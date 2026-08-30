@@ -22,6 +22,7 @@ import type { AnexoChat } from '@/data/remote/servidor'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { Explicacao } from '@/components/shared/Explicacao'
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
+import { usePedirAmizade } from '@/features/correio/usePedirAmizade'
 import { cn } from '@/lib/utils'
 
 export const TABS: { key: ChatTab; label: string }[] = [
@@ -85,6 +86,34 @@ function LinkAnexo({ anexo }: { anexo: AnexoChat }) {
   )
 }
 
+/**
+ * O nome de quem falou, clicavel pra pedir amizade (PH-214).
+ *
+ * A propria mensagem do jogador continua sendo um `<b>` inerte: pedir amizade a
+ * si mesmo o servidor ja recusa, e oferecer seria fazer clicar pra descobrir o
+ * obvio. Toda a regra (ja e amigo, pedido pendente, bloqueio, nick inexistente)
+ * fica no servidor — ver o cabecalho de `usePedirAmizade`.
+ */
+function NomeNoChat({ nick }: { nick: string }) {
+  const { pedir, enviando, souEu } = usePedirAmizade()
+  if (souEu(nick)) return <b className="text-n200">{nick}: </b>
+  return (
+    <>
+      <button
+        type="button"
+        title={`Adicionar ${nick} como amigo`}
+        aria-label={`Adicionar ${nick} como amigo`}
+        disabled={enviando}
+        onClick={() => pedir(nick)}
+        className="font-bold text-n200 hover:underline disabled:opacity-40"
+      >
+        {nick}
+      </button>
+      <b className="text-n200">: </b>
+    </>
+  )
+}
+
 export function AbaMundo() {
   const pontoGrosso = useUiStore((s) => s.coarsePointer)
   const mensagens = useChatStore((s) => s.mensagens)
@@ -108,7 +137,12 @@ export function AbaMundo() {
           mensagens.map((m) => (
             <div key={m.id} className="break-words">
               <span className="text-n600">{horaDe(m.created_at)} </span>
-              <b className="text-n200">{m.trainer_name}: </b>
+              {/* PH-214: o NOME e o gatilho de pedir amizade, e nao um icone ao
+                  lado. Aqui ele ja e texto no meio de uma linha corrida, e
+                  pendurar um icone em cada mensagem encheria o log de ruido. O
+                  sublinhado ao passar o mouse e a unica pista que cabe sem
+                  mudar o layout. */}
+              <NomeNoChat nick={m.trainer_name} />
               <span className="text-n300">{m.body}</span>
               {m.anexos?.length > 0 && (
                 <span className="ml-[.3em] inline-flex flex-wrap gap-[.25em]">
