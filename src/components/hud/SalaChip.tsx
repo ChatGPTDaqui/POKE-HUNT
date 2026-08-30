@@ -18,7 +18,7 @@
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { SALAS_POR_HUNT, ABATES_POR_SALA } from '@/data/biomas'
-import { janelaDaSala, nomeDaSala } from '@/engine/systems/salaSystem'
+import { janelaDaSala, nomeDaSala, protetorDaSala } from '@/engine/systems/salaSystem'
 import { avancarSalaManualmente } from '@/data/remote/autoridade'
 import { GameButton } from '@/components/game/controls'
 import type { DeviceMode } from '@/stores/uiStore'
@@ -44,6 +44,10 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   const sala = useWorldStore((s) => s.sala)
   const faixa = useWorldStore((s) => s.mapDef?.levelRange)
   const countdown = useWorldStore((s) => s.salaCountdownRemaining)
+  // PH-291: a marca vale por SALA e diz que o protetor daquela sala ja caiu.
+  // Sem ela a tela nao tem como distinguir "sala pede protetor" de "protetor ja
+  // resolvido", e ofereceria o avanco num estado que o servidor recusa.
+  const protetorResolvido = useWorldStore((s) => s.protetorResolvido)
   const avancoManualLigado = useGameStateStore((s) => s.autoToggles.avancoManualDeSala)
   if (!sala) return null
 
@@ -53,10 +57,18 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   const janela = faixa ? janelaDaSala(faixa, sala.indice) : null
   const restantes = Math.max(0, ABATES_POR_SALA - sala.abates)
   const progresso = Math.min(1, sala.abates / ABATES_POR_SALA)
+  // PH-291: a sala pede protetor e ele ainda nao caiu. Enquanto isso for
+  // verdade NENHUM caminho avanca — nem o automatico, nem o manual —, e a tela
+  // precisa dizer por que 30/30 nao esta avancando. `solicitarAvancoDeSala` faz
+  // a mesma pergunta do lado do motor; aqui e so pra o jogador nao clicar num
+  // botao que o servidor vai recusar.
+  const tipoDeProtetor = protetorDaSala(sala)
+  const travadaPeloProtetor = tipoDeProtetor != null && !protetorResolvido
+  const quotaFechada = sala.abates >= ABATES_POR_SALA
   // PH-180: so aparece com a quota FECHADA, o toggle ligado (senao a sala ja
   // trocou sozinha) e sem transicao em andamento (o clique nao tem o que
   // fazer enquanto o overlay de "Entrando em nova area" ja esta na tela).
-  const podeAvancarManual = avancoManualLigado && sala.abates >= ABATES_POR_SALA && countdown == null
+  const podeAvancarManual = avancoManualLigado && quotaFechada && countdown == null && !travadaPeloProtetor
 
   // O TITULO CARREGA O QUE NAO CABE (PH-272). No trilho, `Lv X-Y` e o numero do
   // ciclo saem de cena pra o NOME do sub-bioma caber inteiro — o nome e a
@@ -106,6 +118,15 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
       </span>
       {sala.ciclos > 0 && !embutido && (
         <span className="shrink-0 text-[.7em] tabular-nums text-n500">· ciclo {sala.ciclos + 1}</span>
+      )}
+      {/* PH-209/291: por que 30/30 nao avanca. Sem esta linha o jogador ve a
+          barra cheia, o contador em 0 e a sala parada, sem nada explicando —
+          e com o avanco manual ligado ele ainda clicava num botao que o
+          servidor recusa. Aparece com ou sem o toggle: o motivo e o mesmo. */}
+      {quotaFechada && travadaPeloProtetor && (
+        <span className="shrink-0 text-[.7em] font-medium text-warn">
+          Derrote o {tipoDeProtetor === 'lord' ? 'Lorde' : 'Guardião'}
+        </span>
       )}
       {podeAvancarManual && (
         <GameButton
