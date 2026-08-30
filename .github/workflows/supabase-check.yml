@@ -34,28 +34,29 @@ jobs:
           echo "::error::PR para main so e permitido a partir da branch dev (esta PR vem de '${{ github.head_ref }}'). Merge sua feature branch em dev primeiro, teste em jogo-dev, so depois abra PR dev->main."
           exit 1
 
-      # `latest` FICA, e e decisao tomada (PH-290), nao descuido.
+      # VERSAO FIXA, e nao `latest` (PH-290).
       #
-      # O argumento pra fixar e real: este gate le o FORMATO de saida do CLI
-      # (`.migrations[]`, `.local`, `.remote`), e com `latest` esse formato pode
-      # mudar debaixo dele sem ninguem tocar em nada.
+      # ESTA DECISAO FOI TOMADA AO CONTRARIO PRIMEIRO, e durou 40 minutos. O
+      # raciocinio era que versao fixa nao congela o servico do outro lado e so
+      # adiaria o problema. Ele ignorava COMO o `latest` e resolvido:
       #
-      # Mesmo assim `latest` ganha, por duas razoes:
+      #   ##[error]Failed to resolve latest Supabase CLI release: rate limit exceeded
       #
-      #  1. O CLI conversa com um servico que tambem se move. Versao fixa aqui
-      #     nao congela o outro lado — ela so garante que o dia em que o
-      #     `db push` precisar de um CLI mais novo, a fila inteira para com um
-      #     erro que ninguem previu. O risco nao some, muda de lugar e piora.
-      #  2. O motivo real de fixar seria a mensagem criptica quando o formato
-      #     muda, e isso o passo abaixo passou a cobrir: resposta sem
-      #     `.migrations` reprova NOMEANDO a causa e imprimindo a saida crua, em
-      #     vez de morrer com "jq: Cannot iterate over null".
+      # `latest` faz uma CHAMADA A API DO GITHUB a cada run, e ela tem rate
+      # limit. Visto em 30/08 na PR de promocao, depois de uma tarde de muitos
+      # runs — ou seja: o CI inteiro cai por um motivo que nao tem nada a ver com
+      # o codigo, e cai justo na hora de promover, que e quando ha mais runs.
       #
-      # Se um dia o formato mudar de verdade, o gate vai dizer isso com todas as
-      # letras — e ai a decisao de fixar se toma com o numero da versao em maos.
+      # O segundo argumento continua valendo, e agora sem contrapeso: este gate
+      # le o FORMATO de saida do CLI (`.migrations[]`, `.local`, `.remote`), e
+      # com `latest` esse formato pode mudar debaixo dele sem ninguem tocar em
+      # nada.
+      #
+      # O custo de fixar e um PR de uma linha quando o `db push` pedir um CLI
+      # mais novo — e ai o erro dira exatamente isso, em vez de "rate limit".
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.116.0
 
       # PH-106: nao ha mais passo "Link no projeto Supabase" aqui. O `link`
       # provisiona o role `cli_login_postgres` ROTACIONANDO a senha a cada
