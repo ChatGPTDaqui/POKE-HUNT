@@ -89,8 +89,39 @@ export const LURE_TEMPO_MAXIMO_DE_REUNIAO = 18
  * 0,8 e nao 1,0 porque a checagem roda uma vez por tick e o selvagem tambem se
  * move: no limite exato ele solta o aggro no mesmo frame em que a espera
  * comecaria.
+ *
+ * SAO DOIS LIMIARES, E NAO UM (PH-280). Este e o de ENTRADA; a saida e o
+ * `LURE_FRACAO_PARA_VOLTAR_A_ANDAR`, mais apertado. Com um limiar so, o POKE
+ * ficava parando e voltando a andar varias vezes por segundo — o retardatario
+ * oscila em torno da linha, e cada cruzamento zerava ou devolvia o destino.
+ *
+ * Medido em scripts/harness/lure-para-e-anda.mjs, 60 segundos por corrida:
+ *
+ *   lure desligado        0,0 paradas
+ *   lure ligado, juntar 2  32,3
+ *   lure ligado, juntar 3  81,2
+ *   lure ligado, juntar 4 154,7   <- 2,6 solavancos POR SEGUNDO
+ *
+ * O tempo total parado era pequeno (5% da reuniao), entao o defeito nunca foi
+ * "o POKE fica parado": era a FREQUENCIA da troca. E o mesmo remedio de um
+ * termostato que liga e desliga sem parar — histerese.
  */
 const LURE_FRACAO_DA_COLEIRA = 0.8
+
+/**
+ * Fracao da coleira abaixo da qual o jogador VOLTA a andar, depois de ter
+ * parado pra esperar (PH-280).
+ *
+ * Mais apertada que a de entrada de proposito: o retardatario precisa ter
+ * ENCOSTADO de verdade, e nao so raspado na linha de novo. A diferenca entre as
+ * duas (0,8 -> 0,62) e a banda morta que mata o piscar.
+ *
+ * 0,62 e nao 0,7: a 0,7 a banda cobria ~38px de coleira tipica e as paradas
+ * ainda ficavam nas dezenas na medicao. Nao pode ser MUITO menor tambem — abaixo
+ * disso o jogador espera o retardatario colar nele, e a reuniao demora mais sem
+ * ganhar nada.
+ */
+const LURE_FRACAO_PARA_VOLTAR_A_ANDAR = 0.62
 
 /**
  * O jogador esta REUNINDO agora — ou seja, o golpe dele fica segurado (PH-264).
@@ -202,8 +233,16 @@ export function atualizarLure(world: WorldState, gameState: GameStateStore, dt: 
       // Retardatario perto de soltar o aggro: segura a posicao em vez de puxar
       // mais um. O selvagem continua vindo (ele esta em `chase`), entao esperar
       // e o que RECUPERA a distancia — andar mais so a aumentaria.
+      //
+      // O LIMIAR DEPENDE DO QUE O JOGADOR JA ESTAVA FAZENDO (PH-280): pra
+      // COMECAR a esperar basta passar de `LURE_FRACAO_DA_COLEIRA`; pra VOLTAR a
+      // andar, o retardatario precisa ter encostado ate
+      // `LURE_FRACAO_PARA_VOLTAR_A_ANDAR`. Sem essa banda morta, o POKE parava e
+      // andava varias vezes por segundo — ver a medicao nas constantes.
+      const jaEsperava = anterior?.esperandoRetardatario === true
+      const fracao = jaEsperava ? LURE_FRACAO_PARA_VOLTAR_A_ANDAR : LURE_FRACAO_DA_COLEIRA
       const retardatario = reunidos.find(
-        (e) => distanceTo(player, e) > e.leashRadius * LURE_FRACAO_DA_COLEIRA,
+        (e) => distanceTo(player, e) > e.leashRadius * fracao,
       )
       if (retardatario) esperandoRetardatario = true
       else destino = { x: candidato.x, y: candidato.y }
