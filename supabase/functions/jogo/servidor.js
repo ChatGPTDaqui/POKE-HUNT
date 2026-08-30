@@ -57049,6 +57049,34 @@ async function rotear(cfg, req, url) {
 	return json({ erro: "rota desconhecida" }, 404);
 }
 /**
+* Sem flush ha mais que isto, a sessao esta ABANDONADA (PH-277).
+*
+* O cliente flusha a cada 30s e nunca deixa passar mais que
+* `INTERVALO_FLUSH_MAX_MS` (90s, autoridade.ts) enquanto a aba esta viva —
+* qualquer evento volta o intervalo pro piso, e `visibilitychange` dispara um
+* flush sozinho. Meia hora e 20x o teto: nao existe sessao viva desse lado.
+*
+* NAO E MAIS APERTADO DE PROPOSITO. O custo de fechar cedo demais e real e cai
+* no jogador: fechar a sessao perde a POSICAO NAS SALAS (`sala`, `ciclos`), e
+* quem voltar de um notebook que dormiu 10 minutos recomecaria no ciclo 1, sala
+* 1. 30 minutos deixa esse caso inteiro de fora e ainda pega o que a PH-277
+* mediu no banco: linhas paradas ha 4 horas e ha 1 dia e 6 horas.
+*
+* O tempo abandonado NAO E CREDITADO, e isso e o ponto — nao um efeito
+* colateral. Ele nunca foi simulado por ninguem, exatamente como a orfa que
+* `sessaoAberta` ja fechava sem creditar. Hoje `FARM_OFFLINE_PAUSADO` faria o
+* descarte de qualquer jeito; o dia em que ele voltar a `false` e o dia em que
+* a sessao esquecida viraria horas de credito retroativo, com a assimetria
+* injusta de premiar quem fecha a aba de qualquer jeito e nao quem sai pela
+* porta.
+*
+* O GEMEO DESTE NUMERO E SQL: `fechar_sessoes_inativas()` usa o mesmo limite
+* (migration `20260830010000`), porque o caminho de acesso so alcanca quem
+* volta — sessao de quem nunca mais aparece precisa do cron. `limiteDeSessao
+* Inativa.test.ts` reprova se os dois se separarem.
+*/
+var SESSAO_INATIVA_SEGUNDOS = 1800;
+/**
 * A sessao aberta do jogador — e no maximo UMA.
 *
 * O indice unico parcial `game_sessions_abertas` garante isso desde a migration
@@ -57058,11 +57086,25 @@ async function rotear(cfg, req, url) {
 * novo um periodo que a sessao vencedora ja pagou — o exploit de duplicacao que
 * aquela migration descreve. Fechar sem creditar e o certo: o tempo dela ja foi
 * pago pela outra.
+*
+* PH-277: a MESMA regra passa a valer pra sessao ABANDONADA. Ela e devolvida
+* como `null`, e nao reaproveitada, entao o chamador abre uma nova — o que
+* significa que o intervalo esquecido nunca chega a `aplicarFlush`.
 */
 async function sessaoAberta(cfg, userId) {
 	const linhas = await selecionar(cfg, `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*,sala_protetor(*)&order=started_at.desc`);
 	for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id);
-	return linhas[0] ?? null;
+	const atual = linhas[0];
+	if (!atual) return null;
+	if (sessaoAbandonada(atual)) {
+		await sairDaHunt(cfg, userId, atual.id);
+		return null;
+	}
+	return atual;
+}
+/** Passou de `SESSAO_INATIVA_SEGUNDOS` sem nenhum flush? */
+function sessaoAbandonada(sessao, agora = Date.now()) {
+	return agora - new Date(sessao.last_flush_at).getTime() > SESSAO_INATIVA_SEGUNDOS * 1e3;
 }
 async function fecharLinhaDeSessao(cfg, sessaoId) {
 	await atualizar(cfg, `game_sessions?id=eq.${sessaoId}`, { closed_at: (/* @__PURE__ */ new Date()).toISOString() });
