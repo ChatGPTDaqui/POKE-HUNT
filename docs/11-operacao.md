@@ -117,10 +117,31 @@ Mirar `--funcao=jogo` é recusado sem `--confirmar-public`, pelo mesmo motivo de
 |---|---|
 | `npm run build:engine` | Empacota o motor num ESM para o Node (`vite build --ssr`) + os tipos |
 | `npm run build:edge` | Empacota **motor + serviço** num arquivo só para o Deno |
-| `npm run edge:publicar` | `build:edge` + `supabase functions deploy jogo` |
+| `npm run edge:publicar` | `build:edge` + `scripts/publicar-edge.mjs` (publica `jogo`) |
+| `npm run edge:publicar -- --funcao=jogo-dev` | O mesmo, mirando a function de staging |
 | `npx supabase db push` | Aplica as migrations no projeto linkado |
 
 O cliente é publicado por `git push` na `main`, que o Cloudflare Pages observa.
+
+#### `edge:publicar` exige login do CLI na conta certa (PH-187)
+
+O alvo **não** sai do link local do CLI. Ele sai, nesta ordem, de `SUPABASE_PROJECT_REF` no
+ambiente (o caminho do CI) ou do host de `SUPABASE_URL` no `.env` da raiz — a mesma fonte que
+`catalog:migrar` e `db:wipe` usam. Sem nenhuma das duas o comando **recusa**, em vez de publicar no
+que estiver linkado.
+
+Antes de subir qualquer byte ele confere que a **conta logada enxerga o projeto**. Se não enxergar,
+para com a lista de projetos visíveis e a instrução:
+
+```
+npx supabase login     # precisa de TTY — não roda em terminal automatizado
+```
+
+Isso existe porque em 26/08 o CLI desta máquina estava numa conta sem acesso ao projeto atual, e o
+comando documentado não funcionava; o erro era um `403: Your account does not have the necessary
+privileges`, que não sugere "você está na conta errada". **O 403 escondeu o risco maior:** aquela
+conta tem o projeto `Poke Idle Hunt`, um POKE-HUNT anterior. Se ele tivesse uma function chamada
+`jogo`, o deploy teria ido para o projeto errado **com sucesso e sem aviso**.
 
 ### Wipe
 
