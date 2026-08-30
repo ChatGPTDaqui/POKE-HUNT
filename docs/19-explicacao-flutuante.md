@@ -4,6 +4,39 @@ Levantamento de tudo que o jogador vê e pode não entender, e de como (ou se) o
 Feito para a PH-165. Os números foram **contados** na árvore em 2026-08-25, não estimados; quem
 reabrir isto depois deve recontar antes de confiar.
 
+> **Estado em 2026-08-30 — a HUD está fechada, o resto não.**
+>
+> A superfície permanente (`src/components/hud/`) não tem mais **nenhum** `title=` nativo em
+> elemento HTML, e isso agora é travado por teste: `hudNaoUsaTitleNativo.test.ts` varre os fontes
+> da pasta e separa prop de componente (`<Sheet title=…>`) de atributo de elemento
+> (`<div title=…>`) pela regra de JSX — tag com minúscula é HTML, com maiúscula é componente.
+>
+> O que entrou nesta leva:
+>
+> | Onde | Era | Virou |
+> |---|---|---|
+> | `ClimaChip` | `title=` com uma frase | `Explicacao` com todos os efeitos (PH-267) e a duração (PH-285) |
+> | `SalaChip` | **nada** | `Explicacao` com o que não cabe no chip + verbete `sala` (e `protetorDaSala` só quando a sala tem um) |
+> | `Carteira` | `title=` com o valor cheio | `Explicacao` com o valor cheio + verbete `carteira` |
+> | `AbilityHud` (slot) | `title=` do duplo clique, anulado no toque | linha na bolha do golpe (`AbilityTooltip desligado`) |
+> | `TaxasNoCanto` | `title=` "Abrir o Hunt Analyzer" | `aria-label` — é nome de ação, não conceito |
+>
+> O glossário ganhou os três primeiros verbetes que **não** são de combate: `sala`,
+> `protetorDaSala` e `carteira`. Os números de `sala` entram por `import` de `SALAS_POR_HUNT` e
+> `ABATES_POR_SALA`, pela regra 3 lá embaixo.
+>
+> **Continua aberto:** tudo fora de `components/hud/`. A ordem sugerida no fim deste documento
+> segue valendo, e o bloco (a) — os motivos de bloqueio invisíveis no celular — continua sendo o
+> primeiro, porque não é melhoria, é conserto.
+>
+> **Achado no caminho, e é bug de mecanismo, não de conteúdo (PH-296):** bolha com
+> `envolve="bloco"` abre **no canto superior esquerdo da janela**, não junto do gatilho. O
+> `<span className="contents">` que envolve o card não gera caixa, então o positioner do base-ui
+> mede a âncora e recebe `0 × 0` — todo o cálculo parte de `(0,0)`. Medido em 390px: gatilho em
+> `y = 206`, bolha em `x = -13, y = 4`. Vale para golpe, item, POKE no chat, clima, sala e
+> carteira; `envolve="inline"` (a `<Palavra>` do glossário) não tem o problema, e é por isso que
+> ninguém tinha visto — a cobertura antiga era quase toda inline.
+
 ## O que é a bolha, e o que ela não é
 
 A bolha responde **"o que essa palavra quer dizer"** em uma a três frases. A

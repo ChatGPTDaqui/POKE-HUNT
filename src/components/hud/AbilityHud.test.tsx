@@ -44,10 +44,20 @@ function porEmCampo(poke: PokeInstance): void {
   })
 }
 
-// Cada slot e um <div> com titulo de duplo clique; contar por eles e mais
+// Cada slot e um <button> rotulado "Detalhes de <golpe>"; contar por ele e mais
 // estavel do que por icone (tipo sem arte cai num rotulo de 3 letras).
+//
+// PH-165: era `getAllByTitle(/duplo clique/)`, e o `title=` nativo saiu do slot
+// — a dica do duplo clique virou uma linha da bolha do golpe. O `aria-label` e
+// ancora melhor de qualquer jeito: ele existe nos DOIS regimes (o `title` se
+// anulava no `coarse`) e e o que um leitor de tela realmente anuncia.
 function slots(): HTMLElement[] {
-  return screen.getAllByTitle(/duplo clique|Duplo clique/i)
+  return screen.getAllByLabelText(/^Detalhes de /)
+}
+
+/** Mesma busca, mas devolve vazio em vez de estourar quando nao ha slot. */
+function slotsOuVazio(): HTMLElement[] {
+  return screen.queryAllByLabelText(/^Detalhes de /)
 }
 
 beforeEach(() => { useWorldStore.setState({ player: null }) })
@@ -77,15 +87,15 @@ describe('AbilityHud', () => {
 
     // Sem nenhum golpe selecionado a barra fica VAZIA: desde 2026-08-18 nem a
     // Explosao Elemental nem o Ataque Basico sao anexados de graca.
-    // `queryAll` e nao `slots()`: `getAllByTitle` estoura quando nao acha nada,
-    // e "nao achar nada" e exatamente o que este teste afirma.
-    expect(screen.queryAllByTitle(/duplo clique/i)).toHaveLength(0)
+    // `slotsOuVazio` e nao `slots()`: a busca `getAll*` estoura quando nao acha
+    // nada, e "nao achar nada" e exatamente o que este teste afirma.
+    expect(slotsOuVazio()).toHaveLength(0)
     expect(getAbility(typedAoeMoveKey(ESPECIE.type))).toBeTruthy()
   })
 
   it('sem POKE em campo nao desenha nada', () => {
     render(<AbilityHud />)
-    expect(screen.queryAllByTitle(/duplo clique/i)).toHaveLength(0)
+    expect(slotsOuVazio()).toHaveLength(0)
   })
 
   // BUG REAL CORRIGIDO: a barra filtrava golpe de status fora (so mostrava
@@ -120,7 +130,7 @@ describe('AbilityHud — aviso de POKE sem golpe', () => {
 
     expect(screen.getByRole('status').textContent).toMatch(/nao ataca/i)
     expect(screen.getByRole('status').textContent).toMatch(/Sem golpe escolhido/i)
-    expect(screen.queryAllByTitle(/duplo clique/i)).toHaveLength(0)
+    expect(slotsOuVazio()).toHaveLength(0)
   })
 
   it('slots cheios mas TODOS desligados: avisa tambem', () => {
