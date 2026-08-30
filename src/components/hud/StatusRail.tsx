@@ -11,8 +11,8 @@
 // pra ele sem ter pedido. HP, XP, carteira. Todo o resto (local, Pokedex,
 // taxas) mora atras de um toque, na gaveta de detalhes — nao porque importe
 // menos, mas porque ele NAO muda entre um olhar e outro.
-import { useRef, useState } from 'react'
-import { CaretDown, ChartLineUp, Coin, Diamond, User } from '@phosphor-icons/react'
+import { useState } from 'react'
+import { CaretDown, ChartLineUp, User } from '@phosphor-icons/react'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { spriteUrl } from '@/data/sprites'
 import { faceEmocaoUrl } from '@/data/faceEmotions'
@@ -20,7 +20,7 @@ import { rarityOf } from '@/data/rarity'
 import { stoneName } from '@/data/stones'
 import { EscolhaDeEvolucao } from '@/components/modals/EscolhaDeEvolucao'
 import {
-  canEvolve, evolutionStoneRequirement, expProgressForInstance, trainerExpProgress, opcoesDisponiveis,
+  canEvolve, evolutionStoneRequirement, expProgressForInstance, opcoesDisponiveis,
 } from '@/engine/systems/progressionSystem'
 import { controller } from '@/engine/controller'
 import { getPerfStats } from '@/engine/systems/farmRates'
@@ -28,29 +28,16 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useUiStore, useDeviceMode } from '@/stores/uiStore'
+import { Carteira } from '@/components/hud/Carteira'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { useFaceDoPoke } from '@/hooks/useFaceDoPoke'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { GameButton } from '@/components/game/controls'
 import { SalaChip } from '@/components/hud/SalaChip'
 import { useIntervalo } from '@/hooks/useIntervalo'
-import { useAncoraDeVfx, ANCORA } from '@/hooks/useAncoraDeVfx'
 import { cn } from '@/lib/utils'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
-const fmtCheio = new Intl.NumberFormat('pt-BR')
-
-// No celular a carteira divide ~90px com o avatar do treinador, e a conta de
-// teste tem 1.000.403.360 de ouro — 13 digitos que empurravam o avatar pra fora
-// da tela. Abreviar e o unico jeito de a carteira caber sem virar reticencia; o
-// valor exato continua no perfil do treinador e na gaveta de detalhes.
-function fmtCurto(valor: number): string {
-  const abs = Math.abs(valor)
-  if (abs >= 1_000_000_000) return `${(valor / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`
-  if (abs >= 1_000_000) return `${(valor / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
-  if (abs >= 10_000) return `${(valor / 1000).toFixed(0)}k`
-  return fmtCheio.format(valor)
-}
 
 function fmtTaxa(valor: number): string {
   const abs = Math.abs(valor)
@@ -112,19 +99,18 @@ export function StatusRail() {
             As duas continuam na gaveta logo abaixo: as taxas em grade de quatro
             e o valor CHEIO da carteira no `title` do card e no perfil. */}
         {/* NO COMPACTO A CARTEIRA FICA AQUI MESMO, e nao no card: o card do
-            treinador nao existe em 390px (ver a nota do `AvatarTreinador`
-            abaixo — ele desce pra gaveta por falta de largura). Mandar a
-            carteira pra dentro dele sem esta linha tirava ouro e diamante da
-            tela inteira no celular, deixando o jogador sem saber quanto tem
-            sem abrir a gaveta. */}
+            treinador nao existe em 390px — ele desce pra gaveta por falta de
+            largura (ali o avatar virava um icone generico ocupando ~46px
+            permanentes da faixa mais disputada da tela). Mandar a carteira pra
+            dentro dele sem esta linha tirava ouro e diamante da tela inteira no
+            celular, deixando o jogador sem saber quanto tem sem abrir a
+            gaveta. */}
         {estreito && <Carteira abreviada />}
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
-        {/* No compacto o avatar era um botao mudo: sem largura pro nome e pro
-            nivel, sobrava um icone generico ocupando ~46px permanentes da faixa
-            mais disputada da tela — a mesma que ja tinha empurrado o avatar
-            pra fora em 320px. Ele desce pra gaveta, onde cabe COM o nome e o
-            nivel escritos. */}
-        {!estreito && <AvatarTreinador />}
+        {/* PH-282: o card do treinador NAO fica mais aqui. Ele e o primeiro item
+            da coluna do canto superior direito (`ColunaDeAtalhos`), porque este
+            trilho para em `max-w-[64em]` e o card parava junto — em 1920px
+            sobravam ~480px de tela a direita dele. */}
       </div>
 
       {gavetaAberta && <GavetaDetalhes comTreinador={estreito} />}
@@ -324,96 +310,11 @@ function Barra({ pct, altura, cor }: { pct: number; altura: string; cor: string 
 }
 
 // --- carteira e treinador ----------------------------------------------------
-function Carteira({ abreviada }: { abreviada: boolean }) {
-  const gold = useGameStateStore((s) => s.wallet.gold)
-  const diamonds = useGameStateStore((s) => s.wallet.diamonds)
-  const fmt = abreviada ? fmtCurto : fmtCheio.format.bind(fmtCheio)
-  // Ancora da camada de VFX (PH-190): e aqui que o voo de ouro do abate termina
-  // (PH-191). Um ref publicado, e nao um `querySelector` por texto ou por
-  // classe: seletor por conteudo quebra na primeira mudanca de copy e quebra em
-  // SILENCIO — o efeito passaria a mirar no canto (0,0) sem erro nenhum.
-  const carteiraRef = useRef<HTMLDivElement>(null)
-  useAncoraDeVfx(ANCORA.carteira, carteiraRef)
-  return (
-    <div
-      ref={carteiraRef}
-      className={cn(
-        'shrink-0 text-[.72em] leading-[1.15] tabular-nums',
-        abreviada ? 'flex flex-col items-end' : 'flex items-center gap-[.6em]',
-      )}
-      title={`${fmtCheio.format(gold)} ouro · ${fmtCheio.format(diamonds)} diamantes`}
-    >
-      <span className="flex items-center gap-[.25em] font-medium text-gold">
-        <Coin weight="fill" /> {fmt(gold)}
-      </span>
-      <span className="flex items-center gap-[.25em] font-medium text-diamond">
-        <Diamond weight="fill" /> {fmt(diamonds)}
-      </span>
-    </div>
-  )
-}
-
-/**
- * O card do treinador, e desde PH-279 tambem a CARTEIRA.
- *
- * Ouro e diamante moravam soltos na faixa do trilho, em valor cheio. Vieram pra
- * dentro daqui, abreviados (`fmtCurto`: `1.002.017.245` vira `1B`), a pedido do
- * usuario. A abreviacao ja existia e ja era usada no compacto — ela nasceu
- * porque 13 digitos empurravam justamente este avatar pra fora da tela em 390px;
- * agora vale em todo regime.
- *
- * O valor CHEIO nao se perde: fica no `title` do bloco e no perfil do treinador,
- * que e o que este botao abre.
- */
-function AvatarTreinador() {
-  const trainer = useGameStateStore((s) => s.trainer)
-  const setPerfilOpen = useUiStore((s) => s.setPerfilOpen)
-  const compacto = useDeviceMode().mode === 'compacto'
-  const progress = trainerExpProgress(trainer)
-  const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
-
-  return (
-    <button
-      type="button"
-      data-keep-open
-      aria-label="Perfil do treinador"
-      onClick={() => setPerfilOpen(true)}
-      className="relative flex shrink-0 cursor-pointer items-center gap-[.4em] rounded-[.7em] border border-n700 bg-n900 p-[.25em] pr-[.35em]"
-    >
-      <span className="flex h-[2em] w-[2em] items-center justify-center rounded-[.5em] text-[1.1em] text-n300">
-        <User weight="fill" />
-      </span>
-      {!compacto && (
-        <span className="flex flex-col items-start gap-[.2em] pr-[.2em]">
-          <span className="max-w-[7em] truncate text-[.78em] leading-none">{trainer.name}</span>
-          <span className="text-[.7em] leading-none text-n400">Lv {trainer.level}</span>
-        </span>
-      )}
-      {/* Sempre abreviada, inclusive no amplo (PH-279): dentro do card nao ha
-          largura pro valor cheio sem empurrar o nome do treinador, e o cheio ja
-          esta no `title` e no perfil.
-
-          Separada por uma linha vertical e com largura MINIMA reservada: sem o
-          `min-w`, `1B` e `9` ocupam larguras diferentes e o card mudava de
-          tamanho a cada abate — a mesma tremida que o PH-157 tirou da barra de
-          HP, reintroduzida pela porta do card. Com ele, o numero cresce dentro
-          de um espaco que ja estava la. */}
-      <span className="ml-[.15em] h-[1.6em] w-px shrink-0 self-center bg-n700" aria-hidden />
-      <span className="flex min-w-[3.4em] shrink-0 justify-end">
-        <Carteira abreviada />
-      </span>
-      {/* Anel de EXP do treinador em vez de barra: no compacto nao ha largura
-          pra uma barra, e o progresso e um dado de fundo — a borda inferior
-          preenchendo ja diz "esta subindo". */}
-      <span
-        className="absolute inset-x-[.25em] bottom-[.15em] h-[.15em] overflow-hidden rounded-full bg-n800"
-        aria-hidden
-      >
-        <span className="absolute inset-y-0 left-0 rounded-full bg-gold" style={{ width: `${expPct}%` }} />
-      </span>
-    </button>
-  )
-}
+// PH-282: as duas mudaram de arquivo. A carteira foi pra hud/Carteira.tsx
+// (ela e usada nos dois lugares agora) e o card do treinador virou
+// components/hud/CardDoTreinador.tsx, ancorado no canto superior direito junto
+// com a coluna de atalhos — dentro do trilho ele nunca alcancava a borda em
+// tela larga, porque o trilho para em 64em.
 
 // --- gaveta de detalhes ------------------------------------------------------
 function BotaoDetalhes({ aberta, onToggle }: { aberta: boolean; onToggle: () => void }) {
