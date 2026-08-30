@@ -12,6 +12,31 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-303. Entrada da promocao de 30/08 a noite. A 7.15 ja estava na `main`
+  // (o arquivo era identico dos dois lados), entao a leva seguinte pede entrada
+  // NOVA — a regua e uma entrada por PROMOCAO, nao por dia de trabalho.
+  //
+  // O intervalo `main..dev` desta vez tem quatro commits, e so dois sao de
+  // jogador: PH-301 e PH-302, os dois abaixo.
+  //
+  // Fica de FORA:
+  //  - PH-300 (bancada `fumaca-de-producao.mjs`, a verificacao que a promocao
+  //    automatica passou a exigir) e PH-299 (back-merge da `main` na `dev`).
+  //    Processo e encanamento, mesma regua da 7.11 pra ca.
+  //  - O COMO das duas correcoes: o Web Worker que segura o ritmo de liquidacao
+  //    com a aba oculta, o filtro do sorteio do protetor e o cao de guarda do
+  //    impasse. O que o jogador sente ja esta nas linhas abaixo.
+  {
+    version: '7.16',
+    date: '2026-08-30',
+    title: 'A hunt que travava para sempre, e o jogo que parava quando voce minimizava',
+    highlights: [
+      'A HUNT PODIA TRAVAR PARA SEMPRE NUMA SALA, E NAO HAVIA SAIDA. Voce fechava os 30 abates, o guardiao nascia, seu POKE atravessava o mapa, encostava nele e batia — e a vida dele nao mexia um ponto. Nao era lentidao: quando o guardiao era IMUNE ao tipo do seu POKE (um Ponyta com Flash Fire contra um POKE so de Fogo, por exemplo), o dano era zero, para sempre, sem erro na tela e sem nada que voce pudesse fazer. Quem lutava com um POKE de um tipo so era quem mais sofria: quase uma em cada quatro salas de Campina travava assim. Agora o guardiao que aparece e sempre um que o seu POKE consegue machucar; e se mesmo assim a luta empacar, ele sai de campo e outro toma o lugar dele.',
+      'E SEU POKE PAROU DE INSISTIR NUM GOLPE QUE NAO FAZ NADA. Ele seguia a ordem dos quatro golpes sem olhar quem estava na frente, entao contra um alvo imune gastava turno atras de turno num golpe de zero. Agora ele pula o que nao pode dar resultado nenhum e vai pro proximo da fila que funciona — a ordem que voce escolheu continua valendo em todo o resto.',
+      'O JOGO PAROU DE DESACELERAR COM A ABA MINIMIZADA. Deixar a aba em segundo plano fazia o navegador estrangular o relogio do jogo, e o seu progresso passava a ser creditado em intervalos cada vez maiores. Agora o ritmo se mantem com a aba escondida, e voltar pra ela fecha a conta na hora em vez de esperar o proximo ciclo.',
+      'E VOLTAR PRA ABA NAO CONGELA MAIS O JOGO NO AVISO DE AREA NOVA. Aquele "Entrando em nova area" dura tres segundos DE JOGO — e com a aba escondida o jogo anda devagar, entao os tres segundos viravam minutos de tela parada depois que voce voltava. Agora a troca acontece no ato do retorno.',
+    ],
+  },
   // PH-234 + PH-235. Entrada da promocao de 28/08, escrita ANTES de promover — o
   // gate da regra e conferir o INTERVALO desde a nota anterior, e nao a issue
   // que motivou a promocao.
