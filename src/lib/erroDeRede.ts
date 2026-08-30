@@ -26,6 +26,8 @@
 // marcar o proprio dominio), e ainda assim so provaria "existe bloqueador", nao
 // que foi ele que derrubou ESTE request.
 
+import { origemConhecida } from '@/data/origensDoJogo'
+
 /** Um erro que significa "nao houve resposta nenhuma"? */
 export function ehFalhaSemResposta(mensagem: string): boolean {
   const m = mensagem.toLowerCase()
@@ -34,8 +36,28 @@ export function ehFalhaSemResposta(mensagem: string): boolean {
   return m.includes('failed to fetch') || m.includes('load failed') || m.includes('networkerror')
 }
 
-export function mensagemDeFalhaDeRede(online = typeof navigator === 'undefined' || navigator.onLine !== false): string {
+export function mensagemDeFalhaDeRede(
+  online = typeof navigator === 'undefined' || navigator.onLine !== false,
+  origemLiberada = origemConhecida(),
+): string {
   if (!online) return 'Sem conexao — verifique sua internet e tente de novo.'
+  // PH-293: A ORIGEM E A PISTA QUE FALTAVA, E ELA E CERTEIRA.
+  //
+  // O navegador nao conta ao JS que a falha foi CORS (ver o cabecalho), mas nao
+  // precisa: o app SABE de onde foi servido e sabe quais enderecos o servidor
+  // libera (`ORIGENS_DO_JOGO`). Endereco fora da lista + nenhuma resposta =
+  // quase certamente a origem recusada, e nao um bloqueador.
+  //
+  // A frase importa porque a errada manda procurar no lugar errado: foi o que
+  // aconteceu com o cliente de staging, que ficou quebrado acusando extensao de
+  // privacidade de quem nem tinha uma. E ela e pra QUEM OPERA o jogo tanto
+  // quanto pro jogador — quem abre o staging pro pre-voo de promocao e
+  // exatamente a pessoa que precisa ler "este endereco nao esta liberado".
+  if (!origemLiberada) {
+    const onde = typeof location === 'undefined' ? 'este endereco' : location.origin
+    return `O servidor nao aceita chamadas de ${onde}. Este endereco nao esta na`
+      + ' lista de origens liberadas do jogo — nao e problema do seu navegador.'
+  }
   return 'Nao foi possivel falar com o servidor. Voce parece estar online, entao'
     + ' o mais provavel e um bloqueador de anuncios, extensao de privacidade ou'
     + ' filtro de DNS barrando o jogo — libere este site e tente de novo.'
