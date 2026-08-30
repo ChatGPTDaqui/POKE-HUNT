@@ -34,6 +34,25 @@ jobs:
           echo "::error::PR para main so e permitido a partir da branch dev (esta PR vem de '${{ github.head_ref }}'). Merge sua feature branch em dev primeiro, teste em jogo-dev, so depois abra PR dev->main."
           exit 1
 
+      # `latest` FICA, e e decisao tomada (PH-290), nao descuido.
+      #
+      # O argumento pra fixar e real: este gate le o FORMATO de saida do CLI
+      # (`.migrations[]`, `.local`, `.remote`), e com `latest` esse formato pode
+      # mudar debaixo dele sem ninguem tocar em nada.
+      #
+      # Mesmo assim `latest` ganha, por duas razoes:
+      #
+      #  1. O CLI conversa com um servico que tambem se move. Versao fixa aqui
+      #     nao congela o outro lado — ela so garante que o dia em que o
+      #     `db push` precisar de um CLI mais novo, a fila inteira para com um
+      #     erro que ninguem previu. O risco nao some, muda de lugar e piora.
+      #  2. O motivo real de fixar seria a mensagem criptica quando o formato
+      #     muda, e isso o passo abaixo passou a cobrir: resposta sem
+      #     `.migrations` reprova NOMEANDO a causa e imprimindo a saida crua, em
+      #     vez de morrer com "jq: Cannot iterate over null".
+      #
+      # Se um dia o formato mudar de verdade, o gate vai dizer isso com todas as
+      # letras — e ai a decisao de fixar se toma com o numero da versao em maos.
       - uses: supabase/setup-cli@v1
         with:
           version: latest
@@ -91,6 +110,22 @@ jobs:
           LISTA="$(scripts/ci/supabase-cli.sh supabase migration list --linked --output-format json || true)"
           if [ -z "$LISTA" ]; then
             echo "::error::'supabase migration list --linked' falhou em todas as tentativas -- isto e falha de conexao/credencial do CLI, nao o gate de migration orfa. Ver logs do step."
+            exit 1
+          fi
+          # PH-290: a guarda de cima so cobria saida VAZIA. Em 30/08 o CLI saiu
+          # com 0 e imprimiu JSON valido SEM `.migrations`, e o `jq` da linha
+          # seguinte estourou com "Cannot iterate over null (null)" e exit 5. O
+          # que chegava ao log era erro de `jq` — quem fosse investigar
+          # procuraria bug de sintaxe no gate, e a causa era o CLI instavel (o
+          # rerun do MESMO commit passou, sem mudar nada).
+          #
+          # `-e` faz o `jq` sair !=0 quando o teste da falso, entao a decisao
+          # volta pra ca em vez de morrer dentro do pipe. A saida crua vai pro
+          # log limitada a 2000 bytes: o bastante pra reconhecer o formato, sem
+          # despejar a lista inteira num erro de conexao.
+          if ! echo "$LISTA" | jq -e 'has("migrations") and (.migrations | type == "array")' >/dev/null 2>&1; then
+            echo "::error::'migration list --linked' respondeu sem '.migrations' como array -- CLI instavel ou o formato de saida mudou. Isto NAO e o gate de migration orfa reprovando. Saida crua abaixo."
+            echo "$LISTA" | head -c 2000
             exit 1
           fi
           echo "$LISTA" | jq -c '.migrations[]'
