@@ -1668,6 +1668,85 @@ export type Database = {
         }
         Relationships: []
       }
+      troca_sessao: {
+        Row: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+        }
+        Insert: {
+          anfitriao_id: string
+          atualizada_em?: string
+          convidado_id: string
+          criada_em?: string
+          encerrada_em?: string | null
+          encerrada_por?: string | null
+          estado?: string
+          expira_em?: string
+          id?: string
+        }
+        Update: {
+          anfitriao_id?: string
+          atualizada_em?: string
+          convidado_id?: string
+          criada_em?: string
+          encerrada_em?: string | null
+          encerrada_por?: string | null
+          estado?: string
+          expira_em?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "troca_sessao_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_encerrada_por_fkey"
+            columns: ["encerrada_por"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_encerrada_por_fkey"
+            columns: ["encerrada_por"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       type_chart: {
         Row: {
           attacking_type: Database["dev"]["Enums"]["element_type"]
@@ -1969,6 +2048,46 @@ export type Database = {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
       }
+      abrir_troca: {
+        Args: { p_convidado_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      aceitar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       alternar_habilidade: {
         Args: { p_ability_id: string; p_poke_id: string }
         Returns: Json
@@ -2038,6 +2157,26 @@ export type Database = {
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
+      encerrar_troca: {
+        Args: { p_motivo?: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       enviar_mensagem: {
         Args: {
           p_anexos?: Json
@@ -2054,6 +2193,7 @@ export type Database = {
         | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      expirar_trocas: { Args: never; Returns: number }
       fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
       gravar_flush_de_sessao: {
         Args: {
@@ -3907,6 +4047,85 @@ export type Database = {
         }
         Relationships: []
       }
+      troca_sessao: {
+        Row: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+        }
+        Insert: {
+          anfitriao_id: string
+          atualizada_em?: string
+          convidado_id: string
+          criada_em?: string
+          encerrada_em?: string | null
+          encerrada_por?: string | null
+          estado?: string
+          expira_em?: string
+          id?: string
+        }
+        Update: {
+          anfitriao_id?: string
+          atualizada_em?: string
+          convidado_id?: string
+          criada_em?: string
+          encerrada_em?: string | null
+          encerrada_por?: string | null
+          estado?: string
+          expira_em?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "troca_sessao_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_encerrada_por_fkey"
+            columns: ["encerrada_por"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_sessao_encerrada_por_fkey"
+            columns: ["encerrada_por"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       type_chart: {
         Row: {
           attacking_type: Database["public"]["Enums"]["element_type"]
@@ -4208,6 +4427,46 @@ export type Database = {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
       }
+      abrir_troca: {
+        Args: { p_convidado_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      aceitar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       alternar_habilidade: {
         Args: { p_ability_id: string; p_poke_id: string }
         Returns: Json
@@ -4277,6 +4536,26 @@ export type Database = {
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
+      encerrar_troca: {
+        Args: { p_motivo?: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       enviar_mensagem: {
         Args: {
           p_anexos?: Json
@@ -4293,6 +4572,7 @@ export type Database = {
         | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      expirar_trocas: { Args: never; Returns: number }
       fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
       gravar_flush_de_sessao: {
         Args: {
