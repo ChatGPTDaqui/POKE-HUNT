@@ -38,7 +38,7 @@ import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip, salaNoTrilho } from '@/components/hud/SalaChip'
 import { ClimaChip } from '@/components/hud/ClimaChip'
-import { LureChip } from '@/components/hud/LureChip'
+import { TaxasNoCanto } from '@/components/hud/TaxasNoCanto'
 import { ColunaDeAtalhos } from '@/components/hud/ColunaDeAtalhos'
 import { ChatLog } from '@/components/toasts/ChatLog'
 import { ChatMobile } from '@/components/toasts/ChatMobile'
@@ -144,12 +144,13 @@ export function HudLayer() {
                 pra ele (ver a nota no topo de SalaChip.tsx). */}
             {!salaNoTrilho(mode) && <SalaChip />}
             <ClimaChip />
-            {/* Terceiro chip da MESMA linha: os tres respondem "onde estou e o
-                que o bot esta fazendo". O `flex-wrap` da linha ja cobre 390px —
-                em celular o lure desce pra linha de baixo em vez de espremer a
-                sala. Ele se esconde sozinho quando o lure esta inativo, entao
-                nao cobra largura de quem nao usa (ver LureChip). */}
-            <LureChip />
+            {/* O CHIP DO LURE SAIU DAQUI (PH-279), a pedido do usuario.
+                Ele existia pra a mecanica nao ler como bug: durante a reuniao o
+                POKE atravessa a hunt passando ao lado de inimigos sem bater, e
+                o chip era a unica coisa na tela que dizia que aquilo era
+                intencional. Tirando ele, esse esclarecimento deixa de existir —
+                registrado aqui porque o mesmo comportamento ja foi relatado
+                como "o POKE anda travando" (PH-280). */}
           </div>
         </div>
       </div>
@@ -159,6 +160,11 @@ export function HudLayer() {
           topo, e nao filha: ela ancora na DIREITA e aquele container e uma
           coluna alinhada a esquerda. */}
       <ColunaDeAtalhos />
+
+      {/* Taxas no canto inferior direito (PH-279): sairam do trilho, onde
+          disputavam largura com a sala. Irma do rodape, e nao filha: ela ancora
+          na altura MEDIDA dele pra parar acima da doca em vez de cobri-la. */}
+      <TaxasNoCanto />
 
       {/* Rodape: ticker do chat (quando nao ha janela flutuante) + doca. Os dois
           no MESMO container medido — o botao Auto e o chat costumavam se

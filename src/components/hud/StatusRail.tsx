@@ -66,9 +66,6 @@ export function StatusRail() {
   // do meio aumenta a altura do trilho.
   const mode = useDeviceMode().mode
   const estreito = mode === 'compacto'
-  // PH-272: com sala em cena, a faixa central do trilho esta ocupada — e e ela
-  // que paga a largura das taxas. Ver `TaxasInline`.
-  const temSala = useWorldStore((s) => s.sala != null)
   const [gavetaAberta, setGavetaAberta] = useState(false)
 
   return (
@@ -102,12 +99,25 @@ export function StatusRail() {
         <div className="flex min-w-0 flex-1 items-center justify-center">
           {!estreito && <FaixaCentral />}
         </div>
-        {/* Taxas so no amplo. Deitado a largura parece sobrar e nao sobra: com
-            as taxas na faixa do meio, o nome do POKE truncava pra "Ent…" com a
-            barra de HP em 180px enquanto o ouro exibia 13 digitos. O dado menos
-            urgente e o que sai. */}
-        {mode === 'amplo' && <TaxasInline sohOuro={temSala && !estreito} />}
-        <Carteira abreviada={mode !== 'amplo'} />
+        {/* AS TAXAS E A CARTEIRA SAIRAM DAQUI (PH-279), a pedido do usuario.
+            As taxas foram pro canto inferior direito (`TaxasNoCanto`) e a
+            carteira entrou no card do treinador, logo ali na direita.
+
+            Ganho de largura que isso deu ao trilho, medido em 1280: ~430px, que
+            eram a soma das tres taxas (~230px) com o ouro e o diamante em valor
+            cheio (~200px). Era essa largura que faltava pra faixa central — a
+            PH-272 tinha acabado de reduzir as taxas a so `Gold/h` pra o nome do
+            sub-bioma caber, e agora nem isso e preciso.
+
+            As duas continuam na gaveta logo abaixo: as taxas em grade de quatro
+            e o valor CHEIO da carteira no `title` do card e no perfil. */}
+        {/* NO COMPACTO A CARTEIRA FICA AQUI MESMO, e nao no card: o card do
+            treinador nao existe em 390px (ver a nota do `AvatarTreinador`
+            abaixo — ele desce pra gaveta por falta de largura). Mandar a
+            carteira pra dentro dele sem esta linha tirava ouro e diamante da
+            tela inteira no celular, deixando o jogador sem saber quanto tem
+            sem abrir a gaveta. */}
+        {estreito && <Carteira abreviada />}
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
         {/* No compacto o avatar era um botao mudo: sem largura pro nome e pro
             nivel, sobrava um icone generico ocupando ~46px permanentes da faixa
@@ -343,6 +353,18 @@ function Carteira({ abreviada }: { abreviada: boolean }) {
   )
 }
 
+/**
+ * O card do treinador, e desde PH-279 tambem a CARTEIRA.
+ *
+ * Ouro e diamante moravam soltos na faixa do trilho, em valor cheio. Vieram pra
+ * dentro daqui, abreviados (`fmtCurto`: `1.002.017.245` vira `1B`), a pedido do
+ * usuario. A abreviacao ja existia e ja era usada no compacto — ela nasceu
+ * porque 13 digitos empurravam justamente este avatar pra fora da tela em 390px;
+ * agora vale em todo regime.
+ *
+ * O valor CHEIO nao se perde: fica no `title` do bloco e no perfil do treinador,
+ * que e o que este botao abre.
+ */
 function AvatarTreinador() {
   const trainer = useGameStateStore((s) => s.trainer)
   const setPerfilOpen = useUiStore((s) => s.setPerfilOpen)
@@ -367,6 +389,19 @@ function AvatarTreinador() {
           <span className="text-[.7em] leading-none text-n400">Lv {trainer.level}</span>
         </span>
       )}
+      {/* Sempre abreviada, inclusive no amplo (PH-279): dentro do card nao ha
+          largura pro valor cheio sem empurrar o nome do treinador, e o cheio ja
+          esta no `title` e no perfil.
+
+          Separada por uma linha vertical e com largura MINIMA reservada: sem o
+          `min-w`, `1B` e `9` ocupam larguras diferentes e o card mudava de
+          tamanho a cada abate — a mesma tremida que o PH-157 tirou da barra de
+          HP, reintroduzida pela porta do card. Com ele, o numero cresce dentro
+          de um espaco que ja estava la. */}
+      <span className="ml-[.15em] h-[1.6em] w-px shrink-0 self-center bg-n700" aria-hidden />
+      <span className="flex min-w-[3.4em] shrink-0 justify-end">
+        <Carteira abreviada />
+      </span>
       {/* Anel de EXP do treinador em vez de barra: no compacto nao ha largura
           pra uma barra, e o progresso e um dado de fundo — a borda inferior
           preenchendo ja diz "esta subindo". */}
@@ -430,37 +465,10 @@ function FaixaCentral() {
   return <div className="max-w-[12em] truncate text-center text-[.72em] text-n300">{huntName}</div>
 }
 
-/**
- * `sohOuro` (PH-272): as tres taxas viram uma so.
- *
- * A faixa central passou a carregar a sala, e as tres taxas somavam ~230px que
- * saiam justamente dali — medido na tela em 1280: com elas inteiras, o nome do
- * sub-bioma era espremido a ZERO e o chip aparecia como "Sala 9/10" e uma barra
- * solta, sem dizer onde o jogador estava.
- *
- * Fica o ouro por hora, que e o numero pelo qual um jogo idle e julgado. XP/h e
- * Mobs/h continuam na gaveta logo abaixo (um toque) e no Hunt Analyzer — os
- * dois ja estavam nos dois lugares, entao nada saiu do jogo.
- */
-function TaxasInline({ sohOuro = false }: { sohOuro?: boolean }) {
-  const stats = useTaxas()
-  const abrirAnalyzer = useUiStore((s) => s.setAnalyzerOpen)
-  return (
-    <button
-      type="button"
-      data-keep-open
-      onClick={() => abrirAnalyzer(true)}
-      title={sohOuro
-        ? `Gold/h ${fmtTaxa(stats.goldPerHour)} · XP/h ${fmtTaxa(stats.xpPerHour)} · Mobs/h ${stats.mobsPerHour}`
-        : undefined}
-      className="flex shrink-0 cursor-pointer items-center gap-[.6em] rounded-[.5em] px-[.3em] py-[.2em] font-[inherit] text-[.72em] text-n400"
-    >
-      <span>Gold/h <b className="font-medium text-gold">{fmtTaxa(stats.goldPerHour)}</b></span>
-      {!sohOuro && <span>XP/h <b className="font-medium text-n200">{fmtTaxa(stats.xpPerHour)}</b></span>}
-      {!sohOuro && <span>Mobs/h <b className="font-medium text-n200">{stats.mobsPerHour}</b></span>}
-    </button>
-  )
-}
+// PH-279: `TaxasInline` saiu daqui. As taxas viraram `TaxasNoCanto`, ancorada no
+// canto inferior direito — o trilho nao mostra mais nenhuma delas. A grade de
+// quatro na gaveta (logo abaixo) continua igual, e continua sendo o lugar onde
+// `Shinys` aparece.
 
 function GavetaDetalhes({ comTreinador }: { comTreinador: boolean }) {
   const stats = useTaxas()
