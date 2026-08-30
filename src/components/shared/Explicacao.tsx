@@ -58,12 +58,31 @@ export function Explicacao({
   // O `pointerType` do ultimo ponteiro que desceu neste gatilho. Lido no click,
   // que nao carrega essa informacao de forma confiavel em todo browser.
   const ponteiro = useRef('mouse')
+  // PH-296: A ANCORA DA BOLHA, quando o gatilho nao tem caixa propria.
+  //
+  // `envolve="bloco"` renderiza o gatilho como `display: contents` de proposito:
+  // ele envolve um card inteiro e nao pode mudar o layout dele. So que elemento
+  // com `contents` NAO GERA CAIXA — o positioner mede `0 x 0` e passa a
+  // posicionar tudo a partir da origem da janela. Medido em 390px: gatilho em
+  // `y = 206`, bolha em `x = -13, y = 4`, ou seja, 13px fora da tela e a 200px
+  // do que ela explica.
+  //
+  // Valia pra TODA bolha de card do jogo — golpe, item, POKE no chat, clima,
+  // sala, carteira — e passou despercebido porque a cobertura antiga era quase
+  // toda `envolve="inline"`, que gera caixa e nunca teve o problema.
+  //
+  // A saida e apontar a ancora pro primeiro FILHO, que e o card de verdade. Nao
+  // troca o `contents` por outro `display`: isso mexeria no layout de todos os
+  // consumidores de uma vez, e a regressao seria visual — o tipo que teste nao
+  // pega.
+  const gatilhoRef = useRef<HTMLSpanElement>(null)
 
   return (
     <Tooltip open={aberto} onOpenChange={setAberto}>
       <TooltipTrigger
         render={(
           <span
+            ref={gatilhoRef}
             tabIndex={tabIndex}
             style={estilo}
             aria-label={rotulo}
@@ -93,6 +112,14 @@ export function Explicacao({
       <TooltipContent
         side={side}
         data-keep-open
+        // PH-296: so o gatilho de BLOCO precisa da ancora explicita — o inline
+        // gera caixa e o padrao do positioner ja acerta nele. `firstElementChild`
+        // e o card que o gatilho envolve; `?? gatilhoRef.current` cobre o caso
+        // degenerado de `children` sem elemento (texto puro), onde a medida volta
+        // a ser a de antes em vez de virar `null`.
+        anchor={envolve === 'bloco'
+          ? () => gatilhoRef.current?.firstElementChild ?? gatilhoRef.current
+          : undefined}
         // A largura cede pra tela quando a tela e menor que a bolha: em 320px de
         // largura o `21em` fixo vazava pelas duas bordas.
         className={cn(
