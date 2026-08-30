@@ -41,6 +41,8 @@
 import { describe, expect, it } from 'vitest'
 
 import fonteDoCheck from '/.github/workflows/supabase-check.yml?raw'
+import fonteDoDeploy from '/.github/workflows/supabase-deploy.yml?raw'
+import fonteDoDeployDev from '/.github/workflows/supabase-deploy-dev.yml?raw'
 
 /**
  * `has("migrations") and (.migrations | type == "array")`, em JS.
@@ -129,5 +131,42 @@ describe('o gate escrito no workflow e esse mesmo (PH-290)', () => {
     expect(fonteDoCheck).toContain('falhou em todas as tentativas')
     expect(fonteDoCheck.indexOf('falhou em todas as tentativas'))
       .toBeLessThan(fonteDoCheck.indexOf("respondeu sem '.migrations'"))
+  })
+})
+
+// A PRIMEIRA VERSAO DESTA DECISAO ESTAVA ERRADA, e durou 40 minutos.
+//
+// O raciocinio era que fixar a versao nao congela o servico do outro lado, entao
+// so adiaria o problema. Ele ignorava COMO o `latest` e resolvido — por uma
+// chamada a API do GitHub, que tem rate limit:
+//
+//   ##[error]Failed to resolve latest Supabase CLI release: rate limit exceeded
+//
+// Visto na PR de promocao em 30/08, depois de uma tarde de muitos runs. O CI
+// inteiro cai por um motivo que nao tem nada a ver com o codigo, e cai justo na
+// hora de promover — que e quando ha mais runs.
+//
+// Estes casos existem pra que a proxima pessoa (ou eu de novo) nao desfaca isso
+// achando que `latest` e o padrao mais seguro.
+describe('a versao do CLI e FIXA nos tres workflows (PH-290)', () => {
+  const WORKFLOWS = [
+    ['supabase-check', fonteDoCheck],
+    ['supabase-deploy', fonteDoDeploy],
+    ['supabase-deploy-dev', fonteDoDeployDev],
+  ] as const
+
+  for (const [nome, fonte] of WORKFLOWS) {
+    it(`${nome} nao usa 'latest'`, () => {
+      expect(fonte).not.toMatch(/version:\s*latest/)
+      expect(fonte).toMatch(/version:\s*\d+\.\d+\.\d+/)
+    })
+  }
+
+  it('os tres usam a MESMA versao', () => {
+    // Versoes diferentes entre o gate e o deploy significam que o gate aprovou
+    // com um CLI e o deploy aplicou com outro — divergencia que so aparece em
+    // producao.
+    const versoes = WORKFLOWS.map(([, fonte]) => fonte.match(/version:\s*(\d+\.\d+\.\d+)/)?.[1])
+    expect(new Set(versoes).size, `versoes: ${versoes.join(', ')}`).toBe(1)
   })
 })
