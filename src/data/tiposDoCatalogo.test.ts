@@ -49,8 +49,8 @@ describe('a bancada le alguma coisa', () => {
     expect(USUM.size).toBe(251)
     expect(Object.keys(SPECIES_DATA).length).toBeGreaterThan(200)
     expect(PAR_DA_CORRECAO.map(([n]) => n.replace(/.*\//, ''))).toEqual([
-      '20260830000000_tipos_fairy_no_catalogo_public.sql',
-      '20260830000001_tipos_fairy_no_catalogo_dev.sql',
+      '20260830020000_tipos_fairy_no_catalogo_public.sql',
+      '20260830020001_tipos_fairy_no_catalogo_dev.sql',
     ])
   })
 })
