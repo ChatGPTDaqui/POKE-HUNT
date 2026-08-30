@@ -48,12 +48,19 @@ function mundoComGolpe(lane = 0): WorldState {
 }
 
 describe('nome do golpe embaixo da barra de vida (PH-275)', () => {
-  it('a caixa do nome do golpe fica ABAIXO do fim da barra', () => {
+  it('a caixa do nome do golpe ENCOSTA no fim da barra', () => {
     const { moveis } = medirTextoDeCombate(medidor, mundoComGolpe())
     expect(moveis).toHaveLength(1)
-    // `y` da caixa e o TOPO dela. Abaixo do fim da barra = topo da caixa maior
-    // que o fim da barra (y cresce pra baixo).
-    expect(moveis[0].y, 'o nome do golpe voltou pro alto da coluna').toBeGreaterThan(FIM_DA_BARRA)
+    // `y` da caixa e o TOPO dela, e `y` cresce pra baixo — encostar e o topo da
+    // caixa coincidir com o fim da barra.
+    //
+    // PH-283 apertou isto: antes bastava ficar ABAIXO, e com os 3px de folga o
+    // nome flutuava entre a barra e o POKE, sem ler como parte da placa. Quem da
+    // o respiro agora e a placa de fundo, nao o vao.
+    expect(
+      Math.abs(moveis[0].y - FIM_DA_BARRA),
+      'o nome do golpe descolou da barra (ou voltou pro alto da coluna)',
+    ).toBeLessThanOrEqual(1)
   })
 
   it('e nao desce a ponto de cobrir o corpo inteiro', () => {
