@@ -32,7 +32,9 @@ import {
 import { useWorldStore } from '@/stores/worldStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
-import { usePendenciasDoMercado, usePendenciasDoCorreio } from '@/hooks/usePendencias'
+import {
+  usePendenciasDoMercado, usePendenciasDoCorreio, fraseDasPendencias,
+} from '@/hooks/usePendencias'
 import { useEstoqueBaixoNoAuto, LIMIAR_ESTOQUE_BAIXO } from '@/components/auto/estoqueBaixo'
 import { NotificationBadge } from '@/components/game/NotificationBadge'
 import { AbilityHud } from '@/components/hud/AbilityHud'
@@ -143,8 +145,13 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
   useMedirAltura(navRef, useUiStore((s) => s.setNavHeight))
 
   const pendenciasEmMais = destinosDaGrade().reduce((soma, d) => (
-    soma + (d.screen === 'mercado' ? pendenciasMercado : d.screen === 'correio' ? pendenciasCorreio : 0)
+    soma + (d.screen === 'mercado' ? pendenciasMercado : d.screen === 'correio' ? pendenciasCorreio.total : 0)
   ), 0)
+  // PH-287: o "Mais" e o unico lugar onde o numero do Correio aparece somado ao
+  // do Mercado, entao a frase dele nao serve pro selo inteiro. Ela vai no rotulo
+  // acessivel do item de Correio dentro do sheet, que e onde o jogador chega
+  // depois de tocar aqui.
+  const detalheDoCorreio = fraseDasPendencias(pendenciasCorreio)
 
   // Hospital nao abre tela: ele TROCA a cena do canvas. Fora de uma hunt o
   // jogador ja esta la, entao o slot vira indicador de "voce esta aqui" e o
@@ -228,6 +235,11 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         ativo={moreOpen}
         rotulo={!deitado}
         badge={pendenciasEmMais}
+        // PH-287: o selo do "Mais" soma Correio e Mercado, e o numero sozinho
+        // nao diz de onde ele vem. Quando o que esta pendente e do Correio, o
+        // rotulo passa a dizer o que e — a diferenca entre "tem 2 coisas" e "tem
+        // 1 mensagem por ler e 1 item por coletar".
+        descricaoDoBadge={detalheDoCorreio ?? undefined}
         onClick={() => setMoreOpen(!moreOpen)}
       />
     </nav>
@@ -235,12 +247,21 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
 }
 
 function SlotNav({
-  destino, ativo, rotulo, badge = 0, onClick,
+  destino, ativo, rotulo, badge = 0, descricaoDoBadge, onClick,
 }: {
   destino: Destino
   ativo: boolean
   rotulo: boolean
   badge?: number
+  /**
+   * O que o selo esta contando, em palavras (PH-287).
+   *
+   * Sem isto o rotulo acessivel e "2 pendência(s) em Mais", que e o numero
+   * repetido. Com isto ele vira "1 mensagem por ler e 1 item por coletar" — a
+   * diferenca entre o jogador saber que ainda falta PEGAR alguma coisa e ele
+   * concluir que o sino travou (o relato que abriu a PH-213).
+   */
+  descricaoDoBadge?: string
   onClick: () => void
 }) {
   const [imagemQuebrada, setImagemQuebrada] = useState(false)
@@ -283,7 +304,12 @@ function SlotNav({
           {label}
         </span>
       )}
-      <NotificationBadge count={badge} titulo={`${badge} pendência(s) em ${label}`} />
+      <NotificationBadge
+        count={badge}
+        titulo={descricaoDoBadge
+          ? `${label}: ${descricaoDoBadge}`
+          : `${badge} pendência(s) em ${label}`}
+      />
     </button>
   )
 }
@@ -340,7 +366,12 @@ export function SheetMais() {
             key={screen}
             label={label}
             Icon={Icon}
-            badge={screen === 'correio' ? pendenciasCorreio : 0}
+            badge={screen === 'correio' ? pendenciasCorreio.total : 0}
+            // PH-287: aqui a frase e VISIVEL, nao so acessivel. Este sheet e a
+            // tela em que o jogador chega procurando "o que e que esta aceso", e
+            // ele tem espaco pra uma linha embaixo do rotulo — a doca, com oito
+            // slots em 390px, nao tem.
+            detalhe={screen === 'correio' ? fraseDasPendencias(pendenciasCorreio) : null}
             onClick={() => {
               toggleScreen(screen)
               setMoreOpen(false)
@@ -353,11 +384,13 @@ export function SheetMais() {
 }
 
 function ItemGrade({
-  label, Icon, badge = 0, onClick,
+  label, Icon, badge = 0, detalhe, onClick,
 }: {
   label: string
   Icon: Icon
   badge?: number
+  /** O que o selo esta contando, escrito (PH-287). `null` quando nao ha nada. */
+  detalhe?: string | null
   onClick: () => void
 }) {
   return (
@@ -372,7 +405,18 @@ function ItemGrade({
     >
       <Icon className="text-[1.5em]" />
       <span className="text-[.7em] leading-none">{label}</span>
-      <NotificationBadge count={badge} titulo={`${badge} pendência(s) em ${label}`} />
+      {/* PH-287: a linha so existe quando ha o que dizer, entao a grade sem
+          pendencia nenhuma fica identica ao que era. `text-warn` e nao `text-bad`:
+          nao e erro, e coisa esperando. */}
+      {detalhe && (
+        <span className="px-[.2em] text-center text-[.6em] leading-[1.15] text-warn">
+          {detalhe}
+        </span>
+      )}
+      <NotificationBadge
+        count={badge}
+        titulo={detalhe ? `${label}: ${detalhe}` : `${badge} pendência(s) em ${label}`}
+      />
     </button>
   )
 }
