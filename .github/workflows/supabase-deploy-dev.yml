@@ -20,9 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # VERSAO FIXA, e nao 'latest' (PH-290): 'latest' resolve por chamada a API
+      # do GitHub, e ela tem rate limit — visto em 30/08, "Failed to resolve latest
+      # Supabase CLI release: rate limit exceeded", numa tarde de muitos runs. O
+      # raciocinio completo esta no comentario de supabase-check.yml.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.116.0
 
       - name: Aplicar migrations pendentes (mesmo arquivo cobre dev + public)
         # Mesmo comando do deploy de main -- nao ha "db push so pra dev", o CLI
