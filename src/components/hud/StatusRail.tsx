@@ -34,6 +34,7 @@ import { useFaceDoPoke } from '@/hooks/useFaceDoPoke'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { GameButton } from '@/components/game/controls'
 import { SalaChip } from '@/components/hud/SalaChip'
+import { ClimaChip } from '@/components/hud/ClimaChip'
 import { useIntervalo } from '@/hooks/useIntervalo'
 import { cn } from '@/lib/utils'
 
@@ -84,7 +85,16 @@ export function StatusRail() {
             A sobra continua virando espaco quando nao ha o que mostrar, entao a
             razao original do vao segue de pe. */}
         <div className="flex min-w-0 flex-1 items-center justify-center">
-          {!estreito && <FaixaCentral />}
+          {/* PH-285: NO COMPACTO O VAO NAO FICA MAIS VAZIO — o clima entra
+              nele, so como simbolo. O chip de SALA continua de fora aqui (ele
+              pede ~15em; ver o cabecalho de SalaChip.tsx), mas o clima cabe:
+              medido no aparelho, o vao tem 73px livres em 390px e o simbolo
+              sozinho ocupa ~20px.
+
+              Sem isto o clima ficava numa fileira propria abaixo do cabecalho,
+              boiando em cima do cenario — o defeito que a issue descreve, e que
+              no celular era o unico lugar onde ele ainda acontecia. */}
+          {estreito ? <ClimaChip embutido soIcone /> : <FaixaCentral />}
         </div>
         {/* AS TAXAS E A CARTEIRA SAIRAM DAQUI (PH-279), a pedido do usuario.
             As taxas foram pro canto inferior direito (`TaxasNoCanto`) e a
@@ -362,8 +372,27 @@ function useTaxas() {
 function FaixaCentral() {
   const temSala = useWorldStore((s) => s.sala != null)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
-  if (temSala) return <SalaChip embutido />
-  return <div className="max-w-[12em] truncate text-center text-[.72em] text-n300">{huntName}</div>
+  return (
+    // PH-285: O CLIMA VEIO PRA CA. Ele tinha ficado sozinho na fileira de chips
+    // abaixo do cabecalho — que e o meio do campo de jogo — depois que a sala
+    // subiu pro trilho (PH-272) e o chip do Lure saiu (PH-279). Sobrou boiando
+    // em cima do cenario, sem nada em volta que justificasse aquele lugar.
+    //
+    // Aqui ele fica junto da informacao irma: "que sala e esta" e "que tempo faz
+    // nela" respondem a mesma pergunta, e o vao central e o unico lugar do
+    // trilho que cresce com a sobra de largura (ver o comentario do vao). Em
+    // hunt sem salas — BOSS, Lance, a inicial — o nome da hunt ocupa o lugar do
+    // chip e o clima continua ao lado.
+    //
+    // `min-w-0` nos dois: o nome do sub-bioma trunca em vez de empurrar o clima
+    // pra fora, que e a regra que o trilho segue desde a PH-157.
+    <div className="flex min-w-0 items-center justify-center gap-[.5em]">
+      {temSala
+        ? <SalaChip embutido />
+        : <div className="min-w-0 max-w-[12em] truncate text-center text-[.72em] text-n300">{huntName}</div>}
+      <ClimaChip embutido />
+    </div>
+  )
 }
 
 // PH-279: `TaxasInline` saiu daqui. As taxas viraram `TaxasNoCanto`, ancorada no
