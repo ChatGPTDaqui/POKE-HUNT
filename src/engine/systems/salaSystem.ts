@@ -678,6 +678,25 @@ export function reconciliarSalaDaAutoridade(
 }
 
 /**
+ * PH-302: derruba a contagem de "Entrando em nova area" pro minimo, pra ela
+ * resolver no proximo tick.
+ *
+ * A contagem corre em tempo SIMULADO (`stepWorld` desconta `dt` dela), e o
+ * loop local quase nao anda com a aba oculta — o navegador derruba o tick pra
+ * um por minuto, e cada um avanca no maximo 1 segundo de jogo. Os 3 segundos de
+ * aviso viravam MINUTOS de movimento e combate congelados depois de voltar pra
+ * aba, esperando uma animacao que o jogador nao chegou a ver.
+ *
+ * Nao pula a transicao: `aplicarTransicaoDeSala` continua sendo quem troca
+ * mapa, colisao e inimigos, no gate normal de `stepWorld`. So o tempo de espera
+ * some. Sem `salaPendente` nao ha o que encurtar.
+ */
+export function encurtarTransicaoDeSala(world: WorldState): void {
+  if (world.salaCountdownRemaining == null || !world.salaPendente) return
+  world.salaCountdownRemaining = Math.min(world.salaCountdownRemaining, 0)
+}
+
+/**
  * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
  * regressiva zera: troca mapa/colisao e reposiciona pro spawn point da nova
  * sala. "Area nova do zero" (pedido explicito do usuario) — zera tambem
