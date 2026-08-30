@@ -38,11 +38,13 @@ jobs:
         with:
           version: latest
 
-      - name: Link no projeto Supabase
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      # PH-106: nao ha mais passo "Link no projeto Supabase" aqui. O `link`
+      # provisiona o role `cli_login_postgres` ROTACIONANDO a senha a cada
+      # login, e este workflow dispara no MESMO segundo que
+      # `supabase-deploy-dev` em todo push em `dev` — as duas invocacoes se
+      # invalidavam e quem morria era sorteio (28P01). Agora o `link` mora
+      # dentro de scripts/ci/supabase-cli.sh, que re-linka e repete quando a
+      # credencial fica velha. Ver o cabecalho do script.
 
       - name: Existe migration aplicada no remoto que nao existe local?
         # NAO usa 'db diff' — ele reconstroi o banco do zero so com as
@@ -78,18 +80,17 @@ jobs:
         run: |
           # 'migration list --linked' flanca a conexao ocasionalmente (visto
           # 2x em 25/08: falha em ~30s sem imprimir nada, run seguinte no
-          # MESMO commit passa normal em minutos) -- retry pra nao reprovar
-          # PR por instabilidade de rede, nao por orfa de verdade.
-          LISTA=""
-          for tentativa in 1 2 3; do
-            if LISTA=$(supabase migration list --linked --output-format json); then
-              break
-            fi
-            echo "::warning::Tentativa ${tentativa}/3 de 'migration list --linked' falhou (provavel flake de conexao). Retentando..."
-            sleep 5
-          done
+          # MESMO commit passa normal em minutos) -- o wrapper retenta, pra nao
+          # reprovar PR por instabilidade de rede em vez de por orfa de verdade.
+          #
+          # PH-106: o retry que morava AQUI nao re-linkava, entao so cobria o
+          # flake de rede. Contra a senha rotacionada por outra invocacao do CLI
+          # as 3 tentativas falhavam identicas, porque a credencial em disco
+          # continuava velha. scripts/ci/supabase-cli.sh re-linka a cada
+          # tentativa e cobre os dois casos.
+          LISTA="$(scripts/ci/supabase-cli.sh supabase migration list --linked --output-format json || true)"
           if [ -z "$LISTA" ]; then
-            echo "::error::'supabase migration list --linked' falhou 3x seguidas -- isto e falha de conexao/CLI, nao o gate de migration orfa. Ver logs do step."
+            echo "::error::'supabase migration list --linked' falhou em todas as tentativas -- isto e falha de conexao/credencial do CLI, nao o gate de migration orfa. Ver logs do step."
             exit 1
           fi
           echo "$LISTA" | jq -c '.migrations[]'
@@ -116,6 +117,8 @@ jobs:
           echo "ORFA_APLICADA_NA_MAO=$FALHOU" >> "$GITHUB_ENV"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          # PH-106: quem linka agora e o wrapper, entao ele precisa do ref aqui.
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - name: Migration nova mexe em dev sem mexer em public (ou vice-versa)?
         # Convencao do projeto (ver supabase/migrations/2026081*): mudanca de
@@ -174,7 +177,9 @@ jobs:
         # reprovando normal.
         run: |
           npm ci
-          supabase gen types typescript --linked > /tmp/database.types.ts
+          # PH-106: pelo wrapper, que re-linka se a credencial tiver sido
+          # rotacionada por outra invocacao do CLI enquanto o `npm ci` rodava.
+          scripts/ci/supabase-cli.sh supabase gen types typescript --linked > /tmp/database.types.ts
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' /tmp/database.types.ts > /tmp/gerado.norm.ts
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' src/lib/database.types.ts > /tmp/commitado.norm.ts
           if ! diff -q /tmp/gerado.norm.ts /tmp/commitado.norm.ts > /dev/null; then
@@ -186,6 +191,8 @@ jobs:
           echo "database.types.ts em sincronia com o schema remoto (PostgrestVersion ignorada de proposito - ver comentario do step)."
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          # PH-106: quem linka agora e o wrapper, entao ele precisa do ref aqui.
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - name: Resultado do gate
         # Roda SEMPRE (inclusive se um passo anterior falhou) pra transformar a
