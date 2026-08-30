@@ -80,6 +80,21 @@ export type PresetAmbiente =
  * `includes('cave')` classificaria `cave-volcanic` como caverna e daria poeira
  * a um mapa de lava, em silencio. Arte que nao esteja aqui cai em 'nenhum' —
  * fica parada como hoje, que e melhor que ganhar o ambiente errado.
+ *
+ * PH-255: o aviso acima ja estava escrito e mesmo assim CINCO entradas tinham
+ * sido preenchidas pelo NOME do arquivo. A varredura foi refeita abrindo as 31
+ * artes uma a uma, e toda linha corrigida diz o que ha no DESENHO — nao o que o
+ * nome sugere.
+ *
+ * AGUA NAO ENTROU EM NENHUMA ARTE NOVA, e a razao e mecanica, nao estetica:
+ * `lerArtesDeAgua()` (scripts/build-agua-mask.js) monta a fila de mascara
+ * procurando `'agua'` NESTA tabela, e cada arte da fila exige uma referencia
+ * PINTADA A MAO em `scripts/agua-refs/`. A mascara nao e derivavel da arte — foi
+ * o que a PH-113 mediu: agua e vegetacao coincidem em matiz e textura nestes
+ * mapas, e em `town-night`, que e noturna, coincidem ainda mais. Marcar `agua`
+ * aqui sem pintar a referencia faz o script exigir um arquivo que nao existe.
+ * As quatro artes com agua que ficaram fora (`town-night`, `dojo`, `town`,
+ * `mountain`) sao candidatas a `agua` no dia em que alguem pintar as refs.
  */
 const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   'assets/hunt-backgrounds/forest.jpg': 'folha',
@@ -88,10 +103,34 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   // gotejo aos cinco de uma vez seria "chove em todo mapa verde", que e o
   // oposto do que separar os biomas quer dizer.
   'assets/hunt-backgrounds/jungle.jpg': 'selva',
+  // Mata escura com lagoas verdes, teia e cogumelo. Copa fechada o bastante pra
+  // ser candidata a `selva`, mas a agua ali esta PARADA e coberta de limo, nao
+  // escorrendo da copa — gotejo leria como chuva num lugar sem chuva.
   'assets/hunt-backgrounds/tall-grass.jpg': 'folha',
   'assets/hunt-backgrounds/meadow.jpg': 'folha',
   'assets/hunt-backgrounds/plains.jpg': 'folha',
   'assets/hunt-backgrounds/burnt-forest.jpg': 'areia', // arvore queimada nao solta folha; o que sobe ali e cinza
+  // PH-255: era `neve`, pelo nome. A arte e um VALE VERDE — pinheiro, capim,
+  // flor amarela e azul, rio de degelo cruzando de cima a baixo. A neve so
+  // existe nos picos do FUNDO, fora da area jogavel. Floco branco caindo em
+  // cima de flor aberta le como bug de estacao, nao como montanha.
+  'assets/hunt-backgrounds/mountain.jpg': 'folha',
+  // PH-255: era `cidade`, pelo nome do arquivo. Nao ha uma construcao na arte.
+  // E uma MATA DE NOITE: rio atravessando, lagoa com nenufar, capim alto,
+  // cogumelo luminoso e vaga-lume ja pintados. Fiapo urbano cinza flutuando
+  // dentro de uma floresta era o que o jogador via.
+  'assets/hunt-backgrounds/town-night.jpg': 'folha',
+  // PH-255: era `cidade`. A arte e um vilarejo de DUAS construcoes (torre e
+  // moinho) numa mesa central; o resto do quadro e floresta de coniferas, lago,
+  // duas quedas d'agua e campo de flor. O criterio desta tabela e o desenho, e o
+  // desenho e verde. `metropolis` e `slum` e que sao cidade de verdade.
+  'assets/hunt-backgrounds/town.jpg': 'folha',
+  // PH-255: era `poeira` (poeira SECA em suspensao). A arte e um jardim japones
+  // varrido: cerejeira em flor, rio de carpas, ponte de pedra, lanterna, bambu e
+  // piso molhado. Poeira seca e o oposto do que ela mostra; petala em deriva e o
+  // que aquele jardim faz. O comentario antigo ("dojo e seco") respondia a
+  // pergunta do GOTEJO (caverna vs poeira), nunca a de se poeira cabia ali.
+  'assets/hunt-backgrounds/dojo.jpg': 'folha',
 
   'assets/hunt-backgrounds/sea.jpg': 'agua',
   'assets/hunt-backgrounds/lake.jpg': 'agua',
@@ -101,27 +140,31 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
 
   'assets/hunt-backgrounds/volcano.jpg': 'brasa',
   'assets/hunt-backgrounds/cave-volcanic.jpg': 'brasa',
+  // PH-255: era `poeira`. RIO DE LAVA atravessa a arte de cima a baixo, com
+  // geiser de vapor no chao de pedra e tocha acesa na parede. E irma de
+  // `volcano` e `cave-volcanic`, nao de `ruins` — e `brasa` ainda traz o
+  // `brilhoDoChao`, que a lava pintada ali pede.
+  'assets/hunt-backgrounds/dragon.jpg': 'brasa',
 
   // SECO fica em `poeira`; gruta fechada, onde a agua escorre pela rocha,
-  // ganha o gotejo. Ruina a ceu aberto, templo, dojo e covil de dragao sao
-  // secos — pingo ali seria goteira sem telhado.
+  // ganha o gotejo. Ruina a ceu aberto e templo sao secos — pingo ali seria
+  // goteira sem telhado.
   'assets/hunt-backgrounds/ruins.jpg': 'poeira',
+  // Confirmado na varredura, e nao herdado: ilhas flutuantes num ceu roxo, com
+  // cristal e queda d'agua caindo pra dentro da nuvem. Nao ha teto (fora de
+  // `caverna`) e nao ha verde dominante (fora de `folha`); o grao claro em
+  // suspensao de `poeira` le como poeira de luz, que e o que o lugar quer ser.
   'assets/hunt-backgrounds/temple.jpg': 'poeira',
-  'assets/hunt-backgrounds/dragon.jpg': 'poeira',
-  'assets/hunt-backgrounds/dojo.jpg': 'poeira',
   'assets/hunt-backgrounds/fairy-cave.jpg': 'caverna',
   'assets/hunt-backgrounds/abyss.jpg': 'caverna',
 
   'assets/hunt-backgrounds/ice-cave.jpg': 'neve',
   'assets/hunt-backgrounds/ice-mountain.jpg': 'neve',
-  'assets/hunt-backgrounds/mountain.jpg': 'neve',
 
   'assets/hunt-backgrounds/desert.jpg': 'areia',
   'assets/hunt-backgrounds/badlands.jpg': 'areia',
   'assets/hunt-backgrounds/wasteland.jpg': 'areia',
 
-  'assets/hunt-backgrounds/town.jpg': 'cidade',
-  'assets/hunt-backgrounds/town-night.jpg': 'cidade',
   'assets/hunt-backgrounds/metropolis.jpg': 'cidade',
   'assets/hunt-backgrounds/slum.jpg': 'cidade',
   'assets/hunt-backgrounds/industrial.jpg': 'cidade',
