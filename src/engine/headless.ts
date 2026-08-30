@@ -29,6 +29,11 @@ export { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 // (com aviso na tela) 30 segundos depois de entrar na hunt.
 export { novaSala, temSalas, solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, protetorDaSala } from './systems/salaSystem'
 export type { AvancoDeSala, TipoDeProtetor } from './systems/salaSystem'
+// PH-301: "este POKE consegue causar dano naquele?" — a pergunta que o sorteio
+// do protetor passou a fazer. Exportada pra bancada
+// (`scripts/harness/protetor-imune.mjs`) medir a taxa de protetor imune por
+// sub-bioma sem reimplementar a regra e acabar medindo outra coisa.
+export { podeDanificar, golpeAnuladoPorImunidade } from './systems/combatSystem'
 // PH-140: o servidor resolve o clima de ambiente e manda pro cliente, que nao
 // tem a semente da sessao pra derivar o dele.
 export { climaDaSala } from './systems/climaAmbiente'
