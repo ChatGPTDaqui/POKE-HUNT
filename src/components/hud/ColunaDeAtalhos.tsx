@@ -16,7 +16,20 @@
 // decidir a propria posicao por breakpoint. Esta aqui nao decide: ela comeca na
 // altura MEDIDA do trilho (`uiStore.trilhoHeight`, mesmo mecanismo do rodape) e
 // encolhe pra so-icone no compacto, onde a largura e disputada.
+//
+// PH-282: O CARD DO TREINADOR PASSOU A MORAR AQUI, no mesmo container, acima dos
+// atalhos. Ele vivia dentro do trilho, que tem teto de largura (`max-w-[64em]`)
+// e e alinhado a esquerda por PH-83 — em 1920px o trilho acaba por volta de
+// x=1440 e o card acabava junto, com ~480px de tela vazia a direita, desalinhado
+// desta coluna que ja estava colada na borda. Juntar os dois resolve as duas
+// coisas de uma vez: mesma borda, e a coluna continua logo abaixo do card sem
+// depender de medida nenhuma.
+//
+// O `top` medido continua existindo pro COMPACTO, onde o card nao e renderizado
+// (ele desce pra gaveta por falta de largura): sem ele, a coluna subiria pra
+// cima do trilho, que em 390px ocupa a largura inteira.
 import { BookBookmark, CheckSquare, Sparkle, type Icon } from '@phosphor-icons/react'
+import { CardDoTreinador } from '@/components/hud/CardDoTreinador'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 
@@ -53,8 +66,12 @@ export function ColunaDeAtalhos() {
     // vazia abaixo do ultimo botao.
     <div
       className="pointer-events-none absolute right-[.5em] z-20 flex flex-col items-end gap-[.35em]"
-      style={{ top: `calc(${trilhoHeight}px + .5em)` }}
+      // No amplo/deitado o card do treinador abre esta coluna e ela comeca no
+      // topo da tela; no compacto o card nao existe e ela precisa comecar
+      // abaixo do trilho, que ali ocupa a largura toda.
+      style={{ top: soIcone ? `calc(${trilhoHeight}px + .5em)` : '.5em' }}
     >
+      {!soIcone && <CardDoTreinador />}
       {TELAS_NA_COLUNA.map(({ screen, label, Icon }) => (
         <button
           key={screen}

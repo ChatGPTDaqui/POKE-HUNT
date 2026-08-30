@@ -38,13 +38,28 @@ describe('coluna de atalhos do canto superior direito (PH-257)', () => {
     }
   })
 
-  it('a coluna comeca abaixo do trilho, pela altura MEDIDA dele', () => {
+  it('NO COMPACTO a coluna comeca abaixo do trilho, pela altura MEDIDA dele', () => {
     // O numero e do `ResizeObserver` (uiStore#trilhoHeight), nao um `em` fixo: a
     // altura do trilho muda com o regime, com o nome da especie em campo e com o
     // `hudScale`. Errar aqui poe a coluna em cima da carteira.
-    useUiStore.setState({ trilhoHeight: 87 } as never, false)
+    //
+    // PH-282: isto vale so no compacto. La o card do treinador nao existe (ele
+    // desce pra gaveta) e o trilho ocupa a largura inteira, entao a coluna
+    // PRECISA comecar abaixo dele.
+    useUiStore.setState({ viewportWidth: 390, viewportHeight: 844, trilhoHeight: 87 } as never, false)
     const { container } = render(<ColunaDeAtalhos />)
     const coluna = container.firstElementChild as HTMLElement
     expect(coluna.style.top).toContain('87px')
+  })
+
+  it('no amplo a coluna comeca no TOPO, e o card do treinador vem junto', () => {
+    // PH-282: com o card dentro dela, a coluna ancora no canto superior direito
+    // e a altura do trilho deixa de importar aqui. Era o trilho que impedia o
+    // card de alcancar a borda em tela larga.
+    useUiStore.setState({ viewportWidth: 1440, viewportHeight: 900, trilhoHeight: 87 } as never, false)
+    const { container } = render(<ColunaDeAtalhos />)
+    const coluna = container.firstElementChild as HTMLElement
+    expect(coluna.style.top).not.toContain('87px')
+    expect(screen.getByLabelText('Perfil do treinador'), 'o card nao veio junto').toBeTruthy()
   })
 })
