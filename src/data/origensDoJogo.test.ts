@@ -34,20 +34,23 @@ import { describe, expect, it } from 'vitest'
 import { ORIGENS_DO_JOGO, origemConhecida } from './origensDoJogo'
 import { mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 
+import fonteDasOrigens from '/supabase/functions/jogo/origens.ts?raw'
 import fonteDaEdge from '/supabase/functions/jogo/index.ts?raw'
+import fonteDaEdgeDev from '/supabase/functions/jogo-dev/index.ts?raw'
 
 /** As origens escritas na copia do servidor. */
 function origensDoServidor(): string[] {
-  const bloco = fonteDaEdge.match(/const ORIGENS_DO_JOGO = \[([\s\S]*?)\]/)
-  if (!bloco) throw new Error('bloco ORIGENS_DO_JOGO nao encontrado em supabase/functions/jogo/index.ts')
+  const bloco = fonteDasOrigens.match(/export const ORIGENS_DO_JOGO = \[([\s\S]*?)\]/)
+  if (!bloco) throw new Error('bloco ORIGENS_DO_JOGO nao encontrado em supabase/functions/jogo/origens.ts')
   return [...bloco[1].matchAll(/'([^']+)'/g)].map((m) => m[1])
 }
 
 describe('cliente e servidor concordam sobre as origens (PH-293)', () => {
-  it('a varredura achou o fonte da Edge', () => {
+  it('a varredura achou os fontes da Edge', () => {
     // Guarda anti-vacuo: com o import quebrado a comparacao abaixo compararia
     // a lista do cliente com ela mesma.
     expect(fonteDaEdge).toContain('criarApp')
+    expect(fonteDaEdgeDev).toContain('criarApp')
     expect(origensDoServidor().length).toBeGreaterThan(0)
   })
 
@@ -76,8 +79,42 @@ describe('cliente e servidor concordam sobre as origens (PH-293)', () => {
   it('o secret continua ACRESCENTANDO, e nao substituindo', () => {
     // Se alguem trocar o `[...ORIGENS_DO_JOGO, ...secret]` por so o secret, o
     // staging quebra de novo — e de novo em silencio.
-    expect(fonteDaEdge).toContain('...ORIGENS_DO_JOGO')
+    expect(fonteDasOrigens).toContain('...ORIGENS_DO_JOGO')
     expect(fonteDaEdge).toContain("Deno.env.get('ORIGENS_PERMITIDAS')")
+    expect(fonteDaEdgeDev).toContain("Deno.env.get('ORIGENS_PERMITIDAS')")
+  })
+})
+
+// A PRIMEIRA CORRECAO DESTA ISSUE NAO FUNCIONOU, e o motivo cabe num teste.
+//
+// Ela levou a lista pra dentro de `jogo/index.ts`. So que ha DUAS cascas — `jogo`
+// (producao) e `jogo-dev` (staging) — e a segunda tinha a PROPRIA leitura do
+// secret. O deploy saiu verde, o teste passou, e o `OPTIONS` do staging
+// continuou sem `access-control-allow-origin`.
+//
+// Ou seja: consertar duplicando reproduziu, dentro da propria correcao, o
+// defeito que a issue descreve. A lista agora mora em `jogo/origens.ts` e as
+// duas cascas importam — estes casos existem pra que ninguem volte a escrever a
+// lista numa delas.
+describe('as duas cascas usam a MESMA lista (PH-293)', () => {
+  for (const [nome, fonte] of [
+    ['jogo (producao)', fonteDaEdge],
+    ['jogo-dev (staging)', fonteDaEdgeDev],
+  ] as const) {
+    it(`${nome} importa a lista em vez de escrever a propria`, () => {
+      expect(fonte).toMatch(/import \{ origensPermitidas \} from '\.\.?\/?(jogo\/)?origens\.ts'/)
+      // A marca do defeito: lista literal dentro da casca.
+      expect(fonte, 'a lista voltou a ser escrita nesta casca').not.toContain('ORIGENS_DO_JOGO = [')
+      // E a marca da versao ANTIGA, que caia em localhost quando o secret
+      // faltava — o fallback que escondia o problema.
+      expect(fonte).not.toContain("?? 'http://localhost:5173'")
+    })
+  }
+
+  it('as duas passam a lista pro `criarApp`', () => {
+    for (const fonte of [fonteDaEdge, fonteDaEdgeDev]) {
+      expect(fonte).toContain('origensPermitidas: listaDeOrigens')
+    }
   })
 })
 
