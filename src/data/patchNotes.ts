@@ -115,12 +115,34 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   // Fica de fora: a bancada `scripts/harness/janela-do-protetor.mjs` (mesma
   // regua das outras bancadas) e o valor novo de `REPETIR_PEDIDO_DE_SALA_MS`. O
   // jogador ve a hunt andando, nao a constante.
+  //
+  // SEXTA REVARRIDA, na noite de 29/08 (PH-286). Entrou uma leva inteira de HUD,
+  // toda pedida pelo usuario TESTANDO o jogo: PH-272, 275, 279, 280, 281, 282 e
+  // 283.
+  //
+  // As quatro de LAYOUT (sala dentro do cabecalho, taxas no canto de baixo,
+  // carteira dentro do card, card colado na borda) viraram UMA linha. O jogador
+  // nao percebe quatro mudancas — ele percebe que a tela ficou arrumada, e
+  // quatro linhas descrevendo cada peca leriam como changelog de dev.
+  //
+  // Ganham linha propria, porque nao sao "arrumar a tela":
+  //  - o nome do golpe aparecendo na placa do POKE (PH-275 + PH-283);
+  //  - o POKE que parou de andar-e-parar com o Lure (PH-280). Essa linha tambem
+  //    CONSERTA uma promessa que a 7.15 ja fazia: a linha do Lure dizia que um
+  //    chip no topo mostrava a reuniao "pra nao parecer que o bot travou", e o
+  //    chip saiu na PH-279. Anunciar um chip que nao existe mais seria mentira
+  //    na primeira versao em que o jogador leria a nota.
+  //
+  // Fica de fora: as bancadas de `scripts/harness/`, a extracao de `Carteira` e
+  // `CardDoTreinador` pra arquivos proprios (codigo movido, nao escrito) e as
+  // fracoes da coleira do Lure. O jogador ve o POKE andando direito, nao o
+  // limiar.
   {
     version: '7.15',
     date: '2026-08-29',
     title: 'Farm em area, o boss guardando os doze biomas — e as Missoes finalmente dando pra terminar',
     highlights: [
-      'AGORA VOCE PODE JUNTAR ATE QUATRO SELVAGENS ANTES DE BATER. Seu POKE sempre andava ate o mais proximo e lutava um por vez, entao golpe de area nunca acertava mais de um alvo — ele existia e nao servia pra nada. Com o Lure ligado (aba nova no painel de Automacoes) ele passa pelo raio de varios, puxa o grupo atras de si e so entao para pra lutar: um golpe de area acerta todos de uma vez. Voce escolhe juntar 1, 2, 3 ou 4, e um chip no topo mostra a reuniao acontecendo (2/4) pra nao parecer que o bot travou.',
+      'AGORA VOCE PODE JUNTAR ATE QUATRO SELVAGENS ANTES DE BATER. Seu POKE sempre andava ate o mais proximo e lutava um por vez, entao golpe de area nunca acertava mais de um alvo — ele existia e nao servia pra nada. Com o Lure ligado (aba nova no painel de Automacoes) ele passa pelo raio de varios, puxa o grupo atras de si e so entao para pra lutar: um golpe de area acerta todos de uma vez. Voce escolhe juntar 1, 2, 3 ou 4 no painel.',
       'O PRECO DO LURE E LEVAR PANCADA DE TODOS AO MESMO TEMPO. Nao e farm de graca: juntar quatro multiplica o dano que entra no seu POKE, e o ganho depende de ter golpe de AREA na rotacao — sem um, o grupo so bate mais em voce. Shiny em campo cancela a reuniao na hora (ele continua tendo prioridade), e hunt de um inimigo so, como as de boss, ignora o Lure.',
       'E O LURE PAROU DE COMECAR A BRIGA NO MEIO DA REUNIAO. Ele juntava o grupo e batia ao mesmo tempo: bastava um selvagem encostar pra o seu POKE parar pra lutar com ele, e a conta que voce pediu nunca fechava. Agora o golpe fica segurado ate a reuniao terminar — primeiro junta os quatro, depois luta. Enquanto junta, seu POKE apanha sem revidar, entao o Lure ficou mais forte e mais arriscado ao mesmo tempo.',
       'O BOSS AGORA EXISTE NOS DOZE BIOMAS, NAO SO NO IGNEO. Ele tinha nascido em um bioma so, como piloto, e ficou la. Agora cada um dos doze tem o seu, na ordem canonica do mapa.',
@@ -137,6 +159,9 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'A SALA NOVA AS VEZES NASCIA VAZIA, E A HUNT MORRIA ALI. Depois de trocar de sala podia acontecer de nao nascer inimigo nenhum: campo limpo, nada pra matar, a contagem parada — e como a sala so avanca com 30 abates, a hunt ficava presa pra sempre naquele mapa. Recarregar a pagina era a unica saida. Corrigido: o guardiao da sala anterior ficava pendurado no lugar e desligava o nascimento dos selvagens.',
       'E A TROCA DE SALA PAROU DE ACONTECER COM A BARRA PELA METADE. Quem manda na contagem e o servidor, e o numero da sua tela e uma previsao — quando os dois discordavam, a area trocava mostrando 12/30 e parecia que o jogo tinha pulado a sala. Agora a barra fecha em 30/30 antes do aviso de area nova, que e o que de fato aconteceu.',
       'E A AREA PAROU DE TROCAR SEM VOCE SAIR DA SALA. Acontecia de o sub-bioma mudar sozinho — de Relvado pra Planicie, por exemplo — com o contador continuando em "Sala 2/10": quando o servidor demorava a responder, o jogo chutava a sala seguinte e depois se corrigia na sua frente. Ele agora espera de verdade antes de chutar qualquer coisa.',
+      'E O SEU POKE PAROU DE ANDAR TRAVANDO ENQUANTO REUNE. Com o Lure ligado ele dava uns passos, parava, andava de novo — varias vezes por segundo, e parecia que o jogo estava engasgando. Ele parava de proposito (pra nao arrastar o grupo pra longe de quem ainda estava vindo atras), so que decidia isso a cada instante e ficava trocando de ideia. Agora, quando para pra esperar, ele espera de verdade: sao 40 vezes menos paradas no caminho.',
+      'A TELA DE JOGO FOI ARRUMADA. A sala em que voce esta subiu pro cabecalho, no centro; as taxas de Gold/h, XP/h e Mobs/h desceram pro canto de baixo a direita; o seu ouro e o diamante entraram no cartao do treinador, ali no canto de cima (abreviados: 1B, 1M); e o proprio cartao agora fica colado no canto em qualquer tamanho de janela — antes, em tela larga, ele parava no meio do caminho. O que sobrou no meio da tela foi embora.',
+      'O NOME DO GOLPE APARECE NO SEU POKE, LOGO ABAIXO DA VIDA. Antes ele subia junto com os numeros de dano, misturado com o que os OUTROS estavam levando — agora ele fica colado na barra de quem usou o golpe, com fundo proprio pra dar pra ler mesmo no meio da explosao. E a porcentagem de vida saiu de cima do seu POKE: ela ja esta no cabecalho, e no campo so atrapalhava. A do alvo continua, que e a unica que voce nao tem em outro lugar.',
       'E A HUNT PAROU DE EMPACAR COM A BARRA CHEIA. Acontecia de a sala fechar os 30 abates e simplesmente nao passar: barra cheia, o guardiao em pe, e voce matando sem que nada andasse — em alguns casos por mais de dez minutos, ate voce desistir e sair. O jogo cobrava a area seguinte de tanto em tanto segundo, e essa pressa era justamente o que impedia o servidor de terminar a luta com o guardiao. Ele agora pergunta no ritmo certo, e a sala vira.',
       'O F5 PAROU DE TE MANDAR DE VOLTA PRA SALA 1. Recarregar a pagina no meio da hunt jogava voce na primeira sala do primeiro ciclo, perdendo o caminho inteiro. Agora voce volta na MESMA sala, com os mesmos abates e o mesmo ciclo — e se havia um guardiao em pe, ele continua la, com a vida que tinha.',
       'REIVINDICAR MISSAO RESPONDIA "MISSAO JA REIVINDICADA" E NAO PAGAVA. A tela voltava a oferecer, a cada 30 segundos, uma missao que voce ja tinha reivindicado; ao clicar de novo, o jogo recusava. O ouro da primeira vez sempre foi pago — o que sumia era a marca na tela.',
