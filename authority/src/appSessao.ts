@@ -132,6 +132,35 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
 }
 
 /**
+ * Sem flush ha mais que isto, a sessao esta ABANDONADA (PH-277).
+ *
+ * O cliente flusha a cada 30s e nunca deixa passar mais que
+ * `INTERVALO_FLUSH_MAX_MS` (90s, autoridade.ts) enquanto a aba esta viva —
+ * qualquer evento volta o intervalo pro piso, e `visibilitychange` dispara um
+ * flush sozinho. Meia hora e 20x o teto: nao existe sessao viva desse lado.
+ *
+ * NAO E MAIS APERTADO DE PROPOSITO. O custo de fechar cedo demais e real e cai
+ * no jogador: fechar a sessao perde a POSICAO NAS SALAS (`sala`, `ciclos`), e
+ * quem voltar de um notebook que dormiu 10 minutos recomecaria no ciclo 1, sala
+ * 1. 30 minutos deixa esse caso inteiro de fora e ainda pega o que a PH-277
+ * mediu no banco: linhas paradas ha 4 horas e ha 1 dia e 6 horas.
+ *
+ * O tempo abandonado NAO E CREDITADO, e isso e o ponto — nao um efeito
+ * colateral. Ele nunca foi simulado por ninguem, exatamente como a orfa que
+ * `sessaoAberta` ja fechava sem creditar. Hoje `FARM_OFFLINE_PAUSADO` faria o
+ * descarte de qualquer jeito; o dia em que ele voltar a `false` e o dia em que
+ * a sessao esquecida viraria horas de credito retroativo, com a assimetria
+ * injusta de premiar quem fecha a aba de qualquer jeito e nao quem sai pela
+ * porta.
+ *
+ * O GEMEO DESTE NUMERO E SQL: `fechar_sessoes_inativas()` usa o mesmo limite
+ * (migration `20260830010000`), porque o caminho de acesso so alcanca quem
+ * volta — sessao de quem nunca mais aparece precisa do cron. `limiteDeSessao
+ * Inativa.test.ts` reprova se os dois se separarem.
+ */
+export const SESSAO_INATIVA_SEGUNDOS = 30 * 60
+
+/**
  * A sessao aberta do jogador — e no maximo UMA.
  *
  * O indice unico parcial `game_sessions_abertas` garante isso desde a migration
@@ -141,6 +170,10 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
  * novo um periodo que a sessao vencedora ja pagou — o exploit de duplicacao que
  * aquela migration descreve. Fechar sem creditar e o certo: o tempo dela ja foi
  * pago pela outra.
+ *
+ * PH-277: a MESMA regra passa a valer pra sessao ABANDONADA. Ela e devolvida
+ * como `null`, e nao reaproveitada, entao o chamador abre uma nova — o que
+ * significa que o intervalo esquecido nunca chega a `aplicarFlush`.
  */
 async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | null> {
   // PH-241: `sala_protetor(*)` embutido via PostgREST — `session_id` e
@@ -151,7 +184,29 @@ async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | 
     `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*,sala_protetor(*)&order=started_at.desc`,
   )
   for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id)
-  return linhas[0] ?? null
+
+  const atual = linhas[0]
+  if (!atual) return null
+  if (sessaoAbandonada(atual)) {
+    // `sairDaHunt` e nao `fecharLinhaDeSessao`: `current_map_id` tem que ser
+    // limpo junto, senao o cliente volta pra dentro de uma hunt sem sessao e
+    // fica caçando sem creditar nada — o mesmo cuidado que a saida normal toma.
+    await sairDaHunt(cfg, userId, atual.id)
+    return null
+  }
+  return atual
+}
+
+/** Passou de `SESSAO_INATIVA_SEGUNDOS` sem nenhum flush? */
+export function sessaoAbandonada(
+  sessao: Pick<LinhaSessao, 'last_flush_at'>,
+  agora = Date.now(),
+): boolean {
+  const desde = new Date(sessao.last_flush_at).getTime()
+  // Data invalida (coluna nula/torta) nao pode virar "abandonada": `NaN` em
+  // qualquer comparacao e `false`, e e esse o resultado que se quer — na duvida
+  // a sessao continua viva e o caminho normal decide.
+  return agora - desde > SESSAO_INATIVA_SEGUNDOS * 1000
 }
 
 async function fecharLinhaDeSessao(cfg: Config, sessaoId: string): Promise<void> {
@@ -513,3 +568,13 @@ async function fechar(cfg: Config, userId: string, parcial: boolean): Promise<Re
     estado: resultado.estado,
   })
 }
+
+/**
+ * Ponte SO PRA TESTE de `sessaoAberta`.
+ *
+ * Ela e privada de proposito — quem precisa dela e o roteador logo acima, e
+ * exporta-la de verdade convidaria outro modulo a pular o caminho do request.
+ * O `__testes` deixa isso explicito no nome, em vez de promover a funcao a API
+ * publica pra o teste alcancar (PH-277).
+ */
+export const __testes = { sessaoAberta }
