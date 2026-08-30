@@ -696,6 +696,27 @@ function aplicarHazardsAoInimigo(rng: Rng, hazards: EnemyHazards | undefined, en
 export interface ProgressoDaSessao {
   sequenceIndex?: number
   sequenceCleared?: boolean
+  /**
+   * PH-307: HP do membro da sequencia (Campeao Lance) que estava em campo no
+   * fim da janela anterior. Sao TRES valores com tres significados:
+   *
+   *   `undefined`/`null` — nao ha informacao (sessao nova, ou servidor antigo).
+   *                        O membro nasce com HP CHEIO, como sempre foi.
+   *   `> 0`              — luta em andamento. O membro nasce com esse HP.
+   *   `0`                — o membro deste indice JA CAIU e a sequencia ainda
+   *                        nao avancou. O mundo nasce SEM ele.
+   *
+   * O terceiro caso nao e detalhe: sem ele, um membro derrotado exatamente na
+   * borda da janela ressuscitava inteiro na reconstrucao seguinte e tinha que
+   * ser derrotado de novo — e o indice nunca passava dali.
+   *
+   * Sem NADA disto o dano some na borda de cada janela (~30s), e um membro que
+   * nao cabe numa janela e imbativel. Medido em producao em 30/08: as duas
+   * sessoes de `boss_lance` pararam no indice 5 de 6, com o cliente anunciando
+   * a vitoria que o servidor nunca teve. Mesma correcao que PH-217 fez pro
+   * protetor da sala.
+   */
+  sequenceHp?: number | null
   /** Sala em que a sessao parou. Ausente = comeca uma sala nova sorteada. */
   sala?: SalaAtiva | null
   /**
@@ -803,9 +824,21 @@ export function buildMapWorld(
       enemies.push(enemy)
       protetorPendente = pendente
     } else if (mapDef.sequence) {
-      const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala))
-      aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
-      enemies.push(enemy)
+      // PH-307: `sequenceHp === 0` significa "este membro ja caiu e o indice
+      // ainda nao avancou" — o campo nasce VAZIO e o proximo tick avanca a
+      // sequencia (ou a fecha, se era o ultimo). Sem esse caso, um membro
+      // derrotado na borda da janela ressuscitava inteiro aqui.
+      if (progresso?.sequenceHp !== 0) {
+        const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala))
+        // `> 0` e uma luta em andamento; `null`/ausente e sessao sem
+        // informacao, e ai vale o HP cheio que `spawnSequenceEnemy` ja deu.
+        // O clamp protege contra valor gravado por uma versao com outra
+        // formula de stat (o HP maximo depende de nivel e IV).
+        const hpSalvo = progresso?.sequenceHp
+        if (hpSalvo != null && hpSalvo > 0) enemy.poke.hp = Math.min(hpSalvo, enemy.poke.stats.hp)
+        aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
+        enemies.push(enemy)
+      }
     } else {
       for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
         const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies)
