@@ -167,6 +167,38 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   // janela de simulacao), PH-106/187/288/289/290 (CI, deploy, tipos do banco) e
   // PH-293 (CORS do cliente de staging, que nem alcanca producao). Nenhum muda o
   // que o jogador ve — mesma regua da 7.11 pra ca.
+  //
+  // OITAVA REVARRIDA, na tarde do MESMO 30/08 (PH-295 reaberta). A setima foi
+  // escrita de manha; a tarde rendeu outra leva, e a nota continua sendo a 7.15
+  // pela razao de sempre — ela ainda nao subiu, entao nenhum jogador leu nada
+  // disto.
+  //
+  // Esta leva veio quase toda de EXPLICACAO: coisas que o jogo mostrava e nao
+  // dizia. Elas viram DUAS linhas, e nao cinco, porque pro jogador sao uma coisa
+  // so ("agora da pra entender o que esta na tela"):
+  //
+  //  - PH-165 e PH-285: sala, carteira e clima passaram a explicar o que sao, e
+  //    o clima saiu do meio do campo de jogo. A linha do clima que ja existia
+  //    aqui foi REESCRITA em vez de duplicada — ela dizia so que o clima lista
+  //    os efeitos, e agora ele tambem diz onde mora e quanto dura.
+  //  - PH-296: a bolha de explicacao abria no CANTO DA TELA em vez de junto do
+  //    que ela explica, e no celular vazava pra fora. Entra junto porque sem ela
+  //    a explicacao nova apareceria no lugar errado; anunciar as duas separadas
+  //    seria contar o conserto de um defeito que so existiu entre uma e outra.
+  //
+  // Ganham linha propria:
+  //  - PH-287: o sino do Correio dizendo O QUE falta. E a resposta a um relato
+  //    ("o badge nao limpa") que a PH-213 fechou como nao reproduzido — o estado
+  //    sempre esteve certo, faltava a tela dizer que o que sobrou era um item
+  //    por coletar, e nao uma mensagem por ler.
+  //  - PH-292: o avanco manual de sala voltou a funcionar. Ele estava inerte
+  //    desde que todas as salas ganharam protetor, e quem ligava o toggle nao
+  //    via diferenca nenhuma.
+  //
+  // Fica de fora desta leva: PH-290 (versao do CLI no CI), PH-297 (fim do review
+  // manual — processo, nao jogo) e a fatia 1 da PH-120 (a mesa da troca direta
+  // existe no banco, e nada na tela ainda). Meia-feature nao entra: mesma regra
+  // do boss, que esperou os doze biomas pra ser anunciado.
   {
     version: '7.15',
     // A data e a da leva mais RECENTE que a nota cobre, e nao a da primeira
@@ -202,7 +234,11 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'REIVINDICAR MISSAO RESPONDIA "MISSAO JA REIVINDICADA" E NAO PAGAVA. A tela voltava a oferecer, a cada 30 segundos, uma missao que voce ja tinha reivindicado; ao clicar de novo, o jogo recusava. O ouro da primeira vez sempre foi pago — o que sumia era a marca na tela.',
       'A HUNT INICIAL PAROU DE SER UMA CAMINHADA. So havia um selvagem no mapa inteiro, e o POKE passava metade do tempo atravessando o cenario ate o proximo. Agora eles nascem mais perto e o campo enche conforme seu inicial cresce: um ate o Nivel 2, dois a partir do 3, tres a partir do 5. Eles continuam nascendo longe uns dos outros, entao voce enfrenta um por vez — a primeira meia hora de conta nova era o unico lugar do jogo onde dava pra morrer sem entender por que.',
       'IR PRO HOSPITAL AGORA LEVA 3 SEGUNDOS. Era instantaneo, e virou botao de fuga: qualquer aperto em campo se resolvia saindo antes do proximo golpe. Agora ha uma contagem na tela — e da pra cancelar, se voce clicou sem querer.',
-      'O CLIMA EXPLICA O QUE ELE FAZ. Passe o ponteiro (ou toque) no chip de clima e ele lista os efeitos reais daquele tempo: quanto Agua ganha na chuva, quanto Fogo perde, quanto de vida o granizo e a areia tiram por turno, o que a neve muda pro tipo Gelo e quais golpes nunca erram. Antes so o nome aparecia, e o resto era adivinhacao.',
+      'O CLIMA EXPLICA O QUE ELE FAZ, E SAIU DA FRENTE DO JOGO. Ele boiava no meio do campo; agora fica no cabecalho, ao lado da sala. Passe o ponteiro (ou toque) e ele lista os efeitos reais daquele tempo: quanto Agua ganha na chuva, quanto Fogo perde, quanto de vida o granizo e a areia tiram por turno, o que a neve muda pro tipo Gelo e quais golpes nunca erram — e, quando o clima veio de um golpe, quantos turnos ainda faltam pra ele passar. Antes so o nome aparecia, e o resto era adivinhacao.',
+      'A SALA E A CARTEIRA TAMBEM PASSARAM A SE EXPLICAR. Toque no chip de sala e ele conta quantas salas a hunt tem, quantos abates cada uma pede e o que acontece ao limpar a ultima; com o Guardiao segurando a passagem, ele diz isso tambem. Na carteira aparece o valor EXATO do ouro e do diamante — no celular o numero vinha abreviado ("1B") e nao havia jeito nenhum de ver quanto era de verdade.',
+      'E AS EXPLICACOES PARARAM DE ABRIR NO CANTO DA TELA. A bolha de qualquer card — golpe, item, POKE do chat, clima, sala — nascia grudada no alto a esquerda em vez de junto do que ela explica, e no celular ainda vazava pra fora da tela. Agora ela abre encostada no que voce tocou.',
+      'O SINO DO CORREIO DIZ O QUE FALTA, E NAO SO QUANTOS. Uma carta com item dentro conta duas vezes: uma como mensagem por ler, outra como presente por pegar. Voce lia a mensagem, o numero caia de 2 pra 1 e o sino continuava aceso sem explicar — parecia travado. Agora ele diz "1 mensagem por ler e 1 item por coletar", e a conversa que tem presente preso mostra "por coletar" na lista.',
+      'O AVANCO MANUAL DE SALA VOLTOU A FUNCIONAR. Ligar a opcao no painel de Automacoes nao fazia mais nada desde que todas as salas ganharam Guardiao: a sala trocava sozinha assim que ele caia. Agora ela espera o seu clique, e os selvagens continuam nascendo enquanto voce fica — que e o motivo de ligar a opcao.',
       'ESPECIALIDADES, TASKS E BESTIARIO SAIRAM DE DENTRO DO "MAIS". Os tres estavam a dois toques de distancia, no mesmo lugar que a Wiki e os Ajustes. Agora tem coluna fixa no canto superior direito, logo abaixo do seu card de treinador.',
       'A COLUNA DO TOPO FICOU MAIS FACIL DE LER. As reservas encostaram no POKE em campo (elas sao a fila dele, e havia um chip no meio separando os dois), e a sala/clima passou pro centro. A faixa preta do chat parou de atravessar a tela inteira pra escrever "Item encontrado: Potion" — ela agora tem o tamanho do texto.',
       'E O PAINEL DE AUTOMACOES PAROU DE ESCONDER NUMERO. Numa janela estreita, o nome do item empurrava a contagem pra fora e o aviso de "suprimentos acabando" cortava justamente as horas restantes. As regras por especie tambem espremiam o nome do POKE em cinco letras. E o campo de "Vida ≤ __ %" do Auto-pot mostrava so o primeiro digito: a regra padrao de 70% aparecia como 7%, que e a diferenca entre curar cedo e curar quase morto.',
