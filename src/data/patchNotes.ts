@@ -66,15 +66,154 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   //  - De PH-245 e PH-246, o gerador, a tabela `missao_cadeia`, o custo em
   //    tabela e os testes de contrato. O que o jogador ve e a cadeia que
   //    funciona e o preco que ele consegue pagar.
+  //
+  // TERCEIRA REVARRIDA, em 29/08 (PH-268) — a mesma licao, pela terceira vez na
+  // mesma entrada: a PR de promocao tem `head: dev`, entao o intervalo cresce
+  // embaixo da nota enquanto ela esta aberta. Desde a segunda revarrida a `dev`
+  // recebeu mais 13 commits nao-merge (PH-254 e a leva PH-256 a PH-267).
+  //
+  // Continuam na 7.15 em vez de virar 7.16 pela regra de sempre: UMA entrada
+  // por promocao. A 7.15 ainda nao subiu, entao nenhum jogador leu o que ja
+  // estava escrito aqui.
+  //
+  // Do que entrou agora, fica de FORA:
+  //  - As bancadas de medicao de `scripts/harness/` (spawn da hunt inicial,
+  //    divergencia de quota). Mesma regua das anteriores.
+  //  - A heranca de sala no `/sessao/abrir` e a copia do protetor pendente
+  //    (PH-266) COMO MECANISMO — o que o jogador ve e "o F5 nao me joga mais
+  //    pra sala 1", e essa linha existe.
+  //  - O `trilhoHeight` medido, a uniao de `missoesReivindicadas` no flush e o
+  //    `limiteDeInimigos` (PH-257/265/259). Encanamento das linhas que estao
+  //    logo abaixo.
+  //  - Testes e a resolucao do conflito de HudLayer entre PH-257 e PH-261.
+  //
+  // QUARTA REVARRIDA, no mesmo dia (PH-270 e PH-271). Estas duas nao vieram de
+  // pedido nem de leitura de codigo: sairam de TESTAR O JOGO no `jogo-dev`
+  // depois da leva pronta — o campo do Auto-pot cortando o segundo digito e o
+  // sub-bioma trocando dentro da mesma sala. As duas entraram em linhas que ja
+  // existiam (painel de automacoes e troca de sala), porque sao a mesma coisa
+  // que aquelas linhas contam.
+  //
+  // O que fica de fora delas: o `jogo-campo-sem-spinner` e o valor novo de
+  // `ESPERA_MAXIMA_PELA_AUTORIDADE`. Encanamento — o jogador ve o numero
+  // inteiro e a area parada, nao a constante.
+  //
+  // QUINTA REVARRIDA, ainda em 29/08 (PH-276). Mesma causa das quatro
+  // anteriores: a PR de promocao tem `head: dev`, entao o intervalo cresce
+  // embaixo da nota enquanto ela espera revisao. Entraram a terceira correcao
+  // de PH-271 e a PH-273 — as duas achadas TESTANDO no `jogo-dev` depois da
+  // leva pronta, nenhuma vinda de pedido ou de leitura de codigo.
+  //
+  //  - PH-271 nao ganha linha nova: "a area parou de trocar sem voce sair da
+  //    sala", que ja esta escrita aqui, e exatamente o que a correcao entrega.
+  //    Foram tres tentativas ate acertar, e o jogador ve uma coisa so.
+  //  - PH-273 ganha linha propria, logo depois daquela. As duas linhas de sala
+  //    que ja existiam falam de sala nascendo VAZIA e de troca com a barra pela
+  //    METADE; hunt parada com a barra CHEIA e um terceiro jeito de a hunt
+  //    morrer, e o jogador nao tem como saber que sao o mesmo assunto.
+  //
+  // Fica de fora: a bancada `scripts/harness/janela-do-protetor.mjs` (mesma
+  // regua das outras bancadas) e o valor novo de `REPETIR_PEDIDO_DE_SALA_MS`. O
+  // jogador ve a hunt andando, nao a constante.
+  //
+  // SEXTA REVARRIDA, na noite de 29/08 (PH-286). Entrou uma leva inteira de HUD,
+  // toda pedida pelo usuario TESTANDO o jogo: PH-272, 275, 279, 280, 281, 282 e
+  // 283.
+  //
+  // As quatro de LAYOUT (sala dentro do cabecalho, taxas no canto de baixo,
+  // carteira dentro do card, card colado na borda) viraram UMA linha. O jogador
+  // nao percebe quatro mudancas — ele percebe que a tela ficou arrumada, e
+  // quatro linhas descrevendo cada peca leriam como changelog de dev.
+  //
+  // Ganham linha propria, porque nao sao "arrumar a tela":
+  //  - o nome do golpe aparecendo na placa do POKE (PH-275 + PH-283);
+  //  - o POKE que parou de andar-e-parar com o Lure (PH-280). Essa linha tambem
+  //    CONSERTA uma promessa que a 7.15 ja fazia: a linha do Lure dizia que um
+  //    chip no topo mostrava a reuniao "pra nao parecer que o bot travou", e o
+  //    chip saiu na PH-279. Anunciar um chip que nao existe mais seria mentira
+  //    na primeira versao em que o jogador leria a nota.
+  //
+  // Fica de fora: as bancadas de `scripts/harness/`, a extracao de `Carteira` e
+  // `CardDoTreinador` pra arquivos proprios (codigo movido, nao escrito) e as
+  // fracoes da coleira do Lure. O jogador ve o POKE andando direito, nao o
+  // limiar.
+  //
+  // SETIMA REVARRIDA, em 30/08 (PH-295). Mesma causa das seis anteriores, e ela
+  // nao vai embora sozinha: a PR de promocao tem `head: dev`, entao o intervalo
+  // cresce embaixo da nota enquanto ela espera revisao humana.
+  //
+  // Esta leva e diferente das outras seis: foi a primeira vez que alguem foi
+  // CONFERIR se o sistema de boss/andares que esta nota anuncia funcionava de
+  // fato. Nao funcionava, por dois caminhos independentes, e os dois ganham
+  // linha propria:
+  //
+  //  - PH-284: o progresso de bioma era calculado certo e DESCARTADO na
+  //    gravacao — a RPC que grava a linha do jogador tem lista fixa de colunas e
+  //    a coluna do progresso nunca entrou nela. E isto que fazia a promessa
+  //    "vencer o boss abre o proximo bioma", ja escrita nesta mesma entrada, ser
+  //    falsa na pratica. Promover a 7.15 sem esta linha seria anunciar uma
+  //    coisa que nao acontece.
+  //  - PH-291: o botao "Proximo Nivel" pulava o protetor vivo, entao quem usava
+  //    o avanco manual fechava o ciclo sem NUNCA vencer o Lord. Linha propria
+  //    porque o jogador ve outra coisa: o botao que some e o aviso de que falta
+  //    derrotar o guardiao.
+  //
+  // As outras tres se explicam sozinhas: PH-247 (Clefairy), PH-205 (captura do
+  // protetor) e PH-255 (efeito de ambiente em cinco artes). PH-294 (dois
+  // rotulos cortados) entra na linha de tela que ja existe, do mesmo jeito que
+  // as quatro de layout viraram uma.
+  //
+  // Fica de fora: PH-277 (sessao abandonada fecha sozinha), PH-278 (piso da
+  // janela de simulacao), PH-106/187/288/289/290 (CI, deploy, tipos do banco) e
+  // PH-293 (CORS do cliente de staging, que nem alcanca producao). Nenhum muda o
+  // que o jogador ve — mesma regua da 7.11 pra ca.
+  //
+  // OITAVA REVARRIDA, na tarde do MESMO 30/08 (PH-295 reaberta). A setima foi
+  // escrita de manha; a tarde rendeu outra leva, e a nota continua sendo a 7.15
+  // pela razao de sempre — ela ainda nao subiu, entao nenhum jogador leu nada
+  // disto.
+  //
+  // Esta leva veio quase toda de EXPLICACAO: coisas que o jogo mostrava e nao
+  // dizia. Elas viram DUAS linhas, e nao cinco, porque pro jogador sao uma coisa
+  // so ("agora da pra entender o que esta na tela"):
+  //
+  //  - PH-165 e PH-285: sala, carteira e clima passaram a explicar o que sao, e
+  //    o clima saiu do meio do campo de jogo. A linha do clima que ja existia
+  //    aqui foi REESCRITA em vez de duplicada — ela dizia so que o clima lista
+  //    os efeitos, e agora ele tambem diz onde mora e quanto dura.
+  //  - PH-296: a bolha de explicacao abria no CANTO DA TELA em vez de junto do
+  //    que ela explica, e no celular vazava pra fora. Entra junto porque sem ela
+  //    a explicacao nova apareceria no lugar errado; anunciar as duas separadas
+  //    seria contar o conserto de um defeito que so existiu entre uma e outra.
+  //
+  // Ganham linha propria:
+  //  - PH-287: o sino do Correio dizendo O QUE falta. E a resposta a um relato
+  //    ("o badge nao limpa") que a PH-213 fechou como nao reproduzido — o estado
+  //    sempre esteve certo, faltava a tela dizer que o que sobrou era um item
+  //    por coletar, e nao uma mensagem por ler.
+  //  - PH-292: o avanco manual de sala voltou a funcionar. Ele estava inerte
+  //    desde que todas as salas ganharam protetor, e quem ligava o toggle nao
+  //    via diferenca nenhuma.
+  //
+  // Fica de fora desta leva: PH-290 (versao do CLI no CI), PH-297 (fim do review
+  // manual — processo, nao jogo) e a fatia 1 da PH-120 (a mesa da troca direta
+  // existe no banco, e nada na tela ainda). Meia-feature nao entra: mesma regra
+  // do boss, que esperou os doze biomas pra ser anunciado.
   {
     version: '7.15',
-    date: '2026-08-28',
+    // A data e a da leva mais RECENTE que a nota cobre, e nao a da primeira
+    // escrita: e uma entrada por PROMOCAO, e a promocao ainda nao saiu.
+    date: '2026-08-30',
     title: 'Farm em area, o boss guardando os doze biomas — e as Missoes finalmente dando pra terminar',
     highlights: [
-      'AGORA VOCE PODE JUNTAR ATE QUATRO SELVAGENS ANTES DE BATER. Seu POKE sempre andava ate o mais proximo e lutava um por vez, entao golpe de area nunca acertava mais de um alvo — ele existia e nao servia pra nada. Com o Lure ligado (aba nova no painel de Automacoes) ele passa pelo raio de varios, puxa o grupo atras de si e so entao para pra lutar: um golpe de area acerta todos de uma vez. Voce escolhe juntar 1, 2, 3 ou 4, e um chip no topo mostra a reuniao acontecendo (2/4) pra nao parecer que o bot travou.',
+      'AGORA VOCE PODE JUNTAR ATE QUATRO SELVAGENS ANTES DE BATER. Seu POKE sempre andava ate o mais proximo e lutava um por vez, entao golpe de area nunca acertava mais de um alvo — ele existia e nao servia pra nada. Com o Lure ligado (aba nova no painel de Automacoes) ele passa pelo raio de varios, puxa o grupo atras de si e so entao para pra lutar: um golpe de area acerta todos de uma vez. Voce escolhe juntar 1, 2, 3 ou 4 no painel.',
       'O PRECO DO LURE E LEVAR PANCADA DE TODOS AO MESMO TEMPO. Nao e farm de graca: juntar quatro multiplica o dano que entra no seu POKE, e o ganho depende de ter golpe de AREA na rotacao — sem um, o grupo so bate mais em voce. Shiny em campo cancela a reuniao na hora (ele continua tendo prioridade), e hunt de um inimigo so, como as de boss, ignora o Lure.',
+      'E O LURE PAROU DE COMECAR A BRIGA NO MEIO DA REUNIAO. Ele juntava o grupo e batia ao mesmo tempo: bastava um selvagem encostar pra o seu POKE parar pra lutar com ele, e a conta que voce pediu nunca fechava. Agora o golpe fica segurado ate a reuniao terminar — primeiro junta os quatro, depois luta. Enquanto junta, seu POKE apanha sem revidar, entao o Lure ficou mais forte e mais arriscado ao mesmo tempo.',
       'O BOSS AGORA EXISTE NOS DOZE BIOMAS, NAO SO NO IGNEO. Ele tinha nascido em um bioma so, como piloto, e ficou la. Agora cada um dos doze tem o seu, na ordem canonica do mapa.',
       'E VENCER O BOSS E O QUE ABRE O PROXIMO BIOMA. O jogo passou a ter uma linha pra seguir: a area seguinte fica trancada ate voce derrubar o dono da atual. O menu de hunt diz quem esta trancado e o que falta — antes o botao simplesmente nao levava a lugar nenhum, sem explicar.',
+      'E ELE ABRE DE VERDADE — ANTES O PROGRESSO ERA CONTADO E JOGADO FORA. Voce fechava as dez salas, derrubava o Lord, e o bioma seguinte continuava trancado; fechava de novo, e de novo, e nada. O jogo contava certo e a gravacao descartava o numero em silencio, sem erro nenhum na tela. Agora ele e guardado — e quem ja tinha fechado ciclo antes desta correcao recebeu o credito retroativo, sem precisar refazer nada.',
+      'O ATALHO DE TROCAR DE SALA PAROU DE PULAR O GUARDIAO. Com o avanco manual ligado, dava pra passar pra sala seguinte com o guardiao (ou o Lord) ainda de pe — e quem fazia isso fechava o ciclo inteiro sem nunca vencer o dono do bioma, entao nunca destravava a area seguinte. Agora, enquanto ele estiver vivo, a sala diz "Derrote o Guardiao" (ou o Lorde) e nao passa.',
+      'CAPTURAR O GUARDIAO E O LORD FICOU MAIS DIFICIL. Eles caiam com a mesma chance de um selvagem qualquer, sendo que aparecem uma vez por sala, nascem no teto de nivel da area e vem com atributos que selvagem nenhum tem. A chance foi pela metade — continua sempre possivel, so deixou de ser o POKE mais barato da hunt.',
       'O BOSS TAMBEM PASSOU A SE APRESENTAR. Ele entrava em cena como qualquer outro encontro, e o unico jeito de saber que aquilo era o boss era a barra de HP nao acabar nunca. Agora a entrada dele tem apresentacao propria, e no menu ele tem selo.',
       'OS EFEITOS DO CENARIO GANHARAM ESCALA. Folha, poeira, faisca, neve e areia estavam grandes demais pro tamanho de um POKE — a poeira de caverna chegava a um quarto da altura de um Pokemon — e quase todo bioma mostrava a mesma bolinha em outra cor. Agora cada um tem tamanho e formato proprios: a folha tomba, a faisca risca, a cinza urbana e uma fibra dobrada, o reflexo da agua e uma cruz de luz.',
       'E A CHUVA MOLHA O CHAO. As gotas caem, batem e respingam, com microgotas que quicam em volta. Selva e caverna ganharam gotejo proprio, pingando sempre do mesmo ponto, do jeito que agua parada na copa e em teto de gruta pinga.',
@@ -84,6 +223,30 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'E A ORDEM DAS MISSOES PASSOU A SEGUIR A DIFICULDADE, NAO O NUMERO DA POKEDEX. A primeira missao de Voador era Charizard; a de Gelo pedia 150 Articunos no quinto degrau. Cada cadeia agora comeca pelo POKE mais facil de achar daquele tipo e vai subindo, e lendario saiu de todas elas — ele aparece 20 vezes menos que um comum e travava tudo o que vinha depois. A recompensa acompanhou: antes o ouro por abate mudava ate 7,6 vezes so dependendo do tipo que voce escolhesse, e agora e praticamente o mesmo em todos os 18, com o bonus de conclusao crescendo junto com o tamanho da cadeia.',
       'A ESPECIALIDADE DE VOADOR ERA IMPOSSIVEL DE COMPRAR, E A TELA COBRAVA POR ELA MESMO ASSIM. A Pedra VOADOR nao caia de lugar nenhum: o drop olhava so o tipo primario do POKE abatido, e nenhuma especie do jogo tem Voador como primario. Agora POKE de dois tipos solta a pedra de um dos dois, entao Voador tem fonte — e o progresso de 100% deixou de ser inalcancavel.',
       'E O PRECO DAS ESPECIALIDADES PASSOU A LEVAR EM CONTA A RARIDADE DA PEDRA. Como cada pedra so cai do POKE do tipo dela, fechar as duas trilhas custava 18.800 abates em Fogo e 162.933 em Aco — nove vezes mais caro, sem nada que justificasse. Os tipos comuns seguem no mesmo preco de antes; os raros ficaram proporcionais ao que realmente aparece. A trilha de defesa tambem teve o texto corrigido: ela reduz o dano que voce RECEBE daquele tipo, e nao aumenta sua defesa.',
+      'A SALA NOVA AS VEZES NASCIA VAZIA, E A HUNT MORRIA ALI. Depois de trocar de sala podia acontecer de nao nascer inimigo nenhum: campo limpo, nada pra matar, a contagem parada — e como a sala so avanca com 30 abates, a hunt ficava presa pra sempre naquele mapa. Recarregar a pagina era a unica saida. Corrigido: o guardiao da sala anterior ficava pendurado no lugar e desligava o nascimento dos selvagens.',
+      'E A TROCA DE SALA PAROU DE ACONTECER COM A BARRA PELA METADE. Quem manda na contagem e o servidor, e o numero da sua tela e uma previsao — quando os dois discordavam, a area trocava mostrando 12/30 e parecia que o jogo tinha pulado a sala. Agora a barra fecha em 30/30 antes do aviso de area nova, que e o que de fato aconteceu.',
+      'E A AREA PAROU DE TROCAR SEM VOCE SAIR DA SALA. Acontecia de o sub-bioma mudar sozinho — de Relvado pra Planicie, por exemplo — com o contador continuando em "Sala 2/10": quando o servidor demorava a responder, o jogo chutava a sala seguinte e depois se corrigia na sua frente. Ele agora espera de verdade antes de chutar qualquer coisa.',
+      'E O SEU POKE PAROU DE ANDAR TRAVANDO ENQUANTO REUNE. Com o Lure ligado ele dava uns passos, parava, andava de novo — varias vezes por segundo, e parecia que o jogo estava engasgando. Ele parava de proposito (pra nao arrastar o grupo pra longe de quem ainda estava vindo atras), so que decidia isso a cada instante e ficava trocando de ideia. Agora, quando para pra esperar, ele espera de verdade: sao 40 vezes menos paradas no caminho.',
+      'A TELA DE JOGO FOI ARRUMADA. A sala em que voce esta subiu pro cabecalho, no centro; as taxas de Gold/h, XP/h e Mobs/h desceram pro canto de baixo a direita; o seu ouro e o diamante entraram no cartao do treinador, ali no canto de cima (abreviados: 1B, 1M); e o proprio cartao agora fica colado no canto em qualquer tamanho de janela — antes, em tela larga, ele parava no meio do caminho. O que sobrou no meio da tela foi embora.',
+      'O NOME DO GOLPE APARECE NO SEU POKE, LOGO ABAIXO DA VIDA. Antes ele subia junto com os numeros de dano, misturado com o que os OUTROS estavam levando — agora ele fica colado na barra de quem usou o golpe, com fundo proprio pra dar pra ler mesmo no meio da explosao. E a porcentagem de vida saiu de cima do seu POKE: ela ja esta no cabecalho, e no campo so atrapalhava. A do alvo continua, que e a unica que voce nao tem em outro lugar.',
+      'E A HUNT PAROU DE EMPACAR COM A BARRA CHEIA. Acontecia de a sala fechar os 30 abates e simplesmente nao passar: barra cheia, o guardiao em pe, e voce matando sem que nada andasse — em alguns casos por mais de dez minutos, ate voce desistir e sair. O jogo cobrava a area seguinte de tanto em tanto segundo, e essa pressa era justamente o que impedia o servidor de terminar a luta com o guardiao. Ele agora pergunta no ritmo certo, e a sala vira.',
+      'O F5 PAROU DE TE MANDAR DE VOLTA PRA SALA 1. Recarregar a pagina no meio da hunt jogava voce na primeira sala do primeiro ciclo, perdendo o caminho inteiro. Agora voce volta na MESMA sala, com os mesmos abates e o mesmo ciclo — e se havia um guardiao em pe, ele continua la, com a vida que tinha.',
+      'REIVINDICAR MISSAO RESPONDIA "MISSAO JA REIVINDICADA" E NAO PAGAVA. A tela voltava a oferecer, a cada 30 segundos, uma missao que voce ja tinha reivindicado; ao clicar de novo, o jogo recusava. O ouro da primeira vez sempre foi pago — o que sumia era a marca na tela.',
+      'A HUNT INICIAL PAROU DE SER UMA CAMINHADA. So havia um selvagem no mapa inteiro, e o POKE passava metade do tempo atravessando o cenario ate o proximo. Agora eles nascem mais perto e o campo enche conforme seu inicial cresce: um ate o Nivel 2, dois a partir do 3, tres a partir do 5. Eles continuam nascendo longe uns dos outros, entao voce enfrenta um por vez — a primeira meia hora de conta nova era o unico lugar do jogo onde dava pra morrer sem entender por que.',
+      'IR PRO HOSPITAL AGORA LEVA 3 SEGUNDOS. Era instantaneo, e virou botao de fuga: qualquer aperto em campo se resolvia saindo antes do proximo golpe. Agora ha uma contagem na tela — e da pra cancelar, se voce clicou sem querer.',
+      'O CLIMA EXPLICA O QUE ELE FAZ, E SAIU DA FRENTE DO JOGO. Ele boiava no meio do campo; agora fica no cabecalho, ao lado da sala. Passe o ponteiro (ou toque) e ele lista os efeitos reais daquele tempo: quanto Agua ganha na chuva, quanto Fogo perde, quanto de vida o granizo e a areia tiram por turno, o que a neve muda pro tipo Gelo e quais golpes nunca erram — e, quando o clima veio de um golpe, quantos turnos ainda faltam pra ele passar. Antes so o nome aparecia, e o resto era adivinhacao.',
+      'A SALA E A CARTEIRA TAMBEM PASSARAM A SE EXPLICAR. Toque no chip de sala e ele conta quantas salas a hunt tem, quantos abates cada uma pede e o que acontece ao limpar a ultima; com o Guardiao segurando a passagem, ele diz isso tambem. Na carteira aparece o valor EXATO do ouro e do diamante — no celular o numero vinha abreviado ("1B") e nao havia jeito nenhum de ver quanto era de verdade.',
+      'E AS EXPLICACOES PARARAM DE ABRIR NO CANTO DA TELA. A bolha de qualquer card — golpe, item, POKE do chat, clima, sala — nascia grudada no alto a esquerda em vez de junto do que ela explica, e no celular ainda vazava pra fora da tela. Agora ela abre encostada no que voce tocou.',
+      'O SINO DO CORREIO DIZ O QUE FALTA, E NAO SO QUANTOS. Uma carta com item dentro conta duas vezes: uma como mensagem por ler, outra como presente por pegar. Voce lia a mensagem, o numero caia de 2 pra 1 e o sino continuava aceso sem explicar — parecia travado. Agora ele diz "1 mensagem por ler e 1 item por coletar", e a conversa que tem presente preso mostra "por coletar" na lista.',
+      'O AVANCO MANUAL DE SALA VOLTOU A FUNCIONAR. Ligar a opcao no painel de Automacoes nao fazia mais nada desde que todas as salas ganharam Guardiao: a sala trocava sozinha assim que ele caia. Agora ela espera o seu clique, e os selvagens continuam nascendo enquanto voce fica — que e o motivo de ligar a opcao.',
+      'ESPECIALIDADES, TASKS E BESTIARIO SAIRAM DE DENTRO DO "MAIS". Os tres estavam a dois toques de distancia, no mesmo lugar que a Wiki e os Ajustes. Agora tem coluna fixa no canto superior direito, logo abaixo do seu card de treinador.',
+      'A COLUNA DO TOPO FICOU MAIS FACIL DE LER. As reservas encostaram no POKE em campo (elas sao a fila dele, e havia um chip no meio separando os dois), e a sala/clima passou pro centro. A faixa preta do chat parou de atravessar a tela inteira pra escrever "Item encontrado: Potion" — ela agora tem o tamanho do texto.',
+      'E O PAINEL DE AUTOMACOES PAROU DE ESCONDER NUMERO. Numa janela estreita, o nome do item empurrava a contagem pra fora e o aviso de "suprimentos acabando" cortava justamente as horas restantes. As regras por especie tambem espremiam o nome do POKE em cinco letras. E o campo de "Vida ≤ __ %" do Auto-pot mostrava so o primeiro digito: a regra padrao de 70% aparecia como 7%, que e a diferenca entre curar cedo e curar quase morto.',
+      'A BARRA DE VIDA DO LENDARIO VOLTOU AO TAMANHO NORMAL. Ela era cinco vezes mais larga e duas vezes mais alta que a de qualquer selvagem. A escala maior, a aura e o nome continuam distinguindo ele em campo; a barra gigante ficou so pro guardiao de sala.',
+      'O CENARIO GANHOU FONTES DE VIDA ANCORADAS NO MAPA. Tocha com chama, chamine com fumaca, cristal brilhando, espuma quebrando na pedra, faisca de forja e enxame de vaga-lume: cada arte tem os seus, sempre no mesmo ponto, em vez de particula solta atravessando a tela.',
+      'E CINCO MAPAS PARARAM DE MOSTRAR O EFEITO DE OUTRO LUGAR. A mata noturna tinha fiapo de cidade voando no meio da floresta, o jardim do dojo levava poeira seca por cima das cerejeiras e do rio de carpas, o covil do dragao tinha poeira em vez de faisca com um rio de lava atravessando a tela, e o vale verde da montanha nevava sobre as flores. Cada um deles foi conferido olhando o desenho, e nao o nome do arquivo.',
+      'CLEFAIRY VOLTOU A EVOLUIR. A ficha mandava juntar 40 Pedras de Fada e o servidor exigia 40 Pedras Normais — quem farmasse o que a tela pediu (uns 800 abates do tipo certo) tomava recusa no fim, sem nada explicando. Os dois lados agora falam do mesmo tipo.',
+      'E DOIS TEXTOS QUE APARECIAM CORTADOS. A sigla do golpe de area mostrava um parenteses no lugar da terceira letra, e o botao de comprar da Loja perdia o "C" — virava "omprar 1 · 60", com o preco em risco de sumir junto no item mais caro.',
     ],
   },
   // PH-231. Varredura do INTERVALO desde a 7.13 (a licao que aquela entrada

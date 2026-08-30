@@ -44,10 +44,50 @@ export const SALA_TRANSITION_COUNTDOWN = 3
 
 /**
  * Quanto o cliente espera a sala do servidor antes de voltar a sortear a
- * propria. Generoso de proposito: o flush periodico e de 30s e o pedido
- * disparado pela quota repete a cada 5s, entao 20s cobre varias tentativas.
+ * propria.
+ *
+ * 120s, e nao os 20s originais (PH-271). O valor antigo foi escolhido pela
+ * cadencia das REQUISICOES ("o flush periodico e de 30s e o pedido disparado
+ * pela quota repetia a cada 5s, entao 20s cobre varias tentativas") — mas a
+ * pergunta certa nao e quantos pedidos cabem na janela, e sim quanto o servidor
+ * costuma demorar pra fechar a quota DELE.
+ *
+ * Medido em scripts/harness/divergencia-de-quota.mjs, 30 pares de sequencias:
+ * cliente e servidor levam tempos diferentes pra chegar aos 30 abates, com
+ * mediana de 32,6s de diferenca, p90 de 107,3s e pior caso de 112s. Ou seja,
+ * 20s era MENOR que a divergencia tipica — o fallback disparava no caso NORMAL,
+ * e nao no excepcional pra que ele foi escrito.
+ *
+ * O que isso causava, reproduzido ao vivo no jogo-dev em 29/08 lendo o chip de
+ * sala a cada 3 segundos:
+ *
+ *   63s  Sala 2/10 Relvado    0 p/ limpar
+ *   66s  Sala 2/10 Planicie   26 p/ limpar
+ *
+ * O numero da sala nao mudou e o sub-bioma trocou: o cliente tinha adiantado
+ * uma sala por palpite e a sala do servidor chegou depois, corrigindo. Pro
+ * jogador isso le como "a area mudou sozinha sem eu completar as 30 kills" —
+ * metade do relato da PH-258, que corrigiu a outra metade (a sala que nascia
+ * vazia).
+ *
+ * O CUSTO E REAL: contra um servidor que de fato nunca fecha a transicao
+ * (bundle publicado antes de 2026-08-19, o caso que este fallback existe pra
+ * cobrir), a sala fica parada em 30/30 por dois minutos em vez de vinte
+ * segundos. E o lado certo pra errar — um palpite errado troca a area debaixo
+ * do jogador a cada sala, e a espera atrasa uma vez.
+ *
+ * E O NUMERO SOZINHO NAO BASTOU. Voltando ao jogo-dev depois de subir pra 120s,
+ * a troca fantasma apareceu de novo:
+ *
+ *   Sala 3/10 Planicie  ->  Sala 3/10 Vilarejo
+ *
+ * Por isso estes 120 segundos deixaram de contar tempo de ESPERA e passaram a
+ * contar tempo de SILENCIO: qualquer resposta da autoridade zera o relogio (ver
+ * `reconciliarSalaDaAutoridade`), entao ele so estoura quando o servidor parou
+ * de responder de vez. Servidor vivo — mesmo repetindo a mesma sala por
+ * minutos — e o dono da sala, e o cliente espera.
  */
-export const ESPERA_MAXIMA_PELA_AUTORIDADE = 20
+export const ESPERA_MAXIMA_PELA_AUTORIDADE = 120
 
 /** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
 export function temSalas(mapId: string): boolean {
@@ -263,14 +303,43 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
  * dispara a troca — ver `garantirTransicaoDeQuotaFechada`.
  */
 /**
+ * A sala ainda PEDE protetor e ele nao caiu?
+ *
+ * Existe como funcao exportada, e nao inline, porque a mesma pergunta e feita em
+ * dois lugares que nao se enxergam: o avanco manual logo abaixo e o `SalaChip`
+ * da tela — que precisa dela pra nao oferecer um botao que o servidor vai
+ * recusar.
+ */
+export function salaTravadaPeloProtetor(world: WorldState): boolean {
+  return protetorDaSala(world.sala) != null && !world.protetorResolvido
+}
+
+/**
  * Avanco manual (PH-178/179): forca a transicao mesmo com o toggle ligado —
  * o proprio clique do jogador E o avanco que o toggle estava segurando.
  * So entrega "quota fechada" ao chamador; `armarTransicaoDeSala` ja e
  * idempotente (chamar de novo com transicao ja armada nao resorteia).
+ *
+ * PH-291: E ELE TAMBEM RESPEITA O PROTETOR. Os outros dois caminhos ja
+ * respeitavam — `registrarAbate` se recusa a armar transicao em sala com
+ * protetor, e `garantirTransicaoDeQuotaFechada` sai cedo quando
+ * `garantirProtetorDaSala()` devolve true. Este passava por fora dos dois, e o
+ * buraco anulava duas features de uma vez:
+ *
+ *  - PH-202/203: o protetor existe pra travar o avanco, e virava decoracao;
+ *  - PH-206/226/227: quem credita `bioma_progress` e vencer o LORD da sala 10
+ *    (`avancarBiomaProgressSeForOProximo`, em `handleEnemyDefeated`). Pulando o
+ *    Lord, o ciclo fecha, `ciclos` incrementa e o progresso nunca e creditado —
+ *    o jogador farma pra sempre sem destravar o bioma seguinte.
+ *
+ * Esconder o botao nao bastaria: `/sessao/avancar-sala` chega aqui pelo
+ * `forcarAvancoDeSala` de `aplicarFlush`, e a rota e alcancavel por curl.
+ * Limite de negocio so no cliente e bypass — regra do projeto.
  */
 export function solicitarAvancoDeSala(world: WorldState, mapId: string): AvancoDeSala {
   const sala = world.sala
   if (!sala || sala.abates < ABATES_POR_SALA) return { avancou: false, fechouCiclo: false }
+  if (salaTravadaPeloProtetor(world)) return { avancou: false, fechouCiclo: false }
   return armarTransicaoDeSala(world, mapId)
 }
 
@@ -302,7 +371,11 @@ function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
  * local: quem decide quando a sala avanca e o flush do servidor, igual toda
  * outra sala.
  */
-export function resolverProtetorDaSala(world: WorldState, mapId: string): void {
+export function resolverProtetorDaSala(
+  world: WorldState,
+  mapId: string,
+  opts: { manualAdvance?: boolean } = {},
+): void {
   world.protetorPendente = null
   // PH-230: marcar ANTES do corte de autoridade abaixo. Sem esta linha, sob
   // `salaSobAutoridade` a sala nao avanca (por design) e nada registra que o
@@ -311,6 +384,22 @@ export function resolverProtetorDaSala(world: WorldState, mapId: string): void {
   // `WorldState.protetorResolvido`.
   world.protetorResolvido = true
   if (world.salaSobAutoridade) return
+  // PH-292: O TOGGLE DE AVANCO MANUAL VALE AQUI TAMBEM.
+  //
+  // Ate PH-202/225 so o bioma piloto tinha protetor, e esta funcao avancava
+  // direto sem olhar o toggle porque nas salas normais quem decidia era
+  // `registrarAbate` — que ja o respeitava. Depois que TODA sala de bioma
+  // ganhou protetor (Guardian nas 1-9, Lord na 10), este virou o unico caminho
+  // de avanco que sobrou, e o toggle passou a nao fazer nada em lugar nenhum.
+  // Nada quebrou; a promessa da UI so parou de valer, em silencio.
+  //
+  // Com o toggle ligado a sala fica em 30/30 esperando o clique, e o jogador
+  // continua farmando: o respawn de mob comum volta sozinho assim que
+  // `protetorPendente` zera (a condicao vive no gate de respawn de
+  // `simulation.ts`), entao nao ha campo vazio esperando. O botao "Proximo
+  // Nivel" reaparece porque `travadaPeloProtetor` fica falso assim que
+  // `protetorResolvido` sobe (PH-291).
+  if (opts.manualAdvance) return
   armarTransicaoDeSala(world, mapId)
 }
 
@@ -330,7 +419,10 @@ export function resolverProtetorDaSala(world: WorldState, mapId: string): void {
  * A sala travava em `abates: 30` pra sempre — e o cliente, que agora espera a
  * sala do servidor em vez de sortear a propria, travava com ela. Nao aparecia
  * antes porque a janela normal e de 30s e sempre cabia; apareceu quando o cliente
- * passou a pedir flush a cada 5s ao fechar a quota.
+ * passou a pedir flush a cada 5s ao fechar a quota. (Esse pedido de 5s voltou a
+ * ser de 30s em PH-273 — janela curta travava a hunt por outro motivo, o
+ * servidor sem tempo de matar o protetor. A defesa aqui continua valendo: ela
+ * nao pode depender do tamanho da janela.)
  *
  * Com a quota fechada valendo por si, a transicao acontece no comeco da janela e
  * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
@@ -387,6 +479,48 @@ export function garantirTransicaoDeQuotaFechada(
     // sempre a autoridade, e o HUD volta pro sub-bioma que de fato pagou o
     // loot em vez de fugir dele pra sempre.
     if (world.salaPredita) return
+    // O RELOGIO MEDE SILENCIO, NAO ESPERA (PH-271). Ele so anda aqui, e
+    // `reconciliarSalaDaAutoridade` o zera a cada resposta que chega — de
+    // modo que ele so estoura quando o servidor parou de responder.
+    //
+    // O relogio sozinho nao distingue "servidor que ainda nao chegou nesta
+    // sala" de "servidor que nunca vai chegar", e so o segundo justificaria
+    // palpite. A primeira tentativa foi subir a espera de 20s pra 120s,
+    // cobrindo o p90 de 107s da divergencia medida em
+    // scripts/harness/divergencia-de-quota.mjs — e ao vivo, no jogo-dev, a
+    // troca fantasma voltou mesmo assim:
+    //
+    //   Sala 3/10 Planicie  ->  Sala 3/10 Vilarejo
+    //
+    // A segunda tentativa trocou o relogio por "3 respostas seguidas com a
+    // quota do servidor cheia" — na teoria, um servidor que nunca avanca. Ao
+    // vivo, mediu-se que essa e a cara do servidor NORMAL:
+    //
+    //   - com a quota fechada o cliente pedia flush de 5 em 5 segundos
+    //     (REPETIR_PEDIDO_DE_SALA_MS em data/remote/autoridade.ts, hoje 30s por
+    //     causa de PH-273), entao "3 respostas" eram QUINZE SEGUNDOS, e nao os
+    //     90 que a constante supunha;
+    //   - e o servidor legitimamente responde "mesma sala, 30/30" por MINUTOS,
+    //     porque a sala so avanca quando o PROTETOR dela morre (PH-202/203) e
+    //     ele mata o protetor bem mais devagar que o cliente: o mundo do
+    //     servidor e reconstruido a cada janela, com o POKE de volta no ponto
+    //     de entrada. Medido em 29/08, sessao real no jogo-dev: guardiao
+    //     `lickitung` da sala 2, `hp_atual` caindo ao longo de dezenas de
+    //     janelas de ~5s, ~3 minutos ate cair — com `kills: 0` em quase toda
+    //     janela.
+    //
+    // Ou seja: quota cheia repetida NAO e sinal de servidor parado. Sobra UM
+    // caso em que palpitar se justifica, e ele nao tem nada a ver com o que a
+    // resposta diz — e nao ter resposta nenhuma:
+    //
+    //  - servidor MUDO (rede caida, Edge fora do ar): sem palpite a hunt trava
+    //    com a barra cheia ate a rede voltar, que e pior que o bug original.
+    //  - servidor QUE RESPONDE, qualquer que seja a resposta: ele esta vivo, e
+    //    servidor vivo e o dono da sala. O cliente espera. Se ele demora
+    //    minutos matando o protetor, o certo na tela e 30/30 parado — nao uma
+    //    area nova que o servidor vai desmentir no flush seguinte.
+    //
+    // Ver `salaEsperaDaAutoridade` em types.ts.
     world.salaEsperaDaAutoridade += dt
     if (world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) return
     world.salaEsperaDaAutoridade = 0
@@ -449,6 +583,16 @@ export function reconciliarSalaDaAutoridade(
   // Fora de hunt nao ha sala: escrever uma aqui deixaria o Hospital com um
   // sub-bioma pendurado no HUD.
   if (!world.mapDef) return
+  // PH-271: A RESPOSTA ZERA A ESPERA, O CONTEUDO DELA NAO IMPORTA.
+  //
+  // O relogio de `salaEsperaDaAutoridade` mede SILENCIO, e esta linha e o que
+  // faz dele silencio em vez de "tempo desde que a quota fechou". Uma resposta
+  // so precisa responder uma pergunta — "o servidor esta vivo?" — e a resposta
+  // e sim mesmo quando ela traz a mesma sala pela centesima vez, ou uma sala
+  // que vai ser descartada logo abaixo por ser anterior a atual.
+  //
+  // Fica ANTES do `if (!sala)`: sala nula tambem e resposta.
+  world.salaEsperaDaAutoridade = 0
   if (!sala) {
     // `null` DO SERVIDOR TEM DOIS SIGNIFICADOS, e tratar os dois igual apagava
     // a sala em jogo.
@@ -511,6 +655,22 @@ export function reconciliarSalaDaAutoridade(
   const posicao = (s: SalaAtiva) => s.ciclos * SALAS_POR_HUNT + s.indice
   if (!world.salaPredita && posicao(sala) < posicao(atual)) return
 
+  // A BARRA FECHA ANTES DO AVISO (PH-258).
+  //
+  // O contador da sala que esta saindo vai pra quota cheia. Ele e uma PREDICAO:
+  // cliente e servidor simulam com sequencias de sorteio diferentes (o cliente
+  // nao tem a semente da sessao) e matam quantidades diferentes no mesmo
+  // intervalo de relogio. Medido em scripts/harness/divergencia-de-quota.mjs,
+  // 30 pares: a diferenca de tempo pra fechar a quota tem mediana de 32,6s e
+  // chega a 112s no pior caso.
+  //
+  // Quem decide a troca e o servidor, entao quando ele manda sala nova a quota
+  // FECHOU — e deixar a barra do jogador em 12/30 enquanto a tela anuncia area
+  // nova le como bug ("mudou de bioma sem completar as 30 kills", o relato
+  // desta issue). Isto nao inventa progresso: escreve o que a autoridade acabou
+  // de dizer.
+  if (atual.abates < ABATES_POR_SALA) atual.abates = ABATES_POR_SALA
+
   world.salaPendente = { ...sala }
   world.salaCountdownRemaining ??= SALA_TRANSITION_COUNTDOWN
   world.salaEsperaDaAutoridade = 0
@@ -531,6 +691,23 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   world.salaPendente = null
   // PH-230: sala nova, protetor novo — a marca vale por SALA, nao pela sessao.
   world.protetorResolvido = false
+  // O PROTETOR FICA NA SALA QUE PASSOU (PH-258), e esquecer esta linha matava a
+  // hunt inteira em silencio.
+  //
+  // `world.enemies` e zerado logo abaixo, mas `protetorPendente` sobrevivia — e
+  // o respawn de mob comum tem `&& !world.protetorPendente` na condicao
+  // (simulation.ts, "protetor vivo suspende o spawn normal"). Ou seja: sala
+  // nova, campo vazio, respawn desligado por um protetor que nao existe mais em
+  // lugar nenhum. Nada nasce, ninguem morre, a quota nunca fecha — os dois
+  // sintomas relatados juntos ("ficou sem novos oponentes" e "nao passa da sala
+  // 2"), e sem nenhum erro na tela.
+  //
+  // O caminho pra cair nisso e o normal sob autoridade: a quota fecha, o
+  // protetor da sala nasce, o jogador NAO o mata, e o flush do servidor traz a
+  // sala seguinte (la a quota tambem fechou, ou o protetor de la caiu). A
+  // transicao entao roda com um protetor pendurado. F5 era a unica saida,
+  // porque `buildMapWorld` reconstroi o mundo do zero.
+  world.protetorPendente = null
   // PH-140: o clima da sala anterior NAO acompanha o jogador — inclusive o de
   // golpe, que morre junto com a sala mesmo com turnos sobrando. Por isso o
   // `clima` e zerado ANTES de `definirClimaDeAmbiente`, que respeitaria um

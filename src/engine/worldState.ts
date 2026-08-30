@@ -38,7 +38,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     salaPendente: null,
     salaSobAutoridade: false,
     salaEsperaDaAutoridade: 0,
-    salaPredita: false,
+      salaPredita: false,
     rng: createRng(seed),
     // Guardada alem do `rng` porque `rng.state` avanca a cada sorteio e deixa
     // de identificar a sessao — ver o campo em engine/types.ts (PH-140).

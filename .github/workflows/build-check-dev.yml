@@ -1,14 +1,30 @@
-name: Build check (PR para dev)
+name: Build check (PR)
 
 # Gate de tsc+testes pra feature branches virando dev -- nao existia CI
 # nenhum de build/teste antes disso, so o gate especifico de Supabase
 # (supabase-check.yml). Espelha o que "npm run build" + "npm test" fariam
 # local, mas roda antes do merge real (docs/15, Parte 3, fluxo PR
 # feature->dev).
-
+#
+# PH-297: RODA NA PROMOCAO PRA MAIN TAMBEM, e isso e o que faltava.
+#
+# Ate aqui ele so disparava em PR pra `dev`. O unico gate da `main` era o
+# `check` do Supabase — migration orfa, par dev/public, `database.types.ts` —,
+# nada de build nem de teste. Ou seja: `tsc` quebrado entrava em PRODUCAO com os
+# checks verdes, e quem segurava a porta era a aprovacao humana.
+#
+# Com o fim do review manual (decisao do dono do projeto, 30/08) essa aprovacao
+# sai de cena. O CI passa a ser o unico revisor, e revisor que nao olha o build
+# nao e revisor. Este `on:` e o passo 1 dos quatro da PH-297: sem ele, marcar
+# `build-check` como obrigatorio na `main` travaria a promocao esperando um
+# check que nunca chegaria.
+#
+# O NOME DO JOB (`build-check`, logo abaixo) NAO MUDA: e ele o `context` que os
+# rulesets referenciam. Quem deixou de citar `dev` foi o `name:` do workflow, que
+# agora vale pros dois destinos.
 on:
   pull_request:
-    branches: [dev]
+    branches: [dev, main]
 
 jobs:
   build-check:

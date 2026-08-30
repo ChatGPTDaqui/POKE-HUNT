@@ -119,9 +119,21 @@ const AMBIENTES = [
   ['brasa', 'volcano.jpg'],
   ['poeira', 'ruins.jpg'],
   ['caverna', 'abyss.jpg'],
-  ['neve', 'mountain.jpg'],
+  // PH-255: eram `mountain.jpg` e `town.jpg`. As duas SAIRAM desses presets na
+  // tabela (`mountain` e um vale verde, `town` e quase toda floresta e lago),
+  // entao a bancada ficaria demonstrando um par que o jogo nao produz mais —
+  // e demonstrando bem, porque neve sobre pico nevado e fiapo sobre casario
+  // sao justamente os casos que a arte errada disfarcava.
+  ['neve', 'ice-mountain.jpg'],
   ['areia', 'desert.jpg'],
-  ['cidade', 'town.jpg'],
+  ['cidade', 'metropolis.jpg'],
+  // As cinco reclassificadas, pra a conferencia visual da PH-255 caber na
+  // mesma tela. Todas mostram o preset NOVO sobre a arte real.
+  ['folha (town-night, era cidade)', 'town-night.jpg'],
+  ['folha (dojo, era poeira)', 'dojo.jpg'],
+  ['folha (mountain, era neve)', 'mountain.jpg'],
+  ['folha (town, era cidade)', 'town.jpg'],
+  ['brasa (dragon, era poeira)', 'dragon.jpg'],
 ]
 
 // Cada clima sobre a arte em que ele mais aparece no jogo.

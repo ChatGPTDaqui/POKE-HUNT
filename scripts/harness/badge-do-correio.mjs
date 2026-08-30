@@ -18,6 +18,7 @@
 //
 //   node scripts/harness/badge-do-correio.mjs            # mede o ciclo inteiro
 //   node scripts/harness/badge-do-correio.mjs --sujar    # so cria a pendencia
+//   node scripts/harness/badge-do-correio.mjs --sujar-anexo  # pendencia COM item (PH-287)
 //
 // `--sujar` existe pra reproduzir NA TELA: ele deixa a pendencia viva e sai,
 // entao da pra abrir o jogo e olhar o badge com o olho.
@@ -111,13 +112,19 @@ async function rpc(sessao, nome, corpo) {
  * formula nao prova nada.
  */
 function pendencias(caixa) {
-  const naConversa = caixa.conversas.reduce((t, c) => t + c.naoLidas + c.anexosPendentes, 0)
-  const emAvisos = caixa.avisos.filter((m) => {
+  // PH-287: o cliente passou a SEPARAR "por ler" de "por coletar"
+  // (`resumoDoCorreio`), e a copia acompanha — a nota acima e sobre exatamente
+  // isto. O TOTAL nao mudou: continua a mesma soma que a PH-22 e a PH-164
+  // decidiram acender, e e por isso que os numeros medidos em 29/08 seguem
+  // valendo.
+  let porLer = caixa.conversas.reduce((t, c) => t + c.naoLidas, 0)
+  let anexos = caixa.conversas.reduce((t, c) => t + c.anexosPendentes, 0)
+  for (const m of caixa.avisos) {
     const temAlgoAnexado = (m.anexo_itens?.length ?? 0) > 0 || Boolean(m.anexo_poke)
-    const temAnexoPendente = temAlgoAnexado && !m.anexo_coletado_em
-    return temAnexoPendente || m.estado === 'pendente'
-  }).length
-  return { total: naConversa + emAvisos, naConversa, emAvisos }
+    if (temAlgoAnexado && !m.anexo_coletado_em) anexos += 1
+    else if (m.estado === 'pendente') porLer += 1
+  }
+  return { total: porLer + anexos, porLer, anexos }
 }
 
 /**
@@ -147,11 +154,16 @@ async function caixaDoCorreio(sessao) {
 async function contar(sessao, rotulo) {
   const caixa = await caixaDoCorreio(sessao)
   const p = pendencias(caixa)
-  console.log(`  ${rotulo.padEnd(46)} total=${p.total}  (conversas=${p.naConversa} avisos=${p.emAvisos})`)
+  console.log(`  ${rotulo.padEnd(46)} total=${p.total}  (por ler=${p.porLer} por coletar=${p.anexos})`)
   return p
 }
 
 const soSujar = process.argv.includes('--sujar')
+// PH-287: `--sujar` sozinho deixa uma mensagem por LER, que e o caso facil. O
+// caso que aquela issue trata e o outro — carta COM ITEM dentro, que continua no
+// contador depois de lida, de proposito (PH-22/PH-164). Sem esta flag nao havia
+// como pôr esse estado na tela pra olhar com o olho.
+const sujarComAnexo = process.argv.includes('--sujar-anexo')
 
 console.log(`Banco: ${URL_BASE}  schema: ${SCHEMA}\n`)
 
@@ -162,12 +174,13 @@ console.log(`canonica: ${eu.userId}\namiga:    ${amiga.userId}\n`)
 console.log('--- ANTES ---')
 const antes = await contar(eu, 'estado inicial da canonica')
 
-console.log('\n--- a amiga manda uma mensagem de conversa ---')
+console.log(`\n--- a amiga manda uma mensagem de conversa${sujarComAnexo ? ' COM ITEM' : ''} ---`)
 const enviada = await rpc(amiga, 'enviar_mensagem', {
   p_corpo: `PH-213 bancada ${new Date().toISOString()}`,
   p_para_id: eu.userId,
   p_para_nick: null,
-  p_anexos: [],
+  // Uma Potion: o item mais barato do catalogo, e o que o cenario 3 ja usa.
+  p_anexos: sujarComAnexo ? [{ itemId: 'potion', quantity: 1 }] : [],
 })
 console.log(`  enviada: ${enviada?.id ?? JSON.stringify(enviada)}`)
 const depoisDeChegar = await contar(eu, 'depois da mensagem chegar')
@@ -176,8 +189,12 @@ if (depoisDeChegar.total <= antes.total) {
   console.log('\n  !! o contador NAO subiu com mensagem nova — isso ja e um achado.')
 }
 
-if (soSujar) {
+if (soSujar || sujarComAnexo) {
   console.log('\n--sujar: pendencia deixada viva. Abra o jogo e olhe o badge.')
+  if (sujarComAnexo) {
+    console.log('  Com item dentro: leia a mensagem e o sino CONTINUA aceso, de proposito.')
+    console.log('  E ai o Correio precisa dizer que falta coletar (PH-287).')
+  }
   process.exit(0)
 }
 

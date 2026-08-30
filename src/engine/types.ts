@@ -714,10 +714,18 @@ export interface WorldState {
    */
   salaSobAutoridade: boolean
   /**
-   * Segundos acumulados com a quota da sala fechada esperando a sala do
-   * servidor. Estourando ESPERA_MAXIMA_PELA_AUTORIDADE, a predicao local volta a
-   * valer — rede de seguranca pra servidor de versao antiga, ver
-   * salaSystem.ts#garantirTransicaoDeQuotaFechada. Zera em toda troca de sala.
+   * Segundos de SILENCIO da autoridade com a quota da sala fechada (PH-271).
+   * Estourando ESPERA_MAXIMA_PELA_AUTORIDADE, a predicao local volta a valer.
+   *
+   * Silencio, e nao "tempo desde que a quota fechou": QUALQUER resposta da
+   * autoridade zera este relogio, mesmo trazendo a mesma sala pela centesima
+   * vez. Servidor que responde esta vivo, e servidor vivo e o dono da sala —
+   * ele pode estar legitimamente parado na mesma sala por minutos matando o
+   * protetor dela. Contar o tempo em vez do silencio era o que fazia o
+   * sub-bioma trocar sozinho na tela. Ver
+   * salaSystem.ts#garantirTransicaoDeQuotaFechada.
+   *
+   * Zera tambem em toda troca de sala e enquanto a quota estiver aberta.
    */
   salaEsperaDaAutoridade: number
   /**

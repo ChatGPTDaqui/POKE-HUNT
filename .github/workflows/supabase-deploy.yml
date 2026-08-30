@@ -20,20 +20,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # VERSAO FIXA, e nao 'latest' (PH-290): 'latest' resolve por chamada a API
+      # do GitHub, e ela tem rate limit — visto em 30/08, "Failed to resolve latest
+      # Supabase CLI release: rate limit exceeded", numa tarde de muitos runs. O
+      # raciocinio completo esta no comentario de supabase-check.yml.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.116.0
 
-      - name: Link no projeto Supabase
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Aplicar migrations pendentes (public + dev, par por arquivo)
+        # PH-106: o `link` mora DENTRO do wrapper — ver o comentario no topo de
+        # scripts/ci/supabase-cli.sh. Aqui o custo de morrer por colisao de
+        # credencial e o maior de todos: migration de PRODUCAO nao aplicada com
+        # a promocao ja mesclada.
+        run: scripts/ci/supabase-cli.sh supabase db push --linked
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
-
-      - name: Aplicar migrations pendentes (public + dev, par por arquivo)
-        run: supabase db push --linked
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:

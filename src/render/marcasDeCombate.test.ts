@@ -149,16 +149,22 @@ function renderizar(world: WorldState) {
 }
 
 describe('quem recebe marca e porcentagem, no quadro de verdade (PH-189)', () => {
-  it('o alvo e o meu POKE recebem porcentagem; o mob de passagem nao', () => {
+  it('SO o alvo recebe porcentagem — nem o meu POKE, nem o mob de passagem', () => {
+    // PH-281: o numero do MEU POKE saiu do campo, a pedido do usuario. Ele ja
+    // esta no cabecalho, com rotulo `HP` e largura reservada (PH-157/PH-193), e
+    // no campo disputava a placa com o nome do golpe (PH-275).
+    //
+    // A do ALVO fica, e a diferenca importa: o HP do inimigo nao aparece em
+    // lugar nenhum da HUD. Tirar as duas juntas apagaria um dado que so existe
+    // ali (PH-193).
     const { escritas } = renderizar(mundo())
-    // jogador (50%) e alvo (50%) — duas porcentagens, nao tres.
-    expect(escritas.filter((t) => t.endsWith('%'))).toHaveLength(2)
+    expect(escritas.filter((t) => t.endsWith('%'))).toHaveLength(1)
   })
 
-  it('sem alvo, so o meu POKE recebe porcentagem', () => {
+  it('sem alvo, nenhuma porcentagem no campo', () => {
     const w = mundo()
     const { escritas } = renderizar(mundo({ player: comoJogador(entidade('player-1', { targetId: null })), enemies: w.enemies }))
-    expect(escritas.filter((t) => t.endsWith('%'))).toHaveLength(1)
+    expect(escritas.filter((t) => t.endsWith('%'))).toHaveLength(0)
   })
 
   it('com o meu POKE derrubado nao sobra marca nenhuma na tela', () => {

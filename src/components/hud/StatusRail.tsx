@@ -11,8 +11,8 @@
 // pra ele sem ter pedido. HP, XP, carteira. Todo o resto (local, Pokedex,
 // taxas) mora atras de um toque, na gaveta de detalhes — nao porque importe
 // menos, mas porque ele NAO muda entre um olhar e outro.
-import { useRef, useState } from 'react'
-import { CaretDown, ChartLineUp, Coin, Diamond, User } from '@phosphor-icons/react'
+import { useState } from 'react'
+import { CaretDown, ChartLineUp, User } from '@phosphor-icons/react'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { spriteUrl } from '@/data/sprites'
 import { faceEmocaoUrl } from '@/data/faceEmotions'
@@ -20,7 +20,7 @@ import { rarityOf } from '@/data/rarity'
 import { stoneName } from '@/data/stones'
 import { EscolhaDeEvolucao } from '@/components/modals/EscolhaDeEvolucao'
 import {
-  canEvolve, evolutionStoneRequirement, expProgressForInstance, trainerExpProgress, opcoesDisponiveis,
+  canEvolve, evolutionStoneRequirement, expProgressForInstance, opcoesDisponiveis,
 } from '@/engine/systems/progressionSystem'
 import { controller } from '@/engine/controller'
 import { getPerfStats } from '@/engine/systems/farmRates'
@@ -28,28 +28,17 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useUiStore, useDeviceMode } from '@/stores/uiStore'
+import { Carteira } from '@/components/hud/Carteira'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { useFaceDoPoke } from '@/hooks/useFaceDoPoke'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { GameButton } from '@/components/game/controls'
+import { SalaChip } from '@/components/hud/SalaChip'
+import { ClimaChip } from '@/components/hud/ClimaChip'
 import { useIntervalo } from '@/hooks/useIntervalo'
-import { useAncoraDeVfx, ANCORA } from '@/hooks/useAncoraDeVfx'
 import { cn } from '@/lib/utils'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
-const fmtCheio = new Intl.NumberFormat('pt-BR')
-
-// No celular a carteira divide ~90px com o avatar do treinador, e a conta de
-// teste tem 1.000.403.360 de ouro — 13 digitos que empurravam o avatar pra fora
-// da tela. Abreviar e o unico jeito de a carteira caber sem virar reticencia; o
-// valor exato continua no perfil do treinador e na gaveta de detalhes.
-function fmtCurto(valor: number): string {
-  const abs = Math.abs(valor)
-  if (abs >= 1_000_000_000) return `${(valor / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`
-  if (abs >= 1_000_000) return `${(valor / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
-  if (abs >= 10_000) return `${(valor / 1000).toFixed(0)}k`
-  return fmtCheio.format(valor)
-}
 
 function fmtTaxa(valor: number): string {
   const abs = Math.abs(valor)
@@ -83,22 +72,55 @@ export function StatusRail() {
             `VitaisPoke`): sem este vao, com as barras tendo teto, o grupo da
             direita (carteira, detalhes, avatar) descolava da borda do trilho e
             ficava flutuando no meio dele — os vizinhos sao todos `shrink-0` e
-            nenhum cresce pra ocupar o resto. */}
-        <div className="min-w-0 flex-1" aria-hidden />
-        {!estreito && <ResumoLocal />}
-        {/* Taxas so no amplo. Deitado a largura parece sobrar e nao sobra: com
-            as taxas na faixa do meio, o nome do POKE truncava pra "Ent…" com a
-            barra de HP em 180px enquanto o ouro exibia 13 digitos. O dado menos
-            urgente e o que sai. */}
-        {mode === 'amplo' && <TaxasInline />}
-        <Carteira abreviada={mode !== 'amplo'} />
+            nenhum cresce pra ocupar o resto.
+
+            PH-272: O VAO DEIXOU DE SER VAZIO. Ele e a faixa central do trilho, e
+            e nela que "Sala 3/10 Relvado" mora agora, a pedido do usuario.
+            `justify-center` dentro do proprio vao: o chip fica no meio do espaco
+            que sobra, sem nunca sobrepor os vizinhos. Posicao absoluta
+            centralizada na TELA foi descartada — em largura media ela passaria
+            por cima da carteira, e o trilho ja teve esse defeito uma vez (ver o
+            cabecalho deste arquivo).
+
+            A sobra continua virando espaco quando nao ha o que mostrar, entao a
+            razao original do vao segue de pe. */}
+        <div className="flex min-w-0 flex-1 items-center justify-center">
+          {/* PH-285: NO COMPACTO O VAO NAO FICA MAIS VAZIO — o clima entra
+              nele, so como simbolo. O chip de SALA continua de fora aqui (ele
+              pede ~15em; ver o cabecalho de SalaChip.tsx), mas o clima cabe:
+              medido no aparelho, o vao tem 73px livres em 390px e o simbolo
+              sozinho ocupa ~20px.
+
+              Sem isto o clima ficava numa fileira propria abaixo do cabecalho,
+              boiando em cima do cenario — o defeito que a issue descreve, e que
+              no celular era o unico lugar onde ele ainda acontecia. */}
+          {estreito ? <ClimaChip embutido soIcone /> : <FaixaCentral />}
+        </div>
+        {/* AS TAXAS E A CARTEIRA SAIRAM DAQUI (PH-279), a pedido do usuario.
+            As taxas foram pro canto inferior direito (`TaxasNoCanto`) e a
+            carteira entrou no card do treinador, logo ali na direita.
+
+            Ganho de largura que isso deu ao trilho, medido em 1280: ~430px, que
+            eram a soma das tres taxas (~230px) com o ouro e o diamante em valor
+            cheio (~200px). Era essa largura que faltava pra faixa central — a
+            PH-272 tinha acabado de reduzir as taxas a so `Gold/h` pra o nome do
+            sub-bioma caber, e agora nem isso e preciso.
+
+            As duas continuam na gaveta logo abaixo: as taxas em grade de quatro
+            e o valor CHEIO da carteira no `title` do card e no perfil. */}
+        {/* NO COMPACTO A CARTEIRA FICA AQUI MESMO, e nao no card: o card do
+            treinador nao existe em 390px — ele desce pra gaveta por falta de
+            largura (ali o avatar virava um icone generico ocupando ~46px
+            permanentes da faixa mais disputada da tela). Mandar a carteira pra
+            dentro dele sem esta linha tirava ouro e diamante da tela inteira no
+            celular, deixando o jogador sem saber quanto tem sem abrir a
+            gaveta. */}
+        {estreito && <Carteira abreviada />}
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
-        {/* No compacto o avatar era um botao mudo: sem largura pro nome e pro
-            nivel, sobrava um icone generico ocupando ~46px permanentes da faixa
-            mais disputada da tela — a mesma que ja tinha empurrado o avatar
-            pra fora em 320px. Ele desce pra gaveta, onde cabe COM o nome e o
-            nivel escritos. */}
-        {!estreito && <AvatarTreinador />}
+        {/* PH-282: o card do treinador NAO fica mais aqui. Ele e o primeiro item
+            da coluna do canto superior direito (`ColunaDeAtalhos`), porque este
+            trilho para em `max-w-[64em]` e o card parava junto — em 1920px
+            sobravam ~480px de tela a direita dele. */}
       </div>
 
       {gavetaAberta && <GavetaDetalhes comTreinador={estreito} />}
@@ -298,71 +320,11 @@ function Barra({ pct, altura, cor }: { pct: number; altura: string; cor: string 
 }
 
 // --- carteira e treinador ----------------------------------------------------
-function Carteira({ abreviada }: { abreviada: boolean }) {
-  const gold = useGameStateStore((s) => s.wallet.gold)
-  const diamonds = useGameStateStore((s) => s.wallet.diamonds)
-  const fmt = abreviada ? fmtCurto : fmtCheio.format.bind(fmtCheio)
-  // Ancora da camada de VFX (PH-190): e aqui que o voo de ouro do abate termina
-  // (PH-191). Um ref publicado, e nao um `querySelector` por texto ou por
-  // classe: seletor por conteudo quebra na primeira mudanca de copy e quebra em
-  // SILENCIO — o efeito passaria a mirar no canto (0,0) sem erro nenhum.
-  const carteiraRef = useRef<HTMLDivElement>(null)
-  useAncoraDeVfx(ANCORA.carteira, carteiraRef)
-  return (
-    <div
-      ref={carteiraRef}
-      className={cn(
-        'shrink-0 text-[.72em] leading-[1.15] tabular-nums',
-        abreviada ? 'flex flex-col items-end' : 'flex items-center gap-[.6em]',
-      )}
-      title={`${fmtCheio.format(gold)} ouro · ${fmtCheio.format(diamonds)} diamantes`}
-    >
-      <span className="flex items-center gap-[.25em] font-medium text-gold">
-        <Coin weight="fill" /> {fmt(gold)}
-      </span>
-      <span className="flex items-center gap-[.25em] font-medium text-diamond">
-        <Diamond weight="fill" /> {fmt(diamonds)}
-      </span>
-    </div>
-  )
-}
-
-function AvatarTreinador() {
-  const trainer = useGameStateStore((s) => s.trainer)
-  const setPerfilOpen = useUiStore((s) => s.setPerfilOpen)
-  const compacto = useDeviceMode().mode === 'compacto'
-  const progress = trainerExpProgress(trainer)
-  const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
-
-  return (
-    <button
-      type="button"
-      data-keep-open
-      aria-label="Perfil do treinador"
-      onClick={() => setPerfilOpen(true)}
-      className="relative flex shrink-0 cursor-pointer items-center gap-[.4em] rounded-[.7em] border border-n700 bg-n900 p-[.25em] pr-[.35em]"
-    >
-      <span className="flex h-[2em] w-[2em] items-center justify-center rounded-[.5em] text-[1.1em] text-n300">
-        <User weight="fill" />
-      </span>
-      {!compacto && (
-        <span className="flex flex-col items-start gap-[.2em] pr-[.2em]">
-          <span className="max-w-[7em] truncate text-[.78em] leading-none">{trainer.name}</span>
-          <span className="text-[.7em] leading-none text-n400">Lv {trainer.level}</span>
-        </span>
-      )}
-      {/* Anel de EXP do treinador em vez de barra: no compacto nao ha largura
-          pra uma barra, e o progresso e um dado de fundo — a borda inferior
-          preenchendo ja diz "esta subindo". */}
-      <span
-        className="absolute inset-x-[.25em] bottom-[.15em] h-[.15em] overflow-hidden rounded-full bg-n800"
-        aria-hidden
-      >
-        <span className="absolute inset-y-0 left-0 rounded-full bg-gold" style={{ width: `${expPct}%` }} />
-      </span>
-    </button>
-  )
-}
+// PH-282: as duas mudaram de arquivo. A carteira foi pra hud/Carteira.tsx
+// (ela e usada nos dois lugares agora) e o card do treinador virou
+// components/hud/CardDoTreinador.tsx, ancorado no canto superior direito junto
+// com a coluna de atalhos — dentro do trilho ele nunca alcancava a borda em
+// tela larga, porque o trilho para em 64em.
 
 // --- gaveta de detalhes ------------------------------------------------------
 function BotaoDetalhes({ aberta, onToggle }: { aberta: boolean; onToggle: () => void }) {
@@ -390,32 +352,53 @@ function useTaxas() {
   return getPerfStats({ perfStats } as Parameters<typeof getPerfStats>[0])
 }
 
-// So o NOME do lugar. O contador da Pokedex saiu daqui: ele muda umas poucas
-// vezes por sessao, tem slot proprio na barra de navegacao e continua na
-// gaveta — permanente no trilho ele era uma linha de texto que ninguem le duas
-// vezes. O nome fica porque em hunt de BOSS nao ha chip de sala, e sem ele o
-// jogador nao tem em lugar nenhum da tela onde esta.
-function ResumoLocal() {
+/**
+ * A faixa central do trilho (PH-272): a sala, ou o nome do lugar quando nao ha
+ * sala.
+ *
+ * NUNCA OS DOIS, E NUNCA NENHUM — e o ponto deste componente.
+ *
+ *  - Os dois juntos seriam duas respostas pra mesma pergunta ("onde estou"), com
+ *    o nome da hunt repetindo o que o sub-bioma ja diz melhor.
+ *  - Nenhum deixaria um buraco no meio do trilho justamente no Hospital, que e
+ *    onde o jogador para pra ler a tela. O criterio de aceite da issue pede
+ *    exatamente isso.
+ *
+ * O nome do lugar era um bloco proprio encostado a direita, entre o vao e as
+ * taxas (`ResumoLocal`). Ele existia porque em hunt de BOSS nao ha chip de sala
+ * e o jogador ficaria sem saber onde esta — essa razao continua valendo, e por
+ * isso ele nao sumiu: virou o outro lado deste `if`.
+ */
+function FaixaCentral() {
+  const temSala = useWorldStore((s) => s.sala != null)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
-  return <div className="max-w-[8em] shrink-0 truncate text-right text-[.72em] text-n300">{huntName}</div>
-}
-
-function TaxasInline() {
-  const stats = useTaxas()
-  const abrirAnalyzer = useUiStore((s) => s.setAnalyzerOpen)
   return (
-    <button
-      type="button"
-      data-keep-open
-      onClick={() => abrirAnalyzer(true)}
-      className="flex shrink-0 cursor-pointer items-center gap-[.6em] rounded-[.5em] px-[.3em] py-[.2em] font-[inherit] text-[.72em] text-n400"
-    >
-      <span>Gold/h <b className="font-medium text-gold">{fmtTaxa(stats.goldPerHour)}</b></span>
-      <span>XP/h <b className="font-medium text-n200">{fmtTaxa(stats.xpPerHour)}</b></span>
-      <span>Mobs/h <b className="font-medium text-n200">{stats.mobsPerHour}</b></span>
-    </button>
+    // PH-285: O CLIMA VEIO PRA CA. Ele tinha ficado sozinho na fileira de chips
+    // abaixo do cabecalho — que e o meio do campo de jogo — depois que a sala
+    // subiu pro trilho (PH-272) e o chip do Lure saiu (PH-279). Sobrou boiando
+    // em cima do cenario, sem nada em volta que justificasse aquele lugar.
+    //
+    // Aqui ele fica junto da informacao irma: "que sala e esta" e "que tempo faz
+    // nela" respondem a mesma pergunta, e o vao central e o unico lugar do
+    // trilho que cresce com a sobra de largura (ver o comentario do vao). Em
+    // hunt sem salas — BOSS, Lance, a inicial — o nome da hunt ocupa o lugar do
+    // chip e o clima continua ao lado.
+    //
+    // `min-w-0` nos dois: o nome do sub-bioma trunca em vez de empurrar o clima
+    // pra fora, que e a regra que o trilho segue desde a PH-157.
+    <div className="flex min-w-0 items-center justify-center gap-[.5em]">
+      {temSala
+        ? <SalaChip embutido />
+        : <div className="min-w-0 max-w-[12em] truncate text-center text-[.72em] text-n300">{huntName}</div>}
+      <ClimaChip embutido />
+    </div>
   )
 }
+
+// PH-279: `TaxasInline` saiu daqui. As taxas viraram `TaxasNoCanto`, ancorada no
+// canto inferior direito — o trilho nao mostra mais nenhuma delas. A grade de
+// quatro na gaveta (logo abaixo) continua igual, e continua sendo o lugar onde
+// `Shinys` aparece.
 
 function GavetaDetalhes({ comTreinador }: { comTreinador: boolean }) {
   const stats = useTaxas()

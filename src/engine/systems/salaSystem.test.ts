@@ -158,8 +158,41 @@ describe('avanco manual de sala (PH-177/181)', () => {
 
     fecharQuota(world, { manualAdvance: true })
     expect(world.salaCountdownRemaining).toBeNull()
+
+    // PH-291: ESTE CASO MUDOU, e a mudanca E o conserto de um bug.
+    //
+    // Ate aqui o teste esperava `avancou: true` NESTE PONTO — com o protetor da
+    // sala vivo. O comportamento errado estava codificado como esperado, e foi
+    // por isso que ninguem percebeu que o avanco manual era a UNICA das tres
+    // portas de avanco sem a trava do protetor: `registrarAbate` e
+    // `garantirTransicaoDeQuotaFechada` sempre respeitaram, `solicitarAvancoDeSala`
+    // nao. Pulando o Lord da sala 10, o ciclo fecha sem creditar
+    // `bioma_progress` — o jogador farma pra sempre sem destravar o bioma
+    // seguinte.
+    expect(
+      solicitarAvancoDeSala(world, world.mapDef!.id).avancou,
+      'avanco manual passou por cima do protetor vivo',
+    ).toBe(false)
+    expect(world.salaCountdownRemaining).toBeNull()
+
+    // E COM O PROTETOR RESOLVIDO, QUEM ARMA A TRANSICAO E ELE — nao o clique.
+    //
+    // Isto foi achado escrevendo este caso, e vale registrar porque muda o que o
+    // toggle significa hoje: `resolverProtetorDaSala` chama `armarTransicaoDeSala`
+    // direto, sem olhar `manualAdvance`. Como TODA sala de bioma passou a ter
+    // protetor (PH-202/225), a sala nunca fica parada em 30/30 esperando o
+    // clique — ela para esperando o protetor cair, e assim que ele cai a
+    // transicao anda sozinha. O toggle sobrou como controle das salas sem
+    // protetor. Aberto como PH-292.
+    resolverProtetorSeHouver(world)
+    expect(
+      world.salaCountdownRemaining,
+      'a resolucao do protetor deixou de armar a transicao',
+    ).not.toBeNull()
+
+    // E ai o clique e um no-op idempotente, nao um segundo sorteio — a garantia
+    // que `armarTransicaoDeSala` sempre deu.
     const evento = solicitarAvancoDeSala(world, world.mapDef!.id)
-    expect(evento.avancou).toBe(true)
-    expect(world.salaCountdownRemaining).not.toBeNull()
+    expect(evento.avancou, 'rearmou uma transicao ja armada').toBe(false)
   })
 })

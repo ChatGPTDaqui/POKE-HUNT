@@ -24,7 +24,6 @@ import {
 } from './textoDeCombate'
 import { hpBarFillColor } from '@/data/hpBar'
 import { AURA_COLORS } from '@/data/auraColors'
-import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { colorForType } from '@/data/typeColors'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import {
@@ -51,9 +50,12 @@ function getSpecies(entity: WorldEntity): Species {
 }
 
 // PH-228/236: `isProtetor` so existe em EnemyEntity (WorldEntity tambem
-// cobre o player) — `in` narrowing pra nao quebrar o union. Sistema separado
-// do LEGENDARY_SPECIES_IDS que drawHpBar ja usava (Modo Pesadelo, boss por
-// especie fixa) — os dois se somam, nao se substituem.
+// cobre o player) — `in` narrowing pra nao quebrar o union.
+//
+// PH-256: desde entao ele e o UNICO dono da barra de HP grande. O
+// `LEGENDARY_SPECIES_IDS` tambem entrava nela (Modo Pesadelo, boss por especie
+// fixa) e saiu por pedido explicito do usuario — lendario volta a desenhar a
+// barra do tamanho comum. O protetor por sala/andar nao foi tocado.
 function ehProtetor(entity: WorldEntity): boolean {
   return 'isProtetor' in entity && entity.isProtetor === true
 }
@@ -695,12 +697,18 @@ const COR_DA_PORCENTAGEM = '#ffffff'
 export function drawHpBar(
   ctx: CanvasRenderingContext2D, entity: WorldEntity, mostrarPorcentagem = false,
 ): void {
-  // PH-228/236: mesma barra grande que o Modo Pesadelo ja usa pros bosses
-  // por especie fixa (LEGENDARY_SPECIES_IDS) — o protetor por sala/andar
-  // (isProtetor) entra no mesmo tratamento visual, os dois sistemas nao se
-  // excluem. Nome neutro (`barraGrande`, nao `isProtetor`) de proposito: a
-  // condicao cobre os DOIS sistemas, e so um deles e de fato protetor.
-  const barraGrande = ehProtetor(entity) || LEGENDARY_SPECIES_IDS.includes(getSpecies(entity).id)
+  // PH-228/236 criou a barra grande pro protetor por sala/andar; PH-256 tirou
+  // dela o segundo dono. Ate aqui a condicao era
+  // `ehProtetor(entity) || LEGENDARY_SPECIES_IDS.includes(...)`, e o lendario
+  // do Modo Pesadelo desenhava 160x10 onde um selvagem desenha 32x5. Por pedido
+  // explicito do usuario o lendario voltou ao tamanho comum: a escala visual
+  // 1.5x, a aura e o nome continuam distinguindo ele em campo, e a barra deixou
+  // de ser o quinto sinal da mesma coisa.
+  //
+  // O nome do multiplicador (`PROTETOR_*`) agora descreve o unico caso que
+  // sobrou, e a condicao ficou uma so — mantida em variavel propria porque
+  // largura e altura leem a mesma decisao.
+  const barraGrande = ehProtetor(entity)
   const width = HP_BAR_WIDTH * (barraGrande ? PROTETOR_HP_BAR_WIDTH_MULTIPLIER : 1)
   const height = HP_BAR_HEIGHT * (barraGrande ? PROTETOR_HP_BAR_HEIGHT_MULTIPLIER : 1)
   const x = entity.x - width / 2
@@ -1510,7 +1518,53 @@ function drawDamageNumber(
   ctx.restore()
 }
 
-const ABILITY_NAME_Y_OFFSET = 2
+/**
+ * Onde o nome do golpe fica: LOGO ABAIXO DA BARRA DE VIDA do POKE que atacou
+ * (PH-275), e nao no alto da coluna de texto junto com os numeros de dano.
+ *
+ * A geometria da placa, de cima pra baixo (`y` cresce pra baixo, e `topo` e
+ * `entity.y - visualTopOffset(entity)`, o alto do corpo):
+ *
+ *   topo - 26   nome da especie      (drawNameLevelTag)
+ *   topo - 15   Lv                   (drawNameLevelTag)
+ *   topo - 13   barra de vida, 5px de altura, terminando em `topo - 8`
+ *   topo +  2   NOME DO GOLPE        <- aqui, encostado na barra
+ *   topo        cabeca do sprite
+ *
+ * O deslocamento parte de `EFFECT_BASE_GAP` porque a ancora da coluna de efeitos
+ * comeca justamente `EFFECT_BASE_GAP` ACIMA do topo do corpo: somar isso traz o
+ * texto de volta pro corpo.
+ *
+ * COLADO NA BARRA, e nao 3px abaixo dela (PH-283, a pedido do usuario, depois de
+ * ver na tela). Com a folga, o nome flutuava entre a barra e o POKE e nao lia
+ * como parte da placa. A placa de fundo (`PLACA_DO_GOLPE`) da a folga visual que
+ * o vao dava, sem o texto se soltar da barra: o topo dela encosta em `topo - 8`,
+ * que e exatamente onde a barra termina.
+ *
+ * O `lane` continua embutido na ancora e continua subtraindo — entao um SEGUNDO
+ * golpe do mesmo POKE, ainda em cena, cai na raia de cima em vez de escrever por
+ * cima do primeiro. Era pedido explicito da issue: dois golpes seguidos nao
+ * podem deixar dois textos empilhados no mesmo lugar.
+ *
+ * Por que perto do corpo e nao no alto: o nome do golpe responde "o que ESTE
+ * POKE acabou de fazer", e no alto ele disputava leitura com os numeros de dano,
+ * que sao de quem RECEBEU. Duas perguntas diferentes no mesmo lugar.
+ */
+const ABILITY_NAME_Y_OFFSET = EFFECT_BASE_GAP + 2
+
+/**
+ * Fundo da placa do nome do golpe (PH-283).
+ *
+ * Escuro e translucido: ela existe pra o texto ler sobre QUALQUER coisa — grama
+ * clara, o proprio sprite, e principalmente a animacao do golpe, que nos
+ * grandes (Lava Plume, Eruption) cobre a area inteira por alguns quadros e
+ * engolia o nome. Mesma familia do fundo que o numero de dano recebido ja usa
+ * (`PLACA_DE_DANO_RECEBIDO`): area le de relance e nao disputa a COR do texto,
+ * que continua sendo o tipo do golpe.
+ */
+const PLACA_DO_GOLPE = 'rgba(10, 12, 20, 0.72)'
+const PLACA_DO_GOLPE_FOLGA_X = 3
+const PLACA_DO_GOLPE_FOLGA_Y = 2
 
 function drawAbilityName(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState, desvio = 0,
@@ -1524,10 +1578,26 @@ function drawAbilityName(
   ctx.save()
   ctx.globalAlpha = Math.max(0, alpha)
   ctx.textAlign = 'left'
+  ctx.font = FONTE.nomeDeGolpe
+
+  const largura = ctx.measureText(effect.text ?? '').width
+  const altura = alturaDaFonte(FONTE.nomeDeGolpe)
+  roundedRectPath(
+    ctx,
+    x - PLACA_DO_GOLPE_FOLGA_X,
+    y - altura - PLACA_DO_GOLPE_FOLGA_Y,
+    largura + PLACA_DO_GOLPE_FOLGA_X * 2,
+    altura + PLACA_DO_GOLPE_FOLGA_Y * 2,
+    2,
+  )
+  ctx.fillStyle = PLACA_DO_GOLPE
+  ctx.fill()
+
+  // O contorno CONTINUA, e nao virou redundante: a placa e translucida, entao
+  // sobre um fundo claro que atravesse ela o texto ainda precisa da borda.
   ctx.lineWidth = 3
   ctx.lineJoin = 'round'
   ctx.strokeStyle = '#000000'
-  ctx.font = FONTE.nomeDeGolpe
   ctx.fillStyle = effect.color || '#cdd6ff'
   ctx.strokeText(effect.text!, x, y)
   ctx.fillText(effect.text!, x, y)

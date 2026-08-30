@@ -23,6 +23,7 @@ import { faceIconUrl, spriteUrl } from './sprites'
 import { todasAsTirasDeVfx } from './vfxTiras'
 import { todosOsIconesDeHabilidade } from './abilityIcons'
 import { todosOsVfxDeStatus } from './statusVfx'
+import { todasAsTirasDeProps } from '@/render/ambienteProps'
 import { primeImage } from '@/render/sprites'
 import { CENA_HOSPITAL } from './hospital'
 
@@ -120,6 +121,13 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   // troca boot rapido por nada; o primeiro uso de cada golpe cai no
   // procedural por alguns frames enquanto a tira baixa, que e exatamente o
   // que o fallback existe pra fazer.
-  const efeitos = [...todasAsTirasDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus()].map(primeImage)
+  // As duas tiras de prop de ambiente (PH-254) entram sempre, e sao 9 kB: elas
+  // desenham a chama da fogueira e a cintilancia da agua a partir do PRIMEIRO
+  // quadro da cena, e sao a unica arte deste preload cuja ausencia apareceria
+  // parada no cenario em vez de piscar durante um golpe.
+  const efeitos = [
+    ...todasAsTirasDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus(),
+    ...todasAsTirasDeProps(),
+  ].map(primeImage)
   await Promise.all([preloadEspecies(especies), ...fundo, ...efeitos])
 }

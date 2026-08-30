@@ -36,9 +36,9 @@ import { useRef } from 'react'
 import { StatusRail } from '@/components/hud/StatusRail'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
-import { SalaChip } from '@/components/hud/SalaChip'
-import { ClimaChip } from '@/components/hud/ClimaChip'
-import { LureChip } from '@/components/hud/LureChip'
+import { SalaChip, salaNoTrilho } from '@/components/hud/SalaChip'
+import { TaxasNoCanto } from '@/components/hud/TaxasNoCanto'
+import { ColunaDeAtalhos } from '@/components/hud/ColunaDeAtalhos'
 import { ChatLog } from '@/components/toasts/ChatLog'
 import { ChatMobile } from '@/components/toasts/ChatMobile'
 import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
@@ -62,6 +62,12 @@ export function HudLayer() {
   // com o numero de golpes do POKE e com o `hudScale`.
   const footerRef = useRef<HTMLDivElement>(null)
   useMedirAltura(footerRef, setFooterHeight)
+
+  // Mesma medida, mesmo motivo, pro TOPO (PH-257): a coluna de atalhos do canto
+  // direito comeca onde o trilho acaba, e a altura dele muda com o regime, com
+  // o nome da especie em campo e com a escala da HUD.
+  const trilhoRef = useRef<HTMLDivElement>(null)
+  useMedirAltura(trilhoRef, useUiStore((s) => s.setTrilhoHeight))
 
   return (
     <>
@@ -88,32 +94,89 @@ export function HudLayer() {
             verdade, e a margem propria dela (abaixo) so vale quando ela tem
             conteudo. */}
         <div className="flex w-full max-w-[64em] flex-col gap-0">
-          <StatusRail />
-          {/* Sala e clima na MESMA linha: os dois descrevem o lugar onde o
-              jogador esta, e o clima e propriedade da sala (PH-140/PH-141).
-              `flex-wrap` porque em 390px os dois nao cabem lado a lado — ali o
-              clima desce pra linha de baixo em vez de espremer a sala.
-              `:not(:empty)` (PH-197): a coluna nao espaca mais nada, entao o
-              respiro dos chips passa a ser deles — e so quando existem. */}
-          <div className="flex w-full flex-wrap items-center gap-[.4em] [&:not(:empty)]:my-[.4em]">
-            <SalaChip />
-            <ClimaChip />
-            {/* Terceiro chip da MESMA linha: os tres respondem "onde estou e o
-                que o bot esta fazendo". O `flex-wrap` da linha ja cobre 390px —
-                em celular o lure desce pra linha de baixo em vez de espremer a
-                sala. Ele se esconde sozinho quando o lure esta inativo, entao
-                nao cobra largura de quem nao usa (ver LureChip). */}
-            <LureChip />
+          {/* Medido pra `ColunaDeAtalhos` (PH-257) saber onde o trilho acaba —
+              ela comeca logo abaixo do card do treinador. Um `div` so pra
+              medida, sem estilo nenhum: `StatusRail` ja e uma coluna com
+              largura propria, e envolver com classe mudaria o layout dele.
+
+              A MEDIDA E SO DO TRILHO, e nao do bloco todo (foi o conflito com a
+              PH-261, resolvido aqui): as reservas ficam FORA deste `div`. Medir
+              os dois juntos empurraria a coluna de atalhos pra baixo da fila de
+              reservas, que cresce com o tamanho da equipe — e o pedido era
+              "logo abaixo do lvl do treinador", que mora no trilho. */}
+          <div ref={trilhoRef}>
+            <StatusRail />
           </div>
           {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
               ancora propria na borda esquerda. A ancora foi tentada uma vez
               (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em
               390px. Aqui ele empurra em vez de sobrepor, e continua no canto
               superior esquerdo porque o proprio componente se alinha a esquerda
-              dentro da linha. */}
+              dentro da linha.
+
+              ELE VEM LOGO DEPOIS DO CABECALHO DO POKE ATIVO (PH-261), e nao
+              depois dos chips. A fila de reservas E a continuacao do POKE em
+              campo — o slot 1 e o campo, e a numeracao dela comeca em 2 (ver
+              ReservasRail). A linha de sala/clima ficava no meio dos dois e
+              cortava essa leitura: no PC as reservas apareciam como um bloco
+              solto abaixo de um chip, sem relacao visivel com o POKE. */}
           <ReservasRail />
+          {/* SO O CHIP DE SALA MORA AQUI (PH-285), e so no compacto. O clima
+              subiu pro trilho junto com ele; o `flex-wrap` continua porque a
+              linha ainda pode receber outro chip contextual um dia, e porque
+              tirar wrap de uma linha de chips e como se pede uma sobreposicao.
+              `:not(:empty)` (PH-197): a coluna nao espaca mais nada, entao o
+              respiro dos chips passa a ser deles — e so quando existem.
+
+              `justify-center` (PH-261): a linha e CENTRALIZADA, a pedido. Ela
+              descreve o LUGAR, nao o POKE, e colada a esquerda competia com o
+              cabecalho. O centro e o da coluna (`max-w-[64em]`), e nao o da
+              tela: em monitor ultralargo centralizar na tela jogaria o chip pra
+              longe do resto da HUD — exatamente o que o `max-w` e o
+              `items-start` do container existem pra evitar (PH-83). */}
+          <div className="flex w-full flex-wrap items-center justify-center gap-[.4em] [&:not(:empty)]:my-[.4em]">
+            {/* PH-272: em tela com largura o chip de sala subiu pro trilho, e
+                aqui ele nao pode aparecer de novo. Duas copias na tela nao dao
+                erro nenhum — so ficam erradas, e em silencio. Quem decide e
+                `salaNoTrilho`, a MESMA funcao que o `StatusRail` consulta.
+                No compacto ele continua aqui: o trilho de 390px nao tem largura
+                pra ele (ver a nota no topo de SalaChip.tsx). */}
+            {!salaNoTrilho(mode) && <SalaChip />}
+            {/* O CLIMA SAIU DAQUI (PH-285). Ele agora esta no trilho nas TRES
+                larguras: com o nome escrito na faixa central, e so como simbolo
+                no compacto, onde o vao tem 73px (ver `StatusRail`).
+
+                Era ele, sozinho, que deixava esta fileira ocupando o meio do
+                campo de jogo depois que a sala subiu pro trilho (PH-272) e o
+                chip do Lure saiu (PH-279) — no celular a fileira virava DUAS,
+                porque o chip de sala ja gasta 385px dos 390.
+
+                Nao ha condicao aqui de proposito: `ClimaChip` deixou de ser
+                renderizado nesta superficie, ponto. Uma segunda copia atras de
+                um `mode` seria a mesma armadilha que a linha acima documenta —
+                dois lugares pra manter de acordo, e nenhum erro quando eles
+                divergem. */}
+            {/* O CHIP DO LURE SAIU DAQUI (PH-279), a pedido do usuario.
+                Ele existia pra a mecanica nao ler como bug: durante a reuniao o
+                POKE atravessa a hunt passando ao lado de inimigos sem bater, e
+                o chip era a unica coisa na tela que dizia que aquilo era
+                intencional. Tirando ele, esse esclarecimento deixa de existir —
+                registrado aqui porque o mesmo comportamento ja foi relatado
+                como "o POKE anda travando" (PH-280). */}
+          </div>
         </div>
       </div>
+
+      {/* Coluna de atalhos (PH-257): Especialidades, Tasks e Bestiario no canto
+          superior direito, logo abaixo do card do treinador. Irma do bloco do
+          topo, e nao filha: ela ancora na DIREITA e aquele container e uma
+          coluna alinhada a esquerda. */}
+      <ColunaDeAtalhos />
+
+      {/* Taxas no canto inferior direito (PH-279): sairam do trilho, onde
+          disputavam largura com a sala. Irma do rodape, e nao filha: ela ancora
+          na altura MEDIDA dele pra parar acima da doca em vez de cobri-la. */}
+      <TaxasNoCanto />
 
       {/* Rodape: ticker do chat (quando nao ha janela flutuante) + doca. Os dois
           no MESMO container medido — o botao Auto e o chat costumavam se

@@ -34,15 +34,37 @@ jobs:
           echo "::error::PR para main so e permitido a partir da branch dev (esta PR vem de '${{ github.head_ref }}'). Merge sua feature branch em dev primeiro, teste em jogo-dev, so depois abra PR dev->main."
           exit 1
 
+      # VERSAO FIXA, e nao `latest` (PH-290).
+      #
+      # ESTA DECISAO FOI TOMADA AO CONTRARIO PRIMEIRO, e durou 40 minutos. O
+      # raciocinio era que versao fixa nao congela o servico do outro lado e so
+      # adiaria o problema. Ele ignorava COMO o `latest` e resolvido:
+      #
+      #   ##[error]Failed to resolve latest Supabase CLI release: rate limit exceeded
+      #
+      # `latest` faz uma CHAMADA A API DO GITHUB a cada run, e ela tem rate
+      # limit. Visto em 30/08 na PR de promocao, depois de uma tarde de muitos
+      # runs — ou seja: o CI inteiro cai por um motivo que nao tem nada a ver com
+      # o codigo, e cai justo na hora de promover, que e quando ha mais runs.
+      #
+      # O segundo argumento continua valendo, e agora sem contrapeso: este gate
+      # le o FORMATO de saida do CLI (`.migrations[]`, `.local`, `.remote`), e
+      # com `latest` esse formato pode mudar debaixo dele sem ninguem tocar em
+      # nada.
+      #
+      # O custo de fixar e um PR de uma linha quando o `db push` pedir um CLI
+      # mais novo — e ai o erro dira exatamente isso, em vez de "rate limit".
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.116.0
 
-      - name: Link no projeto Supabase
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      # PH-106: nao ha mais passo "Link no projeto Supabase" aqui. O `link`
+      # provisiona o role `cli_login_postgres` ROTACIONANDO a senha a cada
+      # login, e este workflow dispara no MESMO segundo que
+      # `supabase-deploy-dev` em todo push em `dev` — as duas invocacoes se
+      # invalidavam e quem morria era sorteio (28P01). Agora o `link` mora
+      # dentro de scripts/ci/supabase-cli.sh, que re-linka e repete quando a
+      # credencial fica velha. Ver o cabecalho do script.
 
       - name: Existe migration aplicada no remoto que nao existe local?
         # NAO usa 'db diff' — ele reconstroi o banco do zero so com as
@@ -78,18 +100,33 @@ jobs:
         run: |
           # 'migration list --linked' flanca a conexao ocasionalmente (visto
           # 2x em 25/08: falha em ~30s sem imprimir nada, run seguinte no
-          # MESMO commit passa normal em minutos) -- retry pra nao reprovar
-          # PR por instabilidade de rede, nao por orfa de verdade.
-          LISTA=""
-          for tentativa in 1 2 3; do
-            if LISTA=$(supabase migration list --linked --output-format json); then
-              break
-            fi
-            echo "::warning::Tentativa ${tentativa}/3 de 'migration list --linked' falhou (provavel flake de conexao). Retentando..."
-            sleep 5
-          done
+          # MESMO commit passa normal em minutos) -- o wrapper retenta, pra nao
+          # reprovar PR por instabilidade de rede em vez de por orfa de verdade.
+          #
+          # PH-106: o retry que morava AQUI nao re-linkava, entao so cobria o
+          # flake de rede. Contra a senha rotacionada por outra invocacao do CLI
+          # as 3 tentativas falhavam identicas, porque a credencial em disco
+          # continuava velha. scripts/ci/supabase-cli.sh re-linka a cada
+          # tentativa e cobre os dois casos.
+          LISTA="$(scripts/ci/supabase-cli.sh supabase migration list --linked --output-format json || true)"
           if [ -z "$LISTA" ]; then
-            echo "::error::'supabase migration list --linked' falhou 3x seguidas -- isto e falha de conexao/CLI, nao o gate de migration orfa. Ver logs do step."
+            echo "::error::'supabase migration list --linked' falhou em todas as tentativas -- isto e falha de conexao/credencial do CLI, nao o gate de migration orfa. Ver logs do step."
+            exit 1
+          fi
+          # PH-290: a guarda de cima so cobria saida VAZIA. Em 30/08 o CLI saiu
+          # com 0 e imprimiu JSON valido SEM `.migrations`, e o `jq` da linha
+          # seguinte estourou com "Cannot iterate over null (null)" e exit 5. O
+          # que chegava ao log era erro de `jq` — quem fosse investigar
+          # procuraria bug de sintaxe no gate, e a causa era o CLI instavel (o
+          # rerun do MESMO commit passou, sem mudar nada).
+          #
+          # `-e` faz o `jq` sair !=0 quando o teste da falso, entao a decisao
+          # volta pra ca em vez de morrer dentro do pipe. A saida crua vai pro
+          # log limitada a 2000 bytes: o bastante pra reconhecer o formato, sem
+          # despejar a lista inteira num erro de conexao.
+          if ! echo "$LISTA" | jq -e 'has("migrations") and (.migrations | type == "array")' >/dev/null 2>&1; then
+            echo "::error::'migration list --linked' respondeu sem '.migrations' como array -- CLI instavel ou o formato de saida mudou. Isto NAO e o gate de migration orfa reprovando. Saida crua abaixo."
+            echo "$LISTA" | head -c 2000
             exit 1
           fi
           echo "$LISTA" | jq -c '.migrations[]'
@@ -116,6 +153,8 @@ jobs:
           echo "ORFA_APLICADA_NA_MAO=$FALHOU" >> "$GITHUB_ENV"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          # PH-106: quem linka agora e o wrapper, entao ele precisa do ref aqui.
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - name: Migration nova mexe em dev sem mexer em public (ou vice-versa)?
         # Convencao do projeto (ver supabase/migrations/2026081*): mudanca de
@@ -157,6 +196,60 @@ jobs:
           fi
           echo "Par dev/public ok (ou migration nao mexe em nenhum dos dois, ex: grant/extensao)."
 
+      - name: Migration nova tem carimbo ANTERIOR ao que ja esta na base?
+        # PH-247/PH-289: o `db push` recusa aplicar migration cujo carimbo caia
+        # ANTES da ultima ja registrada no remoto:
+        #
+        #   Found local migration files to be inserted before the last migration
+        #   on remote database.
+        #   Rerun the command with --include-all flag to apply these migrations:
+        #
+        # E ele nao para na PR que causou: a partir dali TODO deploy da `dev`
+        # reprova, ate alguem renomear o arquivo. Aconteceu em 30/08 — duas PRs
+        # abertas no mesmo dia, a de carimbo MAIOR (PH-277, `...010000`) mesclou
+        # primeiro e a de carimbo menor (PH-247, `...000000`) virou "fora de
+        # ordem" sem ninguem ter editado nada. O custo cai em quem nao fez.
+        #
+        # A base e a mesma do passo anterior: `origin/main` pra PR de promocao,
+        # `origin/dev` pro resto. Nao e o estado do REMOTO (que o CI nao le aqui),
+        # e sim o do branch de destino — que e o que vai ser aplicado a seguir, e
+        # a aproximacao suficiente pra pegar a colisao entre PRs concorrentes.
+        run: |
+          git fetch origin main dev --depth=50
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE=origin/main
+          else
+            BASE=origin/dev
+          fi
+          NOVAS=$(git diff --name-only --diff-filter=A "$BASE"...HEAD -- supabase/migrations/)
+          if [ -z "$NOVAS" ]; then
+            echo "Nenhuma migration nova neste push/PR."
+            exit 0
+          fi
+          MAIOR_NA_BASE=$(git ls-tree --name-only "$BASE" supabase/migrations/ \
+            | sed -E 's|.*/([0-9]{14})_.*|\1|' | grep -E '^[0-9]{14}$' | sort | tail -1)
+          if [ -z "$MAIOR_NA_BASE" ]; then
+            echo "Base sem migration — nada com que comparar."
+            exit 0
+          fi
+          echo "Ultimo carimbo em $BASE: $MAIOR_NA_BASE"
+          FALHOU=0
+          for f in $NOVAS; do
+            CARIMBO=$(basename "$f" | cut -c1-14)
+            if [ "$CARIMBO" \< "$MAIOR_NA_BASE" ]; then
+              echo "::error::$f tem carimbo $CARIMBO, ANTERIOR ao ultimo de $BASE ($MAIOR_NA_BASE)."
+              echo "  O 'db push' vai recusar com 'to be inserted before the last migration on remote database'"
+              echo "  e travar TODO deploy seguinte, nao so esta PR."
+              echo "  Resolver: renomeie o arquivo com um carimbo maior que $MAIOR_NA_BASE (o par _public/_dev anda junto)."
+              FALHOU=1
+            fi
+          done
+          [ "$FALHOU" = "0" ] || exit 1
+          echo "Toda migration nova tem carimbo posterior ao da base."
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -174,7 +267,9 @@ jobs:
         # reprovando normal.
         run: |
           npm ci
-          supabase gen types typescript --linked > /tmp/database.types.ts
+          # PH-106: pelo wrapper, que re-linka se a credencial tiver sido
+          # rotacionada por outra invocacao do CLI enquanto o `npm ci` rodava.
+          scripts/ci/supabase-cli.sh supabase gen types typescript --linked > /tmp/database.types.ts
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' /tmp/database.types.ts > /tmp/gerado.norm.ts
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' src/lib/database.types.ts > /tmp/commitado.norm.ts
           if ! diff -q /tmp/gerado.norm.ts /tmp/commitado.norm.ts > /dev/null; then
@@ -186,6 +281,8 @@ jobs:
           echo "database.types.ts em sincronia com o schema remoto (PostgrestVersion ignorada de proposito - ver comentario do step)."
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          # PH-106: quem linka agora e o wrapper, entao ele precisa do ref aqui.
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - name: Resultado do gate
         # Roda SEMPRE (inclusive se um passo anterior falhou) pra transformar a

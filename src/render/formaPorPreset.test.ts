@@ -24,7 +24,8 @@ import { desenharAmbiente, reiniciarAmbiente } from './ambiente'
 const FLORESTA = 'assets/hunt-backgrounds/forest.jpg'
 const VULCAO = 'assets/hunt-backgrounds/volcano.jpg'
 const CAVERNA = 'assets/hunt-backgrounds/ruins.jpg'
-const MONTANHA = 'assets/hunt-backgrounds/mountain.jpg'
+// PH-255: era `mountain.jpg`, que saiu de `neve` (a arte e um vale verde).
+const MONTANHA = 'assets/hunt-backgrounds/ice-mountain.jpg'
 
 const JANELA = { x: 0, y: 0, w: 900, h: 600 }
 

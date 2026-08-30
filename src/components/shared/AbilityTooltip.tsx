@@ -27,6 +27,7 @@ import { nomeDoStatus } from '@/data/statusEffects'
 import { colorForType } from '@/data/typeColors'
 import type { PokeInstance } from '@/data/pokes'
 import { Explicacao } from './Explicacao'
+import { cn } from '@/lib/utils'
 
 // 'status' e categoria de verdade desde a base de dados do Ultra Sun (ate a
 // Gen III a categoria era decidida pelo TIPO do golpe e nao existia uma
@@ -104,10 +105,20 @@ export function descricaoDoGolpe(ability: Ability): string {
 }
 
 export function AbilityTooltip({
-  ability, poke, children,
+  ability, poke, desligado, children,
 }: {
   ability: Ability
   poke?: PokeInstance | null
+  /**
+   * O golpe esta FORA da rotacao (PH-165).
+   *
+   * Opcional porque esta bolha tambem e usada fora da fileira de golpes (ficha
+   * do POKE, item linkado no chat), onde ligar e desligar nao existe. Quando vem
+   * definido, a bolha ganha a linha do duplo clique — que antes era um `title=`
+   * nativo no slot, ou seja: hover puro, sem formatacao, e disputando o MESMO
+   * gesto com esta bolha aqui.
+   */
+  desligado?: boolean
   children: ReactNode
 }) {
   const categoria = poke ? resolveAbilityCategory(ability, poke) : ability.category
@@ -175,6 +186,17 @@ export function AbilityTooltip({
             <span className="text-[.85em] opacity-70">{AVISO_DANO_POR_REGRA_PROPRIA}</span>
           )}
           {ohkoDesligado && <span className="text-[.85em] text-warn">{AVISO_OHKO_DESLIGADO}</span>}
+          {/* PH-165: o duplo clique. Por ultimo de proposito — e instrucao de
+              interface, e as linhas acima sao o golpe. O texto diz o estado
+              ATUAL e o que o gesto faz com ele, porque so "duplo clique
+              desliga" num golpe ja desligado seria mentira. */}
+          {desligado != null && (
+            <span className={cn('text-[.85em]', desligado ? 'text-warn' : 'opacity-70')}>
+              {desligado
+                ? 'Fora da rotação — duplo clique religa.'
+                : 'Duplo clique desliga da rotação.'}
+            </span>
+          )}
         </div>
       }
     >

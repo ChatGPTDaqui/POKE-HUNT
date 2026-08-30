@@ -7,6 +7,12 @@
 // relativos mesmo fora da pasta da propria function, entao isto funciona sem
 // flag especial.
 import { criarApp } from '../jogo/servidor.js'
+// Mesma lista de CORS da producao, do MESMO arquivo (PH-293). Ela ja esteve
+// duplicada aqui, e foi assim que o cliente de staging continuou recusado depois
+// da primeira correcao: ela levou a lista pra `jogo/index.ts`, e esta casca
+// seguiu com a propria leitura do secret — sem a origem do staging. Ver o
+// cabecalho de `../jogo/origens.ts`.
+import { origensPermitidas } from '../jogo/origens.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -19,13 +25,14 @@ const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 // que o CLI/dashboard nao oferece.
 const schema = Deno.env.get('JOGO_SCHEMA_DEV') ?? 'dev'
 
-const origensPermitidas = (Deno.env.get('ORIGENS_PERMITIDAS') ?? 'http://localhost:5173')
-  .split(',')
-  .map((o) => o.trim())
+const listaDeOrigens = origensPermitidas(Deno.env.get('ORIGENS_PERMITIDAS'))
 
 const jwksJson = Deno.env.get('JOGO_JWKS') ?? undefined
 
-const handler = criarApp({ supabaseUrl, serviceRoleKey, schema, origensPermitidas, jwksJson })
+const handler = criarApp({
+  supabaseUrl, serviceRoleKey, schema, jwksJson,
+  origensPermitidas: listaDeOrigens,
+})
 
 Deno.serve((req: Request) => {
   const url = new URL(req.url)

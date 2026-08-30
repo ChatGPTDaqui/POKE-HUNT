@@ -44,6 +44,59 @@ const CONQUISTA_LANCE = 'boss_lance'
 export const MAX_SEGUNDOS_POR_FLUSH = 6 * 3600
 
 /**
+ * Janela minima que vale a pena SIMULAR, em segundos (PH-278).
+ *
+ * O servidor nao guarda posicao: a cada flush ele reconstroi o mundo com
+ * `buildMapWorld`, o POKE volta pro ponto de entrada e os inimigos sao
+ * recriados. Isso cobra uma RAMPA por janela — o tempo ate o primeiro abate —
+ * paga em TODA janela, e nao uma vez por hunt.
+ *
+ * A rampa TEM uma compensacao, e ignora-la foi o erro da primeira leitura desta
+ * issue: a janela nova nasce com o campo cheio, sem pagar o `respawnDelay` que
+ * uma simulacao continua pagaria. Medido em
+ * scripts/harness/custo-fixo-por-janela.mjs (8 sementes, 900s de mata_faixa1,
+ * saldo de abates contra uma janela unica de 900s):
+ *
+ *   janela   lure off   lure 2    lure 4
+ *      3s     -71,3%    -67,9%    -93,7%
+ *      5s     -40,6%    -39,6%    -42,6%
+ *      8s     +12,7%     +8,1%     -3,7%
+ *     10s     +11,4%    +12,6%    +26,7%
+ *     30s     +17,2%    +19,2%    +18,3%
+ *
+ * Ou seja: de 10s pra cima a compensacao vence e o servidor rende MAIS que a
+ * simulacao continua — nao ha o que corrigir ali, e a hipotese original da issue
+ * ("o rendimento por janela continua abaixo do que deveria") nao se sustenta na
+ * janela de 30s de hoje. Abaixo de 10s o quadro vira, e vira forte. O ponto de
+ * virada mais tardio e o do lure com 4 (ainda negativo em 8s), e este piso fica
+ * logo depois dele.
+ *
+ * POR QUE ISSO ACONTECE NA PRATICA: TODO request do jogador passa por um flush
+ * obrigatorio. Comprar, vender, mexer no auto, abrir o Mercado — cada um encerra
+ * a janela em andamento. Uma rajada de cliques nao produz "varias janelas
+ * normais": produz varias janelas de 2-5s seguidas, cada uma rendendo perto de
+ * zero. Era o jogador MAIS ativo que pagava.
+ *
+ * O QUE O PISO FAZ: abaixo dele o flush nao simula E NAO MOVE A ANCORA
+ * (`last_flush_at` fica onde estava), entao o tempo NAO e descartado — acumula
+ * pro proximo flush, que ai simula uma janela util. E o oposto deliberado da
+ * regra do teto de 6h e do farm pausado, que descartam: la o descarte impede
+ * sacar semanas de uma vez, aqui o descarte roubaria segundos de quem esta
+ * jogando agora.
+ *
+ * O claim atomico do intervalo perde o efeito nesses flushes (dois concorrentes
+ * passam pelo filtro `last_flush_at=eq.<lido>`), e isso e seguro porque a classe
+ * de bug que o claim existe pra impedir — o MESMO POKE capturado duas vezes — so
+ * acontece se a janela simular alguma coisa. Com `segundos = 0` nao ha sorteio,
+ * nao ha captura, nao ha linha nova. A escrita segue serializada pelo CAS de
+ * `gravarEstado` e pelo `flushing_since`.
+ *
+ * NAO se aplica quando a sessao esta FECHANDO (`ignorarPiso`): ali nao existe
+ * "proximo flush" pra herdar o tempo acumulado, e represar viraria descarte.
+ */
+export const PISO_DE_JANELA_SEGUNDOS = 10
+
+/**
  * FARM OFFLINE PAUSADO — chave temporaria, ligada a pedido do usuario.
  *
  * Com `true`, o intervalo que caracteriza AUSENCIA (acima de
@@ -439,6 +492,14 @@ export async function lerSnapshot(
   // gold via `reivindicar_missao` (RPC de menu, fora da resimulacao) — a
   // resimulacao de sessao nunca le nem escreve este campo, so precisa dele
   // presente pro tipo `GameStateData` fechar.
+  //
+  // CUIDADO (PH-265): esta lista vazia VIAJA pro cliente dentro de `estado`, e
+  // por um tempo ela APAGAVA a lista de la. Um flush a cada 30s fazia a tela de
+  // Tasks voltar a mostrar como disponivel uma missao ja reivindicada, e o
+  // clique seguinte batia na RPC com "Missao ja reivindicada". Quem defende
+  // disso e `mesclarMissoes` (src/data/remote/autoridade.ts): no cliente a
+  // lista de missoes e UNIAO, nunca substituicao. Se um dia esta rota passar a
+  // ler a tabela, aquela uniao continua correta — a chave so entra.
   const linhasNoLoad: PlayerSnapshot = {
     player: player[0], pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas: [],
   }
@@ -920,16 +981,29 @@ export async function aplicarFlush(
   // `forcarAvancoDeSala` (PH-178): so quem chama /sessao/avancar-sala liga
   // isto. Sem ele, um flush normal nunca destrava uma sala parada em 30/30 —
   // e exatamente o que o toggle de avanco manual promete.
-  opcoes: OpcoesDeLeitura & { forcarAvancoDeSala?: boolean } = {},
+  // `ignorarPiso` (PH-278): quem esta FECHANDO a sessao passa isto. Ver
+  // PISO_DE_JANELA_SEGUNDOS — represar tempo so faz sentido quando existe um
+  // proximo flush pra herda-lo.
+  opcoes: OpcoesDeLeitura & { forcarAvancoDeSala?: boolean; ignorarPiso?: boolean } = {},
 ): Promise<ResultadoFlushOuOcupado> {
   const agora = Date.now()
   const desde = new Date(sessao.last_flush_at).getTime()
   const bruto = (agora - desde) / 1000
 
+  // PH-278: janela curta demais rende quase nada (ver PISO_DE_JANELA_SEGUNDOS),
+  // entao ela nao e simulada NEM descartada — a ancora fica parada e o tempo
+  // acumula pro proximo flush.
+  //
+  // `bruto >= 0` no teste: intervalo NEGATIVO (relogio do servidor pra tras) tem
+  // que continuar re-ancorando como sempre fez. Sem essa guarda, uma ancora no
+  // futuro tornaria todo flush seguinte "abaixo do piso" e a hunt congelaria ate
+  // o relogio alcancar a ancora.
+  const represado = !opcoes.ignorarPiso && bruto >= 0 && bruto < PISO_DE_JANELA_SEGUNDOS
+
   // Relogio pra tras (resync de NTP, maquina com hora errada) daria intervalo
   // negativo. Nao creditar e so re-ancorar — creditar seria pagar por tempo que
   // nao passou, e um `while` com segundos negativos nao termina.
-  const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH))
+  const segundos = represado ? 0 : Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH))
   const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH
 
   // ---------------------------------------------------------------------
@@ -973,7 +1047,15 @@ export async function aplicarFlush(
     cfg,
     `game_sessions?id=eq.${sessao.id}&closed_at=is.null`
     + `&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}&select=id`,
-    { last_flush_at: new Date(agora).toISOString(), flushing_since: new Date(agora).toISOString() },
+    {
+      // PH-278: janela represada nao move a ancora — e o que faz o tempo
+      // acumular em vez de ser descartado. Reescrever o MESMO valor mantem o
+      // filtro `last_flush_at=eq.<lido>` valido pro proximo flush; o claim perde
+      // a exclusividade nesses casos de proposito (com `segundos = 0` nao ha
+      // sorteio nem captura pra duplicar), e `flushing_since` continua entrando.
+      last_flush_at: represado ? sessao.last_flush_at : new Date(agora).toISOString(),
+      flushing_since: new Date(agora).toISOString(),
+    },
   )
   if (!reivindicada) return FLUSH_OCUPADO
 

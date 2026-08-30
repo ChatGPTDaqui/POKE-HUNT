@@ -397,6 +397,26 @@
   min-height: 44px;
 }
 
+/* Campo numerico SEM as setinhas nativas (PH-270).
+
+   O spinner do Chrome mora DENTRO da caixa do input e come largura util: no
+   campo de "Vida ≤ __ %" do painel Auto, medido no jogo, sobravam 35px de
+   conteudo numa caixa que precisava de 40 — o valor 70 aparecia como "7". Num
+   campo de 1 a 99 que o jogador digita, as setas so custam espaco.
+
+   Vale a pena esconder em vez de so alargar o campo: a janela do Auto tem 19em,
+   e cada `em` gasto aqui sai do seletor de pocao ao lado. */
+.jogo-campo-sem-spinner {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.jogo-campo-sem-spinner::-webkit-outer-spin-button,
+.jogo-campo-sem-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .hud-root[data-toque] .jogo-botao-icone {
   min-width: 44px;
 }

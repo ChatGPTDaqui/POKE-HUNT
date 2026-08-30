@@ -117,10 +117,31 @@ Mirar `--funcao=jogo` é recusado sem `--confirmar-public`, pelo mesmo motivo de
 |---|---|
 | `npm run build:engine` | Empacota o motor num ESM para o Node (`vite build --ssr`) + os tipos |
 | `npm run build:edge` | Empacota **motor + serviço** num arquivo só para o Deno |
-| `npm run edge:publicar` | `build:edge` + `supabase functions deploy jogo` |
+| `npm run edge:publicar` | `build:edge` + `scripts/publicar-edge.mjs` (publica `jogo`) |
+| `npm run edge:publicar -- --funcao=jogo-dev` | O mesmo, mirando a function de staging |
 | `npx supabase db push` | Aplica as migrations no projeto linkado |
 
 O cliente é publicado por `git push` na `main`, que o Cloudflare Pages observa.
+
+#### `edge:publicar` exige login do CLI na conta certa (PH-187)
+
+O alvo **não** sai do link local do CLI. Ele sai, nesta ordem, de `SUPABASE_PROJECT_REF` no
+ambiente (o caminho do CI) ou do host de `SUPABASE_URL` no `.env` da raiz — a mesma fonte que
+`catalog:migrar` e `db:wipe` usam. Sem nenhuma das duas o comando **recusa**, em vez de publicar no
+que estiver linkado.
+
+Antes de subir qualquer byte ele confere que a **conta logada enxerga o projeto**. Se não enxergar,
+para com a lista de projetos visíveis e a instrução:
+
+```
+npx supabase login     # precisa de TTY — não roda em terminal automatizado
+```
+
+Isso existe porque em 26/08 o CLI desta máquina estava numa conta sem acesso ao projeto atual, e o
+comando documentado não funcionava; o erro era um `403: Your account does not have the necessary
+privileges`, que não sugere "você está na conta errada". **O 403 escondeu o risco maior:** aquela
+conta tem o projeto `Poke Idle Hunt`, um POKE-HUNT anterior. Se ele tivesse uma function chamada
+`jogo`, o deploy teria ido para o projeto errado **com sucesso e sem aviso**.
 
 ### Wipe
 
@@ -228,8 +249,28 @@ PH-92 deixou a função com código velho e a captura gravando errado até algu�
 gh run list --limit 5
 ```
 
-O mesmo vale entre os próprios workflows — ver PH-106 para o `concurrency.group` que serializa os
-dois lados.
+#### O CI se recupera sozinho; a sua máquina não (PH-106)
+
+Os três workflows que tocam o CLI (`supabase-check`, `supabase-deploy`, `supabase-deploy-dev`)
+chamam **`scripts/ci/supabase-cli.sh`** em vez de `supabase` direto. O wrapper linka, roda o
+comando e, **quando a falha tem assinatura de autenticação** (`28P01`,
+`password authentication failed`, `failed to connect as temp role`), **re-linka e repete** — até 3
+vezes. Erro de SQL de verdade (constraint, tipo, migration fora de ordem) reprova na primeira
+tentativa, sem gastar rodadas escondendo o log útil.
+
+Isso fecha a colisão entre workflows, que era a mais frequente: **3 das 20 execuções de
+`supabase-deploy-dev` anteriores a 30/08 morreram assim** — o `check` e o `deploy-dev` disparam no
+mesmo segundo em todo push em `dev`.
+
+**Não é `concurrency.group` compartilhado**, que era a correção óbvia da issue. O GitHub mantém
+apenas **um** run pendente por grupo e **cancela o pendente anterior** quando outro entra na fila:
+com os três no mesmo grupo, um push em `dev` durante um deploy de `main` cancelaria o deploy de
+`main` que estava na fila — migration de **produção** silenciosamente não aplicada. Trocar "morre
+por sorteio" por "morre por fila" não é conserto.
+
+O que o wrapper **não** cobre é o comando que você roda na sua máquina: ele não passa por lá. Se o
+seu `db:types` morrer com `28P01`, foi um workflow que rotacionou a senha — espere o run terminar e
+rode de novo.
 
 ### O que não existe nesta máquina
 

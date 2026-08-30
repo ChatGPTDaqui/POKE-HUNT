@@ -43,6 +43,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { AGUA_POR_ARTE } from '@/data/generated/aguaMask.generated'
 import { LAVA_POR_ARTE } from '@/data/generated/lavaMask.generated'
 import { emPoke } from './escalaDoMundo'
+import { desenharPropsDeAmbiente, reiniciarPropsDeAmbiente } from './ambienteProps'
 import { empurraoDoVento, sincronizarVento, ventoAgora } from './vento'
 import {
   avancarGotas, criarEstadoDeGotas, desenharGotas, povoarGotas,
@@ -79,6 +80,21 @@ export type PresetAmbiente =
  * `includes('cave')` classificaria `cave-volcanic` como caverna e daria poeira
  * a um mapa de lava, em silencio. Arte que nao esteja aqui cai em 'nenhum' —
  * fica parada como hoje, que e melhor que ganhar o ambiente errado.
+ *
+ * PH-255: o aviso acima ja estava escrito e mesmo assim CINCO entradas tinham
+ * sido preenchidas pelo NOME do arquivo. A varredura foi refeita abrindo as 31
+ * artes uma a uma, e toda linha corrigida diz o que ha no DESENHO — nao o que o
+ * nome sugere.
+ *
+ * AGUA NAO ENTROU EM NENHUMA ARTE NOVA, e a razao e mecanica, nao estetica:
+ * `lerArtesDeAgua()` (scripts/build-agua-mask.js) monta a fila de mascara
+ * procurando `'agua'` NESTA tabela, e cada arte da fila exige uma referencia
+ * PINTADA A MAO em `scripts/agua-refs/`. A mascara nao e derivavel da arte — foi
+ * o que a PH-113 mediu: agua e vegetacao coincidem em matiz e textura nestes
+ * mapas, e em `town-night`, que e noturna, coincidem ainda mais. Marcar `agua`
+ * aqui sem pintar a referencia faz o script exigir um arquivo que nao existe.
+ * As quatro artes com agua que ficaram fora (`town-night`, `dojo`, `town`,
+ * `mountain`) sao candidatas a `agua` no dia em que alguem pintar as refs.
  */
 const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   'assets/hunt-backgrounds/forest.jpg': 'folha',
@@ -87,10 +103,34 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   // gotejo aos cinco de uma vez seria "chove em todo mapa verde", que e o
   // oposto do que separar os biomas quer dizer.
   'assets/hunt-backgrounds/jungle.jpg': 'selva',
+  // Mata escura com lagoas verdes, teia e cogumelo. Copa fechada o bastante pra
+  // ser candidata a `selva`, mas a agua ali esta PARADA e coberta de limo, nao
+  // escorrendo da copa — gotejo leria como chuva num lugar sem chuva.
   'assets/hunt-backgrounds/tall-grass.jpg': 'folha',
   'assets/hunt-backgrounds/meadow.jpg': 'folha',
   'assets/hunt-backgrounds/plains.jpg': 'folha',
   'assets/hunt-backgrounds/burnt-forest.jpg': 'areia', // arvore queimada nao solta folha; o que sobe ali e cinza
+  // PH-255: era `neve`, pelo nome. A arte e um VALE VERDE — pinheiro, capim,
+  // flor amarela e azul, rio de degelo cruzando de cima a baixo. A neve so
+  // existe nos picos do FUNDO, fora da area jogavel. Floco branco caindo em
+  // cima de flor aberta le como bug de estacao, nao como montanha.
+  'assets/hunt-backgrounds/mountain.jpg': 'folha',
+  // PH-255: era `cidade`, pelo nome do arquivo. Nao ha uma construcao na arte.
+  // E uma MATA DE NOITE: rio atravessando, lagoa com nenufar, capim alto,
+  // cogumelo luminoso e vaga-lume ja pintados. Fiapo urbano cinza flutuando
+  // dentro de uma floresta era o que o jogador via.
+  'assets/hunt-backgrounds/town-night.jpg': 'folha',
+  // PH-255: era `cidade`. A arte e um vilarejo de DUAS construcoes (torre e
+  // moinho) numa mesa central; o resto do quadro e floresta de coniferas, lago,
+  // duas quedas d'agua e campo de flor. O criterio desta tabela e o desenho, e o
+  // desenho e verde. `metropolis` e `slum` e que sao cidade de verdade.
+  'assets/hunt-backgrounds/town.jpg': 'folha',
+  // PH-255: era `poeira` (poeira SECA em suspensao). A arte e um jardim japones
+  // varrido: cerejeira em flor, rio de carpas, ponte de pedra, lanterna, bambu e
+  // piso molhado. Poeira seca e o oposto do que ela mostra; petala em deriva e o
+  // que aquele jardim faz. O comentario antigo ("dojo e seco") respondia a
+  // pergunta do GOTEJO (caverna vs poeira), nunca a de se poeira cabia ali.
+  'assets/hunt-backgrounds/dojo.jpg': 'folha',
 
   'assets/hunt-backgrounds/sea.jpg': 'agua',
   'assets/hunt-backgrounds/lake.jpg': 'agua',
@@ -100,27 +140,31 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
 
   'assets/hunt-backgrounds/volcano.jpg': 'brasa',
   'assets/hunt-backgrounds/cave-volcanic.jpg': 'brasa',
+  // PH-255: era `poeira`. RIO DE LAVA atravessa a arte de cima a baixo, com
+  // geiser de vapor no chao de pedra e tocha acesa na parede. E irma de
+  // `volcano` e `cave-volcanic`, nao de `ruins` — e `brasa` ainda traz o
+  // `brilhoDoChao`, que a lava pintada ali pede.
+  'assets/hunt-backgrounds/dragon.jpg': 'brasa',
 
   // SECO fica em `poeira`; gruta fechada, onde a agua escorre pela rocha,
-  // ganha o gotejo. Ruina a ceu aberto, templo, dojo e covil de dragao sao
-  // secos — pingo ali seria goteira sem telhado.
+  // ganha o gotejo. Ruina a ceu aberto e templo sao secos — pingo ali seria
+  // goteira sem telhado.
   'assets/hunt-backgrounds/ruins.jpg': 'poeira',
+  // Confirmado na varredura, e nao herdado: ilhas flutuantes num ceu roxo, com
+  // cristal e queda d'agua caindo pra dentro da nuvem. Nao ha teto (fora de
+  // `caverna`) e nao ha verde dominante (fora de `folha`); o grao claro em
+  // suspensao de `poeira` le como poeira de luz, que e o que o lugar quer ser.
   'assets/hunt-backgrounds/temple.jpg': 'poeira',
-  'assets/hunt-backgrounds/dragon.jpg': 'poeira',
-  'assets/hunt-backgrounds/dojo.jpg': 'poeira',
   'assets/hunt-backgrounds/fairy-cave.jpg': 'caverna',
   'assets/hunt-backgrounds/abyss.jpg': 'caverna',
 
   'assets/hunt-backgrounds/ice-cave.jpg': 'neve',
   'assets/hunt-backgrounds/ice-mountain.jpg': 'neve',
-  'assets/hunt-backgrounds/mountain.jpg': 'neve',
 
   'assets/hunt-backgrounds/desert.jpg': 'areia',
   'assets/hunt-backgrounds/badlands.jpg': 'areia',
   'assets/hunt-backgrounds/wasteland.jpg': 'areia',
 
-  'assets/hunt-backgrounds/town.jpg': 'cidade',
-  'assets/hunt-backgrounds/town-night.jpg': 'cidade',
   'assets/hunt-backgrounds/metropolis.jpg': 'cidade',
   'assets/hunt-backgrounds/slum.jpg': 'cidade',
   'assets/hunt-backgrounds/industrial.jpg': 'cidade',
@@ -823,12 +867,33 @@ export function desenharAmbiente(
   familiaDeClima: 'neve' | 'areia' | null = null,
 ): void {
   const ui = useUiStore.getState()
+  const compacto = ui.viewportWidth > 0 && ui.viewportWidth < 760
   if (!ui.vidaNoCenario) {
     // Desligado no ajuste: solta o estado pra a camada nao voltar com
     // particulas velhas (e pra ela nao custar memoria enquanto esta off).
     if (particulas.length) { particulas = []; arteAtual = null; gotejo = null }
+    reiniciarPropsDeAmbiente()
     return
   }
+
+  // O relogio do quadro e lido UMA vez, aqui, e desce por parametro pra os
+  // props: duas leituras por quadro adiantariam o tempo em um passo sempre que
+  // `performance.now` for um contador (todo teste de camada mocka assim).
+  const agora = performance.now()
+  // O vento e da CENA (PH-233) e os props consultam ele pra inclinar fumaca e
+  // petala, entao ele precisa estar no instante certo ANTES do desenho deles.
+  // `sincronizarVento` ATRIBUI, nao acumula — chamar aqui e de novo abaixo com
+  // o mesmo `agora` da o mesmo resultado.
+  sincronizarVento(agora)
+
+  // PROPS (PH-254) ANTES de tudo, inclusive dos dois `return` abaixo.
+  //
+  // Os dois desligamentos que vem a seguir sao certos pra particula e errados
+  // pra prop: preset 'nenhum' significa "esta arte nao tem enxame proprio", e
+  // nao "esta arte nao tem chamine"; e clima calando o preset significa "ja
+  // esta nevando, nao neve de novo", e nao "a fogueira apagou porque nevou".
+  // Passar os props pra depois deles apagaria a fogueira no primeiro floco.
+  desenharPropsDeAmbiente(ctx, imagem, janela, compacto, agora)
 
   const preset = presetDaArte(imagem)
   if (preset === 'nenhum' || !imagem) {
@@ -852,20 +917,17 @@ export function desenharAmbiente(
 
   const mascara = mascaraDaArte(preset, imagem)
   const r = receitaDe(preset, mascara)
-  const compacto = ui.viewportWidth > 0 && ui.viewportWidth < 760
   if (arteAtual !== imagem || particulas.length === 0) reconstruir(imagem, preset, janela, compacto, mascara)
 
-  const agora = performance.now()
   // Primeiro quadro apos reconstruir: sem instante anterior, `delta` seria o
   // uptime inteiro da pagina.
   const delta = ultimoInstante === 0 ? 0 : Math.min(DELTA_MAXIMO, (agora - ultimoInstante) / 1000)
   ultimoInstante = agora
   faseGlobal += delta
-  // O vento e da CENA, nao desta camada (PH-233): passa o instante que ja
-  // lemos, e `vento.ts` atribui a fase em vez de acumular. `faseGlobal`
-  // continua sendo daqui — ela move o feixe de luz e o brilho de lava, que sao
-  // desta arte e nao do clima.
-  sincronizarVento(agora)
+  // O vento ja foi sincronizado la em cima, com o MESMO `agora` — ele precisa
+  // estar certo antes dos props, que desenham antes daqui. `faseGlobal`
+  // continua sendo desta camada: ela move o feixe de luz e o brilho de lava,
+  // que sao desta arte e nao do clima.
 
   ctx.save()
   if (r.aditivo) ctx.globalCompositeOperation = 'lighter'
@@ -1143,4 +1205,7 @@ export function reiniciarAmbiente(): void {
   ultimoInstante = 0
   focosDeBrilho = []
   gotejo = null
+  // Os props sao desenhados por esta funcao, entao soltar o ambiente sem soltar
+  // eles deixaria um caso de teste medindo a arte anterior.
+  reiniciarPropsDeAmbiente()
 }

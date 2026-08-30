@@ -138,7 +138,12 @@ describe('retomarHuntSeHavia', () => {
     // `silencioso` e obrigatorio: esta entrada nao nasceu de um clique, e a
     // recusa do servidor viraria um toast de erro sobre acao que o jogador nao
     // disparou.
-    expect(enterMap).toHaveBeenCalledWith('forest', { silencioso: true })
+    //
+    // `retomando` (PH-266) e a outra metade da mesma condicao, e por isso entra
+    // no mesmo `expect`: e ela que faz o servidor herdar a sala em que a hunt
+    // parou. Perde-la nao quebraria nada visivelmente — so devolveria o jogador
+    // pra sala 1 a cada F5, que e o bug que a issue veio consertar.
+    expect(enterMap).toHaveBeenCalledWith('forest', { silencioso: true, retomando: true })
   })
 
   it('sem mapa no estado, nao espera o assentamento pra liberar o jogo', async () => {

@@ -192,6 +192,34 @@ function mesclarPokedex(local: GameStateData, doServidor: GameStateData): GameSt
   return { ...local.pokedexKills, ...doFlush }
 }
 
+/**
+ * Missoes ja reivindicadas: UNIAO, nunca substituicao (PH-265).
+ *
+ * O BUG QUE ISTO CONSERTA. `carregarEstado` do servidor monta o snapshot com
+ * `missoesReivindicadas: []` de proposito — missao nao entra na resimulacao de
+ * combate, entao a rota nao le a tabela (ver authority/src/progresso.ts). Só que
+ * esse estado e aplicado no cliente por `setState`, e a lista vazia SOBRESCREVIA
+ * a local: bastava um flush (30 em 30 segundos) pra a tela de Tasks voltar a
+ * mostrar como disponivel uma missao ja reivindicada. O jogador clicava e a RPC
+ * respondia "Missao ja reivindicada" — o relato exato desta issue. O ouro da
+ * primeira reivindicacao tinha sido pago; o que se perdeu foi a marca na tela.
+ *
+ * Uniao e seguro porque a chave so ENTRA: `setMissaoReivindicada` nunca remove
+ * (o mesmo ja esta escrito em playerMapper.ts). Entao o pior caso de um servidor
+ * que um dia passe a mandar a lista cheia e ela somar com a local, e nao brigar
+ * com ela.
+ *
+ * O outro conserto possivel era a rota passar a LER a tabela em todo flush. Sai
+ * mais caro (uma consulta a cada 30s por jogador, no caminho que a PH-185/186
+ * existiu pra enxugar) e nao seria mais correto: o servidor de fato nao e dono
+ * deste campo durante a sessao — quem escreve nele e uma RPC de menu.
+ */
+function mesclarMissoes(local: GameStateData, doServidor: GameStateData): GameStateData['missoesReivindicadas'] {
+  const doFlush = doServidor.missoesReivindicadas
+  if (!doFlush || Object.keys(doFlush).length === 0) return local.missoesReivindicadas
+  return { ...local.missoesReivindicadas, ...doFlush }
+}
+
 export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo?: RespostaFlush['resumo']): void {
   if (!estado || typeof estado !== 'object') return
   const doServidor = estado as GameStateData
@@ -202,7 +230,12 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   reconciliarPokeAtivoNoWorld(doServidor)
   if (!parcial) {
     limparCapturasPreditas()
-    useGameStateStore.setState(doServidor)
+    // `setState` com FUNCAO, e nao com o objeto cru: `mesclarMissoes` precisa do
+    // estado local (ver o comentario dela). Este caminho tambem passava por
+    // cima da lista de missoes reivindicadas.
+    useGameStateStore.setState((local) => ({
+      ...doServidor, missoesReivindicadas: mesclarMissoes(local, doServidor),
+    }))
     return
   }
   const novos = Array.isArray(doServidor.bagPokes) ? doServidor.bagPokes : []
@@ -214,6 +247,7 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   if (!mochilaCarregada()) {
     useGameStateStore.setState((local) => ({
       ...doServidor, bagPokes: [], pokedexKills: mesclarPokedex(local, doServidor),
+      missoesReivindicadas: mesclarMissoes(local, doServidor),
     }))
     limparCapturasPreditas()
     return
@@ -222,6 +256,7 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   useGameStateStore.setState((local) => ({
     ...doServidor,
     pokedexKills: mesclarPokedex(local, doServidor),
+    missoesReivindicadas: mesclarMissoes(local, doServidor),
     bagPokes: [
       // Fora: o que era predicao (a linha real dela esta em `novos`) e qualquer
       // uid que o servidor esteja mandando agora — sem o segundo filtro, um
@@ -387,13 +422,16 @@ function agendarProximoFlush(): void {
  * manda o campo.
  */
 export async function abrirSessaoDeHunt(
-  mapId: string, pokeUid: string, opcoes?: { avisarErro?: boolean },
+  mapId: string, pokeUid: string, opcoes?: { avisarErro?: boolean; retomando?: boolean },
 ): Promise<{ ok: boolean; sala: SalaAtiva | null; clima?: ClimaTipo | null }> {
   // Sem servidor nao ha autoridade: `clima` sai AUSENTE (e nao `null`) pra o
   // motor derivar o dele — ver ProgressoDaSessao.clima (PH-140).
   if (!servidorAtivo()) return { ok: true, sala: null }
   try {
-    const resposta = await servidor.abrirSessao(mapId, pokeUid)
+    // `retomando` (PH-266) so vem do boot, junto com `avisarErro: false` — sao
+    // as duas metades da mesma condicao ("o jogador nao pediu isto"). Ver
+    // features/game/bootDaSessao.ts.
+    const resposta = await servidor.abrirSessao(mapId, pokeUid, opcoes?.retomando ?? false)
     pararFlushPeriodico()
     // Hunt nova comeca no piso: a primeira janela e quase sempre produtiva, e
     // herdar o intervalo esticado da hunt anterior faria o jogador entrar e
@@ -598,7 +636,32 @@ export function pararFlushPeriodico(): void {
 // ainda NAO ter fechado a quota dele: as duas simulacoes contam abates
 // separadamente e a dele pode estar dois abates atras. Nesse caso a resposta traz
 // a mesma sala, e o proximo tick pede de novo depois do intervalo.
-const REPETIR_PEDIDO_DE_SALA_MS = 5000
+//
+// 30s, E NAO OS 5s ORIGINAIS — INSISTIR TRAVAVA A HUNT (PH-273).
+//
+// Cada pedido FECHA a janela de simulacao do servidor: ele credita o intervalo
+// desde o ultimo flush, reconstroi o mundo com `buildMapWorld` (POKE de volta no
+// ponto de entrada, inimigos recriados) e simula so aquele intervalo. Pedir de
+// 5 em 5 segundos nao acelera o servidor — ele passa a viver de janelas de 5s,
+// e janela de 5s nao paga nem a caminhada ate o alvo.
+//
+// Medido na conta de teste no jogo-dev em 2026-08-29, mesma sessao, lendo o
+// resumo de cada resposta:
+//
+//   janela de   5s  ->  0 abates   (dezenas seguidas, `hp_atual` do protetor
+//                                   parado em 72 por mais de 10 minutos)
+//   janela de  35s  -> 10 abates, 415 de ouro, sala avancou
+//   janela de  82s  -> 25 abates, 950 de ouro
+//   janela de 111s  -> 24 abates, 6.880 de ouro, protetor morto
+//
+// Como a sala so avanca quando o protetor dela morre (PH-202/203) e quem tem que
+// mata-lo e o servidor, o resultado era uma hunt parada em 30/30 pra sempre — o
+// "nao passa da sala 2" do relato. Um livelock em que a pressa e a causa: quanto
+// mais o cliente pedia, menor a janela e menos o servidor avancava.
+//
+// O custo de esperar o intervalo cheio e o que este pedido existia pra evitar
+// (ate 30s com a barra cheia). Esse custo e real, e e MUITO menor que travar.
+const REPETIR_PEDIDO_DE_SALA_MS = INTERVALO_FLUSH_MS
 let pararObservadorDeSala: (() => void) | null = null
 let salaJaPedida: string | null = null
 let ultimoPedidoDeSala = 0

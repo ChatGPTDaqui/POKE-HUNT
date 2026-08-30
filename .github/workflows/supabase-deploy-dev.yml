@@ -20,24 +20,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # VERSAO FIXA, e nao 'latest' (PH-290): 'latest' resolve por chamada a API
+      # do GitHub, e ela tem rate limit — visto em 30/08, "Failed to resolve latest
+      # Supabase CLI release: rate limit exceeded", numa tarde de muitos runs. O
+      # raciocinio completo esta no comentario de supabase-check.yml.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
-
-      - name: Link no projeto Supabase
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          version: 2.116.0
 
       - name: Aplicar migrations pendentes (mesmo arquivo cobre dev + public)
         # Mesmo comando do deploy de main -- nao ha "db push so pra dev", o CLI
         # aplica toda migration pendente do repo inteiro. O gate de par
         # dev/public (supabase-check.yml) e quem garante que uma migration nova
         # nunca fica so-de-um-lado antes de chegar aqui.
-        run: supabase db push --linked
+        #
+        # PH-106: o `link` mora DENTRO do wrapper, e nao num passo proprio. Ele
+        # provisiona o role `cli_login_postgres` ROTACIONANDO a senha a cada
+        # login, entao duas invocacoes concorrentes do CLI (o outro workflow, ou
+        # um `db:types` numa maquina com o mesmo token) invalidavam uma a outra e
+        # o `db push` morria com 28P01 -- migration nao aplicada e Edge nao
+        # republicada, com a PR ja verde e mesclada. 3 das 20 execucoes deste
+        # workflow anteriores a 30/08, todas por isso.
+        run: scripts/ci/supabase-cli.sh supabase db push --linked
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - uses: actions/setup-node@v4
         with:

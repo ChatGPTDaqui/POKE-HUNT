@@ -5,10 +5,11 @@
 // outro jogador. Sem `VITE_SERVIDOR_URL` a tela diz isso em vez de mostrar uma
 // lista com um jogador so.
 import { useState } from 'react'
-import { Crown, Medal } from '@phosphor-icons/react'
+import { Crown, Medal, UserPlus } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import type { CriterioPoke, EntradaTreinador, EntradaPoke, EntradaHall } from '@/data/remote/servidor'
 import * as rankingRpc from '@/data/remote/rankingRpc'
+import { usePedirAmizade } from '@/features/correio/usePedirAmizade'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
@@ -100,6 +101,31 @@ function Linha({ children, onClick }: { children: React.ReactNode; onClick?: () 
   )
 }
 
+/**
+ * Icone de pedir amizade no fim de uma linha do ranking (PH-214).
+ *
+ * Icone, e nao botao com texto: o ranking e uma LISTA pra ler, e um "Adicionar
+ * amigo" escrito em cada linha competiria com o nome e o nivel, que sao o
+ * conteudo. A regra e a resposta vem toda de `usePedirAmizade` — ver o cabecalho
+ * daquele arquivo pra por que nada disso mora no cliente.
+ */
+function BotaoAdicionarAmigo({ nick }: { nick: string }) {
+  const { pedir, enviando, souEu } = usePedirAmizade()
+  if (souEu(nick)) return null
+  return (
+    <button
+      type="button"
+      aria-label={`Adicionar ${nick} como amigo`}
+      title={`Adicionar ${nick} como amigo`}
+      disabled={enviando}
+      onClick={() => pedir(nick)}
+      className="shrink-0 rounded-[.35em] p-[.25em] text-n500 transition-colors hover:bg-n800 hover:text-n100 disabled:opacity-40"
+    >
+      <UserPlus className="text-[1.05em]" />
+    </button>
+  )
+}
+
 function AbaTreinadores() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['ranking', 'treinadores'],
@@ -118,6 +144,11 @@ function AbaTreinadores() {
             <span className="min-w-0 flex-1 truncate">{e.nome}</span>
             <span className="shrink-0 text-[.85em] text-n300">Lv {e.nivel}</span>
             <span className="shrink-0 font-mono text-[.75em] text-n500">{e.exp.toLocaleString('pt-BR')} XP</span>
+            {/* Ultimo da linha, e um icone: o ranking e uma LISTA pra ler, e um
+                botao com texto em cada linha competiria com o nome e o nivel,
+                que sao o conteudo. `Linha` sem `onClick` continua sendo `div`,
+                entao nao ha botao dentro de botao. */}
+            <BotaoAdicionarAmigo nick={e.nome} />
           </Linha>
         ))}
       </div>

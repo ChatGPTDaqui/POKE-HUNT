@@ -70,11 +70,29 @@ function shortLabel(name: string): string {
  * Nao garante unicidade absoluta (dois golpes "Lab..." do mesmo tipo ainda
  * colidiriam). Nao vale complicar por isso: o criterio e ser distinguivel, e o
  * tooltip/ficha continuam sendo a resposta exata.
+ *
+ * PH-294: SO LETRA E DIGITO contam como palavra. Enquanto o corte era
+ * `[\s-]+`, o golpe AoE por tipo — "Explosao Elemental (FIRE)" — quebrava em
+ * tres pedacos e a inicial do terceiro era o PARENTESE: a barra mostrava
+ * "EE(". Nao era caso raro — toda especie recebe o AoE do proprio tipo
+ * (`typedAoeMoves`), entao qualquer POKE com outro golpe do mesmo tipo caia
+ * nisso, incluindo o Charmeleon de tres golpes Fire que motivou a sigla.
+ *
+ * Descartar o "(FIRE)" tambem e certo pelo conteudo: o TIPO ja e o icone do
+ * slot, e repeti-lo na sigla gastaria a unica informacao que ela tem a dar.
  */
-function siglaDoGolpe(name: string): string {
-  const palavras = name.split(/[\s-]+/).filter(Boolean)
+export function siglaDoGolpe(name: string): string {
+  // O trecho entre parenteses sai ANTES do corte, e nao vira palavra. Ele so
+  // aparece no AoE por tipo, onde carrega o TIPO — que ja e o icone do slot. Um
+  // "F" de FIRE na sigla nao distingue nada (cada POKE tem UM AoE, o do proprio
+  // tipo) e gastaria um terco do espaco repetindo o que o icone diz.
+  const semParenteses = name.replace(/\([^)]*\)/g, ' ')
+  const palavras = semParenteses.split(/[^\p{L}\p{N}]+/u).filter(Boolean)
   if (palavras.length >= 2) return palavras.map((p) => p[0]).join('').toUpperCase().slice(0, 3)
-  return (palavras[0] ?? name).slice(0, 3).toUpperCase()
+  // Sem nenhuma palavra (nome so de pontuacao) devolve vazio em vez de repetir
+  // a pontuacao: nao existe golpe assim no catalogo, e o teste varre o catalogo
+  // inteiro pra garantir — mas a alternativa era mostrar "!!!" na barra.
+  return (palavras[0] ?? '').slice(0, 3).toUpperCase()
 }
 
 // Tamanho do slot por regime de largura. Duas coisas acontecem aqui:
@@ -201,11 +219,17 @@ export function AbilityHud() {
             ability={ability}
             poke={poke}
             coarse={coarse}
+            desligado={isOff}
             onAbrirDetalhe={() => setDetalhe(ability)}
           >
           <div
+            // PH-165: o `title=` nativo que dizia "duplo clique desliga da
+            // rotacao" saiu daqui. Ele so valia no ponteiro fino (era ele mesmo
+            // que se anulava no `coarse`), e a dica agora vai na BOLHA do golpe,
+            // que abre no mesmo hover e num lugar onde o jogador ja esta lendo o
+            // resto do golpe. No dedo o caminho continua sendo a ficha, que tem
+            // o botao "Ligar/Desligar na rotacao" escrito.
             onDoubleClick={coarse ? undefined : () => controller.toggleAbility(poke.uid, ability.id)}
-            title={coarse ? undefined : (isOff ? 'Desligado — duplo clique religa' : 'Duplo clique desliga da rotação')}
             className={cn(
               'relative flex cursor-pointer items-center justify-center rounded-[.5em] select-none',
               ready && 'shadow-[0_0_0_2px_rgba(255,255,255,.85)]',
@@ -353,11 +377,12 @@ export function AbilityHud() {
  * nada que o feche.
  */
 function EnvolucroSlot({
-  ability, poke, coarse, onAbrirDetalhe, children,
+  ability, poke, coarse, desligado, onAbrirDetalhe, children,
 }: {
   ability: Ability
   poke: PokeInstance
   coarse: boolean
+  desligado: boolean
   onAbrirDetalhe: () => void
   children: ReactNode
 }) {
@@ -388,7 +413,7 @@ function EnvolucroSlot({
     </button>
   )
   if (!coarse) {
-    return <AbilityTooltip ability={ability} poke={poke}>{botao}</AbilityTooltip>
+    return <AbilityTooltip ability={ability} poke={poke} desligado={desligado}>{botao}</AbilityTooltip>
   }
   return botao
 }

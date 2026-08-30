@@ -7,11 +7,12 @@ import { autenticar } from './auth.js'
 import { ErroHttp, selecionar, inserir, atualizar, chamarRpc, type Config } from './db.js'
 import {
   aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
-  FLUSH_OCUPADO, type LinhaSessao,
+  FLUSH_OCUPADO, type LinhaSessao, type LinhaSalaProtetor,
 } from './progresso.js'
 import {
   MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
-  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, indiceDoBiomaNoMapId, type BiomaProgress,
+  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, indiceDoBiomaNoMapId,
+  type BiomaProgress, type SalaAtiva,
 } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
@@ -131,6 +132,35 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
 }
 
 /**
+ * Sem flush ha mais que isto, a sessao esta ABANDONADA (PH-277).
+ *
+ * O cliente flusha a cada 30s e nunca deixa passar mais que
+ * `INTERVALO_FLUSH_MAX_MS` (90s, autoridade.ts) enquanto a aba esta viva —
+ * qualquer evento volta o intervalo pro piso, e `visibilitychange` dispara um
+ * flush sozinho. Meia hora e 20x o teto: nao existe sessao viva desse lado.
+ *
+ * NAO E MAIS APERTADO DE PROPOSITO. O custo de fechar cedo demais e real e cai
+ * no jogador: fechar a sessao perde a POSICAO NAS SALAS (`sala`, `ciclos`), e
+ * quem voltar de um notebook que dormiu 10 minutos recomecaria no ciclo 1, sala
+ * 1. 30 minutos deixa esse caso inteiro de fora e ainda pega o que a PH-277
+ * mediu no banco: linhas paradas ha 4 horas e ha 1 dia e 6 horas.
+ *
+ * O tempo abandonado NAO E CREDITADO, e isso e o ponto — nao um efeito
+ * colateral. Ele nunca foi simulado por ninguem, exatamente como a orfa que
+ * `sessaoAberta` ja fechava sem creditar. Hoje `FARM_OFFLINE_PAUSADO` faria o
+ * descarte de qualquer jeito; o dia em que ele voltar a `false` e o dia em que
+ * a sessao esquecida viraria horas de credito retroativo, com a assimetria
+ * injusta de premiar quem fecha a aba de qualquer jeito e nao quem sai pela
+ * porta.
+ *
+ * O GEMEO DESTE NUMERO E SQL: `fechar_sessoes_inativas()` usa o mesmo limite
+ * (migration `20260830010000`), porque o caminho de acesso so alcanca quem
+ * volta — sessao de quem nunca mais aparece precisa do cron. `limiteDeSessao
+ * Inativa.test.ts` reprova se os dois se separarem.
+ */
+export const SESSAO_INATIVA_SEGUNDOS = 30 * 60
+
+/**
  * A sessao aberta do jogador — e no maximo UMA.
  *
  * O indice unico parcial `game_sessions_abertas` garante isso desde a migration
@@ -140,6 +170,10 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
  * novo um periodo que a sessao vencedora ja pagou — o exploit de duplicacao que
  * aquela migration descreve. Fechar sem creditar e o certo: o tempo dela ja foi
  * pago pela outra.
+ *
+ * PH-277: a MESMA regra passa a valer pra sessao ABANDONADA. Ela e devolvida
+ * como `null`, e nao reaproveitada, entao o chamador abre uma nova — o que
+ * significa que o intervalo esquecido nunca chega a `aplicarFlush`.
  */
 async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | null> {
   // PH-241: `sala_protetor(*)` embutido via PostgREST — `session_id` e
@@ -150,7 +184,29 @@ async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | 
     `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*,sala_protetor(*)&order=started_at.desc`,
   )
   for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id)
-  return linhas[0] ?? null
+
+  const atual = linhas[0]
+  if (!atual) return null
+  if (sessaoAbandonada(atual)) {
+    // `sairDaHunt` e nao `fecharLinhaDeSessao`: `current_map_id` tem que ser
+    // limpo junto, senao o cliente volta pra dentro de uma hunt sem sessao e
+    // fica caçando sem creditar nada — o mesmo cuidado que a saida normal toma.
+    await sairDaHunt(cfg, userId, atual.id)
+    return null
+  }
+  return atual
+}
+
+/** Passou de `SESSAO_INATIVA_SEGUNDOS` sem nenhum flush? */
+export function sessaoAbandonada(
+  sessao: Pick<LinhaSessao, 'last_flush_at'>,
+  agora = Date.now(),
+): boolean {
+  const desde = new Date(sessao.last_flush_at).getTime()
+  // Data invalida (coluna nula/torta) nao pode virar "abandonada": `NaN` em
+  // qualquer comparacao e `false`, e e esse o resultado que se quer — na duvida
+  // a sessao continua viva e o caminho normal decide.
+  return agora - desde > SESSAO_INATIVA_SEGUNDOS * 1000
 }
 
 async function fecharLinhaDeSessao(cfg: Config, sessaoId: string): Promise<void> {
@@ -195,10 +251,100 @@ export function bloqueioDeBiomaPendente(
   return `Vença o Lord de ${anteriorNome} para liberar esta área.`
 }
 
+/**
+ * Quanto tempo depois de fechada uma sessao ainda vale como "a hunt que o
+ * jogador estava jogando" pra efeito de herdar a sala (PH-266).
+ *
+ * O caso que isto cobre e o F5: o boot ASSENTA a sessao (fecha) e reentra logo
+ * em seguida, entao o `closed_at` da sessao anterior tem segundos de idade. Os
+ * 5 minutos sao folga pra boot lento, aba que voltou do sono e o assentamento
+ * de quem fechou a aba (que so fecha a sessao no carregamento seguinte).
+ *
+ * Nao e uma janela de imunidade: quem sai da hunt e volta DEPOIS disso recomeca
+ * no ciclo 1, sala 1, como sempre foi.
+ */
+const JANELA_DE_HERANCA_DE_SALA_MS = 5 * 60 * 1000
+
+/**
+ * A sala em que a hunt parou, quando esta abertura e uma REENTRADA (PH-266).
+ *
+ * O BUG: `/sessao/abrir` sempre gravava `sala_indice: 0, sala_abates: 0,
+ * ciclos: 0` e sorteava uma sala inicial. Como o boot fecha a sessao pendente
+ * antes de reentrar (bootDaSessao.ts), um F5 no meio da sala 7 devolvia o
+ * jogador pra sala 1 do ciclo 1 — progresso de sala perdido por recarregar a
+ * pagina.
+ *
+ * ISTO NAO AFROUXA O ANTI-REROLL. O que a nota do topo de salaSystem.ts protege
+ * e o jogador RE-SORTEAR salas ate cair a que ele quer; herdar a sala em que ele
+ * ja estava e o oposto disso — ele fica exatamente onde parou, sem sorteio novo.
+ *
+ * Tres condicoes, todas verificadas AQUI e nao no cliente:
+ *  - a intencao veio marcada como reentrada (`retomando`);
+ *  - a ultima sessao do jogador NESTE mapa (nao em qualquer um);
+ *  - fechada ha menos de `JANELA_DE_HERANCA_DE_SALA_MS`.
+ *
+ * O protetor pendente vem junto de proposito. Sem ele, dar F5 no meio da luta
+ * contra um Guardian herdaria a sala e APAGARIA o protetor — trocando a perda
+ * de progresso por um jeito de se livrar do bicho, que e pior.
+ */
+export interface HerancaDeSala {
+  sala: SalaAtiva
+  protetor: LinhaSalaProtetor | null
+}
+
+/**
+ * A REGRA, separada do acesso ao banco — mesmo motivo de
+ * `bloqueioDeBiomaPendente` ser pura: da pra exercitar "sessao velha demais",
+ * "sem sala" e "protetor junto" sem mockar db.js/HTTP inteiro.
+ *
+ * `agoraMs` entra por parametro pra o teste nao depender do relogio real.
+ */
+export function herancaDaLinha(
+  ultima: LinhaSessao | undefined, agoraMs: number,
+): HerancaDeSala | null {
+  if (!ultima?.sala_chave) return null
+  // Sessao ainda ABERTA nao chega aqui na pratica (quem chama ja fechou a
+  // anterior), mas tratar `closed_at` nulo como "agora" e o certo: e a sessao
+  // mais recente possivel.
+  if (ultima.closed_at) {
+    const fechadaEm = Date.parse(ultima.closed_at)
+    if (!Number.isFinite(fechadaEm)) return null
+    if (agoraMs - fechadaEm > JANELA_DE_HERANCA_DE_SALA_MS) return null
+  }
+  return {
+    sala: {
+      indice: Number(ultima.sala_indice ?? 0),
+      chave: ultima.sala_chave,
+      abates: Number(ultima.sala_abates ?? 0),
+      ciclos: Number(ultima.ciclos ?? 0),
+    },
+    protetor: ultima.sala_protetor ?? null,
+  }
+}
+
+async function salaHerdada(
+  cfg: Config, userId: string, mapId: string,
+): Promise<HerancaDeSala | null> {
+  // `map_id=eq.` no filtro, e nao na regra: herdar so vale pra MESMA hunt, e
+  // deixar isso no `where` evita trazer a sessao de outro mapa so pra
+  // descartar depois.
+  const linhas = await selecionar<LinhaSessao>(
+    cfg,
+    `game_sessions?user_id=eq.${userId}&map_id=eq.${encodeURIComponent(mapId)}`
+    + '&select=*,sala_protetor(*)&order=started_at.desc&limit=1',
+  )
+  return herancaDaLinha(linhas[0], Date.now())
+}
+
 async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<Response> {
-  const corpo = (await req.json().catch(() => null)) as { mapId?: string; pokeUid?: string } | null
+  const corpo = (await req.json().catch(() => null)) as {
+    mapId?: string; pokeUid?: string; retomando?: unknown
+  } | null
   const mapId = corpo?.mapId
   const pokeUid = corpo?.pokeUid
+  // `=== true` e nao coercao: corpo do cliente, e qualquer string nao-vazia
+  // ("false" inclusive) viraria verdadeiro.
+  const retomando = corpo?.retomando === true
   if (!mapId || !pokeUid) throw new ErroHttp(400, 'mapId e pokeUid sao obrigatorios')
 
   if (!MAPS[mapId]) throw new ErroHttp(400, 'hunt desconhecida')
@@ -233,7 +379,9 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
 
   const anterior = await sessaoAberta(cfg, userId)
   if (anterior) {
-    await aplicarFlush(cfg, userId, anterior)
+    // `ignorarPiso` (PH-278): a sessao anterior morre na linha seguinte — nao ha
+    // proximo flush pra herdar tempo represado, entao aqui o piso viraria descarte.
+    await aplicarFlush(cfg, userId, anterior, { ignorarPiso: true })
     await fecharLinhaDeSessao(cfg, anterior.id)
   }
 
@@ -250,7 +398,12 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   // O `rng` avanca junto e e gravado avancado: a sequencia da sessao continua
   // sendo uma so, e o sorteio da sala inicial faz parte dela.
   const rng = createRng(semente)
-  const salaInicial = temSalas(mapId) ? novaSala(rng, mapId, 0, 0) : null
+  // PH-266: numa REENTRADA (F5), a sala nao e sorteada — e a mesma em que a
+  // hunt parou. Ver `salaHerdada`. O `rng` fica sem consumir o sorteio nesse
+  // caso, o que e correto: a sequencia desta sessao e nova de qualquer jeito
+  // (semente nova), e a sala herdada nao saiu dela.
+  const heranca = retomando && temSalas(mapId) ? await salaHerdada(cfg, userId, mapId) : null
+  const salaInicial = heranca?.sala ?? (temSalas(mapId) ? novaSala(rng, mapId, 0, 0) : null)
   let criada: LinhaSessao
   try {
     ;[criada] = await inserir<LinhaSessao>(cfg, 'game_sessions', {
@@ -262,8 +415,12 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
       rng_draws: rng.draws,
       sala_indice: salaInicial?.indice ?? 0,
       sala_chave: salaInicial?.chave ?? null,
-      sala_abates: 0,
-      ciclos: 0,
+      // Os abates e o ciclo acompanham a sala herdada: sem eles o jogador
+      // voltaria pra sala certa com a quota zerada, e a sala 7 com 29 abates
+      // viraria sala 7 com 0 — perda de progresso mais silenciosa que a que
+      // esta issue veio consertar.
+      sala_abates: heranca?.sala.abates ?? 0,
+      ciclos: heranca?.sala.ciclos ?? 0,
     }, { retornar: true })
   } catch {
     const vencedora = await sessaoAberta(cfg, userId)
@@ -283,6 +440,21 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
           }
         : null,
     })
+  }
+
+  // PH-266: o protetor pendente atravessa a reentrada junto com a sala. A
+  // linha e por SESSAO (`session_id` e PK de `sala_protetor`), entao a sessao
+  // nova precisa da propria copia — inclusive o `hp_atual`, senao dar F5 no meio
+  // da luta curaria o Guardian de graca.
+  //
+  // Falha aqui NAO derruba a abertura: o pior caso e o jogador voltar a sala
+  // certa sem o protetor, que e exatamente o comportamento de antes desta issue.
+  // Derrubar a entrada na hunt por causa disso seria trocar um problema pequeno
+  // por um grande.
+  if (heranca?.protetor) {
+    const { session_id: _antiga, ...camposDoProtetor } = heranca.protetor
+    await inserir(cfg, 'sala_protetor', { ...camposDoProtetor, session_id: criada.id })
+      .catch(() => {})
   }
 
   await atualizar(cfg, `players?user_id=eq.${userId}`, {
@@ -383,7 +555,9 @@ async function avancarSala(cfg: Config, userId: string, parcial: boolean): Promi
 async function fechar(cfg: Config, userId: string, parcial: boolean): Promise<Response> {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) return json({ fechada: false })
-  const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial })
+  // `ignorarPiso` (PH-278): o jogador esta saindo da hunt — represar tempo aqui
+  // seria descarta-lo, porque a sessao fecha na linha seguinte.
+  const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial, ignorarPiso: true })
   await sairDaHunt(cfg, userId, sessao.id)
   if (!resultado || resultado === FLUSH_OCUPADO) return json({ fechada: false })
   return json({
@@ -394,3 +568,13 @@ async function fechar(cfg: Config, userId: string, parcial: boolean): Promise<Re
     estado: resultado.estado,
   })
 }
+
+/**
+ * Ponte SO PRA TESTE de `sessaoAberta`.
+ *
+ * Ela e privada de proposito — quem precisa dela e o roteador logo acima, e
+ * exporta-la de verdade convidaria outro modulo a pular o caminho do request.
+ * O `__testes` deixa isso explicito no nome, em vez de promover a funcao a API
+ * publica pra o teste alcancar (PH-277).
+ */
+export const __testes = { sessaoAberta }

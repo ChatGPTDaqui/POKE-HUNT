@@ -34,14 +34,27 @@
 // mesmo raciocinio de `trocaEmCampo` em types.ts: rederivar uma condicao
 // observavel e mais barato e mais seguro que carregar estado.
 //
-// O JOGADOR CONTINUA BATENDO DURANTE A REUNIAO
+// O JOGADOR NAO BATE DURANTE A REUNIAO (PH-264)
 // -----------------------------------------------------------------------------
-// Nada aqui suprime a acao do jogador. Suprimir teria dois custos e nenhum
-// ganho: o POKE apanharia de graca dos selvagens que alcancassem ele, e o DPS da
-// reuniao inteira iria pro lixo. E nao e necessario, porque o jogador anda a 91
-// px/s e o selvagem a 58,5 (ver engine/entity.ts) — quem puxa esta SEMPRE na
-// frente, entao engajar durante a reuniao e excecao (inimigo que veio de
-// frente), nao a regra.
+// REVERTIDO POR PEDIDO EXPLICITO DO USUARIO. Ate aqui nada suprimia a acao do
+// jogador, com o argumento de que suprimir custaria DPS e faria o POKE apanhar
+// de graca. Na tela isso lia como o lure nao funcionando: o jogador pede 4
+// selvagens, o POKE encosta no primeiro e comeca a bater — "ele esta batendo
+// antes de lurar a quantidade solicitada".
+//
+// Agora `reunindoParaLure` responde por essa decisao e `updateCombat` nao chama
+// `executePlayerAction` enquanto ela for verdadeira. A reuniao ficou com a
+// mecanica que o painel promete: reune primeiro, luta depois.
+//
+// O CUSTO E REAL E ESTA ACEITO: o selvagem que alcancar o jogador durante a
+// reuniao bate sem revide (os inimigos continuam agindo — suprimir os dois lados
+// seria invulnerabilidade, nao lure). O teto de `LURE_TEMPO_MAXIMO_DE_REUNIAO`
+// e o que limita esse tempo, e ele nao e mais so uma rede de seguranca contra
+// travamento: virou tambem o teto de quanto o POKE pode apanhar calado.
+//
+// Nao suprime NADA alem do golpe do jogador. Os hooks de entrada em combate
+// (Intimidate, Download, clima automatico) continuam disparando ao engajar, e
+// os inimigos continuam agindo normalmente.
 import { isDead, distanceTo } from '../entity'
 import { LURE_QUANTIDADE_MIN, LURE_QUANTIDADE_MAX } from '@/stores/gameStateDefaults'
 import type { GameStateStore } from '@/stores/gameStateStore'
@@ -76,8 +89,51 @@ export const LURE_TEMPO_MAXIMO_DE_REUNIAO = 18
  * 0,8 e nao 1,0 porque a checagem roda uma vez por tick e o selvagem tambem se
  * move: no limite exato ele solta o aggro no mesmo frame em que a espera
  * comecaria.
+ *
+ * SAO DOIS LIMIARES, E NAO UM (PH-280). Este e o de ENTRADA; a saida e o
+ * `LURE_FRACAO_PARA_VOLTAR_A_ANDAR`, mais apertado. Com um limiar so, o POKE
+ * ficava parando e voltando a andar varias vezes por segundo — o retardatario
+ * oscila em torno da linha, e cada cruzamento zerava ou devolvia o destino.
+ *
+ * Medido em scripts/harness/lure-para-e-anda.mjs, 60 segundos por corrida:
+ *
+ *   lure desligado        0,0 paradas
+ *   lure ligado, juntar 2  32,3
+ *   lure ligado, juntar 3  81,2
+ *   lure ligado, juntar 4 154,7   <- 2,6 solavancos POR SEGUNDO
+ *
+ * O tempo total parado era pequeno (5% da reuniao), entao o defeito nunca foi
+ * "o POKE fica parado": era a FREQUENCIA da troca. E o mesmo remedio de um
+ * termostato que liga e desliga sem parar — histerese.
  */
 const LURE_FRACAO_DA_COLEIRA = 0.8
+
+/**
+ * Fracao da coleira abaixo da qual o jogador VOLTA a andar, depois de ter
+ * parado pra esperar (PH-280).
+ *
+ * Mais apertada que a de entrada de proposito: o retardatario precisa ter
+ * ENCOSTADO de verdade, e nao so raspado na linha de novo. A diferenca entre as
+ * duas (0,8 -> 0,62) e a banda morta que mata o piscar.
+ *
+ * 0,62 e nao 0,7: a 0,7 a banda cobria ~38px de coleira tipica e as paradas
+ * ainda ficavam nas dezenas na medicao. Nao pode ser MUITO menor tambem — abaixo
+ * disso o jogador espera o retardatario colar nele, e a reuniao demora mais sem
+ * ganhar nada.
+ */
+const LURE_FRACAO_PARA_VOLTAR_A_ANDAR = 0.62
+
+/**
+ * O jogador esta REUNINDO agora — ou seja, o golpe dele fica segurado (PH-264).
+ *
+ * Uma funcao, e nao `world.lure?.fase === 'reunindo'` escrito no combate: quem
+ * responde "o jogador pode bater?" e o lure, e o `combatSystem` nao deve
+ * conhecer as fases dele. Se amanha a supressao passar a valer so em parte da
+ * reuniao (por HP baixo, por exemplo), muda aqui e o combate nao sabe de nada.
+ */
+export function reunindoParaLure(world: WorldState): boolean {
+  return world.lure?.fase === 'reunindo'
+}
 
 /** Este selvagem esta com aggro NO JOGADOR agora? */
 function estaReunido(enemy: EnemyEntity, playerId: string): boolean {
@@ -177,8 +233,16 @@ export function atualizarLure(world: WorldState, gameState: GameStateStore, dt: 
       // Retardatario perto de soltar o aggro: segura a posicao em vez de puxar
       // mais um. O selvagem continua vindo (ele esta em `chase`), entao esperar
       // e o que RECUPERA a distancia — andar mais so a aumentaria.
+      //
+      // O LIMIAR DEPENDE DO QUE O JOGADOR JA ESTAVA FAZENDO (PH-280): pra
+      // COMECAR a esperar basta passar de `LURE_FRACAO_DA_COLEIRA`; pra VOLTAR a
+      // andar, o retardatario precisa ter encostado ate
+      // `LURE_FRACAO_PARA_VOLTAR_A_ANDAR`. Sem essa banda morta, o POKE parava e
+      // andava varias vezes por segundo — ver a medicao nas constantes.
+      const jaEsperava = anterior?.esperandoRetardatario === true
+      const fracao = jaEsperava ? LURE_FRACAO_PARA_VOLTAR_A_ANDAR : LURE_FRACAO_DA_COLEIRA
       const retardatario = reunidos.find(
-        (e) => distanceTo(player, e) > e.leashRadius * LURE_FRACAO_DA_COLEIRA,
+        (e) => distanceTo(player, e) > e.leashRadius * fracao,
       )
       if (retardatario) esperandoRetardatario = true
       else destino = { x: candidato.x, y: candidato.y }

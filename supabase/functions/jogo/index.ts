@@ -9,6 +9,7 @@
 // invocacao, e o pior caso medido (6h de farm offline) fica em ~310ms. Cabe com
 // folga, e evita mais uma conta/servico/fatura pra manter.
 import { criarApp } from './servidor.js'
+import { origensPermitidas } from './origens.ts'
 
 // Injetadas pela plataforma — nao ha segredo pra subir a mao. A service_role
 // ignora RLS, e por isso ela so pode viver aqui dentro, nunca no bundle do
@@ -28,12 +29,12 @@ const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 // 'dev' rodava sempre, sem jeito de promover pra public (achado real, 2026-08-13).
 const schema = Deno.env.get('JOGO_SCHEMA') ?? 'dev'
 
-// Origens do jogo. `*` junto de `Authorization` deixaria qualquer site chamar
-// isto com o token do jogador, entao a lista e explicita — configure com
-// `supabase secrets set ORIGENS_PERMITIDAS=https://seu-dominio`.
-const origensPermitidas = (Deno.env.get('ORIGENS_PERMITIDAS') ?? 'http://localhost:5173')
-  .split(',')
-  .map((o) => o.trim())
+// Origens do jogo — a lista mora em `./origens.ts`, importada tambem por
+// `jogo-dev/index.ts`. Ver o cabecalho de la pra por que ela e um modulo e nao
+// uma constante aqui: a primeira correcao da PH-293 escreveu a lista NESTE
+// arquivo, e o staging continuou recusado porque a casca de staging tem a
+// propria leitura do secret.
+const listaDeOrigens = origensPermitidas(Deno.env.get('ORIGENS_PERMITIDAS'))
 
 // Chave PUBLICA do projeto (JWKS), usada por auth.ts pra conferir a assinatura
 // do token sem ida de rede. Nao e segredo — e o mesmo JSON servido em
@@ -46,7 +47,10 @@ const origensPermitidas = (Deno.env.get('ORIGENS_PERMITIDAS') ?? 'http://localho
 // nao vai estar aqui e auth.ts cai no fallback de busca sozinho.
 const jwksJson = Deno.env.get('JOGO_JWKS') ?? undefined
 
-const handler = criarApp({ supabaseUrl, serviceRoleKey, schema, origensPermitidas, jwksJson })
+const handler = criarApp({
+  supabaseUrl, serviceRoleKey, schema, jwksJson,
+  origensPermitidas: listaDeOrigens,
+})
 
 // O gateway das Edge Functions prefixa a rota com o nome da funcao
 // (`/jogo/sessao/flush`, ou `/jogo-dev/sessao/flush` na function de staging). O
