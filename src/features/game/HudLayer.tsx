@@ -37,7 +37,6 @@ import { StatusRail } from '@/components/hud/StatusRail'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip, salaNoTrilho } from '@/components/hud/SalaChip'
-import { ClimaChip } from '@/components/hud/ClimaChip'
 import { TaxasNoCanto } from '@/components/hud/TaxasNoCanto'
 import { ColunaDeAtalhos } from '@/components/hud/ColunaDeAtalhos'
 import { ChatLog } from '@/components/toasts/ChatLog'
@@ -122,10 +121,10 @@ export function HudLayer() {
               cortava essa leitura: no PC as reservas apareciam como um bloco
               solto abaixo de um chip, sem relacao visivel com o POKE. */}
           <ReservasRail />
-          {/* Sala e clima na MESMA linha: os dois descrevem o lugar onde o
-              jogador esta, e o clima e propriedade da sala (PH-140/PH-141).
-              `flex-wrap` porque em 390px os dois nao cabem lado a lado — ali o
-              clima desce pra linha de baixo em vez de espremer a sala.
+          {/* SO O CHIP DE SALA MORA AQUI (PH-285), e so no compacto. O clima
+              subiu pro trilho junto com ele; o `flex-wrap` continua porque a
+              linha ainda pode receber outro chip contextual um dia, e porque
+              tirar wrap de uma linha de chips e como se pede uma sobreposicao.
               `:not(:empty)` (PH-197): a coluna nao espaca mais nada, entao o
               respiro dos chips passa a ser deles — e so quando existem.
 
@@ -143,7 +142,20 @@ export function HudLayer() {
                 No compacto ele continua aqui: o trilho de 390px nao tem largura
                 pra ele (ver a nota no topo de SalaChip.tsx). */}
             {!salaNoTrilho(mode) && <SalaChip />}
-            <ClimaChip />
+            {/* O CLIMA SAIU DAQUI (PH-285). Ele agora esta no trilho nas TRES
+                larguras: com o nome escrito na faixa central, e so como simbolo
+                no compacto, onde o vao tem 73px (ver `StatusRail`).
+
+                Era ele, sozinho, que deixava esta fileira ocupando o meio do
+                campo de jogo depois que a sala subiu pro trilho (PH-272) e o
+                chip do Lure saiu (PH-279) — no celular a fileira virava DUAS,
+                porque o chip de sala ja gasta 385px dos 390.
+
+                Nao ha condicao aqui de proposito: `ClimaChip` deixou de ser
+                renderizado nesta superficie, ponto. Uma segunda copia atras de
+                um `mode` seria a mesma armadilha que a linha acima documenta —
+                dois lugares pra manter de acordo, e nenhum erro quando eles
+                divergem. */}
             {/* O CHIP DO LURE SAIU DAQUI (PH-279), a pedido do usuario.
                 Ele existia pra a mecanica nao ler como bug: durante a reuniao o
                 POKE atravessa a hunt passando ao lado de inimigos sem bater, e

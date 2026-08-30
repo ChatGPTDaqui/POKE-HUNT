@@ -112,7 +112,34 @@ export const APARENCIA: Record<ClimaTipo, Aparencia> = {
 /** Climas que TIRAM HP por turno — os unicos que ganham destaque de alerta. */
 const CLIMAS_QUE_MACHUCAM: ReadonlySet<ClimaTipo> = new Set<ClimaTipo>(['granizo', 'areia'])
 
-export function ClimaChip() {
+interface ClimaChipProps {
+  /**
+   * Versao pro trilho de status (PH-285) — sem a moldura de vidro (ele ja esta
+   * dentro de uma) e sem o arredondamento proprio. Mesma convencao do
+   * `SalaChip`, e de proposito: os dois passam a morar lado a lado na faixa
+   * central, e duas regras de aparencia pro mesmo lugar seriam duas coisas pra
+   * divergir.
+   */
+  embutido?: boolean
+  /**
+   * So o simbolo, sem o nome escrito (PH-285) — o que entra no trilho de 390px.
+   *
+   * NAO E ESCOLHA DE ESTILO, E MEDIDA. O vao central do trilho no compacto tem
+   * 73px livres (medido no aparelho com a carteira em "1B / 1M"); o chip com o
+   * nome pede 88px. Ou o clima entra so como simbolo, ou ele fica de fora do
+   * trilho — e ficar de fora era o defeito que esta issue existe pra corrigir:
+   * ele sobrava numa fileira propria por cima do campo de jogo.
+   *
+   * O nome nao some do jogo: ele e a primeira linha do balao, que abre no TOQUE
+   * (`Explicacao`), e o `aria-label` continua dizendo o clima por extenso pra
+   * quem usa leitor de tela. Emoji sozinho como unico canal seria adivinhacao;
+   * emoji com balao e o mesmo padrao dos atalhos e dos golpes.
+   */
+  soIcone?: boolean
+}
+
+/** @see ClimaChipProps */
+export function ClimaChip({ embutido = false, soIcone = false }: ClimaChipProps = {}) {
   const clima = useWorldStore((s) => s.clima)
   // Fora de hunt (Hospital) nao ha clima, e um chip vazio pendurado no HUD
   // leria como bug — mesma regra do SalaChip.
@@ -149,30 +176,62 @@ export function ClimaChip() {
           <ul className="flex list-disc flex-col gap-[.2em] pl-[1.1em]">
             {aparencia.efeitos.map((efeito) => <li key={efeito}>{efeito}</li>)}
           </ul>
-          {/* So no clima de GOLPE: no de ambiente nao ha nada temporario a
-              avisar, e a linha viraria ruido em toda hunt. */}
-          {deGolpe && (
+          {/* QUANTO AINDA DURA (PH-285), e os dois casos sao de natureza
+              diferente — escrever "duracao" sem separa-los mentiria em um deles.
+              O clima de AMBIENTE (PH-140) e propriedade da sala: nao tem
+              contagem regressiva, e inventar um numero ali seria pior que nao
+              dizer nada. O clima de GOLPE tem turnos, e o numero sai do mesmo
+              `turnosRestantes` que o chip mostra — nao ha um segundo calculo
+              aqui pra divergir daquele. */}
+          {deGolpe ? (
             <span className="text-n400">
-              Ligado por um golpe: quando acabar, o clima do lugar volta.
+              {turnos != null
+                ? `Dura mais ${turnos} ${turnos === 1 ? 'turno' : 'turnos'}. `
+                : ''}
+              Quando acabar, o clima do lugar volta.
             </span>
+          ) : (
+            <span className="text-n400">Vale enquanto voce estiver nesta area.</span>
           )}
         </div>
       }
     >
       <div
         className={cn(
-          'vidro flex shrink-0 cursor-help items-center gap-[.4em] rounded-full px-[.8em] py-[.35em]',
+          'flex shrink-0 cursor-help items-center gap-[.4em]',
+          // No trilho a moldura ja existe em volta; repeti-la daria vidro sobre
+          // vidro e um chip com cara de item solto dentro da barra.
+          !embutido && 'vidro rounded-full px-[.8em] py-[.35em]',
           // So o clima que TIRA HP ganha borda de alerta. Pintar todos de
           // vermelho ensinaria o jogador a ignorar a borda — e ai o granizo
-          // deixaria de avisar.
-          machuca && 'border border-bad/45',
+          // deixaria de avisar. No embutido ela vira so a cor do texto: uma
+          // borda solta no meio do trilho leria como campo, nao como aviso.
+          machuca && (embutido ? 'text-bad' : 'border border-bad/45'),
         )}
       >
-        <span aria-hidden className="text-[.85em] leading-none">{aparencia.simbolo}</span>
-        <span className={cn('text-[.75em] font-medium', aparencia.cor)}>{aparencia.nome}</span>
-        {turnos != null && (
+        {/* No `soIcone` o simbolo deixa de ser decoracao e passa a ser o unico
+            texto do chip — entao ele PERDE o `aria-hidden` e ganha o nome por
+            extenso no rotulo. Sem isso o leitor de tela anunciaria um chip
+            vazio no compacto. */}
+        <span
+          aria-hidden={soIcone ? undefined : true}
+          aria-label={soIcone ? aparencia.nome : undefined}
+          role={soIcone ? 'img' : undefined}
+          className="text-[.85em] leading-none"
+        >
+          {aparencia.simbolo}
+        </span>
+        {!soIcone && (
+          <span className={cn('text-[.75em] font-medium', aparencia.cor)}>{aparencia.nome}</span>
+        )}
+        {turnos != null && !soIcone && (
           // A contagem so aparece no clima de golpe. No de ambiente ela seria
           // "infinito", que nao e informacao.
+          //
+          // No `soIcone` ela sai: o numero sozinho ao lado de uma nuvem nao diz
+          // se sao turnos, segundos ou pilhas, e escrever "turnos" ali estoura os
+          // 73px do vao. Quem carrega a duracao no compacto e o balao, que e
+          // exatamente o canal que esta issue criou pra isso.
           <span className="shrink-0 text-[.68em] tabular-nums text-n500">{turnos} turnos</span>
         )}
       </div>
