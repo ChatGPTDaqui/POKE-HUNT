@@ -17,6 +17,7 @@ import {
 import { mochilaCarregada } from '@/stores/mochilaStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
 import { solicitarAvancoDeSala } from '@/engine/systems/salaSystem'
+import { agendarMesmoEmSegundoPlano, type TemporizadorCancelavel } from '@/core/temporizadorDeSegundoPlano'
 import type { ClimaTipo, SalaAtiva } from '@/engine/types'
 import { supabase, schema, url as supabaseUrl, anonKey } from '@/lib/supabase'
 
@@ -380,7 +381,7 @@ export const INTERVALO_FLUSH_MS = 30000
  */
 export const INTERVALO_FLUSH_MAX_MS = 90000
 
-let timerFlush: ReturnType<typeof setTimeout> | null = null
+let timerFlush: TemporizadorCancelavel | null = null
 // Cresce a cada `pararFlushPeriodico`: um flush que ja estava em voo quando a
 // sessao fechou nao pode reagendar o proximo (`agendarProximoFlush` compara a
 // geracao antes de se reagendar).
@@ -403,14 +404,21 @@ function ajustarRitmoDeFlush(houveEvento: boolean): void {
 
 function agendarProximoFlush(): void {
   const geracao = geracaoDoTimer
-  timerFlush = setTimeout(() => {
+  // PH-302: `agendarMesmoEmSegundoPlano`, e nao `setTimeout` direto. Com a aba
+  // oculta o Chrome derruba os timers da thread principal pra ~1 por MINUTO
+  // depois de 5 minutos escondida: o ritmo de 30s virava 60s e o teto de 90s
+  // virava 120s, que e exatamente `LIMIAR_OFFLINE_SEGUNDOS` — dali pra cima o
+  // servidor para de tratar a janela como jogo ao vivo, com a aba aberta e o
+  // jogador dentro da hunt. Ver o modulo pro que o worker cobre e pro que ele
+  // nao tem como cobrir (aba congelada).
+  timerFlush = agendarMesmoEmSegundoPlano(intervaloAtual, () => {
     void liquidar().finally(() => {
       // `pararFlushPeriodico` durante o request em voo (sessao encerrada pelo
       // servidor, jogador saindo da hunt) bump'a a geracao — e ai nao ha
       // proximo.
       if (geracao === geracaoDoTimer) agendarProximoFlush()
     })
-  }, intervaloAtual)
+  })
 }
 
 /**
@@ -618,7 +626,7 @@ export function pararFlushPeriodico(): void {
   // A geracao sobe ANTES de limpar: um `liquidar()` ja em voo cai no `finally`
   // depois disto e nao reagenda.
   geracaoDoTimer += 1
-  if (timerFlush) clearTimeout(timerFlush)
+  timerFlush?.cancelar()
   timerFlush = null
   intervaloAtual = INTERVALO_FLUSH_MS
   pararObservadorDeSala?.()

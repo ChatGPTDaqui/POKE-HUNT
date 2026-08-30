@@ -14,6 +14,7 @@ import { simulateWorldSeconds } from '@/engine/systems/offlineSimSystem'
 import { recordBatch } from '@/engine/systems/farmRates'
 import { commitAgora } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
+import { encurtarTransicaoDeSala } from '@/engine/systems/salaSystem'
 import { segundosCatchUpEfetivos, deveSerPessimista } from '../utils'
 
 export function useBackgroundCatchUp(): void {
@@ -89,6 +90,23 @@ export function useBackgroundCatchUp(): void {
         void commitAgora()
         return
       }
+      // PH-302: VOLTAR pra aba tambem fecha a janela na hora.
+      //
+      // `runCatchUp` sai na primeira linha sob autoridade (`servidorAtivo()`),
+      // entao ate aqui ficar visivel de novo nao disparava NADA: a janela em
+      // aberto continuava crescendo ate o proximo tique do timer. Numa aba que
+      // o navegador tinha congelado, esse tique so vem depois do descongelo — e
+      // a janela ja atravessou `LIMIAR_OFFLINE_SEGUNDOS` fazia tempo.
+      //
+      // `commitAgora` ja tem o piso de `INTERVALO_MINIMO_COMMIT_MS`, entao
+      // alternar de aba varias vezes seguidas nao vira rajada de request.
+      void commitAgora()
+      // A contagem de "Entrando em nova area" corre em tempo SIMULADO, e o loop
+      // local quase nao anda com a aba oculta (o navegador derruba o tick):
+      // 3 segundos de aviso viravam minutos de jogo congelado depois de voltar.
+      // Ninguem estava olhando o overlay — resolve a transicao no proximo tick
+      // em vez de fazer o jogador esperar por uma animacao que ja passou.
+      useWorldStore.getState().update((draft) => { encurtarTransicaoDeSala(draft) })
       runCatchUp()
     }
 

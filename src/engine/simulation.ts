@@ -40,7 +40,7 @@ import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './ent
 import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
 import { atualizarLure } from './systems/lureSystem'
-import { updateCombat } from './systems/combatSystem'
+import { updateCombat, podeDanificar } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
 import { climaAmbienteDaSala, climaDeAmbiente } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
@@ -59,7 +59,9 @@ import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from './worldState'
 import { toastStore } from '@/stores/toastStoreVanilla'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
-import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState, ProtetorPendente } from './types'
+import type {
+  ClimaTipo, EnemyEntity, EnemyHazards, Point, PlayerEntity, SalaAtiva, WorldState, ProtetorPendente,
+} from './types'
 
 export const STARTER_LEVEL = 1
 // Starters sempre saem previsiveis — raridade Comum, IV 75% (23/31) em toda
@@ -68,6 +70,38 @@ export const STARTER_LEVEL = 1
 export const STARTER_RARITY = 'comum' as const
 export const STARTER_IVS = { hp: 23, atkFis: 23, atkEsp: 23, def: 23, defEsp: 23, speed: 23 }
 export const DEATH_ANIM_GRACE_PERIOD = 4.0 // segundos que um inimigo derrotado fica visivel tocando a pose Faint
+
+/**
+ * PH-301: quantas vezes o sorteio do protetor pode repetir procurando um que o
+ * POKE em campo consiga danificar. Ver `criarEntidadeDoProtetor`.
+ *
+ * 6 e teto de trabalho, nao alvo: no caso normal a primeira tentativa passa e
+ * nenhum numero extra sai da sequencia. So sobe quando o pool tem muita
+ * especie imune ao tipo do POKE — e ai 6 ja cobre bem: com metade do pool
+ * imune, a chance de as 6 falharem e 1 em 64.
+ */
+export const TENTATIVAS_DE_PROTETOR_DANIFICAVEL = 6
+
+/**
+ * PH-301: segundos de COMBATE ENGAJADO sem o protetor perder um ponto de HP
+ * antes de ele ser trocado por outro.
+ *
+ * O cao de guarda existe porque o filtro do sorteio nao cobre tudo: o jogador
+ * troca de POKE depois do sorteio, o protetor sobe estagio de defesa, o pool da
+ * sala pode ser todo imune. Nenhum desses e erro do motor, e todos terminam do
+ * mesmo jeito sem isto — sala parada em 30/30 pra sempre, sem erro na tela.
+ *
+ * TROCA o protetor em vez de liberar a sala. Liberar seria bypass do gate de
+ * bioma (quem credita `bioma_progress` e matar o LORD, ver
+ * `avancarBiomaProgressSeForOProximo`) — o jogador ganharia o avanco sem a
+ * luta. Trocando, o gate continua de pe e o que morre e so o impasse.
+ *
+ * 12s: acima de qualquer sequencia normal de "errei dois golpes seguidos"
+ * (o intervalo entre acoes e ~2s) e bem abaixo da janela de flush de 30s, pra
+ * caber inteiro dentro de UMA janela do servidor — o contador e efemero como
+ * `salaCountdownRemaining`, e nao atravessa a reconstrucao de mundo.
+ */
+export const PROTETOR_SEM_DANO_LIMITE = 12
 
 const formulaEngine = createFormulaEngine(FORMULAS)
 export const OFFLINE_FARM_MAX_HOURS = formulaEngine.evalOrDefault('OFFLINE_FARM_MAX_HOURS', 6)
@@ -322,9 +356,12 @@ function criarEntidadeDoProtetor(
   ctx: { pool: string[]; janela?: [number, number] },
   tipo: TipoDeProtetor,
   protetorSalvo: ProtetorPendente | null | undefined,
-  player: { x: number; y: number; facing: Point } | null,
+  player: PlayerEntity | null,
   entrada: Point | null,
 ): { enemy: EnemyEntity; pendente: ProtetorPendente } {
+  // PH-301: quem vai ter que derrubar este protetor. `null` fora do jogo
+  // normal (mundo sem jogador em campo) — ali o sorteio segue como antes.
+  const atacante = player
   const { rng, counters } = world
   const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, [])
 
@@ -341,12 +378,37 @@ function criarEntidadeDoProtetor(
 
   // Novo: mesmo sorteio de espécie que o spawn comum usa (peso real do
   // encontro), so o NIVEL e o IV seguem a regra propria do protetor.
-  const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45)
-  const encounter = getEncounter(encounterId)
-  if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
-  const level = tipo === 'lord' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
-  const ivs = rollIvsDoProtetor(rng)
-  const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs })
+  //
+  // PH-301: o sorteio REPETE ate cair um protetor que o POKE em campo consiga
+  // danificar. A sala so avanca quando o protetor morre, e ele e o unico
+  // inimigo em campo — um protetor imune ao tipo do POKE (Flash Fire contra um
+  // monotipo de FOGO, Levitate contra um de TERRA) trava a hunt pra sempre, sem
+  // erro e sem saida. Uma repeticao de sorteio custa alguns numeros da
+  // sequencia; a alternativa custa a sessao inteira do jogador.
+  //
+  // O teto existe porque o pool da sala PODE ser todo imune. Nesse caso o
+  // ultimo candidato vale: entregar um protetor duro e melhor que nao entregar
+  // protetor nenhum, e o cao de guarda de `stepWorld` cobre o resto.
+  let escolhido: {
+    encounterId: string
+    level: number
+    ivs: ReturnType<typeof rollIvsDoProtetor>
+    poke: PokeInstance
+  } | null = null
+  for (let tentativa = 0; tentativa < TENTATIVAS_DE_PROTETOR_DANIFICAVEL; tentativa++) {
+    const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45)
+    const encounter = getEncounter(encounterId)
+    if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
+    const level = tipo === 'lord' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
+    const ivs = rollIvsDoProtetor(rng)
+    const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs })
+    escolhido = { encounterId, level, ivs, poke }
+    if (!atacante) break
+    const candidato = createEnemyEntity({ ...counters }, { poke, x: point.x, y: point.y, encounterId })
+    if (podeDanificar(rng, atacante, candidato)) break
+  }
+  if (!escolhido) throw new Error('Sorteio de protetor nao produziu candidato')
+  const { encounterId, level, ivs, poke } = escolhido
   const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
   enemy.isProtetor = true
   const pendente: ProtetorPendente = {
@@ -373,7 +435,7 @@ function garantirProtetorDaSala(
   world: WorldState,
   mapDef: MapDef,
   protetorSalvo: ProtetorPendente | null | undefined,
-  player: { x: number; y: number; facing: Point } | null,
+  player: PlayerEntity | null,
   entrada: Point | null,
 ): boolean {
   const tipo = protetorDaSala(world.sala)
@@ -1252,7 +1314,37 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // um numero.
   if (world.protetorPendente) {
     const protetorVivo = world.enemies.find((e) => e.isProtetor && e.poke.uid === world.protetorPendente!.uid)
-    if (protetorVivo) world.protetorPendente.hpAtual = protetorVivo.poke.hp
+    if (protetorVivo) {
+      // PH-301: CAO DE GUARDA DO IMPASSE. `protetorPendente.hpAtual` ainda tem
+      // o HP do tick anterior neste ponto (a linha abaixo e que o atualiza),
+      // entao a comparacao aqui e "caiu HP desde o ultimo tick?" de graca, sem
+      // guardar estado a mais.
+      //
+      // So conta tempo com os dois ENGAJADOS: o POKE atravessando o mapa nao e
+      // impasse, e sem esta condicao a caminhada (que pode passar de 12s num
+      // mapa grande) trocaria o protetor antes da luta comecar.
+      const engajado = protetorVivo.state === 'engaged' && world.player?.state === 'engaged'
+      if (protetorVivo.poke.hp < world.protetorPendente.hpAtual) world.protetorSemDanoSegundos = 0
+      else if (engajado) world.protetorSemDanoSegundos += dt
+      world.protetorPendente.hpAtual = protetorVivo.poke.hp
+
+      if (world.protetorSemDanoSegundos >= PROTETOR_SEM_DANO_LIMITE) {
+        // Descarta ESTE protetor e deixa o proximo tick sortear outro (com o
+        // filtro de `criarEntidadeDoProtetor`). A sala continua travada por
+        // `protetorDaSala`, `protetorResolvido` continua false, e o gate de
+        // bioma segue de pe — o que muda e so quem esta em campo.
+        world.enemies = world.enemies.filter((e) => e.id !== protetorVivo.id)
+        world.protetorPendente = null
+        world.protetorSemDanoSegundos = 0
+        if (!silent) {
+          toastStore.getState().pushToast(
+            'O protetor da sala fugiu do combate. Outro tomou o lugar dele.', 'info', 'world',
+          )
+        }
+      }
+    }
+  } else {
+    world.protetorSemDanoSegundos = 0
   }
 
   return kills
