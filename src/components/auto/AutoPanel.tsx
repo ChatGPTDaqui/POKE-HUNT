@@ -416,9 +416,15 @@ function AbaDeAutomacoes() {
         </div>
       </BlocoAuto>
 
+      {/* PH-292: a dica passou a citar o Guardiao. O texto antigo dizia so "ao
+          fechar a quota (30/30)", e desde que toda sala de bioma ganhou protetor
+          esse deixou de ser o momento em que a sala espera: ela para primeiro no
+          protetor, e o toggle so entra em cena depois que ele cai. Descrever um
+          passo que nao existe mais faz o jogador concluir que o toggle esta
+          quebrado — foi exatamente o que aconteceu. */}
       <BlocoAuto
         titulo="Avanço manual de sala"
-        dica="Ao fechar a quota (30/30), a sala espera você clicar em 'Próximo Nível' na hunt em vez de trocar sozinha."
+        dica="Depois de fechar a quota (30/30) e derrotar o Guardião, a sala espera você clicar em 'Próximo Nível' em vez de trocar sozinha. Os selvagens continuam nascendo enquanto você fica."
         ligado={autoToggles.avancoManualDeSala}
         aoLigar={(v) => setAutoToggle('avancoManualDeSala', v)}
       />

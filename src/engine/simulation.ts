@@ -786,7 +786,12 @@ export function buildMapWorld(
 // reais de XP/ouro/loot/captura sempre rodam de qualquer jeito, so os
 // Effects visuais e os toasts sao pulados quando silent. Sempre devolve um
 // resumo do que aconteceu pro chamador agregar (OfflineSimSystem).
-export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameState: GameStateStore, opts: { silent?: boolean } = {}): KillResult {
+export function handleEnemyDefeated(
+  world: WorldState,
+  enemy: EnemyEntity,
+  gameState: GameStateStore,
+  opts: { silent?: boolean; manualAdvance?: boolean } = {},
+): KillResult {
   const silent = opts.silent ?? false
   const player = world.player!
   // Autoritativo durante combate — ver nota de arquitetura no topo do
@@ -990,9 +995,14 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   // desarmar o bloqueio. `registrarAbate` (chamado logo depois, mesmo tick,
   // pro proprio abate deste protetor) se recusa a arma-la de novo por conta
   // propria — ver salaSystem.ts#registrarAbate.
+  //
+  // PH-292: `manualAdvance` passa por aqui. Este era o unico caminho de avanco
+  // de sala de bioma que nao olhava o toggle, e desde que TODA sala ganhou
+  // protetor (PH-202/225) ele virou o unico caminho que resta — o que deixava
+  // o "avanco manual de sala" inerte no jogo inteiro sem nada quebrar.
   if (enemy.isProtetor) {
     if (world.sala?.indice === SALAS_POR_HUNT - 1) avancarBiomaProgressSeForOProximo(world, gameState)
-    resolverProtetorDaSala(world, world.mapDef!.id)
+    resolverProtetorDaSala(world, world.mapDef!.id, { manualAdvance: opts.manualAdvance ?? false })
   }
 
   return {
@@ -1117,7 +1127,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     for (const enemyId of defeatedEnemyIds) {
       const enemy = world.enemies.find((e) => e.id === enemyId)
       if (!enemy) continue
-      kills.push(handleEnemyDefeated(world, enemy, gameState, { silent }))
+      kills.push(handleEnemyDefeated(world, enemy, gameState, { silent, manualAdvance }))
       enemy.deathRemovalTimer = silent ? 0 : DEATH_ANIM_GRACE_PERIOD
       // Conta pra quota da sala AQUI, e nao em quem chama: este e o unico
       // ponto de abate do jogo, entao o combate ao vivo, o catch-up de aba

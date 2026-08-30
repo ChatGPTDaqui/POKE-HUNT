@@ -371,7 +371,11 @@ function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
  * local: quem decide quando a sala avanca e o flush do servidor, igual toda
  * outra sala.
  */
-export function resolverProtetorDaSala(world: WorldState, mapId: string): void {
+export function resolverProtetorDaSala(
+  world: WorldState,
+  mapId: string,
+  opts: { manualAdvance?: boolean } = {},
+): void {
   world.protetorPendente = null
   // PH-230: marcar ANTES do corte de autoridade abaixo. Sem esta linha, sob
   // `salaSobAutoridade` a sala nao avanca (por design) e nada registra que o
@@ -380,6 +384,22 @@ export function resolverProtetorDaSala(world: WorldState, mapId: string): void {
   // `WorldState.protetorResolvido`.
   world.protetorResolvido = true
   if (world.salaSobAutoridade) return
+  // PH-292: O TOGGLE DE AVANCO MANUAL VALE AQUI TAMBEM.
+  //
+  // Ate PH-202/225 so o bioma piloto tinha protetor, e esta funcao avancava
+  // direto sem olhar o toggle porque nas salas normais quem decidia era
+  // `registrarAbate` — que ja o respeitava. Depois que TODA sala de bioma
+  // ganhou protetor (Guardian nas 1-9, Lord na 10), este virou o unico caminho
+  // de avanco que sobrou, e o toggle passou a nao fazer nada em lugar nenhum.
+  // Nada quebrou; a promessa da UI so parou de valer, em silencio.
+  //
+  // Com o toggle ligado a sala fica em 30/30 esperando o clique, e o jogador
+  // continua farmando: o respawn de mob comum volta sozinho assim que
+  // `protetorPendente` zera (a condicao vive no gate de respawn de
+  // `simulation.ts`), entao nao ha campo vazio esperando. O botao "Proximo
+  // Nivel" reaparece porque `travadaPeloProtetor` fica falso assim que
+  // `protetorResolvido` sobe (PH-291).
+  if (opts.manualAdvance) return
   armarTransicaoDeSala(world, mapId)
 }
 
