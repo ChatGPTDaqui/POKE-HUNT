@@ -228,8 +228,28 @@ PH-92 deixou a função com código velho e a captura gravando errado até algu�
 gh run list --limit 5
 ```
 
-O mesmo vale entre os próprios workflows — ver PH-106 para o `concurrency.group` que serializa os
-dois lados.
+#### O CI se recupera sozinho; a sua máquina não (PH-106)
+
+Os três workflows que tocam o CLI (`supabase-check`, `supabase-deploy`, `supabase-deploy-dev`)
+chamam **`scripts/ci/supabase-cli.sh`** em vez de `supabase` direto. O wrapper linka, roda o
+comando e, **quando a falha tem assinatura de autenticação** (`28P01`,
+`password authentication failed`, `failed to connect as temp role`), **re-linka e repete** — até 3
+vezes. Erro de SQL de verdade (constraint, tipo, migration fora de ordem) reprova na primeira
+tentativa, sem gastar rodadas escondendo o log útil.
+
+Isso fecha a colisão entre workflows, que era a mais frequente: **3 das 20 execuções de
+`supabase-deploy-dev` anteriores a 30/08 morreram assim** — o `check` e o `deploy-dev` disparam no
+mesmo segundo em todo push em `dev`.
+
+**Não é `concurrency.group` compartilhado**, que era a correção óbvia da issue. O GitHub mantém
+apenas **um** run pendente por grupo e **cancela o pendente anterior** quando outro entra na fila:
+com os três no mesmo grupo, um push em `dev` durante um deploy de `main` cancelaria o deploy de
+`main` que estava na fila — migration de **produção** silenciosamente não aplicada. Trocar "morre
+por sorteio" por "morre por fila" não é conserto.
+
+O que o wrapper **não** cobre é o comando que você roda na sua máquina: ele não passa por lá. Se o
+seu `db:types` morrer com `28P01`, foi um workflow que rotacionou a senha — espere o run terminar e
+rode de novo.
 
 ### O que não existe nesta máquina
 
