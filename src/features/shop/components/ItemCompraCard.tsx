@@ -66,16 +66,29 @@ export function TransacaoCompra({
         onExecutar={onExecutarAtalho}
       />
       {/* O total vai DENTRO do rotulo: o jogador le o quanto vai pagar no mesmo
-          lugar em que confirma. `flex-1 min-w-0` e nao `block` (`w-full`) —
-          numa fileira com os atalhos, `w-full` empurraria o botao pra fora do
-          card. Com x1000 o rotulo passa de 6 digitos e o `truncate` corta o
-          texto em vez de esticar a fileira. */}
+          lugar em que confirma. Nao e `block` (`w-full`) — numa fileira com os
+          atalhos, `w-full` empurraria o botao pra fora do card. Com x1000 o
+          rotulo passa de 6 digitos e o `truncate` corta o texto em vez de
+          esticar a fileira.
+
+          PH-294: `basis-[7em] grow` no lugar de `flex-1`. `flex-1` inclui
+          `basis-0`, entao o botao aceitava QUALQUER largura que sobrasse e
+          nunca disparava o `flex-wrap` do pai — na coluna COMPRAR sobravam
+          85px depois do campo de quantidade e dos tres atalhos, e o rotulo mais
+          CURTO ("Comprar 1 · 60") pede 96px. Como o texto e centralizado, era
+          comido dos DOIS lados: sumia o "C" na esquerda e, com preco maior,
+          digito na direita — justamente o numero que o botao existe pra
+          mostrar. Medido no DOM: os quatro primeiros itens da loja cortavam.
+
+          Com base de 7em ele fica na mesma linha quando cabe e QUEBRA pra linha
+          propria quando nao cabe, que e o que o `flex-wrap` do pai ja prometia.
+          O `truncate` continua ali pro caso que ele foi escrito pra cobrir. */}
       <GameButton
         variant={semOuro ? 'secondary' : 'primary'}
         carregando={isPending}
         disabled={ocupado || semOuro}
         onClick={onComprar}
-        className="min-w-0 flex-1 justify-center overflow-hidden px-[.4em]"
+        className="min-w-0 grow basis-[7em] justify-center overflow-hidden px-[.4em]"
       >
         <span className="min-w-0 truncate">
           {semOuro ? 'Sem ouro' : `Comprar ${fmt.format(qty)} · ${fmt.format(custo)}`}
