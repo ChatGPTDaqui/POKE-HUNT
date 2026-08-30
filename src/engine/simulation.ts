@@ -829,7 +829,13 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef!, lootAtivo(world.sala, world.mapDef!.itemDrops))
   // Champion Lance (data/nightmareMaps.ts) proibe captura explicitamente —
   // seu `noCatch` e o unico lugar que isso e setado.
-  const captureResult = world.mapDef!.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke)
+  //
+  // `enemy.isProtetor` (PH-205): metade da chance. Ele vem da ENTIDADE e nao do
+  // POKE — o mesmo POKE, ja na mochila, e um POKE comum. Passa por `world.rng`
+  // igual a qualquer captura, entao o resim do servidor sorteia o mesmo.
+  const captureResult = world.mapDef!.noCatch
+    ? null
+    : maybeAutoCatch(world.rng, gameState, enemy.poke, Boolean(enemy.isProtetor))
   recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny))
 
   // Ouro que a auto-venda gerou neste abate. Ja esta na carteira (creditado
