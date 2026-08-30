@@ -54184,6 +54184,41 @@ var formulaEngine$2 = createFormulaEngine(FORMULAS);
 var GLOBAL_CATCH_MULTIPLIER = formulaEngine$2.eval("GLOBAL_CATCH_MULTIPLIER");
 var STATUS_BONUS_SEM_STATUS = 1;
 /**
+* Quanto a captura do PROTETOR da sala (Guardian e Lord) vale, em fracao da
+* chance normal (PH-205).
+*
+* O protetor e o unico inimigo que aparece UMA VEZ por sala e que precisa cair
+* pra a sala avancar. Captura-lo na chance de um selvagem comum tornaria o
+* premio do ciclo a coisa mais barata da hunt: ele nasce no teto de nivel da
+* faixa e com IV 20-31 (`rollIvsDoProtetor`), atributos que selvagem nenhum tem.
+*
+* 0,5 — MEDIDO, nao chutado. As chances base ja sao baixas
+* (`GLOBAL_CATCH_MULTIPLIER` = 0,0925); o que a metade faz nos casos reais:
+*
+*   catchRate  bola     normal   protetor
+*         255  ultra     20,9%      14,1%
+*         190  poke      12,0%       8,1%
+*          90  great      9,9%       6,7%
+*          45  poke       5,3%       3,6%
+*           3  poke       1,2%       0,8%
+*
+* Um terco (0,35) foi considerado e recusado: leva a especie de catchRate 3 a
+* 0,6%, e o jogador tem UMA tentativa por ciclo de 10 salas — na pratica isso
+* le como "nao da pra capturar", que e justamente o que a issue proibe. A
+* metade e custo claro sem virar parede.
+*/
+var MULTIPLICADOR_DE_CAPTURA_DO_PROTETOR = .5;
+/**
+* Piso da chance de captura do protetor.
+*
+* A regra e "captura sempre possivel, so reduzida". Hoje nenhuma combinacao
+* chega perto deste piso (o pior caso medido e 0,8%), entao ele nao esta ativo
+* em lugar nenhum — existe pra que mexer no multiplicador acima, ou na formula
+* da Gen VII, nao transforme reducao em proibicao sem ninguem perceber. E
+* guarda estrutural, nao afinacao de balanceamento.
+*/
+var CHANCE_MINIMA_DE_CAPTURA_DO_PROTETOR = .005;
+/**
 * Chance de captura pela cadeia da Gen VII: taxa modificada -> probabilidade de
 * uma sacudida -> tres sacudidas.
 *
@@ -54192,22 +54227,29 @@ var STATUS_BONUS_SEM_STATUS = 1;
 * termo de HP vale sempre 1 (o maximo) — mas ele fica na formula, e nao
 * simplificado pra 1, porque e o que torna a conta a mesma dos jogos e porque
 * qualquer captura futura com o alvo vivo passa a funcionar sozinha.
+*
+* `ehProtetor` entra no `catchMultiplier` (PH-205), e nao numa multiplicacao do
+* RESULTADO: a cadeia da Gen VII nao e linear — `CATCH_SHAKE_PROBABILITY` tira
+* raiz da taxa e `CATCH_CHANCE` eleva a `CATCH_SHAKES` —, entao meter a reducao
+* no fim daria um numero que nao corresponde a taxa de captura de nada. Na
+* entrada, ela significa exatamente "este POKE e metade tao capturavel".
 */
-function catchChance(catchRate, ballMultiplier, hpAtual, hpMax) {
+function catchChance(catchRate, ballMultiplier, hpAtual, hpMax, ehProtetor = false) {
 	const a = formulaEngine$2.eval("CATCH_MODIFIED_RATE", {
 		hpMax: Math.max(1, hpMax),
 		hpAtual: clamp(hpAtual, 0, Math.max(1, hpMax)),
 		catchRate,
 		ballMultiplier,
 		statusBonus: STATUS_BONUS_SEM_STATUS,
-		catchMultiplier: GLOBAL_CATCH_MULTIPLIER
+		catchMultiplier: GLOBAL_CATCH_MULTIPLIER * (ehProtetor ? MULTIPLICADOR_DE_CAPTURA_DO_PROTETOR : 1)
 	});
 	const shakeProbability = formulaEngine$2.eval("CATCH_SHAKE_PROBABILITY", { a });
 	const shakes = formulaEngine$2.eval("CATCH_SHAKES");
-	return clamp(formulaEngine$2.eval("CATCH_CHANCE", {
+	const chance = clamp(formulaEngine$2.eval("CATCH_CHANCE", {
 		shakeProbability,
 		shakes
 	}), 0, 1);
+	return ehProtetor ? Math.max(CHANCE_MINIMA_DE_CAPTURA_DO_PROTETOR, chance) : chance;
 }
 /**
 * A auto-venda pega ESTA captura?
@@ -54221,7 +54263,7 @@ function autoVendeEstaCaptura(config, poke) {
 	if (poke.isShiny) return false;
 	return config.raridades.includes(poke.rarity);
 }
-function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
+function attemptCapture(rng, gameState, defeatedPoke, ballItemId, ehProtetor = false) {
 	const ball = getItem(ballItemId);
 	if (!ball || ball.kind !== "ball" || ball.captureRate == null) return {
 		success: false,
@@ -54232,7 +54274,7 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 		reason: "no_ball"
 	};
 	const species = SPECIES[defeatedPoke.speciesId];
-	const chance = catchChance(species.catchRate, ball.captureRate, defeatedPoke.hp, defeatedPoke.stats.hp);
+	const chance = catchChance(species.catchRate, ball.captureRate, defeatedPoke.hp, defeatedPoke.stats.hp, ehProtetor);
 	if (!rollChance(rng, chance)) return {
 		success: false,
 		reason: "roll_failed",
@@ -54375,17 +54417,17 @@ function updateAutoHeal(world, gameState, dt) {
 	usarPocao();
 	return events;
 }
-function maybeAutoCatch(rng, gameState, defeatedPoke) {
+function maybeAutoCatch(rng, gameState, defeatedPoke, ehProtetor = false) {
 	if (!gameState.autoToggles.autoCatch) return null;
 	const rule = gameState.autoCatchRules.find((r) => r.speciesId === defeatedPoke.speciesId);
 	if (rule) {
 		if (!rule.ballItemId || !gameState.hasItem(rule.ballItemId, 1)) return null;
-		return attemptCapture(rng, gameState, defeatedPoke, rule.ballItemId);
+		return attemptCapture(rng, gameState, defeatedPoke, rule.ballItemId, ehProtetor);
 	}
 	const config = gameState.autoCatchConfig;
 	const ballId = Boolean(defeatedPoke.isShiny) && config.catchShinyEnabled ? config.shinyBallId : config.ballId;
 	if (!ballId || !gameState.hasItem(ballId, 1)) return null;
-	return attemptCapture(rng, gameState, defeatedPoke, ballId);
+	return attemptCapture(rng, gameState, defeatedPoke, ballId, ehProtetor);
 }
 //#endregion
 //#region src/engine/systems/progressionSystem.ts
@@ -55529,7 +55571,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 	const trainerResult = grantTrainerExp(gameState.trainer, expGain);
 	gameState.setTrainer(trainerResult.trainer);
 	const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef, lootAtivo(world.sala, world.mapDef.itemDrops));
-	const captureResult = world.mapDef.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke);
+	const captureResult = world.mapDef.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke, Boolean(enemy.isProtetor));
 	recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny));
 	const ouroDeAutoVenda = captureResult?.success && captureResult.location === "vendido" ? captureResult.vendidoPor : 0;
 	if (!silent) {
