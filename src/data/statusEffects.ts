@@ -119,6 +119,24 @@ export function perdeOTurno(rng: Rng, status: StatusAtivo | null): boolean {
   return false
 }
 
+/**
+ * A metade DETERMINISTICA de `perdeOTurno`: este status impede a acao SEMPRE
+ * (sono e congelamento), sem sortear nada.
+ *
+ * Existe separada porque `perdeOTurno` consome `rng`, e quem so quer OBSERVAR
+ * "este POKE esta impedido de agir agora" nao pode mexer na sequencia de
+ * sorteio — mexer ali muda o resultado da propria luta que se esta observando.
+ * A paralisia, que perde o turno por sorteio, fica de fora de proposito: ela
+ * atrasa a acao, nao impede.
+ *
+ * PH-305: o cao de guarda do protetor (simulation.ts) usa isto pra nao contar
+ * como impasse o tempo em que o POKE simplesmente nao consegue atacar.
+ */
+export function bloqueiaAcaoSempre(status: StatusAtivo | null): boolean {
+  if (!status) return false
+  return regraDoStatus(status.tipo)?.bloqueiaAcao === true
+}
+
 // Status que TRAVAM o POKE no lugar (movementSystem nao move quem esta com um
 // deles). Escrito a mao aqui, e nao derivado de STATUS_RULES, porque nao tem
 // equivalente nos jogos: la a batalha e por turnos e ninguem "anda". E uma

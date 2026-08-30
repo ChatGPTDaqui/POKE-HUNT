@@ -42,6 +42,7 @@ import { updateMovement } from './systems/movementSystem'
 import { atualizarLure } from './systems/lureSystem'
 import { updateCombat, podeDanificar } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
+import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { climaAmbienteDaSala, climaDeAmbiente } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
@@ -1356,9 +1357,19 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       // So conta tempo com os dois ENGAJADOS: o POKE atravessando o mapa nao e
       // impasse, e sem esta condicao a caminhada (que pode passar de 12s num
       // mapa grande) trocaria o protetor antes da luta comecar.
+      //
+      // PH-305: e so enquanto o POKE PODE AGIR. O relogio mede "bato e nao
+      // tiro HP", nao "nao estou batendo" — e sao coisas diferentes com o mesmo
+      // sintoma. Congelamento e o caso que alcanca o limite: ele nao tem
+      // duracao fixa (sorteio de 20% por turno pra descongelar), entao a cauda
+      // passa dos 12s sem esforco, e o guardiao ia embora no meio de uma luta
+      // que estava indo bem — levando junto o HP que ja tinha perdido. Sono nao
+      // alcanca (2 a 4 turnos de 2s). Paralisia tambem fica de fora: ela atrasa
+      // a acao por sorteio, nao impede, entao o POKE segue atacando.
+      const podeAgir = !bloqueiaAcaoSempre(world.player?.poke.status ?? null)
       const engajado = protetorVivo.state === 'engaged' && world.player?.state === 'engaged'
       if (protetorVivo.poke.hp < world.protetorPendente.hpAtual) world.protetorSemDanoSegundos = 0
-      else if (engajado) world.protetorSemDanoSegundos += dt
+      else if (engajado && podeAgir) world.protetorSemDanoSegundos += dt
       world.protetorPendente.hpAtual = protetorVivo.poke.hp
 
       if (world.protetorSemDanoSegundos >= PROTETOR_SEM_DANO_LIMITE) {

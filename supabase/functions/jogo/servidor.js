@@ -34700,6 +34700,23 @@ function perdeOTurno(rng, status) {
 	if (regra.chanceDePerderOTurno) return nextFloat(rng) < regra.chanceDePerderOTurno;
 	return false;
 }
+/**
+* A metade DETERMINISTICA de `perdeOTurno`: este status impede a acao SEMPRE
+* (sono e congelamento), sem sortear nada.
+*
+* Existe separada porque `perdeOTurno` consome `rng`, e quem so quer OBSERVAR
+* "este POKE esta impedido de agir agora" nao pode mexer na sequencia de
+* sorteio — mexer ali muda o resultado da propria luta que se esta observando.
+* A paralisia, que perde o turno por sorteio, fica de fora de proposito: ela
+* atrasa a acao, nao impede.
+*
+* PH-305: o cao de guarda do protetor (simulation.ts) usa isto pra nao contar
+* como impasse o tempo em que o POKE simplesmente nao consegue atacar.
+*/
+function bloqueiaAcaoSempre(status) {
+	if (!status) return false;
+	return regraDoStatus(status.tipo)?.bloqueiaAcao === true;
+}
 var STATUS_QUE_IMOBILIZAM = /* @__PURE__ */ new Set(["sleep", "freeze"]);
 function imobiliza(tipo) {
 	return tipo != null && STATUS_QUE_IMOBILIZAM.has(tipo);
@@ -55882,9 +55899,10 @@ function stepWorld(world, dt, gameState, opts = {}) {
 	if (world.protetorPendente) {
 		const protetorVivo = world.enemies.find((e) => e.isProtetor && e.poke.uid === world.protetorPendente.uid);
 		if (protetorVivo) {
+			const podeAgir = !bloqueiaAcaoSempre(world.player?.poke.status ?? null);
 			const engajado = protetorVivo.state === "engaged" && world.player?.state === "engaged";
 			if (protetorVivo.poke.hp < world.protetorPendente.hpAtual) world.protetorSemDanoSegundos = 0;
-			else if (engajado) world.protetorSemDanoSegundos += dt;
+			else if (engajado && podeAgir) world.protetorSemDanoSegundos += dt;
 			world.protetorPendente.hpAtual = protetorVivo.poke.hp;
 			if (world.protetorSemDanoSegundos >= 12) {
 				world.enemies = world.enemies.filter((e) => e.id !== protetorVivo.id);
