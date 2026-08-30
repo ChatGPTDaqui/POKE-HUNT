@@ -51859,8 +51859,38 @@ function defaultGameStateData() {
 * 0,8 e nao 1,0 porque a checagem roda uma vez por tick e o selvagem tambem se
 * move: no limite exato ele solta o aggro no mesmo frame em que a espera
 * comecaria.
+*
+* SAO DOIS LIMIARES, E NAO UM (PH-280). Este e o de ENTRADA; a saida e o
+* `LURE_FRACAO_PARA_VOLTAR_A_ANDAR`, mais apertado. Com um limiar so, o POKE
+* ficava parando e voltando a andar varias vezes por segundo — o retardatario
+* oscila em torno da linha, e cada cruzamento zerava ou devolvia o destino.
+*
+* Medido em scripts/harness/lure-para-e-anda.mjs, 60 segundos por corrida:
+*
+*   lure desligado        0,0 paradas
+*   lure ligado, juntar 2  32,3
+*   lure ligado, juntar 3  81,2
+*   lure ligado, juntar 4 154,7   <- 2,6 solavancos POR SEGUNDO
+*
+* O tempo total parado era pequeno (5% da reuniao), entao o defeito nunca foi
+* "o POKE fica parado": era a FREQUENCIA da troca. E o mesmo remedio de um
+* termostato que liga e desliga sem parar — histerese.
 */
 var LURE_FRACAO_DA_COLEIRA = .8;
+/**
+* Fracao da coleira abaixo da qual o jogador VOLTA a andar, depois de ter
+* parado pra esperar (PH-280).
+*
+* Mais apertada que a de entrada de proposito: o retardatario precisa ter
+* ENCOSTADO de verdade, e nao so raspado na linha de novo. A diferenca entre as
+* duas (0,8 -> 0,62) e a banda morta que mata o piscar.
+*
+* 0,62 e nao 0,7: a 0,7 a banda cobria ~38px de coleira tipica e as paradas
+* ainda ficavam nas dezenas na medicao. Nao pode ser MUITO menor tambem — abaixo
+* disso o jogador espera o retardatario colar nele, e a reuniao demora mais sem
+* ganhar nada.
+*/
+var LURE_FRACAO_PARA_VOLTAR_A_ANDAR = .62;
 /**
 * O jogador esta REUNINDO agora — ou seja, o golpe dele fica segurado (PH-264).
 *
@@ -51938,11 +51968,14 @@ function atualizarLure(world, gameState, dt) {
 		tempoRestante -= dt;
 		const candidato = proximoCandidato(player, enemies);
 		if (reunidos.length >= alvo || candidato == null || temShinyVivo(enemies) || tempoRestante <= 0) fase = "lutando";
-		else if (reunidos.find((e) => distanceTo(player, e) > e.leashRadius * LURE_FRACAO_DA_COLEIRA)) esperandoRetardatario = true;
-		else destino = {
-			x: candidato.x,
-			y: candidato.y
-		};
+		else {
+			const fracao = anterior?.esperandoRetardatario === true ? LURE_FRACAO_PARA_VOLTAR_A_ANDAR : LURE_FRACAO_DA_COLEIRA;
+			if (reunidos.find((e) => distanceTo(player, e) > e.leashRadius * fracao)) esperandoRetardatario = true;
+			else destino = {
+				x: candidato.x,
+				y: candidato.y
+			};
+		}
 	}
 	world.lure = {
 		fase,
