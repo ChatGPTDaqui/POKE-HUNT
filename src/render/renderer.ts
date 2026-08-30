@@ -333,7 +333,15 @@ export class Renderer {
 
     if (jogadorVivo) {
       drawEntity(ctx, jogadorVivo)
-      drawHpBar(ctx, jogadorVivo, true)
+      // SEM PORCENTAGEM NO MEU PROPRIO POKE (PH-281), a pedido do usuario. O
+      // mesmo numero ja esta no cabecalho, com rotulo `HP` e largura reservada
+      // (PH-157/PH-193) — la ele e legivel sem competir com nada, e aqui
+      // disputava a placa com o nome do golpe (PH-275).
+      //
+      // A DO ALVO CONTINUA, e a diferenca importa: o HP do inimigo nao aparece
+      // em lugar nenhum da HUD. Tirar as duas juntas nao seria "simplificar",
+      // seria apagar um dado que so existe aqui (PH-193).
+      drawHpBar(ctx, jogadorVivo)
       drawNameLevelTag(ctx, jogadorVivo)
     }
 
