@@ -54694,14 +54694,45 @@ function registrarAbate(world, mapId, opts = {}) {
 * dispara a troca — ver `garantirTransicaoDeQuotaFechada`.
 */
 /**
+* A sala ainda PEDE protetor e ele nao caiu?
+*
+* Existe como funcao exportada, e nao inline, porque a mesma pergunta e feita em
+* dois lugares que nao se enxergam: o avanco manual logo abaixo e o `SalaChip`
+* da tela — que precisa dela pra nao oferecer um botao que o servidor vai
+* recusar.
+*/
+function salaTravadaPeloProtetor(world) {
+	return protetorDaSala(world.sala) != null && !world.protetorResolvido;
+}
+/**
 * Avanco manual (PH-178/179): forca a transicao mesmo com o toggle ligado —
 * o proprio clique do jogador E o avanco que o toggle estava segurando.
 * So entrega "quota fechada" ao chamador; `armarTransicaoDeSala` ja e
 * idempotente (chamar de novo com transicao ja armada nao resorteia).
+*
+* PH-291: E ELE TAMBEM RESPEITA O PROTETOR. Os outros dois caminhos ja
+* respeitavam — `registrarAbate` se recusa a armar transicao em sala com
+* protetor, e `garantirTransicaoDeQuotaFechada` sai cedo quando
+* `garantirProtetorDaSala()` devolve true. Este passava por fora dos dois, e o
+* buraco anulava duas features de uma vez:
+*
+*  - PH-202/203: o protetor existe pra travar o avanco, e virava decoracao;
+*  - PH-206/226/227: quem credita `bioma_progress` e vencer o LORD da sala 10
+*    (`avancarBiomaProgressSeForOProximo`, em `handleEnemyDefeated`). Pulando o
+*    Lord, o ciclo fecha, `ciclos` incrementa e o progresso nunca e creditado —
+*    o jogador farma pra sempre sem destravar o bioma seguinte.
+*
+* Esconder o botao nao bastaria: `/sessao/avancar-sala` chega aqui pelo
+* `forcarAvancoDeSala` de `aplicarFlush`, e a rota e alcancavel por curl.
+* Limite de negocio so no cliente e bypass — regra do projeto.
 */
 function solicitarAvancoDeSala(world, mapId) {
 	const sala = world.sala;
 	if (!sala || sala.abates < 30) return {
+		avancou: false,
+		fechouCiclo: false
+	};
+	if (salaTravadaPeloProtetor(world)) return {
 		avancou: false,
 		fechouCiclo: false
 	};
