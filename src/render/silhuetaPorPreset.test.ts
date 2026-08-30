@@ -45,9 +45,13 @@ const ARTE_POR_PRESET: Record<Exclude<PresetAmbiente, 'nenhum'>, string> = {
   brasa: 'assets/hunt-backgrounds/cave-volcanic.jpg',
   poeira: 'assets/hunt-backgrounds/ruins.jpg',
   caverna: 'assets/hunt-backgrounds/abyss.jpg',
-  neve: 'assets/hunt-backgrounds/mountain.jpg',
+  // PH-255: era mountain.jpg, que saiu de `neve` — a arte e um vale verde e
+  // a neve so aparece nos picos do fundo.
+  neve: 'assets/hunt-backgrounds/ice-mountain.jpg',
   areia: 'assets/hunt-backgrounds/desert.jpg',
-  cidade: 'assets/hunt-backgrounds/town.jpg',
+  // PH-255: era town.jpg, que saiu de `cidade` — duas construcoes num quadro
+  // de floresta e lago. `metropolis` e cidade de verdade.
+  cidade: 'assets/hunt-backgrounds/metropolis.jpg',
 }
 
 const JANELA = { x: 0, y: 0, w: 900, h: 600 }
