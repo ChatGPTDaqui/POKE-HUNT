@@ -19,7 +19,7 @@
 // e nao por um arquivo em `PATH`: no Git Bash do Windows um executavel sem
 // extensao nao e encontrado pelo `PATH`, e a bancada passaria a medir nada.
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
+import { chmodSync, mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it, beforeEach, afterEach } from 'vitest'
@@ -32,6 +32,11 @@ let dir
 function comando(nome, corpo) {
   const caminho = join(dir, nome).replace(/\\/g, '/')
   writeFileSync(caminho, `#!/usr/bin/env bash\n${corpo}\n`)
+  // 0o755 e obrigatorio: no Linux do CI um arquivo sem bit de execucao devolve
+  // exit 126 ("found but not executable") e a bancada passa a medir o erro do
+  // bash em vez do caso. No Git Bash do Windows o bit e ignorado, entao os 4
+  // casos passavam local e reprovavam no CI.
+  chmodSync(caminho, 0o755)
   return caminho
 }
 
