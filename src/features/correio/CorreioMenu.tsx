@@ -248,8 +248,20 @@ export function CorreioMenu() {
               {c.ultimaMinha && <span className="text-n500">Voce: </span>}
               {c.ultimoTrecho}
             </span>
+            {/* PH-287: O ICONE GANHOU PALAVRA. Ele ja existia, mas sozinho — e
+                com a explicacao num `title=`, que so abre com o mouse parado. No
+                celular a conversa com presente preso dentro era indistinguivel
+                de qualquer outra, e quem via o sino aceso nao tinha como saber
+                ONDE estava o que faltava.
+
+                O selo azul ao lado conta MENSAGEM por ler; este conta ITEM por
+                coletar. Sao duas coisas, e o sino soma as duas — era essa soma
+                sem legenda que fazia o contador parecer travado (PH-213). */}
             {c.anexosPendentes > 0 && (
-              <span className="shrink-0 text-primary" title="Anexo esperando coleta"><Gift /></span>
+              <span className="flex shrink-0 items-center gap-[.2em] rounded-full bg-primary/15 px-[.4em] text-[.7em] font-medium text-primary">
+                <Gift aria-hidden />
+                {c.anexosPendentes > 1 ? `${c.anexosPendentes} por coletar` : 'por coletar'}
+              </span>
             )}
             {c.naoLidas > 0 && (
               <span className="shrink-0 rounded-full bg-primary px-[.4em] text-[.7em] text-n900">
