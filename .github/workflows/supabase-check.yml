@@ -160,6 +160,60 @@ jobs:
           fi
           echo "Par dev/public ok (ou migration nao mexe em nenhum dos dois, ex: grant/extensao)."
 
+      - name: Migration nova tem carimbo ANTERIOR ao que ja esta na base?
+        # PH-247/PH-289: o `db push` recusa aplicar migration cujo carimbo caia
+        # ANTES da ultima ja registrada no remoto:
+        #
+        #   Found local migration files to be inserted before the last migration
+        #   on remote database.
+        #   Rerun the command with --include-all flag to apply these migrations:
+        #
+        # E ele nao para na PR que causou: a partir dali TODO deploy da `dev`
+        # reprova, ate alguem renomear o arquivo. Aconteceu em 30/08 — duas PRs
+        # abertas no mesmo dia, a de carimbo MAIOR (PH-277, `...010000`) mesclou
+        # primeiro e a de carimbo menor (PH-247, `...000000`) virou "fora de
+        # ordem" sem ninguem ter editado nada. O custo cai em quem nao fez.
+        #
+        # A base e a mesma do passo anterior: `origin/main` pra PR de promocao,
+        # `origin/dev` pro resto. Nao e o estado do REMOTO (que o CI nao le aqui),
+        # e sim o do branch de destino — que e o que vai ser aplicado a seguir, e
+        # a aproximacao suficiente pra pegar a colisao entre PRs concorrentes.
+        run: |
+          git fetch origin main dev --depth=50
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE=origin/main
+          else
+            BASE=origin/dev
+          fi
+          NOVAS=$(git diff --name-only --diff-filter=A "$BASE"...HEAD -- supabase/migrations/)
+          if [ -z "$NOVAS" ]; then
+            echo "Nenhuma migration nova neste push/PR."
+            exit 0
+          fi
+          MAIOR_NA_BASE=$(git ls-tree --name-only "$BASE" supabase/migrations/ \
+            | sed -E 's|.*/([0-9]{14})_.*|\1|' | grep -E '^[0-9]{14}$' | sort | tail -1)
+          if [ -z "$MAIOR_NA_BASE" ]; then
+            echo "Base sem migration — nada com que comparar."
+            exit 0
+          fi
+          echo "Ultimo carimbo em $BASE: $MAIOR_NA_BASE"
+          FALHOU=0
+          for f in $NOVAS; do
+            CARIMBO=$(basename "$f" | cut -c1-14)
+            if [ "$CARIMBO" \< "$MAIOR_NA_BASE" ]; then
+              echo "::error::$f tem carimbo $CARIMBO, ANTERIOR ao ultimo de $BASE ($MAIOR_NA_BASE)."
+              echo "  O 'db push' vai recusar com 'to be inserted before the last migration on remote database'"
+              echo "  e travar TODO deploy seguinte, nao so esta PR."
+              echo "  Resolver: renomeie o arquivo com um carimbo maior que $MAIOR_NA_BASE (o par _public/_dev anda junto)."
+              FALHOU=1
+            fi
+          done
+          [ "$FALHOU" = "0" ] || exit 1
+          echo "Toda migration nova tem carimbo posterior ao da base."
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
