@@ -137,9 +137,41 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   // `CardDoTreinador` pra arquivos proprios (codigo movido, nao escrito) e as
   // fracoes da coleira do Lure. O jogador ve o POKE andando direito, nao o
   // limiar.
+  //
+  // SETIMA REVARRIDA, em 30/08 (PH-295). Mesma causa das seis anteriores, e ela
+  // nao vai embora sozinha: a PR de promocao tem `head: dev`, entao o intervalo
+  // cresce embaixo da nota enquanto ela espera revisao humana.
+  //
+  // Esta leva e diferente das outras seis: foi a primeira vez que alguem foi
+  // CONFERIR se o sistema de boss/andares que esta nota anuncia funcionava de
+  // fato. Nao funcionava, por dois caminhos independentes, e os dois ganham
+  // linha propria:
+  //
+  //  - PH-284: o progresso de bioma era calculado certo e DESCARTADO na
+  //    gravacao — a RPC que grava a linha do jogador tem lista fixa de colunas e
+  //    a coluna do progresso nunca entrou nela. E isto que fazia a promessa
+  //    "vencer o boss abre o proximo bioma", ja escrita nesta mesma entrada, ser
+  //    falsa na pratica. Promover a 7.15 sem esta linha seria anunciar uma
+  //    coisa que nao acontece.
+  //  - PH-291: o botao "Proximo Nivel" pulava o protetor vivo, entao quem usava
+  //    o avanco manual fechava o ciclo sem NUNCA vencer o Lord. Linha propria
+  //    porque o jogador ve outra coisa: o botao que some e o aviso de que falta
+  //    derrotar o guardiao.
+  //
+  // As outras tres se explicam sozinhas: PH-247 (Clefairy), PH-205 (captura do
+  // protetor) e PH-255 (efeito de ambiente em cinco artes). PH-294 (dois
+  // rotulos cortados) entra na linha de tela que ja existe, do mesmo jeito que
+  // as quatro de layout viraram uma.
+  //
+  // Fica de fora: PH-277 (sessao abandonada fecha sozinha), PH-278 (piso da
+  // janela de simulacao), PH-106/187/288/289/290 (CI, deploy, tipos do banco) e
+  // PH-293 (CORS do cliente de staging, que nem alcanca producao). Nenhum muda o
+  // que o jogador ve — mesma regua da 7.11 pra ca.
   {
     version: '7.15',
-    date: '2026-08-29',
+    // A data e a da leva mais RECENTE que a nota cobre, e nao a da primeira
+    // escrita: e uma entrada por PROMOCAO, e a promocao ainda nao saiu.
+    date: '2026-08-30',
     title: 'Farm em area, o boss guardando os doze biomas — e as Missoes finalmente dando pra terminar',
     highlights: [
       'AGORA VOCE PODE JUNTAR ATE QUATRO SELVAGENS ANTES DE BATER. Seu POKE sempre andava ate o mais proximo e lutava um por vez, entao golpe de area nunca acertava mais de um alvo — ele existia e nao servia pra nada. Com o Lure ligado (aba nova no painel de Automacoes) ele passa pelo raio de varios, puxa o grupo atras de si e so entao para pra lutar: um golpe de area acerta todos de uma vez. Voce escolhe juntar 1, 2, 3 ou 4 no painel.',
@@ -147,6 +179,9 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'E O LURE PAROU DE COMECAR A BRIGA NO MEIO DA REUNIAO. Ele juntava o grupo e batia ao mesmo tempo: bastava um selvagem encostar pra o seu POKE parar pra lutar com ele, e a conta que voce pediu nunca fechava. Agora o golpe fica segurado ate a reuniao terminar — primeiro junta os quatro, depois luta. Enquanto junta, seu POKE apanha sem revidar, entao o Lure ficou mais forte e mais arriscado ao mesmo tempo.',
       'O BOSS AGORA EXISTE NOS DOZE BIOMAS, NAO SO NO IGNEO. Ele tinha nascido em um bioma so, como piloto, e ficou la. Agora cada um dos doze tem o seu, na ordem canonica do mapa.',
       'E VENCER O BOSS E O QUE ABRE O PROXIMO BIOMA. O jogo passou a ter uma linha pra seguir: a area seguinte fica trancada ate voce derrubar o dono da atual. O menu de hunt diz quem esta trancado e o que falta — antes o botao simplesmente nao levava a lugar nenhum, sem explicar.',
+      'E ELE ABRE DE VERDADE — ANTES O PROGRESSO ERA CONTADO E JOGADO FORA. Voce fechava as dez salas, derrubava o Lord, e o bioma seguinte continuava trancado; fechava de novo, e de novo, e nada. O jogo contava certo e a gravacao descartava o numero em silencio, sem erro nenhum na tela. Agora ele e guardado — e quem ja tinha fechado ciclo antes desta correcao recebeu o credito retroativo, sem precisar refazer nada.',
+      'O ATALHO DE TROCAR DE SALA PAROU DE PULAR O GUARDIAO. Com o avanco manual ligado, dava pra passar pra sala seguinte com o guardiao (ou o Lord) ainda de pe — e quem fazia isso fechava o ciclo inteiro sem nunca vencer o dono do bioma, entao nunca destravava a area seguinte. Agora, enquanto ele estiver vivo, a sala diz "Derrote o Guardiao" (ou o Lorde) e nao passa.',
+      'CAPTURAR O GUARDIAO E O LORD FICOU MAIS DIFICIL. Eles caiam com a mesma chance de um selvagem qualquer, sendo que aparecem uma vez por sala, nascem no teto de nivel da area e vem com atributos que selvagem nenhum tem. A chance foi pela metade — continua sempre possivel, so deixou de ser o POKE mais barato da hunt.',
       'O BOSS TAMBEM PASSOU A SE APRESENTAR. Ele entrava em cena como qualquer outro encontro, e o unico jeito de saber que aquilo era o boss era a barra de HP nao acabar nunca. Agora a entrada dele tem apresentacao propria, e no menu ele tem selo.',
       'OS EFEITOS DO CENARIO GANHARAM ESCALA. Folha, poeira, faisca, neve e areia estavam grandes demais pro tamanho de um POKE — a poeira de caverna chegava a um quarto da altura de um Pokemon — e quase todo bioma mostrava a mesma bolinha em outra cor. Agora cada um tem tamanho e formato proprios: a folha tomba, a faisca risca, a cinza urbana e uma fibra dobrada, o reflexo da agua e uma cruz de luz.',
       'E A CHUVA MOLHA O CHAO. As gotas caem, batem e respingam, com microgotas que quicam em volta. Selva e caverna ganharam gotejo proprio, pingando sempre do mesmo ponto, do jeito que agua parada na copa e em teto de gruta pinga.',
@@ -173,6 +208,9 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'E O PAINEL DE AUTOMACOES PAROU DE ESCONDER NUMERO. Numa janela estreita, o nome do item empurrava a contagem pra fora e o aviso de "suprimentos acabando" cortava justamente as horas restantes. As regras por especie tambem espremiam o nome do POKE em cinco letras. E o campo de "Vida ≤ __ %" do Auto-pot mostrava so o primeiro digito: a regra padrao de 70% aparecia como 7%, que e a diferenca entre curar cedo e curar quase morto.',
       'A BARRA DE VIDA DO LENDARIO VOLTOU AO TAMANHO NORMAL. Ela era cinco vezes mais larga e duas vezes mais alta que a de qualquer selvagem. A escala maior, a aura e o nome continuam distinguindo ele em campo; a barra gigante ficou so pro guardiao de sala.',
       'O CENARIO GANHOU FONTES DE VIDA ANCORADAS NO MAPA. Tocha com chama, chamine com fumaca, cristal brilhando, espuma quebrando na pedra, faisca de forja e enxame de vaga-lume: cada arte tem os seus, sempre no mesmo ponto, em vez de particula solta atravessando a tela.',
+      'E CINCO MAPAS PARARAM DE MOSTRAR O EFEITO DE OUTRO LUGAR. A mata noturna tinha fiapo de cidade voando no meio da floresta, o jardim do dojo levava poeira seca por cima das cerejeiras e do rio de carpas, o covil do dragao tinha poeira em vez de faisca com um rio de lava atravessando a tela, e o vale verde da montanha nevava sobre as flores. Cada um deles foi conferido olhando o desenho, e nao o nome do arquivo.',
+      'CLEFAIRY VOLTOU A EVOLUIR. A ficha mandava juntar 40 Pedras de Fada e o servidor exigia 40 Pedras Normais — quem farmasse o que a tela pediu (uns 800 abates do tipo certo) tomava recusa no fim, sem nada explicando. Os dois lados agora falam do mesmo tipo.',
+      'E DOIS TEXTOS QUE APARECIAM CORTADOS. A sigla do golpe de area mostrava um parenteses no lugar da terceira letra, e o botao de comprar da Loja perdia o "C" — virava "omprar 1 · 60", com o preco em risco de sumir junto no item mais caro.',
     ],
   },
   // PH-231. Varredura do INTERVALO desde a 7.13 (a licao que aquela entrada
