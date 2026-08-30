@@ -324,7 +324,9 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
 
   const anterior = await sessaoAberta(cfg, userId)
   if (anterior) {
-    await aplicarFlush(cfg, userId, anterior)
+    // `ignorarPiso` (PH-278): a sessao anterior morre na linha seguinte — nao ha
+    // proximo flush pra herdar tempo represado, entao aqui o piso viraria descarte.
+    await aplicarFlush(cfg, userId, anterior, { ignorarPiso: true })
     await fecharLinhaDeSessao(cfg, anterior.id)
   }
 
@@ -498,7 +500,9 @@ async function avancarSala(cfg: Config, userId: string, parcial: boolean): Promi
 async function fechar(cfg: Config, userId: string, parcial: boolean): Promise<Response> {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) return json({ fechada: false })
-  const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial })
+  // `ignorarPiso` (PH-278): o jogador esta saindo da hunt — represar tempo aqui
+  // seria descarta-lo, porque a sessao fecha na linha seguinte.
+  const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial, ignorarPiso: true })
   await sairDaHunt(cfg, userId, sessao.id)
   if (!resultado || resultado === FLUSH_OCUPADO) return json({ fechada: false })
   return json({

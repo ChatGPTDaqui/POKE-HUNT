@@ -56850,10 +56850,11 @@ async function comRetryDeColisao(fn) {
 async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 	const agora = Date.now();
 	const bruto = (agora - new Date(sessao.last_flush_at).getTime()) / 1e3;
-	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
+	const represado = !opcoes.ignorarPiso && bruto >= 0 && bruto < 10;
+	const segundos = represado ? 0 : Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
 	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}&select=id`, {
-		last_flush_at: new Date(agora).toISOString(),
+		last_flush_at: represado ? sessao.last_flush_at : new Date(agora).toISOString(),
 		flushing_since: new Date(agora).toISOString()
 	});
 	if (!reivindicada) return FLUSH_OCUPADO;
@@ -57153,7 +57154,7 @@ async function abrirSessao(cfg, userId, req) {
 	if (bloqueio) throw new ErroHttp(403, bloqueio);
 	const anterior = await sessaoAberta(cfg, userId);
 	if (anterior) {
-		await aplicarFlush(cfg, userId, anterior);
+		await aplicarFlush(cfg, userId, anterior, { ignorarPiso: true });
 		await fecharLinhaDeSessao(cfg, anterior.id);
 	}
 	const semente = randomSeed();
@@ -57285,7 +57286,10 @@ async function avancarSala(cfg, userId, parcial) {
 async function fechar(cfg, userId, parcial) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) return json({ fechada: false });
-	const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial });
+	const resultado = await aplicarFlush(cfg, userId, sessao, {
+		comBag: !parcial,
+		ignorarPiso: true
+	});
 	await sairDaHunt(cfg, userId, sessao.id);
 	if (!resultado || resultado === "ocupado") return json({ fechada: false });
 	return json({
