@@ -52,7 +52,12 @@ export function TaxasNoCanto() {
         type="button"
         data-keep-open
         onClick={() => abrirAnalyzer(true)}
-        title="Abrir o Hunt Analyzer"
+        // PH-165: `aria-label`, e NAO `title=`. Isto e nome de acao ("abrir o
+        // Analyzer"), nao conceito — bolha de glossario aqui abriria por cima do
+        // proprio botao que o jogador quer clicar. O `title` nativo tambem nao
+        // servia pro caso: ele nunca existiu no dedo, e o leitor de tela lia o
+        // botao como "Gold/h 55.1k", que nao diz o que o clique faz.
+        aria-label="Abrir o Hunt Analyzer"
         className={
           'vidro pointer-events-auto flex cursor-pointer items-center gap-[.7em] rounded-full '
           + 'px-[.9em] py-[.35em] font-[inherit] text-[.72em] text-n400'

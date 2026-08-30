@@ -219,11 +219,17 @@ export function AbilityHud() {
             ability={ability}
             poke={poke}
             coarse={coarse}
+            desligado={isOff}
             onAbrirDetalhe={() => setDetalhe(ability)}
           >
           <div
+            // PH-165: o `title=` nativo que dizia "duplo clique desliga da
+            // rotacao" saiu daqui. Ele so valia no ponteiro fino (era ele mesmo
+            // que se anulava no `coarse`), e a dica agora vai na BOLHA do golpe,
+            // que abre no mesmo hover e num lugar onde o jogador ja esta lendo o
+            // resto do golpe. No dedo o caminho continua sendo a ficha, que tem
+            // o botao "Ligar/Desligar na rotacao" escrito.
             onDoubleClick={coarse ? undefined : () => controller.toggleAbility(poke.uid, ability.id)}
-            title={coarse ? undefined : (isOff ? 'Desligado — duplo clique religa' : 'Duplo clique desliga da rotação')}
             className={cn(
               'relative flex cursor-pointer items-center justify-center rounded-[.5em] select-none',
               ready && 'shadow-[0_0_0_2px_rgba(255,255,255,.85)]',
@@ -371,11 +377,12 @@ export function AbilityHud() {
  * nada que o feche.
  */
 function EnvolucroSlot({
-  ability, poke, coarse, onAbrirDetalhe, children,
+  ability, poke, coarse, desligado, onAbrirDetalhe, children,
 }: {
   ability: Ability
   poke: PokeInstance
   coarse: boolean
+  desligado: boolean
   onAbrirDetalhe: () => void
   children: ReactNode
 }) {
@@ -406,7 +413,7 @@ function EnvolucroSlot({
     </button>
   )
   if (!coarse) {
-    return <AbilityTooltip ability={ability} poke={poke}>{botao}</AbilityTooltip>
+    return <AbilityTooltip ability={ability} poke={poke} desligado={desligado}>{botao}</AbilityTooltip>
   }
   return botao
 }
