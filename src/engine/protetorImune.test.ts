@@ -27,6 +27,7 @@ import {
   buildMapWorld, stepWorld, PROTETOR_SEM_DANO_LIMITE, LIVE_SIM_STEP_SECONDS,
 } from './simulation'
 import { podeDanificar, golpeAnuladoPorImunidade } from './systems/combatSystem'
+import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { ABATES_POR_SALA } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from './types'
@@ -133,6 +134,52 @@ describe('PH-301: imunidade nao pode travar a sala', () => {
     // O gate continua de pe: trocar o protetor NAO resolve a sala sozinho, e o
     // avanco (com o credito de bioma_progress) segue dependendo de matar um.
     expect(world.sala?.abates).toBe(ABATES_POR_SALA)
+  })
+
+  // PH-305: o cao de guarda mede "bato e nao tiro HP", e nao "nao estou
+  // batendo". Sem esta distincao, um POKE CONGELADO fazia o guardiao ir embora
+  // no meio de uma luta que estava indo bem — e o HP que ele ja tinha perdido
+  // ia junto, porque o substituto nasce inteiro. Congelamento nao tem duracao
+  // fixa (sorteio de 20% por turno), entao a cauda passa dos 12s com folga.
+  it('bloqueiaAcaoSempre separa "nao pode agir" de "as vezes perde o turno"', () => {
+    // Sono e congelamento bloqueiam sempre; paralisia perde o turno por
+    // sorteio, entao o POKE segue atacando e o impasse continua medindo o que
+    // deve. E a leitura e PURA — nao pode consumir a sequencia de sorteio.
+    expect(bloqueiaAcaoSempre({ tipo: 'freeze', turnosRestantes: 3 })).toBe(true)
+    expect(bloqueiaAcaoSempre({ tipo: 'sleep', turnosRestantes: 3 })).toBe(true)
+    expect(bloqueiaAcaoSempre({ tipo: 'paralysis', turnosRestantes: null })).toBe(false)
+    expect(bloqueiaAcaoSempre({ tipo: 'poison', turnosRestantes: 3 })).toBe(false)
+    expect(bloqueiaAcaoSempre(null)).toBe(false)
+  })
+
+  it('POKE impedido de agir nao faz o relogio do impasse andar', () => {
+    const world = mundoComProtetor(31)
+    const protetor = world.enemies.find((e) => e.isProtetor)!
+    const uidOriginal = protetor.poke.uid
+    protetor.poke.hp = protetor.poke.stats.hp
+    world.protetorPendente!.hpAtual = protetor.poke.hp
+    protetor.x = world.player!.x + 30
+    protetor.y = world.player!.y
+
+    // O congelamento e REPOSTO a cada tick de proposito: ele acaba por sorteio
+    // (20% por turno) e derrete na hora com qualquer golpe de FOGO que acerte,
+    // entao deixar o relogio decidir tornaria o teste um jogo de dados. O que
+    // se quer provar e "enquanto o POKE nao pode agir, o relogio nao anda", e
+    // e isso que este laco monta.
+    for (let t = 0; t < Math.round((PROTETOR_SEM_DANO_LIMITE * 2) / LIVE_SIM_STEP_SECONDS); t++) {
+      world.player!.poke.status = { tipo: 'freeze', turnosRestantes: 99 }
+      stepWorld(world, LIVE_SIM_STEP_SECONDS, useGameStateStore.getState(), { silent: true })
+    }
+
+    // Dobro do limite passou sem o POKE poder atacar: nada de trocar o
+    // guardiao e jogar fora o HP que ele ja tinha perdido.
+    //
+    // `toBeLessThan(1)` e nao `toBe(0)`: no tick em que o congelamento sai
+    // (`tickStatus` roda antes do cao de guarda, dentro do mesmo passo) o POKE
+    // JA podia agir, e contar aquele frame esta certo. Sao centesimos de
+    // segundo; o que nao pode e chegar perto dos 12.
+    expect(world.protetorSemDanoSegundos).toBeLessThan(1)
+    expect(world.enemies.some((e) => e.poke.uid === uidOriginal)).toBe(true)
   })
 
   // O caso completo, do jeito que o jogador vive: monotipo de FOGO numa sala
