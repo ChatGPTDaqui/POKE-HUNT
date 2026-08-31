@@ -139,7 +139,16 @@ const lendarias = new Set(
   [...readFileSync(p('src', 'data', 'legendaries.ts'), 'utf8')
     .matchAll(/'([a-z0-9_]+)'/g)].map((m) => m[1]),
 )
-if (lendarias.size !== 11) throw new Error(`esperava 11 lendarias, li ${lendarias.size}`)
+// Contagem MINIMA, e nao exata. O numero exato estava travado em 11 e envelheceu
+// na primeira leva nova de especies: a Geracao III (PH-332) trouxe 10 lendarias
+// e este gerador passou a ESTOURAR ao ser chamado, o que so aparece pra quem
+// tenta regerar a cadeia — o arquivo gerado continuava commitado e valido, entao
+// nada na suite reclamava. Ficou assim de 25/08 ate ser preciso regerar.
+//
+// O que a guarda existe pra pegar e o REGEX quebrar e ler zero (ou quase),
+// deixando lendaria virar alvo de missao; pra isso o piso serve, e ele nao
+// envelhece a cada geracao nova.
+if (lendarias.size < 11) throw new Error(`lendarias de menos (${lendarias.size}) — o regex quebrou?`)
 
 // Os 18 tipos, na ordem de `TYPE_COLORS` — a mesma que `MISSAO_TYPES` usa e a
 // mesma do `check` das migrations.

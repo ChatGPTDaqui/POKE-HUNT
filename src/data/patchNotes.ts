@@ -12,6 +12,27 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // A cacada por tier do PokeRogue. Uma entrada so pros seis commits, porque pra
+  // quem joga e UM assunto: mudou quem aparece, com que frequencia e quem guarda
+  // a sala. SUCINTA a pedido do usuario — mesma regua da 7.22 (PH-338).
+  //
+  // Fora da nota de proposito, por ser invisivel jogando: o teto de fatia que
+  // passou a valer por sala, o tier de Hoenn que estava derivado e desligado, o
+  // conserto do gerador de missoes e a conta de chance do card de hunt. Os
+  // quatro aparecem indiretamente nas linhas abaixo (as chances mudaram), e
+  // listar cada um encheria a nota de mecanica que ninguem confere na tela.
+  {
+    version: '7.23',
+    date: '2026-08-31',
+    title: 'Cada lugar tem os bichos dele',
+    highlights: [
+      'A CHANCE DE CADA POKE AGORA DEPENDE DO LUGAR. Antes cada especie tinha uma frequencia so, igual em qualquer hunt. Agora vale a raridade que ele tem NAQUELE sub-bioma — forma final ficou bem mais rara, forma base do lugar bem mais comum.',
+      'GUARDIAO E LORD VIRARAM BICHO GRANDE. Saiam do mesmo bolo dos selvagens (dava Guardiao Rattata); agora saem do elenco de chefe do sub-bioma, e o Lord da sala 10 e mais raro que o Guardiao. Em nivel baixo ainda cai bicho comum.',
+      'A PRIMEIRA CACADA TEM NOVE POKE E VAI ATE O NIVEL 3. Pidgey, Caterpie, Weedle, Zigzagoon, Poochyena e Wurmple entraram. Lv3 e raro de proposito: medido, morrer no primeiro minuto ficou MENOS provavel que antes.',
+      'AS EVOLUCOES DO EEVEE SAIRAM DO MATO. Elas so vem de evoluir o Eevee que o Campeao Lance da — como ja valia pro Porygon.',
+      'AS MISSOES DE HOENN CHEGARAM: 517 no lugar de 335, nos 18 tipos. Missao concluida continua concluida, mas alvo novo entra no meio das cadeias que voce ainda nao terminou.',
+    ],
+  },
   // PH-338. Entrada de LIMPEZA DE DIVIDA, e resumida de proposito (pedido do
   // usuario): cinco linhas curtas, nao os paragrafos das 7.15-7.21.
   //

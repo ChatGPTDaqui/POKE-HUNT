@@ -130,10 +130,31 @@ describe('o ouro por abate e comparavel entre os tipos', () => {
 })
 
 describe('cliente e RPC leem a MESMA cadeia (PH-245)', () => {
-  const [caminhoPublic, sqlPublic] = Object.entries(MIGRATIONS)
-    .find(([k]) => k.endsWith('_missao_cadeia_public.sql')) ?? []
-  const [, sqlDev] = Object.entries(MIGRATIONS)
-    .find(([k]) => k.endsWith('_missao_cadeia_dev.sql')) ?? []
+  /**
+   * A migration de cadeia MAIS RECENTE, e nao a primeira que o glob devolver.
+   *
+   * `find` era o que estava aqui, e ele funcionou enquanto existia UM par. A
+   * cadeia e regerada sempre que o elenco abativel muda, e a segunda regeracao
+   * produziu um segundo par — a partir dai o `find` comparava o modulo gerado
+   * (novo) com o SQL antigo e reprovava apontando pro lugar errado: parecia
+   * divergencia cliente x servidor, quando o que havia era uma migration nova
+   * que o teste nao estava olhando.
+   *
+   * No banco quem manda e a ULTIMA aplicada. Ordenar pelo nome do arquivo
+   * funciona porque o carimbo e `YYYYMMDDHHMMSS` — mesma propriedade em que o
+   * `db push` se apoia, e a mesma correcao que `custoDeEspecialidade.test.ts`
+   * ja tinha precisado fazer no par de custo.
+   */
+  function migrationMaisRecente(sufixo: string): [string | undefined, string | undefined] {
+    const [caminho, sql] = Object.entries(MIGRATIONS)
+      .filter(([k]) => k.endsWith(sufixo))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .pop() ?? []
+    return [caminho, sql]
+  }
+
+  const [caminhoPublic, sqlPublic] = migrationMaisRecente('_missao_cadeia_public.sql')
+  const [, sqlDev] = migrationMaisRecente('_missao_cadeia_dev.sql')
 
   /** As tuplas do `insert into ... missao_cadeia`, na ordem em que o SQL as escreve. */
   function linhasDoSql(sql: string) {
