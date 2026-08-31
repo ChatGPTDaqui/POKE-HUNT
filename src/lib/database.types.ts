@@ -2177,7 +2177,7 @@ export type Database = {
             }[]
           }
       _conceder_eevee_do_lance: {
-        Args: { p_user_id: string }
+        Args: { p_substitui_poke_uid?: string; p_user_id: string }
         Returns: boolean
       }
       _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
@@ -2231,6 +2231,7 @@ export type Database = {
         Args: { p_nature: string; p_stat: string }
         Returns: number
       }
+      _sortear_eevee_do_lance: { Args: never; Returns: Json }
       _troca_teto_por_lado: { Args: never; Returns: number }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
@@ -4910,7 +4911,7 @@ export type Database = {
             }[]
           }
       _conceder_eevee_do_lance: {
-        Args: { p_user_id: string }
+        Args: { p_substitui_poke_uid?: string; p_user_id: string }
         Returns: boolean
       }
       _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
@@ -4964,6 +4965,7 @@ export type Database = {
         Args: { p_nature: string; p_stat: string }
         Returns: number
       }
+      _sortear_eevee_do_lance: { Args: never; Returns: Json }
       _troca_teto_por_lado: { Args: never; Returns: number }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
