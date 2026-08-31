@@ -120,6 +120,40 @@ const golpes = catalogo.golpes.filter((g) => golpesUsados.has(g.chave)).sort((a,
 
 const AOE_RADIUS = 240
 
+/**
+ * A categoria do golpe COMO O BANCO ACEITA — e ele aceita duas, não três.
+ *
+ * ---------------------------------------------------------------------------
+ * PH-336: isto derrubou o deploy da PH-332 na PRIMEIRA instrução
+ * ---------------------------------------------------------------------------
+ *     ERROR: invalid input value for enum move_category: "status" (SQLSTATE 22P02)
+ *
+ * `move_category` no banco é `physical, special`. O catálogo de Ultra Sun tem
+ * TRÊS categorias, e a terceira não existe do lado do Postgres.
+ *
+ * A regra abaixo não é invenção: é EXATAMENTE a que
+ * `scripts/migrate-catalog-to-postgres.js#buildMoveRows` sempre usou —
+ * `=== 'especial' ? 'special' : 'physical'`. Consequência, medida em produção:
+ * golpe de status está gravado como `physical` nas 537 linhas que já existem
+ * (416 em `physical`, 210 delas com `power = 0`, que são os de status:
+ * `acupressure`, `attract`, `growl`, `rain_dance`, `substitute`...).
+ *
+ * ISSO É ERRADO, E É CONSISTENTE. A coluna mente para 210 linhas desde a
+ * primeira carga do catálogo. Não quebra o jogo porque a categoria real é
+ * resolvida no motor (`data/abilityCategory.ts#resolveAbilityCategory`) e a
+ * tabela `moves` do banco é a forma reduzida que o servidor usa para validar
+ * escolha de golpe — validação que não olha categoria.
+ *
+ * Acrescentar `status` ao enum e corrigir as 210 antigas é a correção a prazo, e
+ * é outra issue: enum novo com linhas velhas erradas é meia-correção, pior que a
+ * consistência de hoje.
+ *
+ * `especiesNovasSemStatusNoEnum.test.ts` trava esta regra lendo o SQL gerado.
+ */
+function categoriaDoBanco(categoriaDoCatalogo) {
+  return categoriaDoCatalogo === 'special' ? 'special' : 'physical'
+}
+
 const lit = (v) => (v === null || v === undefined
   ? 'null'
   : typeof v === 'string' ? `'${v.replace(/'/g, "''")}'`
@@ -132,7 +166,7 @@ function linhasDeGolpe(schema) {
     return '  (' + [
       lit(g.chave), lit(g.nome),
       `${lit(g.tipo)}::${schema === 'public' ? 'public' : 'public'}.element_type`,
-      `${lit(g.categoria)}::public.move_category`,
+      `${lit(categoriaDoBanco(g.categoria))}::public.move_category`,
       g.poder, g.precisao, g.pp,
       `${lit(g.alvo)}::public.move_target`,
       aoe ? AOE_RADIUS : 'null',
