@@ -100,22 +100,63 @@ async function listarUsuarios(env) {
   }
 }
 
-const ehDescartavel = (u) => (u.email || '').toLowerCase().endsWith(DOMINIO);
+// CONTAS FIXAS: moram no dominio reservado e NAO sao descartaveis (PH-326).
+//
+// Elas nao sao lixo de sessao — sao infraestrutura de teste, criadas de
+// proposito na PH-46 e reusadas desde entao pra todo fluxo que exige DOIS
+// jogadores de verdade: correio, amizade, DM, guerra de lances no leilao e,
+// desde a PH-315, a bancada de fumaca da troca direta.
+//
+// Sem esta lista, `--limpar` apagava as duas: o filtro era so "termina no
+// dominio reservado". E `--criar` NAO as traz de volta — ele provisiona so a
+// canonica. Recriar e trabalho manual, e o `user_id` novo quebra qualquer coisa
+// que tenha guardado o antigo.
+//
+// A propriedade que torna a limpeza segura continua intacta: o filtro primario
+// e o DOMINIO reservado, nunca heuristica de nome (das contas apagadas em
+// 2026-08-14, duas estavam em `gmail.com`). Esta lista so TIRA conta do
+// descarte; ela nunca acrescenta ninguem.
+const FIXAS = new Set([
+  EMAIL_PADRAO,
+  // PH-46: o outro lado de correio/amizade/DM, e o convidado da mesa de troca
+  // em `scripts/harness/fumaca-da-troca.mjs`.
+  `ph46-amigo2${DOMINIO}`,
+  // PH-101: o terceiro, pra guerra de lances no leilao precisar de dois
+  // compradores distintos.
+  `ph46-amigo3${DOMINIO}`,
+]);
+
+const ehDoDominio = (u) => (u.email || '').toLowerCase().endsWith(DOMINIO);
+const ehFixa = (u) => FIXAS.has((u.email || '').toLowerCase());
+const ehDescartavel = (u) => ehDoDominio(u) && !ehFixa(u);
 
 async function status(env, emailCanonica) {
   const usuarios = await listarUsuarios(env);
   const descartaveis = usuarios.filter(ehDescartavel);
+  const fixas = usuarios.filter(ehFixa);
   const canonica = usuarios.find((u) => (u.email || '').toLowerCase() === emailCanonica.toLowerCase());
 
   console.log(`Banco: ${env.SUPABASE_URL}`);
   console.log(`Contas no total:        ${usuarios.length}`);
   console.log(`Canonica (${emailCanonica}): ${canonica ? 'existe' : 'NAO existe — rode --criar'}`);
-  console.log(`Descartaveis em ${DOMINIO}: ${descartaveis.length - (canonica ? 1 : 0)}`);
-  for (const u of descartaveis) {
+  // Listadas separado das descartaveis de proposito: a contagem de descartaveis
+  // dizia "2" pras duas do PH-46, e quem lesse isso concluiria que ha lixo a
+  // limpar quando nao ha.
+  console.log(`Fixas (nunca apagadas): ${fixas.length} de ${FIXAS.size} esperadas`);
+  for (const u of fixas) {
     if (canonica && u.id === canonica.id) continue;
+    console.log(`  ${u.email}  (fixa — fluxo entre dois jogadores)`);
+  }
+  for (const email of FIXAS) {
+    if (!usuarios.some((u) => (u.email || '').toLowerCase() === email)) {
+      console.log(`  ${email}  AUSENTE — teste entre dois jogadores nao roda sem ela`);
+    }
+  }
+  console.log(`Descartaveis em ${DOMINIO}: ${descartaveis.length}`);
+  for (const u of descartaveis) {
     console.log(`  ${u.email}  (criada em ${u.created_at})`);
   }
-  return { usuarios, canonica, descartaveis };
+  return { usuarios, canonica, descartaveis, fixas };
 }
 
 async function criar(env, emailCanonica) {
@@ -162,6 +203,9 @@ async function criar(env, emailCanonica) {
 
 async function limpar(env, emailCanonica) {
   const { canonica, descartaveis } = await status(env, emailCanonica);
+  // O `ehDescartavel` ja tira as fixas, e a canonica esta entre elas. O filtro
+  // extra fica como cinto e suspensorio: se `CONTA_TESTE_EMAIL` apontar pra um
+  // e-mail fora de `FIXAS`, ela continua protegida.
   const alvos = descartaveis.filter((u) => !canonica || u.id !== canonica.id);
   if (!alvos.length) {
     console.log('\nNada a limpar.');
