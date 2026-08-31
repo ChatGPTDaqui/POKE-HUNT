@@ -7,7 +7,7 @@
 // hunt com pool vazio so estoura quando alguem entra nela. Um sub-bioma
 // inalcancavel nao da erro em lugar nenhum.
 import { describe, expect, it } from 'vitest'
-import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID } from './huntSpawnOverrides'
+import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID, TETO_DE_FATIA, POOL_MINIMO_PRA_TETO } from './huntSpawnOverrides'
 import { SPECIES, type Species } from './pokes'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
@@ -16,6 +16,8 @@ import {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL, huntId,
 } from './biomas'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
+import { contextoDeSpawn, janelaDaSala } from '@/engine/systems/salaSystem'
+import { SALAS_POR_HUNT } from './biomas'
 import { NON_WILD_SPECIES } from './regions'
 import { baseStatTotal, especieForte, zonaMinimaDaEspecie } from './spawnStrength'
 import { huntOdds } from '@/features/hunt/HuntMenu'
@@ -315,9 +317,16 @@ describe('pesos de spawn', () => {
     expect(erros).toEqual([])
   })
 
+  // ESTE TESTE MEDE A HUNT, E A HUNT NAO E O QUE O JOGADOR ENFRENTA.
+  //
+  // Ele guarda o pool de FALLBACK — o `enemyPool`, que so vira pool de sorteio
+  // quando nao ha sala (inicial, BOSS, Lance, e o intervalo antes de o servidor
+  // dizer a sala). Ele passou verde durante toda a vida do bug que o teste
+  // seguinte pega: por medir a uniao das salas, ele nunca viu Leito de Praia
+  // III em 50%.
+  //
   // Sem o teto, um pool pequeno com um tier alto vira hunt de uma especie so:
-  // medido, Unown ocupava 50,8% do Sagrado. A hunt inicial (3 especies curadas
-  // a mao) fica de fora — com 3, o minimo possivel ja e 33%.
+  // medido, Unown ocupava 50,8% do Sagrado.
   it('nenhuma especie passa de 35% de uma hunt com 5 ou mais especies', () => {
     const erros: string[] = []
     for (const map of huntsNormais) {
@@ -326,6 +335,42 @@ describe('pesos de spawn', () => {
       for (const id of map.enemyPool) {
         const fatia = ENCOUNTERS[id].weight / total
         if (fatia > 0.35 + 1e-9) erros.push(`${map.id}/${ENCOUNTERS[id].speciesId} = ${(fatia * 100).toFixed(1)}%`)
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
+  // O TESTE QUE MEDE O QUE O JOGADOR ENFRENTA DE VERDADE.
+  //
+  // O sorteio roda sobre o pool da SALA recortado pela JANELA DE NIVEL dela, e e
+  // esse conjunto — nao o `enemyPool` da hunt — que precisa respeitar o teto.
+  // Sao 33 sub-biomas x 3 faixas x 10 indices de sala. Com o teto so no nivel da
+  // hunt, 9 das 99 combinacoes (sub-bioma x faixa) ja passavam de 35%:
+  //
+  //   beach/III 50,0%   laboratory/II 50,0%   beach/I 42,9%   graveyard/I 40,0%
+  //   snowy-forest/I 39,5%   ruins/III 39,5%   graveyard/III 37,0%   ...
+  //
+  // Percorre `contextoDeSpawn`, e nao uma reimplementacao da conta, de proposito:
+  // o que precisa estar certo e o numero que o motor usa no `weightedPick`, nao
+  // um numero parecido calculado no teste.
+  it('nenhuma especie passa de 35% de nenhuma SALA, em nenhum indice', () => {
+    const erros: string[] = []
+    for (const [huntId, salas] of Object.entries(POOL_POR_SALA)) {
+      const mapDef = MAPS[huntId]
+      for (const chave of Object.keys(salas)) {
+        for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+          const sala = { chave, indice, abates: 0, ciclo: 1 }
+          const ctx = contextoDeSpawn(huntId, mapDef.levelRange, sala, mapDef.enemyPool)
+          if (ctx.pool.length < POOL_MINIMO_PRA_TETO) continue
+          const total = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
+          for (const id of ctx.pool) {
+            const fatia = ctx.peso(id) / total
+            if (fatia > TETO_DE_FATIA + 1e-9) {
+              const janela = janelaDaSala(mapDef.levelRange, indice).join('-')
+              erros.push(`${huntId}/${chave}#${indice} (Lv ${janela}) ${ENCOUNTERS[id].speciesId} = ${(fatia * 100).toFixed(1)}%`)
+            }
+          }
+        }
       }
     }
     expect(erros).toEqual([])

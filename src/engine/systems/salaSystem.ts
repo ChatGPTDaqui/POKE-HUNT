@@ -27,7 +27,7 @@ import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
-import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
+import { POOL_POR_SALA, aparaOTeto } from '@/data/huntSpawnOverrides'
 import { getEncounter } from '@/data/enemies'
 import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
 import type { MapItemDrop } from '@/data/generated/types'
@@ -163,6 +163,49 @@ export function poolAtivo(mapId: string, sala: SalaAtiva | null, fallback: strin
 export interface ContextoDeSpawn {
   pool: string[]
   janela?: [number, number]
+  /**
+   * Peso do encontro NESTA sala, ja aparado pelo teto de fatia.
+   *
+   * Existe como funcao no contexto, e nao como `encounter.weight` lido direto,
+   * porque o teto so faz sentido contra o pool que esta valendo AGORA — e o
+   * peso guardado no encontro e um so, compartilhado por todas as salas da
+   * mesma hunt (`addEncounter` chaveia por hunt + especie). Aparar o encontro
+   * pra caber numa sala estragaria a fatia dele na sala vizinha.
+   */
+  peso: (encounterId: string) => number
+}
+
+// ---------------------------------------------------------------------------
+// Peso por sala
+// ---------------------------------------------------------------------------
+// O teto de fatia (`huntSpawnOverrides#TETO_DE_FATIA`) sempre existiu, mas era
+// aplicado sobre o `enemyPool` da HUNT — a uniao das salas — enquanto o sorteio
+// acontece sobre o pool da SALA recortado pela janela de nivel. As duas coisas
+// nao se encostam, e o resultado era um teto que nao segurava nada: medido nas
+// 99 salas (33 sub-biomas x 3 faixas), 9 passavam de 35%, sendo Leito de Praia
+// III e Laboratorio II exatamente 50%.
+//
+// A conta e feita aqui, no ponto onde o pool ativo e conhecido, em vez de
+// pre-calculada num Record por (hunt, sub-bioma, indice de sala): sao ~2.000
+// combinacoes, e uma tabela paralela e mais uma coisa que pode sair de sincronia
+// com o pool sem dar erro. O cache abaixo tira o custo do caminho quente.
+const cacheDePesos = new Map<string, Map<string, number>>()
+
+/**
+ * Pesos aparados do pool ativo. Memoizado porque `contextoDeSpawn` roda a cada
+ * spawn (e milhares de vezes por flush no farm offline) e a resposta so depende
+ * de (mapa, sub-bioma, indice da sala) — a janela de nivel sai do indice, e o
+ * pool sai dos dois.
+ *
+ * O cache e limitado por construcao: as chaves possiveis sao os mapas com sala
+ * vezes os sub-biomas deles vezes `SALAS_POR_HUNT`.
+ */
+function pesosDaSala(chave: string, pool: string[]): Map<string, number> {
+  const pronto = cacheDePesos.get(chave)
+  if (pronto) return pronto
+  const pesos = aparaOTeto(new Map(pool.map((id) => [id, getEncounter(id)?.weight ?? 0])))
+  cacheDePesos.set(chave, pesos)
+  return pesos
 }
 
 /**
@@ -180,13 +223,17 @@ export function contextoDeSpawn(
   fallback: string[],
 ): ContextoDeSpawn {
   const pool = poolAtivo(mapId, sala, fallback)
-  if (!sala) return { pool }
+  // Sem sala o pool de sorteio E o `enemyPool` da hunt, que ja levou a apara do
+  // fallback em `huntSpawnOverrides` — o peso guardado no encontro ja e o final.
+  if (!sala) return { pool, peso: (id) => getEncounter(id)?.weight ?? 0 }
   const janela = janelaDaSala(faixa, sala.indice)
   const naJanela = pool.filter((id) => {
     const enc = getEncounter(id)
     return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0]
   })
-  return { pool: naJanela.length > 0 ? naJanela : pool, janela }
+  const ativo = naJanela.length > 0 ? naJanela : pool
+  const pesos = pesosDaSala(`${mapId}|${sala.chave}|${sala.indice}`, ativo)
+  return { pool: ativo, janela, peso: (id) => pesos.get(id) ?? 0 }
 }
 
 /** Loot que pode cair agora: o do sub-bioma, ou o da hunt inteira. */

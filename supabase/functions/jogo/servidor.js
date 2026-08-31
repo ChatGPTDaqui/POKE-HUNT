@@ -44388,23 +44388,44 @@ var SUB_BIOMA_CLIMA = {
 //#region src/data/generated/spawnTiers.generated.ts
 var SPAWN_WEIGHT_BY_SPECIES = {
 	"abra": 10,
+	"absol": 10,
 	"aerodactyl": 5,
+	"aggron": 1,
 	"aipom": 20,
 	"alakazam": 1,
+	"altaria": 5,
 	"ampharos": 1,
+	"anorith": 10,
 	"arbok": 5,
 	"arcanine": 5,
 	"ariados": 1,
+	"armaldo": 5,
+	"aron": 20,
 	"articuno": 1,
 	"azumarill": 5,
+	"azurill": 10,
+	"bagon": 30,
+	"baltoy": 20,
+	"banette": 20,
+	"barboach": 30,
 	"bayleef": 5,
+	"beautifly": 1,
 	"beedrill": 1,
+	"beldum": 10,
 	"bellossom": 1,
 	"bellsprout": 20,
 	"blastoise": 1,
+	"blaziken": 1,
 	"blissey": 5,
+	"breloom": 5,
 	"bulbasaur": 10,
 	"butterfree": 1,
+	"cacnea": 5,
+	"cacturne": 5,
+	"camerupt": 5,
+	"carvanha": 30,
+	"cascoon": 10,
+	"castform": 5,
 	"caterpie": 10,
 	"celebi": 1,
 	"chansey": 1,
@@ -44412,17 +44433,26 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"charmander": 10,
 	"charmeleon": 5,
 	"chikorita": 10,
+	"chimecho": 1,
 	"chinchou": 30,
+	"clamperl": 30,
+	"claydol": 20,
 	"clefable": 1,
 	"clefairy": 1,
 	"cleffa": 10,
 	"cloyster": 5,
+	"combusken": 5,
+	"corphish": 30,
 	"corsola": 10,
+	"cradily": 5,
+	"crawdaunt": 5,
 	"crobat": 1,
 	"croconaw": 5,
 	"cubone": 30,
 	"cyndaquil": 10,
+	"delcatty": 5,
 	"delibird": 10,
+	"deoxys": 1,
 	"dewgong": 1,
 	"diglett": 30,
 	"ditto": 5,
@@ -44435,37 +44465,52 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"drowzee": 20,
 	"dugtrio": 10,
 	"dunsparce": 1,
+	"dusclops": 5,
+	"duskull": 10,
+	"dustox": 1,
 	"eevee": 10,
 	"ekans": 10,
 	"electabuzz": 5,
+	"electrike": 30,
 	"electrode": 10,
 	"elekid": 10,
 	"entei": 1,
 	"espeon": 5,
 	"exeggcute": 20,
 	"exeggutor": 5,
+	"exploud": 1,
 	"farfetch_d": 5,
 	"fearow": 10,
+	"feebas": 10,
 	"feraligatr": 1,
 	"flaaffy": 10,
 	"flareon": 5,
+	"flygon": 1,
 	"forretress": 5,
 	"furret": 5,
+	"gardevoir": 1,
 	"gastly": 20,
 	"gengar": 1,
 	"geodude": 30,
 	"girafarig": 20,
+	"glalie": 5,
 	"gligar": 10,
 	"gloom": 1,
 	"golbat": 10,
 	"goldeen": 30,
 	"golduck": 10,
 	"golem": 1,
+	"gorebyss": 5,
 	"granbull": 1,
 	"graveler": 30,
 	"grimer": 30,
+	"groudon": 1,
+	"grovyle": 5,
 	"growlithe": 5,
+	"grumpig": 5,
+	"gulpin": 20,
 	"gyarados": 20,
+	"hariyama": 30,
 	"haunter": 5,
 	"heracross": 5,
 	"hitmonchan": 5,
@@ -44477,10 +44522,13 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"horsea": 30,
 	"houndoom": 5,
 	"houndour": 5,
+	"huntail": 5,
 	"hypno": 5,
 	"igglybuff": 10,
+	"illumise": 20,
 	"ivysaur": 5,
 	"jigglypuff": 1,
+	"jirachi": 1,
 	"jolteon": 5,
 	"jumpluff": 1,
 	"jynx": 5,
@@ -44489,17 +44537,31 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"kadabra": 5,
 	"kakuna": 5,
 	"kangaskhan": 5,
+	"kecleon": 1,
 	"kingdra": 1,
 	"kingler": 20,
+	"kirlia": 5,
 	"koffing": 30,
 	"krabby": 30,
+	"kyogre": 1,
+	"lairon": 20,
 	"lanturn": 10,
 	"lapras": 5,
 	"larvitar": 5,
+	"latias": 1,
+	"latios": 1,
 	"ledian": 1,
 	"ledyba": 5,
 	"lickitung": 20,
+	"lileep": 10,
+	"linoone": 20,
+	"lombre": 20,
+	"lotad": 30,
+	"loudred": 10,
+	"ludicolo": 1,
 	"lugia": 1,
+	"lunatone": 5,
+	"luvdisc": 30,
 	"machamp": 1,
 	"machoke": 10,
 	"machop": 20,
@@ -44509,20 +44571,33 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"magmar": 5,
 	"magnemite": 20,
 	"magneton": 10,
+	"makuhita": 30,
+	"manectric": 10,
 	"mankey": 10,
 	"mantine": 5,
 	"mareep": 10,
 	"marill": 5,
 	"marowak": 1,
+	"marshtomp": 5,
+	"masquerain": 5,
+	"mawile": 5,
+	"medicham": 5,
+	"meditite": 10,
 	"meganium": 1,
 	"meowth": 10,
+	"metagross": 1,
+	"metang": 5,
 	"metapod": 5,
 	"mew": 1,
 	"mewtwo": 1,
+	"mightyena": 20,
+	"milotic": 5,
 	"miltank": 5,
+	"minun": 20,
 	"misdreavus": 5,
 	"moltres": 1,
 	"mr__mime": 5,
+	"mudkip": 10,
 	"muk": 5,
 	"murkrow": 5,
 	"natu": 30,
@@ -44532,8 +44607,13 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"nidoran_m": 20,
 	"nidorina": 30,
 	"nidorino": 30,
+	"nincada": 20,
 	"ninetales": 5,
+	"ninjask": 5,
 	"noctowl": 5,
+	"nosepass": 30,
+	"numel": 30,
+	"nuzleaf": 1,
 	"octillery": 5,
 	"oddish": 10,
 	"omanyte": 10,
@@ -44541,6 +44621,7 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"onix": 20,
 	"paras": 10,
 	"parasect": 5,
+	"pelipper": 5,
 	"persian": 1,
 	"phanpy": 1,
 	"pichu": 10,
@@ -44551,11 +44632,13 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"piloswine": 5,
 	"pineco": 10,
 	"pinsir": 1,
+	"plusle": 1,
 	"politoed": 1,
 	"poliwag": 30,
 	"poliwhirl": 20,
 	"poliwrath": 1,
 	"ponyta": 20,
+	"poochyena": 30,
 	"porygon": 10,
 	"porygon2": 5,
 	"primeape": 1,
@@ -44566,24 +44649,47 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"qwilfish": 30,
 	"raichu": 5,
 	"raikou": 1,
+	"ralts": 5,
 	"rapidash": 10,
 	"raticate": 10,
 	"rattata": 30,
+	"rayquaza": 1,
+	"regice": 1,
+	"regirock": 1,
+	"registeel": 1,
+	"relicanth": 5,
 	"remoraid": 30,
 	"rhydon": 1,
 	"rhyhorn": 10,
+	"roselia": 5,
+	"sableye": 30,
+	"salamence": 1,
 	"sandshrew": 10,
 	"sandslash": 5,
+	"sceptile": 1,
 	"scizor": 5,
 	"scyther": 1,
 	"seadra": 10,
 	"seaking": 20,
+	"sealeo": 5,
+	"seedot": 1,
 	"seel": 20,
 	"sentret": 20,
+	"seviper": 10,
+	"sharpedo": 30,
+	"shedinja": 5,
+	"shelgon": 5,
 	"shellder": 20,
+	"shiftry": 1,
+	"shroomish": 20,
 	"shuckle": 5,
+	"shuppet": 30,
+	"silcoon": 10,
 	"skarmory": 1,
 	"skiploom": 5,
+	"skitty": 1,
+	"slaking": 1,
+	"slakoth": 5,
 	"slowbro": 10,
 	"slowking": 5,
 	"slowpoke": 30,
@@ -44592,9 +44698,14 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"smoochum": 10,
 	"sneasel": 1,
 	"snorlax": 5,
+	"snorunt": 10,
 	"snubbull": 5,
+	"solrock": 20,
 	"spearow": 30,
+	"spheal": 30,
 	"spinarak": 5,
+	"spinda": 30,
+	"spoink": 20,
 	"squirtle": 10,
 	"stantler": 10,
 	"starmie": 5,
@@ -44604,7 +44715,13 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"suicune": 1,
 	"sunflora": 5,
 	"sunkern": 10,
+	"surskit": 10,
+	"swablu": 30,
+	"swalot": 5,
+	"swampert": 1,
+	"swellow": 10,
 	"swinub": 30,
+	"taillow": 20,
 	"tangela": 30,
 	"tauros": 5,
 	"teddiursa": 1,
@@ -44612,7 +44729,12 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"tentacruel": 10,
 	"togepi": 10,
 	"togetic": 5,
+	"torchic": 10,
+	"torkoal": 30,
 	"totodile": 10,
+	"trapinch": 30,
+	"treecko": 10,
+	"tropius": 10,
 	"typhlosion": 1,
 	"tyranitar": 1,
 	"tyrogue": 10,
@@ -44623,20 +44745,33 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"venomoth": 1,
 	"venonat": 5,
 	"venusaur": 1,
+	"vibrava": 5,
 	"victreebel": 1,
+	"vigoroth": 5,
 	"vileplume": 1,
+	"volbeat": 1,
 	"voltorb": 30,
 	"vulpix": 5,
+	"wailmer": 30,
+	"wailord": 1,
+	"walrein": 1,
 	"wartortle": 5,
 	"weedle": 10,
 	"weepinbell": 10,
 	"weezing": 1,
+	"whiscash": 20,
+	"whismur": 30,
 	"wigglytuff": 5,
+	"wingull": 30,
 	"wobbuffet": 10,
 	"wooper": 30,
+	"wurmple": 30,
+	"wynaut": 30,
 	"xatu": 5,
 	"yanma": 1,
+	"zangoose": 5,
 	"zapdos": 1,
+	"zigzagoon": 20,
 	"zubat": 20
 };
 //#endregion
@@ -45218,19 +45353,49 @@ function montarHunt(bioma, faixa) {
 }
 for (const bioma of BIOMAS) for (const faixa of FAIXAS$1) montarHunt(bioma, faixa);
 var TETO_DE_FATIA = .35;
-var POOL_MINIMO_PRA_TETO = 5;
-for (const map of Object.values(maps)) {
-	if (map.enemyPool.length < POOL_MINIMO_PRA_TETO) continue;
-	for (let volta = 0; volta < 10; volta++) {
-		const total = map.enemyPool.reduce((s, id) => s + encounters[id].weight, 0);
-		const acima = map.enemyPool.filter((id) => encounters[id].weight / total > .350000001);
-		if (acima.length === 0) break;
-		for (const id of acima) {
-			const resto = total - encounters[id].weight;
-			encounters[id].weight = TETO_DE_FATIA * resto / .65;
-		}
+/**
+* Apara os pesos ate ninguem passar de `TETO_DE_FATIA`. Muta e devolve o mapa.
+*
+* RESOLVIDO DIRETO, E NAO POR APROXIMACAO SUCESSIVA. A versao anterior reaplicava
+* a formula ate 10 vezes, e ela NAO CONVERGE nesse orcamento quando dois
+* encontros empatam no topo de um pool pequeno: cada volta recalcula o peso de
+* um assumindo que o outro ficou parado, entao os dois se perseguem. Medido no
+* pool que expos isto (Espaco do Pesadelo, sala 10 — Solrock e Lunatone
+* empatados com Claydol atras): as 10 voltas paravam em 35,05%, acima do teto,
+* e so o teste POR SALA viu — no nivel da hunt o pool e maior e a convergencia
+* cabia nas 10 voltas.
+*
+* A conta fechada: se os `k` mais pesados ficam no teto `t` e o resto soma `R`,
+* entao `total = k*w + R` e `w/total = t`, o que da `w = t*R/(1 - k*t)`. O `k`
+* certo e o menor em que o (k+1)-esimo ja nao passa do teto — e como
+* `w/total = t` por construcao, "nao passar" e simplesmente `w_(k+1) <= w`.
+*
+* `k*t >= 1` e o caso aritmeticamente impossivel (com teto 0,35, tres encontros
+* no teto dariam 105%): ai o pool e pequeno demais pro teto e fica como esta.
+*
+* Determinismo importa aqui tanto quanto a exatidao: e o mesmo peso dos dois
+* lados que faz cliente e autoridade concordarem sobre o sorteio (ver a nota de
+* divergencia de sala em systems/salaSystem.ts). Por isso o empate e desfeito
+* pela CHAVE, e nao pela ordem de insercao do mapa.
+*/
+function aparaOTeto(pesos) {
+	if (pesos.size < 3) return pesos;
+	const ordenado = [...pesos].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+	let resto = ordenado.reduce((s, [, w]) => s + w, 0);
+	if (!(resto > 0)) return pesos;
+	for (let k = 1; k * .35 < 1 && k < ordenado.length; k++) {
+		resto -= ordenado[k - 1][1];
+		const noTeto = TETO_DE_FATIA * resto / (1 - k * TETO_DE_FATIA);
+		if (ordenado[k][1] > noTeto + 1e-12) continue;
+		if (ordenado[k - 1][1] <= noTeto + 1e-12) break;
+		for (let i = 0; i < k; i++) pesos.set(ordenado[i][0], noTeto);
+		break;
 	}
+	return pesos;
 }
+for (const map of Object.values(maps)) aparaOTeto(new Map(map.enemyPool.map((id) => [id, encounters[id].weight]))).forEach((peso, id) => {
+	encounters[id].weight = peso;
+});
 var nightmare = buildNightmareMirror(maps, encounters, POOL_POR_SALA);
 for (const [id, salas] of Object.entries(nightmare.porSala)) POOL_POR_SALA[id] = salas;
 var MAPS = {
@@ -76380,6 +76545,23 @@ function poolAtivo(mapId, sala, fallback) {
 	const pool = POOL_POR_SALA[mapId]?.[sala.chave];
 	return pool && pool.length > 0 ? pool : fallback;
 }
+var cacheDePesos = /* @__PURE__ */ new Map();
+/**
+* Pesos aparados do pool ativo. Memoizado porque `contextoDeSpawn` roda a cada
+* spawn (e milhares de vezes por flush no farm offline) e a resposta so depende
+* de (mapa, sub-bioma, indice da sala) — a janela de nivel sai do indice, e o
+* pool sai dos dois.
+*
+* O cache e limitado por construcao: as chaves possiveis sao os mapas com sala
+* vezes os sub-biomas deles vezes `SALAS_POR_HUNT`.
+*/
+function pesosDaSala(chave, pool) {
+	const pronto = cacheDePesos.get(chave);
+	if (pronto) return pronto;
+	const pesos = aparaOTeto(new Map(pool.map((id) => [id, getEncounter(id)?.weight ?? 0])));
+	cacheDePesos.set(chave, pesos);
+	return pesos;
+}
 /**
 * O que pode nascer AGORA: o pool da sala, recortado pela janela de nivel dela.
 *
@@ -76390,15 +76572,21 @@ function poolAtivo(mapId, sala, fallback) {
 */
 function contextoDeSpawn(mapId, faixa, sala, fallback) {
 	const pool = poolAtivo(mapId, sala, fallback);
-	if (!sala) return { pool };
+	if (!sala) return {
+		pool,
+		peso: (id) => getEncounter(id)?.weight ?? 0
+	};
 	const janela = janelaDaSala(faixa, sala.indice);
 	const naJanela = pool.filter((id) => {
 		const enc = getEncounter(id);
 		return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0];
 	});
+	const ativo = naJanela.length > 0 ? naJanela : pool;
+	const pesos = pesosDaSala(`${mapId}|${sala.chave}|${sala.indice}`, ativo);
 	return {
-		pool: naJanela.length > 0 ? naJanela : pool,
-		janela
+		pool: ativo,
+		janela,
+		peso: (id) => pesos.get(id) ?? 0
 	};
 }
 /** Loot que pode cair agora: o do sub-bioma, ou o da hunt inteira. */
@@ -77046,7 +77234,7 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 	}
 	let escolhido = null;
 	for (let tentativa = 0; tentativa < 6; tentativa++) {
-		const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45);
+		const encounterId = weightedPick(rng, ctx.pool, ctx.peso);
 		const encounter = getEncounter(encounterId);
 		if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
 		const level = tipo === "lord" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
@@ -77137,13 +77325,13 @@ function avancarBiomaProgressSeForOProximo(world, gameState) {
 	if ((gameState.biomaProgress[faixa] ?? 0) !== indice) return;
 	gameState.setBiomaProgress(faixa, indice + 1);
 }
-function spawnEnemyAt(world, mapDef, pool, janela, player, entrada, ocupados = []) {
+function spawnEnemyAt(world, mapDef, ctx, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
 	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, ocupados);
-	const encounterId = weightedPick(rng, pool, (id) => getEncounter(id)?.weight ?? 45);
+	const encounterId = weightedPick(rng, ctx.pool, ctx.peso);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
-	const [jmin, jmax] = janela ?? [encounter.minLevel, encounter.maxLevel];
+	const [jmin, jmax] = ctx.janela ?? [encounter.minLevel, encounter.maxLevel];
 	const lo = Math.max(encounter.minLevel, Math.min(jmin, encounter.maxLevel));
 	const hi = Math.min(encounter.maxLevel, Math.max(jmax, encounter.minLevel));
 	const level = encounter.levelWeights?.length ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level : randInt(rng, Math.min(lo, hi), Math.max(lo, hi));
@@ -77275,16 +77463,13 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 	const sequenceCleared = progresso?.sequenceCleared ?? false;
 	const countdownRemaining = sequenceIndex > 0 || sequenceCleared ? null : mapDef.startCountdown || null;
 	const climaDaConstrucao = progresso && "clima" in progresso ? climaDeAmbiente(progresso.clima ?? null) : climaAmbienteDaSala(base.seed, sala);
-	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
+	const ctx = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
 	let protetorPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
 		const tipoDeProtetor = sala && sala.abates >= 30 ? protetorDaSala(sala) : null;
 		if (tipoDeProtetor) {
-			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, {
-				pool,
-				janela
-			}, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
+			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, ctx, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 			protetorPendente = pendente;
@@ -77297,7 +77482,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 				enemies.push(enemy);
 			}
 		} else for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
-			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies);
+			const enemy = spawnEnemyAt(base, mapDef, ctx, player, entradaDoInimigo(mapDef, sala), enemies);
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 		}
@@ -77488,7 +77673,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			} else {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
@@ -77508,7 +77693,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
@@ -77582,7 +77767,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
+			const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;

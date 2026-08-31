@@ -52,7 +52,7 @@ import { recordKill } from './systems/farmRates'
 import {
   contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
-  encurtarTransicaoDeSala,
+  encurtarTransicaoDeSala, type ContextoDeSpawn,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -355,7 +355,7 @@ function randomSpawnPoint(
 function criarEntidadeDoProtetor(
   world: SequenciaDeSorteio,
   mapDef: MapDef,
-  ctx: { pool: string[]; janela?: [number, number] },
+  ctx: ContextoDeSpawn,
   tipo: TipoDeProtetor,
   protetorSalvo: ProtetorPendente | null | undefined,
   player: PlayerEntity | null,
@@ -398,7 +398,7 @@ function criarEntidadeDoProtetor(
     poke: PokeInstance
   } | null = null
   for (let tentativa = 0; tentativa < TENTATIVAS_DE_PROTETOR_DANIFICAVEL; tentativa++) {
-    const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45)
+    const encounterId = weightedPick(rng, ctx.pool, ctx.peso)
     const encounter = getEncounter(encounterId)
     if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
     const level = tipo === 'lord' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
@@ -490,8 +490,11 @@ function avancarBiomaProgressSeForOProximo(world: WorldState, gameState: GameSta
 function spawnEnemyAt(
   world: SequenciaDeSorteio,
   mapDef: MapDef,
-  pool: string[],
-  janela?: [number, number],
+  // O CONTEXTO INTEIRO, e nao `pool` e `janela` soltos: o peso de sorteio
+  // depende do pool ATIVO (ver salaSystem#ContextoDeSpawn.peso), entao passar so
+  // a lista abriria caminho pra sortear com o peso da hunt dentro de uma sala —
+  // que e exatamente o bug que o teto por sala existe pra fechar.
+  ctx: ContextoDeSpawn,
   player?: { x: number; y: number; facing: Point } | null,
   entrada?: Point | null,
   // PH-143: onde os outros inimigos ja estao, pra este nao nascer em cima
@@ -530,7 +533,7 @@ function spawnEnemyAt(
   // de milhares de sorteios nao desvia o bastante pra passar o jogo ao vivo.
   // `pool` e o da SALA atual quando a hunt tem salas, e o da hunt inteira
   // quando nao tem (inicial, BOSS, Lance) — ver systems/salaSystem.ts.
-  const encounterId = weightedPick(rng, pool, (id) => getEncounter(id)?.weight ?? 45)
+  const encounterId = weightedPick(rng, ctx.pool, ctx.peso)
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
   // `levelWeights` (ver data/huntTypes.ts) troca o sorteio uniforme por um
@@ -540,7 +543,7 @@ function spawnEnemyAt(
   // sao limpas (ver salaSystem#janelaDaSala). Sem ela, a primeira sala de uma
   // faixa de 30 niveis ja podia jogar um POKE Lv30 contra quem acabou de sair
   // do Hospital.
-  const [jmin, jmax] = janela ?? [encounter.minLevel, encounter.maxLevel]
+  const [jmin, jmax] = ctx.janela ?? [encounter.minLevel, encounter.maxLevel]
   const lo = Math.max(encounter.minLevel, Math.min(jmin, encounter.maxLevel))
   const hi = Math.min(encounter.maxLevel, Math.max(jmax, encounter.minLevel))
   const level = encounter.levelWeights?.length
@@ -797,7 +800,7 @@ export function buildMapWorld(
     ? climaDeAmbiente(progresso.clima ?? null)
     : climaAmbienteDaSala(base.seed, sala)
 
-  const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool)
+  const ctx = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool)
 
   const enemies: EnemyEntity[] = []
   let protetorPendente: ProtetorPendente | null = null
@@ -819,7 +822,7 @@ export function buildMapWorld(
       // existe (zero RNG extra — outra janela ja tinha sorteado esse
       // protetor), sorteia na primeira vez que a sala pede protetor senao.
       const { enemy, pendente } = criarEntidadeDoProtetor(
-        base, mapDef, { pool, janela }, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala),
+        base, mapDef, ctx, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala),
       )
       aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
       enemies.push(enemy)
@@ -842,7 +845,7 @@ export function buildMapWorld(
       }
     } else {
       for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
-        const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies)
+        const enemy = spawnEnemyAt(base, mapDef, ctx, player, entradaDoInimigo(mapDef, sala), enemies)
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
         enemies.push(enemy)
       }
@@ -1168,7 +1171,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       } else {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
@@ -1231,7 +1234,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       if (world.mapDef) {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
@@ -1374,7 +1377,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
+      const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
       aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
       world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay
