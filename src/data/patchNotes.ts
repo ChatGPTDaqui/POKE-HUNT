@@ -12,6 +12,44 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-337. QUARTA promocao de 31/08. A regua e uma entrada por PROMOCAO, e esta
+  // promocao tem UM assunto: a Geracao III.
+  //
+  // A 7.20 dizia, por escrito, que a Geracao III NAO entrava — "coisa nao
+  // promovida nao se anuncia" — porque a PR #327 estava aberta naquele momento.
+  // Ela fechou, e o intervalo `main..dev` desta vez tem CINCO commits: a PH-332
+  // (a geracao) e as tres correcoes de deploy da PH-336, mais o back-merge da
+  // 7.20. E a entrada propria e grande que a 7.20 prometeu.
+  //
+  // Fica de FORA, e nenhum dos itens abaixo e esquecimento:
+  //  - As TRES falhas de deploy da PH-336 (`22P02` no enum de categoria, `23514`
+  //    nas duas CHECK de `species`, `42804` no schema do cast). O jogador nao viu
+  //    nenhuma: o banco de producao ficou alguns minutos com 386 especies e o de
+  //    staging com 251, e o cliente que le as duas coisas so chegou depois. Erro
+  //    de encanamento corrigido antes de existir pra quem joga.
+  //  - `gerar-migration-especies.mjs`, o par de migrations, as CHECK afrouxadas,
+  //    `enumsDaMigrationDeEspecies.test.ts`, e os dois testes que liam a PRIMEIRA
+  //    migration em vez da ultima.
+  //  - A correcao do Azurill em `huntSpawnOverrides.ts` (a faixa `[31,17]` vazia
+  //    tirava Marill do jogo). E bug real, mas so existia COM a Geracao III
+  //    ligada — nunca chegou a producao, entao nao ha o que anunciar como
+  //    "corrigido".
+  //  - `faceEmocoes.generated.ts` (1.671 arquivos novos). O efeito visivel dele e
+  //    a cara dos POKE novos aparecer, e isso ja esta dentro do primeiro item.
+  //  - `height_m` NULL nas 135. Nada no jogo le altura hoje.
+  {
+    version: '7.21',
+    date: '2026-08-31',
+    title: 'A Geracao III chegou: 135 POKE de Hoenn, 10 hunts BOSS novas e o preco das Stone mudou',
+    highlights: [
+      'CENTO E TRINTA E CINCO POKE NOVOS ENTRARAM NO MATO E NA POKEDEX. Hoenn inteira, de Treecko a Deoxys: o elenco do jogo saiu de 245 para 380 especies. Elas nao foram jogadas num canto — cada uma tem bioma, sub-bioma e faixa de nivel proprios, medidos nos encontros de verdade do jogo original. Se voce ja conhecia uma hunt de cor, ela tem bicho novo agora: 38 especies novas no Campo Aberto, 24 na Mata, 18 no Subterraneo, 18 no Sombrio, 18 nos Aridos, e vai por ai. Tudo com arte, retrato, shiny e cara de emocao — nenhuma delas aparece como quadrado vazio.',
+      'AS HUNTS BOSS PASSARAM DE 11 PARA 21. Os dez lendarios de Hoenn ganharam hunt dedicada, uma pra cada: Regirock, Regice, Registeel, Latias, Latios, Kyogre, Groudon, Rayquaza, Jirachi e Deoxys. Eles NAO aparecem em hunt comum — chegaram a nascer no mato durante o desenvolvimento e isso foi corrigido antes de ir ao ar, porque Rayquaza como encontro de rotina nao e hunt BOSS, e sim hunt quebrada.',
+      'OS TRES INICIAIS DE HOENN SAO SELVAGENS, E ISSO E DE PROPOSITO. Treecko, Torchic e Mudkip aparecem no mato. A regra do jogo nunca foi "inicial nao e selvagem" — e "o que voce pode ESCOLHER na tela inicial nao aparece no mato", e a tela oferece Charmander, Squirtle e Bulbasaur. Chikorita, Cyndaquil e Totodile ja eram selvagens desde a Geracao II, pelo mesmo motivo.',
+      'CINCO HABILIDADES QUE NAO EXISTIAM AGORA FUNCIONAM, E DUAS DELAS SEGURAM POKE QUEBRADO. Slaking tem o maior conjunto de atributos do jogo inteiro, e agora tem TRUANT: ele descansa um turno a cada dois, e sem isso seria entregar o POKE mais forte do jogo como encontro de rotina. Shedinja tem 1 de HP maximo e agora tem WONDER GUARD: so golpe super efetivo o acerta, e sem isso a especie era piada. Entraram tambem TOXIC BOOST (envenenado bate mais forte), SIMPLE (mudanca de atributo conta dobrada) e HEAVY METAL. E de brinde: LIGHT METAL, que estava no jogo desde sempre com seis donos e NUNCA fez nada — o motivo escrito dizia que nenhum golpe usava peso, e Low Kick, Heavy Slam e Heat Crash usam desde o primeiro dia. As duas agora pesam de verdade.',
+      'O PRECO DE TROCAR A ESPECIALIDADE MUDOU MUITO EM ALGUNS TIPOS, PRA CIMA E PRA BAIXO. O custo em Stone sempre acompanhou quanto daquela Stone o jogo oferece, e 135 POKE novos mudaram a oferta de quase todo tipo. ACO, PEDRA, GELO e TERRA ficaram bem mais caros (Aco saiu de 2 pra 16 Stone no primeiro nivel — Aron, Lairon, Aggron, Beldum, Metang, Metagross, Mawile e Registeel entraram todos de uma vez). VENENO, FADA, SOMBRIO e FANTASMA ficaram mais baratos. Nao e reajuste solto: e a mesma conta de antes, rodada sobre o elenco novo.',
+      'QUARENTA GOLPES NOVOS GANHARAM DESCRICAO EM PORTUGUES. Os golpes que chegaram com Hoenn nao aparecem mais sem texto na tela de golpes.',
+    ],
+  },
   // PH-335. TERCEIRA promocao de 31/08 — a regua e uma entrada por PROMOCAO,
   // nao por dia, e a 7.18 e a 7.19 sairam de madrugada.
   //
