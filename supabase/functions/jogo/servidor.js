@@ -43532,7 +43532,6 @@ var SUB_BIOMA_ESPECIES = {
 		"haunter",
 		"gengar",
 		"crobat",
-		"umbreon",
 		"misdreavus",
 		"dunsparce",
 		"houndour",
@@ -43818,7 +43817,6 @@ var SUB_BIOMA_ESPECIES = {
 		"seaking",
 		"magikarp",
 		"gyarados",
-		"vaporeon",
 		"marill",
 		"azumarill",
 		"wooper",
@@ -43947,7 +43945,6 @@ var SUB_BIOMA_ESPECIES = {
 		"voltorb",
 		"electrode",
 		"electabuzz",
-		"jolteon",
 		"pichu",
 		"mareep",
 		"flaaffy",
@@ -43966,7 +43963,6 @@ var SUB_BIOMA_ESPECIES = {
 		"hypno",
 		"natu",
 		"xatu",
-		"espeon",
 		"unown",
 		"wobbuffet",
 		"spoink",
@@ -44228,7 +44224,6 @@ var SUB_BIOMA_ESPECIES = {
 		"ponyta",
 		"rapidash",
 		"magmar",
-		"flareon",
 		"cyndaquil",
 		"quilava",
 		"typhlosion",
@@ -44304,7 +44299,7 @@ var SUB_BIOMA_TIERS = {
 			"loudred",
 			"absol"
 		],
-		SUPER_RARE: ["umbreon", "exploud"],
+		SUPER_RARE: ["exploud"],
 		ULTRA_RARE: [],
 		BOSS: [
 			"gengar",
@@ -44312,7 +44307,7 @@ var SUB_BIOMA_TIERS = {
 			"houndoom",
 			"sableye"
 		],
-		BOSS_RARE: ["umbreon"],
+		BOSS_RARE: [],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -44824,7 +44819,6 @@ var SUB_BIOMA_TIERS = {
 		SUPER_RARE: [
 			"blastoise",
 			"gyarados",
-			"vaporeon",
 			"slowking"
 		],
 		ULTRA_RARE: [],
@@ -44838,7 +44832,6 @@ var SUB_BIOMA_TIERS = {
 		BOSS_RARE: [
 			"blastoise",
 			"gyarados",
-			"vaporeon",
 			"slowking"
 		],
 		BOSS_SUPER_RARE: [],
@@ -45038,10 +45031,10 @@ var SUB_BIOMA_TIERS = {
 			"flaaffy",
 			"manectric"
 		],
-		SUPER_RARE: ["jolteon", "ampharos"],
+		SUPER_RARE: ["ampharos"],
 		ULTRA_RARE: [],
 		BOSS: ["raichu", "manectric"],
-		BOSS_RARE: ["jolteon", "ampharos"],
+		BOSS_RARE: ["ampharos"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -45066,7 +45059,7 @@ var SUB_BIOMA_TIERS = {
 			"grumpig",
 			"claydol"
 		],
-		SUPER_RARE: ["espeon"],
+		SUPER_RARE: [],
 		ULTRA_RARE: [],
 		BOSS: [
 			"alakazam",
@@ -45075,7 +45068,7 @@ var SUB_BIOMA_TIERS = {
 			"grumpig",
 			"claydol"
 		],
-		BOSS_RARE: ["espeon", "wobbuffet"],
+		BOSS_RARE: ["wobbuffet"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -45509,11 +45502,7 @@ var SUB_BIOMA_TIERS = {
 			"medicham",
 			"camerupt"
 		],
-		SUPER_RARE: [
-			"charizard",
-			"flareon",
-			"typhlosion"
-		],
+		SUPER_RARE: ["charizard", "typhlosion"],
 		ULTRA_RARE: [],
 		BOSS: [
 			"arcanine",
@@ -45522,11 +45511,7 @@ var SUB_BIOMA_TIERS = {
 			"camerupt",
 			"torkoal"
 		],
-		BOSS_RARE: [
-			"charizard",
-			"flareon",
-			"typhlosion"
-		],
+		BOSS_RARE: ["charizard", "typhlosion"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},

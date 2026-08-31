@@ -135,7 +135,18 @@ describe('cobertura de especies', () => {
     expect(achados).toEqual([])
   })
 
-  it('Porygon, Porygon2 e Eevee nao spawnam em hunt nenhuma', () => {
+  it('o gerador e o catalogo concordam sobre quem nao e selvagem', () => {
+    // Duas listas, dois arquivos, uma regra: `NON_WILD_SPECIES` aqui e
+    // `NAO_SELVAGENS` em scripts/gerar-subbiomas.mjs. Divergir nao da erro —
+    // a especie so volta a spawnar. Foi assim que as cinco evolucoes do Eevee
+    // ficaram no mato: elas entraram no roster, o PokeRogue deu casa pras
+    // cinco, e a lista do gerador tinha so as tres chaves originais.
+    const alocadas = new Set(Object.values(SUB_BIOMA_ESPECIES).flat())
+    const vazaram = [...NON_WILD_SPECIES].filter((id) => alocadas.has(id)).sort()
+    expect(vazaram).toEqual([])
+  })
+
+  it('nada de NON_WILD_SPECIES spawna em hunt nenhuma', () => {
     const achados: string[] = []
     for (const map of Object.values(MAPS)) {
       for (const id of especiesDe(map.enemyPool)) {

@@ -66,7 +66,12 @@ const LENDARIOS = new Set([
   'kyogre', 'groudon', 'rayquaza', 'jirachi', 'deoxys',
 ])
 const INICIAIS_BASE = new Set(['charmander', 'squirtle', 'bulbasaur'])
-const NAO_SELVAGENS = new Set(['porygon', 'porygon2', 'eevee'])
+// Espelha `src/data/regions.ts#NON_WILD_SPECIES`, onde o porque de cada uma
+// esta escrito. As duas listas sao comparadas por `hunts.test.ts`.
+const NAO_SELVAGENS = new Set([
+  'porygon', 'porygon2',
+  'eevee', 'vaporeon', 'jolteon', 'flareon', 'espeon', 'umbreon',
+])
 
 // ESPECIES QUE MUDARAM DE CASA A MAO, POR SUB-BIOMA.
 //

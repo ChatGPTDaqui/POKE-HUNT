@@ -2,8 +2,8 @@
 // scripts/pokerogue/biomas.json (pools do PokeRogue) cruzado com o nosso
 // catalogo. Nao editar a mao — a proxima geracao sobrescreve.
 //
-// 33 sub-biomas, 353 especies alocadas
-// (305 com casa direta no PokeRogue, 48 herdadas da linha evolutiva).
+// 33 sub-biomas, 348 especies alocadas
+// (300 com casa direta no PokeRogue, 48 herdadas da linha evolutiva).
 //
 // A CHANCE de aparicao SAI DAQUI, de `SUB_BIOMA_TIERS`: o tier do PokeRogue
 // decide a fatia (ver data/spawnPorTier.ts), o `spawn_tier` real do Gen1/Gen2
@@ -22,7 +22,6 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'haunter',
     'gengar',
     'crobat',
-    'umbreon',
     'misdreavus',
     'dunsparce',
     'houndour',
@@ -308,7 +307,6 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'seaking',
     'magikarp',
     'gyarados',
-    'vaporeon',
     'marill',
     'azumarill',
     'wooper',
@@ -437,7 +435,6 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'voltorb',
     'electrode',
     'electabuzz',
-    'jolteon',
     'pichu',
     'mareep',
     'flaaffy',
@@ -456,7 +453,6 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'hypno',
     'natu',
     'xatu',
-    'espeon',
     'unown',
     'wobbuffet',
     'spoink',
@@ -718,7 +714,6 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'ponyta',
     'rapidash',
     'magmar',
-    'flareon',
     'cyndaquil',
     'quilava',
     'typhlosion',
@@ -796,7 +791,6 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
       'absol',
     ],
     SUPER_RARE: [
-      'umbreon',
       'exploud',
     ],
     ULTRA_RARE: [],
@@ -806,9 +800,7 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
       'houndoom',
       'sableye',
     ],
-    BOSS_RARE: [
-      'umbreon',
-    ],
+    BOSS_RARE: [],
     BOSS_SUPER_RARE: [],
     BOSS_ULTRA_RARE: [],
   },
@@ -1365,7 +1357,6 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
     SUPER_RARE: [
       'blastoise',
       'gyarados',
-      'vaporeon',
       'slowking',
     ],
     ULTRA_RARE: [],
@@ -1379,7 +1370,6 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
     BOSS_RARE: [
       'blastoise',
       'gyarados',
-      'vaporeon',
       'slowking',
     ],
     BOSS_SUPER_RARE: [],
@@ -1597,7 +1587,6 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
       'manectric',
     ],
     SUPER_RARE: [
-      'jolteon',
       'ampharos',
     ],
     ULTRA_RARE: [],
@@ -1606,7 +1595,6 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
       'manectric',
     ],
     BOSS_RARE: [
-      'jolteon',
       'ampharos',
     ],
     BOSS_SUPER_RARE: [],
@@ -1633,9 +1621,7 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
       'grumpig',
       'claydol',
     ],
-    SUPER_RARE: [
-      'espeon',
-    ],
+    SUPER_RARE: [],
     ULTRA_RARE: [],
     BOSS: [
       'alakazam',
@@ -1645,7 +1631,6 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
       'claydol',
     ],
     BOSS_RARE: [
-      'espeon',
       'wobbuffet',
     ],
     BOSS_SUPER_RARE: [],
@@ -2103,7 +2088,6 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
     ],
     SUPER_RARE: [
       'charizard',
-      'flareon',
       'typhlosion',
     ],
     ULTRA_RARE: [],
@@ -2116,7 +2100,6 @@ export const SUB_BIOMA_TIERS: SubBiomaTiers = {
     ],
     BOSS_RARE: [
       'charizard',
-      'flareon',
       'typhlosion',
     ],
     BOSS_SUPER_RARE: [],

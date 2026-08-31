@@ -60,7 +60,23 @@ export const REGION_LABEL: Record<Region, string> = { johto: 'Johto', kanto: 'Ka
 // do mato": Porygon e premio de cassino, Eevee e presente, e Porygon2 so
 // existe evoluindo o Porygon.
 //
-// EFEITO COLATERAL ACEITO: sem outra fonte de obtencao implementada, as tres
-// deixam de ser obteniveis no jogo. Elas continuam no catalogo (stats,
-// moveset, sprite, Bestiario) pro dia que um cassino/loja de premios existir.
-export const NON_WILD_SPECIES = new Set(['porygon', 'porygon2', 'eevee'])
+// AS CINCO EVOLUCOES DO EEVEE ENTRARAM DEPOIS, e a falta delas era um furo, nao
+// uma decisao. A regra sempre foi "so se obtem fora do mato", e o Eevee e
+// presente do Campeao Lance (migration `eevee_do_lance`) — entao Vaporeon,
+// Jolteon, Flareon, Espeon e Umbreon so podem vir de evoluir aquele Eevee,
+// exatamente como Porygon2 so vem de evoluir o Porygon, que ja estava na lista
+// por esse motivo.
+//
+// Elas estavam spawnando: as pools do PokeRogue dao casa pras cinco (Umbreon e
+// ate BOSS_RARE do Abismo, ou seja, seria Lord de sala), e o cruzamento so
+// filtrava as tres chaves escritas aqui. Ninguem notou porque o resultado nao e
+// um erro — e um Umbreon selvagem, que parece conteudo.
+//
+// EFEITO COLATERAL ACEITO: sem outra fonte de obtencao implementada, Porygon e
+// Porygon2 nao sao obteniveis no jogo (o Eevee e as evolucoes dele sao, pelo
+// presente do Lance). Continuam no catalogo — stats, moveset, sprite,
+// Bestiario — pro dia que um cassino/loja de premios existir.
+export const NON_WILD_SPECIES = new Set([
+  'porygon', 'porygon2',
+  'eevee', 'vaporeon', 'jolteon', 'flareon', 'espeon', 'umbreon',
+])
