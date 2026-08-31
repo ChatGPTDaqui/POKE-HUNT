@@ -152,12 +152,6 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // usa o diametro real do raio, entao a leitura de "isto pegou uma area" vem do
   // tamanho e nao de um desenho diferente. Mesma regra do lote por tipo.
   earthquake: { single: tira('earthquake', 14), aoe: tira('earthquake', 14) },
-  // Chegou na PH-368 com a arte que saiu da camada de AREA por tipo: o efeito
-  // 5467 e uma coluna vertical de fogo (quadro 140x268, proporcao 0.52), o que
-  // como FIRE de area virava um pilar fino esticado ate o diametro do splash.
-  // Num vulcao a coluna e o desenho certo, e Eruption e o unico golpe do
-  // catalogo em que ela e literal.
-  eruption: { single: tira('eruption', 11), aoe: tira('eruption', 11) },
   whirlpool: { single: tira('whirlpool', 16), aoe: tira('whirlpool', 16) },
   whirlwind: { single: tira('whirlwind', 20), aoe: tira('whirlwind', 20) },
   petal_dance: { single: tira('petal_dance', 16), aoe: tira('petal_dance', 16) },
@@ -236,8 +230,15 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // Ancora 0.65 (p75 da massa): a lamina corta em cima do alvo, e com 46px de
   // largura a metade de tras mede 30px contra 39 de alcance — nao alcanca quem
   // lancou, entao nao precisa de recorte.
+  //
+  // `escala` 1.4 depois de ver em jogo: com 7.71x de alongamento a lamina em
+  // 46px vira um traco de poucos pixels de espessura, e sobre grama ela quase
+  // nao aparece. 1.25 leva o quadro pra 57px, que e 1.97x o diametro do POKE —
+  // 1.4 tambem funcionava mas passava dos 2x. A cauda atras do alvo fica em
+  // 57 x 0.65 = 37px contra 39 de alcance, ou seja ela para antes do atacante.
   leaf_blade: {
     single: tira('lamina_verde', 8, { direcional: { anguloBaseGraus: -45, ancoraX: 0.65 } }),
+    escala: { single: 1.25 },
     repeticoes: 2,
   },
   // 4425: X vermelho sobre anel dourado. E o irmao do 4422, que ja e o
@@ -329,7 +330,9 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // --- grama --------------------------------------------------------------
   // 5107: folhas voando, uma a uma. Razor Leaf e Magical Leaf desenhavam o
   // redemoinho generico do tipo GRASS; aqui da pra contar as folhas.
-  razor_leaf: { single: tira('folhas', 7), aoe: tira('folhas', 7), repeticoes: 2 },
+  // `razor_leaf` NAO entra, apesar de a arte servir: ele e `target: aoe` no
+  // catalogo, e area desenha com o diametro do splash. Ver a nota
+  // "AREA NAO E IMPACTO GRANDE" no fim do bloco.
   magical_leaf: { single: tira('folhas', 7), repeticoes: 2 },
   // 4870, nomeado `drain punch`. Drain Punch nao existe no catalogo; a arte sao
   // orbes verdes sendo puxados, que e literalmente o que dreno desenha.
@@ -344,11 +347,13 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // 4329, nomeado `petal`. `petal_dance` ja tem arte propria (5479); esta vai
   // pro Petal Blizzard, que e area.
   petal_blizzard: { single: tira('petalas', 14), aoe: tira('petalas', 14) },
-  // 4328, nomeado `field`: cupula verde TRANSLUCIDA com particula dentro.
-  // Translucida importa — a regra escrita no DARK de `vfxTiras.ts` e que arte
-  // de area cheia so serve se deixar ver o POKE embaixo.
-  leech_seed: { single: tira('cupula_verde', 29) },
-  spore: { single: tira('cupula_verde', 29) },
+  // 4328 (`field`, cupula verde translucida) foi cadastrado aqui pro Leech Seed
+  // e pro Spore e SAIU depois de ver em jogo. Os dois sao alvo-unico, entao a
+  // cupula — 255x256 de arquivo, feita pra cobrir um campo — e desenhada em
+  // 46px: sobre grama ela vira uma mancha esverdeada que nao da pra distinguir
+  // do proprio chao. Sem entrada, os dois voltam pro brilho de status do tipo
+  // GRASS, que aparece. A regra de `assets/move-vfx/NOTAS.txt` vale nos dois
+  // sentidos: efeito invisivel e pior que o que ele substitui.
 
   // --- veneno -------------------------------------------------------------
   // 4310: gas roxo rasteiro, que e o desenho de Smog e Poison Gas. O tipo
@@ -370,8 +375,12 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // jogador precise ver em tamanho cheio. 0.6 leva pra 28x48, dentro da faixa
   // do lote. E `recorteX` nao serve de alternativa: ele so existe pra arte que
   // gira, e esta nao gira.
+  //
+  // `poison_gas` ficou de fora: ele e `target: aoe`, e a nuvem em 402px vira uma
+  // mancha roxa OPACA por cima do campo — o caso que a nota do DARK em
+  // `vfxTiras.ts` proibe ("arte de area cheia so serve pra efeito
+  // translucido"). Ele cai na tira de area do tipo POISON, que e anel.
   smog: { single: tira('gas_roxo', 12), escala: { single: 0.6 } },
-  poison_gas: { single: tira('gas_roxo', 12), aoe: tira('gas_roxo', 12), escala: { single: 0.6, aoe: 0.6 } },
   toxic: { single: tira('gas_roxo', 12), escala: { single: 0.6 } },
   // 5425: estouro magenta de particula — bola de lodo acertando.
   sludge_bomb: { single: tira('estouro_magenta', 10) },
@@ -381,9 +390,10 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // --- terra e vento ------------------------------------------------------
   // 4860: poeira de areia levantando. Serve os tres golpes de terra que jogam
   // areia, e nao terra: Mud-Slap, Sand Attack e Bulldoze.
+  // `bulldoze` ficou de fora pelo mesmo motivo do `razor_leaf`: e area, e um
+  // quadro de 35x36 esticado pra 402px e borrao.
   mud_slap: { single: tira('poeira_areia', 9), repeticoes: 2 },
   sand_attack: { single: tira('poeira_areia', 9), repeticoes: 2 },
-  bulldoze: { single: tira('poeira_areia', 9), aoe: tira('poeira_areia', 9), repeticoes: 2 },
   // 4872, o segundo efeito nomeado `earthquake`. `earthquake` ja usa o 4395
   // (nuvem de poeira); este desenha RACHADURA no chao, que e o unico golpe do
   // catalogo em que o chao abre de verdade.
@@ -473,10 +483,40 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // 5026: moeda de ouro girando. Pay Day e o unico golpe do jogo que solta
   // dinheiro, e desenhava meia-lua branca de NORMAL.
   pay_day: { single: tira('moeda', 21) },
-  // 4941: chuva azul caindo. Rain Dance e WATER/status e desenhava o brilho
-  // generico de status do tipo agua.
-  rain_dance: { single: tira('chuva', 8), repeticoes: 2 },
+  // 4941 (`rain`, chuva azul) foi cadastrado aqui pro Rain Dance e SAIU depois
+  // de ver em jogo: sao fios verticais de 1px de largura na arte, e em 46px de
+  // altura eles somem — nao aparece NADA na tela, em nenhuma das cinco fases,
+  // sobre grama nem sobre agua. O brilho de status do tipo WATER, que era o
+  // que ele desenhava antes, pelo menos aparece.
 
+  // -------------------------------------------------------------------------
+  // AREA NAO E IMPACTO GRANDE — a regra que faltava neste arquivo
+  // -------------------------------------------------------------------------
+  // `drawAoeRing` desenha com o DIAMETRO REAL do splash: AOE_RADIUS (175) x 2 x
+  // ESCALA_VFX_AOE (1.15) = 402px de mundo, quase DEZ VEZES os 46px do impacto
+  // alvo-unico. Isso muda que arte serve:
+  //
+  //   FONTE PEQUENA VIRA BORRAO. Um quadro de 35x36 (a poeira do Bulldoze) ou
+  //   de 55x49 (as folhas do Razor Leaf) esticado pra 402px nao e a mesma arte
+  //   maior — e um bloco de pixel. As quatro entradas de area que funcionam
+  //   (earthquake 320x300, whirlpool 224x224, whirlwind 199x199, petal_dance
+  //   208x205, petal_blizzard 224x223) todas nascem grandes.
+  //
+  //   PROPORCAO LONGE DE 1:1 VIRA PILAR OU FAIXA. A coluna de fogo do 5467
+  //   (140x268, proporcao 0.52) foi cadastrada aqui pro Eruption na PH-368 e
+  //   saiu depois de ver em jogo: em 402px de altura ela e um pilar de tela
+  //   inteira que nao diz "isto pegou uma area", e ainda tapa o campo. E o
+  //   mesmo defeito que a PH-368 tinha ido consertar, so que no eixo oposto.
+  //
+  //   OPACO TAPA O CAMPO. A nuvem do Poison Gas em 402px e uma mancha roxa
+  //   cheia por cima de tudo. Mesma regra que o DARK de `vfxTiras.ts` ja
+  //   escrevia pro impacto: area cheia so serve translucida.
+  //
+  // Nenhuma das tres aparece na conferencia de folha nem na medicao — as duas
+  // trabalham no tamanho do impacto. Quem mostra e
+  // `scripts/harness/arte-de-golpe-em-movimento.html`, que desenha na escala de
+  // area com o proprio `drawEffect`.
+  //
   // -------------------------------------------------------------------------
   // NOMEADOS QUE REPROVARAM, pra ninguem tentar de novo sem argumento novo
   // -------------------------------------------------------------------------
@@ -495,6 +535,11 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // 4886 (`double`)    dois riscos claros formando um pico, sem ponto de
   //                    impacto. O 5010 resolve os mesmos tres golpes com
   //                    leitura de "bateu duas vezes".
+  // 4941 (`rain`)      fios verticais de 1px. Em 46px de altura nao aparece
+  //                    nada na tela. Estava cadastrado no Rain Dance e saiu.
+  // 4328 (`field`)     cupula translucida de 255x256, feita pra cobrir campo.
+  //                    Em 46px vira mancha esverdeada sobre grama. Estava no
+  //                    Leech Seed e no Spore e saiu.
 }
 
 export function vfxDoGolpe(abilityId: string | undefined): VfxDeGolpe | null {

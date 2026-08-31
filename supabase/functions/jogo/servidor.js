@@ -47908,10 +47908,6 @@ var VFX_POR_GOLPE = {
 		single: tira("earthquake", 14),
 		aoe: tira("earthquake", 14)
 	},
-	eruption: {
-		single: tira("eruption", 11),
-		aoe: tira("eruption", 11)
-	},
 	whirlpool: {
 		single: tira("whirlpool", 16),
 		aoe: tira("whirlpool", 16)
@@ -47971,6 +47967,7 @@ var VFX_POR_GOLPE = {
 			anguloBaseGraus: -45,
 			ancoraX: .65
 		} }),
+		escala: { single: 1.25 },
 		repeticoes: 2
 	},
 	cross_chop: {
@@ -48036,11 +48033,6 @@ var VFX_POR_GOLPE = {
 	} }) },
 	thunder: { single: tira("raio_vertical", 10) },
 	thunderbolt: { single: tira("raio_vertical", 10) },
-	razor_leaf: {
-		single: tira("folhas", 7),
-		aoe: tira("folhas", 7),
-		repeticoes: 2
-	},
 	magical_leaf: {
 		single: tira("folhas", 7),
 		repeticoes: 2
@@ -48065,19 +48057,9 @@ var VFX_POR_GOLPE = {
 		single: tira("petalas", 14),
 		aoe: tira("petalas", 14)
 	},
-	leech_seed: { single: tira("cupula_verde", 29) },
-	spore: { single: tira("cupula_verde", 29) },
 	smog: {
 		single: tira("gas_roxo", 12),
 		escala: { single: .6 }
-	},
-	poison_gas: {
-		single: tira("gas_roxo", 12),
-		aoe: tira("gas_roxo", 12),
-		escala: {
-			single: .6,
-			aoe: .6
-		}
 	},
 	toxic: {
 		single: tira("gas_roxo", 12),
@@ -48092,11 +48074,6 @@ var VFX_POR_GOLPE = {
 	},
 	sand_attack: {
 		single: tira("poeira_areia", 9),
-		repeticoes: 2
-	},
-	bulldoze: {
-		single: tira("poeira_areia", 9),
-		aoe: tira("poeira_areia", 9),
 		repeticoes: 2
 	},
 	fissure: { single: tira("rachadura", 20, { direcional: {
@@ -48172,11 +48149,7 @@ var VFX_POR_GOLPE = {
 	outrage: { single: tira("dragon_dance", 16) },
 	dragon_breath: { single: tira("dragon_dance", 16) },
 	dragon_rage: { single: tira("dragon_dance", 16) },
-	pay_day: { single: tira("moeda", 21) },
-	rain_dance: {
-		single: tira("chuva", 8),
-		repeticoes: 2
-	}
+	pay_day: { single: tira("moeda", 21) }
 };
 function vfxDoGolpe(abilityId) {
 	if (!abilityId) return null;

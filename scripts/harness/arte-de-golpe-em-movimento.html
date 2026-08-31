@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<!-- OBRIGATORIO. As URLs de arte no codigo do jogo sao RELATIVAS
+     (`assets/move-vfx/...`), e o jogo roda em /jogo, entao elas caem em
+     /assets/... Esta pagina mora em /scripts/harness/, onde a mesma URL
+     relativa vira /scripts/harness/assets/... e da 404 em silencio: o desenho
+     nao lanca erro, so cai no burst procedural. Foi exatamente o que aconteceu
+     na primeira versao, e a bancada mostrou o fallback achando que era a arte. -->
+<base href="/" />
+<title>Bancada da arte de golpe em movimento (PH-367/368/369)</title>
+<!--
+  BANCADA DA ARTE DE GOLPE, DESENHADA PELO PROPRIO JOGO
+
+  POR QUE ELA EXISTE, tendo `conferir-vfx-visual.mjs` e
+  `folha-de-candidatos-vfx.mjs`
+
+  As duas outras compoem quadros amostrados num PNG, com pixel escrito a mao.
+  Elas respondem "o que esta arte desenha?" e "isto cabe nos 39px?", e foi com
+  elas que o lote de 26 artes da PH-369 foi escolhido. O que nenhuma das duas
+  responde:
+
+  1. O DESENHO DE VERDADE. Elas reimplementam recorte e ancora em JS de
+     bancada; esta pagina chama `drawEffect` do jogo, entao o que aparece aqui
+     inclui giro, espelho, `escala`, `repeticoes` e a precedencia
+     golpe -> tipo -> procedural.
+  2. FUNDO CLARO. O criterio de `assets/move-vfx/NOTAS.txt` e "fundo real da
+     hunt", e as duas outras usam gradiente ESCURO — o pior caso pra arte
+     apagada. Metade das hunts e campo verde ao meio-dia, o pior caso pra arte
+     CLARA, e esse lado nunca tinha sido olhado.
+  3. AREA NA ESCALA DE AREA. `drawAoeRing` usa o diametro real do splash
+     (AOE_RADIUS 175 x 2 x 1.15 = 402px de mundo), quase dez vezes o impacto
+     alvo-unico. Uma arte pode estar certa como impacto e virar um pilar de
+     tela inteira como area — foi o que aconteceu com a coluna de fogo que a
+     PH-368 tinha dado ao Eruption, e so esta pagina mostrou.
+
+  DOIS MODOS, e o padrao e o deterministico
+
+      ?fases=6   (padrao) cada painel desenha o efeito em 6 fases FIXAS, lado a
+                 lado. Screenshot sempre pega a mesma coisa.
+      ?anima=1   um efeito por painel, animando em requestAnimationFrame. E o
+                 modo pra julgar RITMO (`repeticoes`), que fase congelada nao
+                 mostra. Screenshot aqui pega um instante qualquer.
+
+      ?fundo=plains | cave-volcanic | ...   qualquer nome de
+                                            assets/hunt-backgrounds/
+      ?so=<texto>                           filtra pelo rotulo do painel
+
+  COMO RODAR
+
+      npm run dev
+      abrir http://localhost:5173/scripts/harness/arte-de-golpe-em-movimento.html
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14171a; color: #dfe4ea; font: 12px/1.4 ui-monospace, monospace; }
+  h1 { font-size: 14px; margin: 12px; font-weight: 600; }
+  .aviso { margin: 0 12px 12px; color: #9aa4ae; max-width: 1000px; }
+  .grade { display: flex; flex-direction: column; gap: 6px; padding: 0 12px 24px; }
+  figure { margin: 0; }
+  figcaption { padding: 2px 0 0; color: #cbd3da; }
+  canvas { display: block; image-rendering: pixelated; border: 1px solid #2b3138; }
+</style>
+</head>
+<body>
+<h1>Arte de golpe desenhada pelo jogo — <span id="modo"></span></h1>
+<p class="aviso">
+  Disco azul = atacante, vermelho = alvo, 39px de mundo entre os dois (raio 14 + raio 15 + padding
+  10). A barra amarela mede um POKE (29px). Painel de AREA usa o diametro real do splash (402px de
+  mundo), por isso ele é grande: é o tamanho que o jogo desenha.
+</p>
+<div class="grade" id="grade"></div>
+
+<script type="module">
+// SEM query nos imports: precisa ser a MESMA instancia de modulo que guarda o
+// cache de imagem, senao cada painel baixa a arte de novo e o primeiro frame
+// de todos cai no desenho procedural.
+import { drawEffect } from '/src/render/sprites.ts'
+import { primeImage } from '/src/render/sprites.ts'
+import { VFX_POR_GOLPE, todasAsTirasDeGolpe } from '/src/data/moveVfx.ts'
+import { TIRA_POR_ELEMENTO, TIRA_AOE_POR_ELEMENTO, todasAsTirasDeVfx } from '/src/data/vfxTiras.ts'
+import { ABILITIES_DATA } from '/src/data/generated/abilities.generated.ts'
+import { TYPE_COLORS } from '/src/data/typeColors.ts'
+
+const params = new URLSearchParams(location.search)
+const FUNDO = params.get('fundo') || 'plains'
+const FILTRO = params.get('so') || ''
+const ANIMA = params.get('anima') === '1'
+const FASES = Math.max(2, Number(params.get('fases') || 6))
+document.getElementById('modo').textContent =
+  ANIMA ? `fundo ${FUNDO}, animando` : `fundo ${FUNDO}, ${FASES} fases fixas`
+
+// Geometria real do combate, os mesmos numeros de conferir-vfx-visual.mjs.
+const ALCANCE = 39, POKE_RAIO = 14.5
+const ZOOM = 2
+const CEL = { w: 150, h: 110 }          // px de mundo, impacto alvo-unico
+const CEL_AOE = { w: 440, h: 440 }      // area: 402px de diametro + folga
+
+const fundo = new Image()
+fundo.src = `/assets/hunt-backgrounds/${FUNDO}.jpg`
+
+/**
+ * AQUECER A ARTE ANTES DE DESENHAR. Sem isto o primeiro frame de cada painel
+ * cai no burst procedural (a arte por GOLPE fica fora do preload de proposito,
+ * ver o cabecalho de moveVfx.ts) — e num modo de fase FIXA "o primeiro frame"
+ * e o unico frame, entao a bancada mostraria o fallback em vez da arte.
+ */
+async function aquecer() {
+  const urls = [...new Set([...todasAsTirasDeGolpe(), ...todasAsTirasDeVfx()])]
+  await Promise.allSettled(urls.map((u) => primeImage(u)))
+  await new Promise((ok) => { if (fundo.complete) ok(); else fundo.onload = fundo.onerror = ok })
+}
+
+function efeito(cfg, cel) {
+  const ax = cfg.aoe ? cel.w / 2 : 26
+  const tx = cfg.aoe ? cel.w / 2 : ax + ALCANCE
+  const y = cel.h / 2
+  return {
+    id: cfg.rotulo, type: 'abilityEffect',
+    x: ax, y, targetX: tx, targetY: y,
+    radius: 14, color: TYPE_COLORS[cfg.tipo] ?? '#ffffff',
+    duration: 1.0, delay: 0, age: 0,
+    elementType: cfg.tipo, abilityId: cfg.golpe,
+    anguloDeAtaque: 0,
+    isAoe: !!cfg.aoe, worldSize: cfg.aoe ? 350 : undefined,
+    statusDirection: cfg.status,
+    laneSize: 1, ownerId: null, lane: 0,
+  }
+}
+
+function cenario(ctx, cel, aoe, offsetMundo) {
+  ctx.save()
+  ctx.imageSmoothingEnabled = false
+  if (fundo.complete && fundo.naturalWidth) {
+    // Recorte fixo da arte real. Nao e o enquadramento do jogo — o que importa
+    // aqui e a COR e o RUIDO do bioma, que e o que decide se o efeito aparece.
+    const src = 240 + (offsetMundo % 3) * 160
+    ctx.drawImage(fundo, src, src, cel.w * 1.6, cel.h * 1.6, 0, 0, cel.w * ZOOM, cel.h * ZOOM)
+  } else {
+    ctx.fillStyle = '#1a1e18'
+    ctx.fillRect(0, 0, cel.w * ZOOM, cel.h * ZOOM)
+  }
+  ctx.restore()
+  const ax = (aoe ? cel.w / 2 : 26) * ZOOM
+  const tx = (aoe ? cel.w / 2 : 26 + ALCANCE) * ZOOM
+  const y = (cel.h / 2) * ZOOM
+  for (const [cx, cor] of [[ax, 'rgba(70,90,130,0.95)'], [tx, 'rgba(150,70,70,0.95)']]) {
+    ctx.beginPath(); ctx.fillStyle = cor
+    ctx.arc(cx, y, POKE_RAIO * ZOOM, 0, Math.PI * 2); ctx.fill()
+  }
+  ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(ax - POKE_RAIO * ZOOM, y + 40 * ZOOM)
+  ctx.lineTo(ax + POKE_RAIO * ZOOM, y + 40 * ZOOM)
+  ctx.stroke()
+}
+
+const paineis = []
+function painel(cfg) {
+  if (FILTRO && !cfg.rotulo.includes(FILTRO)) return
+  const cel = cfg.aoe ? CEL_AOE : CEL
+  // No modo animado sobra uma sub-celula; no fixo, uma por fase (area ganha
+  // menos porque cada uma tem 440px de mundo).
+  const sub = ANIMA ? 1 : (cfg.aoe ? Math.min(3, FASES) : FASES)
+  const fig = document.createElement('figure')
+  const cv = document.createElement('canvas')
+  cv.width = cel.w * ZOOM * sub
+  cv.height = cel.h * ZOOM
+  const cap = document.createElement('figcaption')
+  cap.textContent = cfg.rotulo
+  fig.append(cv, cap)
+  document.getElementById('grade').append(fig)
+  paineis.push({ ctx: cv.getContext('2d'), cel, sub, cfg, efeito: efeito(cfg, cel) })
+}
+
+// --- o que entra na grade ---------------------------------------------------
+// Um painel por ARQUIVO de arte, e nao por golpe: `bite`, `crunch` e
+// `hyper_fang` desenham a mesma tira, e tres paineis mostrariam a mesma coisa
+// tres vezes.
+const vistos = new Set()
+for (const [golpe, vfx] of Object.entries(VFX_POR_GOLPE)) {
+  const a = ABILITIES_DATA[golpe]
+  if (!a) continue
+  const status = a.category === 'status' ? 'diminui' : undefined
+  const arq = (u) => u.split('/').pop()
+  if (a.target !== 'aoe' && !vistos.has(`s:${vfx.single.url}`)) {
+    vistos.add(`s:${vfx.single.url}`)
+    painel({ rotulo: `golpe ${golpe} [${arq(vfx.single.url)}]`, golpe, tipo: a.type, status })
+  }
+  if (a.target === 'aoe' && vfx.aoe && !vistos.has(`a:${vfx.aoe.url}`)) {
+    vistos.add(`a:${vfx.aoe.url}`)
+    painel({ rotulo: `AREA golpe ${golpe} [${arq(vfx.aoe.url)}]`, golpe, tipo: a.type, aoe: true, status })
+  }
+}
+
+// As tiras por TIPO, com um golpe SEM arte propria pra cair na camada de tipo.
+// `tackle` e NORMAL e nao tem entrada em VFX_POR_GOLPE.
+for (const tipo of Object.keys(TIRA_POR_ELEMENTO)) painel({ rotulo: `tipo ${tipo}`, golpe: 'tackle', tipo })
+for (const tipo of Object.keys(TIRA_AOE_POR_ELEMENTO)) painel({ rotulo: `AREA tipo ${tipo}`, golpe: 'tackle', tipo, aoe: true })
+
+// --- desenho ----------------------------------------------------------------
+function desenharPainel(p, fase) {
+  const { ctx, cel, sub } = p
+  for (let k = 0; k < sub; k++) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.translate(k * cel.w * ZOOM, 0)
+    ctx.beginPath()
+    ctx.rect(0, 0, cel.w * ZOOM, cel.h * ZOOM)
+    ctx.save()
+    ctx.clip()
+    cenario(ctx, cel, p.cfg.aoe, k)
+    // Fase FIXA por sub-celula, ou a fase do relogio no modo animado.
+    p.efeito.age = sub === 1 ? fase : Math.min(0.999, (k / (sub - 1)) * 0.999)
+    ctx.scale(ZOOM, ZOOM)
+    drawEffect(ctx, p.efeito, { player: null, enemies: [] })
+    ctx.restore()
+  }
+}
+
+await aquecer()
+
+if (ANIMA) {
+  const t0 = performance.now()
+  const laco = (agora) => {
+    const fase = Math.min(0.999, ((agora - t0) / 1000) % 1.2)
+    for (const p of paineis) desenharPainel(p, fase)
+    requestAnimationFrame(laco)
+  }
+  requestAnimationFrame(laco)
+} else {
+  for (const p of paineis) desenharPainel(p, 0)
+  // Marcador pro screenshot saber que a grade terminou de desenhar.
+  document.body.dataset.pronto = String(paineis.length)
+}
+</script>
+</body>
+</html>
