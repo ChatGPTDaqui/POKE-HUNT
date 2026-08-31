@@ -77,7 +77,8 @@
 // cache de imagem, senao cada painel baixa a arte de novo e o primeiro frame
 // de todos cai no desenho procedural.
 import { drawEffect } from '/src/render/sprites.ts'
-import { primeImage } from '/src/render/sprites.ts'
+import { primeImage, drawEntity } from '/src/render/sprites.ts'
+import { TIRA_POR_CONDICAO_NO_CORPO, COR_DE_STATUS_NO_CORPO } from '/src/data/vfxTiras.ts'
 import { VFX_POR_GOLPE, todasAsTirasDeGolpe } from '/src/data/moveVfx.ts'
 import { TIRA_POR_ELEMENTO, TIRA_AOE_POR_ELEMENTO, todasAsTirasDeVfx } from '/src/data/vfxTiras.ts'
 import { ABILITIES_DATA } from '/src/data/generated/abilities.generated.ts'
@@ -218,7 +219,97 @@ function desenharPainel(p, fase) {
   }
 }
 
+// --- condicao persistente sobre o corpo (PH-370) ----------------------------
+// Painel separado porque o que se julga aqui e outra coisa: nao "o efeito
+// aparece?", e sim "a faisca aparece sobre um POKE que TEM A COR do proprio
+// status?". A tinta de `COR_DE_STATUS_NO_CORPO` multiplica os pixels da sprite,
+// entao Pikachu paralisado (amarelo em amarelo) e Charizard queimado (laranja em
+// laranja) sao os dois casos que a mudanca existe pra resolver.
+//
+// Aqui o desenho passa pelo `drawEntity` DE VERDADE — a bancada offline
+// (scripts/harness/condicao-sobre-o-corpo.mjs) reimplementa a composicao em
+// Node, e esta confere que o caminho do jogo faz o mesmo.
+//
+// `battleAnim: null` de proposito: com ele nulo, `visualTopOffset` e
+// `groundOffset` devolvem `radius`, entao a geometria e previsivel e o corpo e
+// blitado a mao aqui em vez de sair do sistema de animacao.
+//
+// LIMITE, e importa saber: com `battleAnim` nulo o `alturaDoCorpo` que
+// `drawVfxSobreCorpo` calcula sai de `radius`, e nao da altura real do quadro
+// de animacao. Entao este painel responde "o simbolo DESENHA pelo caminho do
+// jogo?" (as duas linhas de controle, sem status, provam que sim por contraste)
+// e NAO responde "ele tem o tamanho certo?" — esse ficou com
+// scripts/harness/condicao-sobre-o-corpo.mjs, que compoe na altura real da
+// sprite e foi quem fixou a opacidade em 0.75.
+const CONDICOES = [
+  { especie: 'pikachu', status: 'paralysis' },
+  { especie: 'charizard', status: 'burn' },
+  { especie: 'pikachu', status: null },     // controle: so a tinta, o estado anterior
+  { especie: 'charizard', status: null },
+]
+
+async function painelDeCondicao() {
+  if (FILTRO && !'condicao'.includes(FILTRO)) return
+  await Promise.allSettled(
+    Object.values(TIRA_POR_CONDICAO_NO_CORPO).map((t) => primeImage(t.url)),
+  )
+  const RAIO = 16, CEL_C = 90
+  for (const c of CONDICOES) {
+    const corpo = new Image()
+    corpo.src = `/assets/battle-sprites/${c.especie}/Idle-Anim.png`
+    await new Promise((ok) => { if (corpo.complete) ok(); else corpo.onload = corpo.onerror = ok })
+    const cel = Math.floor(corpo.naturalHeight / 8) || 32
+    const fig = document.createElement('figure')
+    const cv = document.createElement('canvas')
+    cv.width = CEL_C * ZOOM * 5
+    cv.height = CEL_C * ZOOM
+    const ctx = cv.getContext('2d')
+    for (let k = 0; k < 5; k++) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.translate(k * CEL_C * ZOOM, 0)
+      ctx.save()
+      ctx.beginPath(); ctx.rect(0, 0, CEL_C * ZOOM, CEL_C * ZOOM); ctx.clip()
+      cenario(ctx, { w: CEL_C, h: CEL_C }, true, k)
+      ctx.scale(ZOOM, ZOOM)
+      const cx = CEL_C / 2, cy = CEL_C / 2
+      // Corpo com a tinta do status, do mesmo jeito que `drawBattleSprite` faz.
+      const cor = c.status && COR_DE_STATUS_NO_CORPO[c.status]
+      const tmp = document.createElement('canvas')
+      tmp.width = tmp.height = cel
+      const tctx = tmp.getContext('2d')
+      tctx.imageSmoothingEnabled = false
+      tctx.drawImage(corpo, 0, 0, cel, cel, 0, 0, cel, cel)
+      if (cor) {
+        tctx.globalCompositeOperation = 'multiply'
+        tctx.fillStyle = cor
+        tctx.globalAlpha = 0.45
+        tctx.fillRect(0, 0, cel, cel)
+        tctx.globalCompositeOperation = 'destination-in'
+        tctx.globalAlpha = 1
+        tctx.drawImage(corpo, 0, 0, cel, cel, 0, 0, cel, cel)
+      }
+      ctx.imageSmoothingEnabled = false
+      ctx.drawImage(tmp, cx - RAIO * 1.2, cy - RAIO * 1.2, RAIO * 2.4, RAIO * 2.4)
+      // E agora o caminho REAL: drawEntity chama drawVfxSobreCorpo.
+      drawEntity(ctx, {
+        id: `cond-${k}`, x: cx, y: cy, radius: RAIO, battleAnim: null, facing: 'down',
+        poke: {
+          speciesId: c.especie, level: 30, isShiny: false, hp: 50,
+          stats: { hp: 100 }, ivs: {},
+          status: c.status ? { tipo: c.status } : undefined,
+        },
+      })
+      ctx.restore()
+    }
+    const cap = document.createElement('figcaption')
+    cap.textContent = `condicao ${c.especie} ${c.status ?? 'SEM STATUS (controle)'}`
+    fig.append(cv, cap)
+    document.getElementById('grade').append(fig)
+  }
+}
+
 await aquecer()
+await painelDeCondicao()
 
 if (ANIMA) {
   const t0 = performance.now()
