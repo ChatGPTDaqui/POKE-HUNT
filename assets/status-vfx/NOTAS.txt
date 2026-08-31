@@ -15,6 +15,11 @@ cura-status.png   a MESMA arte, tingida de verde no exportador. Toca quando um
                   statusSystem#curarStatus.
 confusao.png      48x36, 21 quadros — "???" ciano, constante enquanto durar.
 sono.png          40x40, 16 quadros — "Zzz", constante enquanto durar.
+paralisia.png     214x181, 20 quadros — faiscas amarelas, constante enquanto a
+                  paralisia durar. SOBRE O CORPO, nao no canto: a arte vem do
+                  banco feita pra cobrir um corpo e nos 26px do badge de canto
+                  virava um risco.
+queimadura.png    51x59, 6 quadros — brasas laranja, mesma ideia.
 
 REGERAR
 -------
@@ -22,12 +27,33 @@ REGERAR
   py POKE/PXG_2026/objectbuilder/tira_efeito.py 816 --recortar --matiz 0.33 \
      --sat-min 0.55 --out cura-status.png
   py POKE/PXG_2026/objectbuilder/tira_efeito.py 2638 --recortar --out confusao.png
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py 2436 --recortar --out paralisia.png
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py 2438 --recortar --out queimadura.png
   node scripts/gerar-sprite-sono.mjs
 
 O "Zzz" e o unico DESENHADO e nao importado: varri os 5691 efeitos do banco e
 ele tem o "???" da confusao, mas nao tem nenhum "zzz". Tres letras saem mais
 barato que continuar procurando.
 
-VENENO/QUEIMADURA/PARALISIA/CONGELAMENTO nao tem arquivo aqui: esses quatro
-TINGEM o corpo (roxo/laranja/amarelo/ciano) em vez de ganhar simbolo — ver
-COR_DE_STATUS_NO_CORPO em src/data/vfxTiras.ts.
+VENENO E CONGELAMENTO nao tem arquivo aqui: os dois sao lidos SO pela tinta no
+corpo (roxo e ciano, 45%) — ver COR_DE_STATUS_NO_CORPO em src/data/vfxTiras.ts.
+Roxo e ciano quase nao colidem com a cor do elenco, e simbolo em todo status
+transformaria a hunt cheia num mostruario de icones.
+
+PARALISIA E QUEIMADURA estavam nessa lista ate a PH-370 (31/08) e sairam dela:
+as duas agora tem tinta E simbolo. O motivo e um caso concreto, nao gosto — a
+tinta multiplica os pixels da sprite, entao ela depende de a cor do POKE ser
+diferente da cor do status, e em dois grupos ela nao e:
+
+  paralisia (amarelo)   Pikachu, Raichu, Jolteon, Ampharos, Elekid, Electabuzz
+  queimadura (laranja)  Charizard, Charmander, Magmar, Flareon, Growlithe
+
+Medido em scripts/harness/condicao-sobre-o-corpo.mjs, que compoe a arte sobre o
+corpo REAL com a tinta ja aplicada: um Pikachu paralisado e um Charizard
+queimado ficam indistinguiveis dos saudaveis. Paralisia ainda e o status que
+mais muda o combate, porque o POKE perde turno.
+
+A mesma bancada fixou a opacidade em 0.75. Em 0.5 (o valor que eu tinha
+escolhido por raciocinio, "condicao e estado de fundo") a faisca sobre o Pikachu
+fica um risco esverdeado quase invisivel; em 0.9 as brasas cobrem metade da
+sprite.

@@ -34,7 +34,7 @@
 // final sobre RECORTE DE FUNDO REAL DE HUNT no tamanho de jogo
 // (`verificar_vfx.py`) — nunca em folha de contato, que ja aprovou duas artes
 // invisiveis em jogo.
-import type { ElementType } from './generated/types'
+import type { ElementType, StatusCondition } from './generated/types'
 
 export interface TiraDeVfx {
   url: string
@@ -396,6 +396,36 @@ export const TIRA_CONFUSAO: TiraDeVfx = { url: `${RAIZ_STATUS}/confusao.png`, qu
 export const TIRA_SONO: TiraDeVfx = { url: `${RAIZ_STATUS}/sono.png`, quadros: 16 }
 
 /**
+ * Simbolo CONSTANTE das duas condicoes que a tinta sozinha nao comunica.
+ *
+ * Ate a PH-370, sono e confusao eram os unicos status com desenho proprio, e os
+ * outros quatro eram lidos SO por `COR_DE_STATUS_NO_CORPO`. A tinta entra a 45%
+ * e multiplica os pixels da sprite, entao ela depende da cor do POKE ser
+ * diferente da cor do status — e em dois casos ela nao e:
+ *
+ *   paralisia (amarelo) em Pikachu, Raichu, Jolteon, Ampharos, Elekid,
+ *   Electabuzz — e paralisia e o status que mais muda o combate, porque o POKE
+ *   perde turno.
+ *   queimadura (laranja) em Charizard, Charmander, Magmar, Flareon, Growlithe.
+ *
+ * A tinta CONTINUA nos quatro: isto e um canal a mais, nao um substituto. Veneno
+ * e congelamento ficam de fora porque roxo e ciano quase nao colidem com o
+ * elenco, e porque simbolo em todo status transformaria a hunt cheia num
+ * mostruario de icones.
+ *
+ * As duas sao desenhadas SOBRE O CORPO e nao como badge de canto (o slot do
+ * "Zzz"/"???"): as artes vem do banco em 214x181 e 51x59, feitas pra cobrir um
+ * corpo. Reduzidas aos 26px do badge viravam um risco amarelo e uma mancha
+ * laranja.
+ */
+export const TIRA_POR_CONDICAO_NO_CORPO: Partial<Record<StatusCondition, TiraDeVfx>> = {
+  // 2436 — faiscas amarelas em arco
+  paralysis: { url: `${RAIZ_STATUS}/paralisia.png`, quadros: 20 },
+  // 2438 — brasas laranja subindo
+  burn: { url: `${RAIZ_STATUS}/queimadura.png`, quadros: 6 },
+}
+
+/**
  * Cor com que o corpo do POKE e tingido enquanto o status durar. NAO e pintar
  * por cima: o desenho multiplica so os pixels opacos da sprite e mistura com
  * transparencia, entao o POKE fica "arroxeado"/"alaranjado" e continua
@@ -405,6 +435,11 @@ export const TIRA_SONO: TiraDeVfx = { url: `${RAIZ_STATUS}/sono.png`, quadros: 1
  * constante em cima (TIRA_SONO/TIRA_CONFUSAO) em vez de cor, porque sono e
  * confusao nao tem cor obvia e um POKE dormindo precisa ser lido pelo simbolo,
  * nao pelo tom.
+ *
+ * Paralisia e queimadura estao nas DUAS tabelas desde a PH-370, e isso e
+ * proposito: a tinta diz "esta com status" a distancia e o simbolo diz QUAL,
+ * inclusive quando o POKE tem a cor do proprio status. Ver
+ * TIRA_POR_CONDICAO_NO_CORPO acima.
  */
 export const COR_DE_STATUS_NO_CORPO: Record<string, string> = {
   poison: '#a040c8',
@@ -426,5 +461,9 @@ export function todasAsTirasDeVfx(): string[] {
     // nao 22 que o jogador talvez nunca veja.
     ...Object.values(TIRA_AOE_POR_ELEMENTO).map((t) => t.url),
     TIRA_CURA_HP.url, TIRA_CURA_STATUS.url, TIRA_CONFUSAO.url, TIRA_SONO.url,
+    // Condicao persistente aparece em todo combate, entao ela entra no
+    // preload junto com sono e confusao — e nao fica de fora como a arte por
+    // GOLPE, que o jogador talvez nunca veja.
+    ...Object.values(TIRA_POR_CONDICAO_NO_CORPO).map((t) => t!.url),
   ]
 }
