@@ -280,12 +280,44 @@ async function trocaCompleta({ anfitriao, convidado, doAnfitriao, doConvidado, i
   // O outro lado enxerga a mesa inteira? A policy libera os DOIS lados de
   // proposito — ver o que o outro ofereceu e o ponto da troca.
   const linhasEsperadas = doAnfitriao.length + doConvidado.length + (itemDoAnfitriao ? 1 : 0)
-  const mesaVistaPeloConvidado = await ler(convidado.token, `troca_oferta?sessao_id=eq.${sessaoId}&select=id,dono_id`)
+  const mesaVistaPeloConvidado = await ler(
+    convidado.token,
+    `troca_oferta?sessao_id=eq.${sessaoId}&select=id,dono_id,tipo,poke_uid,species_id,level,iv_percent`,
+  )
   conferir(
     Array.isArray(mesaVistaPeloConvidado) && mesaVistaPeloConvidado.length === linhasEsperadas,
     '  o convidado le a mesa inteira, dos dois lados',
     `veio ${Array.isArray(mesaVistaPeloConvidado) ? mesaVistaPeloConvidado.length : mesaVistaPeloConvidado}, esperava ${linhasEsperadas}`,
   )
+
+  // O RETRATO DO POKE, LIDO PELO LADO QUE NAO E DONO (PH-319).
+  //
+  // Esta e a conferencia que a tela depende e que nenhuma outra faz. A RLS de
+  // `pokemon_instances` tem uma policy so — "o jogador le os proprios POKEs" —
+  // entao a copia em `troca_oferta` e o UNICO caminho pelo qual o convidado
+  // descobre que o que esta na mesa e um Goldeen nivel 12, e nao um uuid.
+  //
+  // Ela existe porque `por_poke_na_mesa` foi REESCRITA pela PH-314 e a bancada
+  // continuou verde: nada aqui teria acusado um `insert` sem as colunas novas.
+  if (Array.isArray(mesaVistaPeloConvidado) && doAnfitriao.length) {
+    const esperado = doAnfitriao[0]
+    const linha = mesaVistaPeloConvidado.find((l) => l.poke_uid === esperado.id)
+    conferir(
+      linha?.species_id === esperado.species_id,
+      '  o convidado ve a ESPECIE do POKE do anfitriao',
+      `esperava ${esperado.species_id}, veio ${linha?.species_id ?? '(nada)'}`,
+    )
+    conferir(
+      typeof linha?.level === 'number' && linha.level > 0,
+      '  ...com o nivel junto',
+      `veio ${JSON.stringify(linha?.level)}`,
+    )
+    conferir(
+      typeof linha?.iv_percent === 'number' && linha.iv_percent >= 0 && linha.iv_percent <= 100,
+      '  ...e o IV numa faixa que faz sentido',
+      `veio ${JSON.stringify(linha?.iv_percent)}`,
+    )
+  }
 
   if (comProvaDeVersao) {
     // ESTE E O PASSO QUE IMPORTA. O convidado confirma; o anfitriao muda a
