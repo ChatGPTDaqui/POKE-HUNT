@@ -34,7 +34,7 @@
 // final sobre RECORTE DE FUNDO REAL DE HUNT no tamanho de jogo
 // (`verificar_vfx.py`) — nunca em folha de contato, que ja aprovou duas artes
 // invisiveis em jogo.
-import type { ElementType } from './generated/types'
+import type { ElementType, StatusCondition } from './generated/types'
 
 export interface TiraDeVfx {
   url: string
@@ -147,15 +147,36 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
   // ninguem OLHAR quadro a quadro.
   FLYING: { url: `${RAIZ}/flying.png`, quadros: 20 },            // 4735 — tornado
   PSYCHIC: { url: `${RAIZ}/psychic.png`, quadros: 20 },          // 4468 — arco magenta
-  // Respingo com inclinacao ESTAVEL de 49° (+-3° entre os 16 quadros): nao e
-  // um projetil, mas tambem nao e redondo — ficava sempre tombado pro mesmo
-  // canto, independente de onde estava o inimigo. Ancora centrada: o respingo
-  // acerta em cima do alvo, nao a frente dele.
-  BUG: {
-    url: `${RAIZ}/bug.png`, quadros: 16,                         // 5446 — respingo verde
-    direcional: { anguloBaseGraus: 49 },
-  },
-  ROCK: { url: `${RAIZ}/rock.png`, quadros: 19 },                // 5504 — cratera
+  // TROCADA em 2026-08-31 (PH-368), e o motivo nao e escala nem direcao: a arte
+  // anterior era o efeito 5446, que o dono do banco nomeou `grass`. E um
+  // respingo de folhagem verde — todo golpe BUG do jogo desenhava grama. Passou
+  // porque a escolha foi por matiz (verde serve pros dois tipos) sem ninguem
+  // cruzar com a lista nomeada.
+  //
+  // O 4675 (`bug`) sao aneis concentricos subindo, leitura de Bug Buzz — som, e
+  // nao folha. Ele SAI da rotacao: o eixo principal e vertical (quadro 96x157) e
+  // os aneis apontam pra CIMA, nao pro alvo; girar deitaria a pilha no chao,
+  // mesmo motivo pelo qual PSYCHIC/FLYING/POISON/FAIRY nunca giraram.
+  //
+  // Sem `escala`, e isso foi MEDIDO e nao suposto. A primeira versao poe 1.5,
+  // raciocinando pela LARGURA (28px contra 29 de diametro do POKE);
+  // `conferir-direcao-vfx.mjs` mostrou que a conta e pela maior dimensao, e a
+  // maior aqui e a altura: 46px sem escala, contra a mediana de 44px do lote.
+  // Com 1.5 a tira ia pra 69px e virava a MAIOR das 18, abrindo o espalhamento
+  // do lote pra 1.9x. Escala a olho neste arquivo ja errou duas vezes (o 1.15
+  // do FIRE e o 1.2 do DARK); esta e a terceira, pega antes de entrar.
+  BUG: { url: `${RAIZ}/bug.png`, quadros: 7 },                   // 4675 — aneis de som
+  // TROCADA em 2026-08-31 (PH-368). A arte anterior era o efeito 5504, que o
+  // dono do banco nomeou `dig sair`: um buraco marrom no chao com centro
+  // escuro. Nao e uma cratera de pedra — e a SAIDA DA ESCAVACAO, e todo golpe
+  // ROCK do jogo aparecia como um POKE saindo do chao. O 5504 continua em uso,
+  // como arte do golpe `dig` (moveVfx.ts), que e o uso que o nome dele
+  // descreve.
+  //
+  // O 4798 (`rock`) desenha pedra estourando em cascalho, que e o que um golpe
+  // de pedra faz. Quadro 68x72, proporcao 0.94 — cai em 44px de largura contra
+  // 46 de altura, dentro da faixa do lote e sem precisar de escala.
+  ROCK: { url: `${RAIZ}/rock.png`, quadros: 16 },                // 4798 — pedra estourando
   GHOST: { url: `${RAIZ}/ghost.png`, quadros: 28 },              // 2583 — anel roxo
   DRAGON: { url: `${RAIZ}/dragon.png`, quadros: 15 },            // 2432 — esfera de energia
   // Era o 4109 (um vazio preto de borda roxa). Bonito na conferencia, ruim em
@@ -192,17 +213,26 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
     direcional: { anguloBaseGraus: -41, ancoraX: 0.63 },
   },
   STEEL: { url: `${RAIZ}/steel.png`, quadros: 22 },              // 3297 — anel metalico
-  // TROCADA em 2026-08-18. A arte anterior (efeito 4073) desenhava CAVEIRAS
-  // rosa — leitura de morte/veneno, nao de fada. Passou porque a escolha do
-  // lote foi por matiz e tamanho: rosa e o matiz certo pro tipo, e ninguem
-  // olhou o que o rosa estava desenhando.
+  // Duas trocas, e a segunda desfaz metade da primeira.
   //
-  // 4836 ganha nos dois eixos que importam aqui, medidos: luminancia 112
-  // contra 98 e 35% de pixels claros contra 22% (mais visivel sobre fundo
-  // escuro de hunt), e sao aneis de particulas, que e o que "fada" desenha.
-  // O outro candidato (5345) tem luminancia 195 e 88% claros — viraria um
-  // borrao branco no tamanho de jogo.
-  FAIRY: { url: `${RAIZ}/fairy.png`, quadros: 14 },              // 4836 — aneis de particulas
+  // 2026-08-18: a arte era o efeito 4073, que desenhava CAVEIRAS rosa — leitura
+  // de morte, nao de fada. Trocada pelo 4836, escolhido por luminancia (112
+  // contra 98) e por serem aneis de particula.
+  //
+  // 2026-08-31 (PH-368): o 4836 e nomeado `fairy aoe` pelo dono do banco, e o
+  // desenho confirma o nome — aneis que CRESCEM DO CENTRO PRA FORA, que e forma
+  // de area e nao de impacto. Ele mudou de camada: virou a entrada FAIRY de
+  // `TIRA_AOE_POR_ELEMENTO`, que era o unico dos 18 tipos sem area E sem
+  // justificativa escrita (o cabecalho daquela tabela nomeia quatro ausentes e
+  // esquecia o FAIRY).
+  //
+  // O impacto passa pro 5345 (`psiquic or fairy`): floracao pastel que fecha num
+  // estouro roxo com anel. Ele estava descartado aqui como "luminancia 195 e 88%
+  // claros — viraria um borrao branco", numero medido no arquivo INTEIRO; visto
+  // quadro a quadro na geometria do combate, o branco e o miolo de dois quadros
+  // e o resto tem contorno roxo definido. Quadro 143x142, proporcao 1.01, sem
+  // escala.
+  FAIRY: { url: `${RAIZ}/fairy.png`, quadros: 12 },              // 5345 — floracao pastel
 }
 
 export function tiraDoElemento(tipo: string | null | undefined): TiraDeVfx | null {
@@ -237,10 +267,20 @@ const RAIZ_AOE = 'assets/move-vfx/tiras-aoe'
  * como GRASS, o de ROCK sumia no tamanho de jogo, os dois de STEEL sao feixes
  * horizontais, nao areas). Tipo ausente cai na tira de impacto exatamente como
  * antes — a camada so ADICIONA.
+ *
+ * FAIRY tambem estava fora, mas por descuido e nao por decisao: este paragrafo
+ * dizia "quatro" e nomeava quatro, e os ausentes eram CINCO. Corrigido na
+ * PH-368, que trouxe o 4836 da camada de impacto pra ca.
  */
 export const TIRA_AOE_POR_ELEMENTO: Partial<Record<ElementType, TiraDeVfx>> = {
   NORMAL: { url: `${RAIZ_AOE}/normal.png`, quadros: 5 },         // 5556 — aneis brancos abrindo
-  FIRE: { url: `${RAIZ_AOE}/fire.png`, quadros: 11 },            // 5467 — coluna de fogo subindo
+  // TROCADA em 2026-08-31 (PH-368). O 5467 e nomeado `fire` (tipo), nao
+  // `aoe fogo`, e o desenho e uma COLUNA VERTICAL de 140x268 — proporcao 0.52.
+  // Como arte de area ela era um pilar fino esticado ate o diametro do splash.
+  // O 5487 (`aoe fogo`) e anel de chamas abrindo do centro, que e a forma que
+  // esta camada existe pra ter. O 5467 nao se perde: virou a arte do golpe
+  // `eruption` (moveVfx.ts), onde coluna vertical e exatamente o desenho certo.
+  FIRE: { url: `${RAIZ_AOE}/fire.png`, quadros: 27 },            // 5487 — anel de chamas abrindo
   WATER: { url: `${RAIZ_AOE}/water.png`, quadros: 8 },           // 4286 — respingo azul
   ELECTRIC: { url: `${RAIZ_AOE}/electric.png`, quadros: 14 },    // 5621 — anel de faiscas
   GRASS: { url: `${RAIZ_AOE}/grass.png`, quadros: 12 },          // 5471 — anel de folhas
@@ -250,8 +290,17 @@ export const TIRA_AOE_POR_ELEMENTO: Partial<Record<ElementType, TiraDeVfx>> = {
   FLYING: { url: `${RAIZ_AOE}/flying.png`, quadros: 16 },        // 4313 — redemoinho branco
   PSYCHIC: { url: `${RAIZ_AOE}/psychic.png`, quadros: 33 },      // 4382 — estrela rosa
   BUG: { url: `${RAIZ_AOE}/bug.png`, quadros: 17 },              // 4326 — enxame verde
-  DRAGON: { url: `${RAIZ_AOE}/dragon.png`, quadros: 18 },        // 4275 — esfera azul
+  // TROCADA em 2026-08-31 (PH-368). O 4275 e a MESMA arte do ICE (4276) noutro
+  // matiz — esfera de pas, dois ids vizinhos do mesmo lote. Nao ha nada na tela
+  // que separe uma Explosao Elemental de gelo de uma de dragao, e a camada de
+  // area existe justamente pra dar desenho proprio por tipo. O 5490 (`aoe drag`)
+  // e estrela de cristal abrindo em esfera: le como area e nao repete o ICE.
+  DRAGON: { url: `${RAIZ_AOE}/dragon.png`, quadros: 6 },         // 5490 — estrela de cristal
   DARK: { url: `${RAIZ_AOE}/dark.png`, quadros: 10 },            // 5648 — esfera roxa
+  // Entrou em 2026-08-31 (PH-368) com a arte que estava na camada de IMPACTO:
+  // 4836 e nomeado `fairy aoe` e desenha aneis crescendo do centro. Ver a nota
+  // do FAIRY em TIRA_POR_ELEMENTO.
+  FAIRY: { url: `${RAIZ_AOE}/fairy.png`, quadros: 14 },          // 4836 — aneis de particulas
 }
 
 export function tiraDeAreaDoElemento(tipo: string | null | undefined): TiraDeVfx | null {
@@ -347,6 +396,36 @@ export const TIRA_CONFUSAO: TiraDeVfx = { url: `${RAIZ_STATUS}/confusao.png`, qu
 export const TIRA_SONO: TiraDeVfx = { url: `${RAIZ_STATUS}/sono.png`, quadros: 16 }
 
 /**
+ * Simbolo CONSTANTE das duas condicoes que a tinta sozinha nao comunica.
+ *
+ * Ate a PH-370, sono e confusao eram os unicos status com desenho proprio, e os
+ * outros quatro eram lidos SO por `COR_DE_STATUS_NO_CORPO`. A tinta entra a 45%
+ * e multiplica os pixels da sprite, entao ela depende da cor do POKE ser
+ * diferente da cor do status — e em dois casos ela nao e:
+ *
+ *   paralisia (amarelo) em Pikachu, Raichu, Jolteon, Ampharos, Elekid,
+ *   Electabuzz — e paralisia e o status que mais muda o combate, porque o POKE
+ *   perde turno.
+ *   queimadura (laranja) em Charizard, Charmander, Magmar, Flareon, Growlithe.
+ *
+ * A tinta CONTINUA nos quatro: isto e um canal a mais, nao um substituto. Veneno
+ * e congelamento ficam de fora porque roxo e ciano quase nao colidem com o
+ * elenco, e porque simbolo em todo status transformaria a hunt cheia num
+ * mostruario de icones.
+ *
+ * As duas sao desenhadas SOBRE O CORPO e nao como badge de canto (o slot do
+ * "Zzz"/"???"): as artes vem do banco em 214x181 e 51x59, feitas pra cobrir um
+ * corpo. Reduzidas aos 26px do badge viravam um risco amarelo e uma mancha
+ * laranja.
+ */
+export const TIRA_POR_CONDICAO_NO_CORPO: Partial<Record<StatusCondition, TiraDeVfx>> = {
+  // 2436 — faiscas amarelas em arco
+  paralysis: { url: `${RAIZ_STATUS}/paralisia.png`, quadros: 20 },
+  // 2438 — brasas laranja subindo
+  burn: { url: `${RAIZ_STATUS}/queimadura.png`, quadros: 6 },
+}
+
+/**
  * Cor com que o corpo do POKE e tingido enquanto o status durar. NAO e pintar
  * por cima: o desenho multiplica so os pixels opacos da sprite e mistura com
  * transparencia, entao o POKE fica "arroxeado"/"alaranjado" e continua
@@ -356,6 +435,11 @@ export const TIRA_SONO: TiraDeVfx = { url: `${RAIZ_STATUS}/sono.png`, quadros: 1
  * constante em cima (TIRA_SONO/TIRA_CONFUSAO) em vez de cor, porque sono e
  * confusao nao tem cor obvia e um POKE dormindo precisa ser lido pelo simbolo,
  * nao pelo tom.
+ *
+ * Paralisia e queimadura estao nas DUAS tabelas desde a PH-370, e isso e
+ * proposito: a tinta diz "esta com status" a distancia e o simbolo diz QUAL,
+ * inclusive quando o POKE tem a cor do proprio status. Ver
+ * TIRA_POR_CONDICAO_NO_CORPO acima.
  */
 export const COR_DE_STATUS_NO_CORPO: Record<string, string> = {
   poison: '#a040c8',
@@ -377,5 +461,9 @@ export function todasAsTirasDeVfx(): string[] {
     // nao 22 que o jogador talvez nunca veja.
     ...Object.values(TIRA_AOE_POR_ELEMENTO).map((t) => t.url),
     TIRA_CURA_HP.url, TIRA_CURA_STATUS.url, TIRA_CONFUSAO.url, TIRA_SONO.url,
+    // Condicao persistente aparece em todo combate, entao ela entra no
+    // preload junto com sono e confusao — e nao fica de fora como a arte por
+    // GOLPE, que o jogador talvez nunca veja.
+    ...Object.values(TIRA_POR_CONDICAO_NO_CORPO).map((t) => t!.url),
   ]
 }

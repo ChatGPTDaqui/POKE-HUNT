@@ -36,6 +36,7 @@ import { vfxDoGolpe } from '@/data/moveVfx'
 import { statusVfxUrl } from '@/data/statusVfx'
 import {
   tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
+  TIRA_POR_CONDICAO_NO_CORPO,
   COR_DE_STATUS_NO_CORPO, FORCA_DA_TINTA_DE_STATUS, type TiraDeVfx,
 } from '@/data/vfxTiras'
 import { VFX_CURA_DURACAO } from '@/engine/entity'
@@ -649,6 +650,31 @@ function drawVfxSobreCorpo(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
     )
   }
 
+  // --- condicao constante: faisca de paralisia, brasa de queimadura --------
+  // Canal SEPARADO do simbolo acima, e nao mais um caso naquele `if`. Os dois
+  // motivos:
+  //
+  // 1. Nao ha disputa a resolver. `poke.status` guarda UM status nao-volatil,
+  //    entao sono e paralisia/queimadura nunca coexistem; o unico encontro
+  //    possivel e com a confusao, que e volatil — e a confusao continua ficando
+  //    com o badge de canto, que e o unico sinal que ela tem. Paralisia e
+  //    queimadura tem a tinta no corpo alem disto.
+  // 2. O tamanho e outro. O badge tem 26px de altura fixa; estas duas artes vem
+  //    do banco em 214x181 e 51x59, feitas pra cobrir um corpo, e nos 26px do
+  //    badge viram um risco e uma mancha.
+  //
+  // Vem ANTES da faisca de cura pelo mesmo motivo que o simbolo vem: cura e
+  // evento e condicao e estado de fundo, entao a faisca fica por cima.
+  const condicao = entity.poke.status?.tipo
+  const arteDaCondicao = condicao ? TIRA_POR_CONDICAO_NO_CORPO[condicao] : undefined
+  if (arteDaCondicao) {
+    const fase = (Date.now() % CICLO_CONDICAO_MS) / CICLO_CONDICAO_MS
+    drawQuadroDeTira(
+      ctx, arteDaCondicao, fase, entity.x, meioDoCorpo,
+      Math.max(24, alturaDoCorpo * 0.9), OPACIDADE_DA_CONDICAO,
+    )
+  }
+
   // --- evento: faisca de cura ----------------------------------------------
   // `vfxCuraHp`/`vfxCuraStatus` sao CONTAGENS REGRESSIVAS (engine/types.ts),
   // entao a fase e o complemento delas. As duas podem tocar juntas — poção
@@ -668,6 +694,20 @@ function drawVfxSobreCorpo(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
 // Pedido explicito: a faisca de cura fica "com 90% de transparencia sobre o
 // corpo" — ou seja, quase solida, deixando ver o POKE por baixo.
 const VFX_CURA_OPACIDADE = 0.9
+
+// Volta completa da arte de condicao. Mais lenta que o ciclo do badge (1400ms)
+// de proposito: ela cobre o corpo inteiro e fica no ar o tempo todo em que o
+// status durar, entao piscar no mesmo ritmo do "Zzz" viraria tremor.
+const CICLO_CONDICAO_MS = 2000
+// 0.75, e o numero saiu de OLHAR, nao de estimar: a primeira versao poe 0.5
+// raciocinando que "condicao e estado de fundo", e
+// scripts/harness/condicao-sobre-o-corpo.mjs — que compoe a arte sobre o corpo
+// REAL do POKE com a tinta de status ja aplicada, no tamanho de jogo — mostrou
+// que em 0.5 a faisca de paralisia sobre um Pikachu fica um risco esverdeado
+// quase invisivel, exatamente o caso que esta feature existe pra resolver.
+// Em 0.9 as brasas cobrem metade da sprite. 0.75 le nos dois e deixa o POKE
+// visivel.
+const OPACIDADE_DA_CONDICAO = 0.75
 
 const HP_BAR_WIDTH = 32
 const HP_BAR_HEIGHT = 5
@@ -1257,11 +1297,25 @@ function drawStatusEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): b
 }
 
 function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
-  // Tenta a arte de status primeiro; sem ela (FLYING/DRAGON, sem sheet no
-  // catalogo — ver statusVfx.ts) ou enquanto o GIF ainda baixa, cai no
-  // burst/anel procedural de sempre — mesmo padrao de fallback do resto do
-  // arquivo, nao um caminho de erro novo.
-  if (effect.statusDirection && drawStatusEffect(ctx, effect)) return
+  // A camada por GOLPE (data/moveVfx.ts) vence a de tipo, e isso inclui o VFX
+  // de status por tipo+direcao. Ate a PH-367 nao incluia: `drawStatusEffect`
+  // era tentado ANTES e devolvia true pra todo golpe de status cujo TIPO tem
+  // GIF, entao a arte propria de `charm` (FAIRY), `taunt` (DARK) e
+  // `spider_web` (BUG) nunca chegava na tela — as tres estao em disco,
+  // cadastradas, cobertas pelo teste de existencia de arquivo e documentadas
+  // como "a camada de golpe vence a de tipo". So `dragon_dance` aparecia, e
+  // por acidente: DRAGON esta fora de TIPOS_COM_ARTE.
+  //
+  // A guarda olha o RAMO que vai desenhar, e nao a existencia da entrada:
+  // golpe de status de AREA sem `aoe` proprio continua no GIF, que le melhor
+  // que a tira de area do tipo. Mesma logica da precedencia de
+  // drawImpactBurst/drawAoeRing, escrita uma vez aqui.
+  const arteDoGolpe = vfxDoGolpe(effect.abilityId)
+  const temArtePropria = effect.isAoe ? !!arteDoGolpe?.aoe : !!arteDoGolpe?.single
+  // Sem arte propria (FLYING/DRAGON sem sheet no catalogo — ver statusVfx.ts)
+  // ou enquanto o GIF ainda baixa, cai no burst/anel procedural de sempre —
+  // mesmo padrao de fallback do resto do arquivo, nao um caminho de erro novo.
+  if (effect.statusDirection && !temArtePropria && drawStatusEffect(ctx, effect)) return
   if (effect.isAoe) drawAoeRing(ctx, effect)
   else drawImpactBurst(ctx, effect)
 }

@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   TIRA_POR_ELEMENTO, TIRA_AOE_POR_ELEMENTO, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
+  TIRA_POR_CONDICAO_NO_CORPO,
   todasAsTirasDeVfx, COR_DE_STATUS_NO_CORPO, orientacaoDaTira, type TiraDeVfx,
 } from './vfxTiras'
 import { TYPE_COLORS } from './typeColors'
@@ -44,6 +45,7 @@ const TODAS: [string, TiraDeVfx][] = [
   ['cura-status', TIRA_CURA_STATUS],
   ['confusao', TIRA_CONFUSAO],
   ['sono', TIRA_SONO],
+  ...Object.entries(TIRA_POR_CONDICAO_NO_CORPO).map(([c, tira]): [string, TiraDeVfx] => [`condicao-${c}`, tira!]),
 ]
 
 describe('tiras de VFX', () => {
@@ -100,6 +102,31 @@ describe('tiras de VFX', () => {
     expect(Object.keys(COR_DE_STATUS_NO_CORPO).sort())
       .toEqual(['burn', 'freeze', 'paralysis', 'poison'])
   })
+
+  // PH-370. A regra deixou de ser "cor OU simbolo" e passou a ser "cor pra
+  // quatro, e simbolo TAMBEM pra dois deles". O teste diz isso explicitamente
+  // porque a alternativa — apagar a assercao acima — perderia a unica linha que
+  // registra que veneno e congelamento ficaram de fora de proposito.
+  it('paralisia e queimadura tem simbolo ALEM da tinta; veneno e congelamento so tinta', () => {
+    expect(Object.keys(TIRA_POR_CONDICAO_NO_CORPO).sort()).toEqual(['burn', 'paralysis'])
+    for (const status of ['burn', 'paralysis'] as const) {
+      expect(COR_DE_STATUS_NO_CORPO[status], `${status} continua tingindo o corpo`).toBeTruthy()
+    }
+    for (const status of ['poison', 'freeze'] as const) {
+      expect(TIRA_POR_CONDICAO_NO_CORPO[status], `${status} e so tinta`).toBeUndefined()
+    }
+  })
+
+  it('as duas artes de condicao entram no preload', () => {
+    // Status persistente aparece em todo combate. Fora do preload, o PRIMEIRO
+    // POKE paralisado de cada sessao ficaria sem faisca por alguns frames — e
+    // como o desenho degrada em silencio, ninguem notaria que o preload
+    // esqueceu.
+    const preload = new Set(todasAsTirasDeVfx())
+    for (const [status, tira] of Object.entries(TIRA_POR_CONDICAO_NO_CORPO)) {
+      expect(preload.has(tira!.url), status).toBe(true)
+    }
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -111,13 +138,16 @@ describe('tiras de VFX', () => {
 // — sinal trocado nao lanca erro, so desenha o fogo saindo pelas costas do
 // POKE, e isso sobrevive a qualquer revisao de codigo.
 describe('orientacao das tiras direcionais', () => {
-  const GIRAM = ['FIRE', 'BUG', 'DARK']
-  // As quatro que sao assimetricas mas NAO podem girar: elas apontam pra CIMA
-  // (cupula, coluna, nuvem), nao pro alvo. Girar deitaria as quatro no chao —
-  // e o erro que um teste ingenuo de "assimetrica? gira" produziria.
-  const ANCORADAS_NO_CHAO = ['PSYCHIC', 'FLYING', 'POISON', 'FAIRY']
+  // BUG saiu em 2026-08-31 (PH-368): a arte trocou de um respingo diagonal
+  // (5446, que era grama) pra aneis de som empilhados (4675), e aneis apontam
+  // pra CIMA. Girar pro alvo deitaria a pilha no chao.
+  const GIRAM = ['FIRE', 'DARK']
+  // As que sao assimetricas mas NAO podem girar: elas apontam pra CIMA
+  // (cupula, coluna, nuvem, pilha de anel), nao pro alvo. Girar deitaria todas
+  // no chao — e o erro que um teste ingenuo de "assimetrica? gira" produziria.
+  const ANCORADAS_NO_CHAO = ['PSYCHIC', 'FLYING', 'POISON', 'FAIRY', 'BUG']
 
-  it('exatamente as tres medidas como direcionais estao marcadas', () => {
+  it('exatamente as medidas como direcionais estao marcadas', () => {
     const marcadas = Object.entries(TIRA_POR_ELEMENTO)
       .filter(([, tira]) => tira.direcional)
       .map(([nome]) => nome)
