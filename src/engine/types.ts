@@ -549,8 +549,15 @@ export type ClimaTipo = 'chuva' | 'sol' | 'granizo' | 'areia' | 'neve' | 'nevoa'
 export interface Clima {
   tipo: ClimaTipo
   /**
-   * So conta pro clima de GOLPE. Clima de ambiente usa `Infinity`: quem o
-   * derruba e a troca de sala, nao o relogio de turno.
+   * Quantos turnos de prazo sobram. So conta pro clima de GOLPE/HABILIDADE;
+   * clima de ambiente usa `Infinity`, porque quem o derruba e a troca de sala.
+   *
+   * PH-329: e FRACIONARIO, e o prazo e gasto em TEMPO CORRIDO
+   * (`climaAmbiente.ts#tickClimaDeGolpe`, chamado de `stepWorld` a cada tick),
+   * nao de um em um a cada turno de combate. A unidade continua sendo turno
+   * porque e o que a tela mostra e o que o balanceamento fala; o que mudou e
+   * que 10 turnos agora significam `10 * TURNO_SEGUNDOS` segundos, com ou sem
+   * luta acontecendo. Quem le pra exibir usa `Math.ceil`.
    */
   turnosRestantes: number
   /**
@@ -561,7 +568,12 @@ export interface Clima {
    *   DERIVADO de `(seed, sala)`, nao guardado (ver systems/climaAmbiente.ts).
    * - `'golpe'` — Rain Dance e companhia, ou Trait de entrada. Sobrepoe o
    *   ambiente por 10 turnos e, ao expirar, o ambiente da sala VOLTA — o ceu
-   *   nao fica limpo so porque o Sunny Day acabou.
+   *   nao fica limpo so porque o Sunny Day acabou. PH-329: o nome do valor
+   *   cobre golpe E habilidade (Drizzle e as outras tres), que ate ali tinham
+   *   prazo `Infinity` e agora tem o mesmo prazo do golpe. Renomear o valor
+   *   custaria migrar nada (o campo e efemero, nunca persistido), mas mexeria em
+   *   toda leitura de `origem === 'golpe'` do motor, da tela e do render por
+   *   ganho puramente cosmetico.
    */
   origem: 'ambiente' | 'golpe'
 }

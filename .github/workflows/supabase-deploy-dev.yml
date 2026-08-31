@@ -80,3 +80,108 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+  # ---------------------------------------------------------------------------
+  # PH-317: avisa AQUI que `database.types.ts` ficou velho, em vez de deixar a
+  # descoberta pra PR do proximo desavisado.
+  # ---------------------------------------------------------------------------
+  # O PADRAO QUE ISTO QUEBRA. Toda vez que uma migration chega na `dev`, o passo
+  # acima aplica no banco remoto — e a partir dali o gate `supabase-check`
+  # reprova TODA PR aberta, inclusive as que nao tocam em banco nenhum. Quatro
+  # vezes ate 31/08 (PH-288, PH-313, PH-316, PH-318), e o custo nunca caiu em
+  # quem fez a mudanca de schema: caiu em quem abriu a PR seguinte e encontrou
+  # um gate vermelho sobre algo que nao era dele.
+  #
+  # POR QUE ISTO NAO ABRE UMA PR SOZINHO, que era o desenho obvio. PR aberta com
+  # o `GITHUB_TOKEN` do proprio workflow NAO dispara outros workflows — e um
+  # checkout do GitHub. Os checks obrigatorios nunca seriam reportados e a PR
+  # ficaria `BLOCKED` pra sempre, com o resto verde. E exatamente o que acontece
+  # com uma PR `main` -> `dev` (visto em 31/08, PR #314). Abrir de verdade
+  # exigiria um PAT novo como secret, e isso e decisao do dono do projeto, nao
+  # deste arquivo.
+  #
+  # POR QUE ELE FALHA, e nao so avisa. O `CLAUDE.md` ja obriga a conferir o run
+  # do deploy depois de todo merge — entao este e o unico lugar onde o aviso
+  # chega em quem ACABOU de causar a defasagem, e chega antes de a proxima PR
+  # de outra pessoa ser reprovada. Um `::warning::` nesse mesmo lugar seria
+  # ignorado na terceira vez.
+  #
+  # O DEPLOY CONTINUA VERDE. Este e um job SEPARADO, dependente do `deploy`: a
+  # migration foi aplicada e a Edge foi publicada, e isso permanece visivelmente
+  # verdadeiro. O que fica vermelho e o chore que ficou faltando.
+  tipos:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Mesma versao fixa do job de cima, pelo mesmo motivo (PH-290): 'latest'
+      # resolve por chamada a API do GitHub e ja caiu por rate limit.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.116.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: database.types.ts ficou velho com esta migration?
+        id: comparar
+        # A comparacao e a MESMA de `supabase-check.yml`, inclusive a
+        # normalizacao de `PostgrestVersion` — aquela linha reflete a versao do
+        # servidor detectada NA HORA da chamada e a Management API ja respondeu
+        # valores diferentes em chamadas quase simultaneas (26/08). Compara-la
+        # byte a byte reprovaria por flakiness de infra, nao por schema velho.
+        #
+        # Pelo wrapper (PH-106): ele re-linka se a credencial tiver sido
+        # rotacionada por outra invocacao do CLI enquanto o `npm ci` rodava.
+        run: |
+          npm ci
+          if ! scripts/ci/supabase-cli.sh supabase gen types typescript --linked > /tmp/database.types.ts; then
+            echo "::warning::Nao foi possivel gerar os tipos pra comparar (CLI falhou). Nao da pra dizer se estao velhos — rode 'npm run db:types' local se esta leva mexeu em schema."
+            exit 0
+          fi
+          sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' /tmp/database.types.ts > /tmp/gerado.norm.ts
+          sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' src/lib/database.types.ts > /tmp/commitado.norm.ts
+          if diff -q /tmp/gerado.norm.ts /tmp/commitado.norm.ts > /dev/null; then
+            echo "database.types.ts em sincronia com o schema remoto."
+            echo "velho=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "velho=1" >> "$GITHUB_OUTPUT"
+          cp /tmp/database.types.ts database.types.regenerado.ts
+          {
+            echo "## \`database.types.ts\` ficou velho"
+            echo
+            echo "O deploy **funcionou** — a migration foi aplicada e a Edge publicada. O que falta e o chore de tipos."
+            echo
+            echo "Sem ele, o gate \`supabase-check\` passa a reprovar **toda PR aberta**, inclusive as que nao tocam em banco nenhum."
+            echo
+            echo '```'
+            echo "git switch -c chore/PH-<n>-db-types-de-<assunto> origin/dev"
+            echo "npm run db:types"
+            echo '```'
+            echo
+            echo "O arquivo ja regenerado esta no artefato \`database.types.ts\` deste run, se preferir baixar em vez de rodar o CLI."
+            echo
+            echo "### O que mudou"
+            echo '```diff'
+            diff /tmp/commitado.norm.ts /tmp/gerado.norm.ts | head -60 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Guardar o arquivo ja regenerado
+        if: steps.comparar.outputs.velho == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: database.types.ts
+          path: database.types.regenerado.ts
+
+      - name: Reprovar pra ninguem descobrir isto pela PR de outra pessoa
+        if: steps.comparar.outputs.velho == '1'
+        run: |
+          echo "::error::database.types.ts esta desatualizado depois desta migration. O deploy funcionou; o que falta e 'npm run db:types' numa PR de chore. Ver o resumo deste run."
+          exit 1

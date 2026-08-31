@@ -235,14 +235,47 @@ function findNearestAliveEnemy(player: PlayerEntity, enemies: EnemyEntity[]): En
   return nearest
 }
 
-// Um shiny em qualquer lugar da hunt sempre ganha a atencao do jogador —
-// shiny mais proximo se houver mais de um vivo ao mesmo tempo, sobrepondo o
-// que quer que ele estivesse perseguindo/lutando antes.
-function findNearestAliveShiny(player: PlayerEntity, enemies: EnemyEntity[]): EnemyEntity | null {
+/**
+ * Este inimigo sobrepoe a regra de "o mais proximo"?
+ *
+ * Dois casos, e eles estao no MESMO nivel de prioridade de proposito (PH-331):
+ *
+ *  - **shiny** — regra antiga: um shiny em qualquer lugar da hunt sempre ganha a
+ *    atencao do jogador, porque perder um por distracao e perda de conteudo raro.
+ *  - **protetor** (Guardian/Lord) — pedido explicito, "ele tera a prioridade
+ *    igual o Pokemon Shine". E a leitura certa mesmo sem o pedido: o protetor e
+ *    o UNICO inimigo que destrava a sala (`salaTravadaPeloProtetor`), entao um
+ *    jogador que persegue um mob comum ao lado dele nao esta apenas perdendo
+ *    tempo — a hunt inteira fica parada em 30/30 esperando.
+ *
+ * "Mesmo nivel" e literal: nao ha desempate por categoria, so por DISTANCIA.
+ * Empilhar (protetor acima de shiny, ou o contrario) seria inventar uma regra
+ * que ninguem pediu, e o caso em que os dois convivem e raro por construcao —
+ * protetor vivo suspende o respawn de mob comum (ver simulation.ts), entao o
+ * unico jeito de haver protetor E shiny em campo e um shiny ter sobrado vivo
+ * de antes do protetor nascer. Nesse caso o mais perto ganha, e o outro vem
+ * logo depois.
+ *
+ * `'isProtetor' in enemy` nao e necessario aqui (o parametro ja e `EnemyEntity`,
+ * que e onde o campo existe), mas o campo e opcional — `=== true` e o que
+ * distingue "nao e protetor" de "campo ausente".
+ */
+export function ehAlvoPrioritario(enemy: EnemyEntity): boolean {
+  return enemy.poke.isShiny === true || enemy.isProtetor === true
+}
+
+/**
+ * O alvo prioritario vivo mais proximo (shiny ou protetor), ou `null`.
+ *
+ * Substitui `findNearestAliveShiny`. O nome mudou junto com a regra: um nome que
+ * diz "shiny" enquanto a funcao tambem devolve protetor e a forma classica de o
+ * proximo leitor concluir que o protetor entrou ali por acidente.
+ */
+function findNearestAlivePrioritario(player: PlayerEntity, enemies: EnemyEntity[]): EnemyEntity | null {
   let nearest: EnemyEntity | null = null
   let nearestDist = Infinity
   for (const enemy of enemies) {
-    if (isDead(enemy) || !enemy.poke.isShiny) continue
+    if (isDead(enemy) || !ehAlvoPrioritario(enemy)) continue
     const dist = distanceTo(player, enemy)
     if (dist < nearestDist) {
       nearestDist = dist
@@ -329,12 +362,12 @@ export function updateMovement(world: WorldState, dt: number): void {
       moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef)
     }
   } else {
-    // Um shiny em qualquer lugar da hunt sobrepoe tudo mais — o jogador
-    // troca de foco pra ele imediatamente, mesmo no meio de outra luta.
-    // Fora isso, o jogador sempre anda em direcao a qualquer inimigo vivo
-    // mais PROXIMO agora — recalculado do zero todo frame.
-    const shinyEnemy = findNearestAliveShiny(player, enemies)
-    const targetEnemy = shinyEnemy || findNearestAliveEnemy(player, enemies)
+    // Um shiny OU um protetor (PH-331) em qualquer lugar da hunt sobrepoe tudo
+    // mais — o jogador troca de foco pra ele imediatamente, mesmo no meio de
+    // outra luta. Fora isso, o jogador sempre anda em direcao a qualquer inimigo
+    // vivo mais PROXIMO agora — recalculado do zero todo frame.
+    const prioritario = findNearestAlivePrioritario(player, enemies)
+    const targetEnemy = prioritario || findNearestAliveEnemy(player, enemies)
 
     if (targetEnemy) {
       const engageRange = engageRangeFor(player, targetEnemy)

@@ -51789,6 +51789,41 @@ function definirClimaDeAmbiente(world, ambiente) {
 	if (world.clima?.origem === "golpe") return;
 	world.clima = ambiente;
 }
+10 * TURNO_SEGUNDOS;
+/**
+* Gasta o prazo do clima de golpe/habilidade, em TEMPO CORRIDO.
+*
+* ---------------------------------------------------------------------------
+* POR QUE ISTO SAIU DE `updateCombat` (PH-329)
+* ---------------------------------------------------------------------------
+* O decremento antigo vivia no fim de `updateCombat` e tinha duas amarras que
+* nao eram de propósito:
+*
+*  1. `!isDead(player)` — POKE desmaiado congelava o clima. Um Sunny Day
+*     lancado antes do desmaio ficava em campo pela troca de POKE inteira.
+*  2. o relogio de turno DO JOGADOR (`proximoTurnoDeStatus`), que so anda
+*     dentro de `tickStatus`. Fora de combate — jogador em `wander`
+*     atravessando o mapa, ou reunindo pro Lure — o contador simplesmente
+*     parava. Sala esvaziada com Rain Dance no ar significava chuva por tempo
+*     indeterminado.
+*
+* A regra do jogo e "dura 10 turnos, e a duracao e por TEMPO". Contar segundos
+* corridos e a unica forma que da o mesmo resultado nos tres regimes que
+* chamam `stepWorld` (ao vivo, catch-up silencioso e resim da autoridade), sem
+* depender de haver luta.
+*
+* O campo continua sendo `turnosRestantes` e continua em TURNOS — so passou a
+* aceitar fracao. O HUD ja fazia `Math.ceil`, entao a contagem na tela anda
+* igual; e `Infinity` (clima de ambiente) continua imune, porque
+* `Infinity - x` e `Infinity`.
+*/
+function tickClimaDeGolpe(world, dt) {
+	const clima = world.clima;
+	if (!clima || clima.origem !== "golpe") return;
+	if (!Number.isFinite(clima.turnosRestantes)) return;
+	clima.turnosRestantes -= dt / TURNO_SEGUNDOS;
+	if (clima.turnosRestantes <= 0) reporClimaDeAmbiente(world);
+}
 //#endregion
 //#region src/stores/gameStateDefaults.ts
 var STARTING_ITEMS = {
@@ -52229,9 +52264,7 @@ var ESCUDO_ABILITIES = {
 	lucky_chant: "luckyChant",
 	wide_guard: "wideGuard"
 };
-var ESCUDO_DURACAO_TURNOS = 5;
-var CLIMA_DE_GOLPE_TURNOS = 10;
-var ESCUDO_DURACAO_SEGUNDOS = ESCUDO_DURACAO_TURNOS * TURNO_SEGUNDOS;
+var ESCUDO_DURACAO_SEGUNDOS = 5 * TURNO_SEGUNDOS;
 var TAUNT_DURATION = TURNO_SEGUNDOS * 3;
 var DISABLE_DURATION = TURNO_SEGUNDOS * 4;
 var ENCORE_DURATION = TURNO_SEGUNDOS * 3;
@@ -53423,7 +53456,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const climaDoGolpe = CLIMA_DO_GOLPE[ability.id];
 	if (climaDoGolpe) world.clima = {
 		tipo: climaDoGolpe,
-		turnosRestantes: CLIMA_DE_GOLPE_TURNOS,
+		turnosRestantes: 10,
 		origem: "golpe"
 	};
 	let statusRecebeuEm = null;
@@ -53762,7 +53795,7 @@ var TRAIT_CLIMA = {
 	snow_warning: "granizo",
 	drought: "sol"
 };
-var CLIMA_DE_TRAIT_TURNOS = Infinity;
+var CLIMA_DE_TRAIT_TURNOS = 10;
 /**
 * HOOK DE ENTRADA EM COMBATE: dispara UMA vez, no primeiro frame em que
 * `self` fica engajado (ver updateCombat#entradaProcessada), pra Traits que
@@ -53802,6 +53835,43 @@ function resolveEntryHook(world, self, opponent, silent) {
 		if (mudanca && !silent) anunciarEstagios(world, self, [mudanca]);
 	}
 }
+/**
+* Coloca os alvos PRIORITARIOS (shiny ou protetor, ver
+* movementSystem.ts#ehAlvoPrioritario) na frente da lista de engajados, os mais
+* proximos primeiro. Os demais mantem a ordem original.
+*
+* ---------------------------------------------------------------------------
+* POR QUE REORDENAR A LISTA, E NAO SO ESCOLHER OUTRO `primaryTarget` (PH-331)
+* ---------------------------------------------------------------------------
+* `engagedEnemies[0]` e lido em TRES lugares que precisam concordar: o
+* `primaryTarget` do hook de entrada, o `primaryTarget` de
+* `executePlayerAction` (que tambem monta o alvo unico como
+* `[engagedEnemies[0]]`), e `player.targetId` — que e o que a tela usa pra
+* mostrar de quem sao os status na barra do oponente (PH-132). Trocar so um dos
+* tres faria o jogador bater num inimigo enquanto o HUD explica outro.
+*
+* O DEFEITO QUE ISTO CORRIGE: a ordem era a de `world.enemies`, isto e, a ordem
+* de SPAWN. Com protetor e mob comum engajados ao mesmo tempo — que acontece
+* quando o protetor nasce com uma luta em andamento — quem levava o golpe era
+* quem tivesse nascido primeiro. O movimento ja priorizava o protetor (o
+* jogador ANDAVA ate ele), e o combate batia no outro.
+*
+* A reordenacao e ESTAVEL entre os nao-prioritarios: `sort` com comparador que
+* devolve 0 nao garante estabilidade em toda engine, entao a lista e montada por
+* particao, nao por `sort`. Isso importa porque a ordem dos engajados tambem e a
+* ordem em que os inimigos AGEM (`executeEnemyAction` em loop) e, por
+* consequencia, a ordem em que consomem `world.rng` — o servidor roda este mesmo
+* codigo, entao a sequencia continua reconferivel, mas so se ela for
+* deterministica dos dois lados.
+*/
+function ordenarPorPrioridade(player, engajados) {
+	const prioritarios = [];
+	const resto = [];
+	for (const enemy of engajados) (ehAlvoPrioritario(enemy) ? prioritarios : resto).push(enemy);
+	if (prioritarios.length === 0) return engajados;
+	if (prioritarios.length > 1) prioritarios.sort((a, b) => distanceTo(player, a) - distanceTo(player, b));
+	return [...prioritarios, ...resto];
+}
 function updateCombat(world, dt, opts = {}) {
 	const silent = opts.silent ?? false;
 	const { player, enemies } = world;
@@ -53813,7 +53883,6 @@ function updateCombat(world, dt, opts = {}) {
 	let playerJustFainted = false;
 	tickCooldowns(player, dt);
 	for (const enemy of enemies) tickCooldowns(enemy, dt);
-	const turnoDeClimaFechou = !isDead(player) && player.proximoTurnoDeStatus - dt <= 1e-9;
 	for (const entity of [player, ...enemies]) {
 		if (isDead(entity)) continue;
 		const { dano, expirados, drenoParaOrigem, pereceu } = tickStatus(world.rng, entity, dt, world.clima?.tipo ?? null);
@@ -53843,10 +53912,6 @@ function updateCombat(world, dt, opts = {}) {
 		creditarMorteSeNecessario(entity, defeatedEnemyIds, () => {
 			playerJustFainted = true;
 		});
-	}
-	if (turnoDeClimaFechou && world.clima) {
-		world.clima.turnosRestantes -= 1;
-		if (world.clima.turnosRestantes <= 0) reporClimaDeAmbiente(world);
 	}
 	for (const effect of world.effects) {
 		tickEffect(effect, dt);
@@ -53884,7 +53949,7 @@ function updateCombat(world, dt, opts = {}) {
 		playerJustFainted
 	};
 	for (const enemy of enemies) if (enemy.state !== "engaged" && enemy.entradaProcessada) enemy.entradaProcessada = false;
-	const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === "engaged" && e.targetId === player.id);
+	const engagedEnemies = ordenarPorPrioridade(player, enemies.filter((e) => !isDead(e) && e.state === "engaged" && e.targetId === player.id));
 	if (engagedEnemies.length === 0 && player.entradaProcessada) player.entradaProcessada = false;
 	player.targetId = engagedEnemies[0]?.id ?? null;
 	if (engagedEnemies.length > 0) {
@@ -53902,10 +53967,7 @@ function updateCombat(world, dt, opts = {}) {
 			if (isDead(enemy) || player.fainted) continue;
 			executeEnemyAction(world, enemy, player, silent);
 		}
-	} else {
-		limparEstadoVolatil(player);
-		reporClimaDeAmbiente(world);
-	}
+	} else limparEstadoVolatil(player);
 	return {
 		defeatedEnemyIds,
 		playerJustFainted
@@ -54048,11 +54110,46 @@ function findNearestAliveEnemy(player, enemies) {
 	}
 	return nearest;
 }
-function findNearestAliveShiny(player, enemies) {
+/**
+* Este inimigo sobrepoe a regra de "o mais proximo"?
+*
+* Dois casos, e eles estao no MESMO nivel de prioridade de proposito (PH-331):
+*
+*  - **shiny** — regra antiga: um shiny em qualquer lugar da hunt sempre ganha a
+*    atencao do jogador, porque perder um por distracao e perda de conteudo raro.
+*  - **protetor** (Guardian/Lord) — pedido explicito, "ele tera a prioridade
+*    igual o Pokemon Shine". E a leitura certa mesmo sem o pedido: o protetor e
+*    o UNICO inimigo que destrava a sala (`salaTravadaPeloProtetor`), entao um
+*    jogador que persegue um mob comum ao lado dele nao esta apenas perdendo
+*    tempo — a hunt inteira fica parada em 30/30 esperando.
+*
+* "Mesmo nivel" e literal: nao ha desempate por categoria, so por DISTANCIA.
+* Empilhar (protetor acima de shiny, ou o contrario) seria inventar uma regra
+* que ninguem pediu, e o caso em que os dois convivem e raro por construcao —
+* protetor vivo suspende o respawn de mob comum (ver simulation.ts), entao o
+* unico jeito de haver protetor E shiny em campo e um shiny ter sobrado vivo
+* de antes do protetor nascer. Nesse caso o mais perto ganha, e o outro vem
+* logo depois.
+*
+* `'isProtetor' in enemy` nao e necessario aqui (o parametro ja e `EnemyEntity`,
+* que e onde o campo existe), mas o campo e opcional — `=== true` e o que
+* distingue "nao e protetor" de "campo ausente".
+*/
+function ehAlvoPrioritario(enemy) {
+	return enemy.poke.isShiny === true || enemy.isProtetor === true;
+}
+/**
+* O alvo prioritario vivo mais proximo (shiny ou protetor), ou `null`.
+*
+* Substitui `findNearestAliveShiny`. O nome mudou junto com a regra: um nome que
+* diz "shiny" enquanto a funcao tambem devolve protetor e a forma classica de o
+* proximo leitor concluir que o protetor entrou ali por acidente.
+*/
+function findNearestAlivePrioritario(player, enemies) {
 	let nearest = null;
 	let nearestDist = Infinity;
 	for (const enemy of enemies) {
-		if (isDead(enemy) || !enemy.poke.isShiny) continue;
+		if (isDead(enemy) || !ehAlvoPrioritario(enemy)) continue;
 		const dist = distanceTo(player, enemy);
 		if (dist < nearestDist) {
 			nearestDist = dist;
@@ -54119,7 +54216,7 @@ function updateMovement(world, dt) {
 		player.wanderTarget = null;
 		if (lure.destino && !imobilizadoPorStatus(player)) moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef);
 	} else {
-		const targetEnemy = findNearestAliveShiny(player, enemies) || findNearestAliveEnemy(player, enemies);
+		const targetEnemy = findNearestAlivePrioritario(player, enemies) || findNearestAliveEnemy(player, enemies);
 		if (targetEnemy) {
 			const engageRange = engageRangeFor(player, targetEnemy);
 			if (distanceTo(player, targetEnemy) <= engageRange) player.state = "engaged";
@@ -54925,6 +55022,24 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = f
 	}
 	if (manualAdvance) return;
 	armarTransicaoDeSala(world, mapId);
+}
+/**
+* PH-302: derruba a contagem de "Entrando em nova area" pro minimo, pra ela
+* resolver no proximo tick.
+*
+* A contagem corre em tempo SIMULADO (`stepWorld` desconta `dt` dela), e o
+* loop local quase nao anda com a aba oculta — o navegador derruba o tick pra
+* um por minuto, e cada um avanca no maximo 1 segundo de jogo. Os 3 segundos de
+* aviso viravam MINUTOS de movimento e combate congelados depois de voltar pra
+* aba, esperando uma animacao que o jogador nao chegou a ver.
+*
+* Nao pula a transicao: `aplicarTransicaoDeSala` continua sendo quem troca
+* mapa, colisao e inimigos, no gate normal de `stepWorld`. So o tempo de espera
+* some. Sem `salaPendente` nao ha o que encurtar.
+*/
+function encurtarTransicaoDeSala(world) {
+	if (world.salaCountdownRemaining == null || !world.salaPendente) return;
+	world.salaCountdownRemaining = Math.min(world.salaCountdownRemaining, 0);
 }
 /**
 * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
@@ -55777,6 +55892,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
+	tickClimaDeGolpe(world, dt);
 	if (world.countdownRemaining != null) {
 		world.countdownRemaining -= dt;
 		if (world.countdownRemaining <= 0) {
@@ -55798,6 +55914,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		return [];
 	}
 	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () => garantirProtetorDaSala(world, world.mapDef, void 0, world.player, null));
+	if (silent) encurtarTransicaoDeSala(world);
 	if (world.salaCountdownRemaining != null) {
 		world.salaCountdownRemaining -= dt;
 		if (world.salaCountdownRemaining <= 0) {

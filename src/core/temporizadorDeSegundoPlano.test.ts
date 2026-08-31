@@ -125,4 +125,39 @@ describe('com Worker', () => {
     vi.advanceTimersByTime(1000)
     expect(disparou).toHaveBeenCalledTimes(1)
   })
+
+  // PH-331: o caso acima provava so o agendamento SEGUINTE. O elo PENDENTE era
+  // descartado, e e ele que sustenta o ritmo de liquidacao — cada flush agenda o
+  // proximo (`autoridade.ts`), entao perder o pendente rompe a corrente pra
+  // sempre. "O proximo agendamento volta pro setTimeout" nao ajuda quando nao
+  // existe proximo agendamento.
+  it('o callback que ESTAVA pendente quando o worker morreu ainda dispara', async () => {
+    const { agendarMesmoEmSegundoPlano } = await carregarComWorker()
+    vi.useFakeTimers()
+
+    const disparou = vi.fn()
+    agendarMesmoEmSegundoPlano(30000, disparou)
+    WorkerFalso.ultimo!.onerror?.()
+
+    // O prazo restante e reaproveitado, nao zerado: nada dispara antes da hora.
+    vi.advanceTimersByTime(29999)
+    expect(disparou).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(2)
+    expect(disparou).toHaveBeenCalledTimes(1)
+  })
+
+  it('cancelar o agendamento resgatado continua valendo', async () => {
+    // Sem isto o cancelamento vira no-op silencioso: `autoridade.ts` cancela o
+    // timer de flush pra reagendar com outro intervalo, e sairiam DOIS flushes.
+    const { agendarMesmoEmSegundoPlano } = await carregarComWorker()
+    vi.useFakeTimers()
+
+    const disparou = vi.fn()
+    const t = agendarMesmoEmSegundoPlano(30000, disparou)
+    WorkerFalso.ultimo!.onerror?.()
+    t.cancelar()
+
+    vi.advanceTimersByTime(60000)
+    expect(disparou).not.toHaveBeenCalled()
+  })
 })
