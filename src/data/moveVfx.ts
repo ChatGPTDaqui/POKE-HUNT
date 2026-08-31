@@ -152,6 +152,12 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // usa o diametro real do raio, entao a leitura de "isto pegou uma area" vem do
   // tamanho e nao de um desenho diferente. Mesma regra do lote por tipo.
   earthquake: { single: tira('earthquake', 14), aoe: tira('earthquake', 14) },
+  // Chegou na PH-368 com a arte que saiu da camada de AREA por tipo: o efeito
+  // 5467 e uma coluna vertical de fogo (quadro 140x268, proporcao 0.52), o que
+  // como FIRE de area virava um pilar fino esticado ate o diametro do splash.
+  // Num vulcao a coluna e o desenho certo, e Eruption e o unico golpe do
+  // catalogo em que ela e literal.
+  eruption: { single: tira('eruption', 11), aoe: tira('eruption', 11) },
   whirlpool: { single: tira('whirlpool', 16), aoe: tira('whirlpool', 16) },
   whirlwind: { single: tira('whirlwind', 20), aoe: tira('whirlwind', 20) },
   petal_dance: { single: tira('petal_dance', 16), aoe: tira('petal_dance', 16) },

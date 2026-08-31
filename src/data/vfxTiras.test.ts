@@ -111,13 +111,16 @@ describe('tiras de VFX', () => {
 // — sinal trocado nao lanca erro, so desenha o fogo saindo pelas costas do
 // POKE, e isso sobrevive a qualquer revisao de codigo.
 describe('orientacao das tiras direcionais', () => {
-  const GIRAM = ['FIRE', 'BUG', 'DARK']
-  // As quatro que sao assimetricas mas NAO podem girar: elas apontam pra CIMA
-  // (cupula, coluna, nuvem), nao pro alvo. Girar deitaria as quatro no chao —
-  // e o erro que um teste ingenuo de "assimetrica? gira" produziria.
-  const ANCORADAS_NO_CHAO = ['PSYCHIC', 'FLYING', 'POISON', 'FAIRY']
+  // BUG saiu em 2026-08-31 (PH-368): a arte trocou de um respingo diagonal
+  // (5446, que era grama) pra aneis de som empilhados (4675), e aneis apontam
+  // pra CIMA. Girar pro alvo deitaria a pilha no chao.
+  const GIRAM = ['FIRE', 'DARK']
+  // As que sao assimetricas mas NAO podem girar: elas apontam pra CIMA
+  // (cupula, coluna, nuvem, pilha de anel), nao pro alvo. Girar deitaria todas
+  // no chao — e o erro que um teste ingenuo de "assimetrica? gira" produziria.
+  const ANCORADAS_NO_CHAO = ['PSYCHIC', 'FLYING', 'POISON', 'FAIRY', 'BUG']
 
-  it('exatamente as tres medidas como direcionais estao marcadas', () => {
+  it('exatamente as medidas como direcionais estao marcadas', () => {
     const marcadas = Object.entries(TIRA_POR_ELEMENTO)
       .filter(([, tira]) => tira.direcional)
       .map(([nome]) => nome)

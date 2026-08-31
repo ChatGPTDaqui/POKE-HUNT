@@ -47908,6 +47908,10 @@ var VFX_POR_GOLPE = {
 		single: tira("earthquake", 14),
 		aoe: tira("earthquake", 14)
 	},
+	eruption: {
+		single: tira("eruption", 11),
+		aoe: tira("eruption", 11)
+	},
 	whirlpool: {
 		single: tira("whirlpool", 16),
 		aoe: tira("whirlpool", 16)
