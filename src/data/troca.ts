@@ -74,3 +74,18 @@ export const TROCA_MAX_LINHAS_POR_LADO = 10
 /** O que uma linha da mesa pode ser. */
 export const TIPOS_DE_OFERTA = ['poke', 'item'] as const
 export type TipoDeOferta = (typeof TIPOS_DE_OFERTA)[number]
+
+/**
+ * Uma confirmacao so vale enquanto for da versao ATUAL da oferta (PH-312).
+ *
+ * O servidor guarda em qual versao cada lado confirmou, e nao um "sim". A
+ * diferenca e o que fecha o golpe: com booleano, toda alteracao da oferta
+ * precisaria LEMBRAR de apagar as duas confirmacoes, e o caminho que
+ * esquecesse deixaria valendo um "sim" dado sobre outra mesa. Comparando
+ * versoes, a confirmacao envelhece sozinha.
+ *
+ * `null` (nunca confirmou) devolve `false` sem caso especial: `null !== numero`.
+ */
+export function confirmacaoValida(versaoDaMesa: number, versaoConfirmada: number | null): boolean {
+  return versaoConfirmada !== null && versaoConfirmada === versaoDaMesa
+}

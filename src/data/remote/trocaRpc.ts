@@ -1,13 +1,16 @@
-// Troca direta entre dois jogadores (PH-120): a MESA (fatia 1) e a OFERTA em
-// cima dela (fatia 2, PH-310).
+// Troca direta entre dois jogadores (PH-120): a MESA (fatia 1), a OFERTA em
+// cima dela (fatia 2, PH-310) e a CONFIRMACAO DUPLA que executa (fatia 3,
+// PH-312).
 //
 // O QUE ESTE ARQUIVO FAZ, E O QUE ELE AINDA NAO FAZ
 // ---------------------------------------------------------------------------
-// Abrir, aceitar e encerrar a mesa; ler a mesa viva do jogador; e por e tirar
-// POKE e item da mesa, com reserva de verdade do outro lado. O que falta e a
-// confirmacao dupla com a execucao atomica (fatia 3) e a tela (fatia 4) — e por
-// isso NENHUM caminho aqui troca o dono de coisa nenhuma: o que sai da mochila
-// de quem ofereceu volta pra ela em toda saida possivel.
+// Abrir, aceitar e encerrar a mesa; ler a mesa viva do jogador; por e tirar
+// POKE e item da mesa, com reserva de verdade do outro lado; e confirmar,
+// carregando a versao da oferta que a tela desenhou. Falta a tela (fatia 4).
+//
+// A CONFIRMACAO NAO TEM PASSO SEPARADO DE "EXECUTAR". Quem confirma por ultimo
+// executa, na mesma transacao do servidor — uma terceira chamada seria uma
+// terceira janela pra oferta mudar entre a confirmacao e o efeito.
 //
 // TODA ESCRITA PASSA POR RPC, e a tabela nao tem policy de INSERT/UPDATE. As
 // regras que impedem o golpe (bloqueio, sessao dupla, quem pode aceitar, quem
@@ -20,7 +23,7 @@ import { supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import { ESTADOS_VIVOS, type EstadoDeTroca, type TipoDeOferta } from '@/data/troca'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { mochilaCarregada } from '@/stores/mochilaStore'
+import { mochilaCarregada, useMochilaStore } from '@/stores/mochilaStore'
 import { descartarIdsConhecidos } from './playerRepository'
 import { COLUNAS_DE_POKE, rowToPoke } from './playerMapper'
 
@@ -48,6 +51,15 @@ export interface SessaoDeTroca {
    * e o que impede trocar a oferta no instante em que o outro confirma.
    */
   versao: number
+  /**
+   * Em qual versao cada lado confirmou (PH-312). `null` = nao confirmou.
+   *
+   * Compare com `versao` usando `confirmacaoValida` em vez de tratar como
+   * booleano: um numero antigo aqui significa "confirmou OUTRA mesa", que na
+   * tela tem que aparecer como nao confirmado.
+   */
+  versaoConfirmadaAnfitriao: number | null
+  versaoConfirmadaConvidado: number | null
 }
 
 interface LinhaDeTroca {
@@ -60,6 +72,8 @@ interface LinhaDeTroca {
   encerrada_por: string | null
   encerrada_em: string | null
   versao: number | null
+  versao_confirmada_anfitriao: number | null
+  versao_confirmada_convidado: number | null
 }
 
 function daLinha(l: LinhaDeTroca): SessaoDeTroca {
@@ -76,6 +90,8 @@ function daLinha(l: LinhaDeTroca): SessaoDeTroca {
     // que o cliente novo fala com um banco que ainda nao recebeu a migration —
     // ler `undefined` como versao viraria `NaN` na comparacao da fatia 3.
     versao: l.versao ?? 0,
+    versaoConfirmadaAnfitriao: l.versao_confirmada_anfitriao ?? null,
+    versaoConfirmadaConvidado: l.versao_confirmada_convidado ?? null,
   }
 }
 
@@ -325,4 +341,58 @@ export async function lerMesa(sessaoId: string): Promise<LinhaDaMesa[]> {
     .order('criada_em', { ascending: true })
   aoFalhar(error)
   return ((data ?? []) as LinhaDeOfertaNoBanco[]).map(daLinhaDaMesa)
+}
+
+// ---------------------------------------------------------------------------
+// A confirmacao dupla e a execucao (PH-312, fatia 3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Confirma a mesa NA VERSAO que o jogador esta vendo.
+ *
+ * A versao vai junto de proposito e nao e detalhe de implementacao: e ela que
+ * impede o golpe. Se a oferta mudou entre a tela e o clique, o servidor recusa
+ * com "A oferta mudou" em vez de fechar uma troca que o jogador nao viu.
+ *
+ * Passe SEMPRE a `versao` da sessao que a tela desenhou — nunca uma relida
+ * agora, que seria justamente concordar com a mudanca sem olhar.
+ *
+ * QUANDO ESTA CHAMADA E A SEGUNDA CONFIRMACAO VALIDA, ELA JA EXECUTA A TROCA:
+ * a sessao volta com `estado === 'concluida'`. Nao ha uma terceira chamada,
+ * porque ela seria uma terceira janela pra oferta mudar.
+ */
+export async function confirmarTroca(sessaoId: string, versao: number): Promise<SessaoDeTroca> {
+  const { data, error } = await db.rpc('confirmar_troca', {
+    p_sessao_id: sessaoId,
+    p_versao: versao,
+  })
+  aoFalhar(error)
+  const sessao = daLinha(data as LinhaDeTroca)
+  if (sessao.estado === 'concluida') aposATrocaExecutar()
+  return sessao
+}
+
+/** Volta atras na propria confirmacao, enquanto a troca nao executou. */
+export async function desconfirmarTroca(sessaoId: string): Promise<SessaoDeTroca> {
+  const { data, error } = await db.rpc('desconfirmar_troca', { p_sessao_id: sessaoId })
+  aoFalhar(error)
+  return daLinha(data as LinhaDeTroca)
+}
+
+/**
+ * O que o cliente precisa esquecer depois que a troca executou.
+ *
+ * POKE recebido: a Mochila e invalidada. Nao adianta inserir na lista local —
+ * o servidor mudou o `user_id` de linhas que este cliente nunca leu, e inventar
+ * a lista aqui seria mostrar uma mochila que nao existe. Invalidar tambem chama
+ * `esquecerIdsDaReserva`, que e o que impede o proximo save de tentar apagar
+ * qualquer coisa com base num dominio que ficou velho.
+ *
+ * ITEM recebido: NADA a fazer aqui, e isso e de propósito. O credito foi pra
+ * `market_deliveries` e e reivindicado no proximo `/estado`, dentro do request
+ * que ja vai gravar o estado. Somar no estado local aqui criaria uma segunda
+ * fonte pro mesmo credito, e as duas se somariam.
+ */
+function aposATrocaExecutar(): void {
+  useMochilaStore.getState().invalidar()
 }
