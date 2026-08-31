@@ -12,6 +12,45 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-338. Entrada de LIMPEZA DE DIVIDA, e resumida de proposito (pedido do
+  // usuario): cinco linhas curtas, nao os paragrafos das 7.15-7.21.
+  //
+  // COMO ELA FOI ACHADA, porque o metodo importa mais que a lista: cruzei as 310
+  // keys `PH-` do historico da `main` contra as 103 citadas neste arquivo, filtrei
+  // as posteriores a 25/08 (quando a regua de citar a issue no comentario comecou,
+  // na 7.11) e conferi cada uma POR TEMA, nao por key — as notas anunciam por
+  // descricao, e uma mudanca pode estar coberta sem a key nunca aparecer aqui.
+  // Conferir so por key teria dado 123 "buracos", quase todos falsos.
+  //
+  // Sobraram SEIS, viradas em cinco linhas porque os dois de chat sao a mesma
+  // coisa pra quem joga: PH-212 e PH-262 (chat), PH-214 (amigo), PH-244 (hunt
+  // ativa), PH-221 (cabecalho sem F5), PH-321 (fim da mesa de troca).
+  //
+  // JA COBERTAS, conferidas uma por uma — fica escrito pra proxima varredura nao
+  // refazer o trabalho: PH-208 (teto da hunt) na 7.14; PH-258, PH-259, PH-260,
+  // PH-263, PH-264, PH-265, PH-281, PH-283, PH-225, PH-226 e PH-230 na 7.15
+  // (sala vazia, caminhada da hunt inicial, numero escondido nas automacoes,
+  // timer do Hospital, Lure, missao reivindicada, a placa do POKE, boss nos doze
+  // biomas, fallback de sala); PH-282 tambem na 7.15, DENTRO do item "A TELA DE
+  // JOGO FOI ARRUMADA" ("o proprio cartao agora fica colado no canto"); PH-311 na
+  // 7.18.
+  //
+  // Fica de fora, mesma regua da 7.11 pra ca: PH-219, PH-251, PH-252, PH-253,
+  // PH-288, PH-289, PH-298, PH-304, PH-322, PH-323 e os back-merges — CI, tipos
+  // do banco, `.gitattributes`, carimbo de migration, teste e processo. Nenhum
+  // chega ao jogo.
+  {
+    version: '7.22',
+    date: '2026-08-31',
+    title: 'Miudezas que ja estavam no ar: chat, amizade, a hunt ativa na lista e o fim da troca',
+    highlights: [
+      'O CHAT PAROU DE INCOMODAR. Ele voltava sempre na aba Mundo e aberto, mesmo se voce o tinha deixado recolhido lendo outra aba — agora ele volta como voce deixou. E a faixa escura do rodape passou a ter a largura do texto: uma linha curta nao cobre mais o campo de batalha de ponta a ponta.',
+      'DA PRA ADICIONAR AMIGO DIRETO DO RANKING E DO CHAT. Antes era preciso digitar o nick de cor no Correio, olhando pra um nome que estava ali na tela.',
+      'A TELA DE HUNTS DIZ EM QUAL HUNT VOCE ESTA. Borda no card, selo EM CACADA no nome, e uma linha no cabecalho que sobrevive a busca e aos filtros — com botao pra achar o card na lista.',
+      'EVOLUIR PAROU DE PRECISAR DE F5 PRA APARECER. O POKE evoluia e o cabecalho continuava mostrando a forma antiga; correcao de nivel vinda do servidor tambem so aparecia depois de recarregar.',
+      'O FIM DA TROCA AVISA OS DOIS LADOS. Quem confirmava PRIMEIRO nao via nada: a mesa sumia sem uma palavra, e o POKE recebido nao aparecia na Mochila ate fechar e abrir. Agora os dois recebem o aviso e a Mochila mostra o POKE novo na hora.',
+    ],
+  },
   // PH-337. QUARTA promocao de 31/08. A regua e uma entrada por PROMOCAO, e esta
   // promocao tem UM assunto: a Geracao III.
   //
