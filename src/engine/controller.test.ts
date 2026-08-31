@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeAll, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES, SPECIAL_EVOLUTION_STONE_COUNT } from '@/data/pokes'
 import { stoneItemId } from '@/data/stones'
@@ -14,6 +14,27 @@ vi.mock('@/data/remote/autoridade', () => ({
   abrirSessaoDeHunt: vi.fn(async () => ({ ok: true, sala: null })),
   fecharSessaoDeHunt: vi.fn(async () => {}),
 }))
+
+// AQUECE O IMPORT DO MOTOR ANTES DE QUALQUER CASO (PH-322).
+//
+// Cada caso abaixo comeca com `await import('./controller')`. O modulo fica em
+// cache depois da primeira vez, entao o custo INTEIRO — o grafo do motor — caia
+// sobre o primeiro caso, sob o timeout padrao de 5s. Numa maquina ocupada isso
+// estourava: em 31/08, com o jogo aberto num navegador ao lado, o primeiro caso
+// reprovou com "Test timed out in 5000ms" enquanto o arquivo sozinho passava em
+// 7,5s no total.
+//
+// Nao e teoria de bancada: `import` foi 1.054s de uma execucao de 132s da suite
+// inteira. Importar e o item mais caro daqui, e 5s de folga e pouco pro runner
+// do CI, que e mais lento e compartilhado.
+//
+// O aquecimento vai num HOOK porque hook tem orcamento proprio, separado do
+// caso — e porque assim nenhum caso paga por um custo que e de todos. Os
+// `await import` de dentro dos casos continuam la e viram acerto de cache; nada
+// do que eles afirmam muda.
+beforeAll(async () => {
+  await import('./controller')
+}, 30000)
 
 beforeEach(() => {
   pedirAcaoMock.mockReset()
