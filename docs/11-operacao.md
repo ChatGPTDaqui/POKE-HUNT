@@ -479,9 +479,58 @@ reconstituir o equivalente antes de precisar dele sob pressão.
 | `VITE_SUPABASE_ANON_KEY` | `.env.local` + Pages | Cliente |
 | `VITE_SERVIDOR_URL` | `.env.local` + Pages | **O interruptor da autoridade** |
 | `ORIGENS_PERMITIDAS` | secret do Supabase | CORS da Edge Function |
+| `JOGO_JWKS` | secret do Supabase | Chave pública para validar o JWT sem ir à rede |
 
 `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` são **injetadas pela plataforma** dentro da Edge
 Function — não há segredo para subir à mão.
+
+### `JOGO_JWKS` — o segredo que nunca foi gravado
+
+`authority/src/auth.ts#chavePublica` valida o token do jogador com a chave pública do projeto, e
+busca ela nesta ordem: cache do isolate → `JOGO_JWKS` → `GET /auth/v1/.well-known/jwks.json`.
+
+O comentário lá diz que a busca de rede acontece "uma vez por rotação de chave, não por request".
+**Medido nos logs em 2026-08-31 (PH-333), janela de 24h:**
+
+```
+/auth/v1/.well-known/jwks.json    9.141 requests   (user-agent Deno/SupabaseEdgeRuntime)
+invocações da Edge Function       9.414
+```
+
+97% das invocações pagam a busca. O cache do isolate quase nunca ajuda (isolate frio), e o
+segredo nunca disparou porque **nunca foi gravado** — antes desta issue `JOGO_JWKS` não aparecia
+em `docs/`, em `.github/` nem em script nenhum.
+
+Custo, medido e sem arredondar para cima:
+
+| | |
+|---|---|
+| egress | 240 B × 9.141 = **~2,1 MB/dia**. Pouco. |
+| latência | **um round-trip HTTP a mais em toda request autenticada.** É o motivo real de arrumar — cada flush do jogo espera por ele. |
+
+**Como gravar:**
+
+```bash
+npm run edge:jwks     # imprime o comando pronto; NÃO executa
+```
+
+Ele não executa de propósito: gravar segredo mexe na configuração de produção, e essa decisão é
+de quem opera. Depois de gravar, **republicar a função** (`npm run edge:publicar`) — segredo novo
+só entra em isolate novo.
+
+O conteúdo não é sigiloso: JWKS é a chave **pública**, servida num endpoint aberto. Chama-se
+"secret" só porque a Edge Function lê variável de ambiente e no Supabase isso vive na área de
+secrets.
+
+**Rotação de chave não quebra o jogo.** Se a chave girar e o segredo ficar velho, o `kid` novo não
+está nele e o fallback de rede resolve sozinho — o custo volta, o serviço não cai. Rodar
+`npm run edge:jwks` de novo depois de uma rotação é o que devolve o ganho.
+
+**Como conferir que funcionou:** contar as buscas numa janela nova de logs. O esperado é zero.
+
+```
+source='edge_logs' and log_attributes['request.path']='/auth/v1/.well-known/jwks.json'
+```
 
 As três `VITE_*` são de **build**: sem elas o bundle sobe e quebra no load, porque
 `lib/supabase.ts` estoura de propósito quando falta config.

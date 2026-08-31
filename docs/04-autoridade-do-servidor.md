@@ -318,6 +318,38 @@ egress; três jogadores fecharam o dia em 23,5 GB de PostgREST + 2,4 GB de Funct
 `bagCarregada: false` significa "não carregada", **não** "mochila vazia" — quem confundir os
 dois apaga a mochila do jogador.
 
+### Quanto o flush custa hoje, leitura por leitura
+
+Medido em 2026-08-31 (PH-333) com `scripts/harness/egress-por-flush.mjs`, contra `public`, na
+conta mais pesada da amostra (164 POKEs, 191 espécies na Pokédex). **Gzipado** — o PostgREST
+serve comprimido e o egress é cobrado no fio; byte cru já superestimou um ganho em 4x neste
+projeto.
+
+| leitura | por flush |
+|---|---|
+| `players` (`select=*`) | 785 B |
+| `player_items` (4 colunas) | 435 B |
+| `game_sessions` + `sala_protetor` | 363 B |
+| `player_especialidades` | 290 B |
+| `pokemon_instances` (só `team`) | 888 B |
+| `player_auto_catch_rules` (3 colunas) | 157 B |
+| **total** | **2.918 B (~2,9 KB)** |
+
+Com os 9.021 flushes contados nos logs em 24h, dá **~25 MB/dia** de leitura de flush. Sem o
+corte de `comBag` o mesmo dia custaria **~143 MB/dia** — o `pokemon_instances` completo sozinho
+é 14.688 B contra 888 B, **16,5x**.
+
+**Conclusão da medição: não há alavanca grande sobrando aqui.** O maior item que resta é
+`players?select=*` (785 B, 27% do total), e trimar as colunas dele foi **avaliado e recusado**:
+uma coluna que falte não dá erro de `tsc` nem de runtime — ela chega `undefined` no mapper e o
+estado do jogador é gravado errado em silêncio. Trocar ~2,7 MB/dia por esse risco é ruim. Se
+alguém for mexer, o pré-requisito é um teste que compare a lista de colunas lida com a que
+`gameStateToPlayerRow` escreve, no mesmo espírito de `colunasDoSnapshot.test.ts`.
+
+Fora do flush, o item mais visível dos logs é a busca de JWKS por request — pequena em bytes,
+mas um round-trip a mais em toda request autenticada. Ver
+[11-operacao.md#jogo_jwks--o-segredo-que-nunca-foi-gravado](11-operacao.md#jogo_jwks--o-segredo-que-nunca-foi-gravado).
+
 ### O cliente reconcilia em vez de substituir
 
 A resposta do flush vem com `estadoParcial: true`. O cliente não pode mais trocar a mochila
