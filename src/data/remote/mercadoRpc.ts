@@ -490,10 +490,41 @@ export async function ofertar(corpo: { anuncioId: string; valor: number }) {
   return { mensagem: data?.mensagem as string | undefined }
 }
 
+/**
+ * O `poke_uid` de um anuncio, lido ANTES da RPC que vai mexer nele (PH-324).
+ *
+ * Quem chama `cancelar_anuncio` / `comprar_anuncio` / `responder_oferta` so tem
+ * o id do ANUNCIO em maos, e as tres RPCs devolvem so uma mensagem. Sem o id do
+ * POKE nao da pra reconciliar a lista local — e foi por isso que a tela passou a
+ * dizer "o POKE voltou pra sua mochila" mostrando uma mochila sem ele.
+ *
+ * ANTES e nao depois: `comprar_anuncio` marca o anuncio como vendido, e
+ * dependendo do caminho a linha deixa de ser legivel pelo comprador.
+ *
+ * Falha em silencio de proposito: se a leitura nao vier, a acao principal
+ * continua valendo e a tela so fica sem o refresh cirurgico — que e exatamente
+ * o comportamento de hoje, nunca pior que ele.
+ */
+async function pokeDoAnuncio(anuncioId: string): Promise<string | undefined> {
+  const { data } = await db.from('market_listings').select('poke_uid').eq('id', anuncioId).maybeSingle()
+  return (data?.poke_uid as string | null | undefined) ?? undefined
+}
+
+/** O mesmo, a partir do id da OFERTA — ela aponta pro anuncio, que aponta pro POKE. */
+async function pokeDaOferta(ofertaId: string): Promise<string | undefined> {
+  const { data } = await db.from('market_offers').select('listing_id').eq('id', ofertaId).maybeSingle()
+  const anuncioId = data?.listing_id as string | null | undefined
+  return anuncioId ? pokeDoAnuncio(anuncioId) : undefined
+}
+
 export async function responderOferta(ofertaId: string, aceitar: boolean) {
+  const pokeUid = await pokeDaOferta(ofertaId)
   const { data, error } = await db.rpc('responder_oferta', { p_oferta_id: ofertaId, p_aceitar: aceitar })
   estourarSeErro(error)
-  await refetchAposAnuncio()
+  // Aceitar manda o POKE pro comprador; recusar devolve pro vendedor. Os dois
+  // casos sao o mesmo aqui: `refetchAposAnuncio` le a linha e decide pela
+  // `location` dela, sem o cliente ter que adivinhar qual dos dois foi.
+  await refetchAposAnuncio(pokeUid)
   return { mensagem: data?.mensagem as string | undefined }
 }
 
@@ -505,15 +536,22 @@ export async function cancelarOferta(ofertaId: string) {
 }
 
 export async function cancelarAnuncio(anuncioId: string) {
+  const pokeUid = await pokeDoAnuncio(anuncioId)
   const { data, error } = await db.rpc('cancelar_anuncio', { p_anuncio_id: anuncioId })
   estourarSeErro(error)
-  await refetchAposAnuncio()
+  // A mensagem que a RPC devolve e "o POKE voltou pra sua mochila". Sem esta
+  // linha, a tela dizia isso mostrando uma mochila sem ele (PH-324).
+  await refetchAposAnuncio(pokeUid)
   return { mensagem: data?.mensagem as string | undefined }
 }
 
 export async function comprarAnuncio(anuncioId: string) {
+  const pokeUid = await pokeDoAnuncio(anuncioId)
   const { data, error } = await db.rpc('comprar_anuncio', { p_anuncio_id: anuncioId })
   estourarSeErro(error)
-  await refetchCarteira()
+  // O jogador PAGOU: nao ver o que comprou e o pior dos tres casos da PH-324.
+  // `comprar_anuncio` muda o `user_id` da linha e a manda pra `bag`, entao a
+  // releitura acha o POKE — agora dele.
+  await refetchAposAnuncio(pokeUid)
   return { mensagem: data?.mensagem as string | undefined }
 }
