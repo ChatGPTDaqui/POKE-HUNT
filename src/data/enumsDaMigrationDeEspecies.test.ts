@@ -60,6 +60,25 @@ function valoresDosEnums(): Map<string, Set<string>> {
 
 const ENUMS = valoresDosEnums()
 
+/**
+ * Sem os comentários — o que o Postgres de fato lê.
+ *
+ * NÃO é detalhe. O cabeçalho destas migrations EXPLICA os valores errados
+ * (`SLIGHTLY_FAST`, `status`), então um `not.toContain` sobre o texto cru reprova
+ * casando a prosa que descreve o problema em vez do problema. É a mesma
+ * armadilha que o PH-252 pagou em `eeveeDoLance.test.ts`, e ela morde pelos dois
+ * lados: um `toContain` também passa VERDE casando o comentário, sem a cláusula
+ * existir no SQL.
+ *
+ * A classe de caractere exclui os dois fins de linha e não usa ponto: em
+ * JavaScript o ponto de uma regex não casa carriage return, e o repositório não
+ * tem `.gitattributes` — o mesmo commit sai em LF no runner e em CRLF aqui, então
+ * a forma com ponto não removeria comentário nenhum num checkout CRLF.
+ */
+function semComentario(sql: string): string {
+  return sql.replace(/--[^\r\n]*/g, '')
+}
+
 const ALVOS = Object.entries(MIGRATIONS)
   .filter(([nome]) => nome.includes('_especies_novas_'))
   .sort(([a], [b]) => a.localeCompare(b))
@@ -80,7 +99,10 @@ describe('a bancada lê alguma coisa (PH-336)', () => {
   })
 })
 
-describe.each(ALVOS)('%s — todo literal de enum é válido', (_nome, sql) => {
+describe.each(ALVOS)('%s — todo literal de enum é válido', (_nome, cru) => {
+  // Toda asserção abaixo olha CÓDIGO, nunca comentário — ver `semComentario`.
+  const sql = semComentario(cru)
+
   it('nenhum `\'valor\'::<enum>` está fora do enum', () => {
     // Casa QUALQUER cast de literal para enum no arquivo, sem lista branca: o
     // ponto é pegar o enum que ninguém lembrou de conferir, e uma lista branca
@@ -108,6 +130,43 @@ describe.each(ALVOS)('%s — todo literal de enum é válido', (_nome, sql) => {
     for (const golpeDeStatus of ['acupressure', 'attract', 'rain_dance', 'swords_dance']) {
       expect(sql, `${golpeDeStatus} sumiu da migration`).toContain(`('${golpeDeStatus}',`)
     }
+  })
+
+  it('as duas CHECK que travavam o elenco em 251 são afrouxadas ANTES do insert', () => {
+    // PH-336, SEGUNDA falha de deploy da mesma leva. `species_dex_number_check`
+    // prendia o dex em 251 e `species_growth_curve_check` não conhecia
+    // ERRATIC/FLUCTUATING (16 e 12 espécies de Hoenn usam). Sai como 23514.
+    //
+    // A ORDEM é o que este caso trava: afrouxar depois do insert não serve de
+    // nada, e é um erro fácil de cometer editando o gerador.
+    const posDex = sql.indexOf('check (dex_number >= 1 and dex_number <= 386)')
+    const posCurva = sql.indexOf("'ERRATIC', 'FLUCTUATING'")
+    const posInsert = sql.search(/insert into \w+\.species \(/)
+    expect(posDex, 'o teto de dex não foi elevado a 386').toBeGreaterThan(-1)
+    expect(posCurva, 'ERRATIC/FLUCTUATING não entraram na CHECK de curva').toBeGreaterThan(-1)
+    expect(posInsert, 'o insert de species sumiu').toBeGreaterThan(-1)
+    expect(posInsert).toBeGreaterThan(posDex)
+    expect(posInsert).toBeGreaterThan(posCurva)
+    // Os dois `SLIGHTLY_*` eram os nomes inventados que ERRATIC/FLUCTUATING
+    // substituíram no cliente. Nenhuma linha do banco os usa (conferido), e
+    // deixá-los na lista nova seria carregar dado morto para frente.
+    expect(sql).not.toContain('SLIGHTLY_FAST')
+  })
+
+  it('toda curva de crescimento emitida está na CHECK que a própria migration cria', () => {
+    // Coerência interna: se alguém acrescentar uma curva ao catálogo sem tocar na
+    // CHECK, o insert reprova no deploy. Aqui reprova de graça.
+    const permitidas = new Set(
+      [...(/check \(growth_curve in \(([^)]*)\)\)/.exec(sql)?.[1] ?? '').matchAll(/'([A-Z_]+)'/g)]
+        .map(([, v]) => v),
+    )
+    expect(permitidas.size, 'não achei a CHECK de curva').toBe(6)
+    const bloco = /insert into \w+\.species \([\s\S]*?on conflict \(id\) do nothing;/.exec(sql)
+    expect(bloco, 'não achei o insert de species').toBeTruthy()
+    const emitidas = [...bloco![0].matchAll(/, '([A-Z_]+)', '(?:muito_comum|comum|incomum|raro|muito_raro)'/g)]
+      .map(([, c]) => c)
+    expect(emitidas.length, 'nenhuma curva lida — o regex mudou').toBeGreaterThan(100)
+    expect([...new Set(emitidas)].filter((c) => !permitidas.has(c))).toEqual([])
   })
 
   it('o `spawn_tier` de toda espécie é uma das cinco chaves de spawn_tiers', () => {
