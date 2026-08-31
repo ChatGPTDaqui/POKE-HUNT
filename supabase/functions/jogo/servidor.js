@@ -1836,6 +1836,848 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"regirock": {
+		"id": "regirock",
+		"name": "Regirock",
+		"description": "Pokedex Nº377 - tipo ROCK.",
+		"type": "ROCK",
+		"type2": null,
+		"catchRate": 3,
+		"baseExp": 261,
+		"growthCurve": "SLOW",
+		"pesoHg": 2300,
+		"base": {
+			"hp": 80,
+			"atkFis": 100,
+			"atkEsp": 50,
+			"def": 200,
+			"defEsp": 100,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "explosion",
+				"levelReq": 1
+			},
+			{
+				"key": "stomp",
+				"levelReq": 1
+			},
+			{
+				"key": "rock_throw",
+				"levelReq": 7
+			},
+			{
+				"key": "charge_beam",
+				"levelReq": 13
+			},
+			{
+				"key": "bulldoze",
+				"levelReq": 19
+			},
+			{
+				"key": "curse",
+				"levelReq": 25
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 31
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 37
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 43
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 49
+			},
+			{
+				"key": "lock_on",
+				"levelReq": 55
+			},
+			{
+				"key": "zap_cannon",
+				"levelReq": 55
+			},
+			{
+				"key": "superpower",
+				"levelReq": 61
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 67
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"regice": {
+		"id": "regice",
+		"name": "Regice",
+		"description": "Pokedex Nº378 - tipo ICE.",
+		"type": "ICE",
+		"type2": null,
+		"catchRate": 3,
+		"baseExp": 261,
+		"growthCurve": "SLOW",
+		"pesoHg": 1750,
+		"base": {
+			"hp": 80,
+			"atkFis": 50,
+			"atkEsp": 100,
+			"def": 100,
+			"defEsp": 200,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "explosion",
+				"levelReq": 1
+			},
+			{
+				"key": "stomp",
+				"levelReq": 1
+			},
+			{
+				"key": "icy_wind",
+				"levelReq": 7
+			},
+			{
+				"key": "charge_beam",
+				"levelReq": 13
+			},
+			{
+				"key": "bulldoze",
+				"levelReq": 19
+			},
+			{
+				"key": "curse",
+				"levelReq": 25
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 31
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 37
+			},
+			{
+				"key": "ice_beam",
+				"levelReq": 43
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 49
+			},
+			{
+				"key": "lock_on",
+				"levelReq": 55
+			},
+			{
+				"key": "zap_cannon",
+				"levelReq": 55
+			},
+			{
+				"key": "superpower",
+				"levelReq": 61
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 67
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"registeel": {
+		"id": "registeel",
+		"name": "Registeel",
+		"description": "Pokedex Nº379 - tipo STEEL.",
+		"type": "STEEL",
+		"type2": null,
+		"catchRate": 3,
+		"baseExp": 261,
+		"growthCurve": "SLOW",
+		"pesoHg": 2050,
+		"base": {
+			"hp": 80,
+			"atkFis": 75,
+			"atkEsp": 75,
+			"def": 150,
+			"defEsp": 150,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "explosion",
+				"levelReq": 1
+			},
+			{
+				"key": "stomp",
+				"levelReq": 1
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 7
+			},
+			{
+				"key": "charge_beam",
+				"levelReq": 13
+			},
+			{
+				"key": "bulldoze",
+				"levelReq": 19
+			},
+			{
+				"key": "curse",
+				"levelReq": 25
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 31
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 37
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 37
+			},
+			{
+				"key": "flash_cannon",
+				"levelReq": 43
+			},
+			{
+				"key": "iron_head",
+				"levelReq": 43
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 49
+			},
+			{
+				"key": "lock_on",
+				"levelReq": 55
+			},
+			{
+				"key": "zap_cannon",
+				"levelReq": 55
+			},
+			{
+				"key": "superpower",
+				"levelReq": 61
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 67
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"latias": {
+		"id": "latias",
+		"name": "Latias",
+		"description": "Pokedex Nº380 - tipo DRAGON/PSYCHIC.",
+		"type": "DRAGON",
+		"type2": "PSYCHIC",
+		"catchRate": 3,
+		"baseExp": 270,
+		"growthCurve": "SLOW",
+		"pesoHg": 400,
+		"base": {
+			"hp": 80,
+			"atkFis": 80,
+			"atkEsp": 110,
+			"def": 90,
+			"defEsp": 130,
+			"speed": 110
+		},
+		"abilities": [
+			{
+				"key": "helping_hand",
+				"levelReq": 1
+			},
+			{
+				"key": "psywave",
+				"levelReq": 1
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 1
+			},
+			{
+				"key": "wish",
+				"levelReq": 1
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 4
+			},
+			{
+				"key": "charm",
+				"levelReq": 7
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 10
+			},
+			{
+				"key": "refresh",
+				"levelReq": 13
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 16
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 20
+			},
+			{
+				"key": "mist_ball",
+				"levelReq": 24
+			},
+			{
+				"key": "psycho_shift",
+				"levelReq": 28
+			},
+			{
+				"key": "recover",
+				"levelReq": 32
+			},
+			{
+				"key": "reflect_type",
+				"levelReq": 36
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 41
+			},
+			{
+				"key": "guard_split",
+				"levelReq": 46
+			},
+			{
+				"key": "psychic",
+				"levelReq": 51
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 56
+			},
+			{
+				"key": "healing_wish",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"latios": {
+		"id": "latios",
+		"name": "Latios",
+		"description": "Pokedex Nº381 - tipo DRAGON/PSYCHIC.",
+		"type": "DRAGON",
+		"type2": "PSYCHIC",
+		"catchRate": 3,
+		"baseExp": 270,
+		"growthCurve": "SLOW",
+		"pesoHg": 600,
+		"base": {
+			"hp": 80,
+			"atkFis": 90,
+			"atkEsp": 130,
+			"def": 80,
+			"defEsp": 110,
+			"speed": 110
+		},
+		"abilities": [
+			{
+				"key": "heal_block",
+				"levelReq": 1
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 1
+			},
+			{
+				"key": "psywave",
+				"levelReq": 1
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 1
+			},
+			{
+				"key": "protect",
+				"levelReq": 4
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 7
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 10
+			},
+			{
+				"key": "refresh",
+				"levelReq": 13
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 16
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 20
+			},
+			{
+				"key": "luster_purge",
+				"levelReq": 24
+			},
+			{
+				"key": "psycho_shift",
+				"levelReq": 28
+			},
+			{
+				"key": "recover",
+				"levelReq": 32
+			},
+			{
+				"key": "telekinesis",
+				"levelReq": 36
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 41
+			},
+			{
+				"key": "power_split",
+				"levelReq": 46
+			},
+			{
+				"key": "psychic",
+				"levelReq": 51
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 56
+			},
+			{
+				"key": "memento",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"kyogre": {
+		"id": "kyogre",
+		"name": "Kyogre",
+		"description": "Pokedex Nº382 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 3,
+		"baseExp": 302,
+		"growthCurve": "SLOW",
+		"pesoHg": 3520,
+		"base": {
+			"hp": 100,
+			"atkFis": 100,
+			"atkEsp": 150,
+			"def": 90,
+			"defEsp": 140,
+			"speed": 90
+		},
+		"abilities": [
+			{
+				"key": "ancient_power",
+				"levelReq": 1
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 1
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 5
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 15
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 20
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 30
+			},
+			{
+				"key": "ice_beam",
+				"levelReq": 35
+			},
+			{
+				"key": "origin_pulse",
+				"levelReq": 45
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 50
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 60
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 65
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 75
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 80
+			},
+			{
+				"key": "water_spout",
+				"levelReq": 90
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"groudon": {
+		"id": "groudon",
+		"name": "Groudon",
+		"description": "Pokedex Nº383 - tipo GROUND.",
+		"type": "GROUND",
+		"type2": null,
+		"catchRate": 3,
+		"baseExp": 302,
+		"growthCurve": "SLOW",
+		"pesoHg": 9500,
+		"base": {
+			"hp": 100,
+			"atkFis": 150,
+			"atkEsp": 100,
+			"def": 140,
+			"defEsp": 90,
+			"speed": 90
+		},
+		"abilities": [
+			{
+				"key": "ancient_power",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 1
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 5
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 15
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 20
+			},
+			{
+				"key": "rest",
+				"levelReq": 30
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 35
+			},
+			{
+				"key": "precipice_blades",
+				"levelReq": 45
+			},
+			{
+				"key": "bulk_up",
+				"levelReq": 50
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 60
+			},
+			{
+				"key": "fissure",
+				"levelReq": 65
+			},
+			{
+				"key": "fire_blast",
+				"levelReq": 75
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 80
+			},
+			{
+				"key": "eruption",
+				"levelReq": 90
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"rayquaza": {
+		"id": "rayquaza",
+		"name": "Rayquaza",
+		"description": "Pokedex Nº384 - tipo DRAGON/FLYING.",
+		"type": "DRAGON",
+		"type2": "FLYING",
+		"catchRate": 45,
+		"baseExp": 306,
+		"growthCurve": "SLOW",
+		"pesoHg": 2065,
+		"base": {
+			"hp": 105,
+			"atkFis": 150,
+			"atkEsp": 150,
+			"def": 90,
+			"defEsp": 90,
+			"speed": 95
+		},
+		"abilities": [
+			{
+				"key": "twister",
+				"levelReq": 1
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 5
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 15
+			},
+			{
+				"key": "crunch",
+				"levelReq": 20
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 30
+			},
+			{
+				"key": "rest",
+				"levelReq": 35
+			},
+			{
+				"key": "extreme_speed",
+				"levelReq": 45
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 50
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 60
+			},
+			{
+				"key": "fly",
+				"levelReq": 65
+			},
+			{
+				"key": "hyper_voice",
+				"levelReq": 75
+			},
+			{
+				"key": "outrage",
+				"levelReq": 80
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 90
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"jirachi": {
+		"id": "jirachi",
+		"name": "Jirachi",
+		"description": "Pokedex Nº385 - tipo STEEL/PSYCHIC.",
+		"type": "STEEL",
+		"type2": "PSYCHIC",
+		"catchRate": 3,
+		"baseExp": 270,
+		"growthCurve": "SLOW",
+		"pesoHg": 11,
+		"base": {
+			"hp": 100,
+			"atkFis": 100,
+			"atkEsp": 100,
+			"def": 100,
+			"defEsp": 100,
+			"speed": 100
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 1
+			},
+			{
+				"key": "wish",
+				"levelReq": 1
+			},
+			{
+				"key": "rest",
+				"levelReq": 5
+			},
+			{
+				"key": "swift",
+				"levelReq": 10
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 15
+			},
+			{
+				"key": "psychic",
+				"levelReq": 20
+			},
+			{
+				"key": "refresh",
+				"levelReq": 25
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 30
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 35
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 40
+			},
+			{
+				"key": "gravity",
+				"levelReq": 45
+			},
+			{
+				"key": "healing_wish",
+				"levelReq": 50
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 55
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 60
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 65
+			},
+			{
+				"key": "doom_desire",
+				"levelReq": 70
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"deoxys": {
+		"id": "deoxys",
+		"name": "Deoxys",
+		"description": "Pokedex Nº386 - tipo PSYCHIC.",
+		"type": "PSYCHIC",
+		"type2": null,
+		"catchRate": 3,
+		"baseExp": 270,
+		"growthCurve": "SLOW",
+		"pesoHg": 608,
+		"base": {
+			"hp": 50,
+			"atkFis": 150,
+			"atkEsp": 150,
+			"def": 50,
+			"defEsp": 50,
+			"speed": 150
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "wrap",
+				"levelReq": 1
+			},
+			{
+				"key": "night_shade",
+				"levelReq": 7
+			},
+			{
+				"key": "teleport",
+				"levelReq": 13
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 19
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 25
+			},
+			{
+				"key": "psychic",
+				"levelReq": 31
+			},
+			{
+				"key": "snatch",
+				"levelReq": 37
+			},
+			{
+				"key": "psycho_shift",
+				"levelReq": 43
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 49
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 55
+			},
+			{
+				"key": "recover",
+				"levelReq": 61
+			},
+			{
+				"key": "psycho_boost",
+				"levelReq": 67
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 73
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"geodude": {
 		"id": "geodude",
 		"name": "Geodude",
@@ -3697,6 +4539,940 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"treecko": {
+		"id": "treecko",
+		"name": "Treecko",
+		"description": "Pokedex Nº252 - tipo GRASS.",
+		"type": "GRASS",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 62,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 50,
+		"base": {
+			"hp": 40,
+			"atkFis": 45,
+			"atkEsp": 65,
+			"def": 35,
+			"defEsp": 55,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "pound",
+				"levelReq": 1
+			},
+			{
+				"key": "absorb",
+				"levelReq": 5
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 9
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 13
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 17
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 21
+			},
+			{
+				"key": "agility",
+				"levelReq": 25
+			},
+			{
+				"key": "slam",
+				"levelReq": 29
+			},
+			{
+				"key": "detect",
+				"levelReq": 33
+			},
+			{
+				"key": "energy_ball",
+				"levelReq": 37
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 41
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 45
+			},
+			{
+				"key": "screech",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": "grovyle",
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "grovyle",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
+	},
+	"grovyle": {
+		"id": "grovyle",
+		"name": "Grovyle",
+		"description": "Pokedex Nº253 - tipo GRASS.",
+		"type": "GRASS",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 142,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 216,
+		"base": {
+			"hp": 50,
+			"atkFis": 65,
+			"atkEsp": 85,
+			"def": 45,
+			"defEsp": 65,
+			"speed": 95
+		},
+		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 5
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 9
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 13
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 16
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 18
+			},
+			{
+				"key": "leaf_blade",
+				"levelReq": 23
+			},
+			{
+				"key": "agility",
+				"levelReq": 28
+			},
+			{
+				"key": "slam",
+				"levelReq": 33
+			},
+			{
+				"key": "detect",
+				"levelReq": 38
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 43
+			},
+			{
+				"key": "false_swipe",
+				"levelReq": 48
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 53
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 58
+			},
+			{
+				"key": "screech",
+				"levelReq": 63
+			}
+		],
+		"evolvesTo": "sceptile",
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "sceptile",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
+	},
+	"sceptile": {
+		"id": "sceptile",
+		"name": "Sceptile",
+		"description": "Pokedex Nº254 - tipo GRASS.",
+		"type": "GRASS",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 239,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 522,
+		"base": {
+			"hp": 70,
+			"atkFis": 85,
+			"atkEsp": 105,
+			"def": 65,
+			"defEsp": 85,
+			"speed": 120
+		},
+		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 5
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 9
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 13
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 18
+			},
+			{
+				"key": "leaf_blade",
+				"levelReq": 23
+			},
+			{
+				"key": "agility",
+				"levelReq": 28
+			},
+			{
+				"key": "slam",
+				"levelReq": 33
+			},
+			{
+				"key": "dual_chop",
+				"levelReq": 36
+			},
+			{
+				"key": "detect",
+				"levelReq": 39
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 45
+			},
+			{
+				"key": "false_swipe",
+				"levelReq": 51
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 57
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 63
+			},
+			{
+				"key": "screech",
+				"levelReq": 69
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"seedot": {
+		"id": "seedot",
+		"name": "Seedot",
+		"description": "Pokedex Nº273 - tipo GRASS.",
+		"type": "GRASS",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 44,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 40,
+		"base": {
+			"hp": 40,
+			"atkFis": 40,
+			"atkEsp": 30,
+			"def": 50,
+			"defEsp": 30,
+			"speed": 30
+		},
+		"abilities": [
+			{
+				"key": "bide",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 3
+			},
+			{
+				"key": "growth",
+				"levelReq": 9
+			},
+			{
+				"key": "nature_power",
+				"levelReq": 15
+			},
+			{
+				"key": "synthesis",
+				"levelReq": 21
+			},
+			{
+				"key": "sunny_day",
+				"levelReq": 27
+			},
+			{
+				"key": "explosion",
+				"levelReq": 33
+			}
+		],
+		"evolvesTo": "nuzleaf",
+		"evolvesAtLevel": 14,
+		"evolutionOptions": [{
+			"to": "nuzleaf",
+			"atLevel": 14,
+			"isSpecial": false
+		}]
+	},
+	"nuzleaf": {
+		"id": "nuzleaf",
+		"name": "Nuzleaf",
+		"description": "Pokedex Nº274 - tipo GRASS/DARK.",
+		"type": "GRASS",
+		"type2": "DARK",
+		"catchRate": 120,
+		"baseExp": 119,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 280,
+		"base": {
+			"hp": 70,
+			"atkFis": 70,
+			"atkEsp": 60,
+			"def": 40,
+			"defEsp": 40,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "harden",
+				"levelReq": 3
+			},
+			{
+				"key": "growth",
+				"levelReq": 6
+			},
+			{
+				"key": "torment",
+				"levelReq": 9
+			},
+			{
+				"key": "fake_out",
+				"levelReq": 12
+			},
+			{
+				"key": "razor_leaf",
+				"levelReq": 14
+			},
+			{
+				"key": "nature_power",
+				"levelReq": 16
+			},
+			{
+				"key": "razor_wind",
+				"levelReq": 20
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 24
+			},
+			{
+				"key": "leaf_blade",
+				"levelReq": 28
+			},
+			{
+				"key": "swagger",
+				"levelReq": 32
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 36
+			}
+		],
+		"evolvesTo": "shiftry",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "shiftry",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"shiftry": {
+		"id": "shiftry",
+		"name": "Shiftry",
+		"description": "Pokedex Nº275 - tipo GRASS/DARK.",
+		"type": "GRASS",
+		"type2": "DARK",
+		"catchRate": 45,
+		"baseExp": 216,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 596,
+		"base": {
+			"hp": 90,
+			"atkFis": 100,
+			"atkEsp": 90,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "feint_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 1
+			},
+			{
+				"key": "razor_leaf",
+				"levelReq": 1
+			},
+			{
+				"key": "whirlwind",
+				"levelReq": 1
+			},
+			{
+				"key": "leaf_tornado",
+				"levelReq": 20
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 32
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 44
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"shroomish": {
+		"id": "shroomish",
+		"name": "Shroomish",
+		"description": "Pokedex Nº285 - tipo GRASS.",
+		"type": "GRASS",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 59,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 45,
+		"base": {
+			"hp": 60,
+			"atkFis": 40,
+			"atkEsp": 40,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 5
+			},
+			{
+				"key": "leech_seed",
+				"levelReq": 8
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 12
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 15
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 19
+			},
+			{
+				"key": "worry_seed",
+				"levelReq": 22
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 26
+			},
+			{
+				"key": "growth",
+				"levelReq": 29
+			},
+			{
+				"key": "toxic",
+				"levelReq": 33
+			},
+			{
+				"key": "seed_bomb",
+				"levelReq": 36
+			},
+			{
+				"key": "spore",
+				"levelReq": 40
+			}
+		],
+		"evolvesTo": "breloom",
+		"evolvesAtLevel": 23,
+		"evolutionOptions": [{
+			"to": "breloom",
+			"atLevel": 23,
+			"isSpecial": false
+		}]
+	},
+	"breloom": {
+		"id": "breloom",
+		"name": "Breloom",
+		"description": "Pokedex Nº286 - tipo GRASS/FIGHTING.",
+		"type": "GRASS",
+		"type2": "FIGHTING",
+		"catchRate": 90,
+		"baseExp": 161,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 392,
+		"base": {
+			"hp": 60,
+			"atkFis": 130,
+			"atkEsp": 60,
+			"def": 80,
+			"defEsp": 60,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "stun_spore",
+				"levelReq": 5
+			},
+			{
+				"key": "leech_seed",
+				"levelReq": 8
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 12
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 15
+			},
+			{
+				"key": "feint",
+				"levelReq": 19
+			},
+			{
+				"key": "counter",
+				"levelReq": 22
+			},
+			{
+				"key": "mach_punch",
+				"levelReq": 23
+			},
+			{
+				"key": "force_palm",
+				"levelReq": 28
+			},
+			{
+				"key": "mind_reader",
+				"levelReq": 33
+			},
+			{
+				"key": "sky_uppercut",
+				"levelReq": 39
+			},
+			{
+				"key": "seed_bomb",
+				"levelReq": 44
+			},
+			{
+				"key": "dynamic_punch",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"roselia": {
+		"id": "roselia",
+		"name": "Roselia",
+		"description": "Pokedex Nº315 - tipo GRASS/POISON.",
+		"type": "GRASS",
+		"type2": "POISON",
+		"catchRate": 150,
+		"baseExp": 140,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 20,
+		"base": {
+			"hp": 50,
+			"atkFis": 60,
+			"atkEsp": 100,
+			"def": 45,
+			"defEsp": 80,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "growth",
+				"levelReq": 4
+			},
+			{
+				"key": "poison_sting",
+				"levelReq": 7
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 10
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 13
+			},
+			{
+				"key": "leech_seed",
+				"levelReq": 16
+			},
+			{
+				"key": "magical_leaf",
+				"levelReq": 19
+			},
+			{
+				"key": "grass_whistle",
+				"levelReq": 22
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 25
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 28
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 31
+			},
+			{
+				"key": "ingrain",
+				"levelReq": 34
+			},
+			{
+				"key": "petal_blizzard",
+				"levelReq": 37
+			},
+			{
+				"key": "toxic",
+				"levelReq": 40
+			},
+			{
+				"key": "aromatherapy",
+				"levelReq": 43
+			},
+			{
+				"key": "synthesis",
+				"levelReq": 46
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"cacnea": {
+		"id": "cacnea",
+		"name": "Cacnea",
+		"description": "Pokedex Nº331 - tipo GRASS.",
+		"type": "GRASS",
+		"type2": null,
+		"catchRate": 190,
+		"baseExp": 67,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 513,
+		"base": {
+			"hp": 50,
+			"atkFis": 85,
+			"atkEsp": 85,
+			"def": 40,
+			"defEsp": 40,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_sting",
+				"levelReq": 1
+			},
+			{
+				"key": "absorb",
+				"levelReq": 4
+			},
+			{
+				"key": "growth",
+				"levelReq": 7
+			},
+			{
+				"key": "leech_seed",
+				"levelReq": 10
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "needle_arm",
+				"levelReq": 16
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 19
+			},
+			{
+				"key": "ingrain",
+				"levelReq": 22
+			},
+			{
+				"key": "payback",
+				"levelReq": 26
+			},
+			{
+				"key": "spikes",
+				"levelReq": 30
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 34
+			},
+			{
+				"key": "pin_missile",
+				"levelReq": 38
+			},
+			{
+				"key": "energy_ball",
+				"levelReq": 42
+			},
+			{
+				"key": "cotton_spore",
+				"levelReq": 46
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 50
+			},
+			{
+				"key": "destiny_bond",
+				"levelReq": 54
+			}
+		],
+		"evolvesTo": "cacturne",
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "cacturne",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
+	},
+	"cacturne": {
+		"id": "cacturne",
+		"name": "Cacturne",
+		"description": "Pokedex Nº332 - tipo GRASS/DARK.",
+		"type": "GRASS",
+		"type2": "DARK",
+		"catchRate": 60,
+		"baseExp": 166,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 774,
+		"base": {
+			"hp": 70,
+			"atkFis": 115,
+			"atkEsp": 115,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 4
+			},
+			{
+				"key": "growth",
+				"levelReq": 7
+			},
+			{
+				"key": "leech_seed",
+				"levelReq": 10
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "needle_arm",
+				"levelReq": 16
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 19
+			},
+			{
+				"key": "ingrain",
+				"levelReq": 22
+			},
+			{
+				"key": "payback",
+				"levelReq": 26
+			},
+			{
+				"key": "spikes",
+				"levelReq": 30
+			},
+			{
+				"key": "spiky_shield",
+				"levelReq": 32
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 35
+			},
+			{
+				"key": "pin_missile",
+				"levelReq": 38
+			},
+			{
+				"key": "energy_ball",
+				"levelReq": 44
+			},
+			{
+				"key": "cotton_spore",
+				"levelReq": 49
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 54
+			},
+			{
+				"key": "destiny_bond",
+				"levelReq": 59
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"tropius": {
+		"id": "tropius",
+		"name": "Tropius",
+		"description": "Pokedex Nº357 - tipo GRASS/FLYING.",
+		"type": "GRASS",
+		"type2": "FLYING",
+		"catchRate": 200,
+		"baseExp": 161,
+		"growthCurve": "SLOW",
+		"pesoHg": 1e3,
+		"base": {
+			"hp": 99,
+			"atkFis": 68,
+			"atkEsp": 72,
+			"def": 83,
+			"defEsp": 87,
+			"speed": 51
+		},
+		"abilities": [
+			{
+				"key": "growth",
+				"levelReq": 1
+			},
+			{
+				"key": "gust",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "razor_leaf",
+				"levelReq": 1
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 6
+			},
+			{
+				"key": "stomp",
+				"levelReq": 10
+			},
+			{
+				"key": "magical_leaf",
+				"levelReq": 16
+			},
+			{
+				"key": "whirlwind",
+				"levelReq": 21
+			},
+			{
+				"key": "leaf_tornado",
+				"levelReq": 26
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 30
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 36
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 41
+			},
+			{
+				"key": "bestow",
+				"levelReq": 46
+			},
+			{
+				"key": "synthesis",
+				"levelReq": 50
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 56
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"caterpie": {
 		"id": "caterpie",
 		"name": "Caterpie",
@@ -5273,6 +7049,796 @@ var SPECIES_DATA = {
 			{
 				"key": "reversal",
 				"levelReq": 46
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"wurmple": {
+		"id": "wurmple",
+		"name": "Wurmple",
+		"description": "Pokedex Nº265 - tipo BUG.",
+		"type": "BUG",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 56,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 36,
+		"base": {
+			"hp": 45,
+			"atkFis": 45,
+			"atkEsp": 20,
+			"def": 35,
+			"defEsp": 30,
+			"speed": 20
+		},
+		"abilities": [
+			{
+				"key": "string_shot",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_sting",
+				"levelReq": 5
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 15
+			}
+		],
+		"evolvesTo": "silcoon",
+		"evolvesAtLevel": 7,
+		"evolutionOptions": [{
+			"to": "silcoon",
+			"atLevel": 7,
+			"isSpecial": false
+		}, {
+			"to": "cascoon",
+			"atLevel": 7,
+			"isSpecial": false
+		}]
+	},
+	"silcoon": {
+		"id": "silcoon",
+		"name": "Silcoon",
+		"description": "Pokedex Nº266 - tipo BUG.",
+		"type": "BUG",
+		"type2": null,
+		"catchRate": 120,
+		"baseExp": 72,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 100,
+		"base": {
+			"hp": 50,
+			"atkFis": 35,
+			"atkEsp": 25,
+			"def": 55,
+			"defEsp": 25,
+			"speed": 15
+		},
+		"abilities": [{
+			"key": "harden",
+			"levelReq": 7
+		}],
+		"evolvesTo": "beautifly",
+		"evolvesAtLevel": 10,
+		"evolutionOptions": [{
+			"to": "beautifly",
+			"atLevel": 10,
+			"isSpecial": false
+		}]
+	},
+	"beautifly": {
+		"id": "beautifly",
+		"name": "Beautifly",
+		"description": "Pokedex Nº267 - tipo BUG/FLYING.",
+		"type": "BUG",
+		"type2": "FLYING",
+		"catchRate": 45,
+		"baseExp": 178,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 284,
+		"base": {
+			"hp": 60,
+			"atkFis": 70,
+			"atkEsp": 100,
+			"def": 50,
+			"defEsp": 50,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "gust",
+				"levelReq": 10
+			},
+			{
+				"key": "absorb",
+				"levelReq": 12
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 15
+			},
+			{
+				"key": "morning_sun",
+				"levelReq": 17
+			},
+			{
+				"key": "air_cutter",
+				"levelReq": 20
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 22
+			},
+			{
+				"key": "silver_wind",
+				"levelReq": 25
+			},
+			{
+				"key": "attract",
+				"levelReq": 27
+			},
+			{
+				"key": "whirlwind",
+				"levelReq": 30
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 32
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 35
+			},
+			{
+				"key": "rage",
+				"levelReq": 37
+			},
+			{
+				"key": "quiver_dance",
+				"levelReq": 40
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"cascoon": {
+		"id": "cascoon",
+		"name": "Cascoon",
+		"description": "Pokedex Nº268 - tipo BUG.",
+		"type": "BUG",
+		"type2": null,
+		"catchRate": 120,
+		"baseExp": 72,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 115,
+		"base": {
+			"hp": 50,
+			"atkFis": 35,
+			"atkEsp": 25,
+			"def": 55,
+			"defEsp": 25,
+			"speed": 15
+		},
+		"abilities": [{
+			"key": "harden",
+			"levelReq": 1
+		}],
+		"evolvesTo": "dustox",
+		"evolvesAtLevel": 10,
+		"evolutionOptions": [{
+			"to": "dustox",
+			"atLevel": 10,
+			"isSpecial": false
+		}]
+	},
+	"dustox": {
+		"id": "dustox",
+		"name": "Dustox",
+		"description": "Pokedex Nº269 - tipo BUG/POISON.",
+		"type": "BUG",
+		"type2": "POISON",
+		"catchRate": 45,
+		"baseExp": 173,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 316,
+		"base": {
+			"hp": 60,
+			"atkFis": 50,
+			"atkEsp": 50,
+			"def": 70,
+			"defEsp": 90,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "gust",
+				"levelReq": 10
+			},
+			{
+				"key": "confusion",
+				"levelReq": 12
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 15
+			},
+			{
+				"key": "moonlight",
+				"levelReq": 17
+			},
+			{
+				"key": "venoshock",
+				"levelReq": 20
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 22
+			},
+			{
+				"key": "silver_wind",
+				"levelReq": 25
+			},
+			{
+				"key": "light_screen",
+				"levelReq": 27
+			},
+			{
+				"key": "whirlwind",
+				"levelReq": 30
+			},
+			{
+				"key": "toxic",
+				"levelReq": 32
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 35
+			},
+			{
+				"key": "protect",
+				"levelReq": 37
+			},
+			{
+				"key": "quiver_dance",
+				"levelReq": 40
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"surskit": {
+		"id": "surskit",
+		"name": "Surskit",
+		"description": "Pokedex Nº283 - tipo BUG/WATER.",
+		"type": "BUG",
+		"type2": "WATER",
+		"catchRate": 200,
+		"baseExp": 54,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 17,
+		"base": {
+			"hp": 40,
+			"atkFis": 30,
+			"atkEsp": 50,
+			"def": 32,
+			"defEsp": 52,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 6
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 9
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 14
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 17
+			},
+			{
+				"key": "agility",
+				"levelReq": 22
+			},
+			{
+				"key": "haze",
+				"levelReq": 25
+			},
+			{
+				"key": "mist",
+				"levelReq": 25
+			},
+			{
+				"key": "aqua_jet",
+				"levelReq": 30
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 35
+			},
+			{
+				"key": "sticky_web",
+				"levelReq": 38
+			}
+		],
+		"evolvesTo": "masquerain",
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "masquerain",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
+	},
+	"masquerain": {
+		"id": "masquerain",
+		"name": "Masquerain",
+		"description": "Pokedex Nº284 - tipo BUG/FLYING.",
+		"type": "BUG",
+		"type2": "FLYING",
+		"catchRate": 75,
+		"baseExp": 159,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 36,
+		"base": {
+			"hp": 70,
+			"atkFis": 60,
+			"atkEsp": 100,
+			"def": 62,
+			"defEsp": 82,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "quick_attack",
+				"levelReq": 6
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 9
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 14
+			},
+			{
+				"key": "gust",
+				"levelReq": 17
+			},
+			{
+				"key": "air_cutter",
+				"levelReq": 22
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 22
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 26
+			},
+			{
+				"key": "silver_wind",
+				"levelReq": 32
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 38
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 42
+			},
+			{
+				"key": "whirlwind",
+				"levelReq": 48
+			},
+			{
+				"key": "quiver_dance",
+				"levelReq": 52
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"nincada": {
+		"id": "nincada",
+		"name": "Nincada",
+		"description": "Pokedex Nº290 - tipo BUG/GROUND.",
+		"type": "BUG",
+		"type2": "GROUND",
+		"catchRate": 255,
+		"baseExp": 53,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 55,
+		"base": {
+			"hp": 31,
+			"atkFis": 45,
+			"atkEsp": 30,
+			"def": 90,
+			"defEsp": 30,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "absorb",
+				"levelReq": 5
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 9
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 13
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 17
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 21
+			},
+			{
+				"key": "mind_reader",
+				"levelReq": 25
+			},
+			{
+				"key": "bide",
+				"levelReq": 29
+			},
+			{
+				"key": "false_swipe",
+				"levelReq": 33
+			},
+			{
+				"key": "dig",
+				"levelReq": 37
+			}
+		],
+		"evolvesTo": "ninjask",
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "ninjask",
+			"atLevel": 20,
+			"isSpecial": false
+		}, {
+			"to": "shedinja",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "BUG"
+		}]
+	},
+	"ninjask": {
+		"id": "ninjask",
+		"name": "Ninjask",
+		"description": "Pokedex Nº291 - tipo BUG/FLYING.",
+		"type": "BUG",
+		"type2": "FLYING",
+		"catchRate": 120,
+		"baseExp": 160,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 120,
+		"base": {
+			"hp": 61,
+			"atkFis": 90,
+			"atkEsp": 50,
+			"def": 45,
+			"defEsp": 50,
+			"speed": 160
+		},
+		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 5
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 9
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 13
+			},
+			{
+				"key": "agility",
+				"levelReq": 17
+			},
+			{
+				"key": "double_team",
+				"levelReq": 20
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 20
+			},
+			{
+				"key": "screech",
+				"levelReq": 20
+			},
+			{
+				"key": "slash",
+				"levelReq": 23
+			},
+			{
+				"key": "mind_reader",
+				"levelReq": 29
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 35
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 41
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 47
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"shedinja": {
+		"id": "shedinja",
+		"name": "Shedinja",
+		"description": "Pokedex Nº292 - tipo BUG/GHOST.",
+		"type": "BUG",
+		"type2": "GHOST",
+		"catchRate": 45,
+		"baseExp": 83,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 12,
+		"base": {
+			"hp": 1,
+			"atkFis": 90,
+			"atkEsp": 30,
+			"def": 45,
+			"defEsp": 30,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 5
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 9
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 13
+			},
+			{
+				"key": "spite",
+				"levelReq": 17
+			},
+			{
+				"key": "shadow_sneak",
+				"levelReq": 21
+			},
+			{
+				"key": "mind_reader",
+				"levelReq": 25
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 29
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 33
+			},
+			{
+				"key": "grudge",
+				"levelReq": 37
+			},
+			{
+				"key": "heal_block",
+				"levelReq": 41
+			},
+			{
+				"key": "phantom_force",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"volbeat": {
+		"id": "volbeat",
+		"name": "Volbeat",
+		"description": "Pokedex Nº313 - tipo BUG.",
+		"type": "BUG",
+		"type2": null,
+		"catchRate": 150,
+		"baseExp": 151,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 177,
+		"base": {
+			"hp": 65,
+			"atkFis": 73,
+			"atkEsp": 47,
+			"def": 75,
+			"defEsp": 85,
+			"speed": 85
+		},
+		"abilities": [
+			{
+				"key": "flash",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "double_team",
+				"levelReq": 5
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 8
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 12
+			},
+			{
+				"key": "struggle_bug",
+				"levelReq": 15
+			},
+			{
+				"key": "moonlight",
+				"levelReq": 19
+			},
+			{
+				"key": "tail_glow",
+				"levelReq": 22
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 26
+			},
+			{
+				"key": "protect",
+				"levelReq": 29
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 33
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 36
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 40
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 43
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 47
+			},
+			{
+				"key": "infestation",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"illumise": {
+		"id": "illumise",
+		"name": "Illumise",
+		"description": "Pokedex Nº314 - tipo BUG.",
+		"type": "BUG",
+		"type2": null,
+		"catchRate": 150,
+		"baseExp": 151,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 177,
+		"base": {
+			"hp": 65,
+			"atkFis": 47,
+			"atkEsp": 73,
+			"def": 75,
+			"defEsp": 85,
+			"speed": 85
+		},
+		"abilities": [
+			{
+				"key": "play_nice",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 5
+			},
+			{
+				"key": "charm",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 12
+			},
+			{
+				"key": "struggle_bug",
+				"levelReq": 15
+			},
+			{
+				"key": "moonlight",
+				"levelReq": 19
+			},
+			{
+				"key": "wish",
+				"levelReq": 22
+			},
+			{
+				"key": "encore",
+				"levelReq": 26
+			},
+			{
+				"key": "flatter",
+				"levelReq": 29
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 33
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 36
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 40
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 43
+			},
+			{
+				"key": "covet",
+				"levelReq": 47
+			},
+			{
+				"key": "infestation",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -8765,6 +11331,1776 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"mudkip": {
+		"id": "mudkip",
+		"name": "Mudkip",
+		"description": "Pokedex Nº258 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 62,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 76,
+		"base": {
+			"hp": 50,
+			"atkFis": 70,
+			"atkEsp": 50,
+			"def": 50,
+			"defEsp": 50,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 4
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 9
+			},
+			{
+				"key": "foresight",
+				"levelReq": 12
+			},
+			{
+				"key": "bide",
+				"levelReq": 17
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 20
+			},
+			{
+				"key": "rock_throw",
+				"levelReq": 25
+			},
+			{
+				"key": "protect",
+				"levelReq": 28
+			},
+			{
+				"key": "whirlpool",
+				"levelReq": 33
+			},
+			{
+				"key": "take_down",
+				"levelReq": 36
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 41
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 44
+			}
+		],
+		"evolvesTo": "marshtomp",
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "marshtomp",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
+	},
+	"marshtomp": {
+		"id": "marshtomp",
+		"name": "Marshtomp",
+		"description": "Pokedex Nº259 - tipo WATER/GROUND.",
+		"type": "WATER",
+		"type2": "GROUND",
+		"catchRate": 45,
+		"baseExp": 142,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 280,
+		"base": {
+			"hp": 70,
+			"atkFis": 85,
+			"atkEsp": 60,
+			"def": 70,
+			"defEsp": 70,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "water_gun",
+				"levelReq": 4
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 9
+			},
+			{
+				"key": "foresight",
+				"levelReq": 12
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 16
+			},
+			{
+				"key": "bide",
+				"levelReq": 18
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 22
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 28
+			},
+			{
+				"key": "protect",
+				"levelReq": 32
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 38
+			},
+			{
+				"key": "take_down",
+				"levelReq": 42
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 48
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 52
+			}
+		],
+		"evolvesTo": "swampert",
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "swampert",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
+	},
+	"swampert": {
+		"id": "swampert",
+		"name": "Swampert",
+		"description": "Pokedex Nº260 - tipo WATER/GROUND.",
+		"type": "WATER",
+		"type2": "GROUND",
+		"catchRate": 45,
+		"baseExp": 241,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 819,
+		"base": {
+			"hp": 100,
+			"atkFis": 110,
+			"atkEsp": 85,
+			"def": 90,
+			"defEsp": 90,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "water_gun",
+				"levelReq": 4
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 9
+			},
+			{
+				"key": "foresight",
+				"levelReq": 12
+			},
+			{
+				"key": "bide",
+				"levelReq": 18
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 22
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 28
+			},
+			{
+				"key": "protect",
+				"levelReq": 32
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 39
+			},
+			{
+				"key": "take_down",
+				"levelReq": 44
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 51
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 56
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 63
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"lotad": {
+		"id": "lotad",
+		"name": "Lotad",
+		"description": "Pokedex Nº270 - tipo WATER/GRASS.",
+		"type": "WATER",
+		"type2": "GRASS",
+		"catchRate": 255,
+		"baseExp": 44,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 26,
+		"base": {
+			"hp": 40,
+			"atkFis": 30,
+			"atkEsp": 40,
+			"def": 30,
+			"defEsp": 50,
+			"speed": 30
+		},
+		"abilities": [
+			{
+				"key": "astonish",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 3
+			},
+			{
+				"key": "absorb",
+				"levelReq": 6
+			},
+			{
+				"key": "bubble",
+				"levelReq": 9
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 12
+			},
+			{
+				"key": "mist",
+				"levelReq": 15
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 18
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 21
+			},
+			{
+				"key": "nature_power",
+				"levelReq": 24
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 27
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 30
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 33
+			},
+			{
+				"key": "energy_ball",
+				"levelReq": 36
+			}
+		],
+		"evolvesTo": "lombre",
+		"evolvesAtLevel": 14,
+		"evolutionOptions": [{
+			"to": "lombre",
+			"atLevel": 14,
+			"isSpecial": false
+		}]
+	},
+	"lombre": {
+		"id": "lombre",
+		"name": "Lombre",
+		"description": "Pokedex Nº271 - tipo WATER/GRASS.",
+		"type": "WATER",
+		"type2": "GRASS",
+		"catchRate": 120,
+		"baseExp": 119,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 325,
+		"base": {
+			"hp": 60,
+			"atkFis": 50,
+			"atkEsp": 60,
+			"def": 50,
+			"defEsp": 70,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 3
+			},
+			{
+				"key": "absorb",
+				"levelReq": 6
+			},
+			{
+				"key": "bubble",
+				"levelReq": 9
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 12
+			},
+			{
+				"key": "fake_out",
+				"levelReq": 16
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 20
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 24
+			},
+			{
+				"key": "nature_power",
+				"levelReq": 28
+			},
+			{
+				"key": "uproar",
+				"levelReq": 32
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 36
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 40
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 44
+			}
+		],
+		"evolvesTo": "ludicolo",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "ludicolo",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"ludicolo": {
+		"id": "ludicolo",
+		"name": "Ludicolo",
+		"description": "Pokedex Nº272 - tipo WATER/GRASS.",
+		"type": "WATER",
+		"type2": "GRASS",
+		"catchRate": 45,
+		"baseExp": 216,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 550,
+		"base": {
+			"hp": 80,
+			"atkFis": 70,
+			"atkEsp": 90,
+			"def": 70,
+			"defEsp": 100,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "astonish",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 1
+			},
+			{
+				"key": "nature_power",
+				"levelReq": 1
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"wingull": {
+		"id": "wingull",
+		"name": "Wingull",
+		"description": "Pokedex Nº278 - tipo WATER/FLYING.",
+		"type": "WATER",
+		"type2": "FLYING",
+		"catchRate": 190,
+		"baseExp": 54,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 95,
+		"base": {
+			"hp": 40,
+			"atkFis": 30,
+			"atkEsp": 55,
+			"def": 30,
+			"defEsp": 30,
+			"speed": 85
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 5
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 8
+			},
+			{
+				"key": "mist",
+				"levelReq": 12
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 15
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 19
+			},
+			{
+				"key": "air_cutter",
+				"levelReq": 22
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 26
+			},
+			{
+				"key": "aerial_ace",
+				"levelReq": 29
+			},
+			{
+				"key": "roost",
+				"levelReq": 33
+			},
+			{
+				"key": "agility",
+				"levelReq": 36
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 40
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 43
+			}
+		],
+		"evolvesTo": "pelipper",
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "pelipper",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
+	},
+	"pelipper": {
+		"id": "pelipper",
+		"name": "Pelipper",
+		"description": "Pokedex Nº279 - tipo WATER/FLYING.",
+		"type": "WATER",
+		"type2": "FLYING",
+		"catchRate": 45,
+		"baseExp": 154,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 280,
+		"base": {
+			"hp": 60,
+			"atkFis": 50,
+			"atkEsp": 95,
+			"def": 100,
+			"defEsp": 70,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "supersonic",
+				"levelReq": 5
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 8
+			},
+			{
+				"key": "mist",
+				"levelReq": 12
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 15
+			},
+			{
+				"key": "payback",
+				"levelReq": 19
+			},
+			{
+				"key": "brine",
+				"levelReq": 22
+			},
+			{
+				"key": "protect",
+				"levelReq": 25
+			},
+			{
+				"key": "fling",
+				"levelReq": 28
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 33
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 33
+			},
+			{
+				"key": "swallow",
+				"levelReq": 33
+			},
+			{
+				"key": "roost",
+				"levelReq": 39
+			},
+			{
+				"key": "tailwind",
+				"levelReq": 44
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 50
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 55
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"carvanha": {
+		"id": "carvanha",
+		"name": "Carvanha",
+		"description": "Pokedex Nº318 - tipo WATER/DARK.",
+		"type": "WATER",
+		"type2": "DARK",
+		"catchRate": 225,
+		"baseExp": 61,
+		"growthCurve": "SLOW",
+		"pesoHg": 208,
+		"base": {
+			"hp": 45,
+			"atkFis": 90,
+			"atkEsp": 65,
+			"def": 20,
+			"defEsp": 20,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "rage",
+				"levelReq": 4
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 8
+			},
+			{
+				"key": "aqua_jet",
+				"levelReq": 11
+			},
+			{
+				"key": "assurance",
+				"levelReq": 15
+			},
+			{
+				"key": "screech",
+				"levelReq": 18
+			},
+			{
+				"key": "swagger",
+				"levelReq": 22
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 25
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 29
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 32
+			},
+			{
+				"key": "crunch",
+				"levelReq": 36
+			},
+			{
+				"key": "agility",
+				"levelReq": 39
+			},
+			{
+				"key": "take_down",
+				"levelReq": 43
+			}
+		],
+		"evolvesTo": "sharpedo",
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "sharpedo",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
+	},
+	"sharpedo": {
+		"id": "sharpedo",
+		"name": "Sharpedo",
+		"description": "Pokedex Nº319 - tipo WATER/DARK.",
+		"type": "WATER",
+		"type2": "DARK",
+		"catchRate": 60,
+		"baseExp": 161,
+		"growthCurve": "SLOW",
+		"pesoHg": 888,
+		"base": {
+			"hp": 70,
+			"atkFis": 120,
+			"atkEsp": 95,
+			"def": 40,
+			"defEsp": 40,
+			"speed": 95
+		},
+		"abilities": [
+			{
+				"key": "rage",
+				"levelReq": 4
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 8
+			},
+			{
+				"key": "aqua_jet",
+				"levelReq": 11
+			},
+			{
+				"key": "assurance",
+				"levelReq": 15
+			},
+			{
+				"key": "screech",
+				"levelReq": 18
+			},
+			{
+				"key": "swagger",
+				"levelReq": 22
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 25
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 29
+			},
+			{
+				"key": "slash",
+				"levelReq": 30
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 34
+			},
+			{
+				"key": "crunch",
+				"levelReq": 40
+			},
+			{
+				"key": "agility",
+				"levelReq": 45
+			},
+			{
+				"key": "skull_bash",
+				"levelReq": 51
+			},
+			{
+				"key": "taunt",
+				"levelReq": 56
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 62
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"wailmer": {
+		"id": "wailmer",
+		"name": "Wailmer",
+		"description": "Pokedex Nº320 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 125,
+		"baseExp": 80,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 1300,
+		"base": {
+			"hp": 130,
+			"atkFis": 70,
+			"atkEsp": 70,
+			"def": 35,
+			"defEsp": 35,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "splash",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 4
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 7
+			},
+			{
+				"key": "rollout",
+				"levelReq": 10
+			},
+			{
+				"key": "whirlpool",
+				"levelReq": 13
+			},
+			{
+				"key": "astonish",
+				"levelReq": 16
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 19
+			},
+			{
+				"key": "mist",
+				"levelReq": 22
+			},
+			{
+				"key": "brine",
+				"levelReq": 25
+			},
+			{
+				"key": "rest",
+				"levelReq": 29
+			},
+			{
+				"key": "water_spout",
+				"levelReq": 33
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 37
+			},
+			{
+				"key": "dive",
+				"levelReq": 41
+			},
+			{
+				"key": "bounce",
+				"levelReq": 45
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 49
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 53
+			}
+		],
+		"evolvesTo": "wailord",
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "wailord",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
+	},
+	"wailord": {
+		"id": "wailord",
+		"name": "Wailord",
+		"description": "Pokedex Nº321 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 60,
+		"baseExp": 175,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 3980,
+		"base": {
+			"hp": 170,
+			"atkFis": 90,
+			"atkEsp": 90,
+			"def": 45,
+			"defEsp": 45,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 4
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 7
+			},
+			{
+				"key": "rollout",
+				"levelReq": 10
+			},
+			{
+				"key": "whirlpool",
+				"levelReq": 13
+			},
+			{
+				"key": "astonish",
+				"levelReq": 16
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 19
+			},
+			{
+				"key": "mist",
+				"levelReq": 22
+			},
+			{
+				"key": "brine",
+				"levelReq": 25
+			},
+			{
+				"key": "rest",
+				"levelReq": 29
+			},
+			{
+				"key": "water_spout",
+				"levelReq": 33
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 37
+			},
+			{
+				"key": "dive",
+				"levelReq": 44
+			},
+			{
+				"key": "bounce",
+				"levelReq": 51
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 58
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 65
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"barboach": {
+		"id": "barboach",
+		"name": "Barboach",
+		"description": "Pokedex Nº339 - tipo WATER/GROUND.",
+		"type": "WATER",
+		"type2": "GROUND",
+		"catchRate": 190,
+		"baseExp": 58,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 19,
+		"base": {
+			"hp": 50,
+			"atkFis": 48,
+			"atkEsp": 46,
+			"def": 43,
+			"defEsp": 41,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "mud_slap",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 6
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 6
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 9
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 13
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 15
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 17
+			},
+			{
+				"key": "magnitude",
+				"levelReq": 20
+			},
+			{
+				"key": "rest",
+				"levelReq": 25
+			},
+			{
+				"key": "snore",
+				"levelReq": 25
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 28
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 32
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 35
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 39
+			},
+			{
+				"key": "fissure",
+				"levelReq": 44
+			}
+		],
+		"evolvesTo": "whiscash",
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "whiscash",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
+	},
+	"whiscash": {
+		"id": "whiscash",
+		"name": "Whiscash",
+		"description": "Pokedex Nº340 - tipo WATER/GROUND.",
+		"type": "WATER",
+		"type2": "GROUND",
+		"catchRate": 75,
+		"baseExp": 164,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 236,
+		"base": {
+			"hp": 110,
+			"atkFis": 78,
+			"atkEsp": 76,
+			"def": 73,
+			"defEsp": 71,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "mud_sport",
+				"levelReq": 6
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 6
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 9
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 13
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 15
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 17
+			},
+			{
+				"key": "magnitude",
+				"levelReq": 20
+			},
+			{
+				"key": "rest",
+				"levelReq": 25
+			},
+			{
+				"key": "snore",
+				"levelReq": 25
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 28
+			},
+			{
+				"key": "thrash",
+				"levelReq": 30
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 34
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 39
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 45
+			},
+			{
+				"key": "fissure",
+				"levelReq": 52
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"corphish": {
+		"id": "corphish",
+		"name": "Corphish",
+		"description": "Pokedex Nº341 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 205,
+		"baseExp": 62,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 115,
+		"base": {
+			"hp": 43,
+			"atkFis": 80,
+			"atkEsp": 50,
+			"def": 65,
+			"defEsp": 35,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 5
+			},
+			{
+				"key": "vice_grip",
+				"levelReq": 7
+			},
+			{
+				"key": "leer",
+				"levelReq": 10
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 14
+			},
+			{
+				"key": "protect",
+				"levelReq": 17
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 20
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 23
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 26
+			},
+			{
+				"key": "razor_shell",
+				"levelReq": 31
+			},
+			{
+				"key": "taunt",
+				"levelReq": 34
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 37
+			},
+			{
+				"key": "crunch",
+				"levelReq": 39
+			},
+			{
+				"key": "crabhammer",
+				"levelReq": 43
+			},
+			{
+				"key": "guillotine",
+				"levelReq": 48
+			}
+		],
+		"evolvesTo": "crawdaunt",
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "crawdaunt",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
+	},
+	"crawdaunt": {
+		"id": "crawdaunt",
+		"name": "Crawdaunt",
+		"description": "Pokedex Nº342 - tipo WATER/DARK.",
+		"type": "WATER",
+		"type2": "DARK",
+		"catchRate": 155,
+		"baseExp": 164,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 328,
+		"base": {
+			"hp": 63,
+			"atkFis": 120,
+			"atkEsp": 90,
+			"def": 85,
+			"defEsp": 55,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "harden",
+				"levelReq": 5
+			},
+			{
+				"key": "vice_grip",
+				"levelReq": 7
+			},
+			{
+				"key": "leer",
+				"levelReq": 10
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 14
+			},
+			{
+				"key": "protect",
+				"levelReq": 17
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 20
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 23
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 26
+			},
+			{
+				"key": "swift",
+				"levelReq": 30
+			},
+			{
+				"key": "razor_shell",
+				"levelReq": 32
+			},
+			{
+				"key": "taunt",
+				"levelReq": 36
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 40
+			},
+			{
+				"key": "crunch",
+				"levelReq": 43
+			},
+			{
+				"key": "crabhammer",
+				"levelReq": 48
+			},
+			{
+				"key": "guillotine",
+				"levelReq": 54
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"feebas": {
+		"id": "feebas",
+		"name": "Feebas",
+		"description": "Pokedex Nº349 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 40,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 74,
+		"base": {
+			"hp": 20,
+			"atkFis": 15,
+			"atkEsp": 10,
+			"def": 20,
+			"defEsp": 55,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "splash",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 15
+			},
+			{
+				"key": "flail",
+				"levelReq": 30
+			}
+		],
+		"evolvesTo": "milotic",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "milotic",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"milotic": {
+		"id": "milotic",
+		"name": "Milotic",
+		"description": "Pokedex Nº350 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 60,
+		"baseExp": 189,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 1620,
+		"base": {
+			"hp": 95,
+			"atkFis": 60,
+			"atkEsp": 100,
+			"def": 79,
+			"defEsp": 125,
+			"speed": 81
+		},
+		"abilities": [
+			{
+				"key": "water_sport",
+				"levelReq": 4
+			},
+			{
+				"key": "refresh",
+				"levelReq": 7
+			},
+			{
+				"key": "disarming_voice",
+				"levelReq": 11
+			},
+			{
+				"key": "twister",
+				"levelReq": 14
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 17
+			},
+			{
+				"key": "captivate",
+				"levelReq": 21
+			},
+			{
+				"key": "dragon_tail",
+				"levelReq": 24
+			},
+			{
+				"key": "recover",
+				"levelReq": 27
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 31
+			},
+			{
+				"key": "attract",
+				"levelReq": 34
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 37
+			},
+			{
+				"key": "coil",
+				"levelReq": 41
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 44
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 47
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 80
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"clamperl": {
+		"id": "clamperl",
+		"name": "Clamperl",
+		"description": "Pokedex Nº366 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 69,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 525,
+		"base": {
+			"hp": 35,
+			"atkFis": 64,
+			"atkEsp": 74,
+			"def": 85,
+			"defEsp": 55,
+			"speed": 32
+		},
+		"abilities": [
+			{
+				"key": "clamp",
+				"levelReq": 1
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "whirlpool",
+				"levelReq": 1
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": "huntail",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "huntail",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "WATER"
+		}, {
+			"to": "gorebyss",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "WATER"
+		}]
+	},
+	"huntail": {
+		"id": "huntail",
+		"name": "Huntail",
+		"description": "Pokedex Nº367 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 60,
+		"baseExp": 170,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 270,
+		"base": {
+			"hp": 55,
+			"atkFis": 104,
+			"atkEsp": 94,
+			"def": 105,
+			"defEsp": 75,
+			"speed": 52
+		},
+		"abilities": [
+			{
+				"key": "screech",
+				"levelReq": 5
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 9
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 11
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 14
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 16
+			},
+			{
+				"key": "brine",
+				"levelReq": 19
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 23
+			},
+			{
+				"key": "dive",
+				"levelReq": 26
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 29
+			},
+			{
+				"key": "crunch",
+				"levelReq": 34
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 39
+			},
+			{
+				"key": "coil",
+				"levelReq": 45
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"gorebyss": {
+		"id": "gorebyss",
+		"name": "Gorebyss",
+		"description": "Pokedex Nº368 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 60,
+		"baseExp": 170,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 226,
+		"base": {
+			"hp": 55,
+			"atkFis": 84,
+			"atkEsp": 114,
+			"def": 105,
+			"defEsp": 75,
+			"speed": 52
+		},
+		"abilities": [
+			{
+				"key": "water_sport",
+				"levelReq": 5
+			},
+			{
+				"key": "agility",
+				"levelReq": 9
+			},
+			{
+				"key": "draining_kiss",
+				"levelReq": 11
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 14
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 16
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 19
+			},
+			{
+				"key": "captivate",
+				"levelReq": 23
+			},
+			{
+				"key": "dive",
+				"levelReq": 26
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 29
+			},
+			{
+				"key": "psychic",
+				"levelReq": 34
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 39
+			},
+			{
+				"key": "coil",
+				"levelReq": 45
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"relicanth": {
+		"id": "relicanth",
+		"name": "Relicanth",
+		"description": "Pokedex Nº369 - tipo WATER/ROCK.",
+		"type": "WATER",
+		"type2": "ROCK",
+		"catchRate": 25,
+		"baseExp": 170,
+		"growthCurve": "SLOW",
+		"pesoHg": 234,
+		"base": {
+			"hp": 100,
+			"atkFis": 90,
+			"atkEsp": 45,
+			"def": 130,
+			"defEsp": 65,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "flail",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 6
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 10
+			},
+			{
+				"key": "rock_tomb",
+				"levelReq": 15
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 21
+			},
+			{
+				"key": "dive",
+				"levelReq": 26
+			},
+			{
+				"key": "take_down",
+				"levelReq": 31
+			},
+			{
+				"key": "yawn",
+				"levelReq": 35
+			},
+			{
+				"key": "rest",
+				"levelReq": 41
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 46
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 50
+			},
+			{
+				"key": "head_smash",
+				"levelReq": 56
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"luvdisc": {
+		"id": "luvdisc",
+		"name": "Luvdisc",
+		"description": "Pokedex Nº370 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 225,
+		"baseExp": 116,
+		"growthCurve": "FAST",
+		"pesoHg": 87,
+		"base": {
+			"hp": 43,
+			"atkFis": 30,
+			"atkEsp": 40,
+			"def": 55,
+			"defEsp": 65,
+			"speed": 97
+		},
+		"abilities": [
+			{
+				"key": "charm",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 4
+			},
+			{
+				"key": "agility",
+				"levelReq": 7
+			},
+			{
+				"key": "draining_kiss",
+				"levelReq": 9
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 17
+			},
+			{
+				"key": "attract",
+				"levelReq": 20
+			},
+			{
+				"key": "heart_stamp",
+				"levelReq": 22
+			},
+			{
+				"key": "flail",
+				"levelReq": 26
+			},
+			{
+				"key": "sweet_kiss",
+				"levelReq": 31
+			},
+			{
+				"key": "take_down",
+				"levelReq": 34
+			},
+			{
+				"key": "captivate",
+				"levelReq": 37
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 40
+			},
+			{
+				"key": "soak",
+				"levelReq": 42
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 46
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"pidgey": {
 		"id": "pidgey",
 		"name": "Pidgey",
@@ -11378,6 +15714,1413 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"zigzagoon": {
+		"id": "zigzagoon",
+		"name": "Zigzagoon",
+		"description": "Pokedex Nº263 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 56,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 175,
+		"base": {
+			"hp": 38,
+			"atkFis": 30,
+			"atkEsp": 30,
+			"def": 41,
+			"defEsp": 41,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 5
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 7
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 11
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 12
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 13
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 17
+			},
+			{
+				"key": "pin_missile",
+				"levelReq": 19
+			},
+			{
+				"key": "covet",
+				"levelReq": 23
+			},
+			{
+				"key": "bestow",
+				"levelReq": 25
+			},
+			{
+				"key": "flail",
+				"levelReq": 29
+			},
+			{
+				"key": "take_down",
+				"levelReq": 31
+			},
+			{
+				"key": "rest",
+				"levelReq": 35
+			},
+			{
+				"key": "belly_drum",
+				"levelReq": 37
+			},
+			{
+				"key": "fling",
+				"levelReq": 41
+			}
+		],
+		"evolvesTo": "linoone",
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "linoone",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
+	},
+	"linoone": {
+		"id": "linoone",
+		"name": "Linoone",
+		"description": "Pokedex Nº264 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 90,
+		"baseExp": 147,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 325,
+		"base": {
+			"hp": 78,
+			"atkFis": 70,
+			"atkEsp": 50,
+			"def": 61,
+			"defEsp": 61,
+			"speed": 100
+		},
+		"abilities": [
+			{
+				"key": "tail_whip",
+				"levelReq": 5
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 7
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 11
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 13
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 17
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 19
+			},
+			{
+				"key": "covet",
+				"levelReq": 24
+			},
+			{
+				"key": "bestow",
+				"levelReq": 27
+			},
+			{
+				"key": "slash",
+				"levelReq": 32
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 35
+			},
+			{
+				"key": "rest",
+				"levelReq": 40
+			},
+			{
+				"key": "belly_drum",
+				"levelReq": 43
+			},
+			{
+				"key": "fling",
+				"levelReq": 48
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"taillow": {
+		"id": "taillow",
+		"name": "Taillow",
+		"description": "Pokedex Nº276 - tipo NORMAL/FLYING.",
+		"type": "NORMAL",
+		"type2": "FLYING",
+		"catchRate": 200,
+		"baseExp": 54,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 23,
+		"base": {
+			"hp": 40,
+			"atkFis": 55,
+			"atkEsp": 30,
+			"def": 30,
+			"defEsp": 30,
+			"speed": 85
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "peck",
+				"levelReq": 1
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 5
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 9
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "double_team",
+				"levelReq": 17
+			},
+			{
+				"key": "aerial_ace",
+				"levelReq": 21
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 25
+			},
+			{
+				"key": "agility",
+				"levelReq": 29
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 33
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 37
+			},
+			{
+				"key": "brave_bird",
+				"levelReq": 41
+			},
+			{
+				"key": "reversal",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": "swellow",
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "swellow",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
+	},
+	"swellow": {
+		"id": "swellow",
+		"name": "Swellow",
+		"description": "Pokedex Nº277 - tipo NORMAL/FLYING.",
+		"type": "NORMAL",
+		"type2": "FLYING",
+		"catchRate": 45,
+		"baseExp": 159,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 198,
+		"base": {
+			"hp": 60,
+			"atkFis": 85,
+			"atkEsp": 75,
+			"def": 60,
+			"defEsp": 50,
+			"speed": 125
+		},
+		"abilities": [
+			{
+				"key": "focus_energy",
+				"levelReq": 5
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 9
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "double_team",
+				"levelReq": 17
+			},
+			{
+				"key": "aerial_ace",
+				"levelReq": 21
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 27
+			},
+			{
+				"key": "agility",
+				"levelReq": 33
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 39
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 45
+			},
+			{
+				"key": "brave_bird",
+				"levelReq": 51
+			},
+			{
+				"key": "reversal",
+				"levelReq": 57
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"slakoth": {
+		"id": "slakoth",
+		"name": "Slakoth",
+		"description": "Pokedex Nº287 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 56,
+		"growthCurve": "SLOW",
+		"pesoHg": 240,
+		"base": {
+			"hp": 60,
+			"atkFis": 60,
+			"atkEsp": 35,
+			"def": 60,
+			"defEsp": 35,
+			"speed": 30
+		},
+		"abilities": [
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "yawn",
+				"levelReq": 1
+			},
+			{
+				"key": "encore",
+				"levelReq": 6
+			},
+			{
+				"key": "slack_off",
+				"levelReq": 9
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 14
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 17
+			},
+			{
+				"key": "covet",
+				"levelReq": 22
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 25
+			},
+			{
+				"key": "counter",
+				"levelReq": 30
+			},
+			{
+				"key": "flail",
+				"levelReq": 33
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 38
+			}
+		],
+		"evolvesTo": "vigoroth",
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "vigoroth",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
+	},
+	"vigoroth": {
+		"id": "vigoroth",
+		"name": "Vigoroth",
+		"description": "Pokedex Nº288 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 120,
+		"baseExp": 154,
+		"growthCurve": "SLOW",
+		"pesoHg": 465,
+		"base": {
+			"hp": 80,
+			"atkFis": 80,
+			"atkEsp": 55,
+			"def": 80,
+			"defEsp": 55,
+			"speed": 90
+		},
+		"abilities": [
+			{
+				"key": "encore",
+				"levelReq": 6
+			},
+			{
+				"key": "uproar",
+				"levelReq": 9
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 14
+			},
+			{
+				"key": "endure",
+				"levelReq": 17
+			},
+			{
+				"key": "slash",
+				"levelReq": 23
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 27
+			},
+			{
+				"key": "counter",
+				"levelReq": 33
+			},
+			{
+				"key": "focus_punch",
+				"levelReq": 37
+			},
+			{
+				"key": "reversal",
+				"levelReq": 43
+			}
+		],
+		"evolvesTo": "slaking",
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "slaking",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
+	},
+	"slaking": {
+		"id": "slaking",
+		"name": "Slaking",
+		"description": "Pokedex Nº289 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 252,
+		"growthCurve": "SLOW",
+		"pesoHg": 1305,
+		"base": {
+			"hp": 150,
+			"atkFis": 160,
+			"atkEsp": 95,
+			"def": 100,
+			"defEsp": 65,
+			"speed": 100
+		},
+		"abilities": [
+			{
+				"key": "encore",
+				"levelReq": 6
+			},
+			{
+				"key": "slack_off",
+				"levelReq": 9
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 14
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 17
+			},
+			{
+				"key": "covet",
+				"levelReq": 23
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 27
+			},
+			{
+				"key": "counter",
+				"levelReq": 33
+			},
+			{
+				"key": "swagger",
+				"levelReq": 36
+			},
+			{
+				"key": "flail",
+				"levelReq": 39
+			},
+			{
+				"key": "fling",
+				"levelReq": 47
+			},
+			{
+				"key": "punishment",
+				"levelReq": 53
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"whismur": {
+		"id": "whismur",
+		"name": "Whismur",
+		"description": "Pokedex Nº293 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 190,
+		"baseExp": 48,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 163,
+		"base": {
+			"hp": 64,
+			"atkFis": 51,
+			"atkEsp": 51,
+			"def": 23,
+			"defEsp": 23,
+			"speed": 28
+		},
+		"abilities": [
+			{
+				"key": "pound",
+				"levelReq": 1
+			},
+			{
+				"key": "echoed_voice",
+				"levelReq": 4
+			},
+			{
+				"key": "astonish",
+				"levelReq": 8
+			},
+			{
+				"key": "howl",
+				"levelReq": 11
+			},
+			{
+				"key": "screech",
+				"levelReq": 15
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 18
+			},
+			{
+				"key": "stomp",
+				"levelReq": 22
+			},
+			{
+				"key": "uproar",
+				"levelReq": 25
+			},
+			{
+				"key": "roar",
+				"levelReq": 29
+			},
+			{
+				"key": "rest",
+				"levelReq": 32
+			},
+			{
+				"key": "sleep_talk",
+				"levelReq": 36
+			},
+			{
+				"key": "hyper_voice",
+				"levelReq": 39
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 43
+			}
+		],
+		"evolvesTo": "loudred",
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "loudred",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
+	},
+	"loudred": {
+		"id": "loudred",
+		"name": "Loudred",
+		"description": "Pokedex Nº294 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 120,
+		"baseExp": 126,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 405,
+		"base": {
+			"hp": 84,
+			"atkFis": 71,
+			"atkEsp": 71,
+			"def": 43,
+			"defEsp": 43,
+			"speed": 48
+		},
+		"abilities": [
+			{
+				"key": "echoed_voice",
+				"levelReq": 4
+			},
+			{
+				"key": "astonish",
+				"levelReq": 9
+			},
+			{
+				"key": "howl",
+				"levelReq": 11
+			},
+			{
+				"key": "screech",
+				"levelReq": 15
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 18
+			},
+			{
+				"key": "bite",
+				"levelReq": 20
+			},
+			{
+				"key": "stomp",
+				"levelReq": 23
+			},
+			{
+				"key": "uproar",
+				"levelReq": 27
+			},
+			{
+				"key": "roar",
+				"levelReq": 32
+			},
+			{
+				"key": "rest",
+				"levelReq": 36
+			},
+			{
+				"key": "sleep_talk",
+				"levelReq": 41
+			},
+			{
+				"key": "hyper_voice",
+				"levelReq": 45
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": "exploud",
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "exploud",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
+	},
+	"exploud": {
+		"id": "exploud",
+		"name": "Exploud",
+		"description": "Pokedex Nº295 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 221,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 840,
+		"base": {
+			"hp": 104,
+			"atkFis": 91,
+			"atkEsp": 91,
+			"def": 63,
+			"defEsp": 73,
+			"speed": 68
+		},
+		"abilities": [
+			{
+				"key": "echoed_voice",
+				"levelReq": 4
+			},
+			{
+				"key": "astonish",
+				"levelReq": 9
+			},
+			{
+				"key": "howl",
+				"levelReq": 11
+			},
+			{
+				"key": "screech",
+				"levelReq": 15
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 18
+			},
+			{
+				"key": "stomp",
+				"levelReq": 23
+			},
+			{
+				"key": "uproar",
+				"levelReq": 27
+			},
+			{
+				"key": "roar",
+				"levelReq": 32
+			},
+			{
+				"key": "rest",
+				"levelReq": 36
+			},
+			{
+				"key": "crunch",
+				"levelReq": 40
+			},
+			{
+				"key": "sleep_talk",
+				"levelReq": 42
+			},
+			{
+				"key": "hyper_voice",
+				"levelReq": 47
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 53
+			},
+			{
+				"key": "boomburst",
+				"levelReq": 58
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 64
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"azurill": {
+		"id": "azurill",
+		"name": "Azurill",
+		"description": "Pokedex Nº298 - tipo NORMAL/FAIRY.",
+		"type": "NORMAL",
+		"type2": "FAIRY",
+		"catchRate": 150,
+		"baseExp": 38,
+		"growthCurve": "FAST",
+		"pesoHg": 20,
+		"base": {
+			"hp": 50,
+			"atkFis": 20,
+			"atkEsp": 20,
+			"def": 40,
+			"defEsp": 40,
+			"speed": 20
+		},
+		"abilities": [
+			{
+				"key": "splash",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 2
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 5
+			},
+			{
+				"key": "bubble",
+				"levelReq": 7
+			},
+			{
+				"key": "charm",
+				"levelReq": 10
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 13
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 16
+			},
+			{
+				"key": "slam",
+				"levelReq": 20
+			},
+			{
+				"key": "bounce",
+				"levelReq": 23
+			}
+		],
+		"evolvesTo": "marill",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "marill",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"skitty": {
+		"id": "skitty",
+		"name": "Skitty",
+		"description": "Pokedex Nº300 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 52,
+		"growthCurve": "FAST",
+		"pesoHg": 110,
+		"base": {
+			"hp": 50,
+			"atkFis": 45,
+			"atkEsp": 35,
+			"def": 45,
+			"defEsp": 35,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "fake_out",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "foresight",
+				"levelReq": 4
+			},
+			{
+				"key": "sing",
+				"levelReq": 7
+			},
+			{
+				"key": "attract",
+				"levelReq": 10
+			},
+			{
+				"key": "disarming_voice",
+				"levelReq": 13
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 16
+			},
+			{
+				"key": "copycat",
+				"levelReq": 19
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 22
+			},
+			{
+				"key": "charm",
+				"levelReq": 25
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 28
+			},
+			{
+				"key": "assist",
+				"levelReq": 31
+			},
+			{
+				"key": "covet",
+				"levelReq": 34
+			},
+			{
+				"key": "heal_bell",
+				"levelReq": 37
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 40
+			},
+			{
+				"key": "captivate",
+				"levelReq": 43
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": "delcatty",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "delcatty",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"delcatty": {
+		"id": "delcatty",
+		"name": "Delcatty",
+		"description": "Pokedex Nº301 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 60,
+		"baseExp": 140,
+		"growthCurve": "FAST",
+		"pesoHg": 326,
+		"base": {
+			"hp": 70,
+			"atkFis": 65,
+			"atkEsp": 55,
+			"def": 65,
+			"defEsp": 55,
+			"speed": 90
+		},
+		"abilities": [
+			{
+				"key": "attract",
+				"levelReq": 1
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 1
+			},
+			{
+				"key": "fake_out",
+				"levelReq": 1
+			},
+			{
+				"key": "sing",
+				"levelReq": 1
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"spinda": {
+		"id": "spinda",
+		"name": "Spinda",
+		"description": "Pokedex Nº327 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 126,
+		"growthCurve": "FAST",
+		"pesoHg": 50,
+		"base": {
+			"hp": 60,
+			"atkFis": 60,
+			"atkEsp": 60,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "copycat",
+				"levelReq": 5
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 10
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 14
+			},
+			{
+				"key": "hypnosis",
+				"levelReq": 19
+			},
+			{
+				"key": "dizzy_punch",
+				"levelReq": 23
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 28
+			},
+			{
+				"key": "teeter_dance",
+				"levelReq": 32
+			},
+			{
+				"key": "uproar",
+				"levelReq": 37
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 41
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 46
+			},
+			{
+				"key": "flail",
+				"levelReq": 50
+			},
+			{
+				"key": "thrash",
+				"levelReq": 55
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"swablu": {
+		"id": "swablu",
+		"name": "Swablu",
+		"description": "Pokedex Nº333 - tipo NORMAL/FLYING.",
+		"type": "NORMAL",
+		"type2": "FLYING",
+		"catchRate": 255,
+		"baseExp": 62,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 12,
+		"base": {
+			"hp": 45,
+			"atkFis": 40,
+			"atkEsp": 40,
+			"def": 60,
+			"defEsp": 75,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "peck",
+				"levelReq": 1
+			},
+			{
+				"key": "astonish",
+				"levelReq": 3
+			},
+			{
+				"key": "sing",
+				"levelReq": 5
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 7
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 9
+			},
+			{
+				"key": "disarming_voice",
+				"levelReq": 11
+			},
+			{
+				"key": "mist",
+				"levelReq": 14
+			},
+			{
+				"key": "round",
+				"levelReq": 17
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 20
+			},
+			{
+				"key": "take_down",
+				"levelReq": 23
+			},
+			{
+				"key": "refresh",
+				"levelReq": 26
+			},
+			{
+				"key": "mirror_move",
+				"levelReq": 30
+			},
+			{
+				"key": "cotton_guard",
+				"levelReq": 34
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 38
+			},
+			{
+				"key": "perish_song",
+				"levelReq": 42
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": "altaria",
+		"evolvesAtLevel": 35,
+		"evolutionOptions": [{
+			"to": "altaria",
+			"atLevel": 35,
+			"isSpecial": false
+		}]
+	},
+	"zangoose": {
+		"id": "zangoose",
+		"name": "Zangoose",
+		"description": "Pokedex Nº335 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 90,
+		"baseExp": 160,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 403,
+		"base": {
+			"hp": 73,
+			"atkFis": 115,
+			"atkEsp": 60,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 90
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 8
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 12
+			},
+			{
+				"key": "hone_claws",
+				"levelReq": 15
+			},
+			{
+				"key": "slash",
+				"levelReq": 19
+			},
+			{
+				"key": "revenge",
+				"levelReq": 22
+			},
+			{
+				"key": "crush_claw",
+				"levelReq": 26
+			},
+			{
+				"key": "false_swipe",
+				"levelReq": 29
+			},
+			{
+				"key": "embargo",
+				"levelReq": 33
+			},
+			{
+				"key": "detect",
+				"levelReq": 36
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 40
+			},
+			{
+				"key": "taunt",
+				"levelReq": 43
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 47
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"castform": {
+		"id": "castform",
+		"name": "Castform",
+		"description": "Pokedex Nº351 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 147,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 8,
+		"base": {
+			"hp": 70,
+			"atkFis": 70,
+			"atkEsp": 70,
+			"def": 70,
+			"defEsp": 70,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "ember",
+				"levelReq": 10
+			},
+			{
+				"key": "powder_snow",
+				"levelReq": 10
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 10
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 15
+			},
+			{
+				"key": "hail",
+				"levelReq": 20
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 20
+			},
+			{
+				"key": "sunny_day",
+				"levelReq": 20
+			},
+			{
+				"key": "weather_ball",
+				"levelReq": 25
+			},
+			{
+				"key": "blizzard",
+				"levelReq": 35
+			},
+			{
+				"key": "fire_blast",
+				"levelReq": 35
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 35
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"kecleon": {
+		"id": "kecleon",
+		"name": "Kecleon",
+		"description": "Pokedex Nº352 - tipo NORMAL.",
+		"type": "NORMAL",
+		"type2": null,
+		"catchRate": 200,
+		"baseExp": 154,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 220,
+		"base": {
+			"hp": 60,
+			"atkFis": 90,
+			"atkEsp": 60,
+			"def": 70,
+			"defEsp": 120,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "astonish",
+				"levelReq": 1
+			},
+			{
+				"key": "lick",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "thief",
+				"levelReq": 1
+			},
+			{
+				"key": "bind",
+				"levelReq": 4
+			},
+			{
+				"key": "shadow_sneak",
+				"levelReq": 7
+			},
+			{
+				"key": "feint",
+				"levelReq": 10
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 13
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 16
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 18
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 21
+			},
+			{
+				"key": "slash",
+				"levelReq": 25
+			},
+			{
+				"key": "camouflage",
+				"levelReq": 30
+			},
+			{
+				"key": "shadow_claw",
+				"levelReq": 33
+			},
+			{
+				"key": "screech",
+				"levelReq": 38
+			},
+			{
+				"key": "substitute",
+				"levelReq": 42
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 46
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"graveler": {
 		"id": "graveler",
 		"name": "Graveler",
@@ -12380,6 +18123,609 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"nosepass": {
+		"id": "nosepass",
+		"name": "Nosepass",
+		"description": "Pokedex Nº299 - tipo ROCK.",
+		"type": "ROCK",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 75,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 970,
+		"base": {
+			"hp": 30,
+			"atkFis": 45,
+			"atkEsp": 45,
+			"def": 135,
+			"defEsp": 90,
+			"speed": 30
+		},
+		"abilities": [
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 4
+			},
+			{
+				"key": "block",
+				"levelReq": 7
+			},
+			{
+				"key": "rock_throw",
+				"levelReq": 10
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 13
+			},
+			{
+				"key": "rest",
+				"levelReq": 16
+			},
+			{
+				"key": "spark",
+				"levelReq": 19
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 22
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 25
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 28
+			},
+			{
+				"key": "discharge",
+				"levelReq": 31
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 34
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 37
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 40
+			},
+			{
+				"key": "lock_on",
+				"levelReq": 43
+			},
+			{
+				"key": "zap_cannon",
+				"levelReq": 43
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"lunatone": {
+		"id": "lunatone",
+		"name": "Lunatone",
+		"description": "Pokedex Nº337 - tipo ROCK/PSYCHIC.",
+		"type": "ROCK",
+		"type2": "PSYCHIC",
+		"catchRate": 45,
+		"baseExp": 161,
+		"growthCurve": "FAST",
+		"pesoHg": 1680,
+		"base": {
+			"hp": 90,
+			"atkFis": 55,
+			"atkEsp": 95,
+			"def": 65,
+			"defEsp": 85,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 1
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 1
+			},
+			{
+				"key": "psyshock",
+				"levelReq": 1
+			},
+			{
+				"key": "rock_throw",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "hypnosis",
+				"levelReq": 5
+			},
+			{
+				"key": "rock_polish",
+				"levelReq": 9
+			},
+			{
+				"key": "psywave",
+				"levelReq": 13
+			},
+			{
+				"key": "embargo",
+				"levelReq": 17
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 21
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 25
+			},
+			{
+				"key": "psychic",
+				"levelReq": 29
+			},
+			{
+				"key": "heal_block",
+				"levelReq": 33
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 37
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 41
+			},
+			{
+				"key": "explosion",
+				"levelReq": 45
+			},
+			{
+				"key": "magic_room",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"solrock": {
+		"id": "solrock",
+		"name": "Solrock",
+		"description": "Pokedex Nº338 - tipo ROCK/PSYCHIC.",
+		"type": "ROCK",
+		"type2": "PSYCHIC",
+		"catchRate": 45,
+		"baseExp": 161,
+		"growthCurve": "FAST",
+		"pesoHg": 1540,
+		"base": {
+			"hp": 90,
+			"atkFis": 95,
+			"atkEsp": 55,
+			"def": 85,
+			"defEsp": 65,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 1
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "rock_throw",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "fire_spin",
+				"levelReq": 5
+			},
+			{
+				"key": "rock_polish",
+				"levelReq": 9
+			},
+			{
+				"key": "psywave",
+				"levelReq": 13
+			},
+			{
+				"key": "embargo",
+				"levelReq": 17
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 21
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 25
+			},
+			{
+				"key": "psychic",
+				"levelReq": 29
+			},
+			{
+				"key": "heal_block",
+				"levelReq": 33
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 37
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 41
+			},
+			{
+				"key": "explosion",
+				"levelReq": 45
+			},
+			{
+				"key": "wonder_room",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"lileep": {
+		"id": "lileep",
+		"name": "Lileep",
+		"description": "Pokedex Nº345 - tipo ROCK/GRASS.",
+		"type": "ROCK",
+		"type2": "GRASS",
+		"catchRate": 45,
+		"baseExp": 71,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 238,
+		"base": {
+			"hp": 66,
+			"atkFis": 41,
+			"atkEsp": 61,
+			"def": 77,
+			"defEsp": 87,
+			"speed": 23
+		},
+		"abilities": [
+			{
+				"key": "astonish",
+				"levelReq": 1
+			},
+			{
+				"key": "constrict",
+				"levelReq": 1
+			},
+			{
+				"key": "acid",
+				"levelReq": 5
+			},
+			{
+				"key": "ingrain",
+				"levelReq": 9
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 13
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 17
+			},
+			{
+				"key": "brine",
+				"levelReq": 21
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 26
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 31
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 36
+			},
+			{
+				"key": "energy_ball",
+				"levelReq": 41
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 46
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 46
+			},
+			{
+				"key": "swallow",
+				"levelReq": 46
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 52
+			}
+		],
+		"evolvesTo": "cradily",
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "cradily",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
+	},
+	"cradily": {
+		"id": "cradily",
+		"name": "Cradily",
+		"description": "Pokedex Nº346 - tipo ROCK/GRASS.",
+		"type": "ROCK",
+		"type2": "GRASS",
+		"catchRate": 45,
+		"baseExp": 173,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 604,
+		"base": {
+			"hp": 86,
+			"atkFis": 81,
+			"atkEsp": 81,
+			"def": 97,
+			"defEsp": 107,
+			"speed": 43
+		},
+		"abilities": [
+			{
+				"key": "acid",
+				"levelReq": 5
+			},
+			{
+				"key": "ingrain",
+				"levelReq": 9
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 13
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 17
+			},
+			{
+				"key": "brine",
+				"levelReq": 21
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 26
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 31
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 36
+			},
+			{
+				"key": "energy_ball",
+				"levelReq": 44
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 52
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 52
+			},
+			{
+				"key": "swallow",
+				"levelReq": 52
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"anorith": {
+		"id": "anorith",
+		"name": "Anorith",
+		"description": "Pokedex Nº347 - tipo ROCK/BUG.",
+		"type": "ROCK",
+		"type2": "BUG",
+		"catchRate": 45,
+		"baseExp": 71,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 125,
+		"base": {
+			"hp": 45,
+			"atkFis": 95,
+			"atkEsp": 40,
+			"def": 50,
+			"defEsp": 50,
+			"speed": 75
+		},
+		"abilities": [
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 4
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 7
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 10
+			},
+			{
+				"key": "smack_down",
+				"levelReq": 13
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 17
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 21
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 25
+			},
+			{
+				"key": "brine",
+				"levelReq": 29
+			},
+			{
+				"key": "slash",
+				"levelReq": 34
+			},
+			{
+				"key": "crush_claw",
+				"levelReq": 39
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 44
+			},
+			{
+				"key": "protect",
+				"levelReq": 49
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 55
+			}
+		],
+		"evolvesTo": "armaldo",
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "armaldo",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
+	},
+	"armaldo": {
+		"id": "armaldo",
+		"name": "Armaldo",
+		"description": "Pokedex Nº348 - tipo ROCK/BUG.",
+		"type": "ROCK",
+		"type2": "BUG",
+		"catchRate": 45,
+		"baseExp": 173,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 682,
+		"base": {
+			"hp": 75,
+			"atkFis": 125,
+			"atkEsp": 70,
+			"def": 100,
+			"defEsp": 80,
+			"speed": 45
+		},
+		"abilities": [
+			{
+				"key": "mud_sport",
+				"levelReq": 4
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 7
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 10
+			},
+			{
+				"key": "smack_down",
+				"levelReq": 13
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 17
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 21
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 25
+			},
+			{
+				"key": "brine",
+				"levelReq": 29
+			},
+			{
+				"key": "slash",
+				"levelReq": 34
+			},
+			{
+				"key": "crush_claw",
+				"levelReq": 39
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 46
+			},
+			{
+				"key": "protect",
+				"levelReq": 53
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"sandshrew": {
 		"id": "sandshrew",
 		"name": "Sandshrew",
@@ -13285,6 +19631,456 @@ var SPECIES_DATA = {
 			{
 				"key": "giga_impact",
 				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"trapinch": {
+		"id": "trapinch",
+		"name": "Trapinch",
+		"description": "Pokedex Nº328 - tipo GROUND.",
+		"type": "GROUND",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 58,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 150,
+		"base": {
+			"hp": 45,
+			"atkFis": 100,
+			"atkEsp": 45,
+			"def": 45,
+			"defEsp": 45,
+			"speed": 10
+		},
+		"abilities": [
+			{
+				"key": "bide",
+				"levelReq": 1
+			},
+			{
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 5
+			},
+			{
+				"key": "bulldoze",
+				"levelReq": 8
+			},
+			{
+				"key": "sand_tomb",
+				"levelReq": 12
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 15
+			},
+			{
+				"key": "dig",
+				"levelReq": 19
+			},
+			{
+				"key": "crunch",
+				"levelReq": 22
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 26
+			},
+			{
+				"key": "feint",
+				"levelReq": 29
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 33
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 36
+			},
+			{
+				"key": "superpower",
+				"levelReq": 40
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 43
+			},
+			{
+				"key": "fissure",
+				"levelReq": 47
+			}
+		],
+		"evolvesTo": "vibrava",
+		"evolvesAtLevel": 35,
+		"evolutionOptions": [{
+			"to": "vibrava",
+			"atLevel": 35,
+			"isSpecial": false
+		}]
+	},
+	"vibrava": {
+		"id": "vibrava",
+		"name": "Vibrava",
+		"description": "Pokedex Nº329 - tipo GROUND/DRAGON.",
+		"type": "GROUND",
+		"type2": "DRAGON",
+		"catchRate": 120,
+		"baseExp": 119,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 153,
+		"base": {
+			"hp": 50,
+			"atkFis": 70,
+			"atkEsp": 50,
+			"def": 50,
+			"defEsp": 50,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "mud_slap",
+				"levelReq": 5
+			},
+			{
+				"key": "bulldoze",
+				"levelReq": 8
+			},
+			{
+				"key": "sand_tomb",
+				"levelReq": 12
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 15
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 19
+			},
+			{
+				"key": "screech",
+				"levelReq": 22
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 26
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 29
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 33
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 35
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 36
+			},
+			{
+				"key": "uproar",
+				"levelReq": 40
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 43
+			},
+			{
+				"key": "boomburst",
+				"levelReq": 47
+			}
+		],
+		"evolvesTo": "flygon",
+		"evolvesAtLevel": 45,
+		"evolutionOptions": [{
+			"to": "flygon",
+			"atLevel": 45,
+			"isSpecial": false
+		}]
+	},
+	"flygon": {
+		"id": "flygon",
+		"name": "Flygon",
+		"description": "Pokedex Nº330 - tipo GROUND/DRAGON.",
+		"type": "GROUND",
+		"type2": "DRAGON",
+		"catchRate": 45,
+		"baseExp": 234,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 820,
+		"base": {
+			"hp": 80,
+			"atkFis": 100,
+			"atkEsp": 80,
+			"def": 80,
+			"defEsp": 80,
+			"speed": 100
+		},
+		"abilities": [
+			{
+				"key": "mud_slap",
+				"levelReq": 5
+			},
+			{
+				"key": "bulldoze",
+				"levelReq": 8
+			},
+			{
+				"key": "sand_tomb",
+				"levelReq": 12
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 15
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 19
+			},
+			{
+				"key": "screech",
+				"levelReq": 22
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 26
+			},
+			{
+				"key": "dragon_tail",
+				"levelReq": 29
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 33
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 36
+			},
+			{
+				"key": "uproar",
+				"levelReq": 40
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 43
+			},
+			{
+				"key": "dragon_claw",
+				"levelReq": 45
+			},
+			{
+				"key": "dragon_rush",
+				"levelReq": 47
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"baltoy": {
+		"id": "baltoy",
+		"name": "Baltoy",
+		"description": "Pokedex Nº343 - tipo GROUND/PSYCHIC.",
+		"type": "GROUND",
+		"type2": "PSYCHIC",
+		"catchRate": 255,
+		"baseExp": 60,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 215,
+		"base": {
+			"hp": 40,
+			"atkFis": 40,
+			"atkEsp": 40,
+			"def": 55,
+			"defEsp": 70,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 4
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 7
+			},
+			{
+				"key": "heal_block",
+				"levelReq": 10
+			},
+			{
+				"key": "rock_tomb",
+				"levelReq": 13
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 16
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 19
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 22
+			},
+			{
+				"key": "power_trick",
+				"levelReq": 25
+			},
+			{
+				"key": "self_destruct",
+				"levelReq": 28
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 31
+			},
+			{
+				"key": "guard_split",
+				"levelReq": 34
+			},
+			{
+				"key": "power_split",
+				"levelReq": 34
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 37
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 40
+			},
+			{
+				"key": "imprison",
+				"levelReq": 43
+			},
+			{
+				"key": "explosion",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": "claydol",
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "claydol",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
+	},
+	"claydol": {
+		"id": "claydol",
+		"name": "Claydol",
+		"description": "Pokedex Nº344 - tipo GROUND/PSYCHIC.",
+		"type": "GROUND",
+		"type2": "PSYCHIC",
+		"catchRate": 90,
+		"baseExp": 175,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1080,
+		"base": {
+			"hp": 60,
+			"atkFis": 70,
+			"atkEsp": 70,
+			"def": 105,
+			"defEsp": 120,
+			"speed": 75
+		},
+		"abilities": [
+			{
+				"key": "rapid_spin",
+				"levelReq": 4
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 7
+			},
+			{
+				"key": "heal_block",
+				"levelReq": 10
+			},
+			{
+				"key": "rock_tomb",
+				"levelReq": 13
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 16
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 19
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 22
+			},
+			{
+				"key": "power_trick",
+				"levelReq": 25
+			},
+			{
+				"key": "self_destruct",
+				"levelReq": 28
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 31
+			},
+			{
+				"key": "guard_split",
+				"levelReq": 34
+			},
+			{
+				"key": "power_split",
+				"levelReq": 34
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 36
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 40
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 46
+			},
+			{
+				"key": "imprison",
+				"levelReq": 52
+			},
+			{
+				"key": "explosion",
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -14395,6 +21191,491 @@ var SPECIES_DATA = {
 			"isSpecial": false
 		}]
 	},
+	"torchic": {
+		"id": "torchic",
+		"name": "Torchic",
+		"description": "Pokedex Nº255 - tipo FIRE.",
+		"type": "FIRE",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 62,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 25,
+		"base": {
+			"hp": 45,
+			"atkFis": 60,
+			"atkEsp": 70,
+			"def": 40,
+			"defEsp": 50,
+			"speed": 45
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "ember",
+				"levelReq": 5
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 10
+			},
+			{
+				"key": "peck",
+				"levelReq": 14
+			},
+			{
+				"key": "fire_spin",
+				"levelReq": 19
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 23
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 28
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 32
+			},
+			{
+				"key": "slash",
+				"levelReq": 37
+			},
+			{
+				"key": "mirror_move",
+				"levelReq": 41
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": "combusken",
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "combusken",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
+	},
+	"combusken": {
+		"id": "combusken",
+		"name": "Combusken",
+		"description": "Pokedex Nº256 - tipo FIRE/FIGHTING.",
+		"type": "FIRE",
+		"type2": "FIGHTING",
+		"catchRate": 45,
+		"baseExp": 142,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 195,
+		"base": {
+			"hp": 60,
+			"atkFis": 85,
+			"atkEsp": 85,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "ember",
+				"levelReq": 5
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 10
+			},
+			{
+				"key": "peck",
+				"levelReq": 14
+			},
+			{
+				"key": "double_kick",
+				"levelReq": 16
+			},
+			{
+				"key": "flame_charge",
+				"levelReq": 20
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 25
+			},
+			{
+				"key": "bulk_up",
+				"levelReq": 31
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 36
+			},
+			{
+				"key": "slash",
+				"levelReq": 42
+			},
+			{
+				"key": "mirror_move",
+				"levelReq": 47
+			},
+			{
+				"key": "sky_uppercut",
+				"levelReq": 53
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 58
+			}
+		],
+		"evolvesTo": "blaziken",
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "blaziken",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
+	},
+	"blaziken": {
+		"id": "blaziken",
+		"name": "Blaziken",
+		"description": "Pokedex Nº257 - tipo FIRE/FIGHTING.",
+		"type": "FIRE",
+		"type2": "FIGHTING",
+		"catchRate": 45,
+		"baseExp": 239,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 520,
+		"base": {
+			"hp": 80,
+			"atkFis": 120,
+			"atkEsp": 110,
+			"def": 70,
+			"defEsp": 70,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "ember",
+				"levelReq": 5
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 10
+			},
+			{
+				"key": "peck",
+				"levelReq": 14
+			},
+			{
+				"key": "flame_charge",
+				"levelReq": 20
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 25
+			},
+			{
+				"key": "bulk_up",
+				"levelReq": 31
+			},
+			{
+				"key": "blaze_kick",
+				"levelReq": 36
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 37
+			},
+			{
+				"key": "slash",
+				"levelReq": 44
+			},
+			{
+				"key": "brave_bird",
+				"levelReq": 50
+			},
+			{
+				"key": "sky_uppercut",
+				"levelReq": 57
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 63
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"numel": {
+		"id": "numel",
+		"name": "Numel",
+		"description": "Pokedex Nº322 - tipo FIRE/GROUND.",
+		"type": "FIRE",
+		"type2": "GROUND",
+		"catchRate": 255,
+		"baseExp": 61,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 240,
+		"base": {
+			"hp": 60,
+			"atkFis": 60,
+			"atkEsp": 65,
+			"def": 40,
+			"defEsp": 45,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "ember",
+				"levelReq": 5
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 8
+			},
+			{
+				"key": "magnitude",
+				"levelReq": 12
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 15
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 19
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 22
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 26
+			},
+			{
+				"key": "curse",
+				"levelReq": 29
+			},
+			{
+				"key": "take_down",
+				"levelReq": 31
+			},
+			{
+				"key": "yawn",
+				"levelReq": 36
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 40
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 43
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 47
+			}
+		],
+		"evolvesTo": "camerupt",
+		"evolvesAtLevel": 33,
+		"evolutionOptions": [{
+			"to": "camerupt",
+			"atLevel": 33,
+			"isSpecial": false
+		}]
+	},
+	"camerupt": {
+		"id": "camerupt",
+		"name": "Camerupt",
+		"description": "Pokedex Nº323 - tipo FIRE/GROUND.",
+		"type": "FIRE",
+		"type2": "GROUND",
+		"catchRate": 150,
+		"baseExp": 161,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 2200,
+		"base": {
+			"hp": 70,
+			"atkFis": 100,
+			"atkEsp": 105,
+			"def": 70,
+			"defEsp": 75,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "ember",
+				"levelReq": 8
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 8
+			},
+			{
+				"key": "magnitude",
+				"levelReq": 12
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 15
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 19
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 22
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 26
+			},
+			{
+				"key": "curse",
+				"levelReq": 29
+			},
+			{
+				"key": "take_down",
+				"levelReq": 31
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 33
+			},
+			{
+				"key": "yawn",
+				"levelReq": 39
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 46
+			},
+			{
+				"key": "eruption",
+				"levelReq": 52
+			},
+			{
+				"key": "fissure",
+				"levelReq": 59
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"torkoal": {
+		"id": "torkoal",
+		"name": "Torkoal",
+		"description": "Pokedex Nº324 - tipo FIRE.",
+		"type": "FIRE",
+		"type2": null,
+		"catchRate": 90,
+		"baseExp": 165,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 804,
+		"base": {
+			"hp": 70,
+			"atkFis": 85,
+			"atkEsp": 85,
+			"def": 140,
+			"defEsp": 70,
+			"speed": 20
+		},
+		"abilities": [
+			{
+				"key": "ember",
+				"levelReq": 1
+			},
+			{
+				"key": "smog",
+				"levelReq": 4
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 7
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 10
+			},
+			{
+				"key": "fire_spin",
+				"levelReq": 13
+			},
+			{
+				"key": "smokescreen",
+				"levelReq": 15
+			},
+			{
+				"key": "flame_wheel",
+				"levelReq": 18
+			},
+			{
+				"key": "curse",
+				"levelReq": 22
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 25
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 27
+			},
+			{
+				"key": "protect",
+				"levelReq": 30
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 34
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 38
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 40
+			},
+			{
+				"key": "flail",
+				"levelReq": 42
+			},
+			{
+				"key": "heat_wave",
+				"levelReq": 45
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 47
+			},
+			{
+				"key": "inferno",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"pikachu": {
 		"id": "pikachu",
 		"name": "Pikachu",
@@ -15424,6 +22705,379 @@ var SPECIES_DATA = {
 			"atLevel": 30,
 			"isSpecial": false
 		}]
+	},
+	"electrike": {
+		"id": "electrike",
+		"name": "Electrike",
+		"description": "Pokedex Nº309 - tipo ELECTRIC.",
+		"type": "ELECTRIC",
+		"type2": null,
+		"catchRate": 120,
+		"baseExp": 59,
+		"growthCurve": "SLOW",
+		"pesoHg": 152,
+		"base": {
+			"hp": 40,
+			"atkFis": 45,
+			"atkEsp": 65,
+			"def": 40,
+			"defEsp": 40,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 4
+			},
+			{
+				"key": "howl",
+				"levelReq": 7
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 10
+			},
+			{
+				"key": "spark",
+				"levelReq": 13
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 16
+			},
+			{
+				"key": "thunder_fang",
+				"levelReq": 19
+			},
+			{
+				"key": "bite",
+				"levelReq": 24
+			},
+			{
+				"key": "discharge",
+				"levelReq": 29
+			},
+			{
+				"key": "roar",
+				"levelReq": 34
+			},
+			{
+				"key": "wild_charge",
+				"levelReq": 39
+			},
+			{
+				"key": "charge",
+				"levelReq": 44
+			},
+			{
+				"key": "thunder",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": "manectric",
+		"evolvesAtLevel": 26,
+		"evolutionOptions": [{
+			"to": "manectric",
+			"atLevel": 26,
+			"isSpecial": false
+		}]
+	},
+	"manectric": {
+		"id": "manectric",
+		"name": "Manectric",
+		"description": "Pokedex Nº310 - tipo ELECTRIC.",
+		"type": "ELECTRIC",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 166,
+		"growthCurve": "SLOW",
+		"pesoHg": 402,
+		"base": {
+			"hp": 70,
+			"atkFis": 75,
+			"atkEsp": 105,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 105
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 4
+			},
+			{
+				"key": "howl",
+				"levelReq": 7
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 10
+			},
+			{
+				"key": "spark",
+				"levelReq": 13
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 16
+			},
+			{
+				"key": "thunder_fang",
+				"levelReq": 19
+			},
+			{
+				"key": "bite",
+				"levelReq": 24
+			},
+			{
+				"key": "discharge",
+				"levelReq": 30
+			},
+			{
+				"key": "roar",
+				"levelReq": 36
+			},
+			{
+				"key": "wild_charge",
+				"levelReq": 42
+			},
+			{
+				"key": "charge",
+				"levelReq": 48
+			},
+			{
+				"key": "thunder",
+				"levelReq": 54
+			},
+			{
+				"key": "electric_terrain",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"plusle": {
+		"id": "plusle",
+		"name": "Plusle",
+		"description": "Pokedex Nº311 - tipo ELECTRIC.",
+		"type": "ELECTRIC",
+		"type2": null,
+		"catchRate": 200,
+		"baseExp": 142,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 42,
+		"base": {
+			"hp": 60,
+			"atkFis": 50,
+			"atkEsp": 85,
+			"def": 40,
+			"defEsp": 75,
+			"speed": 95
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "nuzzle",
+				"levelReq": 1
+			},
+			{
+				"key": "play_nice",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 1
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 4
+			},
+			{
+				"key": "spark",
+				"levelReq": 7
+			},
+			{
+				"key": "encore",
+				"levelReq": 10
+			},
+			{
+				"key": "bestow",
+				"levelReq": 13
+			},
+			{
+				"key": "swift",
+				"levelReq": 16
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 19
+			},
+			{
+				"key": "copycat",
+				"levelReq": 22
+			},
+			{
+				"key": "charm",
+				"levelReq": 25
+			},
+			{
+				"key": "charge",
+				"levelReq": 28
+			},
+			{
+				"key": "discharge",
+				"levelReq": 31
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 34
+			},
+			{
+				"key": "agility",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 40
+			},
+			{
+				"key": "thunder",
+				"levelReq": 43
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 46
+			},
+			{
+				"key": "entrainment",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"minun": {
+		"id": "minun",
+		"name": "Minun",
+		"description": "Pokedex Nº312 - tipo ELECTRIC.",
+		"type": "ELECTRIC",
+		"type2": null,
+		"catchRate": 200,
+		"baseExp": 142,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 42,
+		"base": {
+			"hp": 60,
+			"atkFis": 40,
+			"atkEsp": 75,
+			"def": 50,
+			"defEsp": 85,
+			"speed": 95
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "nuzzle",
+				"levelReq": 1
+			},
+			{
+				"key": "play_nice",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 1
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 4
+			},
+			{
+				"key": "spark",
+				"levelReq": 7
+			},
+			{
+				"key": "encore",
+				"levelReq": 10
+			},
+			{
+				"key": "switcheroo",
+				"levelReq": 13
+			},
+			{
+				"key": "swift",
+				"levelReq": 16
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 19
+			},
+			{
+				"key": "copycat",
+				"levelReq": 22
+			},
+			{
+				"key": "fake_tears",
+				"levelReq": 25
+			},
+			{
+				"key": "charge",
+				"levelReq": 28
+			},
+			{
+				"key": "discharge",
+				"levelReq": 31
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 34
+			},
+			{
+				"key": "agility",
+				"levelReq": 37
+			},
+			{
+				"key": "trump_card",
+				"levelReq": 40
+			},
+			{
+				"key": "thunder",
+				"levelReq": 43
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 46
+			},
+			{
+				"key": "entrainment",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
 	"ekans": {
 		"id": "ekans",
@@ -16587,6 +24241,288 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"gulpin": {
+		"id": "gulpin",
+		"name": "Gulpin",
+		"description": "Pokedex Nº316 - tipo POISON.",
+		"type": "POISON",
+		"type2": null,
+		"catchRate": 225,
+		"baseExp": 60,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 103,
+		"base": {
+			"hp": 70,
+			"atkFis": 43,
+			"atkEsp": 43,
+			"def": 53,
+			"defEsp": 53,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "pound",
+				"levelReq": 1
+			},
+			{
+				"key": "yawn",
+				"levelReq": 5
+			},
+			{
+				"key": "poison_gas",
+				"levelReq": 8
+			},
+			{
+				"key": "sludge",
+				"levelReq": 10
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 12
+			},
+			{
+				"key": "acid_spray",
+				"levelReq": 17
+			},
+			{
+				"key": "encore",
+				"levelReq": 20
+			},
+			{
+				"key": "toxic",
+				"levelReq": 25
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 28
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 28
+			},
+			{
+				"key": "swallow",
+				"levelReq": 28
+			},
+			{
+				"key": "sludge_bomb",
+				"levelReq": 33
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 36
+			},
+			{
+				"key": "belch",
+				"levelReq": 41
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 44
+			},
+			{
+				"key": "gunk_shot",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": "swalot",
+		"evolvesAtLevel": 26,
+		"evolutionOptions": [{
+			"to": "swalot",
+			"atLevel": 26,
+			"isSpecial": false
+		}]
+	},
+	"swalot": {
+		"id": "swalot",
+		"name": "Swalot",
+		"description": "Pokedex Nº317 - tipo POISON.",
+		"type": "POISON",
+		"type2": null,
+		"catchRate": 75,
+		"baseExp": 163,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 800,
+		"base": {
+			"hp": 100,
+			"atkFis": 73,
+			"atkEsp": 73,
+			"def": 83,
+			"defEsp": 83,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "yawn",
+				"levelReq": 5
+			},
+			{
+				"key": "poison_gas",
+				"levelReq": 8
+			},
+			{
+				"key": "sludge",
+				"levelReq": 10
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 12
+			},
+			{
+				"key": "acid_spray",
+				"levelReq": 17
+			},
+			{
+				"key": "encore",
+				"levelReq": 20
+			},
+			{
+				"key": "toxic",
+				"levelReq": 25
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 26
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 30
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 30
+			},
+			{
+				"key": "swallow",
+				"levelReq": 30
+			},
+			{
+				"key": "sludge_bomb",
+				"levelReq": 37
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 42
+			},
+			{
+				"key": "belch",
+				"levelReq": 49
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 54
+			},
+			{
+				"key": "gunk_shot",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"seviper": {
+		"id": "seviper",
+		"name": "Seviper",
+		"description": "Pokedex Nº336 - tipo POISON.",
+		"type": "POISON",
+		"type2": null,
+		"catchRate": 90,
+		"baseExp": 160,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 525,
+		"base": {
+			"hp": 73,
+			"atkFis": 100,
+			"atkEsp": 100,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "swagger",
+				"levelReq": 1
+			},
+			{
+				"key": "wrap",
+				"levelReq": 1
+			},
+			{
+				"key": "bite",
+				"levelReq": 4
+			},
+			{
+				"key": "lick",
+				"levelReq": 6
+			},
+			{
+				"key": "poison_tail",
+				"levelReq": 9
+			},
+			{
+				"key": "feint",
+				"levelReq": 11
+			},
+			{
+				"key": "screech",
+				"levelReq": 14
+			},
+			{
+				"key": "venoshock",
+				"levelReq": 16
+			},
+			{
+				"key": "glare",
+				"levelReq": 19
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 21
+			},
+			{
+				"key": "venom_drench",
+				"levelReq": 24
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 26
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 29
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 31
+			},
+			{
+				"key": "haze",
+				"levelReq": 34
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 36
+			},
+			{
+				"key": "crunch",
+				"levelReq": 39
+			},
+			{
+				"key": "belch",
+				"levelReq": 41
+			},
+			{
+				"key": "coil",
+				"levelReq": 44
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"mankey": {
 		"id": "mankey",
 		"name": "Mankey",
@@ -17362,6 +25298,368 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"makuhita": {
+		"id": "makuhita",
+		"name": "Makuhita",
+		"description": "Pokedex Nº296 - tipo FIGHTING.",
+		"type": "FIGHTING",
+		"type2": null,
+		"catchRate": 180,
+		"baseExp": 47,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 864,
+		"base": {
+			"hp": 72,
+			"atkFis": 60,
+			"atkEsp": 20,
+			"def": 30,
+			"defEsp": 30,
+			"speed": 25
+		},
+		"abilities": [
+			{
+				"key": "focus_energy",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 4
+			},
+			{
+				"key": "arm_thrust",
+				"levelReq": 7
+			},
+			{
+				"key": "fake_out",
+				"levelReq": 10
+			},
+			{
+				"key": "force_palm",
+				"levelReq": 13
+			},
+			{
+				"key": "whirlwind",
+				"levelReq": 16
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 19
+			},
+			{
+				"key": "vital_throw",
+				"levelReq": 22
+			},
+			{
+				"key": "belly_drum",
+				"levelReq": 25
+			},
+			{
+				"key": "smelling_salts",
+				"levelReq": 28
+			},
+			{
+				"key": "seismic_toss",
+				"levelReq": 31
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 34
+			},
+			{
+				"key": "endure",
+				"levelReq": 37
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 40
+			},
+			{
+				"key": "reversal",
+				"levelReq": 43
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": "hariyama",
+		"evolvesAtLevel": 24,
+		"evolutionOptions": [{
+			"to": "hariyama",
+			"atLevel": 24,
+			"isSpecial": false
+		}]
+	},
+	"hariyama": {
+		"id": "hariyama",
+		"name": "Hariyama",
+		"description": "Pokedex Nº297 - tipo FIGHTING.",
+		"type": "FIGHTING",
+		"type2": null,
+		"catchRate": 200,
+		"baseExp": 166,
+		"growthCurve": "FLUCTUATING",
+		"pesoHg": 2538,
+		"base": {
+			"hp": 144,
+			"atkFis": 120,
+			"atkEsp": 40,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "sand_attack",
+				"levelReq": 4
+			},
+			{
+				"key": "arm_thrust",
+				"levelReq": 7
+			},
+			{
+				"key": "fake_out",
+				"levelReq": 10
+			},
+			{
+				"key": "force_palm",
+				"levelReq": 13
+			},
+			{
+				"key": "whirlwind",
+				"levelReq": 16
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 19
+			},
+			{
+				"key": "vital_throw",
+				"levelReq": 22
+			},
+			{
+				"key": "belly_drum",
+				"levelReq": 26
+			},
+			{
+				"key": "smelling_salts",
+				"levelReq": 30
+			},
+			{
+				"key": "seismic_toss",
+				"levelReq": 34
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 38
+			},
+			{
+				"key": "endure",
+				"levelReq": 42
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 46
+			},
+			{
+				"key": "reversal",
+				"levelReq": 50
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 54
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"meditite": {
+		"id": "meditite",
+		"name": "Meditite",
+		"description": "Pokedex Nº307 - tipo FIGHTING/PSYCHIC.",
+		"type": "FIGHTING",
+		"type2": "PSYCHIC",
+		"catchRate": 180,
+		"baseExp": 56,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 112,
+		"base": {
+			"hp": 30,
+			"atkFis": 40,
+			"atkEsp": 40,
+			"def": 55,
+			"defEsp": 55,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "bide",
+				"levelReq": 1
+			},
+			{
+				"key": "meditate",
+				"levelReq": 4
+			},
+			{
+				"key": "confusion",
+				"levelReq": 7
+			},
+			{
+				"key": "detect",
+				"levelReq": 9
+			},
+			{
+				"key": "endure",
+				"levelReq": 12
+			},
+			{
+				"key": "feint",
+				"levelReq": 15
+			},
+			{
+				"key": "force_palm",
+				"levelReq": 17
+			},
+			{
+				"key": "hidden_power",
+				"levelReq": 20
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 23
+			},
+			{
+				"key": "mind_reader",
+				"levelReq": 25
+			},
+			{
+				"key": "high_jump_kick",
+				"levelReq": 28
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 31
+			},
+			{
+				"key": "acupressure",
+				"levelReq": 33
+			},
+			{
+				"key": "power_trick",
+				"levelReq": 36
+			},
+			{
+				"key": "reversal",
+				"levelReq": 39
+			},
+			{
+				"key": "recover",
+				"levelReq": 41
+			},
+			{
+				"key": "counter",
+				"levelReq": 44
+			}
+		],
+		"evolvesTo": "medicham",
+		"evolvesAtLevel": 37,
+		"evolutionOptions": [{
+			"to": "medicham",
+			"atLevel": 37,
+			"isSpecial": false
+		}]
+	},
+	"medicham": {
+		"id": "medicham",
+		"name": "Medicham",
+		"description": "Pokedex Nº308 - tipo FIGHTING/PSYCHIC.",
+		"type": "FIGHTING",
+		"type2": "PSYCHIC",
+		"catchRate": 90,
+		"baseExp": 144,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 315,
+		"base": {
+			"hp": 60,
+			"atkFis": 60,
+			"atkEsp": 60,
+			"def": 75,
+			"defEsp": 75,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "meditate",
+				"levelReq": 4
+			},
+			{
+				"key": "confusion",
+				"levelReq": 7
+			},
+			{
+				"key": "detect",
+				"levelReq": 9
+			},
+			{
+				"key": "endure",
+				"levelReq": 12
+			},
+			{
+				"key": "feint",
+				"levelReq": 15
+			},
+			{
+				"key": "force_palm",
+				"levelReq": 17
+			},
+			{
+				"key": "hidden_power",
+				"levelReq": 20
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 23
+			},
+			{
+				"key": "mind_reader",
+				"levelReq": 25
+			},
+			{
+				"key": "high_jump_kick",
+				"levelReq": 28
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 31
+			},
+			{
+				"key": "acupressure",
+				"levelReq": 33
+			},
+			{
+				"key": "power_trick",
+				"levelReq": 36
+			},
+			{
+				"key": "reversal",
+				"levelReq": 42
+			},
+			{
+				"key": "recover",
+				"levelReq": 47
+			},
+			{
+				"key": "counter",
+				"levelReq": 53
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"jynx": {
 		"id": "jynx",
 		"name": "Jynx",
@@ -17724,6 +26022,396 @@ var SPECIES_DATA = {
 			"isSpecial": false
 		}]
 	},
+	"snorunt": {
+		"id": "snorunt",
+		"name": "Snorunt",
+		"description": "Pokedex Nº361 - tipo ICE.",
+		"type": "ICE",
+		"type2": null,
+		"catchRate": 190,
+		"baseExp": 60,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 168,
+		"base": {
+			"hp": 50,
+			"atkFis": 50,
+			"atkEsp": 50,
+			"def": 50,
+			"defEsp": 50,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "powder_snow",
+				"levelReq": 1
+			},
+			{
+				"key": "double_team",
+				"levelReq": 5
+			},
+			{
+				"key": "ice_shard",
+				"levelReq": 10
+			},
+			{
+				"key": "icy_wind",
+				"levelReq": 14
+			},
+			{
+				"key": "bite",
+				"levelReq": 19
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 23
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 28
+			},
+			{
+				"key": "protect",
+				"levelReq": 32
+			},
+			{
+				"key": "frost_breath",
+				"levelReq": 37
+			},
+			{
+				"key": "crunch",
+				"levelReq": 41
+			},
+			{
+				"key": "blizzard",
+				"levelReq": 46
+			},
+			{
+				"key": "hail",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": "glalie",
+		"evolvesAtLevel": 42,
+		"evolutionOptions": [{
+			"to": "glalie",
+			"atLevel": 42,
+			"isSpecial": false
+		}]
+	},
+	"glalie": {
+		"id": "glalie",
+		"name": "Glalie",
+		"description": "Pokedex Nº362 - tipo ICE.",
+		"type": "ICE",
+		"type2": null,
+		"catchRate": 75,
+		"baseExp": 168,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 2565,
+		"base": {
+			"hp": 80,
+			"atkFis": 80,
+			"atkEsp": 80,
+			"def": 80,
+			"defEsp": 80,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "double_team",
+				"levelReq": 5
+			},
+			{
+				"key": "ice_shard",
+				"levelReq": 10
+			},
+			{
+				"key": "icy_wind",
+				"levelReq": 14
+			},
+			{
+				"key": "bite",
+				"levelReq": 19
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 23
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 28
+			},
+			{
+				"key": "protect",
+				"levelReq": 32
+			},
+			{
+				"key": "frost_breath",
+				"levelReq": 37
+			},
+			{
+				"key": "crunch",
+				"levelReq": 41
+			},
+			{
+				"key": "freeze_dry",
+				"levelReq": 42
+			},
+			{
+				"key": "blizzard",
+				"levelReq": 48
+			},
+			{
+				"key": "hail",
+				"levelReq": 54
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"spheal": {
+		"id": "spheal",
+		"name": "Spheal",
+		"description": "Pokedex Nº363 - tipo ICE/WATER.",
+		"type": "ICE",
+		"type2": "WATER",
+		"catchRate": 255,
+		"baseExp": 58,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 395,
+		"base": {
+			"hp": 70,
+			"atkFis": 40,
+			"atkEsp": 55,
+			"def": 50,
+			"defEsp": 50,
+			"speed": 25
+		},
+		"abilities": [
+			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "powder_snow",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "rollout",
+				"levelReq": 5
+			},
+			{
+				"key": "encore",
+				"levelReq": 9
+			},
+			{
+				"key": "ice_ball",
+				"levelReq": 13
+			},
+			{
+				"key": "brine",
+				"levelReq": 17
+			},
+			{
+				"key": "aurora_beam",
+				"levelReq": 21
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 26
+			},
+			{
+				"key": "rest",
+				"levelReq": 31
+			},
+			{
+				"key": "snore",
+				"levelReq": 31
+			},
+			{
+				"key": "hail",
+				"levelReq": 36
+			},
+			{
+				"key": "blizzard",
+				"levelReq": 41
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": "sealeo",
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "sealeo",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
+	},
+	"sealeo": {
+		"id": "sealeo",
+		"name": "Sealeo",
+		"description": "Pokedex Nº364 - tipo ICE/WATER.",
+		"type": "ICE",
+		"type2": "WATER",
+		"catchRate": 120,
+		"baseExp": 144,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 876,
+		"base": {
+			"hp": 90,
+			"atkFis": 60,
+			"atkEsp": 75,
+			"def": 70,
+			"defEsp": 70,
+			"speed": 45
+		},
+		"abilities": [
+			{
+				"key": "rollout",
+				"levelReq": 5
+			},
+			{
+				"key": "encore",
+				"levelReq": 9
+			},
+			{
+				"key": "ice_ball",
+				"levelReq": 13
+			},
+			{
+				"key": "brine",
+				"levelReq": 17
+			},
+			{
+				"key": "aurora_beam",
+				"levelReq": 21
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 26
+			},
+			{
+				"key": "rest",
+				"levelReq": 31
+			},
+			{
+				"key": "snore",
+				"levelReq": 31
+			},
+			{
+				"key": "swagger",
+				"levelReq": 32
+			},
+			{
+				"key": "hail",
+				"levelReq": 38
+			},
+			{
+				"key": "blizzard",
+				"levelReq": 45
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 52
+			}
+		],
+		"evolvesTo": "walrein",
+		"evolvesAtLevel": 44,
+		"evolutionOptions": [{
+			"to": "walrein",
+			"atLevel": 44,
+			"isSpecial": false
+		}]
+	},
+	"walrein": {
+		"id": "walrein",
+		"name": "Walrein",
+		"description": "Pokedex Nº365 - tipo ICE/WATER.",
+		"type": "ICE",
+		"type2": "WATER",
+		"catchRate": 45,
+		"baseExp": 239,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1506,
+		"base": {
+			"hp": 110,
+			"atkFis": 80,
+			"atkEsp": 95,
+			"def": 90,
+			"defEsp": 90,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "encore",
+				"levelReq": 7
+			},
+			{
+				"key": "rollout",
+				"levelReq": 7
+			},
+			{
+				"key": "ice_ball",
+				"levelReq": 13
+			},
+			{
+				"key": "aurora_beam",
+				"levelReq": 19
+			},
+			{
+				"key": "brine",
+				"levelReq": 19
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 25
+			},
+			{
+				"key": "rest",
+				"levelReq": 31
+			},
+			{
+				"key": "snore",
+				"levelReq": 31
+			},
+			{
+				"key": "hail",
+				"levelReq": 38
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 44
+			},
+			{
+				"key": "blizzard",
+				"levelReq": 49
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"steelix": {
 		"id": "steelix",
 		"name": "Steelix",
@@ -17906,6 +26594,553 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"mawile": {
+		"id": "mawile",
+		"name": "Mawile",
+		"description": "Pokedex Nº303 - tipo STEEL/FAIRY.",
+		"type": "STEEL",
+		"type2": "FAIRY",
+		"catchRate": 45,
+		"baseExp": 133,
+		"growthCurve": "FAST",
+		"pesoHg": 115,
+		"base": {
+			"hp": 50,
+			"atkFis": 85,
+			"atkEsp": 55,
+			"def": 85,
+			"defEsp": 55,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "astonish",
+				"levelReq": 1
+			},
+			{
+				"key": "fairy_wind",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "taunt",
+				"levelReq": 1
+			},
+			{
+				"key": "fake_tears",
+				"levelReq": 5
+			},
+			{
+				"key": "bite",
+				"levelReq": 9
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 13
+			},
+			{
+				"key": "vice_grip",
+				"levelReq": 17
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 21
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 25
+			},
+			{
+				"key": "crunch",
+				"levelReq": 29
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 33
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 37
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 41
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 41
+			},
+			{
+				"key": "swallow",
+				"levelReq": 41
+			},
+			{
+				"key": "iron_head",
+				"levelReq": 45
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"aron": {
+		"id": "aron",
+		"name": "Aron",
+		"description": "Pokedex Nº304 - tipo STEEL/ROCK.",
+		"type": "STEEL",
+		"type2": "ROCK",
+		"catchRate": 180,
+		"baseExp": 66,
+		"growthCurve": "SLOW",
+		"pesoHg": 600,
+		"base": {
+			"hp": 50,
+			"atkFis": 70,
+			"atkEsp": 40,
+			"def": 100,
+			"defEsp": 40,
+			"speed": 30
+		},
+		"abilities": [
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 4
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 7
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 10
+			},
+			{
+				"key": "rock_tomb",
+				"levelReq": 13
+			},
+			{
+				"key": "protect",
+				"levelReq": 16
+			},
+			{
+				"key": "roar",
+				"levelReq": 19
+			},
+			{
+				"key": "iron_head",
+				"levelReq": 22
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 25
+			},
+			{
+				"key": "take_down",
+				"levelReq": 28
+			},
+			{
+				"key": "metal_sound",
+				"levelReq": 31
+			},
+			{
+				"key": "iron_tail",
+				"levelReq": 34
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 37
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 40
+			},
+			{
+				"key": "autotomize",
+				"levelReq": 43
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 46
+			},
+			{
+				"key": "metal_burst",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": "lairon",
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "lairon",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
+	},
+	"lairon": {
+		"id": "lairon",
+		"name": "Lairon",
+		"description": "Pokedex Nº305 - tipo STEEL/ROCK.",
+		"type": "STEEL",
+		"type2": "ROCK",
+		"catchRate": 90,
+		"baseExp": 151,
+		"growthCurve": "SLOW",
+		"pesoHg": 1200,
+		"base": {
+			"hp": 60,
+			"atkFis": 90,
+			"atkEsp": 50,
+			"def": 140,
+			"defEsp": 50,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "mud_slap",
+				"levelReq": 4
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 7
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 10
+			},
+			{
+				"key": "rock_tomb",
+				"levelReq": 13
+			},
+			{
+				"key": "protect",
+				"levelReq": 16
+			},
+			{
+				"key": "roar",
+				"levelReq": 19
+			},
+			{
+				"key": "iron_head",
+				"levelReq": 22
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 25
+			},
+			{
+				"key": "take_down",
+				"levelReq": 28
+			},
+			{
+				"key": "metal_sound",
+				"levelReq": 31
+			},
+			{
+				"key": "iron_tail",
+				"levelReq": 35
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 39
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 43
+			},
+			{
+				"key": "autotomize",
+				"levelReq": 47
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 51
+			},
+			{
+				"key": "metal_burst",
+				"levelReq": 55
+			}
+		],
+		"evolvesTo": "aggron",
+		"evolvesAtLevel": 42,
+		"evolutionOptions": [{
+			"to": "aggron",
+			"atLevel": 42,
+			"isSpecial": false
+		}]
+	},
+	"aggron": {
+		"id": "aggron",
+		"name": "Aggron",
+		"description": "Pokedex Nº306 - tipo STEEL/ROCK.",
+		"type": "STEEL",
+		"type2": "ROCK",
+		"catchRate": 45,
+		"baseExp": 239,
+		"growthCurve": "SLOW",
+		"pesoHg": 3600,
+		"base": {
+			"hp": 70,
+			"atkFis": 110,
+			"atkEsp": 60,
+			"def": 180,
+			"defEsp": 60,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "mud_slap",
+				"levelReq": 4
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 7
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 10
+			},
+			{
+				"key": "rock_tomb",
+				"levelReq": 13
+			},
+			{
+				"key": "protect",
+				"levelReq": 16
+			},
+			{
+				"key": "roar",
+				"levelReq": 19
+			},
+			{
+				"key": "iron_head",
+				"levelReq": 22
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 25
+			},
+			{
+				"key": "take_down",
+				"levelReq": 28
+			},
+			{
+				"key": "metal_sound",
+				"levelReq": 31
+			},
+			{
+				"key": "iron_tail",
+				"levelReq": 35
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 39
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 45
+			},
+			{
+				"key": "autotomize",
+				"levelReq": 51
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 57
+			},
+			{
+				"key": "metal_burst",
+				"levelReq": 63
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"beldum": {
+		"id": "beldum",
+		"name": "Beldum",
+		"description": "Pokedex Nº374 - tipo STEEL/PSYCHIC.",
+		"type": "STEEL",
+		"type2": "PSYCHIC",
+		"catchRate": 3,
+		"baseExp": 60,
+		"growthCurve": "SLOW",
+		"pesoHg": 952,
+		"base": {
+			"hp": 40,
+			"atkFis": 55,
+			"atkEsp": 35,
+			"def": 80,
+			"defEsp": 60,
+			"speed": 30
+		},
+		"abilities": [{
+			"key": "take_down",
+			"levelReq": 1
+		}],
+		"evolvesTo": "metang",
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "metang",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
+	},
+	"metang": {
+		"id": "metang",
+		"name": "Metang",
+		"description": "Pokedex Nº375 - tipo STEEL/PSYCHIC.",
+		"type": "STEEL",
+		"type2": "PSYCHIC",
+		"catchRate": 3,
+		"baseExp": 147,
+		"growthCurve": "SLOW",
+		"pesoHg": 2025,
+		"base": {
+			"hp": 60,
+			"atkFis": 75,
+			"atkEsp": 55,
+			"def": 100,
+			"defEsp": 80,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 20
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 20
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 23
+			},
+			{
+				"key": "bullet_punch",
+				"levelReq": 26
+			},
+			{
+				"key": "miracle_eye",
+				"levelReq": 29
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 32
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 35
+			},
+			{
+				"key": "psychic",
+				"levelReq": 38
+			},
+			{
+				"key": "agility",
+				"levelReq": 41
+			},
+			{
+				"key": "meteor_mash",
+				"levelReq": 44
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 47
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": "metagross",
+		"evolvesAtLevel": 45,
+		"evolutionOptions": [{
+			"to": "metagross",
+			"atLevel": 45,
+			"isSpecial": false
+		}]
+	},
+	"metagross": {
+		"id": "metagross",
+		"name": "Metagross",
+		"description": "Pokedex Nº376 - tipo STEEL/PSYCHIC.",
+		"type": "STEEL",
+		"type2": "PSYCHIC",
+		"catchRate": 3,
+		"baseExp": 270,
+		"growthCurve": "SLOW",
+		"pesoHg": 5500,
+		"base": {
+			"hp": 80,
+			"atkFis": 135,
+			"atkEsp": 95,
+			"def": 130,
+			"defEsp": 90,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "pursuit",
+				"levelReq": 23
+			},
+			{
+				"key": "bullet_punch",
+				"levelReq": 26
+			},
+			{
+				"key": "miracle_eye",
+				"levelReq": 29
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 32
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 35
+			},
+			{
+				"key": "psychic",
+				"levelReq": 38
+			},
+			{
+				"key": "agility",
+				"levelReq": 41
+			},
+			{
+				"key": "meteor_mash",
+				"levelReq": 44
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 45
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 52
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"natu": {
 		"id": "natu",
 		"name": "Natu",
@@ -17997,85 +27232,6 @@ var SPECIES_DATA = {
 			"atLevel": 25,
 			"isSpecial": false
 		}]
-	},
-	"togetic": {
-		"id": "togetic",
-		"name": "Togetic",
-		"description": "Pokedex Nº176 - tipo FAIRY/FLYING.",
-		"type": "FAIRY",
-		"type2": "FLYING",
-		"catchRate": 75,
-		"baseExp": 142,
-		"growthCurve": "FAST",
-		"pesoHg": 32,
-		"base": {
-			"hp": 55,
-			"atkFis": 40,
-			"atkEsp": 80,
-			"def": 85,
-			"defEsp": 105,
-			"speed": 40
-		},
-		"abilities": [
-			{
-				"key": "metronome",
-				"levelReq": 5
-			},
-			{
-				"key": "sweet_kiss",
-				"levelReq": 9
-			},
-			{
-				"key": "yawn",
-				"levelReq": 13
-			},
-			{
-				"key": "fairy_wind",
-				"levelReq": 14
-			},
-			{
-				"key": "encore",
-				"levelReq": 17
-			},
-			{
-				"key": "follow_me",
-				"levelReq": 21
-			},
-			{
-				"key": "bestow",
-				"levelReq": 25
-			},
-			{
-				"key": "wish",
-				"levelReq": 29
-			},
-			{
-				"key": "ancient_power",
-				"levelReq": 33
-			},
-			{
-				"key": "safeguard",
-				"levelReq": 37
-			},
-			{
-				"key": "baton_pass",
-				"levelReq": 41
-			},
-			{
-				"key": "double_edge",
-				"levelReq": 45
-			},
-			{
-				"key": "last_resort",
-				"levelReq": 49
-			},
-			{
-				"key": "after_you",
-				"levelReq": 53
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
 	},
 	"abra": {
 		"id": "abra",
@@ -18667,6 +27823,591 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"ralts": {
+		"id": "ralts",
+		"name": "Ralts",
+		"description": "Pokedex Nº280 - tipo PSYCHIC/FAIRY.",
+		"type": "PSYCHIC",
+		"type2": "FAIRY",
+		"catchRate": 235,
+		"baseExp": 40,
+		"growthCurve": "SLOW",
+		"pesoHg": 66,
+		"base": {
+			"hp": 28,
+			"atkFis": 25,
+			"atkEsp": 45,
+			"def": 25,
+			"defEsp": 35,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "confusion",
+				"levelReq": 4
+			},
+			{
+				"key": "double_team",
+				"levelReq": 6
+			},
+			{
+				"key": "teleport",
+				"levelReq": 9
+			},
+			{
+				"key": "disarming_voice",
+				"levelReq": 11
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 14
+			},
+			{
+				"key": "magical_leaf",
+				"levelReq": 17
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 19
+			},
+			{
+				"key": "draining_kiss",
+				"levelReq": 22
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 24
+			},
+			{
+				"key": "psychic",
+				"levelReq": 27
+			},
+			{
+				"key": "imprison",
+				"levelReq": 29
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 32
+			},
+			{
+				"key": "charm",
+				"levelReq": 34
+			},
+			{
+				"key": "hypnosis",
+				"levelReq": 37
+			},
+			{
+				"key": "dream_eater",
+				"levelReq": 39
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 42
+			}
+		],
+		"evolvesTo": "kirlia",
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "kirlia",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
+	},
+	"kirlia": {
+		"id": "kirlia",
+		"name": "Kirlia",
+		"description": "Pokedex Nº281 - tipo PSYCHIC/FAIRY.",
+		"type": "PSYCHIC",
+		"type2": "FAIRY",
+		"catchRate": 120,
+		"baseExp": 97,
+		"growthCurve": "SLOW",
+		"pesoHg": 202,
+		"base": {
+			"hp": 38,
+			"atkFis": 35,
+			"atkEsp": 65,
+			"def": 35,
+			"defEsp": 55,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 4
+			},
+			{
+				"key": "double_team",
+				"levelReq": 6
+			},
+			{
+				"key": "teleport",
+				"levelReq": 9
+			},
+			{
+				"key": "disarming_voice",
+				"levelReq": 11
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 14
+			},
+			{
+				"key": "magical_leaf",
+				"levelReq": 17
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 19
+			},
+			{
+				"key": "draining_kiss",
+				"levelReq": 23
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 26
+			},
+			{
+				"key": "psychic",
+				"levelReq": 30
+			},
+			{
+				"key": "imprison",
+				"levelReq": 33
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 37
+			},
+			{
+				"key": "charm",
+				"levelReq": 40
+			},
+			{
+				"key": "hypnosis",
+				"levelReq": 44
+			},
+			{
+				"key": "dream_eater",
+				"levelReq": 47
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 51
+			}
+		],
+		"evolvesTo": "gardevoir",
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "gardevoir",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
+	},
+	"gardevoir": {
+		"id": "gardevoir",
+		"name": "Gardevoir",
+		"description": "Pokedex Nº282 - tipo PSYCHIC/FAIRY.",
+		"type": "PSYCHIC",
+		"type2": "FAIRY",
+		"catchRate": 45,
+		"baseExp": 233,
+		"growthCurve": "SLOW",
+		"pesoHg": 484,
+		"base": {
+			"hp": 68,
+			"atkFis": 65,
+			"atkEsp": 125,
+			"def": 65,
+			"defEsp": 115,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 4
+			},
+			{
+				"key": "double_team",
+				"levelReq": 6
+			},
+			{
+				"key": "teleport",
+				"levelReq": 9
+			},
+			{
+				"key": "disarming_voice",
+				"levelReq": 11
+			},
+			{
+				"key": "wish",
+				"levelReq": 14
+			},
+			{
+				"key": "magical_leaf",
+				"levelReq": 17
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 19
+			},
+			{
+				"key": "draining_kiss",
+				"levelReq": 23
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 26
+			},
+			{
+				"key": "psychic",
+				"levelReq": 31
+			},
+			{
+				"key": "imprison",
+				"levelReq": 35
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 40
+			},
+			{
+				"key": "captivate",
+				"levelReq": 44
+			},
+			{
+				"key": "hypnosis",
+				"levelReq": 49
+			},
+			{
+				"key": "dream_eater",
+				"levelReq": 53
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 58
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 62
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"spoink": {
+		"id": "spoink",
+		"name": "Spoink",
+		"description": "Pokedex Nº325 - tipo PSYCHIC.",
+		"type": "PSYCHIC",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 66,
+		"growthCurve": "FAST",
+		"pesoHg": 306,
+		"base": {
+			"hp": 60,
+			"atkFis": 25,
+			"atkEsp": 70,
+			"def": 35,
+			"defEsp": 80,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "splash",
+				"levelReq": 1
+			},
+			{
+				"key": "psywave",
+				"levelReq": 7
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 10
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 14
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 15
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 18
+			},
+			{
+				"key": "magic_coat",
+				"levelReq": 21
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 26
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 29
+			},
+			{
+				"key": "rest",
+				"levelReq": 29
+			},
+			{
+				"key": "snore",
+				"levelReq": 33
+			},
+			{
+				"key": "psyshock",
+				"levelReq": 38
+			},
+			{
+				"key": "payback",
+				"levelReq": 40
+			},
+			{
+				"key": "psychic",
+				"levelReq": 44
+			},
+			{
+				"key": "bounce",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": "grumpig",
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "grumpig",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
+	},
+	"grumpig": {
+		"id": "grumpig",
+		"name": "Grumpig",
+		"description": "Pokedex Nº326 - tipo PSYCHIC.",
+		"type": "PSYCHIC",
+		"type2": null,
+		"catchRate": 60,
+		"baseExp": 165,
+		"growthCurve": "FAST",
+		"pesoHg": 715,
+		"base": {
+			"hp": 80,
+			"atkFis": 45,
+			"atkEsp": 90,
+			"def": 65,
+			"defEsp": 110,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "psywave",
+				"levelReq": 7
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 10
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 14
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 15
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 18
+			},
+			{
+				"key": "magic_coat",
+				"levelReq": 21
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 26
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 29
+			},
+			{
+				"key": "teeter_dance",
+				"levelReq": 32
+			},
+			{
+				"key": "rest",
+				"levelReq": 35
+			},
+			{
+				"key": "snore",
+				"levelReq": 35
+			},
+			{
+				"key": "psyshock",
+				"levelReq": 42
+			},
+			{
+				"key": "payback",
+				"levelReq": 46
+			},
+			{
+				"key": "psychic",
+				"levelReq": 52
+			},
+			{
+				"key": "bounce",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"chimecho": {
+		"id": "chimecho",
+		"name": "Chimecho",
+		"description": "Pokedex Nº358 - tipo PSYCHIC.",
+		"type": "PSYCHIC",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 159,
+		"growthCurve": "FAST",
+		"pesoHg": 10,
+		"base": {
+			"hp": 75,
+			"atkFis": 50,
+			"atkEsp": 95,
+			"def": 80,
+			"defEsp": 90,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 4
+			},
+			{
+				"key": "astonish",
+				"levelReq": 7
+			},
+			{
+				"key": "confusion",
+				"levelReq": 10
+			},
+			{
+				"key": "yawn",
+				"levelReq": 13
+			},
+			{
+				"key": "psywave",
+				"levelReq": 16
+			},
+			{
+				"key": "take_down",
+				"levelReq": 19
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 22
+			},
+			{
+				"key": "heal_bell",
+				"levelReq": 27
+			},
+			{
+				"key": "uproar",
+				"levelReq": 32
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 37
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 42
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 47
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 52
+			},
+			{
+				"key": "healing_wish",
+				"levelReq": 57
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"wynaut": {
+		"id": "wynaut",
+		"name": "Wynaut",
+		"description": "Pokedex Nº360 - tipo PSYCHIC.",
+		"type": "PSYCHIC",
+		"type2": null,
+		"catchRate": 125,
+		"baseExp": 52,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 140,
+		"base": {
+			"hp": 95,
+			"atkFis": 23,
+			"atkEsp": 23,
+			"def": 48,
+			"defEsp": 48,
+			"speed": 23
+		},
+		"abilities": [
+			{
+				"key": "charm",
+				"levelReq": 1
+			},
+			{
+				"key": "encore",
+				"levelReq": 1
+			},
+			{
+				"key": "splash",
+				"levelReq": 1
+			},
+			{
+				"key": "counter",
+				"levelReq": 15
+			},
+			{
+				"key": "destiny_bond",
+				"levelReq": 15
+			},
+			{
+				"key": "mirror_coat",
+				"levelReq": 15
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 15
+			}
+		],
+		"evolvesTo": "wobbuffet",
+		"evolvesAtLevel": 15,
+		"evolutionOptions": [{
+			"to": "wobbuffet",
+			"atLevel": 15,
+			"isSpecial": false
+		}]
+	},
 	"gastly": {
 		"id": "gastly",
 		"name": "Gastly",
@@ -18992,6 +28733,348 @@ var SPECIES_DATA = {
 			{
 				"key": "power_gem",
 				"levelReq": 55
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"shuppet": {
+		"id": "shuppet",
+		"name": "Shuppet",
+		"description": "Pokedex Nº353 - tipo GHOST.",
+		"type": "GHOST",
+		"type2": null,
+		"catchRate": 225,
+		"baseExp": 59,
+		"growthCurve": "FAST",
+		"pesoHg": 23,
+		"base": {
+			"hp": 44,
+			"atkFis": 75,
+			"atkEsp": 63,
+			"def": 35,
+			"defEsp": 33,
+			"speed": 45
+		},
+		"abilities": [
+			{
+				"key": "knock_off",
+				"levelReq": 1
+			},
+			{
+				"key": "screech",
+				"levelReq": 4
+			},
+			{
+				"key": "night_shade",
+				"levelReq": 7
+			},
+			{
+				"key": "spite",
+				"levelReq": 10
+			},
+			{
+				"key": "shadow_sneak",
+				"levelReq": 13
+			},
+			{
+				"key": "will_o_wisp",
+				"levelReq": 16
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 19
+			},
+			{
+				"key": "hex",
+				"levelReq": 22
+			},
+			{
+				"key": "curse",
+				"levelReq": 26
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 30
+			},
+			{
+				"key": "embargo",
+				"levelReq": 34
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 38
+			},
+			{
+				"key": "snatch",
+				"levelReq": 42
+			},
+			{
+				"key": "grudge",
+				"levelReq": 46
+			},
+			{
+				"key": "trick",
+				"levelReq": 50
+			},
+			{
+				"key": "phantom_force",
+				"levelReq": 54
+			}
+		],
+		"evolvesTo": "banette",
+		"evolvesAtLevel": 37,
+		"evolutionOptions": [{
+			"to": "banette",
+			"atLevel": 37,
+			"isSpecial": false
+		}]
+	},
+	"banette": {
+		"id": "banette",
+		"name": "Banette",
+		"description": "Pokedex Nº354 - tipo GHOST.",
+		"type": "GHOST",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 159,
+		"growthCurve": "FAST",
+		"pesoHg": 125,
+		"base": {
+			"hp": 64,
+			"atkFis": 115,
+			"atkEsp": 83,
+			"def": 65,
+			"defEsp": 63,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "screech",
+				"levelReq": 4
+			},
+			{
+				"key": "night_shade",
+				"levelReq": 7
+			},
+			{
+				"key": "spite",
+				"levelReq": 10
+			},
+			{
+				"key": "shadow_sneak",
+				"levelReq": 13
+			},
+			{
+				"key": "will_o_wisp",
+				"levelReq": 16
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 19
+			},
+			{
+				"key": "hex",
+				"levelReq": 22
+			},
+			{
+				"key": "curse",
+				"levelReq": 26
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 30
+			},
+			{
+				"key": "embargo",
+				"levelReq": 34
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 40
+			},
+			{
+				"key": "snatch",
+				"levelReq": 46
+			},
+			{
+				"key": "grudge",
+				"levelReq": 52
+			},
+			{
+				"key": "trick",
+				"levelReq": 58
+			},
+			{
+				"key": "phantom_force",
+				"levelReq": 64
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"duskull": {
+		"id": "duskull",
+		"name": "Duskull",
+		"description": "Pokedex Nº355 - tipo GHOST.",
+		"type": "GHOST",
+		"type2": null,
+		"catchRate": 190,
+		"baseExp": 59,
+		"growthCurve": "FAST",
+		"pesoHg": 150,
+		"base": {
+			"hp": 20,
+			"atkFis": 40,
+			"atkEsp": 30,
+			"def": 90,
+			"defEsp": 90,
+			"speed": 25
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "night_shade",
+				"levelReq": 1
+			},
+			{
+				"key": "disable",
+				"levelReq": 6
+			},
+			{
+				"key": "astonish",
+				"levelReq": 9
+			},
+			{
+				"key": "foresight",
+				"levelReq": 14
+			},
+			{
+				"key": "shadow_sneak",
+				"levelReq": 17
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 22
+			},
+			{
+				"key": "will_o_wisp",
+				"levelReq": 25
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 30
+			},
+			{
+				"key": "curse",
+				"levelReq": 33
+			},
+			{
+				"key": "hex",
+				"levelReq": 38
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 41
+			},
+			{
+				"key": "mean_look",
+				"levelReq": 46
+			},
+			{
+				"key": "payback",
+				"levelReq": 49
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 54
+			}
+		],
+		"evolvesTo": "dusclops",
+		"evolvesAtLevel": 37,
+		"evolutionOptions": [{
+			"to": "dusclops",
+			"atLevel": 37,
+			"isSpecial": false
+		}]
+	},
+	"dusclops": {
+		"id": "dusclops",
+		"name": "Dusclops",
+		"description": "Pokedex Nº356 - tipo GHOST.",
+		"type": "GHOST",
+		"type2": null,
+		"catchRate": 90,
+		"baseExp": 159,
+		"growthCurve": "FAST",
+		"pesoHg": 306,
+		"base": {
+			"hp": 40,
+			"atkFis": 70,
+			"atkEsp": 60,
+			"def": 130,
+			"defEsp": 130,
+			"speed": 25
+		},
+		"abilities": [
+			{
+				"key": "disable",
+				"levelReq": 6
+			},
+			{
+				"key": "astonish",
+				"levelReq": 9
+			},
+			{
+				"key": "foresight",
+				"levelReq": 14
+			},
+			{
+				"key": "shadow_sneak",
+				"levelReq": 17
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 22
+			},
+			{
+				"key": "will_o_wisp",
+				"levelReq": 25
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 30
+			},
+			{
+				"key": "curse",
+				"levelReq": 33
+			},
+			{
+				"key": "shadow_punch",
+				"levelReq": 37
+			},
+			{
+				"key": "hex",
+				"levelReq": 40
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 45
+			},
+			{
+				"key": "mean_look",
+				"levelReq": 52
+			},
+			{
+				"key": "payback",
+				"levelReq": 57
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 64
 			}
 		],
 		"evolvesTo": null,
@@ -19409,6 +29492,383 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"poochyena": {
+		"id": "poochyena",
+		"name": "Poochyena",
+		"description": "Pokedex Nº261 - tipo DARK.",
+		"type": "DARK",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 56,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 136,
+		"base": {
+			"hp": 35,
+			"atkFis": 55,
+			"atkEsp": 30,
+			"def": 35,
+			"defEsp": 30,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "howl",
+				"levelReq": 4
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 7
+			},
+			{
+				"key": "bite",
+				"levelReq": 10
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 13
+			},
+			{
+				"key": "roar",
+				"levelReq": 16
+			},
+			{
+				"key": "swagger",
+				"levelReq": 19
+			},
+			{
+				"key": "assurance",
+				"levelReq": 22
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 25
+			},
+			{
+				"key": "embargo",
+				"levelReq": 28
+			},
+			{
+				"key": "taunt",
+				"levelReq": 31
+			},
+			{
+				"key": "crunch",
+				"levelReq": 34
+			},
+			{
+				"key": "yawn",
+				"levelReq": 37
+			},
+			{
+				"key": "take_down",
+				"levelReq": 40
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 43
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": "mightyena",
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "mightyena",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
+	},
+	"mightyena": {
+		"id": "mightyena",
+		"name": "Mightyena",
+		"description": "Pokedex Nº262 - tipo DARK.",
+		"type": "DARK",
+		"type2": null,
+		"catchRate": 127,
+		"baseExp": 147,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 370,
+		"base": {
+			"hp": 70,
+			"atkFis": 90,
+			"atkEsp": 60,
+			"def": 70,
+			"defEsp": 60,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "howl",
+				"levelReq": 4
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 7
+			},
+			{
+				"key": "bite",
+				"levelReq": 10
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 13
+			},
+			{
+				"key": "roar",
+				"levelReq": 16
+			},
+			{
+				"key": "snarl",
+				"levelReq": 18
+			},
+			{
+				"key": "swagger",
+				"levelReq": 20
+			},
+			{
+				"key": "assurance",
+				"levelReq": 24
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 28
+			},
+			{
+				"key": "embargo",
+				"levelReq": 32
+			},
+			{
+				"key": "taunt",
+				"levelReq": 36
+			},
+			{
+				"key": "crunch",
+				"levelReq": 40
+			},
+			{
+				"key": "yawn",
+				"levelReq": 44
+			},
+			{
+				"key": "take_down",
+				"levelReq": 48
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 52
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 56
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"sableye": {
+		"id": "sableye",
+		"name": "Sableye",
+		"description": "Pokedex Nº302 - tipo DARK/GHOST.",
+		"type": "DARK",
+		"type2": "GHOST",
+		"catchRate": 45,
+		"baseExp": 133,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 110,
+		"base": {
+			"hp": 50,
+			"atkFis": 75,
+			"atkEsp": 65,
+			"def": 75,
+			"defEsp": 65,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "foresight",
+				"levelReq": 4
+			},
+			{
+				"key": "night_shade",
+				"levelReq": 6
+			},
+			{
+				"key": "astonish",
+				"levelReq": 9
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 11
+			},
+			{
+				"key": "detect",
+				"levelReq": 14
+			},
+			{
+				"key": "shadow_sneak",
+				"levelReq": 16
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 19
+			},
+			{
+				"key": "fake_out",
+				"levelReq": 21
+			},
+			{
+				"key": "punishment",
+				"levelReq": 24
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 26
+			},
+			{
+				"key": "shadow_claw",
+				"levelReq": 29
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 31
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 34
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 36
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 39
+			},
+			{
+				"key": "foul_play",
+				"levelReq": 41
+			},
+			{
+				"key": "quash",
+				"levelReq": 44
+			},
+			{
+				"key": "mean_look",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"absol": {
+		"id": "absol",
+		"name": "Absol",
+		"description": "Pokedex Nº359 - tipo DARK.",
+		"type": "DARK",
+		"type2": null,
+		"catchRate": 30,
+		"baseExp": 163,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 470,
+		"base": {
+			"hp": 65,
+			"atkFis": 130,
+			"atkEsp": 75,
+			"def": 60,
+			"defEsp": 60,
+			"speed": 75
+		},
+		"abilities": [
+			{
+				"key": "feint",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 4
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 7
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 10
+			},
+			{
+				"key": "taunt",
+				"levelReq": 13
+			},
+			{
+				"key": "bite",
+				"levelReq": 16
+			},
+			{
+				"key": "double_team",
+				"levelReq": 19
+			},
+			{
+				"key": "slash",
+				"levelReq": 22
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 25
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 29
+			},
+			{
+				"key": "detect",
+				"levelReq": 33
+			},
+			{
+				"key": "psycho_cut",
+				"levelReq": 37
+			},
+			{
+				"key": "me_first",
+				"levelReq": 41
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 45
+			},
+			{
+				"key": "razor_wind",
+				"levelReq": 49
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 53
+			},
+			{
+				"key": "perish_song",
+				"levelReq": 57
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"dratini": {
 		"id": "dratini",
 		"name": "Dratini",
@@ -19643,6 +30103,332 @@ var SPECIES_DATA = {
 			{
 				"key": "hurricane",
 				"levelReq": 81
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"altaria": {
+		"id": "altaria",
+		"name": "Altaria",
+		"description": "Pokedex Nº334 - tipo DRAGON/FLYING.",
+		"type": "DRAGON",
+		"type2": "FLYING",
+		"catchRate": 45,
+		"baseExp": 172,
+		"growthCurve": "ERRATIC",
+		"pesoHg": 206,
+		"base": {
+			"hp": 75,
+			"atkFis": 70,
+			"atkEsp": 70,
+			"def": 90,
+			"defEsp": 105,
+			"speed": 80
+		},
+		"abilities": [
+			{
+				"key": "astonish",
+				"levelReq": 3
+			},
+			{
+				"key": "sing",
+				"levelReq": 5
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 7
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 9
+			},
+			{
+				"key": "disarming_voice",
+				"levelReq": 11
+			},
+			{
+				"key": "mist",
+				"levelReq": 14
+			},
+			{
+				"key": "round",
+				"levelReq": 17
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 20
+			},
+			{
+				"key": "take_down",
+				"levelReq": 23
+			},
+			{
+				"key": "refresh",
+				"levelReq": 26
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 30
+			},
+			{
+				"key": "cotton_guard",
+				"levelReq": 34
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 35
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 40
+			},
+			{
+				"key": "perish_song",
+				"levelReq": 46
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 52
+			},
+			{
+				"key": "sky_attack",
+				"levelReq": 59
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"bagon": {
+		"id": "bagon",
+		"name": "Bagon",
+		"description": "Pokedex Nº371 - tipo DRAGON.",
+		"type": "DRAGON",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 60,
+		"growthCurve": "SLOW",
+		"pesoHg": 421,
+		"base": {
+			"hp": 45,
+			"atkFis": 75,
+			"atkEsp": 40,
+			"def": 60,
+			"defEsp": 30,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "rage",
+				"levelReq": 1
+			},
+			{
+				"key": "ember",
+				"levelReq": 4
+			},
+			{
+				"key": "leer",
+				"levelReq": 7
+			},
+			{
+				"key": "bite",
+				"levelReq": 10
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 13
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 17
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 21
+			},
+			{
+				"key": "crunch",
+				"levelReq": 25
+			},
+			{
+				"key": "dragon_claw",
+				"levelReq": 29
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 34
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 39
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 44
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": "shelgon",
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "shelgon",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
+	},
+	"shelgon": {
+		"id": "shelgon",
+		"name": "Shelgon",
+		"description": "Pokedex Nº372 - tipo DRAGON.",
+		"type": "DRAGON",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 147,
+		"growthCurve": "SLOW",
+		"pesoHg": 1105,
+		"base": {
+			"hp": 65,
+			"atkFis": 95,
+			"atkEsp": 60,
+			"def": 100,
+			"defEsp": 50,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "ember",
+				"levelReq": 4
+			},
+			{
+				"key": "leer",
+				"levelReq": 7
+			},
+			{
+				"key": "bite",
+				"levelReq": 10
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 13
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 17
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 21
+			},
+			{
+				"key": "crunch",
+				"levelReq": 25
+			},
+			{
+				"key": "dragon_claw",
+				"levelReq": 29
+			},
+			{
+				"key": "protect",
+				"levelReq": 30
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 35
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 42
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 49
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 56
+			}
+		],
+		"evolvesTo": "salamence",
+		"evolvesAtLevel": 50,
+		"evolutionOptions": [{
+			"to": "salamence",
+			"atLevel": 50,
+			"isSpecial": false
+		}]
+	},
+	"salamence": {
+		"id": "salamence",
+		"name": "Salamence",
+		"description": "Pokedex Nº373 - tipo DRAGON/FLYING.",
+		"type": "DRAGON",
+		"type2": "FLYING",
+		"catchRate": 45,
+		"baseExp": 270,
+		"growthCurve": "SLOW",
+		"pesoHg": 1026,
+		"base": {
+			"hp": 95,
+			"atkFis": 135,
+			"atkEsp": 110,
+			"def": 80,
+			"defEsp": 80,
+			"speed": 100
+		},
+		"abilities": [
+			{
+				"key": "ember",
+				"levelReq": 4
+			},
+			{
+				"key": "leer",
+				"levelReq": 7
+			},
+			{
+				"key": "bite",
+				"levelReq": 10
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 13
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 17
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 21
+			},
+			{
+				"key": "crunch",
+				"levelReq": 25
+			},
+			{
+				"key": "dragon_claw",
+				"levelReq": 29
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 35
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 42
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 49
+			},
+			{
+				"key": "fly",
+				"levelReq": 50
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 63
 			}
 		],
 		"evolvesTo": null,
@@ -19939,6 +30725,85 @@ var SPECIES_DATA = {
 			"isSpecial": true
 		}]
 	},
+	"togetic": {
+		"id": "togetic",
+		"name": "Togetic",
+		"description": "Pokedex Nº176 - tipo FAIRY/FLYING.",
+		"type": "FAIRY",
+		"type2": "FLYING",
+		"catchRate": 75,
+		"baseExp": 142,
+		"growthCurve": "FAST",
+		"pesoHg": 32,
+		"base": {
+			"hp": 55,
+			"atkFis": 40,
+			"atkEsp": 80,
+			"def": 85,
+			"defEsp": 105,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "metronome",
+				"levelReq": 5
+			},
+			{
+				"key": "sweet_kiss",
+				"levelReq": 9
+			},
+			{
+				"key": "yawn",
+				"levelReq": 13
+			},
+			{
+				"key": "fairy_wind",
+				"levelReq": 14
+			},
+			{
+				"key": "encore",
+				"levelReq": 17
+			},
+			{
+				"key": "follow_me",
+				"levelReq": 21
+			},
+			{
+				"key": "bestow",
+				"levelReq": 25
+			},
+			{
+				"key": "wish",
+				"levelReq": 29
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 33
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 37
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 41
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 45
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 49
+			},
+			{
+				"key": "after_you",
+				"levelReq": 53
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"snubbull": {
 		"id": "snubbull",
 		"name": "Snubbull",
@@ -20229,7 +31094,17 @@ var LEGENDARY_SPECIES_IDS = [
 	"ho_oh",
 	"celebi",
 	"mewtwo",
-	"mew"
+	"mew",
+	"regirock",
+	"regice",
+	"registeel",
+	"latias",
+	"latios",
+	"kyogre",
+	"groudon",
+	"rayquaza",
+	"jirachi",
+	"deoxys"
 ];
 //#endregion
 //#region src/data/natures.ts
@@ -20315,6 +31190,10 @@ var TRAITS_DATA = {
 			"nome": "Aftermath",
 			"efeito": "Damages the attacker for 1/4 its max HP when knocked out by a contact move."
 		},
+		"air_lock": {
+			"nome": "Air Lock",
+			"efeito": "Negates all effects of weather, but does not prevent the weather itself."
+		},
 		"analytic": {
 			"nome": "Analytic",
 			"efeito": "Strengthens moves to 1.3× their power when moving last."
@@ -20354,6 +31233,10 @@ var TRAITS_DATA = {
 		"cloud_nine": {
 			"nome": "Cloud Nine",
 			"efeito": "Negates all effects of weather, but does not prevent the weather itself."
+		},
+		"color_change": {
+			"nome": "Color Change",
+			"efeito": "Changes type to match when hit by a damaging move."
 		},
 		"competitive": {
 			"nome": "Competitive",
@@ -20419,6 +31302,10 @@ var TRAITS_DATA = {
 			"nome": "Flash Fire",
 			"efeito": "Protects against Fire moves. Once one has been blocked, the Pokémon's own Fire moves inflict 1.5× damage until it leaves battle."
 		},
+		"forecast": {
+			"nome": "Forecast",
+			"efeito": "Changes Castform's type and form to match the weather."
+		},
 		"forewarn": {
 			"nome": "Forewarn",
 			"efeito": "Reveals the opponents' strongest move upon entering battle."
@@ -20446,6 +31333,10 @@ var TRAITS_DATA = {
 		"healer": {
 			"nome": "Healer",
 			"efeito": "Has a 30% chance of curing each adjacent ally of any major status ailment after each turn."
+		},
+		"heavy_metal": {
+			"nome": "Heavy Metal",
+			"efeito": "Doubles the Pokémon's weight."
 		},
 		"honey_gather": {
 			"nome": "Honey Gather",
@@ -20555,6 +31446,10 @@ var TRAITS_DATA = {
 			"nome": "Marvel Scale",
 			"efeito": "Increases Defense to 1.5× with a major status ailment."
 		},
+		"minus": {
+			"nome": "Minus",
+			"efeito": "Increases Special Attack to 1.5× when a friendly Pokémon has Plus or Minus."
+		},
 		"mold_breaker": {
 			"nome": "Mold Breaker",
 			"efeito": "Bypasses targets' abilities if they could hinder or prevent a move."
@@ -20582,6 +31477,10 @@ var TRAITS_DATA = {
 		"no_guard": {
 			"nome": "No Guard",
 			"efeito": "Ensures all moves used by and against the Pokémon hit."
+		},
+		"normalize": {
+			"nome": "Normalize",
+			"efeito": "Makes the Pokémon's moves all act Normal-type."
 		},
 		"oblivious": {
 			"nome": "Oblivious",
@@ -20611,6 +31510,10 @@ var TRAITS_DATA = {
 			"nome": "Plus",
 			"efeito": "Increases Special Attack to 1.5× when a friendly Pokémon has Plus or Minus."
 		},
+		"poison_heal": {
+			"nome": "Poison Heal",
+			"efeito": "Heals for 1/8 max HP after each turn when poisoned in place of damage."
+		},
 		"poison_point": {
 			"nome": "Poison Point",
 			"efeito": "Has a 30% chance of poisoning attacking Pokémon on contact."
@@ -20626,6 +31529,14 @@ var TRAITS_DATA = {
 		"pressure": {
 			"nome": "Pressure",
 			"efeito": "Increases the PP cost of moves targetting the Pokémon by one."
+		},
+		"protean": {
+			"nome": "Protean",
+			"efeito": "Changes the bearer's type to match each move it uses."
+		},
+		"pure_power": {
+			"nome": "Pure Power",
+			"efeito": "Doubles Attack in battle."
 		},
 		"quick_feet": {
 			"nome": "Quick Feet",
@@ -20654,6 +31565,10 @@ var TRAITS_DATA = {
 		"rock_head": {
 			"nome": "Rock Head",
 			"efeito": "Protects against recoil damage."
+		},
+		"rough_skin": {
+			"nome": "Rough Skin",
+			"efeito": "Damages attacking Pokémon for 1/8 their max HP on contact."
 		},
 		"run_away": {
 			"nome": "Run Away",
@@ -20707,6 +31622,10 @@ var TRAITS_DATA = {
 			"nome": "Shield Dust",
 			"efeito": "Protects against incoming moves' extra effects."
 		},
+		"simple": {
+			"nome": "Simple",
+			"efeito": "Doubles the Pokémon's stat modifiers. These doubled modifiers are still capped at -6 or 6 stages."
+		},
 		"skill_link": {
 			"nome": "Skill Link",
 			"efeito": "Extends two-to-five-hit moves and Triple Kick to their full length every time."
@@ -20723,6 +31642,10 @@ var TRAITS_DATA = {
 			"nome": "Solar Power",
 			"efeito": "Increases Special Attack to 1.5× but costs 1/8 max HP after each turn during strong sunlight."
 		},
+		"solid_rock": {
+			"nome": "Solid Rock",
+			"efeito": "Decreases damage taken from super-effective moves by 1/4."
+		},
 		"soundproof": {
 			"nome": "Soundproof",
 			"efeito": "Protects against sound-based moves."
@@ -20730,6 +31653,10 @@ var TRAITS_DATA = {
 		"speed_boost": {
 			"nome": "Speed Boost",
 			"efeito": "Raises Speed one stage after each turn."
+		},
+		"stall": {
+			"nome": "Stall",
+			"efeito": "Makes the Pokémon move last within its move's priority bracket."
 		},
 		"static": {
 			"nome": "Static",
@@ -20746,6 +31673,10 @@ var TRAITS_DATA = {
 		"sticky_hold": {
 			"nome": "Sticky Hold",
 			"efeito": "Prevents a held item from being removed by other Pokémon."
+		},
+		"storm_drain": {
+			"nome": "Storm Drain",
+			"efeito": "Redirects single-target Water moves to this Pokémon where possible. Absorbs Water moves, raising Special Attack one stage."
 		},
 		"sturdy": {
 			"nome": "Sturdy",
@@ -20795,9 +31726,17 @@ var TRAITS_DATA = {
 			"nome": "Torrent",
 			"efeito": "Strengthens Water moves to inflict 1.5× damage at 1/3 max HP or less."
 		},
+		"toxic_boost": {
+			"nome": "Toxic Boost",
+			"efeito": "Increases Attack to 1.5× when poisoned."
+		},
 		"trace": {
 			"nome": "Trace",
 			"efeito": "Copies an opponent's ability upon entering battle."
+		},
+		"truant": {
+			"nome": "Truant",
+			"efeito": "Skips every second turn."
 		},
 		"unaware": {
 			"nome": "Unaware",
@@ -20830,6 +31769,18 @@ var TRAITS_DATA = {
 		"weak_armor": {
 			"nome": "Weak Armor",
 			"efeito": "Raises Speed and lowers Defense by one stage each upon being hit by a physical move."
+		},
+		"white_smoke": {
+			"nome": "White Smoke",
+			"efeito": "Prevents stats from being lowered by other Pokémon."
+		},
+		"wind_rider": {
+			"nome": "Wind Rider",
+			"efeito": "Gives immunity to wind moves, and causes the Pokémon's Attack to increase by one stage when hit by one."
+		},
+		"wonder_guard": {
+			"nome": "Wonder Guard",
+			"efeito": "Protects against damaging moves that are not super effective."
 		},
 		"wonder_skin": {
 			"nome": "Wonder Skin",
@@ -21815,6 +32766,546 @@ var TRAITS_DATA = {
 		},
 		"celebi": {
 			"normais": ["natural_cure"],
+			"oculta": null
+		},
+		"treecko": {
+			"normais": ["overgrow"],
+			"oculta": "unburden"
+		},
+		"grovyle": {
+			"normais": ["overgrow"],
+			"oculta": "unburden"
+		},
+		"sceptile": {
+			"normais": ["overgrow"],
+			"oculta": "unburden"
+		},
+		"torchic": {
+			"normais": ["blaze"],
+			"oculta": "speed_boost"
+		},
+		"combusken": {
+			"normais": ["blaze"],
+			"oculta": "speed_boost"
+		},
+		"blaziken": {
+			"normais": ["blaze"],
+			"oculta": "speed_boost"
+		},
+		"mudkip": {
+			"normais": ["torrent"],
+			"oculta": "damp"
+		},
+		"marshtomp": {
+			"normais": ["torrent"],
+			"oculta": "damp"
+		},
+		"swampert": {
+			"normais": ["torrent"],
+			"oculta": "damp"
+		},
+		"poochyena": {
+			"normais": ["run_away", "quick_feet"],
+			"oculta": "rattled"
+		},
+		"mightyena": {
+			"normais": ["intimidate", "quick_feet"],
+			"oculta": "moxie"
+		},
+		"zigzagoon": {
+			"normais": ["pickup", "gluttony"],
+			"oculta": "quick_feet"
+		},
+		"linoone": {
+			"normais": ["pickup", "gluttony"],
+			"oculta": "quick_feet"
+		},
+		"wurmple": {
+			"normais": ["shield_dust"],
+			"oculta": "run_away"
+		},
+		"silcoon": {
+			"normais": ["shed_skin"],
+			"oculta": null
+		},
+		"beautifly": {
+			"normais": ["swarm"],
+			"oculta": "rivalry"
+		},
+		"cascoon": {
+			"normais": ["shed_skin"],
+			"oculta": null
+		},
+		"dustox": {
+			"normais": ["shield_dust"],
+			"oculta": "compound_eyes"
+		},
+		"lotad": {
+			"normais": ["swift_swim", "rain_dish"],
+			"oculta": "own_tempo"
+		},
+		"lombre": {
+			"normais": ["swift_swim", "rain_dish"],
+			"oculta": "own_tempo"
+		},
+		"ludicolo": {
+			"normais": ["swift_swim", "rain_dish"],
+			"oculta": "own_tempo"
+		},
+		"seedot": {
+			"normais": ["chlorophyll", "early_bird"],
+			"oculta": "pickpocket"
+		},
+		"nuzleaf": {
+			"normais": ["chlorophyll", "early_bird"],
+			"oculta": "pickpocket"
+		},
+		"shiftry": {
+			"normais": ["chlorophyll", "wind_rider"],
+			"oculta": "pickpocket"
+		},
+		"taillow": {
+			"normais": ["guts"],
+			"oculta": "scrappy"
+		},
+		"swellow": {
+			"normais": ["guts"],
+			"oculta": "scrappy"
+		},
+		"wingull": {
+			"normais": ["keen_eye", "hydration"],
+			"oculta": "rain_dish"
+		},
+		"pelipper": {
+			"normais": ["keen_eye", "drizzle"],
+			"oculta": "rain_dish"
+		},
+		"ralts": {
+			"normais": ["synchronize", "trace"],
+			"oculta": "telepathy"
+		},
+		"kirlia": {
+			"normais": ["synchronize", "trace"],
+			"oculta": "telepathy"
+		},
+		"gardevoir": {
+			"normais": ["synchronize", "trace"],
+			"oculta": "telepathy"
+		},
+		"surskit": {
+			"normais": ["swift_swim"],
+			"oculta": "rain_dish"
+		},
+		"masquerain": {
+			"normais": ["intimidate"],
+			"oculta": "unnerve"
+		},
+		"shroomish": {
+			"normais": ["effect_spore", "poison_heal"],
+			"oculta": "quick_feet"
+		},
+		"breloom": {
+			"normais": ["effect_spore", "poison_heal"],
+			"oculta": "technician"
+		},
+		"slakoth": {
+			"normais": ["truant"],
+			"oculta": null
+		},
+		"vigoroth": {
+			"normais": ["vital_spirit"],
+			"oculta": null
+		},
+		"slaking": {
+			"normais": ["truant"],
+			"oculta": null
+		},
+		"nincada": {
+			"normais": ["compound_eyes"],
+			"oculta": "run_away"
+		},
+		"ninjask": {
+			"normais": ["speed_boost"],
+			"oculta": "infiltrator"
+		},
+		"shedinja": {
+			"normais": ["wonder_guard"],
+			"oculta": null
+		},
+		"whismur": {
+			"normais": ["soundproof"],
+			"oculta": "rattled"
+		},
+		"loudred": {
+			"normais": ["soundproof"],
+			"oculta": "scrappy"
+		},
+		"exploud": {
+			"normais": ["soundproof"],
+			"oculta": "scrappy"
+		},
+		"makuhita": {
+			"normais": ["thick_fat", "guts"],
+			"oculta": "sheer_force"
+		},
+		"hariyama": {
+			"normais": ["thick_fat", "guts"],
+			"oculta": "sheer_force"
+		},
+		"azurill": {
+			"normais": ["thick_fat", "huge_power"],
+			"oculta": "sap_sipper"
+		},
+		"nosepass": {
+			"normais": ["sturdy", "magnet_pull"],
+			"oculta": "sand_force"
+		},
+		"skitty": {
+			"normais": ["cute_charm", "normalize"],
+			"oculta": "wonder_skin"
+		},
+		"delcatty": {
+			"normais": ["cute_charm", "normalize"],
+			"oculta": "wonder_skin"
+		},
+		"sableye": {
+			"normais": ["keen_eye", "stall"],
+			"oculta": "prankster"
+		},
+		"mawile": {
+			"normais": ["hyper_cutter", "intimidate"],
+			"oculta": "sheer_force"
+		},
+		"aron": {
+			"normais": ["sturdy", "rock_head"],
+			"oculta": "heavy_metal"
+		},
+		"lairon": {
+			"normais": ["sturdy", "rock_head"],
+			"oculta": "heavy_metal"
+		},
+		"aggron": {
+			"normais": ["sturdy", "rock_head"],
+			"oculta": "heavy_metal"
+		},
+		"meditite": {
+			"normais": ["pure_power"],
+			"oculta": "telepathy"
+		},
+		"medicham": {
+			"normais": ["pure_power"],
+			"oculta": "telepathy"
+		},
+		"electrike": {
+			"normais": ["static", "lightning_rod"],
+			"oculta": "minus"
+		},
+		"manectric": {
+			"normais": ["static", "lightning_rod"],
+			"oculta": "minus"
+		},
+		"plusle": {
+			"normais": ["plus"],
+			"oculta": "lightning_rod"
+		},
+		"minun": {
+			"normais": ["minus"],
+			"oculta": "volt_absorb"
+		},
+		"volbeat": {
+			"normais": ["illuminate", "swarm"],
+			"oculta": "prankster"
+		},
+		"illumise": {
+			"normais": ["oblivious", "tinted_lens"],
+			"oculta": "prankster"
+		},
+		"roselia": {
+			"normais": ["natural_cure", "poison_point"],
+			"oculta": "leaf_guard"
+		},
+		"gulpin": {
+			"normais": ["liquid_ooze", "sticky_hold"],
+			"oculta": "gluttony"
+		},
+		"swalot": {
+			"normais": ["liquid_ooze", "sticky_hold"],
+			"oculta": "gluttony"
+		},
+		"carvanha": {
+			"normais": ["rough_skin"],
+			"oculta": "speed_boost"
+		},
+		"sharpedo": {
+			"normais": ["rough_skin"],
+			"oculta": "speed_boost"
+		},
+		"wailmer": {
+			"normais": ["water_veil", "oblivious"],
+			"oculta": "pressure"
+		},
+		"wailord": {
+			"normais": ["water_veil", "oblivious"],
+			"oculta": "pressure"
+		},
+		"numel": {
+			"normais": ["oblivious", "simple"],
+			"oculta": "own_tempo"
+		},
+		"camerupt": {
+			"normais": ["magma_armor", "solid_rock"],
+			"oculta": "anger_point"
+		},
+		"torkoal": {
+			"normais": ["white_smoke", "drought"],
+			"oculta": "shell_armor"
+		},
+		"spoink": {
+			"normais": ["thick_fat", "own_tempo"],
+			"oculta": "gluttony"
+		},
+		"grumpig": {
+			"normais": ["thick_fat", "own_tempo"],
+			"oculta": "gluttony"
+		},
+		"spinda": {
+			"normais": ["own_tempo", "tangled_feet"],
+			"oculta": "contrary"
+		},
+		"trapinch": {
+			"normais": ["hyper_cutter", "arena_trap"],
+			"oculta": "sheer_force"
+		},
+		"vibrava": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"flygon": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"cacnea": {
+			"normais": ["sand_veil"],
+			"oculta": "water_absorb"
+		},
+		"cacturne": {
+			"normais": ["sand_veil"],
+			"oculta": "water_absorb"
+		},
+		"swablu": {
+			"normais": ["natural_cure"],
+			"oculta": "cloud_nine"
+		},
+		"altaria": {
+			"normais": ["natural_cure"],
+			"oculta": "cloud_nine"
+		},
+		"zangoose": {
+			"normais": ["immunity"],
+			"oculta": "toxic_boost"
+		},
+		"seviper": {
+			"normais": ["shed_skin"],
+			"oculta": "infiltrator"
+		},
+		"lunatone": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"solrock": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"barboach": {
+			"normais": ["oblivious", "anticipation"],
+			"oculta": "hydration"
+		},
+		"whiscash": {
+			"normais": ["oblivious", "anticipation"],
+			"oculta": "hydration"
+		},
+		"corphish": {
+			"normais": ["hyper_cutter", "shell_armor"],
+			"oculta": "adaptability"
+		},
+		"crawdaunt": {
+			"normais": ["hyper_cutter", "shell_armor"],
+			"oculta": "adaptability"
+		},
+		"baltoy": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"claydol": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"lileep": {
+			"normais": ["suction_cups"],
+			"oculta": "storm_drain"
+		},
+		"cradily": {
+			"normais": ["suction_cups"],
+			"oculta": "storm_drain"
+		},
+		"anorith": {
+			"normais": ["battle_armor"],
+			"oculta": "swift_swim"
+		},
+		"armaldo": {
+			"normais": ["battle_armor"],
+			"oculta": "swift_swim"
+		},
+		"feebas": {
+			"normais": ["swift_swim", "oblivious"],
+			"oculta": "adaptability"
+		},
+		"milotic": {
+			"normais": ["marvel_scale", "competitive"],
+			"oculta": "cute_charm"
+		},
+		"castform": {
+			"normais": ["forecast"],
+			"oculta": null
+		},
+		"kecleon": {
+			"normais": ["color_change"],
+			"oculta": "protean"
+		},
+		"shuppet": {
+			"normais": ["insomnia", "frisk"],
+			"oculta": "cursed_body"
+		},
+		"banette": {
+			"normais": ["insomnia", "frisk"],
+			"oculta": "cursed_body"
+		},
+		"duskull": {
+			"normais": ["levitate"],
+			"oculta": "frisk"
+		},
+		"dusclops": {
+			"normais": ["pressure"],
+			"oculta": "frisk"
+		},
+		"tropius": {
+			"normais": ["chlorophyll", "solar_power"],
+			"oculta": "harvest"
+		},
+		"chimecho": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"absol": {
+			"normais": ["pressure", "super_luck"],
+			"oculta": "justified"
+		},
+		"wynaut": {
+			"normais": ["shadow_tag"],
+			"oculta": "telepathy"
+		},
+		"snorunt": {
+			"normais": ["inner_focus", "ice_body"],
+			"oculta": "moody"
+		},
+		"glalie": {
+			"normais": ["inner_focus", "ice_body"],
+			"oculta": "moody"
+		},
+		"spheal": {
+			"normais": ["thick_fat", "ice_body"],
+			"oculta": "oblivious"
+		},
+		"sealeo": {
+			"normais": ["thick_fat", "ice_body"],
+			"oculta": "oblivious"
+		},
+		"walrein": {
+			"normais": ["thick_fat", "ice_body"],
+			"oculta": "oblivious"
+		},
+		"clamperl": {
+			"normais": ["shell_armor"],
+			"oculta": "rattled"
+		},
+		"huntail": {
+			"normais": ["swift_swim"],
+			"oculta": "water_veil"
+		},
+		"gorebyss": {
+			"normais": ["swift_swim"],
+			"oculta": "hydration"
+		},
+		"relicanth": {
+			"normais": ["swift_swim", "rock_head"],
+			"oculta": "sturdy"
+		},
+		"luvdisc": {
+			"normais": ["swift_swim"],
+			"oculta": "hydration"
+		},
+		"bagon": {
+			"normais": ["rock_head"],
+			"oculta": "sheer_force"
+		},
+		"shelgon": {
+			"normais": ["rock_head"],
+			"oculta": "overcoat"
+		},
+		"salamence": {
+			"normais": ["intimidate"],
+			"oculta": "moxie"
+		},
+		"beldum": {
+			"normais": ["clear_body"],
+			"oculta": "light_metal"
+		},
+		"metang": {
+			"normais": ["clear_body"],
+			"oculta": "light_metal"
+		},
+		"metagross": {
+			"normais": ["clear_body"],
+			"oculta": "light_metal"
+		},
+		"regirock": {
+			"normais": ["clear_body"],
+			"oculta": "sturdy"
+		},
+		"regice": {
+			"normais": ["clear_body"],
+			"oculta": "ice_body"
+		},
+		"registeel": {
+			"normais": ["clear_body"],
+			"oculta": "light_metal"
+		},
+		"latias": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"latios": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"kyogre": {
+			"normais": ["drizzle"],
+			"oculta": null
+		},
+		"groudon": {
+			"normais": ["drought"],
+			"oculta": null
+		},
+		"rayquaza": {
+			"normais": ["air_lock"],
+			"oculta": null
+		},
+		"jirachi": {
+			"normais": ["serene_grace"],
+			"oculta": null
+		},
+		"deoxys": {
+			"normais": ["pressure"],
 			"oculta": null
 		}
 	}
@@ -23414,6 +34905,728 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
+	"explosion": {
+		"id": "explosion",
+		"name": "Explosion",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 250,
+		"pp": 5,
+		"target": "aoe",
+		"accuracy": 100
+	},
+	"rock_throw": {
+		"id": "rock_throw",
+		"name": "Rock Throw",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 50,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 90
+	},
+	"charge_beam": {
+		"id": "charge_beam",
+		"name": "Charge Beam",
+		"type": "ELECTRIC",
+		"category": "special",
+		"power": 50,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": 1
+		}],
+		"statChance": 70,
+		"accuracy": 90
+	},
+	"bulldoze": {
+		"id": "bulldoze",
+		"name": "Bulldoze",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 60,
+		"pp": 20,
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"curse": {
+		"id": "curse",
+		"name": "Curse",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"stone_edge": {
+		"id": "stone_edge",
+		"name": "Stone Edge",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 100,
+		"pp": 5,
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 80
+	},
+	"hammer_arm": {
+		"id": "hammer_arm",
+		"name": "Hammer Arm",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 90
+	},
+	"lock_on": {
+		"id": "lock_on",
+		"name": "Lock-On",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"superpower": {
+		"id": "superpower",
+		"name": "Superpower",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 120,
+		"pp": 5,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}, {
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"hyper_beam": {
+		"id": "hyper_beam",
+		"name": "Hyper Beam",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 150,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 90
+	},
+	"icy_wind": {
+		"id": "icy_wind",
+		"name": "Icy Wind",
+		"type": "ICE",
+		"category": "special",
+		"power": 55,
+		"pp": 15,
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 95
+	},
+	"metal_claw": {
+		"id": "metal_claw",
+		"name": "Metal Claw",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 50,
+		"pp": 35,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 10,
+		"accuracy": 95
+	},
+	"flash_cannon": {
+		"id": "flash_cannon",
+		"name": "Flash Cannon",
+		"type": "STEEL",
+		"category": "special",
+		"power": 80,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
+	},
+	"iron_head": {
+		"id": "iron_head",
+		"name": "Iron Head",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
+	},
+	"helping_hand": {
+		"id": "helping_hand",
+		"name": "Helping Hand",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"wish": {
+		"id": "wish",
+		"name": "Wish",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"water_sport": {
+		"id": "water_sport",
+		"name": "Water Sport",
+		"type": "WATER",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"charm": {
+		"id": "charm",
+		"name": "Charm",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"stored_power": {
+		"id": "stored_power",
+		"name": "Stored Power",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 20,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"refresh": {
+		"id": "refresh",
+		"name": "Refresh",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"heal_pulse": {
+		"id": "heal_pulse",
+		"name": "Heal Pulse",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
+	},
+	"dragon_breath": {
+		"id": "dragon_breath",
+		"name": "Dragon Breath",
+		"type": "DRAGON",
+		"category": "special",
+		"power": 60,
+		"pp": 20,
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 100
+	},
+	"mist_ball": {
+		"id": "mist_ball",
+		"name": "Mist Ball",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 70,
+		"pp": 5,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": -1
+		}],
+		"statChance": 50,
+		"accuracy": 100
+	},
+	"psycho_shift": {
+		"id": "psycho_shift",
+		"name": "Psycho Shift",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"zen_headbutt": {
+		"id": "zen_headbutt",
+		"name": "Zen Headbutt",
+		"type": "PSYCHIC",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single",
+		"flinchChance": 20,
+		"accuracy": 90
+	},
+	"guard_split": {
+		"id": "guard_split",
+		"name": "Guard Split",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"dragon_pulse": {
+		"id": "dragon_pulse",
+		"name": "Dragon Pulse",
+		"type": "DRAGON",
+		"category": "special",
+		"power": 85,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"dragon_dance": {
+		"id": "dragon_dance",
+		"name": "Dragon Dance",
+		"type": "DRAGON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "speed",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"luster_purge": {
+		"id": "luster_purge",
+		"name": "Luster Purge",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 95,
+		"pp": 5,
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 50,
+		"accuracy": 100
+	},
+	"telekinesis": {
+		"id": "telekinesis",
+		"name": "Telekinesis",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"power_split": {
+		"id": "power_split",
+		"name": "Power Split",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"memento": {
+		"id": "memento",
+		"name": "Memento",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -2
+		}, {
+			"stat": "atkEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"body_slam": {
+		"id": "body_slam",
+		"name": "Body Slam",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 85,
+		"pp": 15,
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 100
+	},
+	"aqua_ring": {
+		"id": "aqua_ring",
+		"name": "Aqua Ring",
+		"type": "WATER",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"origin_pulse": {
+		"id": "origin_pulse",
+		"name": "Origin Pulse",
+		"type": "WATER",
+		"category": "special",
+		"power": 110,
+		"pp": 10,
+		"target": "aoe",
+		"accuracy": 85
+	},
+	"muddy_water": {
+		"id": "muddy_water",
+		"name": "Muddy Water",
+		"type": "WATER",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "aoe",
+		"accuracy": 85
+	},
+	"water_spout": {
+		"id": "water_spout",
+		"name": "Water Spout",
+		"type": "WATER",
+		"category": "special",
+		"power": 150,
+		"pp": 5,
+		"target": "aoe",
+		"accuracy": 100
+	},
+	"mud_shot": {
+		"id": "mud_shot",
+		"name": "Mud Shot",
+		"type": "GROUND",
+		"category": "special",
+		"power": 55,
+		"pp": 15,
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 95
+	},
+	"earth_power": {
+		"id": "earth_power",
+		"name": "Earth Power",
+		"type": "GROUND",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
+	},
+	"rest": {
+		"id": "rest",
+		"name": "Rest",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"earthquake": {
+		"id": "earthquake",
+		"name": "Earthquake",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "aoe",
+		"accuracy": 100
+	},
+	"precipice_blades": {
+		"id": "precipice_blades",
+		"name": "Precipice Blades",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 120,
+		"pp": 10,
+		"target": "aoe",
+		"accuracy": 85
+	},
+	"bulk_up": {
+		"id": "bulk_up",
+		"name": "Bulk Up",
+		"type": "FIGHTING",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"fissure": {
+		"id": "fissure",
+		"name": "Fissure",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 30
+	},
+	"twister": {
+		"id": "twister",
+		"name": "Twister",
+		"type": "DRAGON",
+		"category": "special",
+		"power": 40,
+		"pp": 20,
+		"target": "aoe",
+		"flinchChance": 20,
+		"accuracy": 100
+	},
+	"extreme_speed": {
+		"id": "extreme_speed",
+		"name": "Extreme Speed",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 80,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"fly": {
+		"id": "fly",
+		"name": "Fly",
+		"type": "FLYING",
+		"category": "physical",
+		"power": 90,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 95
+	},
+	"hyper_voice": {
+		"id": "hyper_voice",
+		"name": "Hyper Voice",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "aoe",
+		"accuracy": 100
+	},
+	"outrage": {
+		"id": "outrage",
+		"name": "Outrage",
+		"type": "DRAGON",
+		"category": "physical",
+		"power": 120,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"lucky_chant": {
+		"id": "lucky_chant",
+		"name": "Lucky Chant",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
+	"gravity": {
+		"id": "gravity",
+		"name": "Gravity",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"cosmic_power": {
+		"id": "cosmic_power",
+		"name": "Cosmic Power",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}, {
+			"stat": "defEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"last_resort": {
+		"id": "last_resort",
+		"name": "Last Resort",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 140,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"doom_desire": {
+		"id": "doom_desire",
+		"name": "Doom Desire",
+		"type": "STEEL",
+		"category": "special",
+		"power": 140,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"wrap": {
+		"id": "wrap",
+		"name": "Wrap",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 15,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 90
+	},
+	"night_shade": {
+		"id": "night_shade",
+		"name": "Night Shade",
+		"type": "GHOST",
+		"category": "special",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"teleport": {
+		"id": "teleport",
+		"name": "Teleport",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"knock_off": {
+		"id": "knock_off",
+		"name": "Knock Off",
+		"type": "DARK",
+		"category": "physical",
+		"power": 65,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"pursuit": {
+		"id": "pursuit",
+		"name": "Pursuit",
+		"type": "DARK",
+		"category": "physical",
+		"power": 40,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"snatch": {
+		"id": "snatch",
+		"name": "Snatch",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"psycho_boost": {
+		"id": "psycho_boost",
+		"name": "Psycho Boost",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 140,
+		"pp": 5,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 90
+	},
 	"defense_curl": {
 		"id": "defense_curl",
 		"name": "Defense Curl",
@@ -23476,16 +35689,6 @@ var ABILITIES_DATA = {
 		"target": "aoe",
 		"accuracy": 100
 	},
-	"rock_throw": {
-		"id": "rock_throw",
-		"name": "Rock Throw",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 50,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 90
-	},
 	"smack_down": {
 		"id": "smack_down",
 		"name": "Smack Down",
@@ -23494,21 +35697,6 @@ var ABILITIES_DATA = {
 		"power": 50,
 		"pp": 15,
 		"target": "single",
-		"accuracy": 100
-	},
-	"bulldoze": {
-		"id": "bulldoze",
-		"name": "Bulldoze",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 60,
-		"pp": 20,
-		"target": "aoe",
-		"statChanges": [{
-			"stat": "speed",
-			"estagios": -1
-		}],
-		"statChance": 100,
 		"accuracy": 100
 	},
 	"self_destruct": {
@@ -23540,47 +35728,6 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"accuracy": 90
-	},
-	"earthquake": {
-		"id": "earthquake",
-		"name": "Earthquake",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 100,
-		"pp": 10,
-		"target": "aoe",
-		"accuracy": 100
-	},
-	"explosion": {
-		"id": "explosion",
-		"name": "Explosion",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 250,
-		"pp": 5,
-		"target": "aoe",
-		"accuracy": 100
-	},
-	"stone_edge": {
-		"id": "stone_edge",
-		"name": "Stone Edge",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 100,
-		"pp": 5,
-		"target": "single",
-		"critStages": 1,
-		"accuracy": 80
-	},
-	"pursuit": {
-		"id": "pursuit",
-		"name": "Pursuit",
-		"type": "DARK",
-		"category": "physical",
-		"power": 40,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
 	},
 	"fury_attack": {
 		"id": "fury_attack",
@@ -23742,16 +35889,6 @@ var ABILITIES_DATA = {
 		"drainPercent": 50,
 		"accuracy": 100
 	},
-	"lucky_chant": {
-		"id": "lucky_chant",
-		"name": "Lucky Chant",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 30,
-		"target": "single",
-		"accuracy": 100
-	},
 	"moonlight": {
 		"id": "moonlight",
 		"name": "Moonlight",
@@ -23818,26 +35955,6 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"wrap": {
-		"id": "wrap",
-		"name": "Wrap",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 15,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 90
-	},
-	"knock_off": {
-		"id": "knock_off",
-		"name": "Knock Off",
-		"type": "DARK",
-		"category": "physical",
-		"power": 65,
-		"pp": 20,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -24090,18 +36207,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 85
 	},
-	"body_slam": {
-		"id": "body_slam",
-		"name": "Body Slam",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 85,
-		"pp": 15,
-		"target": "single",
-		"status": "paralysis",
-		"statusChance": 30,
-		"accuracy": 100
-	},
 	"quiver_dance": {
 		"id": "quiver_dance",
 		"name": "Quiver Dance",
@@ -24205,24 +36310,6 @@ var ABILITIES_DATA = {
 		"statusChance": 30,
 		"accuracy": 85
 	},
-	"memento": {
-		"id": "memento",
-		"name": "Memento",
-		"type": "DARK",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": -2
-		}, {
-			"stat": "atkEsp",
-			"estagios": -2
-		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
 	"grass_whistle": {
 		"id": "grass_whistle",
 		"name": "Grass Whistle",
@@ -24234,6 +36321,354 @@ var ABILITIES_DATA = {
 		"status": "sleep",
 		"statusChance": 100,
 		"accuracy": 55
+	},
+	"energy_ball": {
+		"id": "energy_ball",
+		"name": "Energy Ball",
+		"type": "GRASS",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
+	},
+	"quick_guard": {
+		"id": "quick_guard",
+		"name": "Quick Guard",
+		"type": "FIGHTING",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"screech": {
+		"id": "screech",
+		"name": "Screech",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 85
+	},
+	"fury_cutter": {
+		"id": "fury_cutter",
+		"name": "Fury Cutter",
+		"type": "BUG",
+		"category": "physical",
+		"power": 40,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 95
+	},
+	"x_scissor": {
+		"id": "x_scissor",
+		"name": "X-Scissor",
+		"type": "BUG",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"false_swipe": {
+		"id": "false_swipe",
+		"name": "False Swipe",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 40,
+		"pp": 40,
+		"target": "single",
+		"accuracy": 100
+	},
+	"dual_chop": {
+		"id": "dual_chop",
+		"name": "Dual Chop",
+		"type": "DRAGON",
+		"category": "physical",
+		"power": 40,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 90
+	},
+	"bide": {
+		"id": "bide",
+		"name": "Bide",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"harden": {
+		"id": "harden",
+		"name": "Harden",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"nature_power": {
+		"id": "nature_power",
+		"name": "Nature Power",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"torment": {
+		"id": "torment",
+		"name": "Torment",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"fake_out": {
+		"id": "fake_out",
+		"name": "Fake Out",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 40,
+		"pp": 10,
+		"target": "single",
+		"flinchChance": 100,
+		"accuracy": 100
+	},
+	"razor_wind": {
+		"id": "razor_wind",
+		"name": "Razor Wind",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 80,
+		"pp": 10,
+		"target": "aoe",
+		"critStages": 1,
+		"accuracy": 100
+	},
+	"feint_attack": {
+		"id": "feint_attack",
+		"name": "Feint Attack",
+		"type": "DARK",
+		"category": "physical",
+		"power": 60,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"headbutt": {
+		"id": "headbutt",
+		"name": "Headbutt",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 70,
+		"pp": 15,
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
+	},
+	"spore": {
+		"id": "spore",
+		"name": "Spore",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"status": "sleep",
+		"statusChance": 100,
+		"accuracy": 100
+	},
+	"feint": {
+		"id": "feint",
+		"name": "Feint",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 30,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"counter": {
+		"id": "counter",
+		"name": "Counter",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"mach_punch": {
+		"id": "mach_punch",
+		"name": "Mach Punch",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 40,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
+	"force_palm": {
+		"id": "force_palm",
+		"name": "Force Palm",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 100
+	},
+	"sky_uppercut": {
+		"id": "sky_uppercut",
+		"name": "Sky Uppercut",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 85,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 90
+	},
+	"dynamic_punch": {
+		"id": "dynamic_punch",
+		"name": "Dynamic Punch",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 100,
+		"pp": 5,
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 50
+	},
+	"poison_sting": {
+		"id": "poison_sting",
+		"name": "Poison Sting",
+		"type": "POISON",
+		"category": "physical",
+		"power": 15,
+		"pp": 35,
+		"target": "single",
+		"status": "poison",
+		"statusChance": 30,
+		"accuracy": 100
+	},
+	"toxic_spikes": {
+		"id": "toxic_spikes",
+		"name": "Toxic Spikes",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"sand_attack": {
+		"id": "sand_attack",
+		"name": "Sand Attack",
+		"type": "GROUND",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"needle_arm": {
+		"id": "needle_arm",
+		"name": "Needle Arm",
+		"type": "GRASS",
+		"category": "physical",
+		"power": 60,
+		"pp": 15,
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
+	},
+	"payback": {
+		"id": "payback",
+		"name": "Payback",
+		"type": "DARK",
+		"category": "physical",
+		"power": 50,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"spikes": {
+		"id": "spikes",
+		"name": "Spikes",
+		"type": "GROUND",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"pin_missile": {
+		"id": "pin_missile",
+		"name": "Pin Missile",
+		"type": "BUG",
+		"category": "physical",
+		"power": 25,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 95
+	},
+	"sandstorm": {
+		"id": "sandstorm",
+		"name": "Sandstorm",
+		"type": "ROCK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"destiny_bond": {
+		"id": "destiny_bond",
+		"name": "Destiny Bond",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"spiky_shield": {
+		"id": "spiky_shield",
+		"name": "Spiky Shield",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
 	},
 	"string_shot": {
 		"id": "string_shot",
@@ -24258,22 +36693,6 @@ var ABILITIES_DATA = {
 		"power": 60,
 		"pp": 20,
 		"target": "single",
-		"accuracy": 100
-	},
-	"harden": {
-		"id": "harden",
-		"name": "Harden",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 30,
-		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"statTarget": "self",
 		"accuracy": 100
 	},
 	"psybeam": {
@@ -24363,18 +36782,6 @@ var ABILITIES_DATA = {
 		"statChance": 100,
 		"accuracy": 100
 	},
-	"poison_sting": {
-		"id": "poison_sting",
-		"name": "Poison Sting",
-		"type": "POISON",
-		"category": "physical",
-		"power": 15,
-		"pp": 35,
-		"target": "single",
-		"status": "poison",
-		"statusChance": 30,
-		"accuracy": 100
-	},
 	"twineedle": {
 		"id": "twineedle",
 		"name": "Twineedle",
@@ -24407,26 +36814,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"toxic_spikes": {
-		"id": "toxic_spikes",
-		"name": "Toxic Spikes",
-		"type": "POISON",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"pin_missile": {
-		"id": "pin_missile",
-		"name": "Pin Missile",
-		"type": "BUG",
-		"category": "physical",
-		"power": 25,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 95
-	},
 	"fell_stinger": {
 		"id": "fell_stinger",
 		"name": "Fell Stinger",
@@ -24434,38 +36821,6 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 25,
-		"target": "single",
-		"accuracy": 100
-	},
-	"fury_cutter": {
-		"id": "fury_cutter",
-		"name": "Fury Cutter",
-		"type": "BUG",
-		"category": "physical",
-		"power": 40,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 95
-	},
-	"spore": {
-		"id": "spore",
-		"name": "Spore",
-		"type": "GRASS",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"status": "sleep",
-		"statusChance": 100,
-		"accuracy": 100
-	},
-	"x_scissor": {
-		"id": "x_scissor",
-		"name": "X-Scissor",
-		"type": "BUG",
-		"category": "physical",
-		"power": 80,
-		"pp": 15,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -24502,17 +36857,6 @@ var ABILITIES_DATA = {
 		"drainPercent": 50,
 		"accuracy": 100
 	},
-	"zen_headbutt": {
-		"id": "zen_headbutt",
-		"name": "Zen Headbutt",
-		"type": "PSYCHIC",
-		"category": "physical",
-		"power": 80,
-		"pp": 15,
-		"target": "single",
-		"flinchChance": 20,
-		"accuracy": 90
-	},
 	"poison_fang": {
 		"id": "poison_fang",
 		"name": "Poison Fang",
@@ -24533,27 +36877,6 @@ var ABILITIES_DATA = {
 		"power": 40,
 		"pp": 30,
 		"target": "single",
-		"accuracy": 100
-	},
-	"false_swipe": {
-		"id": "false_swipe",
-		"name": "False Swipe",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 40,
-		"pp": 40,
-		"target": "single",
-		"accuracy": 100
-	},
-	"razor_wind": {
-		"id": "razor_wind",
-		"name": "Razor Wind",
-		"type": "NORMAL",
-		"category": "special",
-		"power": 80,
-		"pp": 10,
-		"target": "aoe",
-		"critStages": 1,
 		"accuracy": 100
 	},
 	"double_team": {
@@ -24601,16 +36924,6 @@ var ABILITIES_DATA = {
 		}],
 		"statChance": 100,
 		"statTarget": "self",
-		"accuracy": 100
-	},
-	"feint": {
-		"id": "feint",
-		"name": "Feint",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 30,
-		"pp": 10,
-		"target": "single",
 		"accuracy": 100
 	},
 	"vice_grip": {
@@ -24695,24 +37008,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"superpower": {
-		"id": "superpower",
-		"name": "Superpower",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 120,
-		"pp": 5,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": -1
-		}, {
-			"stat": "def",
-			"estagios": -1
-		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
 	"guillotine": {
 		"id": "guillotine",
 		"name": "Guillotine",
@@ -24722,16 +37017,6 @@ var ABILITIES_DATA = {
 		"pp": 5,
 		"target": "single",
 		"accuracy": 30
-	},
-	"mach_punch": {
-		"id": "mach_punch",
-		"name": "Mach Punch",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 40,
-		"pp": 30,
-		"target": "single",
-		"accuracy": 100
 	},
 	"comet_punch": {
 		"id": "comet_punch",
@@ -24750,16 +37035,6 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 20,
 		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"night_shade": {
-		"id": "night_shade",
-		"name": "Night Shade",
-		"type": "GHOST",
-		"category": "special",
-		"power": 0,
-		"pp": 15,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -24843,51 +37118,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 90
 	},
-	"screech": {
-		"id": "screech",
-		"name": "Screech",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 40,
-		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": -2
-		}],
-		"statChance": 100,
-		"accuracy": 85
-	},
-	"bide": {
-		"id": "bide",
-		"name": "Bide",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"spikes": {
-		"id": "spikes",
-		"name": "Spikes",
-		"type": "GROUND",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"payback": {
-		"id": "payback",
-		"name": "Payback",
-		"type": "DARK",
-		"category": "physical",
-		"power": 50,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
 	"gyro_ball": {
 		"id": "gyro_ball",
 		"name": "Gyro Ball",
@@ -24944,32 +37174,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"metal_claw": {
-		"id": "metal_claw",
-		"name": "Metal Claw",
-		"type": "STEEL",
-		"category": "physical",
-		"power": 50,
-		"pp": 35,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
-		}],
-		"statChance": 10,
-		"accuracy": 95
-	},
-	"iron_head": {
-		"id": "iron_head",
-		"name": "Iron Head",
-		"type": "STEEL",
-		"category": "physical",
-		"power": 80,
-		"pp": 15,
-		"target": "single",
-		"flinchChance": 30,
-		"accuracy": 100
-	},
 	"arm_thrust": {
 		"id": "arm_thrust",
 		"name": "Arm Thrust",
@@ -24996,16 +37200,6 @@ var ABILITIES_DATA = {
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 70,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"counter": {
-		"id": "counter",
-		"name": "Counter",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 0,
 		"pp": 20,
 		"target": "single",
 		"accuracy": 100
@@ -25048,13 +37242,240 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"water_sport": {
-		"id": "water_sport",
-		"name": "Water Sport",
-		"type": "WATER",
+	"morning_sun": {
+		"id": "morning_sun",
+		"name": "Morning Sun",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
+	},
+	"air_cutter": {
+		"id": "air_cutter",
+		"name": "Air Cutter",
+		"type": "FLYING",
+		"category": "special",
+		"power": 60,
+		"pp": 25,
+		"target": "aoe",
+		"critStages": 1,
+		"accuracy": 95
+	},
+	"attract": {
+		"id": "attract",
+		"name": "Attract",
+		"type": "NORMAL",
 		"category": "status",
 		"power": 0,
 		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"haze": {
+		"id": "haze",
+		"name": "Haze",
+		"type": "ICE",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
+	"aqua_jet": {
+		"id": "aqua_jet",
+		"name": "Aqua Jet",
+		"type": "WATER",
+		"category": "physical",
+		"power": 40,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"mud_slap": {
+		"id": "mud_slap",
+		"name": "Mud-Slap",
+		"type": "GROUND",
+		"category": "special",
+		"power": 20,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"dig": {
+		"id": "dig",
+		"name": "Dig",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 80,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"spite": {
+		"id": "spite",
+		"name": "Spite",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"confuse_ray": {
+		"id": "confuse_ray",
+		"name": "Confuse Ray",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 100
+	},
+	"shadow_ball": {
+		"id": "shadow_ball",
+		"name": "Shadow Ball",
+		"type": "GHOST",
+		"category": "special",
+		"power": 80,
+		"pp": 15,
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 20,
+		"accuracy": 100
+	},
+	"grudge": {
+		"id": "grudge",
+		"name": "Grudge",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"phantom_force": {
+		"id": "phantom_force",
+		"name": "Phantom Force",
+		"type": "GHOST",
+		"category": "physical",
+		"power": 90,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"flash": {
+		"id": "flash",
+		"name": "Flash",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"struggle_bug": {
+		"id": "struggle_bug",
+		"name": "Struggle Bug",
+		"type": "BUG",
+		"category": "special",
+		"power": 50,
+		"pp": 20,
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"tail_glow": {
+		"id": "tail_glow",
+		"name": "Tail Glow",
+		"type": "BUG",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": 3
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"play_rough": {
+		"id": "play_rough",
+		"name": "Play Rough",
+		"type": "FAIRY",
+		"category": "physical",
+		"power": 90,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 90
+	},
+	"play_nice": {
+		"id": "play_nice",
+		"name": "Play Nice",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"encore": {
+		"id": "encore",
+		"name": "Encore",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
+	"flatter": {
+		"id": "flatter",
+		"name": "Flatter",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"covet": {
+		"id": "covet",
+		"name": "Covet",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 60,
+		"pp": 25,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -25088,21 +37509,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 85
 	},
-	"mud_shot": {
-		"id": "mud_shot",
-		"name": "Mud Shot",
-		"type": "GROUND",
-		"category": "special",
-		"power": 55,
-		"pp": 15,
-		"target": "single",
-		"statChanges": [{
-			"stat": "speed",
-			"estagios": -1
-		}],
-		"statChance": 100,
-		"accuracy": 95
-	},
 	"belly_drum": {
 		"id": "belly_drum",
 		"name": "Belly Drum",
@@ -25132,18 +37538,6 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"accuracy": 85
-	},
-	"dynamic_punch": {
-		"id": "dynamic_punch",
-		"name": "Dynamic Punch",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 100,
-		"pp": 5,
-		"target": "single",
-		"status": "confusion",
-		"statusChance": 100,
-		"accuracy": 50
 	},
 	"circle_throw": {
 		"id": "circle_throw",
@@ -25202,16 +37596,6 @@ var ABILITIES_DATA = {
 		"statusChance": 10,
 		"accuracy": 100
 	},
-	"curse": {
-		"id": "curse",
-		"name": "Curse",
-		"type": "GHOST",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
 	"yawn": {
 		"id": "yawn",
 		"name": "Yawn",
@@ -25220,17 +37604,6 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 10,
 		"target": "single",
-		"accuracy": 100
-	},
-	"headbutt": {
-		"id": "headbutt",
-		"name": "Headbutt",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 70,
-		"pp": 15,
-		"target": "single",
-		"flinchChance": 30,
 		"accuracy": 100
 	},
 	"slack_off": {
@@ -25242,72 +37615,6 @@ var ABILITIES_DATA = {
 		"pp": 5,
 		"target": "single",
 		"healPercent": 50,
-		"accuracy": 100
-	},
-	"heal_pulse": {
-		"id": "heal_pulse",
-		"name": "Heal Pulse",
-		"type": "PSYCHIC",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"healPercent": 50,
-		"accuracy": 100
-	},
-	"icy_wind": {
-		"id": "icy_wind",
-		"name": "Icy Wind",
-		"type": "ICE",
-		"category": "special",
-		"power": 55,
-		"pp": 15,
-		"target": "aoe",
-		"statChanges": [{
-			"stat": "speed",
-			"estagios": -1
-		}],
-		"statChance": 100,
-		"accuracy": 95
-	},
-	"encore": {
-		"id": "encore",
-		"name": "Encore",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"rest": {
-		"id": "rest",
-		"name": "Rest",
-		"type": "PSYCHIC",
-		"category": "status",
-		"power": 0,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"aqua_ring": {
-		"id": "aqua_ring",
-		"name": "Aqua Ring",
-		"type": "WATER",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"aqua_jet": {
-		"id": "aqua_jet",
-		"name": "Aqua Jet",
-		"type": "WATER",
-		"category": "physical",
-		"power": 40,
-		"pp": 20,
-		"target": "single",
 		"accuracy": 100
 	},
 	"dive": {
@@ -25441,46 +37748,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"twister": {
-		"id": "twister",
-		"name": "Twister",
-		"type": "DRAGON",
-		"category": "special",
-		"power": 40,
-		"pp": 20,
-		"target": "aoe",
-		"flinchChance": 20,
-		"accuracy": 100
-	},
-	"dragon_pulse": {
-		"id": "dragon_pulse",
-		"name": "Dragon Pulse",
-		"type": "DRAGON",
-		"category": "special",
-		"power": 85,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"dragon_dance": {
-		"id": "dragon_dance",
-		"name": "Dragon Dance",
-		"type": "DRAGON",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
-		}, {
-			"stat": "speed",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"statTarget": "self",
-		"accuracy": 100
-	},
 	"waterfall": {
 		"id": "waterfall",
 		"name": "Waterfall",
@@ -25532,37 +37799,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"confuse_ray": {
-		"id": "confuse_ray",
-		"name": "Confuse Ray",
-		"type": "GHOST",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"status": "confusion",
-		"statusChance": 100,
-		"accuracy": 100
-	},
-	"cosmic_power": {
-		"id": "cosmic_power",
-		"name": "Cosmic Power",
-		"type": "PSYCHIC",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": 1
-		}, {
-			"stat": "defEsp",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"statTarget": "self",
-		"accuracy": 100
-	},
 	"spotlight": {
 		"id": "spotlight",
 		"name": "Spotlight",
@@ -25572,16 +37808,6 @@ var ABILITIES_DATA = {
 		"pp": 15,
 		"target": "single",
 		"accuracy": 100
-	},
-	"hyper_beam": {
-		"id": "hyper_beam",
-		"name": "Hyper Beam",
-		"type": "NORMAL",
-		"category": "special",
-		"power": 150,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 90
 	},
 	"sing": {
 		"id": "sing",
@@ -25594,16 +37820,6 @@ var ABILITIES_DATA = {
 		"status": "sleep",
 		"statusChance": 100,
 		"accuracy": 55
-	},
-	"sand_attack": {
-		"id": "sand_attack",
-		"name": "Sand Attack",
-		"type": "GROUND",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
 	},
 	"baby_doll_eyes": {
 		"id": "baby_doll_eyes",
@@ -25636,36 +37852,6 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
-	"haze": {
-		"id": "haze",
-		"name": "Haze",
-		"type": "ICE",
-		"category": "status",
-		"power": 0,
-		"pp": 30,
-		"target": "single",
-		"accuracy": 100
-	},
-	"muddy_water": {
-		"id": "muddy_water",
-		"name": "Muddy Water",
-		"type": "WATER",
-		"category": "special",
-		"power": 90,
-		"pp": 10,
-		"target": "aoe",
-		"accuracy": 85
-	},
-	"last_resort": {
-		"id": "last_resort",
-		"name": "Last Resort",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 140,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
 	"electro_ball": {
 		"id": "electro_ball",
 		"name": "Electro Ball",
@@ -25686,91 +37872,11 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"helping_hand": {
-		"id": "helping_hand",
-		"name": "Helping Hand",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"play_rough": {
-		"id": "play_rough",
-		"name": "Play Rough",
-		"type": "FAIRY",
-		"category": "physical",
-		"power": 90,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": -1
-		}],
-		"statChance": 10,
-		"accuracy": 90
-	},
-	"hyper_voice": {
-		"id": "hyper_voice",
-		"name": "Hyper Voice",
-		"type": "NORMAL",
-		"category": "special",
-		"power": 90,
-		"pp": 10,
-		"target": "aoe",
-		"accuracy": 100
-	},
 	"trump_card": {
 		"id": "trump_card",
 		"name": "Trump Card",
 		"type": "NORMAL",
 		"category": "special",
-		"power": 0,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"destiny_bond": {
-		"id": "destiny_bond",
-		"name": "Destiny Bond",
-		"type": "GHOST",
-		"category": "status",
-		"power": 0,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"refresh": {
-		"id": "refresh",
-		"name": "Refresh",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"earth_power": {
-		"id": "earth_power",
-		"name": "Earth Power",
-		"type": "GROUND",
-		"category": "special",
-		"power": 90,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "defEsp",
-			"estagios": -1
-		}],
-		"statChance": 10,
-		"accuracy": 100
-	},
-	"lock_on": {
-		"id": "lock_on",
-		"name": "Lock-On",
-		"type": "NORMAL",
-		"category": "status",
 		"power": 0,
 		"pp": 5,
 		"target": "single",
@@ -25795,6 +37901,158 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"accuracy": 100
+	},
+	"rock_slide": {
+		"id": "rock_slide",
+		"name": "Rock Slide",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 75,
+		"pp": 10,
+		"target": "aoe",
+		"flinchChance": 30,
+		"accuracy": 90
+	},
+	"astonish": {
+		"id": "astonish",
+		"name": "Astonish",
+		"type": "GHOST",
+		"category": "physical",
+		"power": 30,
+		"pp": 15,
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
+	},
+	"fling": {
+		"id": "fling",
+		"name": "Fling",
+		"type": "DARK",
+		"category": "physical",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"taunt": {
+		"id": "taunt",
+		"name": "Taunt",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"snore": {
+		"id": "snore",
+		"name": "Snore",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 50,
+		"pp": 15,
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
+	},
+	"disarming_voice": {
+		"id": "disarming_voice",
+		"name": "Disarming Voice",
+		"type": "FAIRY",
+		"category": "special",
+		"power": 40,
+		"pp": 15,
+		"target": "aoe",
+		"accuracy": 100
+	},
+	"dragon_tail": {
+		"id": "dragon_tail",
+		"name": "Dragon Tail",
+		"type": "DRAGON",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 90
+	},
+	"coil": {
+		"id": "coil",
+		"name": "Coil",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"draining_kiss": {
+		"id": "draining_kiss",
+		"name": "Draining Kiss",
+		"type": "FAIRY",
+		"category": "special",
+		"power": 50,
+		"pp": 10,
+		"target": "single",
+		"drainPercent": 75,
+		"accuracy": 100
+	},
+	"rock_tomb": {
+		"id": "rock_tomb",
+		"name": "Rock Tomb",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 60,
+		"pp": 15,
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 95
+	},
+	"head_smash": {
+		"id": "head_smash",
+		"name": "Head Smash",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 150,
+		"pp": 5,
+		"target": "single",
+		"drainPercent": -50,
+		"accuracy": 80
+	},
+	"heart_stamp": {
+		"id": "heart_stamp",
+		"name": "Heart Stamp",
+		"type": "PSYCHIC",
+		"category": "physical",
+		"power": 60,
+		"pp": 25,
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
+	},
+	"sweet_kiss": {
+		"id": "sweet_kiss",
+		"name": "Sweet Kiss",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 75
 	},
 	"feather_dance": {
 		"id": "feather_dance",
@@ -25822,31 +38080,6 @@ var ABILITIES_DATA = {
 		"critStages": 1,
 		"accuracy": 95
 	},
-	"play_nice": {
-		"id": "play_nice",
-		"name": "Play Nice",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": -1
-		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
-	"disarming_voice": {
-		"id": "disarming_voice",
-		"name": "Disarming Voice",
-		"type": "FAIRY",
-		"category": "special",
-		"power": 40,
-		"pp": 15,
-		"target": "aoe",
-		"accuracy": 100
-	},
 	"round": {
 		"id": "round",
 		"name": "Round",
@@ -25867,37 +38100,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"fake_out": {
-		"id": "fake_out",
-		"name": "Fake Out",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 40,
-		"pp": 10,
-		"target": "single",
-		"flinchChance": 100,
-		"accuracy": 100
-	},
-	"feint_attack": {
-		"id": "feint_attack",
-		"name": "Feint Attack",
-		"type": "DARK",
-		"category": "physical",
-		"power": 60,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"taunt": {
-		"id": "taunt",
-		"name": "Taunt",
-		"type": "DARK",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
 	"pay_day": {
 		"id": "pay_day",
 		"name": "Pay Day",
@@ -25907,17 +38109,6 @@ var ABILITIES_DATA = {
 		"pp": 20,
 		"target": "single",
 		"accuracy": 100
-	},
-	"air_cutter": {
-		"id": "air_cutter",
-		"name": "Air Cutter",
-		"type": "FLYING",
-		"category": "special",
-		"power": 60,
-		"pp": 25,
-		"target": "aoe",
-		"critStages": 1,
-		"accuracy": 95
 	},
 	"acupressure": {
 		"id": "acupressure",
@@ -25973,16 +38164,6 @@ var ABILITIES_DATA = {
 		"statusChance": 20,
 		"accuracy": 100
 	},
-	"outrage": {
-		"id": "outrage",
-		"name": "Outrage",
-		"type": "DRAGON",
-		"category": "physical",
-		"power": 120,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
 	"work_up": {
 		"id": "work_up",
 		"name": "Work Up",
@@ -26011,31 +38192,6 @@ var ABILITIES_DATA = {
 		"pp": 5,
 		"target": "single",
 		"accuracy": 90
-	},
-	"covet": {
-		"id": "covet",
-		"name": "Covet",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 60,
-		"pp": 25,
-		"target": "single",
-		"accuracy": 100
-	},
-	"charm": {
-		"id": "charm",
-		"name": "Charm",
-		"type": "FAIRY",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": -2
-		}],
-		"statChance": 100,
-		"accuracy": 100
 	},
 	"conversion": {
 		"id": "conversion",
@@ -26093,17 +38249,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"snore": {
-		"id": "snore",
-		"name": "Snore",
-		"type": "NORMAL",
-		"category": "special",
-		"power": 50,
-		"pp": 15,
-		"target": "single",
-		"flinchChance": 30,
-		"accuracy": 100
-	},
 	"sleep_talk": {
 		"id": "sleep_talk",
 		"name": "Sleep Talk",
@@ -26154,16 +38299,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"psycho_shift": {
-		"id": "psycho_shift",
-		"name": "Psycho Shift",
-		"type": "PSYCHIC",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
 	"synchronoise": {
 		"id": "synchronoise",
 		"name": "Synchronoise",
@@ -26185,18 +38320,6 @@ var ABILITIES_DATA = {
 		"drainPercent": 50,
 		"accuracy": 100
 	},
-	"sweet_kiss": {
-		"id": "sweet_kiss",
-		"name": "Sweet Kiss",
-		"type": "FAIRY",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"status": "confusion",
-		"statusChance": 100,
-		"accuracy": 75
-	},
 	"copycat": {
 		"id": "copycat",
 		"name": "Copycat",
@@ -26207,27 +38330,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"astonish": {
-		"id": "astonish",
-		"name": "Astonish",
-		"type": "GHOST",
-		"category": "physical",
-		"power": 30,
-		"pp": 15,
-		"target": "single",
-		"flinchChance": 30,
-		"accuracy": 100
-	},
-	"fling": {
-		"id": "fling",
-		"name": "Fling",
-		"type": "DARK",
-		"category": "physical",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
 	"odor_sleuth": {
 		"id": "odor_sleuth",
 		"name": "Odor Sleuth",
@@ -26235,55 +38337,6 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single",
-		"accuracy": 100
-	},
-	"spite": {
-		"id": "spite",
-		"name": "Spite",
-		"type": "GHOST",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"mud_slap": {
-		"id": "mud_slap",
-		"name": "Mud-Slap",
-		"type": "GROUND",
-		"category": "special",
-		"power": 20,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"coil": {
-		"id": "coil",
-		"name": "Coil",
-		"type": "POISON",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
-		}, {
-			"stat": "def",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"statTarget": "self",
-		"accuracy": 100
-	},
-	"dig": {
-		"id": "dig",
-		"name": "Dig",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 80,
-		"pp": 10,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -26313,21 +38366,6 @@ var ABILITIES_DATA = {
 		}],
 		"statChance": 100,
 		"accuracy": 100
-	},
-	"hammer_arm": {
-		"id": "hammer_arm",
-		"name": "Hammer Arm",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 100,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "speed",
-			"estagios": -1
-		}],
-		"statChance": 100,
-		"accuracy": 90
 	},
 	"role_play": {
 		"id": "role_play",
@@ -26370,6 +38408,152 @@ var ABILITIES_DATA = {
 		"healPercent": 50,
 		"accuracy": 100
 	},
+	"focus_punch": {
+		"id": "focus_punch",
+		"name": "Focus Punch",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 150,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"howl": {
+		"id": "howl",
+		"name": "Howl",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"boomburst": {
+		"id": "boomburst",
+		"name": "Boomburst",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 140,
+		"pp": 10,
+		"target": "aoe",
+		"accuracy": 100
+	},
+	"assist": {
+		"id": "assist",
+		"name": "Assist",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
+	"teeter_dance": {
+		"id": "teeter_dance",
+		"name": "Teeter Dance",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "aoe",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 100
+	},
+	"cotton_guard": {
+		"id": "cotton_guard",
+		"name": "Cotton Guard",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 3
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"hone_claws": {
+		"id": "hone_claws",
+		"name": "Hone Claws",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"crush_claw": {
+		"id": "crush_claw",
+		"name": "Crush Claw",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 75,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 50,
+		"accuracy": 95
+	},
+	"embargo": {
+		"id": "embargo",
+		"name": "Embargo",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"thief": {
+		"id": "thief",
+		"name": "Thief",
+		"type": "DARK",
+		"category": "physical",
+		"power": 60,
+		"pp": 25,
+		"target": "single",
+		"accuracy": 100
+	},
+	"shadow_claw": {
+		"id": "shadow_claw",
+		"name": "Shadow Claw",
+		"type": "GHOST",
+		"category": "physical",
+		"power": 70,
+		"pp": 15,
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 100
+	},
+	"substitute": {
+		"id": "substitute",
+		"name": "Substitute",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
 	"steamroller": {
 		"id": "steamroller",
 		"name": "Steamroller",
@@ -26380,44 +38564,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"flinchChance": 30,
 		"accuracy": 100
-	},
-	"rock_tomb": {
-		"id": "rock_tomb",
-		"name": "Rock Tomb",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 60,
-		"pp": 15,
-		"target": "single",
-		"statChanges": [{
-			"stat": "speed",
-			"estagios": -1
-		}],
-		"statChance": 100,
-		"accuracy": 95
-	},
-	"dragon_breath": {
-		"id": "dragon_breath",
-		"name": "Dragon Breath",
-		"type": "DRAGON",
-		"category": "special",
-		"power": 60,
-		"pp": 20,
-		"target": "single",
-		"status": "paralysis",
-		"statusChance": 30,
-		"accuracy": 100
-	},
-	"rock_slide": {
-		"id": "rock_slide",
-		"name": "Rock Slide",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 75,
-		"pp": 10,
-		"target": "aoe",
-		"flinchChance": 30,
-		"accuracy": 90
 	},
 	"sand_tomb": {
 		"id": "sand_tomb",
@@ -26443,16 +38589,6 @@ var ABILITIES_DATA = {
 		}],
 		"statChance": 30,
 		"accuracy": 75
-	},
-	"sandstorm": {
-		"id": "sandstorm",
-		"name": "Sandstorm",
-		"type": "ROCK",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
 	},
 	"metal_sound": {
 		"id": "metal_sound",
@@ -26507,17 +38643,6 @@ var ABILITIES_DATA = {
 		"statChance": 100,
 		"accuracy": 100
 	},
-	"head_smash": {
-		"id": "head_smash",
-		"name": "Head Smash",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 150,
-		"pp": 5,
-		"target": "single",
-		"drainPercent": -50,
-		"accuracy": 80
-	},
 	"dark_pulse": {
 		"id": "dark_pulse",
 		"name": "Dark Pulse",
@@ -26529,30 +38654,28 @@ var ABILITIES_DATA = {
 		"flinchChance": 20,
 		"accuracy": 100
 	},
-	"crush_claw": {
-		"id": "crush_claw",
-		"name": "Crush Claw",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 75,
+	"magic_room": {
+		"id": "magic_room",
+		"name": "Magic Room",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
 		"pp": 10,
 		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": -1
-		}],
-		"statChance": 50,
-		"accuracy": 95
+		"accuracy": 100
 	},
-	"fissure": {
-		"id": "fissure",
-		"name": "Fissure",
-		"type": "GROUND",
+	"flare_blitz": {
+		"id": "flare_blitz",
+		"name": "Flare Blitz",
+		"type": "FIRE",
 		"category": "physical",
-		"power": 0,
-		"pp": 5,
+		"power": 120,
+		"pp": 15,
 		"target": "single",
-		"accuracy": 30
+		"status": "burn",
+		"statusChance": 10,
+		"drainPercent": -33,
+		"accuracy": 100
 	},
 	"bone_club": {
 		"id": "bone_club",
@@ -26605,27 +38728,24 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 90
 	},
-	"sky_uppercut": {
-		"id": "sky_uppercut",
-		"name": "Sky Uppercut",
-		"type": "FIGHTING",
+	"dragon_claw": {
+		"id": "dragon_claw",
+		"name": "Dragon Claw",
+		"type": "DRAGON",
 		"category": "physical",
-		"power": 85,
+		"power": 80,
 		"pp": 15,
 		"target": "single",
-		"accuracy": 90
+		"accuracy": 100
 	},
-	"flare_blitz": {
-		"id": "flare_blitz",
-		"name": "Flare Blitz",
-		"type": "FIRE",
-		"category": "physical",
-		"power": 120,
-		"pp": 15,
+	"power_trick": {
+		"id": "power_trick",
+		"name": "Power Trick",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
 		"target": "single",
-		"status": "burn",
-		"statusChance": 10,
-		"drainPercent": -33,
 		"accuracy": 100
 	},
 	"flame_wheel": {
@@ -26638,16 +38758,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"status": "burn",
 		"statusChance": 10,
-		"accuracy": 100
-	},
-	"extreme_speed": {
-		"id": "extreme_speed",
-		"name": "Extreme Speed",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 80,
-		"pp": 5,
-		"target": "single",
 		"accuracy": 100
 	},
 	"flame_charge": {
@@ -26709,6 +38819,29 @@ var ABILITIES_DATA = {
 		"target": "aoe",
 		"accuracy": 100
 	},
+	"double_kick": {
+		"id": "double_kick",
+		"name": "Double Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 30,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
+	"blaze_kick": {
+		"id": "blaze_kick",
+		"name": "Blaze Kick",
+		"type": "FIRE",
+		"category": "physical",
+		"power": 85,
+		"pp": 10,
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"critStages": 1,
+		"accuracy": 90
+	},
 	"nuzzle": {
 		"id": "nuzzle",
 		"name": "Nuzzle",
@@ -26754,21 +38887,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"flash_cannon": {
-		"id": "flash_cannon",
-		"name": "Flash Cannon",
-		"type": "STEEL",
-		"category": "special",
-		"power": 80,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "defEsp",
-			"estagios": -1
-		}],
-		"statChance": 10,
-		"accuracy": 100
-	},
 	"eerie_impulse": {
 		"id": "eerie_impulse",
 		"name": "Eerie Impulse",
@@ -26783,21 +38901,6 @@ var ABILITIES_DATA = {
 		}],
 		"statChance": 100,
 		"accuracy": 100
-	},
-	"charge_beam": {
-		"id": "charge_beam",
-		"name": "Charge Beam",
-		"type": "ELECTRIC",
-		"category": "special",
-		"power": 50,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkEsp",
-			"estagios": 1
-		}],
-		"statChance": 70,
-		"accuracy": 90
 	},
 	"shock_wave": {
 		"id": "shock_wave",
@@ -26821,30 +38924,34 @@ var ABILITIES_DATA = {
 		"statusChance": 10,
 		"accuracy": 100
 	},
-	"double_kick": {
-		"id": "double_kick",
-		"name": "Double Kick",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 30,
-		"pp": 30,
-		"target": "single",
-		"accuracy": 100
-	},
-	"cotton_guard": {
-		"id": "cotton_guard",
-		"name": "Cotton Guard",
-		"type": "GRASS",
+	"electric_terrain": {
+		"id": "electric_terrain",
+		"name": "Electric Terrain",
+		"type": "ELECTRIC",
 		"category": "status",
 		"power": 0,
 		"pp": 10,
 		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": 3
-		}],
-		"statChance": 100,
-		"statTarget": "self",
+		"accuracy": 100
+	},
+	"entrainment": {
+		"id": "entrainment",
+		"name": "Entrainment",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"switcheroo": {
+		"id": "switcheroo",
+		"name": "Switcheroo",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
 		"accuracy": 100
 	},
 	"belch": {
@@ -26869,23 +38976,6 @@ var ABILITIES_DATA = {
 		"statusChance": 30,
 		"accuracy": 80
 	},
-	"flatter": {
-		"id": "flatter",
-		"name": "Flatter",
-		"type": "DARK",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"status": "confusion",
-		"statusChance": 100,
-		"statChanges": [{
-			"stat": "atkEsp",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
 	"mean_look": {
 		"id": "mean_look",
 		"name": "Mean Look",
@@ -26893,16 +38983,6 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"quick_guard": {
-		"id": "quick_guard",
-		"name": "Quick Guard",
-		"type": "FIGHTING",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -26967,6 +39047,19 @@ var ABILITIES_DATA = {
 		"statChance": 100,
 		"accuracy": 100
 	},
+	"poison_tail": {
+		"id": "poison_tail",
+		"name": "Poison Tail",
+		"type": "POISON",
+		"category": "physical",
+		"power": 50,
+		"pp": 25,
+		"target": "single",
+		"status": "poison",
+		"statusChance": 10,
+		"critStages": 1,
+		"accuracy": 100
+	},
 	"karate_chop": {
 		"id": "karate_chop",
 		"name": "Karate Chop",
@@ -27012,35 +39105,6 @@ var ABILITIES_DATA = {
 			"estagios": -1
 		}],
 		"statChance": 100,
-		"accuracy": 100
-	},
-	"dual_chop": {
-		"id": "dual_chop",
-		"name": "Dual Chop",
-		"type": "DRAGON",
-		"category": "physical",
-		"power": 40,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 90
-	},
-	"bulk_up": {
-		"id": "bulk_up",
-		"name": "Bulk Up",
-		"type": "FIGHTING",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
-		}, {
-			"stat": "def",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"statTarget": "self",
 		"accuracy": 100
 	},
 	"strength": {
@@ -27090,19 +39154,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 90
 	},
-	"blaze_kick": {
-		"id": "blaze_kick",
-		"name": "Blaze Kick",
-		"type": "FIRE",
-		"category": "physical",
-		"power": 85,
-		"pp": 10,
-		"target": "single",
-		"status": "burn",
-		"statusChance": 10,
-		"critStages": 1,
-		"accuracy": 90
-	},
 	"mega_kick": {
 		"id": "mega_kick",
 		"name": "Mega Kick",
@@ -27135,16 +39186,6 @@ var ABILITIES_DATA = {
 		"statusChance": 10,
 		"accuracy": 100
 	},
-	"focus_punch": {
-		"id": "focus_punch",
-		"name": "Focus Punch",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 150,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
 	"triple_kick": {
 		"id": "triple_kick",
 		"name": "Triple Kick",
@@ -27154,6 +39195,26 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"accuracy": 90
+	},
+	"smelling_salts": {
+		"id": "smelling_salts",
+		"name": "Smelling Salts",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 70,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"hidden_power": {
+		"id": "hidden_power",
+		"name": "Hidden Power",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 60,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
 	},
 	"lovely_kiss": {
 		"id": "lovely_kiss",
@@ -27166,17 +39227,6 @@ var ABILITIES_DATA = {
 		"status": "sleep",
 		"statusChance": 100,
 		"accuracy": 75
-	},
-	"heart_stamp": {
-		"id": "heart_stamp",
-		"name": "Heart Stamp",
-		"type": "PSYCHIC",
-		"category": "physical",
-		"power": 60,
-		"pp": 25,
-		"target": "single",
-		"flinchChance": 30,
-		"accuracy": 100
 	},
 	"avalanche": {
 		"id": "avalanche",
@@ -27198,6 +39248,27 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 90
 	},
+	"frost_breath": {
+		"id": "frost_breath",
+		"name": "Frost Breath",
+		"type": "ICE",
+		"category": "special",
+		"power": 60,
+		"pp": 10,
+		"target": "single",
+		"critStages": 6,
+		"accuracy": 90
+	},
+	"ice_ball": {
+		"id": "ice_ball",
+		"name": "Ice Ball",
+		"type": "ICE",
+		"category": "physical",
+		"power": 30,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 90
+	},
 	"steel_wing": {
 		"id": "steel_wing",
 		"name": "Steel Wing",
@@ -27213,25 +39284,30 @@ var ABILITIES_DATA = {
 		"statChance": 10,
 		"accuracy": 90
 	},
-	"teleport": {
-		"id": "teleport",
-		"name": "Teleport",
-		"type": "PSYCHIC",
-		"category": "status",
+	"metal_burst": {
+		"id": "metal_burst",
+		"name": "Metal Burst",
+		"type": "STEEL",
+		"category": "physical",
 		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"stored_power": {
-		"id": "stored_power",
-		"name": "Stored Power",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 20,
 		"pp": 10,
 		"target": "single",
 		"accuracy": 100
+	},
+	"meteor_mash": {
+		"id": "meteor_mash",
+		"name": "Meteor Mash",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 90,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 20,
+		"accuracy": 90
 	},
 	"ominous_wind": {
 		"id": "ominous_wind",
@@ -27266,26 +39342,6 @@ var ABILITIES_DATA = {
 		"statChance": 10,
 		"accuracy": 100
 	},
-	"wish": {
-		"id": "wish",
-		"name": "Wish",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"after_you": {
-		"id": "after_you",
-		"name": "After You",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
-	},
 	"kinesis": {
 		"id": "kinesis",
 		"name": "Kinesis",
@@ -27295,16 +39351,6 @@ var ABILITIES_DATA = {
 		"pp": 15,
 		"target": "single",
 		"accuracy": 80
-	},
-	"telekinesis": {
-		"id": "telekinesis",
-		"name": "Telekinesis",
-		"type": "PSYCHIC",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
 	},
 	"ally_switch": {
 		"id": "ally_switch",
@@ -27324,42 +39370,6 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 10,
 		"target": "single",
-		"accuracy": 100
-	},
-	"morning_sun": {
-		"id": "morning_sun",
-		"name": "Morning Sun",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 5,
-		"target": "single",
-		"healPercent": 50,
-		"accuracy": 100
-	},
-	"hidden_power": {
-		"id": "hidden_power",
-		"name": "Hidden Power",
-		"type": "NORMAL",
-		"category": "special",
-		"power": 60,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
-	},
-	"shadow_ball": {
-		"id": "shadow_ball",
-		"name": "Shadow Ball",
-		"type": "GHOST",
-		"category": "special",
-		"power": 80,
-		"pp": 15,
-		"target": "single",
-		"statChanges": [{
-			"stat": "defEsp",
-			"estagios": -1
-		}],
-		"statChance": 20,
 		"accuracy": 100
 	},
 	"nightmare": {
@@ -27392,15 +39402,17 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"grudge": {
-		"id": "grudge",
-		"name": "Grudge",
-		"type": "GHOST",
+	"will_o_wisp": {
+		"id": "will_o_wisp",
+		"name": "Will-O-Wisp",
+		"type": "FIRE",
 		"category": "status",
 		"power": 0,
-		"pp": 5,
+		"pp": 15,
 		"target": "single",
-		"accuracy": 100
+		"status": "burn",
+		"statusChance": 100,
+		"accuracy": 85
 	},
 	"foul_play": {
 		"id": "foul_play",
@@ -27408,16 +39420,6 @@ var ABILITIES_DATA = {
 		"type": "DARK",
 		"category": "physical",
 		"power": 95,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
-	},
-	"torment": {
-		"id": "torment",
-		"name": "Torment",
-		"type": "DARK",
-		"category": "status",
-		"power": 0,
 		"pp": 15,
 		"target": "single",
 		"accuracy": 100
@@ -27432,22 +39434,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"hone_claws": {
-		"id": "hone_claws",
-		"name": "Hone Claws",
-		"type": "DARK",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"statTarget": "self",
-		"accuracy": 100
-	},
 	"beat_up": {
 		"id": "beat_up",
 		"name": "Beat Up",
@@ -27458,76 +39444,30 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"snatch": {
-		"id": "snatch",
-		"name": "Snatch",
+	"snarl": {
+		"id": "snarl",
+		"name": "Snarl",
 		"type": "DARK",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"howl": {
-		"id": "howl",
-		"name": "Howl",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 40,
-		"target": "single",
+		"category": "special",
+		"power": 55,
+		"pp": 15,
+		"target": "aoe",
 		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
+			"stat": "atkEsp",
+			"estagios": -1
 		}],
 		"statChance": 100,
-		"statTarget": "self",
-		"accuracy": 100
+		"accuracy": 95
 	},
-	"embargo": {
-		"id": "embargo",
-		"name": "Embargo",
-		"type": "DARK",
+	"after_you": {
+		"id": "after_you",
+		"name": "After You",
+		"type": "NORMAL",
 		"category": "status",
 		"power": 0,
 		"pp": 15,
 		"target": "single",
 		"accuracy": 100
-	},
-	"dragon_tail": {
-		"id": "dragon_tail",
-		"name": "Dragon Tail",
-		"type": "DRAGON",
-		"category": "physical",
-		"power": 60,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 90
-	},
-	"gravity": {
-		"id": "gravity",
-		"name": "Gravity",
-		"type": "PSYCHIC",
-		"category": "status",
-		"power": 0,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"meteor_mash": {
-		"id": "meteor_mash",
-		"name": "Meteor Mash",
-		"type": "STEEL",
-		"category": "physical",
-		"power": 90,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
-		}],
-		"statChance": 20,
-		"accuracy": 90
 	}
 };
 var TURNO_SEGUNDOS = createFormulaEngine(FORMULAS).eval("TURNO_SEGUNDOS");
@@ -31596,7 +43536,13 @@ var SUB_BIOMA_ESPECIES = {
 		"misdreavus",
 		"dunsparce",
 		"houndour",
-		"houndoom"
+		"houndoom",
+		"whismur",
+		"loudred",
+		"exploud",
+		"sableye",
+		"mawile",
+		"absol"
 	],
 	"badlands": [
 		"sandshrew",
@@ -31614,7 +43560,9 @@ var SUB_BIOMA_ESPECIES = {
 		"gligar",
 		"steelix",
 		"phanpy",
-		"donphan"
+		"donphan",
+		"numel",
+		"camerupt"
 	],
 	"beach": [
 		"shellder",
@@ -31622,7 +43570,9 @@ var SUB_BIOMA_ESPECIES = {
 		"krabby",
 		"kingler",
 		"staryu",
-		"starmie"
+		"starmie",
+		"corphish",
+		"crawdaunt"
 	],
 	"cave": [
 		"zubat",
@@ -31636,7 +43586,13 @@ var SUB_BIOMA_ESPECIES = {
 		"crobat",
 		"steelix",
 		"teddiursa",
-		"ursaring"
+		"ursaring",
+		"whismur",
+		"loudred",
+		"exploud",
+		"makuhita",
+		"hariyama",
+		"nosepass"
 	],
 	"construction-site": [
 		"diglett",
@@ -31658,14 +43614,28 @@ var SUB_BIOMA_ESPECIES = {
 		"steelix",
 		"phanpy",
 		"donphan",
-		"tyrogue"
+		"tyrogue",
+		"makuhita",
+		"hariyama",
+		"nosepass"
 	],
 	"desert": [
 		"sandshrew",
 		"sandslash",
 		"doduo",
 		"dodrio",
-		"gligar"
+		"gligar",
+		"numel",
+		"camerupt",
+		"trapinch",
+		"vibrava",
+		"flygon",
+		"cacnea",
+		"cacturne",
+		"lileep",
+		"cradily",
+		"anorith",
+		"armaldo"
 	],
 	"dojo": [
 		"mankey",
@@ -31673,7 +43643,11 @@ var SUB_BIOMA_ESPECIES = {
 		"hitmonlee",
 		"hitmonchan",
 		"tyrogue",
-		"hitmontop"
+		"hitmontop",
+		"makuhita",
+		"hariyama",
+		"meditite",
+		"medicham"
 	],
 	"factory": [
 		"machop",
@@ -31686,7 +43660,10 @@ var SUB_BIOMA_ESPECIES = {
 		"electabuzz",
 		"magmar",
 		"elekid",
-		"magby"
+		"magby",
+		"beldum",
+		"metang",
+		"metagross"
 	],
 	"fairy-cave": [
 		"clefairy",
@@ -31698,7 +43675,12 @@ var SUB_BIOMA_ESPECIES = {
 		"togepi",
 		"togetic",
 		"marill",
-		"azumarill"
+		"azumarill",
+		"ralts",
+		"kirlia",
+		"gardevoir",
+		"azurill",
+		"mawile"
 	],
 	"forest": [
 		"caterpie",
@@ -31727,7 +43709,22 @@ var SUB_BIOMA_ESPECIES = {
 		"heracross",
 		"teddiursa",
 		"ursaring",
-		"stantler"
+		"stantler",
+		"treecko",
+		"grovyle",
+		"sceptile",
+		"wurmple",
+		"silcoon",
+		"beautifly",
+		"cascoon",
+		"dustox",
+		"seedot",
+		"nuzleaf",
+		"shiftry",
+		"shroomish",
+		"breloom",
+		"roselia",
+		"tropius"
 	],
 	"grass": [
 		"ivysaur",
@@ -31741,7 +43738,17 @@ var SUB_BIOMA_ESPECIES = {
 		"jumpluff",
 		"sunkern",
 		"sunflora",
-		"miltank"
+		"miltank",
+		"wurmple",
+		"silcoon",
+		"beautifly",
+		"cascoon",
+		"dustox",
+		"seedot",
+		"nuzleaf",
+		"shiftry",
+		"shroomish",
+		"breloom"
 	],
 	"graveyard": [
 		"gastly",
@@ -31749,7 +43756,11 @@ var SUB_BIOMA_ESPECIES = {
 		"gengar",
 		"cubone",
 		"marowak",
-		"misdreavus"
+		"misdreavus",
+		"shuppet",
+		"banette",
+		"duskull",
+		"dusclops"
 	],
 	"ice-cave": [
 		"seel",
@@ -31761,7 +43772,12 @@ var SUB_BIOMA_ESPECIES = {
 		"swinub",
 		"piloswine",
 		"delibird",
-		"smoochum"
+		"smoochum",
+		"snorunt",
+		"glalie",
+		"spheal",
+		"sealeo",
+		"walrein"
 	],
 	"jungle": [
 		"exeggcute",
@@ -31773,7 +43789,14 @@ var SUB_BIOMA_ESPECIES = {
 		"ariados",
 		"aipom",
 		"yanma",
-		"scizor"
+		"scizor",
+		"shroomish",
+		"breloom",
+		"slakoth",
+		"vigoroth",
+		"slaking",
+		"seviper",
+		"tropius"
 	],
 	"laboratory": [
 		"magnemite",
@@ -31800,7 +43823,13 @@ var SUB_BIOMA_ESPECIES = {
 		"azumarill",
 		"wooper",
 		"quagsire",
-		"slowking"
+		"slowking",
+		"lotad",
+		"lombre",
+		"ludicolo",
+		"surskit",
+		"masquerain",
+		"azurill"
 	],
 	"meadow": [
 		"jigglypuff",
@@ -31816,7 +43845,16 @@ var SUB_BIOMA_ESPECIES = {
 		"ampharos",
 		"snubbull",
 		"granbull",
-		"miltank"
+		"miltank",
+		"ralts",
+		"kirlia",
+		"gardevoir",
+		"skitty",
+		"delcatty",
+		"volbeat",
+		"illumise",
+		"roselia",
+		"spinda"
 	],
 	"metropolis": [
 		"rattata",
@@ -31827,7 +43865,10 @@ var SUB_BIOMA_ESPECIES = {
 		"pichu",
 		"houndour",
 		"houndoom",
-		"smeargle"
+		"smeargle",
+		"zigzagoon",
+		"linoone",
+		"castform"
 	],
 	"mountain": [
 		"pidgey",
@@ -31851,7 +43892,19 @@ var SUB_BIOMA_ESPECIES = {
 		"skarmory",
 		"larvitar",
 		"pupitar",
-		"tyranitar"
+		"tyranitar",
+		"torchic",
+		"combusken",
+		"blaziken",
+		"taillow",
+		"swellow",
+		"aron",
+		"lairon",
+		"aggron",
+		"spoink",
+		"grumpig",
+		"swablu",
+		"altaria"
 	],
 	"plains": [
 		"pidgey",
@@ -31880,7 +43933,11 @@ var SUB_BIOMA_ESPECIES = {
 		"furret",
 		"crobat",
 		"pichu",
-		"dunsparce"
+		"dunsparce",
+		"poochyena",
+		"mightyena",
+		"zigzagoon",
+		"linoone"
 	],
 	"power-plant": [
 		"pikachu",
@@ -31895,7 +43952,11 @@ var SUB_BIOMA_ESPECIES = {
 		"mareep",
 		"flaaffy",
 		"ampharos",
-		"elekid"
+		"elekid",
+		"electrike",
+		"manectric",
+		"plusle",
+		"minun"
 	],
 	"ruins": [
 		"abra",
@@ -31907,7 +43968,12 @@ var SUB_BIOMA_ESPECIES = {
 		"xatu",
 		"espeon",
 		"unown",
-		"wobbuffet"
+		"wobbuffet",
+		"spoink",
+		"grumpig",
+		"baltoy",
+		"claydol",
+		"wynaut"
 	],
 	"sea": [
 		"poliwag",
@@ -31930,7 +43996,13 @@ var SUB_BIOMA_ESPECIES = {
 		"lapras",
 		"chinchou",
 		"lanturn",
-		"kingdra"
+		"kingdra",
+		"wingull",
+		"pelipper",
+		"carvanha",
+		"sharpedo",
+		"wailmer",
+		"wailord"
 	],
 	"seabed": [
 		"tentacool",
@@ -31947,7 +44019,16 @@ var SUB_BIOMA_ESPECIES = {
 		"corsola",
 		"remoraid",
 		"octillery",
-		"mantine"
+		"mantine",
+		"wailmer",
+		"wailord",
+		"feebas",
+		"milotic",
+		"clamperl",
+		"huntail",
+		"gorebyss",
+		"relicanth",
+		"luvdisc"
 	],
 	"slum": [
 		"rattata",
@@ -31961,7 +44042,9 @@ var SUB_BIOMA_ESPECIES = {
 		"murkrow",
 		"sneasel",
 		"houndour",
-		"houndoom"
+		"houndoom",
+		"shuppet",
+		"banette"
 	],
 	"snowy-forest": [
 		"sentret",
@@ -31972,14 +44055,23 @@ var SUB_BIOMA_ESPECIES = {
 		"swinub",
 		"piloswine",
 		"delibird",
-		"stantler"
+		"stantler",
+		"snorunt",
+		"glalie"
 	],
 	"space": [
 		"clefairy",
 		"clefable",
 		"staryu",
 		"starmie",
-		"cleffa"
+		"cleffa",
+		"lunatone",
+		"solrock",
+		"baltoy",
+		"claydol",
+		"beldum",
+		"metang",
+		"metagross"
 	],
 	"swamp": [
 		"ekans",
@@ -31994,7 +44086,17 @@ var SUB_BIOMA_ESPECIES = {
 		"feraligatr",
 		"politoed",
 		"wooper",
-		"quagsire"
+		"quagsire",
+		"mudkip",
+		"marshtomp",
+		"swampert",
+		"lotad",
+		"lombre",
+		"ludicolo",
+		"gulpin",
+		"swalot",
+		"barboach",
+		"whiscash"
 	],
 	"tall-grass": [
 		"nidoran_f",
@@ -32019,7 +44121,14 @@ var SUB_BIOMA_ESPECIES = {
 		"ariados",
 		"bellossom",
 		"girafarig",
-		"scizor"
+		"scizor",
+		"nincada",
+		"ninjask",
+		"shedinja",
+		"zangoose",
+		"seviper",
+		"kecleon",
+		"tropius"
 	],
 	"temple": [
 		"gastly",
@@ -32028,7 +44137,12 @@ var SUB_BIOMA_ESPECIES = {
 		"cubone",
 		"marowak",
 		"natu",
-		"xatu"
+		"xatu",
+		"baltoy",
+		"claydol",
+		"duskull",
+		"dusclops",
+		"chimecho"
 	],
 	"town": [
 		"caterpie",
@@ -32091,7 +44205,38 @@ var SUB_BIOMA_ESPECIES = {
 		"skiploom",
 		"jumpluff",
 		"sunkern",
-		"sunflora"
+		"sunflora",
+		"poochyena",
+		"mightyena",
+		"zigzagoon",
+		"linoone",
+		"wurmple",
+		"silcoon",
+		"beautifly",
+		"cascoon",
+		"dustox",
+		"lotad",
+		"lombre",
+		"ludicolo",
+		"seedot",
+		"nuzleaf",
+		"shiftry",
+		"taillow",
+		"swellow",
+		"ralts",
+		"kirlia",
+		"gardevoir",
+		"surskit",
+		"masquerain",
+		"shroomish",
+		"breloom",
+		"nincada",
+		"ninjask",
+		"whismur",
+		"loudred",
+		"exploud",
+		"skitty",
+		"delcatty"
 	],
 	"volcano": [
 		"charmeleon",
@@ -32107,7 +44252,18 @@ var SUB_BIOMA_ESPECIES = {
 		"typhlosion",
 		"slugma",
 		"magcargo",
-		"magby"
+		"magby",
+		"poochyena",
+		"mightyena",
+		"meditite",
+		"medicham",
+		"numel",
+		"camerupt",
+		"torkoal",
+		"spoink",
+		"grumpig",
+		"swablu",
+		"altaria"
 	],
 	"wasteland": [
 		"aerodactyl",
@@ -32116,7 +44272,15 @@ var SUB_BIOMA_ESPECIES = {
 		"dragonite",
 		"larvitar",
 		"pupitar",
-		"tyranitar"
+		"tyranitar",
+		"trapinch",
+		"vibrava",
+		"flygon",
+		"swablu",
+		"altaria",
+		"bagon",
+		"shelgon",
+		"salamence"
 	]
 };
 /**
@@ -32912,9 +45076,14 @@ function nivelDeTroca(speciesId, desde) {
 		const doAlvo = indiceDeFaixa(zonaMinimaDaEspecie(alvo));
 		const indice = Math.max(doAlvo, daOrigem + 1);
 		if (indice >= FAIXAS$1.length) return null;
-		return FAIXAS$1[indice].niveis[0];
+		const pisoDaFaixa = FAIXAS$1[indice].niveis[0];
+		const alvoDef = SPECIES[alvo];
+		const gatilhoDoAlvo = alvoDef.isSpecialEvolution ? null : alvoDef.evolvesAtLevel;
+		if (gatilhoDoAlvo != null && gatilhoDoAlvo <= pisoDaFaixa) return Math.min(pisoDaFaixa, Math.max(2, Math.ceil(gatilhoDoAlvo / 2)));
+		return pisoDaFaixa;
 	}
-	return especie.evolvesAtLevel ?? null;
+	const porNivel = especie.evolvesAtLevel;
+	return porNivel == null ? null : Math.max(porNivel, desde + 1);
 }
 /** Raizes das linhas evolutivas presentes em `especies`, sem duplicar. */
 function raizesDe(especies) {
@@ -34090,7 +46259,142 @@ var FOOT_OFFSET_FRACTION = {
 	hitmontop: .089,
 	clefairy: .125,
 	togetic: .104,
-	clefable: .104
+	clefable: .104,
+	treecko: .125,
+	grovyle: .125,
+	sceptile: .125,
+	torchic: .125,
+	combusken: .083,
+	blaziken: .089,
+	mudkip: .125,
+	marshtomp: .156,
+	swampert: .063,
+	poochyena: .125,
+	mightyena: .125,
+	zigzagoon: .2,
+	linoone: .275,
+	wurmple: .25,
+	silcoon: .075,
+	beautifly: .016,
+	cascoon: .219,
+	dustox: .018,
+	lotad: .208,
+	lombre: .104,
+	ludicolo: .104,
+	seedot: .156,
+	nuzleaf: .104,
+	shiftry: .107,
+	taillow: .188,
+	swellow: .094,
+	wingull: 0,
+	pelipper: .025,
+	ralts: .125,
+	kirlia: .1,
+	gardevoir: .125,
+	surskit: .219,
+	masquerain: 0,
+	shroomish: .208,
+	breloom: .083,
+	slakoth: .281,
+	vigoroth: .107,
+	slaking: .104,
+	nincada: .333,
+	ninjask: .042,
+	shedinja: -.018,
+	whismur: .089,
+	loudred: .089,
+	exploud: .15,
+	makuhita: .104,
+	hariyama: .143,
+	azurill: .156,
+	nosepass: .089,
+	skitty: .125,
+	delcatty: .125,
+	sableye: .125,
+	mawile: .104,
+	aron: .188,
+	lairon: .175,
+	aggron: .125,
+	meditite: .156,
+	medicham: .071,
+	electrike: .15,
+	manectric: .125,
+	plusle: .125,
+	minun: .125,
+	volbeat: .125,
+	illumise: .1,
+	roselia: .156,
+	gulpin: .219,
+	swalot: .15,
+	carvanha: .063,
+	sharpedo: .063,
+	wailmer: .075,
+	wailord: .087,
+	numel: .175,
+	camerupt: .146,
+	torkoal: .15,
+	spoink: .071,
+	grumpig: .083,
+	spinda: .104,
+	trapinch: .156,
+	vibrava: .146,
+	flygon: 0,
+	cacnea: .125,
+	cacturne: .078,
+	swablu: .025,
+	altaria: .063,
+	zangoose: .104,
+	seviper: .146,
+	lunatone: 0,
+	solrock: .042,
+	barboach: .281,
+	whiscash: .083,
+	corphish: .188,
+	crawdaunt: .175,
+	baltoy: .075,
+	claydol: .1,
+	lileep: .188,
+	cradily: .104,
+	anorith: .25,
+	armaldo: .104,
+	feebas: .075,
+	milotic: .1,
+	castform: .025,
+	kecleon: .104,
+	shuppet: .021,
+	banette: .018,
+	duskull: .036,
+	dusclops: .104,
+	tropius: .083,
+	chimecho: -.021,
+	absol: .146,
+	wynaut: .1,
+	snorunt: .125,
+	glalie: .031,
+	spheal: .156,
+	sealeo: .125,
+	walrein: .167,
+	clamperl: .188,
+	huntail: .107,
+	gorebyss: .014,
+	relicanth: .054,
+	luvdisc: .025,
+	bagon: .1,
+	shelgon: .125,
+	salamence: .143,
+	beldum: .025,
+	metang: .104,
+	metagross: .175,
+	regirock: .107,
+	regice: .104,
+	registeel: .125,
+	latias: .125,
+	latios: .05,
+	kyogre: .139,
+	groudon: .1,
+	rayquaza: .058,
+	jirachi: .021,
+	deoxys: .047
 };
 var DEFAULT_FRACTION = .15;
 function footOffsetFraction(speciesId) {
@@ -34934,6 +47238,7 @@ function multiplicadorDeDanoRecebidoPorTrait(trait, ability, efetividade) {
 	if (trait === "thick_fat" && TIPOS_DO_THICK_FAT.includes(ability.type)) m *= .5;
 	if (trait === "dry_skin" && ability.type === "FIRE") m *= 1.25;
 	if ((trait === "filter" || trait === "solid_rock") && efetividade > 1) m *= .75;
+	if (trait === "wonder_guard" && efetividade > 0 && efetividade < 2) m = 0;
 	return m;
 }
 /** Tinted Lens: golpe pouco efetivo do PORTADOR causa o dobro. Habilidade de quem ATACA. */
@@ -34977,6 +47282,8 @@ var PROTECAO_DE_ESTAGIO = {
 };
 /** Contrary: toda mudanca de estagio no portador troca de sinal. */
 var TRAIT_CONTRARY = "contrary";
+/** Simple: toda mudanca de estagio no portador conta em dobro (PH-332). */
+var TRAIT_SIMPLE = "simple";
 /** Reage a ter um atributo REBAIXADO pelo oponente: sobe outro. */
 var REACAO_A_QUEDA_DE_ESTAGIO = {
 	defiant: {
@@ -35160,10 +47467,12 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 	const vemDoOponente = ability.statTarget !== "self";
 	const traitDoDestino = traitDoPoke(destino.poke);
 	const inverte = traitDoDestino === TRAIT_CONTRARY;
+	const dobra = traitDoDestino === TRAIT_SIMPLE;
 	const aplicadas = [];
 	let sofreuQuedaDoOponente = false;
 	for (const mudanca of ability.statChanges) {
-		const delta = inverte ? -mudanca.estagios : mudanca.estagios;
+		const invertido = inverte ? -mudanca.estagios : mudanca.estagios;
+		const delta = dobra ? invertido * 2 : invertido;
 		if (bloqueadoPorMist && delta < 0) continue;
 		const protegido = traitDoDestino ? PROTECAO_DE_ESTAGIO[traitDoDestino] : void 0;
 		const protegeEsteStat = traitDoDestino != null && traitDoDestino in PROTECAO_DE_ESTAGIO && (protegido === null || protegido === mudanca.stat);
@@ -35314,6 +47623,7 @@ function limparEstadoVolatil(entity) {
 	entity.forcedAbilityId = null;
 	entity.forcedAbilityUntil = 0;
 	entity.tormentedUntil = 0;
+	entity.truantDeFolga = void 0;
 	entity.estagioDeCritico = void 0;
 	entity.proximoGolpeCriticoGarantido = void 0;
 	entity.seeded = void 0;
@@ -51598,6 +63908,9229 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameHeight": 32,
 			"durations": [30, 35]
 		}
+	},
+	"treecko": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				4,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				10,
+				6,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"grovyle": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [18, 12]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				6,
+				6,
+				6,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"sceptile": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [40, 30]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				8,
+				10,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"torchic": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				30,
+				3,
+				4,
+				3,
+				3
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"combusken": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				4,
+				6,
+				6,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"blaziken": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [30, 30]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"mudkip": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				38,
+				2,
+				2,
+				5,
+				3,
+				3,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				6,
+				4,
+				6,
+				6,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				3,
+				4,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"marshtomp": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				36,
+				16,
+				36,
+				16
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 16,
+			"durations": [30, 35]
+		}
+	},
+	"swampert": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				40,
+				1,
+				2,
+				4,
+				2,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"poochyena": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				8,
+				5,
+				8,
+				5,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"mightyena": {
+		"Idle": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				8,
+				5,
+				8,
+				5,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"zigzagoon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				2,
+				4,
+				4,
+				4,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				4,
+				4,
+				2,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"linoone": {
+		"Idle": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"wurmple": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				30,
+				12,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				2,
+				4,
+				6,
+				4,
+				2
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"silcoon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				120
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				120
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"beautifly": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"cascoon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				120
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				120
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"dustox": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"lotad": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				24,
+				18,
+				24,
+				18
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				6,
+				1,
+				2,
+				3,
+				3,
+				3,
+				3,
+				3,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 16,
+			"durations": [30, 35]
+		}
+	},
+	"lombre": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				1,
+				2,
+				3,
+				4,
+				2,
+				1,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				10,
+				6,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"ludicolo": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [40, 20]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"seedot": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [36, 18]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				4,
+				6,
+				4,
+				8,
+				4,
+				6,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"nuzleaf": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				10,
+				6,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"shiftry": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				24,
+				4,
+				4,
+				4,
+				24,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				4,
+				4,
+				4,
+				8,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"taillow": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				30,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 16,
+			"durations": [30, 35]
+		}
+	},
+	"swellow": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				40,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				10,
+				6,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"wingull": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				8,
+				6,
+				8,
+				6,
+				8,
+				6,
+				8,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"pelipper": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [10, 10]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				10,
+				4,
+				8,
+				10,
+				4,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"ralts": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [40, 25]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				10,
+				8,
+				10,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"kirlia": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				60,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				24
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				3,
+				3,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"gardevoir": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				12,
+				6,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"surskit": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				16,
+				8,
+				16
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"masquerain": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"shroomish": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				40,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"breloom": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				4,
+				4,
+				4,
+				4,
+				4,
+				8,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"slakoth": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [60, 8]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"vigoroth": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				2,
+				2,
+				6,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"slaking": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				50,
+				6,
+				2,
+				6,
+				4,
+				2,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				16,
+				10,
+				16
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"nincada": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				40,
+				4,
+				2,
+				4,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"ninjask": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				9
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				26,
+				8,
+				8,
+				26
+			]
+		}
+	},
+	"shedinja": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				4,
+				4,
+				4,
+				4,
+				8,
+				8,
+				4,
+				4,
+				4,
+				4,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				12,
+				12,
+				16,
+				12,
+				12,
+				16
+			]
+		}
+	},
+	"whismur": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				1,
+				1,
+				4,
+				2,
+				1
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				8,
+				6,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				1,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"loudred": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				1,
+				1,
+				4,
+				4,
+				2,
+				1
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				10,
+				6,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				1,
+				1,
+				4,
+				3,
+				2,
+				1
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"exploud": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				10,
+				8,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				4
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"makuhita": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				20,
+				4,
+				4,
+				4,
+				2,
+				2,
+				2,
+				2,
+				20,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"hariyama": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				26,
+				2,
+				4,
+				4,
+				2,
+				1,
+				26,
+				1,
+				4,
+				4,
+				2,
+				1
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"azurill": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				16,
+				10,
+				16,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"nosepass": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				30,
+				6,
+				4,
+				4,
+				4,
+				4,
+				4,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"skitty": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				8,
+				6,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				5,
+				6,
+				6,
+				6,
+				5,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"delcatty": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				60,
+				10,
+				5,
+				5,
+				5,
+				5,
+				5,
+				5,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"sableye": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [40, 12]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				8,
+				6,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"mawile": {
+		"Idle": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				2,
+				2,
+				2,
+				4,
+				6,
+				4,
+				6,
+				4,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				1,
+				1,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				1,
+				1
+			]
+		},
+		"Charge": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"aron": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				34,
+				12,
+				8,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				6,
+				8,
+				6,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"lairon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				16,
+				8,
+				16
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"aggron": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				6,
+				2,
+				6,
+				2,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"meditite": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				16,
+				8,
+				16
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				4,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"medicham": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				2,
+				2,
+				3,
+				4,
+				3,
+				2,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				10,
+				6,
+				6,
+				6,
+				10,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"electrike": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 24,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"manectric": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"plusle": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				30,
+				10,
+				6,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				4,
+				8,
+				4,
+				6,
+				4,
+				8,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				1,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				1,
+				1
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"minun": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				30,
+				10,
+				6,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				4,
+				8,
+				4,
+				6,
+				4,
+				8,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				1,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				1,
+				1
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"volbeat": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				30,
+				8,
+				4,
+				8,
+				4,
+				8,
+				4,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"illumise": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 20]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"roselia": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				40
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				8,
+				1,
+				1,
+				4,
+				3,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"gulpin": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [20, 30]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				8,
+				10,
+				8,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				5,
+				3,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"swalot": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [16, 16]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				10,
+				8,
+				10,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				5,
+				3,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"carvanha": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				26,
+				8,
+				36
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				26,
+				8,
+				8,
+				26
+			]
+		}
+	},
+	"sharpedo": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				16,
+				16,
+				16,
+				16
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				10,
+				8,
+				8,
+				8,
+				10,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				26,
+				8,
+				8,
+				26
+			]
+		}
+	},
+	"wailmer": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				16,
+				10,
+				16,
+				16,
+				10,
+				10,
+				16
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				6,
+				6,
+				8,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"wailord": {
+		"Idle": {
+			"frameWidth": 72,
+			"frameHeight": 104,
+			"durations": [
+				24,
+				12,
+				12,
+				24,
+				12,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 72,
+			"frameHeight": 104,
+			"durations": [
+				10,
+				8,
+				6,
+				6,
+				8,
+				8,
+				10,
+				8,
+				6,
+				6,
+				6,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 80,
+			"frameHeight": 112,
+			"durations": [
+				2,
+				3,
+				4,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 72,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"numel": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				8,
+				12,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"camerupt": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				20,
+				8,
+				20
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"torkoal": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				20,
+				20,
+				20
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 80,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 48,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"spoink": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				30,
+				4,
+				4,
+				8,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				6,
+				4,
+				6,
+				4,
+				4,
+				4,
+				6,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [40, 30]
+		}
+	},
+	"grumpig": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				12,
+				8,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"spinda": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				8,
+				14,
+				4,
+				5,
+				6,
+				8,
+				14,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				10,
+				12,
+				14,
+				12,
+				10,
+				10,
+				12,
+				14,
+				12,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"trapinch": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				40,
+				8,
+				10,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				2,
+				1,
+				2,
+				1,
+				2,
+				1,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 24,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"vibrava": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				6,
+				6,
+				6,
+				4,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"flygon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 72,
+			"durations": [
+				8,
+				9,
+				8,
+				8,
+				11,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"cacnea": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				40,
+				10,
+				16,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"cacturne": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				40,
+				2,
+				4,
+				4,
+				4,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"swablu": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				6,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				6,
+				6,
+				8,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"altaria": {
+		"Idle": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				60,
+				6,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"zangoose": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				30,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"seviper": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				14,
+				18,
+				14,
+				18
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"lunatone": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"solrock": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				5,
+				1,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"barboach": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				12,
+				10,
+				10,
+				12,
+				10,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				6,
+				6,
+				8,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"whiscash": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				6,
+				6,
+				6,
+				8,
+				8,
+				6,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				20,
+				12,
+				12,
+				20,
+				12,
+				12
+			]
+		}
+	},
+	"corphish": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [24, 12]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"crawdaunt": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				24,
+				12,
+				24,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"baltoy": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				6,
+				6,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				16,
+				8,
+				8,
+				8,
+				8,
+				16,
+				8,
+				8
+			]
+		}
+	},
+	"claydol": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [8, 8]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				4,
+				6,
+				1,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"lileep": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"cradily": {
+		"Idle": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"anorith": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"armaldo": {
+		"Idle": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"feebas": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				12,
+				14,
+				12,
+				14
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10,
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"milotic": {
+		"Idle": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				40,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 88,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [30, 35]
+		}
+	},
+	"castform": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				6,
+				6,
+				6,
+				6,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [35, 30]
+		}
+	},
+	"kecleon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				2,
+				6,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"shuppet": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				10,
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				10,
+				10,
+				18,
+				10,
+				10,
+				18
+			]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"banette": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				1,
+				2,
+				4,
+				4,
+				4,
+				4,
+				2,
+				1
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"duskull": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				24,
+				8,
+				8,
+				24,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				16,
+				8,
+				8,
+				8,
+				16,
+				8
+			]
+		}
+	},
+	"dusclops": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				8,
+				12,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				4,
+				4,
+				2,
+				4,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"tropius": {
+		"Idle": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				30,
+				3,
+				5,
+				4,
+				5,
+				4,
+				5,
+				4,
+				5,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				10,
+				14,
+				10,
+				14
+			]
+		},
+		"Shoot": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"chimecho": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				18,
+				8,
+				18,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				6,
+				6,
+				4,
+				4,
+				4,
+				4,
+				6,
+				6,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				28,
+				10,
+				10,
+				28,
+				10,
+				10
+			]
+		}
+	},
+	"absol": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [30, 30]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"wynaut": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				2,
+				10,
+				2,
+				8,
+				2,
+				10,
+				2
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				1,
+				6,
+				2,
+				1,
+				4,
+				1,
+				1,
+				6,
+				2,
+				1,
+				4
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"snorunt": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				6,
+				6,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"glalie": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [30, 35]
+		}
+	},
+	"spheal": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				16,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"sealeo": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				14,
+				18,
+				14
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				6,
+				8,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"walrein": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				2,
+				8,
+				8,
+				8,
+				8,
+				8,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"clamperl": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				40,
+				6,
+				8,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				10,
+				10,
+				6,
+				6,
+				6,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				8,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"huntail": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"gorebyss": {
+		"Idle": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				16,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				14,
+				6,
+				8,
+				8,
+				8,
+				8,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"relicanth": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				30,
+				6,
+				4,
+				6,
+				4,
+				14,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"luvdisc": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				34,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"bagon": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				40,
+				10,
+				14,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"shelgon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				18,
+				20,
+				18,
+				20
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"salamence": {
+		"Idle": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				1,
+				2,
+				2,
+				4,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"beldum": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"metang": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				12,
+				12,
+				12,
+				12,
+				12,
+				12,
+				12,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"metagross": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [40, 20]
+		},
+		"Walk": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				14,
+				8,
+				14
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 48,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"regirock": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				1,
+				4,
+				2,
+				3,
+				4,
+				3
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				18,
+				8,
+				18
+			]
+		},
+		"Shoot": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				8,
+				6,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"regice": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				8,
+				1,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"registeel": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [40, 40]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				4,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"latias": {
+		"Idle": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"latios": {
+		"Idle": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Shoot": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 48,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"kyogre": {
+		"Idle": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				10,
+				14,
+				14,
+				14,
+				14,
+				10,
+				14,
+				14,
+				14,
+				14
+			]
+		},
+		"Walk": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				16,
+				12,
+				16,
+				16,
+				12,
+				16
+			]
+		}
+	},
+	"groudon": {
+		"Idle": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				10,
+				12,
+				10,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [30, 35]
+		}
+	},
+	"rayquaza": {
+		"Idle": {
+			"frameWidth": 80,
+			"frameHeight": 120,
+			"durations": [
+				14,
+				10,
+				14,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 80,
+			"frameHeight": 128,
+			"durations": [
+				8,
+				8,
+				6,
+				4,
+				4,
+				4,
+				8,
+				8,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 112,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 80,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 72,
+			"frameHeight": 96,
+			"durations": [
+				10,
+				10,
+				10,
+				30,
+				10,
+				10,
+				10,
+				30
+			]
+		}
+	},
+	"jirachi": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				12,
+				8,
+				12,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				1,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				24,
+				8,
+				8,
+				8,
+				24
+			]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"deoxys": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				12,
+				12,
+				12,
+				12,
+				12,
+				12,
+				12,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				8,
+				1,
+				1,
+				2,
+				3,
+				2,
+				2,
+				4,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [30, 35]
+		}
 	}
 };
 //#endregion
@@ -52205,11 +73738,12 @@ function golpeAjustadoPeloClima(ability, clima) {
 		power: regra.dobra ? ability.power * 2 : ability.power
 	};
 }
-function multiplicadorDeAtaquePorTrait(trait, isPhysical, temStatus) {
+function multiplicadorDeAtaquePorTrait(trait, isPhysical, temStatus, statusDeVeneno = false) {
 	if (!isPhysical) return 1;
 	if (trait === "huge_power" || trait === "pure_power") return 2;
 	if (trait === "hustle") return 1.5;
 	if (trait === "guts" && temStatus) return 1.5;
+	if (trait === "toxic_boost" && statusDeVeneno) return 1.5;
 	return 1;
 }
 function multiplicadorDeDefesaPorTrait(trait, isPhysical, temStatus) {
@@ -52413,7 +73947,11 @@ function punishmentPower(defenderEntity) {
 	return Math.min(200, 60 + 20 * positivos);
 }
 function pesoEmKg(poke) {
-	return SPECIES[poke.speciesId].pesoHg / 10;
+	const bruto = SPECIES[poke.speciesId].pesoHg / 10;
+	const trait = traitDoPoke(poke);
+	if (trait === "heavy_metal") return bruto * 2;
+	if (trait === "light_metal") return bruto / 2;
+	return bruto;
 }
 function lowKickPower(defenderPoke) {
 	const kg = pesoEmKg(defenderPoke);
@@ -52579,7 +74117,7 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	if (special && special.mode === "fixed") return special.amount;
 	const isPhysical = resolveAbilityCategory(ability, attackerPoke) === "physical";
 	const { atacante: attackerTraitEstimate, defensor: defenderTraitEstimate } = traitsDoConfronto(attackerEntity, defenderEntity);
-	const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status));
+	const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status), attackerPoke.status?.tipo === "poison");
 	const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeDefesaPorTrait(defenderTraitEstimate, isPhysical, Boolean(defenderPoke.status));
 	const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTraitEstimate, ability, null) * multiplicadorCondicional(ability, defenderEntity);
 	if (power === 0) return 0;
@@ -52780,7 +74318,7 @@ function computeDamage(rng, attackerEntity, defenderEntity, abilityBase, pessimi
 		const isPhysical = resolveAbilityCategory(ability, attackerPoke) === "physical";
 		const estagiosDoDefensorValem = attackerTrait !== TRAIT_UNAWARE;
 		const estagiosDoAtacanteValem = defenderTrait !== TRAIT_UNAWARE;
-		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * (estagiosDoAtacanteValem ? multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp") : 1) * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status)) * (attackerTrait === "solar_power" && !isPhysical && climaAtivo === "sol" ? SOLAR_POWER_BONUS : 1);
+		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * (estagiosDoAtacanteValem ? multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp") : 1) * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status), attackerPoke.status?.tipo === "poison") * (attackerTrait === "solar_power" && !isPhysical && climaAtivo === "sol" ? SOLAR_POWER_BONUS : 1);
 		const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * (estagiosDoDefensorValem ? multiplicadorDeStat(defenderEntity.estagios, isPhysical ? "def" : "defEsp") : 1) * multiplicadorDeDefesaPorTrait(defenderTrait, isPhysical, Boolean(defenderPoke.status));
 		const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo) * multiplicadorCondicional(ability, defenderEntity);
 		dmg = power === 0 ? 0 : formulaEngine$4.eval("DAMAGE_BASE", {
@@ -53094,9 +74632,54 @@ function statusImpedeAcao(world, entity, silent) {
 	if (!silent) anunciarStatus(world, entity, r.motivo);
 	return true;
 }
+/**
+* TRUANT (PH-332): age em turnos alternados. Devolve `true` no turno de folga.
+*
+* ---------------------------------------------------------------------------
+* POR QUE ELA NAO PODIA FICAR SEM EFEITO
+* ---------------------------------------------------------------------------
+* Truant e a UNICA habilidade do elenco cujo efeito e uma DESVANTAGEM que paga
+* o preco de atributos altos. A dona dela e Slaking, e Slaking tem o maior BST
+* do jogo (670, acima de Tyranitar e Dragonite, 600). Deixa-la sem efeito nao
+* seria "uma habilidade a menos": seria entregar o POKE mais forte do jogo com o
+* contrapeso dele removido — e como selvagem, num encontro de rotina.
+*
+* O CORTE GASTA O TURNO. `startGlobalCooldown(MIN_ACTION_GAP)` e o mesmo caminho
+* que sono e paralisia usam pra "perdeu a vez" — sem ele o POKE tentaria agir de
+* novo no tick seguinte e a folga duraria um frame, nao um turno.
+*
+* APROXIMACAO ASSUMIDA: a folga e marcada AQUI, no gate, e nao no ponto em que o
+* golpe de fato sai. Se `pickAbility` devolvesse `null` logo depois (POKE sem
+* nenhum golpe utilizavel), a tentativa contaria como turno gasto. E irrelevante
+* na pratica — todo POKE tem Ataque Basico, que nunca fica indisponivel — e a
+* alternativa seria duplicar a marcacao nos dois executores de acao, que e como
+* uma delas fica pra tras na proxima mudanca.
+*/
+function truantImpedeAcao(world, entity, silent) {
+	if (traitDoPoke(entity.poke) !== "truant") return false;
+	if (!entity.truantDeFolga) {
+		entity.truantDeFolga = true;
+		return false;
+	}
+	entity.truantDeFolga = false;
+	startGlobalCooldown(entity, MIN_ACTION_GAP);
+	if (!silent) world.effects.push(createWorldEffect(world.counters, {
+		type: "abilityName",
+		x: entity.x,
+		y: entity.y,
+		targetX: entity.x,
+		targetY: entity.y + getGroundOffset(entity) + 14,
+		text: "Truant!",
+		color: "#a3a3a3",
+		duration: .9,
+		owner: entity
+	}));
+	return true;
+}
 function executePlayerAction(world, player, engagedEnemies, silent) {
 	if (!canAct(player)) return;
 	if (statusImpedeAcao(world, player, silent)) return;
+	if (truantImpedeAcao(world, player, silent)) return;
 	const primaryTarget = engagedEnemies[0];
 	const allEnemies = nearbyAliveEnemies(world);
 	const ability = pickAbility(world, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
@@ -53125,6 +74708,7 @@ function executeEnemyAction(world, enemy, player, silent) {
 	if (world.mapDef?.passiveEnemies) return;
 	if (!canAct(enemy)) return;
 	if (statusImpedeAcao(world, enemy, silent)) return;
+	if (truantImpedeAcao(world, enemy, silent)) return;
 	const ability = pickAbility(world, enemy, player, () => 1);
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id;

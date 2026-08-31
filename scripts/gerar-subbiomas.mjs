@@ -41,9 +41,21 @@ const SAIDA = path.join(RAIZ, 'src/data/generated/subBiomas.generated.ts')
 // zero especie do nosso roster nos dois.
 const DESCARTADOS = new Set(['island', 'end'])
 
+// TERCEIRA copia da lista de lendarios (as outras sao
+// `src/data/legendaries.ts#LEGENDARY_SPECIES_IDS` e
+// `scripts/sync-planilha.js#LEGENDARY_SHEET_KEYS`). As tres sao comparadas por
+// `src/data/lendariosEmDuasListas.test.ts`.
+//
+// PH-332: sem os 10 de Hoenn aqui, este script ESTOURA — e o erro e ate
+// legivel ("2 especie(s) sem sub-bioma nenhum: jirachi, deoxys"), porque o
+// PokeRogue nao da bioma pra mitico. O que ele NAO diria, se o dado do
+// PokeRogue por acaso cobrisse os 10, e que oito lendarios acabaram de ganhar
+// sub-bioma de hunt comum.
 const LENDARIOS = new Set([
   'articuno', 'zapdos', 'moltres', 'raikou', 'entei', 'suicune',
   'lugia', 'ho_oh', 'celebi', 'mewtwo', 'mew',
+  'regirock', 'regice', 'registeel', 'latias', 'latios',
+  'kyogre', 'groudon', 'rayquaza', 'jirachi', 'deoxys',
 ])
 const INICIAIS_BASE = new Set(['charmander', 'squirtle', 'bulbasaur'])
 const NAO_SELVAGENS = new Set(['porygon', 'porygon2', 'eevee'])

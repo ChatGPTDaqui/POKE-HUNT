@@ -148,6 +148,17 @@ export interface BaseEntity {
   // zerada em `limparEstadoVolatil` no fim de luta (nao deve sobreviver pra
   // proxima).
   proximoGolpeCriticoGarantido?: boolean
+  /**
+   * TRUANT (PH-332): este POKE JA agiu, entao o proximo turno e de folga.
+   *
+   * Volatil pelo mesmo motivo de `estagios` — nos jogos o contador de Truant
+   * zera quando o POKE sai de campo, e a entidade e o que e recriado a cada
+   * troca de cena. Zerado em `limparEstadoVolatil`.
+   *
+   * Ausente/false = pode agir. So Slaking tem a habilidade no elenco, entao o
+   * campo e `undefined` em praticamente toda entidade do jogo.
+   */
+  truantDeFolga?: boolean
   // Segundos restantes de imunidade a novo status, contados depois que um
   // status sai (cura ou fim natural). Desvio aprovado, ver
   // scripts/usum/status.json#reaplicacao.

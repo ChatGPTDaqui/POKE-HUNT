@@ -1,5 +1,17 @@
 // PH-146 — o elenco do jogo não muda por acidente.
 //
+// ATUALIZADO NA PH-332, e a atualização é o ponto deste arquivo. A geração III
+// FOI ligada: o elenco passou de 245 para 380 espécies e o recorte de 251 para
+// 386. Os quatro números abaixo mudaram numa linha cada, num diff que alguém
+// leu — que é exatamente o que a PH-146 pediu. Se eles tivessem mudado sozinhos,
+// este arquivo teria reprovado, que é o serviço dele.
+//
+// O que NÃO mudou: a trava de `--dex-max` sem `--saida` continua sendo erro (o
+// parâmetro segue apontado para o catálogo de produção), e nada em `src/` importa
+// `catalog-gen3.json` — o arquivo de preparação continua sendo de preparação.
+// Aquele catálogo agora é redundante com `catalog.json` (os dois têm 386
+// espécies) e fica como registro da leva que o produziu.
+//
 // `DEX_MAX` decide o elenco inteiro: quais espécies existem, quais hunts são
 // montadas, o que entra no Modo Pesadelo, o que a Pokédex lista. Enquanto era
 // uma constante, mudá-lo exigia editar o arquivo. Virou parâmetro para a geração
@@ -33,17 +45,17 @@ const fonte = Object.values(FETCH)[0]
  * atualizá-lo é uma linha — o ponto é que a linha seja ESCRITA, num diff que
  * alguém lê, e não apareça sozinha.
  */
-const ELENCO_ESPERADO = 245
+const ELENCO_ESPERADO = 380
 
-/** Kanto + Johto. A geração III fica fora até uma issue própria ligá-la. */
-const DEX_MAX_ESPERADO = 251
+/** Kanto + Johto + Hoenn, desde a PH-332. */
+const DEX_MAX_ESPERADO = 386
 
 describe('o recorte da Pokédex (PH-146)', () => {
   it(`o jogo tem exatamente ${ELENCO_ESPERADO} espécies`, () => {
     expect(Object.keys(SPECIES_DATA)).toHaveLength(ELENCO_ESPERADO)
   })
 
-  it('nenhuma espécie do jogo passa do dex 251', () => {
+  it(`nenhuma espécie do jogo passa do dex ${DEX_MAX_ESPERADO}`, () => {
     // O número de espécies pode bater por coincidência (uma entra, outra sai).
     // O recorte é a propriedade que interessa.
     const foraDoRecorte: string[] = []

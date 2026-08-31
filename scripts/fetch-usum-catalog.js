@@ -33,6 +33,7 @@
 const fs = require('fs');
 const path = require('path');
 const api = require('./lib/pokeapi.js');
+const { chavesComTier } = require('./lib/spawn-tiers.js');
 
 const OUT_DIR = path.join(__dirname, 'usum');
 
@@ -52,7 +53,7 @@ const OUT_DIR = path.join(__dirname, 'usum');
 // custar caro.
 //
 // `src/data/recorteDaPokedex.test.ts` guarda o padrao.
-const DEX_MAX_PADRAO = 251; // Kanto + Johto: o elenco que o jogo tem hoje.
+const DEX_MAX_PADRAO = 386; // Kanto + Johto + Hoenn: o elenco do jogo desde a PH-332.
 
 function argumento(nome) {
   const a = process.argv.find((x) => x.startsWith(`--${nome}=`));
@@ -629,9 +630,12 @@ async function main() {
   console.log(`  habilidades: ${habilidades.length}`);
 
   // --- Conferencias que devem ESTOURAR, nunca avisar ----------------------
-  const chavesConhecidas = new Set(Object.keys(JSON.parse(
-    fs.readFileSync(path.join(__dirname, 'spawn-tiers.json'), 'utf8')
-  ).especies));
+  // PH-332: as chaves das DUAS faixas (dex 1-251 em `spawn-tiers.json`, 252-386
+  // em `spawn-tiers-gen3.json`). Ler so o arquivo base aqui faria a conferencia
+  // de IDENTIDADE acusar as 135 de Hoenn como "chave divergida" — que e um erro
+  // de outra natureza (chave de especie e save/arte/tabelas) e mandaria corrigir
+  // a coisa errada.
+  const chavesConhecidas = chavesComTier();
   const semTier = especies.filter((e) => !chavesConhecidas.has(e.chave));
   if (semTier.length && DEX_MAX === DEX_MAX_PADRAO) {
     throw new Error(

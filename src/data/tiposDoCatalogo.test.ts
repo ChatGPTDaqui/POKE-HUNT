@@ -46,7 +46,11 @@ describe('a bancada le alguma coisa', () => {
   it('catalogo, cliente e o par de migrations foram carregados', () => {
     // Sem isto, um glob quebrado ou um import vazio deixaria todo o resto
     // passando contra o nada.
-    expect(USUM.size).toBe(251)
+    // 386 desde a PH-332 (Kanto + Johto + Hoenn). Era 251. Este numero e um
+    // guarda anti-vacuo: ele existe pra o arquivo reprovar se o import vier
+    // vazio, e nao pra congelar o tamanho do catalogo — mas atualiza-lo tem que
+    // ser uma linha ESCRITA, do mesmo jeito que em `recorteDaPokedex.test.ts`.
+    expect(USUM.size).toBe(386)
     expect(Object.keys(SPECIES_DATA).length).toBeGreaterThan(200)
     expect(PAR_DA_CORRECAO.map(([n]) => n.replace(/.*\//, ''))).toEqual([
       '20260830020000_tipos_fairy_no_catalogo_public.sql',
@@ -57,7 +61,7 @@ describe('a bancada le alguma coisa', () => {
 
 describe('o catalogo do cliente nao diverge da fonte dele (PH-247)', () => {
   it('toda especie do elenco existe em catalog.json', () => {
-    // O elenco (245) e um SUBCONJUNTO do catalogo (251) por construcao — ver
+    // O elenco (380) e um SUBCONJUNTO do catalogo (386) por construcao — ver
     // `sync-planilha.js#syncSpeciesAndMoves`. Uma especie no elenco e fora do
     // catalogo seria edicao a mao do arquivo gerado.
     const orfas = Object.keys(SPECIES_DATA).filter((id) => !USUM.has(id))

@@ -77,6 +77,57 @@ function especiesDoCatalogo() {
   return ids.map((id, i) => ({ id, dex4: String(dex[i]).padStart(4, '0') }))
 }
 
+/**
+ * A FONTE alternativa: `scripts/usum/catalog.json`, filtrada por faixa de dex.
+ *
+ * ---------------------------------------------------------------------------
+ * POR QUE ISTO PRECISOU EXISTIR — o ciclo arte <-> catalogo (PH-332)
+ * ---------------------------------------------------------------------------
+ * O plano de ativacao da Geracao III (docs/17) manda, nesta ordem: gerar o
+ * catalogo (passo 4), importar a arte (passo 5), gerar o catalogo DE NOVO
+ * (passo 6, porque a curadoria de hunts le `assets/battle-sprites/` em tempo de
+ * carga). Rodando isso, o passo 5 nao importa nada — e o motivo e uma
+ * dependencia circular que o plano nao viu:
+ *
+ *   `pokes.generated.ts` sai de `usum:gerar`, cujo elenco (`allSpeciesKeys`)
+ *   nasce das pools de hunt, que `sync-planilha.js#buildTypeRoster` filtra por
+ *   `ART_SPECIES_IDS` = os diretorios de `assets/battle-sprites/`.
+ *
+ *   Sem arte -> fora do catalogo gerado.
+ *   `especiesDoCatalogo()` le o catalogo gerado -> nao acha as 135.
+ *   Nada e importado -> continua sem arte.
+ *
+ * Medido: depois de `usum:baixar --dex-max=386` e `usum:gerar`,
+ * `scripts/usum/catalog.json` tem 386 especies e `pokes.generated.ts` continua
+ * com 245. Nenhum erro em lugar nenhum.
+ *
+ * A saida NAO e desligar o filtro de arte por uma rodada (isso poria 135
+ * especies em pool de hunt com forma geometrica, que e exatamente o que aquele
+ * filtro existe pra impedir). E importar a arte a partir da FONTE do catalogo,
+ * e nao do arquivo derivado dele: `scripts/usum/catalog.json` ja tem `chave` e
+ * `dex` das 386, e nao depende de arte nenhuma.
+ *
+ * Por isso e um modo explicito (`--faixa-dex=252-386`) e nao o padrao: o uso
+ * normal do script — "importar quem entrou no catalogo e ainda nao tem arte" —
+ * continua funcionando como antes.
+ */
+function especiesDaFaixa(faixa) {
+  const m = /^(\d+)-(\d+)$/.exec(faixa)
+  if (!m) throw new Error(`--faixa-dex invalido: ${faixa} (esperado "252-386")`)
+  const [, de, ate] = m.map(Number)
+  const caminho = join(RAIZ, 'scripts', 'usum', 'catalog.json')
+  if (!existsSync(caminho)) throw new Error('scripts/usum/catalog.json nao existe — rode `npm run usum:baixar`')
+  const catalogo = JSON.parse(readFileSync(caminho, 'utf8'))
+  const naFaixa = catalogo.especies.filter((e) => e.dex >= de && e.dex <= ate)
+  if (!naFaixa.length) {
+    throw new Error(
+      `nenhuma especie entre dex ${de} e ${ate} em scripts/usum/catalog.json `
+      + `(o recorte dele e 1-${catalogo._recorte?.dexMax ?? '?'}).`
+    )
+  }
+  return naFaixa.map((e) => ({ id: e.chave, dex4: String(e.dex).padStart(4, '0') }))
+}
+
 // ---------------------------------------------------------------------------
 // Medicao do pe
 //
@@ -140,15 +191,14 @@ function costurarAnims(novas) {
 
 // `SPECIES_WITH_ART` e um Set literal, nao um objeto: o fechamento e `]);` e
 // nao `}`, entao ele nao passa por `inserirAntesDoFechamento`.
-function costurarSpeciesComArte(ids) {
+function costurarSpeciesComArte(ids, nota) {
   const caminho = join(RAIZ, 'src', 'data', 'sprites.ts')
   const conteudo = readFileSync(caminho, 'utf8')
   const eol = conteudo.includes('\r\n') ? '\r\n' : '\n'
   const idx = conteudo.indexOf(']);')
   if (idx === -1) throw new Error('nao achei o fechamento de SPECIES_WITH_ART')
   const bloco = eol +
-    `  // PH-145: as evolucoes por pedra/troca/amizade que so passaram a existir${eol}` +
-    `  // quando o catalogo ganhou essas arestas.${eol}` +
+    nota.split('\n').map((l) => `  // ${l}`).join(eol) + eol +
     `  ${ids.map((id) => `'${id}'`).join(', ')},${eol}`
   writeFileSync(caminho, conteudo.slice(0, idx) + bloco + conteudo.slice(idx))
 }
@@ -157,8 +207,17 @@ function costurarSpeciesComArte(ids) {
 const { createRequire } = await import('node:module')
 const { decodePng: decodificarPng } = createRequire(import.meta.url)('./lib/png.js')
 
-const alvos = especiesDoCatalogo().filter(({ id }) => !existsSync(join(BATTLE_DIR, id)))
-console.log(`${alvos.length} especie(s) no catalogo sem battle-sprites`)
+const FAIXA_DEX = (() => {
+  const arg = process.argv.find((a) => a.startsWith('--faixa-dex='))
+  return arg ? arg.slice('--faixa-dex='.length) : null
+})()
+
+const fonte = FAIXA_DEX ? especiesDaFaixa(FAIXA_DEX) : especiesDoCatalogo()
+const alvos = fonte.filter(({ id }) => !existsSync(join(BATTLE_DIR, id)))
+console.log(
+  `${alvos.length} especie(s) sem battle-sprites`
+  + (FAIXA_DEX ? ` — fonte: scripts/usum/catalog.json, dex ${FAIXA_DEX}` : ' — fonte: pokes.generated.ts'),
+)
 if (!alvos.length) process.exit(0)
 
 const anims = {}
@@ -221,16 +280,25 @@ for (const { id, dex4 } of alvos) {
   importadas.push(id)
 }
 
+// A nota que vai NOS ARQUIVOS costurados. Ela nao e decoracao: quem abrir
+// `sprites.ts` daqui a seis meses precisa saber de que leva vieram aquelas
+// linhas, e a versao anterior deste script escrevia "PH-145" fixo — o que
+// mentiria para qualquer leva seguinte.
+const NOTA = FAIXA_DEX
+  ? `PH-332: as especies de Hoenn (dex ${FAIXA_DEX}), importadas a partir de\n`
+    + 'scripts/usum/catalog.json (ver `especiesDaFaixa` e o ciclo arte<->catalogo).'
+  : 'As evolucoes que entraram no elenco com PH-145 — mesma medicao\n'
+    + 'automatica das levas anteriores.';
+
 if (importadas.length) {
   costurarAnims(anims)
   inserirAntesDoFechamento(
     join(RAIZ, 'src', 'data', 'spriteFootOffsets.ts'),
     '};',
-    '// As evolucoes que entraram no elenco com PH-145 — mesma medicao\n' +
-    '// automatica das levas anteriores.',
+    NOTA.split('\n').map((l) => `// ${l}`).join('\n'),
     Object.entries(pes).map(([id, f]) => `${id}: ${f},`),
   )
-  costurarSpeciesComArte(importadas)
+  costurarSpeciesComArte(importadas, NOTA)
 }
 
 console.log(`\nImportadas: ${importadas.length}${importadas.length ? ` (${importadas.join(', ')})` : ''}`)
