@@ -426,7 +426,47 @@ values
 on conflict (id) do nothing;
 
 -- ---------------------------------------------------------------------------
--- 2. Especies (135)
+-- 2. As duas CHECK de `species` que ainda descrevem o jogo de 251 especies
+-- ---------------------------------------------------------------------------
+-- Achadas do jeito caro: derrubaram o deploy da `dev` (PH-336, segunda falha).
+-- Sai como 23514, na segunda instrucao, e nada e aplicado — transacao.
+--
+-- (a) `species_dex_number_check` trava o dex em 251. E o recorte de Gen II
+--     escrito na CAMADA DE SCHEMA, e nao ha como inserir Hoenn sem mexer nele. O
+--     teto novo e 386, o mesmo `DEX_MAX_PADRAO` de
+--     `scripts/fetch-usum-catalog.js` — o mesmo recorte dito nos dois lugares
+--     porque um e cliente e o outro e banco.
+--
+-- (b) `species_growth_curve_check` esta ERRADA em DOIS sentidos, e nao so
+--     incompleta:
+--
+--       aceita   MEDIUM_FAST, MEDIUM_SLOW, FAST, SLOW, SLIGHTLY_FAST, SLIGHTLY_SLOW
+--       cliente  MEDIUM_FAST, MEDIUM_SLOW, FAST, SLOW, ERRATIC, FLUCTUATING
+--
+--     Os dois `SLIGHTLY_*` sao os nomes INVENTADOS que
+--     `data/pokes.ts#GROWTH_FORMULA_BY_CURVE` substituiu por ERRATIC e
+--     FLUCTUATING, que sao grupos reais dos jogos (funcoes por partes, ver
+--     `scripts/usum/formulas.json`). O comentario naquele arquivo ja avisava:
+--     "Nenhuma especie do dex 1-251 usa os dois novos — eles existem para o enum
+--     descrever o conjunto real". Hoenn usa: 16 especies em ERRATIC, 12 em
+--     FLUCTUATING.
+--
+--     Conferido antes de mexer: NENHUMA linha do banco usa `SLIGHTLY_*` — as 251
+--     se dividem em FAST 23, MEDIUM_FAST 119, MEDIUM_SLOW 64, SLOW 45, nos dois
+--     schemas. Tirar os dois da lista nao invalida linha nenhuma.
+--
+-- `drop`+`add`, e nao `alter`: CHECK nao se altera no lugar. O `if exists`
+-- deixa idempotente.
+alter table dev.species drop constraint if exists species_dex_number_check;
+alter table dev.species add constraint species_dex_number_check
+  check (dex_number >= 1 and dex_number <= 386);
+
+alter table dev.species drop constraint if exists species_growth_curve_check;
+alter table dev.species add constraint species_growth_curve_check
+  check (growth_curve in ('MEDIUM_FAST', 'MEDIUM_SLOW', 'FAST', 'SLOW', 'ERRATIC', 'FLUCTUATING'));
+
+-- ---------------------------------------------------------------------------
+-- 3. Especies (135)
 -- ---------------------------------------------------------------------------
 insert into dev.species (
   id, dex_number, name, type1, type2,
@@ -572,7 +612,7 @@ values
 on conflict (id) do nothing;
 
 -- ---------------------------------------------------------------------------
--- 3. Learnsets
+-- 4. Learnsets
 -- ---------------------------------------------------------------------------
 -- `where exists` na especie E no golpe: schema `dev` recem-clonado pode nao ter
 -- tudo, e a migration nao pode estourar por isso — ela e o par de uma que roda
