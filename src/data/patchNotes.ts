@@ -12,6 +12,25 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-325. SEGUNDA promocao da madrugada de 31/08 — a 7.18 saiu poucas horas
+  // antes, e a regua e uma entrada por PROMOCAO, nao por dia.
+  //
+  // O intervalo `main..dev` tem UM commit fora os merges, e ele e de jogador:
+  // PH-324, achado varrendo o jogo com a Mochila aberta.
+  //
+  // Fica de FORA o COMO: leitura do `poke_uid` antes da RPC, a ordem por causa
+  // da policy de `status = 'ativo'`, e o corte de mochila nao carregada. O
+  // jogador sente "o POKE aparece agora"; o resto e encanamento, mesma regua da
+  // 7.11 pra ca.
+  {
+    version: '7.19',
+    date: '2026-08-31',
+    title: 'O POKE que volta do Mercado aparece na hora',
+    highlights: [
+      'CANCELAR UM ANUNCIO DIZIA QUE O POKE TINHA VOLTADO, E ELE NAO APARECIA. A mensagem era essa mesma — "o POKE voltou pra sua mochila" — e a Mochila continuava sem ele. Ele estava la, seu, inteiro: era a tela que so descobria depois de voce fechar e abrir de novo. Agora ele volta na hora.',
+      'E COMPRAR UM POKE NO MERCADO TAMBEM NAO MOSTRAVA NADA. Voce pagava, o ouro saia, e a Mochila seguia igual — o POKE comprado so aparecia na proxima vez que voce abrisse a tela. Era o pior dos tres casos, porque nele voce ja tinha pago. Corrigido junto: aceitar uma oferta tambem para de deixar na sua lista um POKE que voce acabou de vender.',
+    ],
+  },
   // PH-320. Promocao da madrugada de 31/08. O intervalo `main..dev` tem dez
   // commits e SO DOIS sao de jogador.
   //
