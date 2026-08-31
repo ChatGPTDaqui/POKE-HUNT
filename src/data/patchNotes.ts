@@ -12,6 +12,33 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // A revisao das sprites de golpe (PH-367 a PH-370). Uma entrada so pros oito
+  // commits, porque pra quem joga e UM assunto: o que aparece na tela quando um
+  // golpe acerta. SUCINTA, mesma regua da 7.22 e da 7.23.
+  //
+  // COMO O LOTE FOI ESCOLHIDO, porque isso explica o item 2: o dono nomeou 95
+  // efeitos do banco de origem, e o sufixo do arquivo e a aplicacao pretendida.
+  // Cruzar essa lista com o cadastro achou cinco tipos usando arte que dizia
+  // outra coisa — dai o buraco de escavacao no golpe de pedra.
+  //
+  // FORA DA NOTA de proposito, por ser invisivel jogando: as tres bancadas de
+  // conferencia, os testes de render, o rebuild do bundle da Edge, e as seis
+  // entradas de arte que foram cadastradas e REMOVIDAS na mesma PR depois de
+  // reprovarem na validacao ao vivo (pilar de fogo de tela inteira no Eruption,
+  // chuva invisivel no Rain Dance, cupula invisivel no Spore). Pro jogador elas
+  // nunca existiram — anunciar a remocao de algo que nunca esteve no ar so
+  // confunde.
+  {
+    version: '7.24',
+    date: '2026-08-31',
+    title: 'Cada golpe com a cara dele',
+    highlights: [
+      'SESSENTA E UM GOLPES GANHARAM ARTE PROPRIA. Bite mostra uma mandibula, Hyper Beam um feixe dourado, Razor Leaf folhas voando, Pay Day uma moeda de ouro girando, Recover uma cruz verde, Fissure uma rachadura no chao. Antes todos desenhavam o mesmo efeito generico do tipo, entao Ice Shard saia igual a Ice Beam.',
+      'GOLPE DE PEDRA DEIXOU DE ABRIR UM BURACO NO CHAO e golpe de inseto deixou de soltar grama — as duas artes estavam trocadas. Fada ganhou efeito de area, que nao tinha, e o de dragao parou de ser identico ao de gelo.',
+      'CHARM, TAUNT E SPIDER WEB VOLTARAM A APARECER. Os tres tinham arte propria desde a leva passada e ela nunca chegava na tela: o brilho generico do tipo desenhava por cima e escondia.',
+      'POKE PARALISADO SOLTA FAISCA E QUEIMADO SOLTA BRASA. Antes os dois so ficavam com o corpo tingido, e num Pikachu amarelo ou num Charizard laranja isso nao dava pra ver — justo a paralisia, que e o status que mais atrapalha.',
+    ],
+  },
   // A cacada por tier do PokeRogue. Uma entrada so pros seis commits, porque pra
   // quem joga e UM assunto: mudou quem aparece, com que frequencia e quem guarda
   // a sala. SUCINTA a pedido do usuario — mesma regua da 7.22 (PH-338).
