@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { mochilaCarregada } from '@/stores/mochilaStore'
+import { descartarIdsConhecidos } from './playerRepository'
 import { COLUNAS_DE_POKE, rowToPoke } from './playerMapper'
 import type {
   AnuncioMercado, NegocioMercado, NivelDePreco, OfertaMercado, OfertaRecebida, OrdemMercado, ResumoItemMercado,
@@ -411,11 +412,40 @@ export async function cancelarOrdem(ordemId: string) {
   return { mensagem: data?.mensagem as string | undefined }
 }
 
+/**
+ * O POKE saiu da mochila e foi pro Mercado — quem o moveu foi a RPC, e o
+ * repositorio precisa saber (PH-311).
+ *
+ * SEM ESTA CHAMADA, O PROXIMO SAVE APAGA O POKE. Sao tres peças certas
+ * isoladamente e erradas juntas:
+ *
+ *  1. abrir a Mochila registra os ids da reserva no dominio de exclusao
+ *     (`acrescentarIdsDaReserva`, mochilaRemota.ts);
+ *  2. `refetchAposAnuncio` tira o POKE de `bagPokes`, porque a linha voltou com
+ *     `location = 'market'` — e correto, e ele nao avisa ninguem;
+ *  3. `savePlayerState` calcula `removidos = dominio - vivos`. O id anunciado
+ *     esta no dominio e nao esta entre os vivos, entao vira DELETE.
+ *
+ * O teto de seguranca (12 por save) nao pega: anuncia-se um POKE por vez. E
+ * `market_listings_poke_uid_fkey` e `on delete set null`, entao o anuncio
+ * SOBREVIVE apontando pra nada — o POKE some pra sempre e a vitrine continua
+ * vendendo ele.
+ *
+ * Aqui e nao dentro de `refetchAposAnuncio` porque aqui o fato ja e conhecido
+ * sem perguntar: a RPC voltou sem erro, logo o POKE saiu da mochila. Dentro do
+ * refetch seria preciso ler a linha ANTES do corte de `mochilaCarregada()`,
+ * gastando uma request a mais em toda conta que anuncia sem a Mochila aberta.
+ */
+function anunciado(pokeUid: string): void {
+  descartarIdsConhecidos([pokeUid])
+}
+
 export async function anunciarPoke(corpo: { pokeUid: string; price: number | null; currency: 'gold' | 'diamond'; apenasOferta?: boolean }) {
   const { data, error } = await db.rpc('anunciar_poke', {
     p_poke_id: corpo.pokeUid, p_price: corpo.price, p_currency: corpo.currency, p_apenas_oferta: !!corpo.apenasOferta,
   })
   estourarSeErro(error)
+  anunciado(corpo.pokeUid)
   await refetchAposAnuncio(corpo.pokeUid)
   return { mensagem: data?.mensagem as string | undefined }
 }
@@ -438,6 +468,8 @@ export async function criarLeilao(corpo: {
     p_incremento_minimo: corpo.incrementoMinimo,
   })
   estourarSeErro(error)
+  // Mesmo caminho de `anunciar_poke`: a RPC move o POKE pra 'market' (PH-311).
+  anunciado(corpo.pokeUid)
   await refetchAposAnuncio(corpo.pokeUid)
   return { mensagem: data?.mensagem as string | undefined }
 }
