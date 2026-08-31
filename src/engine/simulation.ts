@@ -43,7 +43,7 @@ import { atualizarLure } from './systems/lureSystem'
 import { updateCombat, podeDanificar } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
 import { bloqueiaAcaoSempre } from '@/data/statusEffects'
-import { climaAmbienteDaSala, climaDeAmbiente } from './systems/climaAmbiente'
+import { climaAmbienteDaSala, climaDeAmbiente, tickClimaDeGolpe } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
@@ -1139,6 +1139,21 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     if (!silent) updateAnimations(world, dt)
     return []
   }
+
+  // PH-329: o prazo do clima de golpe/habilidade e gasto AQUI, antes de
+  // qualquer um dos retornos antecipados abaixo, e nao dentro de
+  // `updateCombat`.
+  //
+  // A posicao e o ponto. Os tres blocos que vem em seguida (`countdownRemaining`
+  // da intro do Lance, `salaCountdownRemaining` da troca de sala, e o gate de
+  // quota) fazem `return []` — congelam movimento e combate de proposito. Se o
+  // clima fosse gasto depois deles, cada uma dessas pausas viraria tempo
+  // gratis de Rain Dance. "A duracao e por tempo, ponto" nao abre excecao pra
+  // overlay de transicao.
+  //
+  // Vale nos tres regimes que chamam `stepWorld` sem nenhum deles precisar
+  // lembrar: ao vivo, catch-up silencioso e resim da autoridade.
+  tickClimaDeGolpe(world, dt)
 
   // Contagem regressiva de intro da Champion Lance: movimento/combate/
   // respawn ficam congelados e nada nasceu ainda ate isso chegar a 0.
