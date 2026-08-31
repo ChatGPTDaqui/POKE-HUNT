@@ -12,6 +12,35 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-320. Promocao da madrugada de 31/08. O intervalo `main..dev` tem dez
+  // commits e SO DOIS sao de jogador.
+  //
+  // A TROCA ENTRA AGORA, E NAO ANTES, e isso e a regua funcionando. A fatia 1
+  // (a mesa, PH-120) ja estava na `main` desde 30/08 e ficou de fora da 7.17 de
+  // proposito: sem tela, era meia-feature. Agora ela esta inteira — mesa,
+  // oferta com reserva, confirmacao dupla e a tela em tempo real — e a versao
+  // completa ganha entrada propria.
+  //
+  // Fica de FORA:
+  //  - PH-313, PH-316 e PH-318 (regenerar `database.types.ts`). Encanamento, e
+  //    tres vezes o mesmo — ver PH-317 pra por que isso ainda e manual.
+  //  - PH-315 e PH-319 (a bancada de fumaca da troca). Harness.
+  //  - PH-309 (permissao da sessao de agente). Nem chega ao jogo.
+  //  - O COMO dos dois itens abaixo: versao de oferta, trigger, `location =
+  //    'troca'`, caixa de entregas, denormalizacao do retrato do POKE. O
+  //    jogador sente "da pra trocar" e "meu POKE nao some mais"; o resto e
+  //    encanamento, mesma regua da 7.11 pra ca.
+  {
+    version: '7.18',
+    date: '2026-08-31',
+    title: 'Troca direta entre jogadores, com confirmacao dos dois lados',
+    highlights: [
+      'AGORA DA PRA TROCAR POKE COM OUTRO JOGADOR, DE VERDADE. Ate aqui o unico jeito de um POKE mudar de dono era o Mercado, que troca POKE por OURO — POKE por POKE nao existia. A tela nova fica no menu, em "Troca": voce convida alguem pelo Ranking ou pelo Correio (o icone de duas setas ao lado do nome), o outro aceita, e os dois montam a oferta na mesma mesa. POKE e item entram; os dois lados veem o que o outro pos, na hora, sem recarregar nada.',
+      'E ELA E A PROVA DE GOLPE, NAO SO UM COMBINADO. O golpe classico e trocar a oferta no instante em que o outro clica em confirmar — voce ve tres POKEs, confirma, e o que sai e um. Aqui isso nao funciona: qualquer mudanca na mesa DERRUBA as duas confirmacoes na hora, e o servidor recusa qualquer confirmacao que nao seja da mesa que voce esta vendo agora. So com os dois lados confirmados sobre a MESMA mesa a troca acontece — e ela acontece inteira ou nao acontece, nunca pela metade.',
+      'O QUE VOCE POE NA MESA SAI DA SUA MOCHILA ENQUANTO ESTIVER LA. Nao e uma promessa: o POKE ofertado nao pode ser vendido, anunciado, evoluido nem posto na equipe enquanto a mesa estiver aberta, e o item vai reservado tambem. Desistir devolve tudo. Qualquer um dos dois cancela a qualquer momento, e a mesa fecha sozinha depois de 15 minutos parada — o que estava nela volta pra quem era.',
+      'ANUNCIAR UM POKE NO MERCADO PODIA FAZER ELE SUMIR PARA SEMPRE. Com a Mochila aberta, anunciar um POKE (ou coloca-lo em leilao) fazia a gravacao seguinte APAGAR o POKE do banco. O anuncio continuava na vitrine, mas apontando pra nada — quem comprasse pagava por um POKE que nao existia mais, e o dono nao tinha como recuperar. Corrigido.',
+    ],
+  },
   // PH-308. Segunda promocao de 30/08 — a 7.16 saiu poucas horas antes, e a
   // regua e uma entrada por PROMOCAO, nao por dia.
   //

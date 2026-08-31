@@ -1671,6 +1671,134 @@ export type Database = {
         }
         Relationships: []
       }
+      troca_log: {
+        Row: {
+          anfitriao_id: string
+          convidado_id: string
+          executada_em: string
+          id: string
+          oferta: Json
+          sessao_id: string
+          versao: number
+        }
+        Insert: {
+          anfitriao_id: string
+          convidado_id: string
+          executada_em?: string
+          id?: string
+          oferta: Json
+          sessao_id: string
+          versao: number
+        }
+        Update: {
+          anfitriao_id?: string
+          convidado_id?: string
+          executada_em?: string
+          id?: string
+          oferta?: Json
+          sessao_id?: string
+          versao?: number
+        }
+        Relationships: []
+      }
+      troca_oferta: {
+        Row: {
+          criada_em: string
+          dono_id: string
+          id: string
+          is_shiny: boolean | null
+          item_id: string | null
+          iv_percent: number | null
+          level: number | null
+          poke_uid: string | null
+          quantidade: number
+          rarity: Database["dev"]["Enums"]["rarity_tier"] | null
+          sessao_id: string
+          species_id: string | null
+          tipo: string
+        }
+        Insert: {
+          criada_em?: string
+          dono_id: string
+          id?: string
+          is_shiny?: boolean | null
+          item_id?: string | null
+          iv_percent?: number | null
+          level?: number | null
+          poke_uid?: string | null
+          quantidade?: number
+          rarity?: Database["dev"]["Enums"]["rarity_tier"] | null
+          sessao_id: string
+          species_id?: string | null
+          tipo: string
+        }
+        Update: {
+          criada_em?: string
+          dono_id?: string
+          id?: string
+          is_shiny?: boolean | null
+          item_id?: string | null
+          iv_percent?: number | null
+          level?: number | null
+          poke_uid?: string | null
+          quantidade?: number
+          rarity?: Database["dev"]["Enums"]["rarity_tier"] | null
+          sessao_id?: string
+          species_id?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "troca_oferta_dono_id_fkey"
+            columns: ["dono_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_dono_id_fkey"
+            columns: ["dono_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "ranking_pokemon"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "troca_sessao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       troca_sessao: {
         Row: {
           anfitriao_id: string
@@ -1682,6 +1810,9 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         Insert: {
           anfitriao_id: string
@@ -1693,6 +1824,9 @@ export type Database = {
           estado?: string
           expira_em?: string
           id?: string
+          versao?: number
+          versao_confirmada_anfitriao?: number | null
+          versao_confirmada_convidado?: number | null
         }
         Update: {
           anfitriao_id?: string
@@ -1704,6 +1838,9 @@ export type Database = {
           estado?: string
           expira_em?: string
           id?: string
+          versao?: number
+          versao_confirmada_anfitriao?: number | null
+          versao_confirmada_convidado?: number | null
         }
         Relationships: [
           {
@@ -2043,10 +2180,58 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
+      _executar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      _mesa_aberta_minha: {
+        Args: { p_eu: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
       }
+      _troca_teto_por_lado: { Args: never; Returns: number }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
@@ -2063,6 +2248,9 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2083,6 +2271,9 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2126,6 +2317,29 @@ export type Database = {
         }[]
       }
       configurar_auto: { Args: { p_patch: Json }; Returns: Json }
+      confirmar_troca: {
+        Args: { p_sessao_id: string; p_versao: number }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       conversas: { Args: never; Returns: Json }
       criar_leilao: {
         Args: {
@@ -2159,6 +2373,29 @@ export type Database = {
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      desconfirmar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
       encerrar_troca: {
         Args: { p_motivo?: string; p_sessao_id: string }
@@ -2172,6 +2409,9 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2255,7 +2495,53 @@ export type Database = {
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
       perfil_publico: { Args: { p_user_id: string }; Returns: Json }
+      por_item_na_mesa: {
+        Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      por_poke_na_mesa: {
+        Args: { p_poke_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
@@ -2295,6 +2581,52 @@ export type Database = {
       taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      tirar_item_da_mesa: {
+        Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      tirar_poke_da_mesa: {
+        Args: { p_poke_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       usar_item: { Args: { p_item_id: string }; Returns: Json }
       vender_item: {
         Args: { p_item_id: string; p_qtd?: number }
@@ -2357,7 +2689,7 @@ export type Database = {
       map_continent: "johto" | "kanto"
       move_category: "physical" | "special"
       move_target: "single" | "aoe"
-      pokemon_location: "team" | "bag" | "market"
+      pokemon_location: "team" | "bag" | "market" | "troca"
       rarity_tier:
         | "comum"
         | "incomum"
@@ -4072,6 +4404,134 @@ export type Database = {
         }
         Relationships: []
       }
+      troca_log: {
+        Row: {
+          anfitriao_id: string
+          convidado_id: string
+          executada_em: string
+          id: string
+          oferta: Json
+          sessao_id: string
+          versao: number
+        }
+        Insert: {
+          anfitriao_id: string
+          convidado_id: string
+          executada_em?: string
+          id?: string
+          oferta: Json
+          sessao_id: string
+          versao: number
+        }
+        Update: {
+          anfitriao_id?: string
+          convidado_id?: string
+          executada_em?: string
+          id?: string
+          oferta?: Json
+          sessao_id?: string
+          versao?: number
+        }
+        Relationships: []
+      }
+      troca_oferta: {
+        Row: {
+          criada_em: string
+          dono_id: string
+          id: string
+          is_shiny: boolean | null
+          item_id: string | null
+          iv_percent: number | null
+          level: number | null
+          poke_uid: string | null
+          quantidade: number
+          rarity: Database["public"]["Enums"]["rarity_tier"] | null
+          sessao_id: string
+          species_id: string | null
+          tipo: string
+        }
+        Insert: {
+          criada_em?: string
+          dono_id: string
+          id?: string
+          is_shiny?: boolean | null
+          item_id?: string | null
+          iv_percent?: number | null
+          level?: number | null
+          poke_uid?: string | null
+          quantidade?: number
+          rarity?: Database["public"]["Enums"]["rarity_tier"] | null
+          sessao_id: string
+          species_id?: string | null
+          tipo: string
+        }
+        Update: {
+          criada_em?: string
+          dono_id?: string
+          id?: string
+          is_shiny?: boolean | null
+          item_id?: string | null
+          iv_percent?: number | null
+          level?: number | null
+          poke_uid?: string | null
+          quantidade?: number
+          rarity?: Database["public"]["Enums"]["rarity_tier"] | null
+          sessao_id?: string
+          species_id?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "troca_oferta_dono_id_fkey"
+            columns: ["dono_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_dono_id_fkey"
+            columns: ["dono_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "ranking_pokemon"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "troca_sessao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       troca_sessao: {
         Row: {
           anfitriao_id: string
@@ -4083,6 +4543,9 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         Insert: {
           anfitriao_id: string
@@ -4094,6 +4557,9 @@ export type Database = {
           estado?: string
           expira_em?: string
           id?: string
+          versao?: number
+          versao_confirmada_anfitriao?: number | null
+          versao_confirmada_convidado?: number | null
         }
         Update: {
           anfitriao_id?: string
@@ -4105,6 +4571,9 @@ export type Database = {
           estado?: string
           expira_em?: string
           id?: string
+          versao?: number
+          versao_confirmada_anfitriao?: number | null
+          versao_confirmada_convidado?: number | null
         }
         Relationships: [
           {
@@ -4444,10 +4913,58 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
+      _executar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      _mesa_aberta_minha: {
+        Args: { p_eu: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
       }
+      _troca_teto_por_lado: { Args: never; Returns: number }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
@@ -4464,6 +4981,9 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4484,6 +5004,9 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4527,6 +5050,29 @@ export type Database = {
         }[]
       }
       configurar_auto: { Args: { p_patch: Json }; Returns: Json }
+      confirmar_troca: {
+        Args: { p_sessao_id: string; p_versao: number }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       conversas: { Args: never; Returns: Json }
       criar_leilao: {
         Args: {
@@ -4560,6 +5106,29 @@ export type Database = {
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      desconfirmar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
       encerrar_troca: {
         Args: { p_motivo?: string; p_sessao_id: string }
@@ -4573,6 +5142,9 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4656,7 +5228,53 @@ export type Database = {
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
       perfil_publico: { Args: { p_user_id: string }; Returns: Json }
+      por_item_na_mesa: {
+        Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      por_poke_na_mesa: {
+        Args: { p_poke_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
@@ -4696,6 +5314,52 @@ export type Database = {
       taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      tirar_item_da_mesa: {
+        Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      tirar_poke_da_mesa: {
+        Args: { p_poke_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       usar_item: { Args: { p_item_id: string }; Returns: Json }
       vender_item: {
         Args: { p_item_id: string; p_qtd?: number }
@@ -4758,7 +5422,7 @@ export type Database = {
       map_continent: "johto" | "kanto"
       move_category: "physical" | "special"
       move_target: "single" | "aoe"
-      pokemon_location: "team" | "bag" | "market"
+      pokemon_location: "team" | "bag" | "market" | "troca"
       rarity_tier:
         | "comum"
         | "incomum"
@@ -4919,7 +5583,7 @@ export const Constants = {
       map_continent: ["johto", "kanto"],
       move_category: ["physical", "special"],
       move_target: ["single", "aoe"],
-      pokemon_location: ["team", "bag", "market"],
+      pokemon_location: ["team", "bag", "market", "troca"],
       rarity_tier: ["comum", "incomum", "raro", "ultra", "legendary", "mythic"],
     },
   },
@@ -4954,7 +5618,7 @@ export const Constants = {
       map_continent: ["johto", "kanto"],
       move_category: ["physical", "special"],
       move_target: ["single", "aoe"],
-      pokemon_location: ["team", "bag", "market"],
+      pokemon_location: ["team", "bag", "market", "troca"],
       rarity_tier: ["comum", "incomum", "raro", "ultra", "legendary", "mythic"],
     },
   },

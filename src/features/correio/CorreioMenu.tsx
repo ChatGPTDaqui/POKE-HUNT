@@ -30,6 +30,7 @@ import {
   GameButton, GameCard, GameInput, SectionLabel, SegmentedTabs,
 } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
+import { BotaoConvidarTroca } from '@/features/troca/BotaoConvidarTroca'
 import { ComporMensagem } from './ComporMensagem'
 import { Conversa, type Contato } from './Conversa'
 import { LinhaDeMensagem } from './LinhaDeMensagem'
@@ -270,6 +271,12 @@ export function CorreioMenu() {
             )}
           </div>
         </div>
+        {/* PH-314: a troca costuma ser combinada aqui mesmo, e depois de
+            combinada o jogador precisaria sair pro Ranking e achar o outro numa
+            lista ordenada por XP. O botao para dentro do card, e por isso
+            `BotaoConvidarTroca` sempre chama `stopPropagation` — sem isso o
+            convite abriria a conversa por baixo. */}
+        <BotaoConvidarTroca userId={c.userId} />
       </GameCard>
     )
   }

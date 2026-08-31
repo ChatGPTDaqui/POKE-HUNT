@@ -54,3 +54,38 @@ export const ESTADOS_VIVOS: readonly EstadoDeTroca[] = ['convidada', 'aberta']
 export function trocaViva(estado: EstadoDeTroca): boolean {
   return ESTADOS_VIVOS.includes(estado)
 }
+
+/**
+ * Quantas LINHAS cada lado pode por na mesa.
+ *
+ * Linha, nao unidade: uma pilha de 30 Pocao e uma linha so. Por mais Pocao numa
+ * pilha que ja esta na mesa nao gasta linha nova, senao o teto viraria "voce so
+ * pode por 10 Pocao".
+ *
+ * O numero existe por dois motivos concretos. A execucao da fatia 3 e UMA
+ * transacao segurando lock nas duas contas, e mesa de 300 linhas vira transacao
+ * longa; e a tela da fatia 4 precisa caber numa altura previsivel.
+ *
+ * `_troca_teto_por_lado()` no banco devolve o mesmo numero, e
+ * `ofertaDeTrocaNoBanco.test.ts` reprova se os dois se separarem.
+ */
+export const TROCA_MAX_LINHAS_POR_LADO = 10
+
+/** O que uma linha da mesa pode ser. */
+export const TIPOS_DE_OFERTA = ['poke', 'item'] as const
+export type TipoDeOferta = (typeof TIPOS_DE_OFERTA)[number]
+
+/**
+ * Uma confirmacao so vale enquanto for da versao ATUAL da oferta (PH-312).
+ *
+ * O servidor guarda em qual versao cada lado confirmou, e nao um "sim". A
+ * diferenca e o que fecha o golpe: com booleano, toda alteracao da oferta
+ * precisaria LEMBRAR de apagar as duas confirmacoes, e o caminho que
+ * esquecesse deixaria valendo um "sim" dado sobre outra mesa. Comparando
+ * versoes, a confirmacao envelhece sozinha.
+ *
+ * `null` (nunca confirmou) devolve `false` sem caso especial: `null !== numero`.
+ */
+export function confirmacaoValida(versaoDaMesa: number, versaoConfirmada: number | null): boolean {
+  return versaoConfirmada !== null && versaoConfirmada === versaoDaMesa
+}
