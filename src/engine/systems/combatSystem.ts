@@ -53,10 +53,12 @@ import { rollChance, randRange } from '@/core/random'
 import { ATTACK_ANIM_DURATION, triggerAttackAnim } from './animationSystem'
 import { reporClimaDeAmbiente } from './climaAmbiente'
 import { reunindoParaLure } from './lureSystem'
+import { ehAlvoPrioritario } from './movementSystem'
 import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
   startCooldown, canAct, startGlobalCooldown, takeDamage, heal, getMaxHp, releaseEffectLane, findEntityById,
+  distanceTo,
 } from '../entity'
 import type { Clima, ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
 
@@ -3323,6 +3325,50 @@ export interface CombatResult {
   playerJustFainted: boolean
 }
 
+/**
+ * Coloca os alvos PRIORITARIOS (shiny ou protetor, ver
+ * movementSystem.ts#ehAlvoPrioritario) na frente da lista de engajados, os mais
+ * proximos primeiro. Os demais mantem a ordem original.
+ *
+ * ---------------------------------------------------------------------------
+ * POR QUE REORDENAR A LISTA, E NAO SO ESCOLHER OUTRO `primaryTarget` (PH-331)
+ * ---------------------------------------------------------------------------
+ * `engagedEnemies[0]` e lido em TRES lugares que precisam concordar: o
+ * `primaryTarget` do hook de entrada, o `primaryTarget` de
+ * `executePlayerAction` (que tambem monta o alvo unico como
+ * `[engagedEnemies[0]]`), e `player.targetId` — que e o que a tela usa pra
+ * mostrar de quem sao os status na barra do oponente (PH-132). Trocar so um dos
+ * tres faria o jogador bater num inimigo enquanto o HUD explica outro.
+ *
+ * O DEFEITO QUE ISTO CORRIGE: a ordem era a de `world.enemies`, isto e, a ordem
+ * de SPAWN. Com protetor e mob comum engajados ao mesmo tempo — que acontece
+ * quando o protetor nasce com uma luta em andamento — quem levava o golpe era
+ * quem tivesse nascido primeiro. O movimento ja priorizava o protetor (o
+ * jogador ANDAVA ate ele), e o combate batia no outro.
+ *
+ * A reordenacao e ESTAVEL entre os nao-prioritarios: `sort` com comparador que
+ * devolve 0 nao garante estabilidade em toda engine, entao a lista e montada por
+ * particao, nao por `sort`. Isso importa porque a ordem dos engajados tambem e a
+ * ordem em que os inimigos AGEM (`executeEnemyAction` em loop) e, por
+ * consequencia, a ordem em que consomem `world.rng` — o servidor roda este mesmo
+ * codigo, entao a sequencia continua reconferivel, mas so se ela for
+ * deterministica dos dois lados.
+ */
+function ordenarPorPrioridade(player: PlayerEntity, engajados: EnemyEntity[]): EnemyEntity[] {
+  const prioritarios: EnemyEntity[] = []
+  const resto: EnemyEntity[] = []
+  for (const enemy of engajados) {
+    (ehAlvoPrioritario(enemy) ? prioritarios : resto).push(enemy)
+  }
+  // Nada a fazer no caso normal (nenhum prioritario, ou nada com que competir):
+  // devolver a lista original evita alocar duas por tick a 60 Hz por nada.
+  if (prioritarios.length === 0) return engajados
+  if (prioritarios.length > 1) {
+    prioritarios.sort((a, b) => distanceTo(player, a) - distanceTo(player, b))
+  }
+  return [...prioritarios, ...resto]
+}
+
 // Devolve { defeatedEnemyIds, playerJustFainted } pro chamador (controller.ts)
 // distribuir EXP/loot/rolls de captura e disparar reacoes de UI.
 export function updateCombat(world: WorldState, dt: number, opts: { silent?: boolean } = {}): CombatResult {
@@ -3446,7 +3492,10 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     if (enemy.state !== 'engaged' && enemy.entradaProcessada) enemy.entradaProcessada = false
   }
 
-  const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === 'engaged' && e.targetId === player.id)
+  const engagedEnemies = ordenarPorPrioridade(
+    player,
+    enemies.filter((e) => !isDead(e) && e.state === 'engaged' && e.targetId === player.id),
+  )
   // O reset DO JOGADOR olha se ainda ha alguem engajado nele, e nao o
   // `player.state` — que foi como isto nasceu e era um bug de verdade.
   //

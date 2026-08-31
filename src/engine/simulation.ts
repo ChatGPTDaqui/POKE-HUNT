@@ -52,6 +52,7 @@ import { recordKill } from './systems/farmRates'
 import {
   contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
+  encurtarTransicaoDeSala,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -1169,6 +1170,38 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () =>
     garantirProtetorDaSala(world, world.mapDef!, undefined, world.player, null))
 
+  // SIMULACAO SILENCIOSA NAO ESPERA A CONTAGEM DE "ENTRANDO EM NOVA AREA" (PH-331).
+  //
+  // `SALA_TRANSITION_COUNTDOWN` (3s) existe pra o jogador LER o nome do
+  // sub-bioma novo no overlay. Quando ninguem esta olhando — resim do servidor
+  // e catch-up de aba oculta, os dois `silent` — ele nao informa nada, e cobra
+  // uma coisa concreta: `salaPendente` e `salaCountdownRemaining` sao EFEMEROS e
+  // nao atravessam a reconstrucao de mundo por janela de flush.
+  //
+  // O DEFEITO MEDIDO (bancada `janela-do-protetor.mjs`, sonda de 2026-08-31): o
+  // protetor da sala morre a 3,6s do fim da janela, a transicao arma, a janela
+  // fecha com 2,0s de contagem sobrando — e o que o servidor grava e a sala
+  // ANTIGA, com `sala_abates = 30` e a linha de `sala_protetor` deletada. A
+  // janela seguinte reconstroi o mundo, le "sala pede protetor, nao ha protetor"
+  // (`protetorResolvido` tambem e efemero, e nao ha coluna que o guarde) e
+  // sorteia um protetor NOVO, com HP cheio. O jogador mata o guardiao e ganha
+  // outro guardiao. Reproduzido: janela 1 mata em 3,63s; janela 2 mata OUTRO em
+  // 7,37s, mesma sala.
+  //
+  // Com janelas de 30s isso e ~10% das vitorias (a contagem tem que caber nos
+  // ultimos 3s); com janelas curtas vira livelock, que e a cara do travamento
+  // relatado ao vivo em 29/08.
+  //
+  // Encurtar aqui fecha a janela de ambiguidade em vez de tentar persistir mais
+  // estado: matar e trocar de sala passam a acontecer no mesmo tick de
+  // simulacao, entao a sala que o flush grava JA e a nova. `encurtarTransicaoDeSala`
+  // e a mesma funcao que a volta da aba usa (PH-302), pelo mesmo motivo.
+  //
+  // O QUE NAO MUDA: o gate do protetor. Quem arma a transicao continua sendo
+  // `resolverProtetorDaSala`, e so depois de o protetor cair — encurtar a
+  // contagem nao pula protetor nenhum.
+
+  if (silent) encurtarTransicaoDeSala(world)
   // Contagem regressiva "Entrando em nova area" entre salas (ver
   // salaSystem.ts#registrarAbate/aplicarTransicaoDeSala): a quota de abates
   // da sala atual ja fechou e a proxima ja foi sorteada
@@ -1233,6 +1266,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       registrarAbate(world, world.mapDef.id, { manualAdvance })
     }
   }
+
+
   for (const enemy of world.enemies) {
     if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt
   }
