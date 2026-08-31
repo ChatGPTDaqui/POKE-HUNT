@@ -12,6 +12,42 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-335. TERCEIRA promocao de 31/08 — a regua e uma entrada por PROMOCAO,
+  // nao por dia, e a 7.18 e a 7.19 sairam de madrugada.
+  //
+  // O intervalo `main..dev` tem treze commits e TRES sao de jogador: PH-329
+  // (clima), PH-331 (guardiao e troca de sala) e PH-330 (o Eevee do Lance).
+  //
+  // A GERACAO III NAO ENTRA, e isto e a regua funcionando e nao esquecimento. A
+  // PH-332 esta em PR ABERTA, esperando aprovacao pra ir ao ar — nao esta na
+  // `main`, e coisa nao promovida nao se anuncia. Ela vale entrada propria, e
+  // grande: 135 especies, 10 hunts BOSS novas, 5 habilidades.
+  //
+  // Fica de fora tambem:
+  //  - PH-333 (bancada de egress, `npm run edge:jwks`, doc de operacao). Harness
+  //    e medicao. O segredo `JOGO_JWKS` que ela achou NAO foi gravado, entao nao
+  //    ha efeito nenhum a anunciar — so o comando pronto pra quem opera.
+  //  - PH-326 (regenerar `database.types.ts`). Encanamento, e a segunda vez no
+  //    dia — ver PH-317 pra por que isso ainda e manual.
+  //  - PH-328 (correcao no CLAUDE.md) e PH-317 (aviso de tipos no CI). Nem
+  //    chegam ao jogo.
+  //  - O COMO dos tres itens abaixo: `tickClimaDeGolpe` saindo de `updateCombat`,
+  //    `encurtarTransicaoDeSala` no regime silencioso, `substituiPokeUid` na
+  //    receita do correio, e o resgate do worker de timer. O jogador sente "a
+  //    chuva dura", "meu POKE vai atras do guardiao" e "o Eevee e meu, unico";
+  //    o resto e encanamento, mesma regua da 7.11 pra ca.
+  {
+    version: '7.20',
+    date: '2026-08-31',
+    title: 'O clima dura de verdade, o guardiao virou prioridade e o Eevee do Lance e unico',
+    highlights: [
+      'CHUVA, SOL, AREIA E GRANIZO DE GOLPE DURAVAM UM PISCAR DE OLHOS. O jogo dizia dez turnos e entregava menos de um segundo: o clima caia no instante em que o ultimo inimigo do grupo morria, e o cronometro dele so andava enquanto havia luta acontecendo. Agora ele dura o tempo que promete, contado em tempo corrido — atravessa a espera pelo proximo inimigo, atravessa o seu POKE desmaiado, atravessa a tela de "entrando em nova area". Na pratica: Dança da Chuva, Dia Ensolarado, Granizo e Tempestade de Areia ficaram bem mais fortes do que eram.',
+      'E HABILIDADE DE CLIMA (Drizzle, Drought, Sand Stream, Snow Warning) ERA O OPOSTO: NAO ACABAVA NUNCA. Um POKE com Drizzle entrava em campo e a chuva dele apagava o clima do lugar pelo resto da sala inteira. Agora ela dura os mesmos dez turnos do golpe, e depois o clima da area volta a aparecer.',
+      'SEU POKE IGNORAVA O GUARDIAO DA SALA E IA BATER NO BICHO MAIS PERTO. O guardiao e o unico inimigo que destrava a sala, e ele nasce longe — entao o POKE saia atras de qualquer outro e a hunt ficava parada em 30/30 esperando. Agora o guardiao tem a mesma prioridade que um shiny: seu POKE vai direto nele, de qualquer distancia, e bate NELE quando os dois estao em cima de voce.',
+      'E MATAR O GUARDIAO AS VEZES DAVA... OUTRO GUARDIAO. Quando o abate acontecia nos ultimos segundos antes do jogo gravar, a troca de sala se perdia no meio do caminho: o servidor guardava a sala velha ainda em 30/30, e um guardiao novo, de HP cheio, nascia no lugar do que voce acabou de derrubar. Corrigido — a sala troca no mesmo instante em que ele cai.',
+      'O EEVEE DO CAMPEAO LANCE ERA IGUAL PRA TODO MUNDO, E AGORA E SORTEADO. Ele vinha sempre com a mesma raridade, os mesmos seis atributos e nenhuma habilidade — dois jogadores que vencessem o Lance ganhavam POKEs identicos, e shiny era impossivel. Agora ele e sorteado como qualquer POKE do jogo: raridade, atributos, natureza, habilidade (com chance da oculta) e shiny. Ele vem no NIVEL 1, pra voce criar do comeco. QUEM JA RECEBEU O ANTIGO TEM UM NOVO NO CORREIO — ao coletar, o antigo da lugar ao sorteado, e nada e perdido no meio.',
+    ],
+  },
   // PH-325. SEGUNDA promocao da madrugada de 31/08 — a 7.18 saiu poucas horas
   // antes, e a regua e uma entrada por PROMOCAO, nao por dia.
   //
