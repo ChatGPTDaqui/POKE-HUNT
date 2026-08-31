@@ -1,0 +1,29 @@
+-- PH-310 (PH-120, fatia 2): o POKE na mesa de troca ganha um LUGAR proprio.
+--
+-- POR QUE UM VALOR DE ENUM, E NAO UMA COLUNA `em_troca boolean`
+-- ---------------------------------------------------------------------------
+-- Este e exatamente o argumento que a `20260808200000_pokemon_pode_estar_no_
+-- mercado.sql` escreveu pro Mercado, e ele vale igual aqui.
+--
+-- Toda RPC que CONSOME um POKE ja exige `location = 'bag'`:
+--
+--   vender_poke     ... and location = 'bag' and coalesce(locked,false) = false
+--   anunciar_poke   ... and location = 'bag' and coalesce(locked,false) = false
+--   por_na_equipe   ... and location = 'bag'
+--   evoluir_poke    ... idem
+--
+-- Com um valor de `location` que nao e 'bag', o POKE reservado some de todas
+-- elas DE GRACA — nenhuma precisa aprender a palavra "troca". `snapshotToGame
+-- State` monta o estado do jogador filtrando 'team'/'bag', entao ele tambem
+-- some da tela sozinho, que e o comportamento certo: enquanto esta na mesa, ele
+-- nao esta com voce.
+--
+-- Com uma coluna booleana seria o contrario: cada leitura teria que LEMBRAR de
+-- filtrar, e a que esquecesse virava POKE duplicado — vendido pro sistema e
+-- entregue na troca.
+--
+-- ISTO PRECISA SER UMA MIGRATION SEPARADA. Postgres proibe USAR um valor de
+-- enum na mesma transacao em que ele foi adicionado ("unsafe use of new value
+-- of enum type"). A tabela da oferta e as RPCs que gravam 'troca' vao no
+-- arquivo seguinte, e nao aqui.
+alter type pokemon_location add value if not exists 'troca';
