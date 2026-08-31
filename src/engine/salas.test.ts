@@ -165,13 +165,22 @@ describe('salas', () => {
     expect(world.sala!.indice).toBe(0)
 
     // Congelado: um tick pequeno so desconta a contagem, nada mais muda.
+    //
+    // `silent: false` desde a PH-331, e a diferenca e o assunto do teste: a
+    // contagem regressiva existe pro JOGADOR ler o nome da area nova, entao
+    // simulacao silenciosa (resim do servidor, catch-up de aba oculta) passa a
+    // encurta-la pra zero — sem plateia nao ha o que esperar, e a espera custava
+    // a transicao inteira quando a janela de flush fechava no meio dela. Quem
+    // congela o mundo por 3 segundos e o jogo ao vivo, e e ele que este caso
+    // mede. O corte silencioso tem cobertura propria em
+    // `avancoDeSalaAtravessaAJanela.test.ts`.
     const enemiesAntes = world.enemies.length
-    tick(world, 0.1, gameState)
+    stepWorld(world, 0.1, gameState, { silent: false })
     expect(world.sala!.indice).toBe(0)
     expect(world.enemies.length).toBe(enemiesAntes)
 
     // Tick grande o bastante zera a contagem: sala nova, area do zero.
-    stepWorld(world, SALA_TRANSITION_COUNTDOWN, gameState, { silent: true })
+    stepWorld(world, SALA_TRANSITION_COUNTDOWN, gameState, { silent: false })
     expect(world.salaCountdownRemaining).toBeNull()
     expect(world.sala!.indice).toBe(1)
     expect(world.sala!.abates).toBe(0)
@@ -498,7 +507,13 @@ describe('quota de sala fechada atravessa a janela', () => {
     for (let i = 0; i < 50; i++) tick(world, 0.1, gameState)
 
     expect(world.sala!.indice, 'a sala nao avancou numa janela de 5s sem abate').toBe(1)
-    expect(world.sala!.abates).toBe(0)
+    expect(world.salaPendente, 'a transicao ficou pendurada').toBeNull()
+    // `abates` NAO e mais necessariamente 0 aqui (PH-331). A janela silenciosa
+    // deixou de esperar os 3s da contagem regressiva, entao a sala nova entra em
+    // vigor com ~4,8s de janela sobrando pro jogador farmar nela — e o contador
+    // legitimamente sai de zero. O que o teste garante e que ele foi ZERADO na
+    // troca (nao herdou os 30 da sala anterior), nao que nada aconteceu depois.
+    expect(world.sala!.abates).toBeLessThan(ABATES_POR_SALA)
   })
 
   it('sob autoridade remota a quota cheia NAO arma nada (quem decide e o servidor)', () => {
