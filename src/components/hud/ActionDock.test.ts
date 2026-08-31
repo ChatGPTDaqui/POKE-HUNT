@@ -37,8 +37,12 @@ describe('destinos da barra e da grade', () => {
     expect(new Set(telas).size).toBe(telas.length)
     // Bestiario, Especialidades e Tasks sairam daqui na PH-257: os tres ganharam
     // lugar fixo na coluna do canto superior direito.
+    //
+    // Troca entrou na PH-314, logo depois do Correio: as duas sao as telas
+    // "com outro jogador do outro lado", e e do Correio que o convite costuma
+    // sair.
     expect(telas).toEqual(
-      ['correio', 'calc', 'ranking', 'wiki', 'tutoriais', 'config'],
+      ['correio', 'troca', 'calc', 'ranking', 'wiki', 'tutoriais', 'config'],
     )
   })
 })
