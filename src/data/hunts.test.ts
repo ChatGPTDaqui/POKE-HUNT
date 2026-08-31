@@ -11,6 +11,7 @@ import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID } from './huntSpawnOve
 import { SPECIES, type Species } from './pokes'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
+import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL, huntId,
 } from './biomas'
@@ -264,6 +265,25 @@ describe('niveis', () => {
 })
 
 describe('pesos de spawn', () => {
+  // O PESO TEM QUE VIR DO DADO, E NAO DO FALLBACK.
+  //
+  // `huntSpawnOverrides.ts` resolve peso com `SPAWN_WEIGHT_BY_SPECIES[id] ??
+  // DEFAULT_WEIGHT`, e esse `??` e uma falha silenciosa por construcao: especie
+  // sem tier nao da erro, ela so passa a spawnar com peso "incomum" plano. Foi
+  // o que aconteceu com Hoenn inteira — `scripts/spawn-tiers-gen3.json` foi
+  // derivado em 25/08 e `gerar-spawn-tiers.mjs` nunca foi ligado nele, entao
+  // 125 das 353 especies com sub-bioma (35%) spawnavam com peso inventado por
+  // tres semanas, sem um sintoma sequer.
+  //
+  // Este teste e o alarme que faltava, e ele cobre a proxima geracao importada
+  // tambem: ela vai chegar exatamente do mesmo jeito (sprite e catalogo
+  // primeiro, tabela de tier depois).
+  it('toda especie com sub-bioma tem tier proprio, sem cair no fallback', () => {
+    const alocadas = [...new Set(Object.values(SUB_BIOMA_ESPECIES).flat())]
+    const semTier = alocadas.filter((id) => SPAWN_WEIGHT_BY_SPECIES[id] == null).sort()
+    expect(semTier).toEqual([])
+  })
+
   // A soma dos pesos e o denominador do `weightedPick`: peso zero (ou negativo,
   // ou NaN vindo de um encontro sem tier) faria uma especie nunca spawnar sem
   // erro nenhum, e uma hunt com soma zero travaria o sorteio.
