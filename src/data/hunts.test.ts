@@ -376,6 +376,75 @@ describe('pesos de spawn', () => {
     expect(erros).toEqual([])
   })
 
+  // NENHUMA ESPECIE PODE FICAR INALCANCAVEL.
+  //
+  // Este e o teste que a mudanca pra chance-por-tier exigia, e ele mede a coisa
+  // certa: nao a pior fatia de uma especie (que pode ser minuscula sem problema
+  // nenhum — Alakazam num vilarejo DEVE ser raro), e sim a MELHOR sala que
+  // existe pra ela no jogo inteiro. Se a melhor for perto de zero, a especie
+  // saiu do jogo na pratica, com sprite, Bestiario e tudo no lugar.
+  //
+  // O piso e 0,05% (uma aparicao a cada 2.000 abates, algo como 7 ciclos de
+  // hunt). Medido no dado atual, a mais dificil e Sceptile com 0,13% em
+  // mata_faixa3/forest — entao ha folga de 2,6x, e o teste reprova por regressao
+  // e nao por ficar apertado.
+  //
+  // O QUE ELE JA PEGOU: sem limite de razao no desempate, o tier do Gen1/Gen2
+  // (30:1) multiplicava o tier do PokeRogue (348:1) e a ponta sumia — Alakazam
+  // ficava com 0,0070% na melhor sala dele, uma aparicao a cada 14 mil abates.
+  // O teste de fatia por sala nao pegaria: aquele so olha o TETO.
+  it('toda especie tem alguma sala onde a chance dela nao e desprezivel', () => {
+    const PISO = 0.0005
+    const melhor = new Map<string, number>()
+    for (const [huntId, salas] of Object.entries(POOL_POR_SALA)) {
+      // O espelho do Pesadelo tem a mesma composicao com nivel deslocado; medir
+      // os dois so dobraria o custo do teste.
+      if (huntId.startsWith('nightmare_')) continue
+      const mapDef = MAPS[huntId]
+      for (const chave of Object.keys(salas)) {
+        for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+          const ctx = contextoDeSpawn(huntId, mapDef.levelRange, { chave, indice, abates: 0, ciclos: 0 }, mapDef.enemyPool)
+          const total = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
+          if (!(total > 0)) continue
+          for (const id of ctx.pool) {
+            const sp = ENCOUNTERS[id].speciesId
+            const fatia = ctx.peso(id) / total
+            if (fatia > (melhor.get(sp) ?? 0)) melhor.set(sp, fatia)
+          }
+        }
+      }
+    }
+    const invisiveis = [...melhor]
+      .filter(([, f]) => f < PISO)
+      .map(([sp, f]) => `${sp} = ${(f * 100).toFixed(4)}% na melhor sala`)
+      .sort()
+    expect(invisiveis).toEqual([])
+    // Contra o teste passar de vazio (POOL_POR_SALA quebrado, ctx.peso zerado).
+    expect(melhor.size).toBeGreaterThan(300)
+  })
+
+  // O sorteio da sala tem que fechar com o PESO DA SALA, e nao com o peso do
+  // encontro — sao numeros diferentes desde que a chance passou a vir do tier.
+  // O teste irmao logo acima mede `ENCOUNTERS[id].weight`, que hoje so vale no
+  // fallback sem sala.
+  it('todo pool de sala fecha o sorteio com o peso DA SALA', () => {
+    const erros: string[] = []
+    for (const [huntId, salas] of Object.entries(POOL_POR_SALA)) {
+      const mapDef = MAPS[huntId]
+      for (const chave of Object.keys(salas)) {
+        for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+          const ctx = contextoDeSpawn(huntId, mapDef.levelRange, { chave, indice, abates: 0, ciclos: 0 }, mapDef.enemyPool)
+          const soma = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
+          if (!(soma > 0)) erros.push(`${huntId}/${chave}#${indice} soma ${soma}`)
+          for (const id of ctx.pool) {
+            if (!(ctx.peso(id) > 0)) erros.push(`${huntId}/${chave}#${indice}/${ENCOUNTERS[id].speciesId} peso ${ctx.peso(id)}`)
+          }
+        }
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
   // O que o cartao da hunt mostra tem que ser uma distribuicao de verdade. Com
   // salas, a chance e P(sala) x P(especie | sala) somada sobre as salas — uma
   // conta facil de quebrar sem perceber (esquecer de normalizar por sala faz a

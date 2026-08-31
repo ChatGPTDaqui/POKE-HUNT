@@ -25,6 +25,14 @@
 //    Kadabra, Haunter, Wartortle, Croconaw, Seadra, Machoke, Nidorina. Sao 33
 //    no nosso roster. Sem herdar, sumiriam do jogo.
 //
+// 3. O TIER DE RARIDADE DO POKEROGUE PASSOU A SAIR DAQUI (antes era descartado).
+//    As pools do PokeRogue nao sao uma lista: sao NOVE listas por bioma, cinco
+//    de encontro selvagem (COMMON -> ULTRA_RARE) e quatro de chefe (BOSS ->
+//    BOSS_ULTRA_RARE). Este script achatava as nove numa lista so, e a chance de
+//    aparicao vinha de outro lugar (o tier de frequencia real do Gen1/Gen2).
+//    Agora as nove sao emitidas em `SUB_BIOMA_TIERS`: o tier decide a CHANCE
+//    (ver data/spawnPorTier.ts) e o Gen1/Gen2 vira desempate DENTRO do tier.
+//
 // Fora: os 11 lendarios (exclusivos das hunts BOSS — o PokeRogue da casa pra
 // eles, e a informacao fica no JSON pro dia que a gente quiser usar), os 3
 // iniciais base (so a tela de escolha) e NON_WILD_SPECIES (cassino/presente).
@@ -144,29 +152,64 @@ for (const [a, b] of Object.entries(evolui)) if (SPECIES[b]) pai[acha(a)] = acha
 const PR = JSON.parse(fs.readFileSync(ENTRADA, 'utf8'))
 const chaves = Object.keys(PR).filter((k) => !DESCARTADOS.has(k)).sort()
 
+// Os nove tiers do PokeRogue, na ordem do enum `BiomePoolTier` dele — a ordem
+// importa, e o indice E a raridade: menor = mais comum.
+const TIERS_SELVAGENS = ['COMMON', 'UNCOMMON', 'RARE', 'SUPER_RARE', 'ULTRA_RARE']
+const TIERS_DE_CHEFE = ['BOSS', 'BOSS_RARE', 'BOSS_SUPER_RARE', 'BOSS_ULTRA_RARE']
+
+// PRA ONDE UM CHEFE VAI NO POOL SELVAGEM.
+//
+// Decisao de desenho: forma final continua nascendo selvagem, e nao so como
+// Guardian/Lord de sala. Tirar o pool de chefe do selvagem deixaria 97 especies
+// (Gyarados, Tyranitar, Alakazam, Blastoise) aparecendo uma vez a cada 30
+// abates e com metade da chance de captura — e, pior, calaria a linha inteira
+// nas faixas altas: sem Gyarados selvagem, a linha Magikarp nao contribui NADA
+// na faixa III, porque Magikarp trava em [1,19].
+//
+// O que muda e a CHANCE: chefe entra no selvagem no degrau de raridade
+// equivalente, e nao no tier em que ele e chefe. `BOSS_ULTRA_RARE` cai junto com
+// `BOSS_SUPER_RARE` porque ULTRA_RARE ja e o ultimo degrau selvagem.
+const CHEFE_VIRA_SELVAGEM = { BOSS: 2, BOSS_RARE: 3, BOSS_SUPER_RARE: 4, BOSS_ULTRA_RARE: 4 }
+
 const foraDoRoster = new Set()
 const casaDireta = new Map() // especie -> Set(sub-bioma)
 const soChefe = new Map()    // especie -> Set(sub-bioma) onde ela SO era chefe
+const tierSelvagem = new Map() // sub-bioma -> Map(especie -> indice 0..4)
+const tierDeChefe = new Map()  // sub-bioma -> Map(especie -> indice 0..3)
 
 for (const chave of chaves) {
   const pools = PR[chave].pools
-  const selvagem = new Set()
-  const chefe = new Set()
+  const selvagem = new Map()
+  const chefe = new Map()
   for (const [tier, nomes] of Object.entries(pools)) {
+    const iSelvagem = TIERS_SELVAGENS.indexOf(tier)
+    const iChefe = TIERS_DE_CHEFE.indexOf(tier)
+    // Tier que nao e nenhum dos nove e dado novo do PokeRogue: estourar, e nao
+    // ignorar, senao ele some do jogo sem sintoma.
+    if (iSelvagem < 0 && iChefe < 0) throw new Error(`tier desconhecido em ${chave}: ${tier}`)
     for (const nome of nomes) {
       const nosso = PORNORM.get(norm(nome))
       if (!nosso) { foraDoRoster.add(nome); continue }
       if (!elegivel(nosso)) continue
       if (SAI_DO_SUB_BIOMA[chave]?.has(nosso)) continue
-      ;(tier.startsWith('BOSS') ? chefe : selvagem).add(nosso)
+      // `Math.min`: a mesma especie aparece em mais de um tier do mesmo bioma
+      // (Sableye e COMMON e BOSS no Abismo). Vale o mais comum dos dois.
+      const alvo = iSelvagem >= 0 ? selvagem : chefe
+      const i = iSelvagem >= 0 ? iSelvagem : iChefe
+      alvo.set(nosso, Math.min(alvo.get(nosso) ?? 9, i))
     }
   }
-  for (const sp of new Set([...selvagem, ...chefe])) {
+  tierSelvagem.set(chave, selvagem)
+  tierDeChefe.set(chave, chefe)
+  for (const sp of new Set([...selvagem.keys(), ...chefe.keys()])) {
     if (!casaDireta.has(sp)) casaDireta.set(sp, new Set())
     casaDireta.get(sp).add(chave)
     if (!selvagem.has(sp)) {
       if (!soChefe.has(sp)) soChefe.set(sp, new Set())
       soChefe.get(sp).add(chave)
+      // Chefe puro tambem nasce selvagem, num degrau equivalente.
+      const tierChefe = TIERS_DE_CHEFE[chefe.get(sp)]
+      selvagem.set(sp, CHEFE_VIRA_SELVAGEM[tierChefe])
     }
   }
 }
@@ -211,6 +254,65 @@ if (orfas.length) {
 }
 
 // ---------------------------------------------------------------------------
+// tier das herdadas
+// ---------------------------------------------------------------------------
+// A especie herdada nao tem tier proprio no PokeRogue (ele nunca poe estagio do
+// meio numa pool). Ela pega o tier de um PARENTE que tenha casa direta ali,
+// deslocado pela DIFERENCA DE PROFUNDIDADE EVOLUTIVA entre os dois.
+//
+// O deslocamento tem os dois sinais, e isso e o ponto:
+//
+//   Oddish COMMON no town  ->  Gloom UNCOMMON (+1)  ->  Vileplume RARE (+2)
+//   Butterfree na Floresta ->  Metapod (-1)  ->  Caterpie (-2), mais COMUM
+//
+// Uma regra so de "+1 pra quem herda" faria Caterpie nascer mais raro que
+// Butterfree na Floresta, que e o mundo ao contrario. O que a regra captura e
+// que raridade acompanha estagio evolutivo — que e exatamente como o PokeRogue
+// organiza as pools dele (forma base em COMMON, forma final em BOSS).
+//
+// Entre varios parentes com casa direta ali, vale o resultado MAIS COMUM: se
+// existe um caminho pelo qual a especie e comum naquele lugar, ela e comum.
+const profundidade = {}
+for (const sp of Object.keys(SPECIES)) {
+  let d = 0
+  let atual = sp
+  const visto = new Set([sp])
+  // Sobe ate a raiz da linha contando passos.
+  for (let i = 0; i < 10; i++) {
+    const anterior = Object.keys(evolui).find((k) => evolui[k] === atual && !visto.has(k))
+    if (!anterior) break
+    visto.add(anterior)
+    atual = anterior
+    d++
+  }
+  profundidade[sp] = d
+}
+
+const membrosDaFamilia = new Map()
+for (const sp of Object.keys(SPECIES)) {
+  const f = acha(sp)
+  if (!membrosDaFamilia.has(f)) membrosDaFamilia.set(f, [])
+  membrosDaFamilia.get(f).push(sp)
+}
+
+/** Indice de tier selvagem de `sp` em `chave`, direto ou herdado da familia. */
+function tierDe(chave, sp) {
+  const direto = tierSelvagem.get(chave)
+  if (direto.has(sp)) return direto.get(sp)
+  let melhor = null
+  for (const parente of membrosDaFamilia.get(acha(sp)) ?? []) {
+    if (!direto.has(parente)) continue
+    const deslocado = direto.get(parente) + (profundidade[sp] - profundidade[parente])
+    const preso = Math.max(0, Math.min(TIERS_SELVAGENS.length - 1, deslocado))
+    melhor = melhor == null ? preso : Math.min(melhor, preso)
+  }
+  // Sem parente com casa direta aqui e impossivel: a especie so esta neste
+  // sub-bioma porque a familia dela esta. Estourar em vez de chutar COMMON.
+  if (melhor == null) throw new Error(`${sp} esta em ${chave} sem nenhum parente com tier direto`)
+  return melhor
+}
+
+// ---------------------------------------------------------------------------
 // emissao
 // ---------------------------------------------------------------------------
 const porSubBioma = {}
@@ -229,7 +331,12 @@ const links = Object.fromEntries(
   chaves.map((c) => [c, PR[c].links.filter((l) => !DESCARTADOS.has(l.bioma))])
 )
 
+const NL = String.fromCharCode(10)
+const INDENTE = '  '
 const lista = (arr) => (arr.length === 0 ? '[]' : `[\n    ${arr.map((s) => `'${s}'`).join(',\n    ')},\n  ]`)
+// Mesma coisa um nivel pra dentro: `SUB_BIOMA_TIERS` e sub-bioma -> tier ->
+// lista, entao as listas dele ficam dois niveis abaixo da raiz do objeto.
+const listaAninhada = (arr) => lista(arr).split(NL).join(NL + INDENTE)
 
 // WeatherType do PokeRogue -> `ClimaTipo` do nosso motor, mais `limpo` pro
 // NONE deles (PH-140). SNOW e HAIL sao climas DIFERENTES e nao viram os dois
@@ -267,14 +374,44 @@ const linhas = [
   `// ${chaves.length} sub-biomas, ${casa.size} especies alocadas`,
   `// (${casaDireta.size} com casa direta no PokeRogue, ${herdadas.length} herdadas da linha evolutiva).`,
   '//',
-  '// A CHANCE de aparicao NAO vem daqui: peso de spawn continua sendo o',
-  '// `spawn_tier` real do Gen1/Gen2 (scripts/derive-spawn-tiers.js) e a chance',
-  '// de a sala cair neste sub-bioma vive em data/biomas.ts, escrita a mao.',
-  "import type { SubBiomaClima, SubBiomaEspecies, SubBiomaLinks } from './types';",
+  '// A CHANCE de aparicao SAI DAQUI, de `SUB_BIOMA_TIERS`: o tier do PokeRogue',
+  '// decide a fatia (ver data/spawnPorTier.ts), o `spawn_tier` real do Gen1/Gen2',
+  '// (scripts/derive-spawn-tiers.js) desempata DENTRO do tier, e a chance de a',
+  '// sala cair neste sub-bioma vive em data/biomas.ts, escrita a mao.',
+  "import type { SubBiomaClima, SubBiomaEspecies, SubBiomaLinks, SubBiomaTiers } from './types';",
   '',
   '/** Especies do nosso catalogo que podem aparecer em cada sub-bioma. */',
   'export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {',
   ...chaves.map((c) => `  '${c}': ${lista(porSubBioma[c])},`),
+  '};',
+  '',
+  '/**',
+  ' * As NOVE pools do PokeRogue por sub-bioma, que e de onde sai a chance de',
+  ' * aparicao (data/spawnPorTier.ts) e o elenco de Guardian/Lord da sala.',
+  ' *',
+  ' * As cinco selvagens sao o pool de spawn e cobrem TODA especie de',
+  ' * `SUB_BIOMA_ESPECIES` — as herdadas entram com o tier de um parente,',
+  ' * deslocado pela diferenca de estagio evolutivo, e o chefe puro entra num',
+  ' * degrau equivalente (ver o gerador).',
+  ' *',
+  ' * As quatro de chefe sao SO dado direto do PokeRogue, sem heranca: Guardian e',
+  ' * Lord tem que ser um chefe de verdade daquele lugar, nao um parente dele.',
+  ' * Por isso elas podem vir VAZIAS, e quem consome resolve o vazio descendo de',
+  ' * degrau (o proprio PokeRogue faz assim, ver arena.ts#randomSpecies).',
+  ' */',
+  'export const SUB_BIOMA_TIERS: SubBiomaTiers = {',
+  ...chaves.flatMap((c) => {
+    const selvagens = TIERS_SELVAGENS.map((t, i) => {
+      const arr = porSubBioma[c].filter((sp) => tierDe(c, sp) === i).sort((a, b) => dex(a) - dex(b))
+      return `    ${t}: ${listaAninhada(arr)},`
+    })
+    const chefes = TIERS_DE_CHEFE.map((t, i) => {
+      const arr = [...(tierDeChefe.get(c) ?? new Map())]
+        .filter(([, idx]) => idx === i).map(([sp]) => sp).sort((a, b) => dex(a) - dex(b))
+      return `    ${t}: ${listaAninhada(arr)},`
+    })
+    return [`  '${c}': {`, ...selvagens, ...chefes, '  },']
+  }),
   '};',
   '',
   '/**',

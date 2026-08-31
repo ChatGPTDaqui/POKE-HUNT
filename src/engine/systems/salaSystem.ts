@@ -28,6 +28,8 @@ import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA, aparaOTeto } from '@/data/huntSpawnOverrides'
+import { pesosPorTier, tierDaEspecie, TIERS_SELVAGENS } from '@/data/spawnPorTier'
+import { SPAWN_WEIGHT_BY_SPECIES } from '@/data/generated/spawnTiers.generated'
 import { getEncounter } from '@/data/enemies'
 import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
 import type { MapItemDrop } from '@/data/generated/types'
@@ -192,18 +194,41 @@ export interface ContextoDeSpawn {
 const cacheDePesos = new Map<string, Map<string, number>>()
 
 /**
- * Pesos aparados do pool ativo. Memoizado porque `contextoDeSpawn` roda a cada
- * spawn (e milhares de vezes por flush no farm offline) e a resposta so depende
- * de (mapa, sub-bioma, indice da sala) — a janela de nivel sai do indice, e o
- * pool sai dos dois.
+ * Pesos do pool ativo: tier do PokeRogue decide a fatia, tier real de encontro
+ * dos jogos desempata dentro dela, teto de fatia apara o que sobrar.
  *
- * O cache e limitado por construcao: as chaves possiveis sao os mapas com sala
- * vezes os sub-biomas deles vezes `SALAS_POR_HUNT`.
+ * A CHANCE VEM DO TIER, E NAO MAIS DO PESO DO ENCONTRO. O peso guardado em
+ * `encounter.weight` e a frequencia real da especie nos jogos (Gen1/Gen2 por
+ * disassembly, Gen3 por pokeemerald) e ele continua valendo onde nao ha
+ * sub-bioma — hunt inicial, hunts BOSS, Campeao Lance. Dentro de uma sala ele
+ * vira DESEMPATE: quem manda e o tier que o PokeRogue da aquela especie
+ * NAQUELE lugar, que e a informacao que faltava (o mesmo Zubat e comum na
+ * caverna e nao existe na praia, e um numero global nao sabe disso).
+ *
+ * Especie sem tier no sub-bioma cai em COMMON. Nao e defesa: acontece de
+ * verdade quando o pool da sala nao tem ninguem na janela de nivel e o fallback
+ * traz o `enemyPool` da hunt inteira, com especie de sub-bioma vizinho junto.
+ *
+ * Memoizado porque `contextoDeSpawn` roda a cada spawn (milhares de vezes por
+ * flush no farm offline) e a resposta so depende de (mapa, sub-bioma, indice da
+ * sala) — a janela de nivel sai do indice, e o pool sai dos dois. O cache e
+ * limitado por construcao: mapas com sala x sub-biomas deles x `SALAS_POR_HUNT`.
  */
-function pesosDaSala(chave: string, pool: string[]): Map<string, number> {
+function pesosDaSala(chave: string, subBioma: string, pool: string[]): Map<string, number> {
   const pronto = cacheDePesos.get(chave)
   if (pronto) return pronto
-  const pesos = aparaOTeto(new Map(pool.map((id) => [id, getEncounter(id)?.weight ?? 0])))
+  const pesos = aparaOTeto(pesosPorTier(
+    pool,
+    (id) => {
+      const sp = getEncounter(id)?.speciesId
+      const tier = sp ? tierDaEspecie(subBioma, sp) : null
+      return tier == null ? 0 : TIERS_SELVAGENS.indexOf(tier)
+    },
+    (id) => {
+      const sp = getEncounter(id)?.speciesId
+      return sp ? SPAWN_WEIGHT_BY_SPECIES[sp] ?? 0 : 0
+    },
+  ))
   cacheDePesos.set(chave, pesos)
   return pesos
 }
@@ -232,7 +257,7 @@ export function contextoDeSpawn(
     return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0]
   })
   const ativo = naJanela.length > 0 ? naJanela : pool
-  const pesos = pesosDaSala(`${mapId}|${sala.chave}|${sala.indice}`, ativo)
+  const pesos = pesosDaSala(`${mapId}|${sala.chave}|${sala.indice}`, sala.chave, ativo)
   return { pool: ativo, janela, peso: (id) => pesos.get(id) ?? 0 }
 }
 
