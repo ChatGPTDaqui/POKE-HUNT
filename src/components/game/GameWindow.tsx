@@ -11,6 +11,7 @@
 import { useCallback, useEffect, type CSSProperties, type ReactNode } from 'react'
 import { X } from '@phosphor-icons/react'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
+import { useFecharComEsc } from '@/hooks/useFecharComEsc'
 import type { WindowKey } from '@/stores/uiStore'
 import { GameIconButton } from './controls'
 import { cn } from '@/lib/utils'
@@ -76,6 +77,13 @@ export function GameWindow({
   // `[data-keep-open]` marca quem NAO deve disparar o fechamento: os botoes de
   // menu ja alternam a tela por conta propria, e fechar aqui antes do onClick
   // deles transformaria "clicar de novo pra fechar" em "fecha e reabre".
+  // ESC fecha a janela de cima (PH-376). O `zIndex` e a prioridade: com o
+  // perfil do POKE (45) aberto sobre a Loja (31), o primeiro ESC fecha o perfil
+  // e o segundo a Loja. Vale pra TODA janela, inclusive as que nao tem backdrop
+  // (o painel Auto), porque o problema nao e o escurecimento — e nao haver
+  // caminho de teclado nenhum.
+  useFecharComEsc(onClose, zIndex)
+
   const fechaFora = fecharAoTocarFora ?? !!backdrop
   useEffect(() => {
     if (!fechaFora) return
