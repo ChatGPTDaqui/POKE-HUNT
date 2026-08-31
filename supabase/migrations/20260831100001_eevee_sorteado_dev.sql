@@ -115,6 +115,13 @@ revoke execute on function dev._sortear_eevee_do_lance() from authenticated;
 -- presente, ele viaja na receita e diz a `coletar_anexo_correio` qual POKE
 -- apagar NA MESMA TRANSACAO em que o novo nasce. O porque disso nao ser um
 -- `delete` solto na migration esta explicado no par 20260831110000.
+--
+-- O DROP VEM PRIMEIRO, e a ordem nao e estetica. A assinatura nova tem DEFAULT
+-- no segundo argumento, entao enquanto as duas coexistissem uma chamada de um
+-- argumento so seria ambigua ("function is not unique"). Criar antes e dropar
+-- depois deixaria essa janela aberta dentro da propria transacao.
+drop function if exists dev._conceder_eevee_do_lance(uuid);
+
 create or replace function dev._conceder_eevee_do_lance(
   p_user_id uuid,
   p_substitui_poke_uid uuid default null
@@ -162,11 +169,6 @@ $$;
 revoke all on function dev._conceder_eevee_do_lance(uuid, uuid) from public;
 revoke execute on function dev._conceder_eevee_do_lance(uuid, uuid) from anon;
 revoke execute on function dev._conceder_eevee_do_lance(uuid, uuid) from authenticated;
-
--- A assinatura de 1 argumento de 20260828230000 nao e mais chamada por ninguem
--- (o trigger abaixo passa a usar a de 2). Ela some pra nao sobrar rota antiga
--- com a receita congelada dentro.
-drop function if exists dev._conceder_eevee_do_lance(uuid);
 
 -- O trigger e o mesmo; so a assinatura chamada mudou.
 create or replace function dev._recompensa_do_hall_da_fama()

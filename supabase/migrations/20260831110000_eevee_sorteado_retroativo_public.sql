@@ -58,10 +58,24 @@
 -- reconcede pra esse jogador — ela avisa e passa. Reconceder ali daria dois
 -- Eevees, e dois Eevees e pior que um Eevee velho.
 --
--- Estado medido antes de escrever (producao, 2026-08-31): 1 concessao
--- (`Vinny`), carta coletada em 01:19:21, Eevee `c35abeb0-…` com `created_at`
--- identico ao `anexo_coletado_em` — a coleta cria o POKE na MESMA transacao do
--- claim, entao os dois carimbos batem. `dev`: nenhuma concessao.
+-- Estado medido em producao no dia (2026-08-31): DUAS concessoes.
+--
+--   Vinny    carta 01:18:00, coletada 01:19:21, Eevee `c35abeb0-…`
+--   Alfafis  carta 14:09:53, coletada 14:10:05, Eevee `f5b2e141-…`
+--
+-- Nos dois, `pokemon_instances.created_at` e IDENTICO ao `anexo_coletado_em` da
+-- carta — a coleta cria o POKE na mesma transacao do claim, entao os carimbos
+-- batem. `dev`: nenhuma concessao.
+--
+-- A segunda concessao apareceu DEPOIS de esta migration comecar a ser escrita,
+-- e ela e a razao de o laco ter sido revisado: com um jogador so, o bug de
+-- variavel de laco stale (ver `not found` abaixo) nunca apareceria.
+--
+-- Achado ao medir, e ele muda o que da pra usar como filtro: os dois POKE tem
+-- `nature = 'serious'` no banco, e nao NULL — a RPC nunca gravou natureza, mas
+-- o flush do cliente escreveu o default dele por cima depois. Identificar o
+-- POKE por `nature is null` NAO funcionaria; `trait is null` funciona (o
+-- cliente resolve a habilidade por fallback e nunca a persiste).
 
 begin;
 
@@ -85,11 +99,17 @@ begin
         and de_id is null
         and anexo_poke is not null
         and anexo_poke->>'speciesId' = 'eevee'
-        and not (anexo_poke ? 'nature')
+        and anexo_poke->'nature' is null
       order by created_at
       limit 1;
 
-    if v_carta is null then
+    -- `not found`, e NAO `v_carta is null`: quando o SELECT INTO nao acha linha,
+    -- o PL/pgSQL deixa a variavel COMO ESTAVA — na segunda volta do laco ela
+    -- ainda teria a carta do jogador anterior, e este jogador levaria a troca
+    -- do outro. `FOUND` e o unico sinal que nao carrega estado de iteracao.
+    -- (E, de quebra, `record IS NULL` tem a armadilha de exigir TODOS os campos
+    -- nulos — a mesma que quebrou o escrow do Mercado.)
+    if not found then
       -- Nada congelado pra este jogador: ou ja foi trocado (segunda execucao),
       -- ou a concessao dele nunca chegou a virar carta.
       continue;
@@ -100,7 +120,7 @@ begin
       -- dentro dela esta obsoleta) e reconcede sem substituicao.
       delete from public.mail_messages where id = v_carta.id;
       delete from public.recompensa_concedida where user_id = v_user_id and chave = 'eevee_do_lance';
-      if public._conceder_eevee_do_lance(v_user_id, null) then
+      if public._conceder_eevee_do_lance(v_user_id, null::uuid) then
         v_reenviados := v_reenviados + 1;
       end if;
       continue;
@@ -111,7 +131,7 @@ begin
     -- carta sao o mesmo instante — e o casamento mais preciso que existe aqui.
     -- Os outros filtros (especie, nivel, IVs da receita, `trait is null`)
     -- entram como cinto de seguranca, nao como identificacao principal.
-    select count(*), min(id) into v_candidatos, v_poke_id
+    select count(*) into v_candidatos
       from public.pokemon_instances
       where user_id = v_user_id
         and species_id = 'eevee'
@@ -128,6 +148,17 @@ begin
       v_pulados := v_pulados + 1;
       continue;
     end if;
+
+    -- Zerado antes do select pelo mesmo motivo do `not found` acima: variavel de
+    -- laco que o SELECT INTO nao alcanca guarda o valor da volta anterior.
+    v_poke_id := null;
+    select id into v_poke_id
+      from public.pokemon_instances
+      where user_id = v_user_id
+        and species_id = 'eevee'
+        and created_at = v_carta.anexo_coletado_em
+        and trait is null
+        and level = coalesce((v_carta.anexo_poke->>'level')::int, 25);
 
     -- A carta velha SAI. Ela diz "colete abaixo" sobre um anexo que ja foi
     -- entregue e cujo POKE esta sendo revogado; deixa-la ao lado da nova, com o

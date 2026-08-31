@@ -26,11 +26,17 @@ begin
         and de_id is null
         and anexo_poke is not null
         and anexo_poke->>'speciesId' = 'eevee'
-        and not (anexo_poke ? 'nature')
+        and anexo_poke->'nature' is null
       order by created_at
       limit 1;
 
-    if v_carta is null then
+    -- `not found`, e NAO `v_carta is null`: quando o SELECT INTO nao acha linha,
+    -- o PL/pgSQL deixa a variavel COMO ESTAVA — na segunda volta do laco ela
+    -- ainda teria a carta do jogador anterior, e este jogador levaria a troca
+    -- do outro. `FOUND` e o unico sinal que nao carrega estado de iteracao.
+    -- (E, de quebra, `record IS NULL` tem a armadilha de exigir TODOS os campos
+    -- nulos — a mesma que quebrou o escrow do Mercado.)
+    if not found then
       -- Nada congelado pra este jogador: ou ja foi trocado (segunda execucao),
       -- ou a concessao dele nunca chegou a virar carta.
       continue;
@@ -41,7 +47,7 @@ begin
       -- dentro dela esta obsoleta) e reconcede sem substituicao.
       delete from dev.mail_messages where id = v_carta.id;
       delete from dev.recompensa_concedida where user_id = v_user_id and chave = 'eevee_do_lance';
-      if dev._conceder_eevee_do_lance(v_user_id, null) then
+      if dev._conceder_eevee_do_lance(v_user_id, null::uuid) then
         v_reenviados := v_reenviados + 1;
       end if;
       continue;
@@ -52,7 +58,7 @@ begin
     -- carta sao o mesmo instante — e o casamento mais preciso que existe aqui.
     -- Os outros filtros (especie, nivel, IVs da receita, `trait is null`)
     -- entram como cinto de seguranca, nao como identificacao principal.
-    select count(*), min(id) into v_candidatos, v_poke_id
+    select count(*) into v_candidatos
       from dev.pokemon_instances
       where user_id = v_user_id
         and species_id = 'eevee'
@@ -69,6 +75,17 @@ begin
       v_pulados := v_pulados + 1;
       continue;
     end if;
+
+    -- Zerado antes do select pelo mesmo motivo do `not found` acima: variavel de
+    -- laco que o SELECT INTO nao alcanca guarda o valor da volta anterior.
+    v_poke_id := null;
+    select id into v_poke_id
+      from dev.pokemon_instances
+      where user_id = v_user_id
+        and species_id = 'eevee'
+        and created_at = v_carta.anexo_coletado_em
+        and trait is null
+        and level = coalesce((v_carta.anexo_poke->>'level')::int, 25);
 
     -- A carta velha SAI. Ela diz "colete abaixo" sobre um anexo que ja foi
     -- entregue e cujo POKE esta sendo revogado; deixa-la ao lado da nova, com o

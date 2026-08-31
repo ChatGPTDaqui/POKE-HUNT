@@ -233,7 +233,16 @@ describe.each(['public', 'dev'] as const)('a troca retroativa em %s', (schema) =
   })
 
   it('so age sobre carta com receita CONGELADA — e o que a torna idempotente', () => {
-    expect(sql).toContain("not (anexo_poke ? 'nature')")
+    // `-> 'nature' is null` em vez do operador `?`: o mesmo teste com menos
+    // dependencia de como o driver do CLI trata `?` num arquivo de migration.
+    expect(sql).toContain("anexo_poke->'nature' is null")
+  })
+
+  it('usa `not found`, e nao `record is null`, pra detectar carta ausente', () => {
+    // Num laco, SELECT INTO que nao acha linha deixa a variavel COMO ESTAVA: a
+    // segunda volta leria a carta do jogador anterior e trocaria o POKE errado.
+    expect(sql).toContain('if not found then')
+    expect(sql).not.toMatch(/if v_carta is null then/)
   })
 
   it('nao reconcede quando o POKE entregue nao e identificavel com certeza', () => {
