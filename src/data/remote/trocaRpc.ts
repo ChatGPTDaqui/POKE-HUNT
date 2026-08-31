@@ -19,7 +19,7 @@
 // achou no chat mundial e que o Correio evita do mesmo jeito.
 //
 // A LEITURA e RLS-direta: a policy da tabela ja limita a linha a quem esta nela.
-import { supabase } from '@/lib/supabase'
+import { schema, supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import { ESTADOS_VIVOS, type EstadoDeTroca, type TipoDeOferta } from '@/data/troca'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -166,7 +166,15 @@ export async function minhaTrocaViva(): Promise<SessaoDeTroca | null> {
 // que o chamador precisa depois de mexer na mesa e a `versao` nova, e devolver
 // a linha obrigaria uma segunda ida ao banco so pra descobri-la.
 
-/** Uma linha da mesa: um POKE, ou uma pilha de um item. */
+/**
+ * Uma linha da mesa: um POKE, ou uma pilha de um item.
+ *
+ * OS CAMPOS DO POKE SAO COPIA, NAO JUNCAO (PH-314). A RLS de
+ * `pokemon_instances` tem uma policy so — "o jogador le os proprios POKEs" —
+ * entao ler a linha original do outro lado e impossivel, e ver o que se vai
+ * RECEBER e o ponto da troca. `por_poke_na_mesa` copia estes cinco campos no
+ * momento em que o POKE entra, como `market_listings` ja faz ha meses.
+ */
 export interface LinhaDaMesa {
   id: string
   sessaoId: string
@@ -175,6 +183,11 @@ export interface LinhaDaMesa {
   pokeUid: string | null
   itemId: string | null
   quantidade: number
+  speciesId: string | null
+  nivel: number | null
+  shiny: boolean
+  raridade: string | null
+  ivPercent: number | null
 }
 
 interface LinhaDeOfertaNoBanco {
@@ -185,6 +198,11 @@ interface LinhaDeOfertaNoBanco {
   poke_uid: string | null
   item_id: string | null
   quantidade: number
+  species_id: string | null
+  level: number | null
+  is_shiny: boolean | null
+  rarity: string | null
+  iv_percent: number | null
 }
 
 function daLinhaDaMesa(l: LinhaDeOfertaNoBanco): LinhaDaMesa {
@@ -196,6 +214,11 @@ function daLinhaDaMesa(l: LinhaDeOfertaNoBanco): LinhaDaMesa {
     pokeUid: l.poke_uid,
     itemId: l.item_id,
     quantidade: l.quantidade,
+    speciesId: l.species_id,
+    nivel: l.level,
+    shiny: l.is_shiny ?? false,
+    raridade: l.rarity,
+    ivPercent: l.iv_percent,
   }
 }
 
@@ -395,4 +418,36 @@ export async function desconfirmarTroca(sessaoId: string): Promise<SessaoDeTroca
  */
 function aposATrocaExecutar(): void {
   useMochilaStore.getState().invalidar()
+}
+
+// ---------------------------------------------------------------------------
+// Tempo real (PH-314, fatia 4)
+// ---------------------------------------------------------------------------
+
+/**
+ * Avisa quando QUALQUER coisa da minha mesa muda — inclusive do outro lado.
+ *
+ * ASSINA SO `troca_sessao`, e isso cobre a oferta inteira. O trigger
+ * `troca_oferta_versao` (fatia 2) faz um UPDATE na sessao a cada insert, update
+ * ou delete de linha de oferta, porque e assim que a versao sobe. Entao toda
+ * alteracao da mesa ja produz um evento aqui, sem excecao.
+ *
+ * Publicar `troca_oferta` junto nao daria nada de graca e traria um problema:
+ * com `replica identity` default, o DELETE so leva a chave, e o Realtime
+ * descarta o evento por nao conseguir avaliar a RLS. Ver a migration da PH-314.
+ *
+ * SEM FILTRO no `postgres_changes`. A policy de `troca_sessao` ja limita as
+ * linhas aos dois participantes, e um filtro por `anfitriao_id` deixaria de
+ * fora justamente a metade das mesas em que o jogador e o convidado.
+ *
+ * O callback NAO recebe a linha: quem escuta faz refetch. Aplicar o payload
+ * seria confiar num estado que chegou por fora do caminho de leitura, e a
+ * confirmacao da fatia 3 depende da `versao` estar certa.
+ */
+export function assinarMinhaTroca(userId: string, aoMudar: () => void): () => void {
+  const canal = supabase
+    .channel(`troca-${userId}`)
+    .on('postgres_changes', { event: '*', schema, table: 'troca_sessao' }, () => aoMudar())
+    .subscribe()
+  return () => { void supabase.removeChannel(canal) }
 }

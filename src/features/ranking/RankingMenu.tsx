@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { CriterioPoke, EntradaTreinador, EntradaPoke, EntradaHall } from '@/data/remote/servidor'
 import * as rankingRpc from '@/data/remote/rankingRpc'
 import { usePedirAmizade } from '@/features/correio/usePedirAmizade'
+import { BotaoConvidarTroca } from '@/features/troca/BotaoConvidarTroca'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
@@ -149,6 +150,7 @@ function AbaTreinadores() {
                 que sao o conteudo. `Linha` sem `onClick` continua sendo `div`,
                 entao nao ha botao dentro de botao. */}
             <BotaoAdicionarAmigo nick={e.nome} />
+            <BotaoConvidarTroca userId={e.userId} />
           </Linha>
         ))}
       </div>
