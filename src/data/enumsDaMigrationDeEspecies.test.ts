@@ -125,8 +125,12 @@ describe.each(ALVOS)('%s — todo literal de enum é válido', (_nome, cru) => {
     // Guarda do lado positivo: só provar que `'status'` não aparece deixaria
     // passar um gerador que simplesmente PARASSE de emitir os golpes de status.
     // Aqui se cobra que eles estão lá, na categoria que o banco aceita.
-    expect(sql).not.toContain("'status'::public.move_category")
-    expect(sql).toContain("'physical'::public.move_category")
+    // O schema vem do próprio arquivo: `dev` tem os próprios enums (ver o caso
+    // "o cast de enum usa o SCHEMA do próprio arquivo"), então fixar `public`
+    // aqui reprovaria o espelho correto.
+    const esquema = _nome.includes('_dev.sql') ? 'dev' : 'public'
+    expect(sql).not.toContain(`'status'::${esquema}.move_category`)
+    expect(sql).toContain(`'physical'::${esquema}.move_category`)
     for (const golpeDeStatus of ['acupressure', 'attract', 'rain_dance', 'swords_dance']) {
       expect(sql, `${golpeDeStatus} sumiu da migration`).toContain(`('${golpeDeStatus}',`)
     }
@@ -167,6 +171,44 @@ describe.each(ALVOS)('%s — todo literal de enum é válido', (_nome, cru) => {
       .map(([, c]) => c)
     expect(emitidas.length, 'nenhuma curva lida — o regex mudou').toBeGreaterThan(100)
     expect([...new Set(emitidas)].filter((c) => !permitidas.has(c))).toEqual([])
+  })
+
+  it('o cast de enum usa o SCHEMA do próprio arquivo, não `public` fixo', () => {
+    // PH-336, TERCEIRA falha de deploy da mesma leva — e a única que deixou o
+    // banco em estado misto por alguns minutos:
+    //
+    //     ERROR: column "type" is of type dev.element_type
+    //            but expression is of type element_type (SQLSTATE 42804)
+    //
+    // `dev` tem os PRÓPRIOS enums (`dev.element_type`, `dev.move_category`,
+    // `dev.move_target`) e as colunas de `dev.species`/`dev.moves` usam eles. O
+    // Postgres não converte entre dois enums de mesmo nome em schemas
+    // diferentes: é erro de TIPO, não de valor, e nenhuma conferência de VALOR
+    // (que é o que os casos acima fazem) o alcança.
+    //
+    // O par é aplicado em DUAS transações, não uma — por isso o `_public`
+    // comitou com 386 espécies enquanto o `_dev` ficou em 251. Esta é a única
+    // falha desta leva que produziu divergência real entre os schemas.
+    //
+    // CUIDADO AO GENERALIZAR: enum por schema NÃO é regra do banco inteiro.
+    // `dev.species_evolution_options.stone_type` é `public.element_type` — daí
+    // `gerar-migration-evolucoes.mjs` fixar `public` ali estar CERTO, e o
+    // espelho `_dev` daquele par ter 21 casts para `public.element_type` de
+    // propósito. A verdade é coluna por coluna, e a fonte é
+    // `information_schema.columns.udt_schema`. Este caso cobre só as colunas de
+    // `species`/`moves`, que é o que este gerador escreve.
+    const esperado = _nome.includes('_dev.sql') ? 'dev' : 'public'
+    const outro = esperado === 'dev' ? 'public' : 'dev'
+    for (const enumeracao of ['element_type', 'move_category', 'move_target']) {
+      expect(
+        sql,
+        `${enumeracao} devia castar para ${esperado}.* neste arquivo`,
+      ).toContain(`::${esperado}.${enumeracao}`)
+      expect(
+        sql,
+        `${enumeracao} castado para ${outro}.* — foi assim que o deploy caiu na terceira vez`,
+      ).not.toContain(`::${outro}.${enumeracao}`)
+    }
   })
 
   it('o `spawn_tier` de toda espécie é uma das cinco chaves de spawn_tiers', () => {

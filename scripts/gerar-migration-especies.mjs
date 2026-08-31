@@ -165,23 +165,47 @@ function linhasDeGolpe(schema) {
     const aoe = g.alvo === 'aoe'
     return '  (' + [
       lit(g.chave), lit(g.nome),
-      `${lit(g.tipo)}::${schema === 'public' ? 'public' : 'public'}.element_type`,
-      `${lit(categoriaDoBanco(g.categoria))}::public.move_category`,
+      `${lit(g.tipo)}::${schema}.element_type`,
+      `${lit(categoriaDoBanco(g.categoria))}::${schema}.move_category`,
       g.poder, g.precisao, g.pp,
-      `${lit(g.alvo)}::public.move_target`,
+      `${lit(g.alvo)}::${schema}.move_target`,
       aoe ? AOE_RADIUS : 'null',
     ].join(', ') + ')'
   }).join(',\n')
 }
 
-function linhasDeEspecie() {
+/**
+ * O ENUM É POR SCHEMA, e assumir `public` derrubou o deploy uma terceira vez
+ * (PH-336).
+ *
+ *     ERROR: column "type" is of type dev.element_type
+ *            but expression is of type element_type (SQLSTATE 42804)
+ *
+ * `dev` tem os PRÓPRIOS enums — `dev.element_type`, `dev.move_category`,
+ * `dev.move_target` — e as colunas de `dev.species`/`dev.moves` usam eles.
+ * Castar para `public.*` no espelho de `dev` é erro de TIPO, não de valor: o
+ * Postgres não converte entre dois enums de mesmo nome em schemas diferentes.
+ *
+ * E o pior é o que essa falha revelou: ela só apareceu DEPOIS de o arquivo
+ * `_public` ter comitado, deixando os dois schemas divergentes por alguns
+ * minutos (386 espécies em `public`, 251 em `dev`). O par é aplicado em duas
+ * transações, não uma.
+ *
+ * ATENÇÃO À EXCEÇÃO, medida no banco: `dev.species_evolution_options.stone_type`
+ * é `public.element_type`, e não `dev.element_type`. Por isso
+ * `gerar-migration-evolucoes.mjs` acerta ao fixar `public` ali — o que parecia
+ * descuido naquele arquivo está certo para AQUELA coluna. Enum por schema não é
+ * regra geral do banco; é coluna por coluna, e a fonte é
+ * `information_schema.columns.udt_schema`.
+ */
+function linhasDeEspecie(schema) {
   return novas.map((e) => {
     const tier = tierPorEspecie[e.chave]
     if (!tier) throw new Error(`especie sem spawn tier: ${e.chave}`)
     return '  (' + [
       lit(e.chave), e.dex, lit(e.nome),
-      `${lit(e.tipo1)}::public.element_type`,
-      e.tipo2 ? `${lit(e.tipo2)}::public.element_type` : 'null::public.element_type',
+      `${lit(e.tipo1)}::${schema}.element_type`,
+      e.tipo2 ? `${lit(e.tipo2)}::${schema}.element_type` : `null::${schema}.element_type`,
       e.base.hp, e.base.atkFis, e.base.atkEsp, e.base.def, e.base.defEsp, e.base.speed,
       e.catchRate, e.baseExp, lit(e.curva), lit(tier.tier),
       lit(lendarios.has(e.chave)),
@@ -303,7 +327,7 @@ insert into ${schema}.species (
   catch_rate, base_exp, growth_curve, spawn_tier, is_legendary
 )
 values
-${linhasDeEspecie()}
+${linhasDeEspecie(schema)}
 on conflict (id) do nothing;
 
 -- ---------------------------------------------------------------------------
