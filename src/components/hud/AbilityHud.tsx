@@ -1,7 +1,12 @@
 // Barra de golpes do POKE em campo. Icone do TIPO elemental sobre fundo na cor
 // do mesmo tipo, borda na cor da CATEGORIA (fisico/especial), bolinha verde =
-// AOE, faixa inferior com o dano base, anel branco = pronto, overlay preto =
-// cooldown ou desligado.
+// AOE, faixa inferior com o dano base, cortina preta subindo de baixo =
+// recarga, faixa OFF no topo = desligado.
+//
+// PRONTO NAO TEM SINAL PROPRIO, e isso e a decisao (PH-374): num idle de
+// recarga curta o estado normal dos quatro slots e "pronto", entao o anel
+// branco que existia aqui acendia em quase todos, quase sempre. Quem carrega o
+// estado e a AUSENCIA de cortina.
 //
 // O icone substituiu o rotulo de 3 letras do nome do golpe. Tradeoff assumido:
 // dois golpes do mesmo tipo passam a ficar visualmente iguais no slot — o que
