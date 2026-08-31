@@ -23,7 +23,7 @@
 //     sobre uma mesa que ele nao viu;
 //  2. a mesa tem no maximo 20 linhas (teto de 10 por lado). Nao ha o que
 //     economizar.
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import * as trocaRpc from '@/data/remote/trocaRpc'
 import type { LinhaDaMesa, SessaoDeTroca } from '@/data/remote/trocaRpc'
 import { ErroServidor } from '@/data/remote/servidor'
@@ -79,9 +79,59 @@ export function useTroca(): EstadoDaTroca {
   const [carregando, setCarregando] = useState(true)
   const [ocupado, setOcupado] = useState(false)
 
+  /**
+   * A mesa que esta tela esta acompanhando agora.
+   *
+   * Existe por causa da PH-321: `minhaTrocaViva` so devolve mesa VIVA, entao o
+   * lado que nao deu o ultimo clique aprendia apenas `null` quando a troca
+   * acabava — a tela sumia sem dizer se a troca saiu, se o outro cancelou ou se
+   * o prazo venceu. Guardando o id, da pra ir perguntar o DESFECHO.
+   *
+   * `ref` e nao `state` porque ninguem renderiza a partir dele, e porque o
+   * `recarregar` do Realtime precisa do valor ATUAL sem recriar a assinatura a
+   * cada mudanca.
+   */
+  const acompanhando = useRef<string | null>(null)
+
+  /**
+   * O que dizer quando a mesa termina, e o que fazer com a Mochila.
+   *
+   * A INVALIDACAO PRECISA ACONTECER NOS DOIS LADOS, e era esse o defeito: quem
+   * executou invalidava, quem confirmou primeiro nao. Sem invalidar,
+   * `mochilaStore.carregada` continua `true`, `carregar()` vira no-op, e o
+   * jogador abre a Mochila sem ver o POKE que acabou de receber.
+   *
+   * `cancelada` por mim mesmo NAO avisa: eu acabei de clicar em cancelar, e um
+   * toast repetindo isso e ruido.
+   */
+  const anunciarDesfecho = useCallback((encerrada: SessaoDeTroca) => {
+    if (encerrada.estado === 'concluida') {
+      useToastStore.getState().pushToast('Troca concluida.', 'success', 'world')
+      useMochilaStore.getState().invalidar()
+      return
+    }
+    if (encerrada.estado === 'expirada') {
+      useToastStore.getState().pushToast('A troca expirou — o que estava na mesa voltou pra voce.', 'error', 'world')
+      return
+    }
+    if (encerrada.estado === 'cancelada' && encerrada.encerradaPor !== meuId) {
+      useToastStore.getState().pushToast('A outra pessoa cancelou a troca.', 'error', 'world')
+    }
+  }, [meuId])
+
   const recarregar = useCallback(async () => {
     try {
       const viva = await trocaRpc.minhaTrocaViva()
+      // A MESA QUE EU ACOMPANHAVA ACABOU. Pergunta o desfecho pela linha, que
+      // continua legivel pelos dois participantes depois de encerrada.
+      const anterior = acompanhando.current
+      if (!viva && anterior) {
+        acompanhando.current = null
+        const encerrada = await trocaRpc.lerTroca(anterior)
+        if (encerrada) anunciarDesfecho(encerrada)
+      } else if (viva) {
+        acompanhando.current = viva.id
+      }
       setSessao(viva)
       // A mesa so existe depois do aceite. Pedir a oferta de um convite ainda
       // nao aceito seria uma request garantidamente vazia a cada evento.
@@ -91,7 +141,7 @@ export function useTroca(): EstadoDaTroca {
     } finally {
       setCarregando(false)
     }
-  }, [])
+  }, [anunciarDesfecho])
 
   useEffect(() => { void recarregar() }, [recarregar])
 
@@ -117,13 +167,17 @@ export function useTroca(): EstadoDaTroca {
     setOcupado(true)
     try {
       const nova = await acao()
-      setSessao(nova.estado === 'concluida' || nova.estado === 'cancelada' || nova.estado === 'expirada' ? null : nova)
+      const acabou = nova.estado !== 'convidada' && nova.estado !== 'aberta'
+      setSessao(acabou ? null : nova)
       setMesa(nova.estado === 'aberta' ? await trocaRpc.lerMesa(nova.id) : [])
-      if (nova.estado === 'concluida') {
-        useToastStore.getState().pushToast('Troca concluida.', 'success', 'world')
-        // O que chegou de POKE mudou de dono no servidor, em linhas que este
-        // cliente nunca leu. A Mochila reancora na proxima abertura.
-        useMochilaStore.getState().invalidar()
+      if (acabou) {
+        // Avisa AQUI e limpa o acompanhamento: sem isso o evento de Realtime
+        // que chega em seguida cairia no `recarregar` e anunciaria a mesma
+        // coisa de novo.
+        acompanhando.current = null
+        anunciarDesfecho(nova)
+      } else {
+        acompanhando.current = nova.id
       }
     } catch (e) {
       avisarErro(e)
@@ -133,7 +187,7 @@ export function useTroca(): EstadoDaTroca {
     } finally {
       setOcupado(false)
     }
-  }, [ocupado, recarregar])
+  }, [ocupado, recarregar, anunciarDesfecho])
 
   const papel: PapelNaMesa | null = sessao && meuId
     ? (sessao.anfitriaoId === meuId ? 'anfitriao' : 'convidado')

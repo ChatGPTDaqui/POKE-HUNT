@@ -356,6 +356,22 @@ export async function tirarItemDaMesa(
  * as linhas as sessoes de que o jogador participa. Ver o que o outro ofereceu e
  * o ponto da troca, entao nao ha filtro por dono aqui.
  */
+/**
+ * Uma mesa PELO ID, viva ou nao (PH-321).
+ *
+ * `minhaTrocaViva` devolve so o que ainda esta de pe, e por isso o lado que NAO
+ * deu o ultimo clique so aprendia `null` quando a mesa acabava — a tela sumia
+ * sem dizer se a troca saiu, se o outro cancelou ou se o prazo venceu.
+ *
+ * A informacao existe na linha (`estado`, `encerrada_por`) e a policy continua
+ * deixando os dois participantes lerem depois de encerrada. Faltava perguntar.
+ */
+export async function lerTroca(sessaoId: string): Promise<SessaoDeTroca | null> {
+  const { data, error } = await db.from('troca_sessao').select('*').eq('id', sessaoId).maybeSingle()
+  aoFalhar(error)
+  return data ? daLinha(data as LinhaDeTroca) : null
+}
+
 export async function lerMesa(sessaoId: string): Promise<LinhaDaMesa[]> {
   const { data, error } = await db
     .from('troca_oferta')
