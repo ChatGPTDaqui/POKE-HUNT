@@ -1,11 +1,13 @@
-// Troca direta entre dois jogadores (PH-120), fatia 1: a MESA.
+// Troca direta entre dois jogadores (PH-120): a MESA (fatia 1) e a OFERTA em
+// cima dela (fatia 2, PH-310).
 //
 // O QUE ESTE ARQUIVO FAZ, E O QUE ELE AINDA NAO FAZ
 // ---------------------------------------------------------------------------
-// Abrir, aceitar e encerrar a mesa, e ler a mesa viva do jogador. O que vai EM
-// CIMA dela — a oferta versionada, a reserva do que esta na mesa, a confirmacao
-// dupla e a execucao atomica — e das fatias 2 e 3, e nao ha nenhum caminho aqui
-// que mova POKE ou item.
+// Abrir, aceitar e encerrar a mesa; ler a mesa viva do jogador; e por e tirar
+// POKE e item da mesa, com reserva de verdade do outro lado. O que falta e a
+// confirmacao dupla com a execucao atomica (fatia 3) e a tela (fatia 4) — e por
+// isso NENHUM caminho aqui troca o dono de coisa nenhuma: o que sai da mochila
+// de quem ofereceu volta pra ela em toda saida possivel.
 //
 // TODA ESCRITA PASSA POR RPC, e a tabela nao tem policy de INSERT/UPDATE. As
 // regras que impedem o golpe (bloqueio, sessao dupla, quem pode aceitar, quem
@@ -16,7 +18,11 @@
 // A LEITURA e RLS-direta: a policy da tabela ja limita a linha a quem esta nela.
 import { supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
-import { ESTADOS_VIVOS, type EstadoDeTroca } from '@/data/troca'
+import { ESTADOS_VIVOS, type EstadoDeTroca, type TipoDeOferta } from '@/data/troca'
+import { useGameStateStore } from '@/stores/gameStateStore'
+import { mochilaCarregada } from '@/stores/mochilaStore'
+import { descartarIdsConhecidos } from './playerRepository'
+import { COLUNAS_DE_POKE, rowToPoke } from './playerMapper'
 
 // As RPCs so existem no banco depois do `db push`, e o gerador de tipos so
 // conhece o schema atual — mesmo escape hatch de `correioRealtime.ts`,
@@ -36,6 +42,12 @@ export interface SessaoDeTroca {
   expiraEm: string
   encerradaPor: string | null
   encerradaEm: string | null
+  /**
+   * Sobe a cada alteracao da oferta, por trigger no banco (PH-310). A fatia 3
+   * carrega este numero na confirmacao e o servidor recusa o que vier velho —
+   * e o que impede trocar a oferta no instante em que o outro confirma.
+   */
+  versao: number
 }
 
 interface LinhaDeTroca {
@@ -47,6 +59,7 @@ interface LinhaDeTroca {
   expira_em: string
   encerrada_por: string | null
   encerrada_em: string | null
+  versao: number | null
 }
 
 function daLinha(l: LinhaDeTroca): SessaoDeTroca {
@@ -59,6 +72,10 @@ function daLinha(l: LinhaDeTroca): SessaoDeTroca {
     expiraEm: l.expira_em,
     encerradaPor: l.encerrada_por,
     encerradaEm: l.encerrada_em,
+    // A coluna nasceu na fatia 2 com `default 0`. O `?? 0` cobre a janela em
+    // que o cliente novo fala com um banco que ainda nao recebeu a migration —
+    // ler `undefined` como versao viraria `NaN` na comparacao da fatia 3.
+    versao: l.versao ?? 0,
   }
 }
 
@@ -124,4 +141,188 @@ export async function minhaTrocaViva(): Promise<SessaoDeTroca | null> {
   aoFalhar(error)
   const linhas = (data ?? []) as LinhaDeTroca[]
   return linhas.length > 0 ? daLinha(linhas[0]) : null
+}
+
+// ---------------------------------------------------------------------------
+// A oferta (PH-310, fatia 2)
+// ---------------------------------------------------------------------------
+// Toda funcao abaixo devolve a SESSAO, nao a linha inserida. E de proposito: o
+// que o chamador precisa depois de mexer na mesa e a `versao` nova, e devolver
+// a linha obrigaria uma segunda ida ao banco so pra descobri-la.
+
+/** Uma linha da mesa: um POKE, ou uma pilha de um item. */
+export interface LinhaDaMesa {
+  id: string
+  sessaoId: string
+  donoId: string
+  tipo: TipoDeOferta
+  pokeUid: string | null
+  itemId: string | null
+  quantidade: number
+}
+
+interface LinhaDeOfertaNoBanco {
+  id: string
+  sessao_id: string
+  dono_id: string
+  tipo: TipoDeOferta
+  poke_uid: string | null
+  item_id: string | null
+  quantidade: number
+}
+
+function daLinhaDaMesa(l: LinhaDeOfertaNoBanco): LinhaDaMesa {
+  return {
+    id: l.id,
+    sessaoId: l.sessao_id,
+    donoId: l.dono_id,
+    tipo: l.tipo,
+    pokeUid: l.poke_uid,
+    itemId: l.item_id,
+    quantidade: l.quantidade,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// RECONCILIAR O ESTADO LOCAL NAO E COSMETICO AQUI — E CORRECAO
+// ---------------------------------------------------------------------------
+// `savePlayerState` (o flush) escreve `pokemon_instances` e `player_items` a
+// partir do estado LOCAL, e faz duas coisas que desfazem a reserva do servidor
+// se o cliente nao acompanhar:
+//
+//  1. `upsert(gameStateToPokemonRows(...))` grava `location: 'team' | 'bag'` pra
+//     todo POKE que ainda estiver em `team`/`bagPokes`. Um POKE deixado na lista
+//     local voltaria de 'troca' pra 'bag' no proximo save — reservado na mesa e
+//     disponivel na mochila ao mesmo tempo.
+//  2. O diff de exclusao (PH-182) apaga do banco todo id CONHECIDO que sumiu do
+//     estado. Tirar o POKE da lista local sem tirar do dominio conhecido faria o
+//     save seguinte APAGAR a linha — o POKE deixaria de existir no meio da troca.
+//
+// Por isso as duas metades andam juntas: sai da lista local E sai do dominio.
+// `descartarIdsConhecidos` e exatamente a ferramenta pro caso "quem mexeu na
+// linha foi o servidor" — a linha continua existindo, so nao e mais do estado
+// local que ela deve vir.
+//
+// Item tem a mesma armadilha por outro caminho: `gameStateToItemRows` grava a
+// quantidade local por cima. Debitar no servidor sem debitar aqui faria o
+// proximo save devolver o que foi pra mesa — duplicando o item.
+
+function tirarPokeDoEstadoLocal(pokeUid: string): void {
+  useGameStateStore.setState((s) => ({
+    team: s.team.filter((p) => p.uid !== pokeUid),
+    bagPokes: s.bagPokes.filter((p) => p.uid !== pokeUid),
+  }))
+  descartarIdsConhecidos([pokeUid])
+}
+
+function somarItemNoEstadoLocal(itemId: string, delta: number): void {
+  useGameStateStore.setState((s) => {
+    const atual = s.items[itemId] ?? 0
+    // Nunca abaixo de zero: o servidor ja recusou o que nao havia, e um numero
+    // negativo aqui viraria `check (quantity >= 0)` estourado no proximo save.
+    return { items: { ...s.items, [itemId]: Math.max(0, atual + delta) } }
+  })
+}
+
+/**
+ * Poe um POKE na mesa. Ele SAI da mochila de quem ofereceu enquanto estiver
+ * la — nao e uma marca, e mudanca de lugar (`location = 'troca'`), e e o que
+ * impede vende-lo, anuncia-lo ou evolui-lo no meio da troca.
+ */
+export async function porPokeNaMesa(sessaoId: string, pokeUid: string): Promise<SessaoDeTroca> {
+  const { data, error } = await db.rpc('por_poke_na_mesa', {
+    p_sessao_id: sessaoId,
+    p_poke_id: pokeUid,
+  })
+  aoFalhar(error)
+  tirarPokeDoEstadoLocal(pokeUid)
+  return daLinha(data as LinhaDeTroca)
+}
+
+/** Tira o POKE da mesa e devolve pra mochila. */
+export async function tirarPokeDaMesa(sessaoId: string, pokeUid: string): Promise<SessaoDeTroca> {
+  const { data, error } = await db.rpc('tirar_poke_da_mesa', {
+    p_sessao_id: sessaoId,
+    p_poke_id: pokeUid,
+  })
+  aoFalhar(error)
+  await devolverPokeAoEstadoLocal(pokeUid)
+  return daLinha(data as LinhaDeTroca)
+}
+
+/**
+ * O POKE voltou pra 'bag' no servidor; traz a linha de volta pra lista local.
+ *
+ * So quando a Mochila esta carregada, pelo mesmo motivo de
+ * `refetchAposAnuncio` no Mercado: inserir um POKE numa lista que nasceu vazia
+ * faria a tela mostrar UM POKE numa conta de milhares.
+ *
+ * O id NAO volta pro dominio conhecido de proposito. Ele nao precisa: o dominio
+ * so serve pro diff de EXCLUSAO, e um id fora dele nunca gera DELETE. Devolve-lo
+ * seria assumir que o cliente voltou a ser autoritativo sobre a reserva inteira,
+ * que e a suposicao que a PH-182 provou cara.
+ */
+async function devolverPokeAoEstadoLocal(pokeUid: string): Promise<void> {
+  if (!mochilaCarregada()) return
+  const { data } = await db.from('pokemon_instances').select(COLUNAS_DE_POKE).eq('id', pokeUid).maybeSingle()
+  if (!data || data.location !== 'bag') return
+  const poke = rowToPoke(data)
+  useGameStateStore.setState((s) => (
+    s.bagPokes.some((p) => p.uid === pokeUid)
+      ? { bagPokes: s.bagPokes }
+      : { bagPokes: [...s.bagPokes, poke] }
+  ))
+}
+
+/**
+ * Poe itens na mesa. A quantidade e DEBITADA do inventario na hora — mesmo
+ * espirito do escrow do Mercado, e pelo mesmo motivo: item prometido e nao
+ * reservado e item que pode ser vendido antes de a troca executar.
+ */
+export async function porItemNaMesa(
+  sessaoId: string,
+  itemId: string,
+  quantidade: number,
+): Promise<SessaoDeTroca> {
+  const { data, error } = await db.rpc('por_item_na_mesa', {
+    p_sessao_id: sessaoId,
+    p_item_id: itemId,
+    p_quantidade: quantidade,
+  })
+  aoFalhar(error)
+  somarItemNoEstadoLocal(itemId, -quantidade)
+  return daLinha(data as LinhaDeTroca)
+}
+
+/** Tira parte (ou tudo) de uma pilha da mesa e devolve pro inventario. */
+export async function tirarItemDaMesa(
+  sessaoId: string,
+  itemId: string,
+  quantidade: number,
+): Promise<SessaoDeTroca> {
+  const { data, error } = await db.rpc('tirar_item_da_mesa', {
+    p_sessao_id: sessaoId,
+    p_item_id: itemId,
+    p_quantidade: quantidade,
+  })
+  aoFalhar(error)
+  somarItemNoEstadoLocal(itemId, quantidade)
+  return daLinha(data as LinhaDeTroca)
+}
+
+/**
+ * O que esta na mesa, dos DOIS lados.
+ *
+ * Leitura direta com RLS, como `minhaTrocaViva`: a policy da tabela ja limita
+ * as linhas as sessoes de que o jogador participa. Ver o que o outro ofereceu e
+ * o ponto da troca, entao nao ha filtro por dono aqui.
+ */
+export async function lerMesa(sessaoId: string): Promise<LinhaDaMesa[]> {
+  const { data, error } = await db
+    .from('troca_oferta')
+    .select('*')
+    .eq('sessao_id', sessaoId)
+    .order('criada_em', { ascending: true })
+  aoFalhar(error)
+  return ((data ?? []) as LinhaDeOfertaNoBanco[]).map(daLinhaDaMesa)
 }
