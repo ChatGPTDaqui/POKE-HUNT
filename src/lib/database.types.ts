@@ -1706,30 +1706,45 @@ export type Database = {
           criada_em: string
           dono_id: string
           id: string
+          is_shiny: boolean | null
           item_id: string | null
+          iv_percent: number | null
+          level: number | null
           poke_uid: string | null
           quantidade: number
+          rarity: Database["dev"]["Enums"]["rarity_tier"] | null
           sessao_id: string
+          species_id: string | null
           tipo: string
         }
         Insert: {
           criada_em?: string
           dono_id: string
           id?: string
+          is_shiny?: boolean | null
           item_id?: string | null
+          iv_percent?: number | null
+          level?: number | null
           poke_uid?: string | null
           quantidade?: number
+          rarity?: Database["dev"]["Enums"]["rarity_tier"] | null
           sessao_id: string
+          species_id?: string | null
           tipo: string
         }
         Update: {
           criada_em?: string
           dono_id?: string
           id?: string
+          is_shiny?: boolean | null
           item_id?: string | null
+          iv_percent?: number | null
+          level?: number | null
           poke_uid?: string | null
           quantidade?: number
+          rarity?: Database["dev"]["Enums"]["rarity_tier"] | null
           sessao_id?: string
+          species_id?: string | null
           tipo?: string
         }
         Relationships: [
@@ -1773,6 +1788,13 @@ export type Database = {
             columns: ["sessao_id"]
             isOneToOne: false
             referencedRelation: "troca_sessao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
             referencedColumns: ["id"]
           },
         ]
@@ -4417,30 +4439,45 @@ export type Database = {
           criada_em: string
           dono_id: string
           id: string
+          is_shiny: boolean | null
           item_id: string | null
+          iv_percent: number | null
+          level: number | null
           poke_uid: string | null
           quantidade: number
+          rarity: Database["public"]["Enums"]["rarity_tier"] | null
           sessao_id: string
+          species_id: string | null
           tipo: string
         }
         Insert: {
           criada_em?: string
           dono_id: string
           id?: string
+          is_shiny?: boolean | null
           item_id?: string | null
+          iv_percent?: number | null
+          level?: number | null
           poke_uid?: string | null
           quantidade?: number
+          rarity?: Database["public"]["Enums"]["rarity_tier"] | null
           sessao_id: string
+          species_id?: string | null
           tipo: string
         }
         Update: {
           criada_em?: string
           dono_id?: string
           id?: string
+          is_shiny?: boolean | null
           item_id?: string | null
+          iv_percent?: number | null
+          level?: number | null
           poke_uid?: string | null
           quantidade?: number
+          rarity?: Database["public"]["Enums"]["rarity_tier"] | null
           sessao_id?: string
+          species_id?: string | null
           tipo?: string
         }
         Relationships: [
@@ -4484,6 +4521,13 @@ export type Database = {
             columns: ["sessao_id"]
             isOneToOne: false
             referencedRelation: "troca_sessao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
             referencedColumns: ["id"]
           },
         ]
