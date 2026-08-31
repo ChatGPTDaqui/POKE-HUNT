@@ -43532,7 +43532,6 @@ var SUB_BIOMA_ESPECIES = {
 		"haunter",
 		"gengar",
 		"crobat",
-		"umbreon",
 		"misdreavus",
 		"dunsparce",
 		"houndour",
@@ -43818,7 +43817,6 @@ var SUB_BIOMA_ESPECIES = {
 		"seaking",
 		"magikarp",
 		"gyarados",
-		"vaporeon",
 		"marill",
 		"azumarill",
 		"wooper",
@@ -43947,7 +43945,6 @@ var SUB_BIOMA_ESPECIES = {
 		"voltorb",
 		"electrode",
 		"electabuzz",
-		"jolteon",
 		"pichu",
 		"mareep",
 		"flaaffy",
@@ -43966,7 +43963,6 @@ var SUB_BIOMA_ESPECIES = {
 		"hypno",
 		"natu",
 		"xatu",
-		"espeon",
 		"unown",
 		"wobbuffet",
 		"spoink",
@@ -44145,15 +44141,6 @@ var SUB_BIOMA_ESPECIES = {
 		"chimecho"
 	],
 	"town": [
-		"caterpie",
-		"metapod",
-		"butterfree",
-		"weedle",
-		"kakuna",
-		"beedrill",
-		"pidgey",
-		"pidgeotto",
-		"pidgeot",
 		"rattata",
 		"raticate",
 		"spearow",
@@ -44206,15 +44193,6 @@ var SUB_BIOMA_ESPECIES = {
 		"jumpluff",
 		"sunkern",
 		"sunflora",
-		"poochyena",
-		"mightyena",
-		"zigzagoon",
-		"linoone",
-		"wurmple",
-		"silcoon",
-		"beautifly",
-		"cascoon",
-		"dustox",
 		"lotad",
 		"lombre",
 		"ludicolo",
@@ -44246,7 +44224,6 @@ var SUB_BIOMA_ESPECIES = {
 		"ponyta",
 		"rapidash",
 		"magmar",
-		"flareon",
 		"cyndaquil",
 		"quilava",
 		"typhlosion",
@@ -44282,6 +44259,1295 @@ var SUB_BIOMA_ESPECIES = {
 		"shelgon",
 		"salamence"
 	]
+};
+/**
+* As NOVE pools do PokeRogue por sub-bioma, que e de onde sai a chance de
+* aparicao (data/spawnPorTier.ts) e o elenco de Guardian/Lord da sala.
+*
+* As cinco selvagens sao o pool de spawn e cobrem TODA especie de
+* `SUB_BIOMA_ESPECIES` — as herdadas entram com o tier de um parente,
+* deslocado pela diferenca de estagio evolutivo, e o chefe puro entra num
+* degrau equivalente (ver o gerador).
+*
+* As quatro de chefe sao SO dado direto do PokeRogue, sem heranca: Guardian e
+* Lord tem que ser um chefe de verdade daquele lugar, nao um parente dele.
+* Por isso elas podem vir VAZIAS, e quem consome resolve o vazio descendo de
+* degrau (o proprio PokeRogue faz assim, ver arena.ts#randomSpecies).
+*/
+var SUB_BIOMA_TIERS = {
+	"abyss": {
+		COMMON: [
+			"zubat",
+			"paras",
+			"misdreavus",
+			"sableye"
+		],
+		UNCOMMON: [
+			"golbat",
+			"parasect",
+			"gastly",
+			"haunter",
+			"dunsparce",
+			"houndour",
+			"whismur",
+			"mawile"
+		],
+		RARE: [
+			"gengar",
+			"crobat",
+			"houndoom",
+			"loudred",
+			"absol"
+		],
+		SUPER_RARE: ["exploud"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"gengar",
+			"crobat",
+			"houndoom",
+			"sableye"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"badlands": {
+		COMMON: [
+			"diglett",
+			"geodude",
+			"cubone",
+			"rhyhorn",
+			"phanpy"
+		],
+		UNCOMMON: [
+			"sandshrew",
+			"graveler",
+			"rhydon",
+			"numel"
+		],
+		RARE: [
+			"sandslash",
+			"dugtrio",
+			"golem",
+			"onix",
+			"marowak",
+			"gligar",
+			"donphan",
+			"camerupt"
+		],
+		SUPER_RARE: ["steelix"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"dugtrio",
+			"golem",
+			"marowak",
+			"donphan"
+		],
+		BOSS_RARE: ["steelix"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"beach": {
+		COMMON: [
+			"shellder",
+			"krabby",
+			"staryu",
+			"corphish"
+		],
+		UNCOMMON: [],
+		RARE: [
+			"cloyster",
+			"kingler",
+			"starmie",
+			"crawdaunt"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"cloyster",
+			"kingler",
+			"starmie",
+			"crawdaunt"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"cave": {
+		COMMON: [
+			"zubat",
+			"paras",
+			"teddiursa",
+			"whismur"
+		],
+		UNCOMMON: [
+			"golbat",
+			"geodude",
+			"loudred",
+			"makuhita",
+			"nosepass"
+		],
+		RARE: [
+			"parasect",
+			"graveler",
+			"onix",
+			"crobat",
+			"ursaring",
+			"exploud",
+			"hariyama"
+		],
+		SUPER_RARE: ["golem", "steelix"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"parasect",
+			"onix",
+			"crobat",
+			"ursaring",
+			"exploud"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"construction-site": {
+		COMMON: [
+			"diglett",
+			"machop",
+			"grimer",
+			"phanpy",
+			"makuhita",
+			"nosepass"
+		],
+		UNCOMMON: [
+			"dugtrio",
+			"machoke",
+			"magnemite",
+			"muk",
+			"koffing",
+			"rhyhorn",
+			"donphan",
+			"hariyama"
+		],
+		RARE: [
+			"machamp",
+			"magneton",
+			"onix",
+			"weezing",
+			"rhydon",
+			"tyrogue"
+		],
+		SUPER_RARE: [
+			"hitmonlee",
+			"ditto",
+			"steelix"
+		],
+		ULTRA_RARE: [],
+		BOSS: ["machamp"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"desert": {
+		COMMON: [
+			"sandshrew",
+			"trapinch",
+			"cacnea"
+		],
+		UNCOMMON: [
+			"gligar",
+			"numel",
+			"vibrava"
+		],
+		RARE: [
+			"sandslash",
+			"doduo",
+			"camerupt",
+			"flygon",
+			"cacturne"
+		],
+		SUPER_RARE: [
+			"dodrio",
+			"lileep",
+			"cradily",
+			"anorith",
+			"armaldo"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"sandslash",
+			"flygon",
+			"cacturne"
+		],
+		BOSS_RARE: [
+			"dodrio",
+			"cradily",
+			"armaldo"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"dojo": {
+		COMMON: [
+			"mankey",
+			"makuhita",
+			"meditite"
+		],
+		UNCOMMON: ["primeape", "tyrogue"],
+		RARE: [
+			"hitmonlee",
+			"hitmonchan",
+			"hariyama",
+			"medicham"
+		],
+		SUPER_RARE: ["hitmontop"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"hitmonlee",
+			"hitmonchan",
+			"hariyama",
+			"medicham"
+		],
+		BOSS_RARE: ["hitmontop"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"factory": {
+		COMMON: ["machop", "voltorb"],
+		UNCOMMON: [
+			"machoke",
+			"magnemite",
+			"electrode",
+			"elekid",
+			"magby"
+		],
+		RARE: [
+			"machamp",
+			"magneton",
+			"electabuzz",
+			"magmar",
+			"metang"
+		],
+		SUPER_RARE: ["beldum", "metagross"],
+		ULTRA_RARE: [],
+		BOSS: [],
+		BOSS_RARE: ["metagross"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"fairy-cave": {
+		COMMON: [
+			"jigglypuff",
+			"cleffa",
+			"igglybuff",
+			"togepi",
+			"marill",
+			"azurill",
+			"mawile"
+		],
+		UNCOMMON: [
+			"clefairy",
+			"togetic",
+			"azumarill",
+			"ralts"
+		],
+		RARE: [
+			"clefable",
+			"wigglytuff",
+			"kirlia"
+		],
+		SUPER_RARE: ["gardevoir"],
+		ULTRA_RARE: [],
+		BOSS: ["wigglytuff", "mawile"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"forest": {
+		COMMON: [
+			"caterpie",
+			"metapod",
+			"butterfree",
+			"weedle",
+			"kakuna",
+			"beedrill",
+			"venonat",
+			"bellsprout",
+			"spinarak",
+			"pineco",
+			"wurmple",
+			"silcoon",
+			"beautifly",
+			"cascoon",
+			"dustox",
+			"seedot",
+			"shroomish"
+		],
+		UNCOMMON: [
+			"ekans",
+			"weepinbell",
+			"hoothoot",
+			"teddiursa",
+			"nuzleaf",
+			"roselia"
+		],
+		RARE: [
+			"arbok",
+			"venomoth",
+			"victreebel",
+			"exeggcute",
+			"scyther",
+			"noctowl",
+			"ariados",
+			"forretress",
+			"heracross",
+			"ursaring",
+			"stantler",
+			"treecko",
+			"grovyle",
+			"shiftry",
+			"breloom",
+			"tropius"
+		],
+		SUPER_RARE: [
+			"exeggutor",
+			"scizor",
+			"sceptile"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"venomoth",
+			"victreebel",
+			"noctowl",
+			"ariados",
+			"forretress",
+			"beautifly",
+			"dustox",
+			"shiftry",
+			"breloom"
+		],
+		BOSS_RARE: [
+			"heracross",
+			"stantler",
+			"sceptile"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"grass": {
+		COMMON: [
+			"hoppip",
+			"wurmple",
+			"silcoon",
+			"cascoon",
+			"shroomish"
+		],
+		UNCOMMON: [
+			"lickitung",
+			"skiploom",
+			"sunkern",
+			"miltank",
+			"beautifly",
+			"dustox",
+			"seedot",
+			"breloom"
+		],
+		RARE: [
+			"ivysaur",
+			"growlithe",
+			"jumpluff",
+			"sunflora",
+			"nuzleaf"
+		],
+		SUPER_RARE: [
+			"venusaur",
+			"arcanine",
+			"sudowoodo",
+			"shiftry"
+		],
+		ULTRA_RARE: [],
+		BOSS: ["jumpluff", "miltank"],
+		BOSS_RARE: [
+			"venusaur",
+			"arcanine",
+			"sudowoodo"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"graveyard": {
+		COMMON: [
+			"gastly",
+			"shuppet",
+			"duskull"
+		],
+		UNCOMMON: [
+			"haunter",
+			"cubone",
+			"dusclops"
+		],
+		RARE: [
+			"gengar",
+			"marowak",
+			"misdreavus",
+			"banette"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"gengar",
+			"marowak",
+			"banette"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"ice-cave": {
+		COMMON: [
+			"seel",
+			"swinub",
+			"snorunt"
+		],
+		UNCOMMON: [
+			"slowking",
+			"sneasel",
+			"piloswine",
+			"smoochum",
+			"spheal",
+			"sealeo"
+		],
+		RARE: [
+			"dewgong",
+			"lapras",
+			"delibird",
+			"glalie",
+			"walrein"
+		],
+		SUPER_RARE: ["jynx"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"dewgong",
+			"glalie",
+			"walrein"
+		],
+		BOSS_RARE: ["jynx", "lapras"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"jungle": {
+		COMMON: [
+			"spinarak",
+			"aipom",
+			"shroomish"
+		],
+		UNCOMMON: [
+			"exeggcute",
+			"tangela",
+			"ariados",
+			"tropius"
+		],
+		RARE: [
+			"exeggutor",
+			"scyther",
+			"yanma",
+			"breloom",
+			"slakoth",
+			"vigoroth",
+			"seviper"
+		],
+		SUPER_RARE: [
+			"kangaskhan",
+			"scizor",
+			"slaking"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"exeggutor",
+			"breloom",
+			"seviper",
+			"tropius"
+		],
+		BOSS_RARE: [
+			"kangaskhan",
+			"scizor",
+			"slaking"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"laboratory": {
+		COMMON: ["grimer", "voltorb"],
+		UNCOMMON: ["magnemite"],
+		RARE: [
+			"magneton",
+			"muk",
+			"electrode",
+			"ditto"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: ["muk", "electrode"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"lake": {
+		COMMON: [
+			"psyduck",
+			"goldeen",
+			"marill",
+			"wooper",
+			"lotad",
+			"surskit",
+			"azurill"
+		],
+		UNCOMMON: [
+			"slowpoke",
+			"magikarp",
+			"quagsire",
+			"lombre"
+		],
+		RARE: [
+			"wartortle",
+			"golduck",
+			"slowbro",
+			"seaking",
+			"azumarill",
+			"ludicolo",
+			"masquerain"
+		],
+		SUPER_RARE: [
+			"blastoise",
+			"gyarados",
+			"slowking"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"slowbro",
+			"seaking",
+			"azumarill",
+			"masquerain"
+		],
+		BOSS_RARE: [
+			"blastoise",
+			"gyarados",
+			"slowking"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"meadow": {
+		COMMON: [
+			"ledyba",
+			"igglybuff",
+			"roselia"
+		],
+		UNCOMMON: [
+			"jigglypuff",
+			"ponyta",
+			"mareep",
+			"snubbull",
+			"ralts",
+			"kirlia",
+			"skitty"
+		],
+		RARE: [
+			"wigglytuff",
+			"rapidash",
+			"tauros",
+			"ledian",
+			"flaaffy",
+			"granbull",
+			"miltank",
+			"gardevoir",
+			"delcatty",
+			"volbeat",
+			"illumise",
+			"spinda"
+		],
+		SUPER_RARE: ["ampharos"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tauros",
+			"ledian",
+			"granbull",
+			"miltank",
+			"gardevoir",
+			"delcatty"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"metropolis": {
+		COMMON: [
+			"rattata",
+			"pichu",
+			"houndour",
+			"zigzagoon"
+		],
+		UNCOMMON: [
+			"raticate",
+			"pikachu",
+			"houndoom",
+			"linoone"
+		],
+		RARE: [
+			"raichu",
+			"smeargle",
+			"castform"
+		],
+		SUPER_RARE: ["ditto"],
+		ULTRA_RARE: [],
+		BOSS: ["castform"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mountain": {
+		COMMON: [
+			"pidgey",
+			"spearow",
+			"rhyhorn",
+			"taillow",
+			"aron",
+			"swablu"
+		],
+		UNCOMMON: [
+			"pidgeotto",
+			"machop",
+			"geodude",
+			"rhydon",
+			"natu",
+			"slugma",
+			"lairon"
+		],
+		RARE: [
+			"pidgeot",
+			"fearow",
+			"machoke",
+			"graveler",
+			"xatu",
+			"murkrow",
+			"magcargo",
+			"skarmory",
+			"torchic",
+			"combusken",
+			"swellow",
+			"aggron",
+			"spoink",
+			"altaria"
+		],
+		SUPER_RARE: [
+			"machamp",
+			"golem",
+			"larvitar",
+			"blaziken",
+			"grumpig"
+		],
+		ULTRA_RARE: ["pupitar", "tyranitar"],
+		BOSS: [
+			"pidgeot",
+			"fearow",
+			"skarmory",
+			"swellow",
+			"aggron",
+			"altaria"
+		],
+		BOSS_RARE: ["blaziken"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"plains": {
+		COMMON: [
+			"zubat",
+			"meowth",
+			"sentret",
+			"pichu",
+			"poochyena",
+			"zigzagoon"
+		],
+		UNCOMMON: [
+			"pidgey",
+			"spearow",
+			"pikachu",
+			"golbat",
+			"mankey",
+			"doduo"
+		],
+		RARE: [
+			"pidgeotto",
+			"fearow",
+			"raichu",
+			"persian",
+			"primeape",
+			"abra",
+			"dodrio",
+			"lickitung",
+			"furret",
+			"crobat",
+			"mightyena",
+			"linoone"
+		],
+		SUPER_RARE: [
+			"pidgeot",
+			"kadabra",
+			"farfetch_d",
+			"snorlax",
+			"dunsparce"
+		],
+		ULTRA_RARE: ["alakazam", "ditto"],
+		BOSS: [
+			"persian",
+			"dodrio",
+			"furret",
+			"mightyena",
+			"linoone"
+		],
+		BOSS_RARE: ["farfetch_d", "snorlax"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"power-plant": {
+		COMMON: [
+			"pikachu",
+			"voltorb",
+			"pichu",
+			"elekid",
+			"electrike"
+		],
+		UNCOMMON: [
+			"magnemite",
+			"electrode",
+			"electabuzz",
+			"plusle",
+			"minun"
+		],
+		RARE: [
+			"raichu",
+			"magneton",
+			"mareep",
+			"flaaffy",
+			"manectric"
+		],
+		SUPER_RARE: ["ampharos"],
+		ULTRA_RARE: [],
+		BOSS: ["raichu", "manectric"],
+		BOSS_RARE: ["ampharos"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"ruins": {
+		COMMON: [
+			"drowzee",
+			"natu",
+			"unown",
+			"spoink",
+			"baltoy"
+		],
+		UNCOMMON: [
+			"abra",
+			"kadabra",
+			"wynaut"
+		],
+		RARE: [
+			"alakazam",
+			"hypno",
+			"xatu",
+			"wobbuffet",
+			"grumpig",
+			"claydol"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"alakazam",
+			"hypno",
+			"xatu",
+			"grumpig",
+			"claydol"
+		],
+		BOSS_RARE: ["wobbuffet"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"sea": {
+		COMMON: [
+			"tentacool",
+			"slowpoke",
+			"wingull",
+			"wailmer"
+		],
+		UNCOMMON: [
+			"poliwag",
+			"slowbro",
+			"shellder",
+			"horsea",
+			"goldeen",
+			"staryu",
+			"magikarp",
+			"chinchou",
+			"carvanha",
+			"wailord"
+		],
+		RARE: [
+			"poliwhirl",
+			"tentacruel",
+			"cloyster",
+			"seadra",
+			"seaking",
+			"starmie",
+			"lapras",
+			"lanturn",
+			"pelipper",
+			"sharpedo"
+		],
+		SUPER_RARE: [
+			"poliwrath",
+			"gyarados",
+			"kingdra"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"pelipper",
+			"sharpedo"
+		],
+		BOSS_RARE: ["gyarados", "kingdra"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"seabed": {
+		COMMON: [
+			"chinchou",
+			"remoraid",
+			"clamperl"
+		],
+		UNCOMMON: [
+			"tentacool",
+			"shellder",
+			"wailmer",
+			"luvdisc"
+		],
+		RARE: [
+			"tentacruel",
+			"cloyster",
+			"lanturn",
+			"qwilfish",
+			"corsola",
+			"octillery",
+			"mantine",
+			"wailord",
+			"feebas",
+			"huntail",
+			"gorebyss"
+		],
+		SUPER_RARE: [
+			"omanyte",
+			"omastar",
+			"kabuto",
+			"kabutops",
+			"milotic",
+			"relicanth"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"lanturn",
+			"qwilfish",
+			"corsola",
+			"octillery",
+			"mantine",
+			"wailord",
+			"huntail",
+			"gorebyss",
+			"luvdisc"
+		],
+		BOSS_RARE: [
+			"omastar",
+			"kabutops",
+			"milotic",
+			"relicanth"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"slum": {
+		COMMON: [
+			"rattata",
+			"grimer",
+			"drowzee",
+			"koffing",
+			"murkrow",
+			"shuppet"
+		],
+		UNCOMMON: [
+			"raticate",
+			"hypno",
+			"houndour",
+			"banette"
+		],
+		RARE: [
+			"muk",
+			"weezing",
+			"sneasel",
+			"houndoom"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: ["muk", "weezing"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"snowy-forest": {
+		COMMON: [
+			"sentret",
+			"sneasel",
+			"swinub",
+			"snorunt",
+			"glalie"
+		],
+		UNCOMMON: [
+			"furret",
+			"teddiursa",
+			"piloswine",
+			"stantler"
+		],
+		RARE: ["ursaring", "delibird"],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: ["glalie"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"space": {
+		COMMON: [
+			"cleffa",
+			"lunatone",
+			"solrock"
+		],
+		UNCOMMON: ["clefairy", "baltoy"],
+		RARE: [
+			"clefable",
+			"staryu",
+			"claydol",
+			"metang"
+		],
+		SUPER_RARE: [
+			"starmie",
+			"beldum",
+			"metagross"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"clefable",
+			"lunatone",
+			"solrock"
+		],
+		BOSS_RARE: ["metagross"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"swamp": {
+		COMMON: [
+			"ekans",
+			"poliwag",
+			"wooper",
+			"lotad",
+			"gulpin"
+		],
+		UNCOMMON: [
+			"psyduck",
+			"poliwhirl",
+			"lombre",
+			"barboach"
+		],
+		RARE: [
+			"arbok",
+			"golduck",
+			"poliwrath",
+			"totodile",
+			"croconaw",
+			"quagsire",
+			"mudkip",
+			"marshtomp",
+			"ludicolo",
+			"swalot",
+			"whiscash"
+		],
+		SUPER_RARE: [
+			"feraligatr",
+			"politoed",
+			"swampert"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"arbok",
+			"poliwrath",
+			"quagsire",
+			"ludicolo",
+			"swalot",
+			"whiscash"
+		],
+		BOSS_RARE: [
+			"feraligatr",
+			"politoed",
+			"swampert"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"tall-grass": {
+		COMMON: [
+			"nidoran_f",
+			"nidoran_m",
+			"oddish",
+			"paras",
+			"spinarak"
+		],
+		UNCOMMON: [
+			"nidorina",
+			"nidorino",
+			"gloom",
+			"parasect",
+			"venonat",
+			"nincada",
+			"zangoose",
+			"seviper"
+		],
+		RARE: [
+			"nidoqueen",
+			"nidoking",
+			"vileplume",
+			"venomoth",
+			"pinsir",
+			"chikorita",
+			"bayleef",
+			"ariados",
+			"girafarig",
+			"ninjask",
+			"kecleon",
+			"tropius"
+		],
+		SUPER_RARE: [
+			"scyther",
+			"meganium",
+			"bellossom",
+			"shedinja"
+		],
+		ULTRA_RARE: ["scizor"],
+		BOSS: [
+			"nidoqueen",
+			"nidoking",
+			"vileplume",
+			"ariados",
+			"ninjask",
+			"zangoose",
+			"seviper",
+			"kecleon"
+		],
+		BOSS_RARE: [
+			"scyther",
+			"pinsir",
+			"meganium",
+			"bellossom"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"temple": {
+		COMMON: [
+			"gastly",
+			"natu",
+			"duskull"
+		],
+		UNCOMMON: [
+			"haunter",
+			"cubone",
+			"xatu",
+			"baltoy",
+			"dusclops"
+		],
+		RARE: [
+			"gengar",
+			"marowak",
+			"claydol",
+			"chimecho"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: ["chimecho"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"town": {
+		COMMON: [
+			"rattata",
+			"spearow",
+			"sentret",
+			"hoothoot",
+			"ledyba",
+			"spinarak",
+			"hoppip",
+			"sunkern",
+			"taillow"
+		],
+		UNCOMMON: [
+			"raticate",
+			"fearow",
+			"ekans",
+			"nidoran_f",
+			"nidoran_m",
+			"oddish",
+			"paras",
+			"venonat",
+			"meowth",
+			"bellsprout",
+			"furret",
+			"noctowl",
+			"ledian",
+			"ariados",
+			"skiploom",
+			"sunflora",
+			"lotad",
+			"seedot",
+			"swellow",
+			"shroomish",
+			"whismur",
+			"skitty"
+		],
+		RARE: [
+			"arbok",
+			"nidorina",
+			"nidorino",
+			"gloom",
+			"parasect",
+			"venomoth",
+			"persian",
+			"abra",
+			"weepinbell",
+			"cleffa",
+			"igglybuff",
+			"jumpluff",
+			"lombre",
+			"nuzleaf",
+			"surskit",
+			"breloom",
+			"loudred",
+			"delcatty"
+		],
+		SUPER_RARE: [
+			"nidoqueen",
+			"nidoking",
+			"clefairy",
+			"jigglypuff",
+			"vileplume",
+			"kadabra",
+			"victreebel",
+			"pichu",
+			"togepi",
+			"ludicolo",
+			"shiftry",
+			"ralts",
+			"masquerain",
+			"nincada",
+			"exploud"
+		],
+		ULTRA_RARE: [
+			"pikachu",
+			"raichu",
+			"clefable",
+			"wigglytuff",
+			"alakazam",
+			"ditto",
+			"togetic",
+			"kirlia",
+			"gardevoir",
+			"ninjask"
+		],
+		BOSS: [],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"volcano": {
+		COMMON: [
+			"growlithe",
+			"ponyta",
+			"slugma",
+			"magby",
+			"poochyena",
+			"numel",
+			"spoink",
+			"swablu"
+		],
+		UNCOMMON: [
+			"magmar",
+			"mightyena",
+			"meditite",
+			"torkoal",
+			"grumpig",
+			"altaria"
+		],
+		RARE: [
+			"charmeleon",
+			"arcanine",
+			"rapidash",
+			"cyndaquil",
+			"quilava",
+			"magcargo",
+			"medicham",
+			"camerupt"
+		],
+		SUPER_RARE: ["charizard", "typhlosion"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"arcanine",
+			"rapidash",
+			"magcargo",
+			"camerupt",
+			"torkoal"
+		],
+		BOSS_RARE: ["charizard", "typhlosion"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"wasteland": {
+		COMMON: [
+			"larvitar",
+			"trapinch",
+			"vibrava",
+			"bagon"
+		],
+		UNCOMMON: [
+			"dragonair",
+			"pupitar",
+			"swablu",
+			"shelgon"
+		],
+		RARE: [
+			"dratini",
+			"dragonite",
+			"tyranitar",
+			"flygon",
+			"altaria",
+			"salamence"
+		],
+		SUPER_RARE: ["aerodactyl"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"dragonite",
+			"tyranitar",
+			"flygon",
+			"salamence"
+		],
+		BOSS_RARE: ["aerodactyl"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	}
 };
 /**
 * Grafo de vizinhanca do PokeRogue: peso `n` = 1/n de chance de o vizinho
@@ -44388,23 +45654,44 @@ var SUB_BIOMA_CLIMA = {
 //#region src/data/generated/spawnTiers.generated.ts
 var SPAWN_WEIGHT_BY_SPECIES = {
 	"abra": 10,
+	"absol": 10,
 	"aerodactyl": 5,
+	"aggron": 1,
 	"aipom": 20,
 	"alakazam": 1,
+	"altaria": 5,
 	"ampharos": 1,
+	"anorith": 10,
 	"arbok": 5,
 	"arcanine": 5,
 	"ariados": 1,
+	"armaldo": 5,
+	"aron": 20,
 	"articuno": 1,
 	"azumarill": 5,
+	"azurill": 10,
+	"bagon": 30,
+	"baltoy": 20,
+	"banette": 20,
+	"barboach": 30,
 	"bayleef": 5,
+	"beautifly": 1,
 	"beedrill": 1,
+	"beldum": 10,
 	"bellossom": 1,
 	"bellsprout": 20,
 	"blastoise": 1,
+	"blaziken": 1,
 	"blissey": 5,
+	"breloom": 5,
 	"bulbasaur": 10,
 	"butterfree": 1,
+	"cacnea": 5,
+	"cacturne": 5,
+	"camerupt": 5,
+	"carvanha": 30,
+	"cascoon": 10,
+	"castform": 5,
 	"caterpie": 10,
 	"celebi": 1,
 	"chansey": 1,
@@ -44412,17 +45699,26 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"charmander": 10,
 	"charmeleon": 5,
 	"chikorita": 10,
+	"chimecho": 1,
 	"chinchou": 30,
+	"clamperl": 30,
+	"claydol": 20,
 	"clefable": 1,
 	"clefairy": 1,
 	"cleffa": 10,
 	"cloyster": 5,
+	"combusken": 5,
+	"corphish": 30,
 	"corsola": 10,
+	"cradily": 5,
+	"crawdaunt": 5,
 	"crobat": 1,
 	"croconaw": 5,
 	"cubone": 30,
 	"cyndaquil": 10,
+	"delcatty": 5,
 	"delibird": 10,
+	"deoxys": 1,
 	"dewgong": 1,
 	"diglett": 30,
 	"ditto": 5,
@@ -44435,37 +45731,52 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"drowzee": 20,
 	"dugtrio": 10,
 	"dunsparce": 1,
+	"dusclops": 5,
+	"duskull": 10,
+	"dustox": 1,
 	"eevee": 10,
 	"ekans": 10,
 	"electabuzz": 5,
+	"electrike": 30,
 	"electrode": 10,
 	"elekid": 10,
 	"entei": 1,
 	"espeon": 5,
 	"exeggcute": 20,
 	"exeggutor": 5,
+	"exploud": 1,
 	"farfetch_d": 5,
 	"fearow": 10,
+	"feebas": 10,
 	"feraligatr": 1,
 	"flaaffy": 10,
 	"flareon": 5,
+	"flygon": 1,
 	"forretress": 5,
 	"furret": 5,
+	"gardevoir": 1,
 	"gastly": 20,
 	"gengar": 1,
 	"geodude": 30,
 	"girafarig": 20,
+	"glalie": 5,
 	"gligar": 10,
 	"gloom": 1,
 	"golbat": 10,
 	"goldeen": 30,
 	"golduck": 10,
 	"golem": 1,
+	"gorebyss": 5,
 	"granbull": 1,
 	"graveler": 30,
 	"grimer": 30,
+	"groudon": 1,
+	"grovyle": 5,
 	"growlithe": 5,
+	"grumpig": 5,
+	"gulpin": 20,
 	"gyarados": 20,
+	"hariyama": 30,
 	"haunter": 5,
 	"heracross": 5,
 	"hitmonchan": 5,
@@ -44477,10 +45788,13 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"horsea": 30,
 	"houndoom": 5,
 	"houndour": 5,
+	"huntail": 5,
 	"hypno": 5,
 	"igglybuff": 10,
+	"illumise": 20,
 	"ivysaur": 5,
 	"jigglypuff": 1,
+	"jirachi": 1,
 	"jolteon": 5,
 	"jumpluff": 1,
 	"jynx": 5,
@@ -44489,17 +45803,31 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"kadabra": 5,
 	"kakuna": 5,
 	"kangaskhan": 5,
+	"kecleon": 1,
 	"kingdra": 1,
 	"kingler": 20,
+	"kirlia": 5,
 	"koffing": 30,
 	"krabby": 30,
+	"kyogre": 1,
+	"lairon": 20,
 	"lanturn": 10,
 	"lapras": 5,
 	"larvitar": 5,
+	"latias": 1,
+	"latios": 1,
 	"ledian": 1,
 	"ledyba": 5,
 	"lickitung": 20,
+	"lileep": 10,
+	"linoone": 20,
+	"lombre": 20,
+	"lotad": 30,
+	"loudred": 10,
+	"ludicolo": 1,
 	"lugia": 1,
+	"lunatone": 5,
+	"luvdisc": 30,
 	"machamp": 1,
 	"machoke": 10,
 	"machop": 20,
@@ -44509,20 +45837,33 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"magmar": 5,
 	"magnemite": 20,
 	"magneton": 10,
+	"makuhita": 30,
+	"manectric": 10,
 	"mankey": 10,
 	"mantine": 5,
 	"mareep": 10,
 	"marill": 5,
 	"marowak": 1,
+	"marshtomp": 5,
+	"masquerain": 5,
+	"mawile": 5,
+	"medicham": 5,
+	"meditite": 10,
 	"meganium": 1,
 	"meowth": 10,
+	"metagross": 1,
+	"metang": 5,
 	"metapod": 5,
 	"mew": 1,
 	"mewtwo": 1,
+	"mightyena": 20,
+	"milotic": 5,
 	"miltank": 5,
+	"minun": 20,
 	"misdreavus": 5,
 	"moltres": 1,
 	"mr__mime": 5,
+	"mudkip": 10,
 	"muk": 5,
 	"murkrow": 5,
 	"natu": 30,
@@ -44532,8 +45873,13 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"nidoran_m": 20,
 	"nidorina": 30,
 	"nidorino": 30,
+	"nincada": 20,
 	"ninetales": 5,
+	"ninjask": 5,
 	"noctowl": 5,
+	"nosepass": 30,
+	"numel": 30,
+	"nuzleaf": 1,
 	"octillery": 5,
 	"oddish": 10,
 	"omanyte": 10,
@@ -44541,6 +45887,7 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"onix": 20,
 	"paras": 10,
 	"parasect": 5,
+	"pelipper": 5,
 	"persian": 1,
 	"phanpy": 1,
 	"pichu": 10,
@@ -44551,11 +45898,13 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"piloswine": 5,
 	"pineco": 10,
 	"pinsir": 1,
+	"plusle": 1,
 	"politoed": 1,
 	"poliwag": 30,
 	"poliwhirl": 20,
 	"poliwrath": 1,
 	"ponyta": 20,
+	"poochyena": 30,
 	"porygon": 10,
 	"porygon2": 5,
 	"primeape": 1,
@@ -44566,24 +45915,47 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"qwilfish": 30,
 	"raichu": 5,
 	"raikou": 1,
+	"ralts": 5,
 	"rapidash": 10,
 	"raticate": 10,
 	"rattata": 30,
+	"rayquaza": 1,
+	"regice": 1,
+	"regirock": 1,
+	"registeel": 1,
+	"relicanth": 5,
 	"remoraid": 30,
 	"rhydon": 1,
 	"rhyhorn": 10,
+	"roselia": 5,
+	"sableye": 30,
+	"salamence": 1,
 	"sandshrew": 10,
 	"sandslash": 5,
+	"sceptile": 1,
 	"scizor": 5,
 	"scyther": 1,
 	"seadra": 10,
 	"seaking": 20,
+	"sealeo": 5,
+	"seedot": 1,
 	"seel": 20,
 	"sentret": 20,
+	"seviper": 10,
+	"sharpedo": 30,
+	"shedinja": 5,
+	"shelgon": 5,
 	"shellder": 20,
+	"shiftry": 1,
+	"shroomish": 20,
 	"shuckle": 5,
+	"shuppet": 30,
+	"silcoon": 10,
 	"skarmory": 1,
 	"skiploom": 5,
+	"skitty": 1,
+	"slaking": 1,
+	"slakoth": 5,
 	"slowbro": 10,
 	"slowking": 5,
 	"slowpoke": 30,
@@ -44592,9 +45964,14 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"smoochum": 10,
 	"sneasel": 1,
 	"snorlax": 5,
+	"snorunt": 10,
 	"snubbull": 5,
+	"solrock": 20,
 	"spearow": 30,
+	"spheal": 30,
 	"spinarak": 5,
+	"spinda": 30,
+	"spoink": 20,
 	"squirtle": 10,
 	"stantler": 10,
 	"starmie": 5,
@@ -44604,7 +45981,13 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"suicune": 1,
 	"sunflora": 5,
 	"sunkern": 10,
+	"surskit": 10,
+	"swablu": 30,
+	"swalot": 5,
+	"swampert": 1,
+	"swellow": 10,
 	"swinub": 30,
+	"taillow": 20,
 	"tangela": 30,
 	"tauros": 5,
 	"teddiursa": 1,
@@ -44612,7 +45995,12 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"tentacruel": 10,
 	"togepi": 10,
 	"togetic": 5,
+	"torchic": 10,
+	"torkoal": 30,
 	"totodile": 10,
+	"trapinch": 30,
+	"treecko": 10,
+	"tropius": 10,
 	"typhlosion": 1,
 	"tyranitar": 1,
 	"tyrogue": 10,
@@ -44623,20 +46011,33 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"venomoth": 1,
 	"venonat": 5,
 	"venusaur": 1,
+	"vibrava": 5,
 	"victreebel": 1,
+	"vigoroth": 5,
 	"vileplume": 1,
+	"volbeat": 1,
 	"voltorb": 30,
 	"vulpix": 5,
+	"wailmer": 30,
+	"wailord": 1,
+	"walrein": 1,
 	"wartortle": 5,
 	"weedle": 10,
 	"weepinbell": 10,
 	"weezing": 1,
+	"whiscash": 20,
+	"whismur": 30,
 	"wigglytuff": 5,
+	"wingull": 30,
 	"wobbuffet": 10,
 	"wooper": 30,
+	"wurmple": 30,
+	"wynaut": 30,
 	"xatu": 5,
 	"yanma": 1,
+	"zangoose": 5,
 	"zapdos": 1,
+	"zigzagoon": 20,
 	"zubat": 20
 };
 //#endregion
@@ -45027,15 +46428,28 @@ var STARTER_HUNT_ID = "route_46";
 var STARTER_HUNT_SPECIES = [
 	"sentret",
 	"hoothoot",
-	"rattata"
+	"rattata",
+	"pidgey",
+	"caterpie",
+	"weedle",
+	"zigzagoon",
+	"poochyena",
+	"wurmple"
 ];
-var STARTER_LEVEL_WEIGHTS = [{
-	level: 1,
-	weight: 80
-}, {
-	level: 2,
-	weight: 20
-}];
+var STARTER_LEVEL_WEIGHTS = [
+	{
+		level: 1,
+		weight: 76
+	},
+	{
+		level: 2,
+		weight: 21
+	},
+	{
+		level: 3,
+		weight: 3
+	}
+];
 var DEFAULT_WEIGHT = 10;
 var PRE_EVOLUCAO = {};
 for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id;
@@ -45218,19 +46632,49 @@ function montarHunt(bioma, faixa) {
 }
 for (const bioma of BIOMAS) for (const faixa of FAIXAS$1) montarHunt(bioma, faixa);
 var TETO_DE_FATIA = .35;
-var POOL_MINIMO_PRA_TETO = 5;
-for (const map of Object.values(maps)) {
-	if (map.enemyPool.length < POOL_MINIMO_PRA_TETO) continue;
-	for (let volta = 0; volta < 10; volta++) {
-		const total = map.enemyPool.reduce((s, id) => s + encounters[id].weight, 0);
-		const acima = map.enemyPool.filter((id) => encounters[id].weight / total > .350000001);
-		if (acima.length === 0) break;
-		for (const id of acima) {
-			const resto = total - encounters[id].weight;
-			encounters[id].weight = TETO_DE_FATIA * resto / .65;
-		}
+/**
+* Apara os pesos ate ninguem passar de `TETO_DE_FATIA`. Muta e devolve o mapa.
+*
+* RESOLVIDO DIRETO, E NAO POR APROXIMACAO SUCESSIVA. A versao anterior reaplicava
+* a formula ate 10 vezes, e ela NAO CONVERGE nesse orcamento quando dois
+* encontros empatam no topo de um pool pequeno: cada volta recalcula o peso de
+* um assumindo que o outro ficou parado, entao os dois se perseguem. Medido no
+* pool que expos isto (Espaco do Pesadelo, sala 10 — Solrock e Lunatone
+* empatados com Claydol atras): as 10 voltas paravam em 35,05%, acima do teto,
+* e so o teste POR SALA viu — no nivel da hunt o pool e maior e a convergencia
+* cabia nas 10 voltas.
+*
+* A conta fechada: se os `k` mais pesados ficam no teto `t` e o resto soma `R`,
+* entao `total = k*w + R` e `w/total = t`, o que da `w = t*R/(1 - k*t)`. O `k`
+* certo e o menor em que o (k+1)-esimo ja nao passa do teto — e como
+* `w/total = t` por construcao, "nao passar" e simplesmente `w_(k+1) <= w`.
+*
+* `k*t >= 1` e o caso aritmeticamente impossivel (com teto 0,35, tres encontros
+* no teto dariam 105%): ai o pool e pequeno demais pro teto e fica como esta.
+*
+* Determinismo importa aqui tanto quanto a exatidao: e o mesmo peso dos dois
+* lados que faz cliente e autoridade concordarem sobre o sorteio (ver a nota de
+* divergencia de sala em systems/salaSystem.ts). Por isso o empate e desfeito
+* pela CHAVE, e nao pela ordem de insercao do mapa.
+*/
+function aparaOTeto(pesos) {
+	if (pesos.size < 3) return pesos;
+	const ordenado = [...pesos].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+	let resto = ordenado.reduce((s, [, w]) => s + w, 0);
+	if (!(resto > 0)) return pesos;
+	for (let k = 1; k * .35 < 1 && k < ordenado.length; k++) {
+		resto -= ordenado[k - 1][1];
+		const noTeto = TETO_DE_FATIA * resto / (1 - k * TETO_DE_FATIA);
+		if (ordenado[k][1] > noTeto + 1e-12) continue;
+		if (ordenado[k - 1][1] <= noTeto + 1e-12) break;
+		for (let i = 0; i < k; i++) pesos.set(ordenado[i][0], noTeto);
+		break;
 	}
+	return pesos;
 }
+for (const map of Object.values(maps)) aparaOTeto(new Map(map.enemyPool.map((id) => [id, encounters[id].weight]))).forEach((peso, id) => {
+	encounters[id].weight = peso;
+});
 var nightmare = buildNightmareMirror(maps, encounters, POOL_POR_SALA);
 for (const [id, salas] of Object.entries(nightmare.porSala)) POOL_POR_SALA[id] = salas;
 var MAPS = {
@@ -76317,6 +77761,117 @@ function recordBatch(gameState, { gold, xp, mobs, shinys }) {
 		shinys
 	});
 }
+//#endregion
+//#region src/data/spawnPorTier.ts
+/** Do mais comum ao mais raro — a ordem E a raridade, igual ao enum do PokeRogue. */
+var TIERS_SELVAGENS = [
+	"COMMON",
+	"UNCOMMON",
+	"RARE",
+	"SUPER_RARE",
+	"ULTRA_RARE"
+];
+var TIERS_DE_PROTETOR = [
+	"BOSS",
+	"BOSS_RARE",
+	"BOSS_SUPER_RARE",
+	"BOSS_ULTRA_RARE"
+];
+/** Largura de cada faixa do `randSeedInt(512)` do PokeRogue. Soma 512. */
+var CHANCE_DO_TIER = {
+	COMMON: 356 / 512,
+	UNCOMMON: 124 / 512,
+	RARE: 26 / 512,
+	SUPER_RARE: 5 / 512,
+	ULTRA_RARE: 1 / 512
+};
+/** O mesmo, do `randSeedInt(64)` do lado de chefe. Soma 64. */
+var CHANCE_DO_TIER_DE_PROTETOR = {
+	BOSS: 44 / 64,
+	BOSS_RARE: 14 / 64,
+	BOSS_SUPER_RARE: 5 / 64,
+	BOSS_ULTRA_RARE: 1 / 64
+};
+var reverso = /* @__PURE__ */ new Map();
+/**
+* Em que tier selvagem `speciesId` esta neste sub-bioma, ou `null` se ele nao
+* mora ali.
+*
+* `null` e um caso real, nao defensivo: o pool de sorteio cai no `enemyPool` da
+* hunt inteira quando a sala nao tem encontro na janela de nivel
+* (`salaSystem#contextoDeSpawn`), e ai entram especies de sub-biomas vizinhos.
+*/
+function tierDaEspecie(subBioma, speciesId) {
+	let mapa = reverso.get(subBioma);
+	if (!mapa) {
+		mapa = /* @__PURE__ */ new Map();
+		const tiers = SUB_BIOMA_TIERS[subBioma];
+		if (tiers) TIERS_SELVAGENS.forEach((t, i) => {
+			for (const sp of tiers[t]) mapa.set(sp, i);
+		});
+		reverso.set(subBioma, mapa);
+	}
+	const i = mapa.get(speciesId);
+	return i == null ? null : TIERS_SELVAGENS[i];
+}
+/**
+* Distribui a chance dos tiers VAZIOS entre os que sobraram.
+*
+* Desce primeiro (na direcao do mais comum), que e o comportamento do
+* PokeRogue, e sobe quando nao ha nada abaixo. A ordem importa: um pool sem
+* ULTRA_RARE deve engrossar o SUPER_RARE, e nao o COMMON.
+*
+* Devolve a chance EFETIVA por indice de tier; indices ausentes do pool ficam
+* em zero.
+*/
+function colapsarTiers(presentes, chancePorIndice) {
+	const efetiva = new Array(chancePorIndice.length).fill(0);
+	if (presentes.size === 0) return efetiva;
+	for (let t = 0; t < chancePorIndice.length; t++) {
+		let alvo = -1;
+		for (let d = t; d >= 0; d--) if (presentes.has(d)) {
+			alvo = d;
+			break;
+		}
+		if (alvo < 0) {
+			for (let u = t + 1; u < chancePorIndice.length; u++) if (presentes.has(u)) {
+				alvo = u;
+				break;
+			}
+		}
+		efetiva[alvo] += chancePorIndice[t];
+	}
+	return efetiva;
+}
+/**
+* Peso de sorteio de cada item do pool: a chance do tier dele, colapsada,
+* repartida dentro do tier pelo desempate.
+*
+* Os pesos somam 1 quando o pool nao esta vazio. `weightedPick` normaliza de
+* qualquer jeito, mas somar 1 deixa o numero legivel em log e em teste.
+*
+* Generica em `T` porque quem chama passa id de ENCONTRO, e nao de especie —
+* duas hunts tem encontros diferentes pra mesma especie.
+*/
+function pesosPorTier(pool, indiceDoTier, desempate, chancePorIndice = TIERS_SELVAGENS.map((t) => CHANCE_DO_TIER[t])) {
+	const porTier = /* @__PURE__ */ new Map();
+	for (const item of pool) {
+		const i = indiceDoTier(item);
+		const lista = porTier.get(i);
+		if (lista) lista.push(item);
+		else porTier.set(i, [item]);
+	}
+	const efetiva = colapsarTiers(new Set(porTier.keys()), chancePorIndice);
+	const pesos = /* @__PURE__ */ new Map();
+	for (const [i, itens] of porTier) {
+		const cru = itens.map((x) => desempate(x) > 0 ? desempate(x) : 1);
+		const piso = Math.max(...cru) / 4;
+		const g = cru.map((x) => Math.max(x, piso));
+		const soma = g.reduce((s, x) => s + x, 0);
+		itens.forEach((item, k) => pesos.set(item, efetiva[i] * g[k] / soma));
+	}
+	return pesos;
+}
 /** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
 function temSalas(mapId) {
 	return POOL_POR_SALA[mapId] != null;
@@ -76380,6 +77935,42 @@ function poolAtivo(mapId, sala, fallback) {
 	const pool = POOL_POR_SALA[mapId]?.[sala.chave];
 	return pool && pool.length > 0 ? pool : fallback;
 }
+var cacheDePesos = /* @__PURE__ */ new Map();
+/**
+* Pesos do pool ativo: tier do PokeRogue decide a fatia, tier real de encontro
+* dos jogos desempata dentro dela, teto de fatia apara o que sobrar.
+*
+* A CHANCE VEM DO TIER, E NAO MAIS DO PESO DO ENCONTRO. O peso guardado em
+* `encounter.weight` e a frequencia real da especie nos jogos (Gen1/Gen2 por
+* disassembly, Gen3 por pokeemerald) e ele continua valendo onde nao ha
+* sub-bioma — hunt inicial, hunts BOSS, Campeao Lance. Dentro de uma sala ele
+* vira DESEMPATE: quem manda e o tier que o PokeRogue da aquela especie
+* NAQUELE lugar, que e a informacao que faltava (o mesmo Zubat e comum na
+* caverna e nao existe na praia, e um numero global nao sabe disso).
+*
+* Especie sem tier no sub-bioma cai em COMMON. Nao e defesa: acontece de
+* verdade quando o pool da sala nao tem ninguem na janela de nivel e o fallback
+* traz o `enemyPool` da hunt inteira, com especie de sub-bioma vizinho junto.
+*
+* Memoizado porque `contextoDeSpawn` roda a cada spawn (milhares de vezes por
+* flush no farm offline) e a resposta so depende de (mapa, sub-bioma, indice da
+* sala) — a janela de nivel sai do indice, e o pool sai dos dois. O cache e
+* limitado por construcao: mapas com sala x sub-biomas deles x `SALAS_POR_HUNT`.
+*/
+function pesosDaSala(chave, subBioma, pool) {
+	const pronto = cacheDePesos.get(chave);
+	if (pronto) return pronto;
+	const pesos = aparaOTeto(pesosPorTier(pool, (id) => {
+		const sp = getEncounter(id)?.speciesId;
+		const tier = sp ? tierDaEspecie(subBioma, sp) : null;
+		return tier == null ? 0 : TIERS_SELVAGENS.indexOf(tier);
+	}, (id) => {
+		const sp = getEncounter(id)?.speciesId;
+		return sp ? SPAWN_WEIGHT_BY_SPECIES[sp] ?? 0 : 0;
+	}));
+	cacheDePesos.set(chave, pesos);
+	return pesos;
+}
 /**
 * O que pode nascer AGORA: o pool da sala, recortado pela janela de nivel dela.
 *
@@ -76390,15 +77981,21 @@ function poolAtivo(mapId, sala, fallback) {
 */
 function contextoDeSpawn(mapId, faixa, sala, fallback) {
 	const pool = poolAtivo(mapId, sala, fallback);
-	if (!sala) return { pool };
+	if (!sala) return {
+		pool,
+		peso: (id) => getEncounter(id)?.weight ?? 0
+	};
 	const janela = janelaDaSala(faixa, sala.indice);
 	const naJanela = pool.filter((id) => {
 		const enc = getEncounter(id);
 		return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0];
 	});
+	const ativo = naJanela.length > 0 ? naJanela : pool;
+	const pesos = pesosDaSala(`${mapId}|${sala.chave}|${sala.indice}`, sala.chave, ativo);
 	return {
-		pool: naJanela.length > 0 ? naJanela : pool,
-		janela
+		pool: ativo,
+		janela,
+		peso: (id) => pesos.get(id) ?? 0
 	};
 }
 /** Loot que pode cair agora: o do sub-bioma, ou o da hunt inteira. */
@@ -76406,6 +78003,79 @@ function lootAtivo(sala, fallback) {
 	if (!sala) return fallback;
 	const perfil = SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.loot;
 	return perfil ? LOOT[perfil] : fallback;
+}
+var cacheDeProtetor = /* @__PURE__ */ new Map();
+/**
+* O contexto de sorteio DO PROTETOR: o elenco de chefe daquele sub-bioma, com a
+* tabela de chance de chefe do PokeRogue.
+*
+* Guardian comeca no tier BOSS, Lord comeca no BOSS_RARE — e por isso que o
+* Lord da sala 10 e um bicho diferente do Guardian das salas 1-9 quando o lugar
+* tem os dois. De onde comeca, acumula tiers ate juntar
+* `MINIMO_DE_CANDIDATOS_A_PROTETOR`: primeiro na direcao do BOSS (mais comum),
+* depois na direcao do mais raro, que e o mesmo colapso do spawn normal.
+*
+* DUAS DEGRADACOES, as duas medidas, e as duas sao o comportamento certo:
+*
+*  1. CHEFE DO POKEROGUE E FORMA FINAL, E FORMA FINAL NAO CABE NA FAIXA I.
+*     O candidato tem que estar no pool da sala, que ja passou pela janela de
+*     nivel — e medido, 82 das 297 combinacoes (sub-bioma x indice de sala)
+*     nao tem chefe NENHUM disponivel, 71 delas na faixa I. Nesses casos vale o
+*     pool da sala inteiro, que e exatamente o que o jogo fazia antes desta
+*     mudanca. O efeito colateral e bem-vindo: o Guardian VIRA um chefe de
+*     verdade conforme o jogador sobe de faixa, em vez de ser um ja no Lv5.
+*
+*  2. COM MENOS DE 3 CHEFES, O RESTO VEM DO POOL DA SALA, do mais raro pro mais
+*     comum. Sao outras 82 combinacoes com 1 ou 2 chefes. Completar com os mais
+*     raros mantem o protetor sendo o bicho incomum do lugar; completar com os
+*     comuns entregaria um Rattata como Lord.
+*/
+function contextoDoProtetor(mapId, ctx, sala, tipo) {
+	if (!sala) return ctx;
+	const chaveCache = `${mapId}|${sala.chave}|${sala.indice}|${tipo}`;
+	const pronto = cacheDeProtetor.get(chaveCache);
+	if (pronto) return pronto;
+	const tiers = SUB_BIOMA_TIERS[sala.chave];
+	const doTier = TIERS_DE_PROTETOR.map((t) => {
+		const elenco = new Set(tiers?.[t] ?? []);
+		return ctx.pool.filter((id) => elenco.has(getEncounter(id)?.speciesId ?? ""));
+	});
+	const inicio = tipo === "lord" ? 1 : 0;
+	const escolhidos = [];
+	const tierDoEncontro = /* @__PURE__ */ new Map();
+	const juntar = (i) => {
+		for (const id of doTier[i]) {
+			if (tierDoEncontro.has(id)) continue;
+			tierDoEncontro.set(id, i);
+			escolhidos.push(id);
+		}
+	};
+	juntar(inicio);
+	for (let i = inicio - 1; i >= 0 && escolhidos.length < 3; i--) juntar(i);
+	for (let i = inicio + 1; i < doTier.length && escolhidos.length < 3; i++) juntar(i);
+	if (escolhidos.length === 0) {
+		cacheDeProtetor.set(chaveCache, ctx);
+		return ctx;
+	}
+	if (escolhidos.length < 3) {
+		const sobra = ctx.pool.filter((id) => !tierDoEncontro.has(id)).sort((a, b) => ctx.peso(a) - ctx.peso(b) || a.localeCompare(b));
+		for (const id of sobra) {
+			if (escolhidos.length >= 3) break;
+			tierDoEncontro.set(id, TIERS_DE_PROTETOR.length - 1);
+			escolhidos.push(id);
+		}
+	}
+	const pesos = pesosPorTier(escolhidos, (id) => tierDoEncontro.get(id) ?? 0, (id) => {
+		const sp = getEncounter(id)?.speciesId;
+		return sp ? SPAWN_WEIGHT_BY_SPECIES[sp] ?? 0 : 0;
+	}, TIERS_DE_PROTETOR.map((t) => CHANCE_DO_TIER_DE_PROTETOR[t]));
+	const doProtetor = {
+		pool: escolhidos,
+		janela: ctx.janela,
+		peso: (id) => pesos.get(id) ?? 0
+	};
+	cacheDeProtetor.set(chaveCache, doProtetor);
+	return doProtetor;
 }
 /**
 * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
@@ -77046,7 +78716,7 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 	}
 	let escolhido = null;
 	for (let tentativa = 0; tentativa < 6; tentativa++) {
-		const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45);
+		const encounterId = weightedPick(rng, ctx.pool, ctx.peso);
 		const encounter = getEncounter(encounterId);
 		if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
 		const level = tipo === "lord" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
@@ -77111,7 +78781,7 @@ function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
 	}
 	if (world.protetorResolvido) return false;
 	if (world.protetorPendente) return true;
-	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), tipo, protetorSalvo, player, entrada);
+	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDoProtetor(mapDef.id, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), world.sala, tipo), tipo, protetorSalvo, player, entrada);
 	world.enemies.push(enemy);
 	world.protetorPendente = pendente;
 	return true;
@@ -77137,13 +78807,13 @@ function avancarBiomaProgressSeForOProximo(world, gameState) {
 	if ((gameState.biomaProgress[faixa] ?? 0) !== indice) return;
 	gameState.setBiomaProgress(faixa, indice + 1);
 }
-function spawnEnemyAt(world, mapDef, pool, janela, player, entrada, ocupados = []) {
+function spawnEnemyAt(world, mapDef, ctx, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
 	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, ocupados);
-	const encounterId = weightedPick(rng, pool, (id) => getEncounter(id)?.weight ?? 45);
+	const encounterId = weightedPick(rng, ctx.pool, ctx.peso);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
-	const [jmin, jmax] = janela ?? [encounter.minLevel, encounter.maxLevel];
+	const [jmin, jmax] = ctx.janela ?? [encounter.minLevel, encounter.maxLevel];
 	const lo = Math.max(encounter.minLevel, Math.min(jmin, encounter.maxLevel));
 	const hi = Math.min(encounter.maxLevel, Math.max(jmax, encounter.minLevel));
 	const level = encounter.levelWeights?.length ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level : randInt(rng, Math.min(lo, hi), Math.max(lo, hi));
@@ -77275,16 +78945,13 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 	const sequenceCleared = progresso?.sequenceCleared ?? false;
 	const countdownRemaining = sequenceIndex > 0 || sequenceCleared ? null : mapDef.startCountdown || null;
 	const climaDaConstrucao = progresso && "clima" in progresso ? climaDeAmbiente(progresso.clima ?? null) : climaAmbienteDaSala(base.seed, sala);
-	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
+	const ctx = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
 	let protetorPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
 		const tipoDeProtetor = sala && sala.abates >= 30 ? protetorDaSala(sala) : null;
 		if (tipoDeProtetor) {
-			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, {
-				pool,
-				janela
-			}, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
+			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 			protetorPendente = pendente;
@@ -77297,7 +78964,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 				enemies.push(enemy);
 			}
 		} else for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
-			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies);
+			const enemy = spawnEnemyAt(base, mapDef, ctx, player, entradaDoInimigo(mapDef, sala), enemies);
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 		}
@@ -77488,7 +79155,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			} else {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
@@ -77508,7 +79175,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
@@ -77582,7 +79249,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
+			const enemy = spawnEnemyAt(world, world.mapDef, ctx, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;

@@ -48,14 +48,80 @@ import type { HuntMapDef, HuntEncounter } from './huntTypes'
 // ---------------------------------------------------------------------------
 // Hunt inicial
 // ---------------------------------------------------------------------------
-// Nao e um bioma: e a primeira tela do jogo, elenco curado a mao, Lv1-2, e
-// fica FORA do sistema de salas. Rattata e de Kanto e isso e deliberado — o
-// pedido nomeou os tres.
+// Nao e um bioma: e a primeira tela do jogo, elenco curado a mao, e fica FORA
+// do sistema de salas. Rattata e de Kanto e isso e deliberado — o pedido
+// original nomeou os tres primeiros.
 export const STARTER_HUNT_ID = 'route_46'
-const STARTER_HUNT_SPECIES = ['sentret', 'hoothoot', 'rattata']
+
+// O ELENCO SAIU DE 3 PRA 9, E OS 6 NOVOS VIERAM DO SUB-BIOMA `town`.
+//
+// A hunt inicial e a primeira tela do jogo e mostrava tres especies. O `town`
+// do PokeRogue, que e o bioma de entrada dele, tinha 17 especies no tier
+// COMMON — todas forma base de primeira rota — e no nosso desenho isso caia
+// num sub-bioma de Campo Aberto que o jogador so ve depois. Os seis mais
+// reconheciveis como "primeira rota" mudaram de casa: `gerar-subbiomas.mjs`
+// (SAI_DO_SUB_BIOMA) tira os seis do `town`, e eles entram aqui.
+//
+// O CRITERIO NAO FOI TEMATICO SO. Toda especie daqui tem BST <= 251, que e a
+// faixa que a hunt JA tinha (rattata 253, hoothoot 262) — entao o teto de
+// dificuldade nao subiu, a media desceu. Ficaram de fora spearow (262) e
+// taillow (270), que sao os agressivos, e sunkern (evolui no Lv80, ficaria pra
+// sempre). Nenhuma delas evolui antes do Lv7, entao todas continuam sendo o
+// estagio certo em Lv1-3.
+//
+// A HUNT DEIXOU DE SER SO-NORMAL, e isso e consequencia aceita e nao descuido:
+// caterpie e weedle sao BUG, poochyena e DARK. O invariante antigo ("todos
+// NORMAL") era descricao das tres especies escolhidas, nunca uma regra de
+// desenho — o que a hunt precisa garantir e nivel baixo e inimigo fraco, e isso
+// esta medido acima.
+//
+// As seis saem do `town` de verdade (nao ficam nos dois lugares) e nenhuma some
+// do jogo: as tres linhas de inseto continuam com casa em `forest` pela forma
+// final (butterfree, beedrill, beautifly), e pidgey, zigzagoon e poochyena tem
+// casa direta em mountain/plains/metropolis/volcano.
+const STARTER_HUNT_SPECIES = [
+  'sentret', 'hoothoot', 'rattata',
+  'pidgey', 'caterpie', 'weedle', 'zigzagoon', 'poochyena', 'wurmple',
+]
+
+// Lv1-3, com o 3 raro. O 3 e 3% E ESSE NUMERO FOI MEDIDO, nao arredondado.
+//
+// O teto era Lv2. Subir pra 3 tem um risco conhecido: um POKE inicial Lv1 tem
+// 12 HP, e a UNICA janela em que conta nova morre sao os primeiros 30-60
+// segundos (ver a nota de MAX_INIMIGOS_HUNT_INICIAL em data/biomas.ts, decidida
+// medindo exatamente isso).
+//
+// Bancada: scripts/harness/hunt-inicial-lv3.mjs, 200 sementes x os 3 iniciais =
+// 600 vidas por configuracao, 60 segundos cada.
+//
+//   3 especies, Lv1-2  80/20  (era) ..... 2,50%  (15/600)
+//   9 especies, Lv1-2  80/20  ........... 1,17%  ( 7/600)
+//   9 especies, Lv1-3  70/22/8 .......... 4,67%  (28/600)
+//   9 especies, Lv1-3  74/22/4 .......... 2,67%  (16/600)
+//   9 especies, Lv1-3  76/21/3  (este) .. 2,00%  (12/600)
+//
+// DUAS COISAS QUE SO APARECERAM PORQUE A BANCADA DIZ QUEM MATOU:
+//
+// 1. O ELENCO MAIOR TORNA A HUNT MAIS SEGURA, nao menos — 2,50% -> 1,17% so de
+//    trocar 3 especies por 9. O carrasco e o Rattata (atk 56, spd 72, o mais
+//    forte e o mais rapido do elenco): ele era 22 de 28 mortes na configuracao
+//    mais letal, e passar de 1/3 do pool pra 1/6 dilui isso. As seis especies
+//    novas somadas aparecem em 4 das 28.
+//
+// 2. Todo o custo do Lv3 e do Rattata Lv3, que sozinho fez metade das mortes
+//    (14 de 28) com 8% de peso. Foi por isso que a calibragem mexeu no peso do
+//    nivel, e nao no elenco.
+//
+// O resultado escolhido deixa a hunt MAIS SEGURA do que ela esta no ar hoje
+// (2,00% contra 2,50%) e ainda assim com Lv3 dentro. Nao ha troca aqui.
+//
+// A ressalva que toda bancada headless carrega vale: ela ja discordou do
+// servidor real por quase 6x em taxa de morte absoluta. O que ela responde bem
+// e a comparacao RELATIVA, e a comparacao relativa e favoravel.
 const STARTER_LEVEL_WEIGHTS = [
-  { level: 1, weight: 80 },
-  { level: 2, weight: 20 },
+  { level: 1, weight: 76 },
+  { level: 2, weight: 21 },
+  { level: 3, weight: 3 },
 ]
 
 // ---------------------------------------------------------------------------
@@ -403,24 +469,73 @@ for (const bioma of BIOMAS) {
 // A conta sai do peso dos OUTROS, e nao de um numero absoluto: `weightedPick`
 // usa `peso / soma`, entao peso fixo mudaria de significado a cada mudanca de
 // pool. Com fatia alvo `t` e soma `S` no resto:  w/(S+w) = t  =>  w = t*S/(1-t).
-const TETO_DE_FATIA = 0.35
-// Pool pequeno demais nao pode respeitar o teto (com 3 especies o minimo
-// possivel ja e 33%) e nesses casos o pool e curado a mao — a hunt inicial e o
-// unico caso hoje. Aparar ali seria mexer num balanceamento pedido.
-const POOL_MINIMO_PRA_TETO = 5
+export const TETO_DE_FATIA = 0.35
+// Abaixo disto o teto e aritmeticamente impossivel: com 2 especies o minimo ja
+// e 50%. Com 3 o minimo e 33,3%, que cabe — entao 3 e o menor pool aparavel, e
+// nao 5. O 5 anterior era herdado de quando a apara so existia no nivel da
+// HUNT, onde pool de 3 ou 4 so acontecia na inicial (curada a mao). No nivel da
+// SALA um pool de 4 e corriqueiro — o Leito de Praia tem 4 nas tres faixas — e
+// pular esses e pular justamente os casos mais desequilibrados do jogo.
+export const POOL_MINIMO_PRA_TETO = 3
 
-for (const map of Object.values(maps)) {
-  if (map.enemyPool.length < POOL_MINIMO_PRA_TETO) continue
-  // Iterativo: aparar um encontro muda o denominador dos outros.
-  for (let volta = 0; volta < 10; volta++) {
-    const total = map.enemyPool.reduce((s, id) => s + encounters[id].weight, 0)
-    const acima = map.enemyPool.filter((id) => encounters[id].weight / total > TETO_DE_FATIA + 1e-9)
-    if (acima.length === 0) break
-    for (const id of acima) {
-      const resto = total - encounters[id].weight
-      encounters[id].weight = (TETO_DE_FATIA * resto) / (1 - TETO_DE_FATIA)
-    }
+/**
+ * Apara os pesos ate ninguem passar de `TETO_DE_FATIA`. Muta e devolve o mapa.
+ *
+ * RESOLVIDO DIRETO, E NAO POR APROXIMACAO SUCESSIVA. A versao anterior reaplicava
+ * a formula ate 10 vezes, e ela NAO CONVERGE nesse orcamento quando dois
+ * encontros empatam no topo de um pool pequeno: cada volta recalcula o peso de
+ * um assumindo que o outro ficou parado, entao os dois se perseguem. Medido no
+ * pool que expos isto (Espaco do Pesadelo, sala 10 — Solrock e Lunatone
+ * empatados com Claydol atras): as 10 voltas paravam em 35,05%, acima do teto,
+ * e so o teste POR SALA viu — no nivel da hunt o pool e maior e a convergencia
+ * cabia nas 10 voltas.
+ *
+ * A conta fechada: se os `k` mais pesados ficam no teto `t` e o resto soma `R`,
+ * entao `total = k*w + R` e `w/total = t`, o que da `w = t*R/(1 - k*t)`. O `k`
+ * certo e o menor em que o (k+1)-esimo ja nao passa do teto — e como
+ * `w/total = t` por construcao, "nao passar" e simplesmente `w_(k+1) <= w`.
+ *
+ * `k*t >= 1` e o caso aritmeticamente impossivel (com teto 0,35, tres encontros
+ * no teto dariam 105%): ai o pool e pequeno demais pro teto e fica como esta.
+ *
+ * Determinismo importa aqui tanto quanto a exatidao: e o mesmo peso dos dois
+ * lados que faz cliente e autoridade concordarem sobre o sorteio (ver a nota de
+ * divergencia de sala em systems/salaSystem.ts). Por isso o empate e desfeito
+ * pela CHAVE, e nao pela ordem de insercao do mapa.
+ */
+export function aparaOTeto(pesos: Map<string, number>): Map<string, number> {
+  if (pesos.size < POOL_MINIMO_PRA_TETO) return pesos
+  const ordenado = [...pesos].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  let resto = ordenado.reduce((s, [, w]) => s + w, 0)
+  if (!(resto > 0)) return pesos
+  for (let k = 1; k * TETO_DE_FATIA < 1 && k < ordenado.length; k++) {
+    resto -= ordenado[k - 1][1]
+    const noTeto = (TETO_DE_FATIA * resto) / (1 - k * TETO_DE_FATIA)
+    if (ordenado[k][1] > noTeto + 1e-12) continue
+    // `k` fechado: os k primeiros passavam do teto, o (k+1)-esimo nao passa mais.
+    if (ordenado[k - 1][1] <= noTeto + 1e-12) break // ninguem precisava de apara
+    for (let i = 0; i < k; i++) pesos.set(ordenado[i][0], noTeto)
+    break
   }
+  return pesos
+}
+
+// ESTA APARA E A DO FALLBACK, E ELA NAO E A QUE O JOGADOR VE NUMA HUNT DE BIOMA.
+//
+// `map.enemyPool` e a UNIAO dos pools de sala, e o sorteio real acontece sobre o
+// pool da SALA ativa, recortado pela janela de nivel dela
+// (`salaSystem#contextoDeSpawn`). Entao aparar aqui nao limita o que nasce:
+// medido com o teto ja no lugar, 9 das 99 salas passavam de 35%, com Leito de
+// Praia III e Laboratorio II em 50% — uma especie em cada duas. O teste que
+// devia pegar isso media a HUNT, nao a sala, e passava verde.
+//
+// A apara por sala vive em `salaSystem#contextoDeSpawn`. Esta continua aqui
+// porque o `enemyPool` da hunt E o pool de sorteio quando nao ha sala: hunt
+// inicial, hunts BOSS, Campeao Lance, e a janela entre entrar na hunt e o
+// servidor dizer qual e a sala.
+for (const map of Object.values(maps)) {
+  aparaOTeto(new Map(map.enemyPool.map((id) => [id, encounters[id].weight])))
+    .forEach((peso, id) => { encounters[id].weight = peso })
 }
 
 // Espelho do Modo Pesadelo tirado do resultado ACIMA, nao do dado gerado cru.
