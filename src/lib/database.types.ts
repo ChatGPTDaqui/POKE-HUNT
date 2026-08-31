@@ -1671,6 +1671,82 @@ export type Database = {
         }
         Relationships: []
       }
+      troca_oferta: {
+        Row: {
+          criada_em: string
+          dono_id: string
+          id: string
+          item_id: string | null
+          poke_uid: string | null
+          quantidade: number
+          sessao_id: string
+          tipo: string
+        }
+        Insert: {
+          criada_em?: string
+          dono_id: string
+          id?: string
+          item_id?: string | null
+          poke_uid?: string | null
+          quantidade?: number
+          sessao_id: string
+          tipo: string
+        }
+        Update: {
+          criada_em?: string
+          dono_id?: string
+          id?: string
+          item_id?: string | null
+          poke_uid?: string | null
+          quantidade?: number
+          sessao_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "troca_oferta_dono_id_fkey"
+            columns: ["dono_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_dono_id_fkey"
+            columns: ["dono_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "ranking_pokemon"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "troca_sessao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       troca_sessao: {
         Row: {
           anfitriao_id: string
@@ -1682,6 +1758,7 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
         }
         Insert: {
           anfitriao_id: string
@@ -1693,6 +1770,7 @@ export type Database = {
           estado?: string
           expira_em?: string
           id?: string
+          versao?: number
         }
         Update: {
           anfitriao_id?: string
@@ -1704,6 +1782,7 @@ export type Database = {
           estado?: string
           expira_em?: string
           id?: string
+          versao?: number
         }
         Relationships: [
           {
@@ -2043,10 +2122,33 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
+      _mesa_aberta_minha: {
+        Args: { p_eu: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
       }
+      _troca_teto_por_lado: { Args: never; Returns: number }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
@@ -2063,6 +2165,7 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
         }
         SetofOptions: {
           from: "*"
@@ -2083,6 +2186,7 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
         }
         SetofOptions: {
           from: "*"
@@ -2172,6 +2276,7 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
         }
         SetofOptions: {
           from: "*"
@@ -2255,7 +2360,49 @@ export type Database = {
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
       perfil_publico: { Args: { p_user_id: string }; Returns: Json }
+      por_item_na_mesa: {
+        Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      por_poke_na_mesa: {
+        Args: { p_poke_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
@@ -2295,6 +2442,48 @@ export type Database = {
       taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      tirar_item_da_mesa: {
+        Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      tirar_poke_da_mesa: {
+        Args: { p_poke_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       usar_item: { Args: { p_item_id: string }; Returns: Json }
       vender_item: {
         Args: { p_item_id: string; p_qtd?: number }
@@ -2357,7 +2546,7 @@ export type Database = {
       map_continent: "johto" | "kanto"
       move_category: "physical" | "special"
       move_target: "single" | "aoe"
-      pokemon_location: "team" | "bag" | "market"
+      pokemon_location: "team" | "bag" | "market" | "troca"
       rarity_tier:
         | "comum"
         | "incomum"
@@ -4072,6 +4261,82 @@ export type Database = {
         }
         Relationships: []
       }
+      troca_oferta: {
+        Row: {
+          criada_em: string
+          dono_id: string
+          id: string
+          item_id: string | null
+          poke_uid: string | null
+          quantidade: number
+          sessao_id: string
+          tipo: string
+        }
+        Insert: {
+          criada_em?: string
+          dono_id: string
+          id?: string
+          item_id?: string | null
+          poke_uid?: string | null
+          quantidade?: number
+          sessao_id: string
+          tipo: string
+        }
+        Update: {
+          criada_em?: string
+          dono_id?: string
+          id?: string
+          item_id?: string | null
+          poke_uid?: string | null
+          quantidade?: number
+          sessao_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "troca_oferta_dono_id_fkey"
+            columns: ["dono_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_dono_id_fkey"
+            columns: ["dono_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "ranking_pokemon"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "troca_oferta_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "troca_sessao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       troca_sessao: {
         Row: {
           anfitriao_id: string
@@ -4083,6 +4348,7 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
         }
         Insert: {
           anfitriao_id: string
@@ -4094,6 +4360,7 @@ export type Database = {
           estado?: string
           expira_em?: string
           id?: string
+          versao?: number
         }
         Update: {
           anfitriao_id?: string
@@ -4105,6 +4372,7 @@ export type Database = {
           estado?: string
           expira_em?: string
           id?: string
+          versao?: number
         }
         Relationships: [
           {
@@ -4444,10 +4712,33 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
+      _mesa_aberta_minha: {
+        Args: { p_eu: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
       }
+      _troca_teto_por_lado: { Args: never; Returns: number }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
@@ -4464,6 +4755,7 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
         }
         SetofOptions: {
           from: "*"
@@ -4484,6 +4776,7 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
         }
         SetofOptions: {
           from: "*"
@@ -4573,6 +4866,7 @@ export type Database = {
           estado: string
           expira_em: string
           id: string
+          versao: number
         }
         SetofOptions: {
           from: "*"
@@ -4656,7 +4950,49 @@ export type Database = {
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
       perfil_publico: { Args: { p_user_id: string }; Returns: Json }
+      por_item_na_mesa: {
+        Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      por_poke_na_mesa: {
+        Args: { p_poke_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
@@ -4696,6 +5032,48 @@ export type Database = {
       taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      tirar_item_da_mesa: {
+        Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      tirar_poke_da_mesa: {
+        Args: { p_poke_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       usar_item: { Args: { p_item_id: string }; Returns: Json }
       vender_item: {
         Args: { p_item_id: string; p_qtd?: number }
@@ -4758,7 +5136,7 @@ export type Database = {
       map_continent: "johto" | "kanto"
       move_category: "physical" | "special"
       move_target: "single" | "aoe"
-      pokemon_location: "team" | "bag" | "market"
+      pokemon_location: "team" | "bag" | "market" | "troca"
       rarity_tier:
         | "comum"
         | "incomum"
@@ -4919,7 +5297,7 @@ export const Constants = {
       map_continent: ["johto", "kanto"],
       move_category: ["physical", "special"],
       move_target: ["single", "aoe"],
-      pokemon_location: ["team", "bag", "market"],
+      pokemon_location: ["team", "bag", "market", "troca"],
       rarity_tier: ["comum", "incomum", "raro", "ultra", "legendary", "mythic"],
     },
   },
@@ -4954,7 +5332,7 @@ export const Constants = {
       map_continent: ["johto", "kanto"],
       move_category: ["physical", "special"],
       move_target: ["single", "aoe"],
-      pokemon_location: ["team", "bag", "market"],
+      pokemon_location: ["team", "bag", "market", "troca"],
       rarity_tier: ["comum", "incomum", "raro", "ultra", "legendary", "mythic"],
     },
   },
