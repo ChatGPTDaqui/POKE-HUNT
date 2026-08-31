@@ -34700,6 +34700,23 @@ function perdeOTurno(rng, status) {
 	if (regra.chanceDePerderOTurno) return nextFloat(rng) < regra.chanceDePerderOTurno;
 	return false;
 }
+/**
+* A metade DETERMINISTICA de `perdeOTurno`: este status impede a acao SEMPRE
+* (sono e congelamento), sem sortear nada.
+*
+* Existe separada porque `perdeOTurno` consome `rng`, e quem so quer OBSERVAR
+* "este POKE esta impedido de agir agora" nao pode mexer na sequencia de
+* sorteio — mexer ali muda o resultado da propria luta que se esta observando.
+* A paralisia, que perde o turno por sorteio, fica de fora de proposito: ela
+* atrasa a acao, nao impede.
+*
+* PH-305: o cao de guarda do protetor (simulation.ts) usa isto pra nao contar
+* como impasse o tempo em que o POKE simplesmente nao consegue atacar.
+*/
+function bloqueiaAcaoSempre(status) {
+	if (!status) return false;
+	return regraDoStatus(status.tipo)?.bloqueiaAcao === true;
+}
 var STATUS_QUE_IMOBILIZAM = /* @__PURE__ */ new Set(["sleep", "freeze"]);
 function imobiliza(tipo) {
 	return tipo != null && STATUS_QUE_IMOBILIZAM.has(tipo);
@@ -55573,9 +55590,13 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 			enemies.push(enemy);
 			protetorPendente = pendente;
 		} else if (mapDef.sequence) {
-			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
-			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
-			enemies.push(enemy);
+			if (progresso?.sequenceHp !== 0) {
+				const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
+				const hpSalvo = progresso?.sequenceHp;
+				if (hpSalvo != null && hpSalvo > 0) enemy.poke.hp = Math.min(hpSalvo, enemy.poke.stats.hp);
+				aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
+				enemies.push(enemy);
+			}
 		} else for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
 			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies);
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
@@ -55878,9 +55899,10 @@ function stepWorld(world, dt, gameState, opts = {}) {
 	if (world.protetorPendente) {
 		const protetorVivo = world.enemies.find((e) => e.isProtetor && e.poke.uid === world.protetorPendente.uid);
 		if (protetorVivo) {
+			const podeAgir = !bloqueiaAcaoSempre(world.player?.poke.status ?? null);
 			const engajado = protetorVivo.state === "engaged" && world.player?.state === "engaged";
 			if (protetorVivo.poke.hp < world.protetorPendente.hpAtual) world.protetorSemDanoSegundos = 0;
-			else if (engajado) world.protetorSemDanoSegundos += dt;
+			else if (engajado && podeAgir) world.protetorSemDanoSegundos += dt;
 			world.protetorPendente.hpAtual = protetorVivo.poke.hp;
 			if (world.protetorSemDanoSegundos >= 12) {
 				world.enemies = world.enemies.filter((e) => e.id !== protetorVivo.id);
@@ -56716,6 +56738,23 @@ function payloadDoProtetor(bp, tipo) {
 		tipo
 	};
 }
+/**
+* PH-307: o que gravar em `game_sessions.sequence_hp` no fim desta janela.
+*
+*   `null` — o mapa nao tem sequencia (nao ha o que guardar).
+*   `> 0`  — o membro em campo, com o HP em que a luta parou.
+*   `0`    — o membro deste indice CAIU e o indice ainda nao avancou (o avanco
+*            espera `respawnDelay`). E o valor que impede a proxima janela de
+*            ressuscita-lo inteiro e cobrar a mesma luta duas vezes.
+*
+* Mapa de sequencia tem `maxEnemies: 1` e `keepCorpses`, entao "o inimigo em
+* campo" e o unico vivo — o cadaver que fica na tela nao conta.
+*/
+function hpDaSequencia(world) {
+	if (!world.mapDef?.sequence) return null;
+	const vivo = world.enemies.find((e) => e.poke.hp > 0);
+	return vivo ? vivo.poke.hp : 0;
+}
 var MARCA_DE_FLUSH_EXPIRA_MS = 3e4;
 var ESPERA_MAXIMA_POR_FLUSH_MS = 2500;
 var INTERVALO_DE_SONDAGEM_MS = 120;
@@ -57048,6 +57087,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	}, {
 		sequenceIndex: Number(sessao.sequence_index ?? 0),
 		sequenceCleared: Boolean(sessao.sequence_cleared),
+		sequenceHp: sessao.sequence_hp == null ? null : Number(sessao.sequence_hp),
 		sala: sessao.sala_chave ? {
 			indice: Number(sessao.sala_indice ?? 0),
 			chave: sessao.sala_chave,
@@ -57101,6 +57141,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		p_poke_uid: world.player.poke.uid,
 		p_sequence_index: world.sequenceIndex,
 		p_sequence_cleared: world.sequenceCleared,
+		p_sequence_hp: hpDaSequencia(world),
 		p_sala_indice: world.sala?.indice ?? 0,
 		p_sala_chave: world.sala?.chave ?? null,
 		p_sala_abates: world.sala?.abates ?? 0,

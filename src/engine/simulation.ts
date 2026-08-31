@@ -42,6 +42,7 @@ import { updateMovement } from './systems/movementSystem'
 import { atualizarLure } from './systems/lureSystem'
 import { updateCombat, podeDanificar } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
+import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { climaAmbienteDaSala, climaDeAmbiente } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
@@ -695,6 +696,27 @@ function aplicarHazardsAoInimigo(rng: Rng, hazards: EnemyHazards | undefined, en
 export interface ProgressoDaSessao {
   sequenceIndex?: number
   sequenceCleared?: boolean
+  /**
+   * PH-307: HP do membro da sequencia (Campeao Lance) que estava em campo no
+   * fim da janela anterior. Sao TRES valores com tres significados:
+   *
+   *   `undefined`/`null` — nao ha informacao (sessao nova, ou servidor antigo).
+   *                        O membro nasce com HP CHEIO, como sempre foi.
+   *   `> 0`              — luta em andamento. O membro nasce com esse HP.
+   *   `0`                — o membro deste indice JA CAIU e a sequencia ainda
+   *                        nao avancou. O mundo nasce SEM ele.
+   *
+   * O terceiro caso nao e detalhe: sem ele, um membro derrotado exatamente na
+   * borda da janela ressuscitava inteiro na reconstrucao seguinte e tinha que
+   * ser derrotado de novo — e o indice nunca passava dali.
+   *
+   * Sem NADA disto o dano some na borda de cada janela (~30s), e um membro que
+   * nao cabe numa janela e imbativel. Medido em producao em 30/08: as duas
+   * sessoes de `boss_lance` pararam no indice 5 de 6, com o cliente anunciando
+   * a vitoria que o servidor nunca teve. Mesma correcao que PH-217 fez pro
+   * protetor da sala.
+   */
+  sequenceHp?: number | null
   /** Sala em que a sessao parou. Ausente = comeca uma sala nova sorteada. */
   sala?: SalaAtiva | null
   /**
@@ -802,9 +824,21 @@ export function buildMapWorld(
       enemies.push(enemy)
       protetorPendente = pendente
     } else if (mapDef.sequence) {
-      const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala))
-      aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
-      enemies.push(enemy)
+      // PH-307: `sequenceHp === 0` significa "este membro ja caiu e o indice
+      // ainda nao avancou" — o campo nasce VAZIO e o proximo tick avanca a
+      // sequencia (ou a fecha, se era o ultimo). Sem esse caso, um membro
+      // derrotado na borda da janela ressuscitava inteiro aqui.
+      if (progresso?.sequenceHp !== 0) {
+        const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala))
+        // `> 0` e uma luta em andamento; `null`/ausente e sessao sem
+        // informacao, e ai vale o HP cheio que `spawnSequenceEnemy` ja deu.
+        // O clamp protege contra valor gravado por uma versao com outra
+        // formula de stat (o HP maximo depende de nivel e IV).
+        const hpSalvo = progresso?.sequenceHp
+        if (hpSalvo != null && hpSalvo > 0) enemy.poke.hp = Math.min(hpSalvo, enemy.poke.stats.hp)
+        aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
+        enemies.push(enemy)
+      }
     } else {
       for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
         const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies)
@@ -1323,9 +1357,19 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       // So conta tempo com os dois ENGAJADOS: o POKE atravessando o mapa nao e
       // impasse, e sem esta condicao a caminhada (que pode passar de 12s num
       // mapa grande) trocaria o protetor antes da luta comecar.
+      //
+      // PH-305: e so enquanto o POKE PODE AGIR. O relogio mede "bato e nao
+      // tiro HP", nao "nao estou batendo" — e sao coisas diferentes com o mesmo
+      // sintoma. Congelamento e o caso que alcanca o limite: ele nao tem
+      // duracao fixa (sorteio de 20% por turno pra descongelar), entao a cauda
+      // passa dos 12s sem esforco, e o guardiao ia embora no meio de uma luta
+      // que estava indo bem — levando junto o HP que ja tinha perdido. Sono nao
+      // alcanca (2 a 4 turnos de 2s). Paralisia tambem fica de fora: ela atrasa
+      // a acao por sorteio, nao impede, entao o POKE segue atacando.
+      const podeAgir = !bloqueiaAcaoSempre(world.player?.poke.status ?? null)
       const engajado = protetorVivo.state === 'engaged' && world.player?.state === 'engaged'
       if (protetorVivo.poke.hp < world.protetorPendente.hpAtual) world.protetorSemDanoSegundos = 0
-      else if (engajado) world.protetorSemDanoSegundos += dt
+      else if (engajado && podeAgir) world.protetorSemDanoSegundos += dt
       world.protetorPendente.hpAtual = protetorVivo.poke.hp
 
       if (world.protetorSemDanoSegundos >= PROTETOR_SEM_DANO_LIMITE) {
