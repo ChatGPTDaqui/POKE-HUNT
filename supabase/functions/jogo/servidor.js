@@ -51789,6 +51789,41 @@ function definirClimaDeAmbiente(world, ambiente) {
 	if (world.clima?.origem === "golpe") return;
 	world.clima = ambiente;
 }
+10 * TURNO_SEGUNDOS;
+/**
+* Gasta o prazo do clima de golpe/habilidade, em TEMPO CORRIDO.
+*
+* ---------------------------------------------------------------------------
+* POR QUE ISTO SAIU DE `updateCombat` (PH-329)
+* ---------------------------------------------------------------------------
+* O decremento antigo vivia no fim de `updateCombat` e tinha duas amarras que
+* nao eram de propósito:
+*
+*  1. `!isDead(player)` — POKE desmaiado congelava o clima. Um Sunny Day
+*     lancado antes do desmaio ficava em campo pela troca de POKE inteira.
+*  2. o relogio de turno DO JOGADOR (`proximoTurnoDeStatus`), que so anda
+*     dentro de `tickStatus`. Fora de combate — jogador em `wander`
+*     atravessando o mapa, ou reunindo pro Lure — o contador simplesmente
+*     parava. Sala esvaziada com Rain Dance no ar significava chuva por tempo
+*     indeterminado.
+*
+* A regra do jogo e "dura 10 turnos, e a duracao e por TEMPO". Contar segundos
+* corridos e a unica forma que da o mesmo resultado nos tres regimes que
+* chamam `stepWorld` (ao vivo, catch-up silencioso e resim da autoridade), sem
+* depender de haver luta.
+*
+* O campo continua sendo `turnosRestantes` e continua em TURNOS — so passou a
+* aceitar fracao. O HUD ja fazia `Math.ceil`, entao a contagem na tela anda
+* igual; e `Infinity` (clima de ambiente) continua imune, porque
+* `Infinity - x` e `Infinity`.
+*/
+function tickClimaDeGolpe(world, dt) {
+	const clima = world.clima;
+	if (!clima || clima.origem !== "golpe") return;
+	if (!Number.isFinite(clima.turnosRestantes)) return;
+	clima.turnosRestantes -= dt / TURNO_SEGUNDOS;
+	if (clima.turnosRestantes <= 0) reporClimaDeAmbiente(world);
+}
 //#endregion
 //#region src/stores/gameStateDefaults.ts
 var STARTING_ITEMS = {
@@ -52229,9 +52264,7 @@ var ESCUDO_ABILITIES = {
 	lucky_chant: "luckyChant",
 	wide_guard: "wideGuard"
 };
-var ESCUDO_DURACAO_TURNOS = 5;
-var CLIMA_DE_GOLPE_TURNOS = 10;
-var ESCUDO_DURACAO_SEGUNDOS = ESCUDO_DURACAO_TURNOS * TURNO_SEGUNDOS;
+var ESCUDO_DURACAO_SEGUNDOS = 5 * TURNO_SEGUNDOS;
 var TAUNT_DURATION = TURNO_SEGUNDOS * 3;
 var DISABLE_DURATION = TURNO_SEGUNDOS * 4;
 var ENCORE_DURATION = TURNO_SEGUNDOS * 3;
@@ -53423,7 +53456,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const climaDoGolpe = CLIMA_DO_GOLPE[ability.id];
 	if (climaDoGolpe) world.clima = {
 		tipo: climaDoGolpe,
-		turnosRestantes: CLIMA_DE_GOLPE_TURNOS,
+		turnosRestantes: 10,
 		origem: "golpe"
 	};
 	let statusRecebeuEm = null;
@@ -53762,7 +53795,7 @@ var TRAIT_CLIMA = {
 	snow_warning: "granizo",
 	drought: "sol"
 };
-var CLIMA_DE_TRAIT_TURNOS = Infinity;
+var CLIMA_DE_TRAIT_TURNOS = 10;
 /**
 * HOOK DE ENTRADA EM COMBATE: dispara UMA vez, no primeiro frame em que
 * `self` fica engajado (ver updateCombat#entradaProcessada), pra Traits que
@@ -53813,7 +53846,6 @@ function updateCombat(world, dt, opts = {}) {
 	let playerJustFainted = false;
 	tickCooldowns(player, dt);
 	for (const enemy of enemies) tickCooldowns(enemy, dt);
-	const turnoDeClimaFechou = !isDead(player) && player.proximoTurnoDeStatus - dt <= 1e-9;
 	for (const entity of [player, ...enemies]) {
 		if (isDead(entity)) continue;
 		const { dano, expirados, drenoParaOrigem, pereceu } = tickStatus(world.rng, entity, dt, world.clima?.tipo ?? null);
@@ -53843,10 +53875,6 @@ function updateCombat(world, dt, opts = {}) {
 		creditarMorteSeNecessario(entity, defeatedEnemyIds, () => {
 			playerJustFainted = true;
 		});
-	}
-	if (turnoDeClimaFechou && world.clima) {
-		world.clima.turnosRestantes -= 1;
-		if (world.clima.turnosRestantes <= 0) reporClimaDeAmbiente(world);
 	}
 	for (const effect of world.effects) {
 		tickEffect(effect, dt);
@@ -53902,10 +53930,7 @@ function updateCombat(world, dt, opts = {}) {
 			if (isDead(enemy) || player.fainted) continue;
 			executeEnemyAction(world, enemy, player, silent);
 		}
-	} else {
-		limparEstadoVolatil(player);
-		reporClimaDeAmbiente(world);
-	}
+	} else limparEstadoVolatil(player);
 	return {
 		defeatedEnemyIds,
 		playerJustFainted
@@ -55777,6 +55802,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
+	tickClimaDeGolpe(world, dt);
 	if (world.countdownRemaining != null) {
 		world.countdownRemaining -= dt;
 		if (world.countdownRemaining <= 0) {

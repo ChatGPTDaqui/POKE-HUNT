@@ -25,6 +25,7 @@
 // deslocaria todos os seguintes. `deriveRng` existe exatamente pra isso: gera
 // uma sequencia independente a partir da semente e de um rotulo.
 import { deriveRng, nextFloat } from '@/core/rng'
+import { TURNO_SEGUNDOS } from '@/data/abilities'
 import { SUB_BIOMA_CLIMA } from '@/data/generated/subBiomas.generated'
 import { SALAS_POR_HUNT } from '@/data/biomas'
 
@@ -119,4 +120,61 @@ export function definirClimaDeAmbiente(world: WorldState, ambiente: Clima | null
   world.climaAmbiente = ambiente
   if (world.clima?.origem === 'golpe') return
   world.clima = ambiente
+}
+
+/**
+ * Quantos TURNOS um clima de golpe/habilidade dura.
+ *
+ * Mora aqui, e nao em `combatSystem.ts` onde nasceu, porque quem consome agora
+ * e o tick de tempo abaixo — e porque golpe e habilidade passaram a usar o
+ * MESMO numero (PH-329). Ate aqui o de habilidade era `Infinity`: Drizzle
+ * ligava chuva e ela ficava pelo resto da sala, o que nao e o que o design
+ * pede.
+ */
+export const CLIMA_DE_GOLPE_TURNOS = 10
+
+/**
+ * O prazo do clima de golpe/habilidade em SEGUNDOS.
+ *
+ * Derivado de `TURNO_SEGUNDOS`, nao escrito a mao: o pedido e "10 vezes a
+ * duracao de um turno", e duplicar o numero aqui deixaria os dois divergirem no
+ * dia em que a duracao de turno for reafinada.
+ */
+export const CLIMA_DE_GOLPE_SEGUNDOS = CLIMA_DE_GOLPE_TURNOS * TURNO_SEGUNDOS
+
+/**
+ * Gasta o prazo do clima de golpe/habilidade, em TEMPO CORRIDO.
+ *
+ * ---------------------------------------------------------------------------
+ * POR QUE ISTO SAIU DE `updateCombat` (PH-329)
+ * ---------------------------------------------------------------------------
+ * O decremento antigo vivia no fim de `updateCombat` e tinha duas amarras que
+ * nao eram de propósito:
+ *
+ *  1. `!isDead(player)` — POKE desmaiado congelava o clima. Um Sunny Day
+ *     lancado antes do desmaio ficava em campo pela troca de POKE inteira.
+ *  2. o relogio de turno DO JOGADOR (`proximoTurnoDeStatus`), que so anda
+ *     dentro de `tickStatus`. Fora de combate — jogador em `wander`
+ *     atravessando o mapa, ou reunindo pro Lure — o contador simplesmente
+ *     parava. Sala esvaziada com Rain Dance no ar significava chuva por tempo
+ *     indeterminado.
+ *
+ * A regra do jogo e "dura 10 turnos, e a duracao e por TEMPO". Contar segundos
+ * corridos e a unica forma que da o mesmo resultado nos tres regimes que
+ * chamam `stepWorld` (ao vivo, catch-up silencioso e resim da autoridade), sem
+ * depender de haver luta.
+ *
+ * O campo continua sendo `turnosRestantes` e continua em TURNOS — so passou a
+ * aceitar fracao. O HUD ja fazia `Math.ceil`, entao a contagem na tela anda
+ * igual; e `Infinity` (clima de ambiente) continua imune, porque
+ * `Infinity - x` e `Infinity`.
+ */
+export function tickClimaDeGolpe(world: WorldState, dt: number): void {
+  const clima = world.clima
+  if (!clima || clima.origem !== 'golpe') return
+  if (!Number.isFinite(clima.turnosRestantes)) return
+  clima.turnosRestantes -= dt / TURNO_SEGUNDOS
+  // PH-140: expirou o clima de golpe, o do LUGAR volta. Zerar aqui deixaria o
+  // deserto sem areia pelo resto da sala por causa de um Rain Dance.
+  if (clima.turnosRestantes <= 0) reporClimaDeAmbiente(world)
 }
