@@ -28,7 +28,11 @@ import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA, aparaOTeto } from '@/data/huntSpawnOverrides'
-import { pesosPorTier, tierDaEspecie, TIERS_SELVAGENS } from '@/data/spawnPorTier'
+import {
+  pesosPorTier, tierDaEspecie, TIERS_SELVAGENS, TIERS_DE_PROTETOR,
+  CHANCE_DO_TIER_DE_PROTETOR,
+} from '@/data/spawnPorTier'
+import { SUB_BIOMA_TIERS } from '@/data/generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from '@/data/generated/spawnTiers.generated'
 import { getEncounter } from '@/data/enemies'
 import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
@@ -269,6 +273,122 @@ export function lootAtivo(sala: SalaAtiva | null, fallback: MapItemDrop[]): MapI
 }
 
 export type TipoDeProtetor = 'guardian' | 'lord'
+
+/**
+ * Minimo de candidatos a protetor. NAO e estetica — e o que impede um travamento
+ * permanente da sala.
+ *
+ * O cao de guarda de `simulation.ts` (PROTETOR_SEM_DANO_LIMITE) descarta o
+ * protetor depois de 12s de combate engajado sem tirar HP dele e deixa o tick
+ * seguinte SORTEAR OUTRO, com o mesmo filtro. Com um candidato so, "outro" e o
+ * mesmo — mesma especie, mesma imunidade — e o ciclo vira infinito: a cada 12s o
+ * jogador le "o protetor fugiu, outro tomou o lugar" e a sala nunca avanca, com
+ * `bioma_progress` travado atras dela.
+ *
+ * Enquanto o protetor saia do pool inteiro da sala (9 a 63 especies) isso era
+ * teorico. Restringir ao pool de CHEFE torna concreto: sao 33 sub-biomas, e
+ * cinco deles tem um chefe so no PokeRogue inteiro (town=ditto,
+ * construction-site=machamp, metropolis=castform, snowy-forest=glalie,
+ * temple=chimecho).
+ */
+export const MINIMO_DE_CANDIDATOS_A_PROTETOR = 3
+
+// Cache dos candidatos, mesma chave e mesmo motivo do cache de pesos.
+const cacheDeProtetor = new Map<string, ContextoDeSpawn>()
+
+/**
+ * O contexto de sorteio DO PROTETOR: o elenco de chefe daquele sub-bioma, com a
+ * tabela de chance de chefe do PokeRogue.
+ *
+ * Guardian comeca no tier BOSS, Lord comeca no BOSS_RARE — e por isso que o
+ * Lord da sala 10 e um bicho diferente do Guardian das salas 1-9 quando o lugar
+ * tem os dois. De onde comeca, acumula tiers ate juntar
+ * `MINIMO_DE_CANDIDATOS_A_PROTETOR`: primeiro na direcao do BOSS (mais comum),
+ * depois na direcao do mais raro, que e o mesmo colapso do spawn normal.
+ *
+ * DUAS DEGRADACOES, as duas medidas, e as duas sao o comportamento certo:
+ *
+ *  1. CHEFE DO POKEROGUE E FORMA FINAL, E FORMA FINAL NAO CABE NA FAIXA I.
+ *     O candidato tem que estar no pool da sala, que ja passou pela janela de
+ *     nivel — e medido, 82 das 297 combinacoes (sub-bioma x indice de sala)
+ *     nao tem chefe NENHUM disponivel, 71 delas na faixa I. Nesses casos vale o
+ *     pool da sala inteiro, que e exatamente o que o jogo fazia antes desta
+ *     mudanca. O efeito colateral e bem-vindo: o Guardian VIRA um chefe de
+ *     verdade conforme o jogador sobe de faixa, em vez de ser um ja no Lv5.
+ *
+ *  2. COM MENOS DE 3 CHEFES, O RESTO VEM DO POOL DA SALA, do mais raro pro mais
+ *     comum. Sao outras 82 combinacoes com 1 ou 2 chefes. Completar com os mais
+ *     raros mantem o protetor sendo o bicho incomum do lugar; completar com os
+ *     comuns entregaria um Rattata como Lord.
+ */
+export function contextoDoProtetor(
+  mapId: string,
+  ctx: ContextoDeSpawn,
+  sala: SalaAtiva | null,
+  tipo: TipoDeProtetor,
+): ContextoDeSpawn {
+  if (!sala) return ctx
+  const chaveCache = `${mapId}|${sala.chave}|${sala.indice}|${tipo}`
+  const pronto = cacheDeProtetor.get(chaveCache)
+  if (pronto) return pronto
+
+  const tiers = SUB_BIOMA_TIERS[sala.chave]
+  const doTier = TIERS_DE_PROTETOR.map((t) => {
+    const elenco = new Set(tiers?.[t] ?? [])
+    return ctx.pool.filter((id) => elenco.has(getEncounter(id)?.speciesId ?? ''))
+  })
+
+  const inicio = tipo === 'lord' ? 1 : 0
+  const escolhidos: string[] = []
+  const tierDoEncontro = new Map<string, number>()
+  const juntar = (i: number) => {
+    for (const id of doTier[i]) {
+      if (tierDoEncontro.has(id)) continue
+      tierDoEncontro.set(id, i)
+      escolhidos.push(id)
+    }
+  }
+  juntar(inicio)
+  for (let i = inicio - 1; i >= 0 && escolhidos.length < MINIMO_DE_CANDIDATOS_A_PROTETOR; i--) juntar(i)
+  for (let i = inicio + 1; i < doTier.length && escolhidos.length < MINIMO_DE_CANDIDATOS_A_PROTETOR; i++) juntar(i)
+
+  // Sem chefe nenhum: o pool da sala inteiro, com o peso normal de spawn.
+  if (escolhidos.length === 0) {
+    cacheDeProtetor.set(chaveCache, ctx)
+    return ctx
+  }
+
+  // Completa com os mais RAROS da sala, e a ordem do desempate e estavel
+  // (peso, depois id) porque cliente e autoridade precisam chegar no mesmo pool.
+  if (escolhidos.length < MINIMO_DE_CANDIDATOS_A_PROTETOR) {
+    const sobra = ctx.pool
+      .filter((id) => !tierDoEncontro.has(id))
+      .sort((a, b) => ctx.peso(a) - ctx.peso(b) || a.localeCompare(b))
+    for (const id of sobra) {
+      if (escolhidos.length >= MINIMO_DE_CANDIDATOS_A_PROTETOR) break
+      tierDoEncontro.set(id, TIERS_DE_PROTETOR.length - 1)
+      escolhidos.push(id)
+    }
+  }
+
+  const chances = TIERS_DE_PROTETOR.map((t) => CHANCE_DO_TIER_DE_PROTETOR[t])
+  const pesos = pesosPorTier(
+    escolhidos,
+    (id) => tierDoEncontro.get(id) ?? 0,
+    (id) => {
+      const sp = getEncounter(id)?.speciesId
+      return sp ? SPAWN_WEIGHT_BY_SPECIES[sp] ?? 0 : 0
+    },
+    chances,
+  )
+  const doProtetor: ContextoDeSpawn = {
+    pool: escolhidos,
+    janela: ctx.janela,
+    peso: (id) => pesos.get(id) ?? 0,
+  }
+  cacheDeProtetor.set(chaveCache, doProtetor)
+  return doProtetor
+}
 
 /**
  * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o

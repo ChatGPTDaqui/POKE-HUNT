@@ -52,7 +52,7 @@ import { recordKill } from './systems/farmRates'
 import {
   contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
-  encurtarTransicaoDeSala, type ContextoDeSpawn,
+  encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -378,8 +378,18 @@ function criarEntidadeDoProtetor(
     return { enemy, pendente: protetorSalvo }
   }
 
-  // Novo: mesmo sorteio de espécie que o spawn comum usa (peso real do
-  // encontro), so o NIVEL e o IV seguem a regra propria do protetor.
+  // Novo: sorteio no ELENCO DE CHEFE do sub-bioma (as pools BOSS/BOSS_RARE do
+  // PokeRogue, ver salaSystem#contextoDoProtetor), so o NIVEL e o IV seguem a
+  // regra propria do protetor.
+  //
+  // Antes o protetor saia do mesmo pool do spawn comum, entao o Guardian da
+  // sala era um Rattata com IV alto — a diferenca era so a ficha, nao o bicho.
+  // Agora o Guardian e um chefe daquele lugar de verdade, e o Lord da sala 10
+  // comeca um degrau acima dele (BOSS_RARE), quando o lugar tem os dois.
+  //
+  // `contextoDoProtetor` degrada pro pool da sala quando nenhum chefe cabe na
+  // faixa de nivel — o que na faixa I e a regra e nao a excecao, porque chefe do
+  // PokeRogue e forma final. Ver la a medicao.
   //
   // PH-301: o sorteio REPETE ate cair um protetor que o POKE em campo consiga
   // danificar. A sala so avanca quando o protetor morre, e ele e o unico
@@ -457,7 +467,12 @@ function garantirProtetorDaSala(
   // tick, ou protetor ja spawnado e ainda vivo) — idempotente, nao recria.
   if (world.protetorPendente) return true
 
-  const ctx = contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool)
+  const ctx = contextoDoProtetor(
+    mapDef.id,
+    contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool),
+    world.sala,
+    tipo,
+  )
   const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada)
   world.enemies.push(enemy)
   world.protetorPendente = pendente
@@ -822,7 +837,8 @@ export function buildMapWorld(
       // existe (zero RNG extra — outra janela ja tinha sorteado esse
       // protetor), sorteia na primeira vez que a sala pede protetor senao.
       const { enemy, pendente } = criarEntidadeDoProtetor(
-        base, mapDef, ctx, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala),
+        base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor,
+        progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala),
       )
       aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
       enemies.push(enemy)

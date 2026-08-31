@@ -77771,6 +77771,12 @@ var TIERS_SELVAGENS = [
 	"SUPER_RARE",
 	"ULTRA_RARE"
 ];
+var TIERS_DE_PROTETOR = [
+	"BOSS",
+	"BOSS_RARE",
+	"BOSS_SUPER_RARE",
+	"BOSS_ULTRA_RARE"
+];
 /** Largura de cada faixa do `randSeedInt(512)` do PokeRogue. Soma 512. */
 var CHANCE_DO_TIER = {
 	COMMON: 356 / 512,
@@ -77778,6 +77784,13 @@ var CHANCE_DO_TIER = {
 	RARE: 26 / 512,
 	SUPER_RARE: 5 / 512,
 	ULTRA_RARE: 1 / 512
+};
+/** O mesmo, do `randSeedInt(64)` do lado de chefe. Soma 64. */
+var CHANCE_DO_TIER_DE_PROTETOR = {
+	BOSS: 44 / 64,
+	BOSS_RARE: 14 / 64,
+	BOSS_SUPER_RARE: 5 / 64,
+	BOSS_ULTRA_RARE: 1 / 64
 };
 var reverso = /* @__PURE__ */ new Map();
 /**
@@ -77990,6 +78003,79 @@ function lootAtivo(sala, fallback) {
 	if (!sala) return fallback;
 	const perfil = SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.loot;
 	return perfil ? LOOT[perfil] : fallback;
+}
+var cacheDeProtetor = /* @__PURE__ */ new Map();
+/**
+* O contexto de sorteio DO PROTETOR: o elenco de chefe daquele sub-bioma, com a
+* tabela de chance de chefe do PokeRogue.
+*
+* Guardian comeca no tier BOSS, Lord comeca no BOSS_RARE — e por isso que o
+* Lord da sala 10 e um bicho diferente do Guardian das salas 1-9 quando o lugar
+* tem os dois. De onde comeca, acumula tiers ate juntar
+* `MINIMO_DE_CANDIDATOS_A_PROTETOR`: primeiro na direcao do BOSS (mais comum),
+* depois na direcao do mais raro, que e o mesmo colapso do spawn normal.
+*
+* DUAS DEGRADACOES, as duas medidas, e as duas sao o comportamento certo:
+*
+*  1. CHEFE DO POKEROGUE E FORMA FINAL, E FORMA FINAL NAO CABE NA FAIXA I.
+*     O candidato tem que estar no pool da sala, que ja passou pela janela de
+*     nivel — e medido, 82 das 297 combinacoes (sub-bioma x indice de sala)
+*     nao tem chefe NENHUM disponivel, 71 delas na faixa I. Nesses casos vale o
+*     pool da sala inteiro, que e exatamente o que o jogo fazia antes desta
+*     mudanca. O efeito colateral e bem-vindo: o Guardian VIRA um chefe de
+*     verdade conforme o jogador sobe de faixa, em vez de ser um ja no Lv5.
+*
+*  2. COM MENOS DE 3 CHEFES, O RESTO VEM DO POOL DA SALA, do mais raro pro mais
+*     comum. Sao outras 82 combinacoes com 1 ou 2 chefes. Completar com os mais
+*     raros mantem o protetor sendo o bicho incomum do lugar; completar com os
+*     comuns entregaria um Rattata como Lord.
+*/
+function contextoDoProtetor(mapId, ctx, sala, tipo) {
+	if (!sala) return ctx;
+	const chaveCache = `${mapId}|${sala.chave}|${sala.indice}|${tipo}`;
+	const pronto = cacheDeProtetor.get(chaveCache);
+	if (pronto) return pronto;
+	const tiers = SUB_BIOMA_TIERS[sala.chave];
+	const doTier = TIERS_DE_PROTETOR.map((t) => {
+		const elenco = new Set(tiers?.[t] ?? []);
+		return ctx.pool.filter((id) => elenco.has(getEncounter(id)?.speciesId ?? ""));
+	});
+	const inicio = tipo === "lord" ? 1 : 0;
+	const escolhidos = [];
+	const tierDoEncontro = /* @__PURE__ */ new Map();
+	const juntar = (i) => {
+		for (const id of doTier[i]) {
+			if (tierDoEncontro.has(id)) continue;
+			tierDoEncontro.set(id, i);
+			escolhidos.push(id);
+		}
+	};
+	juntar(inicio);
+	for (let i = inicio - 1; i >= 0 && escolhidos.length < 3; i--) juntar(i);
+	for (let i = inicio + 1; i < doTier.length && escolhidos.length < 3; i++) juntar(i);
+	if (escolhidos.length === 0) {
+		cacheDeProtetor.set(chaveCache, ctx);
+		return ctx;
+	}
+	if (escolhidos.length < 3) {
+		const sobra = ctx.pool.filter((id) => !tierDoEncontro.has(id)).sort((a, b) => ctx.peso(a) - ctx.peso(b) || a.localeCompare(b));
+		for (const id of sobra) {
+			if (escolhidos.length >= 3) break;
+			tierDoEncontro.set(id, TIERS_DE_PROTETOR.length - 1);
+			escolhidos.push(id);
+		}
+	}
+	const pesos = pesosPorTier(escolhidos, (id) => tierDoEncontro.get(id) ?? 0, (id) => {
+		const sp = getEncounter(id)?.speciesId;
+		return sp ? SPAWN_WEIGHT_BY_SPECIES[sp] ?? 0 : 0;
+	}, TIERS_DE_PROTETOR.map((t) => CHANCE_DO_TIER_DE_PROTETOR[t]));
+	const doProtetor = {
+		pool: escolhidos,
+		janela: ctx.janela,
+		peso: (id) => pesos.get(id) ?? 0
+	};
+	cacheDeProtetor.set(chaveCache, doProtetor);
+	return doProtetor;
 }
 /**
 * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
@@ -78695,7 +78781,7 @@ function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
 	}
 	if (world.protetorResolvido) return false;
 	if (world.protetorPendente) return true;
-	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), tipo, protetorSalvo, player, entrada);
+	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDoProtetor(mapDef.id, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), world.sala, tipo), tipo, protetorSalvo, player, entrada);
 	world.enemies.push(enemy);
 	world.protetorPendente = pendente;
 	return true;
@@ -78865,7 +78951,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 	if (!countdownRemaining && !sequenceCleared) {
 		const tipoDeProtetor = sala && sala.abates >= 30 ? protetorDaSala(sala) : null;
 		if (tipoDeProtetor) {
-			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, ctx, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
+			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 			protetorPendente = pendente;
