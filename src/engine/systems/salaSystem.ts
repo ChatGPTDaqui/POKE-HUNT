@@ -27,7 +27,13 @@ import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
-import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
+import { POOL_POR_SALA, aparaOTeto } from '@/data/huntSpawnOverrides'
+import {
+  pesosPorTier, tierDaEspecie, TIERS_SELVAGENS, TIERS_DE_PROTETOR,
+  CHANCE_DO_TIER_DE_PROTETOR,
+} from '@/data/spawnPorTier'
+import { SUB_BIOMA_TIERS } from '@/data/generated/subBiomas.generated'
+import { SPAWN_WEIGHT_BY_SPECIES } from '@/data/generated/spawnTiers.generated'
 import { getEncounter } from '@/data/enemies'
 import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
 import type { MapItemDrop } from '@/data/generated/types'
@@ -163,6 +169,72 @@ export function poolAtivo(mapId: string, sala: SalaAtiva | null, fallback: strin
 export interface ContextoDeSpawn {
   pool: string[]
   janela?: [number, number]
+  /**
+   * Peso do encontro NESTA sala, ja aparado pelo teto de fatia.
+   *
+   * Existe como funcao no contexto, e nao como `encounter.weight` lido direto,
+   * porque o teto so faz sentido contra o pool que esta valendo AGORA — e o
+   * peso guardado no encontro e um so, compartilhado por todas as salas da
+   * mesma hunt (`addEncounter` chaveia por hunt + especie). Aparar o encontro
+   * pra caber numa sala estragaria a fatia dele na sala vizinha.
+   */
+  peso: (encounterId: string) => number
+}
+
+// ---------------------------------------------------------------------------
+// Peso por sala
+// ---------------------------------------------------------------------------
+// O teto de fatia (`huntSpawnOverrides#TETO_DE_FATIA`) sempre existiu, mas era
+// aplicado sobre o `enemyPool` da HUNT — a uniao das salas — enquanto o sorteio
+// acontece sobre o pool da SALA recortado pela janela de nivel. As duas coisas
+// nao se encostam, e o resultado era um teto que nao segurava nada: medido nas
+// 99 salas (33 sub-biomas x 3 faixas), 9 passavam de 35%, sendo Leito de Praia
+// III e Laboratorio II exatamente 50%.
+//
+// A conta e feita aqui, no ponto onde o pool ativo e conhecido, em vez de
+// pre-calculada num Record por (hunt, sub-bioma, indice de sala): sao ~2.000
+// combinacoes, e uma tabela paralela e mais uma coisa que pode sair de sincronia
+// com o pool sem dar erro. O cache abaixo tira o custo do caminho quente.
+const cacheDePesos = new Map<string, Map<string, number>>()
+
+/**
+ * Pesos do pool ativo: tier do PokeRogue decide a fatia, tier real de encontro
+ * dos jogos desempata dentro dela, teto de fatia apara o que sobrar.
+ *
+ * A CHANCE VEM DO TIER, E NAO MAIS DO PESO DO ENCONTRO. O peso guardado em
+ * `encounter.weight` e a frequencia real da especie nos jogos (Gen1/Gen2 por
+ * disassembly, Gen3 por pokeemerald) e ele continua valendo onde nao ha
+ * sub-bioma — hunt inicial, hunts BOSS, Campeao Lance. Dentro de uma sala ele
+ * vira DESEMPATE: quem manda e o tier que o PokeRogue da aquela especie
+ * NAQUELE lugar, que e a informacao que faltava (o mesmo Zubat e comum na
+ * caverna e nao existe na praia, e um numero global nao sabe disso).
+ *
+ * Especie sem tier no sub-bioma cai em COMMON. Nao e defesa: acontece de
+ * verdade quando o pool da sala nao tem ninguem na janela de nivel e o fallback
+ * traz o `enemyPool` da hunt inteira, com especie de sub-bioma vizinho junto.
+ *
+ * Memoizado porque `contextoDeSpawn` roda a cada spawn (milhares de vezes por
+ * flush no farm offline) e a resposta so depende de (mapa, sub-bioma, indice da
+ * sala) — a janela de nivel sai do indice, e o pool sai dos dois. O cache e
+ * limitado por construcao: mapas com sala x sub-biomas deles x `SALAS_POR_HUNT`.
+ */
+function pesosDaSala(chave: string, subBioma: string, pool: string[]): Map<string, number> {
+  const pronto = cacheDePesos.get(chave)
+  if (pronto) return pronto
+  const pesos = aparaOTeto(pesosPorTier(
+    pool,
+    (id) => {
+      const sp = getEncounter(id)?.speciesId
+      const tier = sp ? tierDaEspecie(subBioma, sp) : null
+      return tier == null ? 0 : TIERS_SELVAGENS.indexOf(tier)
+    },
+    (id) => {
+      const sp = getEncounter(id)?.speciesId
+      return sp ? SPAWN_WEIGHT_BY_SPECIES[sp] ?? 0 : 0
+    },
+  ))
+  cacheDePesos.set(chave, pesos)
+  return pesos
 }
 
 /**
@@ -180,13 +252,17 @@ export function contextoDeSpawn(
   fallback: string[],
 ): ContextoDeSpawn {
   const pool = poolAtivo(mapId, sala, fallback)
-  if (!sala) return { pool }
+  // Sem sala o pool de sorteio E o `enemyPool` da hunt, que ja levou a apara do
+  // fallback em `huntSpawnOverrides` — o peso guardado no encontro ja e o final.
+  if (!sala) return { pool, peso: (id) => getEncounter(id)?.weight ?? 0 }
   const janela = janelaDaSala(faixa, sala.indice)
   const naJanela = pool.filter((id) => {
     const enc = getEncounter(id)
     return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0]
   })
-  return { pool: naJanela.length > 0 ? naJanela : pool, janela }
+  const ativo = naJanela.length > 0 ? naJanela : pool
+  const pesos = pesosDaSala(`${mapId}|${sala.chave}|${sala.indice}`, sala.chave, ativo)
+  return { pool: ativo, janela, peso: (id) => pesos.get(id) ?? 0 }
 }
 
 /** Loot que pode cair agora: o do sub-bioma, ou o da hunt inteira. */
@@ -197,6 +273,122 @@ export function lootAtivo(sala: SalaAtiva | null, fallback: MapItemDrop[]): MapI
 }
 
 export type TipoDeProtetor = 'guardian' | 'lord'
+
+/**
+ * Minimo de candidatos a protetor. NAO e estetica — e o que impede um travamento
+ * permanente da sala.
+ *
+ * O cao de guarda de `simulation.ts` (PROTETOR_SEM_DANO_LIMITE) descarta o
+ * protetor depois de 12s de combate engajado sem tirar HP dele e deixa o tick
+ * seguinte SORTEAR OUTRO, com o mesmo filtro. Com um candidato so, "outro" e o
+ * mesmo — mesma especie, mesma imunidade — e o ciclo vira infinito: a cada 12s o
+ * jogador le "o protetor fugiu, outro tomou o lugar" e a sala nunca avanca, com
+ * `bioma_progress` travado atras dela.
+ *
+ * Enquanto o protetor saia do pool inteiro da sala (9 a 63 especies) isso era
+ * teorico. Restringir ao pool de CHEFE torna concreto: sao 33 sub-biomas, e
+ * cinco deles tem um chefe so no PokeRogue inteiro (town=ditto,
+ * construction-site=machamp, metropolis=castform, snowy-forest=glalie,
+ * temple=chimecho).
+ */
+export const MINIMO_DE_CANDIDATOS_A_PROTETOR = 3
+
+// Cache dos candidatos, mesma chave e mesmo motivo do cache de pesos.
+const cacheDeProtetor = new Map<string, ContextoDeSpawn>()
+
+/**
+ * O contexto de sorteio DO PROTETOR: o elenco de chefe daquele sub-bioma, com a
+ * tabela de chance de chefe do PokeRogue.
+ *
+ * Guardian comeca no tier BOSS, Lord comeca no BOSS_RARE — e por isso que o
+ * Lord da sala 10 e um bicho diferente do Guardian das salas 1-9 quando o lugar
+ * tem os dois. De onde comeca, acumula tiers ate juntar
+ * `MINIMO_DE_CANDIDATOS_A_PROTETOR`: primeiro na direcao do BOSS (mais comum),
+ * depois na direcao do mais raro, que e o mesmo colapso do spawn normal.
+ *
+ * DUAS DEGRADACOES, as duas medidas, e as duas sao o comportamento certo:
+ *
+ *  1. CHEFE DO POKEROGUE E FORMA FINAL, E FORMA FINAL NAO CABE NA FAIXA I.
+ *     O candidato tem que estar no pool da sala, que ja passou pela janela de
+ *     nivel — e medido, 82 das 297 combinacoes (sub-bioma x indice de sala)
+ *     nao tem chefe NENHUM disponivel, 71 delas na faixa I. Nesses casos vale o
+ *     pool da sala inteiro, que e exatamente o que o jogo fazia antes desta
+ *     mudanca. O efeito colateral e bem-vindo: o Guardian VIRA um chefe de
+ *     verdade conforme o jogador sobe de faixa, em vez de ser um ja no Lv5.
+ *
+ *  2. COM MENOS DE 3 CHEFES, O RESTO VEM DO POOL DA SALA, do mais raro pro mais
+ *     comum. Sao outras 82 combinacoes com 1 ou 2 chefes. Completar com os mais
+ *     raros mantem o protetor sendo o bicho incomum do lugar; completar com os
+ *     comuns entregaria um Rattata como Lord.
+ */
+export function contextoDoProtetor(
+  mapId: string,
+  ctx: ContextoDeSpawn,
+  sala: SalaAtiva | null,
+  tipo: TipoDeProtetor,
+): ContextoDeSpawn {
+  if (!sala) return ctx
+  const chaveCache = `${mapId}|${sala.chave}|${sala.indice}|${tipo}`
+  const pronto = cacheDeProtetor.get(chaveCache)
+  if (pronto) return pronto
+
+  const tiers = SUB_BIOMA_TIERS[sala.chave]
+  const doTier = TIERS_DE_PROTETOR.map((t) => {
+    const elenco = new Set(tiers?.[t] ?? [])
+    return ctx.pool.filter((id) => elenco.has(getEncounter(id)?.speciesId ?? ''))
+  })
+
+  const inicio = tipo === 'lord' ? 1 : 0
+  const escolhidos: string[] = []
+  const tierDoEncontro = new Map<string, number>()
+  const juntar = (i: number) => {
+    for (const id of doTier[i]) {
+      if (tierDoEncontro.has(id)) continue
+      tierDoEncontro.set(id, i)
+      escolhidos.push(id)
+    }
+  }
+  juntar(inicio)
+  for (let i = inicio - 1; i >= 0 && escolhidos.length < MINIMO_DE_CANDIDATOS_A_PROTETOR; i--) juntar(i)
+  for (let i = inicio + 1; i < doTier.length && escolhidos.length < MINIMO_DE_CANDIDATOS_A_PROTETOR; i++) juntar(i)
+
+  // Sem chefe nenhum: o pool da sala inteiro, com o peso normal de spawn.
+  if (escolhidos.length === 0) {
+    cacheDeProtetor.set(chaveCache, ctx)
+    return ctx
+  }
+
+  // Completa com os mais RAROS da sala, e a ordem do desempate e estavel
+  // (peso, depois id) porque cliente e autoridade precisam chegar no mesmo pool.
+  if (escolhidos.length < MINIMO_DE_CANDIDATOS_A_PROTETOR) {
+    const sobra = ctx.pool
+      .filter((id) => !tierDoEncontro.has(id))
+      .sort((a, b) => ctx.peso(a) - ctx.peso(b) || a.localeCompare(b))
+    for (const id of sobra) {
+      if (escolhidos.length >= MINIMO_DE_CANDIDATOS_A_PROTETOR) break
+      tierDoEncontro.set(id, TIERS_DE_PROTETOR.length - 1)
+      escolhidos.push(id)
+    }
+  }
+
+  const chances = TIERS_DE_PROTETOR.map((t) => CHANCE_DO_TIER_DE_PROTETOR[t])
+  const pesos = pesosPorTier(
+    escolhidos,
+    (id) => tierDoEncontro.get(id) ?? 0,
+    (id) => {
+      const sp = getEncounter(id)?.speciesId
+      return sp ? SPAWN_WEIGHT_BY_SPECIES[sp] ?? 0 : 0
+    },
+    chances,
+  )
+  const doProtetor: ContextoDeSpawn = {
+    pool: escolhidos,
+    janela: ctx.janela,
+    peso: (id) => pesos.get(id) ?? 0,
+  }
+  cacheDeProtetor.set(chaveCache, doProtetor)
+  return doProtetor
+}
 
 /**
  * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o

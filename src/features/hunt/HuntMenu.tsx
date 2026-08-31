@@ -15,6 +15,7 @@ import {
   type SubBiomaDef, type BiomaProgress,
 } from '@/data/biomas'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
+import { contextoDeSpawn } from '@/engine/systems/salaSystem'
 import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
 import { SPECIES, type Species } from '@/data/pokes'
@@ -134,17 +135,29 @@ function salasDaHunt(mapId: string): { sub: SubBiomaDef; pool: string[] }[] {
 /**
  * Chance de cada encontro na hunt.
  *
- * O peso de cada encontro vem do TIER de spawn da especie, derivado da chance
- * real de encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js).
  * A "dominancia" de um tipo e a soma das odds de toda especie que o carrega.
  *
- * Com SALAS, a chance nao e mais `peso / soma do pool`: o jogador so encontra o
- * pool da sala em que esta, entao a chance real e
- * `P(sala) x P(especie | sala)`, somada sobre as salas em que a especie
- * aparece. Ignorar isso mostraria numeros que nao acontecem — uma especie que
- * so vive no sub-bioma raro pareceria tao provavel quanto uma do corriqueiro.
+ * COM SALAS, A CHANCE E UMA MEDIA SOBRE AS 10 SALAS DO CICLO, e a conta passa
+ * pelo MESMO `contextoDeSpawn` que o motor usa pra sortear:
  *
- * Hunt sem salas (inicial, BOSS, Lance) cai na conta simples de sempre.
+ *   P(especie) = (1/SALAS) x SOMA_indice SOMA_sub  P(sub) x peso(sub, indice)
+ *
+ * Cada indice de sala pesa igual porque o ciclo passa uma vez por cada um; o
+ * sub-bioma pesa pelo `peso` dele em data/biomas.ts.
+ *
+ * O INDICE ENTRA NA CONTA, E ELE NAO ENTRAVA. A versao anterior somava
+ * `P(sala) x peso do encontro / soma do pool` uma vez por sub-bioma, e isso
+ * errava por dois motivos que so pioraram com a chance vindo do tier:
+ *
+ *   1. Ignorava a JANELA DE NIVEL. A hunt afunda conforme as salas sao limpas
+ *      (salaSystem#janelaDaSala), entao metade do pool de um sub-bioma nem
+ *      existe na sala 1 — e o cartao contava esse pedaco como se existisse.
+ *   2. Lia `encounter.weight`, que desde a chance-por-tier e o peso do
+ *      FALLBACK (hunt inicial, BOSS, Lance) e nao o peso que vale dentro de uma
+ *      sala. O cartao anunciaria uma distribuicao que o jogo nao produz.
+ *
+ * Hunt sem salas (inicial, BOSS, Lance) cai na conta simples de sempre, que la
+ * e a certa: sem sala, `encounter.weight` E o peso do sorteio.
  */
 export function huntOdds(map: HuntMapDef): HuntOdds {
   const encounters = map.enemyPool.map(getEncounter).filter((e) => e != null)
@@ -153,13 +166,17 @@ export function huntOdds(map: HuntMapDef): HuntOdds {
   const salas = salasDaHunt(map.id)
   if (salas.length > 0) {
     const somaPesoDeSala = salas.reduce((s, x) => s + x.sub.peso, 0)
-    for (const { sub, pool } of salas) {
-      const somaDaSala = pool.reduce((s, id) => s + (getEncounter(id)?.weight ?? 0), 0)
-      if (somaDaSala <= 0) continue
-      const pSala = sub.peso / somaPesoDeSala
-      for (const id of pool) {
-        const peso = getEncounter(id)?.weight ?? 0
-        pesoPorEncontro.set(id, (pesoPorEncontro.get(id) ?? 0) + pSala * (peso / somaDaSala))
+    for (const { sub } of salas) {
+      const pSala = sub.peso / somaPesoDeSala / SALAS_POR_HUNT
+      for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+        const ctx = contextoDeSpawn(
+          map.id, map.levelRange, { chave: sub.chave, indice, abates: 0, ciclos: 0 }, map.enemyPool,
+        )
+        const soma = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
+        if (!(soma > 0)) continue
+        for (const id of ctx.pool) {
+          pesoPorEncontro.set(id, (pesoPorEncontro.get(id) ?? 0) + pSala * (ctx.peso(id) / soma))
+        }
       }
     }
   } else {

@@ -252,6 +252,14 @@ export type EncountersData = Record<string, EncounterDataEntry>
 export type SubBiomaEspecies = Record<string, string[]>
 export type SubBiomaLinks = Record<string, { bioma: string; peso: number }[]>
 
+/** Os cinco tiers de encontro selvagem do PokeRogue, do mais comum ao mais raro. */
+export type TierSelvagem = 'COMMON' | 'UNCOMMON' | 'RARE' | 'SUPER_RARE' | 'ULTRA_RARE'
+
+/** Os quatro tiers de chefe do PokeRogue — aqui viram o elenco de Guardian/Lord. */
+export type TierDeProtetor = 'BOSS' | 'BOSS_RARE' | 'BOSS_SUPER_RARE' | 'BOSS_ULTRA_RARE'
+
+export type SubBiomaTiers = Record<string, Record<TierSelvagem | TierDeProtetor, string[]>>
+
 /**
  * Pesos de clima de cada sub-bioma (PH-140), vindos do `weatherPool` do
  * PokeRogue. `limpo` e o peso de CEU LIMPO — nao a ausencia de tabela: um

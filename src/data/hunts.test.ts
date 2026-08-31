@@ -7,14 +7,17 @@
 // hunt com pool vazio so estoura quando alguem entra nela. Um sub-bioma
 // inalcancavel nao da erro em lugar nenhum.
 import { describe, expect, it } from 'vitest'
-import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID } from './huntSpawnOverrides'
+import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID, TETO_DE_FATIA, POOL_MINIMO_PRA_TETO } from './huntSpawnOverrides'
 import { SPECIES, type Species } from './pokes'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
+import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL, huntId,
 } from './biomas'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
+import { contextoDeSpawn, janelaDaSala } from '@/engine/systems/salaSystem'
+import { SALAS_POR_HUNT } from './biomas'
 import { NON_WILD_SPECIES } from './regions'
 import { baseStatTotal, especieForte, zonaMinimaDaEspecie } from './spawnStrength'
 import { huntOdds } from '@/features/hunt/HuntMenu'
@@ -132,7 +135,18 @@ describe('cobertura de especies', () => {
     expect(achados).toEqual([])
   })
 
-  it('Porygon, Porygon2 e Eevee nao spawnam em hunt nenhuma', () => {
+  it('o gerador e o catalogo concordam sobre quem nao e selvagem', () => {
+    // Duas listas, dois arquivos, uma regra: `NON_WILD_SPECIES` aqui e
+    // `NAO_SELVAGENS` em scripts/gerar-subbiomas.mjs. Divergir nao da erro —
+    // a especie so volta a spawnar. Foi assim que as cinco evolucoes do Eevee
+    // ficaram no mato: elas entraram no roster, o PokeRogue deu casa pras
+    // cinco, e a lista do gerador tinha so as tres chaves originais.
+    const alocadas = new Set(Object.values(SUB_BIOMA_ESPECIES).flat())
+    const vazaram = [...NON_WILD_SPECIES].filter((id) => alocadas.has(id)).sort()
+    expect(vazaram).toEqual([])
+  })
+
+  it('nada de NON_WILD_SPECIES spawna em hunt nenhuma', () => {
     const achados: string[] = []
     for (const map of Object.values(MAPS)) {
       for (const id of especiesDe(map.enemyPool)) {
@@ -264,6 +278,25 @@ describe('niveis', () => {
 })
 
 describe('pesos de spawn', () => {
+  // O PESO TEM QUE VIR DO DADO, E NAO DO FALLBACK.
+  //
+  // `huntSpawnOverrides.ts` resolve peso com `SPAWN_WEIGHT_BY_SPECIES[id] ??
+  // DEFAULT_WEIGHT`, e esse `??` e uma falha silenciosa por construcao: especie
+  // sem tier nao da erro, ela so passa a spawnar com peso "incomum" plano. Foi
+  // o que aconteceu com Hoenn inteira — `scripts/spawn-tiers-gen3.json` foi
+  // derivado em 25/08 e `gerar-spawn-tiers.mjs` nunca foi ligado nele, entao
+  // 125 das 353 especies com sub-bioma (35%) spawnavam com peso inventado por
+  // tres semanas, sem um sintoma sequer.
+  //
+  // Este teste e o alarme que faltava, e ele cobre a proxima geracao importada
+  // tambem: ela vai chegar exatamente do mesmo jeito (sprite e catalogo
+  // primeiro, tabela de tier depois).
+  it('toda especie com sub-bioma tem tier proprio, sem cair no fallback', () => {
+    const alocadas = [...new Set(Object.values(SUB_BIOMA_ESPECIES).flat())]
+    const semTier = alocadas.filter((id) => SPAWN_WEIGHT_BY_SPECIES[id] == null).sort()
+    expect(semTier).toEqual([])
+  })
+
   // A soma dos pesos e o denominador do `weightedPick`: peso zero (ou negativo,
   // ou NaN vindo de um encontro sem tier) faria uma especie nunca spawnar sem
   // erro nenhum, e uma hunt com soma zero travaria o sorteio.
@@ -295,9 +328,16 @@ describe('pesos de spawn', () => {
     expect(erros).toEqual([])
   })
 
+  // ESTE TESTE MEDE A HUNT, E A HUNT NAO E O QUE O JOGADOR ENFRENTA.
+  //
+  // Ele guarda o pool de FALLBACK — o `enemyPool`, que so vira pool de sorteio
+  // quando nao ha sala (inicial, BOSS, Lance, e o intervalo antes de o servidor
+  // dizer a sala). Ele passou verde durante toda a vida do bug que o teste
+  // seguinte pega: por medir a uniao das salas, ele nunca viu Leito de Praia
+  // III em 50%.
+  //
   // Sem o teto, um pool pequeno com um tier alto vira hunt de uma especie so:
-  // medido, Unown ocupava 50,8% do Sagrado. A hunt inicial (3 especies curadas
-  // a mao) fica de fora — com 3, o minimo possivel ja e 33%.
+  // medido, Unown ocupava 50,8% do Sagrado.
   it('nenhuma especie passa de 35% de uma hunt com 5 ou mais especies', () => {
     const erros: string[] = []
     for (const map of huntsNormais) {
@@ -306,6 +346,111 @@ describe('pesos de spawn', () => {
       for (const id of map.enemyPool) {
         const fatia = ENCOUNTERS[id].weight / total
         if (fatia > 0.35 + 1e-9) erros.push(`${map.id}/${ENCOUNTERS[id].speciesId} = ${(fatia * 100).toFixed(1)}%`)
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
+  // O TESTE QUE MEDE O QUE O JOGADOR ENFRENTA DE VERDADE.
+  //
+  // O sorteio roda sobre o pool da SALA recortado pela JANELA DE NIVEL dela, e e
+  // esse conjunto — nao o `enemyPool` da hunt — que precisa respeitar o teto.
+  // Sao 33 sub-biomas x 3 faixas x 10 indices de sala. Com o teto so no nivel da
+  // hunt, 9 das 99 combinacoes (sub-bioma x faixa) ja passavam de 35%:
+  //
+  //   beach/III 50,0%   laboratory/II 50,0%   beach/I 42,9%   graveyard/I 40,0%
+  //   snowy-forest/I 39,5%   ruins/III 39,5%   graveyard/III 37,0%   ...
+  //
+  // Percorre `contextoDeSpawn`, e nao uma reimplementacao da conta, de proposito:
+  // o que precisa estar certo e o numero que o motor usa no `weightedPick`, nao
+  // um numero parecido calculado no teste.
+  it('nenhuma especie passa de 35% de nenhuma SALA, em nenhum indice', () => {
+    const erros: string[] = []
+    for (const [huntId, salas] of Object.entries(POOL_POR_SALA)) {
+      const mapDef = MAPS[huntId]
+      for (const chave of Object.keys(salas)) {
+        for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+          const sala = { chave, indice, abates: 0, ciclos: 0 }
+          const ctx = contextoDeSpawn(huntId, mapDef.levelRange, sala, mapDef.enemyPool)
+          if (ctx.pool.length < POOL_MINIMO_PRA_TETO) continue
+          const total = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
+          for (const id of ctx.pool) {
+            const fatia = ctx.peso(id) / total
+            if (fatia > TETO_DE_FATIA + 1e-9) {
+              const janela = janelaDaSala(mapDef.levelRange, indice).join('-')
+              erros.push(`${huntId}/${chave}#${indice} (Lv ${janela}) ${ENCOUNTERS[id].speciesId} = ${(fatia * 100).toFixed(1)}%`)
+            }
+          }
+        }
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
+  // NENHUMA ESPECIE PODE FICAR INALCANCAVEL.
+  //
+  // Este e o teste que a mudanca pra chance-por-tier exigia, e ele mede a coisa
+  // certa: nao a pior fatia de uma especie (que pode ser minuscula sem problema
+  // nenhum — Alakazam num vilarejo DEVE ser raro), e sim a MELHOR sala que
+  // existe pra ela no jogo inteiro. Se a melhor for perto de zero, a especie
+  // saiu do jogo na pratica, com sprite, Bestiario e tudo no lugar.
+  //
+  // O piso e 0,05% (uma aparicao a cada 2.000 abates, algo como 7 ciclos de
+  // hunt). Medido no dado atual, a mais dificil e Sceptile com 0,13% em
+  // mata_faixa3/forest — entao ha folga de 2,6x, e o teste reprova por regressao
+  // e nao por ficar apertado.
+  //
+  // O QUE ELE JA PEGOU: sem limite de razao no desempate, o tier do Gen1/Gen2
+  // (30:1) multiplicava o tier do PokeRogue (348:1) e a ponta sumia — Alakazam
+  // ficava com 0,0070% na melhor sala dele, uma aparicao a cada 14 mil abates.
+  // O teste de fatia por sala nao pegaria: aquele so olha o TETO.
+  it('toda especie tem alguma sala onde a chance dela nao e desprezivel', () => {
+    const PISO = 0.0005
+    const melhor = new Map<string, number>()
+    for (const [huntId, salas] of Object.entries(POOL_POR_SALA)) {
+      // O espelho do Pesadelo tem a mesma composicao com nivel deslocado; medir
+      // os dois so dobraria o custo do teste.
+      if (huntId.startsWith('nightmare_')) continue
+      const mapDef = MAPS[huntId]
+      for (const chave of Object.keys(salas)) {
+        for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+          const ctx = contextoDeSpawn(huntId, mapDef.levelRange, { chave, indice, abates: 0, ciclos: 0 }, mapDef.enemyPool)
+          const total = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
+          if (!(total > 0)) continue
+          for (const id of ctx.pool) {
+            const sp = ENCOUNTERS[id].speciesId
+            const fatia = ctx.peso(id) / total
+            if (fatia > (melhor.get(sp) ?? 0)) melhor.set(sp, fatia)
+          }
+        }
+      }
+    }
+    const invisiveis = [...melhor]
+      .filter(([, f]) => f < PISO)
+      .map(([sp, f]) => `${sp} = ${(f * 100).toFixed(4)}% na melhor sala`)
+      .sort()
+    expect(invisiveis).toEqual([])
+    // Contra o teste passar de vazio (POOL_POR_SALA quebrado, ctx.peso zerado).
+    expect(melhor.size).toBeGreaterThan(300)
+  })
+
+  // O sorteio da sala tem que fechar com o PESO DA SALA, e nao com o peso do
+  // encontro — sao numeros diferentes desde que a chance passou a vir do tier.
+  // O teste irmao logo acima mede `ENCOUNTERS[id].weight`, que hoje so vale no
+  // fallback sem sala.
+  it('todo pool de sala fecha o sorteio com o peso DA SALA', () => {
+    const erros: string[] = []
+    for (const [huntId, salas] of Object.entries(POOL_POR_SALA)) {
+      const mapDef = MAPS[huntId]
+      for (const chave of Object.keys(salas)) {
+        for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+          const ctx = contextoDeSpawn(huntId, mapDef.levelRange, { chave, indice, abates: 0, ciclos: 0 }, mapDef.enemyPool)
+          const soma = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
+          if (!(soma > 0)) erros.push(`${huntId}/${chave}#${indice} soma ${soma}`)
+          for (const id of ctx.pool) {
+            if (!(ctx.peso(id) > 0)) erros.push(`${huntId}/${chave}#${indice}/${ENCOUNTERS[id].speciesId} peso ${ctx.peso(id)}`)
+          }
+        }
       }
     }
     expect(erros).toEqual([])
@@ -331,18 +476,67 @@ describe('pesos de spawn', () => {
 })
 
 describe('hunt inicial', () => {
-  it('so tem Sentret, Hoothoot e Rattata, todos NORMAL', () => {
+  it('tem as 9 especies de primeira rota, e so elas', () => {
     const especies = especiesDe(MAPS[STARTER_HUNT_ID].enemyPool).sort()
-    expect(especies).toEqual(['hoothoot', 'rattata', 'sentret'])
-    for (const id of especies) expect(SPECIES_DATA[id].type).toBe('NORMAL')
+    expect(especies).toEqual([
+      'caterpie', 'hoothoot', 'pidgey', 'poochyena', 'rattata',
+      'sentret', 'weedle', 'wurmple', 'zigzagoon',
+    ])
   })
 
-  it('sai 80% nivel 1 e 20% nivel 2', () => {
+  // O QUE SUBSTITUIU O INVARIANTE "TODOS NORMAL".
+  //
+  // A hunt tinha tres especies e todas eram NORMAL, e havia um teste afirmando
+  // isso. Era descricao das tres escolhidas, nao regra de desenho: caterpie e
+  // weedle sao BUG, poochyena e DARK, e nenhum dos tres tem nada de errado numa
+  // primeira rota.
+  //
+  // O que a hunt inicial precisa garantir de verdade e que o inimigo seja
+  // FRACO — um POKE inicial Lv1 tem 12 HP. Entao o invariante passa a ser o
+  // teto de forca, ancorado no elenco que a hunt ja tinha antes: ninguem entra
+  // mais forte que o mais forte de la.
+  it('ninguem e mais forte que o elenco original da hunt', () => {
+    const tetoOriginal = Math.max(...['sentret', 'hoothoot', 'rattata'].map(baseStatTotal))
+    for (const id of especiesDe(MAPS[STARTER_HUNT_ID].enemyPool)) {
+      expect(baseStatTotal(id), id).toBeLessThanOrEqual(tetoOriginal)
+    }
+  })
+
+  // Lv1-3 com o 3 raro. O peso do Lv1 nao e detalhe de sabor: a unica janela em
+  // que conta nova morre sao os primeiros 30-60 segundos, com o POKE ainda Lv1
+  // (ver data/biomas.ts#MAX_INIMIGOS_HUNT_INICIAL), e e o Lv1 majoritario que
+  // segura essa janela. Um dia alguem vai querer "deixar mais interessante"
+  // achatando isto pra 34/33/33 — este teste e o lugar onde essa conversa
+  // acontece.
+  it('sai Lv1-3, com Lv1 majoritario e Lv3 raro', () => {
     for (const encId of MAPS[STARTER_HUNT_ID].enemyPool) {
-      expect(ENCOUNTERS[encId].levelWeights).toEqual([
-        { level: 1, weight: 80 },
-        { level: 2, weight: 20 },
+      const pesos = ENCOUNTERS[encId].levelWeights
+      expect(pesos).toEqual([
+        { level: 1, weight: 76 },
+        { level: 2, weight: 21 },
+        { level: 3, weight: 3 },
       ])
+      const total = pesos!.reduce((s, p) => s + p.weight, 0)
+      expect(pesos![0].weight / total).toBeGreaterThan(0.5)
+      expect(pesos![2].weight).toBeLessThan(pesos![0].weight)
+    }
+    expect(MAPS[STARTER_HUNT_ID].levelRange).toEqual([1, 3])
+  })
+
+  // As seis que mudaram de casa nao podem ter sumido do mundo: elas SAIRAM do
+  // `town` (scripts/gerar-subbiomas.mjs#SAI_DO_SUB_BIOMA) e a hunt inicial vai
+  // so ate o Lv3, entao quem quiser pegar uma delas depois precisa achar onde.
+  // O teste geral "toda especie selvagem tem pelo menos uma hunt" nao cobre
+  // isto: a propria hunt inicial ja o satisfaz.
+  it('quem saiu do town continua com casa numa hunt de bioma', () => {
+    const mudaramDeCasa = ['pidgey', 'caterpie', 'weedle', 'zigzagoon', 'poochyena', 'wurmple']
+    const emTown = new Set(SUB_BIOMA_ESPECIES['town'])
+    const emBioma = new Set(
+      Object.entries(SUB_BIOMA_ESPECIES).flatMap(([sub, ids]) => (sub === 'town' ? [] : ids)),
+    )
+    for (const id of mudaramDeCasa) {
+      expect(emTown.has(id), `${id} devia ter saido do town`).toBe(false)
+      expect(emBioma.has(id), `${id} ficou sem nenhuma hunt de bioma`).toBe(true)
     }
   })
 
