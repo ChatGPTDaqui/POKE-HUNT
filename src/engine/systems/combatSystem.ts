@@ -51,7 +51,12 @@ import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange } from '@/core/random'
 import { ATTACK_ANIM_DURATION, triggerAttackAnim } from './animationSystem'
-import { reporClimaDeAmbiente } from './climaAmbiente'
+// Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
+// turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
+// dura 30 abates, entao 5 turnos de clima passavam antes de qualquer coisa
+// acontecer. O numero (e o prazo em segundos que sai dele) mora em
+// `climaAmbiente.ts` desde a PH-329, junto do tick que o gasta.
+import { CLIMA_DE_GOLPE_TURNOS } from './climaAmbiente'
 import { reunindoParaLure } from './lureSystem'
 import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
@@ -474,12 +479,6 @@ export const ESCUDO_ABILITIES: Record<string, keyof Escudos> = {
   wide_guard: 'wideGuard',
 }
 const ESCUDO_DURACAO_TURNOS = 5 // igual aos jogos reais (Gen2-VII, fora de Dobrado item/Light Clay)
-// Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
-// turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
-// dura 30 abates, entao 5 turnos de clima passavam antes de qualquer coisa
-// acontecer. Ao expirar, o clima de AMBIENTE da sala volta; o ceu nao fica
-// limpo (ver systems/climaAmbiente.ts#reporClimaDeAmbiente).
-const CLIMA_DE_GOLPE_TURNOS = 10
 const ESCUDO_DURACAO_SEGUNDOS = ESCUDO_DURACAO_TURNOS * TURNO_SEGUNDOS
 
 // Golpes de disable/lock (imprison/embargo descartados por decisao anterior,
@@ -3256,12 +3255,16 @@ const TRAIT_CLIMA: Partial<Record<TraitId, ClimaTipo>> = {
 
 // Clima ligado por TRAIT (Drizzle/Sand Stream/Snow Warning/Drought) e
 // INDEFINIDO nos jogos reais — dura ate outra Trait ou golpe de clima
-// substituir, sem contagem de turnos. `Infinity` e o mesmo sentinela de "sem
-// timer" que `lastDamageTaken.age` ja usa neste motor (ver engine/entity.ts).
+// substituir, sem contagem de turnos. Era `Infinity` aqui por isso, e a PH-140
+// reinterpretou o sentinela como "ate a sala trocar".
 //
-// PH-140: com clima de ambiente, `Infinity` deixou de significar "pra sempre" —
-// significa "ate a sala trocar", que e o que derruba qualquer clima agora.
-const CLIMA_DE_TRAIT_TURNOS = Infinity
+// PH-329 TIROU A EXCECAO: o clima ligado por habilidade passa a durar os mesmos
+// 10 turnos do clima de golpe, por pedido explicito ("quando o clima for
+// ocasionado por golpes de pokemons ou habilidades ... devera durar 10 turnos").
+// A fidelidade ao jogo original cede pra regra do projeto: aqui uma sala dura 30
+// abates e um Drizzle indefinido apagava o clima do sub-bioma pelo resto dela,
+// que e justamente o que o clima de ambiente (PH-140) existe pra mostrar.
+const CLIMA_DE_TRAIT_TURNOS = CLIMA_DE_GOLPE_TURNOS
 
 /**
  * HOOK DE ENTRADA EM COMBATE: dispara UMA vez, no primeiro frame em que
@@ -3336,11 +3339,11 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   tickCooldowns(player, dt)
   for (const enemy of enemies) tickCooldowns(enemy, dt)
 
-  // Turno de clima fecha na MESMA cadencia do relogio de status do jogador
-  // (`proximoTurnoDeStatus`, mesmo epsilon que tickStatus usa) -- capturado
-  // ANTES do loop abaixo mutar esse relogio. Decrementa uma vez por
-  // updateCombat, nao por entidade: o clima e do WORLD, nao de cada POKE.
-  const turnoDeClimaFechou = !isDead(player) && player.proximoTurnoDeStatus - dt <= 1e-9
+  // PH-329: o prazo do clima NAO e gasto aqui. Ele saiu pra
+  // `climaAmbiente.ts#tickClimaDeGolpe`, chamado de `stepWorld`, porque este
+  // ponto so roda com combate acontecendo e com o POKE do jogador vivo — as
+  // duas amarras que faziam o clima de golpe congelar fora de luta. O motivo
+  // completo esta escrito lá.
 
   // Status ANTES das acoes: veneno/queimadura podem derrubar o POKE neste
   // frame, e um POKE derrubado nao age. Passa pelo mesmo caminho de morte que
@@ -3375,15 +3378,6 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     creditarMorteSeNecessario(entity, defeatedEnemyIds, () => {
       playerJustFainted = true
     })
-  }
-
-  if (turnoDeClimaFechou && world.clima) {
-    // Clima de ambiente tem `turnosRestantes: Infinity` — decrementar nao muda
-    // nada e a comparacao nunca dispara, entao ele so sai na troca de sala.
-    world.clima.turnosRestantes -= 1
-    // PH-140: expirou o clima de golpe, o do LUGAR volta. Zerar aqui deixaria o
-    // deserto sem areia pelo resto da sala por causa de um Rain Dance.
-    if (world.clima.turnosRestantes <= 0) reporClimaDeAmbiente(world)
   }
 
   for (const effect of world.effects) {
@@ -3516,15 +3510,24 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     // termine. O POKE ia ficando permanentemente pior a cada inimigo que
     // matava.
     limparEstadoVolatil(player)
-    // Clima e do WORLD, nao da entidade -- por isso reset separado aqui, e
-    // nao dentro de `limparEstadoVolatil` (que so mexe em campos de
-    // WorldEntity). Mesmo ponto porque e aqui que "fim de batalha" e
-    // detectado e quem chama ja tem `world` em maos.
+    // O CLIMA NAO ENTRA MAIS NESTE RESET (PH-329).
     //
-    // PH-140: "reset" agora e VOLTAR AO AMBIENTE, nao zerar. O clima do lugar
-    // nao acaba porque uma batalha acabou — ele vale a sala inteira, e a sala
-    // dura 30 abates. Só o que veio de golpe/trait e que morre aqui.
-    reporClimaDeAmbiente(world)
+    // Ele entrava: "fim de batalha" chamava `reporClimaDeAmbiente(world)` aqui e
+    // derrubava na hora o que tinha vindo de golpe/habilidade. O efeito colateral
+    // e que o prazo de 10 turnos quase nunca era alcancado — "sem nenhum inimigo
+    // engajado" acontece a cada vao entre um spawn e o proximo, que num
+    // auto-battler de campo aberto e o tempo todo. Um Rain Dance lancado no
+    // ultimo inimigo do grupo morria menos de um segundo depois, e o jogador nao
+    // tinha como saber por que.
+    //
+    // A regra pedida e explicita: clima de golpe ou de habilidade dura 10 turnos,
+    // e "a duracao e por tempo, ponto". Se o fim de batalha continuasse
+    // derrubando, o prazo seria decorativo. Quem derruba agora e SO
+    // `tickClimaDeGolpe` (climaAmbiente.ts), ao fim do prazo, e a troca de sala.
+    //
+    // O resto do reset de fim de batalha (estagios, confusao) continua igual: a
+    // decisao aqui e sobre o clima, que e do WORLD e nao da entidade, e nunca
+    // esteve dentro de `limparEstadoVolatil` por isso mesmo.
   }
 
   return { defeatedEnemyIds, playerJustFainted }
