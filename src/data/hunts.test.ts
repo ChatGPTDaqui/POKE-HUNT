@@ -359,7 +359,7 @@ describe('pesos de spawn', () => {
       const mapDef = MAPS[huntId]
       for (const chave of Object.keys(salas)) {
         for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
-          const sala = { chave, indice, abates: 0, ciclo: 1 }
+          const sala = { chave, indice, abates: 0, ciclos: 0 }
           const ctx = contextoDeSpawn(huntId, mapDef.levelRange, sala, mapDef.enemyPool)
           if (ctx.pool.length < POOL_MINIMO_PRA_TETO) continue
           const total = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
@@ -396,18 +396,67 @@ describe('pesos de spawn', () => {
 })
 
 describe('hunt inicial', () => {
-  it('so tem Sentret, Hoothoot e Rattata, todos NORMAL', () => {
+  it('tem as 9 especies de primeira rota, e so elas', () => {
     const especies = especiesDe(MAPS[STARTER_HUNT_ID].enemyPool).sort()
-    expect(especies).toEqual(['hoothoot', 'rattata', 'sentret'])
-    for (const id of especies) expect(SPECIES_DATA[id].type).toBe('NORMAL')
+    expect(especies).toEqual([
+      'caterpie', 'hoothoot', 'pidgey', 'poochyena', 'rattata',
+      'sentret', 'weedle', 'wurmple', 'zigzagoon',
+    ])
   })
 
-  it('sai 80% nivel 1 e 20% nivel 2', () => {
+  // O QUE SUBSTITUIU O INVARIANTE "TODOS NORMAL".
+  //
+  // A hunt tinha tres especies e todas eram NORMAL, e havia um teste afirmando
+  // isso. Era descricao das tres escolhidas, nao regra de desenho: caterpie e
+  // weedle sao BUG, poochyena e DARK, e nenhum dos tres tem nada de errado numa
+  // primeira rota.
+  //
+  // O que a hunt inicial precisa garantir de verdade e que o inimigo seja
+  // FRACO — um POKE inicial Lv1 tem 12 HP. Entao o invariante passa a ser o
+  // teto de forca, ancorado no elenco que a hunt ja tinha antes: ninguem entra
+  // mais forte que o mais forte de la.
+  it('ninguem e mais forte que o elenco original da hunt', () => {
+    const tetoOriginal = Math.max(...['sentret', 'hoothoot', 'rattata'].map(baseStatTotal))
+    for (const id of especiesDe(MAPS[STARTER_HUNT_ID].enemyPool)) {
+      expect(baseStatTotal(id), id).toBeLessThanOrEqual(tetoOriginal)
+    }
+  })
+
+  // Lv1-3 com o 3 raro. O peso do Lv1 nao e detalhe de sabor: a unica janela em
+  // que conta nova morre sao os primeiros 30-60 segundos, com o POKE ainda Lv1
+  // (ver data/biomas.ts#MAX_INIMIGOS_HUNT_INICIAL), e e o Lv1 majoritario que
+  // segura essa janela. Um dia alguem vai querer "deixar mais interessante"
+  // achatando isto pra 34/33/33 — este teste e o lugar onde essa conversa
+  // acontece.
+  it('sai Lv1-3, com Lv1 majoritario e Lv3 raro', () => {
     for (const encId of MAPS[STARTER_HUNT_ID].enemyPool) {
-      expect(ENCOUNTERS[encId].levelWeights).toEqual([
-        { level: 1, weight: 80 },
-        { level: 2, weight: 20 },
+      const pesos = ENCOUNTERS[encId].levelWeights
+      expect(pesos).toEqual([
+        { level: 1, weight: 76 },
+        { level: 2, weight: 21 },
+        { level: 3, weight: 3 },
       ])
+      const total = pesos!.reduce((s, p) => s + p.weight, 0)
+      expect(pesos![0].weight / total).toBeGreaterThan(0.5)
+      expect(pesos![2].weight).toBeLessThan(pesos![0].weight)
+    }
+    expect(MAPS[STARTER_HUNT_ID].levelRange).toEqual([1, 3])
+  })
+
+  // As seis que mudaram de casa nao podem ter sumido do mundo: elas SAIRAM do
+  // `town` (scripts/gerar-subbiomas.mjs#SAI_DO_SUB_BIOMA) e a hunt inicial vai
+  // so ate o Lv3, entao quem quiser pegar uma delas depois precisa achar onde.
+  // O teste geral "toda especie selvagem tem pelo menos uma hunt" nao cobre
+  // isto: a propria hunt inicial ja o satisfaz.
+  it('quem saiu do town continua com casa numa hunt de bioma', () => {
+    const mudaramDeCasa = ['pidgey', 'caterpie', 'weedle', 'zigzagoon', 'poochyena', 'wurmple']
+    const emTown = new Set(SUB_BIOMA_ESPECIES['town'])
+    const emBioma = new Set(
+      Object.entries(SUB_BIOMA_ESPECIES).flatMap(([sub, ids]) => (sub === 'town' ? [] : ids)),
+    )
+    for (const id of mudaramDeCasa) {
+      expect(emTown.has(id), `${id} devia ter saido do town`).toBe(false)
+      expect(emBioma.has(id), `${id} ficou sem nenhuma hunt de bioma`).toBe(true)
     }
   })
 

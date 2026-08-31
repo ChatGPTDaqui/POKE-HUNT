@@ -60,6 +60,45 @@ const LENDARIOS = new Set([
 const INICIAIS_BASE = new Set(['charmander', 'squirtle', 'bulbasaur'])
 const NAO_SELVAGENS = new Set(['porygon', 'porygon2', 'eevee'])
 
+// ESPECIES QUE MUDARAM DE CASA A MAO, POR SUB-BIOMA.
+//
+// O `town` do PokeRogue e o bioma de ENTRADA dele: 17 das nossas especies caem
+// no tier COMMON de la, todas forma base de primeira rota. No nosso desenho o
+// `town` e um sub-bioma de Campo Aberto, que o jogador so alcanca depois de
+// passar pela hunt inicial — entao o elenco de "primeira rota" estava do lado
+// errado da primeira tela.
+//
+// As seis abaixo passaram pra hunt inicial
+// (huntSpawnOverrides.ts#STARTER_HUNT_SPECIES, onde o criterio de escolha esta
+// registrado). Sair daqui e o outro lado dessa mudanca: elas MUDAM de casa, nao
+// ficam nas duas.
+//
+// Nenhuma some do jogo, e isso foi conferido especie por especie antes de
+// escrever a lista — as tres linhas de inseto continuam com casa em `forest`
+// pela forma final (butterfree, beedrill, beautifly), e as outras tres tem casa
+// direta em mountain/plains/metropolis/volcano. O teste "toda especie selvagem
+// tem pelo menos uma hunt onde spawna" (hunts.test.ts) e quem garante isso pra
+// valer, inclusive pros estagios do meio que herdam a casa da familia.
+//
+// EFEITO COLATERAL QUE E O PONTO: tirar a raiz tira a linha INTEIRA do `town`,
+// porque a casa e espalhada por familia (ver a nota logo abaixo). Pidgeot e
+// Nidoking nao tem o que fazer num vilarejo mesmo — o `town` cai de 92 pra
+// menos especies, e as que ficam sao as que a hunt inicial nao levou.
+//
+// `silcoon` e `cascoon` entram na lista mesmo NAO indo pra hunt inicial (sao
+// estagio do meio, e a hunt inicial vai ate o Lv3 — Wurmple so evolui no 7).
+// Eles estao aqui porque o PokeRogue da casa DIRETA aos dois no `town`, e a
+// casa e espalhada por familia: tirar so o Wurmple nao tirava a linha, o
+// Silcoon devolvia o `town` pra ela inteira e o Wurmple voltava por heranca.
+// Conferido na saida do gerador — a primeira versao desta lista deixou o
+// Wurmple no `town` exatamente assim. Os dois continuam com casa em `grass`.
+const SAI_DO_SUB_BIOMA = {
+  town: new Set([
+    'pidgey', 'caterpie', 'weedle', 'zigzagoon', 'poochyena',
+    'wurmple', 'silcoon', 'cascoon',
+  ]),
+}
+
 // Evolucoes que o catalogo nao declara em `evolvesTo` porque nao sao por
 // nivel (troca, pedra). Sem elas a linha evolutiva quebra e o herdeiro nao
 // acha a familia — foi assim que Sunflora saiu orfa na primeira medicao.
@@ -118,6 +157,7 @@ for (const chave of chaves) {
       const nosso = PORNORM.get(norm(nome))
       if (!nosso) { foraDoRoster.add(nome); continue }
       if (!elegivel(nosso)) continue
+      if (SAI_DO_SUB_BIOMA[chave]?.has(nosso)) continue
       ;(tier.startsWith('BOSS') ? chefe : selvagem).add(nosso)
     }
   }

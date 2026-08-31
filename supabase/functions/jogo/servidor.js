@@ -44145,15 +44145,6 @@ var SUB_BIOMA_ESPECIES = {
 		"chimecho"
 	],
 	"town": [
-		"caterpie",
-		"metapod",
-		"butterfree",
-		"weedle",
-		"kakuna",
-		"beedrill",
-		"pidgey",
-		"pidgeotto",
-		"pidgeot",
 		"rattata",
 		"raticate",
 		"spearow",
@@ -44206,15 +44197,6 @@ var SUB_BIOMA_ESPECIES = {
 		"jumpluff",
 		"sunkern",
 		"sunflora",
-		"poochyena",
-		"mightyena",
-		"zigzagoon",
-		"linoone",
-		"wurmple",
-		"silcoon",
-		"beautifly",
-		"cascoon",
-		"dustox",
 		"lotad",
 		"lombre",
 		"ludicolo",
@@ -45162,15 +45144,28 @@ var STARTER_HUNT_ID = "route_46";
 var STARTER_HUNT_SPECIES = [
 	"sentret",
 	"hoothoot",
-	"rattata"
+	"rattata",
+	"pidgey",
+	"caterpie",
+	"weedle",
+	"zigzagoon",
+	"poochyena",
+	"wurmple"
 ];
-var STARTER_LEVEL_WEIGHTS = [{
-	level: 1,
-	weight: 80
-}, {
-	level: 2,
-	weight: 20
-}];
+var STARTER_LEVEL_WEIGHTS = [
+	{
+		level: 1,
+		weight: 76
+	},
+	{
+		level: 2,
+		weight: 21
+	},
+	{
+		level: 3,
+		weight: 3
+	}
+];
 var DEFAULT_WEIGHT = 10;
 var PRE_EVOLUCAO = {};
 for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id;

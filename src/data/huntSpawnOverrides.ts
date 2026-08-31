@@ -48,14 +48,80 @@ import type { HuntMapDef, HuntEncounter } from './huntTypes'
 // ---------------------------------------------------------------------------
 // Hunt inicial
 // ---------------------------------------------------------------------------
-// Nao e um bioma: e a primeira tela do jogo, elenco curado a mao, Lv1-2, e
-// fica FORA do sistema de salas. Rattata e de Kanto e isso e deliberado — o
-// pedido nomeou os tres.
+// Nao e um bioma: e a primeira tela do jogo, elenco curado a mao, e fica FORA
+// do sistema de salas. Rattata e de Kanto e isso e deliberado — o pedido
+// original nomeou os tres primeiros.
 export const STARTER_HUNT_ID = 'route_46'
-const STARTER_HUNT_SPECIES = ['sentret', 'hoothoot', 'rattata']
+
+// O ELENCO SAIU DE 3 PRA 9, E OS 6 NOVOS VIERAM DO SUB-BIOMA `town`.
+//
+// A hunt inicial e a primeira tela do jogo e mostrava tres especies. O `town`
+// do PokeRogue, que e o bioma de entrada dele, tinha 17 especies no tier
+// COMMON — todas forma base de primeira rota — e no nosso desenho isso caia
+// num sub-bioma de Campo Aberto que o jogador so ve depois. Os seis mais
+// reconheciveis como "primeira rota" mudaram de casa: `gerar-subbiomas.mjs`
+// (SAI_DO_SUB_BIOMA) tira os seis do `town`, e eles entram aqui.
+//
+// O CRITERIO NAO FOI TEMATICO SO. Toda especie daqui tem BST <= 251, que e a
+// faixa que a hunt JA tinha (rattata 253, hoothoot 262) — entao o teto de
+// dificuldade nao subiu, a media desceu. Ficaram de fora spearow (262) e
+// taillow (270), que sao os agressivos, e sunkern (evolui no Lv80, ficaria pra
+// sempre). Nenhuma delas evolui antes do Lv7, entao todas continuam sendo o
+// estagio certo em Lv1-3.
+//
+// A HUNT DEIXOU DE SER SO-NORMAL, e isso e consequencia aceita e nao descuido:
+// caterpie e weedle sao BUG, poochyena e DARK. O invariante antigo ("todos
+// NORMAL") era descricao das tres especies escolhidas, nunca uma regra de
+// desenho — o que a hunt precisa garantir e nivel baixo e inimigo fraco, e isso
+// esta medido acima.
+//
+// As seis saem do `town` de verdade (nao ficam nos dois lugares) e nenhuma some
+// do jogo: as tres linhas de inseto continuam com casa em `forest` pela forma
+// final (butterfree, beedrill, beautifly), e pidgey, zigzagoon e poochyena tem
+// casa direta em mountain/plains/metropolis/volcano.
+const STARTER_HUNT_SPECIES = [
+  'sentret', 'hoothoot', 'rattata',
+  'pidgey', 'caterpie', 'weedle', 'zigzagoon', 'poochyena', 'wurmple',
+]
+
+// Lv1-3, com o 3 raro. O 3 e 3% E ESSE NUMERO FOI MEDIDO, nao arredondado.
+//
+// O teto era Lv2. Subir pra 3 tem um risco conhecido: um POKE inicial Lv1 tem
+// 12 HP, e a UNICA janela em que conta nova morre sao os primeiros 30-60
+// segundos (ver a nota de MAX_INIMIGOS_HUNT_INICIAL em data/biomas.ts, decidida
+// medindo exatamente isso).
+//
+// Bancada: scripts/harness/hunt-inicial-lv3.mjs, 200 sementes x os 3 iniciais =
+// 600 vidas por configuracao, 60 segundos cada.
+//
+//   3 especies, Lv1-2  80/20  (era) ..... 2,50%  (15/600)
+//   9 especies, Lv1-2  80/20  ........... 1,17%  ( 7/600)
+//   9 especies, Lv1-3  70/22/8 .......... 4,67%  (28/600)
+//   9 especies, Lv1-3  74/22/4 .......... 2,67%  (16/600)
+//   9 especies, Lv1-3  76/21/3  (este) .. 2,00%  (12/600)
+//
+// DUAS COISAS QUE SO APARECERAM PORQUE A BANCADA DIZ QUEM MATOU:
+//
+// 1. O ELENCO MAIOR TORNA A HUNT MAIS SEGURA, nao menos — 2,50% -> 1,17% so de
+//    trocar 3 especies por 9. O carrasco e o Rattata (atk 56, spd 72, o mais
+//    forte e o mais rapido do elenco): ele era 22 de 28 mortes na configuracao
+//    mais letal, e passar de 1/3 do pool pra 1/6 dilui isso. As seis especies
+//    novas somadas aparecem em 4 das 28.
+//
+// 2. Todo o custo do Lv3 e do Rattata Lv3, que sozinho fez metade das mortes
+//    (14 de 28) com 8% de peso. Foi por isso que a calibragem mexeu no peso do
+//    nivel, e nao no elenco.
+//
+// O resultado escolhido deixa a hunt MAIS SEGURA do que ela esta no ar hoje
+// (2,00% contra 2,50%) e ainda assim com Lv3 dentro. Nao ha troca aqui.
+//
+// A ressalva que toda bancada headless carrega vale: ela ja discordou do
+// servidor real por quase 6x em taxa de morte absoluta. O que ela responde bem
+// e a comparacao RELATIVA, e a comparacao relativa e favoravel.
 const STARTER_LEVEL_WEIGHTS = [
-  { level: 1, weight: 80 },
-  { level: 2, weight: 20 },
+  { level: 1, weight: 76 },
+  { level: 2, weight: 21 },
+  { level: 3, weight: 3 },
 ]
 
 // ---------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 // catalogo. Nao editar a mao — a proxima geracao sobrescreve.
 //
 // 33 sub-biomas, 353 especies alocadas
-// (308 com casa direta no PokeRogue, 45 herdadas da linha evolutiva).
+// (305 com casa direta no PokeRogue, 48 herdadas da linha evolutiva).
 //
 // A CHANCE de aparicao NAO vem daqui: peso de spawn continua sendo o
 // `spawn_tier` real do Gen1/Gen2 (scripts/derive-spawn-tiers.js) e a chance
@@ -634,15 +634,6 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'chimecho',
   ],
   'town': [
-    'caterpie',
-    'metapod',
-    'butterfree',
-    'weedle',
-    'kakuna',
-    'beedrill',
-    'pidgey',
-    'pidgeotto',
-    'pidgeot',
     'rattata',
     'raticate',
     'spearow',
@@ -695,15 +686,6 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'jumpluff',
     'sunkern',
     'sunflora',
-    'poochyena',
-    'mightyena',
-    'zigzagoon',
-    'linoone',
-    'wurmple',
-    'silcoon',
-    'beautifly',
-    'cascoon',
-    'dustox',
     'lotad',
     'lombre',
     'ludicolo',
