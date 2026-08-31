@@ -12,26 +12,25 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
-  // A cacada por tier do PokeRogue. Uma entrada so, mesmo sendo cinco commits,
-  // porque pra quem joga e UM assunto: mudou quem aparece, com que frequencia e
-  // quem guarda a sala.
+  // A cacada por tier do PokeRogue. Uma entrada so pros seis commits, porque pra
+  // quem joga e UM assunto: mudou quem aparece, com que frequencia e quem guarda
+  // a sala. SUCINTA a pedido do usuario — mesma regua da 7.22 (PH-338).
   //
-  // O que ficou DE FORA da nota de proposito, por ser invisivel no jogo: o teto
-  // de fatia que passou a valer por sala, o tier de Hoenn que estava derivado e
-  // desligado, e o conserto do gerador de missoes. Os tres aparecem indiretamente
-  // (as chances mudaram), e listar cada um encheria a nota de mecanica que
-  // ninguem consegue conferir na tela.
+  // Fora da nota de proposito, por ser invisivel jogando: o teto de fatia que
+  // passou a valer por sala, o tier de Hoenn que estava derivado e desligado, o
+  // conserto do gerador de missoes e a conta de chance do card de hunt. Os
+  // quatro aparecem indiretamente nas linhas abaixo (as chances mudaram), e
+  // listar cada um encheria a nota de mecanica que ninguem confere na tela.
   {
     version: '7.23',
     date: '2026-08-31',
-    title: 'Cada lugar tem os bichos dele: chance de aparicao por sub-bioma, Guardiao de verdade e uma primeira rota maior',
+    title: 'Cada lugar tem os bichos dele',
     highlights: [
-      'A CHANCE DE CADA POKE AGORA DEPENDE DO LUGAR. Antes cada especie tinha UMA frequencia, a mesma em qualquer hunt — Zubat aparecia igual na caverna e em qualquer outro canto onde ele morasse. Agora a chance sai da raridade que aquele POKE tem NAQUELE sub-bioma: comum na caverna, achado raro na montanha. Formas finais ficaram bem mais raras, e as formas base do lugar, bem mais comuns.',
-      'O GUARDIAO E O LORD VIRARAM BICHO GRANDE. Eles eram sorteados no mesmo bolo dos selvagens, entao dava Guardiao Rattata. Agora saem do elenco de chefe do sub-bioma, e o Lord da sala 10 comeca um degrau acima do Guardiao — na Mata III o Guardiao e Victreebel ou Noctowl, e o Lord e Heracross, Stantler ou Sceptile. Nas faixas baixas ainda cai bicho comum: chefe de verdade so existe em nivel alto.',
-      'A PRIMEIRA CACADA TRIPLICOU DE ELENCO E VAI ATE O NIVEL 3. Eram tres especies em Lv1-2; agora sao nove — Pidgey, Caterpie, Weedle, Zigzagoon, Poochyena e Wurmple entraram, vindas do Vilarejo. O Lv3 e raro de proposito. Medido: com mais especies e o Rattata diluido, a chance de perder o POKE no primeiro minuto CAIU em relacao ao que estava no ar.',
-      'AS EVOLUCOES DO EEVEE SAIRAM DO MATO. Vaporeon, Jolteon, Flareon, Espeon e Umbreon estavam aparecendo como selvagens. O Eevee e presente do Campeao Lance, e as evolucoes dele so vem de evoluir o seu — como sempre foi a regra, e como ja valia pro Porygon.',
-      'AS MISSOES DE HOENN CHEGARAM. A cadeia estava parada antes da Geracao III e nao tinha uma missao sequer com os POKE novos. Agora tem, nos 18 tipos: sao 517 missoes no lugar de 335. Missao ja concluida continua concluida, mas alvos novos entram no meio das cadeias que voce ainda nao terminou.',
-      'A TELA DE HUNTS PAROU DE MENTIR A CHANCE. A lista de POKE do card calculava as porcentagens ignorando que cada sala cobre so uma fatia de nivel da hunt. Agora ela faz a mesma conta que o jogo faz na hora de spawnar.',
+      'A CHANCE DE CADA POKE AGORA DEPENDE DO LUGAR. Antes cada especie tinha uma frequencia so, igual em qualquer hunt. Agora vale a raridade que ele tem NAQUELE sub-bioma — forma final ficou bem mais rara, forma base do lugar bem mais comum.',
+      'GUARDIAO E LORD VIRARAM BICHO GRANDE. Saiam do mesmo bolo dos selvagens (dava Guardiao Rattata); agora saem do elenco de chefe do sub-bioma, e o Lord da sala 10 e mais raro que o Guardiao. Em nivel baixo ainda cai bicho comum.',
+      'A PRIMEIRA CACADA TEM NOVE POKE E VAI ATE O NIVEL 3. Pidgey, Caterpie, Weedle, Zigzagoon, Poochyena e Wurmple entraram. Lv3 e raro de proposito: medido, morrer no primeiro minuto ficou MENOS provavel que antes.',
+      'AS EVOLUCOES DO EEVEE SAIRAM DO MATO. Elas so vem de evoluir o Eevee que o Campeao Lance da — como ja valia pro Porygon.',
+      'AS MISSOES DE HOENN CHEGARAM: 517 no lugar de 335, nos 18 tipos. Missao concluida continua concluida, mas alvo novo entra no meio das cadeias que voce ainda nao terminou.',
     ],
   },
   // PH-338. Entrada de LIMPEZA DE DIVIDA, e resumida de proposito (pedido do
