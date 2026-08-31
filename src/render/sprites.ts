@@ -1257,11 +1257,25 @@ function drawStatusEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): b
 }
 
 function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
-  // Tenta a arte de status primeiro; sem ela (FLYING/DRAGON, sem sheet no
-  // catalogo — ver statusVfx.ts) ou enquanto o GIF ainda baixa, cai no
-  // burst/anel procedural de sempre — mesmo padrao de fallback do resto do
-  // arquivo, nao um caminho de erro novo.
-  if (effect.statusDirection && drawStatusEffect(ctx, effect)) return
+  // A camada por GOLPE (data/moveVfx.ts) vence a de tipo, e isso inclui o VFX
+  // de status por tipo+direcao. Ate a PH-367 nao incluia: `drawStatusEffect`
+  // era tentado ANTES e devolvia true pra todo golpe de status cujo TIPO tem
+  // GIF, entao a arte propria de `charm` (FAIRY), `taunt` (DARK) e
+  // `spider_web` (BUG) nunca chegava na tela — as tres estao em disco,
+  // cadastradas, cobertas pelo teste de existencia de arquivo e documentadas
+  // como "a camada de golpe vence a de tipo". So `dragon_dance` aparecia, e
+  // por acidente: DRAGON esta fora de TIPOS_COM_ARTE.
+  //
+  // A guarda olha o RAMO que vai desenhar, e nao a existencia da entrada:
+  // golpe de status de AREA sem `aoe` proprio continua no GIF, que le melhor
+  // que a tira de area do tipo. Mesma logica da precedencia de
+  // drawImpactBurst/drawAoeRing, escrita uma vez aqui.
+  const arteDoGolpe = vfxDoGolpe(effect.abilityId)
+  const temArtePropria = effect.isAoe ? !!arteDoGolpe?.aoe : !!arteDoGolpe?.single
+  // Sem arte propria (FLYING/DRAGON sem sheet no catalogo — ver statusVfx.ts)
+  // ou enquanto o GIF ainda baixa, cai no burst/anel procedural de sempre —
+  // mesmo padrao de fallback do resto do arquivo, nao um caminho de erro novo.
+  if (effect.statusDirection && !temArtePropria && drawStatusEffect(ctx, effect)) return
   if (effect.isAoe) drawAoeRing(ctx, effect)
   else drawImpactBurst(ctx, effect)
 }
