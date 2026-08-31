@@ -143,12 +143,48 @@ describe('o servidor conhece as mesmas arestas que o cliente (PH-145)', () => {
   // Dois lugares com o mesmo dado e nada além deste teste os ligando. Divergir
   // não dá erro: dá uma opção que a tela mostra e o servidor recusa — ou pior,
   // um gate que o cliente acha caro e o servidor libera de graça.
-  const sql = Object.entries(MIGRATIONS)
+  /**
+   * O par MAIS RECENTE de `todas_as_evolucoes`, não todos eles.
+   *
+   * Antes isto pegava todos e afirmava que eram exatamente um `public` e um
+   * `dev`. Valeu enquanto existia um par só. As arestas de evolução mudam quando
+   * o ELENCO muda, e a PH-332 (Geração III) foi a primeira vez que isso
+   * aconteceu: as 135 espécies de Hoenn trazem 40 arestas novas, o gerador foi
+   * rodado outra vez e produziu um segundo par.
+   *
+   * Com dois pares, `find` devolvia o de 2026-08-25 e o teste comparava o
+   * catálogo de hoje com o SQL de antes — reprovando como se cliente e servidor
+   * tivessem divergido, quando o que havia era uma migration nova que o teste
+   * não estava olhando.
+   *
+   * No banco quem manda é a última aplicada. Ordenar por nome funciona porque o
+   * carimbo é `YYYYMMDDHHMMSS` — a mesma propriedade em que o `db push` se apoia.
+   */
+  const todos = Object.entries(MIGRATIONS)
     .filter(([nome]) => nome.includes('todas_as_evolucoes'))
     .sort(([a], [b]) => a.localeCompare(b))
+  const carimboMaisRecente = todos.length
+    ? /(\d{14})_todas_as_evolucoes/.exec(todos[todos.length - 1][0])![1].slice(0, -3)
+    : ''
+  const sql = todos.filter(([nome]) => nome.includes(carimboMaisRecente))
 
-  it('o par `_public`/`_dev` existe', () => {
+  it('o par `_public`/`_dev` mais recente existe', () => {
     expect(sql.map(([nome]) => nome.replace(/.*_(public|dev)\.sql$/, '$1'))).toEqual(['public', 'dev'])
+  })
+
+  it('todo par de `todas_as_evolucoes` é completo — nenhum lado sozinho', () => {
+    // O gate de CI reprova migration que mexe em `dev` sem mexer em `public` (e
+    // vice-versa), mas só depois de ela chegar ao banco. Aqui é de graça, e vale
+    // para os pares ANTIGOS também — que o caso acima deixa de olhar.
+    const porCarimbo = new Map<string, string[]>()
+    for (const [nome] of todos) {
+      const carimbo = /(\d{14})_todas_as_evolucoes/.exec(nome)![1].slice(0, -3)
+      const lado = nome.replace(/.*_(public|dev)\.sql$/, '$1')
+      porCarimbo.set(carimbo, [...(porCarimbo.get(carimbo) ?? []), lado].sort())
+    }
+    for (const [carimbo, lados] of porCarimbo) {
+      expect(lados, `par incompleto no carimbo ${carimbo}`).toEqual(['dev', 'public'])
+    }
   })
 
   it.each(['public', 'dev'])('em %s, toda aresta do cliente está cadastrada', (schema) => {

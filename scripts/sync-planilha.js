@@ -48,7 +48,15 @@ const STARTER_SHEET_KEYS = ['CHARMANDER', 'SQUIRTLE', 'BULBASAUR'];
 // lookup failure instead of erroring, so every one of the 11 BOSS hunts
 // (Modo Pesadelo's only source of legendaries) silently stopped existing
 // without a single console error anywhere.
-const LEGENDARY_SHEET_KEYS = ['ARTICUNO', 'ZAPDOS', 'MOLTRES', 'RAIKOU', 'ENTEI', 'SUICUNE', 'LUGIA', 'HO_OH', 'CELEBI', 'MEWTWO', 'MEW'];
+// GEMEO DE `src/data/legendaries.ts#LEGENDARY_SPECIES_IDS`, em maiusculas.
+// `src/data/lendariosEmDuasListas.test.ts` compara os dois e reprova se
+// divergirem — o motivo esta escrito no arquivo TypeScript: divergir poe
+// lendario numa hunt comum, ou deixa lendario sem hunt BOSS.
+// PH-332 acrescentou os 10 de Hoenn.
+const LEGENDARY_SHEET_KEYS = [
+  'ARTICUNO', 'ZAPDOS', 'MOLTRES', 'RAIKOU', 'ENTEI', 'SUICUNE', 'LUGIA', 'HO_OH', 'CELEBI', 'MEWTWO', 'MEW',
+  'REGIROCK', 'REGICE', 'REGISTEEL', 'LATIAS', 'LATIOS', 'KYOGRE', 'GROUDON', 'RAYQUAZA', 'JIRACHI', 'DEOXYS',
+];
 
 // O cabecalho aponta pro gerador ATUAL (`npm run usum:gerar`, dados de Pokemon
 // Ultra Sun). `npm run planilha:aplicar` ainda existe, mas produz o catalogo

@@ -50,10 +50,12 @@ export const MOTIVO_SEM_EFEITO: Record<string, string> = {
   healer: 'Cura o status dos ALIADOS. Mesmo motivo do Friend Guard.',
   telepathy: 'Evita o dano de golpes dos ALIADOS.',
   plus: 'Fortalece quando um ALIADO tem Plus ou Minus.',
+  minus: 'Fortalece quando um ALIADO tem Plus ou Minus. Mesmo motivo do Plus.',
 
   // --- nao existe ordem de turno nem prioridade ---------------------------
   prankster: 'Da PRIORIDADE aos golpes de status. Este motor nao tem prioridade de golpe — a ordem sai de cooldown e Velocidade.',
   analytic: 'Fortalece o golpe quando o portador age POR ULTIMO no turno. Nao ha turno com ordem definida aqui.',
+  stall: 'Faz o portador agir SEMPRE POR ULTIMO. Mesmo motivo do Prankster e do Analytic: nao ha ordem de turno.',
 
   // --- nao existe PP gasto ------------------------------------------------
   pressure: 'Faz o oponente gastar PP dobrado. Neste jogo o PP so define o tempo de recarga do golpe; nao e consumido.',
@@ -69,8 +71,19 @@ export const MOTIVO_SEM_EFEITO: Record<string, string> = {
   cute_charm: 'Pode apaixonar quem encosta. Nao existe condicao de "apaixonado" neste motor.',
   skill_link: 'Faz golpes de 2 a 5 acertos saírem sempre no maximo. Golpe de multiplos acertos nao existe aqui.',
   rivalry: 'Muda o dano conforme o GENERO dos dois POKE. Nao ha genero neste jogo.',
-  light_metal: 'Reduz o peso do POKE pela metade. Nenhum golpe daqui usa peso.',
   illuminate: 'Dobra a taxa de encontro selvagem. O spawn deste jogo e por sala e por hunt, nao por POKE em campo.',
+
+  // --- o TIPO do POKE nao muda em batalha (PH-332) ------------------------
+  // As tres mexem no tipo do portador em pleno combate. Aqui o tipo e
+  // propriedade da ESPECIE (`SPECIES[id].type`), lida por toda a tabela de
+  // efetividade e pela arte; nao existe tipo por INSTANCIA que daria pra
+  // reescrever no meio da luta. E a mesma fronteira do Imposter.
+  color_change: 'Muda pro tipo do golpe que acabou de acertar. O tipo aqui e da especie, nao da instancia — nao ha o que reescrever em batalha.',
+  protean: 'Muda pro tipo do golpe que vai usar. Mesmo motivo do Color Change.',
+  normalize: 'Torna todo golpe do portador tipo Normal. Mesmo motivo: a tipagem nao e mutavel neste motor.',
+
+  // --- nao existe categoria de golpe de VENTO (PH-332) -------------------
+  wind_rider: 'Imunidade a golpe de VENTO. O catalogo deste jogo nao marca quais golpes sao de vento — nao ha como identificar o gatilho.',
 
   // --- so mostra informacao, e a tela nao tem onde mostrar ----------------
   forewarn: 'Revela o golpe mais forte do oponente ao entrar em campo. Nao ha tela de combate onde caberia esse aviso.',
@@ -225,6 +238,28 @@ export const DESCRICAO_DA_TRAIT: Record<string, string> = {
   water_veil: 'Nao pode ser queimado.',
   weak_armor: 'Ao levar golpe fisico: +2 de Velocidade e -1 de Defesa.',
   wonder_skin: 'Golpes sem dano contra o portador caem para 50% de precisao.',
+  // --- As 19 habilidades que entraram com a Geracao III (PH-332) --------
+  // Texto do que acontece NESTE jogo. Onde a habilidade nao tem efeito aqui,
+  // `MOTIVO_SEM_EFEITO` diz por que — e a ficha do POKE mostra os dois.
+  air_lock: 'Anula todos os efeitos do clima, dos dois lados.',
+  color_change: 'Muda de tipo pro tipo do golpe que acabou de acertar.',
+  forecast: 'Muda de tipo conforme o clima da area.',
+  heavy_metal: 'Dobra o proprio peso.',
+  minus: 'Atk Esp 50% maior quando um aliado tem Plus ou Minus.',
+  normalize: 'Todo golpe do portador passa a contar como tipo Normal.',
+  poison_heal: 'Envenenado, CURA 1/8 do HP maximo por turno em vez de perder.',
+  protean: 'Muda de tipo pro tipo do golpe que vai usar, antes de usar.',
+  pure_power: 'DOBRA o Ataque Fisico.',
+  rough_skin: 'Machuca quem encosta: 1/8 do HP maximo do atacante.',
+  simple: 'Toda mudanca de atributo no portador conta em DOBRO.',
+  solid_rock: 'Golpe super efetivo causa 25% menos dano.',
+  stall: 'Age sempre por ultimo.',
+  storm_drain: 'Imune a AGUA: em vez de dano, sobe um estagio de Atk Esp.',
+  toxic_boost: 'Envenenado, o Ataque Fisico sobe 50%.',
+  truant: 'Age em turnos ALTERNADOS — descansa um turno a cada golpe.',
+  white_smoke: 'Nenhum atributo e rebaixado pelo oponente.',
+  wind_rider: 'Imune a golpe de vento, e ganha um estagio de Ataque ao levar um.',
+  wonder_guard: 'SO golpe super efetivo machuca. Qualquer outro nao tira HP.',
 }
 
 /** A habilidade tem efeito mecanico neste jogo? */

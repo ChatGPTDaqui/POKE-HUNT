@@ -208,6 +208,69 @@ Duas coisas, ambas corrigidas ao criar esta pasta:
 
 ---
 
+## `moves.category` mente para 210 golpes — e mente desde a primeira carga
+
+O enum `move_category` do banco tem **dois** valores:
+
+```
+move_category = physical, special
+```
+
+O catálogo de Ultra Sun tem **três** (`physical`, `special`, `status`).
+`scripts/migrate-catalog-to-postgres.js#buildMoveRows` nunca escreveu a terceira:
+
+```js
+category: r['Categoria (informativo)'] === 'especial' ? 'special' : 'physical',
+```
+
+Ou seja: **golpe de status está gravado como `physical`.** Medido em produção em
+2026-08-31:
+
+| categoria | linhas | com `power = 0` |
+| --- | --- | --- |
+| `physical` | 416 | **210** |
+| `special` | 121 | 11 |
+
+As 210 com poder zero em `physical` são os golpes de status — `acupressure`,
+`attract`, `growl`, `rain_dance`, `substitute`, `toxic`, `swords_dance`, e mais
+200.
+
+**Por que não quebra o jogo:** a categoria de verdade é resolvida no motor
+(`src/data/abilityCategory.ts#resolveAbilityCategory`), a partir do catálogo
+gerado. A tabela `moves` do banco é a forma reduzida que o servidor usa para
+validar escolha de golpe, e essa validação não olha categoria.
+
+**Como isso apareceu:** derrubou o deploy da PH-332 (Geração III). O gerador novo
+(`scripts/gerar-migration-especies.mjs`) escrevia a categoria do catálogo direto
+no enum, e o `db push` reprovou na primeira instrução:
+
+```
+ERROR: invalid input value for enum move_category: "status" (SQLSTATE 22P02)
+```
+
+Nada foi aplicado — a migration roda em transação. O gerador passou a usar a
+mesma regra do migrador antigo (PH-336), e
+`src/data/enumsDaMigrationDeEspecies.test.ts` agora trava **todo** literal de enum
+de toda migration de espécies contra os valores declarados nos `create type` /
+`alter type ... add value` do próprio repositório — sem lista branca, porque uma
+lista branca só protege os enums que alguém já pensou.
+
+**Não corrigido, e a decisão é consciente.** Acrescentar `status` ao enum e
+corrigir as 210 linhas antigas é o certo a prazo, mas enum novo com linhas velhas
+erradas é meia-correção: ficaria pior que a consistência de hoje, porque passaria
+a existir um subconjunto confiável e um não, sem nada distinguindo os dois. Vira
+issue quando alguém precisar da categoria real vindo do banco — hoje ninguém
+precisa.
+
+**A lição de processo** é mais barata que a divergência: eu conferi que a coluna
+era `USER-DEFINED move_category` e **assumi** que os três valores do catálogo
+caberiam. Na PH-330, um dia antes, validei por `SELECT` cada expressão de um
+sorteio em PL/pgSQL antes de escrever a migration. Aqui não fiz o mesmo, e um
+`select enumlabel from pg_enum` custaria dez segundos contra 407 literais
+gerados. **Enum é contrato, e contrato se lê.**
+
+---
+
 ## Já corrigido, mas vale o registro
 
 **`public/_redirects`**: o `CLAUDE.md` afirmava que ele tinha sido criado. Um `find` provou que

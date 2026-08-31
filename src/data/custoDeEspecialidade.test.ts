@@ -73,8 +73,31 @@ describe('o esforco pra maxar e comparavel entre os tipos', () => {
 })
 
 describe('cliente e RPC cobram o MESMO custo (PH-246)', () => {
-  const [, sqlPublic] = Object.entries(MIGRATIONS).find(([k]) => k.endsWith('_custo_especialidade_public.sql')) ?? []
-  const [, sqlDev] = Object.entries(MIGRATIONS).find(([k]) => k.endsWith('_custo_especialidade_dev.sql')) ?? []
+  /**
+   * A migration de custo MAIS RECENTE, e nao a primeira que o glob devolver.
+   *
+   * `find` era o que estava aqui, e ele funcionou enquanto existia UM par de
+   * migrations de custo. A tabela de custo escala com a oferta de Stone, e a
+   * oferta muda quando o elenco muda — a PH-332 (Geracao III) foi a primeira vez
+   * que ela precisou ser regerada, e produziu um segundo par. A partir dai `find`
+   * comparava o modulo gerado (novo) com o SQL da PH-246 (velho) e reprovava
+   * apontando pro lugar errado: parecia divergencia cliente x servidor, quando o
+   * que havia era uma migration nova que o teste nao estava olhando.
+   *
+   * No banco quem manda e a ULTIMA aplicada, entao e ela que tem que casar com
+   * o modulo. Ordenacao pelo nome do arquivo funciona porque o carimbo e
+   * `YYYYMMDDHHMMSS` — mesma propriedade em que o `db push` se apoia.
+   */
+  function migrationMaisRecente(sufixo: string): string | undefined {
+    const [, sql] = Object.entries(MIGRATIONS)
+      .filter(([k]) => k.endsWith(sufixo))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .pop() ?? []
+    return sql
+  }
+
+  const sqlPublic = migrationMaisRecente('_custo_especialidade_public.sql')
+  const sqlDev = migrationMaisRecente('_custo_especialidade_dev.sql')
 
   /** Os `when '<TIPO>' then array[...]` do `case` que a RPC usa. */
   function custosDoSql(sql: string): Record<string, number[]> {

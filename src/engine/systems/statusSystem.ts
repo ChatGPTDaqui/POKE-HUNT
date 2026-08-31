@@ -27,7 +27,7 @@ import { traitDoPoke, type TraitId } from '@/data/traits'
 import {
   TRAIT_IMUNE_A_DANO_DE_CLIMA, CURA_POR_CLIMA, DANO_POR_CLIMA, TRAIT_SO_DANO_DIRETO,
   TRAIT_LEAF_GUARD, TRAIT_EARLY_BIRD, SHED_SKIN_CHANCE, TRAIT_HYDRATION,
-  TRAIT_SPEED_BOOST, TRAIT_MOODY, PROTECAO_DE_ESTAGIO, TRAIT_CONTRARY,
+  TRAIT_SPEED_BOOST, TRAIT_MOODY, PROTECAO_DE_ESTAGIO, TRAIT_CONTRARY, TRAIT_SIMPLE,
   REACAO_A_QUEDA_DE_ESTAGIO,
 } from '@/data/traitEffects'
 
@@ -202,10 +202,27 @@ export function aplicarMudancasDeStat(
   // Por isso o sinal e trocado antes de qualquer guard: uma queda que virou
   // subida nao pode mais ser barrada por Clear Body.
   const inverte = traitDoDestino === TRAIT_CONTRARY
+  // SIMPLE (PH-332): toda mudanca de estagio no portador conta em DOBRO — as
+  // boas e as ruins, como nos jogos.
+  //
+  // Aplicada no DELTA, e nao no multiplicador de leitura. Nos jogos a
+  // habilidade dobra o MODIFICADOR (e o teto de +-6 continua valendo); aqui o
+  // resultado e o mesmo porque o `clamp` logo abaixo ja segura o teto, e o
+  // caminho do delta tem duas vantagens concretas: `multiplicadorDeStat` e lido
+  // em uma duzia de lugares (dano, velocidade, precisao) e nenhum deles conhece
+  // habilidade nenhuma, e o numero que a ficha do POKE mostra passa a ser o
+  // estagio de verdade — com o dobro escondido na leitura, a tela mostraria +1
+  // enquanto o combate calcularia +2.
+  //
+  // DEPOIS do Contrary, e nao antes: as duas empilham (dobra o valor invertido),
+  // e trocar a ordem daria o mesmo resultado — mas so por acaso, porque
+  // `-2 * x === 2 * -x`. A ordem escrita e a dos jogos.
+  const dobra = traitDoDestino === TRAIT_SIMPLE
   const aplicadas: StatChange[] = []
   let sofreuQuedaDoOponente = false
   for (const mudanca of ability.statChanges) {
-    const delta = inverte ? -mudanca.estagios : mudanca.estagios
+    const invertido = inverte ? -mudanca.estagios : mudanca.estagios
+    const delta = dobra ? invertido * 2 : invertido
     if (bloqueadoPorMist && delta < 0) continue
     // PROTECAO DE ESTAGIO (Clear Body, Hyper Cutter, Big Pecks, Keen Eye): so
     // contra QUEDA, e so contra queda vinda do OPONENTE — nos jogos nenhuma
@@ -407,6 +424,8 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.forcedAbilityId = null
   entity.forcedAbilityUntil = 0
   entity.tormentedUntil = 0
+  // TRUANT (PH-332): o contador de folga zera no fim da luta, como nos jogos.
+  entity.truantDeFolga = undefined
   entity.estagioDeCritico = undefined
   entity.proximoGolpeCriticoGarantido = undefined
   // Golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/aqua_ring)

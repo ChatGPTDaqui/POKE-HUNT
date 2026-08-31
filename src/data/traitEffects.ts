@@ -187,6 +187,20 @@ export function multiplicadorDeDanoRecebidoPorTrait(trait: string | null, abilit
   // imunidade, e mora em IMUNIDADE_POR_TRAIT no motor.
   if (trait === 'dry_skin' && ability.type === 'FIRE') m *= 1.25
   if ((trait === 'filter' || trait === 'solid_rock') && efetividade > 1) m *= 0.75
+  // WONDER GUARD (PH-332): so golpe SUPER EFETIVO machuca. Vale por multiplicador
+  // 0, e nao por imunidade em `IMUNIDADE_POR_TRAIT`, porque a imunidade lá e por
+  // TIPO — e esta habilidade nao olha o tipo, olha a efetividade resultante.
+  //
+  // `efetividade > 0` no teste: golpe que o tipo do defensor JA anula (0x) nao
+  // precisa de Wonder Guard pra nada, e escrever `efetividade < 2` sozinho
+  // devolveria 0 tambem nesse caso — mesma resposta por outro caminho, mas com o
+  // motivo errado registrado em qualquer log futuro.
+  //
+  // Shedinja e a unica dona no elenco, e ela e a razao de a habilidade ser
+  // obrigatoria e nao enfeite: com 1 de HP maximo, sem Wonder Guard ela cai pra
+  // qualquer golpe e a especie inteira e piada. `efetividade` aqui e a do golpe
+  // contra a tipagem dela (BUG/GHOST), que tem 5 tipos super efetivos.
+  if (trait === 'wonder_guard' && efetividade > 0 && efetividade < 2) m = 0
   return m
 }
 
@@ -251,6 +265,9 @@ export const PROTECAO_DE_ESTAGIO: Partial<Record<string, string | null>> = {
 
 /** Contrary: toda mudanca de estagio no portador troca de sinal. */
 export const TRAIT_CONTRARY = 'contrary'
+
+/** Simple: toda mudanca de estagio no portador conta em dobro (PH-332). */
+export const TRAIT_SIMPLE = 'simple'
 
 /** Reage a ter um atributo REBAIXADO pelo oponente: sobe outro. */
 export const REACAO_A_QUEDA_DE_ESTAGIO: Partial<Record<string, { stat: 'atkFis' | 'atkEsp'; estagios: number }>> = {
