@@ -1671,6 +1671,36 @@ export type Database = {
         }
         Relationships: []
       }
+      troca_log: {
+        Row: {
+          anfitriao_id: string
+          convidado_id: string
+          executada_em: string
+          id: string
+          oferta: Json
+          sessao_id: string
+          versao: number
+        }
+        Insert: {
+          anfitriao_id: string
+          convidado_id: string
+          executada_em?: string
+          id?: string
+          oferta: Json
+          sessao_id: string
+          versao: number
+        }
+        Update: {
+          anfitriao_id?: string
+          convidado_id?: string
+          executada_em?: string
+          id?: string
+          oferta?: Json
+          sessao_id?: string
+          versao?: number
+        }
+        Relationships: []
+      }
       troca_oferta: {
         Row: {
           criada_em: string
@@ -1759,6 +1789,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         Insert: {
           anfitriao_id: string
@@ -1771,6 +1803,8 @@ export type Database = {
           expira_em?: string
           id?: string
           versao?: number
+          versao_confirmada_anfitriao?: number | null
+          versao_confirmada_convidado?: number | null
         }
         Update: {
           anfitriao_id?: string
@@ -1783,6 +1817,8 @@ export type Database = {
           expira_em?: string
           id?: string
           versao?: number
+          versao_confirmada_anfitriao?: number | null
+          versao_confirmada_convidado?: number | null
         }
         Relationships: [
           {
@@ -2123,6 +2159,29 @@ export type Database = {
         Returns: boolean
       }
       _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
+      _executar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _mesa_aberta_minha: {
         Args: { p_eu: string; p_sessao_id: string }
         Returns: {
@@ -2136,6 +2195,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2166,6 +2227,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2187,6 +2250,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2230,6 +2295,29 @@ export type Database = {
         }[]
       }
       configurar_auto: { Args: { p_patch: Json }; Returns: Json }
+      confirmar_troca: {
+        Args: { p_sessao_id: string; p_versao: number }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       conversas: { Args: never; Returns: Json }
       criar_leilao: {
         Args: {
@@ -2263,6 +2351,29 @@ export type Database = {
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      desconfirmar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
       encerrar_troca: {
         Args: { p_motivo?: string; p_sessao_id: string }
@@ -2277,6 +2388,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2373,6 +2486,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2395,6 +2510,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2455,6 +2572,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -2476,6 +2595,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4261,6 +4382,36 @@ export type Database = {
         }
         Relationships: []
       }
+      troca_log: {
+        Row: {
+          anfitriao_id: string
+          convidado_id: string
+          executada_em: string
+          id: string
+          oferta: Json
+          sessao_id: string
+          versao: number
+        }
+        Insert: {
+          anfitriao_id: string
+          convidado_id: string
+          executada_em?: string
+          id?: string
+          oferta: Json
+          sessao_id: string
+          versao: number
+        }
+        Update: {
+          anfitriao_id?: string
+          convidado_id?: string
+          executada_em?: string
+          id?: string
+          oferta?: Json
+          sessao_id?: string
+          versao?: number
+        }
+        Relationships: []
+      }
       troca_oferta: {
         Row: {
           criada_em: string
@@ -4349,6 +4500,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         Insert: {
           anfitriao_id: string
@@ -4361,6 +4514,8 @@ export type Database = {
           expira_em?: string
           id?: string
           versao?: number
+          versao_confirmada_anfitriao?: number | null
+          versao_confirmada_convidado?: number | null
         }
         Update: {
           anfitriao_id?: string
@@ -4373,6 +4528,8 @@ export type Database = {
           expira_em?: string
           id?: string
           versao?: number
+          versao_confirmada_anfitriao?: number | null
+          versao_confirmada_convidado?: number | null
         }
         Relationships: [
           {
@@ -4713,6 +4870,29 @@ export type Database = {
         Returns: boolean
       }
       _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
+      _executar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _mesa_aberta_minha: {
         Args: { p_eu: string; p_sessao_id: string }
         Returns: {
@@ -4726,6 +4906,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4756,6 +4938,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4777,6 +4961,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4820,6 +5006,29 @@ export type Database = {
         }[]
       }
       configurar_auto: { Args: { p_patch: Json }; Returns: Json }
+      confirmar_troca: {
+        Args: { p_sessao_id: string; p_versao: number }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       conversas: { Args: never; Returns: Json }
       criar_leilao: {
         Args: {
@@ -4853,6 +5062,29 @@ export type Database = {
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      desconfirmar_troca: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          atualizada_em: string
+          convidado_id: string
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
       encerrar_troca: {
         Args: { p_motivo?: string; p_sessao_id: string }
@@ -4867,6 +5099,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4963,6 +5197,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -4985,6 +5221,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -5045,6 +5283,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
@@ -5066,6 +5306,8 @@ export type Database = {
           expira_em: string
           id: string
           versao: number
+          versao_confirmada_anfitriao: number | null
+          versao_confirmada_convidado: number | null
         }
         SetofOptions: {
           from: "*"
