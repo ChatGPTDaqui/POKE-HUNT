@@ -16701,5 +16701,9606 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         35
       ]
     }
+  },
+  "treecko": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        4,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        6,
+        10,
+        6,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "grovyle": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        18,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        6,
+        6,
+        6,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "sceptile": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        30
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        10,
+        8,
+        10,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 48,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "torchic": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        3,
+        4,
+        3,
+        3
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        4,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "combusken": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        4,
+        6,
+        6,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "blaziken": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        30,
+        30
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "mudkip": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        38,
+        2,
+        2,
+        5,
+        3,
+        3,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        4,
+        6,
+        4,
+        6,
+        6,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        3,
+        4,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "marshtomp": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        36,
+        16,
+        36,
+        16
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 16,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "swampert": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        40,
+        1,
+        2,
+        4,
+        2,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "poochyena": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        8,
+        5,
+        8,
+        5,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "mightyena": {
+    "Idle": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        8,
+        5,
+        8,
+        5,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 56,
+      "frameHeight": 56,
+      "durations": [
+        6,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "zigzagoon": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        2,
+        4,
+        4,
+        4,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        4,
+        4,
+        2,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "linoone": {
+    "Idle": {
+      "frameWidth": 48,
+      "frameHeight": 40,
+      "durations": [
+        60,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "wurmple": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        12,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        2,
+        4,
+        6,
+        4,
+        2
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "silcoon": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        120
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        120
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "beautifly": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "cascoon": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        120
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        120
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "dustox": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        6,
+        4,
+        4,
+        6,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "lotad": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        24,
+        18,
+        24,
+        18
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        6,
+        1,
+        2,
+        3,
+        3,
+        3,
+        3,
+        3,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 16,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "lombre": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        1,
+        2,
+        3,
+        4,
+        2,
+        1,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        10,
+        6,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "ludicolo": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        20
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "seedot": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        36,
+        18
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        4,
+        6,
+        4,
+        8,
+        4,
+        6,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "nuzleaf": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        60,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        10,
+        6,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        6,
+        2,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "shiftry": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        24,
+        4,
+        4,
+        4,
+        24,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        4,
+        4,
+        4,
+        8,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        1,
+        2,
+        4,
+        2,
+        1,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "taillow": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        4,
+        6,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        6,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 16,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "swellow": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        40,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        6,
+        10,
+        6,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "wingull": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        8,
+        6,
+        8,
+        6,
+        8,
+        6,
+        8,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "pelipper": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        4,
+        8,
+        10,
+        4,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "ralts": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        40,
+        25
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        10,
+        8,
+        10,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "kirlia": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        60,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        6,
+        24
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        1,
+        2,
+        3,
+        3,
+        1,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "gardevoir": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        12,
+        6,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "surskit": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        16,
+        8,
+        16
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "masquerain": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "shroomish": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        40,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "breloom": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        4,
+        4,
+        4,
+        4,
+        4,
+        8,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 48,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "slakoth": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        60,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        4,
+        4,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "vigoroth": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        40,
+        2,
+        2,
+        6,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "slaking": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        50,
+        6,
+        2,
+        6,
+        4,
+        2,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        10,
+        16,
+        10,
+        16
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "nincada": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        40,
+        4,
+        2,
+        4,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "ninjask": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        9
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        26,
+        8,
+        8,
+        26
+      ]
+    }
+  },
+  "shedinja": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        4,
+        4,
+        4,
+        4,
+        8,
+        8,
+        4,
+        4,
+        4,
+        4,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        12,
+        16,
+        12,
+        12,
+        16
+      ]
+    }
+  },
+  "whismur": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        40,
+        1,
+        1,
+        4,
+        2,
+        1
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        8,
+        6,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        1,
+        1,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "loudred": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        40,
+        1,
+        1,
+        4,
+        4,
+        2,
+        1
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        10,
+        6,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        4,
+        3,
+        2,
+        1
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "exploud": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        10,
+        8,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        1,
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        4
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "makuhita": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        20,
+        4,
+        4,
+        4,
+        2,
+        2,
+        2,
+        2,
+        20,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "hariyama": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        26,
+        2,
+        4,
+        4,
+        2,
+        1,
+        26,
+        1,
+        4,
+        4,
+        2,
+        1
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "azurill": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        16,
+        10,
+        16,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "nosepass": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        30,
+        6,
+        4,
+        4,
+        4,
+        4,
+        4,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "skitty": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        8,
+        6,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        4,
+        5,
+        6,
+        6,
+        6,
+        5,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "delcatty": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        60,
+        10,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "sableye": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        8,
+        6,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "mawile": {
+    "Idle": {
+      "frameWidth": 56,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        2,
+        2,
+        2,
+        4,
+        6,
+        4,
+        6,
+        4,
+        2,
+        2,
+        2,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 72,
+      "frameHeight": 64,
+      "durations": [
+        1,
+        1,
+        1,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        4,
+        2,
+        2,
+        1,
+        1
+      ]
+    },
+    "Charge": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "aron": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        34,
+        12,
+        8,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        6,
+        8,
+        6,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "lairon": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        16,
+        8,
+        16
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "aggron": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        6,
+        2,
+        6,
+        2,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 56,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 56,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "meditite": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        16,
+        8,
+        16
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        1,
+        2,
+        4,
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        4,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "medicham": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        40,
+        2,
+        2,
+        3,
+        4,
+        3,
+        2,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        10,
+        6,
+        6,
+        6,
+        10,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "electrike": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        60,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 24,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "manectric": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        60,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "plusle": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        10,
+        6,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        4,
+        8,
+        4,
+        6,
+        4,
+        8,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        4,
+        1,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        1,
+        1
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "minun": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        10,
+        6,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        4,
+        8,
+        4,
+        6,
+        4,
+        8,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        4,
+        1,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        1,
+        1
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "volbeat": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        8,
+        4,
+        8,
+        4,
+        8,
+        4,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "illumise": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        20
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "roselia": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        40
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        8,
+        1,
+        1,
+        4,
+        3,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "gulpin": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        20,
+        30
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        8,
+        10,
+        8,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        5,
+        3,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "swalot": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        16,
+        16
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        8,
+        10,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        5,
+        3,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "carvanha": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        26,
+        8,
+        36
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        26,
+        8,
+        8,
+        26
+      ]
+    }
+  },
+  "sharpedo": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        16,
+        16,
+        16,
+        16
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        10,
+        8,
+        8,
+        8,
+        10,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        26,
+        8,
+        8,
+        26
+      ]
+    }
+  },
+  "wailmer": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        16,
+        10,
+        16,
+        16,
+        10,
+        10,
+        16
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        6,
+        6,
+        8,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "wailord": {
+    "Idle": {
+      "frameWidth": 72,
+      "frameHeight": 104,
+      "durations": [
+        24,
+        12,
+        12,
+        24,
+        12,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 72,
+      "frameHeight": 104,
+      "durations": [
+        10,
+        8,
+        6,
+        6,
+        8,
+        8,
+        10,
+        8,
+        6,
+        6,
+        6,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 80,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        3,
+        4,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 72,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "numel": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        8,
+        12,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "camerupt": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        20,
+        8,
+        20
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "torkoal": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        20,
+        20,
+        20
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 48,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "spoink": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        30,
+        4,
+        4,
+        8,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        4,
+        6,
+        4,
+        6,
+        4,
+        4,
+        4,
+        6,
+        4,
+        6,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        30
+      ]
+    }
+  },
+  "grumpig": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        12,
+        8,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "spinda": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        4,
+        8,
+        14,
+        4,
+        5,
+        6,
+        8,
+        14,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        10,
+        10,
+        12,
+        14,
+        12,
+        10,
+        10,
+        12,
+        14,
+        12,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "trapinch": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        40,
+        8,
+        10,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 64,
+      "frameHeight": 56,
+      "durations": [
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 24,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "vibrava": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        4,
+        6,
+        6,
+        6,
+        4,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "flygon": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        8,
+        9,
+        8,
+        8,
+        11,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "cacnea": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        40,
+        10,
+        16,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "cacturne": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        40,
+        2,
+        4,
+        4,
+        4,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "swablu": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        4,
+        4,
+        4,
+        4,
+        6,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        6,
+        6,
+        8,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "altaria": {
+    "Idle": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        60,
+        6,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "zangoose": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        30,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        1,
+        2,
+        4,
+        2,
+        1,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "seviper": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        14,
+        18,
+        14,
+        18
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 56,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "lunatone": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        4,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "solrock": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        5,
+        1,
+        1,
+        1,
+        4,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "barboach": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        10,
+        10,
+        12,
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        6,
+        6,
+        8,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "whiscash": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        6,
+        6,
+        6,
+        8,
+        8,
+        6,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        20,
+        12,
+        12,
+        20,
+        12,
+        12
+      ]
+    }
+  },
+  "corphish": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        24,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "crawdaunt": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        24,
+        12,
+        24,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "baltoy": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        6,
+        6,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        4,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        16,
+        8,
+        8,
+        8,
+        8,
+        16,
+        8,
+        8
+      ]
+    }
+  },
+  "claydol": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 64,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        4,
+        6,
+        1,
+        1,
+        1,
+        4,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "lileep": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "cradily": {
+    "Idle": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "anorith": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "armaldo": {
+    "Idle": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        60,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "feebas": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        14,
+        12,
+        14
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10,
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "milotic": {
+    "Idle": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        40,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 88,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 48,
+      "frameHeight": 72,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "castform": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        6,
+        6,
+        6,
+        6,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        35,
+        30
+      ]
+    }
+  },
+  "kecleon": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        2,
+        6,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 48,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "shuppet": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        10,
+        18,
+        10,
+        10,
+        18
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "banette": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        40,
+        1,
+        2,
+        4,
+        4,
+        4,
+        4,
+        2,
+        1
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "duskull": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        24,
+        8,
+        8,
+        24,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        16,
+        8,
+        8,
+        8,
+        16,
+        8
+      ]
+    }
+  },
+  "dusclops": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        8,
+        12,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        4,
+        4,
+        2,
+        4,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "tropius": {
+    "Idle": {
+      "frameWidth": 48,
+      "frameHeight": 72,
+      "durations": [
+        30,
+        3,
+        5,
+        4,
+        5,
+        4,
+        5,
+        4,
+        5,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        10,
+        14,
+        10,
+        14
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 64,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "chimecho": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        18,
+        8,
+        18,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        4,
+        4,
+        6,
+        6,
+        4,
+        4,
+        4,
+        4,
+        6,
+        6,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        28,
+        10,
+        10,
+        28,
+        10,
+        10
+      ]
+    }
+  },
+  "absol": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        30,
+        30
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "wynaut": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        2,
+        10,
+        2,
+        8,
+        2,
+        10,
+        2
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        1,
+        1,
+        6,
+        2,
+        1,
+        4,
+        1,
+        1,
+        6,
+        2,
+        1,
+        4
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "snorunt": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        6,
+        6,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "glalie": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "spheal": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        16,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "sealeo": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        14,
+        18,
+        14
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        6,
+        6,
+        8,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "walrein": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        40,
+        2,
+        8,
+        8,
+        8,
+        8,
+        8,
+        4
+      ]
+    },
+    "Walk": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "clamperl": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        40,
+        6,
+        8,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        10,
+        6,
+        6,
+        6,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        8,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "huntail": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "gorebyss": {
+    "Idle": {
+      "frameWidth": 48,
+      "frameHeight": 72,
+      "durations": [
+        16,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        14,
+        6,
+        8,
+        8,
+        8,
+        8,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "relicanth": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        30,
+        6,
+        4,
+        6,
+        4,
+        14,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "luvdisc": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        34,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "bagon": {
+    "Idle": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        10,
+        14,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "shelgon": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        18,
+        20,
+        18,
+        20
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "salamence": {
+    "Idle": {
+      "frameWidth": 56,
+      "frameHeight": 56,
+      "durations": [
+        60,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 56,
+      "frameHeight": 80,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 56,
+      "frameHeight": 80,
+      "durations": [
+        1,
+        2,
+        2,
+        4,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 56,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 56,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "beldum": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "metang": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "metagross": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        20
+      ]
+    },
+    "Walk": {
+      "frameWidth": 48,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        14,
+        8,
+        14
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 48,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "regirock": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        40,
+        1,
+        4,
+        2,
+        3,
+        4,
+        3
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        18,
+        8,
+        18
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 56,
+      "frameHeight": 72,
+      "durations": [
+        8,
+        1,
+        1,
+        1,
+        8,
+        6,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "regice": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        8,
+        1,
+        1,
+        1,
+        4,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "registeel": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        40,
+        40
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        1,
+        1,
+        1,
+        4,
+        4,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "latias": {
+    "Idle": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    },
+    "Faint": {
+      "frameWidth": 56,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "latios": {
+    "Idle": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 48,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "kyogre": {
+    "Idle": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        10,
+        14,
+        14,
+        14,
+        14,
+        10,
+        14,
+        14,
+        14,
+        14
+      ]
+    },
+    "Walk": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "groudon": {
+    "Idle": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        60,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        10,
+        12,
+        10,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 56,
+      "frameHeight": 56,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "rayquaza": {
+    "Idle": {
+      "frameWidth": 80,
+      "frameHeight": 120,
+      "durations": [
+        14,
+        10,
+        14,
+        10
+      ]
+    },
+    "Walk": {
+      "frameWidth": 80,
+      "frameHeight": 128,
+      "durations": [
+        8,
+        8,
+        6,
+        4,
+        4,
+        4,
+        8,
+        8,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 112,
+      "frameHeight": 120,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 80,
+      "frameHeight": 120,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 72,
+      "frameHeight": 96,
+      "durations": [
+        10,
+        10,
+        10,
+        30,
+        10,
+        10,
+        10,
+        30
+      ]
+    }
+  },
+  "jirachi": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        8,
+        12,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        1,
+        1,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        8,
+        8,
+        24,
+        8,
+        8,
+        8,
+        24
+      ]
+    },
+    "Faint": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        4,
+        10
+      ]
+    }
+  },
+  "deoxys": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        2,
+        8,
+        1,
+        1,
+        2,
+        3,
+        2,
+        2,
+        4,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        30,
+        35
+      ]
+    }
   }
 }

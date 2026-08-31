@@ -1,6 +1,6 @@
 {
  "_nota": "Evidencia da decisao de NAO usar encontro do Ultra Sun como taxa de spawn: cobertura parcial e metodos (island-scan/sos) sem semantica de raridade. O eixo de frequencia continua sendo scripts/spawn-tiers.json (Gen1/Gen2).",
- "cobertura": "131 de 251",
+ "cobertura": "189 de 386",
  "encontros": {
   "bulbasaur": [
    {
@@ -2896,6 +2896,1135 @@
    }
   ],
   "ho_oh": [
+   {
+    "area": "ultra-space-wilds-cliff",
+    "chanceMax": 100,
+    "metodos": [
+     "static"
+    ]
+   },
+   {
+    "area": "ultra-space-ultra-space-wilds-cliff",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "grovyle": [
+   {
+    "area": "alola-route-5-area",
+    "chanceMax": 100,
+    "metodos": [
+     "island-scan"
+    ]
+   }
+  ],
+  "combusken": [
+   {
+    "area": "alola-route-8-main",
+    "chanceMax": 100,
+    "metodos": [
+     "island-scan"
+    ]
+   }
+  ],
+  "marshtomp": [
+   {
+    "area": "brooklet-hill-main",
+    "chanceMax": 100,
+    "metodos": [
+     "island-scan"
+    ]
+   }
+  ],
+  "lombre": [
+   {
+    "area": "ultra-space-wilds-waterfall",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "nuzleaf": [
+   {
+    "area": "ultra-space-wilds-crag",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "swellow": [
+   {
+    "area": "ultra-space-wilds-cliff",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "wingull": [
+   {
+    "area": "alola-route-1-hauoli-outskirts",
+    "chanceMax": 50,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "alola-route-7-area",
+    "chanceMax": 20,
+    "metodos": [
+     "surf"
+    ]
+   },
+   {
+    "area": "akala-outskirts-area",
+    "chanceMax": 80,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "brooklet-hill-north",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "brooklet-hill-south",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "brooklet-hill-totems-den",
+    "chanceMax": 20,
+    "metodos": [
+     "surf"
+    ]
+   },
+   {
+    "area": "hano-beach-area",
+    "chanceMax": 10,
+    "metodos": [
+     "surf"
+    ]
+   },
+   {
+    "area": "hauoli-city-shopping-district",
+    "chanceMax": 5,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "hauoli-city-beachfront",
+    "chanceMax": 20,
+    "metodos": [
+     "surf"
+    ]
+   },
+   {
+    "area": "kalae-bay-area",
+    "chanceMax": 60,
+    "metodos": [
+     "surf",
+     "walk"
+    ]
+   },
+   {
+    "area": "melemele-sea-area",
+    "chanceMax": 20,
+    "metodos": [
+     "surf"
+    ]
+   },
+   {
+    "area": "poke-pelago-poni-island-reached",
+    "chanceMax": 5,
+    "metodos": [
+     "gift"
+    ]
+   },
+   {
+    "area": "poke-pelago-ulaula-island-reached",
+    "chanceMax": 5,
+    "metodos": [
+     "gift"
+    ]
+   },
+   {
+    "area": "poke-pelago-elite-four-defeated",
+    "chanceMax": 4,
+    "metodos": [
+     "gift"
+    ]
+   }
+  ],
+  "pelipper": [
+   {
+    "area": "alola-route-14-area",
+    "chanceMax": 50,
+    "metodos": [
+     "surf",
+     "walk"
+    ]
+   },
+   {
+    "area": "alola-route-15-main",
+    "chanceMax": 70,
+    "metodos": [
+     "surf",
+     "walk"
+    ]
+   },
+   {
+    "area": "alola-route-16-east",
+    "chanceMax": 50,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "alola-route-16-west",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "ancient-poni-path-area",
+    "chanceMax": 50,
+    "metodos": [
+     "surf",
+     "walk"
+    ]
+   },
+   {
+    "area": "exeggutor-island-area",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "poni-breaker-coast-area",
+    "chanceMax": 20,
+    "metodos": [
+     "surf"
+    ]
+   },
+   {
+    "area": "poni-gauntlet-area",
+    "chanceMax": 25,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "poni-plains-east",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "poni-wilds-area",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "tapu-village-area",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "ralts": [
+   {
+    "area": "alola-route-6-north",
+    "chanceMax": 100,
+    "metodos": [
+     "island-scan"
+    ]
+   }
+  ],
+  "surskit": [
+   {
+    "area": "brooklet-hill-north",
+    "chanceMax": 60,
+    "metodos": [
+     "surf",
+     "walk"
+    ]
+   },
+   {
+    "area": "brooklet-hill-south",
+    "chanceMax": 60,
+    "metodos": [
+     "surf",
+     "walk"
+    ]
+   }
+  ],
+  "masquerain": [
+   {
+    "area": "malie-garden-area",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "makuhita": [
+   {
+    "area": "alola-route-2-north",
+    "chanceMax": 65,
+    "metodos": [
+     "bubbling-spots",
+     "walk"
+    ]
+   },
+   {
+    "area": "alola-route-2-south",
+    "chanceMax": 65,
+    "metodos": [
+     "bubbling-spots",
+     "walk"
+    ]
+   }
+  ],
+  "hariyama": [
+   {
+    "area": "poni-plains-north",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "nosepass": [
+   {
+    "area": "akala-outskirts-area",
+    "chanceMax": 15,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "sableye": [
+   {
+    "area": "ten-carat-hill-inside",
+    "chanceMax": 15,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "vast-poni-canyon-inside",
+    "chanceMax": 15,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "vast-poni-canyon-northwest",
+    "chanceMax": 15,
+    "metodos": [
+     "sos"
+    ]
+   }
+  ],
+  "mawile": [
+   {
+    "area": "ten-carat-hill-inside",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "aggron": [
+   {
+    "area": "poni-plains-center",
+    "chanceMax": 100,
+    "metodos": [
+     "island-scan"
+    ]
+   }
+  ],
+  "medicham": [
+   {
+    "area": "ultra-space-wilds-cave",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "carvanha": [
+   {
+    "area": "ancient-poni-path-area",
+    "chanceMax": 30,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "poni-breaker-coast-area",
+    "chanceMax": 30,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   }
+  ],
+  "sharpedo": [
+   {
+    "area": "ancient-poni-path-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "poni-breaker-coast-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   }
+  ],
+  "wailmer": [
+   {
+    "area": "ancient-poni-path-area",
+    "chanceMax": 70,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "poni-breaker-coast-area",
+    "chanceMax": 140,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "seafolk-village-main",
+    "chanceMax": 65,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   }
+  ],
+  "wailord": [
+   {
+    "area": "ancient-poni-path-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "poni-breaker-coast-area",
+    "chanceMax": 40,
+    "metodos": [
+     "bubbling-spots",
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "seafolk-village-main",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   }
+  ],
+  "torkoal": [
+   {
+    "area": "alola-route-12-area",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "blush-mountain-area",
+    "chanceMax": 10,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "grumpig": [
+   {
+    "area": "ultra-space-wilds-crag",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "spinda": [
+   {
+    "area": "ten-carat-hill-farthest-hollow",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "trapinch": [
+   {
+    "area": "haina-desert-area",
+    "chanceMax": 10,
+    "metodos": [
+     "bubbling-spots"
+    ]
+   }
+  ],
+  "altaria": [
+   {
+    "area": "ultra-space-wilds-cliff",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "barboach": [
+   {
+    "area": "paniola-town-area",
+    "chanceMax": 70,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "poni-gauntlet-area",
+    "chanceMax": 80,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "poni-meadow-area",
+    "chanceMax": 80,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "royal-avenue-area",
+    "chanceMax": 100,
+    "metodos": [
+     "npc-trade"
+    ]
+   },
+   {
+    "area": "seaward-cave-area",
+    "chanceMax": 70,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "vast-poni-canyon-northwest",
+    "chanceMax": 45,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   }
+  ],
+  "whiscash": [
+   {
+    "area": "paniola-town-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "poni-gauntlet-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "poni-meadow-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "seaward-cave-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "vast-poni-canyon-northwest",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   }
+  ],
+  "corphish": [
+   {
+    "area": "vast-poni-canyon-northwest",
+    "chanceMax": 40,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   }
+  ],
+  "crawdaunt": [
+   {
+    "area": "vast-poni-canyon-northwest",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   }
+  ],
+  "lileep": [
+   {
+    "area": "alola-route-8-fossil-restoration-center",
+    "chanceMax": 100,
+    "metodos": [
+     "gift"
+    ]
+   }
+  ],
+  "anorith": [
+   {
+    "area": "alola-route-8-fossil-restoration-center",
+    "chanceMax": 100,
+    "metodos": [
+     "gift"
+    ]
+   }
+  ],
+  "feebas": [
+   {
+    "area": "brooklet-hill-north",
+    "chanceMax": 11,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "brooklet-hill-south",
+    "chanceMax": 11,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   }
+  ],
+  "castform": [
+   {
+    "area": "alola-route-17-northeast",
+    "chanceMax": 110,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "alola-route-17-west",
+    "chanceMax": 11,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "exeggutor-island-area",
+    "chanceMax": 12,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "haina-desert-area",
+    "chanceMax": 24,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "lush-jungle-north",
+    "chanceMax": 12,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "lush-jungle-south",
+    "chanceMax": 12,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "lush-jungle-west",
+    "chanceMax": 12,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "malie-garden-area",
+    "chanceMax": 11,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "mount-lanakila-base",
+    "chanceMax": 11,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "mount-lanakila-outside",
+    "chanceMax": 11,
+    "metodos": [
+     "sos"
+    ]
+   },
+   {
+    "area": "tapu-village-area",
+    "chanceMax": 12,
+    "metodos": [
+     "sos"
+    ]
+   }
+  ],
+  "kecleon": [
+   {
+    "area": "dividing-peak-tunnel-area",
+    "chanceMax": 100,
+    "metodos": [
+     "bubbling-spots"
+    ]
+   }
+  ],
+  "shuppet": [
+   {
+    "area": "thrifty-megamart-abandoned-site",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "banette": [
+   {
+    "area": "poke-pelago-poni-island-reached",
+    "chanceMax": 3,
+    "metodos": [
+     "gift"
+    ]
+   },
+   {
+    "area": "poke-pelago-elite-four-defeated",
+    "chanceMax": 2,
+    "metodos": [
+     "gift"
+    ]
+   }
+  ],
+  "tropius": [
+   {
+    "area": "exeggutor-island-area",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "poke-pelago-elite-four-defeated",
+    "chanceMax": 7,
+    "metodos": [
+     "gift"
+    ]
+   }
+  ],
+  "absol": [
+   {
+    "area": "alola-route-14-area",
+    "chanceMax": 10,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "mount-lanakila-base",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "mount-lanakila-cave",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "mount-lanakila-outside",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "tapu-village-area",
+    "chanceMax": 10,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "snorunt": [
+   {
+    "area": "alola-route-14-area",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "mount-lanakila-base",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "tapu-village-area",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "glalie": [
+   {
+    "area": "mount-lanakila-cave",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "mount-lanakila-outside",
+    "chanceMax": 30,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "spheal": [
+   {
+    "area": "alola-route-7-area",
+    "chanceMax": 100,
+    "metodos": [
+     "island-scan"
+    ]
+   }
+  ],
+  "clamperl": [
+   {
+    "area": "alola-route-15-main",
+    "chanceMax": 40,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "hauoli-city-beachfront",
+    "chanceMax": 10,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "melemele-sea-area",
+    "chanceMax": 60,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   }
+  ],
+  "huntail": [
+   {
+    "area": "alola-route-15-main",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "hauoli-city-beachfront",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "melemele-sea-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   }
+  ],
+  "gorebyss": [
+   {
+    "area": "alola-route-15-main",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "hauoli-city-beachfront",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   },
+   {
+    "area": "melemele-sea-area",
+    "chanceMax": 30,
+    "metodos": [
+     "sos",
+     "sos-from-bubbling-spot"
+    ]
+   }
+  ],
+  "relicanth": [
+   {
+    "area": "ancient-poni-path-area",
+    "chanceMax": 11,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "poni-breaker-coast-area",
+    "chanceMax": 11,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   }
+  ],
+  "luvdisc": [
+   {
+    "area": "alola-route-9-main",
+    "chanceMax": 50,
+    "metodos": [
+     "super-rod"
+    ]
+   },
+   {
+    "area": "hauoli-city-beachfront",
+    "chanceMax": 40,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   },
+   {
+    "area": "melemele-sea-area",
+    "chanceMax": 40,
+    "metodos": [
+     "bubbling-spots",
+     "super-rod"
+    ]
+   }
+  ],
+  "bagon": [
+   {
+    "area": "alola-route-3-south",
+    "chanceMax": 1,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "kalae-bay-area",
+    "chanceMax": 10,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "shelgon": [
+   {
+    "area": "kalae-bay-area",
+    "chanceMax": 15,
+    "metodos": [
+     "sos"
+    ]
+   }
+  ],
+  "salamence": [
+   {
+    "area": "alola-route-3-south",
+    "chanceMax": 15,
+    "metodos": [
+     "sos"
+    ]
+   }
+  ],
+  "beldum": [
+   {
+    "area": "mount-hokulani-east",
+    "chanceMax": 20,
+    "metodos": [
+     "walk"
+    ]
+   },
+   {
+    "area": "mount-hokulani-west",
+    "chanceMax": 10,
+    "metodos": [
+     "walk"
+    ]
+   }
+  ],
+  "regirock": [
+   {
+    "area": "ultra-space-wilds-cave",
+    "chanceMax": 100,
+    "metodos": [
+     "static"
+    ]
+   },
+   {
+    "area": "ultra-space-ultra-space-wilds-cave",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "regice": [
+   {
+    "area": "ultra-space-wilds-cave",
+    "chanceMax": 100,
+    "metodos": [
+     "static"
+    ]
+   },
+   {
+    "area": "ultra-space-ultra-space-wilds-cave",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "registeel": [
+   {
+    "area": "ultra-space-wilds-cave",
+    "chanceMax": 100,
+    "metodos": [
+     "static"
+    ]
+   },
+   {
+    "area": "ultra-space-ultra-space-wilds-cave",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "latios": [
+   {
+    "area": "ultra-space-wilds-waterfall",
+    "chanceMax": 100,
+    "metodos": [
+     "static"
+    ]
+   },
+   {
+    "area": "ultra-space-ultra-space-wilds-water",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "groudon": [
+   {
+    "area": "ultra-space-wilds-cave",
+    "chanceMax": 100,
+    "metodos": [
+     "static"
+    ]
+   },
+   {
+    "area": "ultra-space-ultra-space-wilds-cave",
+    "chanceMax": 15,
+    "metodos": [
+     "static"
+    ]
+   }
+  ],
+  "rayquaza": [
    {
     "area": "ultra-space-wilds-cliff",
     "chanceMax": 100,

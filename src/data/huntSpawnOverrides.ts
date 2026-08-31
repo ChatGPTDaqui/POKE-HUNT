@@ -138,9 +138,67 @@ function nivelDeTroca(speciesId: string, desde: number): number | null {
     // Alvo forte demais pra qualquer faixa restante: a origem fica com a linha
     // inteira, e a forma evoluida so aparece por evolucao do POKE do jogador.
     if (indice >= FAIXAS.length) return null
-    return FAIXAS[indice].niveis[0]
+    const pisoDaFaixa = FAIXAS[indice].niveis[0]
+
+    // TETO PELO GATILHO DO ALVO (PH-332): empurrar o alvo pro piso da faixa
+    // seguinte assume que ELE tambem tem gatilho de faixa. Quando o alvo evolui
+    // por NIVEL — e por nivel baixo —, o empurrao passa por cima dele e o
+    // estagio do meio fica sem lugar nenhum.
+    //
+    // O caso: `azurill -> marill -> azumarill`, que entrou com a Geracao III.
+    // Azurill evolui por amizade (vira especial, `evolvesAtLevel: 80`) e Marill
+    // evolui em Lv18 pelo catalogo. Sem teto, Azurill ficava com [1,30] e Marill
+    // comecava em 31 — depois de o proprio Marill ja ter evoluido. As duas
+    // guardas de `hunts.test.ts` pegaram: Marill sumia do jogo, e Azumarill
+    // entrava em Lv18-30 na mesma hunt em que Azurill estava em Lv1-30.
+    //
+    // Antes da Gen III isso nao acontecia: as unicas linhas com estagio especial
+    // no MEIO (Pichu/Pikachu/Raichu, Cleffa, Igglybuff, Togepi) tem os DOIS
+    // gatilhos especiais, entao os dois usavam piso de faixa e encaixavam.
+    //
+    // A METADE, e nao `gatilhoDoAlvo - 1`. As duas opcoes mantem todo estagio
+    // alcancavel e as duas passam nos testes; a diferenca e o tamanho da janela
+    // do estagio do MEIO. Com `-1`, Azurill ficaria com [1,16] e Marill com
+    // [17,17] — um unico nivel, o que na pratica e a especie nao existir, que e
+    // exatamente o defeito que a guarda de cobertura existe pra impedir. Com a
+    // metade: Azurill [1,8], Marill [9,17], Azumarill [18,30]. O `max(2, ...)`
+    // garante que a ORIGEM tambem sobreviva quando o gatilho do alvo e 2 ou 3.
+    const alvoDef = SPECIES[alvo]
+    const gatilhoDoAlvo = alvoDef.isSpecialEvolution ? null : alvoDef.evolvesAtLevel
+    if (gatilhoDoAlvo != null && gatilhoDoAlvo <= pisoDaFaixa) {
+      return Math.min(pisoDaFaixa, Math.max(2, Math.ceil(gatilhoDoAlvo / 2)))
+    }
+    return pisoDaFaixa
   }
-  return especie.evolvesAtLevel ?? null
+  // `desde + 1` NAO e defensividade: e o que impede o gatilho de ANDAR PRA TRAS
+  // (PH-332).
+  //
+  // `desde` e o nivel em que este estagio comeca a ser o correto, e ele vem do
+  // gatilho do estagio ANTERIOR. Quando o anterior e uma evolucao ESPECIAL, o
+  // ramo acima devolve o piso de uma faixa (31, 61, ...) e nao o nivel do
+  // catalogo — e o gatilho de nivel do estagio seguinte pode ser MENOR que isso.
+  //
+  // O caso que revelou: `azurill -> marill -> azumarill`. Azurill entrou no
+  // elenco com a Geracao III e evolui por AMIZADE, entao vira especial e empurra
+  // Marill pra `desde = 31`; Marill evolui em Lv18 pelo catalogo. Sem o teto,
+  // `nivelDeTroca(marill, 31)` devolvia 18 e produzia duas coisas erradas de uma
+  // vez:
+  //
+  //   - Marill ficava com a sub-faixa [31, 17], vazia, em TODA faixa — e
+  //     desaparecia do jogo (`hunts.test.ts`: "toda especie selvagem tem pelo
+  //     menos uma hunt");
+  //   - `desde` regredia de 31 pra 18 e Azumarill entrava em Lv18-30 na MESMA
+  //     hunt em que Azurill estava em Lv1-30 — dois estagios da mesma linha
+  //     concorrendo ("estagios da mesma linha nao se sobrepoem").
+  //
+  // Nao afeta linha nenhuma que ja existia: numa linha toda de gatilho por
+  // nivel, o nivel do catalogo de um estagio e sempre maior que o do anterior,
+  // entao o `max` devolve o proprio `evolvesAtLevel`. Ele so morde quando um
+  // gatilho de faixa (do ramo especial) fica acima do gatilho de nivel seguinte,
+  // que antes da Gen III nao acontecia — as linhas com estagio especial no MEIO
+  // (Pichu/Pikachu/Raichu) tinham os DOIS gatilhos especiais.
+  const porNivel = especie.evolvesAtLevel
+  return porNivel == null ? null : Math.max(porNivel, desde + 1)
 }
 
 /** Raizes das linhas evolutivas presentes em `especies`, sem duplicar. */

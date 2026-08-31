@@ -369,11 +369,26 @@ function golpeAjustadoPeloClima(ability: Ability, clima: ClimaTipo | null): Abil
 // Exportadas so pra teste unitario direto (Huge/Pure Power e Marvel Scale
 // nao tem dono no roster Gen1/2 atual — ver traits.ts — entao nao da pra
 // exercitar via especie real; testar a funcao pura evita depender disso).
-export function multiplicadorDeAtaquePorTrait(trait: TraitId | null, isPhysical: boolean, temStatus: boolean): number {
+export function multiplicadorDeAtaquePorTrait(
+  trait: TraitId | null,
+  isPhysical: boolean,
+  temStatus: boolean,
+  // PH-332: Toxic Boost olha um status ESPECIFICO, e nao "tem algum" como o
+  // Guts. Parametro proprio em vez de reusar `temStatus` porque os dois
+  // convivem: um POKE queimado tem `temStatus` verdadeiro e Toxic Boost NAO
+  // dispara — passar o booleano do Guts aqui daria +50% de Ataque a um Guts
+  // disfarcado.
+  //
+  // Opcional pra nao quebrar os chamadores de teste que exercitam a funcao pura
+  // com tres argumentos (Huge/Pure Power e Marvel Scale nao tinham dono no
+  // roster antes desta leva — Medicham e Meditite trouxeram Pure Power).
+  statusDeVeneno = false,
+): number {
   if (!isPhysical) return 1
   if (trait === 'huge_power' || trait === 'pure_power') return 2
   if (trait === 'hustle') return 1.5
   if (trait === 'guts' && temStatus) return 1.5
+  if (trait === 'toxic_boost' && statusDeVeneno) return 1.5
   return 1
 }
 
@@ -725,8 +740,22 @@ function punishmentPower(defenderEntity: WorldEntity): number {
 // PESO, em kg. Vem do catalogo (`pesoHg` da PokeAPI, em hectogramas — Machamp =
 // 1300 = 130,0 kg), dividido por 10 aqui porque as tabelas dos jogos sao todas
 // escritas em kg. Ver scripts/fetch-usum-catalog.js.
+//
+// HEAVY METAL / LIGHT METAL (PH-332) dobram e reduzem a metade o peso, e por
+// isso vivem AQUI e nao numa tabela de dano: peso nao e um multiplicador, e uma
+// ENTRADA de tres tabelas de poder (Low Kick pela faixa do alvo, Heavy Slam pela
+// razao entre os dois, Heat Crash igual). Aplicar o dobro em cada uma delas
+// seria a mesma conta escrita tres vezes.
+//
+// As duas ja existiam no catalogo de habilidades (`light_metal` tem 6 donos); o
+// que faltava era alguem consultar. Sem isso as duas eram texto na ficha e mais
+// nada — o modo de falha que `traitInfo.ts` existe pra denunciar.
 function pesoEmKg(poke: PokeInstance): number {
-  return SPECIES[poke.speciesId].pesoHg / 10
+  const bruto = SPECIES[poke.speciesId].pesoHg / 10
+  const trait = traitDoPoke(poke)
+  if (trait === 'heavy_metal') return bruto * 2
+  if (trait === 'light_metal') return bruto / 2
+  return bruto
 }
 
 // Low Kick: poder pela faixa de peso do ALVO. Tabela da Gen III em diante,
@@ -1007,7 +1036,7 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   // que o hit nao vai ter.
   const { atacante: attackerTraitEstimate, defensor: defenderTraitEstimate } = traitsDoConfronto(attackerEntity, defenderEntity)
   const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp)
-    * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status))
+    * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status), attackerPoke.status?.tipo === 'poison')
   const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp)
     * multiplicadorDeDefesaPorTrait(defenderTraitEstimate, isPhysical, Boolean(defenderPoke.status))
   const poderBruto = special && special.mode === 'dynamicPower' ? special.power : ability.power
@@ -1417,7 +1446,7 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     const estagiosDoAtacanteValem = defenderTrait !== TRAIT_UNAWARE
     const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp)
       * (estagiosDoAtacanteValem ? multiplicadorDeStat(attackerEntity.estagios, isPhysical ? 'atkFis' : 'atkEsp') : 1)
-      * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status))
+      * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status), attackerPoke.status?.tipo === 'poison')
       // SOLAR POWER: +50% de Ataque Especial sob sol. O custo (1/8 do HP por
       // turno) e cobrado no tick de turno, nao aqui.
       * (attackerTrait === 'solar_power' && !isPhysical && climaAtivo === 'sol' ? SOLAR_POWER_BONUS : 1)
@@ -2106,9 +2135,55 @@ function statusImpedeAcao(world: WorldState, entity: WorldEntity, silent: boolea
   return true
 }
 
+/**
+ * TRUANT (PH-332): age em turnos alternados. Devolve `true` no turno de folga.
+ *
+ * ---------------------------------------------------------------------------
+ * POR QUE ELA NAO PODIA FICAR SEM EFEITO
+ * ---------------------------------------------------------------------------
+ * Truant e a UNICA habilidade do elenco cujo efeito e uma DESVANTAGEM que paga
+ * o preco de atributos altos. A dona dela e Slaking, e Slaking tem o maior BST
+ * do jogo (670, acima de Tyranitar e Dragonite, 600). Deixa-la sem efeito nao
+ * seria "uma habilidade a menos": seria entregar o POKE mais forte do jogo com o
+ * contrapeso dele removido — e como selvagem, num encontro de rotina.
+ *
+ * O CORTE GASTA O TURNO. `startGlobalCooldown(MIN_ACTION_GAP)` e o mesmo caminho
+ * que sono e paralisia usam pra "perdeu a vez" — sem ele o POKE tentaria agir de
+ * novo no tick seguinte e a folga duraria um frame, nao um turno.
+ *
+ * APROXIMACAO ASSUMIDA: a folga e marcada AQUI, no gate, e nao no ponto em que o
+ * golpe de fato sai. Se `pickAbility` devolvesse `null` logo depois (POKE sem
+ * nenhum golpe utilizavel), a tentativa contaria como turno gasto. E irrelevante
+ * na pratica — todo POKE tem Ataque Basico, que nunca fica indisponivel — e a
+ * alternativa seria duplicar a marcacao nos dois executores de acao, que e como
+ * uma delas fica pra tras na proxima mudanca.
+ */
+function truantImpedeAcao(world: WorldState, entity: WorldEntity, silent: boolean): boolean {
+  if (traitDoPoke(entity.poke) !== 'truant') return false
+  if (!entity.truantDeFolga) {
+    entity.truantDeFolga = true
+    return false
+  }
+  entity.truantDeFolga = false
+  startGlobalCooldown(entity, MIN_ACTION_GAP)
+  if (!silent) {
+    world.effects.push(createWorldEffect(world.counters, {
+      type: 'abilityName',
+      x: entity.x, y: entity.y,
+      targetX: entity.x, targetY: entity.y + getGroundOffset(entity) + 14,
+      text: 'Truant!',
+      color: '#a3a3a3',
+      duration: 0.9,
+      owner: entity,
+    }))
+  }
+  return true
+}
+
 function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEnemies: EnemyEntity[], silent: boolean): void {
   if (!canAct(player)) return
   if (statusImpedeAcao(world, player, silent)) return
+  if (truantImpedeAcao(world, player, silent)) return
 
   const primaryTarget = engagedEnemies[0]
   const allEnemies = nearbyAliveEnemies(world)
@@ -2175,6 +2250,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   if (world.mapDef?.passiveEnemies) return
   if (!canAct(enemy)) return
   if (statusImpedeAcao(world, enemy, silent)) return
+  if (truantImpedeAcao(world, enemy, silent)) return
 
   const ability = pickAbility(world, enemy, player, () => 1) // inimigos so miram no jogador unico
   if (!ability) return

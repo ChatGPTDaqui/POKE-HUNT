@@ -14,6 +14,10 @@ export const TRAITS_DATA: TraitsData = {
       "nome": "Aftermath",
       "efeito": "Damages the attacker for 1/4 its max HP when knocked out by a contact move."
     },
+    "air_lock": {
+      "nome": "Air Lock",
+      "efeito": "Negates all effects of weather, but does not prevent the weather itself."
+    },
     "analytic": {
       "nome": "Analytic",
       "efeito": "Strengthens moves to 1.3× their power when moving last."
@@ -53,6 +57,10 @@ export const TRAITS_DATA: TraitsData = {
     "cloud_nine": {
       "nome": "Cloud Nine",
       "efeito": "Negates all effects of weather, but does not prevent the weather itself."
+    },
+    "color_change": {
+      "nome": "Color Change",
+      "efeito": "Changes type to match when hit by a damaging move."
     },
     "competitive": {
       "nome": "Competitive",
@@ -118,6 +126,10 @@ export const TRAITS_DATA: TraitsData = {
       "nome": "Flash Fire",
       "efeito": "Protects against Fire moves. Once one has been blocked, the Pokémon's own Fire moves inflict 1.5× damage until it leaves battle."
     },
+    "forecast": {
+      "nome": "Forecast",
+      "efeito": "Changes Castform's type and form to match the weather."
+    },
     "forewarn": {
       "nome": "Forewarn",
       "efeito": "Reveals the opponents' strongest move upon entering battle."
@@ -145,6 +157,10 @@ export const TRAITS_DATA: TraitsData = {
     "healer": {
       "nome": "Healer",
       "efeito": "Has a 30% chance of curing each adjacent ally of any major status ailment after each turn."
+    },
+    "heavy_metal": {
+      "nome": "Heavy Metal",
+      "efeito": "Doubles the Pokémon's weight."
     },
     "honey_gather": {
       "nome": "Honey Gather",
@@ -254,6 +270,10 @@ export const TRAITS_DATA: TraitsData = {
       "nome": "Marvel Scale",
       "efeito": "Increases Defense to 1.5× with a major status ailment."
     },
+    "minus": {
+      "nome": "Minus",
+      "efeito": "Increases Special Attack to 1.5× when a friendly Pokémon has Plus or Minus."
+    },
     "mold_breaker": {
       "nome": "Mold Breaker",
       "efeito": "Bypasses targets' abilities if they could hinder or prevent a move."
@@ -281,6 +301,10 @@ export const TRAITS_DATA: TraitsData = {
     "no_guard": {
       "nome": "No Guard",
       "efeito": "Ensures all moves used by and against the Pokémon hit."
+    },
+    "normalize": {
+      "nome": "Normalize",
+      "efeito": "Makes the Pokémon's moves all act Normal-type."
     },
     "oblivious": {
       "nome": "Oblivious",
@@ -310,6 +334,10 @@ export const TRAITS_DATA: TraitsData = {
       "nome": "Plus",
       "efeito": "Increases Special Attack to 1.5× when a friendly Pokémon has Plus or Minus."
     },
+    "poison_heal": {
+      "nome": "Poison Heal",
+      "efeito": "Heals for 1/8 max HP after each turn when poisoned in place of damage."
+    },
     "poison_point": {
       "nome": "Poison Point",
       "efeito": "Has a 30% chance of poisoning attacking Pokémon on contact."
@@ -325,6 +353,14 @@ export const TRAITS_DATA: TraitsData = {
     "pressure": {
       "nome": "Pressure",
       "efeito": "Increases the PP cost of moves targetting the Pokémon by one."
+    },
+    "protean": {
+      "nome": "Protean",
+      "efeito": "Changes the bearer's type to match each move it uses."
+    },
+    "pure_power": {
+      "nome": "Pure Power",
+      "efeito": "Doubles Attack in battle."
     },
     "quick_feet": {
       "nome": "Quick Feet",
@@ -353,6 +389,10 @@ export const TRAITS_DATA: TraitsData = {
     "rock_head": {
       "nome": "Rock Head",
       "efeito": "Protects against recoil damage."
+    },
+    "rough_skin": {
+      "nome": "Rough Skin",
+      "efeito": "Damages attacking Pokémon for 1/8 their max HP on contact."
     },
     "run_away": {
       "nome": "Run Away",
@@ -406,6 +446,10 @@ export const TRAITS_DATA: TraitsData = {
       "nome": "Shield Dust",
       "efeito": "Protects against incoming moves' extra effects."
     },
+    "simple": {
+      "nome": "Simple",
+      "efeito": "Doubles the Pokémon's stat modifiers. These doubled modifiers are still capped at -6 or 6 stages."
+    },
     "skill_link": {
       "nome": "Skill Link",
       "efeito": "Extends two-to-five-hit moves and Triple Kick to their full length every time."
@@ -422,6 +466,10 @@ export const TRAITS_DATA: TraitsData = {
       "nome": "Solar Power",
       "efeito": "Increases Special Attack to 1.5× but costs 1/8 max HP after each turn during strong sunlight."
     },
+    "solid_rock": {
+      "nome": "Solid Rock",
+      "efeito": "Decreases damage taken from super-effective moves by 1/4."
+    },
     "soundproof": {
       "nome": "Soundproof",
       "efeito": "Protects against sound-based moves."
@@ -429,6 +477,10 @@ export const TRAITS_DATA: TraitsData = {
     "speed_boost": {
       "nome": "Speed Boost",
       "efeito": "Raises Speed one stage after each turn."
+    },
+    "stall": {
+      "nome": "Stall",
+      "efeito": "Makes the Pokémon move last within its move's priority bracket."
     },
     "static": {
       "nome": "Static",
@@ -445,6 +497,10 @@ export const TRAITS_DATA: TraitsData = {
     "sticky_hold": {
       "nome": "Sticky Hold",
       "efeito": "Prevents a held item from being removed by other Pokémon."
+    },
+    "storm_drain": {
+      "nome": "Storm Drain",
+      "efeito": "Redirects single-target Water moves to this Pokémon where possible. Absorbs Water moves, raising Special Attack one stage."
     },
     "sturdy": {
       "nome": "Sturdy",
@@ -494,9 +550,17 @@ export const TRAITS_DATA: TraitsData = {
       "nome": "Torrent",
       "efeito": "Strengthens Water moves to inflict 1.5× damage at 1/3 max HP or less."
     },
+    "toxic_boost": {
+      "nome": "Toxic Boost",
+      "efeito": "Increases Attack to 1.5× when poisoned."
+    },
     "trace": {
       "nome": "Trace",
       "efeito": "Copies an opponent's ability upon entering battle."
+    },
+    "truant": {
+      "nome": "Truant",
+      "efeito": "Skips every second turn."
     },
     "unaware": {
       "nome": "Unaware",
@@ -529,6 +593,18 @@ export const TRAITS_DATA: TraitsData = {
     "weak_armor": {
       "nome": "Weak Armor",
       "efeito": "Raises Speed and lowers Defense by one stage each upon being hit by a physical move."
+    },
+    "white_smoke": {
+      "nome": "White Smoke",
+      "efeito": "Prevents stats from being lowered by other Pokémon."
+    },
+    "wind_rider": {
+      "nome": "Wind Rider",
+      "efeito": "Gives immunity to wind moves, and causes the Pokémon's Attack to increase by one stage when hit by one."
+    },
+    "wonder_guard": {
+      "nome": "Wonder Guard",
+      "efeito": "Protects against damaging moves that are not super effective."
     },
     "wonder_skin": {
       "nome": "Wonder Skin",
@@ -2163,6 +2239,876 @@ export const TRAITS_DATA: TraitsData = {
     "celebi": {
       "normais": [
         "natural_cure"
+      ],
+      "oculta": null
+    },
+    "treecko": {
+      "normais": [
+        "overgrow"
+      ],
+      "oculta": "unburden"
+    },
+    "grovyle": {
+      "normais": [
+        "overgrow"
+      ],
+      "oculta": "unburden"
+    },
+    "sceptile": {
+      "normais": [
+        "overgrow"
+      ],
+      "oculta": "unburden"
+    },
+    "torchic": {
+      "normais": [
+        "blaze"
+      ],
+      "oculta": "speed_boost"
+    },
+    "combusken": {
+      "normais": [
+        "blaze"
+      ],
+      "oculta": "speed_boost"
+    },
+    "blaziken": {
+      "normais": [
+        "blaze"
+      ],
+      "oculta": "speed_boost"
+    },
+    "mudkip": {
+      "normais": [
+        "torrent"
+      ],
+      "oculta": "damp"
+    },
+    "marshtomp": {
+      "normais": [
+        "torrent"
+      ],
+      "oculta": "damp"
+    },
+    "swampert": {
+      "normais": [
+        "torrent"
+      ],
+      "oculta": "damp"
+    },
+    "poochyena": {
+      "normais": [
+        "run_away",
+        "quick_feet"
+      ],
+      "oculta": "rattled"
+    },
+    "mightyena": {
+      "normais": [
+        "intimidate",
+        "quick_feet"
+      ],
+      "oculta": "moxie"
+    },
+    "zigzagoon": {
+      "normais": [
+        "pickup",
+        "gluttony"
+      ],
+      "oculta": "quick_feet"
+    },
+    "linoone": {
+      "normais": [
+        "pickup",
+        "gluttony"
+      ],
+      "oculta": "quick_feet"
+    },
+    "wurmple": {
+      "normais": [
+        "shield_dust"
+      ],
+      "oculta": "run_away"
+    },
+    "silcoon": {
+      "normais": [
+        "shed_skin"
+      ],
+      "oculta": null
+    },
+    "beautifly": {
+      "normais": [
+        "swarm"
+      ],
+      "oculta": "rivalry"
+    },
+    "cascoon": {
+      "normais": [
+        "shed_skin"
+      ],
+      "oculta": null
+    },
+    "dustox": {
+      "normais": [
+        "shield_dust"
+      ],
+      "oculta": "compound_eyes"
+    },
+    "lotad": {
+      "normais": [
+        "swift_swim",
+        "rain_dish"
+      ],
+      "oculta": "own_tempo"
+    },
+    "lombre": {
+      "normais": [
+        "swift_swim",
+        "rain_dish"
+      ],
+      "oculta": "own_tempo"
+    },
+    "ludicolo": {
+      "normais": [
+        "swift_swim",
+        "rain_dish"
+      ],
+      "oculta": "own_tempo"
+    },
+    "seedot": {
+      "normais": [
+        "chlorophyll",
+        "early_bird"
+      ],
+      "oculta": "pickpocket"
+    },
+    "nuzleaf": {
+      "normais": [
+        "chlorophyll",
+        "early_bird"
+      ],
+      "oculta": "pickpocket"
+    },
+    "shiftry": {
+      "normais": [
+        "chlorophyll",
+        "wind_rider"
+      ],
+      "oculta": "pickpocket"
+    },
+    "taillow": {
+      "normais": [
+        "guts"
+      ],
+      "oculta": "scrappy"
+    },
+    "swellow": {
+      "normais": [
+        "guts"
+      ],
+      "oculta": "scrappy"
+    },
+    "wingull": {
+      "normais": [
+        "keen_eye",
+        "hydration"
+      ],
+      "oculta": "rain_dish"
+    },
+    "pelipper": {
+      "normais": [
+        "keen_eye",
+        "drizzle"
+      ],
+      "oculta": "rain_dish"
+    },
+    "ralts": {
+      "normais": [
+        "synchronize",
+        "trace"
+      ],
+      "oculta": "telepathy"
+    },
+    "kirlia": {
+      "normais": [
+        "synchronize",
+        "trace"
+      ],
+      "oculta": "telepathy"
+    },
+    "gardevoir": {
+      "normais": [
+        "synchronize",
+        "trace"
+      ],
+      "oculta": "telepathy"
+    },
+    "surskit": {
+      "normais": [
+        "swift_swim"
+      ],
+      "oculta": "rain_dish"
+    },
+    "masquerain": {
+      "normais": [
+        "intimidate"
+      ],
+      "oculta": "unnerve"
+    },
+    "shroomish": {
+      "normais": [
+        "effect_spore",
+        "poison_heal"
+      ],
+      "oculta": "quick_feet"
+    },
+    "breloom": {
+      "normais": [
+        "effect_spore",
+        "poison_heal"
+      ],
+      "oculta": "technician"
+    },
+    "slakoth": {
+      "normais": [
+        "truant"
+      ],
+      "oculta": null
+    },
+    "vigoroth": {
+      "normais": [
+        "vital_spirit"
+      ],
+      "oculta": null
+    },
+    "slaking": {
+      "normais": [
+        "truant"
+      ],
+      "oculta": null
+    },
+    "nincada": {
+      "normais": [
+        "compound_eyes"
+      ],
+      "oculta": "run_away"
+    },
+    "ninjask": {
+      "normais": [
+        "speed_boost"
+      ],
+      "oculta": "infiltrator"
+    },
+    "shedinja": {
+      "normais": [
+        "wonder_guard"
+      ],
+      "oculta": null
+    },
+    "whismur": {
+      "normais": [
+        "soundproof"
+      ],
+      "oculta": "rattled"
+    },
+    "loudred": {
+      "normais": [
+        "soundproof"
+      ],
+      "oculta": "scrappy"
+    },
+    "exploud": {
+      "normais": [
+        "soundproof"
+      ],
+      "oculta": "scrappy"
+    },
+    "makuhita": {
+      "normais": [
+        "thick_fat",
+        "guts"
+      ],
+      "oculta": "sheer_force"
+    },
+    "hariyama": {
+      "normais": [
+        "thick_fat",
+        "guts"
+      ],
+      "oculta": "sheer_force"
+    },
+    "azurill": {
+      "normais": [
+        "thick_fat",
+        "huge_power"
+      ],
+      "oculta": "sap_sipper"
+    },
+    "nosepass": {
+      "normais": [
+        "sturdy",
+        "magnet_pull"
+      ],
+      "oculta": "sand_force"
+    },
+    "skitty": {
+      "normais": [
+        "cute_charm",
+        "normalize"
+      ],
+      "oculta": "wonder_skin"
+    },
+    "delcatty": {
+      "normais": [
+        "cute_charm",
+        "normalize"
+      ],
+      "oculta": "wonder_skin"
+    },
+    "sableye": {
+      "normais": [
+        "keen_eye",
+        "stall"
+      ],
+      "oculta": "prankster"
+    },
+    "mawile": {
+      "normais": [
+        "hyper_cutter",
+        "intimidate"
+      ],
+      "oculta": "sheer_force"
+    },
+    "aron": {
+      "normais": [
+        "sturdy",
+        "rock_head"
+      ],
+      "oculta": "heavy_metal"
+    },
+    "lairon": {
+      "normais": [
+        "sturdy",
+        "rock_head"
+      ],
+      "oculta": "heavy_metal"
+    },
+    "aggron": {
+      "normais": [
+        "sturdy",
+        "rock_head"
+      ],
+      "oculta": "heavy_metal"
+    },
+    "meditite": {
+      "normais": [
+        "pure_power"
+      ],
+      "oculta": "telepathy"
+    },
+    "medicham": {
+      "normais": [
+        "pure_power"
+      ],
+      "oculta": "telepathy"
+    },
+    "electrike": {
+      "normais": [
+        "static",
+        "lightning_rod"
+      ],
+      "oculta": "minus"
+    },
+    "manectric": {
+      "normais": [
+        "static",
+        "lightning_rod"
+      ],
+      "oculta": "minus"
+    },
+    "plusle": {
+      "normais": [
+        "plus"
+      ],
+      "oculta": "lightning_rod"
+    },
+    "minun": {
+      "normais": [
+        "minus"
+      ],
+      "oculta": "volt_absorb"
+    },
+    "volbeat": {
+      "normais": [
+        "illuminate",
+        "swarm"
+      ],
+      "oculta": "prankster"
+    },
+    "illumise": {
+      "normais": [
+        "oblivious",
+        "tinted_lens"
+      ],
+      "oculta": "prankster"
+    },
+    "roselia": {
+      "normais": [
+        "natural_cure",
+        "poison_point"
+      ],
+      "oculta": "leaf_guard"
+    },
+    "gulpin": {
+      "normais": [
+        "liquid_ooze",
+        "sticky_hold"
+      ],
+      "oculta": "gluttony"
+    },
+    "swalot": {
+      "normais": [
+        "liquid_ooze",
+        "sticky_hold"
+      ],
+      "oculta": "gluttony"
+    },
+    "carvanha": {
+      "normais": [
+        "rough_skin"
+      ],
+      "oculta": "speed_boost"
+    },
+    "sharpedo": {
+      "normais": [
+        "rough_skin"
+      ],
+      "oculta": "speed_boost"
+    },
+    "wailmer": {
+      "normais": [
+        "water_veil",
+        "oblivious"
+      ],
+      "oculta": "pressure"
+    },
+    "wailord": {
+      "normais": [
+        "water_veil",
+        "oblivious"
+      ],
+      "oculta": "pressure"
+    },
+    "numel": {
+      "normais": [
+        "oblivious",
+        "simple"
+      ],
+      "oculta": "own_tempo"
+    },
+    "camerupt": {
+      "normais": [
+        "magma_armor",
+        "solid_rock"
+      ],
+      "oculta": "anger_point"
+    },
+    "torkoal": {
+      "normais": [
+        "white_smoke",
+        "drought"
+      ],
+      "oculta": "shell_armor"
+    },
+    "spoink": {
+      "normais": [
+        "thick_fat",
+        "own_tempo"
+      ],
+      "oculta": "gluttony"
+    },
+    "grumpig": {
+      "normais": [
+        "thick_fat",
+        "own_tempo"
+      ],
+      "oculta": "gluttony"
+    },
+    "spinda": {
+      "normais": [
+        "own_tempo",
+        "tangled_feet"
+      ],
+      "oculta": "contrary"
+    },
+    "trapinch": {
+      "normais": [
+        "hyper_cutter",
+        "arena_trap"
+      ],
+      "oculta": "sheer_force"
+    },
+    "vibrava": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "flygon": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "cacnea": {
+      "normais": [
+        "sand_veil"
+      ],
+      "oculta": "water_absorb"
+    },
+    "cacturne": {
+      "normais": [
+        "sand_veil"
+      ],
+      "oculta": "water_absorb"
+    },
+    "swablu": {
+      "normais": [
+        "natural_cure"
+      ],
+      "oculta": "cloud_nine"
+    },
+    "altaria": {
+      "normais": [
+        "natural_cure"
+      ],
+      "oculta": "cloud_nine"
+    },
+    "zangoose": {
+      "normais": [
+        "immunity"
+      ],
+      "oculta": "toxic_boost"
+    },
+    "seviper": {
+      "normais": [
+        "shed_skin"
+      ],
+      "oculta": "infiltrator"
+    },
+    "lunatone": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "solrock": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "barboach": {
+      "normais": [
+        "oblivious",
+        "anticipation"
+      ],
+      "oculta": "hydration"
+    },
+    "whiscash": {
+      "normais": [
+        "oblivious",
+        "anticipation"
+      ],
+      "oculta": "hydration"
+    },
+    "corphish": {
+      "normais": [
+        "hyper_cutter",
+        "shell_armor"
+      ],
+      "oculta": "adaptability"
+    },
+    "crawdaunt": {
+      "normais": [
+        "hyper_cutter",
+        "shell_armor"
+      ],
+      "oculta": "adaptability"
+    },
+    "baltoy": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "claydol": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "lileep": {
+      "normais": [
+        "suction_cups"
+      ],
+      "oculta": "storm_drain"
+    },
+    "cradily": {
+      "normais": [
+        "suction_cups"
+      ],
+      "oculta": "storm_drain"
+    },
+    "anorith": {
+      "normais": [
+        "battle_armor"
+      ],
+      "oculta": "swift_swim"
+    },
+    "armaldo": {
+      "normais": [
+        "battle_armor"
+      ],
+      "oculta": "swift_swim"
+    },
+    "feebas": {
+      "normais": [
+        "swift_swim",
+        "oblivious"
+      ],
+      "oculta": "adaptability"
+    },
+    "milotic": {
+      "normais": [
+        "marvel_scale",
+        "competitive"
+      ],
+      "oculta": "cute_charm"
+    },
+    "castform": {
+      "normais": [
+        "forecast"
+      ],
+      "oculta": null
+    },
+    "kecleon": {
+      "normais": [
+        "color_change"
+      ],
+      "oculta": "protean"
+    },
+    "shuppet": {
+      "normais": [
+        "insomnia",
+        "frisk"
+      ],
+      "oculta": "cursed_body"
+    },
+    "banette": {
+      "normais": [
+        "insomnia",
+        "frisk"
+      ],
+      "oculta": "cursed_body"
+    },
+    "duskull": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": "frisk"
+    },
+    "dusclops": {
+      "normais": [
+        "pressure"
+      ],
+      "oculta": "frisk"
+    },
+    "tropius": {
+      "normais": [
+        "chlorophyll",
+        "solar_power"
+      ],
+      "oculta": "harvest"
+    },
+    "chimecho": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "absol": {
+      "normais": [
+        "pressure",
+        "super_luck"
+      ],
+      "oculta": "justified"
+    },
+    "wynaut": {
+      "normais": [
+        "shadow_tag"
+      ],
+      "oculta": "telepathy"
+    },
+    "snorunt": {
+      "normais": [
+        "inner_focus",
+        "ice_body"
+      ],
+      "oculta": "moody"
+    },
+    "glalie": {
+      "normais": [
+        "inner_focus",
+        "ice_body"
+      ],
+      "oculta": "moody"
+    },
+    "spheal": {
+      "normais": [
+        "thick_fat",
+        "ice_body"
+      ],
+      "oculta": "oblivious"
+    },
+    "sealeo": {
+      "normais": [
+        "thick_fat",
+        "ice_body"
+      ],
+      "oculta": "oblivious"
+    },
+    "walrein": {
+      "normais": [
+        "thick_fat",
+        "ice_body"
+      ],
+      "oculta": "oblivious"
+    },
+    "clamperl": {
+      "normais": [
+        "shell_armor"
+      ],
+      "oculta": "rattled"
+    },
+    "huntail": {
+      "normais": [
+        "swift_swim"
+      ],
+      "oculta": "water_veil"
+    },
+    "gorebyss": {
+      "normais": [
+        "swift_swim"
+      ],
+      "oculta": "hydration"
+    },
+    "relicanth": {
+      "normais": [
+        "swift_swim",
+        "rock_head"
+      ],
+      "oculta": "sturdy"
+    },
+    "luvdisc": {
+      "normais": [
+        "swift_swim"
+      ],
+      "oculta": "hydration"
+    },
+    "bagon": {
+      "normais": [
+        "rock_head"
+      ],
+      "oculta": "sheer_force"
+    },
+    "shelgon": {
+      "normais": [
+        "rock_head"
+      ],
+      "oculta": "overcoat"
+    },
+    "salamence": {
+      "normais": [
+        "intimidate"
+      ],
+      "oculta": "moxie"
+    },
+    "beldum": {
+      "normais": [
+        "clear_body"
+      ],
+      "oculta": "light_metal"
+    },
+    "metang": {
+      "normais": [
+        "clear_body"
+      ],
+      "oculta": "light_metal"
+    },
+    "metagross": {
+      "normais": [
+        "clear_body"
+      ],
+      "oculta": "light_metal"
+    },
+    "regirock": {
+      "normais": [
+        "clear_body"
+      ],
+      "oculta": "sturdy"
+    },
+    "regice": {
+      "normais": [
+        "clear_body"
+      ],
+      "oculta": "ice_body"
+    },
+    "registeel": {
+      "normais": [
+        "clear_body"
+      ],
+      "oculta": "light_metal"
+    },
+    "latias": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "latios": {
+      "normais": [
+        "levitate"
+      ],
+      "oculta": null
+    },
+    "kyogre": {
+      "normais": [
+        "drizzle"
+      ],
+      "oculta": null
+    },
+    "groudon": {
+      "normais": [
+        "drought"
+      ],
+      "oculta": null
+    },
+    "rayquaza": {
+      "normais": [
+        "air_lock"
+      ],
+      "oculta": null
+    },
+    "jirachi": {
+      "normais": [
+        "serene_grace"
+      ],
+      "oculta": null
+    },
+    "deoxys": {
+      "normais": [
+        "pressure"
       ],
       "oculta": null
     }

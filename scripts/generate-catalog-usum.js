@@ -38,6 +38,7 @@
 const fs = require('fs');
 const path = require('path');
 const sync = require('./sync-planilha.js');
+const { lerSpawnTiers } = require('./lib/spawn-tiers.js');
 
 const ROOT = path.join(__dirname, '..');
 const USUM_DIR = path.join(__dirname, 'usum');
@@ -164,7 +165,11 @@ function abaItens(tabela) {
 
 // ---------------------------------------------------------------------------
 function pesosDeSpawn() {
-  const { tiers, especies } = lerJson(path.join(__dirname, 'spawn-tiers.json'));
+  // PH-332: `lerSpawnTiers` une `spawn-tiers.json` (dex 1-251) e
+  // `spawn-tiers-gen3.json` (252-386) e confere que a escala e a mesma nos dois.
+  // Sem a uniao, as 135 de Hoenn cairiam no fallback do gerador e a raridade
+  // medida em Emerald seria jogada fora sem aviso.
+  const { tiers, especies } = lerSpawnTiers();
   const pesoPorTier = Object.fromEntries(tiers.map((t) => [t.chave, t.peso]));
   const pesos = {};
   for (const [id, info] of Object.entries(especies)) {
