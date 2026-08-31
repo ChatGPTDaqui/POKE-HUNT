@@ -12,6 +12,26 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-308. Segunda promocao de 30/08 — a 7.16 saiu poucas horas antes, e a
+  // regua e uma entrada por PROMOCAO, nao por dia.
+  //
+  // O intervalo `main..dev` tem tres coisas, e duas sao de jogador: PH-307 (o
+  // Lance) e PH-305 (o guardiao que fugia com o POKE congelado). PH-306 e
+  // asseracao orfa num teste de patch notes — interno, fica de fora.
+  //
+  // Fica de fora tambem o COMO do PH-307: coluna nova, sobrecarga de RPC,
+  // janela de flush. O jogador sente "derrotar o Lance passou a valer"; o resto
+  // e encanamento, mesma regua da 7.11 pra ca.
+  {
+    version: '7.17',
+    date: '2026-08-30',
+    title: 'Derrotar o Campeao Lance finalmente conta',
+    highlights: [
+      'DERROTAR O CAMPEAO LANCE NAO ESTAVA VALENDO NADA. Voce vencia os seis POKEs dele, o jogo anunciava a vitoria — e a Faixa III continuava trancada, o Hall da Fama continuava vazio e o Eevee da primeira vitoria nunca chegava pelo correio. As tres coisas dependem do mesmo registro, e ele nunca era gravado. Agora vale.',
+      'PORQUE A LUTA CONTRA ELE RECOMECAVA SOZINHA, E VOCE NAO VIA. Quem guarda o placar da luta e o servidor, e a cada rodada de gravacao o POKE do Lance voltava com a vida CHEIA por la. Quem nao derrubasse um deles inteiro entre duas gravacoes nunca o derrubava; e quem derrubava terminava a luta antes de o servidor concordar, entao a vitoria que aparecia na sua tela nao existia pra ele. Agora a vida do POKE do Lance continua de onde parou.',
+      'E O GUARDIAO PAROU DE FUGIR QUANDO O SEU POKE ESTA CONGELADO. Ele sai de campo quando a luta empaca de verdade — mas estava contando junto o tempo em que o seu POKE nao CONSEGUIA atacar. Resultado: ele ia embora no meio de uma luta que estava indo bem, e a vida que ele ja tinha perdido voltava inteira com o substituto.',
+    ],
+  },
   // PH-303. Entrada da promocao de 30/08 a noite. A 7.15 ja estava na `main`
   // (o arquivo era identico dos dois lados), entao a leva seguinte pede entrada
   // NOVA — a regua e uma entrada por PROMOCAO, nao por dia de trabalho.
