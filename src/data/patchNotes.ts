@@ -45,13 +45,28 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   // encurtaria a espera DE VERDADE, mexe em quantos abates cabem numa janela —
   // logo em balanceamento de farm — e nao foi feito. Meia-feature nao entra em
   // nota: quando entrar, ganha entrada propria.
+  //
+  // TEXTO ENXUGADO NO MESMO DIA (PH-391), a pedido do usuario. A primeira versao
+  // tinha quatro e cinco frases por item e duas palavras que so quem mexe no
+  // codigo entende — "sprite" e "chip da sala". Patch notes e canal de JOGADOR:
+  // informacao publica, de interesse dele, e curta.
+  //
+  // O que sobreviveu ao corte nao e enfeite, e as duas frases que evitam
+  // conclusao errada: "o alcance do combate nao mudou" (senao o jogador teme que
+  // o POKE pare de alcancar depois de ler que os corpos se afastaram) e "ouro e
+  // XP continuam entrando" (senao "esperando" le como "parei de ganhar"). O que
+  // saiu foi o resto: o numero de meio minuto, a explicacao de que a espera em si
+  // nao mudou, e o jargao.
+  //
+  // NAO virou 7.31: e a mesma entrega, dita em menos palavras. Versao nova aqui
+  // faria o jogador achar que recebeu duas coisas.
   {
     version: '7.30',
     date: '2026-09-01',
     title: 'Cada POKE no seu lugar',
     highlights: [
-      'POKE NÃO ENTRA MAIS DENTRO DE POKE. Quando vários selvagens vinham para cima de você ao mesmo tempo, eles se empilhavam no mesmo ponto e um sprite desaparecia dentro do outro. Agora cada corpo ocupa o próprio espaço — os selvagens se acomodam em volta em vez de virar uma pilha. O alcance do combate não mudou: quem estava batendo continua batendo.',
-      'A SALA AGORA DIZ QUANDO ESTÁ ESPERANDO. Ao completar os 30 abates, a barra enchia e ficava parada sem nenhuma explicação, e isso podia durar mais de meio minuto. O chip da sala passa a mostrar "Preparando a próxima área..." nesse tempo. A espera em si não mudou — o que acabou foi a tela não dizer nada. E ela não te custa nada: os selvagens continuam nascendo, e ouro e XP continuam entrando enquanto a próxima área não chega.',
+      'POKE NÃO ENTRA MAIS DENTRO DE POKE. Os selvagens deixam de se empilhar no mesmo ponto e se acomodam em volta. O alcance do combate não mudou.',
+      'A SALA AVISA QUANDO A PRÓXIMA ÁREA ESTÁ VINDO. Ao completar os 30 abates, a tela mostra "Preparando a próxima área..." em vez de barra cheia e nada. Ouro e XP continuam entrando nessa espera.',
     ],
   },
   // A PH-382 subiu na `dev` sem nota, e ela e do tipo que NAO pode subir calada:
