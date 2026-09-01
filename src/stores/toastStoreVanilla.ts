@@ -83,6 +83,39 @@ export interface ChatLine {
   message: string
   type: ToastType
   realce?: ToastRealce
+  /**
+   * Ordem de chegada GLOBAL, atravessando as tres abas (PH-372).
+   *
+   * `chatLines` e um array por aba, entao dentro de uma aba a ordem e a do
+   * proprio array — mas ENTRE abas nao havia nada. O ticker do celular
+   * precisava dessa comparacao e a fazia por prioridade de canal
+   * (`sistema ?? trade ?? log`), que congelava na primeira linha de sistema
+   * que aparecesse.
+   *
+   * Campo proprio e nao `Number(id.split('-')[1])`: o formato do `id` e
+   * detalhe interno do `makeId`, e amarrar leitura de ordem a ele faz uma
+   * mudanca de formato virar bug silencioso de ordenacao.
+   */
+  seq: number
+}
+
+/**
+ * A linha mais recente das TRES abas, ou `undefined` com todas vazias.
+ *
+ * Existe para o ticker do celular (`ChatMobile`), que mostra UMA linha e
+ * precisa que seja a ultima que chegou — nao a ultima de um canal preferido.
+ * Funcao pura e exportada porque e ela que o teste tranca; o componente so a
+ * chama.
+ */
+export function ultimaLinhaDeTodasAsAbas(
+  chatLines: Record<LogTab, ChatLine[]>,
+): ChatLine | undefined {
+  let maior: ChatLine | undefined
+  for (const tab of Object.keys(chatLines) as LogTab[]) {
+    const ultima = chatLines[tab].at(-1)
+    if (ultima && (!maior || ultima.seq > maior.seq)) maior = ultima
+  }
+  return maior
 }
 
 const CHANNEL_TO_TAB: Record<ToastChannel, LogTab> = {
@@ -97,6 +130,12 @@ let nextId = 1
 function makeId(): string {
   return `toast-${nextId++}`
 }
+
+// Contador de ordem global (PH-372). Separado do `nextId` de proposito: o `id`
+// e identidade (chave de lista no React, alvo do `dismissToast`) e o `seq` e
+// ordem. Sao dois papeis, e amarrar um no outro faz a proxima mudanca de
+// formato de `id` mexer, sem querer, em como o ticker escolhe a linha.
+let proximaSeq = 1
 
 // Exportada porque `toastStore.ts` a referencia no tipo inferido de
 // `useToastStore`. Sem o `export`, `tsc` reclama com TS4023 ("has or is using
@@ -115,7 +154,7 @@ export const toastStore = createStore<ToastState>()((set) => ({
 
   pushToast: (message, type, channel, realce, erroDetalhe) => {
     const tab = CHANNEL_TO_TAB[channel] || 'sistema'
-    const line: ChatLine = { id: makeId(), message, type, realce }
+    const line: ChatLine = { id: makeId(), message, type, realce, seq: proximaSeq++ }
     set((state) => {
       const nextTabLines = [...state.chatLines[tab], line]
       if (nextTabLines.length > MAX_CHAT_LINES) nextTabLines.shift()

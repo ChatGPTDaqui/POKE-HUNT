@@ -1,7 +1,12 @@
 // Barra de golpes do POKE em campo. Icone do TIPO elemental sobre fundo na cor
 // do mesmo tipo, borda na cor da CATEGORIA (fisico/especial), bolinha verde =
-// AOE, faixa inferior com o dano base, anel branco = pronto, overlay preto =
-// cooldown ou desligado.
+// AOE, faixa inferior com o dano base, cortina preta subindo de baixo =
+// recarga, faixa OFF no topo = desligado.
+//
+// PRONTO NAO TEM SINAL PROPRIO, e isso e a decisao (PH-374): num idle de
+// recarga curta o estado normal dos quatro slots e "pronto", entao o anel
+// branco que existia aqui acendia em quase todos, quase sempre. Quem carrega o
+// estado e a AUSENCIA de cortina.
 //
 // O icone substituiu o rotulo de 3 letras do nome do golpe. Tradeoff assumido:
 // dois golpes do mesmo tipo passam a ficar visualmente iguais no slot — o que
@@ -98,13 +103,34 @@ export function siglaDoGolpe(name: string): string {
 // Tamanho do slot por regime de largura. Duas coisas acontecem aqui:
 //
 // 1. O padrao caiu de 3.4em pra 2.6em (pedido explicito: icones menores).
-// 2. Ele encolhe mais em tela estreita. O `em` sozinho ja escalava com a largura
-//    (a `.hud-root` tem font-size fluido), mas nao resolvia o problema real: o
-//    numero de slots cresce com o nivel do POKE, e uma fileira de 8 slotes de
-//    3.4em quebra em duas ou tres linhas num celular, inflando o rodape (que o
-//    chat e o botao Auto medem e ancoram em cima — ver HudLayer). Encolher por
-//    breakpoint mantem a fileira baixa.
-const TAMANHO_SLOT = { largo: '2.6em', medio: '2.35em', estreito: '2.05em' } as const
+// 2. Ele encolhe mais em tela estreita.
+//
+// O ESTREITO SUBIU DE 2.05em PRA 2.75em (PH-374), e o motivo e que a premissa
+// do encolhimento nao existe mais.
+//
+// A regra 2 foi calibrada quando "o numero de slots cresce com o nivel do POKE"
+// e uma fileira de OITO quebrava em duas linhas no celular, inflando o rodape
+// que o chat e o botao Auto medem. Hoje sao no maximo
+// `MAX_ACTIVE_ABILITIES = 4` (data/activeAbilities.ts): a fileira nao tem como
+// crescer, e o slot continuava pagando por um problema aposentado.
+//
+// O que os 2.05em custavam, medido em 390px (1em = 16px, piso do clamp da
+// `.hud-root`) num slot de 32,8px:
+//
+//   faixa de dano no rodape       15,5px   47% do slot
+//   sigla de tipo repetido / OFF  11,5px   35% do slot
+//   sobra pro icone do elemento    5,8px   18% do slot
+//
+// Ou seja: o icone sumia justamente no caso em que ele decide alguma coisa —
+// dois golpes do mesmo tipo, que e quando a sigla acende. E o alvo de toque
+// ficava em 38,8px de LARGURA (32,8 + 2x3 de `--alvo-folga-x`), abaixo dos 44px
+// que a propria `.alvo-toque` do index.css declara como piso.
+//
+// A folga estava la o tempo todo: em 320px, descontando zoom, botao Auto e
+// vaos, sobram ~220px pra fileira; 4 slots de 2.75em (44px) usam 197,6px.
+// Junto com o `leading` apertado das faixas (abaixo), o texto cai de 82% pra
+// ~51% do slot.
+const TAMANHO_SLOT = { largo: '2.6em', medio: '2.35em', estreito: '2.75em' } as const
 const TAMANHO_ROTULO = { largo: '.8em', medio: '.75em', estreito: '.68em' } as const
 
 export function AbilityHud() {
@@ -230,10 +256,22 @@ export function AbilityHud() {
             // resto do golpe. No dedo o caminho continua sendo a ficha, que tem
             // o botao "Ligar/Desligar na rotacao" escrito.
             onDoubleClick={coarse ? undefined : () => controller.toggleAbility(poke.uid, ability.id)}
-            className={cn(
-              'relative flex cursor-pointer items-center justify-center rounded-[.5em] select-none',
-              ready && 'shadow-[0_0_0_2px_rgba(255,255,255,.85)]',
-            )}
+            // SEM ANEL DE "PRONTO" (PH-374). Ele era
+            // `ready && shadow-[0_0_0_2px_rgba(255,255,255,.85)]`, aceso em todo
+            // slot fora de recarga.
+            //
+            // Num idle de recarga curta o estado normal dos (no maximo) quatro
+            // slots e justamente "pronto": o anel valia pro caso COMUM, e
+            // destaque que vale pro caso comum nao destaca — vira moldura, e o
+            // jogador para de ler. Pior, era a coisa mais brilhante do rodape,
+            // gastando o recurso visual mais caro da tela na informacao menos
+            // util.
+            //
+            // Nenhum estado ficou sem sinal: recarga continua na cortina que
+            // sobe de baixo (que le de relance qual golpe sai antes) mais o
+            // numero de segundos, e desligado continua na faixa `OFF` mais a
+            // dessaturacao do icone.
+            className="relative flex cursor-pointer items-center justify-center rounded-[.5em] select-none"
             style={{
               width: lado,
               height: lado,
@@ -329,7 +367,11 @@ export function AbilityHud() {
               // "este golpe esta desligado" e "este e o Lanca-Chamas, nao a
               // Labareda", o estado ganha.
               <span
-                className="pointer-events-none absolute inset-x-0 top-0 z-[2] rounded-t-[.32em] bg-black/70 text-center font-bold tracking-[.06em] text-[#e5e5e5]"
+                // `leading-[1.1]` (PH-374): a faixa herdava o `line-height: 1.35`
+                // da `.hud-root`, entao 8,9px de fonte viravam 12,1px de faixa
+                // opaca. As tres faixas do slot usam o mesmo aperto — juntas
+                // elas cobriam 82% de um slot de 32,8px no celular.
+                className="pointer-events-none absolute inset-x-0 top-0 z-[2] rounded-t-[.32em] bg-black/70 text-center font-bold leading-[1.1] tracking-[.06em] text-[#e5e5e5]"
                 style={{ fontSize: `calc(${fonteRotulo} * .78)` }}
               >
                 {siglaDoGolpe(ability.name)}
@@ -341,7 +383,7 @@ export function AbilityHud() {
               // agora; este rotulo so confirma o estado, mesmo padrao visual da
               // faixa de dano logo abaixo dele (que continua por cima, z-[2]).
               <span
-                className="absolute inset-x-0 top-0 rounded-t-[.32em] bg-black/70 text-center tracking-[.08em] text-n300"
+                className="absolute inset-x-0 top-0 rounded-t-[.32em] bg-black/70 text-center leading-[1.1] tracking-[.08em] text-n300"
                 style={{ fontSize: `calc(${fonteRotulo} * .78)` }}
               >
                 OFF
@@ -350,7 +392,7 @@ export function AbilityHud() {
 
             {/* z-[2] pra faixa de dano continuar legivel POR CIMA do overlay de
                 cooldown, que cobre o slot inteiro. */}
-            <span className="absolute inset-x-0 bottom-0 z-[2] rounded-b-[.32em] bg-black/70 text-center text-[.72em] text-[#e5e5e5]">
+            <span className="absolute inset-x-0 bottom-0 z-[2] rounded-b-[.32em] bg-black/70 text-center text-[.72em] leading-[1.1] text-[#e5e5e5]">
               {ability.power > 0 ? ability.power : '—'}
             </span>
           </div>
