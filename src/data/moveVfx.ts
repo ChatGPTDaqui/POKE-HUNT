@@ -45,13 +45,6 @@ export interface VfxDeGolpe {
   aoe?: TiraDeVfx
   /** Correcao de tamanho por golpe, multiplicando a escala base do desenho. */
   escala?: { single?: number; aoe?: number }
-  /**
-   * Quantas voltas a tira da dentro da vida do efeito. Serve pra arte CURTA:
-   * `IMPACT_EFFECT_DURATION` e 1,0s, e 4 quadros esticados nesse tempo dariam
-   * 250ms cada — um soco em camera lenta. Duas voltas devolvem 125ms sem
-   * encurtar o tempo de tela.
-   */
-  repeticoes?: number
 }
 
 const RAIZ = 'assets/move-vfx/golpes'
@@ -84,8 +77,12 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
       // acontece a 39px: a garra passava DUAS VEZES a distancia do atacante e
       // saia por tras dele. 0.55 deixa o rastro em 37px.
       direcional: { anguloBaseGraus: 0, ancoraX: 0.8, recorteX: 0.55 },
+      // Termina com 0,86 da massa do pico: as garras ainda estao na tela
+      // quando os 8 quadros acabam. `repetir` e nao `boomerang` porque a arte
+      // e DIRECIONAL — de tras pra frente a garra voltaria pra dentro do
+      // atacante. E Bullet Punch e um jab rapido: bater de novo le certo.
+      cauda: 'repetir',
     }),
-    repeticoes: 2,
   },
   comet_punch: { single: tira('comet_punch', 9) },
   // A mais direcional do lote inteiro: 5.15x de alongamento num eixo de
@@ -139,7 +136,10 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   flamethrower: {
     single: tira('flamethrower', 13, { direcional: { anguloBaseGraus: -19, ancoraX: 0.56 } }),
   },
-  fire_spin: { single: tira('fire_spin', 5), repeticoes: 2 },
+  // Chama GIRANDO: primeiro e ultimo quadro tem a mesma massa (0,94 e 0,92 do
+  // pico), ou seja a arte fecha o ciclo sozinha. Repetir e o unico modo que nao
+  // mostra emenda.
+  fire_spin: { single: tira('fire_spin', 5, { cauda: 'repetir' }) },
   // 2.86x no eixo 46°, desvio de 2° — projetil de verdade. Skew +0.41 diz que
   // a massa esta na PONTA pra onde o eixo aponta, e a ancora 0.68 poe essa
   // ponta sobre o alvo.
@@ -166,11 +166,14 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // baixo no proprio corpo.
   charm: {
     single: tira('charm', 12, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
-    repeticoes: 2,
   },
-  taunt: { single: tira('taunt', 12), repeticoes: 2 },
+  // Termina com metade da massa do pico (0,52) — as estrelas ainda estao na
+  // tela quando a arte acaba, entao segurar congelaria uma provocacao no ar.
+  taunt: { single: tira('taunt', 12, { cauda: 'repetir' }) },
   dragon_dance: { single: tira('dragon_dance', 16) },
-  spider_web: { single: tira('spider_web', 4), repeticoes: 3 },
+  // A teia ja nasce inteira (quadro 0 e o pico) e termina em 0,94 dele: os 4
+  // quadros sao um tremular, nao um desenho que se forma. Repetir e o que ela e.
+  spider_web: { single: tira('spider_web', 4, { cauda: 'repetir' }) },
 
   // =========================================================================
   // LOTE NOMEADO (PH-369)
@@ -200,9 +203,17 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // 892: mandibula branca fechando. E o desenho mais literal do lote — dente,
   // e nao "impacto escuro genarico", que e o que Bite e Crunch tinham por
   // serem DARK.
-  bite: { single: tira('mandibula', 6), repeticoes: 2 },
-  crunch: { single: tira('mandibula', 6), repeticoes: 2 },
-  hyper_fang: { single: tira('mandibula', 6), repeticoes: 2 },
+  // O UNICO `boomerang` do lote, e ele e literal: a mandibula FECHA nos 6
+  // quadros e termina com 0,69 da massa do pico, entao segurar deixaria uma
+  // boca cerrada parada na tela. De tras pra frente ela ABRE — a mordida solta
+  // o alvo, que e o gesto que falta.
+  //
+  // A arte nao e `direcional`, e isso importa: em arte direcional o boomerang
+  // desfaz o gesto (o punho des-soca, o feixe volta pro canhao). Aqui o gesto
+  // e simetrico no tempo de verdade.
+  bite: { single: tira('mandibula', 6, { cauda: 'boomerang' }) },
+  crunch: { single: tira('mandibula', 6, { cauda: 'boomerang' }) },
+  hyper_fang: { single: tira('mandibula', 6, { cauda: 'boomerang' }) },
 
   // --- talho --------------------------------------------------------------
   // 890: crescentes vermelhos em sequencia. Slash e Night Slash sao NORMAL e
@@ -215,11 +226,9 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // 39px que separam os dois POKEs — nao chega a atravessar o atacante.
   slash: {
     single: tira('talho_vermelho', 7, { direcional: { anguloBaseGraus: 0, ancoraX: 0.79 } }),
-    repeticoes: 2,
   },
   night_slash: {
     single: tira('talho_vermelho', 7, { direcional: { anguloBaseGraus: 0, ancoraX: 0.79 } }),
-    repeticoes: 2,
   },
   // 4423, nomeado `cut`. `cut` NAO EXISTE no catalogo de 526 golpes, e a arte e
   // uma lamina VERDE na diagonal: Leaf Blade e o golpe existente que ela
@@ -239,12 +248,11 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   leaf_blade: {
     single: tira('lamina_verde', 8, { direcional: { anguloBaseGraus: -45, ancoraX: 0.65 } }),
     escala: { single: 1.25 },
-    repeticoes: 2,
   },
   // 4425: X vermelho sobre anel dourado. E o irmao do 4422, que ja e o
   // `x_scissor` — 4422 tem o X verde (BUG) e 4425 o vermelho, entao o par cai
   // naturalmente em X-Scissor e Cross Chop.
-  cross_chop: { single: tira('x_vermelho', 7), repeticoes: 2 },
+  cross_chop: { single: tira('x_vermelho', 7) },
 
   // --- multi-golpe --------------------------------------------------------
   // 4760: a MESMA estrela batendo varias vezes, com poeira entre as batidas —
@@ -301,11 +309,9 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   },
   psybeam: {
     single: tira('feixe_roxo', 7, { direcional: { anguloBaseGraus: 0, ancoraX: 0.70, recorteX: 0.64 } }),
-    repeticoes: 2,
   },
   moonblast: {
     single: tira('feixe_roxo', 7, { direcional: { anguloBaseGraus: 0, ancoraX: 0.70, recorteX: 0.64 } }),
-    repeticoes: 2,
   },
   // `conferir-direcao-vfx.mjs` chama este de RADIAL (eixo 9° +-15°), e o
   // veredito dele esta sendo CONTRARIADO de proposito: o skew e +0.67, o mais
@@ -333,7 +339,9 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // `razor_leaf` NAO entra, apesar de a arte servir: ele e `target: aoe` no
   // catalogo, e area desenha com o diametro do splash. Ver a nota
   // "AREA NAO E IMPACTO GRANDE" no fim do bloco.
-  magical_leaf: { single: tira('folhas', 7), repeticoes: 2 },
+  // Acaba com 0,64 do pico: as folhas ainda estao voando quando os 7 quadros
+  // terminam. Repetir manda outra leva; boomerang sugaria as folhas de volta.
+  magical_leaf: { single: tira('folhas', 7, { cauda: 'repetir' }) },
   // 4870, nomeado `drain punch`. Drain Punch nao existe no catalogo; a arte sao
   // orbes verdes sendo puxados, que e literalmente o que dreno desenha.
   // `escala` 1.25: o quadro e 51x50 e a arte chegava com 36px, 1.2x o POKE —
@@ -392,8 +400,8 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // areia, e nao terra: Mud-Slap, Sand Attack e Bulldoze.
   // `bulldoze` ficou de fora pelo mesmo motivo do `razor_leaf`: e area, e um
   // quadro de 35x36 esticado pra 402px e borrao.
-  mud_slap: { single: tira('poeira_areia', 9), repeticoes: 2 },
-  sand_attack: { single: tira('poeira_areia', 9), repeticoes: 2 },
+  mud_slap: { single: tira('poeira_areia', 9) },
+  sand_attack: { single: tira('poeira_areia', 9) },
   // 4872, o segundo efeito nomeado `earthquake`. `earthquake` ja usa o 4395
   // (nuvem de poeira); este desenha RACHADURA no chao, que e o unico golpe do
   // catalogo em que o chao abre de verdade.
@@ -406,8 +414,8 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   },
   // 4429, nomeado `fly`: fitas brancas de vento girando. Gust e Air Slash sao
   // FLYING e desenhavam o tornado do tipo — arte de coluna, nao de rajada.
-  gust: { single: tira('vento_branco', 7), repeticoes: 2 },
-  air_slash: { single: tira('vento_branco', 7), repeticoes: 2 },
+  gust: { single: tira('vento_branco', 7) },
+  air_slash: { single: tira('vento_branco', 7) },
   // 4576, tambem nomeado `fly`, mas o tornado dele e de AREIA (marrom). Vai
   // pros dois golpes de areia, e nao pros de vento.
   sandstorm: { single: tira('tornado_areia', 20) },
@@ -467,11 +475,9 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // alvo num golpe e pra diagonal fixa nos outros dois.
   attract: {
     single: tira('charm', 12, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
-    repeticoes: 2,
   },
   sweet_kiss: {
     single: tira('charm', 12, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
-    repeticoes: 2,
   },
   // Mesma ideia com a cabeca de dragao do Dragon Dance (5393): os tres golpes
   // de dragao que sobram desenhavam a esfera de energia do tipo.
@@ -545,14 +551,6 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
 export function vfxDoGolpe(abilityId: string | undefined): VfxDeGolpe | null {
   if (!abilityId) return null
   return VFX_POR_GOLPE[abilityId] ?? null
-}
-
-/**
- * Multiplicador de duracao do impacto deste golpe. 1 pra golpe sem arte propria
- * ou sem repeticao — ou seja, o comportamento de todo o resto do jogo.
- */
-export function repeticoesDoGolpe(abilityId: string | undefined): number {
-  return vfxDoGolpe(abilityId)?.repeticoes ?? 1
 }
 
 /**

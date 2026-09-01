@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { ABILITIES_DATA } from './generated/abilities.generated'
-import { VFX_POR_GOLPE, todasAsTirasDeGolpe, vfxDoGolpe, repeticoesDoGolpe } from './moveVfx'
+import { VFX_POR_GOLPE, todasAsTirasDeGolpe, vfxDoGolpe } from './moveVfx'
 import { TIRA_POR_ELEMENTO, orientacaoDaTira, type TiraDeVfx } from './vfxTiras'
 
 // `import.meta.glob` e não `node:fs`: confere contra o que o Vite realmente
@@ -72,12 +72,20 @@ describe('arte de efeito por golpe', () => {
 
   it('golpe sem arte própria não muda de comportamento', () => {
     // A garantia de que esta camada é aditiva: os 450+ golpes sem entrada aqui
-    // continuam caindo na tira do tipo, e `repeticoes` volta 1 (nenhuma
-    // esticada de duração).
+    // continuam caindo na tira do tipo.
     expect(vfxDoGolpe('tackle')).toBeNull()
     expect(vfxDoGolpe(undefined)).toBeNull()
-    expect(repeticoesDoGolpe('tackle')).toBe(1)
-    expect(repeticoesDoGolpe(undefined)).toBe(1)
+  })
+
+  it('nenhuma arte DIRECIONAL usa boomerang sem justificativa escrita', () => {
+    // A regra da PH-375. Boomerang toca a arte de trás pra frente, e em arte
+    // direcional isso DESFAZ o gesto: o punho des-soca, o feixe volta pra
+    // dentro do canhão. Não é erro de tipo nem de teste de existência — é o
+    // tipo de coisa que só aparece olhando, e por isso fica trancada aqui.
+    const suspeitas = Object.entries(VFX_POR_GOLPE)
+      .filter(([, v]) => v.single.direcional && v.single.cauda === 'boomerang')
+      .map(([id]) => id)
+    expect(suspeitas).toEqual([])
   })
 
   it('a área reusa a tira do impacto, nunca uma arte diferente', () => {

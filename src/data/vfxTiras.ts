@@ -52,10 +52,45 @@ import type { ElementType, StatusCondition } from './generated/types'
  */
 export const FPS_DA_ARTE_DE_EFEITO = 10
 
+/**
+ * Ate quando a arte curta e prolongada pelo modo de cauda, em segundos.
+ *
+ * 1,5s e perto da mediana do acervo (1,30s), e o ponto e esse: prolongar ate a
+ * mediana faz a arte curta parecer com o resto, e prolongar ate o TURNO (3s)
+ * faria o contrario. Um `spider_web` de 0,4s precisaria de quase quatro idas e
+ * voltas pra cobrir 3s e viraria nervoso — o oposto do que a leva veio
+ * resolver.
+ *
+ * Silencio entre um golpe e o proximo e legibilidade, nao buraco.
+ */
+export const PISO_DE_PROLONGAMENTO = 1.5
+
 export interface TiraDeVfx {
   url: string
   /** Quantos quadros a tira tem. A largura de cada um sai da imagem. */
   quadros: number
+  /**
+   * O que a arte faz DEPOIS de tocar uma vez, quando ela e curta demais pro
+   * golpe. Ausente = `segurar`.
+   *
+   * Existe porque, na velocidade autorada, 27 das 78 tiras duram menos de 1,0s
+   * — a mais curta (`spider_web`) tem 4 quadros, 0,4s. Prolongar NAO pode ser
+   * "tocar mais devagar": 4 quadros esticados num turno de 3s dao 750ms por
+   * quadro, um slideshow, que e o defeito oposto ao que esta leva consertou.
+   *
+   *   `segurar`    trava no ultimo quadro. Serve pra arte que termina numa
+   *                pose — cratera aberta, marca no chao, fumaca assentando.
+   *   `repetir`    volta ao quadro 0. Serve pra arte CICLICA, que termina onde
+   *                comecou: redemoinho, chama girando, anel pulsando.
+   *   `boomerang`  vai ate o fim e volta de tras pra frente. Serve pra arte
+   *                SIMETRICA NO TEMPO — o que abre e fecha.
+   *
+   * BOOMERANG E ESCOLHA POR ARTE, NUNCA REGRA GLOBAL. Em arte direcional ele
+   * desfaz o gesto: o punho do Shadow Punch da o soco e des-soca, o feixe do
+   * Hyper Beam volta pra dentro do canhao. Toda tira marcada `direcional` e
+   * suspeita por definicao, e nenhuma leva `boomerang` sem o motivo escrito.
+   */
+  cauda?: 'segurar' | 'repetir' | 'boomerang'
   /**
    * Sobrescreve `FPS_DA_ARTE_DE_EFEITO` para esta tira.
    *

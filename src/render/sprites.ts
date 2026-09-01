@@ -37,7 +37,7 @@ import { vfxDoGolpe } from '@/data/moveVfx'
 import { statusVfxUrl } from '@/data/statusVfx'
 import {
   tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
-  TIRA_POR_CONDICAO_NO_CORPO, FPS_DA_ARTE_DE_EFEITO,
+  TIRA_POR_CONDICAO_NO_CORPO, FPS_DA_ARTE_DE_EFEITO, PISO_DE_PROLONGAMENTO,
   COR_DE_STATUS_NO_CORPO, FORCA_DA_TINTA_DE_STATUS, type TiraDeVfx,
 } from '@/data/vfxTiras'
 import { VFX_CURA_DURACAO } from '@/engine/entity'
@@ -1121,6 +1121,18 @@ function tempoDaTira(tira: TiraDeVfx): number {
 }
 
 /**
+ * Quantos quadros uma volta COMPLETA do modo de cauda percorre.
+ *
+ * O boomerang nao repete as pontas: pra N quadros a sequencia e
+ * `0..N-1` seguida de `N-2..1`, ou seja `2N-2` passos. Repetir o primeiro e o
+ * ultimo travaria a animacao dois quadros em cada ponta, que e visivel e le
+ * como engasgo.
+ */
+function passosDaVolta(tira: TiraDeVfx): number {
+  return tira.cauda === 'boomerang' ? Math.max(1, 2 * tira.quadros - 2) : tira.quadros
+}
+
+/**
  * Fase 0..1 dentro da tira, agora derivada do TEMPO e nao do progresso.
  *
  * A conta e `idade x fps / quadros`, ou seja o quadro `k` aparece no instante
@@ -1141,15 +1153,40 @@ function tempoDaTira(tira: TiraDeVfx): number {
  */
 function faseDaTira(effect: WorldEffect, tira: TiraDeVfx): number {
   if (tira.quadros <= 0) return 0
-  return Math.max(0, effect.age - effect.delay) / tempoDaTira(tira)
+  const decorrido = Math.max(0, effect.age - effect.delay)
+  const fps = tira.fps ?? FPS_DA_ARTE_DE_EFEITO
+
+  // `segurar` e o caminho simples: fase linear, e o clamp de `drawQuadroDeTira`
+  // trava no ultimo quadro sozinho.
+  if (!tira.cauda || tira.cauda === 'segurar') return decorrido / tempoDaTira(tira)
+
+  // Os outros dois escolhem o QUADRO e devolvem a fase que aponta pra ele.
+  // Devolver `(quadro + 0.5) / quadros` em vez de `quadro / quadros` e o que
+  // sobrevive ao `Math.floor` de quem desenha sem depender de arredondamento
+  // de ponto flutuante na borda.
+  const passo = Math.floor(decorrido * fps) % passosDaVolta(tira)
+  const quadro = tira.cauda === 'boomerang' && passo >= tira.quadros
+    ? 2 * tira.quadros - 2 - passo
+    : passo
+  return (quadro + 0.5) / tira.quadros
 }
 
 /**
- * Quanto tempo a arte fica VISIVEL. Hoje e o tempo de uma volta; a PH-375
- * prolonga a arte curta por aqui, sem que nada mais precise saber.
+ * Quanto tempo a arte fica VISIVEL, ja com o prolongamento da cauda.
+ *
+ * Arte que ja passa do piso toca UMA VEZ e pronto: prolongar o que ja e longo
+ * so atrasaria o proximo golpe.
+ *
+ * Arte curta e prolongada em VOLTAS INTEIRAS, nunca em fracao. Cortar no meio
+ * de uma ida deixa o boomerang parado na volta e o `repetir` no meio do gesto —
+ * e o mesmo tipo de corte que esta leva veio tirar da tela.
  */
 function tempoVisivelDaTira(tira: TiraDeVfx): number {
-  return tempoDaTira(tira)
+  const natural = tempoDaTira(tira)
+  if (natural >= PISO_DE_PROLONGAMENTO) return natural
+  if (!tira.cauda || tira.cauda === 'segurar') return PISO_DE_PROLONGAMENTO
+  const volta = passosDaVolta(tira) / (tira.fps ?? FPS_DA_ARTE_DE_EFEITO)
+  return volta * Math.max(1, Math.round(PISO_DE_PROLONGAMENTO / volta))
 }
 
 /** Fade do fim da vida do efeito, ja multiplicado pela opacidade global de VFX. */
