@@ -52,6 +52,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'AS ANIMACOES DE GOLPE TOCAM NA VELOCIDADE EM QUE FORAM DESENHADAS. Antes cada efeito era esticado ou espremido pra caber num tempo fixo, e quem decidia a velocidade era o numero de quadros do desenho: um golpe de gelo passava voando e um de area arrastava. Agora todos correm no mesmo ritmo, o ritmo do desenho original.',
       'GOLPE CURTO DEIXOU DE CONGELAR NO FIM. Efeito com poucos quadros agora repete ou volta de tras pra frente, conforme o desenho — a mordida do Bite fecha e abre, a chama do Fire Spin continua girando. Antes eles paravam numa imagem fixa esperando o proximo golpe.',
       'ALGUNS GOLPES COMECAVAM ATRASADOS. Vinte e cinco efeitos tinham quadros em branco na ponta, e o Dig gastava o primeiro terco da animacao sem desenhar nada. Foram aparados.',
+      'O TREINADOR PASSOU A AGIR EM TURNOS, COMO TODO MUNDO. Ele conseguia usar dois itens de cura no tempo de um turno; agora usa um, do mesmo jeito que o POKE ataca uma vez por turno. A cura automática dispara metade das vezes. Caçando no seu nível isso não aparece: medido, nenhuma derrota a mais. Caçando muito acima do nível, onde o POKE já apanhava, ele cai cerca de 20% mais.',
     ],
   },
   // Entrada de UMA LINHA, e de proposito. A regua manda anunciar so o que o

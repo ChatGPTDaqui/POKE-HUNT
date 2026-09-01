@@ -77659,7 +77659,7 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId, ehProtetor = f
 }
 //#endregion
 //#region src/engine/systems/autoSystem.ts
-var COOLDOWN_DO_TREINADOR = 1.5;
+var COOLDOWN_DO_TREINADOR = TURNO_SEGUNDOS;
 var HP_CRITICO = .25;
 function resolveRulePotionId(gameState, rule) {
 	if (rule.itemId !== "best") return rule.itemId;
