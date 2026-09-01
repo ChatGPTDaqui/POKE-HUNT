@@ -78645,6 +78645,7 @@ var nextId = 1;
 function makeId() {
 	return `toast-${nextId++}`;
 }
+var proximaSeq = 1;
 var toastStore = createStore()((set) => ({
 	toasts: [],
 	chatLines: {
@@ -78658,7 +78659,8 @@ var toastStore = createStore()((set) => ({
 			id: makeId(),
 			message,
 			type,
-			realce
+			realce,
+			seq: proximaSeq++
 		};
 		set((state) => {
 			const nextTabLines = [...state.chatLines[tab], line];
