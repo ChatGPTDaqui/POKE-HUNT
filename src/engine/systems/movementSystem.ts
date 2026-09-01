@@ -7,6 +7,8 @@ import { findPath } from '@/core/pathfinding'
 import { engageRangeFor } from './combatSystem'
 import { isDead, distanceTo } from '../entity'
 import { imobilizadoPorStatus } from './statusSystem'
+import { canOccupy, clampToMapCircle, empurrarCorpo } from './corpoNoMapa'
+import { aplicarEncarada } from './encaradaSystem'
 import type { EnemyEntity, PlayerEntity, Point, WorldState } from '../types'
 
 const WANDER_MARGIN = 40
@@ -37,23 +39,10 @@ const PATH_TARGET_BIG_JUMP = 150
 // pro A* real, que contorna a parede que o atalho nao via.
 const PATH_STUCK_THRESHOLD_SECONDS = 0.3
 
-// A pegada de colisao de um POKE e uma caixa de `POKE_COLLISION_FOOTPRINT`, e
-// checar so o ponto central contra a grade EQUIVALE a isso — mas nao porque
-// "cada celula ja e uma caixa", que era o raciocinio antigo e valia so enquanto
-// a pegada e o tamanho da celula eram o mesmo numero por coincidencia.
-//
-// Equivale porque a grade nao diz "aqui tem tinta": ela diz "o CENTRO do POKE
-// pode estar aqui". A pegada e aplicada na GERACAO, por erosao
-// (build-sub-bioma-collision.js, passo 1.5), o que mantem este laco — que roda
-// ate 250 mil passos por chamada no resim do servidor — com uma consulta so em
-// vez das nove que uma caixa exigiria em runtime.
-//
-// Mexer na pegada e mexer naquela constante e rodar o gerador de novo; nao ha
-// nada a mudar aqui. Ver a nota longa em data/collisionConstants.ts (PH-94)
-// pro que a medicao mostrou sobre a pegada de 40.
-function canOccupy(mapDef: MapDef, x: number, y: number): boolean {
-  return !isCellBlocked(mapDef, x, y)
-}
+// `canOccupy`, `clampToMapCircle` e `empurrarCorpo` moraram aqui ate PH-397 e
+// agora vem de `./corpoNoMapa` — a encarada precisa das mesmas garantias de
+// parede, e importar de volta daqui fecharia um ciclo de import com
+// `encaradaSystem`. As notas longas de cada uma foram junto.
 
 // Passo em linha reta sem consciencia de colisao — seguro quando nao ha
 // grade nenhuma, ou ao longo de um segmento ja verificado caminhavel.
@@ -251,37 +240,6 @@ function direcaoDeDesempate(idA: string, idB: string): Point {
 }
 
 /**
- * Desloca um corpo por (dx, dy) respeitando parede pintada e o circulo andavel.
- *
- * Mesma degradacao por eixo do `slideToward`: o passo cheio, senao so X, senao
- * so Y, senao nao anda. Um empurrao NUNCA pode ser a porta de entrada pra
- * atravessar parede — a colisao da arte e mais forte que a separacao de corpos.
- */
-function empurrarCorpo(
-  entity: { x: number; y: number },
-  dx: number,
-  dy: number,
-  mapDef: MapDef,
-  mapCx: number,
-  mapCy: number,
-  mapRadius: number,
-): void {
-  const alvo = clampToMapCircle(entity.x + dx, entity.y + dy, mapCx, mapCy, mapRadius)
-  if (canOccupy(mapDef, alvo.x, alvo.y)) {
-    entity.x = alvo.x
-    entity.y = alvo.y
-    return
-  }
-  if (canOccupy(mapDef, alvo.x, entity.y)) {
-    entity.x = alvo.x
-    return
-  }
-  if (canOccupy(mapDef, entity.x, alvo.y)) {
-    entity.y = alvo.y
-  }
-}
-
-/**
  * Nenhum corpo vivo ocupa o espaco de outro (PH-384).
  *
  * Roda no FIM de `updateMovement`, depois de todo mundo ter andado: a separacao
@@ -353,17 +311,6 @@ function separarCorpos(world: WorldState, dt: number): void {
     // primeira passada e sai — as outras seriam varredura a toa.
     if (!sobrou) break
   }
-}
-
-// Puxa (x, y) de volta pra borda circular caminhavel do mapa se caiu fora
-// dela — a hunt nao tem mais cantos retangulares, so esse circulo invisivel.
-function clampToMapCircle(x: number, y: number, mapCx: number, mapCy: number, mapRadius: number): Point {
-  const dx = x - mapCx
-  const dy = y - mapCy
-  const dist = Math.hypot(dx, dy)
-  if (dist <= mapRadius || dist === 0) return { x, y }
-  const ratio = mapRadius / dist
-  return { x: mapCx + dx * ratio, y: mapCy + dy * ratio }
 }
 
 interface Wanderer extends Movable {
@@ -612,6 +559,11 @@ export function updateMovement(world: WorldState, dt: number): void {
       }
     }
   }
+
+  // A coreografia de duelo (PH-397) sobrepoe a posicao de quem ja parou pra
+  // lutar, entao ela vem DEPOIS de todo mundo ter andado — e ANTES da separacao,
+  // que continua sendo quem tem a ultima palavra sobre corpo dentro de corpo.
+  aplicarEncarada(world, dt)
 
   // Depois de TODO MUNDO ter andado, nao antes e nao no meio: a separacao
   // desfaz a sobreposicao que o passo deste tick criou. Ver `separarCorpos`.
