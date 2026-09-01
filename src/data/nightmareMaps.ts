@@ -184,6 +184,9 @@ function buildBossHunts(): { maps: Record<string, HuntMapDef>; encounters: Recor
       bg: { primary: '#3e2f23', secondary: '#4a3829', image: bossBackgroundImage(species) },
       maxEnemies: 1,
       noRespawn: true,
+      // PH-397: covil de um lendario e um duelo 1x1 — o par se encara e gira
+      // entre um golpe e o outro. Ver data/huntTypes.ts#encarada.
+      encarada: true,
       respawnDelay: 6,
       spawnPoints: [{ x: 700, y: 450 }],
       enemyPool: [encId],
@@ -258,6 +261,10 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
     unlocksContinentOnClear: GRUPOS_DO_LANCE,
     startCountdown: 5, // explicit user request — 5..0 countdown before Lance's first POKE spawns (main.js#buildMapWorld/stepWorld)
     keepCorpses: true, // explicit user request — defeated POKEs here stay on the field as "bodies" instead of despawning after DEATH_ANIM_GRACE_PERIOD
+    // PH-397: a arena de duelo do jogo. O par se encara e gira entre um golpe e
+    // o outro; os cadaveres que `keepCorpses` deixa em campo nao participam
+    // (`aplicarEncarada` conta so os vivos). Ver data/huntTypes.ts#encarada.
+    encarada: true,
     respawnDelay: ESPERA_DE_TROCA_SEGUNDOS, // o lado do Lance da espera de troca; o do jogador esta em simulation.ts#trocarPorDesmaio
     spawnPoints: [{ x: 700, y: 450 }],
     enemyPool,

@@ -40,6 +40,11 @@ export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
   // lote PMD; o que comunica o status e o corpo tingido de ciano
   // (data/vfxTiras.ts#COR_DE_STATUS_NO_CORPO).
   if (imobilizadoPorStatus(entity)) return 'Idle'
+  // Encarada do duelo (PH-397): o corpo esta girando em torno do adversario,
+  // mas o estado continua 'engaged' — e tem que continuar, senao `updateCombat`
+  // para de contar essa entidade como em combate. A flag e a unica coisa que
+  // liga "o corpo se deslocou neste tick" a arte que o mostra.
+  if (entity.encarando) return 'Walk'
   if (entity.state === 'chase') return 'Walk'
   // 'wander' cobre duas fases (ver movementSystem.ts#wanderStep/wanderFreely):
   // perseguindo um wanderTarget (anda de verdade) e pausado entre alvos
