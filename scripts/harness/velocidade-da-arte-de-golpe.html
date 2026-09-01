@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<!-- OBRIGATORIO. As URLs de arte no codigo do jogo sao RELATIVAS
+     (`assets/move-vfx/...`) e o jogo roda em /jogo, entao elas caem em
+     /assets/... Uma pagina em /scripts/harness/ resolveria pra
+     /scripts/harness/assets/... e daria 404 EM SILENCIO: o desenho nao lanca
+     erro, so cai no burst procedural. Ja aconteceu na bancada irma e me fez
+     julgar o fallback achando que era a arte. -->
+<base href="/" />
+<title>Comparador de velocidade da arte de golpe (PH-372)</title>
+<!--
+  COMPARADOR DE VELOCIDADE DA ARTE DE GOLPE
+
+  A PERGUNTA QUE ELE RESPONDE
+  ---------------------------------------------------------------------------
+  "A que velocidade a arte de golpe deve tocar?" — e ele responde POR
+  COMPARACAO, nao por argumento.
+
+  O PROBLEMA MEDIDO. `faseDaTira` (render/sprites.ts) calcula
+  `fase = idade / duracao`, entao a tira inteira e esticada ou comprimida pra
+  caber exatos IMPACT_EFFECT_DURATION (1,0s) ou AOE_EFFECT_DURATION (1,2s). O
+  NUMERO DE QUADROS DA ARTE DECIDE A VELOCIDADE, e nada mais. Como a arte veio
+  de bancos diferentes, a velocidade saiu por acaso:
+
+      39,0 fps   26ms/quadro   tipo ICE            (39 quadros)
+      30,0 fps   33ms          tipo NORMAL, POISON (30)
+      26,0 fps   38ms          charm/attract/sweet_kiss (13 x2 repeticoes)
+      14,0 fps   71ms          MEDIANA das 110 entradas
+       5,0 fps  200ms          area POISON, area DRAGON (6)
+       4,2 fps  238ms          area NORMAL (5)
+
+  9,3x de espalhamento. E o efeito colateral pior que a velocidade absoluta e a
+  INCONSISTENCIA: o mesmo POKE muda de ritmo conforme o tipo do golpe.
+
+  COMO ELE COMPARA SEM MENTIR
+  ---------------------------------------------------------------------------
+  Cada coluna e um candidato de fps, e o jeito de obter aquele fps e
+  `duracao = quadros_efetivos / fps` — porque `fase = idade / duracao` e
+  exatamente essa conta ao contrario. Ou seja: **nenhuma matematica de bancada
+  entra no caminho**. Quem desenha e o `drawEffect` do jogo, com o recorte, a
+  ancora, o giro, o espelho, a `escala` e o `repeticoes` de verdade. A unica
+  coisa que muda entre as colunas e um numero que o motor ja usa.
+
+  `quadros_efetivos = quadros x repeticoes`, porque `faseDaTira` multiplica a
+  fase por `repeticoes` — sem isso o rotulo da coluna mentiria justamente nas
+  artes que ja sao as mais rapidas.
+
+  A PRIMEIRA COLUNA E O MODELO ATUAL, sempre. Sem ela nao ha com o que
+  comparar, e a tentacao de aprovar o candidato bonito no vacuo e real.
+
+  O CICLO E DE 2,0s, que e `BASE_ATTACK_INTERVAL` — o vao entre dois golpes
+  basicos. A barra embaixo de cada celula mostra quanto desse vao a opcao
+  ocupa. Isso responde de graca a segunda pergunta da decisao: um fps lento
+  deixa o efeito passando por cima do golpe seguinte?
+
+  A SEGUNDA MEDICAO, achada montando a primeira
+  ---------------------------------------------------------------------------
+  A tabela do topo conta QUADROS VAZIOS nas pontas de cada tira. Ela nasceu de
+  um acidente: a linha do ICE aparecia em branco em todas as colunas, e o
+  motivo e que os 9 PRIMEIROS quadros dos 39 nao tem pixel nenhum.
+
+  Isso conta duas vezes contra a velocidade:
+
+    1. `quadros` e o que DIVIDE a duracao, entao quadro vazio infla o numero e
+       ACELERA o resto. O ICE tem 39 cadastrados e 30 com desenho: o conteudo
+       real toca a 39 fps em vez de 30.
+    2. Vira tempo morto visivel. O `dig` gasta os primeiros 32% do efeito
+       desenhando nada — o golpe sai e por um terco da animacao nao acontece.
+
+  A causa esta no exportador: `tira_efeito.py` remove os vazios do FIM
+  (`while quadros[-1].getbbox() is None`) e nunca os do COMECO. E `getbbox()`
+  so acha quadro 100% transparente, entao quadro com meia duzia de pixels
+  quase invisiveis passa como cheio — e a maioria dos casos daqui e desses.
+
+  Consequencia pra decisao: **aparar as pontas ANTES de escolher o fps**. Sem
+  isso o fps e escolhido contra um numero de quadros que e mentira.
+
+  O QUE ELE NAO RESPONDE
+  ---------------------------------------------------------------------------
+  * O QUE FAZER COM A SOBRA. Este comparador mostra a arte tocando na
+    velocidade X e sumindo quando acaba. As propostas de "segurar o ultimo
+    quadro" ou "repetir" mudam so o RABO da animacao, nao a velocidade — e a
+    velocidade e o que esta em disputa. Depois de escolher o fps, o rabo se
+    prototipa no motor, com teste.
+  * TAMANHO E LEGIBILIDADE. Isso e `arte-de-golpe-em-movimento.html` e
+    `conferir-vfx-visual.mjs`. As linhas de AREA aqui aparecem reduzidas de
+    proposito (a arte tem 402px de mundo e nao caberia); a geometria e a real,
+    so a lente e menor.
+  * A POSE DO POKE. Ela NAO acelera — `updateAnimations` usa a duracao autoral
+    do sheet PMD, mediana 0,33s nas 743 animacoes Shoot/Charge, e so 24 passam
+    dos 0,5s da janela. Fica escrito aqui pra ninguem procurar ali.
+
+  COMO RODAR
+  ---------------------------------------------------------------------------
+      npm run dev
+      abrir /scripts/harness/velocidade-da-arte-de-golpe.html
+
+  Qualquer porta serve: esta pagina nao fala com a Edge, entao a exigencia da
+  5173 (CORS) nao se aplica.
+
+      ?fps=8,10,12,15,20     candidatos, em colunas (padrao 10,12,15,20)
+      ?arte=ICE,NORMAL,...   FILTRA as linhas padrao por texto do rotulo. Ele
+                             nao aceita arte arbitraria de proposito: o valor
+                             da bancada esta em comparar sempre as MESMAS
+                             posicoes da distribuicao (os dois extremos e a
+                             mediana). Pra trocar o conjunto, editar PADRAO.
+      ?fundo=plains          qualquer nome de assets/hunt-backgrounds/
+      ?atual=0               esconde a coluna do modelo atual (nao recomendado)
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14171a; color: #dfe4ea; font: 12px/1.45 ui-monospace, monospace; }
+  h1 { font-size: 14px; margin: 12px 12px 4px; font-weight: 600; }
+  .aviso { margin: 0 12px 10px; color: #9aa4ae; max-width: 1100px; }
+  table { border-collapse: collapse; margin: 0 12px 24px; }
+  th { font-weight: 600; color: #cbd3da; padding: 4px 6px; text-align: left; font-size: 12px; }
+  th.atual { color: #ffb454; }
+  td { padding: 0 3px 10px 3px; vertical-align: top; }
+  td.rot { padding-right: 10px; white-space: nowrap; color: #cbd3da; }
+  canvas { display: block; image-rendering: pixelated; border: 1px solid #2b3138; }
+  .sub { font-size: 11px; color: #8d97a1; padding-top: 2px; }
+  .sub b { color: #dfe4ea; font-weight: 600; }
+  .sub.estoura { color: #e07a5f; }
+  .barra { height: 4px; background: #22272c; margin-top: 3px; position: relative; }
+  .barra i { position: absolute; left: 0; top: 0; bottom: 0; background: #4c8fbd; }
+  .barra.estoura i { background: #e07a5f; }
+  table.vazios td { padding: 1px 10px 1px 0; vertical-align: baseline; }
+  table.vazios td.n { text-align: right; color: #dfe4ea; }
+  table.vazios tr.ruim td { color: #e07a5f; }
+  table.vazios tr.ruim td.n { color: #e07a5f; }
+</style>
+</head>
+<body>
+<h1>Comparador de velocidade da arte de golpe — <span id="modo"></span></h1>
+<p class="aviso">
+  Uma linha por arte, uma coluna por candidato de fps. Todas animam do mesmo relógio, em ciclo de
+  <b>2,0s</b> (<code>BASE_ATTACK_INTERVAL</code>, o vão entre dois golpes básicos). A barra azul sob
+  cada célula é quanto desse vão a opção ocupa; ela fica <span style="color:#e07a5f">laranja</span>
+  quando a arte não termina antes do próximo golpe. Disco azul = atacante, vermelho = alvo, 39px de
+  mundo entre os dois.
+</p>
+<h2 style="font-size:13px;margin:14px 12px 4px">Quadros vazios nas pontas</h2>
+<p class="aviso">
+  Quadro sem pixel nenhum conta como quadro: ele infla o divisor que define a velocidade
+  <b>e</b> vira tempo morto na tela. Medido no alpha médio de cada quadro (limiar 1/255, mais
+  rígido que o <code>getbbox()</code> do exportador, que só pega o quadro 100% transparente).
+</p>
+<div id="vazios"></div>
+<h2 style="font-size:13px;margin:18px 12px 4px">Comparação de velocidade</h2>
+<div id="grade"></div>
+
+<script type="module">
+// SEM query no import: precisa ser a MESMA instancia de modulo que guarda o
+// cache de imagem, senao cada celula baixa a arte de novo e todas caem no
+// desenho procedural no primeiro frame.
+import { drawEffect, primeImage, readyImage } from '/src/render/sprites.ts'
+import { VFX_POR_GOLPE, todasAsTirasDeGolpe, repeticoesDoGolpe } from '/src/data/moveVfx.ts'
+import { TIRA_POR_ELEMENTO, TIRA_AOE_POR_ELEMENTO, todasAsTirasDeVfx } from '/src/data/vfxTiras.ts'
+import { ABILITIES_DATA } from '/src/data/generated/abilities.generated.ts'
+import { TYPE_COLORS } from '/src/data/typeColors.ts'
+
+const params = new URLSearchParams(location.search)
+const FUNDO = params.get('fundo') || 'plains'
+const MOSTRA_ATUAL = params.get('atual') !== '0'
+const FPS = (params.get('fps') || '10,12,15,20').split(',').map(Number).filter((n) => n > 0)
+
+// Numeros do jogo. `duracaoBase` e o que o motor usa hoje; `CICLO` e o vao
+// entre dois golpes basicos, e existe pra mostrar quanto dele cada opcao come.
+const IMPACT_EFFECT_DURATION = 1.0
+const AOE_EFFECT_DURATION = 1.2
+const CICLO = 2.0
+const ALCANCE = 39, POKE_RAIO = 14.5
+
+const fundo = new Image()
+fundo.src = `/assets/hunt-backgrounds/${FUNDO}.jpg`
+
+/**
+ * As linhas padrao NAO sao as artes bonitas: sao as posicoes medidas da
+ * distribuicao. Sem os dois extremos a comparacao aprova qualquer coisa,
+ * porque no meio da faixa quase todo fps parece aceitavel.
+ */
+const PADRAO = [
+  { rot: 'tipo ICE — a mais rapida', tipo: 'ICE' },
+  { rot: 'tipo NORMAL', tipo: 'NORMAL' },
+  { rot: 'golpe charm — pior caso de repeticoes', golpe: 'charm' },
+  { rot: 'tipo GRASS — perto da mediana', tipo: 'GRASS' },
+  { rot: 'golpe bite — por golpe, perto da mediana', golpe: 'bite' },
+  { rot: 'tipo BUG — ponta lenta do impacto', tipo: 'BUG' },
+  { rot: 'AREA NORMAL — a mais lenta de todas', tipo: 'NORMAL', aoe: true },
+]
+
+const filtro = params.get('arte')
+const LINHAS = filtro
+  ? PADRAO.filter((l) => filtro.split(',').some((f) => l.rot.toUpperCase().includes(f.trim().toUpperCase())))
+  : PADRAO
+
+document.getElementById('modo').textContent =
+  `fundo ${FUNDO} · candidatos ${FPS.join(', ')} fps · ciclo ${CICLO}s`
+
+/** Quantos quadros a fase percorre de fato — `repeticoes` multiplica. */
+function quadrosEfetivos(linha) {
+  const rep = linha.golpe ? repeticoesDoGolpe(linha.golpe) : 1
+  let tira
+  if (linha.golpe) {
+    const v = VFX_POR_GOLPE[linha.golpe]
+    tira = linha.aoe ? v?.aoe : v?.single
+  } else {
+    tira = linha.aoe ? TIRA_AOE_POR_ELEMENTO[linha.tipo] : TIRA_POR_ELEMENTO[linha.tipo]
+  }
+  if (!tira) return null
+  return { quadros: tira.quadros, rep, efetivos: tira.quadros * rep, url: tira.url }
+}
+
+function efeitoBase(linha, cel, duracao) {
+  const tipo = linha.tipo ?? ABILITIES_DATA[linha.golpe]?.type ?? 'NORMAL'
+  const ax = linha.aoe ? cel.w / 2 : 26
+  const tx = linha.aoe ? cel.w / 2 : ax + ALCANCE
+  const y = cel.h / 2
+  return {
+    id: `${linha.rot}-${duracao}`, type: 'abilityEffect',
+    x: ax, y, targetX: tx, targetY: y,
+    radius: 14, color: TYPE_COLORS[tipo] ?? '#ffffff',
+    duration: duracao, delay: 0, age: 0,
+    elementType: tipo, abilityId: linha.golpe,
+    anguloDeAtaque: 0,
+    isAoe: !!linha.aoe, worldSize: linha.aoe ? 350 : undefined,
+    laneSize: 1, ownerId: null, lane: 0,
+  }
+}
+
+function cenario(ctx, cel, zoom, aoe) {
+  ctx.save()
+  ctx.imageSmoothingEnabled = false
+  if (fundo.complete && fundo.naturalWidth) {
+    ctx.drawImage(fundo, 320, 320, cel.w * 1.5, cel.h * 1.5, 0, 0, cel.w * zoom, cel.h * zoom)
+  } else {
+    ctx.fillStyle = '#1a1e18'
+    ctx.fillRect(0, 0, cel.w * zoom, cel.h * zoom)
+  }
+  ctx.restore()
+  const ax = (aoe ? cel.w / 2 : 26) * zoom
+  const tx = (aoe ? cel.w / 2 : 26 + ALCANCE) * zoom
+  const y = (cel.h / 2) * zoom
+  for (const [cx, cor] of [[ax, 'rgba(70,90,130,0.95)'], [tx, 'rgba(150,70,70,0.95)']]) {
+    ctx.beginPath(); ctx.fillStyle = cor
+    ctx.arc(cx, y, POKE_RAIO * zoom, 0, Math.PI * 2); ctx.fill()
+  }
+}
+
+// --- monta a tabela ---------------------------------------------------------
+const celulas = []
+const tabela = document.createElement('table')
+const cabecalho = document.createElement('tr')
+cabecalho.append(document.createElement('th'))
+if (MOSTRA_ATUAL) {
+  const th = document.createElement('th')
+  th.className = 'atual'
+  th.textContent = 'ATUAL (cabe na duracao)'
+  cabecalho.append(th)
+}
+for (const f of FPS) {
+  const th = document.createElement('th')
+  th.textContent = `${f} fps`
+  cabecalho.append(th)
+}
+tabela.append(cabecalho)
+
+for (const linha of LINHAS) {
+  const info = quadrosEfetivos(linha)
+  if (!info) continue
+  // AREA tem 402px de mundo (AOE_RADIUS 175 x 2 x 1.15) e nao cabe numa celula
+  // de comparacao. A geometria segue real; so a lente encolhe.
+  const cel = linha.aoe ? { w: 440, h: 300 } : { w: 96, h: 68 }
+  const zoom = linha.aoe ? 0.62 : 2.8
+  const duracaoBase = linha.aoe ? AOE_EFFECT_DURATION : IMPACT_EFFECT_DURATION
+
+  const tr = document.createElement('tr')
+  const rot = document.createElement('td')
+  rot.className = 'rot'
+  rot.innerHTML = `${linha.rot}<div class="sub">${info.quadros} quadros`
+    + `${info.rep > 1 ? ` &times;${info.rep} rep` : ''} = <b>${info.efetivos}</b> efetivos</div>`
+  tr.append(rot)
+
+  const colunas = []
+  if (MOSTRA_ATUAL) colunas.push({ duracao: duracaoBase, atual: true })
+  for (const f of FPS) colunas.push({ duracao: info.efetivos / f, atual: false })
+
+  for (const col of colunas) {
+    const fpsReal = info.efetivos / col.duracao
+    const td = document.createElement('td')
+    const cv = document.createElement('canvas')
+    cv.width = Math.round(cel.w * zoom)
+    cv.height = Math.round(cel.h * zoom)
+    const estoura = col.duracao > CICLO
+    const sub = document.createElement('div')
+    sub.className = 'sub' + (estoura ? ' estoura' : '')
+    sub.innerHTML = `<b>${fpsReal.toFixed(1)} fps</b> · ${Math.round(1000 / fpsReal)}ms/quadro`
+      + `<br>toca em <b>${col.duracao.toFixed(2)}s</b>${estoura ? ' — passa do proximo golpe' : ''}`
+    const barra = document.createElement('div')
+    barra.className = 'barra' + (estoura ? ' estoura' : '')
+    const i = document.createElement('i')
+    i.style.width = `${Math.min(100, (col.duracao / CICLO) * 100)}%`
+    barra.append(i)
+    td.append(cv, sub, barra)
+    tr.append(td)
+    celulas.push({ ctx: cv.getContext('2d'), cel, zoom, linha, efeito: efeitoBase(linha, cel, col.duracao) })
+  }
+  tabela.append(tr)
+}
+document.getElementById('grade').append(tabela)
+
+// --- aquece e roda ----------------------------------------------------------
+// Sem aquecer, o primeiro frame de cada celula cai no burst procedural (a arte
+// por GOLPE fica fora do preload de proposito, ver o cabecalho de moveVfx.ts) —
+// e num comparador isso seria comparar dois fallbacks.
+const urls = [...new Set([...todasAsTirasDeGolpe(), ...todasAsTirasDeVfx()])]
+await Promise.allSettled(urls.map((u) => primeImage(u)))
+await new Promise((ok) => { if (fundo.complete) ok(); else fundo.onload = fundo.onerror = ok })
+
+// --- quadros vazios nas pontas ---------------------------------------------
+// Roda depois do aquecimento porque precisa dos pixels. `willReadFrequently`
+// evita o aviso do Chrome de canvas lido em laco.
+function medirVazios() {
+  const alvos = []
+  for (const [t, tira] of Object.entries(TIRA_POR_ELEMENTO)) alvos.push([`tipo ${t}`, tira])
+  for (const [t, tira] of Object.entries(TIRA_AOE_POR_ELEMENTO)) alvos.push([`area ${t}`, tira])
+  const vistos = new Set()
+  for (const [g, v] of Object.entries(VFX_POR_GOLPE)) {
+    if (vistos.has(v.single.url)) continue
+    vistos.add(v.single.url)
+    alvos.push([`golpe ${g}`, v.single])
+  }
+  const cv = document.createElement('canvas')
+  const ctx = cv.getContext('2d', { willReadFrequently: true })
+  const achados = []
+  for (const [nome, tira] of alvos) {
+    const img = readyImage(tira.url)
+    if (!img || !img.naturalWidth) continue
+    const L = Math.floor(img.naturalWidth / tira.quadros)
+    cv.width = L; cv.height = img.naturalHeight
+    const cheio = (f) => {
+      ctx.clearRect(0, 0, L, cv.height)
+      ctx.drawImage(img, f * L, 0, L, img.naturalHeight, 0, 0, L, img.naturalHeight)
+      const d = ctx.getImageData(0, 0, L, cv.height).data
+      let soma = 0
+      for (let i = 3; i < d.length; i += 4) soma += d[i]
+      return soma / (d.length / 4) >= 1
+    }
+    let ini = 0
+    while (ini < tira.quadros && !cheio(ini)) ini++
+    let fim = 0
+    while (fim < tira.quadros - ini && !cheio(tira.quadros - 1 - fim)) fim++
+    if (ini || fim) {
+      achados.push({ nome, quadros: tira.quadros, ini, fim, pct: Math.round(((ini + fim) / tira.quadros) * 100) })
+    }
+  }
+  achados.sort((a, b) => b.pct - a.pct)
+
+  const t = document.createElement('table')
+  t.className = 'vazios'
+  const cab = document.createElement('tr')
+  for (const c of ['tira', 'quadros', 'vazios no inicio', 'no fim', 'desperdicio', 'fps real x fps cadastrado']) {
+    const th = document.createElement('th'); th.textContent = c; cab.append(th)
+  }
+  t.append(cab)
+  for (const a of achados) {
+    const tr = document.createElement('tr')
+    if (a.pct >= 20) tr.className = 'ruim'
+    const uteis = a.quadros - a.ini - a.fim
+    const dur = a.nome.startsWith('area ') ? AOE_EFFECT_DURATION : IMPACT_EFFECT_DURATION
+    const cels = [
+      a.nome, a.quadros, a.ini || '-', a.fim || '-', `${a.pct}%`,
+      `${(uteis / dur).toFixed(1)} contra ${(a.quadros / dur).toFixed(1)} fps`,
+    ]
+    cels.forEach((v, i) => {
+      const td = document.createElement('td')
+      if (i > 0) td.className = 'n'
+      td.textContent = String(v)
+      tr.append(td)
+    })
+    t.append(tr)
+  }
+  const resumo = document.createElement('p')
+  resumo.className = 'aviso'
+  resumo.innerHTML = `<b>${achados.length}</b> de <b>${alvos.length}</b> tiras tem quadro vazio na ponta.`
+  document.getElementById('vazios').append(resumo, t)
+}
+medirVazios()
+
+const t0 = performance.now()
+function quadro(agora) {
+  const t = ((agora - t0) / 1000) % CICLO
+  for (const c of celulas) {
+    c.ctx.setTransform(1, 0, 0, 1, 0, 0)
+    c.ctx.clearRect(0, 0, c.cel.w * c.zoom, c.cel.h * c.zoom)
+    cenario(c.ctx, c.cel, c.zoom, c.linha.aoe)
+    c.efeito.age = t
+    c.ctx.save()
+    c.ctx.scale(c.zoom, c.zoom)
+    drawEffect(c.ctx, c.efeito, { player: null, enemies: [] })
+    c.ctx.restore()
+  }
+  requestAnimationFrame(quadro)
+}
+requestAnimationFrame(quadro)
+document.body.dataset.pronto = String(celulas.length)
+</script>
+</body>
+</html>
