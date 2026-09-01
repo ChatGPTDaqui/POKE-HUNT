@@ -12,6 +12,27 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Entrada de UMA LINHA, e de proposito. A regua manda anunciar so o que o
+  // jogador ve ou sente, e o que entrou aqui e uma coisa so: o texto pequeno
+  // ficou legivel. Esticar isso em tres linhas seria encher a nota.
+  //
+  // POR QUE ENTRA, ja que "ajuste de cor" soa a detalhe interno: nao e escolha
+  // de gosto, e correcao de acessibilidade medida. O token do MENOR texto do
+  // jogo dava 3,96 de contraste sobre o fundo de card e 4,29 sobre o de painel,
+  // contra os 4,5 que a WCAG pede pra texto normal. Quem sente sao os mesmos
+  // que hoje apertam os olhos pra ler o rotulo de Gold/h e as abas do chat.
+  //
+  // Fora da nota, por ser invisivel jogando: o teste que passou a trancar o
+  // contraste dos tokens e a guarda que impede "consertar" o valor de volta pro
+  // do handoff.
+  {
+    version: '7.26',
+    date: '2026-09-01',
+    title: 'O texto pequeno ficou legível',
+    highlights: [
+      'OS RÓTULOS MIÚDOS DA INTERFACE CLAREARAM. Os rótulos de taxa (Gold/h, XP/h), os títulos de seção dos painéis e as abas não selecionadas do chat estavam escritos num cinza escuro demais para o tamanho deles. A cor subiu o suficiente para passar no padrão de contraste — o resto da interface não mudou.',
+    ],
+  },
   // A leva da auditoria de HUD (PH-372 a PH-379). SUCINTA a pedido do usuario,
   // mesma regua da 7.22 em diante: cinco linhas, uma por coisa que o jogador
   // percebe sozinho.
