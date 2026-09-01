@@ -16,6 +16,7 @@ import {
 } from './predicoesDeCaptura'
 import { mochilaCarregada } from '@/stores/mochilaStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
+import { SPECIES } from '@/data/pokes'
 import { solicitarAvancoDeSala } from '@/engine/systems/salaSystem'
 import { agendarMesmoEmSegundoPlano, type TemporizadorCancelavel } from '@/core/temporizadorDeSegundoPlano'
 import type { ClimaTipo, SalaAtiva } from '@/engine/types'
@@ -119,7 +120,64 @@ function reconciliarPokeAtivoNoWorld(doServidor: GameStateData): void {
   const noWorld = useWorldStore.getState().player?.poke
   if (!noWorld) return
   const doServ = doServidor.team.find((p) => p.uid === noWorld.uid)
-  if (!doServ) return
+  // POKE FANTASMA EM CAMPO (PH-396).
+  //
+  // `if (!doServ) return` era o comportamento antigo, e ele tinha um buraco: o
+  // POKE que esta em campo pode nao existir MAIS na equipe do servidor — vendido,
+  // liberado ou mandado pra mochila noutra aba, ou estado local defasado. Sem
+  // casar por uid, NENHUMA reconciliacao o derrubava: ele ficava em campo,
+  // desenhado e com HUD, ate a proxima reconstrucao de mundo (F5 ou troca de
+  // cena).
+  //
+  // Achado em 01/09 validando outra coisa no dev: a tela mostrava um Scizor Lv 80
+  // em campo enquanto o banco tinha esse POKE na MOCHILA, sem alteracao desde
+  // 24/08 — ou seja, ele nao estava na equipe durante a sessao inteira em que
+  // apareceu lutando.
+  //
+  // O SINAL E CONFIAVEL: `estadoParcial` (ver `aplicarEstadoDoServidor`) afeta
+  // so `bagPokes`; `team` vem sempre completo. E nenhum caminho legitimo poe em
+  // campo quem nao esta na equipe — a troca por desmaio (`autoSwitchTeamOnFaint`)
+  // escolhe outro membro DA equipe, e captura vai pra mochila.
+  if (!doServ) {
+    const substituto = doServidor.team[0]
+    // Equipe vazia (conta recem-resetada, antes de escolher o inicial): nao ha
+    // quem por em campo, e a tela de escolha do inicial ja cobre esse estado.
+    if (!substituto) return
+    useWorldStore.getState().update((draft) => {
+      if (!draft.player || draft.player.poke.uid !== noWorld.uid) return
+      draft.player.poke = substituto
+      // Mesmo saneamento da troca manual (`controller#setActiveTeamIndex`): o
+      // POKE que entra nao herda recarga nem alvo de quem saiu.
+      draft.player.cooldowns = {}
+      draft.player.flashTimer = 0
+      draft.player.fainted = substituto.hp <= 0
+      draft.player.state = draft.player.fainted ? 'dead' : 'wander'
+      draft.player.targetId = null
+    })
+    // Preload solto, sem `await`, pelo mesmo motivo do `setActiveTeamIndex`: numa
+    // aba em segundo plano o carregamento de imagem fica suspenso e seguraria a
+    // troca. O guard de `drawEntity` cobre os quadros sem arte.
+    //
+    // IMPORT DINAMICO, e nao estatico no topo: `data/preload` puxa
+    // `render/sprites`, que e um dos modulos mais pesados do projeto. Este
+    // arquivo e importado por meia interface, e o import estatico engordou o
+    // grafo o bastante pra `reordenarReservas.test.ts` — que faz
+    // `await import('./controller')` — estourar o timeout de 5s da suite sob
+    // carga. O ramo aqui e raro (POKE saiu da equipe noutra aba); carregar o
+    // preload so quando ele acontece nao custa nada a ninguem.
+    void import('@/data/preload').then((m) => m.preloadEspecies(
+      [{ speciesId: substituto.speciesId, isShiny: substituto.isShiny }],
+    ))
+    // O jogador PRECISA saber: ele estava vendo um POKE lutar e o que rende de
+    // verdade e outro. Trocar em silencio deixaria a tela certa e a leitura
+    // errada ("por que meu POKE mudou sozinho?").
+    useToastStore.getState().pushToast(
+      `${SPECIES[noWorld.speciesId]?.name ?? 'Seu POKE'} não está mais na sua equipe.`
+      + ` ${SPECIES[substituto.speciesId]?.name ?? 'Outro POKE'} entrou em campo.`,
+      'error', 'world',
+    )
+    return
+  }
 
   const level = Math.max(noWorld.level, Number.isFinite(doServ.level) ? doServ.level : noWorld.level)
   const exp = Math.max(noWorld.exp, Number.isFinite(doServ.exp) ? doServ.exp : noWorld.exp)
