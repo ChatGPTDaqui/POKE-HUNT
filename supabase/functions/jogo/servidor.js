@@ -75114,9 +75114,24 @@ function proximoCandidato(player, enemies) {
 	}
 	return melhor;
 }
-/** Ha shiny vivo em campo? */
-function temShinyVivo(enemies) {
-	return enemies.some((e) => !isDead(e) && e.poke.isShiny);
+/**
+* Ha ALVO PRIORITARIO vivo em campo — shiny ou protetor (Guardian/Lord)?
+*
+* ERA `temShinyVivo`, E ESSE ERA O BUG (PH-394). A saida de shiny existe porque
+* a prioridade de shiny do movimento e mais forte que o lure, e as duas mandam no
+* MESMO `player` em direcoes diferentes. O PH-331 deu ao protetor a mesma
+* prioridade do shiny em `movementSystem#ehAlvoPrioritario` — e ninguem atualizou
+* esta saida. Resultado com lure ligado: o POKE andava passando pelo protetor sem
+* bater (a fase `reunindo` sobrepoe a escolha de alvo, e `reunindoParaLure`
+* suprime o golpe), e como a sala so avanca quando o protetor cai, a hunt ficava
+* parada esperando uma reuniao que reinicia sozinha.
+*
+* Consome `ehAlvoPrioritario` em vez de repetir a pergunta: "quem e alvo
+* prioritario" precisa de UM dono, e ele e o movimento. Foi exatamente a copia da
+* regra (aqui olhando so shiny, la olhando os dois) que produziu este defeito.
+*/
+function temAlvoPrioritarioVivo(enemies) {
+	return enemies.some((e) => !isDead(e) && ehAlvoPrioritario(e));
 }
 /**
 * Recalcula `world.lure` pro tick atual. Roda ANTES de `updateMovement`, que e
@@ -75152,7 +75167,7 @@ function atualizarLure(world, gameState, dt) {
 	if (fase === "reunindo") {
 		tempoRestante -= dt;
 		const candidato = proximoCandidato(player, enemies);
-		if (reunidos.length >= alvo || candidato == null || temShinyVivo(enemies) || tempoRestante <= 0) fase = "lutando";
+		if (reunidos.length >= alvo || candidato == null || temAlvoPrioritarioVivo(enemies) || tempoRestante <= 0) fase = "lutando";
 		else {
 			const fracao = anterior?.esperandoRetardatario === true ? LURE_FRACAO_PARA_VOLTAR_A_ANDAR : LURE_FRACAO_DA_COLEIRA;
 			if (reunidos.find((e) => distanceTo(player, e) > e.leashRadius * fracao)) esperandoRetardatario = true;
