@@ -285,6 +285,25 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     .sort((a, b) => (a.team_slot ?? 0) - (b.team_slot ?? 0))
     .map(rowToPoke)
 
+  // O ATIVO VOLTA PRO SLOT 0 NA CARGA (PH-382).
+  //
+  // O invariante do modelo e `team[0]` = POKE em campo: `definir_ativo` grava
+  // `active_team_index = 0` sempre, o trilho de reservas desenha
+  // `team.slice(1)` e `reordenarReservas` recusa mexer no indice 0.
+  //
+  // Um save gravado ANTES do conserto de PH-382 pode chegar com
+  // `active_team_index != 0` (a troca automatica por desmaio so apontava o
+  // indice, sem rotacionar a equipe). Rotacionar aqui conserta o save na
+  // primeira carga — sem migration de dado, e nos dois lados de uma vez, porque
+  // esta funcao e a mesma que o servidor usa pra montar o estado (ver
+  // authority/src/progresso.ts).
+  //
+  // Rotaciona em vez de zerar o indice: quem esta em campo e o POKE que
+  // `active_team_index` aponta, e e ele que o jogador esta vendo lutar. Zerar o
+  // indice trocaria o POKE de campo debaixo do jogador.
+  const indiceAtivoSalvo = Math.max(0, Math.min(p.active_team_index, Math.max(0, team.length - 1)))
+  if (indiceAtivoSalvo > 0) team.unshift(...team.splice(indiceAtivoSalvo, 1))
+
   const bagPokes = snap.pokemon.filter((r) => r.location === 'bag').map(rowToPoke)
 
   const items: Record<string, number> = {}
@@ -323,10 +342,11 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
   return {
     team,
     bagPokes,
-    // Um save pode ter activeIndex apontando pra fora da equipe (POKE removido
-    // noutro device). Clampar aqui e mais barato que um null-check em todo
-    // lugar que le o POKE ativo.
-    activeIndex: Math.max(0, Math.min(p.active_team_index, Math.max(0, team.length - 1))),
+    // Sempre 0: a equipe acima ja foi rotacionada pra deixar em campo o POKE
+    // que `active_team_index` apontava (PH-382). Isso tambem cobre o caso que
+    // esta linha tratava antes por clamp — indice apontando pra fora da equipe
+    // (POKE removido noutro device) — porque a rotacao usa o valor ja clampado.
+    activeIndex: 0,
     items,
     lockedItems,
     wallet: { gold: p.gold, diamonds: p.diamonds },
