@@ -66,6 +66,7 @@ interface Arrasto {
 
 export function ReservasRail() {
   const team = useGameStateStore((s) => s.team)
+  const activeIndex = useGameStateStore((s) => s.activeIndex)
   const { compacto, coarse } = useDeviceMode()
   const showProfile = usePokeProfileStore((s) => s.showProfile)
 
@@ -75,8 +76,17 @@ export function ReservasRail() {
   const alturaDoCard = useRef(0)
   const trilhoRef = useRef<HTMLDivElement>(null)
 
-  // O slot 0 e o POKE em campo e vive no StatusRail.
-  const reservas = team.slice(1)
+  // O POKE em campo vive no StatusRail e NAO se repete aqui.
+  //
+  // Sai por `activeIndex`, e nao por `slice(1)` (PH-382). O invariante e que os
+  // dois dao no mesmo — `team[0]` E o ativo —, mas quando ele quebrou o trilho
+  // desenhou o POKE de campo como reserva: mesma instancia nos dois lugares,
+  // logo nivel e HP subindo em dobro na tela e o POKE do slot 0 invisivel. O
+  // conserto do invariante esta no motor e na carga; isto e a garantia de que
+  // uma quebra futura nao volta a duplicar POKE na tela.
+  const reservas = team
+    .map((poke, indice) => ({ poke, indice }))
+    .filter(({ indice }) => indice !== activeIndex)
 
   const tamanho = compacto ? TAMANHO_COMPACTO : TAMANHO_AMPLO
 
@@ -159,8 +169,7 @@ export function ReservasRail() {
           segundo (senao as bordas vizinhas somam e viram uma linha de 2px), e
           arredondamento so nas pontas do bloco (ver `cantoDoBloco`). */}
       <div className="pointer-events-auto flex flex-col">
-        {reservas.map((poke, i) => {
-          const indiceNaEquipe = i + 1
+        {reservas.map(({ poke, indice: indiceNaEquipe }, i) => {
           // Canto arredondado so onde o BLOCO termina, nao em cada card. Com
           // uma reserva unica as duas condicoes valem e ela volta a ser um card
           // redondo sozinho, como antes.
