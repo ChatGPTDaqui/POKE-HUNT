@@ -79034,8 +79034,8 @@ function trocarPorDesmaio(world, gameState, dt, silent) {
 	world.trocaEmCampo = (world.trocaEmCampo ?? 2) - dt;
 	if (world.trocaEmCampo > 0) return;
 	world.trocaEmCampo = null;
-	gameState.setActiveIndex(proximo);
 	const nextPoke = gameState.team[proximo];
+	gameState.moveTeamIndexToFront(proximo);
 	player.poke = nextPoke;
 	player.cooldowns = {};
 	player.flashTimer = 0;
@@ -79645,6 +79645,8 @@ function rowToPoke(row) {
 function snapshotToGameState(snap, defaults) {
 	const p = snap.player;
 	const team = snap.pokemon.filter((r) => r.location === "team").sort((a, b) => (a.team_slot ?? 0) - (b.team_slot ?? 0)).map(rowToPoke);
+	const indiceAtivoSalvo = Math.max(0, Math.min(p.active_team_index, Math.max(0, team.length - 1)));
+	if (indiceAtivoSalvo > 0) team.unshift(...team.splice(indiceAtivoSalvo, 1));
 	const bagPokes = snap.pokemon.filter((r) => r.location === "bag").map(rowToPoke);
 	const items = {};
 	const lockedItems = {};
@@ -79671,7 +79673,7 @@ function snapshotToGameState(snap, defaults) {
 	return {
 		team,
 		bagPokes,
-		activeIndex: Math.max(0, Math.min(p.active_team_index, Math.max(0, team.length - 1))),
+		activeIndex: 0,
 		items,
 		lockedItems,
 		wallet: {
@@ -79952,7 +79954,7 @@ function criarEstadoDoJogador(dados) {
 				s.team.push(poke);
 			},
 			moveTeamIndexToFront: (index) => {
-				if (index <= 0 || index >= s.team.length) return;
+				if (index < 0 || index >= s.team.length) return;
 				const [p] = s.team.splice(index, 1);
 				s.team.unshift(p);
 				s.activeIndex = 0;
