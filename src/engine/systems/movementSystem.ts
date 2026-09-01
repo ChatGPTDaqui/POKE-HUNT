@@ -178,6 +178,183 @@ function moveToward(entity: Movable, tx: number, ty: number, speed: number, dt: 
   return arrived
 }
 
+// --- corpo nao entra em corpo (PH-384) ---------------------------------------
+//
+// O QUE ACONTECIA
+//
+// Nada no motor olhava a posicao de uma entidade em relacao a OUTRA. A grade de
+// colisao e a arte (parede), e `engageRangeFor` so decide a que distancia o
+// combate comeca — nao segura ninguem. O caso visivel era o empilhamento: com
+// `maxEnemies: 6`, os seis perseguem o MESMO ponto (o jogador), e quem chega
+// depois entra dentro de quem chegou antes. `SPAWN_ENTRE_INIMIGOS` (170) espalha
+// o NASCIMENTO e mais nada; dois segundos de perseguicao desfazem o
+// espacamento.
+//
+// POR QUE A SEPARACAO E A SOMA DOS RAIOS, E NAO MAIS QUE ISSO
+//
+// `engageRangeFor(a, b)` = `a.radius + b.radius + MELEE_RANGE_PADDING` (10).
+// Separar por mais que a soma dos raios + 10 faria o perseguidor nunca alcancar
+// o alcance de combate: os dois se empurrariam pra fora da distancia em que
+// lutam, e o combate PARAVA — trocar um defeito visual por um jogo que nao
+// bate. Com a soma dos raios sobra exatamente a folga de 10 do
+// `MELEE_RANGE_PADDING`.
+//
+// A geometria tambem fecha pro caso cheio: seis inimigos em volta do jogador,
+// todos no alcance de combate (39), ficam num circulo cujos vizinhos distam 39
+// um do outro — mais que os 30 que esta regra exige. Ou seja, os seis cabem em
+// volta do jogador sem briga entre a separacao e o combate. Separacao maior que
+// isso comecaria a expulsar inimigo do circulo e viraria um vai-e-vem.
+//
+// LIMITE CONHECIDO, ACEITO: isto separa os CORPOS (o raio de 14/15 que o motor
+// declara), nao os SPRITES. O quadro PMD desenhado tem dezenas de pixels de
+// largura, boa parte deles padding vazio, e a 30 unidades de distancia duas
+// artes ainda se encostam. Encostar e o que um corpo-a-corpo deve parecer;
+// afastar mais que isso exige mexer no alcance do combate (balanceamento) ou
+// derivar a largura opaca real por especie, como `spriteTopOffsets.generated.ts`
+// fez pra altura. Nenhum dos dois cabe nesta issue.
+const SEPARACAO_MAXIMA_POR_SEGUNDO = 120
+/**
+ * Quantas varreduras de pares por tick.
+ *
+ * UMA NAO BASTA COM O CAMPO CHEIO, e isso foi medido. Cada par e resolvido em
+ * sequencia (Gauss-Seidel), entao o par seguinte desfaz parte do que o
+ * anterior acertou. Com seis inimigos empilhados no mesmo pixel, uma passada
+ * so estabiliza em ~22 unidades de distancia minima e para de melhorar; quatro
+ * chegam a ~28, que e o limite geometrico do caso (ver a nota da funcao).
+ *
+ * O laco sai cedo quando nenhum par sobrou sobreposto, entao o caso comum — um
+ * ou dois corpos encostando — continua custando UMA varredura.
+ */
+const PASSADAS_DE_SEPARACAO = 4
+
+/**
+ * Direcao de desempate quando dois corpos estao EXATAMENTE no mesmo ponto.
+ *
+ * Sem isto a normal seria 0/0 e ninguem se moveria — e o caso acontece de
+ * verdade (dois inimigos entrando pela mesma bola de spawn, POKE substituto
+ * nascendo onde o anterior caiu).
+ *
+ * Deriva dos `id` das entidades, e nao de `world.rng`, DE PROPOSITO: a sequencia
+ * de sorteio e comparada entre a predicao do cliente e o resim da autoridade
+ * (core/rng.ts), e consumir um numero aqui deslocaria tudo o que vem depois.
+ * Aritmetica inteira sobre os ids da o mesmo angulo nas duas pontas e nas duas
+ * rodadas do teste de determinismo.
+ */
+function direcaoDeDesempate(idA: string, idB: string): Point {
+  // `id` e `entity-<n>` (entity.ts), entao somar os codigos dos caracteres
+  // separa os pares na pratica e nao depende do formato continuar o mesmo.
+  let h = 0
+  for (let i = 0; i < idA.length; i++) h = (h * 31 + idA.charCodeAt(i)) % 100003
+  for (let i = 0; i < idB.length; i++) h = (h * 17 + idB.charCodeAt(i)) % 100003
+  const rad = ((h % 360) * Math.PI) / 180
+  return { x: Math.cos(rad), y: Math.sin(rad) }
+}
+
+/**
+ * Desloca um corpo por (dx, dy) respeitando parede pintada e o circulo andavel.
+ *
+ * Mesma degradacao por eixo do `slideToward`: o passo cheio, senao so X, senao
+ * so Y, senao nao anda. Um empurrao NUNCA pode ser a porta de entrada pra
+ * atravessar parede — a colisao da arte e mais forte que a separacao de corpos.
+ */
+function empurrarCorpo(
+  entity: { x: number; y: number },
+  dx: number,
+  dy: number,
+  mapDef: MapDef,
+  mapCx: number,
+  mapCy: number,
+  mapRadius: number,
+): void {
+  const alvo = clampToMapCircle(entity.x + dx, entity.y + dy, mapCx, mapCy, mapRadius)
+  if (canOccupy(mapDef, alvo.x, alvo.y)) {
+    entity.x = alvo.x
+    entity.y = alvo.y
+    return
+  }
+  if (canOccupy(mapDef, alvo.x, entity.y)) {
+    entity.x = alvo.x
+    return
+  }
+  if (canOccupy(mapDef, entity.x, alvo.y)) {
+    entity.y = alvo.y
+  }
+}
+
+/**
+ * Nenhum corpo vivo ocupa o espaco de outro (PH-384).
+ *
+ * Roda no FIM de `updateMovement`, depois de todo mundo ter andado: a separacao
+ * corrige a sobreposicao que o passo daquele tick criou, em vez de disputar o
+ * destino com quem esta perseguindo.
+ *
+ * O par se resolve pela METADE pra cada lado. Empurrar so um dos dois faria o
+ * inimigo parado (`engaged`, que nao anda) absorver todo o deslocamento e o
+ * jogador atravessar o campo empurrando a fila inteira.
+ *
+ * O teto de `SEPARACAO_MAXIMA_POR_SEGUNDO` existe pro caso de sobreposicao
+ * GRANDE (dois corpos nascendo no mesmo ponto): resolver de uma vez leria como
+ * teleporte. Sobreposicao normal — no maximo o passo de um tick — cabe inteira
+ * dentro do teto e se resolve no mesmo tick.
+ *
+ * O(n²) sem grade espacial de proposito: `maxEnemies` e 6, entao sao 21 pares no
+ * pior caso do jogo inteiro. Uma grade custaria mais em manutencao do que
+ * economiza em ciclos.
+ *
+ * MORTO NAO EMPURRA E NAO E EMPURRADO: o corpo fica em campo por
+ * `deathRemovalTimer` (e pra sempre na arena do Lance, `keepCorpses`), e um
+ * cadaver que ocupa espaco viraria obstaculo permanente em volta do jogador.
+ *
+ * IMOBILIZADO (sono/congelamento) TAMBEM SE MOVE AQUI. Imobilizacao e sobre nao
+ * poder AGIR — andar, perseguir, atacar —, nao sobre virar poste. Um POKE
+ * dormindo empurrado alguns pixels por quem esbarra nele nao ganha nem perde
+ * nada; um POKE dormindo intransponivel deixaria a sobreposicao sem solucao,
+ * porque o outro lado teria que absorver o dobro.
+ */
+function separarCorpos(world: WorldState, dt: number): void {
+  const { player, enemies, mapDef } = world
+  if (!player || !mapDef) return
+
+  const corpos: { x: number; y: number; id: string; radius: number }[] = []
+  if (!isDead(player)) corpos.push(player)
+  for (const enemy of enemies) {
+    if (!isDead(enemy)) corpos.push(enemy)
+  }
+  if (corpos.length < 2) return
+
+  const mapCx = mapDef.bounds.width / 2
+  const mapCy = mapDef.bounds.height / 2
+  const mapRadius = mapWalkRadius(mapDef)
+  const teto = SEPARACAO_MAXIMA_POR_SEGUNDO * dt
+
+  for (let passada = 0; passada < PASSADAS_DE_SEPARACAO; passada++) {
+    let sobrou = false
+    for (let i = 0; i < corpos.length; i++) {
+      for (let j = i + 1; j < corpos.length; j++) {
+        const a = corpos[i]
+        const b = corpos[j]
+        const minima = a.radius + b.radius
+        const dx = b.x - a.x
+        const dy = b.y - a.y
+        const dist = Math.hypot(dx, dy)
+        if (dist >= minima) continue
+        sobrou = true
+
+        const normal = dist > 0
+          ? { x: dx / dist, y: dy / dist }
+          : direcaoDeDesempate(a.id, b.id)
+        const metade = Math.min(minima - dist, teto) / 2
+
+        empurrarCorpo(a, -normal.x * metade, -normal.y * metade, mapDef, mapCx, mapCy, mapRadius)
+        empurrarCorpo(b, normal.x * metade, normal.y * metade, mapDef, mapCx, mapCy, mapRadius)
+      }
+    }
+    // Campo folgado (o caso comum: 1 ou 2 corpos encostando) resolve na
+    // primeira passada e sai — as outras seriam varredura a toa.
+    if (!sobrou) break
+  }
+}
+
 // Puxa (x, y) de volta pra borda circular caminhavel do mapa se caiu fora
 // dela — a hunt nao tem mais cantos retangulares, so esse circulo invisivel.
 function clampToMapCircle(x: number, y: number, mapCx: number, mapCy: number, mapRadius: number): Point {
@@ -435,4 +612,8 @@ export function updateMovement(world: WorldState, dt: number): void {
       }
     }
   }
+
+  // Depois de TODO MUNDO ter andado, nao antes e nao no meio: a separacao
+  // desfaz a sobreposicao que o passo deste tick criou. Ver `separarCorpos`.
+  separarCorpos(world, dt)
 }
