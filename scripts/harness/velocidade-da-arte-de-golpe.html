@@ -108,6 +108,28 @@
                              mediana). Pra trocar o conjunto, editar PADRAO.
       ?fundo=plains          qualquer nome de assets/hunt-backgrounds/
       ?atual=0               esconde a coluna do modelo atual (nao recomendado)
+      ?ciclo=3               muda a referencia de "cabe entre dois golpes".
+                             O PADRAO 2 e o valor REAL de hoje
+                             (`TURNO_SEGUNDOS` na planilha mestra). Serve pra
+                             responder "e se o combate fosse mais lento?" SEM
+                             mexer no jogo — mas leia o aviso abaixo antes de
+                             usar o resultado como argumento.
+
+  O QUE ?ciclo= NAO SIGNIFICA
+  ---------------------------------------------------------------------------
+  Aqui ele so move a regua. No jogo, `TURNO_SEGUNDOS` nao e "o intervalo entre
+  ataques": e O TURNO, e o combate inteiro esta escrito em turnos.
+
+    * cooldown de TODO golpe = `TURNO_SEGUNDOS x (20 / pp)` (data/abilities.ts)
+    * o piso global entre acoes = `MIN_ACTION_GAP = TURNO_SEGUNDOS`
+    * o tique de dano de veneno/queimadura
+    * a duracao de sono/congelamento, que sao contados em TURNOS
+    * o texto do glossario que promete esses numeros ao jogador
+
+  Levar de 2 pra 3 dilata o combate inteiro em 1,5x de forma uniforme — o que
+  e bom (nenhum balanceamento RELATIVO muda) e caro: a vazao cai pra 1/1,5, ou
+  seja **-33% de ouro/h, XP/h e mobs/h pra todo jogador**. E decisao de
+  balanceamento, na planilha mestra, nao conserto de animacao.
 -->
 <style>
   :root { color-scheme: dark; }
@@ -170,7 +192,10 @@ const FPS = (params.get('fps') || '10,12,15,20').split(',').map(Number).filter((
 // entre dois golpes basicos, e existe pra mostrar quanto dele cada opcao come.
 const IMPACT_EFFECT_DURATION = 1.0
 const AOE_EFFECT_DURATION = 1.2
-const CICLO = 2.0
+// Referencia de "cabe entre dois golpes". 2,0 e o valor REAL de hoje
+// (`TURNO_SEGUNDOS`); `?ciclo=` so move a regua desta pagina — ver o aviso no
+// cabecalho sobre o que mudar isso custaria no jogo.
+const CICLO = Number(params.get('ciclo')) > 0 ? Number(params.get('ciclo')) : 2.0
 const ALCANCE = 39, POKE_RAIO = 14.5
 
 const fundo = new Image()
@@ -198,6 +223,7 @@ const LINHAS = filtro
 
 document.getElementById('modo').textContent =
   `fundo ${FUNDO} · candidatos ${FPS.join(', ')} fps · ciclo ${CICLO}s`
+  + (CICLO !== 2 ? '  ⚠ ciclo HIPOTETICO — o real e 2,0s' : '')
 
 /** Quantos quadros a fase percorre de fato — `repeticoes` multiplica. */
 function quadrosEfetivos(linha) {
