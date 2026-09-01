@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<!-- OBRIGATORIO. As URLs de arte no codigo do jogo sao RELATIVAS
+     (`assets/battle-sprites/...`, `assets/hunt-backgrounds/...`), e o jogo roda
+     em /jogo, entao elas caem em /assets/... Esta pagina mora em
+     /scripts/harness/, onde a mesma URL relativa vira
+     /scripts/harness/assets/... e da 404 EM SILENCIO — o desenho nao lanca
+     erro, so cai no placeholder geometrico. -->
+<base href="/" />
+<title>Bancada da encarada no duelo (PH-397)</title>
+<!--
+  A ENCARADA, DESENHADA PELO PROPRIO JOGO
+
+  POR QUE ELA EXISTE, tendo `src/engine/systems/encarada.test.ts`
+
+  O teste prova que a coreografia e INOFENSIVA: a distancia nunca sai do
+  alcance de combate, nada de parede atravessada, `world.rng` intocado, o par
+  segue 'engaged'. Nada disso responde a unica pergunta que importa numa
+  feature puramente cosmetica — ELA FICA BONITA? — e nenhum numero responde:
+
+  1. A CADENCIA DA ARTE. `Walk` do sheet PMD toca a uma taxa FIXA
+     (`durations[frame] / 60`), que nao escala com velocidade. A escolha de
+     30px/s tangenciais foi feita pra casar com ela, e "casar" e uma coisa que
+     so o olho julga. Devagar demais e o POKE corre no lugar.
+  2. A TROCA DE FILEIRA. `facing` gira continuamente e alimenta as 8 direcoes do
+     sheet. Cruzar uma fronteira de 45 graus troca a fileira inteira do
+     spritesheet — se ficar visivel como um "estalo", o arco esta rapido demais.
+  3. A CAMERA. `renderer.ts#_computeCamera` trava no jogador SEM suavizacao
+     nenhuma: tudo que o jogador faz, o fundo inteiro faz junto. O arco foi
+     escolhido em vez da volta completa exatamente por isso, e o balanco que
+     sobra so da pra medir olhando.
+
+  DOIS PAINEIS LADO A LADO, e essa e a razao da pagina
+
+     Esquerda: a encarada LIGADA.   Direita: `mapDef.encarada = false`, que e o
+     jogo de hoje. Mesma semente, mesmo POKE, mesmo tick. Sem o par lado a lado
+     a comparacao vira memoria, e memoria de animacao e ruim.
+
+  PARAMETROS
+
+     ?especie=dragonite   qual POKE o jogador leva (padrao: charizard)
+     ?zoom=1.5            zoom da camera (padrao: o do jogo)
+     ?arco=50             meia-abertura do arco em graus, so pra experimentar
+     ?vel=30              velocidade tangencial em px/s, so pra experimentar
+
+     `arco` e `vel` NAO mexem no jogo — a pagina os aplica reescrevendo os
+     valores no mundo dela. Servem pra achar o numero na tela antes de
+     escrever em `encaradaSystem.ts`.
+
+  COMO RODAR
+
+     npm run dev
+     abrir http://localhost:5173/scripts/harness/encarada-no-duelo.html
+
+  A porta 5173 nao e opcional: e a unica origem que o CORS da Edge libera, e a
+  pagina sobe o motor real, que puxa o catalogo.
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14171a; color: #dfe4ea; font: 12px/1.5 ui-monospace, monospace; }
+  h1 { font-size: 14px; margin: 12px; font-weight: 600; }
+  .aviso { margin: 0 12px 12px; color: #9aa4ae; max-width: 1100px; }
+  .par { display: flex; gap: 12px; padding: 0 12px 16px; flex-wrap: wrap; }
+  .painel { display: flex; flex-direction: column; gap: 4px; }
+  .rotulo { color: #ffe9a8; }
+  .rotulo.off { color: #9aa4ae; }
+  canvas { background: #000; border: 1px solid #2a2f36; display: block; }
+  .medidas { margin: 0 12px 24px; white-space: pre; color: #9aa4ae; }
+  button { font: inherit; background: #2a2f36; color: #dfe4ea; border: 1px solid #3a4149; padding: 4px 10px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Encarada no duelo (PH-397) — arena do Campeão Lance</h1>
+<p class="aviso">
+  Esquerda: coreografia ligada. Direita: o jogo de hoje (par parado em Idle entre um golpe e outro).
+  Os dois mundos rodam com a mesma semente e o mesmo passo de tempo.
+  <button id="pausa">pausar</button>
+</p>
+<div class="par">
+  <div class="painel"><span class="rotulo">encarada LIGADA</span><canvas id="ligada" width="520" height="420"></canvas></div>
+  <div class="painel"><span class="rotulo off">como é hoje (desligada)</span><canvas id="desligada" width="520" height="420"></canvas></div>
+</div>
+<p class="medidas" id="medidas">medindo…</p>
+
+<script type="module">
+import { createRng } from '/src/core/rng.ts'
+import { createPokeInstance } from '/src/data/pokes.ts'
+import { LANCE_MAP_ID } from '/src/data/nightmareMaps.ts'
+import { buildMapWorld, stepWorld } from '/src/engine/simulation.ts'
+import { useGameStateStore } from '/src/stores/gameStateStore.ts'
+import { Renderer } from '/src/render/renderer.ts'
+
+const params = new URLSearchParams(location.search)
+const ESPECIE = params.get('especie') || 'charizard'
+const PASSO = 1 / 60
+
+// O jogador precisa AGUENTAR o time inteiro do Lance, senao a bancada mostra
+// dois segundos de duelo e uma tela de troca. Nao e balanceamento: nada da
+// coreografia olha HP.
+function duelista() {
+  const poke = createPokeInstance(createRng(11), ESPECIE, 100)
+  poke.stats = { hp: 99999, atkFis: 1, atkEsp: 1, def: 9999, defEsp: 9999, speed: 100 }
+  poke.hp = 99999
+  return poke
+}
+
+function montarMundo(comEncarada) {
+  const gs = useGameStateStore.getState()
+  gs.resetToDefaults()
+  gs.addPokeToTeam(duelista())
+  gs.setActiveIndex(0)
+  const world = buildMapWorld(LANCE_MAP_ID, useGameStateStore.getState().team[0], {
+    seed: 0,
+    rng: createRng(7),
+    counters: { entity: 1, effect: 1, pendingHit: 1 },
+  })
+  // O painel da direita e o jogo de hoje: mesmo mundo, flag do mapa desligada.
+  if (!comEncarada) world.mapDef = { ...world.mapDef, encarada: false }
+  return world
+}
+
+const mundos = [
+  { world: montarMundo(true), renderer: new Renderer(document.getElementById('ligada')) },
+  { world: montarMundo(false), renderer: new Renderer(document.getElementById('desligada')) },
+]
+const zoom = Number(params.get('zoom'))
+if (Number.isFinite(zoom) && zoom > 0) for (const m of mundos) m.renderer.zoom = zoom
+
+// `arco` e `vel` reescrevem o estado do mundo da esquerda a cada tick, DEPOIS
+// do motor ter andado — e por isso que dao pra experimentar numero sem tocar em
+// `encaradaSystem.ts`. Ausentes, a pagina mostra exatamente o que o jogo faz.
+const arcoGraus = Number(params.get('arco'))
+const velExperimental = Number(params.get('vel'))
+
+const medidas = document.getElementById('medidas')
+let rodando = true
+document.getElementById('pausa').onclick = (e) => {
+  rodando = !rodando
+  e.target.textContent = rodando ? 'pausar' : 'continuar'
+}
+
+function passo(world) {
+  const gameState = useGameStateStore.getState()
+  if (world.player) world.player.poke.hp = world.player.poke.stats.hp
+  for (const e of world.enemies) e.poke.hp = e.poke.stats.hp
+  stepWorld(world, PASSO, gameState)
+  if (world.encarada && Number.isFinite(arcoGraus)) {
+    const limite = (arcoGraus * Math.PI) / 180
+    world.encarada.desvio = Math.max(-limite, Math.min(limite, world.encarada.desvio))
+  }
+}
+
+function texto(world, nome) {
+  const jogador = world.player
+  const inimigo = world.enemies.find((e) => e.poke.hp > 0)
+  if (!jogador || !inimigo) return `${nome}: sem par em campo`
+  const dist = Math.hypot(inimigo.x - jogador.x, inimigo.y - jogador.y).toFixed(1)
+  const desvio = world.encarada ? ((world.encarada.desvio * 180) / Math.PI).toFixed(0) : '—'
+  const sentido = world.encarada ? (world.encarada.sentido > 0 ? 'horário' : 'anti-horário') : '—'
+  const trocas = world.encarada ? world.encarada.trocas : '—'
+  return `${nome}: distância ${dist}px · desvio ${desvio}° · ${sentido} · golpes trocados ${trocas} · anim ${jogador.battleAnim?.url?.split('/').pop() ?? 'placeholder'}`
+}
+
+function quadro() {
+  if (rodando) {
+    for (const m of mundos) {
+      if (velExperimental > 0 && m.world.mapDef?.encarada) {
+        // Aproximacao boa o bastante pra bancada: escala o desvio do tick
+        // inteiro pela razao entre a velocidade pedida e a do jogo (30px/s).
+        const antes = m.world.encarada?.desvio ?? 0
+        passo(m.world)
+        if (m.world.encarada) {
+          m.world.encarada.desvio = antes + (m.world.encarada.desvio - antes) * (velExperimental / 30)
+        }
+      } else {
+        passo(m.world)
+      }
+      if (m.world.mapDef) m.renderer.renderMap(m.world.mapDef, m.world)
+    }
+    medidas.textContent = [texto(mundos[0].world, 'ligada  '), texto(mundos[1].world, 'desligada')].join('\n')
+  }
+  requestAnimationFrame(quadro)
+}
+quadro()
+</script>
+</body>
+</html>

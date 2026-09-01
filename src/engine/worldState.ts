@@ -27,6 +27,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     autoTimers: { treinador: 0 },
     reviveCountdown: null,
     trocaEmCampo: null,
+    encarada: null,
     respawnTimer: null,
     sequenceIndex: 0,
     sequenceCleared: false,
