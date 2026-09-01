@@ -8,7 +8,8 @@
 // (icone, tooltip) e nao pode depender do motor.
 //
 // O TURNO DESTE JOGO. Nos jogos originais um turno e uma rodada da batalha.
-// Aqui o combate e continuo, entao "turno" e TURNO_SEGUNDOS (2s) — o mesmo
+// Aqui o combate e continuo, entao "turno" e TURNO_SEGUNDOS (3s desde a
+// PH-376; leia a constante, nao o numero neste comentario) — o mesmo
 // intervalo minimo entre duas acoes de um POKE. Um veneno que tira 1/8 por
 // turno tira 1/8 a cada 2 segundos.
 import { STATUS_RULES } from './generated/status.generated'

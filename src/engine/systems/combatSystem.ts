@@ -76,7 +76,8 @@ import type { Clima, ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, 
 // conectando), mas pedido explicito revertendo aquilo: a sobreposicao lia como
 // incoerente, nao como golpe conectando.
 //
-// Nada mais depende do valor mudar aqui: `MIN_ACTION_GAP` (2s) continua sendo
+// Nada mais depende do valor mudar aqui: `MIN_ACTION_GAP` (o TURNO, 3s desde a
+// PH-376) continua sendo
 // o que impede golpe empilhado, e o travamento de movimento ja lia
 // `attackAnimTimer` (tambem `ATTACK_ANIM_DURATION`) — os dois relogios voltam
 // a bater.
@@ -92,7 +93,7 @@ const HIT_LAND_DELAY = ATTACK_ANIM_DURATION
 //
 // Nestes valores as tiras rodam entre 25 e 40 quadros por segundo, que e a
 // faixa em que a animacao le como movimento e nao como sequencia de imagens.
-// Continua bem abaixo do MIN_ACTION_GAP (2s), entao dois golpes seguidos do
+// Continua bem abaixo do MIN_ACTION_GAP (o turno, 3s), entao dois golpes seguidos do
 // mesmo POKE nao empilham efeito.
 // TETO de vida do efeito, e nao mais o tempo em que a arte tem que caber.
 //
