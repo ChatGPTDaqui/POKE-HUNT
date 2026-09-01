@@ -77248,6 +77248,126 @@ function moveToward(entity, tx, ty, speed, dt, mapDef) {
 	entity.pathStuckSeconds = !arrived && entity.x === beforeX && entity.y === beforeY ? entity.pathStuckSeconds + dt : 0;
 	return arrived;
 }
+var SEPARACAO_MAXIMA_POR_SEGUNDO = 120;
+/**
+* Quantas varreduras de pares por tick.
+*
+* UMA NAO BASTA COM O CAMPO CHEIO, e isso foi medido. Cada par e resolvido em
+* sequencia (Gauss-Seidel), entao o par seguinte desfaz parte do que o
+* anterior acertou. Com seis inimigos empilhados no mesmo pixel, uma passada
+* so estabiliza em ~22 unidades de distancia minima e para de melhorar; quatro
+* chegam a ~28, que e o limite geometrico do caso (ver a nota da funcao).
+*
+* O laco sai cedo quando nenhum par sobrou sobreposto, entao o caso comum — um
+* ou dois corpos encostando — continua custando UMA varredura.
+*/
+var PASSADAS_DE_SEPARACAO = 4;
+/**
+* Direcao de desempate quando dois corpos estao EXATAMENTE no mesmo ponto.
+*
+* Sem isto a normal seria 0/0 e ninguem se moveria — e o caso acontece de
+* verdade (dois inimigos entrando pela mesma bola de spawn, POKE substituto
+* nascendo onde o anterior caiu).
+*
+* Deriva dos `id` das entidades, e nao de `world.rng`, DE PROPOSITO: a sequencia
+* de sorteio e comparada entre a predicao do cliente e o resim da autoridade
+* (core/rng.ts), e consumir um numero aqui deslocaria tudo o que vem depois.
+* Aritmetica inteira sobre os ids da o mesmo angulo nas duas pontas e nas duas
+* rodadas do teste de determinismo.
+*/
+function direcaoDeDesempate(idA, idB) {
+	let h = 0;
+	for (let i = 0; i < idA.length; i++) h = (h * 31 + idA.charCodeAt(i)) % 100003;
+	for (let i = 0; i < idB.length; i++) h = (h * 17 + idB.charCodeAt(i)) % 100003;
+	const rad = h % 360 * Math.PI / 180;
+	return {
+		x: Math.cos(rad),
+		y: Math.sin(rad)
+	};
+}
+/**
+* Desloca um corpo por (dx, dy) respeitando parede pintada e o circulo andavel.
+*
+* Mesma degradacao por eixo do `slideToward`: o passo cheio, senao so X, senao
+* so Y, senao nao anda. Um empurrao NUNCA pode ser a porta de entrada pra
+* atravessar parede — a colisao da arte e mais forte que a separacao de corpos.
+*/
+function empurrarCorpo(entity, dx, dy, mapDef, mapCx, mapCy, mapRadius) {
+	const alvo = clampToMapCircle(entity.x + dx, entity.y + dy, mapCx, mapCy, mapRadius);
+	if (canOccupy(mapDef, alvo.x, alvo.y)) {
+		entity.x = alvo.x;
+		entity.y = alvo.y;
+		return;
+	}
+	if (canOccupy(mapDef, alvo.x, entity.y)) {
+		entity.x = alvo.x;
+		return;
+	}
+	if (canOccupy(mapDef, entity.x, alvo.y)) entity.y = alvo.y;
+}
+/**
+* Nenhum corpo vivo ocupa o espaco de outro (PH-384).
+*
+* Roda no FIM de `updateMovement`, depois de todo mundo ter andado: a separacao
+* corrige a sobreposicao que o passo daquele tick criou, em vez de disputar o
+* destino com quem esta perseguindo.
+*
+* O par se resolve pela METADE pra cada lado. Empurrar so um dos dois faria o
+* inimigo parado (`engaged`, que nao anda) absorver todo o deslocamento e o
+* jogador atravessar o campo empurrando a fila inteira.
+*
+* O teto de `SEPARACAO_MAXIMA_POR_SEGUNDO` existe pro caso de sobreposicao
+* GRANDE (dois corpos nascendo no mesmo ponto): resolver de uma vez leria como
+* teleporte. Sobreposicao normal — no maximo o passo de um tick — cabe inteira
+* dentro do teto e se resolve no mesmo tick.
+*
+* O(n²) sem grade espacial de proposito: `maxEnemies` e 6, entao sao 21 pares no
+* pior caso do jogo inteiro. Uma grade custaria mais em manutencao do que
+* economiza em ciclos.
+*
+* MORTO NAO EMPURRA E NAO E EMPURRADO: o corpo fica em campo por
+* `deathRemovalTimer` (e pra sempre na arena do Lance, `keepCorpses`), e um
+* cadaver que ocupa espaco viraria obstaculo permanente em volta do jogador.
+*
+* IMOBILIZADO (sono/congelamento) TAMBEM SE MOVE AQUI. Imobilizacao e sobre nao
+* poder AGIR — andar, perseguir, atacar —, nao sobre virar poste. Um POKE
+* dormindo empurrado alguns pixels por quem esbarra nele nao ganha nem perde
+* nada; um POKE dormindo intransponivel deixaria a sobreposicao sem solucao,
+* porque o outro lado teria que absorver o dobro.
+*/
+function separarCorpos(world, dt) {
+	const { player, enemies, mapDef } = world;
+	if (!player || !mapDef) return;
+	const corpos = [];
+	if (!isDead(player)) corpos.push(player);
+	for (const enemy of enemies) if (!isDead(enemy)) corpos.push(enemy);
+	if (corpos.length < 2) return;
+	const mapCx = mapDef.bounds.width / 2;
+	const mapCy = mapDef.bounds.height / 2;
+	const mapRadius = mapWalkRadius(mapDef);
+	const teto = SEPARACAO_MAXIMA_POR_SEGUNDO * dt;
+	for (let passada = 0; passada < PASSADAS_DE_SEPARACAO; passada++) {
+		let sobrou = false;
+		for (let i = 0; i < corpos.length; i++) for (let j = i + 1; j < corpos.length; j++) {
+			const a = corpos[i];
+			const b = corpos[j];
+			const minima = a.radius + b.radius;
+			const dx = b.x - a.x;
+			const dy = b.y - a.y;
+			const dist = Math.hypot(dx, dy);
+			if (dist >= minima) continue;
+			sobrou = true;
+			const normal = dist > 0 ? {
+				x: dx / dist,
+				y: dy / dist
+			} : direcaoDeDesempate(a.id, b.id);
+			const metade = Math.min(minima - dist, teto) / 2;
+			empurrarCorpo(a, -normal.x * metade, -normal.y * metade, mapDef, mapCx, mapCy, mapRadius);
+			empurrarCorpo(b, normal.x * metade, normal.y * metade, mapDef, mapCx, mapCy, mapRadius);
+		}
+		if (!sobrou) break;
+	}
+}
 function clampToMapCircle(x, y, mapCx, mapCy, mapRadius) {
 	const dx = x - mapCx;
 	const dy = y - mapCy;
@@ -77452,6 +77572,7 @@ function updateMovement(world, dt) {
 			} else wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef);
 		}
 	}
+	separarCorpos(world, dt);
 }
 //#endregion
 //#region src/engine/systems/economySystem.ts

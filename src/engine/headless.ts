@@ -28,6 +28,14 @@ export { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 // cliente entraria com uma sala sorteada por ele e trocaria de sub-bioma
 // (com aviso na tela) 30 segundos depois de entrar na hunt.
 export { novaSala, temSalas, solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, protetorDaSala } from './systems/salaSystem'
+// PH-386: a unica porta pela qual a sala do servidor entra no cliente. O
+// servidor NAO a chama (lá `salaSobAutoridade` e false e a sala e sorteada
+// localmente) — quem precisa dela aqui e a bancada
+// `scripts/harness/troca-de-sala-sob-autoridade.mjs`, que roda as DUAS pontas
+// com o protocolo real pra medir quanto tempo o jogador fica parado em 30/30.
+// Sem ela a bancada teria que reimplementar a reconciliacao, e mediria a copia
+// em vez do jogo.
+export { reconciliarSalaDaAutoridade } from './systems/salaSystem'
 export type { AvancoDeSala, TipoDeProtetor } from './systems/salaSystem'
 // PH-301: "este POKE consegue causar dano naquele?" — a pergunta que o sorteio
 // do protetor passou a fazer. Exportada pra bancada

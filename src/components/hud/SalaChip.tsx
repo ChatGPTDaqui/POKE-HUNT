@@ -50,6 +50,10 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // Sem ela a tela nao tem como distinguir "sala pede protetor" de "protetor ja
   // resolvido", e ofereceria o avanco num estado que o servidor recusa.
   const protetorResolvido = useWorldStore((s) => s.protetorResolvido)
+  // PH-386: quem decide a sala e o servidor, e o cliente so descobre no flush.
+  // Sem este flag a tela nao tem como distinguir "a sala vai trocar em 3s" de
+  // "a sala esta esperando resposta" — ver `esperandoAAutoridade` abaixo.
+  const salaSobAutoridade = useWorldStore((s) => s.salaSobAutoridade)
   const avancoManualLigado = useGameStateStore((s) => s.autoToggles.avancoManualDeSala)
   if (!sala) return null
 
@@ -71,6 +75,37 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // trocou sozinha) e sem transicao em andamento (o clique nao tem o que
   // fazer enquanto o overlay de "Entrando em nova area" ja esta na tela).
   const podeAvancarManual = avancoManualLigado && quotaFechada && countdown == null && !travadaPeloProtetor
+
+  // A ESPERA PARA DE SER SILENCIOSA (PH-386).
+  //
+  // Este era o unico dos quatro estados de "30/30" sem nada na tela:
+  //
+  //   1. protetor vivo            -> "Derrote o Guardião" (PH-209/291)
+  //   2. avanco manual ligado     -> botao "Próximo Nível" (PH-180)
+  //   3. transicao em andamento   -> overlay "Entrando em nova área"
+  //   4. esperando o servidor     -> NADA
+  //
+  // E o (4) nao e raro: e o caso NORMAL de toda troca de sala sob autoridade.
+  // Medido em `scripts/harness/troca-de-sala-sob-autoridade.mjs`, 48 trocas em 8
+  // sementes: mediana de 33,0s parado com a barra cheia, p90 de 33,0s e pior
+  // caso de 243s. O piso de ~30s e o intervalo de flush — o cliente pede a
+  // liquidacao na hora em que a quota fecha (`observarQuotaDeSala`), mas nessa
+  // hora o servidor tipicamente ainda nao fechou a dele, e a proxima resposta
+  // vem um intervalo depois.
+  //
+  // O jogo NAO para nesse tempo: o respawn de mob comum volta assim que o
+  // protetor e resolvido, e o jogador continua matando, ganhando ouro e XP. O
+  // que congela e o contador da sala — e uma barra cheia que nao anda, sem
+  // explicacao nenhuma, e exatamente o relato "a sala nao esta trocando".
+  //
+  // `salaSobAutoridade` no predicado: no jogo local a transicao e imediata e
+  // este estado nao existe. `!avancoManualLigado` porque ali quem esta sendo
+  // esperado e o CLIQUE, nao o servidor — e o botao ao lado ja diz isso.
+  const esperandoAAutoridade = quotaFechada
+    && salaSobAutoridade
+    && !travadaPeloProtetor
+    && countdown == null
+    && !avancoManualLigado
 
   // O QUE NAO CABE NO CHIP (PH-272). No trilho, `Lv X-Y` e o numero do ciclo
   // saem de cena pra o NOME do sub-bioma caber inteiro — o nome e a resposta pra
@@ -170,6 +205,14 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
       {quotaFechada && travadaPeloProtetor && (
         <span className="shrink-0 text-[.7em] font-medium text-warn">
           Derrote o {tipoDeProtetor === 'lord' ? 'Lorde' : 'Guardião'}
+        </span>
+      )}
+      {/* PH-386: ver `esperandoAAutoridade`. Cor neutra e nao `warn`: nada esta
+          errado nem pede acao do jogador — a area seguinte esta a caminho, e
+          enquanto ela nao chega o farm continua rendendo. */}
+      {esperandoAAutoridade && (
+        <span className="shrink-0 text-[.7em] font-medium text-n400">
+          Preparando a próxima área...
         </span>
       )}
     </div>
