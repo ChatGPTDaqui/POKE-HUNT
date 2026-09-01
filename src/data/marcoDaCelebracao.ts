@@ -78,6 +78,37 @@ export const DURACAO: Record<Intensidade, number> = {
 }
 
 /**
+ * Level-up fica 4 SEGUNDOS na tela — pedido explicito do usuario (PH-398).
+ *
+ * ISSO CONTRARIA A NOTA DO TOPO DESTE ARQUIVO, e o registro fica: a regra de
+ * frequencia foi desenhada medindo 612 abates/hora, e o argumento era que
+ * celebracao longa e frequente vira algo que o jogador aprende a ignorar. 4s por
+ * nivel, com um cartao POR nivel, e o oposto dessa escolha.
+ *
+ * Foi decisao do dono do projeto, que tambem foi quem tomou a anterior. O que
+ * sobrou de defesa contra a parede de cartoes e o `TETO_DA_FILA` do store: no
+ * maximo tres esperando, ou seja 16s de fila, e o mais antigo em espera cai.
+ *
+ * SO LEVEL-UP. Evolucao e shiny ficam nos 2600ms — o pedido nomeia "splashs de
+ * lvlup", e sao eles que acontecem toda hora.
+ */
+export const DURACAO_DE_NIVEL_MS = 4000
+
+/**
+ * Quanto tempo ESTA celebracao fica na tela.
+ *
+ * Uma funcao, e nao `DURACAO[intensidade]` espalhado: a duracao passou a depender
+ * do TIPO (level-up) e nao so da intensidade, e o componente tem tres lugares que
+ * leem esse numero (o timer, a animacao do chip e a do cartao). Com o mapa cru,
+ * um deles ficaria com a duracao antiga e o cartao sumiria antes do timer — ou
+ * ficaria parado depois dele.
+ */
+export function duracaoDe(c: Celebracao): number {
+  if (c.tipo === 'nivel' || c.tipo === 'treinador') return DURACAO_DE_NIVEL_MS
+  return DURACAO[intensidadeDe(c)]
+}
+
+/**
  * Teto de quanto um cartao pode ser ESTENDIDO pela coalescencia, em multiplos
  * da propria duracao.
  *

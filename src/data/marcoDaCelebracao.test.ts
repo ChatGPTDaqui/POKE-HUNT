@@ -12,6 +12,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   PASSO_DO_MARCO, PASSO_DO_MARCO_DO_TREINADOR, cruzouMultiplo, ehMarco, intensidadeDe,
+  DURACAO, DURACAO_DE_NIVEL_MS, duracaoDe,
 } from './marcoDaCelebracao'
 import type { Celebracao } from '@/stores/celebracaoStoreVanilla'
 
@@ -111,5 +112,35 @@ describe('intensidade (PH-192)', () => {
 
   it('nivel do treinador e sempre medio', () => {
     expect(intensidadeDe({ tipo: 'treinador', nome: 'Mark', nivelInicial: 7, nivel: 8 })).toBe('medio')
+  })
+})
+
+// PH-398: a duracao passou a depender do TIPO, e nao so da intensidade.
+//
+// Level-up fica 4s por pedido explicito do usuario. Isso contraria a regra de
+// frequencia que este proprio arquivo documenta (ver `DURACAO_DE_NIVEL_MS`), e o
+// registro fica; o que estes casos trancam e que a decisao vale pros DOIS tipos
+// de level-up e NAO vaza pra evolucao/shiny, que continuam com o tempo antigo.
+describe('duracao por tipo (PH-398)', () => {
+  it('nivel de POKE fica 4 segundos, discreto OU marco', () => {
+    // O chip (discreto) e o cartao (marco) tem o mesmo tempo: o pedido e sobre
+    // "splash de lvlup", nao sobre uma das duas formas dele.
+    expect(duracaoDe(nivel(33, 34))).toBe(DURACAO_DE_NIVEL_MS)
+    expect(duracaoDe(nivel(34, 35))).toBe(DURACAO_DE_NIVEL_MS)
+    expect(DURACAO_DE_NIVEL_MS).toBe(4000)
+  })
+
+  it('nivel de TREINADOR tambem', () => {
+    expect(duracaoDe({ tipo: 'treinador', nome: 'Mark', nivelInicial: 7, nivel: 8 }))
+      .toBe(DURACAO_DE_NIVEL_MS)
+  })
+
+  it('evolucao e shiny NAO mudaram — eles nao acontecem toda hora', () => {
+    const evo: Celebracao = {
+      tipo: 'evolucao', deId: 'charmeleon', paraId: 'charizard',
+      deNome: 'Charmeleon', paraNome: 'Charizard', isShiny: false,
+    }
+    expect(duracaoDe(evo)).toBe(DURACAO.cheio)
+    expect(duracaoDe({ tipo: 'shiny', especieId: 'charizard', nome: 'Charizard' })).toBe(DURACAO.cheio)
   })
 })
