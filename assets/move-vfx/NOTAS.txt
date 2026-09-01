@@ -60,3 +60,30 @@ REGERAR UMA TIRA (a ferramenta monta os tiles sozinha, ja recortando):
   py POKE/PXG_2026/objectbuilder/tira_efeito.py <id> --projeto pxg \
      --recortar --out assets/move-vfx/tiras/<tipo>.png
 O <id> esta no nome dos arquivos de POKE/Assets/move sprites/nomeados/.
+
+5. A ARTE E AUTORADA A 100 ms POR QUADRO — 10 fps, e isso nao e estimativa.
+   O .dat guarda duracao por quadro e o parser PULAVA esse bloco; lendo ele
+   (PH-373), o banco inteiro responde uma coisa so: 5.394 efeitos, 69.282
+   quadros, TODOS a 100 ms, sem uma variacao e sem nenhum `min != max`.
+
+   O jogo usa essa velocidade desde a PH-374. Antes ele esticava cada tira pra
+   caber num tempo fixo, o que fazia o NUMERO DE QUADROS decidir a velocidade
+   — 39 fps numa arte e 4,2 fps noutra, 9,3x de espalhamento.
+
+   `tira_efeito.py` imprime "autorado 100 ms/quadro" em toda exportacao. Se um
+   banco novo trouxer outro numero, ele aparece ali na hora.
+
+6. QUADRO VAZIO CONTA COMO QUADRO, e por isso e aparado dos DOIS lados.
+   `quadros` e o DIVISOR da velocidade no jogo, entao quadro vazio infla o
+   numero e ACELERA o desenho real, alem de virar tempo morto na tela.
+
+   Ate a PH-373 o exportador aparava so o FIM, e testava com
+   `getbbox() is None` — que so acha quadro 100% transparente. As duas coisas
+   deixavam passar: 25 das 78 tiras cadastradas tinham quadro vazio na ponta,
+   ate 32% (o `dig` gastava o primeiro terco desenhando nada; o ICE tinha 9
+   vazios NA FRENTE e tocava a 39 fps em vez de 30).
+
+   Hoje o corte e por MEDIA DE ALPHA do quadro (>= 1/255), nos dois lados. O
+   acervo ja commitado foi aparado por
+   `py scripts/aparar-quadros-vazios-vfx.py`, que usa o MESMO limiar — os dois
+   tem que continuar iguais, senao arte nova e arte velha divergem.

@@ -15,8 +15,9 @@ import {
   aplicarStatus, curarStatus, tickStatus, tentarAgir, statusVaiPegar,
   aplicarEfeitosDoGolpe, aplicarMudancasDeStat, limparEstadoVolatil,
 } from './statusSystem'
-import { getAbility, ABILITIES } from '@/data/abilities'
+import { getAbility, ABILITIES, TURNO_SEGUNDOS } from '@/data/abilities'
 import type { WorldEntity } from '../types'
+import { SEGUNDOS_DE_IMUNIDADE_APOS_CURA } from '@/data/statusEffects'
 import type { StatusCondition } from '@/data/statusEffects'
 
 function poke(speciesId: string, hpMax = 160): PokeInstance {
@@ -165,8 +166,14 @@ describe('aplicacao', () => {
     const alvo = entidade('rattata')
     aplicarStatus(createRng(1), alvo, 'poison', 100)
     curarStatus(alvo, 'poison')
-    // 3 turnos de 2s = 6s. Passa o tempo em fatias.
-    for (let i = 0; i < 40; i++) tickStatus(createRng(5), alvo, 0.2)
+    // Passa a imunidade inteira em fatias de 0,2s. A CONTA sai de
+    // SEGUNDOS_DE_IMUNIDADE_APOS_CURA e nao de um numero na unha: ela e
+    // TURNOS_DE_IMUNIDADE_APOS_CURA x TURNO_SEGUNDOS, e o turno virou 3s na
+    // PH-376 — com o 40 fixo (8s) o teste passou a parar ANTES dos 9s de
+    // imunidade e reprovou por aritmetica velha, nao por defeito.
+    const fatia = 0.2
+    const fatias = Math.ceil(SEGUNDOS_DE_IMUNIDADE_APOS_CURA / fatia) + 1
+    for (let i = 0; i < fatias; i++) tickStatus(createRng(5), alvo, fatia)
     expect(alvo.imunidadeDeStatus).toBe(0)
     expect(aplicarStatus(createRng(9), alvo, 'poison', 100)).not.toBeNull()
   })
@@ -201,7 +208,7 @@ describe('passagem do tempo', () => {
     const alvo = entidade('rattata')
     aplicarStatus(createRng(1), alvo, 'sleep', 100)
     const turnos = alvo.poke.status!.turnosRestantes!
-    for (let i = 0; i < turnos; i++) tickStatus(createRng(4), alvo, 2)
+    for (let i = 0; i < turnos; i++) tickStatus(createRng(4), alvo, TURNO_SEGUNDOS)
     expect(alvo.poke.status).toBeNull()
   })
 
@@ -225,7 +232,7 @@ describe('passagem do tempo', () => {
     const rng = createRng(11)
     let saiu = false
     for (let i = 0; i < 200 && !saiu; i++) {
-      saiu = tickStatus(rng, alvo, 2).expirados.includes('freeze')
+      saiu = tickStatus(rng, alvo, TURNO_SEGUNDOS).expirados.includes('freeze')
     }
     expect(saiu).toBe(true)
   })
@@ -287,7 +294,7 @@ describe('golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/aqua_
   it('leech_seed tira 1/8 do HP maximo do alvo e devolve quem drenar', () => {
     const alvo = entidade('rattata', 160)
     alvo.seeded = { sourceId: 'origem-1' }
-    const r = tickStatus(createRng(1), alvo, 2)
+    const r = tickStatus(createRng(1), alvo, TURNO_SEGUNDOS)
     expect(r.dano).toBe(20) // 160/8
     expect(r.drenoParaOrigem).toEqual({ sourceId: 'origem-1', amount: 20 })
   })
@@ -295,7 +302,7 @@ describe('golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/aqua_
   it('curseDot tira 1/4 do HP maximo por turno, sem timer (continua ligado)', () => {
     const alvo = entidade('rattata', 160)
     alvo.curseDot = true
-    const r = tickStatus(createRng(1), alvo, 2)
+    const r = tickStatus(createRng(1), alvo, TURNO_SEGUNDOS)
     expect(r.dano).toBe(40) // 160/4
     expect(alvo.curseDot).toBe(true) // so sai quando o alvo desmaiar/a batalha acabar
   })
@@ -303,19 +310,19 @@ describe('golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/aqua_
   it('nightmareDot so causa dano enquanto o alvo estiver com status sleep', () => {
     const acordado = entidade('rattata', 160)
     acordado.nightmareDot = true
-    expect(tickStatus(createRng(1), acordado, 2).dano).toBe(0)
+    expect(tickStatus(createRng(1), acordado, TURNO_SEGUNDOS).dano).toBe(0)
 
     const dormindo = entidade('rattata', 160)
     dormindo.nightmareDot = true
     aplicarStatus(createRng(1), dormindo, 'sleep', 100)
-    expect(tickStatus(createRng(1), dormindo, 2).dano).toBe(40) // 160/4
+    expect(tickStatus(createRng(1), dormindo, TURNO_SEGUNDOS).dano).toBe(40) // 160/4
   })
 
   it('regenPercent (Ingrain/Aqua Ring, mesmo campo pros dois) cura 1/16 do HP maximo por turno', () => {
     const alvo = entidade('rattata', 160)
     alvo.poke.hp = 100
     alvo.regenPercent = 1 / 16
-    tickStatus(createRng(1), alvo, 2)
+    tickStatus(createRng(1), alvo, TURNO_SEGUNDOS)
     expect(alvo.poke.hp).toBe(110) // 100 + 160/16
   })
 
@@ -464,10 +471,10 @@ describe('Heal Block / Yawn / Perish Song (Fase 12)', () => {
     // resolveHit#'yawn') — o primeiro tickStatus fecha o turno ATUAL (sem
     // sono ainda), o segundo fecha o PROXIMO turno de verdade.
     alvo.yawnTurnos = 2
-    const r1 = tickStatus(createRng(1), alvo, 2)
+    const r1 = tickStatus(createRng(1), alvo, TURNO_SEGUNDOS)
     expect(alvo.poke.status).toBeNull()
     expect(r1.expirados).toEqual([])
-    const r2 = tickStatus(createRng(1), alvo, 2)
+    const r2 = tickStatus(createRng(1), alvo, TURNO_SEGUNDOS)
     expect(alvo.poke.status?.tipo).toBe('sleep')
     expect(alvo.yawnTurnos).toBeNull()
     expect(r2).toBeTruthy()
@@ -476,16 +483,16 @@ describe('Heal Block / Yawn / Perish Song (Fase 12)', () => {
   it('Perish Song: contador de 3 turnos chega a 0 e reporta `pereceu`', () => {
     const alvo = entidade('rattata')
     alvo.perishCountdown = 3
-    expect(tickStatus(createRng(1), alvo, 2).pereceu).toBe(false)
-    expect(tickStatus(createRng(1), alvo, 2).pereceu).toBe(false)
-    const r3 = tickStatus(createRng(1), alvo, 2)
+    expect(tickStatus(createRng(1), alvo, TURNO_SEGUNDOS).pereceu).toBe(false)
+    expect(tickStatus(createRng(1), alvo, TURNO_SEGUNDOS).pereceu).toBe(false)
+    const r3 = tickStatus(createRng(1), alvo, TURNO_SEGUNDOS)
     expect(r3.pereceu).toBe(true)
     expect(alvo.perishCountdown).toBeNull()
   })
 
   it('sem perishCountdown ativo, tickStatus nunca reporta pereceu', () => {
     const alvo = entidade('rattata')
-    expect(tickStatus(createRng(1), alvo, 2).pereceu).toBe(false)
+    expect(tickStatus(createRng(1), alvo, TURNO_SEGUNDOS).pereceu).toBe(false)
   })
 })
 

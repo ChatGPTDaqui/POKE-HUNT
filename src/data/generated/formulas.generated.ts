@@ -161,7 +161,7 @@ export const FORMULAS: FormulasData = {
     "vars": []
   },
   "TURNO_SEGUNDOS": {
-    "expr": "2",
+    "expr": "3",
     "vars": []
   }
 };
