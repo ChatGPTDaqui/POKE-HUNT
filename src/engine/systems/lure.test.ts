@@ -148,6 +148,39 @@ describe('lure: fase de reuniao', () => {
     expect(world.lure?.fase).toBe('lutando')
   })
 
+  // PH-394: o MESMO caso do shiny, com o protetor da sala — que virou alvo
+  // prioritario no PH-331 e ficou fora desta saida.
+  //
+  // O QUE ISSO CUSTAVA NA TELA: com lure ligado, o POKE passava pelo Guardian
+  // sem bater ate a reuniao fechar (`reunindoParaLure` suprime o golpe e a fase
+  // `reunindo` sobrepoe a escolha de alvo). E como a sala so avanca quando o
+  // protetor cai, a hunt ficava parada — a reuniao reinicia sozinha assim que
+  // ninguem mais esta atras do jogador, entao isso se repetia.
+  it('protetor em campo cancela a reuniao na hora, igual ao shiny', () => {
+    const { world, gameState } = cenario({ quantidade: 4 })
+    selvagem(world, { dx: 100, dy: 0, reunido: true })
+    const protetor = selvagem(world, { dx: 250, dy: 0 })
+    protetor.isProtetor = true
+
+    atualizarLure(world, gameState, PASSO)
+
+    expect(world.lure?.fase, 'a reuniao continuou e o POKE nao vai bater no protetor').toBe('lutando')
+  })
+
+  // O contrapeso do caso acima: o protetor MORTO nao pode segurar a saida —
+  // senao a sala que ja resolveu o protetor nunca mais reuniria.
+  it('protetor MORTO nao cancela a reuniao', () => {
+    const { world, gameState } = cenario({ quantidade: 4 })
+    selvagem(world, { dx: 100, dy: 0, reunido: true })
+    const protetor = selvagem(world, { dx: 250, dy: 0, morto: true })
+    protetor.isProtetor = true
+    selvagem(world, { dx: 300, dy: 0 })
+
+    atualizarLure(world, gameState, PASSO)
+
+    expect(world.lure?.fase).toBe('reunindo')
+  })
+
   it('segura a posicao enquanto um reunido esta perto de soltar o aggro', () => {
     const { world, player, gameState } = cenario({ quantidade: 3 })
     const retardatario = selvagem(world, { dx: 100, dy: 0, reunido: true })
