@@ -50,7 +50,7 @@ import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } fr
 import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/farmRates'
 import {
-  contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas,
+  contextoDeSpawn, lootAtivo, novaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
 } from './systems/salaSystem'
@@ -61,6 +61,7 @@ import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from './worldState'
 import { toastStore } from '@/stores/toastStoreVanilla'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
+import { splashDeSalaStore } from '@/stores/splashDeSalaVanilla'
 import type {
   ClimaTipo, EnemyEntity, EnemyHazards, Point, PlayerEntity, SalaAtiva, WorldState, ProtetorPendente,
 } from './types'
@@ -1281,14 +1282,19 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
           world.enemies.push(enemy)
         }
         world.respawnTimer = world.mapDef.respawnDelay
-        if (!silent) {
-          const nome = nomeDaSala(world.sala)
-          toastStore.getState().pushToast(
-            fechouCiclo
-              ? `Ciclo ${world.sala?.ciclos ?? 0} concluído! Voltando para a primeira sala: ${nome}.`
-              : `Entrando em nova área: ${nome}.`,
-            'success', 'world',
-          )
+        // O AVISO DE CHEGADA VIROU SPLASH, e nao e mais um toast (PH-395).
+        //
+        // O nome do lugar e a informacao que o jogador quer da troca de sala, e
+        // ela saia num toast de canto, com a mesma duracao e no mesmo lugar de
+        // "Item encontrado: Potion". Agora ela tem espaco proprio, 4 segundos, e
+        // o resto (numero da sala, faixa de nivel, bioma) e derivado da propria
+        // `sala` pelo componente — o motor manda o FATO, nao o texto.
+        //
+        // `!silent` pelo mesmo motivo de sempre: o resim do servidor e o
+        // catch-up de aba oculta atravessam varias salas de uma vez, e nao ha
+        // ninguem olhando.
+        if (!silent && world.sala) {
+          splashDeSalaStore.getState().anunciarSala(world.sala, fechouCiclo)
         }
       }
     }
