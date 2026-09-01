@@ -12,6 +12,31 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // A PH-382 subiu na `dev` sem nota, e ela e do tipo que NAO pode subir calada:
+  // teve relato de jogador (01/09) descrevendo o time errado na tela.
+  //
+  // O QUE O JOGADOR VIA: com `active_team_index = 1`, o trilho de reservas
+  // desenhava o MESMO POKE que estava em campo — mesma instancia, entao nivel e HP
+  // da "reserva" subiam junto com os de campo — e o POKE do slot 0 ficava
+  // invisivel. Na conta que reportou, o Eevee do Lance sumiu e a reserva 2 virou o
+  // POKE que estava lutando.
+  //
+  // A SEGUNDA FRASE DA NOTA E A QUE IMPORTA, e nao e enfeite: o conserto se aplica
+  // sozinho ao save torto na carga (`snapshotToGameState` roda o POKE apontado por
+  // `active_team_index` pro slot 0). Sem dizer isso, quem viu o time errado nao tem
+  // como distinguir "consertaram" de "mudou de novo sozinho" — e um jogador que
+  // acha que o time embaralha sem motivo para de confiar no save.
+  //
+  // FORA DA NOTA: o custo de fork do wrapper do CLI do Supabase (PH-377). E CI, e
+  // ninguem joga o CI.
+  {
+    version: '7.29',
+    date: '2026-09-01',
+    title: 'A reserva voltou a ser a reserva',
+    highlights: [
+      'O TRILHO DE RESERVAS MOSTRAVA O POKE QUE ESTAVA LUTANDO. Depois de uma troca automática por desmaio, o mesmo POKE podia aparecer em campo E na reserva, com o nível e o HP dos dois subindo juntos, enquanto o POKE do primeiro slot ficava invisível. Se o seu time ficou assim, ele se corrige sozinho na próxima vez que você entrar — não precisa mexer em nada.',
+    ],
+  },
   // ENTRADA PROPRIA, e nao um quinto item da 7.27, porque a 7.27 JA FOI
   // PROMOVIDA (PR #368) enquanto esta mudanca ainda estava em revisao. A
   // regua e uma entrada por promocao: acrescentar item numa versao que o
