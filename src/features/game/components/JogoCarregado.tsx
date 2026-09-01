@@ -8,6 +8,7 @@ import { DefeatModal } from '@/components/modals/DefeatModal'
 import { LanceCountdownModal, LanceVictoryReturn } from '@/components/modals/LanceModals'
 import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
 import { SalaCountdownModal } from '@/components/modals/SalaCountdownModal'
+import { SplashDeSala } from '@/components/modals/SplashDeSala'
 import { ViagemAoHospitalOverlay } from '@/components/modals/ViagemAoHospitalOverlay'
 import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
 import { HudLayer } from '../HudLayer'
@@ -122,6 +123,11 @@ export function JogoCarregado() {
       <TutorialModal />
       <ConfirmDialog />
       <CamadaDeCelebracao />
+      {/* PH-395: montado DEPOIS das janelas de propósito. Ele já se esconde
+          sozinho quando alguma delas está aberta (`useJanelaSobreOCampo`), mas a
+          ordem aqui é a segunda linha de defesa — z-[46] fica abaixo do
+          ConfirmDialog (60) e do perfil (45/46). */}
+      <SplashDeSala />
       {summary && <OfflineFarmModal summary={summary} onClose={dismiss} />}
     </div>
   )

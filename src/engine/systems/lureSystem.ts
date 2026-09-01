@@ -56,6 +56,8 @@
 // (Intimidate, Download, clima automatico) continuam disparando ao engajar, e
 // os inimigos continuam agindo normalmente.
 import { isDead, distanceTo } from '../entity'
+// PH-394: a regra de 'quem e alvo prioritario' tem UM dono, e e o movimento.
+import { ehAlvoPrioritario } from './movementSystem'
 import { LURE_QUANTIDADE_MIN, LURE_QUANTIDADE_MAX } from '@/stores/gameStateDefaults'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import type { EnemyEntity, EstadoDeLure, PlayerEntity, WorldState } from '../types'
@@ -167,9 +169,24 @@ function proximoCandidato(player: PlayerEntity, enemies: EnemyEntity[]): EnemyEn
   return melhor
 }
 
-/** Ha shiny vivo em campo? */
-function temShinyVivo(enemies: EnemyEntity[]): boolean {
-  return enemies.some((e) => !isDead(e) && e.poke.isShiny)
+/**
+ * Ha ALVO PRIORITARIO vivo em campo — shiny ou protetor (Guardian/Lord)?
+ *
+ * ERA `temShinyVivo`, E ESSE ERA O BUG (PH-394). A saida de shiny existe porque
+ * a prioridade de shiny do movimento e mais forte que o lure, e as duas mandam no
+ * MESMO `player` em direcoes diferentes. O PH-331 deu ao protetor a mesma
+ * prioridade do shiny em `movementSystem#ehAlvoPrioritario` — e ninguem atualizou
+ * esta saida. Resultado com lure ligado: o POKE andava passando pelo protetor sem
+ * bater (a fase `reunindo` sobrepoe a escolha de alvo, e `reunindoParaLure`
+ * suprime o golpe), e como a sala so avanca quando o protetor cai, a hunt ficava
+ * parada esperando uma reuniao que reinicia sozinha.
+ *
+ * Consome `ehAlvoPrioritario` em vez de repetir a pergunta: "quem e alvo
+ * prioritario" precisa de UM dono, e ele e o movimento. Foi exatamente a copia da
+ * regra (aqui olhando so shiny, la olhando os dois) que produziu este defeito.
+ */
+function temAlvoPrioritarioVivo(enemies: EnemyEntity[]): boolean {
+  return enemies.some((e) => !isDead(e) && ehAlvoPrioritario(e))
 }
 
 /**
@@ -222,12 +239,15 @@ export function atualizarLure(world: WorldState, gameState: GameStateStore, dt: 
     //  - sem candidato: hunt de um inimigo so (a inicial, as 11 BOSS, o Lance)
     //    e tambem o caso em que TODOS ja estao reunidos — nao ha mais o que
     //    puxar, e insistir seria andar sem bater pra sempre;
-    //  - shiny: a prioridade de shiny do movimento (movementSystem) e mais
-    //    antiga e mais importante que o lure, e as duas mandariam no mesmo
-    //    `player` em direcoes diferentes;
+    //  - ALVO PRIORITARIO vivo — shiny OU protetor (Guardian/Lord): a prioridade
+    //    do movimento (movementSystem#ehAlvoPrioritario) e mais forte que o
+    //    lure, e as duas mandariam no mesmo `player` em direcoes diferentes. Era
+    //    SO shiny ate PH-394, e o protetor (prioritario desde PH-331) ficava de
+    //    fora: o POKE passava por ele sem bater ate a reuniao fechar, e a sala
+    //    nao avanca sem o protetor cair;
     //  - tempo-limite: ver LURE_TEMPO_MAXIMO_DE_REUNIAO.
     const fechou = reunidos.length >= alvo
-    if (fechou || candidato == null || temShinyVivo(enemies) || tempoRestante <= 0) {
+    if (fechou || candidato == null || temAlvoPrioritarioVivo(enemies) || tempoRestante <= 0) {
       fase = 'lutando'
     } else {
       // Retardatario perto de soltar o aggro: segura a posicao em vez de puxar

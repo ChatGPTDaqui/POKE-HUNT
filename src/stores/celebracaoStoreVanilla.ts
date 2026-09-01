@@ -87,13 +87,45 @@ function somarGanhos(a: StatBlock | null, b: StatBlock | null): StatBlock | null
   return fora
 }
 
+/**
+ * LEVEL-UP DE POKE NAO COALESCE MAIS (PH-398).
+ *
+ * Pedido explicito do usuario: um splash POR NIVEL, com os ganhos daquele nivel.
+ * A coalescencia era o oposto disso — ela juntava a rajada num cartao so, somando
+ * os ganhos e esticando o intervalo (`nivelInicial`..`nivel`).
+ *
+ * O que ela protegia continua protegido, por outro mecanismo: era ela que
+ * impedia a fila de virar uma parede de cartoes num jogo que faz 612 abates/hora.
+ * Quem faz isso agora e `TETO_DA_FILA` — e o teto descarta o mais ANTIGO em
+ * espera, nao o mais novo, porque o mais novo carrega o nivel mais alto.
+ *
+ * O TREINADOR CONTINUA COALESCENDO. O pedido era sobre "splash de lvlup" com
+ * stats por nivel, e o cartao do treinador nao tem stats — ele so diz o nivel. E
+ * ele sobe muito mais devagar (mesma EXP por abate, curva mais longa), entao a
+ * rajada dele e rara e juntar nao esconde nada.
+ */
 function podeJuntar(a: Celebracao | undefined, b: Celebracao): boolean {
   if (!a) return false
-  if (a.tipo === 'nivel' && b.tipo === 'nivel') return a.especieId === b.especieId
   if (a.tipo === 'treinador' && b.tipo === 'treinador') return true
-  // Evolucao e shiny NAO coalescem: cada uma e um evento unico.
+  // Evolucao, shiny e nivel de POKE NAO coalescem: cada um e um evento unico.
   return false
 }
+
+/**
+ * Quantos cartoes podem estar ESPERANDO, alem do que esta na tela.
+ *
+ * A VALVULA QUE A COALESCENCIA ERA. Com um cartao por nivel a 4 segundos cada,
+ * uma rajada de dez niveis (POKE muito acima do teto da hunt sobe vario nivel por
+ * abate) daria 40 segundos de cartao — mais tempo de splash que de jogo, e
+ * tapando o combate que o jogador tenta ler.
+ *
+ * Tres em espera = no maximo 16s de fila. Passando disso, o mais ANTIGO em espera
+ * cai: o jogador ve o primeiro nivel da rajada (que ja esta na tela) e os tres
+ * ultimos, e o ultimo e o que tem o nivel mais alto — a informacao que ele quer
+ * conferir. Descartar o mais novo faria o cartao final mostrar um nivel que o
+ * POKE ja passou.
+ */
+export const TETO_DA_FILA = 3
 
 function juntar(a: Celebracao, b: Celebracao): Celebracao {
   if (a.tipo === 'nivel' && b.tipo === 'nivel') {
@@ -146,7 +178,14 @@ export const celebracaoStore = createStore<CelebracaoState>()((set) => ({
         const junta = { id: ultima.id, celebracao: juntar(ultima.celebracao, c) }
         return { fila: [...fila.slice(0, -1), junta] }
       }
-      return { fila: [...fila, { id: proximoId++, celebracao: c }] }
+      const comNova = [...fila, { id: proximoId++, celebracao: c }]
+      // PH-398: teto de fila. O indice 0 e o que esta NA TELA e nunca e
+      // interrompido — quem cai e o mais antigo da ESPERA (indice 1). Ver
+      // `TETO_DA_FILA`.
+      if (comNova.length > TETO_DA_FILA + 1) {
+        return { fila: [comNova[0], ...comNova.slice(2)] }
+      }
+      return { fila: comNova }
     }),
 
   encerrarAtual: () => set((estado) => ({ fila: estado.fila.slice(1) })),

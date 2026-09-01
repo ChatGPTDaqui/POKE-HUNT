@@ -34,6 +34,22 @@ export interface HuntMapDef extends MapDataEntry {
   unlocksContinentOnClear?: string[]
   startCountdown?: number
   keepCorpses?: boolean
+  /**
+   * PH-397: esta hunt e um DUELO — os dois POKEs se encaram e giram num arco
+   * entre um golpe e o outro, em vez de ficarem parados na pose de Idle. Ver
+   * `engine/systems/encaradaSystem.ts`.
+   *
+   * Ligada hoje nos 12 mapas de duelo (a arena do Campeao Lance e as 11 hunts
+   * BOSS de lendario) e desligada em todo o resto.
+   *
+   * FLAG EXPLICITA, e nao `maxEnemies === 1` inferido, embora hoje os 12 mapas
+   * sejam exatamente os que tem `maxEnemies: 1`. `maxEnemies` e botao de
+   * BALANCEAMENTO: no dia em que alguem der dois inimigos a uma hunt BOSS pra
+   * ajustar dificuldade, a coreografia sumiria junto, sem nada ligando as duas
+   * coisas. A flag tambem e por onde o duelo entre jogadores entra quando ele
+   * existir — sem tocar no sistema.
+   */
+  encarada?: boolean
   // Hunt-alvo de teste (ver data/trainingDummy.ts): abate nao concede EXP,
   // ouro, item nem captura. `handleEnemyDefeated` sai cedo com um resumo
   // zerado antes de tocar em qualquer uma dessas quatro coisas.

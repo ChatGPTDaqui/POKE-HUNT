@@ -50,7 +50,7 @@ import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } fr
 import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/farmRates'
 import {
-  contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas,
+  contextoDeSpawn, lootAtivo, novaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
 } from './systems/salaSystem'
@@ -61,6 +61,7 @@ import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from './worldState'
 import { toastStore } from '@/stores/toastStoreVanilla'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
+import { splashDeSalaStore } from '@/stores/splashDeSalaVanilla'
 import type {
   ClimaTipo, EnemyEntity, EnemyHazards, Point, PlayerEntity, SalaAtiva, WorldState, ProtetorPendente,
 } from './types'
@@ -959,11 +960,10 @@ export function handleEnemyDefeated(
   }
 
   const expGain = expRewardForEnemy(enemy.poke, poke.level)
-  // Os niveis ANTES da concessao, guardados aqui porque `grantExp`/
-  // `grantTrainerExp` devolvem so o nivel final e a cascata some (PH-192). Sao
-  // dois numeros na pilha; a alternativa seria o cartao de celebracao mentir
-  // sobre quantos niveis subiram de uma vez.
-  const nivelAntesDoAbate = poke.level
+  // O nivel do TREINADOR antes da concessao. `grantTrainerExp` devolve so o
+  // nivel final, e o cartao dele CONTINUA coalescendo (PH-398) — entao o
+  // intervalo importa. O do POKE nao esta mais aqui: `grantExp` passou a
+  // devolver o detalhe por nivel (`niveis`), e cada cartao usa `nivel - 1`.
   const nivelDoTreinadorAntes = gameState.trainer.level
 
   const grantResult = grantExp(poke, expGain)
@@ -1024,24 +1024,36 @@ export function handleEnemyDefeated(
       for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) {
         toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, 'levelup', 'combat')
       }
-      // `nivelAntesDoAbate` e nao `grantResult.level - 1` (PH-192): `grantExp`
-      // tem um `while` e um unico abate pode subir varios niveis de uma vez.
-      // Sem o nivel de partida o cartao diria "Nv 36" numa cascata que veio do
-      // 33, escondendo dois tercos do que aconteceu — e o teste de marco
-      // (`cruzouMultiplo`) perderia o 35 no meio do caminho.
-      celebracaoStore.getState().celebrar({
-        tipo: 'nivel',
-        especieId: grantResult.poke.speciesId,
-        nome: SPECIES[grantResult.poke.speciesId].name,
-        nivelInicial: nivelAntesDoAbate,
-        nivel: grantResult.level,
-        ganhos: grantResult.statGains,
-        // So golpe de DANO, igual ao toast logo acima: o jogador nao precisa de
-        // um cartao pra dizer que aprendeu um golpe de status que a IA nem vai
-        // priorizar.
-        golpesNovos: grantResult.newAbilities.filter(isDamagingAbility).map((a) => a.name),
-        isShiny: Boolean(grantResult.poke.isShiny),
-      })
+      // UM CARTAO POR NIVEL (PH-398), pedido explicito do usuario.
+      //
+      // Antes era um cartao pela rajada inteira, com `nivelAntesDoAbate` ->
+      // `grantResult.level` e os ganhos SOMADOS — um abate pode subir vários
+      // níveis (`grantExp` tem um `while`), e a coalescência do store ainda
+      // juntava abates seguidos no mesmo cartão.
+      //
+      // `grantResult.niveis` traz o detalhe por nível, e o intervalo de cada
+      // cartão é `nivel - 1` -> `nivel`: com isso o teste de marco
+      // (`cruzouMultiplo`, a cada 5) passa a acertar EXATAMENTE o nível que
+      // cruza o múltiplo, em vez de detectar "houve um 35 no meio" e mostrar o
+      // cartão grande no fim da rajada.
+      //
+      // O teto de fila do store (`TETO_DA_FILA`) é o que impede a rajada de
+      // virar uma parede de cartões — era isso que a coalescência fazia.
+      for (const nivelGanho of grantResult.niveis) {
+        celebracaoStore.getState().celebrar({
+          tipo: 'nivel',
+          especieId: grantResult.poke.speciesId,
+          nome: SPECIES[grantResult.poke.speciesId].name,
+          nivelInicial: nivelGanho.nivel - 1,
+          nivel: nivelGanho.nivel,
+          ganhos: nivelGanho.ganhos,
+          // So golpe de DANO, igual ao toast logo acima: o jogador nao precisa de
+          // um cartao pra dizer que aprendeu um golpe de status que a IA nem vai
+          // priorizar.
+          golpesNovos: nivelGanho.golpesNovos.filter(isDamagingAbility).map((a) => a.name),
+          isShiny: Boolean(grantResult.poke.isShiny),
+        })
+      }
     }
     if (trainerResult.leveledUp) {
       toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nível ${trainerResult.level}!`, 'levelup', 'combat')
@@ -1281,14 +1293,19 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
           world.enemies.push(enemy)
         }
         world.respawnTimer = world.mapDef.respawnDelay
-        if (!silent) {
-          const nome = nomeDaSala(world.sala)
-          toastStore.getState().pushToast(
-            fechouCiclo
-              ? `Ciclo ${world.sala?.ciclos ?? 0} concluído! Voltando para a primeira sala: ${nome}.`
-              : `Entrando em nova área: ${nome}.`,
-            'success', 'world',
-          )
+        // O AVISO DE CHEGADA VIROU SPLASH, e nao e mais um toast (PH-395).
+        //
+        // O nome do lugar e a informacao que o jogador quer da troca de sala, e
+        // ela saia num toast de canto, com a mesma duracao e no mesmo lugar de
+        // "Item encontrado: Potion". Agora ela tem espaco proprio, 4 segundos, e
+        // o resto (numero da sala, faixa de nivel, bioma) e derivado da propria
+        // `sala` pelo componente — o motor manda o FATO, nao o texto.
+        //
+        // `!silent` pelo mesmo motivo de sempre: o resim do servidor e o
+        // catch-up de aba oculta atravessam varias salas de uma vez, e nao ha
+        // ninguem olhando.
+        if (!silent && world.sala) {
+          splashDeSalaStore.getState().anunciarSala(world.sala, fechouCiclo)
         }
       }
     }

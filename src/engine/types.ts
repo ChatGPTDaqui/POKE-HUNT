@@ -111,6 +111,20 @@ export interface BaseEntity {
   vfxCuraHp?: number
   vfxCuraStatus?: number
 
+  /**
+   * PH-397: este POKE esta girando na encarada do duelo NESTE tick.
+   *
+   * Efemera e reescrita todo tick por `aplicarEncarada` — nao ha estado a
+   * preservar aqui, o estado do par vive em `WorldState.encarada`.
+   *
+   * Existe porque `desiredAnimName` precisa saber que o corpo esta andando pra
+   * escolher 'Walk' em vez de 'Idle', e a informacao NAO pode vir de
+   * `entity.state`: `updateCombat` filtra os inimigos por `state === 'engaged'`,
+   * entao trocar o estado pra 'chase' so pra ganhar a animacao pararia o
+   * combate.
+   */
+  encarando?: boolean
+
   // --- Status ---------------------------------------------------------------
   // O status NAO-VOLATIL (veneno, queimadura, paralisia, sono, congelamento)
   // mora no `poke`, nao aqui: ele sobrevive a hunt e vai pro banco, como nos
@@ -381,6 +395,28 @@ export interface ProtetorPendente {
   nature?: NatureKey
   trait?: string
   hpAtual: number
+}
+
+/**
+ * PH-397: a coreografia de encarada de UM par em duelo.
+ *
+ * Mora aqui e nao em `systems/encaradaSystem.ts` pela mesma convencao de
+ * `SalaAtiva`/`ProtetorPendente`: `types.ts` nao importa de `systems/`, so de
+ * `data/` e `core/`, e e `WorldState` que precisa da forma.
+ */
+export interface EstadoDaEncarada {
+  /** `id` dos dois, pra detectar troca de POKE em campo (a sequencia do Lance). */
+  parKey: string
+  /** Eixo do arco: o angulo do par no instante em que a encarada comecou. */
+  anguloBase: number
+  /** Deslocamento atual dentro do arco, em radianos, preso a +/- ARCO_MAXIMO. */
+  desvio: number
+  sentido: 1 | -1
+  /** Golpes trocados desde o inicio desta encarada. Semente do sorteio de sentido. */
+  trocas: number
+  /** Havia pose de ataque no tick anterior — usado pra achar a BORDA de subida. */
+  poseAtiva: boolean
+  paradoSegundos: number
 }
 
 export type WorldEntity = PlayerEntity | EnemyEntity
@@ -673,6 +709,16 @@ export interface WorldState {
    * que `engine/lance.test.ts` existe pra impedir.
    */
   trocaEmCampo: number | null
+  /**
+   * PH-397: estado da coreografia de encarada do par em duelo, ou `null` quando
+   * nao ha duelo acontecendo.
+   *
+   * EFEMERO como `trocaEmCampo`, e pelo mesmo tipo de razao: e uma pose, nao um
+   * progresso. Um flush que corte no meio de uma varredura de arco so faz o par
+   * recomecar do eixo atual na janela seguinte — nada que o jogador consiga
+   * apontar, e nada que justifique um campo novo no payload do servidor.
+   */
+  encarada: EstadoDaEncarada | null
   sequenceIndex: number
   sequenceCleared: boolean
   countdownRemaining: number | null

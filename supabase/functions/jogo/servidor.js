@@ -46168,6 +46168,7 @@ function buildBossHunts() {
 			},
 			maxEnemies: 1,
 			noRespawn: true,
+			encarada: true,
 			respawnDelay: 6,
 			spawnPoints: [{
 				x: 700,
@@ -46264,6 +46265,7 @@ function buildLanceHunt() {
 			unlocksContinentOnClear: GRUPOS_DO_LANCE,
 			startCountdown: 5,
 			keepCorpses: true,
+			encarada: true,
 			respawnDelay: 2,
 			spawnPoints: [{
 				x: 700,
@@ -74778,6 +74780,7 @@ function desiredAnimName(entity) {
 	if (entity.poke.status?.tipo === "sleep") return "Sleep";
 	if (entity.attackAnimTimer > 0) return entity.attackAnim;
 	if (imobilizadoPorStatus(entity)) return "Idle";
+	if (entity.encarando) return "Walk";
 	if (entity.state === "chase") return "Walk";
 	if (entity.state === "wander") return entity.wanderTarget ? "Walk" : "Idle";
 	return "Idle";
@@ -75114,9 +75117,24 @@ function proximoCandidato(player, enemies) {
 	}
 	return melhor;
 }
-/** Ha shiny vivo em campo? */
-function temShinyVivo(enemies) {
-	return enemies.some((e) => !isDead(e) && e.poke.isShiny);
+/**
+* Ha ALVO PRIORITARIO vivo em campo — shiny ou protetor (Guardian/Lord)?
+*
+* ERA `temShinyVivo`, E ESSE ERA O BUG (PH-394). A saida de shiny existe porque
+* a prioridade de shiny do movimento e mais forte que o lure, e as duas mandam no
+* MESMO `player` em direcoes diferentes. O PH-331 deu ao protetor a mesma
+* prioridade do shiny em `movementSystem#ehAlvoPrioritario` — e ninguem atualizou
+* esta saida. Resultado com lure ligado: o POKE andava passando pelo protetor sem
+* bater (a fase `reunindo` sobrepoe a escolha de alvo, e `reunindoParaLure`
+* suprime o golpe), e como a sala so avanca quando o protetor cai, a hunt ficava
+* parada esperando uma reuniao que reinicia sozinha.
+*
+* Consome `ehAlvoPrioritario` em vez de repetir a pergunta: "quem e alvo
+* prioritario" precisa de UM dono, e ele e o movimento. Foi exatamente a copia da
+* regra (aqui olhando so shiny, la olhando os dois) que produziu este defeito.
+*/
+function temAlvoPrioritarioVivo(enemies) {
+	return enemies.some((e) => !isDead(e) && ehAlvoPrioritario(e));
 }
 /**
 * Recalcula `world.lure` pro tick atual. Roda ANTES de `updateMovement`, que e
@@ -75152,7 +75170,7 @@ function atualizarLure(world, gameState, dt) {
 	if (fase === "reunindo") {
 		tempoRestante -= dt;
 		const candidato = proximoCandidato(player, enemies);
-		if (reunidos.length >= alvo || candidato == null || temShinyVivo(enemies) || tempoRestante <= 0) fase = "lutando";
+		if (reunidos.length >= alvo || candidato == null || temAlvoPrioritarioVivo(enemies) || tempoRestante <= 0) fase = "lutando";
 		else {
 			const fracao = anterior?.esperandoRetardatario === true ? LURE_FRACAO_PARA_VOLTAR_A_ANDAR : LURE_FRACAO_DA_COLEIRA;
 			if (reunidos.find((e) => distanceTo(player, e) > e.leashRadius * fracao)) esperandoRetardatario = true;
@@ -77158,6 +77176,219 @@ function updateCombat(world, dt, opts = {}) {
 	};
 }
 //#endregion
+//#region src/engine/systems/corpoNoMapa.ts
+function canOccupy(mapDef, x, y) {
+	return !isCellBlocked(mapDef, x, y);
+}
+function clampToMapCircle(x, y, mapCx, mapCy, mapRadius) {
+	const dx = x - mapCx;
+	const dy = y - mapCy;
+	const dist = Math.hypot(dx, dy);
+	if (dist <= mapRadius || dist === 0) return {
+		x,
+		y
+	};
+	const ratio = mapRadius / dist;
+	return {
+		x: mapCx + dx * ratio,
+		y: mapCy + dy * ratio
+	};
+}
+/**
+* Desloca um corpo por (dx, dy) respeitando parede pintada e o circulo andavel.
+*
+* Mesma degradacao por eixo do `slideToward`: o passo cheio, senao so X, senao
+* so Y, senao nao anda. Um empurrao NUNCA pode ser a porta de entrada pra
+* atravessar parede — a colisao da arte e mais forte que qualquer coreografia
+* ou separacao de corpos.
+*/
+function empurrarCorpo(entity, dx, dy, mapDef, mapCx, mapCy, mapRadius) {
+	const alvo = clampToMapCircle(entity.x + dx, entity.y + dy, mapCx, mapCy, mapRadius);
+	if (canOccupy(mapDef, alvo.x, alvo.y)) {
+		entity.x = alvo.x;
+		entity.y = alvo.y;
+		return;
+	}
+	if (canOccupy(mapDef, alvo.x, entity.y)) {
+		entity.x = alvo.x;
+		return;
+	}
+	if (canOccupy(mapDef, entity.x, alvo.y)) entity.y = alvo.y;
+}
+/** Meia-abertura do arco. O par varre 100 graus no total, ida e volta. */
+var ARCO_MAXIMO = 50 * Math.PI / 180;
+/**
+* Velocidade TANGENCIAL, px/s. Escolhida pela leitura da arte, nao pelo relogio:
+* e ela que decide se o `Walk` do sheet PMD combina com o quanto o corpo anda.
+* A cadencia do quadro e fixa (`animationSystem`: `durations[frame] / 60`), nao
+* escala com velocidade — deslocar devagar demais e o que produz o pe deslizando.
+*/
+var VELOCIDADE_DA_ENCARADA = 30;
+/**
+* Quanto tempo o par pode ficar sem sair do lugar antes de a coreografia
+* desistir daquele sentido.
+*
+* Acontece de verdade: `empurrarCorpo` recusa o passo que cairia em parede
+* pintada, e um par encostado na borda da arena do Lance varreria o arco
+* inteiro contra a parede sem andar nada. Inverter e o conserto — o outro lado
+* do arco esta livre por construcao (foi de la que eles vieram).
+*/
+var PARADO_ANTES_DE_INVERTER = .25;
+/**
+* Horario ou anti-horario, re-sorteado a cada golpe trocado.
+*
+* Pedido explicito: pode continuar no mesmo sentido ou inverter, 50/50 — nao e
+* uma inversao garantida.
+*
+* NAO CONSOME `world.rng`. A sequencia principal e comparada entre a predicao do
+* cliente e o resim da autoridade (core/rng.ts), entao um sorteio a mais aqui
+* deslocaria tudo o que vem depois — mesma razao pela qual
+* `movementSystem#direcaoDeDesempate` deriva dos ids em vez de sortear.
+* `deriveRng` existe exatamente pra isto: uma sequencia paralela, funcao pura de
+* (par, contador), reproduzivel nas duas pontas sem gastar nada da principal.
+*
+* Exportada so pro teste: "50/50, e nao uma inversao garantida" e uma afirmacao
+* sobre a DISTRIBUICAO, e nao da pra medir distribuicao por fora sem rodar
+* centenas de duelos.
+*/
+function sortearSentido(parKey, trocas) {
+	return nextFloat(deriveRng(0, `encarada|${parKey}|${trocas}`)) < .5 ? 1 : -1;
+}
+/**
+* O par de duelo, se houver um.
+*
+* Exige TODAS as condicoes, e cada uma por um motivo diferente:
+*
+*  - `mapDef.encarada` — flag explicita nos 12 mapas de duelo. Nao se infere de
+*    `maxEnemies === 1`: aquilo e botao de balanceamento e a coreografia se
+*    desligaria sozinha no dia em que alguem o ajustasse.
+*  - exatamente UM inimigo vivo — a coreografia e de PAR. Com dois ou mais em
+*    campo nao ha ponto medio que faca sentido. Mortos nao contam: a arena do
+*    Lance tem `keepCorpses`, entao os derrotados ficam em `world.enemies` pra
+*    sempre.
+*  - os dois em 'engaged', e o inimigo mirando o jogador — e a definicao de
+*    "estao se enfrentando agora". Sem isso a coreografia rodaria durante a
+*    aproximacao e brigaria com quem esta perseguindo.
+*/
+function parEmEncarada(world) {
+	const { player, enemies, mapDef } = world;
+	if (!mapDef?.encarada || !player) return null;
+	if (player.fainted || isDead(player) || player.state !== "engaged") return null;
+	let inimigo = null;
+	for (const e of enemies) {
+		if (isDead(e)) continue;
+		if (inimigo) return null;
+		inimigo = e;
+	}
+	if (!inimigo) return null;
+	if (inimigo.state !== "engaged" || inimigo.targetId !== player.id) return null;
+	return {
+		jogador: player,
+		inimigo
+	};
+}
+/**
+* Um tick de encarada.
+*
+* Chamada do fim de `updateMovement`, DEPOIS de todo mundo ter andado e ANTES de
+* `separarCorpos`. A ordem importa nas duas pontas: depois do movimento porque a
+* coreografia sobrepoe a posicao de quem ja parou, e antes da separacao porque e
+* ela quem tem a ultima palavra sobre corpo dentro de corpo.
+*
+* RODA TAMBEM EM MODO SILENCIOSO, e isso e de proposito. Foi um gate por
+* `silent` que travou entidades pra sempre no `tickAttackAnimTimers` (ver a nota
+* la): um estado que so avanca no cliente fica congelado em qualquer simulacao
+* de servidor. Aqui o custo e desprezivel — um par, uma vez por tick — e o
+* beneficio e nao ter duas maquinas de estado diferentes rodando dos dois lados.
+*
+* NAO TOCA EM `entity.state`. `updateCombat` filtra os inimigos por
+* `state === 'engaged'`; trocar pra 'chase' so pra ganhar a animacao de andar
+* PARARIA o combate. Quem carrega a informacao pro desenho e a flag efemera
+* `encarando`, lida so por `desiredAnimName`.
+*/
+function aplicarEncarada(world, dt) {
+	if (world.player) world.player.encarando = false;
+	for (const e of world.enemies) e.encarando = false;
+	const par = parEmEncarada(world);
+	if (!par) {
+		world.encarada = null;
+		return;
+	}
+	const { jogador, inimigo } = par;
+	const mapDef = world.mapDef;
+	const parKey = `${jogador.id}|${inimigo.id}`;
+	let estado = world.encarada;
+	if (!estado || estado.parKey !== parKey) {
+		const dx = inimigo.x - jogador.x;
+		const dy = inimigo.y - jogador.y;
+		estado = {
+			parKey,
+			anguloBase: dx === 0 && dy === 0 ? 0 : Math.atan2(dy, dx),
+			desvio: 0,
+			sentido: sortearSentido(parKey, 0),
+			trocas: 0,
+			poseAtiva: jogador.attackAnimTimer > 0 || inimigo.attackAnimTimer > 0,
+			paradoSegundos: 0
+		};
+		world.encarada = estado;
+	}
+	const poseAgora = jogador.attackAnimTimer > 0 || inimigo.attackAnimTimer > 0;
+	if (poseAgora && !estado.poseAtiva) {
+		estado.trocas += 1;
+		estado.sentido = sortearSentido(parKey, estado.trocas);
+	}
+	estado.poseAtiva = poseAgora;
+	if (poseAgora || imobilizadoPorStatus(jogador) || imobilizadoPorStatus(inimigo)) return;
+	const raio = 17;
+	const passoAngular = VELOCIDADE_DA_ENCARADA / raio * dt;
+	let desvio = estado.desvio + estado.sentido * passoAngular;
+	if (desvio > ARCO_MAXIMO) {
+		desvio = ARCO_MAXIMO;
+		estado.sentido = -1;
+	} else if (desvio < -ARCO_MAXIMO) {
+		desvio = -ARCO_MAXIMO;
+		estado.sentido = 1;
+	}
+	estado.desvio = desvio;
+	const angulo = estado.anguloBase + desvio;
+	const meioX = (jogador.x + inimigo.x) / 2;
+	const meioY = (jogador.y + inimigo.y) / 2;
+	const ux = Math.cos(angulo);
+	const uy = Math.sin(angulo);
+	const mapCx = mapDef.bounds.width / 2;
+	const mapCy = mapDef.bounds.height / 2;
+	const mapRadius = mapWalkRadius(mapDef);
+	const teto = 60 * dt;
+	const antes = {
+		jx: jogador.x,
+		jy: jogador.y,
+		ix: inimigo.x,
+		iy: inimigo.y
+	};
+	moverPara(jogador, meioX - ux * raio, meioY - uy * raio, teto, mapDef, mapCx, mapCy, mapRadius);
+	moverPara(inimigo, meioX + ux * raio, meioY + uy * raio, teto, mapDef, mapCx, mapCy, mapRadius);
+	if (Math.hypot(jogador.x - antes.jx, jogador.y - antes.jy) + Math.hypot(inimigo.x - antes.ix, inimigo.y - antes.iy) < VELOCIDADE_DA_ENCARADA * dt * .1) {
+		estado.paradoSegundos += dt;
+		if (estado.paradoSegundos >= PARADO_ANTES_DE_INVERTER) {
+			estado.sentido = estado.sentido === 1 ? -1 : 1;
+			estado.paradoSegundos = 0;
+		}
+	} else estado.paradoSegundos = 0;
+	jogador.encarando = true;
+	inimigo.encarando = true;
+	faceToward(jogador, inimigo);
+	faceToward(inimigo, jogador);
+}
+/** Empurra `corpo` em direcao a (tx, ty), no maximo `teto` unidades neste tick. */
+function moverPara(corpo, tx, ty, teto, mapDef, mapCx, mapCy, mapRadius) {
+	const dx = tx - corpo.x;
+	const dy = ty - corpo.y;
+	const dist = Math.hypot(dx, dy);
+	if (dist === 0) return;
+	const fator = Math.min(1, teto / dist);
+	empurrarCorpo(corpo, dx * fator, dy * fator, mapDef, mapCx, mapCy, mapRadius);
+}
+//#endregion
 //#region src/engine/systems/movementSystem.ts
 var WANDER_MARGIN = 40;
 var ARRIVE_THRESHOLD = 4;
@@ -77167,9 +77398,6 @@ var PATH_RECALC_INTERVAL = 1;
 var PATH_TARGET_DRIFT = 60;
 var PATH_TARGET_BIG_JUMP = 150;
 var PATH_STUCK_THRESHOLD_SECONDS = .3;
-function canOccupy(mapDef, x, y) {
-	return !isCellBlocked(mapDef, x, y);
-}
 function stepDirect(entity, tx, ty, speed, dt) {
 	const dx = tx - entity.x;
 	const dy = ty - entity.y;
@@ -77286,26 +77514,6 @@ function direcaoDeDesempate(idA, idB) {
 	};
 }
 /**
-* Desloca um corpo por (dx, dy) respeitando parede pintada e o circulo andavel.
-*
-* Mesma degradacao por eixo do `slideToward`: o passo cheio, senao so X, senao
-* so Y, senao nao anda. Um empurrao NUNCA pode ser a porta de entrada pra
-* atravessar parede — a colisao da arte e mais forte que a separacao de corpos.
-*/
-function empurrarCorpo(entity, dx, dy, mapDef, mapCx, mapCy, mapRadius) {
-	const alvo = clampToMapCircle(entity.x + dx, entity.y + dy, mapCx, mapCy, mapRadius);
-	if (canOccupy(mapDef, alvo.x, alvo.y)) {
-		entity.x = alvo.x;
-		entity.y = alvo.y;
-		return;
-	}
-	if (canOccupy(mapDef, alvo.x, entity.y)) {
-		entity.x = alvo.x;
-		return;
-	}
-	if (canOccupy(mapDef, entity.x, alvo.y)) entity.y = alvo.y;
-}
-/**
 * Nenhum corpo vivo ocupa o espaco de outro (PH-384).
 *
 * Roda no FIM de `updateMovement`, depois de todo mundo ter andado: a separacao
@@ -77367,20 +77575,6 @@ function separarCorpos(world, dt) {
 		}
 		if (!sobrou) break;
 	}
-}
-function clampToMapCircle(x, y, mapCx, mapCy, mapRadius) {
-	const dx = x - mapCx;
-	const dy = y - mapCy;
-	const dist = Math.hypot(dx, dy);
-	if (dist <= mapRadius || dist === 0) return {
-		x,
-		y
-	};
-	const ratio = mapRadius / dist;
-	return {
-		x: mapCx + dx * ratio,
-		y: mapCy + dy * ratio
-	};
 }
 function wanderStep(rng, entity, dt, centerX, centerY, radius, mapCx, mapCy, mapRadius, mapDef) {
 	if (entity.wanderTarget) {
@@ -77572,6 +77766,7 @@ function updateMovement(world, dt) {
 			} else wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef);
 		}
 	}
+	aplicarEncarada(world, dt);
 	separarCorpos(world, dt);
 }
 //#endregion
@@ -77955,19 +78150,28 @@ function grantExp(pokeInstance, amount) {
 	const unlockedAbilities = [...pokeInstance.unlockedAbilities];
 	let leveledUp = false;
 	const newAbilities = [];
+	const niveis = [];
 	while (exp >= pokeExpForLevel(level + 1, species.growthCurve)) {
 		const previousMaxHp = stats.hp;
+		const statsAntesDesteNivel = stats;
 		level += 1;
 		leveledUp = true;
 		stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature);
 		const hpGain = stats.hp - previousMaxHp;
 		hp = Math.min(stats.hp, hp + hpGain);
+		const golpesDesteNivel = [];
+		niveis.push({
+			nivel: level,
+			ganhos: diffStats(statsAntesDesteNivel, stats),
+			golpesNovos: golpesDesteNivel
+		});
 		for (const [key, exigido] of nivelDeAprendizado(species)) {
 			if (exigido !== level || unlockedAbilities.includes(key)) continue;
 			const ability = getAbility(key);
 			if (!ability) continue;
 			unlockedAbilities.push(key);
 			newAbilities.push(ability);
+			golpesDesteNivel.push(ability);
 		}
 	}
 	const poke = {
@@ -77985,7 +78189,8 @@ function grantExp(pokeInstance, amount) {
 		leveledUp,
 		newAbilities,
 		level,
-		statGains
+		statGains,
+		niveis
 	};
 }
 function diffStats(antes, depois) {
@@ -78370,10 +78575,6 @@ function protetorDaSala(sala) {
 	if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null;
 	return sala.indice >= 9 ? "lord" : "guardian";
 }
-function nomeDaSala(sala) {
-	if (!sala) return null;
-	return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave;
-}
 /**
 * Conta um abate na sala atual. Ao fechar a quota, NAO troca de sala na
 * hora — sorteia a proxima (o "carregamento" adiantado, pra UI ja saber o
@@ -78640,6 +78841,7 @@ function emptyWorldState(seed = randomSeed()) {
 		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
 		trocaEmCampo: null,
+		encarada: null,
 		respawnTimer: null,
 		sequenceIndex: 0,
 		sequenceCleared: false,
@@ -78761,9 +78963,25 @@ function somarGanhos(a, b) {
 	for (const k of Object.keys(b)) fora[k] = (a[k] ?? 0) + (b[k] ?? 0);
 	return fora;
 }
+/**
+* LEVEL-UP DE POKE NAO COALESCE MAIS (PH-398).
+*
+* Pedido explicito do usuario: um splash POR NIVEL, com os ganhos daquele nivel.
+* A coalescencia era o oposto disso — ela juntava a rajada num cartao so, somando
+* os ganhos e esticando o intervalo (`nivelInicial`..`nivel`).
+*
+* O que ela protegia continua protegido, por outro mecanismo: era ela que
+* impedia a fila de virar uma parede de cartoes num jogo que faz 612 abates/hora.
+* Quem faz isso agora e `TETO_DA_FILA` — e o teto descarta o mais ANTIGO em
+* espera, nao o mais novo, porque o mais novo carrega o nivel mais alto.
+*
+* O TREINADOR CONTINUA COALESCENDO. O pedido era sobre "splash de lvlup" com
+* stats por nivel, e o cartao do treinador nao tem stats — ele so diz o nivel. E
+* ele sobe muito mais devagar (mesma EXP por abate, curva mais longa), entao a
+* rajada dele e rara e juntar nao esconde nada.
+*/
 function podeJuntar(a, b) {
 	if (!a) return false;
-	if (a.tipo === "nivel" && b.tipo === "nivel") return a.especieId === b.especieId;
 	if (a.tipo === "treinador" && b.tipo === "treinador") return true;
 	return false;
 }
@@ -78799,7 +79017,7 @@ function juntar(a, b) {
 * POKE ja esta em 35, e informacao desatualizada na tela e pior que cartao
 * repetido.
 */
-var proximoId = 1;
+var proximoId$1 = 1;
 var celebracaoStore = createStore()((set) => ({
 	fila: [],
 	celebrar: (c) => set((estado) => {
@@ -78816,13 +79034,28 @@ var celebracaoStore = createStore()((set) => ({
 			};
 			return { fila: [...fila.slice(0, -1), junta] };
 		}
-		return { fila: [...fila, {
-			id: proximoId++,
+		const comNova = [...fila, {
+			id: proximoId$1++,
 			celebracao: c
-		}] };
+		}];
+		if (comNova.length > 4) return { fila: [comNova[0], ...comNova.slice(2)] };
+		return { fila: comNova };
 	}),
 	encerrarAtual: () => set((estado) => ({ fila: estado.fila.slice(1) })),
 	limpar: () => set({ fila: [] })
+}));
+//#endregion
+//#region src/stores/splashDeSalaVanilla.ts
+var proximoId = 1;
+var splashDeSalaStore = createStore()((set) => ({
+	atual: null,
+	anunciarSala: (sala, fechouCiclo) => set({ atual: {
+		id: proximoId++,
+		sala: { ...sala },
+		fechouCiclo
+	} }),
+	encerrar: (id) => set((estado) => estado.atual?.id === id ? { atual: null } : estado),
+	limpar: () => set({ atual: null })
 }));
 var formulaEngine = createFormulaEngine(FORMULAS);
 formulaEngine.evalOrDefault("OFFLINE_FARM_MAX_HOURS", 6);
@@ -79294,7 +79527,6 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		};
 	}
 	const expGain = expRewardForEnemy(enemy.poke, poke.level);
-	const nivelAntesDoAbate = poke.level;
 	const nivelDoTreinadorAntes = gameState.trainer.level;
 	const grantResult = grantExp(poke, expGain);
 	player.poke = grantResult.poke;
@@ -79340,14 +79572,14 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			const ganhos = formatStatGains(grantResult.statGains);
 			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nível ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
 			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
-			celebracaoStore.getState().celebrar({
+			for (const nivelGanho of grantResult.niveis) celebracaoStore.getState().celebrar({
 				tipo: "nivel",
 				especieId: grantResult.poke.speciesId,
 				nome: SPECIES[grantResult.poke.speciesId].name,
-				nivelInicial: nivelAntesDoAbate,
-				nivel: grantResult.level,
-				ganhos: grantResult.statGains,
-				golpesNovos: grantResult.newAbilities.filter(isDamagingAbility).map((a) => a.name),
+				nivelInicial: nivelGanho.nivel - 1,
+				nivel: nivelGanho.nivel,
+				ganhos: nivelGanho.ganhos,
+				golpesNovos: nivelGanho.golpesNovos.filter(isDamagingAbility).map((a) => a.name),
 				isShiny: Boolean(grantResult.poke.isShiny)
 			});
 		}
@@ -79459,10 +79691,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 					world.enemies.push(enemy);
 				}
 				world.respawnTimer = world.mapDef.respawnDelay;
-				if (!silent) {
-					const nome = nomeDaSala(world.sala);
-					toastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluído! Voltando para a primeira sala: ${nome}.` : `Entrando em nova área: ${nome}.`, "success", "world");
-				}
+				if (!silent && world.sala) splashDeSalaStore.getState().anunciarSala(world.sala, fechouCiclo);
 			}
 		}
 		if (!silent) updateAnimations(world, dt);

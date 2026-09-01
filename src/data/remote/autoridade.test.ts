@@ -356,6 +356,75 @@ describe('pedido de sala com a quota fechada (PH-273)', () => {
     expect(mock.flush.mock.calls.length).toBeGreaterThan(1)
   })
 
+  // --- PH-393: o pedido extra ------------------------------------------------
+  //
+  // O primeiro pedido pega o servidor a 1-3 abates de fechar (medido: mediana
+  // 27/30), e sem um segundo pedido o jogador espera o intervalo INTEIRO por
+  // isso. O extra existe pra cobrir essa borda — e as duas regras abaixo sao o
+  // que o separa da repeticao de 5s do PH-273, que travava a hunt.
+
+  /** Resposta de flush com a sala do servidor e a contagem dela. */
+  function janelaComSala(abates: number) {
+    return {
+      estado: {},
+      resumo: { kills: 1, gold: 1, xp: 1 },
+      sala: { indice: 0, chave: 'grass', abates, ciclos: 0 },
+    }
+  }
+
+  it('servidor quase fechando: sai UM pedido extra, e so um, antes do intervalo', async () => {
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
+    mock.flush.mockResolvedValue(janelaComSala(28))
+    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    mock.flush.mockClear()
+
+    fecharQuota()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(mock.flush, 'o primeiro pedido sai na hora').toHaveBeenCalledTimes(1)
+
+    // Antes da espera do extra, nada muda: continua UM.
+    for (let i = 0; i < 2; i++) {
+      await vi.advanceTimersByTimeAsync(5000)
+      useWorldStore.setState({ sala: { indice: 0, chave: 'grass', abates: ABATES_POR_SALA, ciclos: 0 } })
+    }
+    expect(mock.flush, 'o extra saiu cedo demais — janela curta e o PH-273').toHaveBeenCalledTimes(1)
+
+    // Passada a espera do extra, ele sai.
+    await vi.advanceTimersByTimeAsync(5000)
+    useWorldStore.setState({ sala: { indice: 0, chave: 'grass', abates: ABATES_POR_SALA, ciclos: 0 } })
+    await vi.advanceTimersByTimeAsync(0)
+    expect(mock.flush, 'o pedido extra nao saiu').toHaveBeenCalledTimes(2)
+
+    // E ele e UM SO: daqui ate o intervalo cheio, nada mais.
+    for (let i = 0; i < 2; i++) {
+      await vi.advanceTimersByTimeAsync(5000)
+      useWorldStore.setState({ sala: { indice: 0, chave: 'grass', abates: ABATES_POR_SALA, ciclos: 0 } })
+    }
+    expect(
+      mock.flush,
+      'o extra repetiu — e repetir e exatamente o livelock que o PH-273 mediu',
+    ).toHaveBeenCalledTimes(2)
+  })
+
+  it('servidor LONGE de fechar nao ganha pedido extra — a janela curta so o atrasaria', async () => {
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
+    // 15 de 30: o pedido extra nao teria como fechar a quota, e ainda encurtaria
+    // a janela do servidor. O caso que a bancada mostrou piorando o p90.
+    mock.flush.mockResolvedValue(janelaComSala(15))
+    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    mock.flush.mockClear()
+
+    fecharQuota()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+
+    for (let i = 0; i < 5; i++) {
+      await vi.advanceTimersByTimeAsync(5000)
+      useWorldStore.setState({ sala: { indice: 0, chave: 'grass', abates: ABATES_POR_SALA, ciclos: 0 } })
+    }
+    expect(mock.flush, 'pediu extra com o servidor longe de fechar').toHaveBeenCalledTimes(1)
+  })
+
   it('sala NOVA com a quota fechada pede na hora, sem esperar o intervalo', async () => {
     mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
     mock.flush.mockResolvedValue(janela)

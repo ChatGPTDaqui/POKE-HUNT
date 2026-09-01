@@ -231,6 +231,27 @@ export interface GrantPokeExpResult {
    * quanto?").
    */
   statGains: StatBlock | null
+  /**
+   * UM ITEM POR NIVEL subido nesta chamada (PH-398), na ordem em que subiram.
+   *
+   * `statGains` acima e a SOMA do bloco, e ela continua onde estava — o toast e
+   * quem pergunta "subi 3 niveis, ganhei quanto no total?". O que faltava era o
+   * detalhe: o splash de level-up passou a ser um por nivel, com os ganhos
+   * DAQUELE nivel, e a soma nao da pra desmembrar depois que a chamada volta.
+   *
+   * Derivado aqui de graca: o `while` abaixo ja calcula `computeStatsAtLevel`
+   * nivel a nivel. Recalcular isso na tela significaria a tela conhecer curva de
+   * crescimento, natureza, IV e raridade — a regra de progressao inteira, num
+   * segundo lugar.
+   */
+  niveis: NivelGanho[]
+}
+
+/** Um nivel subido: o numero, o que ele deu, e o que ele ensinou. */
+export interface NivelGanho {
+  nivel: number
+  ganhos: StatBlock
+  golpesNovos: Ability[]
 }
 
 // Aplica EXP a um pokeInstance, tratando (possivelmente varios) level-ups e
@@ -245,14 +266,21 @@ export function grantExp(pokeInstance: PokeInstance, amount: number): GrantPokeE
   let leveledUp = false
   const newAbilities: Ability[] = []
 
+  const niveis: NivelGanho[] = []
+
   while (exp >= pokeExpForLevel(level + 1, species.growthCurve)) {
     const previousMaxHp = stats.hp
+    // PH-398: os stats DE ANTES deste nivel, pro diff sair por nivel e nao do
+    // bloco inteiro. `stats` e reatribuido logo abaixo.
+    const statsAntesDesteNivel = stats
     level += 1
     leveledUp = true
 
     stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature)
     const hpGain = stats.hp - previousMaxHp
     hp = Math.min(stats.hp, hp + hpGain)
+    const golpesDesteNivel: Ability[] = []
+    niveis.push({ nivel: level, ganhos: diffStats(statsAntesDesteNivel, stats), golpesNovos: golpesDesteNivel })
 
     // Pelo nivel EXIGIDO de verdade (ver activeAbilities.ts), nao pelo
     // `levelReq` cru: senao um POKE que sobe pro nivel 1... nao existe, mas um
@@ -263,6 +291,9 @@ export function grantExp(pokeInstance: PokeInstance, amount: number): GrantPokeE
       if (!ability) continue
       unlockedAbilities.push(key)
       newAbilities.push(ability)
+      // PH-398: o mesmo golpe entra nas duas listas — a do bloco (`newAbilities`,
+      // que o toast e o gate de marco usam) e a DESTE nivel.
+      golpesDesteNivel.push(ability)
     }
   }
 
@@ -281,7 +312,7 @@ export function grantExp(pokeInstance: PokeInstance, amount: number): GrantPokeE
     ),
   }
   const statGains = leveledUp ? diffStats(pokeInstance.stats, stats) : null
-  return { poke, leveledUp, newAbilities, level, statGains }
+  return { poke, leveledUp, newAbilities, level, statGains, niveis }
 }
 
 function diffStats(antes: StatBlock, depois: StatBlock): StatBlock {
