@@ -122,18 +122,18 @@ describe('a mensagem de erro para de culpar o navegador (PH-293)', () => {
   it('origem conhecida: continua falando de bloqueador', () => {
     // O caso comum — jogador em producao com uBlock barrando o request. A frase
     // antiga continua sendo a certa ali.
-    expect(mensagemDeFalhaDeRede(true, true)).toContain('bloqueador de anuncios')
+    expect(mensagemDeFalhaDeRede(true, true)).toContain('bloqueador de anúncios')
   })
 
   it('origem NAO liberada: aponta o servidor, e diz que nao e o navegador', () => {
     const m = mensagemDeFalhaDeRede(true, false)
-    expect(m).toContain('nao esta na')
-    expect(m).toContain('nao e problema do seu navegador')
-    expect(m, 'a acusacao errada nao pode sobrar').not.toContain('bloqueador de anuncios')
+    expect(m).toContain('não está na')
+    expect(m).toContain('não é problema do seu navegador')
+    expect(m, 'a acusacao errada nao pode sobrar').not.toContain('bloqueador de anúncios')
   })
 
   it('offline ganha da origem — sem internet nada mais importa', () => {
-    expect(mensagemDeFalhaDeRede(false, false)).toContain('Sem conexao')
+    expect(mensagemDeFalhaDeRede(false, false)).toContain('Sem conexão')
   })
 
   it('fora do navegador `origemConhecida` nao acusa ninguem', () => {

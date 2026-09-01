@@ -9,7 +9,7 @@ export function RegisterPage() {
   return (
     <AuthForm
       titulo="Criar conta"
-      descricao="Seu progresso fica salvo na nuvem e acompanha voce em qualquer dispositivo."
+      descricao="Seu progresso fica salvo na nuvem e acompanha você em qualquer dispositivo."
       rotuloAcao="Criar conta"
       confirmarSenha
       pedirNomeTreinador
@@ -20,7 +20,7 @@ export function RegisterPage() {
       // precisa virar uma tela de "confira seu email" — o usuario NAO estara
       // logado neste ponto.
       aoConcluir={() => navigate('/jogo', { replace: true })}
-      rodape={{ texto: 'Ja tem conta?', linkTexto: 'Entrar', para: '/login' }}
+      rodape={{ texto: 'Já tem conta?', linkTexto: 'Entrar', para: '/login' }}
     />
   )
 }

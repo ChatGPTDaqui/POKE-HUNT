@@ -15,7 +15,7 @@ export function Historico() {
   })
   if (isLoading) return <Carregando />
   const negocios: NegocioMercado[] = data?.negocios ?? []
-  if (negocios.length === 0) return <p className="text-n500">Voce ainda nao negociou nada.</p>
+  if (negocios.length === 0) return <p className="text-n500">Você ainda não negociou nada.</p>
 
   return (
     <div className="flex flex-col gap-[.35em]">
@@ -39,7 +39,7 @@ export function Historico() {
               sugeriria um desconto que nao existiu.
 
               `!n.taxa` cobre ausente e zero de uma vez — linha de antes do
-              PH-98 e venda em diamante (isenta) leem igual, "nao houve taxa". */}
+              PH-98 e venda em diamante (isenta) leem igual, "não houve taxa". */}
           {!n.souComprador && !!n.taxa && (
             <span className="text-[.8em] text-n500" title="Taxa de venda do Mercado">
               − {fmt.format(n.taxa)}

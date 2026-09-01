@@ -135,7 +135,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
       }
     >
     {/* O GATILHO PARA ANTES DO BOTAO, de proposito: `Explicacao` abre no click, e
-        com o botao "Proximo Nivel" dentro dela o toque que avanca a sala abriria
+        com o botao "Próximo Nível" dentro dela o toque que avanca a sala abriria
         a bolha por cima do proprio avanco. O aviso "Derrote o Lorde" fica dentro
         — ele e leitura, nao acao. */}
     <div className="flex min-w-0 items-center gap-[.6em]">

@@ -81,7 +81,7 @@ function InicioTab() {
         cruzar com inimigos fortes logo de cara, essa hunt tem o nivel dos selvagens travado bem baixo.
       </WikiCard>
 
-      <WikiCard title="2. Como funciona o combate automatico">
+      <WikiCard title="2. Como funciona o combate automático">
         Assim que voce entra numa hunt, seu POKE ativo comeca a andar pelo mapa sozinho procurando o inimigo
         selvagem mais proximo. Ao chegar perto o suficiente ele engaja em combate automaticamente e usa seus
         golpes por conta propria (dentre os que estao prontos/fora de cooldown, o de maior dano estimado
@@ -90,15 +90,15 @@ function InicioTab() {
         caçada — seu POKE nunca fica parado esperando ordem.
         <br />
         <br />
-        Voce pode <b>desligar</b> um golpe especifico da rotacao automatica: no celular, toque no icone dele e
+        Você pode <b>desligar</b> um golpe específico da rotação automática: no celular, toque no ícone dele e
         use o botao no fim da ficha; no computador, duplo clique no icone
         na barra de habilidades (a barra fixa no centro inferior da tela, entre os dois lados do HUD) — util
         pra evitar que a IA gaste um golpe fraco quando um mais forte esta quase pronto.
       </WikiCard>
 
       <WikiCard title="3. Navegando pelos menus">
-        A barra de baixo tem os atalhos principais: <b>Equipe</b>, <b>Mochila</b>, <b>Hunt</b> (o botao do
-        meio) e <b>Loja</b>. Tudo o mais — Pokedex, Mercado, Correio, Bestiario, Tasks, Calculadora, Ranking,
+        A barra de baixo tem os atalhos principais: <b>Equipe</b>, <b>Mochila</b>, <b>Hunt</b> (o botão do
+        meio) e <b>Loja</b>. Tudo o mais — Pokedex, Mercado, Correio, Bestiário, Tasks, Calculadora, Ranking,
         Wiki, Tutoriais, Configuracoes e o Hospital, quando voce esta numa hunt — vive atras do botao
         <b>Mais</b>, no fim da barra. Numa tela larga, Pokedex e Mercado sobem pra barra e saem do Mais. Os
         icones abaixo sao os MESMOS que aparecem no jogo.
@@ -132,7 +132,7 @@ function InicioTab() {
             o botao de robo na barra de acao, ao lado dos golpes — liga/desliga auto-pot, auto-catch e
             auto-revive, e configura qual item cada automacao deve usar.
           </LinhaDeMenu>
-          <LinhaDeMenu Icon={Gear} nome="Configuracoes">
+          <LinhaDeMenu Icon={Gear} nome="Configurações">
             reiniciar o jogo e ver o historico de atualizacoes (Patch-notes).
           </LinhaDeMenu>
         </ul>
@@ -148,7 +148,7 @@ function InicioTab() {
         desafio maior ainda.
         <br />
         <br />
-        Deixe <b>auto-pot</b>, <b>auto-catch</b> e <b>auto-revive</b> ligados (vem ativados por padrao) pra
+        Deixe <b>auto-pot</b>, <b>auto-catch</b> e <b>auto-revive</b> ligados (vem ativados por padrão) pra
         caçar sem precisar intervir manualmente — configure as bolas/pocoes preferidas no painel Auto.
       </WikiCard>
     </div>
@@ -267,7 +267,7 @@ function TiposTab() {
         <div className="space-y-1.5">
           <div className="text-[.8em] text-n400">Fraqueza — recebe 2x de:</div>
           <ChipList types={weaknesses} />
-          <div className="text-[.8em] text-n400">Resistencia — recebe 0.5x de:</div>
+          <div className="text-[.8em] text-n400">Resistência — recebe 0.5x de:</div>
           <ChipList types={resistances} />
           <div className="text-[.8em] text-n400">Imunidade — recebe 0x de:</div>
           <ChipList types={immunities} />
@@ -296,7 +296,7 @@ function RaridadesTab() {
         eixo totalmente independente da especie ou da hunt de onde veio. Um Rattata comum pode nascer "Mythic"
         do mesmo jeito que um Dragonite pode nascer "Comum" — a chance por especie/hunt de aparecer ja existia
         antes e continua separada (ver a aba "Efetividade de Tipos"/Pokedex pra isso). Quanto mais rara, maior
-        o multiplicador de status <b>e</b> de valor de venda — POKEs raros nao sao so um troféu, sao mais
+        o multiplicador de status <b>e</b> de valor de venda — POKEs raros não são só um troféu, são mais
         fortes de verdade.
       </WikiCard>
 
@@ -318,7 +318,7 @@ function RaridadesTab() {
       </div>
 
       <WikiCard title="Shiny — um eixo separado">
-        Alem da raridade, todo POKE tambem tem uma chance independente de nascer <b>Shiny</b> (aparencia
+        Além da raridade, todo POKE também tem uma chance independente de nascer <b>Shiny</b> (aparência
         alternativa, ✨ no nome) — a taxa real e 200x mais alta que a taxa oficial dos jogos, proporcional a
         taxa de captura da propria especie. Shiny nao muda status nem venda por si so (isso e o que a raridade
         acima faz) — e puramente um brinde visual raro, mas continua contando pro seu placar no painel de
@@ -327,7 +327,7 @@ function RaridadesTab() {
 
       <WikiCard title="Lendarios">
         Os 11 Pokemon lendarios do Dex nao aparecem em nenhuma hunt normal — eles sao exclusivos das 11{' '}
-        <b>hunts BOSS</b> do Modo Pesadelo (um confronto único e fixo por lendario, nivel bem alto, sem
+        <b>hunts BOSS</b> do Modo Pesadelo (um confronto único e fixo por lendário, nível bem alto, sem
         respawn). Em campo eles ganham uma escala visual 1.5x maior que o normal pra refletir o quao imponente
         e essa luta — isso e visual/de apresentacao, a raridade sorteada neles continua seguindo a mesma
         tabela acima. A barra de HP deles e a mesma de qualquer selvagem; a barra grande ficou sendo so do{' '}
@@ -341,21 +341,21 @@ function MecanicasTab() {
   return (
     <div className="space-y-2">
       <WikiCard title="Sistema de captura">
-        A captura e <b>sempre automatica</b> — nao existe um botao pra jogar a bola manualmente. Sempre que um
+        A captura e <b>sempre automática</b> — não existe um botão pra jogar a bola manualmente. Sempre que um
         selvagem e derrotado (com <b>auto-catch</b> ligado no painel 🤖 Auto), o jogo tenta usar a bola
         configurada e rola uma chance de sucesso baseada em 3 fatores: a <b>taxa de captura real</b> da
         especie (dado da planilha/Gen2 — quanto menor, mais raro e dificil de capturar), o{' '}
-        <b>multiplicador da bola</b> usada (bolas melhores capturam mais facil) e um multiplicador global fixo
-        de balanceamento. Todo POKE capturado entra na mochila resetado pro <b>Nivel 1</b>, independente do
+        <b>multiplicador da bola</b> usada (bolas melhores capturam mais fácil) e um multiplicador global fixo
+        de balanceamento. Todo POKE capturado entra na mochila resetado pro <b>Nível 1</b>, independente do
         nivel que tinha em campo — e sempre carrega consigo a raridade e o status shiny que foram sorteados no
         momento em que apareceu.
       </WikiCard>
 
       <WikiCard title="Odio / agressividade (lure)">
-        Cada selvagem tem um raio de <b>agressividade</b> (aggro) — a distancia a partir da qual ele nota seu
-        POKE e comeca a se aproximar. Esse alcance foi calibrado pra ser <b>moderado</b>: o selvagem só
+        Cada selvagem tem um raio de <b>agressividade</b> (aggro) — a distância a partir da qual ele nota seu
+        POKE e começa a se aproximar. Esse alcance foi calibrado pra ser <b>moderado</b>: o selvagem só
         persegue de uma distancia media, nunca do mapa inteiro. Uma vez que a perseguição começa, existe um
-        raio de <b>desistencia</b> (leash) mais generoso — se voce (ou ele) se afastar demais depois de já ter
+        raio de <b>desistencia</b> (leash) mais generoso — se você (ou ele) se afastar demais depois de já ter
         engajado, o selvagem desiste e volta a vagar perto do seu ponto de nascimento original, em vez de te
         seguir pra sempre.
         <br />
@@ -366,29 +366,29 @@ function MecanicasTab() {
         posicao esperando os selvagens virem.
       </WikiCard>
 
-      <WikiCard title="Distancia de visao (camera/FOV)">
+      <WikiCard title="Distância de visão (camera/FOV)">
         A camera comeca com um campo de visao 160% maior que o padrao original (voce ve mais mapa ao redor do
         seu POKE do que veria em 100%), tanto durante as hunts quanto na cena do Hospital. Isso e só o ponto
         de partida — o zoom ainda pode ser ajustado livremente pelas lupas + e − a esquerda da barra de golpes
         (so dentro de uma hunt) ou por Ctrl+Scroll do mouse, pra qualquer lado.
       </WikiCard>
 
-      <WikiCard title="Habilidades em area (AoE)">
+      <WikiCard title="Habilidades em área (AoE)">
         Alguns golpes (marcados com uma bolinha verde no icone da barra de habilidades) atingem{' '}
-        <b>todos os alvos</b> dentro de um raio fixo ao redor de quem usou o golpe, em vez de só um alvo unico
+        <b>todos os alvos</b> dentro de um raio fixo ao redor de quem usou o golpe, em vez de só um alvo único
         — o efeito visual em campo (o anel se expandindo) e desenhado exatamente do tamanho real dessa area,
         então dá pra ver visualmente quem vai ser atingido. Sempre que algum golpe AOE disponivel acertaria 2
         ou mais inimigos ao mesmo tempo, a IA de combate o escolhe direto — mesmo que exista um golpe
         single-target pronto com mais poder.
         <br />
         <br />
-        Todo POKE, ao atingir o <b>Nivel 50</b>, aprende automaticamente um golpe em area exclusivo tematizado
+        Todo POKE, ao atingir o <b>Nível 50</b>, aprende automaticamente um golpe em área exclusivo tematizado
         pelo seu próprio tipo elemental primario — a categoria de dano (Fisico ou Especial) desse golpe não e
         fixa: é decidida na hora, comparando o Atk Fisico e o Atk Especial daquele POKE especifico e usando o
         maior dos dois.
       </WikiCard>
 
-      <WikiCard title="Sistema de recarga (tempo de acao)">
+      <WikiCard title="Sistema de recarga (tempo de ação)">
         Cada golpe tem seu proprio cooldown individual, calculado a partir do PP real daquele golpe na
         planilha: <b>menos PP significa mais tempo de recarga</b> (um golpe de 5 PP recarrega bem mais lento
         que um de 35 PP). Esse cooldown ainda e ajustado pela <b>Velocidade</b> do seu POKE — quanto maior a
@@ -447,14 +447,14 @@ function StatusCard({ tipo }: { tipo: StatusCondition }) {
     linhas.push(<li key="acao">Impede agir em <b>todo</b> turno enquanto durar.</li>)
   } else if (regra.chanceDePerderOTurno) {
     linhas.push(
-      <li key="acao">{formatPercent(regra.chanceDePerderOTurno)} de chance de perder o turno (nao agir) a cada acao tentada.</li>,
+      <li key="acao">{formatPercent(regra.chanceDePerderOTurno)} de chance de perder o turno (não agir) a cada ação tentada.</li>,
     )
   }
 
   if (regra.danoPorTurnoFracaoDoMaximo) {
     linhas.push(
       <li key="dano">
-        Tira {formatPercent(regra.danoPorTurnoFracaoDoMaximo)} do HP <b>maximo</b> a cada {TURNO_SEGUNDOS}s (minimo 1
+        Tira {formatPercent(regra.danoPorTurnoFracaoDoMaximo)} do HP <b>máximo</b> a cada {TURNO_SEGUNDOS}s (minimo 1
         de dano, mesmo em HP maximo baixo).
       </li>,
     )
@@ -465,7 +465,7 @@ function StatusCard({ tipo }: { tipo: StatusCondition }) {
   }
   if (regra.multiplicadorDeDanoFisico && regra.multiplicadorDeDanoFisico !== 1) {
     linhas.push(
-      <li key="fis">Dano de golpes <b>Fisicos</b> causados por este POKE multiplicado por {regra.multiplicadorDeDanoFisico}x.</li>,
+      <li key="fis">Dano de golpes <b>Físicos</b> causados por este POKE multiplicado por {regra.multiplicadorDeDanoFisico}x.</li>,
     )
   }
 
@@ -482,13 +482,13 @@ function StatusCard({ tipo }: { tipo: StatusCondition }) {
       <li key="desc">{formatPercent(regra.chanceDeDescongelarPorTurno)} de chance de sair sozinho a cada turno — sem prazo fixo, pode durar 1 turno ou 20.</li>,
     )
   } else {
-    linhas.push(<li key="dur">Nao passa sozinho com o tempo — so sai com item ou curando no Hospital.</li>)
+    linhas.push(<li key="dur">Não passa sozinho com o tempo — só sai com item ou curando no Hospital.</li>)
   }
 
   if (regra.descongelaComTipo) {
     linhas.push(
       <li key="degelo" className="flex items-center gap-1">
-        Um golpe de tipo <TypeChip type={regra.descongelaComTipo} /> que cause dano tambem tira este status na hora,
+        Um golpe de tipo <TypeChip type={regra.descongelaComTipo} /> que cause dano também tira este status na hora,
         alem do proprio dano do golpe.
       </li>,
     )
@@ -518,7 +518,7 @@ function StatusCard({ tipo }: { tipo: StatusCondition }) {
         </div>
       )}
       <div className="text-[.8em] text-n400">
-        Cura: {curas.length === 0 ? 'so no Hospital' : `${curas.map((i) => i.name).join(', ')}, ou o Hospital de graca`}
+        Cura: {curas.length === 0 ? 'só no Hospital' : `${curas.map((i) => i.name).join(', ')}, ou o Hospital de graça`}
       </div>
     </div>
   )
@@ -530,17 +530,17 @@ function StatusTab() {
       <WikiCard title="Como funciona o sistema de status">
         Um status e um efeito que gruda no seu POKE (ou no inimigo) alem do dano normal do golpe — os jogos
         originais resolvem isso por <b>turno</b> de batalha; aqui o combate e continuo, entao um "turno" equivale a{' '}
-        <b>{TURNO_SEGUNDOS} segundos</b> reais, o mesmo intervalo minimo entre duas acoes do POKE. Existem duas
+        <b>{TURNO_SEGUNDOS} segundos</b> reais, o mesmo intervalo mínimo entre duas ações do POKE. Existem duas
         familias:
         <ul className="mt-[.5em] list-disc space-y-1 pl-4">
           <li>
-            <b>Nao-volateis</b> (Envenenado, Queimado, Paralisado, Dormindo, Congelado) — so cabe <b>um por vez</b>{' '}
+            <b>Nao-volateis</b> (Envenenado, Queimado, Paralisado, Dormindo, Congelado) — só cabe <b>um por vez</b>{' '}
             no POKE, igual aos jogos originais: se ele ja esta paralisado, um golpe de veneno simplesmente falha.
             Sobrevivem entre combates (voltar pra hunt com um POKE queimado ainda o mantem queimado) — so saem com
             item ou no Hospital.
           </li>
           <li>
-            <b>Volateis</b> (Confuso) — convive normalmente com um status nao-volatil (dá pra estar envenenado E
+            <b>Volateis</b> (Confuso) — convive normalmente com um status não-volatil (dá pra estar envenenado E
             confuso ao mesmo tempo) e some sozinho ao sair da hunt/trocar de cena, mesmo sem cura nenhuma.
           </li>
         </ul>
@@ -557,7 +557,7 @@ function StatusTab() {
         informativo (nao precisa tocar em nada); no computador, passe o mouse pra ver o nome exato.
       </WikiCard>
 
-      <WikiCard title="Imunidade de reaplicacao">
+      <WikiCard title="Imunidade de reaplicação">
         Todo status que sai — seja curado por item, no Hospital, ou expirando sozinho (sono acabando, degelo) —
         deixa o POKE <b>imune a receber outro status por {TURNOS_DE_IMUNIDADE_APOS_CURA} turnos</b> (
         {TURNOS_DE_IMUNIDADE_APOS_CURA * TURNO_SEGUNDOS}s). Sem isso, curar um Antidoto no meio de uma luta contra
@@ -565,8 +565,8 @@ function StatusTab() {
         golpe.
       </WikiCard>
 
-      <WikiCard title={`Golpes de po (${STATUS_RULES.golpesDePo.golpes.map((id) => getAbility(id)?.name ?? id).join(', ')})`}>
-        POKEs de tipo <TypeChip type="GRASS" /> sao imunes a qualquer golpe dessa familia especifica, mesmo que o
+      <WikiCard title={`Golpes de pó (${STATUS_RULES.golpesDePo.golpes.map((id) => getAbility(id)?.name ?? id).join(', ')})`}>
+        POKEs de tipo <TypeChip type="GRASS" /> são imunes a qualquer golpe dessa família especifica, mesmo que o
         STATUS que ele causaria normalmente pudesse pegar neles — e uma regra sobre o GOLPE usado, nao sobre o tipo
         de status. Essa imunidade e diferente (e além) das imunidades por tipo listadas em cada card acima.
       </WikiCard>
@@ -614,37 +614,37 @@ function turnos(qtd: number): string {
 // abaixo, honesta sobre a lacuna em vez de fingir que fazem algo.
 const TRAITS_IMPLEMENTADAS: { id: TraitId; efeito: ReactNode }[] = [
   { id: 'levitate', efeito: 'Imune a golpes de tipo GROUND.' },
-  { id: 'volt_absorb', efeito: 'Imune a ELECTRIC — cura 1/4 do HP maximo em vez de tomar dano.' },
-  { id: 'water_absorb', efeito: 'Imune a WATER — cura 1/4 do HP maximo em vez de tomar dano.' },
-  { id: 'flash_fire', efeito: 'Imune a FIRE — depois de absorver um golpe assim, os proprios golpes FIRE saem 1.5x mais fortes pro resto da luta.' },
-  { id: 'sap_sipper', efeito: 'Imune a GRASS — ganha +1 de estagio de Ataque Fisico.' },
-  { id: 'lightning_rod', efeito: 'Imune a ELECTRIC — ganha +1 de estagio de Ataque Especial.' },
-  { id: 'storm_drain', efeito: 'Imune a WATER — ganha +1 de estagio de Ataque Especial.' },
-  { id: 'motor_drive', efeito: 'Imune a ELECTRIC — ganha +1 de estagio de Velocidade.' },
-  { id: 'intimidate', efeito: 'Ao entrar em combate, baixa 1 estagio do Ataque Fisico do oponente.' },
-  { id: 'download', efeito: 'Ao entrar em combate, sobe +1 no proprio Atk Fisico ou Atk Especial — o que for mais forte contra a Defesa correspondente do oponente.' },
-  { id: 'static', efeito: '30% de chance de paralisar quem acertar um golpe FISICO nele.' },
-  { id: 'flame_body', efeito: '30% de chance de queimar quem acertar um golpe FISICO nele.' },
-  { id: 'poison_point', efeito: '30% de chance de envenenar quem acertar um golpe FISICO nele.' },
-  { id: 'effect_spore', efeito: '30% de chance de envenenar, paralisar OU adormecer (sorteado) quem acertar um golpe FISICO nele — nao pega em atacante GRASS.' },
-  { id: 'inner_focus', efeito: 'Imune a flinch (perder a proxima acao por ter sido atingido).' },
-  { id: 'huge_power', efeito: 'Ataque Fisico multiplicado por 2x.' },
-  { id: 'pure_power', efeito: 'Ataque Fisico multiplicado por 2x.' },
-  { id: 'hustle', efeito: 'Ataque Fisico multiplicado por 1.5x, mas os proprios golpes FISICOS saem com 20% menos precisao.' },
-  { id: 'guts', efeito: 'Ataque Fisico multiplicado por 1.5x enquanto estiver com qualquer status.' },
-  { id: 'marvel_scale', efeito: 'Defesa Fisica multiplicada por 1.5x enquanto estiver com qualquer status.' },
-  { id: 'quick_feet', efeito: 'Enquanto estiver com qualquer status, Velocidade multiplicada por 1.5x — ignorando por completo a penalidade de velocidade que o proprio status daria (ex: Paralisia).' },
-  { id: 'blaze', efeito: <>Abaixo de 1/3 do HP maximo, golpes de tipo <TypeChip type="FIRE" /> saem 1.5x mais fortes.</> },
-  { id: 'torrent', efeito: <>Abaixo de 1/3 do HP maximo, golpes de tipo <TypeChip type="WATER" /> saem 1.5x mais fortes.</> },
-  { id: 'overgrow', efeito: <>Abaixo de 1/3 do HP maximo, golpes de tipo <TypeChip type="GRASS" /> saem 1.5x mais fortes.</> },
-  { id: 'swarm', efeito: <>Abaixo de 1/3 do HP maximo, golpes de tipo <TypeChip type="BUG" /> saem 1.5x mais fortes.</> },
-  { id: 'sturdy', efeito: 'Sobrevive com 1 de HP a um golpe que seria fatal — so funciona partindo do HP maximo EXATO.' },
-  { id: 'multiscale', efeito: 'Dano recebido reduzido pela metade enquanto o HP estiver no maximo EXATO.' },
-  { id: 'synchronize', efeito: 'Veneno/Paralisia/Queimadura recebidos sao refletidos de volta em quem aplicou.' },
+  { id: 'volt_absorb', efeito: 'Imune a ELECTRIC — cura 1/4 do HP máximo em vez de tomar dano.' },
+  { id: 'water_absorb', efeito: 'Imune a WATER — cura 1/4 do HP máximo em vez de tomar dano.' },
+  { id: 'flash_fire', efeito: 'Imune a FIRE — depois de absorver um golpe assim, os próprios golpes FIRE saem 1.5x mais fortes pro resto da luta.' },
+  { id: 'sap_sipper', efeito: 'Imune a GRASS — ganha +1 de estágio de Ataque Físico.' },
+  { id: 'lightning_rod', efeito: 'Imune a ELECTRIC — ganha +1 de estágio de Ataque Especial.' },
+  { id: 'storm_drain', efeito: 'Imune a WATER — ganha +1 de estágio de Ataque Especial.' },
+  { id: 'motor_drive', efeito: 'Imune a ELECTRIC — ganha +1 de estágio de Velocidade.' },
+  { id: 'intimidate', efeito: 'Ao entrar em combate, baixa 1 estágio do Ataque Físico do oponente.' },
+  { id: 'download', efeito: 'Ao entrar em combate, sobe +1 no próprio Atk Físico ou Atk Especial — o que for mais forte contra a Defesa correspondente do oponente.' },
+  { id: 'static', efeito: '30% de chance de paralisar quem acertar um golpe FÍSICO nele.' },
+  { id: 'flame_body', efeito: '30% de chance de queimar quem acertar um golpe FÍSICO nele.' },
+  { id: 'poison_point', efeito: '30% de chance de envenenar quem acertar um golpe FÍSICO nele.' },
+  { id: 'effect_spore', efeito: '30% de chance de envenenar, paralisar OU adormecer (sorteado) quem acertar um golpe FÍSICO nele — não pega em atacante GRASS.' },
+  { id: 'inner_focus', efeito: 'Imune a flinch (perder a próxima ação por ter sido atingido).' },
+  { id: 'huge_power', efeito: 'Ataque Físico multiplicado por 2x.' },
+  { id: 'pure_power', efeito: 'Ataque Físico multiplicado por 2x.' },
+  { id: 'hustle', efeito: 'Ataque Físico multiplicado por 1.5x, mas os próprios golpes FÍSICOS saem com 20% menos precisão.' },
+  { id: 'guts', efeito: 'Ataque Físico multiplicado por 1.5x enquanto estiver com qualquer status.' },
+  { id: 'marvel_scale', efeito: 'Defesa Física multiplicada por 1.5x enquanto estiver com qualquer status.' },
+  { id: 'quick_feet', efeito: 'Enquanto estiver com qualquer status, Velocidade multiplicada por 1.5x — ignorando por completo a penalidade de velocidade que o próprio status daria (ex: Paralisia).' },
+  { id: 'blaze', efeito: <>Abaixo de 1/3 do HP máximo, golpes de tipo <TypeChip type="FIRE" /> saem 1.5x mais fortes.</> },
+  { id: 'torrent', efeito: <>Abaixo de 1/3 do HP máximo, golpes de tipo <TypeChip type="WATER" /> saem 1.5x mais fortes.</> },
+  { id: 'overgrow', efeito: <>Abaixo de 1/3 do HP máximo, golpes de tipo <TypeChip type="GRASS" /> saem 1.5x mais fortes.</> },
+  { id: 'swarm', efeito: <>Abaixo de 1/3 do HP máximo, golpes de tipo <TypeChip type="BUG" /> saem 1.5x mais fortes.</> },
+  { id: 'sturdy', efeito: 'Sobrevive com 1 de HP a um golpe que seria fatal — só funciona partindo do HP máximo EXATO.' },
+  { id: 'multiscale', efeito: 'Dano recebido reduzido pela metade enquanto o HP estiver no máximo EXATO.' },
+  { id: 'synchronize', efeito: 'Veneno/Paralisia/Queimadura recebidos são refletidos de volta em quem aplicou.' },
   { id: 'poison_heal', efeito: 'Em vez de tomar dano de veneno por turno, cura a mesma fracao de HP.' },
-  { id: 'rough_skin', efeito: 'Todo golpe FISICO recebido por contato causa dano de retorno no atacante (1/8 do HP maximo dele).' },
-  { id: 'iron_barbs', efeito: 'Todo golpe FISICO recebido por contato causa dano de retorno no atacante (1/8 do HP maximo dele).' },
-  { id: 'aftermath', efeito: 'Se for derrotado por um golpe FISICO, o atacante recebe dano de retorno (1/4 do proprio HP maximo dele).' },
+  { id: 'rough_skin', efeito: 'Todo golpe FÍSICO recebido por contato causa dano de retorno no atacante (1/8 do HP máximo dele).' },
+  { id: 'iron_barbs', efeito: 'Todo golpe FÍSICO recebido por contato causa dano de retorno no atacante (1/8 do HP máximo dele).' },
+  { id: 'aftermath', efeito: 'Se for derrotado por um golpe FÍSICO, o atacante recebe dano de retorno (1/4 do próprio HP máximo dele).' },
   { id: 'immunity', efeito: 'Imune a Envenenado.' },
   { id: 'limber', efeito: 'Imune a Paralisado.' },
   { id: 'insomnia', efeito: 'Imune a Dormindo.' },
@@ -652,10 +652,10 @@ const TRAITS_IMPLEMENTADAS: { id: TraitId; efeito: ReactNode }[] = [
   { id: 'water_veil', efeito: 'Imune a Queimado.' },
   { id: 'magma_armor', efeito: 'Imune a Congelado.' },
   { id: 'own_tempo', efeito: 'Imune a Confuso.' },
-  { id: 'drizzle', efeito: 'Ao entrar em combate, poe chuva em campo (dura ate outro clima sobrescrever).' },
-  { id: 'sand_stream', efeito: 'Ao entrar em combate, poe areia em campo (dura ate outro clima sobrescrever).' },
-  { id: 'snow_warning', efeito: 'Ao entrar em combate, poe granizo em campo (dura ate outro clima sobrescrever).' },
-  { id: 'drought', efeito: 'Ao entrar em combate, poe sol em campo (dura ate outro clima sobrescrever).' },
+  { id: 'drizzle', efeito: 'Ao entrar em combate, poe chuva em campo (dura até outro clima sobrescrever).' },
+  { id: 'sand_stream', efeito: 'Ao entrar em combate, poe areia em campo (dura até outro clima sobrescrever).' },
+  { id: 'snow_warning', efeito: 'Ao entrar em combate, poe granizo em campo (dura até outro clima sobrescrever).' },
+  { id: 'drought', efeito: 'Ao entrar em combate, poe sol em campo (dura até outro clima sobrescrever).' },
 ]
 
 const TRAITS_SEM_MECANICA: TraitId[] = [
@@ -690,36 +690,36 @@ function CombateTab() {
         Este jogo NAO tem turno de batalha alternado como os jogos originais — o combate roda em tempo real,
         continuo, e cada POKE age assim que estiver pronto (golpe fora de cooldown), sem esperar a "vez" de
         ninguem. A unidade de tempo usada nas contas abaixo (duracao de status/escudo/trava, etc.) e o{' '}
-        <b>turno</b>, que aqui equivale a <b>{TURNO_SEGUNDOS} segundos</b> reais — o mesmo intervalo minimo entre
-        duas acoes de um POKE (o <b>cooldown global</b>, ver PP/Velocidade na aba Mecanicas) — na pratica, um
+        <b>turno</b>, que aqui equivale a <b>{TURNO_SEGUNDOS} segundos</b> reais — o mesmo intervalo mínimo entre
+        duas ações de um POKE (o <b>cooldown global</b>, ver PP/Velocidade na aba Mecânicas) — na prática, um
         golpe so recarrega mais rapido que isso se a Velocidade do POKE for maior que a referencia de{' '}
         {SPEED_REFERENCE_WIKI}. O Ataque Basico foge dessa regra: seu cooldown e sempre fixo em{' '}
         {BASIC_ATTACK_COOLDOWN_WIKI}s, sem depender de PP nem de Velocidade. Por causa disso,{' '}
-        <b>nao existe sistema de prioridade de golpe</b> (o que faria um golpe como {nomeDoGolpe('quick_attack')}{' '}
+        <b>não existe sistema de prioridade de golpe</b> (o que faria um golpe como {nomeDoGolpe('quick_attack')}{' '}
         agir sempre primeiro, independente de Velocidade): todo golpe passa pelo mesmo cano de resolucao, sem
         fila nem ordem especial — {nomeDoGolpe('wide_guard')} e {nomeDoGolpe('quick_guard')} existem no catalogo
         mas essa parte deles nao faz nada aqui, por exatamente esse motivo.
         <br />
         <br />
         Alvo, alcance de engajamento (corpo-a-corpo sempre), agressividade/desistencia do selvagem, area de
-        efeito (AOE) e o golpe de nivel 50 ja estao detalhados na aba <b>Mecanicas</b> — esta aba cobre o que
+        efeito (AOE) e o golpe de nível 50 já estão detalhados na aba <b>Mecânicas</b> — esta aba cobre o que
         acontece a partir do momento em que um golpe e de fato usado: acerto, calculo de dano, e todas as
         mecanicas de status/campo que um golpe pode acionar.
       </WikiCard>
 
       <WikiCard title="Como a IA escolhe o golpe">
-        POKEs <b>selvagens</b> escolhem sozinhos, a cada acao, entre os golpes fora de cooldown: primeiro
+        POKEs <b>selvagens</b> escolhem sozinhos, a cada ação, entre os golpes fora de cooldown: primeiro
         verificam se algum golpe de apoio (status, buff/debuff, escudo, armadilha de campo) ainda vale a pena
         usar — por exemplo, nao usam {nomeDoGolpe('toxic')} se o alvo ja esta envenenado, nem uma tela se ela ja
         esta de pe — e,
         se houver um pronto E o melhor golpe de dano disponivel nao bastaria pra derrotar o alvo neste instante,
         usam o de apoio. Caso contrario escolhem golpe de dano: se algum golpe em AREA (AOE) pronto atingiria 2
         ou mais alvos, a escolha fica restrita aos golpes de AOE; dentro do que sobrou, escolhem o de maior{' '}
-        <b>dano esperado</b> (dano estimado multiplicado pela propria chance de acerto — um golpe forte mas
+        <b>dano esperado</b> (dano estimado multiplicado pela própria chance de acerto — um golpe forte mas
         impreciso pode perder pra um mais fraco e mais confiavel). Sem nada pronto, cai no Ataque Basico.
         <br />
         <br />
-        Seu <b>proprio POKE</b> segue uma logica diferente: ele usa os ate <b>{MAX_ACTIVE_ABILITIES} golpes</b>{' '}
+        Seu <b>próprio POKE</b> segue uma lógica diferente: ele usa os até <b>{MAX_ACTIVE_ABILITIES} golpes</b>{' '}
         que voce escolheu deixar ativos (aba Golpes do perfil do POKE), numa fila fixa — tenta o proximo da fila
         assim que ele estiver pronto, pulando (sem gastar a vez) um golpe de status que nao faria nada agora
         (alvo imune, ja no teto de estagio, etc.). Ele NAO prioriza AOE sozinho — a ordem e inteiramente a que
@@ -728,10 +728,10 @@ function CombateTab() {
 
       <WikiCard title="Acerto ou erro">
         Todo golpe (exceto os de precisao 100, que nunca erram — o Ataque Basico e um deles) rola uma chance de
-        acerto: <code>precisao do golpe × multiplicador de Precisao do atacante ÷ multiplicador de Evasao do
-        defensor</code>. Os estagios de <b>Precisao</b> e <b>Evasao</b> sao um eixo separado dos estagios normais
+        acerto: <code>precisão do golpe × multiplicador de Precisão do atacante ÷ multiplicador de Evasão do
+        defensor</code>. Os estágios de <b>Precisão</b> e <b>Evasão</b> são um eixo separado dos estágios normais
         de Ataque/Defesa/Velocidade (formula propria, base 3 em vez de base 2): +1 da 1.33x, −1 da 0.75x. A rolagem
-        e feita <b>uma vez por uso</b> do golpe, nao por alvo atingido (um AOE nao pode acertar 2 e errar o 3º).
+        e feita <b>uma vez por uso</b> do golpe, não por alvo atingido (um AOE não pode acertar 2 e errar o 3º).
         <br />
         <br />
         Golpes como {nomeDoGolpe('lock_on')}/{nomeDoGolpe('mind_reader')} (que travam o alvo) ignoram a rolagem
@@ -740,42 +740,42 @@ function CombateTab() {
         dali em diante.
       </WikiCard>
 
-      <WikiCard title="O calculo de dano, passo a passo">
+      <WikiCard title="O cálculo de dano, passo a passo">
         Pra golpes de dano fixo ({nomeDoGolpe('seismic_toss')}/{nomeDoGolpe('night_shade')} usam o proprio
         nivel do usuario, {nomeDoGolpe('dragon_rage')} e sempre 40, {nomeDoGolpe('super_fang')} tira metade do
         HP atual do alvo) o dano sai direto, sem passar pelos passos abaixo — so a imunidade de tipo continua
         valendo. Pra golpe normal:
         <ol className="mt-[.5em] list-decimal space-y-1 pl-5">
           <li>
-            <b>Dano base</b>: formula com Nivel do atacante, Poder do golpe, e o Ataque/Defesa certos — Fisico
+            <b>Dano base</b>: fórmula com Nível do atacante, Poder do golpe, e o Ataque/Defesa certos — Físico
             usa Atk Fisico/Defesa, Especial usa Atk Especial/Defesa Especial (categoria decidida por golpe; o
             golpe de AOE de nivel 50 usa o maior dos dois Ataques do PROPRIO usuario, fixado no valor que ele
             tinha no Nivel 50).
           </li>
           <li>Cada stat de Ataque/Defesa usada ja entra multiplicada pelo proprio estagio (+1 = 1.5x, −1 = 0.67x, ... ate ±6).</li>
-          <li>Queimado reduz o dano de golpes FISICOS causados pelo proprio queimado pela metade.</li>
+          <li>Queimado reduz o dano de golpes FÍSICOS causados pelo próprio queimado pela metade.</li>
           <li>
             <b>STAB</b> (Same Type Attack Bonus): golpe do MESMO tipo elemental de um dos tipos do atacante sai{' '}
             {STAB_MULTIPLIER_WIKI}x mais forte.
           </li>
-          <li>Traits de baixo HP (Blaze/Torrent/Overgrow/Swarm — ver tabela abaixo) e Flash Fire aplicam o proprio multiplicador aqui, se valerem.</li>
+          <li>Traits de baixo HP (Blaze/Torrent/Overgrow/Swarm — ver tabela abaixo) e Flash Fire aplicam o próprio multiplicador aqui, se valerem.</li>
           <li>
             <b>Efetividade de tipo</b> (2x/0.5x/0x, multiplicando os dois tipos do defensor — ver a aba
             Efetividade pra tabela completa).
           </li>
           <li>Clima favorece ou prejudica o tipo do golpe (ver card de Clima abaixo).</li>
-          <li>Multiscale reduz pela metade se o defensor estiver no HP maximo exato.</li>
-          <li>{nomeDoGolpe('reflect')}/{nomeDoGolpe('light_screen')} reduzem pela metade, se o defensor tiver o escudo certo de pe.</li>
+          <li>Multiscale reduz pela metade se o defensor estiver no HP máximo exato.</li>
+          <li>{nomeDoGolpe('reflect')}/{nomeDoGolpe('light_screen')} reduzem pela metade, se o defensor tiver o escudo certo de pé.</li>
           <li>
-            <b>Critico</b>: chance base de {formatPercent(CRIT_CHANCE_WIKI)}, multiplicada por 3 pra cada
-            "estagio de critico" que o golpe/usuario tiver ({nomeDoGolpe('focus_energy')} da +2 por uso, alguns
+            <b>Crítico</b>: chance base de {formatPercent(CRIT_CHANCE_WIKI)}, multiplicada por 3 pra cada
+            "estágio de crítico" que o golpe/usuario tiver ({nomeDoGolpe('focus_energy')} da +2 por uso, alguns
             golpes ja nascem com +1) — satura em 50% de chance a partir do 3º estagio. Um critico multiplica o
             dano por {CRIT_MULTIPLIER_WIKI}x. {nomeDoGolpe('lucky_chant')} torna o usuario dela imune a critico
             recebido (mesmo contra um critico GARANTIDO por {nomeDoGolpe('laser_focus')});{' '}
             {nomeDoGolpe('laser_focus')} garante o critico no proprio proximo golpe de
             dano, uma unica vez.
           </li>
-          <li>Variacao final aleatoria entre 85% e 100% do valor calculado.</li>
+          <li>Variação final aleatória entre 85% e 100% do valor calculado.</li>
         </ol>
         <div className="mt-[.5em]">
           Resultado sempre arredondado, com piso de 1 de dano (ou 0, se o defensor for imune ao tipo do golpe).
@@ -783,7 +783,7 @@ function CombateTab() {
       </WikiCard>
 
       <WikiCard title="Habilidades passivas (Traits)">
-        Toda especie pode ter <b>uma</b> Trait fixa (ver o card dela no perfil/Pokedex) — um efeito passivo que
+        Toda espécie pode ter <b>uma</b> Trait fixa (ver o card dela no perfil/Pokedex) — um efeito passivo que
         vale o tempo todo, sem gastar golpe nem turno. Estas sao as que ja tem mecanica real no motor:
         <div className="mt-[.5em]">
           <TraitTable traits={TRAITS_IMPLEMENTADAS} />
@@ -804,7 +804,7 @@ function CombateTab() {
         {nomeDoGolpe('hail')}, {nomeDoGolpe('sandstorm')}) ou por Trait de entrada (Drizzle/Sand Stream/
         Snow Warning/Drought, ver tabela acima). Um clima novo sempre substitui o anterior (nao empilha);
         ligado por golpe, dura {turnos(10)} — e quando acaba, o clima da SALA volta, em vez de o ceu ficar
-        limpo. <b>Neve e Neblina so vem do ambiente</b>: nao ha golpe que as invoque.
+        limpo. <b>Neve e Neblina só vem do ambiente</b>: não há golpe que as invoque.
         <ul className="mt-[.5em] list-disc space-y-1 pl-4">
           <li>Chuva: golpes <TypeChip type="WATER" /> +50% de dano, <TypeChip type="FIRE" /> −50%.</li>
           <li>Sol: golpes <TypeChip type="FIRE" /> +50% de dano, <TypeChip type="WATER" /> −50%.</li>
@@ -817,10 +817,10 @@ function CombateTab() {
             <TypeChip type="GROUND" /> ou <TypeChip type="STEEL" /> (nenhum dos tipos).
           </li>
           <li>
-            Neve: <b>nao causa dano nenhum</b> — da +50% de Defesa pra POKE do tipo <TypeChip type="ICE" />.
+            Neve: <b>não causa dano nenhum</b> — da +50% de Defesa pra POKE do tipo <TypeChip type="ICE" />.
             Nao confunda com Granizo: sao climas diferentes.
           </li>
-          <li>Neblina: precisao de TODOS os golpes cai pra 60% do normal, dos dois lados.</li>
+          <li>Neblina: precisão de TODOS os golpes cai pra 60% do normal, dos dois lados.</li>
         </ul>
         <div className="mt-[.5em]">
           Alguns golpes mudam de comportamento conforme o tempo: {nomeDoGolpe('thunder')} e{' '}
@@ -835,26 +835,26 @@ function CombateTab() {
       <WikiCard title="Escudos (telas de campo)">
         Golpes de escudo protegem sempre quem os usou (nunca redirecionam pra outro alvo), por {turnos(5)}:
         <ul className="mt-[.5em] list-disc space-y-1 pl-4">
-          <li><b>{nomeDoGolpe('reflect')}</b>: reduz pela metade o dano de golpes FISICOS recebidos.</li>
+          <li><b>{nomeDoGolpe('reflect')}</b>: reduz pela metade o dano de golpes FÍSICOS recebidos.</li>
           <li><b>{nomeDoGolpe('light_screen')}</b>: reduz pela metade o dano de golpes ESPECIAIS recebidos.</li>
-          <li><b>{nomeDoGolpe('safeguard')}</b>: impede qualquer status NOVO de pegar (nao remove um que ja estava la).</li>
-          <li><b>{nomeDoGolpe('mist')}</b>: impede o OPONENTE de baixar seus estagios (nao bloqueia queda auto-infligida).</li>
-          <li><b>{nomeDoGolpe('lucky_chant')}</b>: imune a critico recebido, mesmo um garantido.</li>
-          <li><b>{nomeDoGolpe('wide_guard')}</b>: cancela por completo o proximo golpe em AREA recebido (golpe de alvo unico passa direto).</li>
+          <li><b>{nomeDoGolpe('safeguard')}</b>: impede qualquer status NOVO de pegar (não remove um que já estava lá).</li>
+          <li><b>{nomeDoGolpe('mist')}</b>: impede o OPONENTE de baixar seus estágios (não bloqueia queda auto-infligida).</li>
+          <li><b>{nomeDoGolpe('lucky_chant')}</b>: imune a crítico recebido, mesmo um garantido.</li>
+          <li><b>{nomeDoGolpe('wide_guard')}</b>: cancela por completo o próximo golpe em ÁREA recebido (golpe de alvo único passa direto).</li>
         </ul>
       </WikiCard>
 
       <WikiCard title={`${nomeDoGolpe('protect')}, ${nomeDoGolpe('endure')} e ${nomeDoGolpe('destiny_bond')}`}>
         <ul className="list-disc space-y-1 pl-4">
           <li>
-            <b>{nomeDoGolpe('protect')}</b>/<b>{nomeDoGolpe('detect')}</b>: bloqueia por completo o proximo
+            <b>{nomeDoGolpe('protect')}</b>/<b>{nomeDoGolpe('detect')}</b>: bloqueia por completo o próximo
             golpe que mira em quem usou (dano, status ou mudanca de estagio) — golpes que miram no proprio
             usuario (cura, buff em si mesmo) ignoram a Protecao, assim como uma lista curta de golpes especiais
             ({nomeDoGolpe('endure')}, {nomeDoGolpe('destiny_bond')}, {nomeDoGolpe('rest')},{' '}
             {nomeDoGolpe('perish_song')} entre outros). Consumido no golpe bloqueado.
           </li>
           <li>
-            <b>{nomeDoGolpe('endure')}</b>: garante sobreviver com 1 de HP no proximo golpe recebido, SE ele
+            <b>{nomeDoGolpe('endure')}</b>: garante sobreviver com 1 de HP no próximo golpe recebido, SE ele
             fosse te derrotar — mesma garantia que a Trait Sturdy, so que com timer (um uso, precisa ser usado
             de novo) em vez de depender de estar no HP maximo.
           </li>
@@ -868,24 +868,24 @@ function CombateTab() {
       <WikiCard title="Efeitos continuos (dano ou cura por turno)">
         <ul className="list-disc space-y-1 pl-4">
           <li>
-            <b>{nomeDoGolpe('leech_seed')}</b>: drena 1/8 do HP maximo do alvo por turno, curando quem plantou
-            a semente — nao pega em alvo <TypeChip type="GRASS" />.
+            <b>{nomeDoGolpe('leech_seed')}</b>: drena 1/8 do HP máximo do alvo por turno, curando quem plantou
+            a semente — não pega em alvo <TypeChip type="GRASS" />.
           </li>
           <li>
-            <b>{nomeDoGolpe('curse')}</b> (variante <TypeChip type="GHOST" />, so usavel por POKEs desse tipo):
+            <b>{nomeDoGolpe('curse')}</b> (variante <TypeChip type="GHOST" />, só usavel por POKEs desse tipo):
             custa 50% do proprio HP MAXIMO de quem usa, e tira 1/4 do HP maximo do alvo por turno, sem prazo pra
             acabar sozinho.
           </li>
           <li>
-            <b>{nomeDoGolpe('nightmare')}</b>: tira 1/4 do HP maximo do alvo por turno, mas SO enquanto ele
+            <b>{nomeDoGolpe('nightmare')}</b>: tira 1/4 do HP máximo do alvo por turno, mas SÓ enquanto ele
             estiver Dormindo — para de fazer efeito se ele acordar (sem precisar curar o Pesadelo em si).
           </li>
           <li>
-            <b>{nomeDoGolpe('ingrain')}</b> e <b>{nomeDoGolpe('aqua_ring')}</b>: curam 1/16 do proprio HP maximo
+            <b>{nomeDoGolpe('ingrain')}</b> e <b>{nomeDoGolpe('aqua_ring')}</b>: curam 1/16 do próprio HP máximo
             por turno, sem prazo pra acabar sozinho.
           </li>
           <li>
-            <b>{nomeDoGolpe('wish')}</b>: nao cura na hora — agenda uma cura de 50% do HP maximo de quem usou,
+            <b>{nomeDoGolpe('wish')}</b>: não cura na hora — agenda uma cura de 50% do HP máximo de quem usou,
             que se aplica 2 turnos depois (mesmo que o time ja tenha trocado de POKE ativo nesse meio tempo).
           </li>
         </ul>
@@ -894,24 +894,24 @@ function CombateTab() {
       <WikiCard title="Golpes que travam o oponente">
         <ul className="list-disc space-y-1 pl-4">
           <li><b>{nomeDoGolpe('taunt')}</b>: por {turnos(3)}, o alvo fica proibido de usar qualquer golpe de status.</li>
-          <li><b>{nomeDoGolpe('disable')}</b>: por {turnos(4)}, tranca especificamente o ULTIMO golpe que o alvo usou.</li>
-          <li><b>{nomeDoGolpe('encore')}</b>: por {turnos(3)}, forca o alvo a repetir so o ultimo golpe que usou (cai pro Ataque Basico se esse golpe entrar em cooldown).</li>
+          <li><b>{nomeDoGolpe('disable')}</b>: por {turnos(4)}, tranca especificamente o ÚLTIMO golpe que o alvo usou.</li>
+          <li><b>{nomeDoGolpe('encore')}</b>: por {turnos(3)}, força o alvo a repetir só o último golpe que usou (cai pro Ataque Básico se esse golpe entrar em cooldown).</li>
           <li><b>{nomeDoGolpe('torment')}</b>: por {turnos(3)}, o alvo nunca pode repetir o mesmo golpe duas vezes seguidas.</li>
-          <li><b>{nomeDoGolpe('spite')}</b>: soma {turnos(4)} direto no cooldown do ultimo golpe que o alvo usou.</li>
-          <li><b>{nomeDoGolpe('heal_block')}</b>: por {turnos(5)}, bloqueia qualquer cura/dreno positivo no alvo (nao bloqueia recoil, que e dano).</li>
-          <li><b>{nomeDoGolpe('yawn')}</b>: nao adormece na hora — 2 turnos depois, tenta aplicar Dormindo de verdade (respeitando imunidade normalmente).</li>
+          <li><b>{nomeDoGolpe('spite')}</b>: soma {turnos(4)} direto no cooldown do último golpe que o alvo usou.</li>
+          <li><b>{nomeDoGolpe('heal_block')}</b>: por {turnos(5)}, bloqueia qualquer cura/dreno positivo no alvo (não bloqueia recoil, que e dano).</li>
+          <li><b>{nomeDoGolpe('yawn')}</b>: não adormece na hora — 2 turnos depois, tenta aplicar Dormindo de verdade (respeitando imunidade normalmente).</li>
         </ul>
       </WikiCard>
 
-      <WikiCard title="Golpes de poder variavel ou dano fixo">
+      <WikiCard title="Golpes de poder variável ou dano fixo">
         <ul className="list-disc space-y-1 pl-4">
-          <li><b>{nomeDoGolpe('magnitude')}</b>: sorteia o poder do golpe — de 10 (5% de chance) ate 150 (5% de chance), passando por 30/50/70/90/110 no meio.</li>
-          <li><b>{nomeDoGolpe('reversal')}</b>/<b>{nomeDoGolpe('flail')}</b>: quanto MENOS HP restante o usuario tiver, mais forte sai (ate poder 200 perto de morrer).</li>
+          <li><b>{nomeDoGolpe('magnitude')}</b>: sorteia o poder do golpe — de 10 (5% de chance) até 150 (5% de chance), passando por 30/50/70/90/110 no meio.</li>
+          <li><b>{nomeDoGolpe('reversal')}</b>/<b>{nomeDoGolpe('flail')}</b>: quanto MENOS HP restante o usuário tiver, mais forte sai (até poder 200 perto de morrer).</li>
           <li><b>{nomeDoGolpe('present')}</b>: poder sorteado entre 40, 80 ou 120.</li>
-          <li><b>{nomeDoGolpe('hidden_power')}</b>: sempre tipo NORMAL aqui (simplificacao deste jogo), poder entre 30 e 70 conforme a media dos IVs do POKE.</li>
-          <li><b>{nomeDoGolpe('psywave')}</b>: dano aleatorio baseado so no NIVEL do usuario, ignorando Ataque/Defesa por completo.</li>
-          <li><b>{nomeDoGolpe('counter')}</b>/<b>{nomeDoGolpe('mirror_coat')}</b>: devolve 2x o ultimo dano FISICO/ESPECIAL sofrido nos ultimos 3 segundos — sem nada recente pra devolver, vira um golpe generico de poder 40.</li>
-          <li><b>{nomeDoGolpe('seismic_toss')}</b>/<b>{nomeDoGolpe('night_shade')}</b>: dano fixo igual ao NIVEL do usuario.</li>
+          <li><b>{nomeDoGolpe('hidden_power')}</b>: sempre tipo NORMAL aqui (simplificação deste jogo), poder entre 30 e 70 conforme a media dos IVs do POKE.</li>
+          <li><b>{nomeDoGolpe('psywave')}</b>: dano aleatório baseado só no NÍVEL do usuário, ignorando Ataque/Defesa por completo.</li>
+          <li><b>{nomeDoGolpe('counter')}</b>/<b>{nomeDoGolpe('mirror_coat')}</b>: devolve 2x o último dano FÍSICO/ESPECIAL sofrido nos últimos 3 segundos — sem nada recente pra devolver, vira um golpe genérico de poder 40.</li>
+          <li><b>{nomeDoGolpe('seismic_toss')}</b>/<b>{nomeDoGolpe('night_shade')}</b>: dano fixo igual ao NÍVEL do usuário.</li>
           <li><b>{nomeDoGolpe('super_fang')}</b>: tira metade do HP ATUAL do alvo.</li>
         </ul>
       </WikiCard>
@@ -924,7 +924,7 @@ function CombateTab() {
         contra voce).
       </WikiCard>
 
-      <WikiCard title="Outras mecanicas de combate">
+      <WikiCard title="Outras mecânicas de combate">
         <ul className="list-disc space-y-1 pl-4">
           <li>
             <b>Confusao</b> (detalhes completos na aba Status): quando o POKE confuso falha em agir, ele se
@@ -936,15 +936,15 @@ function CombateTab() {
             originais — esses golpes nao ficariam com custo nenhum sem essa adaptacao).
           </li>
           <li>
-            <b>{nomeDoGolpe('soak')}</b>: forca o TIPO do alvo pra <TypeChip type="WATER" /> so pra efeito de
+            <b>{nomeDoGolpe('soak')}</b>: força o TIPO do alvo pra <TypeChip type="WATER" /> só pra efeito de
             calculo de efetividade (nao muda imunidade de status nem STAB do proprio alvo).
           </li>
           <li>
-            <b>Flinch</b> (perder a proxima acao por ter sido atingido): modelado como um cooldown global extra
+            <b>Flinch</b> (perder a próxima ação por ter sido atingido): modelado como um cooldown global extra
             no atingido, ja que este combate nao tem "ordem de turno" pra furar. A Trait Inner Focus da imunidade.
           </li>
           <li>
-            <b>{nomeDoGolpe('rage_powder')}</b>: existe no catalogo mas nao faz nada aqui — esse golpe redireciona
+            <b>{nomeDoGolpe('rage_powder')}</b>: existe no catálogo mas não faz nada aqui — esse golpe redireciona
             ataques pro usuario num time de 2+ POKEs em campo, e este jogo e sempre 1 POKE seu contra os
             selvagens, sem aliado pra redirecionar.
           </li>
@@ -987,7 +987,7 @@ function TracosTab() {
       </WikiCard>
 
       <WikiCard title="Habilidade">
-        Cada especie tem 1 ou 2 habilidades normais e, as vezes, uma <b>oculta</b>. O POKE sorteia
+        Cada espécie tem 1 ou 2 habilidades normais e, as vezes, uma <b>oculta</b>. O POKE sorteia
         a dele quando aparece — dois Marill selvagens podem sair um com Thick Fat e outro com Huge
         Power, que dobra o Ataque Fisico. A oculta e rara (5% dos encontros) e a ficha a marca
         com um selo.
@@ -995,7 +995,7 @@ function TracosTab() {
         A habilidade e passiva: nao ocupa slot de golpe e nao precisa ser ativada. A descricao do
         que a sua faz esta na ficha do POKE.
         <br /><br />
-        <b>Nem toda habilidade funciona aqui.</b> Algumas dependem de coisas que este jogo nao tem
+        <b>Nem toda habilidade funciona aqui.</b> Algumas dependem de coisas que este jogo não tem
         — trocar de POKE no meio da luta, item equipado, aliado em campo, fuga. Quando for o caso,
         a ficha diz isso em amarelo, com o motivo. Preferimos avisar a fingir.
       </WikiCard>
@@ -1022,7 +1022,7 @@ export function WikiMenu() {
           { value: 'inicio', label: 'Primeiros Passos' },
           { value: 'tipos', label: 'Efetividade' },
           { value: 'raridades', label: 'Raridades' },
-          { value: 'mecanicas', label: 'Mecanicas' },
+          { value: 'mecanicas', label: 'Mecânicas' },
           { value: 'tracos', label: 'Natureza e Habilidade' },
           { value: 'status', label: 'Status' },
           { value: 'combate', label: 'Combate' },

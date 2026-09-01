@@ -263,14 +263,14 @@ export function ComprarPokes() {
       <div className="flex flex-col gap-[.45em]">
       <div className="flex flex-wrap items-center gap-[.5em]">
         <GameInput
-          placeholder="Buscar especie..." value={busca}
+          placeholder="Buscar espécie..." value={busca}
           onChange={(e) => setBusca(e.target.value)} className="min-w-[9em] flex-1"
         />
         <GameSelect value={ordem} onChange={(e) => setOrdem(e.target.value as typeof ordem)}>
-          <option value="preco">Menor preco</option>
+          <option value="preco">Menor preço</option>
           <option value="recente">Mais recente</option>
           <option value="termina">Leilão terminando</option>
-          <option value="nivel">Maior nivel</option>
+          <option value="nivel">Maior nível</option>
           <option value="iv">Maior IV</option>
         </GameSelect>
       </div>
@@ -439,7 +439,7 @@ export function ComprarPokes() {
             )}
             {/* Historico SOB DEMANDA e UM POR VEZ (PH-97).
 
-                A issue pedia o grafico "no cartao do anuncio", mas montar um por
+                A issue pedia o grafico "no cartão do anúncio", mas montar um por
                 linha seriam DUAS leituras por anuncio numa vitrine que pode ter
                 centenas — o mesmo tipo de custo que o PH-65 existiu pra cortar
                 (dois polls de badge gastando 90 requisicoes por hora por aba).

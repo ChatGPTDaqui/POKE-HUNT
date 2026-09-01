@@ -153,7 +153,7 @@ describe('a duracao aparece no balao, e ela e diferente por origem (PH-285)', ()
       clima: { tipo: 'granizo', origem: 'ambiente', turnosRestantes: Infinity },
     } as never, false)
     abrir()
-    expect(screen.getByText(/enquanto voce estiver nesta area/)).toBeTruthy()
+    expect(screen.getByText(/enquanto você estiver nesta área/)).toBeTruthy()
     expect(screen.queryByText(/Dura mais/)).toBeNull()
   })
 })

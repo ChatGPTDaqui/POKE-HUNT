@@ -147,7 +147,7 @@ function BotaoAba({ label, ativo, onClick }: { label: string; ativo: boolean; on
         // `jogo-botao` e o gancho do alvo minimo de toque: sao quatro abas lado
         // a lado com 27px de altura, e errar a vizinha troca o canal que o
         // jogador esta lendo.
-        'jogo-botao flex-1 cursor-pointer rounded-[.6em] px-[.4em] py-[.45em] font-[inherit] text-[.75em]',
+        'jogo-botão flex-1 cursor-pointer rounded-[.6em] px-[.4em] py-[.45em] font-[inherit] text-[.75em]',
         ativo ? 'bg-n800 text-foreground' : 'text-n500',
       )}
     >

@@ -192,7 +192,7 @@ const SPAWN_POINT_MAX_ATTEMPTS = 40
 // jogador ter que andar/virar pra "descobrir" spawn novo em vez de tudo
 // aparecer ao redor do ponto onde ele esta parado — o pedido era
 // literalmente "criar a ideia de explorar o mapa".
-const SPAWN_CONE_MIN_DISTANCE = 250 // "media distancia": nunca colado no jogador
+const SPAWN_CONE_MIN_DISTANCE = 250 // "media distância": nunca colado no jogador
 const SPAWN_CONE_MAX_DISTANCE = 550 // nem no fim do mapa — se a tentativa nao achar celula livre nessa faixa, cai no sorteio antigo (raio do mapa inteiro) abaixo
 const SPAWN_CONE_HALF_ANGLE = (55 * Math.PI) / 180 // ~110 graus de cone total
 /**
@@ -419,7 +419,7 @@ function criarEntidadeDoProtetor(
     const candidato = createEnemyEntity({ ...counters }, { poke, x: point.x, y: point.y, encounterId })
     if (podeDanificar(rng, atacante, candidato)) break
   }
-  if (!escolhido) throw new Error('Sorteio de protetor nao produziu candidato')
+  if (!escolhido) throw new Error('Sorteio de protetor não produziu candidato')
   const { encounterId, level, ivs, poke } = escolhido
   const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
   enemy.isProtetor = true
@@ -992,7 +992,7 @@ export function handleEnemyDefeated(
       // abrir o perfil pra descobrir se aquilo valeu alguma coisa.
       const ganhos = formatStatGains(grantResult.statGains)
       toastStore.getState().pushToast(
-        `${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ''}`,
+        `${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nível ${grantResult.level}!${ganhos ? ` ${ganhos}` : ''}`,
         'levelup', 'combat',
       )
       for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) {
@@ -1018,7 +1018,7 @@ export function handleEnemyDefeated(
       })
     }
     if (trainerResult.leveledUp) {
-      toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, 'levelup', 'combat')
+      toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nível ${trainerResult.level}!`, 'levelup', 'combat')
       // Um dos DOIS pontos que disparavam o splash no vanilla (js/main.js:288) e
       // que se perderam na migracao pra React — ver PH-192.
       celebracaoStore.getState().celebrar({
@@ -1259,8 +1259,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
           const nome = nomeDaSala(world.sala)
           toastStore.getState().pushToast(
             fechouCiclo
-              ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
-              : `Entrando em nova area: ${nome}.`,
+              ? `Ciclo ${world.sala?.ciclos ?? 0} concluído! Voltando para a primeira sala: ${nome}.`
+              : `Entrando em nova área: ${nome}.`,
             'success', 'world',
           )
         }
@@ -1379,7 +1379,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g))
     for (const grupo of grupos) gameState.unlockContinent(grupo)
     if (!silent && algumEstavaTrancado) {
-      toastStore.getState().pushToast('Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
+      toastStore.getState().pushToast('Você derrotou o Campeão Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
     }
   }
 

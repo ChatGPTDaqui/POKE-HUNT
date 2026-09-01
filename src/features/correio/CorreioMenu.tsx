@@ -118,13 +118,13 @@ export function CorreioMenu() {
   const adicionar = useMutation({
     mutationFn: (n: string) => correioRpc.pedirAmizade(n),
     onSuccess: (r) => { toast(r.mensagem); setNick(''); recarregar() },
-    onError: aoFalhar('Nao foi possivel enviar o pedido.'),
+    onError: aoFalhar('Não foi possível enviar o pedido.'),
   })
 
   const responderPedido = useMutation({
     mutationFn: ({ id, aceitar }: { id: string; aceitar: boolean }) => correioRpc.responderPedido(id, aceitar),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
-    onError: aoFalhar('Nao foi possivel responder.'),
+    onError: aoFalhar('Não foi possível responder.'),
   })
 
   const marcarLida = useMutation({
@@ -141,7 +141,7 @@ export function CorreioMenu() {
       else toast(r.mensagem)
       recarregar()
     },
-    onError: aoFalhar('Nao foi possivel coletar.'),
+    onError: aoFalhar('Não foi possível coletar.'),
   })
 
   // Comecar conversa nova: manda a primeira mensagem por NICK e ja abre o fio
@@ -155,37 +155,37 @@ export function CorreioMenu() {
       setContatoAberto({ userId: r.paraId, nick: r.paraNome })
       recarregar()
     },
-    onError: aoFalhar('Nao foi possivel enviar a mensagem.'),
+    onError: aoFalhar('Não foi possível enviar a mensagem.'),
   })
 
   const excluir = useMutation({
     mutationFn: (id: string) => correioRpc.excluirCorreio(id),
     onSuccess: recarregar,
-    onError: aoFalhar('Nao foi possivel excluir.'),
+    onError: aoFalhar('Não foi possível excluir.'),
   })
 
   const apagarFio = useMutation({
     mutationFn: (id: string) => correioRpc.excluirConversa(id),
     onSuccess: () => { setContatoAberto(null); recarregar() },
-    onError: aoFalhar('Nao foi possivel apagar a conversa.'),
+    onError: aoFalhar('Não foi possível apagar a conversa.'),
   })
 
   const remover = useMutation({
     mutationFn: (id: string) => correioRpc.removerAmizade(id),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
-    onError: aoFalhar('Nao foi possivel remover.'),
+    onError: aoFalhar('Não foi possível remover.'),
   })
 
   const bloquear = useMutation({
     mutationFn: (id: string) => correioRpc.bloquearJogador(id),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
-    onError: aoFalhar('Nao foi possivel bloquear.'),
+    onError: aoFalhar('Não foi possível bloquear.'),
   })
 
   const desbloquear = useMutation({
     mutationFn: (id: string) => correioRpc.desbloquearJogador(id),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
-    onError: aoFalhar('Nao foi possivel desbloquear.'),
+    onError: aoFalhar('Não foi possível desbloquear.'),
   })
 
   // Memoizado porque `?? []` cria um array novo a cada render, e `contatoAtual`
@@ -246,7 +246,7 @@ export function CorreioMenu() {
           </div>
           <div className="flex items-center gap-[.35em]">
             <span className="min-w-0 flex-1 truncate text-[.8em] text-n400">
-              {c.ultimaMinha && <span className="text-n500">Voce: </span>}
+              {c.ultimaMinha && <span className="text-n500">Você: </span>}
               {c.ultimoTrecho}
             </span>
             {/* PH-287: O ICONE GANHOU PALAVRA. Ele ja existia, mas sozinho — e

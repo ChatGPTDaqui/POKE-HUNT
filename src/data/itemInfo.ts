@@ -34,20 +34,20 @@ export function infoDoItem(item: AnyItem): InfoDeItem {
         ? `Restaura ${fmt.format(item.healAmount)} de HP do POKE em campo.`
         : 'Restaura TODO o HP do POKE em campo.',
     )
-    efeitos.push('Nao funciona com o POKE desmaiado — use um Revive.')
+    efeitos.push('Não funciona com o POKE desmaiado — use um Revive.')
   }
 
   if (item.kind === 'revive' && item.reviveHpPercent != null) {
-    efeitos.push(`Reanima um POKE desmaiado com ${Math.round(item.reviveHpPercent * 100)}% do HP maximo.`)
+    efeitos.push(`Reanima um POKE desmaiado com ${Math.round(item.reviveHpPercent * 100)}% do HP máximo.`)
   }
 
   if (item.kind === 'ball' && item.captureRate != null) {
     efeitos.push(`Multiplica a chance de captura por ${item.captureRate}x.`)
-    efeitos.push('Capturados entram na Mochila no Nivel 1.')
+    efeitos.push('Capturados entram na Mochila no Nível 1.')
   }
 
   if (item.kind === 'rod') {
-    efeitos.push('A pesca ainda nao existe no jogo — esta vara nao faz nada.')
+    efeitos.push('A pesca ainda não existe no jogo — esta vara não faz nada.')
   }
 
   if (item.kind === 'stone') {
@@ -56,10 +56,10 @@ export function infoDoItem(item: AnyItem): InfoDeItem {
     // exatamente o lugar onde essa divergencia nao aparece como bug — aparece
     // como o jogo mentindo.
     efeitos.push(
-      `Evolucao especial: ${SPECIAL_EVOLUTION_STONE_COUNT} unidades no Nivel ${SPECIAL_EVOLUTION_LEVEL}`
+      `Evolução especial: ${SPECIAL_EVOLUTION_STONE_COUNT} unidades no Nível ${SPECIAL_EVOLUTION_LEVEL}`
       + ` evoluem um POKE de tipo ${item.stoneType}.`,
     )
-    efeitos.push('Nao e vendida na Loja: so cai de POKEs derrotados do mesmo tipo.')
+    efeitos.push('Não e vendida na Loja: só cai de POKEs derrotados do mesmo tipo.')
   }
 
   const precos: string[] = []

@@ -42,7 +42,7 @@ export function EspecialidadesMenu() {
           {Math.round((global.atual / global.max) * 100)}%
         </div>
         <div>
-          <div className="font-medium">{global.atual} / {global.max} niveis · {titulo}</div>
+          <div className="font-medium">{global.atual} / {global.max} níveis · {titulo}</div>
           <div className="text-[.78em] text-n500">Progresso de dano/defesa por tipo elemental.</div>
         </div>
       </div>
@@ -149,11 +149,11 @@ function Trilha({
       )
       if (!ok) return // pedirAcao ja avisou o erro do servidor
       if (!local) return // caminho remoto: a mensagem certa vem do servidor
-      if (local.success) toast(`Maestria ${tipo} (${trilha}) subiu para o nivel ${nivel + 1}.`)
+      if (local.success) toast(`Maestria ${tipo} (${trilha}) subiu para o nível ${nivel + 1}.`)
       else toast(
         local.reason === 'insufficient_gold' ? 'Ouro insuficiente.'
           : local.reason === 'stone_insuficiente' ? `${stoneName(tipo)} insuficiente.`
-            : 'Nao foi possivel subir de nivel.',
+            : 'Não foi possível subir de nível.',
         'error',
       )
     })
@@ -172,10 +172,10 @@ function Trilha({
       <Meter pct={(nivel / ESPECIALIDADE_NIVEL_MAX) * 100} height=".3em" color="var(--color-primary)" className="mt-[.35em]" />
 
       {noMax ? (
-        <div className="mt-[.4em] text-[.78em] text-gold">Nivel maximo.</div>
+        <div className="mt-[.4em] text-[.78em] text-gold">Nível máximo.</div>
       ) : (
         <>
-          <SectionLabel className="mt-[.45em]">PROXIMO NIVEL {nivel + 1}</SectionLabel>
+          <SectionLabel className="mt-[.45em]">PRÓXIMO NÍVEL {nivel + 1}</SectionLabel>
           <div className="mt-[.2em] flex flex-wrap items-center gap-[.6em] text-[.78em]">
             <span className={cn('tabular-nums', stoneQtd >= custo!.stoneQtd ? 'text-n300' : 'text-warn')}>
               {stoneName(tipo)} {fmt.format(stoneQtd)}/{fmt.format(custo!.stoneQtd)}

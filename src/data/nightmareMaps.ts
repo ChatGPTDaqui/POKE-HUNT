@@ -175,7 +175,7 @@ function buildBossHunts(): { maps: Record<string, HuntMapDef>; encounters: Recor
     maps[mapId] = {
       id: mapId,
       name: `BOSS ${species.name}`,
-      description: `Covil do lendario ${species.name} (nivel ${BOSS_LEVEL}) — aparece uma unica vez, sem respawn.`,
+      description: `Covil do lendário ${species.name} (nível ${BOSS_LEVEL}) — aparece uma única vez, sem respawn.`,
       levelRange: [BOSS_LEVEL, BOSS_LEVEL],
       unlockCost: null,
       continent: 'nightmare',
@@ -235,8 +235,8 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
 
   const map: HuntMapDef = {
     id: LANCE_MAP_ID,
-    name: 'BOSS Campeao Lance',
-    description: 'Batalha contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.',
+    name: 'BOSS Campeão Lance',
+    description: 'Batalha contra o Campeão Lance — 6 POKEs Lendários em sequência (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o próximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.',
     levelRange: [55, 65],
     unlockCost: null,
     // Fica na faixa2 (Lv31-60), que e exatamente onde o time dele cai

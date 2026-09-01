@@ -89,7 +89,7 @@ function selosDaEntidade(entidade: WorldEntity | null, prefixo: string): Badge[]
       Icone: null,
       titulo: status.turnosRestantes != null
         ? `${nomeDoStatus(status.tipo)} — ${status.turnosRestantes} turno(s) restante(s)`
-        : `${nomeDoStatus(status.tipo)} — nao passa sozinho`,
+        : `${nomeDoStatus(status.tipo)} — não passa sozinho`,
       contador: status.turnosRestantes != null ? String(status.turnosRestantes) : '∞',
       aumenta: false,
       verbete: verbeteDoStatus(status),

@@ -48,15 +48,15 @@ export function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dis
 
     if (!farmOfflineSemServidorEhConfiavel(import.meta.env.PROD)) {
       console.warn(
-        '[farm-offline] producao sem servidor de autoridade (VITE_SERVIDOR_URL ausente) — '
-        + 'farm offline desabilitado, relogio do dispositivo nao e confiavel',
+        '[farm-offline] produção sem servidor de autoridade (VITE_SERVIDOR_URL ausente) — '
+        + 'farm offline desabilitado, relogio do dispositivo não e confiavel',
       )
       return
     }
 
     console.info(
       '[farm-offline] modo dev sem servidor de autoridade — usando relogio do dispositivo '
-      + '(nao confiavel, valido so para desenvolvimento local)',
+      + '(não confiavel, valido só para desenvolvimento local)',
     )
 
     const savedAt = readLastSavedAt()

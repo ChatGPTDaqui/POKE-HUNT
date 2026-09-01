@@ -45,7 +45,7 @@ export function useConvidarTroca(): ConviteDeTroca {
       abrirTela('troca')
     },
     onError: (e: unknown) => useToastStore.getState().pushToast(
-      e instanceof ErroServidor ? e.message : 'Nao foi possivel abrir a troca.',
+      e instanceof ErroServidor ? e.message : 'Não foi possível abrir a troca.',
       'error',
       'world',
     ),

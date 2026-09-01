@@ -360,7 +360,7 @@ function tokenize(expr) {
 			i++;
 			continue;
 		}
-		throw new Error(`Formula: caractere inesperado "${c}" em "${expr}"`);
+		throw new Error(`Fórmula: caractere inesperado "${c}" em "${expr}"`);
 	}
 	return tokens;
 }
@@ -413,7 +413,7 @@ function parse(tokens) {
 	}
 	function parsePrimary() {
 		const tok = peek();
-		if (!tok) throw new Error("Formula: fim inesperado da expressao");
+		if (!tok) throw new Error("Fórmula: fim inesperado da expressão");
 		if (tok.type === "number") {
 			next();
 			return {
@@ -424,7 +424,7 @@ function parse(tokens) {
 		if (tok.type === "op" && tok.value === "(") {
 			next();
 			const node = parseExpr();
-			if (!peek() || peek().value !== ")") throw new Error("Formula: parenteses desbalanceados");
+			if (!peek() || peek().value !== ")") throw new Error("Fórmula: parenteses desbalanceados");
 			next();
 			return node;
 		}
@@ -440,7 +440,7 @@ function parse(tokens) {
 						args.push(parseExpr());
 					}
 				}
-				if (!peek() || peek().value !== ")") throw new Error("Formula: parenteses desbalanceados na funcao");
+				if (!peek() || peek().value !== ")") throw new Error("Fórmula: parenteses desbalanceados na funcao");
 				next();
 				return {
 					type: "call",
@@ -453,10 +453,10 @@ function parse(tokens) {
 				name: tok.value
 			};
 		}
-		throw new Error(`Formula: token inesperado ${JSON.stringify(tok)}`);
+		throw new Error(`Fórmula: token inesperado ${JSON.stringify(tok)}`);
 	}
 	const result = parseExpr();
-	if (pos < tokens.length) throw new Error("Formula: sobrou texto apos a expressao");
+	if (pos < tokens.length) throw new Error("Fórmula: sobrou texto após a expressão");
 	return result;
 }
 function evalNode(node, context, rng) {
@@ -464,11 +464,11 @@ function evalNode(node, context, rng) {
 		case "number": return node.value;
 		case "neg": return -evalNode(node.value, context, rng);
 		case "var":
-			if (!(node.name in context)) throw new Error(`Formula: variavel desconhecida "${node.name}"`);
+			if (!(node.name in context)) throw new Error(`Fórmula: variável desconhecida "${node.name}"`);
 			return context[node.name];
 		case "call": {
 			const fn = node.name === "random" && rng ? () => nextFloat(rng) : FUNCS[node.name];
-			if (!fn) throw new Error(`Formula: funcao desconhecida "${node.name}"`);
+			if (!fn) throw new Error(`Fórmula: funcao desconhecida "${node.name}"`);
 			return fn(...node.args.map((a) => evalNode(a, context, rng)));
 		}
 		case "binary": {
@@ -481,10 +481,10 @@ function evalNode(node, context, rng) {
 				case "/": return l / r;
 				case "%": return l % r;
 				case "^": return Math.pow(l, r);
-				default: throw new Error(`Formula: operador desconhecido "${node.op}"`);
+				default: throw new Error(`Fórmula: operador desconhecido "${node.op}"`);
 			}
 		}
-		default: throw new Error("Formula: no de AST desconhecido");
+		default: throw new Error("Fórmula: no de AST desconhecido");
 	}
 }
 var astCache = /* @__PURE__ */ new Map();
@@ -503,7 +503,7 @@ function createFormulaEngine(formulas) {
 	return {
 		eval(key, context = {}, rng) {
 			const entry = formulas[key];
-			if (!entry) throw new Error(`Formula desconhecida: "${key}"`);
+			if (!entry) throw new Error(`Fórmula desconhecida: "${key}"`);
 			return evalExpression(entry.expr, context, rng);
 		},
 		evalOrDefault(key, fallback, context = {}, rng) {
@@ -33357,7 +33357,7 @@ function buildTypedAoeMoves() {
 		const key = typedAoeMoveKey(type);
 		moves[key] = {
 			id: key,
-			name: `Explosao Elemental (${type})`,
+			name: `Explosão Elemental (${type})`,
 			type,
 			category: "dynamic",
 			power: TYPED_AOE_POWER,
@@ -39477,7 +39477,7 @@ function cooldownFromPp(pp) {
 }
 var BASIC_ATTACK = {
 	id: "basic_attack",
-	name: "Ataque Basico",
+	name: "Ataque Básico",
 	category: "physical",
 	type: "NORMAL",
 	target: "single",
@@ -40042,7 +40042,7 @@ function novoPokeUid() {
 }
 function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature, isShiny: fixedIsShiny, trait: fixedTrait, uid: fixedUid } = {}) {
 	const species = SPECIES[speciesId];
-	if (!species) throw new Error(`Especie desconhecida: ${speciesId}`);
+	if (!species) throw new Error(`Espécie desconhecida: ${speciesId}`);
 	const ivs = fixedIvs || rollIvs(rng, speciesId);
 	const rarity = fixedRarity || rollRarity(rng);
 	const shinyChance = species.catchRate / MAX_CATCH_RATE * SHINY_CHANCE_AT_MAX_CATCH_RATE;
@@ -43005,7 +43005,7 @@ var BIOMAS = [
 		subBiomas: [
 			{
 				chave: "plains",
-				nome: "Planicie",
+				nome: "Planície",
 				peso: 10,
 				loot: "basico",
 				bg: {
@@ -43121,7 +43121,7 @@ var BIOMAS = [
 	},
 	{
 		chave: "aguas_interiores",
-		nome: "Aguas Interiores",
+		nome: "Águas Interiores",
 		tipo: "WATER",
 		bg: {
 			primary: "#24463f",
@@ -43333,7 +43333,7 @@ var BIOMAS = [
 			},
 			{
 				chave: "laboratory",
-				nome: "Laboratorio",
+				nome: "Laboratório",
 				peso: 3,
 				loot: "profundo"
 			}
@@ -43408,7 +43408,7 @@ var BIOMAS = [
 			},
 			{
 				chave: "space",
-				nome: "Espaco",
+				nome: "Espaço",
 				peso: 3,
 				loot: "profundo",
 				bg: {
@@ -46149,7 +46149,7 @@ function buildBossHunts() {
 		maps[mapId] = {
 			id: mapId,
 			name: `BOSS ${species.name}`,
-			description: `Covil do lendario ${species.name} (nivel ${BOSS_LEVEL}) — aparece uma unica vez, sem respawn.`,
+			description: `Covil do lendário ${species.name} (nível ${BOSS_LEVEL}) — aparece uma única vez, sem respawn.`,
 			levelRange: [BOSS_LEVEL, BOSS_LEVEL],
 			unlockCost: null,
 			continent: "nightmare",
@@ -46238,8 +46238,8 @@ function buildLanceHunt() {
 	return {
 		map: {
 			id: LANCE_MAP_ID,
-			name: "BOSS Campeao Lance",
-			description: "Batalha contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.",
+			name: "BOSS Campeão Lance",
+			description: "Batalha contra o Campeão Lance — 6 POKEs Lendários em sequência (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o próximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.",
 			levelRange: [55, 65],
 			unlockCost: null,
 			continent: "faixa2",
@@ -46312,7 +46312,7 @@ var TRAINING_ENCOUNTER = {
 var TRAINING_MAP = {
 	id: TRAINING_MAP_ID,
 	name: "Treinamento",
-	description: "Um boneco de treino (Wobbuffet, nunca revida) pra testar a forca do seu time com seguranca. Sem ouro, XP, item ou captura — so pra medir: acompanhe \"Mobs/h\" no Hunt Analyzer.",
+	description: "Um boneco de treino (Wobbuffet, nunca revida) pra testar a força do seu time com segurança. Sem ouro, XP, item ou captura — só pra medir: acompanhe \"Mobs/h\" no Hunt Analyzer.",
 	levelRange: [TREINO_LEVEL, TREINO_LEVEL],
 	unlockCost: null,
 	continent: "faixa1",
@@ -46573,12 +46573,12 @@ function montarHunt(bioma, faixa) {
 		porSala[sub.chave] = ids;
 	}
 	const enemyPool = [...new Set(Object.values(porSala).flat())];
-	if (enemyPool.length === 0) throw new Error(`Hunt "${id}" nasceria sem nenhum encontro (faixa ${faixa.nome}, Lv ${lo}-${hi}). Hunt vazia nao da erro em runtime: ela so nunca spawna nada e o jogador fica num mapa morto.`);
+	if (enemyPool.length === 0) throw new Error(`Hunt "${id}" nasceria sem nenhum encontro (faixa ${faixa.nome}, Lv ${lo}-${hi}). Hunt vazia não da erro em runtime: ela só nunca spawna nada e o jogador fica num mapa morto.`);
 	POOL_POR_SALA[id] = porSala;
 	maps[id] = {
 		id,
 		name: `${bioma.nome} ${faixa.nome}`,
-		description: `${bioma.nome} — niveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(", ")}.`,
+		description: `${bioma.nome} — níveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(", ")}.`,
 		levelRange: [lo, hi],
 		unlockCost: null,
 		continent: faixa.id,
@@ -46599,7 +46599,7 @@ function montarHunt(bioma, faixa) {
 	maps[STARTER_HUNT_ID] = {
 		id: STARTER_HUNT_ID,
 		name: "Route 46 (Inicial)",
-		description: "A primeira cacada. So POKEs de tipo Normal, nivel 1 a 2.",
+		description: "A primeira caçada. Só POKEs de tipo Normal, nível 1 a 2.",
 		levelRange: [lo, hi],
 		unlockCost: null,
 		continent: "faixa1",
@@ -47012,7 +47012,7 @@ var STONE_ITEMS = Object.fromEntries(STONE_TYPES.map((type) => {
 		name: stoneName(type),
 		kind: "stone",
 		stoneType: type,
-		description: `Usada para evoluir POKEs de tipo primario ${type} ao atingir o Nivel 80.`,
+		description: `Usada para evoluir POKEs de tipo primario ${type} ao atingir o Nível 80.`,
 		sellPrice: 500
 	}];
 }));
@@ -78952,7 +78952,7 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 			encounterId
 		}))) break;
 	}
-	if (!escolhido) throw new Error("Sorteio de protetor nao produziu candidato");
+	if (!escolhido) throw new Error("Sorteio de protetor não produziu candidato");
 	const { encounterId, level, ivs, poke } = escolhido;
 	const enemy = createEnemyEntity(counters, {
 		poke,
@@ -79275,7 +79275,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat", realceDaRaridade(enemy.poke));
 		if (grantResult.leveledUp) {
 			const ganhos = formatStatGains(grantResult.statGains);
-			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
+			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nível ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
 			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
 			celebracaoStore.getState().celebrar({
 				tipo: "nivel",
@@ -79289,7 +79289,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			});
 		}
 		if (trainerResult.leveledUp) {
-			toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
+			toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nível ${trainerResult.level}!`, "levelup", "combat");
 			celebracaoStore.getState().celebrar({
 				tipo: "treinador",
 				nome: gameState.trainer.name,
@@ -79398,7 +79398,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 				world.respawnTimer = world.mapDef.respawnDelay;
 				if (!silent) {
 					const nome = nomeDaSala(world.sala);
-					toastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Entrando em nova area: ${nome}.`, "success", "world");
+					toastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluído! Voltando para a primeira sala: ${nome}.` : `Entrando em nova área: ${nome}.`, "success", "world");
 				}
 			}
 		}
@@ -79459,7 +79459,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const grupos = world.mapDef.unlocksContinentOnClear;
 		const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g));
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
-		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
+		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Você derrotou o Campeão Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
 	}
 	if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
@@ -79652,7 +79652,7 @@ var especiesJaAvisadas = /* @__PURE__ */ new Set();
 function golpesGravados(speciesId, gravados) {
 	if (!especiesJaAvisadas.has(speciesId)) {
 		especiesJaAvisadas.add(speciesId);
-		console.warn(`rowToPoke: especie "${speciesId}" nao esta no catalogo do cliente — usando o learnset gravado na linha. Ver PH-247 (catalogo do banco x do cliente).`);
+		console.warn(`rowToPoke: espécie "${speciesId}" não esta no catálogo do cliente — usando o learnset gravado na linha. Ver PH-247 (catálogo do banco x do cliente).`);
 	}
 	return gravados ?? [];
 }

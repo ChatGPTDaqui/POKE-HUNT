@@ -70,7 +70,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
         }
       })
       .catch((e) => {
-        if (!cancelado) toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel abrir a conversa.', 'error', detalheDeErro(e))
+        if (!cancelado) toast(e instanceof ErroServidor ? e.message : 'Não foi possível abrir a conversa.', 'error', detalheDeErro(e))
       })
       .finally(() => { if (!cancelado) setCarregando(false) })
     return () => { cancelado = true }
@@ -106,7 +106,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
       setMensagens((prev) => [...r.mensagens, ...prev])
       setTemMais(r.temMais)
     } catch (e) {
-      toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel carregar o historico.', 'error', detalheDeErro(e))
+      toast(e instanceof ErroServidor ? e.message : 'Não foi possível carregar o histórico.', 'error', detalheDeErro(e))
     } finally {
       setCarregandoMais(false)
     }
@@ -131,7 +131,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
       }])
       setTexto('')
     } catch (e) {
-      toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel enviar.', 'error', detalheDeErro(e))
+      toast(e instanceof ErroServidor ? e.message : 'Não foi possível enviar.', 'error', detalheDeErro(e))
     } finally {
       setEnviando(false)
     }
@@ -146,7 +146,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
       setMensagens((prev) => prev.map((m) => (m.id === mensagemId ? { ...m, anexo_coletado_em: agora } : m)))
       aoMarcarLidas()
     } catch (e) {
-      toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel coletar.', 'error', detalheDeErro(e))
+      toast(e instanceof ErroServidor ? e.message : 'Não foi possível coletar.', 'error', detalheDeErro(e))
     } finally {
       setColetando(null)
     }

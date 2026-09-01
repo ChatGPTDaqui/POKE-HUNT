@@ -66,7 +66,7 @@ export function ItensTab() {
     if (!ok) return // pedirAcao ja avisou o erro do servidor
     if (!local) return // caminho remoto: a mensagem certa vem do servidor
     if (local.success) toast(`Comprou ${nome} x${qty}.`)
-    else toast(local.reason === 'insufficient_gold' ? 'Ouro insuficiente.' : 'Nao foi possivel comprar.', 'error')
+    else toast(local.reason === 'insufficient_gold' ? 'Ouro insuficiente.' : 'Não foi possível comprar.', 'error')
   }
 
   async function vender(itemId: string, qty: number, nome: string) {
@@ -76,7 +76,7 @@ export function ItensTab() {
     )
     if (!ok || !local) return
     if (local.success) toast(`Vendeu ${nome} x${qty}.`)
-    else toast(local.reason === 'locked' ? 'Item trancado.' : 'Nao foi possivel vender.', 'error')
+    else toast(local.reason === 'locked' ? 'Item trancado.' : 'Não foi possível vender.', 'error')
   }
 
   function acoesCompra(itemId: string): AcoesCompra | null {
@@ -162,7 +162,7 @@ export function ItensTab() {
             <GameButton
               variant="ghost"
               disabled={acao.pendingKey != null}
-              title="Vender TODOS os itens da mochila (os trancados sao poupados)"
+              title="Vender TODOS os itens da mochila (os trancados são poupados)"
               onClick={() =>
                 void acao.run('sell-all-items', async () => {
                   const { ok, local } = await pedirAcaoComLocal(
@@ -171,7 +171,7 @@ export function ItensTab() {
                   )
                   if (!ok || !local) return
                   if (local.itemCount > 0) toast(`Vendeu ${local.itemCount} itens por ${fmt.format(local.gold)} ouro.`)
-                  else toast('Nada para vender (itens trancados sao poupados).', 'info')
+                  else toast('Nada para vender (itens trancados são poupados).', 'info')
                 })
               }
               className="shrink-0 px-[.4em] text-[.8em]"

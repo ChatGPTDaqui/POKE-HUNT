@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
 // PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
 // enquanto duram. O guard de verdade esta em controller.setActiveTeamIndex; aqui
 // e so pra o botao nao parecer quebrado.
-const MOTIVO_PRESO = 'O POKE em campo esta preso e nao pode sair agora.'
+const MOTIVO_PRESO = 'O POKE em campo esta preso e não pode sair agora.'
 
 export function TeamMenu() {
   const team = useGameStateStore((s) => s.team)
@@ -35,7 +35,7 @@ export function TeamMenu() {
   const [escolhendo, setEscolhendo] = useState<string | null>(null)
 
   if (team.length === 0) {
-    return <p className="text-n500">Voce ainda nao tem nenhum POKE.</p>
+    return <p className="text-n500">Você ainda não tem nenhum POKE.</p>
   }
 
   const pokeEscolhendo = team.find((p) => p.uid === escolhendo)
@@ -60,7 +60,7 @@ export function TeamMenu() {
         // Guard herdado do vanilla: um unico POKE com especie invalida (save
         // legado) nao pode cortar o resto da lista.
         if (!species) {
-          console.warn('TeamMenu: pulando POKE com especie invalida', poke)
+          console.warn('TeamMenu: pulando POKE com espécie invalida', poke)
           return null
         }
         const isActive = index === activeIndex

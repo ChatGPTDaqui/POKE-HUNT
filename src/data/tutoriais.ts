@@ -26,78 +26,78 @@ export const TUTORIAIS: Tutorial[] = [
   {
     id: TUTORIAL_BOT,
     titulo: 'Como funciona o Bot',
-    resumo: 'Auto-pot, auto-catch e auto-revive: o que cada um faz, quanto custa e por que dois deles comecam desligados.',
+    resumo: 'Auto-pot, auto-catch e auto-revive: o que cada um faz, quanto custa e por que dois deles começam desligados.',
     passos: [
       {
-        titulo: 'O que o Bot e',
+        titulo: 'O que o Bot é',
         corpo:
-          'O Bot e o conjunto de automacoes que agem pelo seu POKE durante a cacada: usar pocao, jogar bola e reanimar. ' +
-          'Ele fica no botao com o icone de robo, na barra de acao, ao lado dos golpes.',
+          'O Bot é o conjunto de automações que agem pelo seu POKE durante a caçada: usar poção, jogar bola e reanimar. ' +
+          'Ele fica no botão com o ícone de robô, na barra de ação, ao lado dos golpes.',
       },
       {
-        titulo: 'Auto-Pot — comeca LIGADO, a 70% de vida',
+        titulo: 'Auto-Pot — começa LIGADO, a 70% de vida',
         corpo:
-          'Quando a vida do POKE em campo cai a 70% ou menos, o Bot usa uma pocao automaticamente. ' +
-          'Voce escolhe a porcentagem e qual pocao usar; "melhor" pega sempre a pocao mais forte que voce tiver. ' +
-          'Sem pocao no inventario, nada acontece — o POKE continua apanhando.',
+          'Quando a vida do POKE em campo cai a 70% ou menos, o Bot usa uma poção automaticamente. ' +
+          'Você escolhe a porcentagem e qual poção usar; "melhor" pega sempre a poção mais forte que você tiver. ' +
+          'Sem poção no inventário, nada acontece — o POKE continua apanhando.',
       },
       {
-        titulo: 'Auto-Catch — comeca DESLIGADO',
+        titulo: 'Auto-Catch — começa DESLIGADO',
         corpo:
           'Com ele ligado, toda vez que um POKE selvagem e derrotado o Bot gasta uma bola tentando captura-lo. ' +
-          'Comeca desligado de proposito: a bola e consumida na tentativa, mesmo quando a captura falha, ' +
-          'e voce comeca o jogo com apenas 100 Poke Balls. Ligue quando quiser encher a Pokedex.',
+          'Começa desligado de propósito: a bola é consumida na tentativa, mesmo quando a captura falha, ' +
+          'e você começa o jogo com apenas 100 Poke Balls. Ligue quando quiser encher a Pokedex.',
       },
       {
-        titulo: 'Auto-Revive — comeca DESLIGADO',
+        titulo: 'Auto-Revive — começa DESLIGADO',
         corpo:
-          'Se o POKE em campo desmaia, o Bot espera 5 segundos e gasta um Revive pra coloca-lo de pe. ' +
-          'Comeca desligado porque voce so tem 10 Revives — desmaiar tambem custa uma fatia da EXP do nivel atual, ' +
-          'entao vale mais ajustar o auto-pot do que depender do revive.',
+          'Se o POKE em campo desmaia, o Bot espera 5 segundos e gasta um Revive pra colocá-lo de pé. ' +
+          'Começa desligado porque você só tem 10 Revives — desmaiar também custa uma fatia da EXP do nível atual, ' +
+          'então vale mais ajustar o auto-pot do que depender do revive.',
       },
       {
-        titulo: 'Regra por especie',
+        titulo: 'Regra por espécie',
         corpo:
           'Dentro do painel do Bot da pra criar regras do tipo "capturar Dratini com Ultra Ball". ' +
-          'A regra por especie tem prioridade sobre a bola padrao e sobre a bola de shiny. ' +
-          'Se a bola daquela regra acabar, o Bot NAO troca por outra — ele simplesmente nao tenta.',
+          'A regra por espécie tem prioridade sobre a bola padrão e sobre a bola de shiny. ' +
+          'Se a bola daquela regra acabar, o Bot NÃO troca por outra — ele simplesmente não tenta.',
       },
       {
-        titulo: 'Nas hunts BOSS o Bot nao age',
+        titulo: 'Nas hunts BOSS o Bot não age',
         corpo:
-          'Em hunt de BOSS (lendarios e o Campeao Lance) auto-pot e auto-revive ficam desligados, ' +
-          'independente da sua configuracao. Morrer la e definitivo: voce volta pro Hospital.',
+          'Em hunt de BOSS (lendários e o Campeão Lance) auto-pot e auto-revive ficam desligados, ' +
+          'independente da sua configuração. Morrer lá é definitivo: você volta pro Hospital.',
       },
     ],
   },
   {
     id: 'cacada',
-    titulo: 'Sua primeira cacada',
-    resumo: 'Como escolher uma hunt, o que acontece enquanto voce esta fora e onde curar.',
+    titulo: 'Sua primeira caçada',
+    resumo: 'Como escolher uma hunt, o que acontece enquanto você está fora e onde curar.',
     passos: [
       {
         titulo: 'Escolha uma hunt',
         corpo:
-          'O botao Hunt, no meio da barra de baixo, abre a lista. Cada hunt tem uma faixa de nivel e um elenco proprio. ' +
-          'Comece pela Johto Route 46 (Inicial): la so aparecem POKEs de nivel 1 e 2.',
+          'O botão Hunt, no meio da barra de baixo, abre a lista. Cada hunt tem uma faixa de nível e um elenco próprio. ' +
+          'Comece pela Johto Route 46 (Inicial): lá só aparecem POKEs de nível 1 e 2.',
       },
       {
-        titulo: 'Johto e Kanto nao se misturam',
+        titulo: 'Johto e Kanto não se misturam',
         corpo:
-          'Hunt de Johto so tem POKE de Johto; hunt de Kanto so tem POKE de Kanto. ' +
-          'O continente Kanto abre quando voce derrota o Campeao Lance.',
+          'Hunt de Johto só tem POKE de Johto; hunt de Kanto só tem POKE de Kanto. ' +
+          'O continente Kanto abre quando você derrota o Campeão Lance.',
       },
       {
-        titulo: 'O jogo continua sem voce',
+        titulo: 'O jogo continua sem você',
         corpo:
-          'Fechou a aba? O servidor continua simulando a cacada e credita o resultado quando voce voltar. ' +
-          'O combate ausente e um pouco mais lento que o ao vivo, de proposito — jogar acordado sempre rende mais.',
+          'Fechou a aba? O servidor continua simulando a caçada e credita o resultado quando você voltar. ' +
+          'O combate ausente e um pouco mais lento que o ao vivo, de propósito — jogar acordado sempre rende mais.',
       },
       {
         titulo: 'Curar custa zero',
         corpo:
-          'O botao Hospital (so aparece dentro de uma hunt) leva voce de volta a enfermeira. ' +
-          'Clique nela pra curar a equipe inteira de graca.',
+          'O botão Hospital (só aparece dentro de uma hunt) leva você de volta a enfermeira. ' +
+          'Clique nela pra curar a equipe inteira de graça.',
       },
     ],
   },

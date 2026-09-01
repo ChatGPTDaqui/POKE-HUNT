@@ -21,7 +21,7 @@ export async function lerChat(): Promise<{ mensagens: MensagemChat[] }> {
 export async function enviarChat(body: string, anexos: AnexoChat[]): Promise<void> {
   const { data: sessao } = await supabase.auth.getSession()
   const userId = sessao.session?.user.id
-  if (!userId) throw new ErroServidor(401, 'sem sessao — faca login de novo')
+  if (!userId) throw new ErroServidor(401, 'sem sessão — faca login de novo')
   const { data: jogador } = await supabase.from('players').select('trainer_name').eq('user_id', userId).maybeSingle()
   const { error } = await supabase.from('chat_messages').insert({
     user_id: userId, trainer_name: jogador?.trainer_name ?? 'Treinador', body, anexos,

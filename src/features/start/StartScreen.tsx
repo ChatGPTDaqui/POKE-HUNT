@@ -39,7 +39,7 @@ function validaNick(nick: string): string | null {
   if (nick.length < MIN_NICK || nick.length > MAX_NICK) {
     return `O nome precisa ter de ${MIN_NICK} a ${MAX_NICK} caracteres.`
   }
-  if (!NICK_VALIDO.test(nick)) return 'Use apenas letras, numeros e _ .'
+  if (!NICK_VALIDO.test(nick)) return 'Use apenas letras, números e _ .'
   return null
 }
 

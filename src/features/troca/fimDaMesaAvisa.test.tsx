@@ -92,7 +92,7 @@ describe('quem NAO deu o ultimo clique tambem e avisado (PH-321)', () => {
     await aMesaAcabaCom('concluida')
     await waitFor(() => expect(result.current.sessao).toBeNull())
 
-    expect(toasts.map((t) => t.texto)).toEqual(['Troca concluida.'])
+    expect(toasts.map((t) => t.texto)).toEqual(['Troca concluída.'])
     expect(invalidacoes).toBe(1)
   })
 
