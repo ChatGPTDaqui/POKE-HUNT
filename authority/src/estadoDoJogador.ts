@@ -116,7 +116,13 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     setCurrentMapId: (mapId) => { s.currentMapId = mapId },
     addPokeToTeam: (poke) => { s.team.push(poke) },
     moveTeamIndexToFront: (index) => {
-      if (index <= 0 || index >= s.team.length) return
+      // `index < 0`, e nao `<= 0`: o guarda tem que ser o MESMO do store do
+      // navegador (gameStateStore.ts), senao `moveTeamIndexToFront(0)` sai
+      // daqui sem normalizar `activeIndex` e a mesma chamada deixa os dois
+      // lados em estados diferentes. Com 0 a rotacao e no-op e o que sobra —
+      // `activeIndex = 0` — e exatamente o que se quer: e o conserto de um save
+      // que chegou com `active_team_index != 0` (PH-382).
+      if (index < 0 || index >= s.team.length) return
       const [p] = s.team.splice(index, 1)
       s.team.unshift(p)
       s.activeIndex = 0

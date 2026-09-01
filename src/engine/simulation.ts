@@ -624,8 +624,34 @@ function trocarPorDesmaio(world: WorldState, gameState: GameStateStore, dt: numb
   if (world.trocaEmCampo > 0) return
   world.trocaEmCampo = null
 
-  gameState.setActiveIndex(proximo)
+  // ROTACIONA, NAO SO APONTA (PH-382).
+  //
+  // O invariante do modelo e um: `team[0]` E o POKE em campo. `definir_ativo`
+  // (RPC) rotaciona o escolhido pro slot 0 e grava `active_team_index = 0`
+  // SEMPRE; `refetchEquipeInteira` ordena por `team_slot` por causa disso; o
+  // trilho de reservas desenha `team.slice(1)`; e `reordenarReservas` recusa
+  // mexer no indice 0 nos dois lados.
+  //
+  // Esta funcao chamava `setActiveIndex(proximo)` e deixava a equipe na ordem
+  // antiga — o unico lugar do projeto que quebrava o invariante. Com
+  // `activeIndex = 1`, o `StatusRail` desenha `team[1]` (certo, e quem esta em
+  // campo) e o trilho de reservas desenha `team.slice(1)`, entao o MESMO POKE
+  // aparece nos dois lugares: mesma instancia, logo o nivel e o HP da "reserva"
+  // sobem junto com o de campo, e o POKE do slot 0 desaparece da tela.
+  //
+  // Relatado ao vivo em 01/09 (conta Vinny): o Eevee do Lance no slot 0 sumiu e
+  // a reserva 2 virou o Quagsire que estava lutando, ganhando nivel junto.
+  // Estado no banco: `active_team_index = 1`, que so o flush a partir do estado
+  // local pode ter escrito — `definir_ativo` nunca grava outra coisa que 0.
+  // O POKE e lido ANTES da rotacao de proposito. No navegador `gameState` e o
+  // objeto que `useGameStateStore.getState()` devolveu no comeco do tick, e
+  // zustand troca o objeto de estado a cada `set` — depois de
+  // `moveTeamIndexToFront` a propriedade `team` deste `gameState` ainda e o
+  // ARRAY ANTIGO, e `team[0]` seria o POKE desmaiado. Ler antes vale nos dois
+  // lados (a rotacao preserva a identidade das instancias) e nao depende de
+  // reler a store, que o motor headless nao tem como fazer.
   const nextPoke = gameState.team[proximo]
+  gameState.moveTeamIndexToFront(proximo)
   player.poke = nextPoke
   player.cooldowns = {}
   player.flashTimer = 0
