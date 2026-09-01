@@ -20,7 +20,8 @@ import { STAT_LABEL, STAT_ORDER } from '@/data/statLabels'
 import type { StatBlock } from '@/data/pokes'
 import { spriteUrl } from '@/data/sprites'
 import { useCelebracaoStore, type Celebracao } from '@/stores/celebracaoStore'
-import { DURACAO, TETO_DE_EXTENSAO, intensidadeDe, type Intensidade } from '@/data/marcoDaCelebracao'
+import { useJanelaSobreOCampo } from '@/stores/janelaSobreOCampo'
+import { TETO_DE_EXTENSAO, duracaoDe, intensidadeDe, type Intensidade } from '@/data/marcoDaCelebracao'
 import { cn } from '@/lib/utils'
 
 // --- CSS ---------------------------------------------------------------------
@@ -98,6 +99,17 @@ const CSS = `
 export function CamadaDeCelebracao() {
   const atual = useCelebracaoStore((s) => s.fila[0] ?? null)
   const encerrar = useCelebracaoStore((s) => s.encerrarAtual)
+  // PH-398, pedido explicito: com menu, painel, perfil, analyzer ou tutorial
+  // aberto o cartao NAO desenha. Mesma fonte de verdade do splash de sala — sao
+  // cinco fontes de "janela aberta" em tres stores, e duas listas pra manter em
+  // sincronia foi o erro que produziu o PH-394.
+  //
+  // O RELOGIO CONTINUA CORRENDO (o `useEffect` abaixo nao olha isto). Uma fila
+  // que espera a janela fechar viraria uma parede de cartoes atrasados: com
+  // level-up a cada poucos abates, abrir a Mochila por um minuto acumularia
+  // cartao de nivel que o POKE ja passou. Celebracao e do momento — perdida, ela
+  // nao volta, e o nivel continua no perfil pra quem quiser conferir.
+  const janelaAberta = useJanelaSobreOCampo()
   // Quando a atual comecou a aparecer, pro teto de extensao da coalescencia.
   const inicio = useRef(0)
 
@@ -107,7 +119,7 @@ export function CamadaDeCelebracao() {
       return
     }
     if (inicio.current === 0) inicio.current = performance.now()
-    const base = DURACAO[intensidadeDe(atual.celebracao)]
+    const base = duracaoDe(atual.celebracao)
     const decorrido = performance.now() - inicio.current
     // O que falta pra completar a duracao, sem passar do teto. A coalescencia
     // remonta este efeito (o objeto `atual` muda) e reinicia a contagem — e o
@@ -129,7 +141,7 @@ export function CamadaDeCelebracao() {
           2600ms. Mesmo defeito que o ticker do `ChatMobile` ja documenta.
           A coalescencia MANTEM o id de proposito, pra o cartao nao piscar a
           cada abate de uma sequencia. */}
-      {atual && <Celebrando key={atual.id} c={atual.celebracao} />}
+      {atual && !janelaAberta && <Celebrando key={atual.id} c={atual.celebracao} />}
     </>
   )
 }
@@ -155,7 +167,7 @@ function ChipDeNivel({ c }: { c: Celebracao }) {
     <div className="pointer-events-none absolute left-1/2 top-[4.6em] z-[45] w-max max-w-[calc(100vw-1em)] -translate-x-1/2">
       <div
         className="celeb-anima flex flex-col items-center gap-[.2em]"
-        style={{ animation: `celeb-chip ${DURACAO.discreto}ms ease-out forwards` }}
+        style={{ animation: `celeb-chip ${duracaoDe(c)}ms ease-out forwards` }}
       >
         <span
           className="rounded-full border px-[.7em] py-[.18em] text-[.8em] font-bold tracking-wide"
@@ -188,7 +200,7 @@ function ChipDeNivel({ c }: { c: Celebracao }) {
 function Cartao({ c, intensidade }: { c: Celebracao; intensidade: Intensidade }) {
   const cheio = intensidade === 'cheio'
   const cor = corDe(c)
-  const duracao = DURACAO[intensidade]
+  const duracao = duracaoDe(c)
 
   return (
     <div className="pointer-events-none absolute inset-0 z-[45] overflow-hidden">

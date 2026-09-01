@@ -32,49 +32,56 @@ const celebrar = (c: Celebracao) => celebracaoStore.getState().celebrar(c)
 
 beforeEach(() => celebracaoStore.getState().limpar())
 
-describe('coalescencia de nivel do POKE (PH-192)', () => {
-  it('tres abates seguidos viram UM cartao com o intervalo somado', () => {
+// A COALESCENCIA DE NIVEL DE POKE FOI REVERTIDA (PH-398), e este bloco mudou de
+// lado por isso.
+//
+// Ele trancava o contrario: "tres abates seguidos viram UM cartao com o intervalo
+// somado", "os atributos SOMAM". Era a decisao da PH-192, e ela tinha medicao por
+// tras — a 612 abates/hora, celebracao repetida vira ruido.
+//
+// O dono do projeto pediu o oposto, explicitamente: um splash POR NIVEL, com os
+// stats DAQUELE nivel, 4 segundos cada. Os casos antigos nao "quebraram": eles
+// afirmavam uma regra que deixou de valer, e apagar sem registro deixaria a
+// proxima pessoa achando que a coalescencia nunca existiu.
+//
+// A protecao que a coalescencia dava (fila que nao vira parede de cartao) mudou
+// de mecanismo, nao desapareceu — ver `TETO_DA_FILA` e
+// `stores/filaDeCelebracao.test.ts`.
+describe('nivel do POKE NAO coalesce mais (PH-398, revertendo PH-192)', () => {
+  it('tres abates seguidos viram TRES cartoes', () => {
     celebrar(nivel(33, 34))
     celebrar(nivel(34, 35))
     celebrar(nivel(35, 36))
 
-    expect(fila()).toHaveLength(1)
-    const c = frente() as Extract<Celebracao, { tipo: 'nivel' }>
-    expect(c.nivelInicial).toBe(33)
-    expect(c.nivel).toBe(36)
+    expect(fila()).toHaveLength(3)
+    expect(fila().map((f) => (f.celebracao as Extract<Celebracao, { tipo: 'nivel' }>).nivel))
+      .toEqual([34, 35, 36])
   })
 
-  it('os atributos SOMAM, e nao viram o maximo', () => {
-    // Sao deltas de atributo: somar e a operacao certa. `Math.max` mostraria
-    // "+3 HP" depois de tres niveis que deram 9.
+  it('cada cartao mantem os ganhos DELE, sem somar', () => {
     celebrar(nivel(33, 34))
     celebrar(nivel(34, 35))
-    celebrar(nivel(35, 36))
 
-    const c = frente() as Extract<Celebracao, { tipo: 'nivel' }>
-    expect(c.ganhos).toEqual({ hp: 9, atkFis: 6, atkEsp: 3, def: 6, defEsp: 3, speed: 3 })
+    // `GANHO` e o mesmo objeto nos dois: o que se prova aqui e que ninguem
+    // somou 3+3 em `hp`.
+    for (const item of fila()) {
+      expect((item.celebracao as Extract<Celebracao, { tipo: 'nivel' }>).ganhos).toEqual(GANHO)
+    }
   })
 
-  it('os golpes novos concatenam sem repetir', () => {
-    celebrar(nivel(33, 34, { golpesNovos: ['Brasa'] }))
-    celebrar(nivel(34, 35, { golpesNovos: ['Brasa', 'Lança-Chamas'] }))
-
-    const c = frente() as Extract<Celebracao, { tipo: 'nivel' }>
-    expect(c.golpesNovos).toEqual(['Brasa', 'Lança-Chamas'])
-  })
-
-  it('coalesce no que ESTA NA TELA, nao so na fila de tras', () => {
-    // O cartao visivel precisa acompanhar: dizer "Nv 34" com o POKE ja em 35 e
-    // informacao desatualizada, que e pior que cartao repetido.
+  it('o cartao na tela nao e reescrito pelo nivel seguinte', () => {
+    // Era o oposto: a PH-192 atualizava o cartao visivel pra ele nao mostrar
+    // nivel defasado. Com um cartao por nivel, o visivel esta correto por
+    // construcao — ele e o nivel dele.
     celebrar(nivel(33, 34))
+    const idDaFrente = fila()[0].id
     celebrar(nivel(34, 35))
-    expect(fila()).toHaveLength(1)
-    expect((frente() as Extract<Celebracao, { tipo: 'nivel' }>).nivel).toBe(35)
+
+    expect(fila()[0].id).toBe(idDaFrente)
+    expect((frente() as Extract<Celebracao, { tipo: 'nivel' }>).nivel).toBe(34)
   })
 
-  it('POKE DIFERENTE nao coalesce', () => {
-    // Trocar de POKE em campo no meio de uma sequencia: dois cartoes, porque
-    // sao dois POKE. Juntar diria que um deles subiu niveis que nao subiu.
+  it('POKE diferente tambem vira cartao proprio', () => {
     celebrar(nivel(33, 34))
     celebrar(nivel(10, 11, { especieId: 'pikachu', nome: 'Pikachu' }))
     expect(fila()).toHaveLength(2)
@@ -115,17 +122,22 @@ describe('o que NAO pode coalescer (PH-192)', () => {
     expect(fila()).toHaveLength(2)
   })
 
-  it('nivel que chega durante uma EVOLUCAO vai pra fila, e coalesce entre si', () => {
-    // A evolucao fica na tela; os dois niveis atras dela viram UM cartao, e nao
-    // dois enfileirados.
+  it('nivel que chega durante uma EVOLUCAO vai pra fila, um cartao por nivel', () => {
+    // ERA "e coalesce entre si" (PH-192): os dois niveis atras da evolucao
+    // viravam UM cartao. Com a reversao da PH-398 eles sao dois, e o que garante
+    // que isso nao vire fila infinita e o `TETO_DA_FILA`.
+    //
+    // O que continua igual, e e o ponto deste caso: a evolucao NAO e absorvida
+    // nem empurrada — ela fica na frente e os niveis esperam atras.
     celebrar(EVOLUCAO)
     celebrar(nivel(33, 34))
     celebrar(nivel(34, 35))
 
-    expect(fila()).toHaveLength(2)
+    expect(fila()).toHaveLength(3)
     expect(frente().tipo).toBe('evolucao')
-    const atras = frente(1) as Extract<Celebracao, { tipo: 'nivel' }>
-    expect([atras.nivelInicial, atras.nivel]).toEqual([33, 35])
+    expect(frente(1).tipo).toBe('nivel')
+    expect((frente(1) as Extract<Celebracao, { tipo: 'nivel' }>).nivel).toBe(34)
+    expect((frente(2) as Extract<Celebracao, { tipo: 'nivel' }>).nivel).toBe(35)
   })
 })
 
@@ -160,13 +172,21 @@ describe('identidade da celebracao, pra a animacao reiniciar (PH-192)', () => {
     expect(fila()[0].id).not.toBe(fila()[1].id)
   })
 
-  it('o id NAO muda na coalescencia', () => {
+  it('o id NAO muda na coalescencia — e ela agora e SO do treinador', () => {
     // De proposito: juntar niveis atualiza o cartao que ja esta na tela, e
-    // trocar a `key` ali faria o cartao PISCAR a cada abate de uma sequencia.
-    celebrar(nivel(33, 34))
+    // trocar a `key` ali faria o cartao PISCAR a cada nivel de uma sequencia.
+    //
+    // O caso mudou de TIPO na PH-398: com nivel de POKE ele passaria verde pelo
+    // motivo errado (o cartao da frente nunca e tocado porque nao ha mais
+    // coalescencia de POKE), e um teste que passa pelo motivo errado e pior que
+    // teste nenhum. O treinador continua coalescendo, entao e ele que exercita
+    // isto de verdade.
+    celebrar({ tipo: 'treinador', nome: 'Mark', nivelInicial: 4, nivel: 5 })
     const idInicial = fila()[0].id
-    celebrar(nivel(34, 35))
-    celebrar(nivel(35, 36))
+    celebrar({ tipo: 'treinador', nome: 'Mark', nivelInicial: 5, nivel: 6 })
+    celebrar({ tipo: 'treinador', nome: 'Mark', nivelInicial: 6, nivel: 7 })
+
+    expect(fila()).toHaveLength(1)
     expect(fila()[0].id).toBe(idInicial)
   })
 

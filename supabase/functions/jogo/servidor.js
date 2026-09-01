@@ -78150,19 +78150,28 @@ function grantExp(pokeInstance, amount) {
 	const unlockedAbilities = [...pokeInstance.unlockedAbilities];
 	let leveledUp = false;
 	const newAbilities = [];
+	const niveis = [];
 	while (exp >= pokeExpForLevel(level + 1, species.growthCurve)) {
 		const previousMaxHp = stats.hp;
+		const statsAntesDesteNivel = stats;
 		level += 1;
 		leveledUp = true;
 		stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature);
 		const hpGain = stats.hp - previousMaxHp;
 		hp = Math.min(stats.hp, hp + hpGain);
+		const golpesDesteNivel = [];
+		niveis.push({
+			nivel: level,
+			ganhos: diffStats(statsAntesDesteNivel, stats),
+			golpesNovos: golpesDesteNivel
+		});
 		for (const [key, exigido] of nivelDeAprendizado(species)) {
 			if (exigido !== level || unlockedAbilities.includes(key)) continue;
 			const ability = getAbility(key);
 			if (!ability) continue;
 			unlockedAbilities.push(key);
 			newAbilities.push(ability);
+			golpesDesteNivel.push(ability);
 		}
 	}
 	const poke = {
@@ -78180,7 +78189,8 @@ function grantExp(pokeInstance, amount) {
 		leveledUp,
 		newAbilities,
 		level,
-		statGains
+		statGains,
+		niveis
 	};
 }
 function diffStats(antes, depois) {
@@ -78953,9 +78963,25 @@ function somarGanhos(a, b) {
 	for (const k of Object.keys(b)) fora[k] = (a[k] ?? 0) + (b[k] ?? 0);
 	return fora;
 }
+/**
+* LEVEL-UP DE POKE NAO COALESCE MAIS (PH-398).
+*
+* Pedido explicito do usuario: um splash POR NIVEL, com os ganhos daquele nivel.
+* A coalescencia era o oposto disso — ela juntava a rajada num cartao so, somando
+* os ganhos e esticando o intervalo (`nivelInicial`..`nivel`).
+*
+* O que ela protegia continua protegido, por outro mecanismo: era ela que
+* impedia a fila de virar uma parede de cartoes num jogo que faz 612 abates/hora.
+* Quem faz isso agora e `TETO_DA_FILA` — e o teto descarta o mais ANTIGO em
+* espera, nao o mais novo, porque o mais novo carrega o nivel mais alto.
+*
+* O TREINADOR CONTINUA COALESCENDO. O pedido era sobre "splash de lvlup" com
+* stats por nivel, e o cartao do treinador nao tem stats — ele so diz o nivel. E
+* ele sobe muito mais devagar (mesma EXP por abate, curva mais longa), entao a
+* rajada dele e rara e juntar nao esconde nada.
+*/
 function podeJuntar(a, b) {
 	if (!a) return false;
-	if (a.tipo === "nivel" && b.tipo === "nivel") return a.especieId === b.especieId;
 	if (a.tipo === "treinador" && b.tipo === "treinador") return true;
 	return false;
 }
@@ -79008,10 +79034,12 @@ var celebracaoStore = createStore()((set) => ({
 			};
 			return { fila: [...fila.slice(0, -1), junta] };
 		}
-		return { fila: [...fila, {
+		const comNova = [...fila, {
 			id: proximoId$1++,
 			celebracao: c
-		}] };
+		}];
+		if (comNova.length > 4) return { fila: [comNova[0], ...comNova.slice(2)] };
+		return { fila: comNova };
 	}),
 	encerrarAtual: () => set((estado) => ({ fila: estado.fila.slice(1) })),
 	limpar: () => set({ fila: [] })
@@ -79499,7 +79527,6 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		};
 	}
 	const expGain = expRewardForEnemy(enemy.poke, poke.level);
-	const nivelAntesDoAbate = poke.level;
 	const nivelDoTreinadorAntes = gameState.trainer.level;
 	const grantResult = grantExp(poke, expGain);
 	player.poke = grantResult.poke;
@@ -79545,14 +79572,14 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			const ganhos = formatStatGains(grantResult.statGains);
 			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nível ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
 			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
-			celebracaoStore.getState().celebrar({
+			for (const nivelGanho of grantResult.niveis) celebracaoStore.getState().celebrar({
 				tipo: "nivel",
 				especieId: grantResult.poke.speciesId,
 				nome: SPECIES[grantResult.poke.speciesId].name,
-				nivelInicial: nivelAntesDoAbate,
-				nivel: grantResult.level,
-				ganhos: grantResult.statGains,
-				golpesNovos: grantResult.newAbilities.filter(isDamagingAbility).map((a) => a.name),
+				nivelInicial: nivelGanho.nivel - 1,
+				nivel: nivelGanho.nivel,
+				ganhos: nivelGanho.ganhos,
+				golpesNovos: nivelGanho.golpesNovos.filter(isDamagingAbility).map((a) => a.name),
 				isShiny: Boolean(grantResult.poke.isShiny)
 			});
 		}
