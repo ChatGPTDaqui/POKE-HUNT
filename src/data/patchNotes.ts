@@ -16,10 +16,28 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   // porque pro jogador e UM assunto: a velocidade com que as coisas acontecem.
   //
   // O ITEM DO TURNO E O UNICO QUE TIRA ALGO DO JOGADOR, e por isso ele vem
-  // primeiro e diz o numero. Combate 1,5x mais lento e -33% de ouro/h, XP/h e
-  // mobs/h — esconder isso numa nota sobre animacao seria o tipo de omissao
-  // que o jogador descobre sozinho no fim do dia e passa a desconfiar do
-  // resto. Decisao do dono, com o custo aceito na PH-376.
+  // primeiro e diz o numero. Esconder isso numa nota sobre animacao seria a
+  // omissao que o jogador descobre sozinho no fim do dia.
+  //
+  // O NUMERO FOI MEDIDO, e a primeira versao desta nota estava ERRADA. Ela
+  // dizia "cerca de um terco a menos", que era a conta aritmetica: o combate
+  // dilata 1,5x, logo a vazao cairia pra 1/1,5. A conta ignora que o POKE passa
+  // boa parte do tempo ANDANDO entre alvos, e andar nao dilatou.
+  //
+  // `scripts/harness/vazao-do-combate.mjs`, 200 minutos simulados por regime,
+  // com rebuild do headless entre as duas medicoes:
+  //
+  //             ouro/min t2   ouro/min t3   queda   % do tempo em luta (t2)
+  //   Nv25            928,8         784,9   -15,5%                    38,5%
+  //   Nv102           475,4         380,9   -19,9%                    58,0%
+  //
+  // O modelo que explica: `vazao = 1 / (1 + 0,5 x f)`, com `f` = fracao do tempo
+  // em combate. f=0,385 preve -16,1% e a medicao deu -15,5%; f=0,580 preve
+  // -22,5% e deu -19,9%. Dai a nota dizer "15% a 20%", e nao um terco.
+  //
+  // Uma amostra de 12 sementes x 3 minutos tinha dado -1,4%, que era RUIDO —
+  // registrado pra ninguem repetir a medicao curta e concluir que nao mudou
+  // nada.
   //
   // FORA DA NOTA, por serem invisiveis jogando: a duracao autorada recuperada
   // do banco de origem (o exportador pulava esses bytes), os quadros vazios
@@ -30,7 +48,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
     date: '2026-09-01',
     title: 'O combate respira',
     highlights: [
-      'O TURNO PASSOU DE 2 PARA 3 SEGUNDOS. Tudo no combate ficou 1,5x mais espacado: recarga de golpe, tique de veneno e queimadura, duracao de sono e congelamento. Nenhum golpe ficou melhor ou pior que outro — mudou a escala, nao o equilibrio. Em compensacao rende menos por hora: cerca de um terco a menos de ouro, XP e abates no mesmo tempo de jogo. Foi de proposito, pra dar pra ver o que esta acontecendo.',
+      'O TURNO PASSOU DE 2 PARA 3 SEGUNDOS. Tudo no combate ficou 1,5x mais espacado: recarga de golpe, tique de veneno e queimadura, duracao de sono e congelamento. Nenhum golpe ficou melhor ou pior que outro — mudou a escala, nao o equilibrio. Em compensacao rende menos por hora: medido, entre 15% e 20% menos de ouro e de abates no mesmo tempo de jogo. Menos que o terco que a conta sugere, porque boa parte do tempo o POKE esta andando entre alvos, e andar nao ficou mais lento. Foi de proposito, pra dar pra ver o que esta acontecendo.',
       'AS ANIMACOES DE GOLPE TOCAM NA VELOCIDADE EM QUE FORAM DESENHADAS. Antes cada efeito era esticado ou espremido pra caber num tempo fixo, e quem decidia a velocidade era o numero de quadros do desenho: um golpe de gelo passava voando e um de area arrastava. Agora todos correm no mesmo ritmo, o ritmo do desenho original.',
       'GOLPE CURTO DEIXOU DE CONGELAR NO FIM. Efeito com poucos quadros agora repete ou volta de tras pra frente, conforme o desenho — a mordida do Bite fecha e abre, a chama do Fire Spin continua girando. Antes eles paravam numa imagem fixa esperando o proximo golpe.',
       'ALGUNS GOLPES COMECAVAM ATRASADOS. Vinte e cinco efeitos tinham quadros em branco na ponta, e o Dig gastava o primeiro terco da animacao sem desenhar nada. Foram aparados.',

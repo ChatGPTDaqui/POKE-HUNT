@@ -1057,7 +1057,7 @@ describe('golpe de multiplos acertos', () => {
   }
 
   // Um uso do golpe: `updateCombat(0)` enfileira o hit e `updateCombat(0.6)`
-  // pousa ele (HIT_LAND_DELAY e 0.3s). 0.6 e menor que MIN_ACTION_GAP (2s), ou
+  // pousa ele (HIT_LAND_DELAY e 0.3s). 0.6 e menor que MIN_ACTION_GAP (o turno), ou
   // seja o POKE nao age de novo e cada numero de dano contado abaixo pertence a
   // ESTE uso.
   function umUsoDoGolpe(world: ReturnType<typeof cenarioMultiAcerto>['world']) {
