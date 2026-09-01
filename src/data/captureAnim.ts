@@ -108,3 +108,21 @@ export function captureAnimFrameRect(ballItemId: string, success: boolean, frame
     sh: CAPTURE_ANIM_CELL_HEIGHT,
   }
 }
+
+/**
+ * Toda tira de animacao de bola — as duas (sucesso e falha) de cada bola.
+ *
+ * PH-400: existe pro preload de entrada aquecer isto. Sao 8 arquivos, 170 kB no
+ * total, e sem eles a PRIMEIRA captura da sessao desenhava nada por alguns
+ * quadros — exatamente quando o cache esta mais frio. Mesmo formato de
+ * `todasAsTirasDeVfx`, e pelo mesmo motivo: quem aquece nao deve saber a forma da
+ * tabela.
+ */
+export function todasAsTirasDeCaptura(): string[] {
+  const urls = new Set<string>()
+  for (const par of Object.values(CAPTURE_ANIM_FILES)) {
+    urls.add(par.success)
+    urls.add(par.fail)
+  }
+  return [...urls]
+}

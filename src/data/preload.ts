@@ -26,6 +26,11 @@ import { todosOsVfxDeStatus } from './statusVfx'
 import { todasAsTirasDeProps } from '@/render/ambienteProps'
 import { primeImage } from '@/render/sprites'
 import { CENA_HOSPITAL } from './hospital'
+import { todasAsTirasDeCaptura } from './captureAnim'
+import { SUB_BIOMA_POR_CHAVE } from './biomas'
+import { SPECIES } from './pokes'
+import { nivelDeAprendizado } from './activeAbilities'
+import { vfxDoGolpe } from './moveVfx'
 
 // Teto de tempo pra NAO transformar uma rede ruim em "o botao Entrar nao
 // funciona". Estourado o prazo, a cena entra do mesmo jeito e o que faltou
@@ -128,6 +133,142 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   const efeitos = [
     ...todasAsTirasDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus(),
     ...todasAsTirasDeProps(),
+    // PH-400: as tiras da animacao de bola (8 arquivos, 170 kB no total). Ficavam
+    // de fora e a PRIMEIRA captura da sessao desenhava nada por alguns quadros —
+    // e a primeira captura acontece no comeco, quando o cache esta mais frio.
+    // Barato o bastante pra entrar no preload que BLOQUEIA a entrada; o resto do
+    // que faltava (fundo das outras salas, arte por golpe) e grande demais pra
+    // isso e vai pro aquecimento de segundo plano, abaixo.
+    ...todasAsTirasDeCaptura(),
   ].map(primeImage)
   await Promise.all([preloadEspecies(especies), ...fundo, ...efeitos])
+}
+
+// --- aquecimento de segundo plano (PH-400) ------------------------------------
+//
+// O PEDIDO era "nada carrega durante a jogabilidade". O que ainda carregava, e o
+// peso de cada coisa (medido em 2026-09-01):
+//
+//   fundo da proxima sala     ~2,9 MB por arte (30 artes, 85,6 MB no total)
+//   arte por golpe            164 arquivos, 5,3 MB (~33 kB cada)
+//   animacao de captura       8 arquivos, 170 kB   <- foi pro preload de entrada
+//   faces de emocao           5.306 arquivos, 8,1 MB  <- fora de escopo, ver a issue
+//
+// POR QUE ISTO NAO PODE ENTRAR NO PRELOAD DA ENTRADA. Os biomas com mais salas
+// (campo aberto, industrial) tem 4 sub-biomas: pre-carregar as outras tres custa
+// ~9 MB ANTES de a cena aparecer. Trocaria "o mapa aparece durante o jogo" por
+// "o botao Entrar demora dez segundos no 4G" — e o `PRELOAD_TIMEOUT_MS` existe
+// justamente porque esse risco ja foi medido antes.
+//
+// A troca de sala leva de 1 a 2 minutos (medido em producao: 57s a 126s por
+// sala). Ha tempo de sobra pra 2,9 MB chegarem antes da primeira transicao, desde
+// que o download nao dispute com o que a cena precisa AGORA — dai ser sequencial
+// e comecar depois da entrada.
+
+/** Cancela o aquecimento em andamento. Chamado ao sair da hunt ou entrar noutra. */
+let cancelarAquecimento: (() => void) | null = null
+
+/**
+ * `true` quando vale gastar banda aquecendo.
+ *
+ * `saveData` e o jogador dizendo explicitamente "economize meus dados" — aquecer
+ * 9 MB de arte que ele PODE nem ver (a hunt tem 10 salas e ele sai quando quiser)
+ * contra esse pedido e escolher o solavanco dele pelo bolso dele. `slow-2g`/`2g`
+ * pela mesma razao por outro caminho: nessa banda o aquecimento nao chega antes
+ * da troca de sala de qualquer jeito, e ainda rouba o que a cena precisa.
+ *
+ * `navigator.connection` nao existe no Safari nem no Firefox: ausente = aquece,
+ * que e o comportamento certo pro caso comum (rede boa e sem pedido de economia).
+ */
+function conexaoPermiteAquecer(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const conexao = (navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string }
+  }).connection
+  if (!conexao) return true
+  if (conexao.saveData) return false
+  return conexao.effectiveType !== 'slow-2g' && conexao.effectiveType !== '2g'
+}
+
+/**
+ * As artes de fundo das OUTRAS salas que esta hunt pode sortear.
+ *
+ * Sai do BIOMA da sala atual, e nao do `mapId`: `SUB_BIOMA_POR_CHAVE` ja liga
+ * chave -> sub-bioma -> bioma, e e o bioma que lista os sub-biomas candidatos
+ * (`data/biomas.ts`). Derivar do mapId exigiria a faixa junto (`biomaDoMapId`),
+ * que este chamador nao tem por que conhecer.
+ *
+ * Sub-bioma sem arte propria cai na arte do bioma (mesma regra de
+ * `maps.ts#backgroundParaSala`), e a arte da sala ATUAL sai da lista — ela ja
+ * chegou no preload de entrada.
+ */
+export function fundosDasOutrasSalas(sala: { chave: string } | null): string[] {
+  if (!sala) return []
+  const entrada = SUB_BIOMA_POR_CHAVE[sala.chave]
+  if (!entrada) return []
+  const atual = entrada.sub.bg?.image ?? entrada.bioma.bg.image
+  const candidatas = entrada.bioma.subBiomas.map((sub) => sub.bg?.image ?? entrada.bioma.bg.image)
+  return [...new Set(candidatas)].filter((url) => url !== atual)
+}
+
+/** As tiras dos golpes que o time do jogador de fato conhece. */
+export function tirasDosGolpesDoTime(especies: string[]): string[] {
+  const urls = new Set<string>()
+  for (const speciesId of especies) {
+    const species = SPECIES[speciesId]
+    if (!species) continue
+    for (const [abilityId] of nivelDeAprendizado(species)) {
+      const vfx = vfxDoGolpe(abilityId)
+      if (!vfx) continue
+      urls.add(vfx.single.url)
+      if (vfx.aoe) urls.add(vfx.aoe.url)
+    }
+  }
+  return [...urls]
+}
+
+/**
+ * Aquece, em segundo plano, o que a hunt vai precisar DEPOIS do primeiro frame.
+ *
+ * SEQUENCIAL de proposito: em paralelo, seis downloads de 2,9 MB disputam a
+ * banda com a arte que a cena esta desenhando agora — o preload de entrada
+ * termina com timeout e o jogador ve exatamente o buraco que isto existe pra
+ * fechar. Um por vez, sem pressa, e a troca de sala tem um minuto de folga.
+ *
+ * Nao devolve promessa: quem chama nao espera. Erro de rede em arte de
+ * aquecimento nao e erro de jogo — `primeImage` resolve nos dois casos e o
+ * desenho tem o guard de `img.complete` de sempre.
+ */
+export function aquecerHuntEmSegundoPlano(
+  sala: { chave: string } | null,
+  especiesDoTime: string[],
+): void {
+  pararAquecimento()
+  if (!conexaoPermiteAquecer()) return
+
+  // Golpes primeiro, fundos depois: as tiras sao ~33 kB e podem ser precisas no
+  // PROXIMO turno de combate; o fundo da sala seguinte tem um minuto de prazo.
+  const urls = [...tirasDosGolpesDoTime(especiesDoTime), ...fundosDasOutrasSalas(sala)]
+  if (urls.length === 0) return
+
+  let cancelado = false
+  cancelarAquecimento = () => { cancelado = true }
+  void (async () => {
+    for (const url of urls) {
+      if (cancelado) return
+      await primeImage(url)
+    }
+  })()
+}
+
+/**
+ * Para o aquecimento pendente.
+ *
+ * Sair da hunt ou entrar noutra: o resto da fila e arte de um bioma que o jogador
+ * nao esta mais vendo, e continuar baixando competiria com o preload da cena
+ * nova — que e o caminho que o jogador esta esperando na tela.
+ */
+export function pararAquecimento(): void {
+  cancelarAquecimento?.()
+  cancelarAquecimento = null
 }

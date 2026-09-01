@@ -16,7 +16,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
-import { preloadEspecies, preloadHunt } from '@/data/preload'
+import { preloadEspecies, preloadHunt, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
 import type { Point } from './types'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
@@ -42,6 +42,10 @@ export function avisoDeTetoDeHunt(pokeLevel: number, mapId: string): string | nu
 export const controller = {
   returnToHospital(hospitalSpot: Point): void {
     const gameState = useGameStateStore.getState()
+    // PH-400: o resto da fila de aquecimento e arte de um bioma que o jogador nao
+    // esta mais vendo. Continuar baixando competiria com a cena que ele ESTA
+    // esperando na tela.
+    pararAquecimento()
     void fecharSessaoDeHunt()
     gameState.setCurrentMapId(null)
     const world = buildHospitalWorld(gameState.team[gameState.activeIndex] || null, hospitalSpot, useWorldStore.getState())
@@ -108,6 +112,18 @@ export const controller = {
     // entrada mas nunca a impede. Depois da sessao ja estar aceita de proposito:
     // se o servidor recusar, nao ha por que gastar banda.
     await preloadHunt(mapId, { speciesId: activePoke.speciesId, isShiny: activePoke.isShiny })
+    // PH-400: o que a hunt precisa DEPOIS do primeiro frame — a arte de fundo das
+    // outras salas que ela pode sortear (~2,9 MB cada) e as tiras dos golpes que
+    // o time conhece. Nao entra no `preloadHunt` acima porque bioma de 4
+    // sub-biomas custaria ~9 MB ANTES de a cena aparecer, e o botao Entrar
+    // passaria a demorar dez segundos no 4G. Sequencial, em segundo plano, e
+    // desligado por `saveData`/conexao lenta — ver a nota longa em preload.ts.
+    //
+    // Sem `await` de proposito: quem espera aqui e o jogador olhando a tela.
+    aquecerHuntEmSegundoPlano(
+      sessao.sala ?? null,
+      useGameStateStore.getState().team.map((p) => p.speciesId),
+    )
     // A sala inicial e a que o servidor decidiu na abertura. Sem passa-la aqui, a
     // simulacao local sorteia a propria e o jogador ve o sub-bioma trocar poucos
     // segundos depois de entrar, quando a do servidor chega no primeiro flush.
