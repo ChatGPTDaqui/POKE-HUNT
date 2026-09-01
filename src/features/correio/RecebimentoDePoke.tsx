@@ -59,7 +59,7 @@ export function RecebimentoDePoke({ poke, onFechar }: Props) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Voce recebeu ${poke.nome}`}
+      aria-label={`Você recebeu ${poke.nome}`}
       className="fixed inset-0 z-[50] flex items-center justify-center bg-black/80 p-[1em]"
       onClick={onFechar}
     >
@@ -70,7 +70,7 @@ export function RecebimentoDePoke({ poke, onFechar }: Props) {
         // O clique no cartao nao pode fechar junto com o do fundo.
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="text-[.8em] uppercase tracking-[.15em] text-amber-300">Voce recebeu</div>
+        <div className="text-[.8em] uppercase tracking-[.15em] text-amber-300">Você recebeu</div>
 
         <div className="relative flex h-[9em] w-[9em] items-center justify-center">
           <div
@@ -95,7 +95,7 @@ export function RecebimentoDePoke({ poke, onFechar }: Props) {
             {poke.isShiny && <span className="text-[#b366ff]">✨ </span>}
             {poke.nome}
           </b>
-          <span className="text-[.85em] text-n400">Nivel {poke.level}</span>
+          <span className="text-[.85em] text-n400">Nível {poke.level}</span>
         </div>
 
         <p className="text-[.85em] text-n300">

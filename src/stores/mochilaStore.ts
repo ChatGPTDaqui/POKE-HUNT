@@ -55,7 +55,7 @@ export const useMochilaStore = create<MochilaStore>((set, get) => ({
       } catch (erro) {
         set({
           carregando: false,
-          erro: erro instanceof Error ? erro.message : 'nao foi possivel carregar a mochila',
+          erro: erro instanceof Error ? erro.message : 'não foi possível carregar a mochila',
         })
       } finally {
         emVoo = null

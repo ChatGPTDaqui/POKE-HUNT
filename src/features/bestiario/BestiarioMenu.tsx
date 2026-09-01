@@ -214,10 +214,10 @@ function DetalheEspecie({
           derrotas para o Estagio {p.stage + 1}
         </div>
       ) : (
-        <div className="text-[.78em] text-gold">Todos os estagios concluidos.</div>
+        <div className="text-[.78em] text-gold">Todos os estágios concluidos.</div>
       )}
 
-      <SectionLabel>ESTAGIOS</SectionLabel>
+      <SectionLabel>ESTÁGIOS</SectionLabel>
       {STAGE_THRESHOLDS.map((limiar, i) => {
         const anterior = i === 0 ? 0 : STAGE_THRESHOLDS[i - 1]
         const dentro = Math.max(0, Math.min(limiar - anterior, p.total - anterior))
@@ -236,7 +236,7 @@ function DetalheEspecie({
               >
                 {i + 1}
               </span>
-              <b className="flex-1 font-medium">Estagio {i + 1}</b>
+              <b className="flex-1 font-medium">Estágio {i + 1}</b>
               <span className="text-[.8em] text-n500">
                 {concluido ? 'CONCLUIDO' : atual ? 'ATUAL' : 'BLOQUEADO'}
               </span>

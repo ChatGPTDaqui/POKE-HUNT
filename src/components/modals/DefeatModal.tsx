@@ -32,11 +32,11 @@ export function DefeatModal() {
           tamanho tem que acompanhar a escala fluida e o `hudScale`, e o botao
           precisa do alvo de toque de 44px que so o `GameButton` carrega. */}
       <div className="mx-[1em] flex max-w-[22em] flex-col items-center gap-[.7em] rounded-xl border border-destructive bg-background px-[1.2em] py-[1em] text-center shadow-xl">
-        <div className="text-[1.05em] font-bold text-destructive">Voce foi derrotado!</div>
+        <div className="text-[1.05em] font-bold text-destructive">Você foi derrotado!</div>
         <p className="text-[.85em] text-muted-foreground">
           {huntBoss
-            ? 'Nesta hunt nao ha auto-revive. A cacada acabou.'
-            : 'Sem auto-revive (ou sem Revive na mochila) a cacada para aqui — um POKE desmaiado nao derrota nada, nem com o jogo fechado.'}
+            ? 'Nesta hunt não há auto-revive. A caçada acabou.'
+            : 'Sem auto-revive (ou sem Revive na mochila) a caçada para aqui — um POKE desmaiado não derrota nada, nem com o jogo fechado.'}
         </p>
         <GameButton variant="danger" onClick={() => controller.returnToHospital({ x: 0, y: 0 })}>
           Voltar para o Hospital

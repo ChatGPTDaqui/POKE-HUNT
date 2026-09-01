@@ -230,7 +230,7 @@ export function TrocaMenu() {
     return (
       <div className="flex flex-col items-center gap-[.5em] rounded-[.7em] border border-dashed border-n700 p-[1.2em] text-center">
         <ArrowsLeftRight className="text-[1.8em] text-n500" />
-        <span className="text-[.9em] text-n300">Voce nao esta em nenhuma troca.</span>
+        <span className="text-[.9em] text-n300">Você não está em nenhuma troca.</span>
         <span className="text-[.8em] text-n500">
           Convide alguem pelo Ranking ou pelo Correio — o icone de troca aparece ao lado do nome.
         </span>
@@ -244,7 +244,7 @@ export function TrocaMenu() {
       <div className="flex flex-col gap-[.6em]">
         <span className="text-[.9em]">
           {souOConvidado
-            ? <><strong>{nick}</strong> quer trocar com voce.</>
+            ? <><strong>{nick}</strong> quer trocar com você.</>
             : <>Convite enviado para <strong>{nick}</strong>. Esperando aceitar...</>}
         </span>
         <span className="flex items-center gap-[.3em] text-[.8em] text-n500">
@@ -279,7 +279,7 @@ export function TrocaMenu() {
 
       <div className="flex gap-[.6em]">
         <Coluna
-          titulo="Voce oferece"
+          titulo="Você oferece"
           linhas={troca.minhaOferta}
           confirmado={troca.euConfirmei}
           aoTirar={(l) => {

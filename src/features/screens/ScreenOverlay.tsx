@@ -55,7 +55,7 @@ const TITLES: Record<ScreenName, string> = {
   hunts: 'Selecione um mapa',
   pokedex: 'Pokedex',
   wiki: 'Wiki',
-  config: 'Configuracoes',
+  config: 'Configurações',
   bestiario: 'Bestiário',
   tasks: 'Tasks & Missões',
   correio: 'Correio',

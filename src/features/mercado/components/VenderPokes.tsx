@@ -59,7 +59,7 @@ export function VenderPokes() {
     <GameCard className="flex flex-col gap-[.45em] p-[.55em]">
       <SectionLabel>ANUNCIAR POKE</SectionLabel>
       {/* Grade, e nao dropdown (PH-114): o que se escolhe aqui sai da mochila,
-          e o texto do `<select>` nao mostrava sprite, borda de raridade nem
+          e o texto do `<select>` não mostrava sprite, borda de raridade nem
           shiny. O dado que estava no rotulo da opcao nao se perdeu — ele passou
           pro `title`/`aria-label` do slot e pra linha de resumo abaixo, que
           descreve o SELECIONADO em vez de todos ao mesmo tempo. */}
@@ -164,9 +164,9 @@ export function VenderPokes() {
               liquido calculado sobre um campo que aquele modo nem usa. */}
           {modo === 'preco_fixo' && (
             taxa > 0
-              ? <>Voce recebe <b className="text-gold">{fmt.format(preco - taxa)}</b>
+              ? <>Você recebe <b className="text-gold">{fmt.format(preco - taxa)}</b>
                 <span className="text-n500"> (taxa de {regra.percentual}%: {fmt.format(taxa)})</span>.{' '}</>
-              : <>Voce recebe <b className="text-gold">{fmt.format(preco)}</b>
+              : <>Você recebe <b className="text-gold">{fmt.format(preco)}</b>
                 <span className="text-n500"> (sem taxa em {moeda === 'gold' ? 'ouro' : 'diamante'})</span>.{' '}</>
           )}
           O POKE sai da sua mochila enquanto o anuncio estiver de pe.

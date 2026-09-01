@@ -20,7 +20,7 @@ export function TutoriaisMenu() {
               <div className="flex items-center gap-[.4em]">
                 <span className="font-semibold">{tutorial.titulo}</span>
                 {vistos.has(tutorial.id) && (
-                  <span title="Ja visto" className="flex items-center">
+                  <span title="Já visto" className="flex items-center">
                     <CheckCircle className="text-[1em] text-ok" />
                   </span>
                 )}

@@ -72,7 +72,7 @@ async function acionarHunt(
   if (continentGated) {
     const mapContinent = map.continent || FAIXAS[0].id
     useToastStore.getState().pushToast(
-      `Derrote o Campeao Lance antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
+      `Derrote o Campeão Lance antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
       'error', 'world',
     )
     return
@@ -91,7 +91,7 @@ async function acionarHunt(
     // Nao deveria acontecer (a lista sai de MAPS), mas era o terceiro `return`
     // mudo deste caminho — e um botao que nao faz nada e sempre lido como
     // clique perdido, nunca como erro.
-    useToastStore.getState().pushToast(`Hunt "${map.id}" nao existe mais.`, 'error', 'world')
+    useToastStore.getState().pushToast(`Hunt "${map.id}" não existe mais.`, 'error', 'world')
     return
   }
   const desbloqueou = await pedirAcao(
@@ -230,7 +230,7 @@ function SalasDaHunt({ mapId }: { mapId: string }) {
             <span
               key={sub.chave}
               className="rounded-[.35em] border border-n700 px-[.45em] py-[.2em] text-[.72em]"
-              title={`${pool.length} especies · loot ${sub.loot}`}
+              title={`${pool.length} espécies · loot ${sub.loot}`}
             >
               {sub.nome}{' '}
               <b className="tabular-nums font-medium text-n300">{((sub.peso / total) * 100).toFixed(0)}%</b>
@@ -498,7 +498,7 @@ export function HuntMenu() {
                 {!unlocked && (
                   <div className="mt-[.15em] text-[.75em] text-warn">
                     {continentGated
-                      ? 'Derrote o Campeao Lance para desbloquear'
+                      ? 'Derrote o Campeão Lance para desbloquear'
                       : bloqueioDeBioma
                         ? bloqueioDeBioma
                         : `Custo: ${fmt.format(map.unlockCost ?? 0)} ouro`}

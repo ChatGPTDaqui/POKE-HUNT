@@ -13,7 +13,7 @@ export const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 // um erro de rede generico que nao diz que o problema e configuracao faltando.
 if (!url || !anonKey) {
   throw new Error(
-    'Supabase nao configurado. Copie web/.env.example para web/.env.local e preencha ' +
+    'Supabase não configurado. Copie web/.env.example para web/.env.local e preencha ' +
       'VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY (Dashboard > Project Settings > API).',
   )
 }

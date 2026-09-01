@@ -91,8 +91,8 @@ const RECEBIDO: PokeRecebido = { speciesId: 'eevee', nome: 'Eevee', level: 25, i
 describe('tela de recebimento (PH-164)', () => {
   it('mostra o POKE com nome e nivel', () => {
     render(<RecebimentoDePoke poke={RECEBIDO} onFechar={vi.fn()} />)
-    expect(screen.getByRole('dialog', { name: /Voce recebeu Eevee/i })).toBeTruthy()
-    expect(screen.getByText(/Nivel 25/)).toBeTruthy()
+    expect(screen.getByRole('dialog', { name: /Você recebeu Eevee/i })).toBeTruthy()
+    expect(screen.getByText(/Nível 25/)).toBeTruthy()
   })
 
   it('fecha no botao', async () => {

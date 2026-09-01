@@ -405,7 +405,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
     if (!podeEscolher) return
     const ja = ativos.includes(key)
     if (!ja && ativos.length >= MAX_ACTIVE_ABILITIES) {
-      useToastStore.getState().pushToast(`Maximo de ${MAX_ACTIVE_ABILITIES} golpes — desmarque um primeiro.`, 'info', 'world')
+      useToastStore.getState().pushToast(`Máximo de ${MAX_ACTIVE_ABILITIES} golpes — desmarque um primeiro.`, 'info', 'world')
       return
     }
     // TIRAR O ULTIMO e permitido — a liberdade de montar a build sem restricao
@@ -416,7 +416,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
     // parado em campo sem nada na tela explicando — que le como jogo travado.
     if (ja && ativos.length === 1) {
       useToastStore.getState().pushToast(
-        'Sem nenhum golpe escolhido seu POKE nao ataca. Escolha ao menos um.', 'error', 'world',
+        'Sem nenhum golpe escolhido seu POKE não ataca. Escolha ao menos um.', 'error', 'world',
       )
     }
     controller.setActiveAbilities(poke.uid, ja ? ativos.filter((k) => k !== key) : [...ativos, key])

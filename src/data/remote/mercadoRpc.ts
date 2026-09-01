@@ -37,7 +37,7 @@ const numero = new Intl.NumberFormat('pt-BR')
 async function userIdAtual(): Promise<string> {
   const { data } = await supabase.auth.getSession()
   const id = data.session?.user.id
-  if (!id) throw new ErroServidor(401, 'sem sessao — faca login de novo')
+  if (!id) throw new ErroServidor(401, 'sem sessão — faca login de novo')
   return id
 }
 
@@ -400,7 +400,7 @@ export async function criarOrdem(corpo: { itemId: string; side: 'compra' | 'vend
     ? `Ordem executada: ${executado}x ${corpo.itemId} casou na hora.${sufixoDeVenda}`
     : executado > 0
       ? `${executado}x casou na hora, o resto (${corpo.quantity - executado}x) ficou no livro esperando.${sufixoDeVenda}`
-      : 'Ordem criada, aguardando alguem do outro lado.'
+      : 'Ordem criada, aguardando alguém do outro lado.'
   return { mensagem, executado }
 }
 

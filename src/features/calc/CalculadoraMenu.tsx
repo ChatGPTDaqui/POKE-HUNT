@@ -123,7 +123,7 @@ function PainelLado({
             A equipe atual vem PRIMEIRO, num grupo proprio (pedido explicito).
             O caso comum aqui e "quanto o meu POKE chega a valer" — com 226
             especies em ordem alfabetica, achar o proprio POKE era rolar a
-            lista inteira. `<optgroup>` em vez de so reordenar porque sem o
+            lista inteira. `<optgroup>` em vez de só reordenar porque sem o
             rotulo o jogador nao entende por que a lista comeca fora de ordem.
           */}
           {daEquipe.length > 0 && (

@@ -17,7 +17,7 @@ export const MIN_SENHA = 8
 
 export function validaSenha(senha: string): string | null {
   if (senha.length < MIN_SENHA) return `A senha precisa de pelo menos ${MIN_SENHA} caracteres.`
-  if (!/[a-zA-Z]/.test(senha) || !/[0-9]/.test(senha)) return 'A senha precisa misturar letras e numeros.'
+  if (!/[a-zA-Z]/.test(senha) || !/[0-9]/.test(senha)) return 'A senha precisa misturar letras e números.'
   return null
 }
 
@@ -33,7 +33,7 @@ function validaNick(nick: string): string | null {
   if (nick.length < MIN_NICK || nick.length > MAX_NICK) {
     return `O nome do treinador precisa ter de ${MIN_NICK} a ${MAX_NICK} caracteres.`
   }
-  if (!NICK_VALIDO.test(nick)) return 'Use apenas letras, numeros e _ no nome do treinador.'
+  if (!NICK_VALIDO.test(nick)) return 'Use apenas letras, números e _ no nome do treinador.'
   return null
 }
 
@@ -70,7 +70,7 @@ export function AuthForm({
 
     const problemaSenha = validaSenha(senha)
     if (problemaSenha) return setErro(problemaSenha)
-    if (confirmarSenha && senha !== senha2) return setErro('As senhas nao conferem.')
+    if (confirmarSenha && senha !== senha2) return setErro('As senhas não conferem.')
 
     const nickLimpo = nick.trim()
     if (pedirNomeTreinador) {
@@ -86,7 +86,7 @@ export function AuthForm({
       // aparecendo do nada.
       const { data, error } = await supabase.rpc('nome_de_treinador_disponivel', { nome: nickLimpo })
       if (!error && data === false) {
-        return setErro(`O nome "${nickLimpo}" ja esta em uso. Escolha outro.`)
+        return setErro(`O nome "${nickLimpo}" já esta em uso. Escolha outro.`)
       }
     }
 
@@ -118,7 +118,7 @@ export function AuthForm({
             <Label htmlFor="nick">Nome do treinador</Label>
             <Input
               id="nick" name="nick" required autoComplete="nickname"
-              maxLength={MAX_NICK} placeholder="Como voce aparece no mundo"
+              maxLength={MAX_NICK} placeholder="Como você aparece no mundo"
               value={nick} onChange={(e) => setNick(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
@@ -135,7 +135,7 @@ export function AuthForm({
             value={senha} onChange={(e) => setSenha(e.target.value)}
           />
           {confirmarSenha && (
-            <p className="text-xs text-muted-foreground">Pelo menos {MIN_SENHA} caracteres, com letras e numeros.</p>
+            <p className="text-xs text-muted-foreground">Pelo menos {MIN_SENHA} caracteres, com letras e números.</p>
           )}
           {mostrarEsqueciSenha && (
             <Link to="/esqueci-senha" className="inline-block text-xs text-muted-foreground underline underline-offset-4">

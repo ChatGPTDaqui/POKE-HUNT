@@ -170,8 +170,8 @@ export function AbilityHud() {
           <span aria-hidden>⚠</span>
           <span>
             {abilities.length === 0
-              ? 'Sem golpe escolhido — seu POKE nao ataca.'
-              : 'Todos os golpes desligados — seu POKE nao ataca.'}
+              ? 'Sem golpe escolhido — seu POKE não ataca.'
+              : 'Todos os golpes desligados — seu POKE não ataca.'}
           </span>
         </div>
       )}

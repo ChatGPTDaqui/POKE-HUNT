@@ -38,7 +38,7 @@ function GeralTab() {
           <span className="w-[3.5em] text-right tabular-nums text-n300">
             {Math.round(hudScale * 100)}%
           </span>
-          <GameButton variant="ghost" onClick={() => setHudScale(1)}>Padrao</GameButton>
+          <GameButton variant="ghost" onClick={() => setHudScale(1)}>Padrão</GameButton>
         </div>
       </GameCard>
 
@@ -78,7 +78,7 @@ function GeralTab() {
             askConfirm({
               title: 'Apagar todo o progresso?',
               message:
-                'Equipe, itens, ouro e mapas desbloqueados serao perdidos. Essa acao nao pode ser desfeita.',
+                'Equipe, itens, ouro e mapas desbloqueados serão perdidos. Essa ação não pode ser desfeita.',
               confirmLabel: 'Apagar e recomecar',
               onConfirm: () => controller.resetGame(),
             })

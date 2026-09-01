@@ -23,7 +23,7 @@ export function ResetPasswordPage() {
 
     const problema = validaSenha(senha)
     if (problema) return setErro(problema)
-    if (senha !== senha2) return setErro('As senhas nao conferem.')
+    if (senha !== senha2) return setErro('As senhas não conferem.')
 
     setEnviando(true)
     const { error } = await atualizarSenha(senha)
@@ -60,7 +60,7 @@ export function ResetPasswordPage() {
                 id="senha" type="password" required autoComplete="new-password"
                 value={senha} onChange={(e) => setSenha(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">Pelo menos {MIN_SENHA} caracteres, com letras e numeros.</p>
+              <p className="text-xs text-muted-foreground">Pelo menos {MIN_SENHA} caracteres, com letras e números.</p>
             </div>
 
             <div className="space-y-2">

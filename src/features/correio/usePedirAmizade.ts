@@ -58,7 +58,7 @@ export function usePedirAmizade(): PedidoDeAmizade {
     mutationFn: (nick: string) => correioRpc.pedirAmizade(nick),
     onSuccess: (r) => useToastStore.getState().pushToast(r.mensagem, 'success', 'world'),
     onError: (e: unknown) => useToastStore.getState().pushToast(
-      e instanceof ErroServidor ? e.message : 'Nao foi possivel enviar o pedido.',
+      e instanceof ErroServidor ? e.message : 'Não foi possível enviar o pedido.',
       'error',
       'world',
     ),

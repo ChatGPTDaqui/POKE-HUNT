@@ -128,7 +128,7 @@ describe('AbilityHud — aviso de POKE sem golpe', () => {
     porEmCampo(pokeEmCampo({ activeAbilities: [] }))
     render(<AbilityHud />)
 
-    expect(screen.getByRole('status').textContent).toMatch(/nao ataca/i)
+    expect(screen.getByRole('status').textContent).toMatch(/não ataca/i)
     expect(screen.getByRole('status').textContent).toMatch(/Sem golpe escolhido/i)
     expect(slotsOuVazio()).toHaveLength(0)
   })

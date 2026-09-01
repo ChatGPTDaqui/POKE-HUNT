@@ -139,8 +139,8 @@ function golpesGravados(speciesId: string, gravados: string[] | null): string[] 
   if (!especiesJaAvisadas.has(speciesId)) {
     especiesJaAvisadas.add(speciesId)
     console.warn(
-      `rowToPoke: especie "${speciesId}" nao esta no catalogo do cliente — `
-      + 'usando o learnset gravado na linha. Ver PH-247 (catalogo do banco x do cliente).',
+      `rowToPoke: espécie "${speciesId}" não esta no catálogo do cliente — `
+      + 'usando o learnset gravado na linha. Ver PH-247 (catálogo do banco x do cliente).',
     )
   }
   return gravados ?? []

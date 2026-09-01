@@ -68,7 +68,7 @@ function tokenize(expr: string): Token[] {
       i++
       continue
     }
-    throw new Error(`Formula: caractere inesperado "${c}" em "${expr}"`)
+    throw new Error(`Fórmula: caractere inesperado "${c}" em "${expr}"`)
   }
   return tokens
 }
@@ -127,7 +127,7 @@ function parse(tokens: Token[]): AstNode {
 
   function parsePrimary(): AstNode {
     const tok = peek()
-    if (!tok) throw new Error('Formula: fim inesperado da expressao')
+    if (!tok) throw new Error('Fórmula: fim inesperado da expressão')
 
     if (tok.type === 'number') {
       next()
@@ -137,7 +137,7 @@ function parse(tokens: Token[]): AstNode {
     if (tok.type === 'op' && tok.value === '(') {
       next()
       const node = parseExpr()
-      if (!peek() || peek().value !== ')') throw new Error('Formula: parenteses desbalanceados')
+      if (!peek() || peek().value !== ')') throw new Error('Fórmula: parenteses desbalanceados')
       next()
       return node
     }
@@ -154,18 +154,18 @@ function parse(tokens: Token[]): AstNode {
             args.push(parseExpr())
           }
         }
-        if (!peek() || peek().value !== ')') throw new Error('Formula: parenteses desbalanceados na funcao')
+        if (!peek() || peek().value !== ')') throw new Error('Fórmula: parenteses desbalanceados na funcao')
         next()
         return { type: 'call', name: tok.value, args }
       }
       return { type: 'var', name: tok.value }
     }
 
-    throw new Error(`Formula: token inesperado ${JSON.stringify(tok)}`)
+    throw new Error(`Fórmula: token inesperado ${JSON.stringify(tok)}`)
   }
 
   const result = parseExpr()
-  if (pos < tokens.length) throw new Error('Formula: sobrou texto apos a expressao')
+  if (pos < tokens.length) throw new Error('Fórmula: sobrou texto após a expressão')
   return result
 }
 
@@ -176,11 +176,11 @@ function evalNode(node: AstNode, context: FormulaContext, rng?: Rng): number {
     case 'neg':
       return -evalNode(node.value, context, rng)
     case 'var':
-      if (!(node.name in context)) throw new Error(`Formula: variavel desconhecida "${node.name}"`)
+      if (!(node.name in context)) throw new Error(`Fórmula: variável desconhecida "${node.name}"`)
       return context[node.name]
     case 'call': {
       const fn = node.name === 'random' && rng ? () => nextFloat(rng) : FUNCS[node.name]
-      if (!fn) throw new Error(`Formula: funcao desconhecida "${node.name}"`)
+      if (!fn) throw new Error(`Fórmula: funcao desconhecida "${node.name}"`)
       return fn(...node.args.map((a) => evalNode(a, context, rng)))
     }
     case 'binary': {
@@ -193,11 +193,11 @@ function evalNode(node: AstNode, context: FormulaContext, rng?: Rng): number {
         case '/': return l / r
         case '%': return l % r
         case '^': return Math.pow(l, r)
-        default: throw new Error(`Formula: operador desconhecido "${node.op}"`)
+        default: throw new Error(`Fórmula: operador desconhecido "${node.op}"`)
       }
     }
     default:
-      throw new Error('Formula: no de AST desconhecido')
+      throw new Error('Fórmula: no de AST desconhecido')
   }
 }
 
@@ -234,7 +234,7 @@ export function createFormulaEngine(formulas: FormulasData): FormulaEngine {
   return {
     eval(key, context = {}, rng) {
       const entry = formulas[key]
-      if (!entry) throw new Error(`Formula desconhecida: "${key}"`)
+      if (!entry) throw new Error(`Fórmula desconhecida: "${key}"`)
       return evalExpression(entry.expr, context, rng)
     },
     evalOrDefault(key, fallback, context = {}, rng) {

@@ -46,7 +46,7 @@ function LockButton({ locked, onToggle, carregando }: { locked: boolean; onToggl
     <GameIconButton
       variant="ghost"
       carregando={carregando}
-      title={locked ? 'Destrancar' : 'Trancar (nunca sera vendido)'}
+      title={locked ? 'Destrancar' : 'Trancar (nunca será vendido)'}
       aria-label={locked ? 'Destrancar' : 'Trancar'}
       onClick={(e) => {
         e.stopPropagation()
@@ -118,7 +118,7 @@ function PokemonsTab() {
   return (
     <div className="flex flex-col gap-[.3em]">
       {/* Uma linha so. Com o checkbox de shiny em linha propria (ele ocupa a
-          largura inteira por ser um `<label>` com 44px de alvo), o cabecalho de
+          largura inteira por ser um `<label>` com 44px de alvo), o cabeçalho de
           filtros comia 180px dos ~470px uteis do celular. Como CHIP ele cabe ao
           lado dos outros tres controles e o estado continua obvio. */}
       <div className="flex items-center gap-[.4em]">

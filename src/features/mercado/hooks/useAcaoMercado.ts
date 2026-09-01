@@ -16,7 +16,7 @@ export function useAcaoMercado<T>(fn: (arg: T) => Promise<{ mensagem?: string }>
     },
     onError: (erro) => {
       toast(
-        erro instanceof ErroServidor ? erro.message : 'Nao foi possivel falar com o Mercado.',
+        erro instanceof ErroServidor ? erro.message : 'Não foi possível falar com o Mercado.',
         'error',
         detalheDeErro(erro),
       )

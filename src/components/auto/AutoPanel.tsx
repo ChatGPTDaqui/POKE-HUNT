@@ -198,15 +198,15 @@ function AbaDeAutomacoes() {
 
       <BlocoAuto
         titulo="Auto-catch"
-        dica="Lanca a bola em todo inimigo derrotado; capturas vao para a mochila."
+        dica="Lança a bola em todo inimigo derrotado; capturas vão para a mochila."
         ligado={autoToggles.autoCatch}
         aoLigar={(v) => setAutoToggle('autoCatch', v)}
       >
         <div className="grid grid-cols-2 gap-[.5em]">
           <label className="flex flex-col gap-[.25em]">
-            <span className="text-n400">Bola padrao</span>
+            <span className="text-n400">Bola padrão</span>
             <ItemPicker
-              label="Bola padrao"
+              label="Bola padrão"
               value={autoCatchConfig.ballId}
               opcoes={opcoesBola}
               onChange={(ballId) => setAutoCatchConfig({ ballId })}
@@ -233,11 +233,11 @@ function AbaDeAutomacoes() {
 
         <div className="flex items-center gap-[.4em] font-medium">
           Regras por especie
-          <InfoIcon text="Define uma bola especifica pra uma especie da hunt atual. Tem prioridade sobre a bola padrao/shiny. Se a bola da regra acabar, o bot so mata aquela especie em vez de gastar outra bola nela." />
+          <InfoIcon text="Define uma bola especifica pra uma espécie da hunt atual. Tem prioridade sobre a bola padrão/shiny. Se a bola da regra acabar, o bot só mata aquela espécie em vez de gastar outra bola nela." />
         </div>
 
         {huntSpecies.length === 0 && (
-          <div className="text-n500">Entre numa hunt pra configurar regras por especie.</div>
+          <div className="text-n500">Entre numa hunt pra configurar regras por espécie.</div>
         )}
 
         {autoCatchRules.map((rule, index) => {
@@ -303,7 +303,7 @@ function AbaDeAutomacoes() {
 
       <BlocoAuto
         titulo="Auto-pot"
-        dica="Usa pocao quando o HP cai do limite. A primeira regra que casar (na ordem da lista) e usada."
+        dica="Usa poção quando o HP cai do limite. A primeira regra que casar (na ordem da lista) e usada."
         ligado={autoToggles.autoPot}
         aoLigar={(v) => setAutoToggle('autoPot', v)}
       >
@@ -336,7 +336,7 @@ function AbaDeAutomacoes() {
             />
             <span>% usar</span>
             <ItemPicker
-              label="Pocao da regra"
+              label="Poção da regra"
               className="min-w-[8em] flex-1"
               value={rule.itemId}
               opcoes={opcoesPocao}

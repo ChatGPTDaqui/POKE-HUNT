@@ -22,7 +22,7 @@ export function HomePage() {
         </p>
       </div>
       {/* `buttonVariants` em vez de <Button asChild>: este Button (base-ui)
-          nao expoe `asChild`, e um <button> nao pode envolver um <a>. */}
+          não expoe `asChild`, e um <button> não pode envolver um <a>. */}
       <div className="flex gap-3">
         <Link to="/registro" className={buttonVariants({ size: 'lg' })}>
           Criar conta

@@ -31,7 +31,7 @@ const db = supabase as unknown as {
 async function userIdAtual(): Promise<string> {
   const { data } = await supabase.auth.getSession()
   const id = data.session?.user.id
-  if (!id) throw new ErroServidor(401, 'sem sessao — faca login de novo')
+  if (!id) throw new ErroServidor(401, 'sem sessão — faca login de novo')
   return id
 }
 

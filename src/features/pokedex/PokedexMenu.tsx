@@ -95,9 +95,9 @@ function evoluiDe(speciesId: string): Species | null {
 function condicaoDeEvolucao(species: Species): string | null {
   if (!species.evolvesTo || species.evolvesAtLevel == null) return null
   if (species.isSpecialEvolution) {
-    return `Nivel ${SPECIAL_EVOLUTION_LEVEL} + ${SPECIAL_EVOLUTION_STONE_COUNT} ${stoneName(species.type)}`
+    return `Nível ${SPECIAL_EVOLUTION_LEVEL} + ${SPECIAL_EVOLUTION_STONE_COUNT} ${stoneName(species.type)}`
   }
-  return `Nivel ${species.evolvesAtLevel}`
+  return `Nível ${species.evolvesAtLevel}`
 }
 
 /** A linha evolutiva inteira, do primeiro estagio ao ultimo. */
@@ -148,7 +148,7 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
         <div className="flex items-center justify-between gap-[.4em]">
           <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(-1) }}>← Anterior</GameButton>
           <span className="text-[.75em] text-n500">#{dexNumber(species)} · {species.name}</span>
-          <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(1) }}>Proximo →</GameButton>
+          <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(1) }}>Próximo →</GameButton>
         </div>
       )}
 
@@ -174,9 +174,9 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
       </div>
 
       <div>
-        <div className="mb-[.4em] font-medium">Evolucao</div>
+        <div className="mb-[.4em] font-medium">Evolução</div>
         {linha.length === 1 ? (
-          <span className="text-[.8em] text-n500">Nao evolui e nao vem de nenhuma evolucao.</span>
+          <span className="text-[.8em] text-n500">Não evolui e não vem de nenhuma evolução.</span>
         ) : (
           <div className="flex flex-col gap-[.3em] text-[.8em]">
             {linha.map((etapa, i) => {
@@ -205,7 +205,7 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
       {traits && (
         <div>
           <div className="mb-[.4em] font-medium">
-            <Palavra verbete="habilidade">Habilidades</Palavra> possiveis
+            <Palavra verbete="habilidade">Habilidades</Palavra> possíveis
           </div>
           <div className="flex flex-col gap-[.3em] text-[.8em]">
             {[...traits.normais.map((k) => [k, false] as const), ...(traits.oculta ? [[traits.oculta, true] as const] : [])]
@@ -238,7 +238,7 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
       </div>
 
       <div>
-        <div className="mb-[.4em] font-medium">Fraquezas e resistencias</div>
+        <div className="mb-[.4em] font-medium">Fraquezas e resistências</div>
         <TypeWeaknessSection species={species} />
       </div>
 

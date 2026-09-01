@@ -135,7 +135,7 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     await userEvent.click(botaoUsar(nomeDoGolpe(deFora))!)
 
     expect(setActiveAbilities).not.toHaveBeenCalled()
-    expect(useToastStore.getState().toasts.some((t) => /Maximo de 4/.test(t.message))).toBe(true)
+    expect(useToastStore.getState().toasts.some((t) => /Máximo de 4/.test(t.message))).toBe(true)
   })
 
   it('com slot livre, marcar ACRESCENTA sem derrubar os outros', async () => {
@@ -328,7 +328,7 @@ describe('MovesetTable — aviso ao ficar sem golpe', () => {
 
     // Avisa, mas nao barra: montar a build sem restricao e pedido explicito
     // registrado em data/activeAbilities.ts.
-    expect(useToastStore.getState().toasts.some((t) => /nao ataca/i.test(t.message))).toBe(true)
+    expect(useToastStore.getState().toasts.some((t) => /não ataca/i.test(t.message))).toBe(true)
     expect(setActiveAbilities).toHaveBeenCalledWith(poke.uid, [])
   })
 
@@ -340,7 +340,7 @@ describe('MovesetTable — aviso ao ficar sem golpe', () => {
 
     await userEvent.click(botaoUsar(nomeDoGolpe(escolhidos[0]))!)
 
-    expect(useToastStore.getState().toasts.some((t) => /nao ataca/i.test(t.message))).toBe(false)
+    expect(useToastStore.getState().toasts.some((t) => /não ataca/i.test(t.message))).toBe(false)
     expect(setActiveAbilities).toHaveBeenCalledWith(poke.uid, [escolhidos[1]])
   })
 })
