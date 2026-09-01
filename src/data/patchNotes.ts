@@ -12,6 +12,48 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Dois itens, duas issues (PH-384 e PH-386), e eles NAO sao o mesmo assunto —
+  // por isso vao como duas frases e nao uma. O primeiro e o corpo dos POKE no
+  // campo; o segundo e a sala nao dizer que estava esperando.
+  //
+  // O ITEM DA SALA NAO ANUNCIA UMA CORRECAO DE VELOCIDADE, e essa distincao e o
+  // ponto: a sala continua levando o mesmo tempo pra trocar. O que mudou e a
+  // tela parar de mentir por omissao. Medido em
+  // `scripts/harness/troca-de-sala-sob-autoridade.mjs` (as duas pontas com o
+  // protocolo real, 48 trocas em 8 sementes): mediana de 33,0s parado em 30/30,
+  // p90 de 33,0s, pior caso de 243s, ZERO travamentos. Em producao no mesmo dia,
+  // o servidor avancava uma sala a cada 57s (Vinny), 105s (Perneta) e 126s
+  // (Alfafis) — ou seja, numa sala rapida MAIS DA METADE do tempo era barra
+  // cheia e parada, sem nada na tela.
+  //
+  // Prometer "a sala troca mais rapido" seria a mentira que o jogador desmente
+  // no primeiro minuto. A nota diz o que de fato mudou, e diz tambem que o farm
+  // nao para nesse tempo — porque "esperando" le como "parei de ganhar", e nao
+  // e verdade: o respawn de mob comum volta assim que o protetor cai.
+  //
+  // FORA DA NOTA, e nenhum deles e player-facing:
+  //  - as duas bancadas novas (`custo-da-separacao.mjs`,
+  //    `troca-de-sala-sob-autoridade.mjs`) e o `+5,7%` de custo do passo do
+  //    motor que a primeira mediu;
+  //  - a correcao de `docs/06`, que afirmava que a contagem regressiva de 3s
+  //    cobria a espera (media latencia de chamada, nao espera de jogador);
+  //  - `reconciliarSalaDaAutoridade` exportada em `headless.ts` pra a bancada.
+  //
+  // TAMBEM FORA: o handicap estrutural do servidor (ele reconstroi o mundo por
+  // janela e o POKE volta ao ponto de entrada, entao cada janela paga a
+  // caminhada de novo, e ele fecha a quota sempre depois do cliente). E o que
+  // encurtaria a espera DE VERDADE, mexe em quantos abates cabem numa janela —
+  // logo em balanceamento de farm — e nao foi feito. Meia-feature nao entra em
+  // nota: quando entrar, ganha entrada propria.
+  {
+    version: '7.30',
+    date: '2026-09-01',
+    title: 'Cada POKE no seu lugar',
+    highlights: [
+      'POKE NÃO ENTRA MAIS DENTRO DE POKE. Quando vários selvagens vinham para cima de você ao mesmo tempo, eles se empilhavam no mesmo ponto e um sprite desaparecia dentro do outro. Agora cada corpo ocupa o próprio espaço — os selvagens se acomodam em volta em vez de virar uma pilha. O alcance do combate não mudou: quem estava batendo continua batendo.',
+      'A SALA AGORA DIZ QUANDO ESTÁ ESPERANDO. Ao completar os 30 abates, a barra enchia e ficava parada sem nenhuma explicação, e isso podia durar mais de meio minuto. O chip da sala passa a mostrar "Preparando a próxima área..." nesse tempo. A espera em si não mudou — o que acabou foi a tela não dizer nada. E ela não te custa nada: os selvagens continuam nascendo, e ouro e XP continuam entrando enquanto a próxima área não chega.',
+    ],
+  },
   // A PH-382 subiu na `dev` sem nota, e ela e do tipo que NAO pode subir calada:
   // teve relato de jogador (01/09) descrevendo o time errado na tela.
   //
