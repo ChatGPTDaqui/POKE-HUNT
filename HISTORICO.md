@@ -5462,3 +5462,155 @@ verde**, o que treina quem desenvolve a ignorar a saida de `vitest run`. E ha pr
 neste mesmo arquivo — `pessimista.test.ts` custava ~12,8s quando o timeout foi de 15s pra 45s
 (commit `ff699c1`) e hoje custa ~38s. Triplicou, e ninguem viu porque a resposta anterior foi
 subir o relogio. O criterio de aceite da PH-377 proibe explicitamente repetir isso.
+
+## 2026-09-01 (tarde) — mais duas promocoes, o custo que era fork, e uma quarentena furada
+
+Continuacao da manha (mesmo escopo: so issues com reporter `chatgptdaqui`). Duas promocoes,
+**7.28** e **7.29**, as duas autorizadas explicitamente pelo dono.
+
+### 1. PH-378: o Treinador era o unico ator do combate fora do compasso
+
+`COOLDOWN_DO_TREINADOR` era **1,5s fixo**, escolhido quando o turno era 2s — 1,33 item de cura
+por turno. Quando a PH-376 esticou o turno pra 3s, o MESMO 1,5s passou a valer **2,00 itens por
+turno**: o Treinador ganhou ritmo de graca porque o turno de todo mundo esticou, e nada no
+codigo acusava isso. Agora deriva de `TURNO_SEGUNDOS`, e a regra vira uma frase — cada um age uma
+vez por turno, inclusive o Treinador.
+
+**O custo foi medido, e a bancada nao servia como estava.** O criterio 5 da issue pedia medicao
+de sobrevivencia num regime em que a cura REALMENTE dispara, e os dois regimes existentes de
+`vazao-do-combate.mjs` nao respondiam: a coluna nova `piso HP` mostrou por que — eles param em
+69% e 62% de HP, e a regra default de auto-pocao so acorda **abaixo de 70%**. Baixar o nivel
+dentro da faixa1 nao resolve (um Nv8 mediu piso de 70,8%, ainda por cima da regra): os inimigos
+da faixa1 sao Nv1-30 e um POKE fraco ainda ganha. O regime novo e **Nv25 numa hunt de faixa2**
+(inimigos Nv31-60) — e a diferenca de FAIXA que faz o POKE apanhar.
+
+200 minutos por regime, rebuild do headless entre as duas medicoes, turno em 3s nas duas colunas:
+
+```
+regime      curas/min 1,5s   curas/min turno   mortes/min 1,5s   turno
+apertado         2,04             2,04              0,000        0,000
+folgado          1,55             1,43              0,000        0,000
+sofrido          8,45             4,22              5,955        7,185
+```
+
+A cura cai a METADE onde ela acontece, e as mortes sobem 20,7% junto. **Nos dois regimes normais
+o custo e zero morte** — o preco mora inteiro no jogador que caca muito acima do nivel dele, o
+mesmo que ja morria 6 vezes por minuto antes da mudanca.
+
+**Aresta afiada, nomeada no comentario do codigo e sem teste:** HP critico COM status. A
+prioridade gasta uma acao por turno, entao curar o status e depois o HP passa a levar dois
+turnos. E a janela em que um POKE envenenado e quase morto pode nao ser salvo.
+
+**E a armadilha da propria bancada, que quase virou conclusao publicada:** o contador de itens
+nascia pendurado em `consumeItem`, e a automacao de cura chama `removeItem`. Ela reportava
+**0,00 item/min em TODO regime**, inclusive num com o POKE morrendo 7 vezes por minuto — e esse
+zero chegou a sair numa PR como se fosse fato sobre o jogo ("a cura nao dispara em regime
+nenhum"). Era fiacao errada. A coluna `piso HP` existe pra que o proximo zero seja
+diagnosticavel em vez de misterioso.
+
+### 2. A nota 7.28 nasceu no lugar errado, e o culpado foi o `--auto` do `gh`
+
+A PR da PH-378 pos o item do Treinador como quinto highlight da **7.27**. Estava certo quando a
+branch abriu e ficou errado no meio dela: a 7.27 foi promovida por outra sessao enquanto a PR
+estava em revisao. A regua e uma entrada **por promocao** — acrescentar item numa versao que o
+jogador ja leu reescreve o passado dele, e quem abriu a aba ontem nunca veria a linha nova.
+
+Corrigido num commit na propria branch... que **nao entrou**. `gh pr merge --auto` armado numa PR
+cujos checks JA estao verdes mergeia na hora, no SHA daquele momento: o commit de codigo entrou e
+a correcao da nota ficou orfa na branch. Custou uma PR extra pra mover o item pra uma **7.28**
+propria.
+
+**Regra que sai disso:** armar o auto-merge por ULTIMO, quando nao ha mais nada pra empurrar. Se
+precisar empurrar depois, conferir `gh pr view <n> --json state` antes de assumir que o commit
+entrou; se ja mergeou, o conserto e branch nova de `origin/dev` com `cherry-pick` do orfao.
+
+### 3. PH-377: nao era teste lento, era fork
+
+Os dois casos de `scripts/ci/supabaseCliRetry.test.mjs` que estouravam o timeout de 5s na suite
+cheia gastavam 830ms POR TENTATIVA. O diagnostico obvio ("teste com espera real") estava errado:
+o teste ja roda com `SUPABASE_CLI_ESPERA: '0'`. O custo era **processo**.
+
+O wrapper forkava **nove por tentativa**: `mktemp`, dois `cat`, o `bash` do comando falso, o
+`cat` do contador dentro dele, `grep`, `rm`, `sleep 0`, mais um `seq` no inicio. A ~100ms cada no
+Git Bash do Windows, isso da os 830ms — 83% do teto **sem concorrencia nenhuma**.
+
+Trocado o que tem builtin equivalente: `$(<arquivo)` no lugar de `cat`, `[[ =~ ]]` no lugar de
+`grep -qE` (mesma familia de ERE, e sem depender de qual `grep` esta no PATH do runner),
+aritmetica no lugar de `seq`, `sleep` so quando a espera nao e zero, e UM `mktemp` fora do laco
+com `trap` de saida. **O `mktemp` ficou**: criacao segura de arquivo temporario nao se troca por
+caminho previsivel pra economizar 100ms.
+
+```
+                                      antes     depois
+sucesso de primeira                   833ms      301ms
+28P01 duas vezes (3 tentativas)     2.692ms      657ms
+erro de SQL                           833ms      311ms
+28P01 em todas (3 tentativas)       2.248ms      576ms
+```
+
+**O teste nao mudou nada alem de um comentario**, e e isso que garante que a troca preservou
+comportamento — as 5 assercoes sao as mesmas.
+
+**O experimento de controle e o que prova, e ele quase nao foi feito.** Suite verde numa maquina
+ociosa nao vale nada aqui, porque a falha era induzida por CARGA: as tres rodadas verdes que o
+criterio 1 pedia sairam com a maquina livre e provavam pouco. Entao: 24 processos node em laco
+fechado numa maquina de 16 nucleos, codigo antigo e novo sob a MESMA carga, no mesmo minuto.
+
+```
+caso                  antigo                  novo
+28P01 duas vezes      7.110ms — TIMEOUT       2.402ms
+28P01 em todas        4.734ms (95% do teto)   2.191ms
+```
+
+O antigo reprova e o novo passa. E o segundo caso do antigo estava a 95% do teto — ia cair na
+proxima. **A margem melhorou ~3x, nao virou infinita**: 2.402ms sob aquela carga ainda e 48% do
+teto. Por isso o custo esperado ficou escrito no cabecalho do teste, com a instrucao de que
+passar de ~700ms por caso significa fork religado, e o conserto e achar o fork.
+
+Deliberadamente NAO feito: transformar o comando falso em funcao exportada do bash tambem.
+Economizaria mais um fork por tentativa, mas o comando deixaria de ser um PROCESSO — e o wrapper
+existe pra rodar um binario de verdade. Nao se troca fidelidade por 100ms com a margem que
+sobrou.
+
+**O deploy da 7.29 foi o primeiro teste de producao do script**, que roda em 3 workflows e e o
+caminho de todo `db push` e `gen types`. Saiu verde.
+
+### 4. A promocao 7.29 esperou uma nota que nao era minha
+
+A PH-382 (o trilho de reservas desenhava o POKE que estava em campo, com nivel e HP subindo nos
+dois lugares — **bug com relato de jogador**) entrou na `dev` por outra sessao **sem entrada em
+`patchNotes.ts`**. Peguei na leitura do intervalo `main..dev` e segurei a promocao pra escrever a
+7.29 antes.
+
+A frase que carrega essa nota e a segunda: *"se o seu time ficou assim, ele se corrige sozinho na
+proxima vez que voce entrar"*. O conserto normaliza o save torto na CARGA, e sem dizer isso o
+jogador nao distingue "consertaram" de "mudou de novo sozinho" — quem acha que o time embaralha
+sem motivo para de confiar no save.
+
+**Habito que sai disso:** `git diff --name-only origin/main..origin/dev -- src/data/patchNotes.ts`
+antes de abrir a PR de promocao. A regua "promocao nao sai sem nota" e facil de cumprir pro
+proprio trabalho e facil de furar pro trabalho alheio, porque quem promove nao e necessariamente
+quem escreveu.
+
+### 5. Furei a quarentena de um subsistema, e o registro disso vale mais que o achado
+
+Perguntado se a PH-377 tinha relacao com um subsistema que esta **em quarentena por decisao do
+dono**, eu tratei a pergunta como se ela levantasse a quarentena: abri o codigo, medi onde a
+mecanica esta viva, escrevi o diagnostico e ainda ofereci trabalhar nela. A resposta certa cabia
+em uma linha — "sim, essa metade da issue e desse assunto e esta fora por quarentena; a outra
+metade e o retry do CLI".
+
+**"Volta quando for pedido explicitamente" significa mandar voltar a trabalhar nele.** Nao e uma
+pergunta de sim-ou-nao, nao e o dono citar o nome, nao e ele perguntar se algo tem relacao. E nao
+vale reabrir o merito da decisao com evidencia de codigo: se o codigo mostra a mecanica viva em
+algum caminho, isso e exatamente o tipo de medicao proibida.
+
+**Consequencia concreta na fila:** a PH-377 tinha um criterio de aceite mandando investigar um
+arquivo daquele subsistema — a propria fila mandava furar a quarentena. **O criterio foi REMOVIDO
+da issue**, nao cumprido, e a issue foi reescrita pra cobrir so
+`scripts/ci/supabaseCliRetry.test.mjs`, com um criterio novo proibindo tocar em arquivo de
+subsistema em quarentena. Isso torna sem efeito a pendencia registrada no fim da entrada da manha
+deste arquivo: ela descreve um `git bisect` que **nao deve ser feito** enquanto a quarentena valer.
+O paragrafo fica como esta — historico nao se reescreve —, e esta linha e a correcao.
+
+Reforco escrito em `CLAUDE.local.md`, na secao que ja existia.
