@@ -12,6 +12,30 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // O ritmo do combate (PH-373 a PH-376). Uma entrada so pras quatro issues,
+  // porque pro jogador e UM assunto: a velocidade com que as coisas acontecem.
+  //
+  // O ITEM DO TURNO E O UNICO QUE TIRA ALGO DO JOGADOR, e por isso ele vem
+  // primeiro e diz o numero. Combate 1,5x mais lento e -33% de ouro/h, XP/h e
+  // mobs/h — esconder isso numa nota sobre animacao seria o tipo de omissao
+  // que o jogador descobre sozinho no fim do dia e passa a desconfiar do
+  // resto. Decisao do dono, com o custo aceito na PH-376.
+  //
+  // FORA DA NOTA, por serem invisiveis jogando: a duracao autorada recuperada
+  // do banco de origem (o exportador pulava esses bytes), os quadros vazios
+  // aparados em 25 tiras, os tres modos de cauda como MECANISMO, o comparador
+  // de velocidade e as duas bancadas. O que entra e o que se ve.
+  {
+    version: '7.25',
+    date: '2026-09-01',
+    title: 'O combate respira',
+    highlights: [
+      'O TURNO PASSOU DE 2 PARA 3 SEGUNDOS. Tudo no combate ficou 1,5x mais espacado: recarga de golpe, tique de veneno e queimadura, duracao de sono e congelamento. Nenhum golpe ficou melhor ou pior que outro — mudou a escala, nao o equilibrio. Em compensacao rende menos por hora: cerca de um terco a menos de ouro, XP e abates no mesmo tempo de jogo. Foi de proposito, pra dar pra ver o que esta acontecendo.',
+      'AS ANIMACOES DE GOLPE TOCAM NA VELOCIDADE EM QUE FORAM DESENHADAS. Antes cada efeito era esticado ou espremido pra caber num tempo fixo, e quem decidia a velocidade era o numero de quadros do desenho: um golpe de gelo passava voando e um de area arrastava. Agora todos correm no mesmo ritmo, o ritmo do desenho original.',
+      'GOLPE CURTO DEIXOU DE CONGELAR NO FIM. Efeito com poucos quadros agora repete ou volta de tras pra frente, conforme o desenho — a mordida do Bite fecha e abre, a chama do Fire Spin continua girando. Antes eles paravam numa imagem fixa esperando o proximo golpe.',
+      'ALGUNS GOLPES COMECAVAM ATRASADOS. Vinte e cinco efeitos tinham quadros em branco na ponta, e o Dig gastava o primeiro terco da animacao sem desenhar nada. Foram aparados.',
+    ],
+  },
   // A revisao das sprites de golpe (PH-367 a PH-370). Uma entrada so pros oito
   // commits, porque pra quem joga e UM assunto: o que aparece na tela quando um
   // golpe acerta. SUCINTA, mesma regua da 7.22 e da 7.23.

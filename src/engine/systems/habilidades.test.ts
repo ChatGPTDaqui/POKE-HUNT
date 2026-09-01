@@ -15,7 +15,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
-import { getAbility, type Ability } from '@/data/abilities'
+import { getAbility, type Ability, TURNO_SEGUNDOS } from '@/data/abilities'
 import { buildMapWorld } from '../simulation'
 import { criarInimigoDeTeste } from '../testes/inimigoDeTeste'
 import { updateCombat, velocidadeEfetiva } from './combatSystem'
@@ -211,8 +211,10 @@ describe('habilidades de fim de turno', () => {
   function turnos(entity: WorldEntity, quantos: number, clima: Parameters<typeof tickStatus>[3] = null): number {
     let dano = 0
     for (let i = 0; i < quantos; i++) {
-      // TURNO_SEGUNDOS e 2; um passo de 2s fecha exatamente um turno.
-      dano += tickStatus(createRng(i + 1), entity, 2, clima).dano
+      // Um passo de TURNO_SEGUNDOS fecha exatamente um turno. Escrito assim, e
+      // nao com o numero, porque o turno mudou de 2 pra 3 na PH-376 e a
+      // primeira versao deste teste quebrou justamente por ter o `2` na unha.
+      dano += tickStatus(createRng(i + 1), entity, TURNO_SEGUNDOS, clima).dano
     }
     return dano
   }

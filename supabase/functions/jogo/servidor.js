@@ -648,7 +648,7 @@ var FORMULAS = {
 		"vars": []
 	},
 	"TURNO_SEGUNDOS": {
-		"expr": "2",
+		"expr": "3",
 		"vars": []
 	}
 };
