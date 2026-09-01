@@ -78385,10 +78385,6 @@ function protetorDaSala(sala) {
 	if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null;
 	return sala.indice >= 9 ? "lord" : "guardian";
 }
-function nomeDaSala(sala) {
-	if (!sala) return null;
-	return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave;
-}
 /**
 * Conta um abate na sala atual. Ao fechar a quota, NAO troca de sala na
 * hora — sorteia a proxima (o "carregamento" adiantado, pra UI ja saber o
@@ -78814,7 +78810,7 @@ function juntar(a, b) {
 * POKE ja esta em 35, e informacao desatualizada na tela e pior que cartao
 * repetido.
 */
-var proximoId = 1;
+var proximoId$1 = 1;
 var celebracaoStore = createStore()((set) => ({
 	fila: [],
 	celebrar: (c) => set((estado) => {
@@ -78832,12 +78828,25 @@ var celebracaoStore = createStore()((set) => ({
 			return { fila: [...fila.slice(0, -1), junta] };
 		}
 		return { fila: [...fila, {
-			id: proximoId++,
+			id: proximoId$1++,
 			celebracao: c
 		}] };
 	}),
 	encerrarAtual: () => set((estado) => ({ fila: estado.fila.slice(1) })),
 	limpar: () => set({ fila: [] })
+}));
+//#endregion
+//#region src/stores/splashDeSalaVanilla.ts
+var proximoId = 1;
+var splashDeSalaStore = createStore()((set) => ({
+	atual: null,
+	anunciarSala: (sala, fechouCiclo) => set({ atual: {
+		id: proximoId++,
+		sala: { ...sala },
+		fechouCiclo
+	} }),
+	encerrar: (id) => set((estado) => estado.atual?.id === id ? { atual: null } : estado),
+	limpar: () => set({ atual: null })
 }));
 var formulaEngine = createFormulaEngine(FORMULAS);
 formulaEngine.evalOrDefault("OFFLINE_FARM_MAX_HOURS", 6);
@@ -79474,10 +79483,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 					world.enemies.push(enemy);
 				}
 				world.respawnTimer = world.mapDef.respawnDelay;
-				if (!silent) {
-					const nome = nomeDaSala(world.sala);
-					toastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluído! Voltando para a primeira sala: ${nome}.` : `Entrando em nova área: ${nome}.`, "success", "world");
-				}
+				if (!silent && world.sala) splashDeSalaStore.getState().anunciarSala(world.sala, fechouCiclo);
 			}
 		}
 		if (!silent) updateAnimations(world, dt);
