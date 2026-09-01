@@ -2543,6 +2543,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
@@ -5277,6 +5278,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
