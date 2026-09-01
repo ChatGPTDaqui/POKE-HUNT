@@ -25,6 +25,7 @@ import {
 import { hpBarFillColor } from '@/data/hpBar'
 import { AURA_COLORS } from '@/data/auraColors'
 import { colorForType } from '@/data/typeColors'
+import { rarityOf } from '@/data/rarity'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import {
   captureAnimFrameDuration,
@@ -799,6 +800,51 @@ export function drawHpBar(
 
 const SHINY_NAME_COLOR = '#b366ff'
 
+// Cor do nome de um POKE que nao e shiny e cuja raridade e COMUM.
+const NOME_COR_PADRAO = '#f1f1f6'
+
+/**
+ * Cor do NOME na placa acima do POKE, por raridade (PH-373).
+ *
+ * O problema que isto resolve: a raridade so existia em POKE do JOGADOR — a
+ * borda do retrato no `StatusRail` e a borda da miniatura em `ReservasRail`, as
+ * duas por `rarityOf(poke).color`. No selvagem a placa saia sempre branca, e
+ * nao havia como distinguir um ULTRA de um COMUM antes de captura-lo.
+ *
+ * TRES DECISOES, e as tres tem numero por tras:
+ *
+ * 1. **COMUM continua no branco de sempre.** `#9aa0a6` e mais ESCURO que
+ *    `#f1f1f6`, e COMUM e 69% dos spawns (`data/rarity.ts#RARITIES`). Pintar a
+ *    maioria seria pagar legibilidade em quase toda placa da tela por uma
+ *    informacao que, sendo o caso comum, nao informa nada.
+ *
+ * 2. **Shiny ganha do resto.** O roxo de shiny (`#b366ff`) e o lilas de ULTRA
+ *    (`#a78bfa`) tem distancia RGB 39 — indistinguiveis num nome de ~10px com
+ *    contorno. Com os dois disputando o mesmo canal, o mais raro fica. A
+ *    consequencia assumida: em shiny a raridade NAO aparece na placa, igual ao
+ *    que ja acontecia antes desta mudanca (nenhuma regressao, so um caso que
+ *    continua em aberto — precisa de um segundo canal visual, e escolher um sem
+ *    poder olhar a tela seria chute).
+ *
+ * 3. **Aqui a regra e o OPOSTO da do chat, de proposito.**
+ *    `data/rarity.ts#realceDaRaridade` registra que pintar o NOME por raridade
+ *    ja foi tentado no log e revertido: la a PALAVRA da raridade ("RARO")
+ *    aparece na mesma linha, entao o nome colorido criava duas leituras pra uma
+ *    informacao so ("o azul fala da especie ou da raridade?"). Na placa do
+ *    canvas nao existe palavra nenhuma — o nome e o unico lugar onde a raridade
+ *    pode caber. Nao unificar as duas: elas resolvem contextos diferentes.
+ *
+ * Vale pra placa de QUALQUER entidade, inclusive o POKE do jogador: e a mesma
+ * funcao de desenho, e deixar o do jogador branco enquanto os selvagens ao lado
+ * saem coloridos leria como defeito. No jogador a cor apenas repete o que a
+ * borda do retrato no trilho ja diz.
+ */
+export function corDoNomeNaPlaca(poke: { rarity?: string | null; isShiny?: boolean }): string {
+  if (poke.isShiny) return SHINY_NAME_COLOR
+  const raridade = rarityOf(poke)
+  return raridade.key === 'comum' ? NOME_COR_PADRAO : raridade.color
+}
+
 // PH-228/236: cor propria pra distinguir do amarelo de shiny e do branco
 // normal — vermelho/dourado le como "aviso/destaque", nao como raridade de
 // captura.
@@ -841,7 +887,11 @@ export function drawNameLevelTag(
   ctx.fillStyle = '#f1f1f6'
   ctx.fillText(levelText, entity.x, entity.y - halfHeight - 15)
   ctx.strokeText(name, entity.x, entity.y - halfHeight - 26)
-  ctx.fillStyle = isShiny ? SHINY_NAME_COLOR : '#f1f1f6'
+  // PH-373: a cor sai de `corDoNomeNaPlaca` (pura e testada la em cima), e nao
+  // de um ternario escrito aqui — as tres regras que ela aplica (COMUM fica
+  // branco, shiny ganha, e por que aqui e o oposto do chat) precisam morar
+  // junto do porque.
+  ctx.fillStyle = corDoNomeNaPlaca(entity.poke)
   ctx.fillText(name, entity.x, entity.y - halfHeight - 26)
   if (protetor) {
     const tagText = rotuloDeProtetor(tipoDeProtetor)
