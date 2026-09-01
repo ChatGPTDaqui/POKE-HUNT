@@ -5280,3 +5280,185 @@ quando o timeout foi de 15s pra 45s. Triplicou desde entao, e ninguem viu porque
 foi subir o relogio. **Nao subi o relogio de novo de proposito** — foi exatamente assim que o 3x se
 escondeu. O caminho certo e `git bisect` no custo do teste, e isso fica registrado aqui como
 pendencia com o numero na mao, nao como "teste flaky".
+
+## 2026-09-01 (manha) — duas promocoes no mesmo dia, e um exploit que a propria issue pedia
+
+Sessao com escopo fechado pelo dono: **so issues com reporter `chatgptdaqui`**. O bloco do
+Otavio (epico shadcn PH-339 a PH-360, `sala_transicao` PH-361 a PH-365, PH-366, PH-205, PH-48)
+nao foi tocado — 27 das 33 issues abertas ficaram de fora de proposito.
+
+### 1. PH-334: o criterio de aceite da issue criaria um exploit de jogo
+
+`sala_protetor` (PH-241) guarda o protetor vivo da sessao, uma linha por sessao. Ela nunca era
+apagada. Medido em 01/09, antes do conserto:
+
+```
+public:  14 linhas, 14 de 14 apontam pra sessao FECHADA   (3 sessoes abertas)
+dev:      7 linhas,  7 de  7 idem                         (0 sessoes abertas)
+```
+
+A FK **tem** `on delete cascade`, e ele nunca dispara: `game_sessions` nao e apagada no
+fechamento, e MARCADA (`closed_at`). A linha do protetor sobrevive a sessao dona dela.
+
+**A issue mandava pendurar um trigger em `closed_at`, com a justificativa de que "linha de
+sessao fechada nunca e lida". Isso esta errado, e implementar ao pe da letra teria dado ao
+jogador uma fuga gratis do Guardian.**
+
+A issue conferiu UM leitor (`sessaoAberta`, que de fato filtra `closed_at=is.null`) e nao viu o
+segundo: `salaHerdada` (`authority/src/appSessao.ts`) busca a ultima sessao do jogador NAQUELE
+mapa com `select=*,sala_protetor(*)` e **sem filtro de `closed_at`** — le exatamente a linha de
+uma sessao fechada. E a heranca de sala da PH-266: dar F5 no meio da luta fecha a sessao e abre
+outra, e o protetor atravessa junto com o `hp_atual` que tinha. O comentario da propria PH-266
+diz que ela existe pra impedir que F5 vire jeito de sumir com o bicho.
+
+**O conserto e por IDADE, nao por evento.** `purgar_sala_protetor(p_limite interval default
+'1 hour')`, cron horario (minuto 34 em `public`, 04 em `dev`), `delete` de filtro POSITIVO: so
+alcanca linha para a qual **nao existe** sessao aberta nem fechada dentro do limite. O filtro
+positivo e a parte que importa — ele obriga a provar que ha sessao viva pra poupar a linha, em
+vez de provar que ha uma morta pra apaga-la, entao um caminho de fechamento novo que ninguem
+lembrou erra pro lado de guardar lixo.
+
+1 hora, e nao 5 minutos colados na janela do TypeScript: o purge nao precisa ser apertado e a
+margem larga tira qualquer corrida entre fechar e reabrir do limite.
+
+Isso cobre os dois caminhos de fechamento **e qualquer futuro**, que era o argumento a favor do
+trigger, sem o efeito colateral: olha o estado, nao o evento.
+
+`src/data/salaProtetorPurga.test.ts` tranca dois invariantes, pelo padrao `?raw` de
+`limiteDeSessaoInativa.test.ts` (a suite nao tem Postgres): o limite do SQL tem que ser MAIOR
+que `JANELA_DE_HERANCA_DE_SALA_MS` lido do fonte de authority, e **nenhuma** migration pode ter
+trigger de `closed_at` tocando `sala_protetor`. Contrafactual conferido: com o limite em
+`1 minute` o teste reprova nominalmente.
+
+Depois de aplicar (run 33490599514): `public` 0 protetores com 3 sessoes abertas, `dev` 0 com 0.
+As 21 orfas foram embora e nenhuma linha viva foi levada junto.
+
+**A descricao da issue no Jira continua afirmando a frase errada** — a correcao foi so num
+comentario. Quem reler a PH-334 sem ler os comentarios reimplementa o trigger.
+
+### 2. PH-327: as tres armadilhas de tirar o CI do Node 20
+
+Todo run dos 4 workflows anotava `Node.js 20 is deprecated ... being forced to run on Node.js
+24`. "Being forced" e passado, nao futuro: o runtime ja tinha sido trocado por baixo.
+
+Subiram as quatro no **menor major que sai do `node20`**, 15 pontos de uso em 4 arquivos —
+`checkout` v4→v5, `setup-node` v4→v5, `upload-artifact` v4→**v6**, `setup-cli` v1→**v2**. O
+runtime de cada alvo foi conferido no `action.yml` da propria tag, nao no changelog.
+
+**Armadilha 1: `upload-artifact@v5` AINDA e `node20`.** Esta escrito na release note do v6:
+"v5 had preliminary support for Node.js 24, however this action was by default still running on
+Node.js 20". Uma varredura de "sobe um major em tudo" deixa justamente ela pra tras — e ela e
+usada num lugar so, num passo condicional — e o aviso continua aparecendo sem ninguem entender
+por que.
+
+**Armadilha 2: nao precisa do `setup-cli@v3`.** O `v2` ja e `composite` e o unico Node que ele
+carrega e `oven-sh/setup-bun@0c5077e` (v2.2.0), que ja e `node24`. Ele mantem o input `version`,
+entao a pinagem `2.116.0` da PH-290 sobrevive — conferido no log: `Download action repository
+'supabase/setup-cli@v2'` seguido de `version: 2.116.0`.
+
+**Armadilha 3: `setup-node@v5` liga cache automatico** quando existe `packageManager` no
+`package.json`. Este repo nao tem o campo, entao nada muda hoje; no dia em que alguem adicionar
+por outro motivo, o comportamento do CI muda junto e ninguem relaciona as duas coisas. O
+desligador e `package-manager-cache: false`.
+
+**A prova, e ela e direta.** Anotacoes do mesmo workflow antes e depois:
+
+| run | anotacao |
+|---|---|
+| `build-check` da PR #363 (v4) | `Node.js 20 is deprecated ... actions/checkout@v4, actions/setup-node@v4` |
+| `build-check` da PR #364 (v5) | nenhuma |
+
+`ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION` nao aparece em lugar nenhum e nao foi usado: ele fixa
+a divida em vez de paga-la.
+
+**Risco que fica escrito:** `supabase/setup-cli@v2` e uma BRANCH (`refs/heads/v2`), nao uma tag.
+O conteudo pode mudar debaixo do CI sem nenhuma mudanca neste repo. Ja era assim no `@v1`, entao
+nao e regressao — mas as duas actions da Supabase sao as unicas do arsenal que nao sao
+referencias imutaveis. Fecha-se pinando por SHA, como a propria `setup-cli` faz internamente com
+o `oven-sh/setup-bun`.
+
+### 3. O laco de tipos, que e fluxo e nao acidente
+
+A migration da PH-334 criou uma RPC, entao o job `tipos` do `supabase-deploy-dev` reprovou o run
+do proprio merge por `database.types.ts` desatualizado. **Nao ha como commitar o arquivo junto da
+migration** — ele so pode ser gerado depois de a migration existir no remoto —, e o job ja sobe o
+resultado como artefato justamente pra a PR de chore nao precisar de acesso ao banco. PH-379:
+baixar o artefato, trocar o arquivo, `1 file changed, 2 insertions(+)`.
+
+O custo de nao fazer isso na hora apareceu em minutos: o `check` da PR #364, que so mexe em YAML
+de CI, reprovou por causa desse arquivo. E o "o custo cai em quem nao fez a mudanca" que a regra
+do projeto descreve, e caiu na PR seguinte da mesma sessao.
+
+**O que sempre conferir num `db:types` regenerado:** ele traz o schema remoto INTEIRO. Se houver
+qualquer coisa aplicada fora de migration, ela entra de carona no commit e fica parecendo
+consequencia da issue que motivou. O `--stat` e o gate: 2 linhas, nenhuma deriva.
+
+### 4. A corrida de nove minutos entre duas sessoes, e o numero errado que subiu ao ar
+
+**A promocao 7.27 (PR #366) foi mergeada as 09:29. A PR #362, de uma sessao paralela, corrigindo
+um numero da MESMA nota, foi mergeada na `dev` as 09:38.** O corpo da #362 dizia "ainda nao
+chegou em producao, da tempo de consertar antes da promocao". Nao deu.
+
+A nota no ar prometia ao jogador **"cerca de um terco a menos de ouro, XP e abates"**. Isso era
+aritmetica (1/1,5), nao medicao: **a conta ignora que o POKE passa boa parte do tempo ANDANDO
+entre alvos, e andar nao dilatou com o turno.**
+
+Medido em `scripts/harness/vazao-do-combate.mjs`, 200 minutos simulados por regime, com rebuild
+do headless entre as duas medicoes (`TURNO_SEGUNDOS` e compilado dentro dele):
+
+| regime | ouro/min turno 2 | ouro/min turno 3 | queda | % do tempo em luta |
+|---|---|---|---|---|
+| Nv25 charmander | 928,8 | 784,9 | **-15,5%** | 38,5% |
+| Nv102 entei | 475,4 | 380,9 | **-19,9%** | 58,0% |
+
+O modelo que explica: `vazao = 1 / (1 + 0,5 x f)`, com `f` = fracao do tempo em combate.
+`f=0,385` preve -16,1% (medido -15,5%); `f=0,580` preve -22,5% (medido -19,9%). Concordancia de
+~2 pontos, e a fracao engajada SOBE nos dois regimes, que e o sinal de que o turno dilatou a luta
+como previsto.
+
+Duas armadilhas da bancada, registradas nela: uma amostra de 12 sementes x 3 minutos deu
+**-1,4%** e quase virou "o turno quase nao muda nada" — era ruido, e com 20 x 10 minutos virou
+-15,5%; e `world.effects` nao serve pra contar golpe em `silent: true` (o modo do servidor), onde
+devolve zero e parece "o POKE nao ataca" — `pendingHits` existe nos dois modos.
+
+**Foi preciso uma segunda promocao no mesmo dia** (PR #368) so pra corrigir o texto. O erro era
+para menos em favor do jogo — o jogador achava que tinha perdido mais do que perdeu —, mas e um
+numero que ele confere sozinho ao fim de uma hora de farm, e uma nota que erra o proprio custo
+por um fator de dois e pior que nota nenhuma.
+
+**A licao de processo:** ler `origin/main..origin/dev` no comeco da sessao nao vale na hora do
+merge. Duas sessoes no mesmo repositorio nao se veem, e a segunda tambem refez sozinha o
+`database.types.ts` que a primeira ja tinha entregue pela PH-379 — duplicata benigna so por
+sorte, porque as duas escreviam a mesma linha. Antes de mergear promocao: `git fetch` naquele
+momento e `gh pr list --state all` das ultimas horas.
+
+Cada promocao pediu back-merge proprio (PH-380, dois no dia): promocao entra por merge commit, a
+`main` fica com um commit que a `dev` nao tem, e a promocao seguinte nasce `BEHIND`. E o
+back-merge sai de branch de trabalho, nunca com `head:main` — PR assim fica `BLOCKED` pra
+sempre, porque o check obrigatorio nao roda nesse par.
+
+Producao conferida com `scripts/harness/fumaca-de-producao.mjs` nas duas vezes: login, status,
+CORS e corpo do estado OK nos dois ambientes.
+
+### 5. PH-162 arquivada, e PH-377 aberta com numero na mao
+
+**PH-162** (encoder de PNG e gerador de referencia de body-block presos numa PR abandonada)
+fechada como **nao-fazer**, por decisao do dono. Os dois primeiros criterios ja estavam
+cumpridos desde 25/08 — a PR #139 fechada e o encoder duplicado fora da `dev`. O que restava era
+a pergunta: gerar referencia de body-block por retangulo vale o custo de (1) um decoder de JPEG
+em Node puro ou (2) uma base PNG versionada, que reabriria o peso que a PH-125 tinha cortado?
+Resposta: nenhum dos dois. A pintura a mao continua.
+
+**PH-377**, aberta com o achado da rodada de testes: 2 testes de
+`scripts/ci/supabaseCliRetry.test.mjs` estouram o timeout de 5s **so quando a suite roda
+inteira**, e passam sozinhos. Medido em isolamento: 4.162 ms e 3.895 ms contra teto de 5.000 ms —
+78% e 83% do teto sem concorrencia nenhuma. Nao e `sleep` (o teste roda com
+`SUPABASE_CLI_ESPERA: '0'`); e processo real, `bash` + o `supabase` falso, uma vez por tentativa.
+Conferido com `git stash` numa rodada limpa: **as mesmas 2 falham no HEAD sem nenhuma mudanca
+local**.
+
+O que torna isso serio e a assimetria: **a suite local ja esta vermelha e o CI ainda esta
+verde**, o que treina quem desenvolve a ignorar a saida de `vitest run`. E ha precedente medido
+neste mesmo arquivo — `pessimista.test.ts` custava ~12,8s quando o timeout foi de 15s pra 45s
+(commit `ff699c1`) e hoje custa ~38s. Triplicou, e ninguem viu porque a resposta anterior foi
+subir o relogio. O criterio de aceite da PH-377 proibe explicitamente repetir isso.
