@@ -35,7 +35,7 @@ import { servidorAtivo } from '@/data/remote/servidor'
 export function avisoDeTetoDeHunt(pokeLevel: number, mapId: string): string | null {
   const teto = getMap(mapId)?.levelRange[1]
   if (teto == null || pokeLevel <= teto) return null
-  return `Seu POKE (Lv ${pokeLevel}) ja passou do teto desta hunt (Lv ${teto}). `
+  return `Seu POKE (Lv ${pokeLevel}) já passou do teto desta hunt (Lv ${teto}). `
     + 'O XP daqui pra frente rende pouco — troque de hunt ou leve um POKE mais fraco.'
 }
 
@@ -93,7 +93,7 @@ export const controller = {
     if (activePoke.hp <= 0) {
       if (avisar) {
         useToastStore.getState().pushToast(
-          'Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.', 'error', 'world',
+          'Seu POKE esta desmaiado. Cure na Enfermeira antes de caçar.', 'error', 'world',
         )
       }
       return false
@@ -332,7 +332,7 @@ export const controller = {
     const jogador = useWorldStore.getState().player
     if (jogador && (jogador.presoAte ?? 0) > 0 && !isDead(jogador)) {
       useToastStore.getState().pushToast(
-        `${SPECIES[jogador.poke.speciesId].name} esta preso e nao pode sair de campo agora.`,
+        `${SPECIES[jogador.poke.speciesId].name} esta preso e não pode sair de campo agora.`,
         'error', 'combat',
       )
       return
@@ -395,7 +395,7 @@ export const controller = {
     const idx = gameState.team.findIndex((p) => p.uid === pokeUid)
     if (idx === -1) return
     if (gameState.team.length <= 1) {
-      useToastStore.getState().pushToast('Voce precisa manter ao menos 1 POKE na equipe.', 'error', 'world')
+      useToastStore.getState().pushToast('Você precisa manter ao menos 1 POKE na equipe.', 'error', 'world')
       return
     }
     const wasActive = idx === gameState.activeIndex
@@ -405,7 +405,7 @@ export const controller = {
     const jogadorEmCampo = useWorldStore.getState().player
     if (wasActive && jogadorEmCampo && (jogadorEmCampo.presoAte ?? 0) > 0 && !isDead(jogadorEmCampo)) {
       useToastStore.getState().pushToast(
-        `${SPECIES[jogadorEmCampo.poke.speciesId].name} esta preso e nao pode sair de campo agora.`,
+        `${SPECIES[jogadorEmCampo.poke.speciesId].name} esta preso e não pode sair de campo agora.`,
         'error', 'combat',
       )
       return
@@ -456,7 +456,7 @@ export const controller = {
       }
     } else if (item.kind === 'revive' && item.reviveHpPercent != null) {
       if (!world.player.fainted) {
-        useToastStore.getState().pushToast('O POKE ja esta consciente.', 'error', 'world')
+        useToastStore.getState().pushToast('O POKE já esta consciente.', 'error', 'world')
       } else if (gameState.hasItem(itemId, 1)) {
         void pedirAcao({ tipo: 'usarItem', itemId }, () => { gameState.removeItem(itemId, 1) })
         const revivePercent = item.reviveHpPercent

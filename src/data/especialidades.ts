@@ -110,7 +110,7 @@ const TITULOS_POR_PERCENTUAL: { min: number; titulo: string }[] = [
   { min: 0.2, titulo: 'Aprendiz' },
   { min: 0.4, titulo: 'Veterano' },
   { min: 0.7, titulo: 'Mestre' },
-  { min: 1, titulo: 'Lendario' },
+  { min: 1, titulo: 'Lendário' },
 ]
 
 export function tituloDoProgresso(atual: number, max: number): string {

@@ -290,7 +290,7 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
     esquecerIdsDaReserva()
     throw new Error(
       `Save abortado: ${removidos.length} POKEs sumiriam de uma vez (teto ${TETO_DE_REMOCAO_POR_SAVE}). `
-      + 'Isso e descompasso entre o estado local e o que foi lido do banco, nao acao do jogador — '
+      + 'Isso e descompasso entre o estado local e o que foi lido do banco, não ação do jogador — '
       + 'ver idsNoBancoPorUsuario em playerRepository.ts (PH-182).',
     )
   }
@@ -316,7 +316,7 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
     // dois casos tem que ficar visiveis, nunca silenciosos.
     throw updatedAtEsperado != null
       ? new ConflitoDeEscrita()
-      : new Error('Nenhuma linha atualizada ao salvar jogador — sessao pode ter expirado ou sido revogada')
+      : new Error('Nenhuma linha atualizada ao salvar jogador — sessão pode ter expirado ou sido revogada')
   }
   updatedAtEsperadoPorUsuario.set(userId, linhasPlayer[0].updated_at)
 
@@ -347,7 +347,7 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   if (missaoRows.length > 0) {
     const { error } = await supabase.from('player_missoes_reivindicadas')
       .upsert(missaoRows, { onConflict: 'user_id,tipo,species_id', ignoreDuplicates: true })
-    if (error) throw new Error(`Falha ao salvar missoes: ${error.message}`)
+    if (error) throw new Error(`Falha ao salvar missões: ${error.message}`)
   }
 
   if (especialidadeRows.length > 0) {

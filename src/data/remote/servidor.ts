@@ -95,7 +95,7 @@ interface OpcoesPedido extends RequestInit {
 async function pedir<T>(caminho: string, { retentavel = false, timeoutMs = TIMEOUT_PADRAO_MS, ...init }: OpcoesPedido = {}): Promise<T> {
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
-  if (!token) throw new ErroServidor(401, 'sem sessao — faca login de novo')
+  if (!token) throw new ErroServidor(401, 'sem sessão — faca login de novo')
 
   const tentativas = retentavel ? ESPERA_ENTRE_TENTATIVAS_MS.length + 1 : 1
   let ultimoErro: unknown
@@ -132,7 +132,7 @@ async function pedir<T>(caminho: string, { retentavel = false, timeoutMs = TIMEO
 // nao distingue "meu wifi caiu" de "o jogo quebrou" — e a diferenca muda o que
 // ele deve tentar.
 function mensagemPorStatus(status: number): string {
-  if (status === 401 || status === 403) return 'sua sessao expirou — entre de novo'
+  if (status === 401 || status === 403) return 'sua sessão expirou — entre de novo'
   if (status === 429) return 'muitas chamadas seguidas — tente de novo em instantes'
   if (status === 502 || status === 503 || status === 504) return 'o servidor esta fora do ar no momento — tente de novo em instantes'
   if (status >= 500) return 'erro no servidor — tente de novo em instantes'

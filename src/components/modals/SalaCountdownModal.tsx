@@ -13,7 +13,7 @@ export function SalaCountdownModal() {
 
   return (
     <CampoOverlay>
-      <div className="text-lg font-semibold">Entrando em nova area...</div>
+      <div className="text-lg font-semibold">Entrando em nova área...</div>
       <div className="font-mono text-6xl font-black text-sky-300">{Math.ceil(remaining)}</div>
     </CampoOverlay>
   )

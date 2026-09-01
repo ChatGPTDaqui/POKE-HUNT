@@ -201,7 +201,7 @@ export const BIOMAS: BiomaDef[] = [
     tipo: 'NORMAL',
     bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.campina },
     subBiomas: [
-      { chave: 'plains', nome: 'Planicie', peso: 10, loot: 'basico', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.planicie } },
+      { chave: 'plains', nome: 'Planície', peso: 10, loot: 'basico', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.planicie } },
       // Sem arte propria entre os 27 arquivos novos — herda o fundo do bioma.
       { chave: 'grass', nome: 'Relvado', peso: 10, loot: 'basico' },
       { chave: 'meadow', nome: 'Campina', peso: 6, loot: 'basico' },
@@ -233,7 +233,7 @@ export const BIOMAS: BiomaDef[] = [
   },
   {
     chave: 'aguas_interiores',
-    nome: 'Aguas Interiores',
+    nome: 'Águas Interiores',
     tipo: 'WATER',
     bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.lago },
     subBiomas: [
@@ -308,7 +308,7 @@ export const BIOMAS: BiomaDef[] = [
       // factory/power-plant/laboratory sem arte propria — herdam o fundo do bioma.
       { chave: 'factory', nome: 'Fabrica', peso: 6, loot: 'civilizado' },
       { chave: 'power-plant', nome: 'Usina', peso: 6, loot: 'remoto' },
-      { chave: 'laboratory', nome: 'Laboratorio', peso: 3, loot: 'profundo' },
+      { chave: 'laboratory', nome: 'Laboratório', peso: 3, loot: 'profundo' },
     ],
   },
   {
@@ -332,7 +332,7 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'graveyard', nome: 'Cemiterio', peso: 10, loot: 'remoto' },
       { chave: 'abyss', nome: 'Abismo', peso: 6, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
       // Reaproveita o Abismo: vazio/cosmico e o mais proximo dos 27 arquivos novos.
-      { chave: 'space', nome: 'Espaco', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
+      { chave: 'space', nome: 'Espaço', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
     ],
   },
 ]

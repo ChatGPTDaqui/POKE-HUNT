@@ -66,9 +66,9 @@ async function temOutraSessaoAtiva(): Promise<boolean> {
 function traduzErro(mensagem: string): string {
   const m = mensagem.toLowerCase()
   if (m.includes('invalid login credentials')) return 'Email ou senha incorretos.'
-  if (m.includes('user already registered')) return 'Ja existe uma conta com este email.'
-  if (m.includes('password should be at least')) return 'A senha precisa de pelo menos 8 caracteres, com letras e numeros.'
-  if (m.includes('password') && m.includes('weak')) return 'Senha fraca: use pelo menos 8 caracteres, com letras e numeros.'
+  if (m.includes('user already registered')) return 'Já existe uma conta com este email.'
+  if (m.includes('password should be at least')) return 'A senha precisa de pelo menos 8 caracteres, com letras e números.'
+  if (m.includes('password') && m.includes('weak')) return 'Senha fraca: use pelo menos 8 caracteres, com letras e números.'
   if (m.includes('unable to validate email')) return 'Email invalido.'
   if (m.includes('email rate limit') || m.includes('over_email_send_rate_limit')) {
     return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.'

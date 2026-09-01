@@ -193,7 +193,7 @@ aoFalharSave((mensagem) => {
   useToastStore
     .getState()
     .pushToast(
-      'Sem conexao com o servidor — seu progresso nao esta sendo salvo. Ele volta a salvar sozinho quando a conexao voltar.',
+      'Sem conexão com o servidor — seu progresso não esta sendo salvo. Ele volta a salvar sozinho quando a conexão voltar.',
       'error',
       'world',
     )

@@ -367,7 +367,7 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
   if (enemyPool.length === 0) {
     throw new Error(
       `Hunt "${id}" nasceria sem nenhum encontro (faixa ${faixa.nome}, Lv ${lo}-${hi}). ` +
-      'Hunt vazia nao da erro em runtime: ela so nunca spawna nada e o jogador ' +
+      'Hunt vazia não da erro em runtime: ela só nunca spawna nada e o jogador ' +
       'fica num mapa morto.'
     )
   }
@@ -377,7 +377,7 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
   maps[id] = {
     id,
     name: nome,
-    description: `${bioma.nome} — niveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(', ')}.`,
+    description: `${bioma.nome} — níveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(', ')}.`,
     levelRange: [lo, hi],
     unlockCost: null,
     // `continent` deixou de ser regiao e passou a ser o GRUPO DE GATE (ver
@@ -408,7 +408,7 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
   maps[STARTER_HUNT_ID] = {
     id: STARTER_HUNT_ID,
     name: 'Route 46 (Inicial)',
-    description: 'A primeira cacada. So POKEs de tipo Normal, nivel 1 a 2.',
+    description: 'A primeira caçada. Só POKEs de tipo Normal, nível 1 a 2.',
     levelRange: [lo, hi],
     unlockCost: null,
     continent: 'faixa1',

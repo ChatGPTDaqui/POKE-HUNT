@@ -14,7 +14,7 @@ export function LoginPage() {
       onSubmit={signIn}
       mostrarEsqueciSenha
       aoConcluir={() => navigate('/jogo', { replace: true })}
-      rodape={{ texto: 'Ainda nao tem conta?', linkTexto: 'Criar conta', para: '/registro' }}
+      rodape={{ texto: 'Ainda não tem conta?', linkTexto: 'Criar conta', para: '/registro' }}
     />
   )
 }

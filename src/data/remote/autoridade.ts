@@ -288,7 +288,7 @@ const ultimoAviso = new Map<string, number>()
  * disparada por clique sempre responde alguma coisa.
  */
 function reportarErro(erro: unknown, sempreAvisar = false): void {
-  const mensagem = erro instanceof ErroServidor ? erro.message : 'nao foi possivel falar com o servidor'
+  const mensagem = erro instanceof ErroServidor ? erro.message : 'não foi possível falar com o servidor'
   const agora = Date.now()
   const anterior = ultimoAviso.get(mensagem)
   if (!sempreAvisar && anterior != null && agora - anterior < JANELA_ANTI_REPETICAO_MS) return
@@ -503,8 +503,8 @@ export function registrarEncerramentoDeSessao(cb: () => void): () => void {
 }
 
 const MOTIVO_ENCERRAMENTO: Record<string, string> = {
-  desmaio: 'Seu POKE desmaiou e a cacada foi encerrada. Cure na Enfermeira para voltar a cacar.',
-  sumiu: 'A cacada foi encerrada — voce entrou em outra hunt ou saiu por outra aba.',
+  desmaio: 'Seu POKE desmaiou e a caçada foi encerrada. Cure na Enfermeira para voltar a caçar.',
+  sumiu: 'A caçada foi encerrada — você entrou em outra hunt ou saiu por outra aba.',
 }
 
 function tratarEncerramento(motivo: string | null | undefined): void {
@@ -514,7 +514,7 @@ function tratarEncerramento(motivo: string | null | undefined): void {
   // hunt como se estivesse rendendo.
   pararFlushPeriodico()
   useToastStore.getState().pushToast(
-    MOTIVO_ENCERRAMENTO[motivo] ?? 'A cacada foi encerrada pelo servidor.', 'error', 'world',
+    MOTIVO_ENCERRAMENTO[motivo] ?? 'A caçada foi encerrada pelo servidor.', 'error', 'world',
   )
   aoEncerrarSessao?.()
 }
@@ -555,7 +555,7 @@ export async function liquidar(): Promise<void> {
         && (posicaoDepois.ciclos !== posicaoAntes.ciclos || posicaoDepois.indice !== posicaoAntes.indice)
       ) {
         console.warn(
-          `[diag-sala] avancou sem quota local fechada: sala ${posicaoAntes.ciclos}/${posicaoAntes.indice}`
+          `[diag-sala] avançou sem quota local fechada: sala ${posicaoAntes.ciclos}/${posicaoAntes.indice}`
           + ` (abates locais ${posicaoAntes.abates}/${ABATES_POR_SALA}) -> ${posicaoDepois.ciclos}/${posicaoDepois.indice}.`
           + ` Janela do flush: ${r.segundosCreditados}s.`,
         )
@@ -567,7 +567,7 @@ export async function liquidar(): Promise<void> {
     tratarEncerramento(r.sessaoEncerrada)
     if (r.truncado) {
       useToastStore.getState().pushToast(
-        'Voce ficou fora tempo demais — parte do periodo nao foi creditada.', 'error', 'world',
+        'Você ficou fora tempo demais — parte do período não foi creditada.', 'error', 'world',
       )
     }
   } catch (erro) {
@@ -725,14 +725,14 @@ export async function avancarSalaManualmente(): Promise<void> {
     tratarEncerramento(r.sessaoEncerrada)
     if (r.truncado) {
       useToastStore.getState().pushToast(
-        'Voce ficou fora tempo demais — parte do periodo nao foi creditada.', 'error', 'world',
+        'Você ficou fora tempo demais — parte do período não foi creditada.', 'error', 'world',
       )
     }
     // `false`: a sala ja nao estava mais travada quando o servidor processou
     // (corrida rara — outro flush avancou primeiro). Nao e erro, so nao ha
     // sala nova pra mostrar; o toast evita um clique "mudo" sem explicacao.
     if (!r.avancoAplicado) {
-      useToastStore.getState().pushToast('A sala ja tinha avancado.', 'info', 'world')
+      useToastStore.getState().pushToast('A sala já tinha avançado.', 'info', 'world')
     }
   } catch (erro) {
     reportarErro(erro)

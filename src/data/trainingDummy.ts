@@ -55,7 +55,7 @@ export const TRAINING_ENCOUNTER: HuntEncounter = {
 export const TRAINING_MAP: HuntMapDef = {
   id: TRAINING_MAP_ID,
   name: 'Treinamento',
-  description: 'Um boneco de treino (Wobbuffet, nunca revida) pra testar a forca do seu time com seguranca. Sem ouro, XP, item ou captura — so pra medir: acompanhe "Mobs/h" no Hunt Analyzer.',
+  description: 'Um boneco de treino (Wobbuffet, nunca revida) pra testar a força do seu time com segurança. Sem ouro, XP, item ou captura — só pra medir: acompanhe "Mobs/h" no Hunt Analyzer.',
   levelRange: [TREINO_LEVEL, TREINO_LEVEL],
   unlockCost: null,
   continent: 'faixa1', // nasce liberada pra qualquer conta, do primeiro POKE ao ultimo

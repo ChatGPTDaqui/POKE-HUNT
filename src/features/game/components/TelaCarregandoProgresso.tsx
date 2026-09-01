@@ -5,7 +5,7 @@ export function TelaCarregandoProgresso({ estado }: { estado: EstadoProgresso })
     <div className="flex min-h-svh flex-col items-center justify-center gap-3 bg-background p-6 text-center">
       {estado.fase === 'erro' ? (
         <>
-          <p className="font-medium text-destructive">Nao foi possivel carregar seu progresso.</p>
+          <p className="font-medium text-destructive">Não foi possível carregar seu progresso.</p>
           <p className="max-w-md text-sm text-muted-foreground">{estado.mensagem}</p>
           <button
             onClick={() => window.location.reload()}

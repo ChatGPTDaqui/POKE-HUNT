@@ -40,7 +40,7 @@ export function mensagemDeFalhaDeRede(
   online = typeof navigator === 'undefined' || navigator.onLine !== false,
   origemLiberada = origemConhecida(),
 ): string {
-  if (!online) return 'Sem conexao — verifique sua internet e tente de novo.'
+  if (!online) return 'Sem conexão — verifique sua internet e tente de novo.'
   // PH-293: A ORIGEM E A PISTA QUE FALTAVA, E ELA E CERTEIRA.
   //
   // O navegador nao conta ao JS que a falha foi CORS (ver o cabecalho), mas nao
@@ -54,11 +54,11 @@ export function mensagemDeFalhaDeRede(
   // quanto pro jogador — quem abre o staging pro pre-voo de promocao e
   // exatamente a pessoa que precisa ler "este endereco nao esta liberado".
   if (!origemLiberada) {
-    const onde = typeof location === 'undefined' ? 'este endereco' : location.origin
-    return `O servidor nao aceita chamadas de ${onde}. Este endereco nao esta na`
-      + ' lista de origens liberadas do jogo — nao e problema do seu navegador.'
+    const onde = typeof location === 'undefined' ? 'este endereço' : location.origin
+    return `O servidor não aceita chamadas de ${onde}. Este endereço não está na`
+      + ' lista de origens liberadas do jogo — não é problema do seu navegador.'
   }
-  return 'Nao foi possivel falar com o servidor. Voce parece estar online, entao'
-    + ' o mais provavel e um bloqueador de anuncios, extensao de privacidade ou'
+  return 'Não foi possível falar com o servidor. Você parece estar online, então'
+    + ' o mais provável é um bloqueador de anúncios, extensão de privacidade ou'
     + ' filtro de DNS barrando o jogo — libere este site e tente de novo.'
 }

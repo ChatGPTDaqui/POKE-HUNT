@@ -17,7 +17,7 @@ const ENCRYPTION_PREFIX = 'enc:'
 
 if (!STORAGE_SECRET && import.meta.env.PROD) {
   throw new Error(
-    'VITE_AUTH_STORAGE_KEY nao configurada. Sem ela o token de sessao seria salvo em texto puro.',
+    'VITE_AUTH_STORAGE_KEY não configurada. Sem ela o token de sessão seria salvo em texto puro.',
   )
 }
 

@@ -185,7 +185,7 @@ export function PerfilTreinador() {
             onClick={() =>
               askConfirm({
                 title: 'Sair da conta?',
-                message: 'Seu progresso ja esta salvo. Voce precisara entrar de novo com email e senha.',
+                message: 'Seu progresso já esta salvo. Você precisará entrar de novo com email e senha.',
                 confirmLabel: 'Sair da conta',
                 onConfirm: () => void signOut(),
               })

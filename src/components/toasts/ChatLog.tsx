@@ -67,7 +67,7 @@ function LinkAnexo({ anexo }: { anexo: AnexoChat }) {
         anexo.kind === 'poke' ? (
           <div className="flex flex-col gap-[.15em]">
             <b>{anexo.isShiny ? '✨ ' : ''}{anexo.nome}</b>
-            <span>Nivel {anexo.level ?? 1}</span>
+            <span>Nível {anexo.level ?? 1}</span>
             <span style={{ color: cor }}>{RARITIES[(anexo.rarity ?? 'comum') as RarityKey]?.label ?? anexo.rarity}</span>
             <span>IV medio {anexo.ivPercent ?? 0}%</span>
           </div>
@@ -132,7 +132,7 @@ export function AbaMundo() {
     <>
       <div className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto px-[.55em] pt-[.3em] pb-[.3em] text-[.76em]">
         {mensagens.length === 0 ? (
-          <div className="text-n500">Ninguem falou nada ainda. Diga oi.</div>
+          <div className="text-n500">Ninguém falou nada ainda. Diga oi.</div>
         ) : (
           mensagens.map((m) => (
             <div key={m.id} className="break-words">
@@ -180,7 +180,7 @@ export function AbaMundo() {
           type="submit"
           disabled={carregando || !rascunho.trim()}
           aria-label="Enviar"
-          className="jogo-botao jogo-botao-icone flex h-[1.8em] w-[1.8em] shrink-0 cursor-pointer items-center justify-center rounded-[.4em] border border-n700 text-n300 hover:border-primary disabled:cursor-not-allowed disabled:opacity-40"
+          className="jogo-botão jogo-botão-ícone flex h-[1.8em] w-[1.8em] shrink-0 cursor-pointer items-center justify-center rounded-[.4em] border border-n700 text-n300 hover:border-primary disabled:cursor-not-allowed disabled:opacity-40"
         >
           <PaperPlaneRight />
         </button>

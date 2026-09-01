@@ -72,7 +72,7 @@ function Estado({ carregando, erro, vazio, children }: {
   if (erro) {
     return (
       <div className="p-[1em] text-center text-[.85em] text-bad">
-        {erro instanceof Error ? erro.message : 'nao foi possivel carregar o ranking'}
+        {erro instanceof Error ? erro.message : 'não foi possível carregar o ranking'}
       </div>
     )
   }

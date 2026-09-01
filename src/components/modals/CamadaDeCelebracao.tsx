@@ -81,7 +81,7 @@ const CSS = `
    Antes as duas eram .celeb-anima. Com reduced-motion ligado, a lista de
    stats recebia o fade com 260ms e fill:both — passados os 260ms ela ficava
    presa no ultimo quadro do keyframe, que e opacity 0. Ou seja, os atributos
-   ganhos NAO APARECIAM, e o cartao dizia "subiu de nivel" sem responder "valeu
+   ganhos NAO APARECIAM, e o cartao dizia "subiu de nível" sem responder "valeu
    a pena?", a unica pergunta que ele levanta. */
 @media (prefers-reduced-motion: reduce) {
   .celeb-anima { animation-name: celeb-fade !important }
@@ -214,7 +214,7 @@ function Cartao({ c, intensidade }: { c: Celebracao; intensidade: Intensidade })
       <div className="absolute left-1/2 top-[42%] w-max max-w-[calc(100vw-1.5em)] -translate-x-1/2 -translate-y-1/2">
         <div
           className="celeb-anima flex flex-col items-center"
-          style={{ animation: `celeb-cartao ${duracao}ms cubic-bezier(.2,.9,.25,1) forwards` }}
+          style={{ animation: `celeb-cartão ${duracao}ms cubic-bezier(.2,.9,.25,1) forwards` }}
         >
           {cheio && <Faiscas cor={cor} />}
           <div
@@ -428,7 +428,7 @@ function Faiscas({ cor }: { cor: string }): ReactNode {
             // le como falha de desenho.
             '--ang': `${i * 36}deg`,
             '--dist': `${5.5 + (i % 3) * 1.6}em`,
-            animation: `celeb-faisca 1200ms ease-out ${i * 26}ms forwards`,
+            animation: `celeb-faísca 1200ms ease-out ${i * 26}ms forwards`,
           } as React.CSSProperties}
         />
       ))}

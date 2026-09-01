@@ -99,9 +99,9 @@ export function descricaoDoGolpe(ability: Ability): string {
     return 'Golpe universal: todo POKE sempre tem este, mesmo sem nenhum outro golpe de dano aprendido.'
   }
   if (ability.id.startsWith('aoe50_')) {
-    return `Golpe de area aprendido no Nivel 50, tematico do tipo ${ability.type}. A categoria acompanha o maior atributo de ataque do POKE no Nivel 50.`
+    return `Golpe de área aprendido no Nível 50, tematico do tipo ${ability.type}. A categoria acompanha o maior atributo de ataque do POKE no Nível 50.`
   }
-  return 'Sem descricao.'
+  return 'Sem descrição.'
 }
 
 export function AbilityTooltip({
@@ -154,7 +154,7 @@ export function AbilityTooltip({
                 `isDamagingAbility` e nao `power > 0`: os 12 de
                 DANO_SEM_PODER_BASE tem poder 0 e causam dano, e com o teste
                 antigo a precisao deles nunca aparecia — Earthquake mostrava
-                "Precisao 100%" e Magnitude, ao lado, nada. */}
+                "Precisão 100%" e Magnitude, ao lado, nada. */}
             {isDamagingAbility(ability) && (
               <span className={(ability.accuracy ?? 100) < 100 ? 'text-warn' : undefined}>
                 Precisao {ability.accuracy ?? 100}%
@@ -162,7 +162,7 @@ export function AbilityTooltip({
             )}
             <span>PP {ability.pp}</span>
             {ability.cooldown != null && <span>Recarga {ability.cooldown.toFixed(1)}s</span>}
-            {ability.target === 'aoe' && <span>Area (raio {ability.radius ?? AOE_RADIUS})</span>}
+            {ability.target === 'aoe' && <span>Área (raio {ability.radius ?? AOE_RADIUS})</span>}
           </div>
 
           <span className="opacity-85">{descricao}</span>

@@ -26,6 +26,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from '@phosphor-icons/react'
 import { useDeviceMode, useUiStore } from '@/stores/uiStore'
+import { useFecharComEsc } from '@/hooks/useFecharComEsc'
 import { GameIconButton } from './controls'
 import { cn } from '@/lib/utils'
 
@@ -104,6 +105,12 @@ export function Sheet({
   const [arrasto, setArrasto] = useState(0)
   const inicio = useRef<number | null>(null)
   const alvo = useCamadaHud()
+
+  // ESC tambem no sheet (PH-376). Ele e o painel do celular, onde o botao
+  // Voltar ja resolve — mas um notebook com tela de toque, um tablet com
+  // teclado e a janela de navegador estreita num desktop caem todos aqui, e
+  // nesses o ESC e o unico gesto de teclado que o jogador vai tentar.
+  useFecharComEsc(onClose, zIndex)
 
   // Fechar ao tocar FORA. Mesmo desenho da GameWindow (listener de documento em
   // vez de backdrop clicavel) pra doca e trilho continuarem vivos com o sheet

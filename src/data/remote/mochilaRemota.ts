@@ -26,7 +26,7 @@ const TAMANHO_DA_PAGINA = 1000
 export async function carregarMochilaRemota(): Promise<PokeInstance[]> {
   const { data: sessao } = await supabase.auth.getSession()
   const userId = sessao.session?.user.id
-  if (!userId) throw new Error('sem sessao — faca login de novo')
+  if (!userId) throw new Error('sem sessão — faca login de novo')
 
   const acumulado: PokeInstance[] = []
   let total: number | null = null
@@ -84,7 +84,7 @@ export async function carregarMochilaRemota(): Promise<PokeInstance[]> {
 export async function carregarCapturasRecentes(limite: number): Promise<PokeInstance[]> {
   const { data: sessao } = await supabase.auth.getSession()
   const userId = sessao.session?.user.id
-  if (!userId) throw new Error('sem sessao — faca login de novo')
+  if (!userId) throw new Error('sem sessão — faca login de novo')
 
   const { data, error } = await supabase
     .from('pokemon_instances')

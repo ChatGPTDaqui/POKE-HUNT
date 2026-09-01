@@ -29,7 +29,7 @@ function BotaoTrava({ locked, onToggleLock }: Pick<AcoesVenda, 'locked' | 'onTog
   return (
     <GameIconButton
       variant="ghost"
-      title={locked ? 'Destrancar' : 'Trancar (nunca sera vendido)'}
+      title={locked ? 'Destrancar' : 'Trancar (nunca será vendido)'}
       aria-label={locked ? 'Destrancar' : 'Trancar'}
       className={locked ? 'text-gold' : undefined}
       onClick={(e) => {

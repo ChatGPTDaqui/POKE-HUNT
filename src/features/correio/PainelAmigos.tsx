@@ -114,7 +114,7 @@ export function PainelAmigos({
                       e.stopPropagation()
                       confirmar({
                         title: 'Remover amigo',
-                        message: `${a.nome} sai da sua lista e voce sai da lista dele. A conversa entre voces some do alcance dos dois.`,
+                        message: `${a.nome} sai da sua lista e você sai da lista dele. A conversa entre vocês some do alcance dos dois.`,
                         confirmLabel: 'Remover',
                         onConfirm: () => onRemover(a),
                       })
@@ -133,7 +133,7 @@ export function PainelAmigos({
                         title: `Bloquear ${a.nome}`,
                         // Diz o efeito colateral: bloquear tambem DESFAZ a
                         // amizade, e ninguem espera isso lendo so "Bloquear".
-                        message: `${a.nome} deixa de ser seu amigo e nao consegue mais mandar pedido, mensagem nem conversa. Voce tambem nao consegue mandar nada pra ele.`,
+                        message: `${a.nome} deixa de ser seu amigo e não consegue mais mandar pedido, mensagem nem conversa. Você também não consegue mandar nada pra ele.`,
                         confirmLabel: 'Bloquear',
                         onConfirm: () => onBloquear(a),
                       })

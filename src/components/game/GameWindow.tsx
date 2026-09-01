@@ -11,6 +11,7 @@
 import { useCallback, useEffect, type CSSProperties, type ReactNode } from 'react'
 import { X } from '@phosphor-icons/react'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
+import { useFecharComEsc } from '@/hooks/useFecharComEsc'
 import type { WindowKey } from '@/stores/uiStore'
 import { GameIconButton } from './controls'
 import { cn } from '@/lib/utils'
@@ -76,6 +77,13 @@ export function GameWindow({
   // `[data-keep-open]` marca quem NAO deve disparar o fechamento: os botoes de
   // menu ja alternam a tela por conta propria, e fechar aqui antes do onClick
   // deles transformaria "clicar de novo pra fechar" em "fecha e reabre".
+  // ESC fecha a janela de cima (PH-376). O `zIndex` e a prioridade: com o
+  // perfil do POKE (45) aberto sobre a Loja (31), o primeiro ESC fecha o perfil
+  // e o segundo a Loja. Vale pra TODA janela, inclusive as que nao tem backdrop
+  // (o painel Auto), porque o problema nao e o escurecimento — e nao haver
+  // caminho de teclado nenhum.
+  useFecharComEsc(onClose, zIndex)
+
   const fechaFora = fecharAoTocarFora ?? !!backdrop
   useEffect(() => {
     if (!fechaFora) return
@@ -124,7 +132,26 @@ export function GameWindow({
           // aberto. Sem o segundo termo, o rodape da janela vira area morta
           // coberta pelos circulos do menu.
           'pointer-events-auto absolute flex max-h-[min(86vh,calc(100vh-12em))] max-w-[calc(100vw-1.5em)]',
-          'min-h-[10em] min-w-[18em] resize flex-col overflow-hidden rounded-xl border border-n700 bg-background shadow-2xl',
+          // `vidro-alto` (PH-377), e nao `bg-background shadow-2xl`.
+          //
+          // `docs/09-interface.md#Vidro preto` define tres niveis de superficie
+          // e diz que `.vidro-alto` e "sheet e janela". O `Sheet` cumpria; esta
+          // janela nao — usava `#0a0a0c` opaco mais sombra espalhada, que e
+          // exatamente o que a mesma secao registra que NAO le em fundo preto.
+          // Eram duas identidades pra mesma tela: no celular o painel era vidro
+          // sobre o jogo, no PC um retangulo preto chapado.
+          //
+          // A borda e a sombra locais saem junto: a classe ja traz o fio de luz
+          // na borda de cima e a sombra do nivel, e `border-n700` por cima
+          // somaria duas bordas.
+          //
+          // O QUE FICA DE OLHO: `backdrop-filter` obriga o compositor a
+          // reamostrar o canvas atras, e a janela do desktop e bem maior que um
+          // sheet de celular. O custo nunca foi medido — a secao do `index.css`
+          // registra as duas tentativas que nao isolaram nada — e o escape
+          // hatch continua sendo "Reduzir transparencia" em Configuracoes,
+          // que ja cobre `.vidro-alto`.
+          'vidro-alto min-h-[10em] min-w-[18em] resize flex-col overflow-hidden rounded-xl',
           className,
         )}
       >

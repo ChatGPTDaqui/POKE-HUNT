@@ -28,7 +28,7 @@ const fmt = new Intl.NumberFormat('pt-BR')
 
 function duracao(segundos: number): string {
   if (!Number.isFinite(segundos) || segundos <= 0) return '—'
-  if (segundos > 86400 * 30) return 'mais de um mes'
+  if (segundos > 86400 * 30) return 'mais de um mês'
   const h = Math.floor(segundos / 3600)
   const m = Math.floor((segundos % 3600) / 60)
   const s = Math.floor(segundos % 60)
@@ -118,7 +118,7 @@ export function HuntAnalyzer() {
           )}
           <span className="flex-1" />
           <span className="text-[.8em] text-n500">
-            {amostraIniciada ? `Amostra desta sessao: ${duracao(segundos)}` : 'Amostra ainda nao iniciada — entre numa hunt'}
+            {amostraIniciada ? `Amostra desta sessão: ${duracao(segundos)}` : 'Amostra ainda não iniciada — entre numa hunt'}
           </span>
         </div>
 
@@ -166,12 +166,12 @@ export function HuntAnalyzer() {
               valor={fmt.format(taxas.goldPerHour * 8)} cor="var(--color-gold)"
             />
             <Metrica
-              icone={<Clock />} rotulo="Proximo nivel do POKE"
+              icone={<Clock />} rotulo="Próximo nível do POKE"
               valor={xpPorSegundo > 0 && progressoPoke ? duracao(faltaPoke / xpPorSegundo) : '—'}
               detalhe={progressoPoke ? `faltam ${fmt.format(faltaPoke)} XP` : 'sem POKE ativo'}
             />
             <Metrica
-              icone={<Clock />} rotulo="Proximo nivel do Treinador"
+              icone={<Clock />} rotulo="Próximo nível do Treinador"
               valor={xpPorSegundo > 0 ? duracao(faltaTreinador / xpPorSegundo) : '—'}
               detalhe={`faltam ${fmt.format(faltaTreinador)} XP`}
             />

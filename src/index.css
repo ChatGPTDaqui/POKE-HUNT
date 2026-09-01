@@ -27,7 +27,32 @@
     --color-n800: #232428;
     --color-n700: #303136;
     --color-n600: #4a4b52;
-    --color-n500: #717580;
+    /* n500 SUBIU de #717580 pra #80848e (PH-382), e o motivo e contraste
+       medido, nao gosto.
+
+       Ele e o token do MENOR texto da interface — `SectionLabel` em `.75em`, o
+       rotulo de `Taxa` em `.8em`, aba inativa do chat — e era o de MENOR
+       contraste da escada. Medido por WCAG 2.1 contra os dois fundos em que
+       esse texto de fato pousa:
+
+                        antes   agora   AA texto normal
+         sobre n900     3,96    4,87    reprovava
+         sobre bg       4,29    5,28    reprovava
+
+       O limiar frouxo de 3:1 vale pra texto GRANDE, que nao e o caso de
+       nenhum dos dois. Sao 168 usos de `text-n500` no projeto: corrigir call
+       site por call site deixaria a escada mentindo e o proximo uso novo
+       nasceria errado de novo — token existe pra isso.
+
+       O matiz nao mudou (mesmo azul frio, h=222 s=6%), so a luminancia: 47% ->
+       53%. O degrau da escada continua de pe — n400 da 6,82 sobre n900, bem
+       acima destes 4,87.
+
+       NAO passa em `bg-n800` (4,14), e isso e deliberado: os poucos `text-n500`
+       perto de n800 sao estado INATIVO cujo fundo e a superficie do painel, ou
+       `hover:bg-n800` transitorio. Levar n500 ate passar ali exigiria #888c96,
+       que encosta em n400 e apaga o degrau. */
+    --color-n500: #80848e;
     --color-n400: #9b9ea8;
     --color-n300: #c9cbd1;
     --color-n200: #e4e5e9;

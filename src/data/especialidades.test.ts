@@ -108,6 +108,6 @@ describe('progressoGlobal', () => {
 describe('tituloDoProgresso', () => {
   it('Novato em 0%, Lendario em 100%', () => {
     expect(tituloDoProgresso(0, 180)).toBe('Novato')
-    expect(tituloDoProgresso(180, 180)).toBe('Lendario')
+    expect(tituloDoProgresso(180, 180)).toBe('Lendário')
   })
 })
