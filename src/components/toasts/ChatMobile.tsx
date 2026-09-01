@@ -11,6 +11,7 @@
 import { useState, type CSSProperties } from 'react'
 import { ChatCircleDots } from '@phosphor-icons/react'
 import { useToastStore } from '@/stores/toastStore'
+import { ultimaLinhaDeTodasAsAbas } from '@/stores/toastStoreVanilla'
 import { useUiStore, type ChatTab } from '@/stores/uiStore'
 import { Sheet } from '@/components/game/Sheet'
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
@@ -41,14 +42,22 @@ const COR_POR_TIPO: Record<string, string> = {
 }
 
 function Ticker({ onOpen }: { onOpen: () => void }) {
-  const linhasLog = useToastStore((s) => s.chatLines.log)
-  const linhasSistema = useToastStore((s) => s.chatLines.sistema)
-  const linhasTrade = useToastStore((s) => s.chatLines.trade)
-  // A mais recente das duas fontes. Sem timestamp comparavel nas linhas, o
-  // criterio e a ordem de chegada dentro de cada lista — pegar a ultima de cada
-  // e preferir Sistema empata a favor do aviso ao jogador, que e o que ele
-  // precisa ver.
-  const ultima = linhasSistema.at(-1) ?? linhasTrade.at(-1) ?? linhasLog.at(-1)
+  const chatLines = useToastStore((s) => s.chatLines)
+  // A MAIS RECENTE DAS TRES ABAS, por `seq` (PH-372).
+  //
+  // Era `sistema.at(-1) ?? trade.at(-1) ?? log.at(-1)` — prioridade de canal
+  // fantasiada de recencia, com o comentario antigo justificando o desempate
+  // "a favor do aviso ao jogador". Nao era desempate: `sistema.at(-1)` so
+  // devolve `undefined` enquanto a aba esta VAZIA, e ela recebe as 23 chamadas
+  // de canal `world` (erro de rede, "Equipe curada!", recusa do servidor).
+  // Depois da primeira delas o ticker ficava preso naquela frase para sempre, e
+  // o canal `combat` — abate com ouro, level up, captura falhada, auto-pot,
+  // auto-revive — nao aparecia mais nunca.
+  //
+  // O agravante e o regime: no compacto o ticker e o UNICO canal de chat (so
+  // `error` continua virando toast), entao nao havia segunda superficie onde
+  // esse feed aparecesse. Ver docs/09-interface.md#O que so existe no dedo.
+  const ultima = ultimaLinhaDeTodasAsAbas(chatLines)
   const cor = ultima ? COR_POR_TIPO[ultima.type] ?? COR_POR_TIPO.info : undefined
 
   return (
@@ -138,7 +147,7 @@ function BotaoAba({ label, ativo, onClick }: { label: string; ativo: boolean; on
         // `jogo-botao` e o gancho do alvo minimo de toque: sao quatro abas lado
         // a lado com 27px de altura, e errar a vizinha troca o canal que o
         // jogador esta lendo.
-        'jogo-botao flex-1 cursor-pointer rounded-[.6em] px-[.4em] py-[.45em] font-[inherit] text-[.75em]',
+        'jogo-botão flex-1 cursor-pointer rounded-[.6em] px-[.4em] py-[.45em] font-[inherit] text-[.75em]',
         ativo ? 'bg-n800 text-foreground' : 'text-n500',
       )}
     >

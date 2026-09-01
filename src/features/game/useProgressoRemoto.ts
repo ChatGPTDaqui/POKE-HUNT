@@ -75,7 +75,7 @@ export function useProgressoRemoto(): EstadoProgresso {
         try {
           await retomarHuntSeHavia()
         } catch (erro) {
-          console.warn('[boot] nao foi possivel retomar a hunt anterior', erro)
+          console.warn('[boot] não foi possível retomar a hunt anterior', erro)
         }
         if (cancelado) return
         setEstado({ fase: 'pronto' })

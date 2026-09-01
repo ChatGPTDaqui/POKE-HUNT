@@ -48,7 +48,7 @@ function LinhaDeResumo({ resumo, currency }: { resumo: NonNullable<Dados['resumo
     <div className="flex flex-wrap items-baseline gap-x-[.9em] gap-y-[.15em] text-[.8em] tabular-nums">
       <span>
         <span className="text-n500">24h </span>
-        {/* `null` e "nao houve negocio", nao zero. Mostrar 0 aqui daria um
+        {/* `null` e "não houve negocio", nao zero. Mostrar 0 aqui daria um
             preco em que da pra clicar. */}
         {resumo.mediana24h == null
           ? <span className="text-n500">—</span>

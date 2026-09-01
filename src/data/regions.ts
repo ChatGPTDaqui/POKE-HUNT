@@ -26,8 +26,8 @@ export const POKEDEX_NUMBER: Record<string, number> = Object.fromEntries(
     const match = species.description.match(DEX_RE)
     if (!match) {
       throw new Error(
-        `Especie "${id}" sem numero de Pokedex na descricao ("${species.description}") — ` +
-        'sem ele nao da pra dizer se ela e de Kanto ou de Johto.'
+        `Espécie "${id}" sem número de Pokedex na descrição ("${species.description}") — ` +
+        'sem ele não da pra dizer se ela e de Kanto ou de Johto.'
       )
     }
     return [id, Number(match[1])]
@@ -36,7 +36,7 @@ export const POKEDEX_NUMBER: Record<string, number> = Object.fromEntries(
 
 export function pokedexNumber(speciesId: string): number {
   const dex = POKEDEX_NUMBER[speciesId]
-  if (dex == null) throw new Error(`Especie desconhecida: ${speciesId}`)
+  if (dex == null) throw new Error(`Espécie desconhecida: ${speciesId}`)
   return dex
 }
 

@@ -114,7 +114,7 @@ function Captures({ captures }: { captures: OfflineSimSummary['captures'] }) {
 export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSummary; onClose: () => void }) {
   const capNote =
     !summary.stoppedEarly && !summary.truncated && summary.requestedSeconds > summary.simulatedSeconds + 1
-      ? `Limitado a ${formatDuration(summary.simulatedSeconds)} de simulacao (o resto do tempo fora nao gerou progresso).`
+      ? `Limitado a ${formatDuration(summary.simulatedSeconds)} de simulação (o resto do tempo fora não gerou progresso).`
       : null
 
   const gainedValue = estimatedValueGained(summary)
@@ -164,30 +164,30 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
         )}
 
         {summary.kills === 0 ? (
-          <div className="text-n500">Nada aconteceu enquanto voce esteve fora.</div>
+          <div className="text-n500">Nada aconteceu enquanto você esteve fora.</div>
         ) : (
           <>
             <div className="flex flex-col gap-[.15em]">
               {summary.gold > 0 && <StatRow label="Ouro ganho" value={`+${fmt.format(summary.gold)}`} color="var(--color-gold)" />}
               {summary.xp > 0 && <StatRow label="EXP ganho" value={`+${fmt.format(summary.xp)}`} />}
-              {/* Quantos niveis, e de quanto pra quanto — "Subiu de nivel!" nao
+              {/* Quantos niveis, e de quanto pra quanto — "Subiu de nível!" nao
                   distinguia uma sessao que rendeu 1 nivel de uma que rendeu 9.
                   O fallback pro booleano cobre resumo antigo (ou de um servidor
                   ainda nao atualizado), em que a contagem vem 0. */}
               {summary.pokeLevelsGained > 0 ? (
                 <StatRow
-                  label="Niveis do POKE ativo"
+                  label="Níveis do POKE ativo"
                   value={`+${summary.pokeLevelsGained} (Lv ${summary.pokeLevelBefore} → ${summary.pokeLevelAfter})`}
                   color="#7dd3fc"
                 />
-              ) : summary.pokeLeveledUp && <StatRow label="POKE ativo" value="Subiu de nivel!" color="#7dd3fc" />}
+              ) : summary.pokeLeveledUp && <StatRow label="POKE ativo" value="Subiu de nível!" color="#7dd3fc" />}
               {summary.trainerLevelsGained > 0 ? (
                 <StatRow
-                  label="Niveis do Treinador"
+                  label="Níveis do Treinador"
                   value={`+${summary.trainerLevelsGained} (Lv ${summary.trainerLevelBefore} → ${summary.trainerLevelAfter})`}
                   color="#7dd3fc"
                 />
-              ) : summary.trainerLeveledUp && <StatRow label="Treinador" value="Subiu de nivel!" color="#7dd3fc" />}
+              ) : summary.trainerLeveledUp && <StatRow label="Treinador" value="Subiu de nível!" color="#7dd3fc" />}
               {summary.captures.length > 0 && (
                 <StatRow label="POKEs capturados" value={String(summary.captures.length)} color="var(--color-ok)" />
               )}

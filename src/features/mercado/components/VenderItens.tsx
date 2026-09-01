@@ -88,7 +88,7 @@ export function VenderItens() {
         </label>
       </div>
       <div className="text-[.8em] text-n400">
-        Voce recebe ate <b className="text-gold">{fmt.format(bruto - taxa)}</b> de ouro.
+        Você recebe até <b className="text-gold">{fmt.format(bruto - taxa)}</b> de ouro.
         {/* A taxa aparece ANTES de confirmar (PH-98). Descobrir depois de vender
             e indistinguivel de bug de ouro faltando. */}
         {taxa > 0 && (

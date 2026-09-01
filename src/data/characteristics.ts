@@ -69,7 +69,7 @@ const FRASES: Record<StatKey, string[]> = {
   ],
   speed: [
     'Corre demais',
-    'Muito rapido',
+    'Muito rápido',
     'Foge quando pode',
     'Alerta a sons',
     'Impetuoso',

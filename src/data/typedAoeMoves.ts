@@ -45,7 +45,7 @@ function buildTypedAoeMoves(): Record<string, TypedAoeMove> {
     const key = typedAoeMoveKey(type)
     moves[key] = {
       id: key,
-      name: `Explosao Elemental (${type})`,
+      name: `Explosão Elemental (${type})`,
       type,
       category: 'dynamic',
       power: TYPED_AOE_POWER,

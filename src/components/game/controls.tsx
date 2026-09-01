@@ -64,7 +64,7 @@ export function GameButton({
       disabled={disabled || carregando}
       aria-busy={carregando || undefined}
       className={cn(
-        'jogo-botao relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
+        'jogo-botão relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
         'px-[.55em] py-[.32em] font-[inherit] text-[.85em] leading-[1.35] whitespace-nowrap transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
@@ -114,7 +114,7 @@ export function GameIconButton({ className, ...props }: GameButtonProps) {
   return (
     <GameButton
       {...props}
-      className={cn('jogo-botao-icone h-[1.9em] w-[1.9em] shrink-0 px-0 py-0 text-[1em]', className)}
+      className={cn('jogo-botão-ícone h-[1.9em] w-[1.9em] shrink-0 px-0 py-0 text-[1em]', className)}
     />
   )
 }
@@ -401,7 +401,7 @@ export function Recolhivel({
         type="button"
         aria-expanded={aberto}
         onClick={() => setAberto((v) => !v)}
-        className="jogo-botao flex w-full cursor-pointer items-center gap-[.5em] border-0 bg-transparent px-[.6em] py-[.5em] text-left font-[inherit]"
+        className="jogo-botão flex w-full cursor-pointer items-center gap-[.5em] border-0 bg-transparent px-[.6em] py-[.5em] text-left font-[inherit]"
       >
         {icone}
         <span className="font-medium">{titulo}</span>

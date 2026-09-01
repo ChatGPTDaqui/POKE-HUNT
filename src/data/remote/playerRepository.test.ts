@@ -111,6 +111,6 @@ describe('savePlayerState() — 0 linhas nunca e sucesso silencioso (PH-17)', ()
     // Nunca chamou loadPlayerState nesta aba -- updatedAtEsperado comeca
     // null, entao sem o fix o retorno vazio do RLS passaria batido.
     bloqueadoPorRLS = true
-    await expect(aba.savePlayerState('jogador-1', defaultGameStateData())).rejects.toThrow(/sessao pode ter expirado/)
+    await expect(aba.savePlayerState('jogador-1', defaultGameStateData())).rejects.toThrow(/sessão pode ter expirado/)
   })
 })

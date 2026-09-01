@@ -77,7 +77,7 @@ export class Renderer {
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
     const ctx = canvas.getContext('2d')
-    if (!ctx) throw new Error('Canvas 2D context indisponivel')
+    if (!ctx) throw new Error('Canvas 2D context indisponível')
     this.ctx = ctx
     this.ctx.imageSmoothingEnabled = false
     this.width = canvas.width

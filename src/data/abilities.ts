@@ -89,7 +89,7 @@ function cooldownFromPp(pp: number): number {
 
 export const BASIC_ATTACK: Ability = {
   id: 'basic_attack',
-  name: 'Ataque Basico',
+  name: 'Ataque Básico',
   category: 'physical',
   type: 'NORMAL',
   target: 'single',

@@ -15,7 +15,7 @@ export function LanceCountdownModal() {
 
   return (
     <CampoOverlay>
-      <div className="text-lg font-semibold">O Campeao Lance se aproxima...</div>
+      <div className="text-lg font-semibold">O Campeão Lance se aproxima...</div>
       <div className="font-mono text-6xl font-black text-amber-300">{Math.ceil(remaining)}</div>
     </CampoOverlay>
   )
@@ -38,7 +38,7 @@ export function LanceVictoryReturn() {
       style={{ top: 'calc(4.6em + var(--sa-top, 0px))' }}
     >
       <div className="rounded-lg border border-amber-500 bg-background/95 px-[1em] py-[.7em] text-center shadow-xl">
-        <div className="mb-[.5em] font-semibold text-amber-300">Voce derrotou o Campeao Lance!</div>
+        <div className="mb-[.5em] font-semibold text-amber-300">Você derrotou o Campeão Lance!</div>
         <GameButton onClick={() => controller.returnToHospital({ x: 0, y: 0 })}>
           Retornar ao Centro Pokemon
         </GameButton>

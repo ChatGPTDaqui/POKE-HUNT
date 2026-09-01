@@ -37,7 +37,7 @@ export const STONE_ITEMS: Record<string, StoneItem> = Object.fromEntries(
       name: stoneName(type),
       kind: 'stone' as const,
       stoneType: type,
-      description: `Usada para evoluir POKEs de tipo primario ${type} ao atingir o Nivel 80.`,
+      description: `Usada para evoluir POKEs de tipo primario ${type} ao atingir o Nível 80.`,
       sellPrice: 500,
     }]
   })

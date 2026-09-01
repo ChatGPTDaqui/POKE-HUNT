@@ -56,7 +56,7 @@ export function ChipAutoVenda({ aberto, onToggle }: { aberto: boolean; onToggle:
       aria-label={`Auto-venda: ${resumo}`}
       onClick={onToggle}
       className={cn(
-        'jogo-botao flex min-w-0 shrink cursor-pointer items-center gap-[.3em] rounded-[.6em]',
+        'jogo-botão flex min-w-0 shrink cursor-pointer items-center gap-[.3em] rounded-[.6em]',
         'border border-n800 bg-n900 px-[.55em] font-[inherit] text-[.8em] transition-colors',
         semRaridade && 'border-warn/60',
       )}
@@ -124,7 +124,7 @@ export function AutoVendaPanel() {
                 // Sao seis chips lado a lado e, com 20px de altura, errar o
                 // vizinho no dedo liga a venda automatica de uma raridade que
                 // o jogador nao escolheu.
-                'jogo-botao flex cursor-pointer items-center rounded-[.35em] border px-[.5em] py-[.25em] text-[.72em] transition-colors',
+                'jogo-botão flex cursor-pointer items-center rounded-[.35em] border px-[.5em] py-[.25em] text-[.72em] transition-colors',
                 marcada ? 'border-transparent font-semibold text-[#0b0e18]' : 'border-n700 text-n400',
               )}
               style={marcada ? { backgroundColor: def.color } : undefined}

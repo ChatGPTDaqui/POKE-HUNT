@@ -191,7 +191,7 @@ export function ClimaChip({ embutido = false, soIcone = false }: ClimaChipProps 
               Quando acabar, o clima do lugar volta.
             </span>
           ) : (
-            <span className="text-n400">Vale enquanto voce estiver nesta area.</span>
+            <span className="text-n400">Vale enquanto você estiver nesta área.</span>
           )}
         </div>
       }

@@ -129,6 +129,6 @@ describe('sem mesa, a tela diz por onde comecar (PH-314)', () => {
   it('explica que o convite sai do Ranking ou do Correio', async () => {
     sessao = null
     render(<TrocaMenu />)
-    expect(await screen.findByText(/Voce nao esta em nenhuma troca/)).toBeTruthy()
+    expect(await screen.findByText(/Você não está em nenhuma troca/)).toBeTruthy()
   })
 })

@@ -41,7 +41,7 @@ function venderUmPoke(
   if (poke.isShiny) {
     askConfirm({
       title: 'Vender POKE Shiny?',
-      message: `${species.name} e Shiny. Essa acao nao pode ser desfeita. Vender por ${format.format(value)} ouro?`,
+      message: `${species.name} e Shiny. Essa ação não pode ser desfeita. Vender por ${format.format(value)} ouro?`,
       confirmLabel: 'Vender',
       onConfirm: executar,
     })
@@ -123,8 +123,8 @@ export function PokemonsTab() {
     }
     // Contagens de poupados sao calculadas do estado LOCAL antes da acao, entao
     // valem nos dois caminhos.
-    if (extras?.shiny) toast(`${extras.shiny} POKE(s) Shiny nao foram vendidos.`, 'info')
-    if (extras?.locked) toast(`${extras.locked} POKE(s) trancado(s) nao foram vendidos.`, 'info')
+    if (extras?.shiny) toast(`${extras.shiny} POKE(s) Shiny não foram vendidos.`, 'info')
+    if (extras?.locked) toast(`${extras.locked} POKE(s) trancado(s) não foram vendidos.`, 'info')
   }
 
   function venderSelecionados() {
@@ -136,7 +136,7 @@ export function PokemonsTab() {
     if (shinyOnly) {
       askConfirm({
         title: 'Vender POKEs Shiny?',
-        message: `Voce esta vendendo ${uids.length} POKE(s) Shiny. Essa acao nao pode ser desfeita.`,
+        message: `Você esta vendendo ${uids.length} POKE(s) Shiny. Essa ação não pode ser desfeita.`,
         confirmLabel: 'Vender',
         onConfirm: executar,
       })
@@ -150,7 +150,7 @@ export function PokemonsTab() {
     const locked = filtered.filter(({ poke }) => poke.locked).length
     const uids = filtered.filter(({ poke }) => !poke.isShiny && !poke.locked).map(({ poke }) => poke.uid)
     if (uids.length === 0) {
-      toast('Nenhum POKE elegivel (shiny e trancados sao poupados).', 'info')
+      toast('Nenhum POKE elegível (shiny e trancados são poupados).', 'info')
       return
     }
     void acao.run('sell-all-pokes', () => venderLote(uids, { shiny, locked }))

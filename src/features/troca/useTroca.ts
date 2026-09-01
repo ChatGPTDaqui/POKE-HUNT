@@ -66,7 +66,7 @@ export interface EstadoDaTroca {
  */
 function avisarErro(e: unknown): void {
   useToastStore.getState().pushToast(
-    e instanceof ErroServidor ? e.message : 'Nao foi possivel falar com a mesa de troca.',
+    e instanceof ErroServidor ? e.message : 'Não foi possível falar com a mesa de troca.',
     'error',
     'world',
   )
@@ -106,12 +106,12 @@ export function useTroca(): EstadoDaTroca {
    */
   const anunciarDesfecho = useCallback((encerrada: SessaoDeTroca) => {
     if (encerrada.estado === 'concluida') {
-      useToastStore.getState().pushToast('Troca concluida.', 'success', 'world')
+      useToastStore.getState().pushToast('Troca concluída.', 'success', 'world')
       useMochilaStore.getState().invalidar()
       return
     }
     if (encerrada.estado === 'expirada') {
-      useToastStore.getState().pushToast('A troca expirou — o que estava na mesa voltou pra voce.', 'error', 'world')
+      useToastStore.getState().pushToast('A troca expirou — o que estava na mesa voltou pra você.', 'error', 'world')
       return
     }
     if (encerrada.estado === 'cancelada' && encerrada.encerradaPor !== meuId) {

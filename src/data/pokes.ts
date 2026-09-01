@@ -452,7 +452,7 @@ export interface CreatePokeInstanceOptions {
 // silencioso de volta pro nao-verificavel.
 export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature, isShiny: fixedIsShiny, trait: fixedTrait, uid: fixedUid }: CreatePokeInstanceOptions = {}): PokeInstance {
   const species = SPECIES[speciesId]
-  if (!species) throw new Error(`Especie desconhecida: ${speciesId}`)
+  if (!species) throw new Error(`Espécie desconhecida: ${speciesId}`)
   const ivs = fixedIvs || rollIvs(rng, speciesId)
   const rarity = fixedRarity || rollRarity(rng)
   const shinyChance = (species.catchRate / MAX_CATCH_RATE) * SHINY_CHANCE_AT_MAX_CATCH_RATE

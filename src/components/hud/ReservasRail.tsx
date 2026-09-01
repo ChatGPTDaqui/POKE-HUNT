@@ -199,7 +199,7 @@ export function ReservasRail() {
               <div
                 role="button"
                 tabIndex={0}
-                aria-label={`Reserva ${indiceNaEquipe + 1}: ${especie.name} nivel ${poke.level}`}
+                aria-label={`Reserva ${indiceNaEquipe + 1}: ${especie.name} nível ${poke.level}`}
                 // `touch-action: none` e o que permite arrastar no toque: sem
                 // isto o navegador trata o gesto vertical como rolagem e nunca
                 // entrega os `pointermove`.

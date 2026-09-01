@@ -44,7 +44,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
       <div className="grid grid-cols-2 gap-[.45em]">
         <div>
           <SectionLabel>OFERTAS DE VENDA</SectionLabel>
-          {(data?.vendas.length ?? 0) === 0 && <p className="text-n500">Ninguem vendendo.</p>}
+          {(data?.vendas.length ?? 0) === 0 && <p className="text-n500">Ninguém vendendo.</p>}
           {data?.vendas.map((n) => (
             <div key={`v${n.unitPrice}`} className="flex justify-between text-[.85em]">
               <span className="text-gold">{fmt.format(n.unitPrice)}</span>
@@ -54,7 +54,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
         </div>
         <div>
           <SectionLabel>PROCURAS</SectionLabel>
-          {(data?.compras.length ?? 0) === 0 && <p className="text-n500">Ninguem procurando.</p>}
+          {(data?.compras.length ?? 0) === 0 && <p className="text-n500">Ninguém procurando.</p>}
           {data?.compras.map((n) => (
             <div key={`c${n.unitPrice}`} className="flex justify-between text-[.85em]">
               <span className="text-ok">{fmt.format(n.unitPrice)}</span>
@@ -109,7 +109,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
         </GameButton>
       </GameCard>
 
-      <SectionLabel>ULTIMOS NEGOCIOS</SectionLabel>
+      <SectionLabel>ÚLTIMOS NEGOCIOS</SectionLabel>
       {(data?.negocios.length ?? 0) === 0 && <p className="text-n500">Nenhum negocio ainda.</p>}
       {data?.negocios.map((n) => (
         <div key={n.id} className="flex justify-between text-[.8em] text-n400">

@@ -39,7 +39,7 @@ function statusPorErrcode(code: string | undefined): number {
 async function userIdAtual(): Promise<string> {
   const { data } = await supabase.auth.getSession()
   const id = data.session?.user.id
-  if (!id) throw new ErroServidor(401, 'sem sessao — faca login de novo')
+  if (!id) throw new ErroServidor(401, 'sem sessão — faca login de novo')
   return id
 }
 
@@ -375,7 +375,7 @@ const DESPACHO: Record<string, Despacho> = {
 /** Substitui `servidor.acao(acao)`. Chama a RPC certa, sincroniza so o que mudou. */
 export async function executarAcaoRpc(acao: Acao): Promise<{ mensagem?: string }> {
   const despacho = DESPACHO[acao.tipo]
-  if (!despacho) throw new ErroServidor(400, `acao desconhecida: ${acao.tipo}`)
+  if (!despacho) throw new ErroServidor(400, `ação desconhecida: ${acao.tipo}`)
   const { data, error } = await despacho.chamar(acao)
   if (error) throw new ErroServidor(statusPorErrcode(error.code), error.message)
   await despacho.aoSucesso(acao)

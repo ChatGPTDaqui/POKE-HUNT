@@ -67,7 +67,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       // pra "eu mandei" e "outro jogador mandou", sem duplicar logica.
       set({ rascunho: '', anexos: [], erro: null })
     } catch (erro) {
-      set({ erro: erro instanceof ErroServidor ? erro.message : 'nao foi possivel enviar' })
+      set({ erro: erro instanceof ErroServidor ? erro.message : 'não foi possível enviar' })
     } finally {
       set({ carregando: false })
     }
@@ -76,7 +76,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   iniciarAoVivo: () => {
     let vivo = true
     void lerChat().then(({ mensagens }) => { if (vivo) set({ mensagens, erro: null }) })
-      .catch((erro) => { if (vivo) set({ erro: erro instanceof ErroServidor ? erro.message : 'chat indisponivel' }) })
+      .catch((erro) => { if (vivo) set({ erro: erro instanceof ErroServidor ? erro.message : 'chat indisponível' }) })
 
     const pararCanal = assinarChatAoVivo((mensagem) => {
       set((s) => (s.mensagens.some((m) => m.id === mensagem.id) ? s : { mensagens: [...s.mensagens, mensagem] }))
