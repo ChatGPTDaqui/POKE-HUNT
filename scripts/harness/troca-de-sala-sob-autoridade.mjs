@@ -69,6 +69,16 @@ const JANELA_S = Number(opcao('janela', 30))
 const TETO_POR_SALA_S = Number(opcao('teto', 600))
 const SALAS = Number(opcao('salas', 6))
 const SEMENTES = Number(opcao('sementes', 8))
+/**
+ * Segundos entre o pedido de quota fechada e o PEDIDO EXTRA (PH-393).
+ *
+ * `--extra=0` desliga, e e assim que se mede o ANTES na mesma bancada e com as
+ * mesmas sementes — comparar contra numero de outra rodada nao vale, porque a
+ * divergencia de contagem depende da semente.
+ */
+const EXTRA_S = Number(opcao('extra', 12))
+/** Abates do servidor, na ultima resposta, a partir dos quais o extra vale. */
+const LIMIAR_QUASE_FECHADA = Number(opcao('limiar', 24))
 
 function gameStateFalso(poke) {
   const dados = defaultGameStateData()
@@ -157,7 +167,13 @@ function corrida(semente) {
   const tetoDePassos = Math.round(TETO_POR_SALA_S / PASSO)
   let passosNestaSala = 0
   let ultimoFlush = 0
-  let pediuNestaSala = false
+  let pedidosDesdeQuota = 0
+  let extrasPedidos = 0
+  // O que a ULTIMA resposta trouxe como contagem do servidor. E o unico dado que
+  // o cliente tem pra decidir se vale um pedido extra: `reconciliarSala` escreve
+  // `max(local, servidor)` e apaga o numero cru, entao ele precisa ser lido
+  // ANTES da reconciliacao (no jogo, dentro de `liquidar`).
+  let abatesDoServidorNaResposta = 0
 
   while (esperas.length < SALAS) {
     stepWorld(cliente, PASSO, gameStateCliente, { silent: false })
@@ -172,16 +188,38 @@ function corrida(semente) {
     // O PEDIDO NA HORA (autoridade.ts#observarQuotaDeSala): quota fechada
     // dispara `liquidar()` imediatamente em vez de esperar o proximo intervalo.
     // Modelar isto e obrigatorio — sem ele a bancada mediria um jogo que espera
-    // sempre o ciclo cheio, e o piso da espera sairia inflado em ate 30s. UMA
-    // vez por sala, e depois a repeticao volta ao intervalo normal
-    // (`REPETIR_PEDIDO_DE_SALA_MS` = `INTERVALO_FLUSH_MS`).
-    const pedidoAgora = quotaFechadaEm === t && !pediuNestaSala
-    if (pedidoAgora) pediuNestaSala = true
+    // sempre o ciclo cheio, e o piso da espera sairia inflado em ate 30s.
+    const pedidoInicial = quotaFechadaEm === t && pedidosDesdeQuota === 0
 
-    if (pedidoAgora || t - ultimoFlush >= passosPorJanela) {
+    // O PEDIDO EXTRA (PH-393), que e o que esta bancada existe pra dimensionar.
+    //
+    // O primeiro pedido tipicamente pega o servidor a 1-3 abates de fechar
+    // (medido: mediana 27/30), e ai o jogador espera um INTERVALO INTEIRO por
+    // quase nada. Um pedido a mais, poucos segundos depois, fecha a conta.
+    //
+    // TRES GUARDAS, e nenhuma e enfeite:
+    //  - `extrasPedidos === 0`: no maximo UM por sala. Repetir e o livelock de
+    //    PH-273 — cada pedido fecha a janela do servidor, que reconstroi o mundo
+    //    com o POKE no ponto de entrada, e janela curta nao paga a caminhada.
+    //  - `abatesDoServidorNaResposta >= LIMIAR`: pedir quando o servidor esta
+    //    LONGE (15/30) gasta invocacao de Edge e ainda encurta a janela dele —
+    //    piora. Só vale quando ele esta perto.
+    //  - a espera propria (`EXTRA_S`): o servidor precisa de ALGUM tempo de
+    //    janela pra matar o que falta.
+    const pedidoExtra = EXTRA_S > 0
+      && quotaFechadaEm != null
+      && pedidosDesdeQuota === 1
+      && extrasPedidos === 0
+      && abatesDoServidorNaResposta >= LIMIAR_QUASE_FECHADA
+      && (t - ultimoFlush) * PASSO >= EXTRA_S
+
+    if (pedidoInicial || pedidoExtra || t - ultimoFlush >= passosPorJanela) {
+      if (pedidoInicial || pedidoExtra) pedidosDesdeQuota += 1
+      if (pedidoExtra) extrasPedidos += 1
       const duracaoS = (t - ultimoFlush) * PASSO
       ultimoFlush = t
       const salaDoServidor = janelaDoServidor(estadoDoServidor, gameStateServidor, duracaoS)
+      abatesDoServidorNaResposta = salaDoServidor?.abates ?? 0
       reconciliarSalaDaAutoridade(cliente, salaDoServidor ? { ...salaDoServidor } : null, undefined)
     }
 
@@ -201,7 +239,8 @@ function corrida(semente) {
       quotaFechadaEm = null
       abatesDoServidorNaQuota = null
       passosNestaSala = 0
-      pediuNestaSala = false
+      pedidosDesdeQuota = 0
+      extrasPedidos = 0
       continue
     }
 
@@ -235,7 +274,7 @@ for (let s = 1; s <= SEMENTES; s++) {
   const esperas = corrida(s * 101)
   todas.push(...esperas)
   const resumo = esperas
-    .map((e) => (e.travou ? 'TRAVOU' : `${e.esperaS.toFixed(1)}s`))
+    .map((e) => (e.travou ? 'TRAVOU' : `${e.esperaS.toFixed(0)}s(srv ${e.abatesDoServidorNaQuota ?? '?'}/30)`))
     .join('  ')
   console.log(`semente ${String(s).padStart(2)} | ${resumo}`)
 }

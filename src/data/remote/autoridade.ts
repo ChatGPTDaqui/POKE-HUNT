@@ -545,6 +545,11 @@ export async function liquidar(): Promise<void> {
       // console: a hipotese ainda nao foi confirmada nem descartada, entao o
       // dado continua sendo coletado — so deixa de ser mensagem de jogo. Some
       // de vez quando a hipotese fechar.
+      // PH-393: o numero CRU do servidor, guardado ANTES da reconciliacao —
+      // depois dela ele nao existe mais (o world fica com `max(local, servidor)`).
+      // E ele que decide se vale o pedido extra desta sala; ver
+      // `LIMIAR_DE_QUOTA_QUASE_FECHADA`.
+      abatesDoServidorNaUltimaResposta = r.sala?.abates ?? 0
       const antesDoFlush = useWorldStore.getState()
       const posicaoAntes = antesDoFlush.salaPendente ?? antesDoFlush.sala
       useWorldStore.getState().definirSala(r.sala, r.clima)
@@ -670,9 +675,64 @@ export function pararFlushPeriodico(): void {
 // O custo de esperar o intervalo cheio e o que este pedido existia pra evitar
 // (ate 30s com a barra cheia). Esse custo e real, e e MUITO menor que travar.
 const REPETIR_PEDIDO_DE_SALA_MS = INTERVALO_FLUSH_MS
+
+/**
+ * UM pedido extra por sala, este tanto de tempo depois do primeiro (PH-393).
+ *
+ * O QUE ISTO CONSERTA, e o numero que decidiu o valor.
+ *
+ * O primeiro pedido sai no instante em que a quota fecha — e nesse instante o
+ * servidor tipicamente esta a 1 a 3 abates de fechar a dele. Medido em
+ * `scripts/harness/troca-de-sala-sob-autoridade.mjs` (as duas pontas com o
+ * protocolo real), 20 trocas: 22, 23, 23, 24, 25, 25, 25, 27, 27, 27, 28, 29,
+ * 29, 29, 30, 30, 30, 30 de 30. Ou seja, o jogador esperava um INTERVALO INTEIRO
+ * de flush por quase nada — e era isso, e nao servidor lento, que fazia "os 30
+ * abates nao trocam a sala".
+ *
+ * POR QUE 15s, E POR QUE ISTO NAO E VOLTAR AO PH-273. Aquele defeito era
+ * repeticao SEM FIM a cada 5s: cada pedido fecha a janela do servidor, que
+ * reconstroi o mundo com o POKE no ponto de entrada, e janela curta nao paga nem
+ * a caminhada ate o alvo — zero abate por janela, hunt travada de vez. Aqui e um
+ * pedido SO, e a bancada mediu o quanto a duracao importa (8 sementes x 5 salas,
+ * 40 trocas, mesmas sementes nas quatro linhas):
+ *
+ *   sem extra   mediana 33s   p90 63s   pior 243s   travadas 0
+ *   extra  8s   mediana 11s   p90 41s   pior  71s   travadas 1  <- PH-273 de novo
+ *   extra 12s   mediana 15s   p90 75s   pior 135s   travadas 0  <- p90 PIOR
+ *   extra 15s   mediana 18s   p90 48s   pior  78s   travadas 0  <- este
+ *
+ * 8s trava (janela curta demais, o defeito antigo reaparece em 1 de 40). 12s
+ * melhora a mediana e PIORA o p90 — a janela gasta em falso atrasa o servidor
+ * justamente nos casos que ja eram ruins. 15s e o unico que melhora as tres
+ * medidas ao mesmo tempo.
+ */
+const ESPERA_DO_PEDIDO_EXTRA_MS = 15000
+
+/**
+ * Abates do servidor, na ultima resposta, a partir dos quais o pedido extra vale
+ * a pena.
+ *
+ * Pedir quando o servidor esta LONGE (15/30) gasta uma invocacao de Edge e ainda
+ * encurta a janela dele — piora nas duas pontas. O limiar em si quase nao muda o
+ * resultado (24, 26, 27 e 28 deram medianas iguais na bancada), porque o servidor
+ * quase sempre esta perto quando e perguntado. Ele existe pela CAUDA: e a guarda
+ * do caso raro em que ele esta atras de verdade.
+ */
+const LIMIAR_DE_QUOTA_QUASE_FECHADA = 26
+
 let pararObservadorDeSala: (() => void) | null = null
 let salaJaPedida: string | null = null
 let ultimoPedidoDeSala = 0
+/** Ja gastei o pedido extra desta sala? Zera junto com a chave da sala. */
+let pedidoExtraFeitoNaSala = false
+/**
+ * `sala.abates` CRU da ultima resposta de flush.
+ *
+ * Precisa ser lido antes da reconciliacao: `reconciliarSalaDaAutoridade` escreve
+ * `max(local, servidor)` no world, entao depois dela o numero do servidor nao
+ * existe mais em lugar nenhum. Ver o call site em `liquidar`.
+ */
+let abatesDoServidorNaUltimaResposta = 0
 
 function observarQuotaDeSala(): void {
   pararObservadorDeSala?.()
@@ -691,7 +751,25 @@ function observarQuotaDeSala(): void {
     if (useGameStateStore.getState().autoToggles.avancoManualDeSala) return
     const chave = `${sala.ciclos}:${sala.indice}`
     const agora = Date.now()
-    if (chave === salaJaPedida && agora - ultimoPedidoDeSala < REPETIR_PEDIDO_DE_SALA_MS) return
+    // Sala nova: o extra volta a estar disponivel, e o numero do servidor zera —
+    // o extra tem que se decidir por uma resposta recebida NESTA sala, e nao pela
+    // contagem que sobrou da anterior.
+    if (chave !== salaJaPedida) {
+      pedidoExtraFeitoNaSala = false
+      abatesDoServidorNaUltimaResposta = 0
+    }
+    // PH-393: o pedido EXTRA, um por sala. Ver `ESPERA_DO_PEDIDO_EXTRA_MS` pro
+    // numero medido e pra por que isto nao e a repeticao de 5s do PH-273.
+    const cabeExtra = chave === salaJaPedida
+      && !pedidoExtraFeitoNaSala
+      && abatesDoServidorNaUltimaResposta >= LIMIAR_DE_QUOTA_QUASE_FECHADA
+      && agora - ultimoPedidoDeSala >= ESPERA_DO_PEDIDO_EXTRA_MS
+    if (
+      chave === salaJaPedida
+      && agora - ultimoPedidoDeSala < REPETIR_PEDIDO_DE_SALA_MS
+      && !cabeExtra
+    ) return
+    if (cabeExtra) pedidoExtraFeitoNaSala = true
     salaJaPedida = chave
     ultimoPedidoDeSala = agora
     // Quota fechada e o oposto de janela parada: o jogador esta matando no
