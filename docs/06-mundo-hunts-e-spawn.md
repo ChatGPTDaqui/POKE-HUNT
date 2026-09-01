@@ -237,8 +237,31 @@ Como funciona desde 2026-08-19:
   contagens de abate são independentes), a resposta traz a mesma sala e o pedido repete a cada
   5s até ele fechar.
 
-O preço assumido: a troca de sala passa a custar uma ida ao servidor. A contagem regressiva de
-3s existia antes e cobre esse tempo (pior caso medido da Edge Function: 1593ms).
+O preço assumido: a troca de sala passa a custar uma ida ao servidor.
+
+**E ele é MUITO maior que os 3s da contagem regressiva — este parágrafo dizia o contrário até
+2026-09-01.** A frase antiga era "a contagem regressiva de 3s existia antes e cobre esse tempo
+(pior caso medido da Edge Function: 1593ms)": ela media a LATÊNCIA de uma chamada, não a espera
+do jogador. Medido de verdade em `scripts/harness/troca-de-sala-sob-autoridade.mjs` (as duas
+pontas com o protocolo real, 48 trocas em 8 sementes): **mediana de 33,0s com a barra em 30/30,
+p90 de 33,0s e pior caso de 243s**. Zero travamentos — a sala sempre chega.
+
+O piso de ~30s é o intervalo de flush, e ele não sai com um `await` mais rápido: o cliente já
+pede a liquidação no instante em que a quota fecha (`observarQuotaDeSala`), mas nesse instante o
+servidor tipicamente ainda não fechou a dele — a resposta útil vem um intervalo depois, e
+insistir antes disso é PH-273 (janela curta não paga nem a caminhada até o alvo). A cauda de
+243s é o protetor do servidor levando várias janelas para cair.
+
+O que o jogador NÃO perde nessa espera: o respawn de mob comum volta assim que o protetor é
+resolvido, então ouro e XP continuam entrando. O que congela é o contador da sala. Desde PH-386
+o chip de sala diz "Preparando a próxima área..." nesse estado, que era o único dos quatro
+estados de 30/30 sem nada na tela.
+
+Para encurtar a espera de verdade seria preciso tirar o handicap estrutural do servidor: ele
+reconstrói o mundo a cada janela e o POKE volta ao ponto de entrada, então **cada janela paga a
+caminhada de novo** e ele fecha a quota sistematicamente depois do cliente. Persistir a posição
+entre janelas resolveria — e mexeria em quantos abates cabem numa janela, ou seja, em
+balanceamento de farm. Decisão do dono, não ajuste de protocolo.
 
 Por que **não** fazer os dois sorteios coincidirem: seria preciso o cliente conhecer a semente
 da sessão, e com ela ele calcula as 10 salas na abertura — o reroll grátis que a decisão
