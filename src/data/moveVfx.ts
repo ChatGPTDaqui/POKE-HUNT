@@ -87,7 +87,7 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
     }),
     repeticoes: 2,
   },
-  comet_punch: { single: tira('comet_punch', 12) },
+  comet_punch: { single: tira('comet_punch', 9) },
   // A mais direcional do lote inteiro: 5.15x de alongamento num eixo de
   // -46° que so varia 3° entre os 12 quadros. Sem girar, o arranhao sairia
   // sempre na mesma diagonal, com o inimigo onde estivesse.
@@ -124,12 +124,12 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // de largura. Alongamento medido de 18.4x, o maior de todo o lote por uma ordem
   // de grandeza. Sem entrada aqui, Aqua Jet cai na tira do tipo WATER, que e uma
   // esfera legivel — melhor que arte propria ilegivel.
-  dig: { single: tira('dig', 19) },
+  dig: { single: tira('dig', 13) },
 
   // --- presas (o mesmo gesto em tres tipos) --------------------------------
-  fire_fang: { single: tira('fire_fang', 12) },
-  thunder_fang: { single: tira('thunder_fang', 12) },
-  ice_fang: { single: tira('ice_fang', 11) },
+  fire_fang: { single: tira('fire_fang', 11) },
+  thunder_fang: { single: tira('thunder_fang', 11) },
+  ice_fang: { single: tira('ice_fang', 9) },
 
   // --- projetil / jato ----------------------------------------------------
   // Jato: 2.09x no eixo -19°. `recorteX` nao entra aqui — com 54px de largura
@@ -165,7 +165,7 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // resto do lote de status (data/statusVfx.ts), que e brilho pra cima ou pra
   // baixo no proprio corpo.
   charm: {
-    single: tira('charm', 13, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
+    single: tira('charm', 12, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
     repeticoes: 2,
   },
   taunt: { single: tira('taunt', 12), repeticoes: 2 },
@@ -285,19 +285,19 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   //
   // 4.08x no eixo 0° +-1°: os dois feixes largos sao os mais estaveis do lote.
   hyper_beam: {
-    single: tira('feixe_dourado', 10, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
+    single: tira('feixe_dourado', 9, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
   },
   giga_impact: {
-    single: tira('feixe_dourado', 10, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
+    single: tira('feixe_dourado', 9, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
   },
   flash_cannon: {
-    single: tira('feixe_branco', 10, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
+    single: tira('feixe_branco', 9, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
   },
   ice_beam: {
-    single: tira('feixe_branco', 10, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
+    single: tira('feixe_branco', 9, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
   },
   aurora_beam: {
-    single: tira('feixe_branco', 10, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
+    single: tira('feixe_branco', 9, { direcional: { anguloBaseGraus: 0, ancoraX: 0.76, recorteX: 0.56 } }),
   },
   psybeam: {
     single: tira('feixe_roxo', 7, { direcional: { anguloBaseGraus: 0, ancoraX: 0.70, recorteX: 0.64 } }),
@@ -316,16 +316,16 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // centrados no alvo cobrem o atacante inteiro, e sem `direcional` o recorte
   // nao existe (`orientacaoDaTira` devolve recorteX 1 pra arte que nao gira).
   energy_ball: {
-    single: tira('energia_verde', 16, { direcional: { anguloBaseGraus: 9, ancoraX: 0.59, recorteX: 0.72 } }),
+    single: tira('energia_verde', 15, { direcional: { anguloBaseGraus: 9, ancoraX: 0.59, recorteX: 0.72 } }),
   },
   solar_beam: {
-    single: tira('energia_verde', 16, { direcional: { anguloBaseGraus: 9, ancoraX: 0.59, recorteX: 0.72 } }),
+    single: tira('energia_verde', 15, { direcional: { anguloBaseGraus: 9, ancoraX: 0.59, recorteX: 0.72 } }),
   },
   // 5093: raio VERTICAL, quadro 96x221. Fica fora da rotacao pelo mesmo motivo
   // que PSYCHIC/FLYING/POISON/FAIRY: ele aponta pra BAIXO (raio cai), nao pro
   // alvo, e girar deitaria o raio no chao.
-  thunder: { single: tira('raio_vertical', 10) },
-  thunderbolt: { single: tira('raio_vertical', 10) },
+  thunder: { single: tira('raio_vertical', 9) },
+  thunderbolt: { single: tira('raio_vertical', 9) },
 
   // --- grama --------------------------------------------------------------
   // 5107: folhas voando, uma a uma. Razor Leaf e Magical Leaf desenhavam o
@@ -340,13 +340,13 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // abaixo da faixa de 1.3x a 1.9x em que o resto do lote vive. O numero e o que
   // `conferir-direcao-vfx.mjs` calcula pra igualar a mediana de 44px, e nao um
   // palpite.
-  absorb: { single: tira('dreno_verde', 13), escala: { single: 1.25 } },
-  mega_drain: { single: tira('dreno_verde', 13), escala: { single: 1.25 } },
-  giga_drain: { single: tira('dreno_verde', 13), escala: { single: 1.25 } },
-  leech_life: { single: tira('dreno_verde', 13), escala: { single: 1.25 } },
+  absorb: { single: tira('dreno_verde', 12), escala: { single: 1.25 } },
+  mega_drain: { single: tira('dreno_verde', 12), escala: { single: 1.25 } },
+  giga_drain: { single: tira('dreno_verde', 12), escala: { single: 1.25 } },
+  leech_life: { single: tira('dreno_verde', 12), escala: { single: 1.25 } },
   // 4329, nomeado `petal`. `petal_dance` ja tem arte propria (5479); esta vai
   // pro Petal Blizzard, que e area.
-  petal_blizzard: { single: tira('petalas', 14), aoe: tira('petalas', 14) },
+  petal_blizzard: { single: tira('petalas', 13), aoe: tira('petalas', 13) },
   // 4328 (`field`, cupula verde translucida) foi cadastrado aqui pro Leech Seed
   // e pro Spore e SAIU depois de ver em jogo. Os dois sao alvo-unico, entao a
   // cupula — 255x256 de arquivo, feita pra cobrir um campo — e desenhada em
@@ -444,14 +444,14 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   //
   // `escala` 1.25 pelos mesmos 44px de mediana: sem ela as cruzes chegam com
   // 37px, 1.2x o POKE.
-  recover: { single: tira('cura_verde', 14), escala: { single: 1.25 } },
-  rest: { single: tira('cura_verde', 14), escala: { single: 1.25 } },
-  synthesis: { single: tira('cura_verde', 14), escala: { single: 1.25 } },
-  milk_drink: { single: tira('cura_verde', 14), escala: { single: 1.25 } },
-  heal_pulse: { single: tira('cura_verde', 14), escala: { single: 1.25 } },
-  moonlight: { single: tira('cura_verde', 14), escala: { single: 1.25 } },
-  morning_sun: { single: tira('cura_verde', 14), escala: { single: 1.25 } },
-  wish: { single: tira('cura_verde', 14), escala: { single: 1.25 } },
+  recover: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
+  rest: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
+  synthesis: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
+  milk_drink: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
+  heal_pulse: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
+  moonlight: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
+  morning_sun: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
+  wish: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
 
   // --- buff e status ------------------------------------------------------
   // 5619, nomeado `algum buff`: fitas verdes subindo pelo corpo.
@@ -466,11 +466,11 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // vale igual. Deixar os dois novos sem ela faria a mesma arte apontar pro
   // alvo num golpe e pra diagonal fixa nos outros dois.
   attract: {
-    single: tira('charm', 13, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
+    single: tira('charm', 12, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
     repeticoes: 2,
   },
   sweet_kiss: {
-    single: tira('charm', 13, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
+    single: tira('charm', 12, { direcional: { anguloBaseGraus: 22, ancoraX: 0.66 } }),
     repeticoes: 2,
   },
   // Mesma ideia com a cabeca de dragao do Dragon Dance (5393): os tres golpes

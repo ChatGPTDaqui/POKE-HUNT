@@ -132,12 +132,12 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
     // a distancia do atacante.
     direcional: { anguloBaseGraus: 0, ancoraX: 0.78, recorteX: 0.68 },
   },
-  WATER: { url: `${RAIZ}/water.png`, quadros: 25 },              // 641  — estouro azul
+  WATER: { url: `${RAIZ}/water.png`, quadros: 22 },              // 641  — estouro azul
   ELECTRIC: { url: `${RAIZ}/electric.png`, quadros: 14 },        // 2572 — arcos amarelos
   GRASS: { url: `${RAIZ}/grass.png`, quadros: 15 },              // 2575 — redemoinho verde
-  ICE: { url: `${RAIZ}/ice.png`, quadros: 39 },                  // 4693 — cristal ciano
-  FIGHTING: { url: `${RAIZ}/fighting.png`, quadros: 21 },        // 2079 — anel de impacto
-  POISON: { url: `${RAIZ}/poison.png`, quadros: 30 },            // 2707 — vortice roxo
+  ICE: { url: `${RAIZ}/ice.png`, quadros: 30 },                  // 4693 — cristal ciano
+  FIGHTING: { url: `${RAIZ}/fighting.png`, quadros: 19 },        // 2079 — anel de impacto
+  POISON: { url: `${RAIZ}/poison.png`, quadros: 29 },            // 2707 — vortice roxo
   GROUND: { url: `${RAIZ}/ground.png`, quadros: 24 },            // 2495 — redemoinho de terra
   // TROCADA em 2026-08-18. A arte anterior (efeito 1029) tinha um SPRITE DE
   // ITEM embutido — um objeto amarelo com a palavra DROP escrita — visivel em
@@ -146,7 +146,7 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
   // porque a escolha original foi feita por varredura de matiz/tamanho, sem
   // ninguem OLHAR quadro a quadro.
   FLYING: { url: `${RAIZ}/flying.png`, quadros: 20 },            // 4735 — tornado
-  PSYCHIC: { url: `${RAIZ}/psychic.png`, quadros: 20 },          // 4468 — arco magenta
+  PSYCHIC: { url: `${RAIZ}/psychic.png`, quadros: 19 },          // 4468 — arco magenta
   // TROCADA em 2026-08-31 (PH-368), e o motivo nao e escala nem direcao: a arte
   // anterior era o efeito 5446, que o dono do banco nomeou `grass`. E um
   // respingo de folhagem verde — todo golpe BUG do jogo desenhava grama. Passou
@@ -176,7 +176,7 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
   // O 4798 (`rock`) desenha pedra estourando em cascalho, que e o que um golpe
   // de pedra faz. Quadro 68x72, proporcao 0.94 — cai em 44px de largura contra
   // 46 de altura, dentro da faixa do lote e sem precisar de escala.
-  ROCK: { url: `${RAIZ}/rock.png`, quadros: 16 },                // 4798 — pedra estourando
+  ROCK: { url: `${RAIZ}/rock.png`, quadros: 11 },                // 4798 — pedra estourando
   GHOST: { url: `${RAIZ}/ghost.png`, quadros: 28 },              // 2583 — anel roxo
   DRAGON: { url: `${RAIZ}/dragon.png`, quadros: 15 },            // 2432 — esfera de energia
   // Era o 4109 (um vazio preto de borda roxa). Bonito na conferencia, ruim em
@@ -282,14 +282,14 @@ export const TIRA_AOE_POR_ELEMENTO: Partial<Record<ElementType, TiraDeVfx>> = {
   // `eruption` (moveVfx.ts), onde coluna vertical e exatamente o desenho certo.
   FIRE: { url: `${RAIZ_AOE}/fire.png`, quadros: 27 },            // 5487 — anel de chamas abrindo
   WATER: { url: `${RAIZ_AOE}/water.png`, quadros: 8 },           // 4286 — respingo azul
-  ELECTRIC: { url: `${RAIZ_AOE}/electric.png`, quadros: 14 },    // 5621 — anel de faiscas
-  GRASS: { url: `${RAIZ_AOE}/grass.png`, quadros: 12 },          // 5471 — anel de folhas
+  ELECTRIC: { url: `${RAIZ_AOE}/electric.png`, quadros: 13 },    // 5621 — anel de faiscas
+  GRASS: { url: `${RAIZ_AOE}/grass.png`, quadros: 11 },          // 5471 — anel de folhas
   ICE: { url: `${RAIZ_AOE}/ice.png`, quadros: 18 },              // 4276 — esfera ciano
   POISON: { url: `${RAIZ_AOE}/poison.png`, quadros: 6 },         // 5489 — anel roxo
-  GROUND: { url: `${RAIZ_AOE}/ground.png`, quadros: 8 },         // 5538 — anel de terra
-  FLYING: { url: `${RAIZ_AOE}/flying.png`, quadros: 16 },        // 4313 — redemoinho branco
-  PSYCHIC: { url: `${RAIZ_AOE}/psychic.png`, quadros: 33 },      // 4382 — estrela rosa
-  BUG: { url: `${RAIZ_AOE}/bug.png`, quadros: 17 },              // 4326 — enxame verde
+  GROUND: { url: `${RAIZ_AOE}/ground.png`, quadros: 6 },         // 5538 — anel de terra
+  FLYING: { url: `${RAIZ_AOE}/flying.png`, quadros: 13 },        // 4313 — redemoinho branco
+  PSYCHIC: { url: `${RAIZ_AOE}/psychic.png`, quadros: 28 },      // 4382 — estrela rosa
+  BUG: { url: `${RAIZ_AOE}/bug.png`, quadros: 16 },              // 4326 — enxame verde
   // TROCADA em 2026-08-31 (PH-368). O 4275 e a MESMA arte do ICE (4276) noutro
   // matiz — esfera de pas, dois ids vizinhos do mesmo lote. Nao ha nada na tela
   // que separe uma Explosao Elemental de gelo de uma de dragao, e a camada de

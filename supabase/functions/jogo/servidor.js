@@ -49323,7 +49323,7 @@ var VFX_POR_GOLPE = {
 		} }),
 		repeticoes: 2
 	},
-	comet_punch: { single: tira("comet_punch", 12) },
+	comet_punch: { single: tira("comet_punch", 9) },
 	scratch: { single: tira("scratch", 12, { direcional: {
 		anguloBaseGraus: -46,
 		ancoraX: .67
@@ -49332,10 +49332,10 @@ var VFX_POR_GOLPE = {
 	stomp: { single: tira("stomp", 9) },
 	x_scissor: { single: tira("x_scissor", 7) },
 	shadow_punch: { single: tira("shadow_punch", 16, { direcional: { anguloBaseGraus: 98 } }) },
-	dig: { single: tira("dig", 19) },
-	fire_fang: { single: tira("fire_fang", 12) },
-	thunder_fang: { single: tira("thunder_fang", 12) },
-	ice_fang: { single: tira("ice_fang", 11) },
+	dig: { single: tira("dig", 13) },
+	fire_fang: { single: tira("fire_fang", 11) },
+	thunder_fang: { single: tira("thunder_fang", 11) },
+	ice_fang: { single: tira("ice_fang", 9) },
 	flamethrower: { single: tira("flamethrower", 13, { direcional: {
 		anguloBaseGraus: -19,
 		ancoraX: .56
@@ -49365,7 +49365,7 @@ var VFX_POR_GOLPE = {
 		aoe: tira("petal_dance", 16)
 	},
 	charm: {
-		single: tira("charm", 13, { direcional: {
+		single: tira("charm", 12, { direcional: {
 			anguloBaseGraus: 22,
 			ancoraX: .66
 		} }),
@@ -49424,27 +49424,27 @@ var VFX_POR_GOLPE = {
 	double_hit: { single: tira("anel_duplo", 16) },
 	double_kick: { single: tira("anel_duplo", 16) },
 	double_edge: { single: tira("anel_duplo", 16) },
-	hyper_beam: { single: tira("feixe_dourado", 10, { direcional: {
+	hyper_beam: { single: tira("feixe_dourado", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	giga_impact: { single: tira("feixe_dourado", 10, { direcional: {
+	giga_impact: { single: tira("feixe_dourado", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	flash_cannon: { single: tira("feixe_branco", 10, { direcional: {
+	flash_cannon: { single: tira("feixe_branco", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	ice_beam: { single: tira("feixe_branco", 10, { direcional: {
+	ice_beam: { single: tira("feixe_branco", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	aurora_beam: { single: tira("feixe_branco", 10, { direcional: {
+	aurora_beam: { single: tira("feixe_branco", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
@@ -49465,41 +49465,41 @@ var VFX_POR_GOLPE = {
 		} }),
 		repeticoes: 2
 	},
-	energy_ball: { single: tira("energia_verde", 16, { direcional: {
+	energy_ball: { single: tira("energia_verde", 15, { direcional: {
 		anguloBaseGraus: 9,
 		ancoraX: .59,
 		recorteX: .72
 	} }) },
-	solar_beam: { single: tira("energia_verde", 16, { direcional: {
+	solar_beam: { single: tira("energia_verde", 15, { direcional: {
 		anguloBaseGraus: 9,
 		ancoraX: .59,
 		recorteX: .72
 	} }) },
-	thunder: { single: tira("raio_vertical", 10) },
-	thunderbolt: { single: tira("raio_vertical", 10) },
+	thunder: { single: tira("raio_vertical", 9) },
+	thunderbolt: { single: tira("raio_vertical", 9) },
 	magical_leaf: {
 		single: tira("folhas", 7),
 		repeticoes: 2
 	},
 	absorb: {
-		single: tira("dreno_verde", 13),
+		single: tira("dreno_verde", 12),
 		escala: { single: 1.25 }
 	},
 	mega_drain: {
-		single: tira("dreno_verde", 13),
+		single: tira("dreno_verde", 12),
 		escala: { single: 1.25 }
 	},
 	giga_drain: {
-		single: tira("dreno_verde", 13),
+		single: tira("dreno_verde", 12),
 		escala: { single: 1.25 }
 	},
 	leech_life: {
-		single: tira("dreno_verde", 13),
+		single: tira("dreno_verde", 12),
 		escala: { single: 1.25 }
 	},
 	petal_blizzard: {
-		single: tira("petalas", 14),
-		aoe: tira("petalas", 14)
+		single: tira("petalas", 13),
+		aoe: tira("petalas", 13)
 	},
 	smog: {
 		single: tira("gas_roxo", 12),
@@ -49543,48 +49543,48 @@ var VFX_POR_GOLPE = {
 		escala: { single: 1.4 }
 	},
 	recover: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	rest: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	synthesis: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	milk_drink: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	heal_pulse: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	moonlight: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	morning_sun: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	wish: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	swords_dance: { single: tira("aura_verde", 18) },
 	growth: { single: tira("aura_verde", 18) },
 	attract: {
-		single: tira("charm", 13, { direcional: {
+		single: tira("charm", 12, { direcional: {
 			anguloBaseGraus: 22,
 			ancoraX: .66
 		} }),
 		repeticoes: 2
 	},
 	sweet_kiss: {
-		single: tira("charm", 13, { direcional: {
+		single: tira("charm", 12, { direcional: {
 			anguloBaseGraus: 22,
 			ancoraX: .66
 		} }),
