@@ -75232,8 +75232,8 @@ function atualizarLure(world, gameState, dt) {
 //#endregion
 //#region src/engine/systems/combatSystem.ts
 var HIT_LAND_DELAY = ATTACK_ANIM_DURATION;
-var IMPACT_EFFECT_DURATION = 1;
-var AOE_EFFECT_DURATION = 1.2;
+var IMPACT_EFFECT_DURATION = 3;
+var AOE_EFFECT_DURATION = 3;
 var STATUS_VFX_DURATION = 1.1;
 var formulaEngine$4 = createFormulaEngine(FORMULAS);
 var STAB_MULTIPLIER = formulaEngine$4.eval("STAB_MULTIPLIER");

@@ -94,8 +94,24 @@ const HIT_LAND_DELAY = ATTACK_ANIM_DURATION
 // faixa em que a animacao le como movimento e nao como sequencia de imagens.
 // Continua bem abaixo do MIN_ACTION_GAP (2s), entao dois golpes seguidos do
 // mesmo POKE nao empilham efeito.
-const IMPACT_EFFECT_DURATION = 1.0
-const AOE_EFFECT_DURATION = 1.2
+// TETO de vida do efeito, e nao mais o tempo em que a arte tem que caber.
+//
+// Ate a PH-374 estes numeros DEFINIAM a velocidade: `faseDaTira` esticava a
+// tira pra caber neles, entao arte de 39 quadros tocava a 39 fps e arte de 5
+// tocava a 4,2. Agora a arte toca na velocidade autorada (10 fps) e estes dois
+// so dizem ate quando o efeito pode viver.
+//
+// 3,0s porque e o tempo da arte MAIS LONGA do acervo depois de aparar os
+// quadros vazios (tipo NORMAL e tipo ICE, 30 quadros cada) — e tambem o turno
+// (PH-376). Efeito mais curto que isso some antes: quem controla o
+// desaparecimento e o fade da propria arte (`opacidadeDoEfeito`), nao este
+// teto. O que ele evita e a arte longa ser CEITADA no meio.
+//
+// O motor nao sabe quantos quadros a arte tem, e isso e de proposito:
+// `combatSystem` roda no servidor, que nao desenha. Por isso um teto unico em
+// vez de duracao derivada da tira.
+const IMPACT_EFFECT_DURATION = 3.0
+const AOE_EFFECT_DURATION = 3.0
 // Golpe de status usa GIF real (statusVfx.ts), nao os quadros PNG do burst
 // procedural: um GIF de servico Tibia costuma ter 8-20 quadros a
 // ~100-150ms cada (0,8-3s por ciclo). Nos 0,35/0,55s dos outros dois, o

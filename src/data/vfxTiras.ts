@@ -36,10 +36,35 @@
 // invisiveis em jogo.
 import type { ElementType, StatusCondition } from './generated/types'
 
+/**
+ * A velocidade em que a arte de efeito FOI AUTORADA, e nao um numero escolhido.
+ *
+ * O `.dat` de origem guarda duracao por quadro, e o exportador PULAVA esse
+ * bloco (`self.p += frames * 8`). Lido na PH-373, o banco inteiro responde uma
+ * coisa so: 5.394 efeitos, 69.282 quadros, TODOS a 100 ms — zero variacao,
+ * zero `min != max`. Dai 10 fps, exato.
+ *
+ * ANTES A VELOCIDADE ERA ACIDENTE. `faseDaTira` amarrava a fase ao progresso
+ * do efeito, entao a tira era esticada ou comprimida pra caber num tempo fixo
+ * e o NUMERO DE QUADROS decidia o ritmo: 39 fps no ICE contra 4,2 fps na area
+ * NORMAL, 9,3x de espalhamento. A queixa que abriu a leva foi exatamente essa
+ * — "parece que o POKE acelera a animacao pra caber no tempo".
+ */
+export const FPS_DA_ARTE_DE_EFEITO = 10
+
 export interface TiraDeVfx {
   url: string
   /** Quantos quadros a tira tem. A largura de cada um sai da imagem. */
   quadros: number
+  /**
+   * Sobrescreve `FPS_DA_ARTE_DE_EFEITO` para esta tira.
+   *
+   * Nao ha nenhum caso hoje: o banco pxg e 100% uniforme a 100 ms. O campo
+   * existe porque arte de OUTRO banco pode nascer com outra cadencia (sao 8
+   * bancos em `projetos.json`, ~9.400 efeitos nunca varridos), e sem ele o
+   * primeiro caso desses obrigaria a mexer no motor.
+   */
+  fps?: number
   /**
    * Correcao de tamanho, multiplicando a altura-base do desenho. Existe
    * porque o enquadramento nao e padronizado nem depois do recorte: um
