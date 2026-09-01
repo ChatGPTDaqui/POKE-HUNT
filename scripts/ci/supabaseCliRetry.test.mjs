@@ -18,6 +18,40 @@
 // O `supabase` real e substituido por uma FUNCAO exportada do bash (`export -f`),
 // e nao por um arquivo em `PATH`: no Git Bash do Windows um executavel sem
 // extensao nao e encontrado pelo `PATH`, e a bancada passaria a medir nada.
+//
+// QUANTO ESTE ARQUIVO CUSTA, E POR QUE ESTA ESCRITO AQUI (PH-377)
+//
+// Medido nesta maquina (Windows, Git Bash), arquivo isolado e sem carga:
+//
+//                                        antes da PH-377   depois
+//   sucesso de primeira (1 tentativa)          833 ms      301 ms
+//   28P01 duas vezes (3 tentativas)          2.692 ms      657 ms
+//   erro de SQL (1 tentativa)                  833 ms      311 ms
+//   28P01 em todas (3 tentativas)            2.248 ms      576 ms
+//
+// O teto de cada caso e o `testTimeout` padrao do vitest, 5.000 ms. Os dois
+// casos de 3 tentativas gastavam 83% e 54% do teto SEM CONCORRENCIA, e por isso
+// estouravam quando a suite inteira roda em paralelo — a suite local ficava
+// vermelha com o CI verde, que e o pior dos dois mundos: treina quem desenvolve
+// a ignorar a saida do `vitest run`.
+//
+// O CUSTO E FORK, NAO LOGICA. Cada processo externo custa ~100ms no Git Bash do
+// Windows, e o wrapper forkava nove por tentativa (`mktemp`, dois `cat`, o
+// `bash` do comando falso, o `cat` do contador dentro dele, `grep`, `rm`,
+// `sleep 0`, mais um `seq`). A PH-377 trocou o que tinha builtin equivalente —
+// ver o cabecalho de `supabase-cli.sh`. **O teste nao mudou nada alem deste
+// comentario**, e e isso que garante que a troca preservou comportamento: as 5
+// asserções continuam as mesmas.
+//
+// DELIBERADAMENTE NAO FEITO: transformar o comando falso em funcao exportada do
+// bash tambem. Economizaria mais um fork por tentativa, mas o comando deixaria
+// de ser um PROCESSO — e o wrapper existe pra rodar um binario de verdade.
+// Trocar fidelidade por 100ms nao se paga com a margem que sobrou.
+//
+// SE ESTE ARQUIVO VOLTAR A ESTOURAR: o numero de cima e a referencia. Passar de
+// ~700ms por caso significa que alguem religou um fork por tentativa, e o
+// conserto e achar o fork — nunca subir o `testTimeout`, que foi o que escondeu
+// crescimento neste repo antes.
 import { execFileSync } from 'node:child_process'
 import { chmodSync, mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
