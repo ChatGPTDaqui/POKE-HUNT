@@ -6,7 +6,7 @@
 // precarregar a arte da especie nova, escrever `worldStore.player.poke`, zerar
 // cooldowns e alvo. Se o reordenar pudesse mexer no slot 0, o POKE desenhado no
 // canvas ficaria diferente do POKE ativo no estado ate a proxima troca de cena.
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeAll, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -26,6 +26,23 @@ function montarEquipe(quantos: number) {
   useGameStateStore.setState({ team: equipe, activeIndex: 0 })
   return equipe
 }
+
+// AQUECE O IMPORT DO MOTOR ANTES DE QUALQUER CASO (PH-404).
+//
+// Os casos de `controller.reorderTeam` comecam com `await import('./controller')`.
+// O modulo fica em cache depois da primeira vez, entao o grafo INTEIRO do motor
+// caia sobre o primeiro caso, dentro do orcamento de 5s dele. Na suite cheia isso
+// reprovava sempre nesta maquina — `Test timed out in 5000ms` — enquanto o arquivo
+// sozinho passava em 7,2s. `import` foi 1.290s de uma execucao de 155s da suite
+// inteira: e o item mais caro daqui.
+//
+// O aquecimento vai num HOOK porque hook tem orcamento proprio, separado do caso —
+// e porque assim nenhum caso paga sozinho por um custo que e de todos. Os
+// `await import` de dentro dos casos continuam la e viram acerto de cache; nada do
+// que eles afirmam muda. Mesmo remedio da PH-322 em `controller.test.ts`.
+beforeAll(async () => {
+  await import('./controller')
+}, 30000)
 
 beforeEach(() => {
   pedirAcaoMock.mockReset()

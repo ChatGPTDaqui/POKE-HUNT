@@ -12,6 +12,28 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // UM item pra um intervalo de duas issues (PH-396 e PH-404).
+  //
+  // O achado e de QA, nao de jogador: nenhum jogador reclamou de ver o POKE
+  // errado em campo, e o caso reproduzido foi na conta de teste do dev. Ele
+  // entra mesmo assim porque o sintoma E visivel e o jogador que o vivesse nao
+  // teria como nomear o que aconteceu — a nota da o nome.
+  //
+  // A nota NAO diz "vendido, liberado ou mandado pra mochila noutra aba", que e
+  // a causa real: falar de "outra aba" ensina um caminho que quase ninguem usa e
+  // faz parecer que a culpa e de quem jogou. Diz o que o jogador via e o que
+  // acontece agora.
+  //
+  // FICA DE FORA (a lista de exclusao e o indice barato do intervalo seguinte):
+  //   - PH-404: aquecimento de import num arquivo de teste. Zero efeito visivel.
+  {
+    version: '7.32',
+    date: '2026-09-01',
+    title: 'Cada POKE no seu lugar, de novo',
+    highlights: [
+      'O POKE EM CAMPO É SEMPRE UM DA SUA EQUIPE. Em algumas situações a tela continuava mostrando lutando um POKE que já não estava na equipe, e só um recarregar da página resolvia. Agora o primeiro POKE da equipe entra no lugar na hora, com aviso na tela.',
+    ],
+  },
   // CINCO itens pra seis issues do intervalo (PH-393 a PH-400), e a conta nao
   // fecha de proposito — ver a lista de exclusao no fim.
   //

@@ -101,15 +101,30 @@ describe('reconciliarPokeAtivoNoWorld (PH-221)', () => {
     expect(pokeAtivoNoHud()).toBeUndefined()
   })
 
-  it('POKE em campo nao esta no time do servidor (trocou): nao mexe', () => {
+  // ESTE CASO TROCOU DE LADO NA PH-396, e nao foi apagado.
+  //
+  // Ele travava "POKE em campo que nao esta no time do servidor: NAO MEXE" — o
+  // `return` mudo do `!doServ`. Era leitura defensiva razoavel (nao derrubar o
+  // POKE por causa de uma resposta estranha), e ela abria um buraco real: POKE
+  // vendido, liberado ou mandado pra mochila noutra aba ficava em campo,
+  // desenhado e lutando, ate um F5.
+  //
+  // Achado em 01/09 no dev: a tela mostrava um Scizor Lv 80 em campo enquanto o
+  // banco tinha esse POKE na MOCHILA, sem alteracao desde 24/08. O sinal e
+  // confiavel — `estadoParcial` afeta so `bagPokes`, `team` vem sempre completo —
+  // e nao ha caminho legitimo que ponha em campo quem saiu da equipe.
+  //
+  // O detalhe da cobertura fica em `pokeFantasmaEmCampo.test.ts`; aqui fica so a
+  // inversao, pra quem ler este arquivo nao concluir que a regra antiga vale.
+  it('POKE em campo que saiu da equipe do servidor E SUBSTITUIDO (PH-396)', () => {
     const emCampo = { ...createPokeInstance(rng, 'pikachu', 24), uid: 'p1', exp: 5000 }
     porEmCampo(emCampo)
     const outro = { ...createPokeInstance(rng, 'eevee', 10), uid: 'p2' }
 
     aplicarEstadoDoServidor(resposta([outro]).estado, true, resposta([outro]).resumo)
 
-    expect(pokeAtivoNoHud()!.speciesId).toBe('pikachu')
-    expect(pokeAtivoNoHud()!.uid).toBe('p1')
+    expect(pokeAtivoNoHud()!.uid).toBe('p2')
+    expect(pokeAtivoNoHud()!.speciesId).toBe('eevee')
   })
 })
 
