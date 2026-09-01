@@ -1,6 +1,7 @@
 // Port de js/systems/AutoSystem.js.
 import type { Rng } from '@/core/rng'
 import { getItem, ITEMS, type GeneratedItem } from '@/data/items'
+import { TURNO_SEGUNDOS } from '@/data/abilities'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import { attemptCapture, type CaptureResult } from './captureSystem'
 import { heal } from '../entity'
@@ -9,15 +10,25 @@ import type { StatusCondition } from '@/data/statusEffects'
 import type { PokeInstance } from '@/data/pokes'
 import type { WorldState } from '../types'
 
-// O cooldown do TREINADOR: de 1.5 em 1.5 segundos ele consegue usar UM item de
-// cura, seja pocao, revive ou antidoto. Substituiu dois timers de 1s
-// independentes (um pra pocao, outro pra revive) que nunca se esperavam — o bot
-// conseguia usar os dois no mesmo instante, o que nao e uma mao humana usando
-// itens, e sim duas.
+// O cooldown do TREINADOR: uma vez por TURNO ele consegue usar UM item de cura,
+// seja pocao, revive ou antidoto. Substituiu dois timers de 1s independentes
+// (um pra pocao, outro pra revive) que nunca se esperavam — o bot conseguia usar
+// os dois no mesmo instante, o que nao e uma mao humana usando itens, e sim duas.
 //
-// Numero do usuario, atrelado ao Treinador como personagem (a ser introduzido).
+// ERA 1,5s FIXO, e virou o turno na PH-378. O motivo nao e estetico: com o turno
+// em 2s, 1,5s dava 1,33 item por turno; quando a PH-376 esticou o turno pra 3s,
+// o MESMO 1,5s passou a dar 2,00 — o Treinador ganhou ritmo de graca so porque o
+// turno de todo mundo esticou. Amarrado ao turno, a regra vira uma frase:
+// **cada um age uma vez por turno, inclusive o Treinador.**
+//
+// O CUSTO, e onde ele morde. Em segundos de parede a cura cai a metade. O dano
+// recebido tambem desacelerou junto com o turno, entao a perda liquida e menor
+// que parece — mas a aresta afiada e HP CRITICO COM STATUS: a prioridade gasta
+// uma acao por turno, entao curar o status e depois o HP passa a levar dois
+// turnos. E a janela em que um POKE envenenado e quase morto pode nao ser salvo.
+//
 // Poke Ball NAO passa por este cooldown: capturar nao e curar.
-const COOLDOWN_DO_TREINADOR = 1.5
+const COOLDOWN_DO_TREINADOR = TURNO_SEGUNDOS
 
 // Abaixo disso, HP tem precedencia sobre status: de nada adianta curar o
 // veneno de um POKE que morre no proximo golpe. Acima, o status vem primeiro —

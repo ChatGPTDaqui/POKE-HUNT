@@ -12,6 +12,35 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // ENTRADA PROPRIA, e nao um quinto item da 7.27, porque a 7.27 JA FOI
+  // PROMOVIDA (PR #368) enquanto esta mudanca ainda estava em revisao. A
+  // regua e uma entrada por promocao: acrescentar item numa versao que o
+  // jogador ja leu reescreve o passado dele, e quem abriu a aba ontem nunca
+  // veria a linha nova.
+  //
+  // ELA TIRA ALGO DO JOGADOR, entao diz o numero. `vazao-do-combate.mjs`,
+  // 200 minutos por regime, trocando so o cooldown do Treinador (1,5s fixo
+  // -> o turno) com rebuild entre as medicoes:
+  //
+  //   regime      curas/min 1,5s   curas/min turno   mortes/min 1,5s   turno
+  //   apertado         2,04             2,04              0,000        0,000
+  //   folgado          1,55             1,43              0,000        0,000
+  //   sofrido          8,45             4,22              5,955        7,185
+  //
+  // Nos dois regimes normais o custo e ZERO mortes — o preco mora inteiro no
+  // regime em que o POKE ja apanhava. Dai a nota separar os dois casos em vez
+  // de anunciar so a metade que soa mal.
+  //
+  // FORA DA NOTA: a bancada ter ganhado um terceiro regime e a coluna de piso
+  // de HP, e o contador de itens que media a funcao errada. Encanamento.
+  {
+    version: '7.28',
+    date: '2026-09-01',
+    title: 'O Treinador entrou no compasso',
+    highlights: [
+      'O TREINADOR PASSOU A AGIR EM TURNOS, COMO TODO MUNDO. Ele conseguia usar dois itens de cura no tempo de um turno; agora usa um, do mesmo jeito que o POKE ataca uma vez por turno. A cura automática dispara metade das vezes. Caçando no seu nível isso não aparece: medido, nenhuma derrota a mais. Caçando acima do nível, onde o POKE já apanhava, ele cai cerca de 20% mais.',
+    ],
+  },
   // O ritmo do combate (PH-373 a PH-376). Uma entrada so pras quatro issues,
   // porque pro jogador e UM assunto: a velocidade com que as coisas acontecem.
   //
