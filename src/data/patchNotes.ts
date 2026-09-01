@@ -12,6 +12,38 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // A leva da auditoria de HUD (PH-372 a PH-379). SUCINTA a pedido do usuario,
+  // mesma regua da 7.22 em diante: cinco linhas, uma por coisa que o jogador
+  // percebe sozinho.
+  //
+  // O ITEM 1 E BUG, e o mais grave da leva: o ticker do celular escolhia a
+  // linha por PRIORIDADE DE CANAL (`sistema ?? trade ?? log`), nao por
+  // recencia. Bastava uma linha de sistema aparecer uma vez — e sao 23 pontos
+  // de chamada — pra ele congelar nela pra sempre. Como no compacto o ticker e
+  // o unico canal de chat, o feed de jogo inteiro (abate, ouro, nivel, captura)
+  // sumia da tela. Vale a primeira linha por isso.
+  //
+  // FORA DA NOTA de proposito, por ser invisivel jogando: o script de
+  // normalizacao de acentuacao e o teste que o tranca (o jogador ve o texto
+  // certo, nao a ferramenta), o rebuild do bundle da Edge, e o `leading` das
+  // faixas do slot de golpe — ele so existe pra o item 3 caber.
+  //
+  // O QUE NAO ENTROU e vale registrar pra proxima varredura nao procurar: a
+  // raridade continua sem aparecer em POKE shiny (o roxo de shiny e o lilas de
+  // ULTRA tem distancia RGB 39, indistinguiveis num nome de 10px), entao ali
+  // nada mudou e nao ha o que anunciar.
+  {
+    version: '7.25',
+    date: '2026-09-01',
+    title: 'A tela conta o que está acontecendo',
+    highlights: [
+      'O CHAT DO CELULAR VOLTOU A MOSTRAR O JOGO. A linha sobre o rodapé travava na primeira mensagem de sistema que aparecesse e ficava nela para sempre — abate, ouro, subida de nível e captura simplesmente não apareciam mais. Agora ela mostra sempre a última coisa que aconteceu.',
+      'O NOME DO POKE SELVAGEM SAI NA COR DA RARIDADE. Dá pra ver que é um RARO ou um ULTRA antes de capturar, do mesmo jeito que a borda da foto já dizia no seu time. Comum continua branco e shiny continua roxo.',
+      'A BARRA DE GOLPES CRESCEU NO CELULAR. Os ícones estavam pequenos demais e o número do dano cobria metade do slot; agora o elemento do golpe aparece inteiro e o botão é mais fácil de acertar com o dedo.',
+      'ESC FECHA O PAINEL ABERTO, NO COMPUTADOR. Com dois abertos, o primeiro ESC fecha o de cima. As janelas também ganharam o mesmo vidro fosco que os painéis do celular já tinham.',
+      'O TEXTO DO JOGO GANHOU ACENTO. Ficha de golpe, habilidade, Wiki, tutoriais, avisos e estas próprias notas estavam escritos sem acentuação em boa parte do jogo.',
+    ],
+  },
   // A revisao das sprites de golpe (PH-367 a PH-370). Uma entrada so pros oito
   // commits, porque pra quem joga e UM assunto: o que aparece na tela quando um
   // golpe acerta. SUCINTA, mesma regua da 7.22 e da 7.23.
