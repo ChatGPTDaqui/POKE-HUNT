@@ -648,7 +648,7 @@ var FORMULAS = {
 		"vars": []
 	},
 	"TURNO_SEGUNDOS": {
-		"expr": "2",
+		"expr": "3",
 		"vars": []
 	}
 };
@@ -49315,15 +49315,15 @@ var tira = (arquivo, quadros, extra) => ({
 	...extra
 });
 var VFX_POR_GOLPE = {
-	bullet_punch: {
-		single: tira("bullet_punch", 8, { direcional: {
+	bullet_punch: { single: tira("bullet_punch", 8, {
+		direcional: {
 			anguloBaseGraus: 0,
 			ancoraX: .8,
 			recorteX: .55
-		} }),
-		repeticoes: 2
-	},
-	comet_punch: { single: tira("comet_punch", 12) },
+		},
+		cauda: "repetir"
+	}) },
+	comet_punch: { single: tira("comet_punch", 9) },
 	scratch: { single: tira("scratch", 12, { direcional: {
 		anguloBaseGraus: -46,
 		ancoraX: .67
@@ -49332,18 +49332,15 @@ var VFX_POR_GOLPE = {
 	stomp: { single: tira("stomp", 9) },
 	x_scissor: { single: tira("x_scissor", 7) },
 	shadow_punch: { single: tira("shadow_punch", 16, { direcional: { anguloBaseGraus: 98 } }) },
-	dig: { single: tira("dig", 19) },
-	fire_fang: { single: tira("fire_fang", 12) },
-	thunder_fang: { single: tira("thunder_fang", 12) },
-	ice_fang: { single: tira("ice_fang", 11) },
+	dig: { single: tira("dig", 13) },
+	fire_fang: { single: tira("fire_fang", 11) },
+	thunder_fang: { single: tira("thunder_fang", 11) },
+	ice_fang: { single: tira("ice_fang", 9) },
 	flamethrower: { single: tira("flamethrower", 13, { direcional: {
 		anguloBaseGraus: -19,
 		ancoraX: .56
 	} }) },
-	fire_spin: {
-		single: tira("fire_spin", 5),
-		repeticoes: 2
-	},
+	fire_spin: { single: tira("fire_spin", 5, { cauda: "repetir" }) },
 	mud_shot: { single: tira("mud_shot", 15, { direcional: {
 		anguloBaseGraus: 46,
 		ancoraX: .68
@@ -49364,142 +49361,105 @@ var VFX_POR_GOLPE = {
 		single: tira("petal_dance", 16),
 		aoe: tira("petal_dance", 16)
 	},
-	charm: {
-		single: tira("charm", 13, { direcional: {
-			anguloBaseGraus: 22,
-			ancoraX: .66
-		} }),
-		repeticoes: 2
-	},
-	taunt: {
-		single: tira("taunt", 12),
-		repeticoes: 2
-	},
+	charm: { single: tira("charm", 12, { direcional: {
+		anguloBaseGraus: 22,
+		ancoraX: .66
+	} }) },
+	taunt: { single: tira("taunt", 12, { cauda: "repetir" }) },
 	dragon_dance: { single: tira("dragon_dance", 16) },
-	spider_web: {
-		single: tira("spider_web", 4),
-		repeticoes: 3
-	},
-	bite: {
-		single: tira("mandibula", 6),
-		repeticoes: 2
-	},
-	crunch: {
-		single: tira("mandibula", 6),
-		repeticoes: 2
-	},
-	hyper_fang: {
-		single: tira("mandibula", 6),
-		repeticoes: 2
-	},
-	slash: {
-		single: tira("talho_vermelho", 7, { direcional: {
-			anguloBaseGraus: 0,
-			ancoraX: .79
-		} }),
-		repeticoes: 2
-	},
-	night_slash: {
-		single: tira("talho_vermelho", 7, { direcional: {
-			anguloBaseGraus: 0,
-			ancoraX: .79
-		} }),
-		repeticoes: 2
-	},
+	spider_web: { single: tira("spider_web", 4, { cauda: "repetir" }) },
+	bite: { single: tira("mandibula", 6, { cauda: "boomerang" }) },
+	crunch: { single: tira("mandibula", 6, { cauda: "boomerang" }) },
+	hyper_fang: { single: tira("mandibula", 6, { cauda: "boomerang" }) },
+	slash: { single: tira("talho_vermelho", 7, { direcional: {
+		anguloBaseGraus: 0,
+		ancoraX: .79
+	} }) },
+	night_slash: { single: tira("talho_vermelho", 7, { direcional: {
+		anguloBaseGraus: 0,
+		ancoraX: .79
+	} }) },
 	leaf_blade: {
 		single: tira("lamina_verde", 8, { direcional: {
 			anguloBaseGraus: -45,
 			ancoraX: .65
 		} }),
-		escala: { single: 1.25 },
-		repeticoes: 2
+		escala: { single: 1.25 }
 	},
-	cross_chop: {
-		single: tira("x_vermelho", 7),
-		repeticoes: 2
-	},
+	cross_chop: { single: tira("x_vermelho", 7) },
 	fury_attack: { single: tira("estrela_repetida", 24) },
 	fury_cutter: { single: tira("estrela_repetida", 24) },
 	double_slap: { single: tira("estrela_repetida", 24) },
 	double_hit: { single: tira("anel_duplo", 16) },
 	double_kick: { single: tira("anel_duplo", 16) },
 	double_edge: { single: tira("anel_duplo", 16) },
-	hyper_beam: { single: tira("feixe_dourado", 10, { direcional: {
+	hyper_beam: { single: tira("feixe_dourado", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	giga_impact: { single: tira("feixe_dourado", 10, { direcional: {
+	giga_impact: { single: tira("feixe_dourado", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	flash_cannon: { single: tira("feixe_branco", 10, { direcional: {
+	flash_cannon: { single: tira("feixe_branco", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	ice_beam: { single: tira("feixe_branco", 10, { direcional: {
+	ice_beam: { single: tira("feixe_branco", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	aurora_beam: { single: tira("feixe_branco", 10, { direcional: {
+	aurora_beam: { single: tira("feixe_branco", 9, { direcional: {
 		anguloBaseGraus: 0,
 		ancoraX: .76,
 		recorteX: .56
 	} }) },
-	psybeam: {
-		single: tira("feixe_roxo", 7, { direcional: {
-			anguloBaseGraus: 0,
-			ancoraX: .7,
-			recorteX: .64
-		} }),
-		repeticoes: 2
-	},
-	moonblast: {
-		single: tira("feixe_roxo", 7, { direcional: {
-			anguloBaseGraus: 0,
-			ancoraX: .7,
-			recorteX: .64
-		} }),
-		repeticoes: 2
-	},
-	energy_ball: { single: tira("energia_verde", 16, { direcional: {
+	psybeam: { single: tira("feixe_roxo", 7, { direcional: {
+		anguloBaseGraus: 0,
+		ancoraX: .7,
+		recorteX: .64
+	} }) },
+	moonblast: { single: tira("feixe_roxo", 7, { direcional: {
+		anguloBaseGraus: 0,
+		ancoraX: .7,
+		recorteX: .64
+	} }) },
+	energy_ball: { single: tira("energia_verde", 15, { direcional: {
 		anguloBaseGraus: 9,
 		ancoraX: .59,
 		recorteX: .72
 	} }) },
-	solar_beam: { single: tira("energia_verde", 16, { direcional: {
+	solar_beam: { single: tira("energia_verde", 15, { direcional: {
 		anguloBaseGraus: 9,
 		ancoraX: .59,
 		recorteX: .72
 	} }) },
-	thunder: { single: tira("raio_vertical", 10) },
-	thunderbolt: { single: tira("raio_vertical", 10) },
-	magical_leaf: {
-		single: tira("folhas", 7),
-		repeticoes: 2
-	},
+	thunder: { single: tira("raio_vertical", 9) },
+	thunderbolt: { single: tira("raio_vertical", 9) },
+	magical_leaf: { single: tira("folhas", 7, { cauda: "repetir" }) },
 	absorb: {
-		single: tira("dreno_verde", 13),
+		single: tira("dreno_verde", 12),
 		escala: { single: 1.25 }
 	},
 	mega_drain: {
-		single: tira("dreno_verde", 13),
+		single: tira("dreno_verde", 12),
 		escala: { single: 1.25 }
 	},
 	giga_drain: {
-		single: tira("dreno_verde", 13),
+		single: tira("dreno_verde", 12),
 		escala: { single: 1.25 }
 	},
 	leech_life: {
-		single: tira("dreno_verde", 13),
+		single: tira("dreno_verde", 12),
 		escala: { single: 1.25 }
 	},
 	petal_blizzard: {
-		single: tira("petalas", 14),
-		aoe: tira("petalas", 14)
+		single: tira("petalas", 13),
+		aoe: tira("petalas", 13)
 	},
 	smog: {
 		single: tira("gas_roxo", 12),
@@ -49512,26 +49472,14 @@ var VFX_POR_GOLPE = {
 	sludge_bomb: { single: tira("estouro_magenta", 10) },
 	poison_sting: { single: tira("estouro_magenta", 10) },
 	cross_poison: { single: tira("estouro_magenta", 10) },
-	mud_slap: {
-		single: tira("poeira_areia", 9),
-		repeticoes: 2
-	},
-	sand_attack: {
-		single: tira("poeira_areia", 9),
-		repeticoes: 2
-	},
+	mud_slap: { single: tira("poeira_areia", 9) },
+	sand_attack: { single: tira("poeira_areia", 9) },
 	fissure: { single: tira("rachadura", 20, { direcional: {
 		anguloBaseGraus: 41,
 		ancoraX: .74
 	} }) },
-	gust: {
-		single: tira("vento_branco", 7),
-		repeticoes: 2
-	},
-	air_slash: {
-		single: tira("vento_branco", 7),
-		repeticoes: 2
-	},
+	gust: { single: tira("vento_branco", 7) },
+	air_slash: { single: tira("vento_branco", 7) },
 	sandstorm: { single: tira("tornado_areia", 20) },
 	sand_tomb: { single: tira("tornado_areia", 20) },
 	ice_shard: {
@@ -49543,53 +49491,47 @@ var VFX_POR_GOLPE = {
 		escala: { single: 1.4 }
 	},
 	recover: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	rest: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	synthesis: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	milk_drink: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	heal_pulse: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	moonlight: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	morning_sun: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	wish: {
-		single: tira("cura_verde", 14),
+		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
 	swords_dance: { single: tira("aura_verde", 18) },
 	growth: { single: tira("aura_verde", 18) },
-	attract: {
-		single: tira("charm", 13, { direcional: {
-			anguloBaseGraus: 22,
-			ancoraX: .66
-		} }),
-		repeticoes: 2
-	},
-	sweet_kiss: {
-		single: tira("charm", 13, { direcional: {
-			anguloBaseGraus: 22,
-			ancoraX: .66
-		} }),
-		repeticoes: 2
-	},
+	attract: { single: tira("charm", 12, { direcional: {
+		anguloBaseGraus: 22,
+		ancoraX: .66
+	} }) },
+	sweet_kiss: { single: tira("charm", 12, { direcional: {
+		anguloBaseGraus: 22,
+		ancoraX: .66
+	} }) },
 	outrage: { single: tira("dragon_dance", 16) },
 	dragon_breath: { single: tira("dragon_dance", 16) },
 	dragon_rage: { single: tira("dragon_dance", 16) },
@@ -75232,8 +75174,8 @@ function atualizarLure(world, gameState, dt) {
 //#endregion
 //#region src/engine/systems/combatSystem.ts
 var HIT_LAND_DELAY = ATTACK_ANIM_DURATION;
-var IMPACT_EFFECT_DURATION = 1;
-var AOE_EFFECT_DURATION = 1.2;
+var IMPACT_EFFECT_DURATION = 3;
+var AOE_EFFECT_DURATION = 3;
 var STATUS_VFX_DURATION = 1.1;
 var formulaEngine$4 = createFormulaEngine(FORMULAS);
 var STAB_MULTIPLIER = formulaEngine$4.eval("STAB_MULTIPLIER");

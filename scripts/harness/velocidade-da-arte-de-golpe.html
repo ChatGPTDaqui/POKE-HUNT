@@ -13,10 +13,20 @@
 <!--
   COMPARADOR DE VELOCIDADE DA ARTE DE GOLPE
 
-  A PERGUNTA QUE ELE RESPONDE
+  A PERGUNTA JA FOI RESPONDIDA — E AGORA ELE E A PROVA DISSO
   ---------------------------------------------------------------------------
-  "A que velocidade a arte de golpe deve tocar?" — e ele responde POR
-  COMPARACAO, nao por argumento.
+  A pergunta era "a que velocidade a arte de golpe deve tocar?", e a resposta
+  veio do proprio arquivo de origem: 10 fps, autorados (PH-373/374). Nao houve
+  escolha a fazer — o .dat guardava a duracao por quadro e o exportador pulava
+  esses bytes.
+
+  Com a PH-374 a velocidade DEIXOU DE DEPENDER da duracao do efeito. Entao
+  esta pagina virou outra coisa, e util: as colunas de "candidato de fps" agora
+  so mudam quanto tempo o efeito VIVE, e todas tem que desenhar O MESMO QUADRO
+  no mesmo instante. Coluna diferente das outras = a velocidade voltou a ser
+  refem da duracao, ou seja o bug voltou.
+
+  O texto abaixo descreve o problema que ELA ACHOU, e fica como registro.
 
   O PROBLEMA MEDIDO. `faseDaTira` (render/sprites.ts) calcula
   `fase = idade / duracao`, entao a tira inteira e esticada ou comprimida pra
@@ -158,10 +168,13 @@
 <h1>Comparador de velocidade da arte de golpe — <span id="modo"></span></h1>
 <p class="aviso">
   Uma linha por arte, uma coluna por candidato de fps. Todas animam do mesmo relógio, em ciclo de
-  <b>2,0s</b> (<code>BASE_ATTACK_INTERVAL</code>, o vão entre dois golpes básicos). A barra azul sob
-  cada célula é quanto desse vão a opção ocupa; ela fica <span style="color:#e07a5f">laranja</span>
-  quando a arte não termina antes do próximo golpe. Disco azul = atacante, vermelho = alvo, 39px de
-  mundo entre os dois.
+  <b>2,0s</b>. A barra azul sob cada célula é quanto desse vão a opção ocupa. Disco azul =
+  atacante, vermelho = alvo, 39px de mundo entre os dois.
+  <br><br>
+  <b>Desde a PH-374, todas as colunas de uma linha devem desenhar o MESMO quadro</b> — a velocidade
+  não depende mais da duração do efeito. Coluna fora do passo significa que o defeito voltou. Os
+  rótulos de fps abaixo de cada célula descrevem a duração que aquela coluna força, não a velocidade
+  de desenho.
 </p>
 <h2 style="font-size:13px;margin:14px 12px 4px">Quadros vazios nas pontas</h2>
 <p class="aviso">
@@ -178,7 +191,7 @@
 // cache de imagem, senao cada celula baixa a arte de novo e todas caem no
 // desenho procedural no primeiro frame.
 import { drawEffect, primeImage, readyImage } from '/src/render/sprites.ts'
-import { VFX_POR_GOLPE, todasAsTirasDeGolpe, repeticoesDoGolpe } from '/src/data/moveVfx.ts'
+import { VFX_POR_GOLPE, todasAsTirasDeGolpe } from '/src/data/moveVfx.ts'
 import { TIRA_POR_ELEMENTO, TIRA_AOE_POR_ELEMENTO, todasAsTirasDeVfx } from '/src/data/vfxTiras.ts'
 import { ABILITIES_DATA } from '/src/data/generated/abilities.generated.ts'
 import { TYPE_COLORS } from '/src/data/typeColors.ts'
@@ -225,9 +238,16 @@ document.getElementById('modo').textContent =
   `fundo ${FUNDO} · candidatos ${FPS.join(', ')} fps · ciclo ${CICLO}s`
   + (CICLO !== 2 ? '  ⚠ ciclo HIPOTETICO — o real e 2,0s' : '')
 
-/** Quantos quadros a fase percorre de fato — `repeticoes` multiplica. */
+/**
+ * Quantos quadros a fase percorre de fato.
+ *
+ * Era `quadros x repeticoes` ate a PH-375, quando `repeticoes` virou o modo de
+ * cauda `repetir` e saiu da conta de velocidade. Hoje e so `quadros` — a
+ * multiplicacao continuaria dando o numero certo (rep = 1 em tudo), mas mentiria
+ * sobre o modelo.
+ */
 function quadrosEfetivos(linha) {
-  const rep = linha.golpe ? repeticoesDoGolpe(linha.golpe) : 1
+  const rep = 1
   let tira
   if (linha.golpe) {
     const v = VFX_POR_GOLPE[linha.golpe]
@@ -283,7 +303,7 @@ cabecalho.append(document.createElement('th'))
 if (MOSTRA_ATUAL) {
   const th = document.createElement('th')
   th.className = 'atual'
-  th.textContent = 'ATUAL (cabe na duracao)'
+  th.textContent = 'ATUAL (10 fps autorados)'
   cabecalho.append(th)
 }
 for (const f of FPS) {

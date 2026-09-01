@@ -37,7 +37,7 @@ import { vfxDoGolpe } from '@/data/moveVfx'
 import { statusVfxUrl } from '@/data/statusVfx'
 import {
   tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
-  TIRA_POR_CONDICAO_NO_CORPO,
+  TIRA_POR_CONDICAO_NO_CORPO, FPS_DA_ARTE_DE_EFEITO, PISO_DE_PROLONGAMENTO,
   COR_DE_STATUS_NO_CORPO, FORCA_DA_TINTA_DE_STATUS, type TiraDeVfx,
 } from '@/data/vfxTiras'
 import { VFX_CURA_DURACAO } from '@/engine/entity'
@@ -1111,21 +1111,99 @@ const ESCALA_VFX_AOE = 1.15
 
 
 /**
- * Fase 0..1 dentro da tira. Uma volta ocupa a vida INTEIRA do efeito: a
- * duracao ja e diferente entre impacto (1,0s) e area (1,2s), entao amarrar a
- * fase ao progresso deixa as duas terminando junto com o proprio efeito, sem
- * constante de fps nova. Arte muito curta pede `repeticoes` (data/moveVfx.ts).
+ * Quanto tempo esta tira leva pra tocar UMA VEZ, na velocidade autorada.
+ *
+ * E o numero que faltava. Ate a PH-374 nada no jogo sabia disso: a tira era
+ * esticada pra caber na duracao do efeito, e o resultado ia de 4,2 a 39 fps.
+ */
+function tempoDaTira(tira: TiraDeVfx): number {
+  return tira.quadros / (tira.fps ?? FPS_DA_ARTE_DE_EFEITO)
+}
+
+/**
+ * Quantos quadros uma volta COMPLETA do modo de cauda percorre.
+ *
+ * O boomerang nao repete as pontas: pra N quadros a sequencia e
+ * `0..N-1` seguida de `N-2..1`, ou seja `2N-2` passos. Repetir o primeiro e o
+ * ultimo travaria a animacao dois quadros em cada ponta, que e visivel e le
+ * como engasgo.
+ */
+function passosDaVolta(tira: TiraDeVfx): number {
+  return tira.cauda === 'boomerang' ? Math.max(1, 2 * tira.quadros - 2) : tira.quadros
+}
+
+/**
+ * Fase 0..1 dentro da tira, agora derivada do TEMPO e nao do progresso.
+ *
+ * A conta e `idade x fps / quadros`, ou seja o quadro `k` aparece no instante
+ * `k / fps` — independente de quanto o efeito vive. Isso e o oposto exato do
+ * modelo antigo, em que a fase era `idade / duracao` e portanto o numero de
+ * quadros da arte definia a velocidade.
+ *
+ * Passar de 1 significa que a arte ACABOU. Quem chama decide o que fazer com
+ * isso (hoje: para de desenhar, via `opacidadeDoEfeito`); a PH-375 traz os
+ * modos de cauda pra arte curta — segurar, repetir, boomerang.
+ *
+ * `repeticoes` (data/moveVfx.ts) DEIXA DE ENTRAR na conta. Ele existia pra
+ * arte curta nao ficar em camera lenta dentro de um tempo fixo — problema que
+ * some junto com o tempo fixo. Mantido como multiplicador aqui, ele passaria a
+ * ACELERAR a arte pra 20-30 fps, que e exatamente o defeito que esta issue
+ * conserta. O campo continua no cadastro e vira o modo de cauda `repetir` na
+ * PH-375.
  */
 function faseDaTira(effect: WorldEffect, tira: TiraDeVfx): number {
-  const repeticoes = vfxDoGolpe(effect.abilityId)?.repeticoes ?? 1
-  if (repeticoes <= 1 || tira.quadros <= 0) return effectProgress(effect)
-  return (effectProgress(effect) * repeticoes) % 1
+  if (tira.quadros <= 0) return 0
+  const decorrido = Math.max(0, effect.age - effect.delay)
+  const fps = tira.fps ?? FPS_DA_ARTE_DE_EFEITO
+
+  // `segurar` e o caminho simples: fase linear, e o clamp de `drawQuadroDeTira`
+  // trava no ultimo quadro sozinho.
+  if (!tira.cauda || tira.cauda === 'segurar') return decorrido / tempoDaTira(tira)
+
+  // Os outros dois escolhem o QUADRO e devolvem a fase que aponta pra ele.
+  // Devolver `(quadro + 0.5) / quadros` em vez de `quadro / quadros` e o que
+  // sobrevive ao `Math.floor` de quem desenha sem depender de arredondamento
+  // de ponto flutuante na borda.
+  const passo = Math.floor(decorrido * fps) % passosDaVolta(tira)
+  const quadro = tira.cauda === 'boomerang' && passo >= tira.quadros
+    ? 2 * tira.quadros - 2 - passo
+    : passo
+  return (quadro + 0.5) / tira.quadros
+}
+
+/**
+ * Quanto tempo a arte fica VISIVEL, ja com o prolongamento da cauda.
+ *
+ * Arte que ja passa do piso toca UMA VEZ e pronto: prolongar o que ja e longo
+ * so atrasaria o proximo golpe.
+ *
+ * Arte curta e prolongada em VOLTAS INTEIRAS, nunca em fracao. Cortar no meio
+ * de uma ida deixa o boomerang parado na volta e o `repetir` no meio do gesto —
+ * e o mesmo tipo de corte que esta leva veio tirar da tela.
+ */
+function tempoVisivelDaTira(tira: TiraDeVfx): number {
+  const natural = tempoDaTira(tira)
+  if (natural >= PISO_DE_PROLONGAMENTO) return natural
+  if (!tira.cauda || tira.cauda === 'segurar') return PISO_DE_PROLONGAMENTO
+  const volta = passosDaVolta(tira) / (tira.fps ?? FPS_DA_ARTE_DE_EFEITO)
+  return volta * Math.max(1, Math.round(PISO_DE_PROLONGAMENTO / volta))
 }
 
 /** Fade do fim da vida do efeito, ja multiplicado pela opacidade global de VFX. */
-function opacidadeDoEfeito(effect: WorldEffect): number {
-  const progress = effectProgress(effect)
-  const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
+function opacidadeDoEfeito(effect: WorldEffect, tira?: TiraDeVfx): number {
+  // COM TIRA o fade acompanha a ARTE; sem tira (burst procedural, o caminho de
+  // fallback) acompanha a vida do efeito, como sempre foi.
+  //
+  // Isso deixou de ser a mesma coisa na PH-374. Antes a arte era esticada pra
+  // caber na duracao, entao "60% da arte" e "60% do efeito" coincidiam por
+  // construcao. Agora a arte toca em 0,4s a 3,0s conforme o numero de quadros,
+  // e a duracao do efeito e um teto unico de 3,0s — amarrar o fade ao efeito
+  // faria a arte de 0,4s ficar 1,4s parada no ultimo quadro antes de comecar a
+  // sumir.
+  const vida = tira ? tempoVisivelDaTira(tira) : effect.duration
+  const decorrido = Math.max(0, effect.age - effect.delay)
+  const progresso = vida > 0 ? Math.min(1, decorrido / vida) : 1
+  const fade = progresso < HOLD_PORTION ? 1 : 1 - (progresso - HOLD_PORTION) / (1 - HOLD_PORTION)
   return Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
 }
 
@@ -1164,7 +1242,7 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
     if (drawQuadroDeTira(
       ctx, arteDoGolpe.single, faseDaTira(effect, arteDoGolpe.single),
       effect.targetX! + dxg, effect.targetY! + dyg, tamanho,
-      opacidadeDoEfeito(effect), effect.anguloDeAtaque,
+      opacidadeDoEfeito(effect, arteDoGolpe.single), effect.anguloDeAtaque,
     )) return
   }
 
@@ -1181,7 +1259,7 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
     // acima ou atras. Encostar o efeito na FACE do alvo virada pro atacante
     // devolve essa leitura sem tocar na arte.
     const [dx, dy] = encostoNoAlvo(effect, tira)
-    if (drawQuadroDeTira(ctx, tira, faseDaTira(effect, tira), effect.targetX! + dx, effect.targetY! + dy, tamanho, opacidadeDoEfeito(effect), effect.anguloDeAtaque)) return
+    if (drawQuadroDeTira(ctx, tira, faseDaTira(effect, tira), effect.targetX! + dx, effect.targetY! + dy, tamanho, opacidadeDoEfeito(effect, tira), effect.anguloDeAtaque)) return
   }
 
   const x = effect.targetX!
@@ -1238,7 +1316,7 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
     // Sem angulo e sem recuo: area e um circulo, nao aponta pra ninguem.
     if (drawQuadroDeTira(
       ctx, arteDoGolpe.aoe, faseDaTira(effect, arteDoGolpe.aoe),
-      effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect),
+      effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect, arteDoGolpe.aoe),
     )) return
   }
 
@@ -1251,7 +1329,7 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   const tiraDeArea = tiraDeAreaDoElemento(effect.elementType)
   if (tiraDeArea) {
     const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (tiraDeArea.escala ?? 1)
-    if (drawQuadroDeTira(ctx, tiraDeArea, faseDaTira(effect, tiraDeArea), effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect))) return
+    if (drawQuadroDeTira(ctx, tiraDeArea, faseDaTira(effect, tiraDeArea), effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect, tiraDeArea))) return
   }
 
   // Ultimo recurso antes do procedural: a tira do IMPACTO alvo-unico, esticada
@@ -1260,7 +1338,7 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   const tira = tiraDoElemento(effect.elementType)
   if (tira) {
     const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (tira.escala ?? 1)
-    if (drawQuadroDeTira(ctx, tira, faseDaTira(effect, tira), effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect))) return
+    if (drawQuadroDeTira(ctx, tira, faseDaTira(effect, tira), effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect, tira))) return
   }
 
   const x = effect.targetX!

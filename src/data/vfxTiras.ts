@@ -36,10 +36,70 @@
 // invisiveis em jogo.
 import type { ElementType, StatusCondition } from './generated/types'
 
+/**
+ * A velocidade em que a arte de efeito FOI AUTORADA, e nao um numero escolhido.
+ *
+ * O `.dat` de origem guarda duracao por quadro, e o exportador PULAVA esse
+ * bloco (`self.p += frames * 8`). Lido na PH-373, o banco inteiro responde uma
+ * coisa so: 5.394 efeitos, 69.282 quadros, TODOS a 100 ms — zero variacao,
+ * zero `min != max`. Dai 10 fps, exato.
+ *
+ * ANTES A VELOCIDADE ERA ACIDENTE. `faseDaTira` amarrava a fase ao progresso
+ * do efeito, entao a tira era esticada ou comprimida pra caber num tempo fixo
+ * e o NUMERO DE QUADROS decidia o ritmo: 39 fps no ICE contra 4,2 fps na area
+ * NORMAL, 9,3x de espalhamento. A queixa que abriu a leva foi exatamente essa
+ * — "parece que o POKE acelera a animacao pra caber no tempo".
+ */
+export const FPS_DA_ARTE_DE_EFEITO = 10
+
+/**
+ * Ate quando a arte curta e prolongada pelo modo de cauda, em segundos.
+ *
+ * 1,5s e perto da mediana do acervo (1,30s), e o ponto e esse: prolongar ate a
+ * mediana faz a arte curta parecer com o resto, e prolongar ate o TURNO (3s)
+ * faria o contrario. Um `spider_web` de 0,4s precisaria de quase quatro idas e
+ * voltas pra cobrir 3s e viraria nervoso — o oposto do que a leva veio
+ * resolver.
+ *
+ * Silencio entre um golpe e o proximo e legibilidade, nao buraco.
+ */
+export const PISO_DE_PROLONGAMENTO = 1.5
+
 export interface TiraDeVfx {
   url: string
   /** Quantos quadros a tira tem. A largura de cada um sai da imagem. */
   quadros: number
+  /**
+   * O que a arte faz DEPOIS de tocar uma vez, quando ela e curta demais pro
+   * golpe. Ausente = `segurar`.
+   *
+   * Existe porque, na velocidade autorada, 27 das 78 tiras duram menos de 1,0s
+   * — a mais curta (`spider_web`) tem 4 quadros, 0,4s. Prolongar NAO pode ser
+   * "tocar mais devagar": 4 quadros esticados num turno de 3s dao 750ms por
+   * quadro, um slideshow, que e o defeito oposto ao que esta leva consertou.
+   *
+   *   `segurar`    trava no ultimo quadro. Serve pra arte que termina numa
+   *                pose — cratera aberta, marca no chao, fumaca assentando.
+   *   `repetir`    volta ao quadro 0. Serve pra arte CICLICA, que termina onde
+   *                comecou: redemoinho, chama girando, anel pulsando.
+   *   `boomerang`  vai ate o fim e volta de tras pra frente. Serve pra arte
+   *                SIMETRICA NO TEMPO — o que abre e fecha.
+   *
+   * BOOMERANG E ESCOLHA POR ARTE, NUNCA REGRA GLOBAL. Em arte direcional ele
+   * desfaz o gesto: o punho do Shadow Punch da o soco e des-soca, o feixe do
+   * Hyper Beam volta pra dentro do canhao. Toda tira marcada `direcional` e
+   * suspeita por definicao, e nenhuma leva `boomerang` sem o motivo escrito.
+   */
+  cauda?: 'segurar' | 'repetir' | 'boomerang'
+  /**
+   * Sobrescreve `FPS_DA_ARTE_DE_EFEITO` para esta tira.
+   *
+   * Nao ha nenhum caso hoje: o banco pxg e 100% uniforme a 100 ms. O campo
+   * existe porque arte de OUTRO banco pode nascer com outra cadencia (sao 8
+   * bancos em `projetos.json`, ~9.400 efeitos nunca varridos), e sem ele o
+   * primeiro caso desses obrigaria a mexer no motor.
+   */
+  fps?: number
   /**
    * Correcao de tamanho, multiplicando a altura-base do desenho. Existe
    * porque o enquadramento nao e padronizado nem depois do recorte: um
@@ -132,12 +192,12 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
     // a distancia do atacante.
     direcional: { anguloBaseGraus: 0, ancoraX: 0.78, recorteX: 0.68 },
   },
-  WATER: { url: `${RAIZ}/water.png`, quadros: 25 },              // 641  — estouro azul
+  WATER: { url: `${RAIZ}/water.png`, quadros: 22 },              // 641  — estouro azul
   ELECTRIC: { url: `${RAIZ}/electric.png`, quadros: 14 },        // 2572 — arcos amarelos
   GRASS: { url: `${RAIZ}/grass.png`, quadros: 15 },              // 2575 — redemoinho verde
-  ICE: { url: `${RAIZ}/ice.png`, quadros: 39 },                  // 4693 — cristal ciano
-  FIGHTING: { url: `${RAIZ}/fighting.png`, quadros: 21 },        // 2079 — anel de impacto
-  POISON: { url: `${RAIZ}/poison.png`, quadros: 30 },            // 2707 — vortice roxo
+  ICE: { url: `${RAIZ}/ice.png`, quadros: 30 },                  // 4693 — cristal ciano
+  FIGHTING: { url: `${RAIZ}/fighting.png`, quadros: 19 },        // 2079 — anel de impacto
+  POISON: { url: `${RAIZ}/poison.png`, quadros: 29 },            // 2707 — vortice roxo
   GROUND: { url: `${RAIZ}/ground.png`, quadros: 24 },            // 2495 — redemoinho de terra
   // TROCADA em 2026-08-18. A arte anterior (efeito 1029) tinha um SPRITE DE
   // ITEM embutido — um objeto amarelo com a palavra DROP escrita — visivel em
@@ -146,7 +206,7 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
   // porque a escolha original foi feita por varredura de matiz/tamanho, sem
   // ninguem OLHAR quadro a quadro.
   FLYING: { url: `${RAIZ}/flying.png`, quadros: 20 },            // 4735 — tornado
-  PSYCHIC: { url: `${RAIZ}/psychic.png`, quadros: 20 },          // 4468 — arco magenta
+  PSYCHIC: { url: `${RAIZ}/psychic.png`, quadros: 19 },          // 4468 — arco magenta
   // TROCADA em 2026-08-31 (PH-368), e o motivo nao e escala nem direcao: a arte
   // anterior era o efeito 5446, que o dono do banco nomeou `grass`. E um
   // respingo de folhagem verde — todo golpe BUG do jogo desenhava grama. Passou
@@ -176,7 +236,7 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
   // O 4798 (`rock`) desenha pedra estourando em cascalho, que e o que um golpe
   // de pedra faz. Quadro 68x72, proporcao 0.94 — cai em 44px de largura contra
   // 46 de altura, dentro da faixa do lote e sem precisar de escala.
-  ROCK: { url: `${RAIZ}/rock.png`, quadros: 16 },                // 4798 — pedra estourando
+  ROCK: { url: `${RAIZ}/rock.png`, quadros: 11 },                // 4798 — pedra estourando
   GHOST: { url: `${RAIZ}/ghost.png`, quadros: 28 },              // 2583 — anel roxo
   DRAGON: { url: `${RAIZ}/dragon.png`, quadros: 15 },            // 2432 — esfera de energia
   // Era o 4109 (um vazio preto de borda roxa). Bonito na conferencia, ruim em
@@ -282,14 +342,14 @@ export const TIRA_AOE_POR_ELEMENTO: Partial<Record<ElementType, TiraDeVfx>> = {
   // `eruption` (moveVfx.ts), onde coluna vertical e exatamente o desenho certo.
   FIRE: { url: `${RAIZ_AOE}/fire.png`, quadros: 27 },            // 5487 — anel de chamas abrindo
   WATER: { url: `${RAIZ_AOE}/water.png`, quadros: 8 },           // 4286 — respingo azul
-  ELECTRIC: { url: `${RAIZ_AOE}/electric.png`, quadros: 14 },    // 5621 — anel de faiscas
-  GRASS: { url: `${RAIZ_AOE}/grass.png`, quadros: 12 },          // 5471 — anel de folhas
+  ELECTRIC: { url: `${RAIZ_AOE}/electric.png`, quadros: 13 },    // 5621 — anel de faiscas
+  GRASS: { url: `${RAIZ_AOE}/grass.png`, quadros: 11 },          // 5471 — anel de folhas
   ICE: { url: `${RAIZ_AOE}/ice.png`, quadros: 18 },              // 4276 — esfera ciano
   POISON: { url: `${RAIZ_AOE}/poison.png`, quadros: 6 },         // 5489 — anel roxo
-  GROUND: { url: `${RAIZ_AOE}/ground.png`, quadros: 8 },         // 5538 — anel de terra
-  FLYING: { url: `${RAIZ_AOE}/flying.png`, quadros: 16 },        // 4313 — redemoinho branco
-  PSYCHIC: { url: `${RAIZ_AOE}/psychic.png`, quadros: 33 },      // 4382 — estrela rosa
-  BUG: { url: `${RAIZ_AOE}/bug.png`, quadros: 17 },              // 4326 — enxame verde
+  GROUND: { url: `${RAIZ_AOE}/ground.png`, quadros: 6 },         // 5538 — anel de terra
+  FLYING: { url: `${RAIZ_AOE}/flying.png`, quadros: 13 },        // 4313 — redemoinho branco
+  PSYCHIC: { url: `${RAIZ_AOE}/psychic.png`, quadros: 28 },      // 4382 — estrela rosa
+  BUG: { url: `${RAIZ_AOE}/bug.png`, quadros: 16 },              // 4326 — enxame verde
   // TROCADA em 2026-08-31 (PH-368). O 4275 e a MESMA arte do ICE (4276) noutro
   // matiz — esfera de pas, dois ids vizinhos do mesmo lote. Nao ha nada na tela
   // que separe uma Explosao Elemental de gelo de uma de dragao, e a camada de
