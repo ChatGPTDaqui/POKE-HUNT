@@ -83,7 +83,13 @@ export function CorreioMenu() {
   useEffect(() => {
     if (!contatoInicial) return
     setAba('conversas')
-    setContatoAberto({ userId: contatoInicial.userId, nick: contatoInicial.nick })
+    // O anuncio vem junto (PH-435): quem chegou pela vitrine ou por um lance
+    // recebido abre o fio ja com o contexto da negociacao na mao.
+    setContatoAberto({
+      userId: contatoInicial.userId,
+      nick: contatoInicial.nick,
+      anuncio: contatoInicial.anuncio,
+    })
     consumirContatoInicial()
   }, [contatoInicial, consumirContatoInicial])
 
@@ -204,7 +210,12 @@ export function CorreioMenu() {
   const contatoAtual = useMemo<Contato | null>(() => {
     if (!contatoAberto) return null
     const daLista = conversas.find((c) => c.userId === contatoAberto.userId)
-    return daLista ? { userId: daLista.userId, nick: daLista.nick, online: daLista.online } : contatoAberto
+    // `anuncio` NAO vem da lista — ele e do clique, nao do fio. Ele sobrevive
+    // por referencia, e nao copiado campo por campo, pra a identidade do objeto
+    // nao trocar a cada refetch: ela entra na `key` do fio la embaixo.
+    return daLista
+      ? { userId: daLista.userId, nick: daLista.nick, online: daLista.online, anuncio: contatoAberto.anuncio }
+      : contatoAberto
   }, [contatoAberto, conversas])
 
   const abrirComposicao = useCallback((nickInicial?: string) => {
@@ -373,10 +384,16 @@ export function CorreioMenu() {
       <Conversa
         // `key` por contato: trocar de conversa precisa REMONTAR, nao reusar.
         // Sem isto o fio do contato anterior fica na tela ate o novo carregar.
-        key={contatoAtual.userId}
+        //
+        // O ANUNCIO entra na chave (PH-435) porque o chip "vai junto" e estado
+        // interno do fio: sem ele aqui, reabrir o mesmo contato por outro
+        // anuncio — ou pela lista, sem anuncio — manteria na tela o chip da
+        // visita anterior.
+        key={`${contatoAtual.userId}:${contatoAtual.anuncio?.id ?? ''}`}
         contato={contatoAtual}
         meuId={meuId}
         aoMarcarLidas={recarregar}
+        anuncio={contatoAtual.anuncio}
       />
     </GameCard>
   ) : null

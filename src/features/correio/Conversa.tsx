@@ -10,7 +10,7 @@
 // cresce por DUAS fontes (paginar pra tras e chegada por Realtime) e encolhe
 // por nenhuma. Uma query com `invalidate` a cada mensagem recebida jogaria fora
 // o historico ja paginado e devolveria a rolagem pro fim a cada linha nova.
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowUp, Gift, PaperPlaneRight } from '@phosphor-icons/react'
 import { GameButton, GameInput, SectionLabel } from '@/components/game/controls'
 import { getItem } from '@/data/items'
@@ -19,7 +19,10 @@ import { ErroServidor, detalheDeErro } from '@/data/remote/servidor'
 import type { MensagemCorreio } from '@/data/remote/servidor'
 import * as correio from '@/data/remote/correioRealtime'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
+import type { AnuncioParaConversa } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
+import { CardDoAnuncio } from './CardDoAnuncio'
+import { idsComCardDeAnuncio } from './cardsDoAnuncio'
 
 /** Mesmo teto do `enviar_mensagem` no banco. */
 export const MAX_MENSAGEM = 1000
@@ -33,6 +36,12 @@ export interface Contato {
   userId: string
   nick: string
   online?: boolean
+  /**
+   * Anuncio que trouxe o jogador ate este fio (PH-435). So existe em quem
+   * chegou pelo Mercado — pela lista de conversas e pelo Painel de Amigos vem
+   * ausente, e e isso que faz o chip nao aparecer nesses caminhos.
+   */
+  anuncio?: AnuncioParaConversa
 }
 
 interface Props {
@@ -40,9 +49,15 @@ interface Props {
   meuId: string
   /** Avisa a tela-mae pra recontar os badges depois de marcar lidas. */
   aoMarcarLidas: () => void
+  /**
+   * Anuncio que trouxe o jogador ate aqui (PH-435). Vira o chip sobre o campo
+   * de texto e sai junto da PRIMEIRA mensagem; da segunda em diante o fio ja
+   * tem o card no historico e repetir seria ruido.
+   */
+  anuncio?: AnuncioParaConversa | null
 }
 
-export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
+export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
   const [mensagens, setMensagens] = useState<MensagemCorreio[]>([])
   const [temMais, setTemMais] = useState(false)
   const [carregando, setCarregando] = useState(true)
@@ -50,7 +65,20 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
   const [texto, setTexto] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [coletando, setColetando] = useState<string | null>(null)
+  // Anuncio que ainda NAO foi enviado. Estado local e nao a prop direto porque
+  // ele sai da tela sozinho: depois do primeiro envio o card ja esta no
+  // historico, e o chip por cima do campo passaria a prometer um segundo card
+  // que nao vem.
+  //
+  // Nasce da prop e nunca a re-le: a tela-mae poe o anuncio na `key` deste
+  // componente, entao entrar pelo mesmo contato por OUTRO anuncio (ou pela
+  // lista, sem anuncio nenhum) remonta e este estado nasce de novo. Sem isso,
+  // fechar o fio sem enviar e reabri-lo pela lista deixaria o chip antigo na
+  // tela prometendo um card que ninguem pediu.
+  const [anuncioPendente, setAnuncioPendente] = useState<AnuncioParaConversa | null>(anuncio ?? null)
   const fimDoFio = useRef<HTMLDivElement>(null)
+
+  const comCard = useMemo(() => idsComCardDeAnuncio(mensagens), [mensagens])
 
   // Carga inicial + marcar lidas. Refaz ao trocar de contato.
   useEffect(() => {
@@ -117,7 +145,9 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
     if (!corpo || enviando) return
     setEnviando(true)
     try {
-      const { id } = await correio.enviarMensagem({ paraId: contato.userId }, corpo)
+      const { id, contextoAnuncio } = await correio.enviarMensagem(
+        { paraId: contato.userId }, corpo, [], anuncioPendente?.id ?? null,
+      )
       setMensagens((prev) => [...prev, {
         id,
         de_id: meuId,
@@ -128,8 +158,14 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
         corpo,
         estado: 'pendente',
         created_at: new Date().toISOString(),
+        // O snapshot vem do RETORNO da RPC, nao do que a vitrine tinha em
+        // memoria: se o preco mudou entre abrir a tela e enviar, o eco local
+        // mostraria um valor que nao esta gravado em lugar nenhum.
+        contexto_anuncio: contextoAnuncio,
       }])
       setTexto('')
+      // O anuncio ja virou registro no fio — o chip sai.
+      setAnuncioPendente(null)
     } catch (e) {
       toast(e instanceof ErroServidor ? e.message : 'Não foi possível enviar.', 'error', detalheDeErro(e))
     } finally {
@@ -179,12 +215,21 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
         )}
         {mensagens.map((m) => {
           const minha = m.de_id === meuId
+          const abreAnuncio = comCard.has(m.id)
           const anexos = m.anexo_itens ?? []
           // So o DESTINATARIO coleta, e so uma vez. Do lado de quem mandou o
           // anexo aparece como registro do que saiu, sem botao.
           const podeColetar = !minha && anexos.length > 0 && !m.anexo_coletado_em
           return (
-            <div key={m.id} className={cn('flex', minha ? 'justify-end' : 'justify-start')}>
+            <Fragment key={m.id}>
+              {/* Largura inteira e fora da bolha: o card nao e fala de ninguem,
+                  e o ponto dele e os DOIS lados lerem a mesma linha. Dentro da
+                  bolha ele herdaria o alinhamento de quem mandou e pareceria
+                  argumento de um dos lados. */}
+              {abreAnuncio && m.contexto_anuncio && (
+                <CardDoAnuncio ctx={m.contexto_anuncio} meuId={meuId} />
+              )}
+            <div className={cn('flex', minha ? 'justify-end' : 'justify-start')}>
               <div
                 className={cn(
                   'max-w-[80%] rounded-[.5em] px-[.5em] py-[.3em] text-[.85em]',
@@ -230,10 +275,35 @@ export function Conversa({ contato, meuId, aoMarcarLidas }: Props) {
                 </div>
               </div>
             </div>
+            </Fragment>
           )
         })}
         <div ref={fimDoFio} />
       </div>
+
+      {/* O chip do que VAI junto. Fica sobre o campo de texto, e nao dentro do
+          fio, porque ainda nao e historico: fechar a conversa sem enviar nao
+          deixa registro nenhum, e o chip desaparece com ele. */}
+      {anuncioPendente && (
+        <CardDoAnuncio
+          ctx={{
+            anuncioId: anuncioPendente.id,
+            sellerId: anuncioPendente.sellerId,
+            speciesId: anuncioPendente.speciesId,
+            level: anuncioPendente.level,
+            isShiny: anuncioPendente.isShiny,
+            rarity: anuncioPendente.rarity,
+            ivPercent: anuncioPendente.ivPercent,
+            price: anuncioPendente.price,
+            currency: anuncioPendente.currency,
+            modo: anuncioPendente.modo,
+            apenasOferta: anuncioPendente.apenasOferta,
+          }}
+          meuId={meuId}
+          pendente
+          aoDescartar={() => setAnuncioPendente(null)}
+        />
+      )}
 
       <div className="flex items-end gap-[.35em]">
         <GameInput

@@ -1,18 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
-import { Gavel, X } from '@phosphor-icons/react'
+import { ChatCircleDots, Gavel, X } from '@phosphor-icons/react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { type AnuncioMercado, type OrdemMercado } from '@/data/remote/servidor'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { GameButton, GameCard, SectionLabel } from '@/components/game/controls'
+import { useUiStore } from '@/stores/uiStore'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
-import { fmt, STALE_MS } from '../utils'
+import { anuncioParaConversa, fmt, STALE_MS } from '../utils'
 import { Carregando, IconeItem, Moeda } from './shared'
 import { TempoRestante } from './TempoRestante'
 
 export function Ativos() {
+  const abrirCorreioCom = useUiStore((s) => s.abrirCorreioCom)
   const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'meus'],
     queryFn: () => mercadoRpc.mercadoMeus(),
@@ -77,6 +79,27 @@ export function Ativos() {
                   onClick={() => responder.mutate({ id: o.id, aceitar: false })}
                 >
                   Recusar
+                </GameButton>
+                {/* PH-435: o vendedor via "lance de Fulano" e nao tinha caminho
+                    nenhum pra falar com o Fulano — a decisao era aceitar ou
+                    recusar um valor, sem discutir. O anuncio vai junto pelo
+                    `listing_id`: `anuncios` ja tem a linha inteira dos meus
+                    anuncios ativos, e lance pendente so existe em anuncio
+                    ativo, entao a busca acha. Se nao achar, a conversa abre sem
+                    card em vez de nao abrir. */}
+                <GameButton
+                  variant="ghost"
+                  aria-label={`Falar com ${o.comprador}`}
+                  onClick={() => {
+                    const anuncio = anuncios.find((a) => a.id === o.listing_id)
+                    abrirCorreioCom({
+                      userId: o.buyer_id,
+                      nick: o.comprador,
+                      anuncio: anuncio ? anuncioParaConversa(anuncio) : undefined,
+                    })
+                  }}
+                >
+                  <ChatCircleDots /> Falar
                 </GameButton>
               </div>
             </GameCard>
