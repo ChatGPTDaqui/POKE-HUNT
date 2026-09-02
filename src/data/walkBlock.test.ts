@@ -113,8 +113,8 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
   it('a arte da SALA vence a arte do bioma quando ela tem uma', () => {
     // 'metropolis' tem arte propria; 'factory' nao tem e cai na do bioma.
     // Se a resolucao ignorasse a sala, as duas dariam a mesma grade.
-    const comArte = mapDefParaSala('urbano_faixa1', { chave: 'metropolis' })
-    const semArte = mapDefParaSala('industrial_faixa1', { chave: 'factory' })
+    const comArte = mapDefParaSala('urbano_e1', { chave: 'metropolis' })
+    const semArte = mapDefParaSala('industrial_e1', { chave: 'factory' })
     expect(comArte?.collisionGrid).toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/metropolis.jpg'].grid)
     expect(semArte?.collisionGrid).toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/industrial.jpg'].grid)
   })
@@ -122,7 +122,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
   it('todo ponto de spawn pintado cai em celula andavel', () => {
     for (const bioma of BIOMAS) {
       for (const sub of bioma.subBiomas) {
-        const mapId = `${bioma.chave}_faixa1`
+        const mapId = `${bioma.chave}_e1`
         if (!getMap(mapId)) continue
         const mapDef = mapDefParaSala(mapId, { chave: sub.chave })
         const ponto = spawnPointParaSala(mapId, { chave: sub.chave })

@@ -1,8 +1,15 @@
 // Onde as hunts sao montadas de verdade.
 //
-// DESENHO ATUAL: 12 biomas (data/biomas.ts) x 3 faixas de nivel = 36 hunts.
-// Cada bioma tem de 1 a 4 SUB-BIOMAS (data/generated/subBiomas.generated.ts,
-// derivado das pools do PokeRogue), e a hunt sorteia um sub-bioma por sala.
+// DESENHO ATUAL: 12 biomas (data/biomas.ts) x 10 ESTAGIOS de 10 niveis
+// (data/estagios.ts) = 120 hunts. Cada bioma tem de 1 a 4 SUB-BIOMAS
+// (data/generated/subBiomas.generated.ts, derivado das pools do PokeRogue), e a
+// hunt sorteia um sub-bioma por sala.
+//
+// ERAM 36 (12 biomas x 3 faixas de 30 niveis) ate a PH-426. A faixa saiu
+// porque 30 niveis e margem demais pra o jogador enxergar onde esta e escolher
+// pra onde vai — a divisao em degraus ja existia dentro dela, invisivel, no
+// `salaSystem#janelaDaSala`. Ver a regua e o peso por estagio em
+// data/estagios.ts.
 //
 // O QUE ISTO SUBSTITUIU, E POR QUE: antes eram 69 hunts montadas por "1 tipo
 // elemental = 1 bioma" x zona de 10 niveis x regiao (Johto/Kanto). O recorte
@@ -13,24 +20,31 @@
 // em 11 dos 12 biomas.
 //
 // ---------------------------------------------------------------------------
-// A REGRA CENTRAL: UMA LINHA EVOLUTIVA, ESTAGIOS EM FAIXAS DISJUNTAS
+// A REGRA CENTRAL: UMA LINHA EVOLUTIVA, FORMAS EM JANELAS DISJUNTAS
 // ---------------------------------------------------------------------------
-// Uma faixa cobre 30 niveis. Jogar a linha inteira dentro dela produzia coisa
-// absurda: medido, 228 pares especie x hunt em que a especie ja deveria ter
-// evoluido (Caterpie, que evolui no 7, nascendo Lv60).
+// ATENCAO AO VOCABULARIO. "Estagio" tem DOIS sentidos por perto, sem relacao
+// um com o outro: o estagio da LINHA EVOLUTIVA (Caterpie -> Metapod ->
+// Butterfree, `evolutionStage.ts`) e o ESTAGIO DO BIOMA (o degrau de 10
+// niveis, `estagios.ts`). Onde a ambiguidade morde, este arquivo diz FORMA pro
+// primeiro e ESTAGIO so pro segundo.
 //
-// Entao cada ESTAGIO da linha entra com a sub-faixa de nivel em que ele e o
-// estagio correto, e essas sub-faixas nao se sobrepoem:
+// Jogar a linha evolutiva inteira dentro da janela da hunt produzia coisa
+// absurda quando a janela tinha 30 niveis: medido, 228 pares especie x hunt em
+// que a especie ja deveria ter evoluido (Caterpie, que evolui no 7, nascendo
+// Lv60).
 //
-//   linha Caterpie na faixa I  (Lv 1-30):  Caterpie 1-6 | Metapod 7-9 | Butterfree 10-30
-//   linha Pidgey   na faixa II (Lv 31-60): Pidgeotto 31-35 | Pidgeot 36-60
-//   linha Pidgey   na faixa III (Lv 61-90): Pidgeot 61-90
+// Entao cada FORMA da linha entra com a sub-janela de nivel em que ela e a
+// forma correta, e essas sub-janelas nao se sobrepoem:
+//
+//   linha Caterpie no estagio 1 (Lv 1-10):  Caterpie 1-6 | Metapod 7-9 | Butterfree 10
+//   linha Pidgey   no estagio 4 (Lv 31-40): Pidgeotto 31-35 | Pidgeot 36-40
+//   linha Pidgey   no estagio 7 (Lv 61-70): Pidgeot 61-70
 //
 // Duas consequencias que sao o ponto, nao efeito colateral:
 //
-//   - Nenhum nivel absurdo, em nenhuma faixa.
-//   - O peso de spawn continua sendo o `spawn_tier` real do Gen1/Gen2 DO
-//     PROPRIO ESTAGIO. A alternativa (auto-evoluir no spawn, como o PokeRogue
+//   - Nenhum nivel absurdo, em nenhum estagio.
+//   - O peso de spawn continua sendo o `spawn_tier` real do Gen1/Gen2 DA
+//     PROPRIA FORMA. A alternativa (auto-evoluir no spawn, como o PokeRogue
 //     faz) faria o Gyarados herdar o peso `muito_comum` do Magikarp — o dado
 //     mais bem fundamentado do projeto destruido em silencio.
 import { SPECIES } from './pokes'
@@ -39,9 +53,12 @@ import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
 import { TRAINING_MAP, TRAINING_MAP_ID, TRAINING_ENCOUNTER } from './trainingDummy'
 import {
-  BIOMAS, FAIXAS, GEOMETRIA, LOOT, MAX_INIMIGOS_HUNT_INICIAL, huntId,
-  type BiomaDef, type FaixaDef,
+  BIOMAS, FAIXAS, GEOMETRIA, LOOT, MAX_INIMIGOS_HUNT_INICIAL,
+  type BiomaDef, type FaixaId,
 } from './biomas'
+import {
+  ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, zonaMaximaDoEstagio,
+} from './estagios'
 import { zonaMinimaDaEspecie } from './spawnStrength'
 import type { HuntMapDef, HuntEncounter } from './huntTypes'
 
@@ -143,22 +160,48 @@ for (const especie of Object.values(SPECIES)) {
 }
 
 /**
- * Em que FAIXA uma zona minima cai — o indice, nao a faixa, porque quem chama
- * precisa poder pedir "a seguinte".
+ * O primeiro ESTAGIO (1..10) que alcanca esta zona minima.
  *
- * Zona acima de toda `zonaMaxima` devolve o indice da ultima faixa: e o topo do
- * jogo, nao ha mais pra onde empurrar.
+ * Como `zonaMaximaDoEstagio(e) === e - 1`, a conta e direta: zona `z` cabe a
+ * partir do estagio `z + 1`. Zona acima do ultimo estagio devolve o ultimo: e
+ * o topo do modo normal, nao ha mais pra onde empurrar.
  */
-function indiceDeFaixa(zona: number): number {
-  const i = FAIXAS.findIndex((f) => zona <= f.zonaMaxima)
-  return i === -1 ? FAIXAS.length - 1 : i
+function estagioDaZona(zona: number): number {
+  return Math.min(Math.max(zona + 1, 1), ESTAGIOS_POR_BIOMA)
 }
 
-/** A faixa que contem este nivel. Nivel acima da ultima cai na ultima. */
-function indiceDeFaixaPorNivel(nivel: number): number {
-  const i = FAIXAS.findIndex((f) => nivel <= f.niveis[1])
-  return i === -1 ? FAIXAS.length - 1 : i
+/** O estagio que contem este nivel. Nivel acima do ultimo cai no ultimo. */
+function estagioDoNivel(nivel: number): number {
+  return Math.min(Math.max(Math.ceil(nivel / 10), 1), ESTAGIOS_POR_BIOMA)
 }
+
+/**
+ * Ate que estagio (inclusive) uma FAIXA antiga ia — a ponte que mantem o gate
+ * de hoje de pe enquanto ele nao e trocado.
+ *
+ * `continent` continua sendo o grupo de gate (`FAIXAS_INICIAIS` abre faixa1 e
+ * faixa2; o Lance abre faixa3 e o Pesadelo), e trocar isso e a PH-430/PH-432,
+ * nao esta issue. Entao cada estagio herda o grupo da faixa que cobria aquele
+ * nivel: estagios 1-3 = faixa1 (Lv 1-30), 4-6 = faixa2 (Lv 31-60), 7-10 =
+ * faixa3 (Lv 61-100 — o estagio 10 e conteudo novo, acima do antigo teto de
+ * 90, e cai no grupo mais alto).
+ *
+ * SEM ISSO O JOGO ABRE TODO DE UMA VEZ: `continent` de valor desconhecido nao
+ * casa com grupo liberado nenhum, e o menu esconderia as 120 hunts. Com um
+ * valor unico e aberto, o Modo Pesadelo deixaria de ser recompensa do Lance.
+ * A ponte sai junto com o vocabulario de faixa, na PH-434.
+ */
+function grupoDeGateDoEstagio(estagio: number): FaixaId {
+  const faixa = FAIXAS.find((f) => niveisDoEstagio(estagio)[1] <= f.niveis[1])
+  return (faixa ?? FAIXAS[FAIXAS.length - 1]).id
+}
+
+/**
+ * Pares `origem->alvo` em que o teto pelo gatilho do alvo (PH-332) de fato
+ * mordeu na montagem. Vazio hoje, e um teste tranca isso — ver o comentario do
+ * ramo em `nivelDeTroca`.
+ */
+export const TETO_DE_GATILHO_APLICADO = new Set<string>()
 
 /**
  * A partir de que nivel `speciesId` deixa de ser o estagio correto da linha.
@@ -169,7 +212,7 @@ function indiceDeFaixaPorNivel(nivel: number): number {
  * data/pokes.ts) e nao faz sentido pro selvagem: usar 80 aqui trancaria
  * Alakazam, Gengar, Machamp, Steelix, Golem, Kingdra, Politoed e Scizor em
  * Lv80-90, uma fatia minuscula do jogo. Pro selvagem o gatilho e a FORCA — a
- * forma evoluida aparece a partir da primeira faixa que a zona minima dela
+ * forma evoluida aparece a partir do primeiro ESTAGIO que a zona minima dela
  * alcanca.
  */
 function nivelDeTroca(speciesId: string, desde: number): number | null {
@@ -177,72 +220,96 @@ function nivelDeTroca(speciesId: string, desde: number): number | null {
   const alvo = especie?.evolvesTo
   if (!alvo || !SPECIES[alvo]) return null
   if (especie.isSpecialEvolution) {
-    // A forma evoluida tem que comecar pelo menos uma FAIXA acima da origem,
+    // A forma evoluida tem que comecar pelo menos um ESTAGIO acima da origem,
     // senao a origem e espremida pra fora do jogo. Bug real, pego pelo teste
     // "toda especie selvagem tem pelo menos uma hunt": Scyther tem zona minima
-    // 5 e Scizor tambem 5, entao o gatilho caia no mesmo Lv31 em que Scyther
-    // comeca e a sub-faixa dele virava [31,30] — vazia.
+    // 5 e Scizor tambem 5, entao o gatilho caia no mesmo nivel em que Scyther
+    // comeca e a sub-janela dele virava vazia.
     //
-    // O empurrao e em FAIXA, e nao em zona (PH-145). "Zona + 1" resolvia
-    // Scyther porque as zonas 5 e 6 caem em faixas diferentes, mas nao resolve
-    // quando as duas zonas moram na MESMA faixa: Pichu tem zona 0 e Pikachu
-    // zona 1, as duas na primeira faixa, entao `max(1, 0+1) = 1` devolvia Lv1 e
-    // Pichu ficava com [1,0]. Igglybuff, Cleffa e Togepi sumiam pelo mesmo
-    // motivo. Antes desta issue nao aparecia porque evolucao por amizade nao
-    // existia no catalogo e os quatro passavam por "nao evolui".
+    // O EMPURRAO ERA EM FAIXA E PASSOU A SER EM ESTAGIO (PH-426), e o motivo
+    // que o obrigava a ser em faixa CAIU JUNTO. Em 2026-08 (PH-145) "zona + 1"
+    // nao servia porque duas zonas vizinhas podiam morar na MESMA faixa de 30
+    // niveis — Pichu (zona 0) e Pikachu (zona 1) caiam as duas na faixa1,
+    // entao `max(1, 0+1) = 1` devolvia Lv1 e Pichu ficava com uma janela
+    // vazia. Com estagio de 10 niveis, zona e estagio sao a MESMA escala
+    // (`zonaMaximaDoEstagio(e) === e - 1`): zonas diferentes sao estagios
+    // diferentes por construcao, e o caso que exigia a faixa deixou de existir.
+    // O `+1` continua aqui porque zonas IGUAIS (Scyther/Scizor) ainda
+    // precisam ser separadas.
     //
-    // `desde` e o que faz a conta ENCADEAR numa linha de tres estagios onde os
+    // O que MUDA de verdade: o empurrao encurtou de 30 niveis pra 10. Scyther
+    // ia de Lv31-60 e agora vai de Lv51-60 — mas Lv31-50 era vazamento da
+    // faixa grossa, nao desenho: a zona minima 5 dele ja dizia "Lv51+", e a
+    // faixa2 (zonaMaxima 5) o deixava entrar 20 niveis cedo demais.
+    //
+    // `desde` e o que faz a conta ENCADEAR numa linha de tres formas onde os
     // dois gatilhos sao especiais. Pichu -> Pikachu -> Raichu: sem ele, Pichu
-    // empurra Pikachu pra Lv31 e Pikachu tambem troca em Lv31, entao o estagio
-    // do meio fica com [31,30] e some. A faixa da ORIGEM e a maior entre "onde
-    // este estagio comeca" e "onde a especie e forte o bastante pra aparecer" —
-    // a segunda metade e o caso do Scyther, que nao aparece antes da faixa II
-    // mesmo comecando a linha no Lv1.
-    const daOrigem = Math.max(indiceDeFaixaPorNivel(desde), indiceDeFaixa(zonaMinimaDaEspecie(speciesId)))
-    const doAlvo = indiceDeFaixa(zonaMinimaDaEspecie(alvo))
+    // empurra Pikachu pra um estagio e Pikachu troca no mesmo, entao a forma
+    // do meio fica com janela vazia e some. O estagio da ORIGEM e o maior
+    // entre "onde esta forma comeca" e "onde a especie e forte o bastante pra
+    // aparecer" — a segunda metade e o caso do Scyther, que nao aparece antes
+    // do estagio 6 mesmo comecando a linha no Lv1.
+    const daOrigem = Math.max(estagioDoNivel(desde), estagioDaZona(zonaMinimaDaEspecie(speciesId)))
+    const doAlvo = estagioDaZona(zonaMinimaDaEspecie(alvo))
     const indice = Math.max(doAlvo, daOrigem + 1)
-    // Alvo forte demais pra qualquer faixa restante: a origem fica com a linha
-    // inteira, e a forma evoluida so aparece por evolucao do POKE do jogador.
-    if (indice >= FAIXAS.length) return null
-    const pisoDaFaixa = FAIXAS[indice].niveis[0]
+    // Alvo forte demais pra qualquer estagio restante: a origem fica com a
+    // linha inteira, e a forma evoluida so aparece por evolucao do POKE do
+    // jogador.
+    if (indice > ESTAGIOS_POR_BIOMA) return null
+    const pisoDoEstagio = niveisDoEstagio(indice)[0]
 
-    // TETO PELO GATILHO DO ALVO (PH-332): empurrar o alvo pro piso da faixa
-    // seguinte assume que ELE tambem tem gatilho de faixa. Quando o alvo evolui
-    // por NIVEL — e por nivel baixo —, o empurrao passa por cima dele e o
-    // estagio do meio fica sem lugar nenhum.
+    // TETO PELO GATILHO DO ALVO (PH-332): empurrar o alvo pro piso do estagio
+    // seguinte assume que ELE tambem tem gatilho de estagio. Quando o alvo
+    // evolui por NIVEL — e por nivel baixo —, o empurrao passa por cima dele e
+    // a forma do meio fica sem lugar nenhum.
     //
     // O caso: `azurill -> marill -> azumarill`, que entrou com a Geracao III.
     // Azurill evolui por amizade (vira especial, `evolvesAtLevel: 80`) e Marill
-    // evolui em Lv18 pelo catalogo. Sem teto, Azurill ficava com [1,30] e Marill
-    // comecava em 31 — depois de o proprio Marill ja ter evoluido. As duas
-    // guardas de `hunts.test.ts` pegaram: Marill sumia do jogo, e Azumarill
-    // entrava em Lv18-30 na mesma hunt em que Azurill estava em Lv1-30.
+    // evolui em Lv18 pelo catalogo. Sem teto, Azurill ficava com a linha toda
+    // e Marill comecava acima do proprio gatilho — depois de o proprio Marill
+    // ja ter evoluido. As duas guardas de `hunts.test.ts` pegaram: Marill sumia
+    // do jogo, e Azumarill entrava na mesma hunt em que Azurill estava.
     //
-    // Antes da Gen III isso nao acontecia: as unicas linhas com estagio especial
+    // Antes da Gen III isso nao acontecia: as unicas linhas com forma especial
     // no MEIO (Pichu/Pikachu/Raichu, Cleffa, Igglybuff, Togepi) tem os DOIS
-    // gatilhos especiais, entao os dois usavam piso de faixa e encaixavam.
+    // gatilhos especiais, entao os dois usavam piso de janela e encaixavam.
     //
-    // A METADE, e nao `gatilhoDoAlvo - 1`. As duas opcoes mantem todo estagio
+    // A METADE, e nao `gatilhoDoAlvo - 1`. As duas opcoes mantem toda forma
     // alcancavel e as duas passam nos testes; a diferenca e o tamanho da janela
-    // do estagio do MEIO. Com `-1`, Azurill ficaria com [1,16] e Marill com
-    // [17,17] — um unico nivel, o que na pratica e a especie nao existir, que e
-    // exatamente o defeito que a guarda de cobertura existe pra impedir. Com a
-    // metade: Azurill [1,8], Marill [9,17], Azumarill [18,30]. O `max(2, ...)`
-    // garante que a ORIGEM tambem sobreviva quando o gatilho do alvo e 2 ou 3.
+    // da forma do MEIO. Com `-1`, Marill ficaria com um unico nivel, o que na
+    // pratica e a especie nao existir — exatamente o defeito que a guarda de
+    // cobertura existe pra impedir. O `max(2, ...)` garante que a ORIGEM
+    // tambem sobreviva quando o gatilho do alvo e 2 ou 3.
+    //
+    // O TETO FICOU INERTE COM A REGUA DE 10 NIVEIS, E ISSO ESTA MEDIDO, NAO
+    // SUPOSTO. Com faixa, o empurrao levava Marill pro Lv31 e o gatilho dele
+    // (Lv18) ficava abaixo — o teto era o que salvava a forma do meio. Com
+    // estagio, o empurrao leva pro Lv11, que ja e MENOR que 18, e a linha se
+    // resolve sozinha: Azurill 1-10, Marill 11-17, Azumarill 21+. Nenhuma
+    // especie do catalogo entra mais neste ramo, e uma sabotagem confirmou:
+    // trocar a condicao por `false` nao reprova nenhum teste.
+    //
+    // ELE FICA, MAS OBSERVADO. Codigo morto que ninguem ve e armadilha: a
+    // proxima especie com evolucao especial cujo alvo evolui abaixo do piso
+    // empurrado re-arma o ramo em silencio. Por isso cada disparo e registrado
+    // em `TETO_DE_GATILHO_APLICADO`, e um teste tranca a lista em vazio — se
+    // ela deixar de estar vazia, alguem le este comentario em vez de descobrir
+    // o caso num relato de jogador.
     const alvoDef = SPECIES[alvo]
     const gatilhoDoAlvo = alvoDef.isSpecialEvolution ? null : alvoDef.evolvesAtLevel
-    if (gatilhoDoAlvo != null && gatilhoDoAlvo <= pisoDaFaixa) {
-      return Math.min(pisoDaFaixa, Math.max(2, Math.ceil(gatilhoDoAlvo / 2)))
+    if (gatilhoDoAlvo != null && gatilhoDoAlvo <= pisoDoEstagio) {
+      TETO_DE_GATILHO_APLICADO.add(`${speciesId}->${alvo}`)
+      return Math.min(pisoDoEstagio, Math.max(2, Math.ceil(gatilhoDoAlvo / 2)))
     }
-    return pisoDaFaixa
+    return pisoDoEstagio
   }
   // `desde + 1` NAO e defensividade: e o que impede o gatilho de ANDAR PRA TRAS
   // (PH-332).
   //
-  // `desde` e o nivel em que este estagio comeca a ser o correto, e ele vem do
-  // gatilho do estagio ANTERIOR. Quando o anterior e uma evolucao ESPECIAL, o
-  // ramo acima devolve o piso de uma faixa (31, 61, ...) e nao o nivel do
-  // catalogo — e o gatilho de nivel do estagio seguinte pode ser MENOR que isso.
+  // `desde` e o nivel em que esta forma comeca a ser a correta, e ele vem do
+  // gatilho da forma ANTERIOR. Quando a anterior e uma evolucao ESPECIAL, o
+  // ramo acima devolve o piso de um estagio (11, 21, 31, ...) e nao o nivel do
+  // catalogo — e o gatilho de nivel da forma seguinte pode ser MENOR que isso.
   //
   // O caso que revelou: `azurill -> marill -> azumarill`. Azurill entrou no
   // elenco com a Geracao III e evolui por AMIZADE, entao vira especial e empurra
@@ -285,16 +352,18 @@ interface Trecho {
 }
 
 /**
- * Recorta a linha que comeca em `raiz` na faixa [lo, hi]: um trecho por
- * estagio, com a sub-faixa de nivel em que aquele estagio e o correto.
+ * Recorta a linha que comeca em `raiz` na janela do estagio: um trecho por
+ * FORMA, com a sub-janela de nivel em que aquela forma e a correta.
  *
- * Um estagio e pulado quando (a) nao esta no elenco deste sub-bioma — a
+ * Uma forma e pulada quando (a) nao esta no elenco deste sub-bioma — a
  * heranca por familia do gerador da a mesma casa pra linha toda, mas duas
- * linhas podem se juntar com casas diferentes — ou (b) a zona minima dele
- * passa da faixa, que e o que impede Tyranitar de aparecer numa hunt Lv31-60.
+ * linhas podem se juntar com casas diferentes — ou (b) a zona minima dela
+ * passa da zona maxima do estagio, que e o que impede Tyranitar de aparecer
+ * numa hunt de Lv31-40.
  */
-function trechosDaLinha(raiz: string, faixa: FaixaDef, elenco: Set<string>): Trecho[] {
-  const [lo, hi] = faixa.niveis
+function trechosDaLinha(raiz: string, estagio: number, elenco: Set<string>): Trecho[] {
+  const [lo, hi] = niveisDoEstagio(estagio)
+  const zonaMaxima = zonaMaximaDoEstagio(estagio)
   const trechos: Trecho[] = []
   let atual: string | null = raiz
   let desde = 1
@@ -303,7 +372,7 @@ function trechosDaLinha(raiz: string, faixa: FaixaDef, elenco: Set<string>): Tre
     const ate = troca == null ? Number.POSITIVE_INFINITY : troca - 1
     const min = Math.max(lo, desde)
     const max = Math.min(hi, ate)
-    if (min <= max && elenco.has(atual) && zonaMinimaDaEspecie(atual) <= faixa.zonaMaxima) {
+    if (min <= max && elenco.has(atual) && zonaEfetiva(atual, ate) <= zonaMaxima) {
       trechos.push({ speciesId: atual, minLevel: min, maxLevel: max })
     }
     if (troca == null) break
@@ -311,6 +380,40 @@ function trechosDaLinha(raiz: string, faixa: FaixaDef, elenco: Set<string>): Tre
     atual = SPECIES[atual].evolvesTo
   }
   return trechos
+}
+
+/**
+ * A zona minima que vale PRA ESTA FORMA, dado que ela deixa de ser a forma
+ * correta no nivel `ate`.
+ *
+ * REGRESSAO REAL QUE ISTO CONSERTA (PH-426): com a faixa de 30 niveis,
+ * `metapod`, `kakuna`, `silcoon` e `cascoon` sumiram do jogo inteiro assim que
+ * a janela encolheu pra 10. Os quatro sao casulo: existem em Lv7-9 e evoluem no
+ * 10. A zona minima deles e 1 (Lv11+) porque `spawnStrength.PISO_POR_ESTAGIO`
+ * poe todo segundo estagio de evolucao na zona 1 — e as duas regras se
+ * contradizem, porque a zona so abre DEPOIS de a forma ja ter evoluido.
+ *
+ * A faixa escondia isso: faixa1 ia de Lv1 a Lv30 com zonaMaxima 2, entao a
+ * janela [7,9] cabia dentro dela sem ninguem reparar no conflito. Com estagios
+ * de 10 niveis, o estagio 1 (zonaMaxima 0) recusava o casulo por forca e o
+ * estagio 2 (Lv11-20) nao o alcancava por nivel. Pego pela guarda "toda
+ * especie selvagem tem pelo menos uma hunt".
+ *
+ * QUAL DAS DUAS REGRAS CEDE, E POR QUE E ESTA. `PISO_POR_ESTAGIO` e uma
+ * heuristica de PERCEPCAO — "forma evoluida na zona de estreia le como bug
+ * mesmo quando o numero permite" — e ela vale porque normalmente evolucao e
+ * sinal de forca. O nivel de evolucao do catalogo nao e heuristica: e o dado.
+ * Um Metapod em Lv7-9 nao le como bug, le como exatamente certo, porque
+ * Caterpie evolui no 7. Entao a heuristica cede onde o dado a contradiz, e so
+ * ai: a zona minima e limitada pela zona em que a forma ainda EXISTE.
+ *
+ * Nao afrouxa nada pra quem importa. Tyranitar nao tem evolucao seguinte, seu
+ * `ate` e infinito, e a zona 7 dele fica de pe.
+ */
+function zonaEfetiva(speciesId: string, ate: number): number {
+  const zona = zonaMinimaDaEspecie(speciesId)
+  if (!Number.isFinite(ate)) return zona
+  return Math.min(zona, zonaMaximaDoEstagio(estagioDoNivel(ate)))
 }
 
 // ---------------------------------------------------------------------------
@@ -349,16 +452,16 @@ function addEncounter(
   return id
 }
 
-function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
-  const id = huntId(bioma.chave, faixa.id)
-  const [lo, hi] = faixa.niveis
+function montarHunt(bioma: BiomaDef, estagio: number): void {
+  const id = estagioId(bioma.chave, estagio)
+  const [lo, hi] = niveisDoEstagio(estagio)
 
   const porSala: Record<string, string[]> = {}
   for (const sub of bioma.subBiomas) {
     const doSub = new Set(SUB_BIOMA_ESPECIES[sub.chave] ?? [])
     const ids: string[] = []
     for (const raiz of raizesDe(doSub)) {
-      for (const trecho of trechosDaLinha(raiz, faixa, doSub)) ids.push(addEncounter(id, trecho))
+      for (const trecho of trechosDaLinha(raiz, estagio, doSub)) ids.push(addEncounter(id, trecho))
     }
     porSala[sub.chave] = ids
   }
@@ -366,14 +469,14 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
   const enemyPool = [...new Set(Object.values(porSala).flat())]
   if (enemyPool.length === 0) {
     throw new Error(
-      `Hunt "${id}" nasceria sem nenhum encontro (faixa ${faixa.nome}, Lv ${lo}-${hi}). ` +
+      `Hunt "${id}" nasceria sem nenhum encontro (estágio ${estagio}, Lv ${lo}-${hi}). ` +
       'Hunt vazia não da erro em runtime: ela só nunca spawna nada e o jogador ' +
       'fica num mapa morto.'
     )
   }
 
   POOL_POR_SALA[id] = porSala
-  const nome = `${bioma.nome} ${faixa.nome}`
+  const nome = `${bioma.nome} ${estagio}`
   maps[id] = {
     id,
     name: nome,
@@ -382,8 +485,10 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
     unlockCost: null,
     // `continent` deixou de ser regiao e passou a ser o GRUPO DE GATE (ver
     // data/biomas.ts): faixa1 e faixa2 nascem abertas, faixa3 e o Modo
-    // Pesadelo sao liberados por derrotar o Campeao Lance.
-    continent: faixa.id,
+    // Pesadelo sao liberados por derrotar o Campeao Lance. O estagio herda o
+    // grupo da faixa que cobria aquele nivel — ponte temporaria, ver
+    // `grupoDeGateDoEstagio`.
+    continent: grupoDeGateDoEstagio(estagio),
     bounds: { ...GEOMETRIA.bounds },
     playerSpawn: { ...GEOMETRIA.playerSpawn },
     bg: { ...bioma.bg },
@@ -452,7 +557,7 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
 }
 
 for (const bioma of BIOMAS) {
-  for (const faixa of FAIXAS) montarHunt(bioma, faixa)
+  for (let estagio = 1; estagio <= ESTAGIOS_POR_BIOMA; estagio++) montarHunt(bioma, estagio)
 }
 
 // ---------------------------------------------------------------------------

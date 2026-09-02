@@ -12,7 +12,7 @@
 // Este arquivo mede DISTÂNCIA ENTRE INIMIGOS no mundo construído — não a função
 // de sorteio isolada. É o número que o jogador sente.
 //
-// MEDIDO em 60 sementes de `mata_faixa1`, antes e depois da regra de separação:
+// MEDIDO em 60 sementes de `mata_e1`, antes e depois da regra de separação:
 //
 //   antes   mínimo 3   p10 15    mediana 34    p90 71
 //   depois  mínimo 81  p10 110   mediana 129   p90 153
@@ -31,7 +31,7 @@ import { buildMapWorld } from './simulation'
 
 import type { EnemyEntity } from './types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 
 function mundo(semente: number) {
   const rng = createRng(semente)

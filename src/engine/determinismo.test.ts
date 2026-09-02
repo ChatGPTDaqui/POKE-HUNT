@@ -140,7 +140,7 @@ describe('determinismo da simulacao', () => {
     // frequencia, e o teste acusaria repeticao onde nao ha. Uma hunt de bioma
     // tem pool grande e seis inimigos, entao assinatura repetida vira sinal em
     // vez de coincidencia.
-    const MAPA_VARIADO = 'mata_faixa1'
+    const MAPA_VARIADO = 'mata_e1'
 
     function janelas(retomar: boolean): string[] {
       let estado = { state: SEMENTE, draws: 0 }

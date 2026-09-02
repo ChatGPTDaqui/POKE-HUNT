@@ -199,7 +199,7 @@ describe('ritmo adaptativo do flush', () => {
     await abrirSessaoDeHunt('route_46', 'poke-1')
     await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS * 6)
 
-    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    await abrirSessaoDeHunt('mata_e1', 'poke-1')
     mock.flush.mockClear()
     await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
     expect(mock.flush).toHaveBeenCalledTimes(1)
@@ -326,9 +326,9 @@ describe('pedido de sala com a quota fechada (PH-273)', () => {
   }
 
   it('a quota fechada nao pode ser repedida antes do intervalo de flush inteiro', async () => {
-    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_e1' })
     mock.flush.mockResolvedValue(janela)
-    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    await abrirSessaoDeHunt('mata_e1', 'poke-1')
     mock.flush.mockClear()
 
     fecharQuota()
@@ -373,9 +373,9 @@ describe('pedido de sala com a quota fechada (PH-273)', () => {
   }
 
   it('servidor quase fechando: sai UM pedido extra, e so um, antes do intervalo', async () => {
-    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_e1' })
     mock.flush.mockResolvedValue(janelaComSala(28))
-    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    await abrirSessaoDeHunt('mata_e1', 'poke-1')
     mock.flush.mockClear()
 
     fecharQuota()
@@ -407,11 +407,11 @@ describe('pedido de sala com a quota fechada (PH-273)', () => {
   })
 
   it('servidor LONGE de fechar nao ganha pedido extra — a janela curta so o atrasaria', async () => {
-    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_e1' })
     // 15 de 30: o pedido extra nao teria como fechar a quota, e ainda encurtaria
     // a janela do servidor. O caso que a bancada mostrou piorando o p90.
     mock.flush.mockResolvedValue(janelaComSala(15))
-    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    await abrirSessaoDeHunt('mata_e1', 'poke-1')
     mock.flush.mockClear()
 
     fecharQuota()
@@ -426,9 +426,9 @@ describe('pedido de sala com a quota fechada (PH-273)', () => {
   })
 
   it('sala NOVA com a quota fechada pede na hora, sem esperar o intervalo', async () => {
-    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_e1' })
     mock.flush.mockResolvedValue(janela)
-    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    await abrirSessaoDeHunt('mata_e1', 'poke-1')
     mock.flush.mockClear()
 
     fecharQuota(0)

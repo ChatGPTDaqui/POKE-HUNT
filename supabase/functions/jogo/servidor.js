@@ -43490,31 +43490,6 @@ function biomaProgressDefault() {
 	};
 }
 Object.fromEntries(FAIXAS$1.map((f) => [f.id, f]));
-/** Id da hunt de um bioma numa faixa. Estavel: e o que vai pro banco. */
-function huntId(bioma, faixa) {
-	return `${bioma}_${faixa}`;
-}
-/**
-* Inverso de `huntId` — o bioma embutido no mapId de uma hunt de bioma, ou
-* `null` se o mapId nao segue esse padrao (BOSS/Nightmare/hunt inicial nao
-* tem bioma). PH-227/229: mesma logica usada pelo gate server-side
-* (abrirSessao) E pelo menu (HuntMenu) — nao duplicar, os dois precisam
-* concordar sobre "que bioma e esse mapId" sempre.
-*/
-function biomaDoMapId(mapId, faixa) {
-	return mapId.endsWith(`_${faixa}`) ? mapId.slice(0, -(faixa.length + 1)) : null;
-}
-/**
-* Indice do bioma embutido no mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` se
-* o mapId nao tem bioma (hunt inicial/BOSS/Nightmare) ou o bioma nao esta na
-* ordem (nao deveria acontecer com os 12 habilitados, PH-225 — defesa em
-* profundidade). Usado pelo gate server-side (PH-227) E pelo sort/selo do
-* menu (PH-229).
-*/
-function indiceDoBiomaNoMapId(mapId, faixa) {
-	const bioma = biomaDoMapId(mapId, faixa);
-	return bioma ? ORDEM_DOS_BIOMAS.indexOf(bioma) : -1;
-}
 var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
 	sub,
 	bioma
@@ -46343,6 +46318,327 @@ var TRAINING_MAP = {
 	noRewards: true,
 	passiveEnemies: true
 };
+/**
+* Quantas salas cada estagio tem, do 1 ao 10.
+*
+* Sobe de 3 a 8 em vez das 10 fixas de hoje (`SALAS_POR_HUNT`): o estagio 1
+* precisa ser curto o bastante pra o novato ver o primeiro Lord cedo, e o
+* estagio 10 precisa ser longo o bastante pra o fim do bioma pesar. Com a
+* quota de 30 abates por sala (`ABATES_POR_SALA`, que fica como esta), a soma
+* da 55 salas e 1.650 abates por bioma.
+*
+* NUMEROS PROVISORIOS, e o dono do projeto sabe disso ("por enquanto"). O que
+* decide se estao certos e o TEMPO REAL por sala, que ainda nao foi medido —
+* e, quando for, tem que ser contra o servidor publicado, nao no motor
+* headless: os dois ja discordaram por quase 6x no dimensionamento da hunt
+* inicial (ver `MAX_INIMIGOS_HUNT_INICIAL` em biomas.ts).
+*/
+var SALAS_POR_ESTAGIO = [
+	3,
+	4,
+	4,
+	5,
+	5,
+	6,
+	6,
+	7,
+	7,
+	8
+];
+SALAS_POR_ESTAGIO.reduce((a, b) => a + b, 0);
+/** `true` se `estagio` e um numero de estagio valido (1..10, inteiro). */
+function estagioValido(estagio) {
+	return Number.isInteger(estagio) && estagio >= 1 && estagio <= 10;
+}
+/**
+* Faixa fechada de nivel do estagio: o estagio `e` cobre
+* `(e-1)*10+1` a `e*10`. Contigua e sem sobreposicao, cobrindo Lv 1-100.
+*/
+function niveisDoEstagio(estagio) {
+	const topo = estagio * 10;
+	return [topo - 10 + 1, topo];
+}
+/**
+* Zona maxima de `spawnStrength.zonaMinimaDaEspecie` que cabe neste estagio.
+*
+* A escala de zona e de 10 niveis desde sempre (zona 0 = Lv 1-10), entao o
+* casamento e direto: `estagio - 1`. Isso preserva o eixo de FORCA que impede
+* Tyranitar de nascer no comeco — e o mesmo eixo que as faixas usavam
+* (faixa1 ia ate a zona 2, que e o estagio 3 aqui).
+*/
+function zonaMaximaDoEstagio(estagio) {
+	return estagio - 1;
+}
+/** Quantas salas tem o estagio. */
+function salasDoEstagio(estagio) {
+	return SALAS_POR_ESTAGIO[estagio - 1];
+}
+/**
+* Id da hunt de um estagio. Estavel: vai pro banco (`players.current_map`,
+* `game_sessions.map_id`, `sala_protetor`), entao mudar o formato depois exige
+* migration de dado.
+*
+* Formato `<bioma>_e<N>` — o `_e` separa do formato antigo `<bioma>_faixa<N>`
+* sem ambiguidade, o que deixa os dois conviverem durante a traducao de save
+* legado (PH-429).
+*/
+function estagioId(bioma, estagio) {
+	return `${bioma}_e${estagio}`;
+}
+var PADRAO_DE_ESTAGIO = /^(.+)_e(\d+)$/;
+var CHAVES_DE_BIOMA = new Set(BIOMAS.map((b) => b.chave));
+/**
+* Inverso de `estagioId`, ou `null` se o mapId nao e de um estagio de bioma.
+*
+* Valida o bioma contra `BIOMAS` e o estagio contra a regua, de proposito: sem
+* isso `nightmare_marinho_e7` (o Modo Pesadelo prefixa o mapId, ver
+* nightmareMaps.ts) devolveria o bioma inventado `nightmare_marinho` e o gate
+* de entrada da autoridade (PH-430) liberaria sessao com progresso de um bioma
+* que nao existe. O Pesadelo ganha tratamento PROPRIO quando for a vez dele —
+* aqui ele so nao pode passar por engano.
+*/
+function parseEstagioId(mapId) {
+	const m = PADRAO_DE_ESTAGIO.exec(mapId);
+	if (!m) return null;
+	const bioma = m[1];
+	const estagio = Number(m[2]);
+	if (!CHAVES_DE_BIOMA.has(bioma)) return null;
+	if (!estagioValido(estagio)) return null;
+	return {
+		bioma,
+		estagio
+	};
+}
+/**
+* Indice do bioma deste mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` quando o
+* mapId nao e de um estagio de bioma (hunt inicial, BOSS, Pesadelo).
+*
+* SUBSTITUI `biomas.ts#indiceDoBiomaNoMapId` (PH-426), que sabia ler so o
+* formato antigo `<bioma>_faixa<N>`. A funcao mora AQUI, e nao la, porque
+* `estagios.ts` ja importa `biomas.ts` — o contrario criaria ciclo, e
+* `ESTAGIOS` e calculado em tempo de import.
+*
+* O INVARIANTE QUE ELA CARREGA e o mesmo de antes: o gate server-side
+* (`authority/src/appSessao.ts#bloqueioDeBiomaPendente`) e o selo/ordem do menu
+* (`HuntMenu.tsx`) precisam concordar sobre "que bioma e esse mapId". Uma
+* funcao so, chamada pelos dois.
+*
+* ELA E TRANSITORIA. O gate por ORDEM de bioma morre na PH-430, quando os 12
+* biomas passam a nascer abertos e o eixo vira o estagio dentro do bioma.
+*/
+function indiceDoBiomaDoEstagio(mapId) {
+	const estagio = parseEstagioId(mapId);
+	return estagio ? ORDEM_DOS_BIOMAS.indexOf(estagio.bioma) : -1;
+}
+/**
+* Perfil de cada um dos 33 sub-biomas.
+*
+* Escrito a mao, pelo mesmo motivo que os pesos de `biomas.ts` sao: "o que e
+* raso e o que e fundo neste lugar" e decisao tematica, nao dado derivavel.
+* Nao ha ordem implicita na lista de `subBiomas` que sirva — `seabed` e o
+* ultimo do Marinho por acaso de insercao, nao por profundidade.
+*/
+var PERFIL_POR_SUB_BIOMA = {
+	town: {
+		profundidade: .05,
+		pico: 6
+	},
+	plains: {
+		profundidade: .35,
+		pico: 10
+	},
+	grass: {
+		profundidade: .45,
+		pico: 10
+	},
+	meadow: {
+		profundidade: .85,
+		pico: 8
+	},
+	"tall-grass": {
+		profundidade: .15,
+		pico: 10
+	},
+	forest: {
+		profundidade: .45,
+		pico: 10
+	},
+	jungle: {
+		profundidade: .95,
+		pico: 10
+	},
+	beach: {
+		profundidade: 0,
+		pico: 6
+	},
+	sea: {
+		profundidade: .45,
+		pico: 10
+	},
+	seabed: {
+		profundidade: 1,
+		pico: 10
+	},
+	lake: {
+		profundidade: .25,
+		pico: 10
+	},
+	swamp: {
+		profundidade: .9,
+		pico: 9
+	},
+	badlands: {
+		profundidade: .1,
+		pico: 10
+	},
+	desert: {
+		profundidade: .5,
+		pico: 10
+	},
+	wasteland: {
+		profundidade: 1,
+		pico: 10
+	},
+	mountain: {
+		profundidade: .15,
+		pico: 9
+	},
+	cave: {
+		profundidade: .85,
+		pico: 10
+	},
+	"snowy-forest": {
+		profundidade: .15,
+		pico: 9
+	},
+	"ice-cave": {
+		profundidade: .85,
+		pico: 10
+	},
+	volcano: {
+		profundidade: .5,
+		pico: 10
+	},
+	metropolis: {
+		profundidade: .2,
+		pico: 10
+	},
+	slum: {
+		profundidade: .6,
+		pico: 8
+	},
+	dojo: {
+		profundidade: .95,
+		pico: 10
+	},
+	"construction-site": {
+		profundidade: .05,
+		pico: 10
+	},
+	factory: {
+		profundidade: .4,
+		pico: 10
+	},
+	"power-plant": {
+		profundidade: .7,
+		pico: 9
+	},
+	laboratory: {
+		profundidade: 1,
+		pico: 10
+	},
+	ruins: {
+		profundidade: .15,
+		pico: 10
+	},
+	temple: {
+		profundidade: .55,
+		pico: 10
+	},
+	"fairy-cave": {
+		profundidade: 1,
+		pico: 10
+	},
+	graveyard: {
+		profundidade: .1,
+		pico: 10
+	},
+	abyss: {
+		profundidade: .6,
+		pico: 10
+	},
+	space: {
+		profundidade: 1,
+		pico: 10
+	}
+};
+/**
+* Posicao do estagio na profundidade do bioma: 0 no estagio 1, 1 no estagio 10.
+*/
+function posicaoDoEstagio(estagio) {
+	return (estagio - 1) / 9;
+}
+function perfilDe(sub) {
+	return PERFIL_POR_SUB_BIOMA[sub.chave] ?? {
+		profundidade: .5,
+		pico: sub.peso
+	};
+}
+function afinidade(perfil, posicao) {
+	const alcance = perfil.alcance ?? .75;
+	const distancia = Math.abs(posicao - perfil.profundidade);
+	return Math.max(0, 1 - distancia / alcance);
+}
+/**
+* Peso normalizado de cada sub-bioma numa posicao do bioma. Soma 1.
+*
+* Separada de `pesosDoEstagio` porque e a parte que precisa ser testada com
+* entrada sintetica — inclusive o caso degenerado em que TODO sub-bioma zera
+* na posicao pedida (perfis todos rasos num estagio fundo). Ai o fallback e o
+* peso base: sala vazia e pior que sala fora do tema, do mesmo jeito que
+* `contextoDeSpawn` prefere pool errado a pool nenhum.
+*/
+function pesosPorProfundidade(subs, posicao) {
+	const brutos = subs.map((sub) => {
+		const perfil = perfilDe(sub);
+		return afinidade(perfil, posicao) * perfil.pico;
+	});
+	let total = brutos.reduce((a, b) => a + b, 0);
+	let base = brutos;
+	if (total <= 0) {
+		base = subs.map((sub) => sub.peso);
+		total = base.reduce((a, b) => a + b, 0);
+	}
+	if (total <= 0) {
+		const igual = subs.length > 0 ? 1 / subs.length : 0;
+		return Object.fromEntries(subs.map((sub) => [sub.chave, igual]));
+	}
+	return Object.fromEntries(subs.map((sub, i) => [sub.chave, base[i] / total]));
+}
+/**
+* Peso de cada sub-bioma do bioma no estagio dado. Soma 1.
+*
+* E isto que o menu mostra como porcentagem (PH-431) e o que o sorteio de sala
+* consome (PH-427) — os dois precisam ler a mesma funcao, senao a tela promete
+* uma composicao e a sala entrega outra.
+*/
+function pesosDoEstagio(bioma, estagio) {
+	return pesosPorProfundidade(bioma.subBiomas, posicaoDoEstagio(estagio));
+}
+/** Os 120 estagios (12 biomas x 10), na ordem de `BIOMAS`. */
+var ESTAGIOS = BIOMAS.flatMap((bioma) => Array.from({ length: 10 }, (_, i) => {
+	const estagio = i + 1;
+	return {
+		id: estagioId(bioma.chave, estagio),
+		bioma: bioma.chave,
+		estagio,
+		niveis: niveisDoEstagio(estagio),
+		zonaMaxima: zonaMaximaDoEstagio(estagio),
+		salas: salasDoEstagio(estagio),
+		pesosDeSubBioma: pesosDoEstagio(bioma, estagio)
+	};
+}));
+Object.fromEntries(ESTAGIOS.map((e) => [e.id, e]));
 //#endregion
 //#region src/data/evolutionStage.ts
 var PRE_EVOLUCAO$1 = {};
@@ -46456,21 +46752,44 @@ var DEFAULT_WEIGHT = 10;
 var PRE_EVOLUCAO = {};
 for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id;
 /**
-* Em que FAIXA uma zona minima cai — o indice, nao a faixa, porque quem chama
-* precisa poder pedir "a seguinte".
+* O primeiro ESTAGIO (1..10) que alcanca esta zona minima.
 *
-* Zona acima de toda `zonaMaxima` devolve o indice da ultima faixa: e o topo do
-* jogo, nao ha mais pra onde empurrar.
+* Como `zonaMaximaDoEstagio(e) === e - 1`, a conta e direta: zona `z` cabe a
+* partir do estagio `z + 1`. Zona acima do ultimo estagio devolve o ultimo: e
+* o topo do modo normal, nao ha mais pra onde empurrar.
 */
-function indiceDeFaixa(zona) {
-	const i = FAIXAS$1.findIndex((f) => zona <= f.zonaMaxima);
-	return i === -1 ? FAIXAS$1.length - 1 : i;
+function estagioDaZona(zona) {
+	return Math.min(Math.max(zona + 1, 1), 10);
 }
-/** A faixa que contem este nivel. Nivel acima da ultima cai na ultima. */
-function indiceDeFaixaPorNivel(nivel) {
-	const i = FAIXAS$1.findIndex((f) => nivel <= f.niveis[1]);
-	return i === -1 ? FAIXAS$1.length - 1 : i;
+/** O estagio que contem este nivel. Nivel acima do ultimo cai no ultimo. */
+function estagioDoNivel(nivel) {
+	return Math.min(Math.max(Math.ceil(nivel / 10), 1), 10);
 }
+/**
+* Ate que estagio (inclusive) uma FAIXA antiga ia — a ponte que mantem o gate
+* de hoje de pe enquanto ele nao e trocado.
+*
+* `continent` continua sendo o grupo de gate (`FAIXAS_INICIAIS` abre faixa1 e
+* faixa2; o Lance abre faixa3 e o Pesadelo), e trocar isso e a PH-430/PH-432,
+* nao esta issue. Entao cada estagio herda o grupo da faixa que cobria aquele
+* nivel: estagios 1-3 = faixa1 (Lv 1-30), 4-6 = faixa2 (Lv 31-60), 7-10 =
+* faixa3 (Lv 61-100 — o estagio 10 e conteudo novo, acima do antigo teto de
+* 90, e cai no grupo mais alto).
+*
+* SEM ISSO O JOGO ABRE TODO DE UMA VEZ: `continent` de valor desconhecido nao
+* casa com grupo liberado nenhum, e o menu esconderia as 120 hunts. Com um
+* valor unico e aberto, o Modo Pesadelo deixaria de ser recompensa do Lance.
+* A ponte sai junto com o vocabulario de faixa, na PH-434.
+*/
+function grupoDeGateDoEstagio(estagio) {
+	return (FAIXAS$1.find((f) => niveisDoEstagio(estagio)[1] <= f.niveis[1]) ?? FAIXAS$1[FAIXAS$1.length - 1]).id;
+}
+/**
+* Pares `origem->alvo` em que o teto pelo gatilho do alvo (PH-332) de fato
+* mordeu na montagem. Vazio hoje, e um teste tranca isso — ver o comentario do
+* ramo em `nivelDeTroca`.
+*/
+var TETO_DE_GATILHO_APLICADO = /* @__PURE__ */ new Set();
 /**
 * A partir de que nivel `speciesId` deixa de ser o estagio correto da linha.
 *
@@ -46480,7 +46799,7 @@ function indiceDeFaixaPorNivel(nivel) {
 * data/pokes.ts) e nao faz sentido pro selvagem: usar 80 aqui trancaria
 * Alakazam, Gengar, Machamp, Steelix, Golem, Kingdra, Politoed e Scizor em
 * Lv80-90, uma fatia minuscula do jogo. Pro selvagem o gatilho e a FORCA — a
-* forma evoluida aparece a partir da primeira faixa que a zona minima dela
+* forma evoluida aparece a partir do primeiro ESTAGIO que a zona minima dela
 * alcanca.
 */
 function nivelDeTroca(speciesId, desde) {
@@ -46488,15 +46807,18 @@ function nivelDeTroca(speciesId, desde) {
 	const alvo = especie?.evolvesTo;
 	if (!alvo || !SPECIES[alvo]) return null;
 	if (especie.isSpecialEvolution) {
-		const daOrigem = Math.max(indiceDeFaixaPorNivel(desde), indiceDeFaixa(zonaMinimaDaEspecie(speciesId)));
-		const doAlvo = indiceDeFaixa(zonaMinimaDaEspecie(alvo));
+		const daOrigem = Math.max(estagioDoNivel(desde), estagioDaZona(zonaMinimaDaEspecie(speciesId)));
+		const doAlvo = estagioDaZona(zonaMinimaDaEspecie(alvo));
 		const indice = Math.max(doAlvo, daOrigem + 1);
-		if (indice >= FAIXAS$1.length) return null;
-		const pisoDaFaixa = FAIXAS$1[indice].niveis[0];
+		if (indice > 10) return null;
+		const pisoDoEstagio = niveisDoEstagio(indice)[0];
 		const alvoDef = SPECIES[alvo];
 		const gatilhoDoAlvo = alvoDef.isSpecialEvolution ? null : alvoDef.evolvesAtLevel;
-		if (gatilhoDoAlvo != null && gatilhoDoAlvo <= pisoDaFaixa) return Math.min(pisoDaFaixa, Math.max(2, Math.ceil(gatilhoDoAlvo / 2)));
-		return pisoDaFaixa;
+		if (gatilhoDoAlvo != null && gatilhoDoAlvo <= pisoDoEstagio) {
+			TETO_DE_GATILHO_APLICADO.add(`${speciesId}->${alvo}`);
+			return Math.min(pisoDoEstagio, Math.max(2, Math.ceil(gatilhoDoAlvo / 2)));
+		}
+		return pisoDoEstagio;
 	}
 	const porNivel = especie.evolvesAtLevel;
 	return porNivel == null ? null : Math.max(porNivel, desde + 1);
@@ -46512,16 +46834,18 @@ function raizesDe(especies) {
 	return raizes;
 }
 /**
-* Recorta a linha que comeca em `raiz` na faixa [lo, hi]: um trecho por
-* estagio, com a sub-faixa de nivel em que aquele estagio e o correto.
+* Recorta a linha que comeca em `raiz` na janela do estagio: um trecho por
+* FORMA, com a sub-janela de nivel em que aquela forma e a correta.
 *
-* Um estagio e pulado quando (a) nao esta no elenco deste sub-bioma — a
+* Uma forma e pulada quando (a) nao esta no elenco deste sub-bioma — a
 * heranca por familia do gerador da a mesma casa pra linha toda, mas duas
-* linhas podem se juntar com casas diferentes — ou (b) a zona minima dele
-* passa da faixa, que e o que impede Tyranitar de aparecer numa hunt Lv31-60.
+* linhas podem se juntar com casas diferentes — ou (b) a zona minima dela
+* passa da zona maxima do estagio, que e o que impede Tyranitar de aparecer
+* numa hunt de Lv31-40.
 */
-function trechosDaLinha(raiz, faixa, elenco) {
-	const [lo, hi] = faixa.niveis;
+function trechosDaLinha(raiz, estagio, elenco) {
+	const [lo, hi] = niveisDoEstagio(estagio);
+	const zonaMaxima = zonaMaximaDoEstagio(estagio);
 	const trechos = [];
 	let atual = raiz;
 	let desde = 1;
@@ -46530,7 +46854,7 @@ function trechosDaLinha(raiz, faixa, elenco) {
 		const ate = troca == null ? Number.POSITIVE_INFINITY : troca - 1;
 		const min = Math.max(lo, desde);
 		const max = Math.min(hi, ate);
-		if (min <= max && elenco.has(atual) && zonaMinimaDaEspecie(atual) <= faixa.zonaMaxima) trechos.push({
+		if (min <= max && elenco.has(atual) && zonaEfetiva(atual, ate) <= zonaMaxima) trechos.push({
 			speciesId: atual,
 			minLevel: min,
 			maxLevel: max
@@ -46540,6 +46864,39 @@ function trechosDaLinha(raiz, faixa, elenco) {
 		atual = SPECIES[atual].evolvesTo;
 	}
 	return trechos;
+}
+/**
+* A zona minima que vale PRA ESTA FORMA, dado que ela deixa de ser a forma
+* correta no nivel `ate`.
+*
+* REGRESSAO REAL QUE ISTO CONSERTA (PH-426): com a faixa de 30 niveis,
+* `metapod`, `kakuna`, `silcoon` e `cascoon` sumiram do jogo inteiro assim que
+* a janela encolheu pra 10. Os quatro sao casulo: existem em Lv7-9 e evoluem no
+* 10. A zona minima deles e 1 (Lv11+) porque `spawnStrength.PISO_POR_ESTAGIO`
+* poe todo segundo estagio de evolucao na zona 1 — e as duas regras se
+* contradizem, porque a zona so abre DEPOIS de a forma ja ter evoluido.
+*
+* A faixa escondia isso: faixa1 ia de Lv1 a Lv30 com zonaMaxima 2, entao a
+* janela [7,9] cabia dentro dela sem ninguem reparar no conflito. Com estagios
+* de 10 niveis, o estagio 1 (zonaMaxima 0) recusava o casulo por forca e o
+* estagio 2 (Lv11-20) nao o alcancava por nivel. Pego pela guarda "toda
+* especie selvagem tem pelo menos uma hunt".
+*
+* QUAL DAS DUAS REGRAS CEDE, E POR QUE E ESTA. `PISO_POR_ESTAGIO` e uma
+* heuristica de PERCEPCAO — "forma evoluida na zona de estreia le como bug
+* mesmo quando o numero permite" — e ela vale porque normalmente evolucao e
+* sinal de forca. O nivel de evolucao do catalogo nao e heuristica: e o dado.
+* Um Metapod em Lv7-9 nao le como bug, le como exatamente certo, porque
+* Caterpie evolui no 7. Entao a heuristica cede onde o dado a contradiz, e so
+* ai: a zona minima e limitada pela zona em que a forma ainda EXISTE.
+*
+* Nao afrouxa nada pra quem importa. Tyranitar nao tem evolucao seguinte, seu
+* `ate` e infinito, e a zona 7 dele fica de pe.
+*/
+function zonaEfetiva(speciesId, ate) {
+	const zona = zonaMinimaDaEspecie(speciesId);
+	if (!Number.isFinite(ate)) return zona;
+	return Math.min(zona, zonaMaximaDoEstagio(estagioDoNivel(ate)));
 }
 var maps = {};
 var encounters = {};
@@ -46564,26 +46921,26 @@ function addEncounter(huntKey, trecho, levelWeights) {
 	};
 	return id;
 }
-function montarHunt(bioma, faixa) {
-	const id = huntId(bioma.chave, faixa.id);
-	const [lo, hi] = faixa.niveis;
+function montarHunt(bioma, estagio) {
+	const id = estagioId(bioma.chave, estagio);
+	const [lo, hi] = niveisDoEstagio(estagio);
 	const porSala = {};
 	for (const sub of bioma.subBiomas) {
 		const doSub = new Set(SUB_BIOMA_ESPECIES[sub.chave] ?? []);
 		const ids = [];
-		for (const raiz of raizesDe(doSub)) for (const trecho of trechosDaLinha(raiz, faixa, doSub)) ids.push(addEncounter(id, trecho));
+		for (const raiz of raizesDe(doSub)) for (const trecho of trechosDaLinha(raiz, estagio, doSub)) ids.push(addEncounter(id, trecho));
 		porSala[sub.chave] = ids;
 	}
 	const enemyPool = [...new Set(Object.values(porSala).flat())];
-	if (enemyPool.length === 0) throw new Error(`Hunt "${id}" nasceria sem nenhum encontro (faixa ${faixa.nome}, Lv ${lo}-${hi}). Hunt vazia não da erro em runtime: ela só nunca spawna nada e o jogador fica num mapa morto.`);
+	if (enemyPool.length === 0) throw new Error(`Hunt "${id}" nasceria sem nenhum encontro (estágio ${estagio}, Lv ${lo}-${hi}). Hunt vazia não da erro em runtime: ela só nunca spawna nada e o jogador fica num mapa morto.`);
 	POOL_POR_SALA[id] = porSala;
 	maps[id] = {
 		id,
-		name: `${bioma.nome} ${faixa.nome}`,
+		name: `${bioma.nome} ${estagio}`,
 		description: `${bioma.nome} — níveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(", ")}.`,
 		levelRange: [lo, hi],
 		unlockCost: null,
-		continent: faixa.id,
+		continent: grupoDeGateDoEstagio(estagio),
 		bounds: { ...GEOMETRIA.bounds },
 		playerSpawn: { ...GEOMETRIA.playerSpawn },
 		bg: { ...bioma.bg },
@@ -46632,7 +46989,7 @@ function montarHunt(bioma, faixa) {
 		itemDrops: [...LOOT.basico]
 	};
 }
-for (const bioma of BIOMAS) for (const faixa of FAIXAS$1) montarHunt(bioma, faixa);
+for (const bioma of BIOMAS) for (let estagio = 1; estagio <= 10; estagio++) montarHunt(bioma, estagio);
 var TETO_DE_FATIA = .35;
 /**
 * Apara os pesos ate ninguem passar de `TETO_DE_FATIA`. Muta e devolve o mapa.
@@ -81665,14 +82022,14 @@ async function sairDaHunt(cfg, userId, sessaoId) {
 * sequencial de bioma — vencer o Lord do bioma N libera o N+1 (PH-207/226).
 *
 * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
-* inteiro so pra exercitar uma regra de negocio. `biomaDoMapId` (PH-229)
+* inteiro so pra exercitar uma regra de negocio. `indiceDoBiomaDoEstagio`
 * e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
 * dois lados tem que concordar sobre "que bioma e esse mapId" E sobre o
 * texto exato da mensagem (`HuntMenu.tsx#bloqueioDeBiomaClient` espelha
 * esta string).
 */
 function bloqueioDeBiomaPendente(mapId, grupo, biomaProgress) {
-	const indiceEsperado = indiceDoBiomaNoMapId(mapId, grupo);
+	const indiceEsperado = indiceDoBiomaDoEstagio(mapId);
 	if (indiceEsperado <= 0) return null;
 	if ((biomaProgress?.[grupo] ?? 0) >= indiceEsperado) return null;
 	const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1];
