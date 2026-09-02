@@ -34,6 +34,7 @@ export interface CreateWorldEffectParams {
   ballItemId?: string
   success?: boolean
   statusDirection?: WorldEffect['statusDirection']
+  statusStat?: WorldEffect['statusStat']
   // Dono que este efeito de texto flutuante segue (le owner.x/y todo frame
   // em vez de congelar targetX/targetY na criacao — ver Sprites.ts). Reserva
   // uma "raia" (claimEffectLane) nele pra nao sobrepor outro efeito
@@ -59,6 +60,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25, delay = 0,
     value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1,
     worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection,
+    statusStat,
     seguir = null, apontarPara = null,
   } = params
 
@@ -76,6 +78,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     effectivenessLabel: effectivenessLabel ?? undefined,
     isCrit,
     text, unit, isAoe, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection,
+    statusStat,
     laneSize,
     ownerId: owner ? owner.id : null,
     lane,
