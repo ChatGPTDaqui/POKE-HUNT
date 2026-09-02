@@ -68,20 +68,29 @@ async function spritesNovo() {
 describe('simbolo de condicao sobre o corpo', () => {
   beforeEach(() => { pedidas = [] })
 
-  it.each(['paralysis', 'burn'] as const)('POKE com %s pede a arte da condicao', async (status) => {
-    const url = TIRA_POR_CONDICAO_NO_CORPO[status]!.url
-    const { drawEntity } = await spritesNovo()
-    drawEntity(ctxFalso(), entidade(status))
-    expect(pedidas, `${status} tem simbolo e ele tem que ser desenhado`).toContain(url)
-  })
+  // OS QUATRO, e nao dois (PH-416). Veneno e congelamento entraram no canal de
+  // corpo junto com a arte deles — a PH-370 os havia deixado de fora apostando
+  // que "roxo e ciano quase nao colidem com o elenco", e a mesma bancada que
+  // aprovou paralisia e queimadura (`condicao-sobre-o-corpo.mjs`) mostrou um
+  // Gengar envenenado indistinguivel de um Gengar saudavel.
+  it.each(['poison', 'burn', 'paralysis', 'freeze'] as const)(
+    'POKE com %s pede a arte da condicao',
+    async (status) => {
+      const url = TIRA_POR_CONDICAO_NO_CORPO[status]!.url
+      const { drawEntity } = await spritesNovo()
+      drawEntity(ctxFalso(), entidade(status))
+      expect(pedidas, `${status} tem glifo e ele tem que ser desenhado`).toContain(url)
+    },
+  )
 
-  it.each(['poison', 'freeze', 'sleep'] as const)('POKE com %s NAO pede arte de condicao', async (status) => {
-    // O outro lado: veneno e congelamento ficaram de fora de proposito (roxo e
-    // ciano quase nao colidem com o elenco), e sono ja tem o badge de canto.
+  it('POKE dormindo NAO pede arte de condicao — sono e badge de canto', async () => {
+    // O sono e o unico status nao-volatil que fica fora do canal de corpo, e
+    // isso e decisao e nao lacuna: ele nao tem cor de corpo (um POKE dormindo se
+    // le pelo simbolo, nao pelo tom) e o "Z" ja mora no slot de badge.
     const daCondicao = Object.values(TIRA_POR_CONDICAO_NO_CORPO).map((t) => t!.url)
     const { drawEntity } = await spritesNovo()
-    drawEntity(ctxFalso(), entidade(status))
-    for (const url of daCondicao) expect(pedidas, status).not.toContain(url)
+    drawEntity(ctxFalso(), entidade('sleep'))
+    for (const url of daCondicao) expect(pedidas, 'sleep').not.toContain(url)
   })
 
   it('POKE sem status nenhum nao pede nada de condicao', async () => {
