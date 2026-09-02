@@ -1,8 +1,8 @@
-// O fio de conversa com um contato (PH-81) — o miolo do correio novo.
+// O fio de conversa com um contato (PH-81) — o miolo do Social.
 //
 // Herdeiro direto do `ConversaDM.tsx` de PH-74, que fazia isto so pra amigo e
 // so pra `friend_messages`. O que mudou: a fonte agora e `mail_messages` (a
-// mesma do resto do correio), o contato pode ser qualquer jogador, e a
+// mesma do resto da tela), o contato pode ser qualquer jogador, e a
 // mensagem pode levar anexo de ouro/item — que e coletado aqui dentro, no fio,
 // em vez de numa caixa separada.
 //
@@ -16,8 +16,8 @@ import { GameButton, GameInput, SectionLabel } from '@/components/game/controls'
 import { getItem } from '@/data/items'
 import { itemIconUrl } from '@/data/sprites'
 import { ErroServidor, detalheDeErro } from '@/data/remote/servidor'
-import type { MensagemCorreio } from '@/data/remote/servidor'
-import * as correio from '@/data/remote/correioRealtime'
+import type { MensagemSocial } from '@/data/remote/servidor'
+import * as social from '@/data/remote/socialRealtime'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
 import type { AnuncioParaConversa } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
@@ -58,7 +58,7 @@ interface Props {
 }
 
 export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
-  const [mensagens, setMensagens] = useState<MensagemCorreio[]>([])
+  const [mensagens, setMensagens] = useState<MensagemSocial[]>([])
   const [temMais, setTemMais] = useState(false)
   const [carregando, setCarregando] = useState(true)
   const [carregandoMais, setCarregandoMais] = useState(false)
@@ -85,7 +85,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
     let cancelado = false
     setCarregando(true)
     setMensagens([])
-    void correio.lerConversa(contato.userId)
+    void social.lerConversa(contato.userId)
       .then(async (r) => {
         if (cancelado) return
         setMensagens(r.mensagens)
@@ -93,7 +93,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
         // So chama a RPC se ha o que marcar — abrir um fio ja lido nao precisa
         // de round-trip nem de invalidar o badge da tela-mae.
         if (r.mensagens.some((m) => m.de_id === contato.userId && !m.excluido_destinatario_em && m.estado === 'pendente')) {
-          await correio.marcarConversaLida(contato.userId)
+          await social.marcarConversaLida(contato.userId)
           if (!cancelado) aoMarcarLidas()
         }
       })
@@ -107,14 +107,14 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
   // Realtime: so o que CHEGA. O eco das minhas sai do retorno de
   // `enviarMensagem`, entao a mensagem aparece mesmo com o socket caido.
   useEffect(() => {
-    // Sufixo proprio: o menu ja tem um canal `correio-<id>-menu` vivo, e
+    // Sufixo proprio: o menu ja tem um canal `social-<id>-menu` vivo, e
     // reusar o nome faria o `.on()` estourar em cima do canal ja inscrito.
-    const parar = correio.assinarCorreioAoVivo(meuId, () => {}, (m) => {
+    const parar = social.assinarSocialAoVivo(meuId, () => {}, (m) => {
       if (m.de_id !== contato.userId || m.tipo !== 'texto') return
       // O guard de id evita linha duplicada se o socket entregar duas vezes
       // (reconexao reenvia o backlog).
       setMensagens((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]))
-      void correio.marcarConversaLida(contato.userId).then(aoMarcarLidas).catch(() => {})
+      void social.marcarConversaLida(contato.userId).then(aoMarcarLidas).catch(() => {})
     }, 'fio')
     return parar
   }, [contato.userId, meuId, aoMarcarLidas])
@@ -130,7 +130,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
     if (!mensagens.length || carregandoMais) return
     setCarregandoMais(true)
     try {
-      const r = await correio.lerConversa(contato.userId, mensagens[0].created_at)
+      const r = await social.lerConversa(contato.userId, mensagens[0].created_at)
       setMensagens((prev) => [...r.mensagens, ...prev])
       setTemMais(r.temMais)
     } catch (e) {
@@ -145,7 +145,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
     if (!corpo || enviando) return
     setEnviando(true)
     try {
-      const { id, contextoAnuncio } = await correio.enviarMensagem(
+      const { id, contextoAnuncio } = await social.enviarMensagem(
         { paraId: contato.userId }, corpo, [], anuncioPendente?.id ?? null,
       )
       setMensagens((prev) => [...prev, {
@@ -176,7 +176,7 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
   async function coletar(mensagemId: string) {
     setColetando(mensagemId)
     try {
-      const r = await correio.coletarAnexo(mensagemId)
+      const r = await social.coletarAnexo(mensagemId)
       toast(r.mensagem)
       const agora = new Date().toISOString()
       setMensagens((prev) => prev.map((m) => (m.id === mensagemId ? { ...m, anexo_coletado_em: agora } : m)))

@@ -25,7 +25,7 @@
 // cada linha do rodape custa 13% do jogo visivel.
 import { useRef, useState } from 'react'
 import {
-  Backpack, BookOpen, Books, Calculator, CheckSquare, DotsThreeOutline, Envelope,
+  Backpack, BookOpen, Books, Calculator, ChatsCircle, CheckSquare, DotsThreeOutline,
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
   Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
   ArrowsLeftRight,
@@ -34,7 +34,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
 import {
-  usePendenciasDoMercado, usePendenciasDoCorreio, fraseDasPendencias,
+  usePendenciasDoMercado, usePendenciasDoSocial, fraseDasPendencias,
 } from '@/hooks/usePendencias'
 import { useEstoqueBaixoNoAuto, LIMIAR_ESTOQUE_BAIXO } from '@/components/auto/estoqueBaixo'
 import { NotificationBadge } from '@/components/game/NotificationBadge'
@@ -70,10 +70,12 @@ const DIREITA: DestinoDeTela[] = [
 ]
 
 // O que vive dentro de "Mais". Ordem por frequencia de uso real, nao
-// alfabetica: Correio abre varias vezes por sessao, Configuracoes uma vez por
+// alfabetica: Social abre varias vezes por sessao, Configuracoes uma vez por
 // mes.
 const SECUNDARIOS: DestinoDeTela[] = [
-  { screen: 'correio', label: 'Correio', Icon: Envelope },
+  // Icone de CHAT, nao de envelope (PH-436): a tela deixou de ser caixa de
+  // carta em PH-81, e o envelope era a ultima peca dizendo o contrario.
+  { screen: 'social', label: 'Social', Icon: ChatsCircle },
   { screen: 'troca', label: 'Troca', Icon: ArrowsLeftRight },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
   { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
@@ -140,20 +142,20 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
   const moreOpen = useUiStore((s) => s.moreOpen)
   const setMoreOpen = useUiStore((s) => s.setMoreOpen)
   const pendenciasMercado = usePendenciasDoMercado()
-  const pendenciasCorreio = usePendenciasDoCorreio()
+  const pendenciasSocial = usePendenciasDoSocial()
   // Medida propria (ver `uiStore#navHeight`): deitado, o sheet para em cima
   // desta barra e nao do rodape inteiro.
   const navRef = useRef<HTMLElement>(null)
   useMedirAltura(navRef, useUiStore((s) => s.setNavHeight))
 
   const pendenciasEmMais = destinosDaGrade().reduce((soma, d) => (
-    soma + (d.screen === 'mercado' ? pendenciasMercado : d.screen === 'correio' ? pendenciasCorreio.total : 0)
+    soma + (d.screen === 'mercado' ? pendenciasMercado : d.screen === 'social' ? pendenciasSocial.total : 0)
   ), 0)
-  // PH-287: o "Mais" e o unico lugar onde o numero do Correio aparece somado ao
+  // PH-287: o "Mais" e o unico lugar onde o numero do Social aparece somado ao
   // do Mercado, entao a frase dele nao serve pro selo inteiro. Ela vai no rotulo
-  // acessivel do item de Correio dentro do sheet, que e onde o jogador chega
+  // acessivel do item de Social dentro do sheet, que e onde o jogador chega
   // depois de tocar aqui.
-  const detalheDoCorreio = fraseDasPendencias(pendenciasCorreio)
+  const detalheDoSocial = fraseDasPendencias(pendenciasSocial)
 
   // Hospital nao abre tela: ele TROCA a cena do canvas. Fora de uma hunt o
   // jogador ja esta la, entao o slot vira indicador de "voce esta aqui" e o
@@ -237,11 +239,11 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         ativo={moreOpen}
         rotulo={!deitado}
         badge={pendenciasEmMais}
-        // PH-287: o selo do "Mais" soma Correio e Mercado, e o numero sozinho
-        // nao diz de onde ele vem. Quando o que esta pendente e do Correio, o
+        // PH-287: o selo do "Mais" soma Social e Mercado, e o numero sozinho
+        // nao diz de onde ele vem. Quando o que esta pendente e do Social, o
         // rotulo passa a dizer o que e — a diferenca entre "tem 2 coisas" e "tem
         // 1 mensagem por ler e 1 item por coletar".
-        descricaoDoBadge={detalheDoCorreio ?? undefined}
+        descricaoDoBadge={detalheDoSocial ?? undefined}
         onClick={() => setMoreOpen(!moreOpen)}
       />
     </nav>
@@ -355,7 +357,7 @@ export function SheetMais() {
   const moreOpen = useUiStore((s) => s.moreOpen)
   const toggleScreen = useUiStore((s) => s.toggleScreen)
   const setMoreOpen = useUiStore((s) => s.setMoreOpen)
-  const pendenciasCorreio = usePendenciasDoCorreio()
+  const pendenciasSocial = usePendenciasDoSocial()
   const destinos = destinosDaGrade()
 
   if (!moreOpen) return null
@@ -368,12 +370,12 @@ export function SheetMais() {
             key={screen}
             label={label}
             Icon={Icon}
-            badge={screen === 'correio' ? pendenciasCorreio.total : 0}
+            badge={screen === 'social' ? pendenciasSocial.total : 0}
             // PH-287: aqui a frase e VISIVEL, nao so acessivel. Este sheet e a
             // tela em que o jogador chega procurando "o que e que esta aceso", e
             // ele tem espaco pra uma linha embaixo do rotulo — a doca, com oito
             // slots em 390px, nao tem.
-            detalhe={screen === 'correio' ? fraseDasPendencias(pendenciasCorreio) : null}
+            detalhe={screen === 'social' ? fraseDasPendencias(pendenciasSocial) : null}
             onClick={() => {
               toggleScreen(screen)
               setMoreOpen(false)

@@ -10,10 +10,10 @@
 // card do mesmo anúncio nasceria de novo do outro lado dela. Por isso a
 // comparação é contra o último anúncio VISTO no fio.
 import { describe, expect, it } from 'vitest'
-import type { ContextoAnuncioCorreio, MensagemCorreio } from '@/data/remote/servidor'
+import type { ContextoAnuncioSocial, MensagemSocial } from '@/data/remote/servidor'
 import { idsComCardDeAnuncio } from './cardsDoAnuncio'
 
-function ctx(anuncioId: string): ContextoAnuncioCorreio {
+function ctx(anuncioId: string): ContextoAnuncioSocial {
   return {
     anuncioId, sellerId: 'vendedor', speciesId: 'charmander', level: 40,
     isShiny: false, rarity: 'raro', ivPercent: 88, price: 2_500_000,
@@ -21,7 +21,7 @@ function ctx(anuncioId: string): ContextoAnuncioCorreio {
   }
 }
 
-function msg(id: string, anuncioId?: string): MensagemCorreio {
+function msg(id: string, anuncioId?: string): MensagemSocial {
   return {
     id, de_id: 'eu', de_nome: 'Eu', para_id: 'contato', tipo: 'texto',
     assunto: null, corpo: `msg ${id}`, estado: 'pendente',

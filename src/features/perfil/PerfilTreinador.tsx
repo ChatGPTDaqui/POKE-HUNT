@@ -6,7 +6,7 @@
 // que ainda nao tem sistema por tras — "Outfit" (skins) e "Especialidades" —
 // ficam com o layout pronto e um aviso honesto, e nao com numero inventado.
 // Barra que nunca anda e botao que nao faz nada lem como bug, nao como
-// recurso futuro (mesma decisao ja tomada em Tasks/Correio/Mercado).
+// recurso futuro (mesma decisao ja tomada em Tasks/Social/Mercado).
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { User, Coins, Diamond, Trophy, Sword, Clock, BookOpen, Sparkle, TShirt, Star, SignOut } from '@phosphor-icons/react'

@@ -6,7 +6,7 @@
 // `usePedirAmizade`, que virou hook porque o Ranking mostra icone e o Chat usa o
 // proprio nick como gatilho — la nao havia forma comum pra compartilhar.
 //
-// `stopPropagation` sempre, e nao so no Correio: la a linha inteira e clicavel
+// `stopPropagation` sempre, e nao so no Social: la a linha inteira e clicavel
 // (abre o fio), e sem isso convidar pra trocar abriria a conversa por baixo. No
 // Ranking a linha nao tem clique, entao a chamada e inofensiva — e deixar a
 // decisao "aqui precisa, ali nao" com quem monta o componente e como se esquece

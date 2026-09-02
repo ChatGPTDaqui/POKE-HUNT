@@ -11,7 +11,7 @@ import { GameButton, GameInput, GameSelect, SectionLabel } from '@/components/ga
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { getItem } from '@/data/items'
 import { itemIconUrl } from '@/data/sprites'
-import type { AnexoItemCorreio } from '@/data/remote/servidor'
+import type { AnexoItemSocial } from '@/data/remote/servidor'
 import { cn } from '@/lib/utils'
 
 export const MAX_CORPO = 1000
@@ -23,13 +23,13 @@ interface Props {
   nickInicial?: string
   enviando: boolean
   onCancelar: () => void
-  onEnviar: (dados: { nick: string; corpo: string; anexos: AnexoItemCorreio[] }) => void
+  onEnviar: (dados: { nick: string; corpo: string; anexos: AnexoItemSocial[] }) => void
 }
 
 export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: Props) {
   const [nick, setNick] = useState(nickInicial ?? '')
   const [corpo, setCorpo] = useState('')
-  const [anexos, setAnexos] = useState<AnexoItemCorreio[]>([])
+  const [anexos, setAnexos] = useState<AnexoItemSocial[]>([])
   const [itemEscolhido, setItemEscolhido] = useState('')
   const [qtd, setQtd] = useState(1)
 

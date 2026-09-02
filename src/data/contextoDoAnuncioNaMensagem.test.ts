@@ -6,7 +6,7 @@
 // 1. A assinatura de 4 argumentos de `enviar_mensagem` tem que ser DROPADA. Com
 //    ela viva ao lado da de 5, toda chamada do PostgREST casa nas duas
 //    candidatas (o argumento novo tem default) e volta "could not choose the
-//    best candidate function" — o correio pararia de mandar mensagem por
+//    best candidate function" — o social pararia de mandar mensagem por
 //    inteiro, e a migration teria "funcionado".
 // 2. Os grants precisam ser reemitidos para a assinatura NOVA. `grant` é por
 //    assinatura, não por nome: sem isso a função nasce sem `execute` pra

@@ -188,7 +188,7 @@ describe.each(['public', 'dev'] as const)('invariantes da concessao em %s', (sch
 
   it('time cheio ABORTA antes de criar o POKE', () => {
     // A ordem e o ponto: a checagem tem que vir antes do insert, e a excecao
-    // desfaz o claim junto — e assim que o presente continua no correio.
+    // desfaz o claim junto — e assim que o presente continua na caixa do jogador.
     const posChecagem = sql.indexOf('if v_team_count >= 6 then')
     const posInsert = sql.indexOf(`insert into ${s}.pokemon_instances`)
     expect(posChecagem).toBeGreaterThan(-1)

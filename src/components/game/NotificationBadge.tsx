@@ -6,7 +6,7 @@
 // tamanho sozinha e pior que nao ter aviso nenhum.
 //
 // `aria-label` completo em vez do numero cru: um leitor de tela anunciando "3"
-// solto ao lado de "correio" nao diz o que sao os tres.
+// solto ao lado de "social" nao diz o que sao os tres.
 import { cn } from '@/lib/utils'
 
 export function NotificationBadge({

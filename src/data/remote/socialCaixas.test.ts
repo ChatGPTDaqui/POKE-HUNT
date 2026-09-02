@@ -1,4 +1,4 @@
-// PH-81: o que `correio()` monta pra tela inicial — conversas, avisos e a
+// PH-81: o que `social()` monta pra tela inicial — conversas, avisos e a
 // contagem que alimenta o badge do HUD.
 //
 // Era o teste das duas caixas (entrada e enviados) de PH-74. As caixas sairam:
@@ -48,7 +48,7 @@ vi.mock('@/lib/supabase', () => ({
   },
 }))
 
-const { correio } = await import('./correioRealtime')
+const { social } = await import('./socialRealtime')
 
 function fio(userId: string, naoLidas: number) {
   return {
@@ -64,7 +64,7 @@ function respondeRpcs(conversas: unknown[], detalhes: unknown = { amigos: [], bl
   ))
 }
 
-describe('correio()', () => {
+describe('social()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     chamadas.length = 0
@@ -77,7 +77,7 @@ describe('correio()', () => {
     // descobrir o nome do destinatario. Isso saiu: a RPC ja devolve nick,
     // ultimo trecho e contagem prontos, num registro por contato.
     respondeRpcs([fio('u1', 0), fio('u2', 0)])
-    const r = await correio()
+    const r = await social()
     expect(rpc).toHaveBeenCalledWith('conversas')
     expect(chamadas.some((c) => c.tabela === 'treinadores_publico')).toBe(false)
     expect(r.conversas.map((c) => c.userId)).toEqual(['u1', 'u2'])
@@ -86,7 +86,7 @@ describe('correio()', () => {
   it('a lista de avisos exclui `texto` — conversa nao e aviso', async () => {
     // Os dois vivem na MESMA tabela. Sem o `neq` a caixa de avisos mostraria
     // cada mensagem de gente como se fosse notificacao do jogo.
-    await correio()
+    await social()
     const consulta = chamadas.find((c) => c.tabela === 'mail_messages')
     expect(consulta?.filtros['neq:tipo']).toBe('texto')
   })
@@ -94,7 +94,7 @@ describe('correio()', () => {
   it('a lista de avisos ignora o que EU apaguei', async () => {
     // O filtro tem que estar na CONSULTA: `naoLidas` conta sobre este retorno e
     // alimenta o badge do HUD.
-    await correio()
+    await social()
     const consulta = chamadas.find((c) => c.tabela === 'mail_messages')
     expect(consulta?.filtros['is:excluido_destinatario_em']).toBeNull()
   })
@@ -110,7 +110,7 @@ describe('correio()', () => {
       ],
       error: null,
     }
-    const r = await correio()
+    const r = await social()
     expect(r.naoLidas).toBe(4)
   })
 
@@ -119,7 +119,7 @@ describe('correio()', () => {
       amigos: [{ userId: 'u1', nome: 'Misty', nivel: 12, online: true, pokeAtivo: null, naoLidas: 2 }],
       bloqueados: [{ userId: 'u9', nome: 'Gary' }],
     })
-    const r = await correio()
+    const r = await social()
     expect(rpc).toHaveBeenCalledWith('amigos_detalhados')
     expect(chamadas.some((c) => c.tabela === 'friendships')).toBe(false)
     expect(r.amigos[0].nome).toBe('Misty')
@@ -128,7 +128,7 @@ describe('correio()', () => {
 
   it('tolera RPC devolvendo corpo vazio sem quebrar a tela', async () => {
     rpc.mockResolvedValue({ data: null, error: null })
-    const r = await correio()
+    const r = await social()
     expect(r.conversas).toEqual([])
     expect(r.amigos).toEqual([])
     expect(r.bloqueados).toEqual([])
@@ -140,6 +140,6 @@ describe('correio()', () => {
         ? { data: null, error: { message: 'permission denied for conversas' } }
         : { data: {}, error: null },
     ))
-    await expect(correio()).rejects.toThrow('permission denied for conversas')
+    await expect(social()).rejects.toThrow('permission denied for conversas')
   })
 })

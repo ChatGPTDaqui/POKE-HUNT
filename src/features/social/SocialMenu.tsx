@@ -1,4 +1,4 @@
-// Correio como aplicativo de mensagem (PH-81): lista de CONVERSAS, avisos e
+// Social como aplicativo de mensagem (PH-81): lista de CONVERSAS, avisos e
 // amigos.
 //
 // Antes eram quatro abas — Entrada, Enviados, Avisos, Amigos — e a mesma pessoa
@@ -20,9 +20,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChatCircleDots, Gift, PencilSimple, Trash, UserPlus, X } from '@phosphor-icons/react'
 import {
   ErroServidor, detalheDeErro,
-  type AnexoItemCorreio, type ConversaResumo,
+  type AnexoItemSocial, type ConversaResumo,
 } from '@/data/remote/servidor'
-import * as correioRpc from '@/data/remote/correioRealtime'
+import * as socialRpc from '@/data/remote/socialRealtime'
 import { supabase } from '@/lib/supabase'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
 import { useDeviceMode, useUiStore } from '@/stores/uiStore'
@@ -61,7 +61,7 @@ function quando(iso: string): string {
     : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 }
 
-export function CorreioMenu() {
+export function SocialMenu() {
   const qc = useQueryClient()
   const { compacto } = useDeviceMode()
   const [nick, setNick] = useState('')
@@ -72,14 +72,14 @@ export function CorreioMenu() {
   // POKE que acabou de sair de um anexo (PH-164). Estado de COMPONENTE e nada
   // mais: a tela de recebimento nao pode sobreviver a uma recarga de pagina —
   // ver o cabecalho de `RecebimentoDePoke`.
-  const [pokeRecebido, setPokeRecebido] = useState<correioRpc.PokeRecebido | null>(null)
+  const [pokeRecebido, setPokeRecebido] = useState<socialRpc.PokeRecebido | null>(null)
 
-  // PH-119: quem abriu o Correio pedindo uma conversa específica (o botão
+  // PH-119: quem abriu o Social pedindo uma conversa específica (o botão
   // "Conversar" do perfil público). Consumido UMA vez e limpo — sem isso,
-  // fechar o fio e voltar ao Correio reabriria o mesmo contato para sempre, e o
+  // fechar o fio e voltar ao Social reabriria o mesmo contato para sempre, e o
   // jogador não conseguiria mais ver a lista.
-  const contatoInicial = useUiStore((s) => s.correioContatoInicial)
-  const consumirContatoInicial = useUiStore((s) => s.consumirCorreioContatoInicial)
+  const contatoInicial = useUiStore((s) => s.socialContatoInicial)
+  const consumirContatoInicial = useUiStore((s) => s.consumirSocialContatoInicial)
   useEffect(() => {
     if (!contatoInicial) return
     setAba('conversas')
@@ -94,12 +94,12 @@ export function CorreioMenu() {
   }, [contatoInicial, consumirContatoInicial])
 
   const { data, isLoading } = useQuery({
-    queryKey: ['correio'],
-    queryFn: () => correioRpc.correio(),
+    queryKey: ['social'],
+    queryFn: () => socialRpc.social(),
     staleTime: STALE_MS,
   })
 
-  const recarregar = useCallback(() => { void qc.invalidateQueries({ queryKey: ['correio'] }) }, [qc])
+  const recarregar = useCallback(() => { void qc.invalidateQueries({ queryKey: ['social'] }) }, [qc])
 
   useEffect(() => {
     let cancelado = false
@@ -110,36 +110,36 @@ export function CorreioMenu() {
   }, [])
 
   // A ASSINATURA DE REALTIME NAO MORA MAIS AQUI. Ela subiu pra
-  // `hooks/usePendencias.ts#useCorreioAoVivo`, que roda enquanto o jogo esta
+  // `hooks/usePendencias.ts#useSocialAoVivo`, que roda enquanto o jogo esta
   // aberto (o `ActionDock` do HUD sempre esta montado) — antes ela existia so
-  // com o Correio ABERTO, e era justamente por isso que o contador de pendencia
+  // com o Social ABERTO, e era justamente por isso que o contador de pendencia
   // dependia de um poll de 60s.
   //
   // Desde PH-81 cada assinante leva um sufixo de canal proprio, entao duas
   // assinaturas ate SERIAM possiveis (o fio aberto tem a dele). O ponto aqui e
-  // outro: nao PRECISA. Este componente compartilha a `queryKey` ['correio']
+  // outro: nao PRECISA. Este componente compartilha a `queryKey` ['social']
   // com o contador, entao a invalidacao que o Realtime dispara la ja atualiza a
   // tela aberta aqui — um socket a menos por aba.
 
   const adicionar = useMutation({
-    mutationFn: (n: string) => correioRpc.pedirAmizade(n),
+    mutationFn: (n: string) => socialRpc.pedirAmizade(n),
     onSuccess: (r) => { toast(r.mensagem); setNick(''); recarregar() },
     onError: aoFalhar('Não foi possível enviar o pedido.'),
   })
 
   const responderPedido = useMutation({
-    mutationFn: ({ id, aceitar }: { id: string; aceitar: boolean }) => correioRpc.responderPedido(id, aceitar),
+    mutationFn: ({ id, aceitar }: { id: string; aceitar: boolean }) => socialRpc.responderPedido(id, aceitar),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
     onError: aoFalhar('Não foi possível responder.'),
   })
 
   const marcarLida = useMutation({
-    mutationFn: (id: string) => correioRpc.marcarLida(id),
+    mutationFn: (id: string) => socialRpc.marcarLida(id),
     onSuccess: recarregar,
   })
 
   const coletar = useMutation({
-    mutationFn: (id: string) => correioRpc.coletarAnexo(id),
+    mutationFn: (id: string) => socialRpc.coletarAnexo(id),
     onSuccess: (r) => {
       // Com POKE a tela de recebimento JA diz o que chegou; um toast por cima
       // dela seria o mesmo aviso duas vezes, um deles atras de um overlay.
@@ -154,8 +154,8 @@ export function CorreioMenu() {
   // com o id que a RPC devolveu — sem isso o jogador escreveria e cairia de
   // volta numa lista, tendo que procurar o proprio contato que acabou de criar.
   const comecar = useMutation({
-    mutationFn: (d: { nick: string; corpo: string; anexos: AnexoItemCorreio[] }) =>
-      correioRpc.enviarMensagem({ paraNick: d.nick }, d.corpo, d.anexos),
+    mutationFn: (d: { nick: string; corpo: string; anexos: AnexoItemSocial[] }) =>
+      socialRpc.enviarMensagem({ paraNick: d.nick }, d.corpo, d.anexos),
     onSuccess: (r) => {
       setCompondo(null)
       setContatoAberto({ userId: r.paraId, nick: r.paraNome })
@@ -165,31 +165,31 @@ export function CorreioMenu() {
   })
 
   const excluir = useMutation({
-    mutationFn: (id: string) => correioRpc.excluirCorreio(id),
+    mutationFn: (id: string) => socialRpc.excluirSocial(id),
     onSuccess: recarregar,
     onError: aoFalhar('Não foi possível excluir.'),
   })
 
   const apagarFio = useMutation({
-    mutationFn: (id: string) => correioRpc.excluirConversa(id),
+    mutationFn: (id: string) => socialRpc.excluirConversa(id),
     onSuccess: () => { setContatoAberto(null); recarregar() },
     onError: aoFalhar('Não foi possível apagar a conversa.'),
   })
 
   const remover = useMutation({
-    mutationFn: (id: string) => correioRpc.removerAmizade(id),
+    mutationFn: (id: string) => socialRpc.removerAmizade(id),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
     onError: aoFalhar('Não foi possível remover.'),
   })
 
   const bloquear = useMutation({
-    mutationFn: (id: string) => correioRpc.bloquearJogador(id),
+    mutationFn: (id: string) => socialRpc.bloquearJogador(id),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
     onError: aoFalhar('Não foi possível bloquear.'),
   })
 
   const desbloquear = useMutation({
-    mutationFn: (id: string) => correioRpc.desbloquearJogador(id),
+    mutationFn: (id: string) => socialRpc.desbloquearJogador(id),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
     onError: aoFalhar('Não foi possível desbloquear.'),
   })

@@ -166,7 +166,7 @@ async function refetchPoke(pokeId: string): Promise<void> {
 }
 
 /**
- * Exportada desde a PH-164: coletar um anexo de POKE (`correioRealtime.ts`) cria
+ * Exportada desde a PH-164: coletar um anexo de POKE (`socialRealtime.ts`) cria
  * o POKE no SERVIDOR, e o cliente precisa do mesmo refetch que as acoes de
  * equipe ja usam. Reescrever a leitura la duplicaria a regra do
  * `order('team_slot')` abaixo, e uma copia que se desatualize poe o POKE errado

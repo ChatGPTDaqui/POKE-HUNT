@@ -21,7 +21,7 @@ import { WikiMenu } from '@/features/wiki/WikiMenu'
 import { SettingsScreen } from '@/features/settings/SettingsScreen'
 import { BestiarioMenu } from '@/features/bestiario/BestiarioMenu'
 import { TasksMenu } from '@/features/tasks/TasksMenu'
-import { CorreioMenu } from '@/features/correio/CorreioMenu'
+import { SocialMenu } from '@/features/social/SocialMenu'
 import { CalculadoraMenu } from '@/features/calc/CalculadoraMenu'
 import { MercadoMenu } from '@/features/mercado/MercadoMenu'
 import { RankingMenu } from '@/features/ranking/RankingMenu'
@@ -39,7 +39,7 @@ const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   config: SettingsScreen,
   bestiario: BestiarioMenu,
   tasks: TasksMenu,
-  correio: CorreioMenu,
+  social: SocialMenu,
   calc: CalculadoraMenu,
   mercado: MercadoMenu,
   ranking: RankingMenu,
@@ -58,7 +58,7 @@ const TITLES: Record<ScreenName, string> = {
   config: 'Configurações',
   bestiario: 'Bestiário',
   tasks: 'Tasks & Missões',
-  correio: 'Correio',
+  social: 'Social',
   calc: 'Calculadora de Força',
   mercado: 'Mercado',
   ranking: 'Ranking',
@@ -76,7 +76,7 @@ const WIDTHS: Partial<Record<ScreenName, number>> = {
   loja: 52,
   bestiario: 56,
   calc: 46,
-  correio: 40,
+  social: 40,
   // Linha de ranking: posicao + icone + nome + treinador + nivel + valor. Em
   // 36em o nome do POKE e o do treinador brigam pelo mesmo espaco truncado.
   ranking: 44,

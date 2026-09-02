@@ -173,7 +173,7 @@ describe.each(['public', 'dev'] as const)('a coleta grava o que foi sorteado em 
   })
 
   it('receita antiga (sem `nature`/`trait`) nao quebra a coleta', () => {
-    // Carta ja no correio quando isto subir. `nullif(..., '')` sobre um `->>` de
+    // Carta ja entregue quando isto subir. `nullif(..., '')` sobre um `->>` de
     // chave ausente devolve NULL, que e o que a coluna aceita.
     expect(sql).toContain("v_nature := nullif(v_poke->>'nature', '');")
     expect(sql).toContain("v_trait := nullif(v_poke->>'trait', '');")
@@ -225,7 +225,7 @@ describe.each(['public', 'dev'] as const)('a troca retroativa em %s', (schema) =
   const sql = RETRO[schema]
   const s = schema === 'public' ? 'public' : 'dev'
 
-  it('NAO apaga POKE direto — a exclusao vai pela receita do correio', () => {
+  it('NAO apaga POKE direto — a exclusao vai pela receita da mensagem', () => {
     // O `delete` solto e justamente o que nao funciona: o flush ressuscita a
     // linha a partir do estado local do jogador (progresso.ts, `atual == null`).
     expect(sql).not.toMatch(new RegExp(`delete from ${s}\\.pokemon_instances`))
