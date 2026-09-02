@@ -327,6 +327,17 @@ export interface AnuncioMercado {
   vendedor?: string
   ofertas?: number
   melhorOferta?: number | null
+  /**
+   * Comprador para quem este anúncio está reservado (PH-437). Nulo é o normal.
+   *
+   * Anúncio reservado sai da vitrine de todo mundo menos do vendedor e do
+   * próprio reservado — e `comprar_anuncio` recusa a compra de terceiro, que é
+   * onde a regra vive de verdade: o id do anúncio circula (o card da conversa
+   * carrega ele), então esconder da lista não impede chamada direta.
+   */
+  reservado_para?: string | null
+  /** Nome de quem reservou. Só vem da view — a tabela guarda apenas o uuid. */
+  reservado_nome?: string | null
 }
 
 export interface OfertaMercado {

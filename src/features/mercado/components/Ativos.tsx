@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChatCircleDots, Gavel, X } from '@phosphor-icons/react'
+import { BookmarkSimple, ChatCircleDots, Gavel, X } from '@phosphor-icons/react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { type AnuncioMercado, type OrdemMercado } from '@/data/remote/servidor'
 import { ITEMS } from '@/data/items'
@@ -25,6 +25,10 @@ export function Ativos() {
   const responder = useAcaoMercado(({ id, aceitar }: { id: string; aceitar: boolean }) =>
     mercadoRpc.responderOferta(id, aceitar))
   const cancelarOferta = useAcaoMercado((id: string) => mercadoRpc.cancelarOferta(id))
+  // Aqui a reserva so e LIBERADA (`paraId` nulo). Reservar exige um
+  // destinatario, e o lugar onde ele e inequivoco e a conversa — ver
+  // `features/social/AcaoDeReserva.tsx`.
+  const reservar = useAcaoMercado((c: { anuncioId: string; paraId: string | null }) => mercadoRpc.reservarAnuncio(c))
   const { regra } = useTaxaDoMercado()
 
   if (isLoading) return <Carregando />
@@ -165,6 +169,24 @@ export function Ativos() {
               IV {a.iv_percent}%{a.apenas_oferta && ` · ${a.ofertas ?? 0} lance(s)`}
               {a.modo === 'leilao' && <> · encerra em <TempoRestante expiraEm={a.expira_em} /></>}
             </div>
+            {/* PH-437: anuncio reservado esta FORA da vitrine publica, e o
+                vendedor precisa ver isso na lista dele — senao ele fica
+                esperando uma venda que ninguem mais pode fazer. */}
+            {a.reservado_para && (
+              <div className="mt-[.15em] flex flex-wrap items-center gap-[.3em] text-[.75em]">
+                <span className="flex items-center gap-[.2em] rounded-full bg-primary/15 px-[.4em] text-primary">
+                  <BookmarkSimple aria-hidden weight="fill" />
+                  reservado para {a.reservado_nome ?? 'outro jogador'}
+                </span>
+                <button
+                  type="button"
+                  className="text-n400 underline decoration-dotted underline-offset-2 hover:text-n200"
+                  onClick={() => reservar.mutate({ anuncioId: a.id, paraId: null })}
+                >
+                  liberar
+                </button>
+              </div>
+            )}
           </div>
           {a.modo === 'leilao'
             ? <span className="flex items-center gap-[.25em] text-[.8em] text-warn"><Gavel weight="fill" /> leilão</span>

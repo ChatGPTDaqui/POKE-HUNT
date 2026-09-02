@@ -675,6 +675,7 @@ export type Database = {
           poke_uid: string | null
           price: number | null
           rarity: Database["dev"]["Enums"]["rarity_tier"]
+          reservado_para: string | null
           seller_id: string
           sold_at: string | null
           species_id: string
@@ -696,6 +697,7 @@ export type Database = {
           poke_uid?: string | null
           price?: number | null
           rarity: Database["dev"]["Enums"]["rarity_tier"]
+          reservado_para?: string | null
           seller_id: string
           sold_at?: string | null
           species_id: string
@@ -717,6 +719,7 @@ export type Database = {
           poke_uid?: string | null
           price?: number | null
           rarity?: Database["dev"]["Enums"]["rarity_tier"]
+          reservado_para?: string | null
           seller_id?: string
           sold_at?: string | null
           species_id?: string
@@ -1929,6 +1932,8 @@ export type Database = {
           poke_uid: string | null
           price: number | null
           rarity: Database["dev"]["Enums"]["rarity_tier"] | null
+          reservado_nome: string | null
+          reservado_para: string | null
           seller_id: string | null
           sold_at: string | null
           species_id: string | null
@@ -2568,6 +2573,10 @@ export type Database = {
       }
       remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
       reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
+      reservar_anuncio: {
+        Args: { p_anuncio_id: string; p_para_id?: string; p_price?: number }
+        Returns: Json
+      }
       responder_oferta: {
         Args: { p_aceitar: boolean; p_oferta_id: string }
         Returns: Json
@@ -3414,6 +3423,7 @@ export type Database = {
           poke_uid: string | null
           price: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
+          reservado_para: string | null
           seller_id: string
           sold_at: string | null
           species_id: string
@@ -3435,6 +3445,7 @@ export type Database = {
           poke_uid?: string | null
           price?: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
+          reservado_para?: string | null
           seller_id: string
           sold_at?: string | null
           species_id: string
@@ -3456,6 +3467,7 @@ export type Database = {
           poke_uid?: string | null
           price?: number | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
+          reservado_para?: string | null
           seller_id?: string
           sold_at?: string | null
           species_id?: string
@@ -4668,6 +4680,8 @@ export type Database = {
           poke_uid: string | null
           price: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"] | null
+          reservado_nome: string | null
+          reservado_para: string | null
           seller_id: string | null
           sold_at: string | null
           species_id: string | null
@@ -5307,6 +5321,10 @@ export type Database = {
       }
       remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
       reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
+      reservar_anuncio: {
+        Args: { p_anuncio_id: string; p_para_id?: string; p_price?: number }
+        Returns: Json
+      }
       responder_oferta: {
         Args: { p_aceitar: boolean; p_oferta_id: string }
         Returns: Json
