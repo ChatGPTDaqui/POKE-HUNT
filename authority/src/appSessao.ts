@@ -11,7 +11,7 @@ import {
 } from './progresso.js'
 import {
   MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
-  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, indiceDoBiomaNoMapId,
+  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, indiceDoBiomaDoEstagio,
   type BiomaProgress, type SalaAtiva,
 } from '#engine'
 
@@ -230,7 +230,7 @@ async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promis
  * sequencial de bioma — vencer o Lord do bioma N libera o N+1 (PH-207/226).
  *
  * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
- * inteiro so pra exercitar uma regra de negocio. `biomaDoMapId` (PH-229)
+ * inteiro so pra exercitar uma regra de negocio. `indiceDoBiomaDoEstagio`
  * e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
  * dois lados tem que concordar sobre "que bioma e esse mapId" E sobre o
  * texto exato da mensagem (`HuntMenu.tsx#bloqueioDeBiomaClient` espelha
@@ -239,7 +239,7 @@ async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promis
 export function bloqueioDeBiomaPendente(
   mapId: string, grupo: string, biomaProgress: BiomaProgress,
 ): string | null {
-  const indiceEsperado = indiceDoBiomaNoMapId(mapId, grupo)
+  const indiceEsperado = indiceDoBiomaDoEstagio(mapId)
   // Bioma sem protetor habilitado (indice -1, nao acontece hoje com os 12
   // todos habilitados — PH-225) ou o PRIMEIRO da ordem (indice 0) libera
   // automatico, sem checar nada — nao ha "Lord anterior" pra vencer.

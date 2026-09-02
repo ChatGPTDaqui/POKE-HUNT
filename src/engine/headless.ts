@@ -51,6 +51,12 @@ export {
   ORDEM_DOS_BIOMAS, biomaProgressDefault,
 } from '@/data/biomas'
 export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId, BiomaProgress } from '@/data/biomas'
+export {
+  ESTAGIOS, ESTAGIOS_POR_BIOMA, ESTAGIO_POR_ID, SALAS_POR_ESTAGIO, SALAS_POR_BIOMA,
+  TETO_DO_MODO_NORMAL, estagioId, parseEstagioId, estagioValido, niveisDoEstagio,
+  zonaMaximaDoEstagio, salasDoEstagio, pesosDoEstagio, indiceDoBiomaDoEstagio,
+} from '@/data/estagios'
+export type { EstagioDef, EstagioDoMapId } from '@/data/estagios'
 export { getEncounter } from '@/data/enemies'
 export { ITEMS, getItem } from '@/data/items'
 export {

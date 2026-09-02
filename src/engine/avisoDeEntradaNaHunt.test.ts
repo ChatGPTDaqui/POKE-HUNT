@@ -20,7 +20,7 @@ import { controller } from './controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
 
-const HUNT = 'campo_aberto_faixa1'
+const HUNT = 'campo_aberto_e1'
 
 function poke(hp: number) {
   const p = createPokeInstance(createRng(5), 'charmander', 20)

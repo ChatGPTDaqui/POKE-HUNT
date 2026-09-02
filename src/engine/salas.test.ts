@@ -21,7 +21,7 @@ import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { SalaAtiva, WorldState } from './types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 
 function mundo(semente: number, mapa = HUNT): WorldState {
   const rng = createRng(semente)

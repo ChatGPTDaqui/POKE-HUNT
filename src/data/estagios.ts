@@ -27,7 +27,7 @@
 // O elenco NAO e recortado por estagio: ele continua vindo do sub-bioma. O que
 // o estagio carrega e so a tabela de porcentagem. E isso que mantem o dado
 // gerado no lugar e evita curar 120 listas a mao.
-import { BIOMAS, type BiomaDef, type SubBiomaDef } from './biomas'
+import { BIOMAS, ORDEM_DOS_BIOMAS, type BiomaDef, type SubBiomaDef } from './biomas'
 
 // ---------------------------------------------------------------------------
 // A regua
@@ -142,6 +142,28 @@ export function parseEstagioId(mapId: string): EstagioDoMapId | null {
   if (!CHAVES_DE_BIOMA.has(bioma)) return null
   if (!estagioValido(estagio)) return null
   return { bioma, estagio }
+}
+
+/**
+ * Indice do bioma deste mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` quando o
+ * mapId nao e de um estagio de bioma (hunt inicial, BOSS, Pesadelo).
+ *
+ * SUBSTITUI `biomas.ts#indiceDoBiomaNoMapId` (PH-426), que sabia ler so o
+ * formato antigo `<bioma>_faixa<N>`. A funcao mora AQUI, e nao la, porque
+ * `estagios.ts` ja importa `biomas.ts` — o contrario criaria ciclo, e
+ * `ESTAGIOS` e calculado em tempo de import.
+ *
+ * O INVARIANTE QUE ELA CARREGA e o mesmo de antes: o gate server-side
+ * (`authority/src/appSessao.ts#bloqueioDeBiomaPendente`) e o selo/ordem do menu
+ * (`HuntMenu.tsx`) precisam concordar sobre "que bioma e esse mapId". Uma
+ * funcao so, chamada pelos dois.
+ *
+ * ELA E TRANSITORIA. O gate por ORDEM de bioma morre na PH-430, quando os 12
+ * biomas passam a nascer abertos e o eixo vira o estagio dentro do bioma.
+ */
+export function indiceDoBiomaDoEstagio(mapId: string): number {
+  const estagio = parseEstagioId(mapId)
+  return estagio ? ORDEM_DOS_BIOMAS.indexOf(estagio.bioma) : -1
 }
 
 // ---------------------------------------------------------------------------

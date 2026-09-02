@@ -300,7 +300,7 @@ describe('MovesetTable — reordenar a fila', () => {
   it('dentro de hunt reordenar fica bloqueado, como o resto da tela', async () => {
     const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL)
     const poke = pokeDoJogador({ activeAbilities: escolhidos })
-    useGameStateStore.setState({ team: [poke], currentMapId: 'mata_faixa1' })
+    useGameStateStore.setState({ team: [poke], currentMapId: 'mata_e1' })
     render(<MovesetTable poke={poke} species={ESPECIE} />)
 
     const seta = setaDe(nomeDoGolpe(escolhidos[1]), 'Subir')

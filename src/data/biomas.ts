@@ -462,11 +462,15 @@ export function huntId(bioma: string, faixa: FaixaId): string {
 }
 
 /**
- * Inverso de `huntId` — o bioma embutido no mapId de uma hunt de bioma, ou
- * `null` se o mapId nao segue esse padrao (BOSS/Nightmare/hunt inicial nao
- * tem bioma). PH-227/229: mesma logica usada pelo gate server-side
- * (abrirSessao) E pelo menu (HuntMenu) — nao duplicar, os dois precisam
- * concordar sobre "que bioma e esse mapId" sempre.
+ * LEGADO (PH-426): le so o formato antigo `<bioma>_faixa<N>`, que nenhuma hunt
+ * usa mais — as hunts agora sao `<bioma>_e<N>`. Quem precisa do bioma de um
+ * mapId hoje chama `estagios.ts#parseEstagioId` /
+ * `estagios.ts#indiceDoBiomaDoEstagio`, que sao as funcoes que o gate
+ * server-side e o menu compartilham.
+ *
+ * Continua aqui porque save antigo ainda carrega o formato velho em
+ * `players.current_map` e em `game_sessions` vivas, e a traducao dele (PH-429)
+ * precisa saber le-lo. Sai junto com o vocabulario de faixa, na PH-434.
  */
 export function biomaDoMapId(mapId: string, faixa: string): string | null {
   return mapId.endsWith(`_${faixa}`) ? mapId.slice(0, -(faixa.length + 1)) : null

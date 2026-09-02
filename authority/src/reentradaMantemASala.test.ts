@@ -13,7 +13,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import type { OpcoesApp } from './appSessao.js'
 
 const USER = 'jogador-1'
-const MAPA = 'mata_faixa1'
+const MAPA = 'mata_e1'
 
 /** A sessao anterior que a consulta de heranca vai encontrar (ou nenhuma). */
 let sessaoAnterior: Record<string, unknown> | null = null

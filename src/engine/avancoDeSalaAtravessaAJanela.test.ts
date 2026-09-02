@@ -18,7 +18,7 @@
 // tem coluna — e sorteia um protetor NOVO, com HP cheio. O jogador mata o
 // guardiao e ganha outro guardiao, na mesma sala, sem nada na tela explicando.
 //
-// Sonda de 2026-08-31 (Entei Lv102, `campo_aberto_faixa1`, sala 9):
+// Sonda de 2026-08-31 (Entei Lv102, `campo_aberto_e1`, sala 9):
 //
 //   janela 1: protetor morre em 3,63s, contagem armada, janela cortada 1s depois
 //             -> grava sala indice 8, abates 30
@@ -38,7 +38,7 @@ import { SALA_TRANSITION_COUNTDOWN } from './systems/salaSystem'
 
 import type { WorldState } from './types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 const PASSO = 0.1
 
 function mundoComQuotaFechada(semente: number): WorldState {
