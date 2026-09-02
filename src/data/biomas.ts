@@ -436,21 +436,23 @@ export const ORDEM_DOS_BIOMAS: readonly string[] = [
   'igneo',
 ]
 
-/**
- * PH-224: `players.bioma_progress` (migration PH-200) — indice de quantos
- * biomas da FAIXA o jogador ja venceu (posicao em `ORDEM_DOS_BIOMAS`), nao
- * lista de biomas liberados. Uma faixa por chave porque o gate e independente
- * entre as 3 (a Faixa II reinicia do zero, mesma decisao do brainstorm 16/08).
- */
-export interface BiomaProgress {
-  faixa1: number
-  faixa2: number
-  faixa3: number
-}
-
-export function biomaProgressDefault(): BiomaProgress {
-  return { faixa1: 0, faixa2: 0, faixa3: 0 }
-}
+// O TIPO `BiomaProgress` E O `biomaProgressDefault()` SAIRAM DAQUI NA PH-429.
+//
+// Eles descreviam o formato de tres inteiros por faixa ("quantos biomas da
+// ORDEM o jogador venceu naquela faixa"), que deixou de existir: o progresso
+// agora e um numero por BIOMA, "maior estagio ja limpo". A forma nova, o
+// default, a traducao do save antigo e o gate moram em
+// `data/progressoDeBioma.ts`.
+//
+// FORAM APAGADOS, E NAO MANTIDOS COMO ALIAS, de propósito. As duas formas sao
+// objetos de numeros e conviveriam sem o compilador reclamar — quem lesse
+// `progresso.faixa1` no formato novo receberia `undefined`, viraria zero, e o
+// gate trancaria o jogo inteiro sem nenhum erro. Apagar transforma cada leitura
+// remanescente em erro de compilacao.
+//
+// A traducao do formato antigo continua existindo (ela precisa, ha save no
+// banco), mas com a ordem dos biomas CONGELADA junto dela — ver
+// `ORDEM_LEGADA_DOS_BIOMAS`.
 
 export const FAIXA_POR_ID: Record<string, FaixaDef> = Object.fromEntries(
   FAIXAS.map((f) => [f.id, f])

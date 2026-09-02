@@ -12,7 +12,7 @@
 // quem grava e o `flush` no fim, a partir do estado final. Nada aqui escreve
 // direto no Postgres — um `addGold` que fizesse UPDATE por kill geraria milhares
 // de escritas por sessao.
-import { MAX_TEAM_SIZE } from '#engine'
+import { MAX_TEAM_SIZE, comEstagioLimpo } from '#engine'
 import type {
   GameStateData, GameStateStore, PokeInstance,
 } from '#engine'
@@ -197,11 +197,14 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     // `reordenarReservas`: o tipo exige, e um stub que divergisse da regra do
     // navegador seria uma diferenca esperando pra ser descoberta.
     setEspecialidadeNivel: (tipo, trilha, nivel) => { s.especialidades[tipo][trilha] = nivel },
-    // PH-226/236: ESTA a simulacao chama de verdade — vencer o Lord
-    // avanca o indice dentro de handleEnemyDefeated (simulation.ts). Precisa
-    // do mesmo comportamento nos dois lados (resim do servidor E predicao
-    // do cliente rodam o mesmo handleEnemyDefeated).
-    setBiomaProgress: (faixa, indice) => { s.biomaProgress[faixa as keyof typeof s.biomaProgress] = indice },
+    // PH-429/430: ESTA a simulacao chama de verdade — vencer o Lord marca o
+    // estagio como limpo dentro de handleEnemyDefeated (simulation.ts).
+    // Precisa do mesmo comportamento nos dois lados (resim do servidor E
+    // predicao do cliente rodam o mesmo handleEnemyDefeated), incluindo a
+    // garantia de NAO REGREDIR: escrever direto (`s.biomaProgress[bioma] =
+    // estagio`, como era aqui) deixaria revisitar um estagio antigo desligar
+    // o seguinte — e o servidor e a autoridade, entao o buraco seria dele.
+    setBiomaProgress: (bioma, estagio) => { s.biomaProgress = comEstagioLimpo(s.biomaProgress, bioma, estagio) },
 
     // ----- acoes de UI: existem pro tipo fechar, nao sao usadas na simulacao -----
     setAutoToggle: (key, value) => { s.autoToggles[key] = value },
