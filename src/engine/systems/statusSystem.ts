@@ -496,8 +496,31 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
  * combatSystem.ts#resolveEntryHook). O nao-volatil NAO sai daqui — ele
  * sobrevive a batalha nos jogos, e e por isso que existe Antidoto.
  *
- * ESTAGIO DE ATRIBUTO SAIU DESTA LISTA NA PH-418, e essa e a mudanca central da
- * issue. O motivo do reset era real e esta medido no `combatSystem`: sem ele, o
+ * ESTAGIO DE ATRIBUTO SAIU DESTA LISTA SO PELA METADE (PH-418).
+ *
+ * A primeira versao tirou o estagio inteiro daqui e deixou o PRAZO limitar. A
+ * medicao reprovou: 100 mortes do jogador contra 15 antes, 628 abates/h contra
+ * 786 (`farmOffline`, uma hora, route_46, Charmander Lv25). Ou seja −20%, quase
+ * o mesmo −27% que o reset existia pra evitar.
+ *
+ * O furo e a RENOVACAO. Prazo de 18s so limita fonte que PARA de ser aplicada:
+ * cada Rosnado novo renova os 18s, e numa hunt de campo aberto o jogador leva
+ * Rosnado a cada poucos segundos, de especies diferentes, sem intervalo. "No
+ * maximo 18s" virou "pra sempre" — exatamente o debuff eterno de antes, agora
+ * com um relogio que nunca chega ao fim.
+ *
+ * ENTAO O CORTE E POR AUTORIA, e nao por tipo de estagio:
+ *
+ *   `proprio: true`   fica, e vive o prazo de 18s. E o pedido da issue: quem se
+ *                     buffa usufrui pelo tempo prometido, sem morrer no vao de
+ *                     um segundo entre dois spawns.
+ *   `proprio: false`  sai, como saia antes. O que o jogador sofre de terceiro
+ *                     nao atravessa a batalha, e e isso que segura o −27%.
+ *
+ * Isso NAO contraria "o mesmo vale para debuffs": um debuff que o jogador aplica
+ * mora no ALVO, e alvo de hunt morre em segundos — atravessar batalha ali nao
+ * significa nada. O que atravessa e o que o dono fez a si mesmo, nos dois
+ * sentidos (Danca das Espadas e Hammer Arm). O motivo do reset era real e esta medido no `combatSystem`: sem ele, o
  * debuff dos selvagens empilhava ate −6 e nunca voltava, e isso custava 27% das
  * kills/hora. Só que o "fim de batalha" deste motor e *nenhum inimigo
  * engajado*, o que numa hunt de campo aberto acontece no vao entre cada spawn —
@@ -532,6 +555,18 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.tormentedUntil = 0
   // TRUANT (PH-332): o contador de folga zera no fim da luta, como nos jogos.
   entity.truantDeFolga = undefined
+  // Estagio de terceiro sai; o proprio fica contando o prazo. `recalcularEstagio`
+  // reescreve o cache e limpa a chave que esvaziou, entao nao ha estado meio-limpo.
+  if (entity.estagiosFonte) {
+    for (const chave of Object.keys(entity.estagiosFonte) as StatDeEstagio[]) {
+      const fontes = entity.estagiosFonte[chave]
+      if (!fontes?.length) continue
+      const proprias = fontes.filter((f) => f.proprio)
+      if (proprias.length === fontes.length) continue
+      entity.estagiosFonte[chave] = proprias
+      recalcularEstagio(entity, chave)
+    }
+  }
   entity.estagioDeCritico = undefined
   entity.proximoGolpeCriticoGarantido = undefined
   // Golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/aqua_ring)
