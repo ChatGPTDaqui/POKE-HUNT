@@ -5614,3 +5614,138 @@ deste arquivo: ela descreve um `git bisect` que **nao deve ser feito** enquanto 
 O paragrafo fica como esta — historico nao se reescreve —, e esta linha e a correcao.
 
 Reforco escrito em `CLAUDE.local.md`, na secao que ja existia.
+
+---
+
+## 2026-09-02 (madrugada) — a encarada dos duelos: tres reprovacoes visuais e o custo de cada uma
+
+Uma feature so, puramente cosmetica, em quatro rodadas: PH-397 (a coreografia), PH-402 (a forma
+final), PH-407 (a nota da 7.33), PH-408 (aberta). Promovida como **7.33**, com fumaca verde nos
+dois ambientes.
+
+O pedido: entre um golpe e o outro, nos duelos 1x1 (arena do Campeao Lance e as 11 hunts BOSS de
+lendario), os dois POKEs deviam se encarar e girar em vez de tocar Idle parados. Medido antes de
+comecar: **83% do tempo de duelo** era exatamente esse intervalo — `MIN_ACTION_GAP` e
+`TURNO_SEGUNDOS` (3s) e a pose de ataque dura 0,5s.
+
+### 1. A restricao de geometria que decide tudo, e que nao e obvia
+
+`engageRangeFor` e `raioA + raioB + MELEE_RANGE_PADDING` = 39px, e `separarCorpos` (PH-384)
+empurra ate a soma dos raios, 29px. **A distancia entre os dois esta presa em (29, 39) pelo
+combate.**
+
+Disso sai a consequencia que custou a primeira rodada: se os dois giram em torno do PONTO MEDIO,
+o raio de cada corpo e METADE da distancia entre eles — 17px. O passo lateral sai
+`2 x 17 x sen(arco)`, ou seja **26px com arco de 50 graus, e no maximo 34px** com +/-90 graus (que
+ja nao e arco, e meia volta). Nao ha numero a mexer: largura de orbita e distancia de combate sao
+a mesma variavel.
+
+Sair disso exige **mover os dois JUNTOS** — translacao ou rotacao rigida do par —, e nao orbitar
+um no outro. Rotacao rigida preserva distancia exatamente, entao o raio percorrido por cada corpo
+deixa de ser metade da distancia e passa a ser a distancia ate um pivo qualquer, que e livre.
+
+O limite superior tambem tem dono: a velocidade do corpo nao pode passar do **andar do proprio
+POKE** (58,5px/s pro inimigo, 91 pro jogador), porque a cadencia do quadro do sheet PMD e FIXA
+(`durations[frame] / 60`) e nao escala com velocidade. Devagar demais o POKE corre no lugar;
+rapido demais ele patina. Sobra uma janela estreita, e ela e o que amarra tamanho de passo a
+duracao de ciclo.
+
+### 2. As tres reprovacoes, e por que sao a MESMA reprovacao
+
+Cada uma custou um ciclo inteiro: implementar, testar, medir, subir bancada, o dono olhar.
+
+1. **Giro em torno do ponto medio** (PH-397, foi pra producao assim): 26px. *"ficou muito
+   discreta"*. Invisivel por geometria, nao por escolha de numero.
+2. **Giro em torno de um pivo lateral fixo**: resolveu a largura (117px medidos) e criou outro
+   defeito. Arco unico, sempre com a mesma barriga, percorrido pra la e pra ca: *"esta parecendo
+   um balanco de um brinquedo de barca viking"*. E literalmente o que um pendulo e.
+3. **Oito deitado** (lemniscata de Gerono): alternou a curva — duas meia-luas, uma pra cada lado —
+   mas fecha sempre no mesmo ponto. *"nao ficou bom voltar para onde comecou"*.
+
+**A leitura que so aparece na terceira:** as tres sao figuras FIXAS, e o olho acha o padrao de
+qualquer figura fixa. Nao adianta escolher uma figura melhor. A solucao foi tirar a figura — uma
+sequencia de meia-luas em que cada uma sorteia lado do pivo, curvatura (32 a 95px) e comprimento
+(95px +/-35%). Nenhuma anuncia onde a proxima vai parar.
+
+**Se eu tivesse enxergado isso na rodada 2, teria economizado uma rodada inteira.** O sinal estava
+na propria reclamacao: "parece um pendulo" e uma queixa sobre PREVISIBILIDADE, nao sobre forma.
+
+### 3. Onde o tempo foi embora, e o conserto que eu so fiz na terceira rodada
+
+O caro nao foi implementar — cada geometria e 30 a 80 linhas. O caro foi **o loop de validacao**:
+mexer no numero exigia editar constante, rodar `build:engine`, subir dev server, o dono abrir a
+pagina.
+
+Na terceira rodada a bancada `encarada-no-duelo.html` ganhou `?passo=`, `?coleira=` e `?vel=`
+escrevendo em campos opcionais de `WorldState.encarada`. **Isso deveria existir desde a primeira
+PR.** Para feature cosmetica, os botoes de ajuste sao parte da primeira entrega, nao um extra da
+terceira — sem eles, cada "ficou X demais" custa um ciclo de PR inteiro em vez de um F5.
+
+Os campos moram no ESTADO DO MUNDO, e nao numa variavel de modulo mutavel, de proposito: um
+ajuste global seria lido tambem pela simulacao do servidor, e valor escrito de um lado so e a
+forma classica de cliente e autoridade discordarem em silencio.
+
+### 4. Como se testa "isto nao pode virar padrao"
+
+Os testes obvios (distancia dentro de (29,39), parede, `world.rng` intocado, nao mexer em
+`entity.state`) continuavam **todos verdes** nas tres versoes reprovadas. Eles provam que a
+coreografia e inofensiva, nao que ela e boa.
+
+O que trava a regressao sao tres medidas de VARIEDADE, e elas foram escritas depois de a tela
+reprovar duas vezes:
+
+- as meia-luas entortam pros dois lados em proporcao parecida (32 de 77 medidos);
+- a curvatura varia de perna pra perna (desvio-padrao nao trivial — curvatura fixa daria zero);
+- os fins de perna nao se repetem (10 de 77 caem perto de um anterior; caminho fechado poria
+  quase todas).
+
+Sem essas tres, alguem "simplifica" pra uma figura fixa e o pendulo volta com o resto do arquivo
+verde. Todas verificadas por sabotagem — `RAIO_DA_CURVA = 0`, `ALTURA_DO_PASSO = 0`, gate do mapa
+removido, `nextFloat(world.rng)` injetado: as quatro ficam vermelhas.
+
+**Um teste de parede nasceu VACUO e so a sabotagem pegou.** A primeira versao posicionava o par
+34px abaixo da parede, mas a excursao vertical do arco era 13px — o par nunca encostava. Passava
+verde com a guarda de colisao REMOVIDA. A folga virou 4px e ai o teste passou a valer.
+
+### 5. A nota da 7.31 prometeu o que o jogador nao podia ver
+
+Este e o achado que mais vale registrar, porque nao e sobre codigo.
+
+A PH-397 subiu na 7.31 com o item *"Agora eles circulam um ao redor do outro, virados de frente"*.
+Aquilo era a versao de 26px. **O jogador leu uma promessa e nao teve como ver o que ela
+descrevia** — e o verbo estava errado por cima: eles nao "circulam", nunca deram voltas um no
+outro.
+
+A nota da 7.33 nao podia anunciar a encarada de novo: seria a segunda vez que a mesma coisa e
+prometida, e quem leu a 7.31 passaria a desconfiar da nota inteira. O item reconhece a promessa
+anterior e diz o que mudou — da pra ver.
+
+**A regra que sai disso:** so entra em nota o que foi olhado na tela pelo dono. "O codigo faz X"
+nao autoriza escrever "voce ve X". A 7.31 foi escrita com a feature medida e testada, e ainda
+assim mentiu.
+
+### 6. Duas armadilhas de operacao encontradas no caminho
+
+- **O dev server nao sobrevive entre turnos** numa sessao de background: subiu e foi morto tres
+  vezes, sempre logo depois do fim do turno. Nao adianta reiniciar em loop — o caminho e o dono
+  rodar `npm run dev` no proprio PowerShell. Alem disso a porta MUDA (5173 se livre, senao 5174),
+  e a raiz `/` serve o JOGO, que sem CORS na porta errada nao deixa entrar: o link tem que ser o
+  caminho completo da bancada.
+- **`gh pr merge --delete-branch` falha** quando a branch base esta em uso por outro worktree
+  (`fatal: 'dev' is already used by worktree at ...`). O merge no GitHub ACONTECE; o erro e do
+  `gh` tentando trocar a branch local depois. Conferir o estado da PR antes de concluir que
+  falhou, e deixar o worktree em HEAD destacado pra nao brigar com a sessao vizinha.
+
+### 7. Aberto
+
+**PH-408** — `src/data/remote/confirmacaoDaTrocaNoCliente.test.ts` estoura o timeout de 5s no
+primeiro caso, por `await import()` dentro dele. Mesma classe que a PH-404 corrigiu em
+`reordenarReservas`. Reproduz na `origin/dev` limpa (confirmado com stash), e **a CI passa** — ou
+seja, o gate nao protege contra essa classe, so nao dispara no runner. Vale varrer todos os
+arquivos com `await import()` no primeiro `it()` em vez de consertar um por um.
+
+**Custo aceito e nao consertado:** a camera passeia bem mais agora (o par se afasta ate ~200px da
+origem do duelo). `renderer.ts#_computeCamera` trava no jogador SEM suavizacao nenhuma, entao o
+quanto o par anda e o quanto o fundo inteiro anda junto. E consequencia inseparavel do pedido —
+se o ponto final muda, o par sai do lugar. O botao barato e `COLEIRA_DA_ENCARADA`; o conserto de
+raiz seria suavizar a camera, e isso nunca foi pedido.
