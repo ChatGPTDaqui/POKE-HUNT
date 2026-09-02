@@ -15,7 +15,7 @@
 // DIRECIONADA (nenhum estagio fica obsoleto — voltar ao 3 pela especie que ele
 // da e uma escolha, nao um retrocesso). Uma grade de dez quadrados nao conta
 // nenhuma das duas; uma trilha conta as duas de relance.
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import { BIOMAS, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, type BiomaDef } from '@/data/biomas'
 import {
@@ -184,6 +184,61 @@ export function MapaDeBiomas({
 // ---------------------------------------------------------------------------
 // Nivel 2 — a trilha
 // ---------------------------------------------------------------------------
+/**
+ * A arte de fundo da trilha de um bioma (PH-441).
+ *
+ * URL RELATIVA, como toda arte do jogo: `assets/` mora na RAIZ do repo, fora de
+ * `public/`, e e servida por um plugin em dev e copiada pro `dist` no build
+ * (ver vite.config.ts e scripts/copiar-assets.mjs). Um caminho absoluto aqui
+ * quebraria no site publicado sem quebrar em dev.
+ *
+ * O nome do arquivo E a chave do bioma, e nao o nome de exibicao: as artes
+ * chegaram como "campo aberto.jpg" e "metropole.jpg" (o Urbano), e nome com
+ * espaco, maiuscula e acento vira URL fragil — o 404 de arte nao lanca erro
+ * nenhum, so nao desenha.
+ */
+export function urlDoFundoDoBioma(chave: string): string {
+  return `assets/biome-selector/${chave}.jpg`
+}
+
+/**
+ * O fundo, com a arte entrando por cima da cor.
+ *
+ * TRES CAMADAS, e cada uma resolve um problema distinto:
+ *
+ *  1. a COR do bioma (no elemento-pai) — o piso enquanto os ~3 MB nao chegam;
+ *  2. a ARTE, que aparece com transicao quando carrega. `onLoad` e nao
+ *     `background-image` porque so o `<img>` avisa quando terminou, e sem esse
+ *     aviso a unica opcao seria mostrar a arte na hora — que e o "pisca";
+ *  3. o VEU escuro, que e o que torna o texto legivel. As 12 artes sao fotos
+ *     de cena, com area clara e area escura na mesma imagem: sem o veu, metade
+ *     dos nomes de estagio some no claro e a outra metade nao.
+ */
+function FundoDoBioma({ biomaChave }: { biomaChave: string }) {
+  const [carregou, setCarregou] = useState(false)
+  // A chave force a remontagem ao trocar de bioma: sem ela o `carregou` de um
+  // bioma valeria pro seguinte, e a arte nova apareceria sem transicao.
+  return (
+    <div key={biomaChave} aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      <img
+        src={urlDoFundoDoBioma(biomaChave)}
+        alt=""
+        onLoad={() => setCarregou(true)}
+        className={cn(
+          'h-full w-full object-cover transition-opacity duration-500',
+          carregou ? 'opacity-100' : 'opacity-0',
+        )}
+      />
+      {/* O VEU E O QUE TORNA O TEXTO LEGIVEL, e calibrar a forca dele foi feito
+          na bancada: a 85% a arte sumia (o motivo de ela existir ia junto), e
+          sem veu nenhum metade dos nomes de estagio desaparecia nas areas
+          claras das fotos. Mais forte em cima e embaixo, onde ficam o
+          cabecalho e o fim da lista. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-n900/80 via-n900/40 to-n900/85" />
+    </div>
+  )
+}
+
 const ROTULO_DO_ESTADO: Record<EstadoDoEstagio, string> = {
   limpo: 'LIMPO · FARM LIVRE',
   atual: 'CONTINUE AQUI',
@@ -253,13 +308,21 @@ function NoDaTrilha({
 
       <div
         className={cn(
-          'mb-[.4em] min-w-0 flex-1 overflow-hidden rounded-[.6em] border bg-n900',
+          // SEMITRANSPARENTE com blur: com `bg-n900` opaco os dez cartoes
+          // cobriam a arte inteira e so as bordas apareciam — a foto virava
+          // moldura em vez de fundo.
+          'mb-[.4em] min-w-0 flex-1 overflow-hidden rounded-[.6em] border bg-n900/78 backdrop-blur-[3px]',
+          // Sombra no texto do cartao inteiro: as 12 artes tem area clara e
+          // area escura na MESMA imagem, e o cartao translucido deixa as duas
+          // passarem. Sem ela, o mesmo cinza que le bem no leito oceanico some
+          // no ceu da praia — dois estagios da mesma trilha.
+          '[text-shadow:0_1px_2px_rgba(0,0,0,.85)]',
           ehAtiva ? 'border-ok' : estado === 'atual' ? 'border-n600' : 'border-n800',
           // O BLOQUEADO NAO USA `opacity`. Ela apaga o cartao INTEIRO, e a linha
           // que mais importa nele e justamente a que diz o que falta pra
           // liberar — apagar o aviso junto com o resto e o oposto do que a tela
           // quer. O que apaga e o TITULO (abaixo); a mensagem fica legivel.
-          desabilitado && 'border-n800/60',
+          desabilitado && 'border-n800/60 bg-n900/55',
         )}
       >
         <div
@@ -367,17 +430,28 @@ export function TrilhaDoBioma({
   const limpo = maiorEstagioLimpo(progresso, bioma.chave)
 
   return (
-    <div className="flex flex-col gap-[.4em]">
-      <div className="flex items-center gap-[.5em]">
+    <div
+      className="relative isolate flex flex-col gap-[.4em] overflow-hidden rounded-[.7em] p-[.5em]"
+      // A COR DO BIOMA E O PISO, e nao um branco (PH-441). A arte tem ~3 MB e
+      // chega segundos depois num link lento; sem um piso da cor certa a trilha
+      // nasce sobre um vazio e depois "pisca" pra foto. Com ele, o que muda e
+      // so a textura.
+      style={{ background: bioma.bg.primary }}
+    >
+      <FundoDoBioma biomaChave={bioma.chave} />
+
+      <div className="relative flex items-center gap-[.5em]">
         <button
           type="button"
           onClick={onVoltar}
-          className="rounded-[.4em] bg-n800 px-[.5em] py-[.2em] text-[.8em] text-n300 hover:bg-n700"
+          className="rounded-[.4em] bg-n900/80 px-[.5em] py-[.2em] text-[.8em] text-n200 backdrop-blur-sm hover:bg-n800"
         >
           ← Biomas
         </button>
-        <span className="min-w-0 truncate font-medium text-n100">{bioma.nome}</span>
-        <span className="text-[.75em] text-n500">
+        <span className="min-w-0 truncate font-semibold text-n100 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]">
+          {bioma.nome}
+        </span>
+        <span className="text-[.75em] text-n300 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]">
           {limpo} de {ESTAGIOS_POR_BIOMA} estágios
         </span>
       </div>
