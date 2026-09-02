@@ -12,6 +12,41 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // UM item pra UMA issue (PH-402). O intervalo tem dois commits e um deles e
+  // back-merge.
+  //
+  // ESTA NOTA CORRIGE UMA PROMESSA DA 7.31, e e por isso que ela e dificil de
+  // escrever. A 7.31 ja anunciou a encarada — "agora eles circulam um ao redor
+  // do outro, virados de frente" — e aquilo era a PH-397, que subiu com um passo
+  // lateral de 26px. Vinte e seis pixels e geometricamente invisivel na tela: o
+  // jogador leu a promessa e nao teve como ver o que ela descrevia.
+  //
+  // Entao o item NAO anuncia a encarada como novidade. Anunciar de novo seria a
+  // segunda vez que a mesma coisa e prometida, e quem leu a 7.31 passa a
+  // desconfiar da nota inteira. O item reconhece a promessa anterior e diz o que
+  // de fato mudou: da pra ver.
+  //
+  // "MEIAS-LUAS" E A PALAVRA CERTA e nao enfeite. O que o jogador ve nao e uma
+  // orbita (eles nao dao voltas um no outro) nem um vaivem (nao ha figura fixa):
+  // e um arco de cada vez, com tamanho e lado sorteados. Chamar de "circulam",
+  // como a 7.31 fez, foi parte do problema — descrevia um movimento que o jogo
+  // nao faz.
+  //
+  // FICA DE FORA (a lista de exclusao e o indice barato do intervalo seguinte):
+  //   - as tres geometrias descartadas no caminho (giro no ponto medio, pivo
+  //     lateral fixo, oito deitado): processo, nao jogo;
+  //   - os knobs da bancada (`?passo=`, `?coleira=`, `?vel=`) e as medidas de
+  //     `ritmo-da-encarada.mjs`: encanamento;
+  //   - a coleira, a ancora por perna e a velocidade constante entre curvaturas
+  //     diferentes: sao o COMO, e o jogador ve so o resultado.
+  {
+    version: '7.33',
+    date: '2026-09-02',
+    title: 'A encarada dos duelos, agora dá pra ver',
+    highlights: [
+      'A ENCARADA DOS DUELOS FICOU VISÍVEL. A nota passada anunciou que os dois POKEs se mexem entre um golpe e o outro na arena do Campeão Lance e nas caçadas BOSS — e eles se mexiam, num passo tão curto que não dava pra perceber. Agora eles se deslocam de verdade: meias-luas que mudam de tamanho e de lado, cada golpe trocado começa outra, e a luta anda pela arena em vez de ficar num ponto só.',
+    ],
+  },
   // UM item pra um intervalo de duas issues (PH-396 e PH-404).
   //
   // O achado e de QA, nao de jogador: nenhum jogador reclamou de ver o POKE
