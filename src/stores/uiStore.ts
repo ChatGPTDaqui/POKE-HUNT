@@ -14,6 +14,33 @@ import type { ChatTab } from '@/stores/toastStore'
 // Nomes em portugues porque sao os mesmos rotulos que aparecem no menu — o
 // handoff especifica esta uniao literalmente, e ter um `'team'` interno virando
 // `'Equipe'` na tela so cria uma traducao a mais pra manter.
+/**
+ * Anúncio levado do Mercado pra dentro da conversa (PH-435).
+ *
+ * Estrutura própria em vez de reusar `AnuncioMercado`: a store da interface não
+ * tem por que conhecer o formato de linha do servidor, e o que a conversa
+ * precisa é só o suficiente pro card — mais o `id`, que é o único campo que a
+ * RPC de envio consome.
+ */
+export interface AnuncioParaConversa {
+  id: string
+  sellerId: string
+  speciesId: string
+  level: number
+  isShiny: boolean
+  rarity: string
+  ivPercent: number
+  price: number | null
+  currency: 'gold' | 'diamond'
+  /**
+   * Vem junto pro chip de preview não afirmar preço fixo num leilão. O snapshot
+   * definitivo é o do servidor; este campo existe só pra a tela não mentir
+   * durante os segundos entre abrir o fio e enviar a mensagem.
+   */
+  modo: 'preco_fixo' | 'leilao'
+  apenasOferta: boolean
+}
+
 export type ScreenName =
   | 'equipe' | 'mochila' | 'loja' | 'hunts' | 'pokedex'
   | 'wiki' | 'config' | 'correio' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
@@ -206,8 +233,14 @@ interface UiState {
   // caminho que a issue pede (do anuncio pro perfil, do perfil pra conversa).
   // Consumido UMA vez e limpo pelo proprio Correio: sem isso, fechar o fio e
   // reabrir o Correio reabriria o mesmo contato pra sempre.
-  correioContatoInicial: { userId: string; nick: string } | null
-  abrirCorreioCom: (contato: { userId: string; nick: string }) => void
+  //
+  // `anuncio` (PH-435) e o contexto da negociacao: quem abriu a conversa pela
+  // vitrine (ou pelo lance recebido) chega com o anuncio na mao, e o fio ja
+  // abre sabendo do que se trata. So o PREVIEW vem daqui — o snapshot que fica
+  // gravado e o que o servidor monta, entao um preco desatualizado na tela nao
+  // vira registro errado no historico.
+  correioContatoInicial: { userId: string; nick: string; anuncio?: AnuncioParaConversa } | null
+  abrirCorreioCom: (contato: { userId: string; nick: string; anuncio?: AnuncioParaConversa }) => void
   consumirCorreioContatoInicial: () => void
 
   // Hunt Analyzer: aberto pelo card/chip de taxas do HUD. Mesma razao do perfil
