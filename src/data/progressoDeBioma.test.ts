@@ -157,6 +157,64 @@ describe('traducao do save antigo', () => {
     expect(tres).toEqual(uma)
   })
 
+  // PH-440: o TERCEIRO estado, que a PH-429 nao previu e o banco produziu em
+  // horas. O objeto abaixo e copia literal de uma linha de `public` em 02/09.
+  //
+  // COMO ELE NASCE: a migration converteu a linha pro formato novo; o cliente
+  // ainda publicado em producao (bundle antigo) leu, fez `{...defaults,
+  // ...doBanco}` com `defaults = {faixa1: 0, faixa2: 0, faixa3: 0}` e regravou
+  // no flush — deixando as chaves de faixa ZERADAS ao lado das chaves de bioma
+  // corretas. Enquanto houver bundle antigo escrevendo na mesma coluna, os dois
+  // formatos NAO sao mutuamente exclusivos.
+  //
+  // O QUE ISSO CAUSAVA: o leitor detectava "tem faixa, logo e legado", traduzia
+  // os zeros das faixas e descartava tudo. Uma conta com os 12 biomas fechados
+  // voltava zerada, sem erro em lugar nenhum.
+  describe('objeto MISTO — os dois formatos na mesma linha (PH-440)', () => {
+    const DO_BANCO_02_09 = {
+      mata: 9, igneo: 0, aridos: 0, gelido: 0, urbano: 3, marinho: 9,
+      sagrado: 0, sombrio: 0, industrial: 9, subterraneo: 9, campo_aberto: 9,
+      aguas_interiores: 6,
+      faixa1: 0, faixa2: 0, faixa3: 0,
+    }
+
+    it('nao perde NENHUM valor de bioma', () => {
+      const p = lerProgressoPorBioma(DO_BANCO_02_09)
+      expect(p.mata).toBe(9)
+      expect(p.marinho).toBe(9)
+      expect(p.industrial).toBe(9)
+      expect(p.subterraneo).toBe(9)
+      expect(p.campo_aberto).toBe(9)
+      expect(p.aguas_interiores).toBe(6)
+      expect(p.urbano).toBe(3)
+      expect(p.igneo).toBe(0)
+      expect(p).not.toHaveProperty('faixa1')
+    })
+
+    it('continua idempotente no estado misto', () => {
+      const uma = lerProgressoPorBioma(DO_BANCO_02_09)
+      expect(lerProgressoPorBioma(uma)).toEqual(uma)
+    })
+
+    it('quando os dois formatos discordam, vale o MAIOR', () => {
+      // Misto com conflito real: a faixa1 diz "os 3 primeiros ate o estagio 3",
+      // mas o campo_aberto ja esta em 9 pelo formato novo. Perder o 9 seria
+      // regressao; ignorar a faixa seria perder o subterraneo e o marinho.
+      const p = lerProgressoPorBioma({ campo_aberto: 9, faixa1: 3 })
+      expect(p.campo_aberto).toBe(9)
+      expect(p.subterraneo).toBe(3)
+      expect(p.marinho).toBe(3)
+      expect(p.mata).toBe(0)
+    })
+
+    it('so-novo e so-legado continuam valendo com o mesmo caminho', () => {
+      // O conserto trocou "escolhe um dos dois caminhos" por "aplica os dois".
+      // Os dois casos puros precisam continuar identicos ao que eram.
+      expect(lerProgressoPorBioma({ marinho: 4 }).marinho).toBe(4)
+      expect(lerProgressoPorBioma({ faixa1: 1, faixa2: 0, faixa3: 0 }).campo_aberto).toBe(3)
+    })
+  })
+
   it('entrada podre devolve o default em vez de estourar', () => {
     // Uma carga que falha derruba a sessao inteira. Progresso zerado e
     // recuperavel (o servidor grava de novo ao vencer o proximo Lord); sessao

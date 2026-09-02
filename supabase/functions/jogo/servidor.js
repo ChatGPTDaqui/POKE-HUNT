@@ -75685,9 +75685,6 @@ var ORDEM_LEGADA_DOS_BIOMAS = [
 	"sombrio",
 	"igneo"
 ];
-function ehFormatoLegado(bruto) {
-	return ESTAGIO_DA_FAIXA_LEGADA.some(([faixa]) => faixa in bruto);
-}
 /**
 * Le `players.bioma_progress` em qualquer um dos dois formatos.
 *
@@ -75704,21 +75701,17 @@ function lerProgressoPorBioma(bruto) {
 	const base = progressoPorBiomaDefault();
 	if (bruto == null || typeof bruto !== "object" || Array.isArray(bruto)) return base;
 	const objeto = bruto;
-	if (ehFormatoLegado(objeto)) {
-		let traduzido = base;
-		for (const [faixa, estagio] of ESTAGIO_DA_FAIXA_LEGADA) {
-			const quantos = objeto[faixa];
-			if (typeof quantos !== "number" || !Number.isFinite(quantos)) continue;
-			const ate = Math.min(Math.trunc(quantos), ORDEM_LEGADA_DOS_BIOMAS.length);
-			for (let i = 0; i < ate; i++) traduzido = comEstagioLimpo(traduzido, ORDEM_LEGADA_DOS_BIOMAS[i], estagio);
-		}
-		return traduzido;
-	}
-	const lido = base;
+	let lido = base;
 	for (const chave of Object.keys(base)) {
 		const valor = objeto[chave];
 		if (typeof valor !== "number" || !Number.isFinite(valor)) continue;
 		lido[chave] = Math.min(Math.max(Math.trunc(valor), 0), 10);
+	}
+	for (const [faixa, estagio] of ESTAGIO_DA_FAIXA_LEGADA) {
+		const quantos = objeto[faixa];
+		if (typeof quantos !== "number" || !Number.isFinite(quantos)) continue;
+		const ate = Math.min(Math.trunc(quantos), ORDEM_LEGADA_DOS_BIOMAS.length);
+		for (let i = 0; i < ate; i++) lido = comEstagioLimpo(lido, ORDEM_LEGADA_DOS_BIOMAS[i], estagio);
 	}
 	return lido;
 }

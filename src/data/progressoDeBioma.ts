@@ -148,9 +148,6 @@ export const ORDEM_LEGADA_DOS_BIOMAS: readonly string[] = [
   'igneo',
 ]
 
-function ehFormatoLegado(bruto: Record<string, unknown>): boolean {
-  return ESTAGIO_DA_FAIXA_LEGADA.some(([faixa]) => faixa in bruto)
-}
 
 /**
  * Le `players.bioma_progress` em qualquer um dos dois formatos.
@@ -169,30 +166,48 @@ export function lerProgressoPorBioma(bruto: unknown): ProgressoPorBioma {
   if (bruto == null || typeof bruto !== 'object' || Array.isArray(bruto)) return base
   const objeto = bruto as Record<string, unknown>
 
-  if (ehFormatoLegado(objeto)) {
-    let traduzido = base
-    for (const [faixa, estagio] of ESTAGIO_DA_FAIXA_LEGADA) {
-      const quantos = objeto[faixa]
-      if (typeof quantos !== 'number' || !Number.isFinite(quantos)) continue
-      // `faixa1: 7` significa "venceu os 7 PRIMEIROS biomas da ordem", entao os
-      // indices 0 a 6. `Math.min` protege contra o valor 12+ que ja existe no
-      // banco (uma linha tem `faixa2: 12`, o total de biomas).
-      const ate = Math.min(Math.trunc(quantos), ORDEM_LEGADA_DOS_BIOMAS.length)
-      for (let i = 0; i < ate; i++) {
-        traduzido = comEstagioLimpo(traduzido, ORDEM_LEGADA_DOS_BIOMAS[i], estagio)
-      }
-    }
-    return traduzido
-  }
-
-  // Formato novo: copia so o que e bioma conhecido e numero valido. Chave
-  // estranha e descartada em silencio — ela nao teria consumidor, e propagar
-  // lixo pro banco a cada flush e pior que perde-lo.
-  const lido = base // `base` ja e objeto novo; mutar aqui nao vaza pra ninguem
+  // PASSO 1 — o que ja esta no formato novo. Chave que nao e bioma conhecido ou
+  // valor que nao e numero e descartada em silencio: ela nao teria consumidor, e
+  // propagar lixo pro banco a cada flush e pior que perde-lo.
+  let lido = base // `base` ja e objeto novo; mutar aqui nao vaza pra ninguem
   for (const chave of Object.keys(base)) {
     const valor = objeto[chave]
     if (typeof valor !== 'number' || !Number.isFinite(valor)) continue
     lido[chave] = Math.min(Math.max(Math.trunc(valor), 0), ESTAGIOS_POR_BIOMA)
+  }
+
+  // PASSO 2 — o que vem das faixas antigas, aplicado POR CIMA e pelo MAXIMO.
+  //
+  // OS DOIS PASSOS RODAM SEMPRE, E ESSE E O CONSERTO DA PH-440. A versao
+  // original escolhia UM dos dois caminhos pela presenca de qualquer chave
+  // `faixa*`, assumindo que os formatos eram mutuamente exclusivos. Nao sao:
+  // enquanto houver um cliente com bundle antigo escrevendo na MESMA coluna — o
+  // que e exatamente o intervalo entre o deploy da `dev` e a promocao pra
+  // `main` — a linha volta do banco com as duas coisas juntas. O bundle antigo
+  // fazia `{...defaults, ...doBanco}` com `defaults = {faixa1: 0, faixa2: 0,
+  // faixa3: 0}`, entao ele regrava as chaves de faixa ZERADAS ao lado das
+  // chaves de bioma corretas.
+  //
+  // Diante desse objeto misto, o caminho legado traduzia so os zeros das faixas
+  // e DESCARTAVA o progresso de bioma. Medido no banco em 02/09: duas linhas de
+  // `public` no estado misto, uma delas com os 12 biomas fechados. O leitor as
+  // devolvia inteiramente zeradas — o jogador voltava ao estagio 1 em tudo, sem
+  // erro nenhum na tela.
+  //
+  // Aplicar os dois pelo maximo e correto nos tres casos: so-novo (o passo 2
+  // nao acha faixa e nao faz nada), so-legado (o passo 1 nao acha bioma e
+  // comeca do zero) e misto (o maior dos dois vence, que e o que preserva o
+  // progresso).
+  for (const [faixa, estagio] of ESTAGIO_DA_FAIXA_LEGADA) {
+    const quantos = objeto[faixa]
+    if (typeof quantos !== 'number' || !Number.isFinite(quantos)) continue
+    // `faixa1: 7` significa "venceu os 7 PRIMEIROS biomas da ordem", entao os
+    // indices 0 a 6. `Math.min` protege contra o valor 12+ que ja existe no
+    // banco (uma linha tem `faixa2: 12`, o total de biomas).
+    const ate = Math.min(Math.trunc(quantos), ORDEM_LEGADA_DOS_BIOMAS.length)
+    for (let i = 0; i < ate; i++) {
+      lido = comEstagioLimpo(lido, ORDEM_LEGADA_DOS_BIOMAS[i], estagio)
+    }
   }
   return lido
 }
