@@ -17,6 +17,7 @@ import {
 } from './statusSystem'
 import { getAbility, ABILITIES, TURNO_SEGUNDOS } from '@/data/abilities'
 import type { WorldEntity } from '../types'
+import { darEstagio } from '../testes/estagioDeTeste'
 import { SEGUNDOS_DE_IMUNIDADE_APOS_CURA } from '@/data/statusEffects'
 import type { StatusCondition } from '@/data/statusEffects'
 
@@ -379,19 +380,26 @@ describe('estagios de atributo', () => {
   it('no teto de +6 o golpe nao reporta mudanca nenhuma', () => {
     const atacante = entidade('rattata')
     const alvo = entidade('pidgey')
-    atacante.estagios.atkFis = 6
+    // Pela fonte: no teto o golpe RENOVA prazo e nao reporta degrau, e e isso
+    // que "nao reporta mudanca nenhuma" quer dizer desde a PH-418.
+    darEstagio(atacante, 'atkFis', 6, { id: 'teto' })
     expect(aplicarMudancasDeStat(createRng(1), atacante, alvo, getAbility('swords_dance')!)).toEqual([])
   })
 
-  it('fim de batalha zera estagio e confusao, mas NAO o status nao-volatil', () => {
+  it('fim de batalha zera estagio DE TERCEIRO e confusao, mas NAO o proprio nem o nao-volatil', () => {
     const e = entidade('rattata')
-    e.estagios.atkFis = -4
+    // PH-418: o corte de fim de batalha e por AUTORIA. O que veio de fora sai
+    // (senao o debuff dos selvagens fica eterno e custa 20% dos abates), o que o
+    // POKE fez a si mesmo fica vivendo o prazo de 18s — que e o pedido da issue.
+    darEstagio(e, 'atkFis', -4, { proprio: false, id: 'growl' })
+    darEstagio(e, 'speed', 2, { id: 'agility' })
     aplicarStatus(createRng(1), e, 'confusion', 100)
     aplicarStatus(createRng(2), e, 'poison', 100)
 
     limparEstadoVolatil(e)
 
-    expect(e.estagios).toEqual({})
+    expect(e.estagios).toEqual({ speed: 2 })
+    expect(e.estagiosFonte?.atkFis, 'a fonte de terceiro tambem sai').toBeUndefined()
     expect(e.statusVolatil).toBeNull()
     // Veneno sobrevive a batalha nos jogos — e por isso que existe Antidoto.
     expect(e.poke.status?.tipo).toBe('poison')

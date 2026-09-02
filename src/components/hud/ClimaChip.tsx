@@ -23,6 +23,7 @@
 import { useWorldStore } from '@/stores/worldStore'
 import { Explicacao } from '@/components/shared/Explicacao'
 import { cn } from '@/lib/utils'
+import { formatarPrazoEmTurnos, TEXTO_DE_RITMO_CONTINUO } from '@/data/textoDeEstagioEPrazo'
 
 import type { ClimaTipo } from '@/engine/types'
 
@@ -79,7 +80,7 @@ export const APARENCIA: Record<ClimaTipo, Aparencia> = {
   granizo: {
     nome: 'Granizo', simbolo: '🧊', cor: 'text-[#a8e4f2]',
     efeitos: [
-      'Tira 1/16 do HP por turno de quem não é do tipo Gelo.',
+      `Tira 1/16 do HP ${TEXTO_DE_RITMO_CONTINUO} de quem não é do tipo Gelo.`,
       'Blizzard nunca erra.',
       'Solar Beam cai pela metade.',
     ],
@@ -96,7 +97,7 @@ export const APARENCIA: Record<ClimaTipo, Aparencia> = {
   areia: {
     nome: 'Tempestade de areia', simbolo: '🌪️', cor: 'text-[#e0c286]',
     efeitos: [
-      'Tira 1/16 do HP por turno de quem não é Pedra, Terra ou Aço.',
+      `Tira 1/16 do HP ${TEXTO_DE_RITMO_CONTINUO} de quem não é Pedra, Terra ou Aço.`,
       'Solar Beam cai pela metade.',
     ],
   },
@@ -186,7 +187,8 @@ export function ClimaChip({ embutido = false, soIcone = false }: ClimaChipProps 
           {deGolpe ? (
             <span className="text-n400">
               {turnos != null
-                ? `Dura mais ${turnos} ${turnos === 1 ? 'turno' : 'turnos'}. `
+                // PH-422: segundos, nao turnos.
+                ? `Dura mais ${formatarPrazoEmTurnos(turnos)}. `
                 : ''}
               Quando acabar, o clima do lugar volta.
             </span>
@@ -229,10 +231,13 @@ export function ClimaChip({ embutido = false, soIcone = false }: ClimaChipProps 
           // "infinito", que nao e informacao.
           //
           // No `soIcone` ela sai: o numero sozinho ao lado de uma nuvem nao diz
-          // se sao turnos, segundos ou pilhas, e escrever "turnos" ali estoura os
+          // se sao segundos, turnos ou pilhas, e escrever a unidade ali estoura os
           // 73px do vao. Quem carrega a duracao no compacto e o balao, que e
           // exatamente o canal que esta issue criou pra isso.
-          <span className="shrink-0 text-[.68em] tabular-nums text-n500">{turnos} turnos</span>
+          //
+          // PH-422: a unidade aqui e SEGUNDO. Era "turnos", e o contador do chip
+          // foi o ultimo lugar de jogo a mostrar turno como prazo.
+          <span className="shrink-0 text-[.68em] tabular-nums text-n500">{formatarPrazoEmTurnos(turnos)}</span>
         )}
       </div>
     </Explicacao>

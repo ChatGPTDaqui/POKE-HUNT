@@ -19,6 +19,7 @@ import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { preloadEspecies, preloadHunt, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
 import type { Point } from './types'
+import { apagarTodosOsEstagios } from './systems/statusSystem'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
 
@@ -328,6 +329,16 @@ export const controller = {
         draft.player.fainted = false
         draft.player.state = 'wander'
         draft.player.targetId = null
+        // PH-418: curar no Hospital tambem zera estagio de atributo. Com o prazo
+        // de 18s o estagio deixou de morrer no fim da luta, e sem esta linha um
+        // Rosnado levado na hunt anterior atravessaria a cura e a proxima
+        // entrada — "curei e meu POKE continua fraco" sem nada na tela
+        // explicando por quanto tempo.
+        // Os DOIS campos: zerar so `estagios` nao limpava nada, porque
+        // `recalcularEstagio` reescreve o cache a partir das fontes vivas no
+        // proximo tick — o Rosnado voltava sozinho depois da cura.
+        apagarTodosOsEstagios(draft.player)
+        draft.player.estagiosFonte = undefined
         draft.player.cooldowns = {}
       })
     }
@@ -377,6 +388,10 @@ export const controller = {
           draft.player.fainted = isDead(draft.player)
           draft.player.state = draft.player.fainted ? 'dead' : 'wander'
           draft.player.targetId = null
+          // PH-418: estagio de atributo nao atravessa troca de POKE — o que entra
+          // nao herda buff nem debuff de quem saiu.
+          draft.player.estagios = {}
+          draft.player.estagiosFonte = undefined
         }
       })
     })
@@ -443,6 +458,10 @@ export const controller = {
           draft.player.fainted = isDead(draft.player)
           draft.player.state = draft.player.fainted ? 'dead' : 'wander'
           draft.player.targetId = null
+          // PH-418: estagio de atributo nao atravessa troca de POKE — o que entra
+          // nao herda buff nem debuff de quem saiu.
+          draft.player.estagios = {}
+          draft.player.estagiosFonte = undefined
         }
       })
     })
@@ -481,6 +500,9 @@ export const controller = {
             draft.player.poke.hp = Math.round(draft.player.poke.stats.hp * revivePercent)
             draft.player.fainted = false
             draft.player.state = 'wander'
+            // PH-418: mesma regra do auto-revive — cair zera estagio. Sem isto,
+            // o Revive da mochila e o do bot discordavam sobre o mesmo evento.
+            apagarTodosOsEstagios(draft.player)
           }
         })
         syncActivePokeToGameState(useWorldStore.getState(), gameState)

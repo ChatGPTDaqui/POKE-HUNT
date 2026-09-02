@@ -16,7 +16,8 @@ import { TURNO_SEGUNDOS } from '@/data/abilities'
 import {
   podeReceberStatus, sortearDuracao, danoPorTurno, ehVolatil, perdeOTurno,
   chanceDeDescongelar, descongelaCom, chanceDeSeAtacar, poderDoAutoDano, imobiliza,
-  SEGUNDOS_DE_IMUNIDADE_APOS_CURA, ESTAGIO_MINIMO, ESTAGIO_MAXIMO,
+  SEGUNDOS_DE_IMUNIDADE_APOS_CURA,
+  DURACAO_DE_ESTAGIO_SEGUNDOS, totalDeEstagio, envelhecerFontes,
   type StatusAtivo, type StatusCondition, type StatDeEstagio, type FonteDeEstagio,
 } from '@/data/statusEffects'
 import type { StatChange } from '@/data/generated/types'
@@ -233,22 +234,27 @@ export function aplicarMudancasDeStat(
     if (delta < 0 && vemDoOponente && protegeEsteStat) continue
 
     const antes = destino.estagios[mudanca.stat] ?? 0
-    const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + delta))
-    if (depois === antes) continue // ja no teto ou no piso
-    destino.estagios[mudanca.stat] = depois
+    // PH-418: quem escreve o estagio e a FONTE. `registrarFonteDeEstagio`
+    // renova o prazo quando a fonte ja existe (sem somar), soma quando e nova, e
+    // devolve o total ja clampado.
+    //
     // PH-121: a procedencia e anotada AQUI porque e o unico ponto onde `ability`
     // e `atacante` existem juntos. Depois do hit, `estagios` e um numero solto.
-    registrarFonteDeEstagio(destino, mudanca.stat, {
+    const depois = registrarFonteDeEstagio(destino, mudanca.stat, comPrazoPadrao({
       id: ability.id,
       tipo: 'golpe',
       proprio: destino === atacante,
       deQuem: SPECIES[atacante.poke.speciesId]?.name ?? atacante.poke.speciesId,
-    })
-    // Voltar a 0 pelo caminho normal (Rosnado desfazendo uma Danca das Espadas)
-    // apaga a lista: sem selo na tela, nao ha o que a fonte explique.
-    esquecerFonteSeZerado(destino, mudanca.stat)
+      estagios: delta,
+    }))
+    // A REACAO OLHA A QUEDA REAL DO TOTAL, e nao o delta pedido. Nos jogos, um
+    // atributo que ja esta no piso nao cai mais, o golpe falha e Defiant nao
+    // ativa — comportamento que existia aqui de graca (o `continue` vinha antes)
+    // e que a PH-418 tinha que preservar de proposito, porque agora a fonte e
+    // registrada mesmo no piso (pra renovar o prazo do debuff).
+    if (depois < antes && vemDoOponente) sofreuQuedaDoOponente = true
+    if (depois === antes) continue // ja no teto ou no piso: renovou prazo, nada a anunciar
     aplicadas.push({ stat: mudanca.stat, estagios: depois - antes })
-    if (delta < 0 && vemDoOponente) sofreuQuedaDoOponente = true
   }
 
   // DEFIANT / COMPETITIVE: levar um estagio rebaixado pelo oponente vira +2 em
@@ -281,15 +287,26 @@ export function aplicarEstagioUnico(
   alvo: WorldEntity,
   stat: StatDeEstagio,
   delta: number,
-  /** PH-121 — de onde veio. Ausente deixa o estagio sem procedencia registrada. */
-  fonte?: FonteDeEstagio,
+  /**
+   * PH-121 — de onde veio. PH-418: virou o jeito de aplicar, nao um enfeite.
+   *
+   * Ausente ainda e aceito porque `fonteDeTrait` devolve `undefined` quando a
+   * trait e nula, e o TS nao sabe que nos pontos de chamada ela sempre existe
+   * (o hook so roda com a trait). Nesse caso entra uma fonte anonima, pra que o
+   * estagio nunca fique sem prazo — um estagio eterno e exatamente o defeito
+   * que esta issue conserta.
+   */
+  fonte?: Omit<FonteDeEstagio, 'estagios' | 'expiraEm'>,
 ): StatChange | null {
   const antes = alvo.estagios[stat] ?? 0
-  const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + delta))
-  if (depois === antes) return null
-  alvo.estagios[stat] = depois
-  if (fonte) registrarFonteDeEstagio(alvo, stat, fonte)
-  esquecerFonteSeZerado(alvo, stat)
+  const identidade = fonte ?? {
+    id: 'anonimo',
+    tipo: 'trait' as const,
+    proprio: true,
+    deQuem: SPECIES[alvo.poke.speciesId]?.name ?? alvo.poke.speciesId,
+  }
+  const depois = registrarFonteDeEstagio(alvo, stat, comPrazoPadrao({ ...identidade, estagios: delta }))
+  if (depois === antes) return null // teto/piso: prazo renovado, nada a anunciar
   return { stat, estagios: depois - antes }
 }
 
@@ -304,7 +321,10 @@ export function aplicarEstagioUnico(
  */
 export function fonteDeTrait(
   dono: WorldEntity, trait: TraitId | null | undefined, destino: WorldEntity = dono,
-): FonteDeEstagio | undefined {
+  // PH-418: devolve so a IDENTIDADE da fonte. Quem chama sabe quantos degraus
+  // vale (`aplicarEstagioUnico` recebe o delta) e o prazo e sempre o padrao,
+  // entao carregar os dois campos aqui obrigaria todo chamador a repeti-los.
+): Omit<FonteDeEstagio, 'estagios' | 'expiraEm'> | undefined {
   if (!trait) return undefined
   return {
     id: trait,
@@ -315,32 +335,146 @@ export function fonteDeTrait(
 }
 
 /**
- * Anota a procedencia de um estagio (PH-121), deduplicando.
+ * Anota a procedencia de um estagio (PH-121) e, desde a PH-418, a contribuicao
+ * e o prazo dela — e este e o unico jeito de um estagio entrar.
  *
- * DEDUPLICA porque o mesmo golpe do mesmo POKE pode acertar dez vezes na mesma
- * luta, e a lista existe pra responder "quem fez isso", nao "quantas vezes".
- * Sem isto ela cresceria sem teto dentro de uma entidade que vive a luta toda.
+ * REAPLICAR A MESMA FONTE RENOVA O PRAZO SEM SOMAR ESTAGIO. E o desenho pedido:
+ * duas Dancas das Espadas seguidas dao +2 com prazo cheio, nao +4. Fontes
+ * DIFERENTES somam, entao chegar ao teto exige golpes de buff distintos.
+ *
+ * Sem essa regra o pedido viraria outra coisa: Danca das Espadas recarrega em
+ * 3,0s e o prazo e 18s, entao caberiam seis aplicacoes vivas — Ataque 4x
+ * permanente. Do outro lado, Screech (1,5s de recarga, −2 de Defesa) fixaria a
+ * Defesa do jogador em 25%.
+ *
+ * `magnitude` MAIOR EM MODULO SUBSTITUI: Growth no sol vale +2 onde normalmente
+ * vale +1, e reaplicar com o sol aceso nao pode deixar o POKE preso no valor
+ * fraco de antes.
+ *
+ * Devolve o total do atributo DEPOIS da mudanca — quem chama precisa dele pra
+ * saber se houve mudanca de verdade (quem ja esta no teto nao sobe).
  */
 export function registrarFonteDeEstagio(
   destino: WorldEntity, stat: StatDeEstagio, fonte: FonteDeEstagio,
-): void {
+): number {
   const mapa = (destino.estagiosFonte ??= {})
   const lista = (mapa[stat] ??= [])
-  const jaTem = lista.some(
-    (f) => f.id === fonte.id && f.tipo === fonte.tipo && f.proprio === fonte.proprio && f.deQuem === fonte.deQuem,
+  // `acumula` (Speed Boost, Moody) entra como entrada NOVA sempre — ver o campo
+  // em `FonteDeEstagio` pro motivo. Sem esta linha o Speed Boost congelaria em
+  // +1 em vez de subir um degrau por turno.
+  //
+  // A CHAVE NAO INCLUI `deQuem`, e essa decisao custou uma medicao. Com ele na
+  // chave, "Rosnado do Rattata" e "Rosnado do Sentret" eram fontes distintas e
+  // SOMAVAM — num auto-battler de campo aberto, onde passam dezenas de especies
+  // diferentes, o jogador ia a −6 e ficava lá renovando. O teste de simulacao de
+  // uma hora pegou: um POKE 22 niveis acima do mato gastou os 50 Revives.
+  //
+  // Conceitualmente o `deQuem` nunca deveria estar na chave: o modificador e do
+  // ALVO, nao de quem aplicou, e nos jogos dois Rosnados de dois POKEs
+  // diferentes empilham porque cada um e um TURNO diferente — o que aqui e
+  // coberto pelo prazo, nao pela identidade de quem rosnou. O campo continua na
+  // fonte, e e atualizado na renovacao, porque o selo do HUD mostra quem foi o
+  // ultimo a causar.
+  const existente = fonte.acumula ? undefined : lista.find(
+    (f) => f.id === fonte.id && f.tipo === fonte.tipo && f.proprio === fonte.proprio,
   )
-  if (!jaTem) lista.push(fonte)
+  if (existente) {
+    existente.expiraEm = fonte.expiraEm
+    existente.deQuem = fonte.deQuem
+    if (Math.abs(fonte.estagios) > Math.abs(existente.estagios)) existente.estagios = fonte.estagios
+  } else {
+    lista.push(fonte)
+  }
+  return recalcularEstagio(destino, stat)
 }
 
 /**
- * Estagio de volta a 0 nao tem fonte — o selo desapareceu da tela, e manter a
- * lista faria a proxima mudanca daquele atributo aparecer com o historico de uma
- * situacao que ja passou.
+ * Reescreve `estagios[stat]` a partir das fontes vivas (PH-418) e devolve o
+ * total.
+ *
+ * `estagios` virou CACHE: a verdade e a lista de fontes. Toda escrita passa por
+ * aqui, e nenhuma leitura precisou mudar — `multiplicadorDeStat`, a formula de
+ * dano, a velocidade de movimento e o HUD continuam lendo `estagios`.
+ *
+ * Estagio 0 sai do objeto (`delete`) em vez de virar `0` explicito: e a
+ * convencao do resto do arquivo, e o selo do HUD trata ausente e zero igual.
  */
-export function esquecerFonteSeZerado(destino: WorldEntity, stat: StatDeEstagio): void {
-  if ((destino.estagios[stat] ?? 0) !== 0) return
-  if (destino.estagiosFonte) delete destino.estagiosFonte[stat]
+export function recalcularEstagio(destino: WorldEntity, stat: StatDeEstagio): number {
+  const fontes = destino.estagiosFonte?.[stat]
+  const total = totalDeEstagio(fontes)
+  if (total === 0) delete destino.estagios[stat]
+  else destino.estagios[stat] = total
+  // Lista vazia nao fica pendurada: sem fonte nao ha selo, e uma lista vazia
+  // faria `estagiosFonte` crescer com uma chave por atributo ja usado na luta.
+  if (destino.estagiosFonte && (!fontes || fontes.length === 0)) delete destino.estagiosFonte[stat]
+  return total
 }
+
+/**
+ * Apaga estagio e fonte de todos os atributos (PH-418) — Haze, a troca do POKE
+ * em campo, e todo caminho que levanta um POKE caido.
+ *
+ * Os dois campos juntos, sempre: `estagios` e cache do que as fontes somam, e
+ * limpar um sem o outro NAO limpa nada — `recalcularEstagio` reescreve o cache
+ * a partir das fontes que sobraram, no proximo tick. Foi o defeito real do
+ * Hospital: ele zerava `estagios` e o Rosnado voltava sozinho.
+ *
+ * MORA AQUI, e nao no `combatSystem`, porque `autoSystem` precisa dele pro
+ * auto-revive e ja importa este modulo — o caminho contrario abriria ciclo.
+ */
+export function apagarTodosOsEstagios(entity: WorldEntity): void {
+  entity.estagios = {}
+  entity.estagiosFonte = undefined
+}
+
+/**
+ * Prazo que sobra na fonte que ESTE golpe criou, ou `null` se ela nao existe
+ * mais (PH-419).
+ *
+ * A busca e pela mesma identidade que `registrarFonteDeEstagio` usa pra decidir
+ * renovacao — id, tipo e autoria. Perguntar so "tem fonte viva neste atributo"
+ * daria a resposta errada no caso que importa: um Rosnado do inimigo tambem e
+ * fonte de atkFis, e a IA nao renova o buff dela olhando o prazo do debuff
+ * alheio.
+ */
+export function prazoDaFonteDoGolpe(
+  entity: WorldEntity, stat: StatDeEstagio, abilityId: string, proprio: boolean,
+): number | null {
+  const fonte = entity.estagiosFonte?.[stat]?.find(
+    (f) => f.id === abilityId && f.tipo === 'golpe' && f.proprio === proprio,
+  )
+  if (!fonte) return null
+  // `expiraEm: null` e fonte permanente. Nada cria uma hoje, mas devolver 0 aqui
+  // faria a IA reaplicar pra sempre uma fonte que nunca vence.
+  return fonte.expiraEm ?? Number.POSITIVE_INFINITY
+}
+
+/**
+ * Se a entidade tem alguma fonte PROPRIA viva neste atributo (PH-419).
+ *
+ * Existe pro Belly Drum, que e a excecao nomeada da issue: ele custa 50% do HP
+ * maximo e vai direto ao teto, entao ele nao entra na renovacao preventiva e
+ * ainda recusa entrar quando o POKE ja tem buff proprio de Ataque de pe —
+ * empilhar o custo de HP em cima de um buff que ja existe e o pior negocio que
+ * a IA consegue fechar.
+ */
+export function temFontePropriaViva(entity: WorldEntity, stat: StatDeEstagio): boolean {
+  return Boolean(entity.estagiosFonte?.[stat]?.some((f) => f.proprio))
+}
+/**
+ * Fonte nova com o prazo padrao (PH-418). Existe pra `DURACAO_DE_ESTAGIO_SEGUNDOS`
+ * nao ficar repetida em cada um dos oito pontos que aplicam estagio.
+ */
+export function comPrazoPadrao(fonte: Omit<FonteDeEstagio, 'expiraEm'>): FonteDeEstagio {
+  return { ...fonte, expiraEm: DURACAO_DE_ESTAGIO_SEGUNDOS }
+}
+
+// `esquecerFonteSeZerado` MORREU NA PH-418, e a razao vale registro: ela
+// apagava a lista de fontes quando o total voltava a zero. Com o total derivado
+// das fontes isso ficou errado — total zero costuma ser CANCELAMENTO (um Rosnado
+// −1 sobre um Howl +1), as duas fontes seguem vivas contando o prazo, e quando o
+// Rosnado expira o Howl volta a valer. Apagar mataria essa volta. Lista que
+// esvaziou de verdade e limpa por `recalcularEstagio`.
 
 // Efeito colateral de golpe: le `ability.status`/`statusChance` e tenta aplicar.
 // Separado de `aplicarStatus` porque o golpe tambem PODE DESCONGELAR o alvo
@@ -391,25 +525,54 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
 }
 
 /**
- * Zera o que os jogos zeram no fim da batalha: estagios de atributo, status
- * volatil (confusao) e o hook de entrada em combate (Intimidate/Download/
- * clima automatico — ver combatSystem.ts#resolveEntryHook). O nao-volatil NAO
- * sai daqui — ele sobrevive a batalha nos jogos, e e por isso que existe
- * Antidoto.
+ * Zera o que os jogos zeram no fim da batalha: status volatil (confusao) e o
+ * hook de entrada em combate (Intimidate/Download/clima automatico — ver
+ * combatSystem.ts#resolveEntryHook). O nao-volatil NAO sai daqui — ele
+ * sobrevive a batalha nos jogos, e e por isso que existe Antidoto.
+ *
+ * ESTAGIO DE ATRIBUTO SAIU DESTA LISTA SO PELA METADE (PH-418).
+ *
+ * A primeira versao tirou o estagio inteiro daqui e deixou o PRAZO limitar. A
+ * medicao reprovou: 100 mortes do jogador contra 15 antes, 628 abates/h contra
+ * 786 (`farmOffline`, uma hora, route_46, Charmander Lv25). Ou seja −20%, quase
+ * o mesmo −27% que o reset existia pra evitar.
+ *
+ * O furo e a RENOVACAO. Prazo de 18s so limita fonte que PARA de ser aplicada:
+ * cada Rosnado novo renova os 18s, e numa hunt de campo aberto o jogador leva
+ * Rosnado a cada poucos segundos, de especies diferentes, sem intervalo. "No
+ * maximo 18s" virou "pra sempre" — exatamente o debuff eterno de antes, agora
+ * com um relogio que nunca chega ao fim.
+ *
+ * ENTAO O CORTE E POR AUTORIA, e nao por tipo de estagio:
+ *
+ *   `proprio: true`   fica, e vive o prazo de 18s. E o pedido da issue: quem se
+ *                     buffa usufrui pelo tempo prometido, sem morrer no vao de
+ *                     um segundo entre dois spawns.
+ *   `proprio: false`  sai, como saia antes. O que o jogador sofre de terceiro
+ *                     nao atravessa a batalha, e e isso que segura o −27%.
+ *
+ * Isso NAO contraria "o mesmo vale para debuffs": um debuff que o jogador aplica
+ * mora no ALVO, e alvo de hunt morre em segundos — atravessar batalha ali nao
+ * significa nada. O que atravessa e o que o dono fez a si mesmo, nos dois
+ * sentidos (Danca das Espadas e Hammer Arm). O motivo do reset era real e esta medido no `combatSystem`: sem ele, o
+ * debuff dos selvagens empilhava ate −6 e nunca voltava, e isso custava 27% das
+ * kills/hora. Só que o "fim de batalha" deste motor e *nenhum inimigo
+ * engajado*, o que numa hunt de campo aberto acontece no vao entre cada spawn —
+ * entao o mesmo reset que protegia do debuff eterno matava o buff proprio em
+ * cerca de um segundo. Agora quem limita e o PRAZO (18s por fonte), que resolve
+ * os dois lados: debuff nao fica eterno e buff dura o que promete. Mesma troca
+ * que o clima fez na PH-329.
  *
  * A imunidade de reaplicacao tambem nao e mexida: ela e sobre o tempo desde a
  * ultima cura, nao sobre a batalha.
  *
  * `estagioDeCritico` (Focus Energy) e `proximoGolpeCriticoGarantido` (Laser
- * Focus) sao volateis pelo mesmo motivo de `estagios`: contador/flag por
- * entidade de campo, nao pelo POKE — zeram junto no fim de luta.
+ * Focus) CONTINUAM saindo aqui: sao contador/flag por entidade de campo, nao
+ * tem prazo proprio, e sem o reset ficariam eternos — que e justamente o que a
+ * PH-418 evitou dando prazo ao estagio.
  */
 export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.statusVolatil = null
-  entity.estagios = {}
-  // Anda junto com `estagios` (PH-121): fonte sobrevivendo ao fim da luta faria
-  // o selo da proxima explicar um golpe que aconteceu em outra.
-  entity.estagiosFonte = undefined
   entity.revelado = undefined
   entity.escudos = undefined
   entity.imuneAoTipoVolatil = undefined
@@ -426,6 +589,18 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.tormentedUntil = 0
   // TRUANT (PH-332): o contador de folga zera no fim da luta, como nos jogos.
   entity.truantDeFolga = undefined
+  // Estagio de terceiro sai; o proprio fica contando o prazo. `recalcularEstagio`
+  // reescreve o cache e limpa a chave que esvaziou, entao nao ha estado meio-limpo.
+  if (entity.estagiosFonte) {
+    for (const chave of Object.keys(entity.estagiosFonte) as StatDeEstagio[]) {
+      const fontes = entity.estagiosFonte[chave]
+      if (!fontes?.length) continue
+      const proprias = fontes.filter((f) => f.proprio)
+      if (proprias.length === fontes.length) continue
+      entity.estagiosFonte[chave] = proprias
+      recalcularEstagio(entity, chave)
+    }
+  }
   entity.estagioDeCritico = undefined
   entity.proximoGolpeCriticoGarantido = undefined
   // Golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/aqua_ring)
@@ -515,6 +690,29 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   // status — ver os pontos de checagem em combatSystem#resolveHit.
   if (entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0) {
     entity.curaBloqueadaAte = Math.max(0, entity.curaBloqueadaAte - dt)
+  }
+
+  // ESTAGIO DE ATRIBUTO (PH-418): prazo por fonte, em segundos corridos, no
+  // mesmo formato dos timers acima e pelo mesmo motivo — o relogio de TURNO
+  // desta entidade nao serve, porque o prazo de um buff nao pode depender de
+  // quando o POKE age. Fonte que vence sai da lista e o total e recalculado; era
+  // aqui que faltava a unica coisa que o modelo antigo nao tinha, o tempo.
+  if (entity.estagiosFonte) {
+    for (const chave of Object.keys(entity.estagiosFonte) as StatDeEstagio[]) {
+      const fontes = entity.estagiosFonte[chave]
+      if (!fontes?.length) continue
+      const vivas = envelhecerFontes(fontes, dt)
+      if (vivas.length === fontes.length) continue // ninguem venceu: nada a reescrever
+      if (vivas.length === 0) {
+        delete entity.estagiosFonte[chave]
+        delete entity.estagios[chave]
+        continue
+      }
+      entity.estagiosFonte[chave] = vivas
+      const total = totalDeEstagio(vivas)
+      if (total === 0) delete entity.estagios[chave]
+      else entity.estagios[chave] = total
+    }
   }
 
   // Escudos (Screens): mesmo padrao de `imunidadeDeStatus` acima — contam em
@@ -649,7 +847,9 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
     }
   }
   if (traitDaEntidade === TRAIT_SPEED_BOOST) {
-    aplicarEstagioUnico(entity, 'speed', 1, fonteDeTrait(entity, traitDaEntidade))
+    // `acumula` (PH-418): habilidade de POR TURNO empilha, nao renova — sem isso
+    // o Speed Boost congelaria em +1 em vez de subir um degrau a cada turno.
+    aplicarEstagioUnico(entity, 'speed', 1, { ...fonteDeTrait(entity, traitDaEntidade)!, acumula: true })
   }
   if (traitDaEntidade === TRAIT_MOODY) {
     // Sobe 2 num atributo sorteado e desce 1 em OUTRO. Os dois sorteios saem da
@@ -659,8 +859,11 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
     const sobe = opcoes[Math.floor(nextFloat(rng) * opcoes.length)]
     const restantes = opcoes.filter((o) => o !== sobe)
     const desce = restantes[Math.floor(nextFloat(rng) * restantes.length)]
-    aplicarEstagioUnico(entity, sobe, 2, fonteDeTrait(entity, traitDaEntidade))
-    aplicarEstagioUnico(entity, desce, -1, fonteDeTrait(entity, traitDaEntidade))
+    // Mesmo `acumula` do Speed Boost, e pelo mesmo motivo: o Moody age todo
+    // turno, e cada turno e uma mudanca nova, nao a repeticao de uma anterior.
+    const fonteMoody = { ...fonteDeTrait(entity, traitDaEntidade)!, acumula: true }
+    aplicarEstagioUnico(entity, sobe, 2, fonteMoody)
+    aplicarEstagioUnico(entity, desce, -1, fonteMoody)
   }
 
   const vol = entity.statusVolatil

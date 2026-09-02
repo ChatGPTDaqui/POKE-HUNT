@@ -17,6 +17,7 @@ import {
   regraDoStatus, nomeDoStatus, poderDoAutoDano,
 } from '@/data/statusEffects'
 import { TURNO_SEGUNDOS, getAbility } from '@/data/abilities'
+import { formatarPrazoEmTurnos, TEXTO_DE_RITMO_CONTINUO } from '@/data/textoDeEstagioEPrazo'
 import { ITEMS, type GeneratedItem } from '@/data/items'
 import { STATUS_RULES } from '@/data/generated/status.generated'
 import { createFormulaEngine } from '@/core/formulaEngine'
@@ -454,7 +455,7 @@ function StatusCard({ tipo }: { tipo: StatusCondition }) {
   if (regra.danoPorTurnoFracaoDoMaximo) {
     linhas.push(
       <li key="dano">
-        Tira {formatPercent(regra.danoPorTurnoFracaoDoMaximo)} do HP <b>máximo</b> a cada {TURNO_SEGUNDOS}s (minimo 1
+        Tira {formatPercent(regra.danoPorTurnoFracaoDoMaximo)} do HP <b>máximo</b> {TEXTO_DE_RITMO_CONTINUO} (minimo 1
         de dano, mesmo em HP maximo baixo).
       </li>,
     )
@@ -473,7 +474,10 @@ function StatusCard({ tipo }: { tipo: StatusCondition }) {
     const [min, max] = regra.duracaoEmTurnos
     linhas.push(
       <li key="dur">
-        Passa sozinho depois de {min} a {max} turnos ({min * TURNO_SEGUNDOS}s a {max * TURNO_SEGUNDOS}s), sorteado
+        {/* PH-422: a wiki pode dizer "turno", porque o papel dela e EXPLICAR a
+            equivalencia; o que ela nao pode e ter a propria conversao. O numero
+            em segundos sai da mesma funcao do HUD. */}
+        Passa sozinho depois de {min} a {max} turnos ({formatarPrazoEmTurnos(min)} a {formatarPrazoEmTurnos(max)}), sorteado
         no momento em que pega.
       </li>,
     )
