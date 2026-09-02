@@ -19,7 +19,8 @@ import { useMemo, useState } from 'react'
 
 import { BIOMAS, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, type BiomaDef } from '@/data/biomas'
 import {
-  ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, pesosDoEstagio, quantidadeDeSalas,
+  ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, parseEstagioId, pesosDoEstagio,
+  quantidadeDeSalas,
 } from '@/data/estagios'
 import {
   bloqueioDoEstagio, estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma,
@@ -239,6 +240,67 @@ function FundoDoBioma({ biomaChave }: { biomaChave: string }) {
   )
 }
 
+// ---------------------------------------------------------------------------
+// O CAMINHO
+// ---------------------------------------------------------------------------
+/**
+ * Onde cada um dos 10 nos fica sobre a arte, em coordenadas RELATIVAS (0-1).
+ *
+ * POR QUE RELATIVAS. A area do mapa muda de largura com a tela, e a arte e
+ * `object-cover`. Coordenada em pixel casaria com uma largura so e sairia do
+ * lugar em qualquer outra — o no ficaria fora do caminho que ele deveria
+ * seguir, sem nada quebrar.
+ *
+ * O CAMINHO DESCE, e isso nao e estetica: as 12 artes foram desenhadas
+ * acompanhando a profundidade do bioma (no Marinho, ceu e praia em cima, leito
+ * oceanico com corais embaixo; no Gelido, floresta nevada em cima e caverna de
+ * gelo no fundo). Como o estagio 1 e o raso e o 10 e o fundo, um caminho que
+ * subisse poria o estagio 10 na praia — a arte contaria o contrario da
+ * mecanica.
+ *
+ * UM CAMINHO SO PRA OS 12, E NAO 120 COORDENADAS A MAO. Afinar cada no contra
+ * cada arte fica melhor e custa 120 numeros que ninguem revisa e que quebram na
+ * primeira troca de arte. O override existe (`CAMINHO_POR_BIOMA`) pra o bioma
+ * cuja arte pedir outra coisa — mesmo padrao da curva de profundidade em
+ * `estagios.ts`: uma regra que serve pra todos, com escape nomeado.
+ *
+ * A serpentina fica entre 10% e 90% da altura de proposito: a arte e quadrada
+ * e a area do mapa e 4/3, entao `object-cover` corta um pouco de cima e de
+ * baixo. No sem folga cairia bem na borda do corte.
+ */
+export const CAMINHO_PADRAO: readonly (readonly [number, number])[] = [
+  [0.14, 0.10],
+  [0.34, 0.17],
+  [0.51, 0.27],
+  [0.33, 0.37],
+  [0.51, 0.46],
+  [0.71, 0.52],
+  [0.84, 0.62],
+  [0.65, 0.71],
+  [0.44, 0.79],
+  [0.62, 0.90],
+]
+
+/**
+ * Caminho proprio de um bioma, quando a arte dele pedir. Vazio hoje — o escape
+ * existe pra nao travar em 120 coordenadas antes de alguem ver como o caminho
+ * padrao cai sobre cada imagem.
+ */
+export const CAMINHO_POR_BIOMA: Record<string, readonly (readonly [number, number])[]> = {}
+
+export function caminhoDoBioma(chave: string): readonly (readonly [number, number])[] {
+  return CAMINHO_POR_BIOMA[chave] ?? CAMINHO_PADRAO
+}
+
+// ---------------------------------------------------------------------------
+// O no sobre o mapa
+// ---------------------------------------------------------------------------
+/**
+ * O rotulo curto do estado.
+ *
+ * ELE MIGROU PRO PAINEL com o desenho espacial: o no e um circulo com um
+ * numero e nao carrega texto nenhum. O estado dele se le por forma e cor.
+ */
 const ROTULO_DO_ESTADO: Record<EstadoDoEstagio, string> = {
   limpo: 'LIMPO · FARM LIVRE',
   atual: 'CONTINUE AQUI',
@@ -246,173 +308,231 @@ const ROTULO_DO_ESTADO: Record<EstadoDoEstagio, string> = {
   bloqueado: '',
 }
 
-function NoDaTrilha({
-  bioma, estagio, estado, progresso, aberto, ehAtiva, onAbrir, onEntrar, entrando,
+function NoNoMapa({
+  estagio, estado, cor, x, y, selecionado, ehAtiva, onSelecionar,
+}: {
+  estagio: number
+  estado: EstadoDoEstagio
+  cor: string
+  x: number
+  y: number
+  selecionado: boolean
+  ehAtiva: boolean
+  onSelecionar: () => void
+}) {
+  const bloqueado = estado === 'bloqueado'
+  return (
+    <button
+      type="button"
+      onClick={onSelecionar}
+      aria-label={`Estágio ${estagio}`}
+      aria-pressed={selecionado}
+      className={cn(
+        'absolute z-[2] flex h-[2.4em] w-[2.4em] -translate-x-1/2 -translate-y-1/2',
+        'items-center justify-center rounded-full text-[.85em] font-bold transition-transform',
+        'hover:scale-110',
+        // O ATUAL PULSA. Com dez pontos espalhados sobre uma foto, "onde eu
+        // continuo" nao se acha lendo — precisa de um canal que o olho pegue
+        // antes de qualquer texto.
+        estado === 'atual' && 'animate-pulse',
+      )}
+      style={{
+        left: `${x * 100}%`,
+        top: `${y * 100}%`,
+        background: bloqueado ? '#1a1a22' : estado === 'limpo' ? cor : '#12121a',
+        color: bloqueado ? '#6b6b78' : estado === 'limpo' ? '#0b0b0f' : cor,
+        // Anel duplo: o de dentro na cor do estado, o de fora PRETO. As artes
+        // tem area clara, e um anel claro sobre neve some — o contorno escuro
+        // e o que garante a silhueta do no em qualquer foto.
+        boxShadow: bloqueado
+          ? 'inset 0 0 0 .14em #3a3a44, 0 0 0 .16em rgba(0,0,0,.75)'
+          : `inset 0 0 0 .16em ${cor}, 0 0 0 .16em rgba(0,0,0,.75), 0 0 .9em ${cor}88`,
+        outline: selecionado ? '.18em solid #f4f4f6' : undefined,
+        outlineOffset: '.12em',
+      }}
+    >
+      {estado === 'limpo' ? '✓' : estagio}
+      {ehAtiva && (
+        <span
+          aria-hidden
+          className="absolute -right-[.15em] -top-[.15em] h-[.7em] w-[.7em] rounded-full bg-ok"
+          style={{ boxShadow: '0 0 0 .12em rgba(0,0,0,.75)' }}
+        />
+      )}
+    </button>
+  )
+}
+
+/**
+ * A linha que liga os nos, em SVG sobre a arte.
+ *
+ * DOIS TRACOS, e nao um: o trecho ja percorrido vem na cor do bioma e o que
+ * falta vem pontilhado e apagado. Uma linha unica desenharia um caminho sem
+ * progresso — e o progresso e a unica coisa que a FORMA da trilha existe pra
+ * contar.
+ *
+ * Cada traco vai com um contorno preto por baixo. As 12 artes tem area clara: a
+ * linha na cor do bioma sozinha some na neve do Gelido e no ceu do Marinho.
+ *
+ * `preserveAspectRatio="none"` com viewBox 0-100 deixa o SVG esticar junto com
+ * a caixa, entao as coordenadas do caminho e as do SVG sao as MESMAS — os nos
+ * (posicionados em %) e a linha nunca saem de sincronia.
+ */
+function LinhaDoCaminho({
+  pontos, limpo, cor,
+}: {
+  pontos: readonly (readonly [number, number])[]
+  limpo: number
+  cor: string
+}) {
+  const traco = (de: number, ate: number) => pontos
+    .slice(de, ate)
+    .map(([x, y]) => `${x * 100},${y * 100}`)
+    .join(' ')
+  // O trecho percorrido vai ate o no do ultimo estagio limpo, e o que falta
+  // comeca NELE — senao haveria um vao entre os dois.
+  const feito = traco(0, Math.max(limpo, 1))
+  const falta = traco(Math.max(limpo - 1, 0), pontos.length)
+
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute inset-0 z-[1] h-full w-full"
+    >
+      <polyline
+        points={falta} fill="none" stroke="rgba(0,0,0,.55)"
+        strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+      <polyline
+        points={falta} fill="none" stroke="#8b8b99" strokeDasharray="6 6"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+      {limpo > 0 && (
+        <>
+          <polyline
+            points={feito} fill="none" stroke="rgba(0,0,0,.6)"
+            strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          <polyline
+            points={feito} fill="none" stroke={cor}
+            strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </>
+      )}
+    </svg>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// O painel de detalhe
+// ---------------------------------------------------------------------------
+/**
+ * O que a lista vertical mostrava em cada linha, agora num painel so.
+ *
+ * O NO NAO CABE ISSO. Um circulo com um numero nao carrega faixa de nivel,
+ * composicao de sub-bioma com porcentagem, contagem de salas e mensagem de
+ * bloqueio — e foi exatamente por isso que a primeira versao virou uma lista.
+ * A troca e a das duas referencias que o dono mandou: o mapa responde "onde
+ * estou e pra onde vou", o painel responde "o que tem la".
+ */
+function PainelDoEstagio({
+  bioma, estagio, estado, progresso, ehAtiva, entrando, onEntrar,
 }: {
   bioma: BiomaDef
   estagio: number
   estado: EstadoDoEstagio
   progresso: ProgressoPorBioma
-  aberto: boolean
   ehAtiva: boolean
-  onAbrir: () => void
-  onEntrar: () => void
   entrando: boolean
+  onEntrar: () => void
 }) {
   const mapId = estagioId(bioma.chave, estagio)
   const [lo, hi] = niveisDoEstagio(estagio)
-  const cor = colorForType(bioma.tipo)
   const composicao = useMemo(() => composicaoDoEstagio(bioma, estagio), [bioma, estagio])
-  const especies = useMemo(() => (aberto ? especiesDoEstagio(mapId) : []), [aberto, mapId])
-  // A mensagem sai da MESMA funcao que o servidor usa pra recusar a sessao.
-  // Antes cada lado montava a string a mao e um comentario em cada arquivo
-  // pedia que nao divergissem (PH-227/229).
+  const especies = useMemo(() => especiesDoEstagio(mapId), [mapId])
   const bloqueio = bloqueioDoEstagio(progresso, bioma.chave, estagio)
-
-  const desabilitado = estado === 'bloqueado'
+  const bloqueado = estado === 'bloqueado'
 
   return (
-    <li className="relative flex gap-[.6em]">
-      {/* O TRILHO. Uma linha vertical que atravessa os nos e para no ultimo —
-          e ela que faz dez cartoes virarem uma trilha em vez de uma lista. O
-          trecho ja percorrido vem na cor do bioma; o que falta, apagado. */}
-      <div className="relative flex w-[1.6em] shrink-0 flex-col items-center">
-        {estagio > 1 && (
+    <div className="flex flex-col gap-[.4em] rounded-[.6em] border border-n800 bg-n900 p-[.55em]">
+      <div className="flex flex-wrap items-center gap-[.4em]">
+        <span className="font-semibold text-n100">Estágio {estagio}</span>
+        <span className="text-[.8em] text-n400">Lv {lo}-{hi}</span>
+        <span className="text-[.72em] text-n600">{quantidadeDeSalas(mapId)} salas</span>
+        {ROTULO_DO_ESTADO[estado] && (
           <span
-            className="absolute top-0 h-[1.95em] w-[.18em] rounded-full"
-            style={{ background: estado === 'limpo' || estado === 'atual' ? cor : '#3a3a44' }}
-          />
-        )}
-        {estagio < ESTAGIOS_POR_BIOMA && (
-          <span
-            className="absolute bottom-0 top-[1.95em] w-[.18em] rounded-full"
-            style={{ background: estado === 'limpo' ? cor : '#3a3a44' }}
-          />
-        )}
-        <span
-          className={cn(
-            'relative z-[1] mt-[1.1em] flex h-[1.7em] w-[1.7em] items-center justify-center rounded-full',
-            'text-[.8em] font-bold',
-          )}
-          style={
-            estado === 'bloqueado'
-              ? { background: '#26262e', color: '#6b6b78', boxShadow: 'inset 0 0 0 .12em #3a3a44' }
-              : estado === 'limpo'
-                ? { background: cor, color: '#0b0b0f' }
-                : { background: '#15151c', color: cor, boxShadow: `inset 0 0 0 .14em ${cor}` }
-          }
-        >
-          {estado === 'limpo' ? '✓' : estagio}
-        </span>
-      </div>
-
-      <div
-        className={cn(
-          // SEMITRANSPARENTE com blur: com `bg-n900` opaco os dez cartoes
-          // cobriam a arte inteira e so as bordas apareciam — a foto virava
-          // moldura em vez de fundo.
-          'mb-[.4em] min-w-0 flex-1 overflow-hidden rounded-[.6em] border bg-n900/78 backdrop-blur-[3px]',
-          // Sombra no texto do cartao inteiro: as 12 artes tem area clara e
-          // area escura na MESMA imagem, e o cartao translucido deixa as duas
-          // passarem. Sem ela, o mesmo cinza que le bem no leito oceanico some
-          // no ceu da praia — dois estagios da mesma trilha.
-          '[text-shadow:0_1px_2px_rgba(0,0,0,.85)]',
-          ehAtiva ? 'border-ok' : estado === 'atual' ? 'border-n600' : 'border-n800',
-          // O BLOQUEADO NAO USA `opacity`. Ela apaga o cartao INTEIRO, e a linha
-          // que mais importa nele e justamente a que diz o que falta pra
-          // liberar — apagar o aviso junto com o resto e o oposto do que a tela
-          // quer. O que apaga e o TITULO (abaixo); a mensagem fica legivel.
-          desabilitado && 'border-n800/60 bg-n900/55',
-        )}
-      >
-        <div
-          onClick={onAbrir}
-          className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-n800"
-        >
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-[.35em]">
-              <span className={cn("font-medium", desabilitado ? "text-n500" : "text-n100")}>Estágio {estagio}</span>
-              <span className={cn("text-[.8em]", desabilitado ? "text-n600" : "text-n400")}>Lv {lo}-{hi}</span>
-              <span className="text-[.72em] text-n600">{quantidadeDeSalas(mapId)} salas</span>
-              {ROTULO_DO_ESTADO[estado] && (
-                <span
-                  className={cn(
-                    'rounded-[.3em] px-[.35em] py-[.05em] text-[.62em] font-bold',
-                    estado === 'limpo' ? 'bg-n700 text-n300' : 'bg-ok/20 text-ok',
-                  )}
-                >
-                  {ROTULO_DO_ESTADO[estado]}
-                </span>
-              )}
-              {ehAtiva && (
-                <span className="rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] text-[.62em] font-bold text-ok">
-                  EM CAÇADA
-                </span>
-              )}
-            </div>
-
-            {/* A COMPOSICAO DE SUB-BIOMA, na linha de cima e nao escondida no
-                detalhe: e ela que conta que o bioma afunda. Ver a Praia cair de
-                60% pra 0% ao descer a trilha e a unica leitura direta disso que
-                o jogo oferece. */}
-            <div className="mt-[.15em] truncate text-[.72em] text-n500">
-              {composicao.map((s) => `${s.nome} ${Math.round(s.pct)}%`).join(' · ')}
-            </div>
-
-            {desabilitado && bloqueio && (
-              <div className="mt-[.15em] text-[.72em] text-warn">{bloqueio}</div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            disabled={desabilitado || entrando}
-            onClick={(e) => { e.stopPropagation(); onEntrar() }}
             className={cn(
-              'shrink-0 rounded-[.4em] px-[.6em] py-[.25em] text-[.8em] font-medium',
-              desabilitado
-                ? 'cursor-not-allowed bg-n800 text-n600'
-                : ehAtiva
-                  ? 'bg-ok/20 text-ok hover:bg-ok/30'
-                  : 'bg-n700 text-n100 hover:bg-n600',
+              'rounded-[.3em] px-[.35em] py-[.05em] text-[.62em] font-bold',
+              estado === 'limpo' ? 'bg-n700 text-n300' : 'bg-ok/20 text-ok',
             )}
           >
-            {entrando ? 'Entrando...' : desabilitado ? 'Bloqueado' : ehAtiva ? 'Voltar' : 'Entrar'}
-          </button>
-        </div>
-
-        {aberto && (
-          <div className="flex flex-col gap-[.35em] border-t border-n800 p-[.5em]">
-            <div className="flex flex-wrap gap-[.3em]">
-              {composicao.map((s) => (
-                <span
-                  key={s.chave}
-                  className="rounded-[.35em] bg-n800 px-[.4em] py-[.1em] text-[.72em] text-n300"
-                >
-                  {s.nome} <b className="text-n100">{Math.round(s.pct)}%</b>
-                </span>
-              ))}
-            </div>
-            <div className="text-[.72em] text-n500">
-              POKEs deste estágio ({especies.length})
-            </div>
-            <div className="flex flex-wrap gap-[.25em]">
-              {especies.map((sp) => (
-                <span
-                  key={sp.id}
-                  className="rounded-[.35em] bg-n800 px-[.4em] py-[.1em] text-[.72em] text-n300"
-                >
-                  {sp.name}
-                </span>
-              ))}
-            </div>
-          </div>
+            {ROTULO_DO_ESTADO[estado]}
+          </span>
         )}
+        {ehAtiva && (
+          <span className="rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] text-[.62em] font-bold text-ok">
+            EM CAÇADA
+          </span>
+        )}
+        <span className="flex-1" />
+        <button
+          type="button"
+          disabled={bloqueado || entrando}
+          onClick={onEntrar}
+          className={cn(
+            'shrink-0 rounded-[.4em] px-[.7em] py-[.25em] text-[.85em] font-medium',
+            bloqueado
+              ? 'cursor-not-allowed bg-n800 text-n600'
+              : ehAtiva
+                ? 'bg-ok/20 text-ok hover:bg-ok/30'
+                : 'bg-n700 text-n100 hover:bg-n600',
+          )}
+        >
+          {entrando ? 'Entrando...' : bloqueado ? 'Bloqueado' : ehAtiva ? 'Voltar' : 'Entrar'}
+        </button>
       </div>
-    </li>
+
+      {bloqueado && bloqueio && <div className="text-[.78em] text-warn">{bloqueio}</div>}
+
+      {/* A COMPOSICAO DE SUB-BIOMA e o que conta que o bioma afunda: no Marinho
+          a Praia cai de 60% pra 0% e o Leito Oceanico sobe de 0% pra 79% ao
+          descer os dez. Sub-bioma de peso zero nao aparece — a ausencia dele E
+          a historia. */}
+      <div className="flex flex-wrap gap-[.3em]">
+        {composicao.map((s) => (
+          <span
+            key={s.chave}
+            className="rounded-[.35em] bg-n800 px-[.4em] py-[.1em] text-[.72em] text-n300"
+          >
+            {s.nome} <b className="text-n100">{Math.round(s.pct)}%</b>
+          </span>
+        ))}
+      </div>
+
+      <div className="text-[.72em] text-n500">POKEs deste estágio ({especies.length})</div>
+      <div className="flex flex-wrap gap-[.25em]">
+        {especies.map((sp) => (
+          <span
+            key={sp.id}
+            className="rounded-[.35em] bg-n800 px-[.4em] py-[.1em] text-[.72em] text-n300"
+          >
+            {sp.name}
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
+// ---------------------------------------------------------------------------
+// A trilha
+// ---------------------------------------------------------------------------
 export function TrilhaDoBioma({
   biomaChave, progresso, mapaAtivoId, abertoId, entrandoId, onAbrir, onEntrar, onVoltar,
 }: {
@@ -427,55 +547,72 @@ export function TrilhaDoBioma({
 }) {
   const bioma = BIOMA_POR_CHAVE[biomaChave]
   if (!bioma) return null
+
   const limpo = maiorEstagioLimpo(progresso, bioma.chave)
+  const cor = colorForType(bioma.tipo)
+  const pontos = caminhoDoBioma(bioma.chave)
+
+  // O painel abre no estagio ATUAL quando o jogador entra no bioma, e nao
+  // vazio: chegar num mapa e ter que adivinhar qual dos dez clicar e o mesmo
+  // problema que o pulso do no resolve — so que sem resposta nenhuma.
+  const doAberto = abertoId != null ? parseEstagioId(abertoId) : null
+  const selecionado = doAberto?.bioma === bioma.chave
+    ? doAberto.estagio
+    : Math.min(limpo + 1, ESTAGIOS_POR_BIOMA)
 
   return (
-    <div
-      className="relative isolate flex flex-col gap-[.4em] overflow-hidden rounded-[.7em] p-[.5em]"
-      // A COR DO BIOMA E O PISO, e nao um branco (PH-441). A arte tem ~3 MB e
-      // chega segundos depois num link lento; sem um piso da cor certa a trilha
-      // nasce sobre um vazio e depois "pisca" pra foto. Com ele, o que muda e
-      // so a textura.
-      style={{ background: bioma.bg.primary }}
-    >
-      <FundoDoBioma biomaChave={bioma.chave} />
-
-      <div className="relative flex items-center gap-[.5em]">
+    <div className="flex flex-col gap-[.5em]">
+      <div className="flex items-center gap-[.5em]">
         <button
           type="button"
           onClick={onVoltar}
-          className="rounded-[.4em] bg-n900/80 px-[.5em] py-[.2em] text-[.8em] text-n200 backdrop-blur-sm hover:bg-n800"
+          className="rounded-[.4em] bg-n800 px-[.5em] py-[.2em] text-[.8em] text-n300 hover:bg-n700"
         >
           ← Biomas
         </button>
-        <span className="min-w-0 truncate font-semibold text-n100 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]">
-          {bioma.nome}
-        </span>
-        <span className="text-[.75em] text-n300 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]">
+        <span className="min-w-0 truncate font-medium text-n100">{bioma.nome}</span>
+        <span className="text-[.75em] text-n500">
           {limpo} de {ESTAGIOS_POR_BIOMA} estágios
         </span>
       </div>
 
-      <ol className="flex flex-col">
-        {Array.from({ length: ESTAGIOS_POR_BIOMA }, (_, i) => {
+      {/* O MAPA. Proporcao FIXA pra a arte nao distorcer e pra as coordenadas
+          relativas do caminho valerem em qualquer largura de tela. */}
+      <div
+        data-testid="mapa-da-trilha"
+        className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-[.7em] border border-n800"
+        style={{ background: bioma.bg.primary }}
+      >
+        <FundoDoBioma biomaChave={bioma.chave} />
+        <LinhaDoCaminho pontos={pontos} limpo={limpo} cor={cor} />
+        {pontos.map(([x, y], i) => {
           const estagio = i + 1
           const mapId = estagioId(bioma.chave, estagio)
           return (
-            <NoDaTrilha
+            <NoNoMapa
               key={mapId}
-              bioma={bioma}
               estagio={estagio}
               estado={estadoDoEstagio(progresso, bioma.chave, estagio)}
-              progresso={progresso}
-              aberto={abertoId === mapId}
+              cor={cor}
+              x={x}
+              y={y}
+              selecionado={selecionado === estagio}
               ehAtiva={mapaAtivoId === mapId}
-              entrando={entrandoId === mapId}
-              onAbrir={() => onAbrir(abertoId === mapId ? null : mapId)}
-              onEntrar={() => onEntrar(mapId)}
+              onSelecionar={() => onAbrir(mapId)}
             />
           )
         })}
-      </ol>
+      </div>
+
+      <PainelDoEstagio
+        bioma={bioma}
+        estagio={selecionado}
+        estado={estadoDoEstagio(progresso, bioma.chave, selecionado)}
+        progresso={progresso}
+        ehAtiva={mapaAtivoId === estagioId(bioma.chave, selecionado)}
+        entrando={entrandoId === estagioId(bioma.chave, selecionado)}
+        onEntrar={() => onEntrar(estagioId(bioma.chave, selecionado))}
+      />
     </div>
   )
 }

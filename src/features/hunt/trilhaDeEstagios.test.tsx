@@ -18,7 +18,7 @@
 // devolve. Quando as duas eram escritas a mao em arquivos diferentes (PH-227/
 // 229), a nota de cada um pedia que ninguem as deixasse divergir.
 import { describe, it, expect, afterEach, beforeEach } from 'vitest'
-import { render, screen, cleanup, within } from '@testing-library/react'
+import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { BIOMAS, BIOMA_POR_CHAVE } from '@/data/biomas'
@@ -29,7 +29,8 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
 import { HuntMenu } from './HuntMenu'
 import {
-  BIOMA_RECOMENDADO, composicaoDoEstagio, especiesDoEstagio, estadoDoEstagio,
+  BIOMA_RECOMENDADO, CAMINHO_PADRAO, caminhoDoBioma, composicaoDoEstagio,
+  especiesDoEstagio, estadoDoEstagio,
 } from './TrilhaDeEstagios'
 
 function comEquipe(progresso = progressoPorBiomaDefault()) {
@@ -115,6 +116,7 @@ describe('a composicao exibida e a que o jogo sorteia', () => {
   })
 })
 
+
 describe('navegacao em dois niveis', () => {
   it('o nivel 1 mostra os 12 biomas, e nao as 120 hunts', () => {
     render(<HuntMenu />)
@@ -129,18 +131,19 @@ describe('navegacao em dois niveis', () => {
   it('marca UM bioma como recomendado pra conta nova, e nao doze', () => {
     render(<HuntMenu />)
     expect(screen.getAllByText('COMECE AQUI').length).toBe(1)
-    const recomendado = BIOMA_POR_CHAVE[BIOMA_RECOMENDADO]
-    expect(recomendado).toBeTruthy()
+    expect(BIOMA_POR_CHAVE[BIOMA_RECOMENDADO]).toBeTruthy()
   })
 
-  it('clicar no bioma abre a trilha dele, com os 10 estagios, e da pra voltar', async () => {
+  it('clicar no bioma abre a trilha dele, com os 10 nos, e da pra voltar', async () => {
     const user = userEvent.setup()
     render(<HuntMenu />)
 
     await user.click(screen.getByText('Marinho'))
 
+    // PH-442: os estagios sao NOS sobre o mapa, e nao dez cartoes empilhados.
+    // O nome de cada um vem do `aria-label` — o no desenha so o numero.
     for (let e = 1; e <= ESTAGIOS_POR_BIOMA; e++) {
-      expect(screen.getByText(`Estágio ${e}`), `estagio ${e}`).toBeTruthy()
+      expect(screen.getByRole('button', { name: `Estágio ${e}` }), `no ${e}`).toBeTruthy()
     }
     // A trilha e do bioma escolhido, e so dele.
     expect(screen.queryByText('Mata')).toBeNull()
@@ -150,63 +153,123 @@ describe('navegacao em dois niveis', () => {
   })
 })
 
-describe('os estados do no na tela', () => {
-  it('o estagio limpo aparece como farm livre e o bloqueado diz o que falta', async () => {
+// PH-442: A FORMA E O PONTO DESTA ISSUE, entao ela precisa de teste proprio.
+// Uma lista vertical passaria em todo teste de conteudo acima — o que distingue
+// as duas e onde os nos estao, e so isso pega uma regressao pra lista.
+describe('a trilha e ESPACIAL, e nao uma lista', () => {
+  it('os 10 nos ficam posicionados sobre o mapa, cada um num lugar diferente', async () => {
+    const user = userEvent.setup()
+    render(<HuntMenu />)
+    await user.click(screen.getByText('Marinho'))
+
+    const posicoes = new Set<string>()
+    for (let e = 1; e <= ESTAGIOS_POR_BIOMA; e++) {
+      const no = screen.getByRole('button', { name: `Estágio ${e}` }) as HTMLElement
+      // Posicao absoluta em % — numa lista, `left`/`top` nem existiriam.
+      expect(no.style.left, `no ${e} sem left`).toMatch(/%$/)
+      expect(no.style.top, `no ${e} sem top`).toMatch(/%$/)
+      posicoes.add(`${no.style.left}|${no.style.top}`)
+    }
+    // Dez lugares DISTINTOS: dois nos no mesmo ponto seriam invisiveis um sobre
+    // o outro, e um caminho reto vertical (todos com o mesmo `left`) e
+    // literalmente a lista que esta issue substitui.
+    expect(posicoes.size).toBe(ESTAGIOS_POR_BIOMA)
+    const colunas = new Set([...posicoes].map((p) => p.split('|')[0]))
+    expect(colunas.size, 'todos os nos na mesma coluna: isso e uma lista').toBeGreaterThan(3)
+  })
+
+  it('o caminho DESCE, na mesma direcao em que o bioma afunda', () => {
+    // As artes foram desenhadas com o raso em cima e o fundo embaixo. Um
+    // caminho que subisse poria o estagio 10 na praia — a arte contando o
+    // contrario da mecanica.
+    for (let i = 1; i < CAMINHO_PADRAO.length; i++) {
+      expect(CAMINHO_PADRAO[i][1], `no ${i + 1} nao desce`).toBeGreaterThan(CAMINHO_PADRAO[i - 1][1])
+    }
+  })
+
+  it('todo no cabe dentro do mapa, com folga pro corte da arte', () => {
+    // A arte e quadrada e a caixa e 4/3, entao `object-cover` corta topo e
+    // base. No colado na borda cairia no pedaco cortado.
+    for (const [x, y] of CAMINHO_PADRAO) {
+      expect(x).toBeGreaterThanOrEqual(0.08)
+      expect(x).toBeLessThanOrEqual(0.92)
+      expect(y).toBeGreaterThanOrEqual(0.08)
+      expect(y).toBeLessThanOrEqual(0.92)
+    }
+  })
+
+  it('ha um caminho por bioma, sempre com 10 pontos', () => {
+    for (const bioma of BIOMAS) {
+      expect(caminhoDoBioma(bioma.chave).length, bioma.chave).toBe(ESTAGIOS_POR_BIOMA)
+    }
+  })
+})
+
+describe('o painel de detalhe do estagio', () => {
+  it('abre no estagio ATUAL, sem o jogador precisar clicar', async () => {
     const user = userEvent.setup()
     comEquipe({ ...progressoPorBiomaDefault(), marinho: 3 })
     render(<HuntMenu />)
     await user.click(screen.getByText('Marinho'))
 
-    // Tres limpos.
-    expect(screen.getAllByText('LIMPO · FARM LIVRE').length).toBe(3)
-    // Um "continue aqui" — o proximo.
-    expect(screen.getAllByText('CONTINUE AQUI').length).toBe(1)
+    // Progresso 3 -> o painel ja mostra o estagio 4, que e onde continuar.
+    expect(screen.getByText('Estágio 4')).toBeTruthy()
+    expect(screen.getByText('CONTINUE AQUI')).toBeTruthy()
+    expect(screen.getByText('Lv 31-40')).toBeTruthy()
+  })
 
-    // E o bloqueado mostra a MESMA mensagem que o servidor devolveria.
-    const doServidor = bloqueioDoEstagio(
-      { ...progressoPorBiomaDefault(), marinho: 3 }, 'marinho', 5,
-    )
+  it('clicar num no troca o painel pra aquele estagio', async () => {
+    const user = userEvent.setup()
+    comEquipe({ ...progressoPorBiomaDefault(), marinho: 3 })
+    render(<HuntMenu />)
+    await user.click(screen.getByText('Marinho'))
+
+    await user.click(screen.getByRole('button', { name: 'Estágio 1' }))
+    expect(screen.getByText('Estágio 1')).toBeTruthy()
+    expect(screen.getByText('LIMPO · FARM LIVRE')).toBeTruthy()
+    expect(screen.getByText('Lv 1-10')).toBeTruthy()
+  })
+
+  it('o estagio bloqueado diz o que falta, com a MESMA mensagem do servidor', async () => {
+    const user = userEvent.setup()
+    const progresso = { ...progressoPorBiomaDefault(), marinho: 3 }
+    comEquipe(progresso)
+    render(<HuntMenu />)
+    await user.click(screen.getByText('Marinho'))
+    await user.click(screen.getByRole('button', { name: 'Estágio 7' }))
+
+    const doServidor = bloqueioDoEstagio(progresso, 'marinho', 7)
     expect(doServidor).toBeTruthy()
-    expect(screen.getAllByText(doServidor!).length).toBeGreaterThan(0)
+    expect(screen.getByText(doServidor!)).toBeTruthy()
+    // E o botao de entrar nao aceita clique.
+    const entrar = screen.getByRole('button', { name: 'Bloqueado' }) as HTMLButtonElement
+    expect(entrar.disabled).toBe(true)
   })
 
-  it('o estagio bloqueado nao tem botao de entrar clicavel', async () => {
+  it('mostra a composicao de sub-bioma e o elenco do estagio selecionado', async () => {
     const user = userEvent.setup()
-    comEquipe({ ...progressoPorBiomaDefault(), marinho: 1 })
+    comEquipe({ ...progressoPorBiomaDefault(), marinho: 9 })
     render(<HuntMenu />)
     await user.click(screen.getByText('Marinho'))
+    await user.click(screen.getByRole('button', { name: 'Estágio 10' }))
 
-    const bloqueados = screen.getAllByRole('button', { name: 'Bloqueado' })
-    // Estagios 3 a 10 estao bloqueados com progresso 1.
-    expect(bloqueados.length).toBe(8)
-    for (const b of bloqueados) expect((b as HTMLButtonElement).disabled).toBe(true)
+    // No fundo do Marinho o Leito Oceanico domina — a leitura que a trilha
+    // inteira existe pra dar.
+    const doEstagio = composicaoDoEstagio(BIOMA_POR_CHAVE['marinho'], 10)
+    expect(doEstagio[0].chave).toBe('seabed')
+    expect(screen.getByText(/POKEs deste estágio/)).toBeTruthy()
+    expect(screen.getAllByText(new RegExp(doEstagio[0].nome)).length).toBeGreaterThan(0)
   })
 
-  it('abrir um no mostra a composicao e o elenco daquele estagio', async () => {
-    const user = userEvent.setup()
-    render(<HuntMenu />)
-    await user.click(screen.getByText('Marinho'))
-    await user.click(screen.getByText('Estágio 1'))
-
-    const doEstagio = composicaoDoEstagio(BIOMA_POR_CHAVE['marinho'], 1)
-    const detalhe = screen.getByText(/POKEs deste estágio/)
-    expect(detalhe).toBeTruthy()
-    // A porcentagem do maior sub-bioma aparece escrita, nao so no resumo.
-    const maior = doEstagio[0]
-    expect(screen.getAllByText(new RegExp(`${maior.nome}`)).length).toBeGreaterThan(0)
-  })
-})
-
-describe('a hunt em andamento continua visivel na trilha', () => {
-  it('o no da hunt ativa troca o botao pra "Voltar"', async () => {
+  it('o no da hunt ativa aparece marcado, e o painel dela oferece "Voltar"', async () => {
     const user = userEvent.setup()
     comEquipe({ ...progressoPorBiomaDefault(), marinho: 5 })
     useWorldStore.setState({ mapDef: { id: estagioId('marinho', 2) } } as never, false)
     render(<HuntMenu />)
     await user.click(screen.getByText('Marinho'))
+    await user.click(screen.getByRole('button', { name: 'Estágio 2' }))
 
     expect(screen.getByText('EM CAÇADA')).toBeTruthy()
-    const no = screen.getByText('Estágio 2').closest('div')!
-    expect(within(no.parentElement!.parentElement!).getByRole('button', { name: 'Voltar' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Voltar' })).toBeTruthy()
   })
 })
