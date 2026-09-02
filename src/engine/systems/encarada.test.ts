@@ -26,7 +26,8 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { buildMapWorld, stepWorld } from '../simulation'
 import { engageRangeFor } from './combatSystem'
 import { desiredAnimName } from './animationSystem'
-import { aplicarEncarada, DISTANCIA_DA_ENCARADA, sortearSentido } from './encaradaSystem'
+import { aplicarEncarada, DISTANCIA_DA_ENCARADA, sortearPerna } from './encaradaSystem'
+import type { EstadoDaEncarada } from '../types'
 import type { EnemyEntity, PlayerEntity, WorldState } from '../types'
 
 const PASSO = 1 / 60
@@ -91,6 +92,13 @@ function zerarPose(jogador: PlayerEntity, inimigo: EnemyEntity): void {
   inimigo.attackAnimTimer = 0
 }
 
+/** O que a perna `n` daquele par seria: lado, curvatura e arco. */
+function assinaturaDaPerna(base: EstadoDaEncarada, n: number): string {
+  const clone: EstadoDaEncarada = { ...base, perna: n }
+  sortearPerna(clone, base.centroX, base.centroY, base.anguloBase)
+  return `${clone.lado}|${clone.raioDaCurva.toFixed(3)}|${clone.arcoDaPerna.toFixed(3)}`
+}
+
 function parEngajado(world: WorldState): { jogador: PlayerEntity; inimigo: EnemyEntity } | null {
   const jogador = world.player
   const inimigo = world.enemies.find((e) => e.poke.hp > 0)
@@ -132,6 +140,112 @@ describe('encarada: o que ela faz no duelo', () => {
     duelarAte(world, 60)
     const andou = Math.hypot(par.jogador.x - inicio.x, par.jogador.y - inicio.y)
     expect(andou).toBeGreaterThan(5)
+  })
+
+  it('o passo e largo o bastante pra aparecer na tela (PH-402)', () => {
+    // A primeira versão girava em torno do PONTO MÉDIO, então o raio era metade
+    // da distância entre os dois (17px) e o passo saía com 26px — some na tela,
+    // e foi o que o teste visual pegou. O conserto foi soltar o raio da
+    // distância de combate.
+    //
+    // Este número é a única coisa que impede alguém de "simplificar" de volta
+    // pro ponto médio: os testes de distância, parede e rng continuariam todos
+    // verdes com a coreografia invisível de novo.
+    const world = mundoDoLance()
+    duelarAte(world, 400)
+    const par = parEngajado(world)!
+    expect(world.encarada).not.toBeNull()
+
+    const ancora = { x: par.jogador.x, y: par.jogador.y, chave: world.encarada!.parKey }
+    let maisLonge = 0
+    duelarAte(world, 900, (w) => {
+      if (w.encarada?.parKey !== ancora.chave) return
+      maisLonge = Math.max(maisLonge, Math.hypot(w.player!.x - ancora.x, w.player!.y - ancora.y))
+    })
+
+    expect(maisLonge).toBeGreaterThan(45)
+  })
+
+  it('cada perna e sorteada de novo — curva, lado e tamanho (PH-402)', () => {
+    // As duas versões anteriores foram reprovadas na tela pelo MESMO motivo de
+    // fundo: o caminho era uma figura fixa, e o olho acha o padrão. O arco em
+    // torno de um pivô fixo leu como barca viking; o oito deitado alternava a
+    // curva mas fechava sempre no mesmo ponto.
+    //
+    // O que impede as duas é a variedade das pernas. Estes três números são a
+    // única coisa que a segura: sem eles, alguém fixa um valor "pra simplificar"
+    // e a coreografia volta a ser previsível com todos os outros testes verdes.
+    const world = mundoDoLance()
+    duelarAte(world, 400)
+    expect(world.encarada).not.toBeNull()
+
+    const lados = new Set<number>()
+    const sinaisDoArco = new Set<number>()
+    const curvas: number[] = []
+    let ultimaPerna = -1
+    duelarAte(world, 2400, (w) => {
+      const enc = w.encarada
+      if (!enc || enc.perna === ultimaPerna) return
+      ultimaPerna = enc.perna
+      lados.add(enc.lado)
+      sinaisDoArco.add(Math.sign(enc.arcoDaPerna))
+      curvas.push(enc.raioDaCurva)
+    })
+
+    expect(curvas.length, 'nenhuma perna nova em 40s — o caminho travou').toBeGreaterThan(8)
+    expect(lados, 'a curva entorta sempre pro mesmo lado — barca viking de volta').toEqual(new Set([1, -1]))
+    expect(sinaisDoArco, 'o giro sai sempre pro mesmo sentido').toEqual(new Set([1, -1]))
+    // Curvatura fixa daria um desvio-padrão zerado: todas as meia-luas com o
+    // mesmo formato, variando só a orientação.
+    const media = curvas.reduce((a, b) => a + b, 0) / curvas.length
+    const desvio = Math.sqrt(curvas.reduce((a, c) => a + (c - media) ** 2, 0) / curvas.length)
+    expect(desvio, 'todas as meia-luas com a mesma curvatura').toBeGreaterThan(8)
+  })
+
+  it('a danca nao volta pro mesmo ponto (PH-402)', () => {
+    // O pedido literal depois de ver o oito na tela: "não ficou bom voltar para
+    // onde começou, o ponto final podemos alterar de maneira aleatória".
+    //
+    // Um caminho fechado deixaria os fins de perna empilhados num punhado de
+    // pontos. Aqui eles têm que estar espalhados.
+    const world = mundoDoLance()
+    duelarAte(world, 400)
+    expect(world.encarada).not.toBeNull()
+
+    const fins: { x: number; y: number }[] = []
+    let ultimaPerna = -1
+    duelarAte(world, 2400, (w) => {
+      const enc = w.encarada
+      if (!enc || enc.perna === ultimaPerna) return
+      ultimaPerna = enc.perna
+      fins.push({ x: enc.centroX, y: enc.centroY })
+    })
+
+    expect(fins.length).toBeGreaterThan(8)
+    const repetidos = fins.filter((p, i) =>
+      fins.some((q, j) => j < i && Math.hypot(p.x - q.x, p.y - q.y) < 8),
+    ).length
+    expect(repetidos / fins.length, 'as pernas terminam sempre nos mesmos pontos').toBeLessThan(0.4)
+  })
+
+  it('a coleira nao deixa o duelo migrar pela arena (PH-402)', () => {
+    // O contrapeso do sorteio: pernas aleatórias sem coleira são um passeio
+    // aleatório, e passeio aleatório não fica onde começou — o duelo andaria até
+    // encostar numa parede e ficar raspando nela.
+    const world = mundoDoLance()
+    duelarAte(world, 400)
+    expect(world.encarada).not.toBeNull()
+    const origem = { x: world.encarada!.origemX, y: world.encarada!.origemY, chave: world.encarada!.parKey }
+
+    let maisLonge = 0
+    duelarAte(world, 3600, (w) => {
+      if (w.encarada?.parKey !== origem.chave) return
+      maisLonge = Math.max(maisLonge, Math.hypot(w.player!.x - origem.x, w.player!.y - origem.y))
+    })
+
+    // A coleira é 170 e mede o FIM da perna, então uma perna em curso pode
+    // ultrapassar; o teto real é ela mais um passo, com folga.
+    expect(maisLonge).toBeLessThan(320)
   })
 
   it('a distancia entre os dois nunca sai do alcance de combate, em 60s', () => {
@@ -333,40 +447,43 @@ describe('encarada: parede', () => {
   })
 })
 
-describe('encarada: o sentido do giro', () => {
+describe('encarada: o golpe corta a perna', () => {
   beforeEach(() => useGameStateStore.getState().resetToDefaults())
 
-  it('a cada golpe trocado pode continuar igual ou inverter, nao e alternancia fixa', () => {
-    // O pedido foi "muda aleatoriamente, pode continuar no mesmo sentido ou
-    // inverter". Uma inversao garantida (ou um sentido fixo) tambem passaria por
-    // "muda a cada golpe" numa leitura descuidada — o que distingue os tres e a
-    // distribuicao, e ela so aparece em cima de muitas trocas.
-    const sequencia = Array.from({ length: 400 }, (_, i) => sortearSentido('entity-1|entity-2', i))
-    const horarios = sequencia.filter((s) => s === 1).length
-
-    expect(horarios).toBeGreaterThan(140) // nem sempre o mesmo sentido
-    expect(horarios).toBeLessThan(260)
-
-    const repetiu = sequencia.slice(1).filter((s, i) => s === sequencia[i]).length
-    expect(repetiu, 'inverteu em toda troca — isso e alternancia, nao sorteio').toBeGreaterThan(100)
-    expect(repetiu, 'nunca inverteu').toBeLessThan(299)
-  })
-
-  it('pares diferentes nao herdam a mesma coreografia', () => {
-    const a = Array.from({ length: 60 }, (_, i) => sortearSentido('entity-1|entity-2', i))
-    const b = Array.from({ length: 60 }, (_, i) => sortearSentido('entity-1|entity-9', i))
-    expect(a).not.toEqual(b)
-  })
-
-  it('o contador de trocas anda durante um duelo de verdade', () => {
-    // Prova que a borda de subida da pose de ataque esta sendo vista. Se este
-    // teste ficar em 0, a coreografia gira sem nunca re-sortear o sentido e
-    // nenhum dos testes acima acusa.
+  it('cada golpe trocado encerra a perna em curso', () => {
+    // É o que faz a coreografia ter o RITMO DA LUTA em vez de um ritmo próprio:
+    // a troca de golpe recomeça a dança noutra direção, em vez de o par retomar
+    // a curva de onde parou como se nada tivesse acontecido.
+    //
+    // Se `trocas` ficar em 0, a borda de subida da pose de ataque deixou de ser
+    // vista e nenhum outro teste deste arquivo acusa — a dança continua, só que
+    // desacoplada do combate.
     const world = mundoDoLance()
     duelarAte(world, 400)
     expect(parEngajado(world)).not.toBeNull()
-    duelarAte(world, 1200) // 20s: cabem varios turnos de MIN_ACTION_GAP (3s)
+    const antes = world.encarada!.perna
+
+    duelarAte(world, 1200) // 20s: cabem vários turnos de MIN_ACTION_GAP (3s)
+
     expect(world.encarada?.trocas ?? 0).toBeGreaterThan(0)
+    // Cada troca força uma perna nova, então o contador de pernas tem que ter
+    // andado pelo menos tanto quanto o de golpes.
+    expect((world.encarada?.perna ?? 0) - antes).toBeGreaterThanOrEqual(world.encarada!.trocas)
+  })
+
+  it('pares diferentes nao herdam a mesma coreografia', () => {
+    // O sorteio deriva de `parKey`. Se ele parasse de derivar (uma semente fixa
+    // "pra simplificar"), todo duelo do jogo dançaria exatamente igual — e todos
+    // os testes de variedade acima continuariam verdes, porque eles olham um
+    // duelo só.
+    const world = mundoDoLance()
+    duelarAte(world, 500)
+    const enc = world.encarada!
+    const outro = { ...enc, parKey: 'entity-9|entity-8' }
+
+    const daquele = [1, 2, 3, 4, 5].map((n) => assinaturaDaPerna(enc, n))
+    const desteOutro = [1, 2, 3, 4, 5].map((n) => assinaturaDaPerna(outro, n))
+    expect(daquele).not.toEqual(desteOutro)
   })
 })
 
