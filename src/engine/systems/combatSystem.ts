@@ -21,6 +21,7 @@ import {
   type StatusCondition, type StatDeEstagio,
 } from '@/data/statusEffects'
 import { corDoStatus } from '@/data/statusColors'
+import { formatarMultiplicador, multiplicadorDoStat } from '@/data/textoDeEstagioEPrazo'
 import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
@@ -2008,8 +2009,17 @@ const ROTULO_DE_STAT: Record<string, string> = {
 }
 
 function anunciarEstagios(world: WorldState, alvo: WorldEntity, mudancas: StatChange[]): void {
+  // PH-421: MOSTRA O TOTAL RESULTANTE, e nao o passo.
+  //
+  // O delta em multiplicador nao e o que o jogador pensa que e: de +1 pra +2 o
+  // Ataque sobe 2,0/1,5 = +33%, e nao +50%. Um flutuante dizendo "+50%" na
+  // segunda Danca das Espadas estaria aritmeticamente errado. O total e sempre
+  // verdade e e o numero com que se decide continuar a luta ou fugir.
   const texto = mudancas
-    .map((m) => `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${(m.estagios > 0 ? '↑' : '↓').repeat(Math.abs(m.estagios))}`)
+    .map((m) => {
+      const total = alvo.estagios[m.stat] ?? 0
+      return `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${formatarMultiplicador(multiplicadorDoStat(m.stat, total))}`
+    })
     .join('  ')
   world.effects.push(createWorldEffect(world.counters, {
     type: 'abilityName',

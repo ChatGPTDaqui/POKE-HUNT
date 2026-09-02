@@ -48500,6 +48500,21 @@ function chanceDeDescongelar(tipo) {
 */
 var DURACAO_DE_ESTAGIO_SEGUNDOS = 6 * TURNO_SEGUNDOS;
 /**
+* Quanto prazo restante ja conta como "vai vencer" para a IA reaplicar o buff
+* (PH-419).
+*
+* DOIS TURNOS, e nao um: a IA decide uma vez por acao, e entre a decisao e o
+* golpe pousar passa o delay do proprio golpe. Com um turno de folga o buff
+* vencia entre a escolha e a aplicacao em parte das corridas, e a renovacao
+* chegava depois do buraco que ela existe pra evitar.
+*
+* Sem esta folga o prazo de 18s da PH-418 deixaria de ser DURACAO e passaria a
+* ser TETO DE USO: a guarda da IA e "estagio abaixo do alvo", entao um POKE no
+* alvo nunca reaplica, o buff cai aos 18s com o golpe pronto na mao, e ele
+* recomeca do zero.
+*/
+var FOLGA_DE_RENOVACAO_SEGUNDOS = 2 * TURNO_SEGUNDOS;
+/**
 * Multiplicador de um estagio, formula exata dos jogos: (2+n)/2 subindo e
 * 2/(2-n) descendo.
 *
@@ -48579,6 +48594,35 @@ var CORES = {
 function corDoStatus(tipo) {
 	return CORES[tipo] ?? "#e5e5e5";
 }
+//#endregion
+//#region src/data/textoDeEstagioEPrazo.ts
+/**
+* Os dois atributos que usam a formula de base 3.
+*
+* Lista explicita, e nao `stat === 'accuracy' || stat === 'evasion'` espalhado:
+* e a unica coisa que separa as duas familias, e ela merece um nome.
+*/
+var STATS_DE_BASE_3 = /* @__PURE__ */ new Set(["accuracy", "evasion"]);
+/** O multiplicador real do atributo, pela formula CERTA para ele. */
+function multiplicadorDoStat(stat, estagio) {
+	return STATS_DE_BASE_3.has(stat) ? multiplicadorDeAccuracyOuEvasion(estagio) : multiplicadorDeEstagio(estagio);
+}
+/**
+* `2x`, `0,67x`, `1,33x` — sempre com virgula decimal, e sem decimal quando o
+* valor e inteiro.
+*
+* Inteiro sem `,00` porque `2x` e o caso mais comum (Danca das Espadas) e
+* `2,00x` parece precisao que o numero nao tem. Duas casas de teto nos outros
+* porque uma so colapsaria 0,67 e 0,71 (−1 e −5 de Ataque) no mesmo texto.
+*
+* O ZERO A DIREITA CAI: `1,5x`, e nao `1,50x`. Sao numeros de HUD, lidos de
+* relance no meio da luta, e a casa que nao informa nada so ocupa espaco.
+*/
+function formatarMultiplicador(mult) {
+	const arredondado = Math.round(mult * 100) / 100;
+	return `${Number.isInteger(arredondado) ? String(arredondado) : arredondado.toFixed(2).replace(/0$/, "").replace(".", ",")}x`;
+}
+`${TURNO_SEGUNDOS}`;
 //#endregion
 //#region src/data/traitEffects.ts
 /** Dobra a Velocidade no clima correspondente (Gen VII: 2x, nao 1.5x). */
@@ -49111,6 +49155,33 @@ function recalcularEstagio(destino, stat) {
 function apagarTodosOsEstagios(entity) {
 	entity.estagios = {};
 	entity.estagiosFonte = void 0;
+}
+/**
+* Prazo que sobra na fonte que ESTE golpe criou, ou `null` se ela nao existe
+* mais (PH-419).
+*
+* A busca e pela mesma identidade que `registrarFonteDeEstagio` usa pra decidir
+* renovacao — id, tipo e autoria. Perguntar so "tem fonte viva neste atributo"
+* daria a resposta errada no caso que importa: um Rosnado do inimigo tambem e
+* fonte de atkFis, e a IA nao renova o buff dela olhando o prazo do debuff
+* alheio.
+*/
+function prazoDaFonteDoGolpe(entity, stat, abilityId, proprio) {
+	const fonte = entity.estagiosFonte?.[stat]?.find((f) => f.id === abilityId && f.tipo === "golpe" && f.proprio === proprio);
+	if (!fonte) return null;
+	return fonte.expiraEm ?? Number.POSITIVE_INFINITY;
+}
+/**
+* Se a entidade tem alguma fonte PROPRIA viva neste atributo (PH-419).
+*
+* Existe pro Belly Drum, que e a excecao nomeada da issue: ele custa 50% do HP
+* maximo e vai direto ao teto, entao ele nao entra na renovacao preventiva e
+* ainda recusa entrar quando o POKE ja tem buff proprio de Ataque de pe —
+* empilhar o custo de HP em cima de um buff que ja existe e o pior negocio que
+* a IA consegue fechar.
+*/
+function temFontePropriaViva(entity, stat) {
+	return Boolean(entity.estagiosFonte?.[stat]?.some((f) => f.proprio));
 }
 /**
 * Fonte nova com o prazo padrao (PH-418). Existe pra `DURACAO_DE_ESTAGIO_SEGUNDOS`
@@ -76036,14 +76107,17 @@ function golpeDeApoioUtil(world, entity, defenderEntity, ability, golpesDeDanoPr
 	}
 	if (ability.statChanges && ability.statChanges.length) {
 		const destino = ability.statTarget === "self" ? entity : defenderEntity;
+		const proprio = destino === entity;
 		return ability.statChanges.some((m) => {
 			const atual = destino.estagios[m.stat] ?? 0;
-			return m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -2;
+			if (m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -2) return true;
+			const prazo = prazoDaFonteDoGolpe(destino, m.stat, ability.id, proprio);
+			return prazo != null && prazo <= FOLGA_DE_RENOVACAO_SEGUNDOS;
 		});
 	}
 	switch (ability.id) {
 		case "rest": return entity.poke.hp / entity.poke.stats.hp <= .5 && !entity.poke.status;
-		case "belly_drum": return (entity.estagios.atkFis ?? 0) < 6 && entity.poke.hp / entity.poke.stats.hp > .5;
+		case "belly_drum": return (entity.estagios.atkFis ?? 0) < 6 && entity.poke.hp / entity.poke.stats.hp > .5 && !temFontePropriaViva(entity, "atkFis");
 		case "acupressure": return true;
 		case "endure": return entity.poke.hp / entity.poke.stats.hp <= .25 && !entity.enduraAtiva;
 		case "protect":
@@ -76301,7 +76375,10 @@ var ROTULO_DE_STAT = {
 	evasion: "Evasão"
 };
 function anunciarEstagios(world, alvo, mudancas) {
-	const texto = mudancas.map((m) => `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${(m.estagios > 0 ? "↑" : "↓").repeat(Math.abs(m.estagios))}`).join("  ");
+	const texto = mudancas.map((m) => {
+		const total = alvo.estagios[m.stat] ?? 0;
+		return `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${formatarMultiplicador(multiplicadorDoStat(m.stat, total))}`;
+	}).join("  ");
 	world.effects.push(createWorldEffect(world.counters, {
 		type: "abilityName",
 		x: alvo.x,

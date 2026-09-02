@@ -34,6 +34,7 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 
 import { useWorldStore } from '@/stores/worldStore'
 import { ClimaChip } from './ClimaChip'
+import { TURNO_SEGUNDOS } from '@/data/abilities'
 
 import fonteDoHudLayer from '@/features/game/HudLayer.tsx?raw'
 import fonteDoStatusRail from '@/components/hud/StatusRail.tsx?raw'
@@ -101,14 +102,18 @@ describe('o `soIcone` esconde o nome sem esconder o clima (PH-285)', () => {
     expect(screen.getByText(/Blizzard nunca erra/)).toBeTruthy()
   })
 
-  it('o contador de turnos sai no `soIcone` — numero nu ao lado de um emoji nao diz o que e', () => {
+  it('o contador de prazo sai no `soIcone` — numero nu ao lado de um emoji nao diz o que e', () => {
+    // A assercao do contador virou SEGUNDOS na PH-422 (era `5 turnos`). O que
+    // este teste guarda nao mudou: no compacto o numero SAI, porque numero solto
+    // ao lado de uma nuvem nao diz se e prazo, pilha ou intensidade — quem
+    // carrega a duracao ali e o balao.
     cleanup()
     useWorldStore.setState({
       clima: { tipo: 'chuva', origem: 'golpe', turnosRestantes: 5 },
     } as never, false)
 
     const comNome = render(<ClimaChip embutido />)
-    expect(comNome.container.textContent).toContain('5 turnos')
+    expect(comNome.container.textContent).toContain(`${5 * TURNO_SEGUNDOS}s`)
     cleanup()
 
     const soIcone = render(<ClimaChip embutido soIcone />)
@@ -129,21 +134,30 @@ describe('a duracao aparece no balao, e ela e diferente por origem (PH-285)', ()
     fireEvent.click(chip)
   }
 
-  it('clima de GOLPE conta os turnos que faltam', () => {
+  it('clima de GOLPE conta o que falta EM SEGUNDOS (PH-422)', () => {
+    // TESTE INVERTIDO NA PH-422, e a inversao e o pedido: ele exigia "Dura mais
+    // 3 turnos". O jogador nao tem intuicao de quanto vale um turno deste motor,
+    // e a conversao e literal — o relogio de turno aqui e tempo puro
+    // (`proximoTurnoDeStatus -= dt`), nao "por acao", entao 1 turno = 3s sem
+    // ressalva e dizer em segundos nao esconde nada.
     useWorldStore.setState({
       clima: { tipo: 'chuva', origem: 'golpe', turnosRestantes: 3 },
     } as never, false)
     abrir()
-    expect(screen.getByText(/Dura mais 3 turnos/)).toBeTruthy()
+    expect(screen.getByText(new RegExp(`Dura mais ${3 * TURNO_SEGUNDOS}s`))).toBeTruthy()
     expect(screen.getByText(/o clima do lugar volta/)).toBeTruthy()
   })
 
-  it('um turno so nao diz "1 turnos"', () => {
+  it('nao existe mais singular/plural pra errar — a unidade e fixa', () => {
+    // O teste anterior garantia que 1 turno nao virava "1 turnos". Com segundos o
+    // problema deixou de existir, porque "s" nao pluraliza. Mantido INVERTIDO em
+    // vez de apagado: a pergunta continua valida (o texto de um passo restante
+    // tem que sair correto), so a armadilha e outra.
     useWorldStore.setState({
       clima: { tipo: 'chuva', origem: 'golpe', turnosRestantes: 1 },
     } as never, false)
     abrir()
-    expect(screen.getByText(/Dura mais 1 turno\./)).toBeTruthy()
+    expect(screen.getByText(new RegExp(`Dura mais ${TURNO_SEGUNDOS}s\\.`))).toBeTruthy()
   })
 
   it('clima de AMBIENTE nao inventa contagem — ele vale enquanto voce estiver na area', () => {

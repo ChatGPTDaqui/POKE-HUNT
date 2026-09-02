@@ -20,6 +20,7 @@ import { faceIconUrl } from '@/data/sprites'
 import { nomeDoStatus, type StatusAtivo } from '@/data/statusEffects'
 import { statusVfxUrl } from '@/data/statusVfx'
 import { ROTULO_ESTAGIO } from '@/data/statLabels'
+import { formatarEstagio, formatarMultiplicador, formatarPrazoEmTurnos, multiplicadorDoStat } from '@/data/textoDeEstagioEPrazo'
 import { ICONE_DE_ESTAGIO } from '@/data/statIcones'
 import { getAbility } from '@/data/abilities'
 import { nomeDaTrait } from '@/data/traits'
@@ -87,10 +88,15 @@ function selosDaEntidade(entidade: WorldEntity | null, prefixo: string): Badge[]
       key: `${prefixo}-status-${status.tipo}`,
       url: statusVfxUrl(species.type, 'diminui'),
       Icone: null,
+      // PH-422: prazo em SEGUNDOS. "3 turno(s)" nao diz nada a quem nunca viu
+      // quanto vale um turno; o contador continua andando em degraus de
+      // TURNO_SEGUNDOS porque `turnosRestantes` so cai quando o relogio fecha.
       titulo: status.turnosRestantes != null
-        ? `${nomeDoStatus(status.tipo)} — ${status.turnosRestantes} turno(s) restante(s)`
+        ? `${nomeDoStatus(status.tipo)} — ${formatarPrazoEmTurnos(status.turnosRestantes)} restantes`
         : `${nomeDoStatus(status.tipo)} — não passa sozinho`,
-      contador: status.turnosRestantes != null ? String(status.turnosRestantes) : '∞',
+      contador: status.turnosRestantes != null
+        ? formatarPrazoEmTurnos(status.turnosRestantes)
+        : '∞',
       aumenta: false,
       verbete: verbeteDoStatus(status),
       fontes: [],
@@ -105,8 +111,12 @@ function selosDaEntidade(entidade: WorldEntity | null, prefixo: string): Badge[]
       // Sem `url`: o icone do ATRIBUTO e o que este selo tem pra dizer.
       url: null,
       Icone: ICONE_DE_ESTAGIO[stat],
-      titulo: `${ROTULO_ESTAGIO[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} (${valor > 0 ? '+' : ''}${valor})`,
-      contador: `${valor > 0 ? '+' : ''}${valor}`,
+      // PH-421: o selo diz o MULTIPLICADOR, nao o degrau. "-1" e lido como
+      // "menos um ponto de Ataque" e na verdade e 0,67x — um terco do atributo
+      // embora. O degrau nao aparece mais em lugar nenhum de jogo; ele fica na
+      // wiki, junto da formula.
+      titulo: `${ROTULO_ESTAGIO[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} — ${formatarEstagio(stat, valor)}`,
+      contador: formatarMultiplicador(multiplicadorDoStat(stat, valor)),
       aumenta: valor > 0,
       verbete: GLOSSARIO.estagioDeAtributo,
       fontes: entidade.estagiosFonte?.[stat] ?? [],

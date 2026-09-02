@@ -20,12 +20,17 @@ describe('efeitosDoGolpe — numeros lidos do dado', () => {
     expect(efeitosDoGolpe(getAbility('ember')!)).toContain('Queimado (10%)')
   })
 
-  it('estagio de atributo, com alvo e chance', () => {
-    // Growl: -1 de Ataque no alvo, 100% (sem "(100%)" no rotulo — chance certa
-    // nao e informacao, e ruido).
-    expect(efeitosDoGolpe(getAbility('growl')!)).toContain('Atk Fís -1 no alvo')
-    // Swords Dance: +2 em si mesmo.
-    expect(efeitosDoGolpe(getAbility('swords_dance')!)).toContain('Atk Fís +2 em si')
+  it('estagio de atributo diz o MULTIPLICADOR prometido, e nao o degrau (PH-421)', () => {
+    // TESTE INVERTIDO NA PH-421, e a inversao e o ponto da issue: ele afirmava
+    // 'Atk Fís -1 no alvo' e 'Atk Fís +2 em si'. Esse texto e o defeito — '-1'
+    // e lido como 'menos um ponto de Ataque' e na verdade e 0,67x, um terco do
+    // atributo embora. Quem le '-1' acha que perdeu quase nada e mantem uma luta
+    // ja perdida.
+    //
+    // Chance certa continua sem '(100%)' no rotulo, porque chance certa nao e
+    // informacao — isso nao mudou.
+    expect(efeitosDoGolpe(getAbility('growl')!)).toContain('Atk Fís do alvo para 0,67x (−33%)')
+    expect(efeitosDoGolpe(getAbility('swords_dance')!)).toContain('Atk Fís de quem usa para 2x (+100%)')
   })
 
   it('dreno diz de QUE o percentual e — foi o mal-entendido que abriu a issue', () => {
@@ -40,7 +45,9 @@ describe('efeitosDoGolpe — numeros lidos do dado', () => {
 
   it('cura, flinch, critico, armadilha e clima', () => {
     expect(efeitosDoGolpe(getAbility('recover')!)).toContain('Cura 50% do HP máximo')
-    expect(efeitosDoGolpe(getAbility('rock_slide')!)).toContain('30% de tirar o turno do alvo')
+    // "turno" saiu do texto de jogo na PH-422: o que o alvo perde e a ACAO, e
+    // essa e a palavra que se entende sem saber que o turno deste motor e 3s.
+    expect(efeitosDoGolpe(getAbility('rock_slide')!)).toContain('30% de tirar a ação do alvo')
     expect(efeitosDoGolpe(getAbility('slash')!)).toContain('Chance de crítico maior')
     expect(efeitosDoGolpe(getAbility('spikes')!)).toContain('Armadilha no campo inimigo')
     expect(efeitosDoGolpe(getAbility('rain_dance')!)).toContain('Muda o clima para chuva')
