@@ -14,7 +14,8 @@
 import { schema, supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import type {
-  AmigoDetalhado, AnexoItemCorreio, BloqueadoRemoto, ConversaResumo, MensagemCorreio,
+  AmigoDetalhado, AnexoItemCorreio, BloqueadoRemoto, ContextoAnuncioCorreio, ConversaResumo,
+  MensagemCorreio,
 } from './servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { refetchEquipeInteira } from './acoesRpc'
@@ -127,17 +128,24 @@ export async function lerConversa(
 /**
  * Manda mensagem num fio. `paraId` quando a conversa ja esta aberta (o caminho
  * normal), `paraNick` quando o jogador esta comecando uma nova.
+ *
+ * `anuncioId` (PH-435) estampa o anuncio da negociacao NESTA mensagem. Quem
+ * decide se manda e a tela: so a primeira mensagem de cada entrada pelo
+ * Mercado leva o id, e o servidor devolve o snapshot que gravou pra o eco local
+ * nascer identico ao que ficou no banco.
  */
 export async function enviarMensagem(
   destino: { paraId?: string; paraNick?: string },
   corpo: string,
   anexos: AnexoItemCorreio[] = [],
-): Promise<{ id: string; paraId: string; paraNome: string }> {
+  anuncioId?: string | null,
+): Promise<{ id: string; paraId: string; paraNome: string; contextoAnuncio: ContextoAnuncioCorreio | null }> {
   const { data, error } = await db.rpc('enviar_mensagem', {
     p_corpo: corpo,
     p_para_id: destino.paraId ?? null,
     p_para_nick: destino.paraNick ?? null,
     p_anexos: anexos,
+    p_anuncio_id: anuncioId ?? null,
   })
   if (error) throw new ErroServidor(409, error.message)
 
@@ -158,7 +166,11 @@ export async function enviarMensagem(
       }))
     }
   }
-  return data as { id: string; paraId: string; paraNome: string }
+  // `contextoAnuncio` so existe em servidor com PH-435 aplicado; `?? null`
+  // mantem o fio funcionando contra um `jogo-dev` mais velho em vez de deixar
+  // `undefined` vazar pro estado da tela.
+  const r = data as { id: string; paraId: string; paraNome: string; contextoAnuncio?: ContextoAnuncioCorreio | null }
+  return { ...r, contextoAnuncio: r.contextoAnuncio ?? null }
 }
 
 /** Zera as nao lidas de UM contato. Substituiu `marcar_dm_lidas`. */

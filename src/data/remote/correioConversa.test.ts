@@ -154,15 +154,44 @@ describe('escrita de conversa', () => {
     await enviarMensagem({ paraId: 'contato' }, 'oi')
     expect(rpc).toHaveBeenCalledWith('enviar_mensagem', {
       p_corpo: 'oi', p_para_id: 'contato', p_para_nick: null, p_anexos: [],
+      // PH-435: sempre presente e NULO por omissao. Mandar a chave sempre e o
+      // que evita a ambiguidade de sobrecarga no PostgREST.
+      p_anuncio_id: null,
     })
     expect(de).not.toHaveBeenCalled()
+  })
+
+  it('leva o anuncio da negociacao quando a conversa nasce de um anuncio (PH-435)', () => {
+    rpc.mockResolvedValue({
+      data: {
+        ok: true, id: 'nova', paraId: 'contato', paraNome: 'Contato',
+        contextoAnuncio: { anuncioId: 'anuncio-1', speciesId: 'charmander' },
+      },
+      error: null,
+    })
+    return enviarMensagem({ paraId: 'contato' }, 'aceita 1.8M?', [], 'anuncio-1').then((r) => {
+      expect(rpc).toHaveBeenCalledWith('enviar_mensagem', {
+        p_corpo: 'aceita 1.8M?', p_para_id: 'contato', p_para_nick: null, p_anexos: [],
+        p_anuncio_id: 'anuncio-1',
+      })
+      // O snapshot volta do SERVIDOR, e nao do que a vitrine tinha em memoria:
+      // o eco local do fio precisa nascer igual ao que ficou gravado.
+      expect(r.contextoAnuncio).toEqual({ anuncioId: 'anuncio-1', speciesId: 'charmander' })
+    })
+  })
+
+  it('normaliza contexto ausente pra null — servidor sem PH-435 ainda manda mensagem', () => {
+    rpc.mockResolvedValue({ data: { ok: true, id: 'nova', paraId: 'contato', paraNome: 'Contato' }, error: null })
+    return enviarMensagem({ paraId: 'contato' }, 'oi').then((r) => {
+      expect(r.contextoAnuncio).toBeNull()
+    })
   })
 
   it('aceita apontar o destinatario por NICK quando o fio ainda nao existe', async () => {
     rpc.mockResolvedValue({ data: { ok: true, id: 'nova', paraId: 'u2', paraNome: 'Misty' }, error: null })
     const r = await enviarMensagem({ paraNick: 'Misty' }, 'oi')
     expect(rpc).toHaveBeenCalledWith('enviar_mensagem', {
-      p_corpo: 'oi', p_para_id: null, p_para_nick: 'Misty', p_anexos: [],
+      p_corpo: 'oi', p_para_id: null, p_para_nick: 'Misty', p_anexos: [], p_anuncio_id: null,
     })
     // O id volta pra tela poder ABRIR o fio recem-criado em vez de largar o
     // jogador numa lista procurando o contato que ele acabou de criar.

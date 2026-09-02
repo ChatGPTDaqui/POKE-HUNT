@@ -426,6 +426,32 @@ export interface AnexoPokeCorreio {
   ivs?: Record<string, number>
 }
 
+/**
+ * Anúncio que originou a negociação (PH-435), COPIADO no instante do envio.
+ *
+ * É snapshot e não referência de propósito: `market_listings.status` vira
+ * `vendido`/`cancelado`, e ler o anúncio ao vivo faria o card de uma conversa
+ * de ontem mudar de preço sozinho — ou virar linha vazia depois da venda, que é
+ * justamente quando o registro do que foi combinado passa a importar.
+ *
+ * `sellerId` viaja junto pro card saber de que lado da mesa o leitor está
+ * ("anúncio seu" x "anúncio dele") sem precisar buscar nada.
+ */
+export interface ContextoAnuncioCorreio {
+  anuncioId: string
+  sellerId: string
+  speciesId: string
+  level: number
+  isShiny: boolean
+  rarity: string
+  ivPercent: number
+  /** `null` em anúncio somente-lance e em leilão — os dois não têm preço fixo. */
+  price: number | null
+  currency: 'gold' | 'diamond'
+  modo: 'preco_fixo' | 'leilao'
+  apenasOferta: boolean
+}
+
 export interface MensagemCorreio {
   id: string
   de_id: string | null
@@ -446,6 +472,11 @@ export interface MensagemCorreio {
   anexo_poke?: AnexoPokeCorreio | null
   /** Carimbo de coleta — presente significa "ja recebido". */
   anexo_coletado_em?: string | null
+  /**
+   * Anúncio que abriu a negociação (PH-435). Nulo na esmagadora maioria das
+   * mensagens — só a PRIMEIRA de cada entrada pelo Mercado carrega.
+   */
+  contexto_anuncio?: ContextoAnuncioCorreio | null
   /**
    * Exclusao e por lado e SOFT (PH-74): cada ponta some com a mensagem da
    * propria caixa sem tirar da outra. Por isso duas colunas em vez de um
