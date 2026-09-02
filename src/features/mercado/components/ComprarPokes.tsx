@@ -152,7 +152,7 @@ function LinhaDeLeilao({
 
 export function ComprarPokes() {
   const abrirPerfilPublico = useUiStore((s) => s.abrirPerfilPublico)
-  const abrirCorreioCom = useUiStore((s) => s.abrirCorreioCom)
+  const abrirSocialCom = useUiStore((s) => s.abrirSocialCom)
   const meuId = useAuthStore((s) => s.user?.id ?? null)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const [busca, setBusca] = useState('')
@@ -393,7 +393,7 @@ export function ComprarPokes() {
                       type="button"
                       aria-label={`Negociar ${SPECIES[a.species_id]?.name ?? a.species_id} com ${a.vendedor ?? 'o vendedor'}`}
                       className="inline-flex items-center gap-[.2em] text-primary underline decoration-dotted underline-offset-2 transition-colors hover:text-n200"
-                      onClick={() => abrirCorreioCom({
+                      onClick={() => abrirSocialCom({
                         userId: a.seller_id,
                         nick: a.vendedor ?? '?',
                         anuncio: anuncioParaConversa(a),

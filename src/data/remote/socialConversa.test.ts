@@ -1,4 +1,4 @@
-// PH-81: o fio de conversa do correio.
+// PH-81: o fio de conversa do Social.
 //
 // Herdeiro de `dmConversa.test.ts` (PH-74), que cobria a mesma paginacao sobre
 // `friend_messages`. A tabela saiu, o invariante nao: a consulta pede as mais
@@ -48,7 +48,7 @@ vi.mock('@/lib/supabase', () => ({
 
 const {
   lerConversa, enviarMensagem, marcarConversaLida, excluirConversa, PAGINA_CONVERSA,
-} = await import('./correioRealtime')
+} = await import('./socialRealtime')
 
 function linha(id: string, criadaEm: string, extra: Record<string, unknown> = {}) {
   return {

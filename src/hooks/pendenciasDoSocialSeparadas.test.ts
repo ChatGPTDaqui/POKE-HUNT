@@ -1,4 +1,4 @@
-// PH-287 — o sino do Correio separa "mensagem por ler" de "item por coletar".
+// PH-287 — o sino do Social separa "mensagem por ler" de "item por coletar".
 //
 // O QUE ESTA ISSUE CONSERTA, e nao e estado
 // -----------------------------------------------------------------------------
@@ -15,7 +15,7 @@
 //                  chega a carta com item
 //
 // O jogador le a mensagem, o numero cai de 2 pra 1, e o sino CONTINUA ACESO sem
-// nada explicando. A bancada `scripts/harness/badge-do-correio.mjs` ja tinha
+// nada explicando. A bancada `scripts/harness/badge-do-social.mjs` ja tinha
 // provado que o estado zera nas tres fontes (foi o que fechou a PH-213 como nao
 // reproduzida); o que faltava era a tela dizer O QUE falta, e nao so quantos.
 //
@@ -23,47 +23,47 @@
 // por conversa. Ela era jogada fora numa soma. Estes casos trancam a separacao
 // sobrevivendo ate a tela.
 import { describe, expect, it } from 'vitest'
-import { resumoDoCorreio, fraseDasPendencias } from './usePendencias'
+import { resumoDoSocial, fraseDasPendencias } from './usePendencias'
 
 import fonteDaDoca from '@/components/hud/ActionDock.tsx?raw'
-import fonteDoCorreio from '@/features/correio/CorreioMenu.tsx?raw'
+import fonteDoSocial from '@/features/social/SocialMenu.tsx?raw'
 
 function conversa(naoLidas: number, anexosPendentes: number) {
   return { naoLidas, anexosPendentes }
 }
 
-describe('resumoDoCorreio separa as duas naturezas (PH-287)', () => {
+describe('resumoDoSocial separa as duas naturezas (PH-287)', () => {
   it('sem dado nenhum e zero em tudo — nao um `undefined` que vira "NaN" na tela', () => {
-    expect(resumoDoCorreio(undefined)).toEqual({ total: 0, porLer: 0, anexos: 0 })
+    expect(resumoDoSocial(undefined)).toEqual({ total: 0, porLer: 0, anexos: 0 })
   })
 
   it('caixa vazia nao acende nada', () => {
-    expect(resumoDoCorreio({ conversas: [], avisos: [] })).toEqual({ total: 0, porLer: 0, anexos: 0 })
+    expect(resumoDoSocial({ conversas: [], avisos: [] })).toEqual({ total: 0, porLer: 0, anexos: 0 })
   })
 
   it('a carta com item conta nas DUAS colunas, e o total continua 2', () => {
     // E o estado logo depois de a carta chegar. O total tem de continuar o mesmo
     // de antes desta issue: mudar o numero do sino seria mexer no que a PH-22 e
     // a PH-164 decidiram, e nao e isso que esta em jogo aqui.
-    const r = resumoDoCorreio({ conversas: [conversa(1, 1)], avisos: [] })
+    const r = resumoDoSocial({ conversas: [conversa(1, 1)], avisos: [] })
     expect(r).toEqual({ total: 2, porLer: 1, anexos: 1 })
   })
 
   it('ler a mensagem deixa o item — e agora a tela sabe disso', () => {
     // O passo em que o jogador achava que o sino tinha travado.
-    const r = resumoDoCorreio({ conversas: [conversa(0, 1)], avisos: [] })
+    const r = resumoDoSocial({ conversas: [conversa(0, 1)], avisos: [] })
     expect(r).toEqual({ total: 1, porLer: 0, anexos: 1 })
     expect(fraseDasPendencias(r)).toBe('1 item por coletar')
   })
 
   it('coletar o item zera', () => {
-    const r = resumoDoCorreio({ conversas: [conversa(0, 0)], avisos: [] })
+    const r = resumoDoSocial({ conversas: [conversa(0, 0)], avisos: [] })
     expect(r.total).toBe(0)
     expect(fraseDasPendencias(r)).toBeNull()
   })
 
   it('aviso com anexo por coletar conta como ITEM, nao como mensagem', () => {
-    const r = resumoDoCorreio({
+    const r = resumoDoSocial({
       conversas: [],
       avisos: [{ estado: 'lido', anexo_itens: [{}], anexo_coletado_em: null }],
     })
@@ -71,7 +71,7 @@ describe('resumoDoCorreio separa as duas naturezas (PH-287)', () => {
   })
 
   it('anexo de POKE conta igual ao de item (PH-164)', () => {
-    const r = resumoDoCorreio({
+    const r = resumoDoSocial({
       conversas: [],
       avisos: [{ estado: 'lido', anexo_poke: { uid: 'eevee-do-lance' }, anexo_coletado_em: null }],
     })
@@ -79,7 +79,7 @@ describe('resumoDoCorreio separa as duas naturezas (PH-287)', () => {
   })
 
   it('anexo ja coletado nao conta mais', () => {
-    const r = resumoDoCorreio({
+    const r = resumoDoSocial({
       conversas: [],
       avisos: [{ estado: 'lido', anexo_itens: [{}], anexo_coletado_em: '2026-08-30T12:00:00Z' }],
     })
@@ -87,7 +87,7 @@ describe('resumoDoCorreio separa as duas naturezas (PH-287)', () => {
   })
 
   it('pedido de amizade pendente conta como POR LER', () => {
-    const r = resumoDoCorreio({ conversas: [], avisos: [{ estado: 'pendente' }] })
+    const r = resumoDoSocial({ conversas: [], avisos: [{ estado: 'pendente' }] })
     expect(r).toEqual({ total: 1, porLer: 1, anexos: 0 })
   })
 
@@ -95,7 +95,7 @@ describe('resumoDoCorreio separa as duas naturezas (PH-287)', () => {
     // A regressao que este caso impede: contar as duas coisas do mesmo aviso
     // inflaria o sino sem nada ter chegado. O codigo anterior usava
     // `filter(...).length`, ou seja, uma carta = uma unidade — e continua assim.
-    const r = resumoDoCorreio({
+    const r = resumoDoSocial({
       conversas: [],
       avisos: [{ estado: 'pendente', anexo_itens: [{}], anexo_coletado_em: null }],
     })
@@ -105,7 +105,7 @@ describe('resumoDoCorreio separa as duas naturezas (PH-287)', () => {
   })
 
   it('varias conversas somam por coluna', () => {
-    const r = resumoDoCorreio({
+    const r = resumoDoSocial({
       conversas: [conversa(2, 0), conversa(0, 3), conversa(1, 1)],
       avisos: [{ estado: 'pendente' }],
     })
@@ -143,28 +143,28 @@ describe('a frase que a tela mostra (PH-287)', () => {
 // somava antes de renderizar.
 //
 // Renderizar `SheetMais` de verdade exigiria subir QueryClient, sessao do
-// Supabase e o Realtime do correio; o que estes dois casos garantem e mais
+// Supabase e o Realtime do Social; o que estes dois casos garantem e mais
 // modesto e ainda assim o que importa: a frase e a etiqueta CONTINUAM ligadas na
 // arvore. Se alguem voltar a passar so o numero, ficam vermelhos.
 describe('a separacao sobrevive ate a tela (PH-287)', () => {
-  it('a doca passa a frase pro item de Correio, e nao so o total', () => {
+  it('a doca passa a frase pro item de Social, e nao so o total', () => {
     expect(fonteDaDoca).toContain('fraseDasPendencias')
-    expect(fonteDaDoca).toMatch(/detalhe=\{screen === 'correio'/)
+    expect(fonteDaDoca).toMatch(/detalhe=\{screen === 'social'/)
     // O selo continua mostrando o TOTAL: separar a leitura nao muda o numero que
     // a PH-22 e a PH-164 decidiram acender.
-    expect(fonteDaDoca).toContain('pendenciasCorreio.total')
+    expect(fonteDaDoca).toContain('pendenciasSocial.total')
   })
 
   it('a conversa com item por coletar diz isso em PALAVRA, sem `title=`', () => {
     // O fim do recorte e procurado A PARTIR do inicio, e nao do zero: `naoLidas`
     // aparece ANTES na borda do card, e um `indexOf` solto devolvia um recorte
     // invertido — vazio, e o caso passaria sem olhar nada.
-    const inicio = fonteDoCorreio.indexOf('c.anexosPendentes > 0')
+    const inicio = fonteDoSocial.indexOf('c.anexosPendentes > 0')
     expect(inicio).toBeGreaterThan(0)
-    const linha = fonteDoCorreio.slice(inicio, fonteDoCorreio.indexOf('c.naoLidas > 0', inicio))
+    const linha = fonteDoSocial.slice(inicio, fonteDoSocial.indexOf('c.naoLidas > 0', inicio))
     expect(linha.length).toBeGreaterThan(50)
     expect(linha).toContain('por coletar')
-    // O `title=` nativo nao abre no dedo, e a lista do Correio e onde o jogador
+    // O `title=` nativo nao abre no dedo, e a lista do Social e onde o jogador
     // vai procurar o que ficou faltando.
     expect(linha).not.toContain('title=')
   })

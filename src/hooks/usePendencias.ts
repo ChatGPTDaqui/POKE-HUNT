@@ -1,7 +1,7 @@
 // Quantas coisas estao esperando uma acao do jogador em cada menu.
 //
-// As duas consultas usam as MESMAS `queryKey` das telas de Correio e Mercado.
-// Isso nao e detalhe: com a chave compartilhada, abrir o Correio e ler uma
+// As duas consultas usam as MESMAS `queryKey` das telas de Social e Mercado.
+// Isso nao e detalhe: com a chave compartilhada, abrir o Social e ler uma
 // mensagem invalida o cache e o contador some sozinho — se cada lado tivesse a
 // propria chave, a bolinha continuaria la ate o proximo intervalo.
 //
@@ -9,45 +9,45 @@
 // CUSTO: ESTES DOIS POLLS SAO O SEGUNDO MAIOR CONSUMO DE BANCO DO JOGO
 // ---------------------------------------------------------------------------
 // `ActionDock` esta sempre montado, entao os dois intervalos rodam durante a
-// sessao inteira, mesmo que o jogador nunca abra Correio ou Mercado. Nos valores
+// sessao inteira, mesmo que o jogador nunca abra Social ou Mercado. Nos valores
 // antigos (60s e 120s) eram ~90 requisicoes por hora por aba, so pra manter dois
 // contadores — atras somente do flush de sessao no consumo de Egress do plano
 // Free.
 //
-// O que mudou: o Correio passou a ser servido por REALTIME (a assinatura vive
-// aqui, ver `useCorreioAoVivo`) e o poll dele virou rede de seguranca de 5
+// O que mudou: o Social passou a ser servido por REALTIME (a assinatura vive
+// aqui, ver `useSocialAoVivo`) e o poll dele virou rede de seguranca de 5
 // minutos, nao mais o caminho principal. O do Mercado tambem foi pra 5 minutos:
 // ele nao tem Realtime e e a consulta mais cara das duas (ordens, anuncios e
 // ofertas dos dois lados), mas um lance recebido pode esperar — e o proprio
 // jogador dando lance ja invalida a chave na hora.
 import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { correio, assinarCorreioAoVivo } from '@/data/remote/correioRealtime'
+import { social, assinarSocialAoVivo } from '@/data/remote/socialRealtime'
 import { mercadoMeus } from '@/data/remote/mercadoRpc'
 import { supabase } from '@/lib/supabase'
 
 // Rede de seguranca, nao caminho principal: cobre Realtime cair, websocket
 // bloqueado por rede corporativa, e a janela entre o login e a assinatura subir.
-const INTERVALO_CORREIO_MS = 300000
+const INTERVALO_SOCIAL_MS = 300000
 // Sem Realtime (a tabela do Mercado nao esta na publication), entao aqui o poll
 // AINDA e o caminho principal — so mais espacado.
 const INTERVALO_MERCADO_MS = 300000
 
 // ---------------------------------------------------------------------------
-// Assinatura UNICA de Realtime do correio, com contagem de referencia
+// Assinatura UNICA de Realtime do Social, com contagem de referencia
 // ---------------------------------------------------------------------------
-// Estado de modulo, e nao `useRef`, porque `usePendenciasDoCorreio` e chamado de
+// Estado de modulo, e nao `useRef`, porque `usePendenciasDoSocial` e chamado de
 // DOIS componentes ao mesmo tempo (`ActionDock` e o sheet "Mais"). Uma assinatura
-// por chamador estouraria: `assinarCorreioAoVivo` usa `supabase.channel()` com
-// nome fixo por usuario (`correio-<uid>`), e pedir o mesmo nome antes de remover
+// por chamador estouraria: `assinarSocialAoVivo` usa `supabase.channel()` com
+// nome fixo por usuario (`social-<uid>`), e pedir o mesmo nome antes de remover
 // o canal anterior devolve o canal JA inscrito — `.on()` nele lanca "cannot add
 // postgres_changes callbacks after subscribe()". Esse bug ja aconteceu no
-// `CorreioMenu` (ver o comentario que sobrou la) e a contagem de referencia e o
+// `SocialMenu` (ver o comentario que sobrou la) e a contagem de referencia e o
 // que impede a terceira ocorrencia.
 let assinantes = 0
 let cancelarAssinatura: (() => void) | null = null
 
-function useCorreioAoVivo(): void {
+function useSocialAoVivo(): void {
   const qc = useQueryClient()
   useEffect(() => {
     assinantes += 1
@@ -58,8 +58,8 @@ function useCorreioAoVivo(): void {
         // assincrono do `getSession` (StrictMode, remount rapido): sem isto a
         // assinatura subiria depois da limpeza e ficaria orfa.
         if (!uid || assinantes === 0 || cancelarAssinatura) return
-        cancelarAssinatura = assinarCorreioAoVivo(uid, () => {
-          void qc.invalidateQueries({ queryKey: ['correio'] })
+        cancelarAssinatura = assinarSocialAoVivo(uid, () => {
+          void qc.invalidateQueries({ queryKey: ['social'] })
         })
       })
     }
@@ -74,7 +74,7 @@ function useCorreioAoVivo(): void {
 }
 
 /**
- * O que esta esperando o jogador no Correio, SEPARADO POR NATUREZA (PH-287).
+ * O que esta esperando o jogador no Social, SEPARADO POR NATUREZA (PH-287).
  *
  * Era um numero so, e o numero sozinho mentia por omissao. Carta com item
  * anexado conta DUAS vezes — uma como mensagem por ler, outra como anexo por
@@ -85,7 +85,7 @@ function useCorreioAoVivo(): void {
  * como nao reproduzida: o estado sempre esteve certo, a comunicacao e que nao
  * existia.
  */
-export interface PendenciasDoCorreio {
+export interface PendenciasDoSocial {
   /** O que o sino mostra. Continua sendo a soma — no badge nao cabe mais que um numero. */
   total: number
   /** Mensagens e pedidos que o jogador ainda nao abriu. */
@@ -97,10 +97,10 @@ export interface PendenciasDoCorreio {
 /**
  * A conta, separada da consulta pra poder ser testada sem React e sem rede.
  *
- * `data` e o retorno de `correio()`; o parametro estrutural evita arrastar o
+ * `data` e o retorno de `social()`; o parametro estrutural evita arrastar o
  * tipo inteiro da RPC pra ca so pra somar tres campos.
  */
-export function resumoDoCorreio(data: {
+export function resumoDoSocial(data: {
   conversas: { naoLidas: number; anexosPendentes: number }[]
   avisos: {
     estado?: string | null
@@ -108,7 +108,7 @@ export function resumoDoCorreio(data: {
     anexo_poke?: unknown
     anexo_coletado_em?: string | null
   }[]
-} | undefined): PendenciasDoCorreio {
+} | undefined): PendenciasDoSocial {
   if (!data) return { total: 0, porLer: 0, anexos: 0 }
 
   // As conversas (PH-81) trazem `naoLidas` e `anexosPendentes` ja contados pela
@@ -137,27 +137,27 @@ export function resumoDoCorreio(data: {
 }
 
 /** Mensagem de conversa nao lida + aviso pendente + anexo ainda nao coletado. */
-export function usePendenciasDoCorreio(): PendenciasDoCorreio {
-  useCorreioAoVivo()
+export function usePendenciasDoSocial(): PendenciasDoSocial {
+  useSocialAoVivo()
   const { data } = useQuery({
-    queryKey: ['correio'],
-    queryFn: () => correio(),
-    staleTime: INTERVALO_CORREIO_MS / 2,
-    refetchInterval: INTERVALO_CORREIO_MS,
+    queryKey: ['social'],
+    queryFn: () => social(),
+    staleTime: INTERVALO_SOCIAL_MS / 2,
+    refetchInterval: INTERVALO_SOCIAL_MS,
     // Explicito, apesar de ser o default: aba oculta nao tem contador pra
     // ninguem ver, e um jogo idle passa horas em segundo plano.
     refetchIntervalInBackground: false,
   })
-  return resumoDoCorreio(data)
+  return resumoDoSocial(data)
 }
 
 /**
- * O que o sino do Correio esta dizendo, em uma frase (PH-287).
+ * O que o sino do Social esta dizendo, em uma frase (PH-287).
  *
  * `null` quando nao ha nada — quem chama trata como "sem bolha", e a tela sem
  * pendencia continua exatamente como era.
  */
-export function fraseDasPendencias(p: PendenciasDoCorreio): string | null {
+export function fraseDasPendencias(p: PendenciasDoSocial): string | null {
   if (p.total === 0) return null
   const partes: string[] = []
   if (p.porLer > 0) {

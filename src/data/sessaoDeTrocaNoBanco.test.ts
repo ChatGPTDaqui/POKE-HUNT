@@ -161,7 +161,7 @@ describe('as armadilhas de PL/pgSQL que este repo ja pagou (PH-120)', () => {
 
   it('bloqueio usa a funcao que ja existe, nos dois sentidos', () => {
     // Repetir a consulta criaria uma segunda definicao de "bloqueado" pra
-    // divergir da do Correio.
+    // divergir da do Social.
     expect(PUBLICO).toContain('public.bloqueio_entre(v_eu, p_convidado_id)')
     expect(DEV).toContain('dev.bloqueio_entre(v_eu, p_convidado_id)')
   })

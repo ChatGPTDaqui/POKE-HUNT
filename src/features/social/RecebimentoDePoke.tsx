@@ -1,4 +1,4 @@
-// Tela de recebimento: o POKE que acabou de sair do correio, com destaque
+// Tela de recebimento: o POKE que acabou de sair de um anexo, com destaque
 // (PH-164).
 //
 // POR QUE UMA TELA, e nao so um toast: o toast do jogo dura ~3s e divide espaco
@@ -15,7 +15,7 @@ import { useEffect } from 'react'
 import { GameButton } from '@/components/game/controls'
 import { gen5SpriteUrl } from '@/data/gen5Sprites'
 import { spriteUrl } from '@/data/sprites'
-import type { PokeRecebido } from '@/data/remote/correioRealtime'
+import type { PokeRecebido } from '@/data/remote/socialRealtime'
 
 const CSS = `
 @keyframes recebimento-brilho {
@@ -102,7 +102,7 @@ export function RecebimentoDePoke({ poke, onFechar }: Props) {
           {poke.nome} entrou na sua equipe.
         </p>
 
-        {/* `autoFocus`: a tela cobre o correio inteiro, e sem isso o foco do
+        {/* `autoFocus`: a tela cobre o social inteiro, e sem isso o foco do
             teclado fica numa lista que nao da mais pra ver. */}
         <GameButton autoFocus variant="primary" block onClick={onFechar}>
           Continuar

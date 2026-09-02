@@ -1,6 +1,6 @@
 // Lista de amigos e de bloqueados (PH-74).
 //
-// Cada linha e um alvo de acao, nao so texto: conversar, escrever no correio,
+// Cada linha e um alvo de acao, nao so texto: conversar, escrever mensagem,
 // remover e bloquear. Remover e bloquear passam pelo ConfirmDialog — as duas
 // sao destrutivas e bloquear ainda desfaz a amizade junto, o que nao e obvio
 // pelo rotulo do botao.
@@ -99,7 +99,7 @@ export function PainelAmigos({
                   </GameButton>
                   <GameButton
                     variant="ghost"
-                    title="Mandar mensagem no correio"
+                    title="Mandar mensagem"
                     aria-label={`Escrever para ${a.nome}`}
                     onClick={(e) => { e.stopPropagation(); onEscrever(a.nome) }}
                   >

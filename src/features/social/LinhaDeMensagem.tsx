@@ -1,4 +1,4 @@
-// Uma linha da lista de AVISOS do correio (PH-74, reduzido em PH-81).
+// Uma linha da lista de AVISOS do Social (PH-74, reduzido em PH-81).
 //
 // Era a linha de qualquer mensagem da caixa. Desde que conversa virou fio
 // proprio (Conversa.tsx), este componente so ve o que NAO e conversa: aviso de
@@ -6,7 +6,7 @@
 // sai de mim) e o botao Responder (aviso de sistema nao tem remetente pra
 // responder, e pedido de amizade se responde com Aceitar/Recusar).
 //
-// Componente de topo, NAO uma funcao declarada dentro de CorreioMenu: componente
+// Componente de topo, NAO uma funcao declarada dentro de SocialMenu: componente
 // definido no corpo de outro e recriado a cada render, o que remonta a subarvore
 // inteira e joga fora foco e estado interno. Mesmo motivo de PH-31.
 import { Check, Gift, Trash, X } from '@phosphor-icons/react'
@@ -14,17 +14,17 @@ import { GameButton, GameCard } from '@/components/game/controls'
 import { getItem } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl, itemIconUrl } from '@/data/sprites'
-import type { MensagemCorreio } from '@/data/remote/servidor'
+import type { MensagemSocial } from '@/data/remote/servidor'
 import { cn } from '@/lib/utils'
 
-const ROTULO_TIPO: Record<MensagemCorreio['tipo'], string> = {
+const ROTULO_TIPO: Record<MensagemSocial['tipo'], string> = {
   texto: 'Mensagem',
   pedido_amizade: 'Pedido de amizade',
   sistema: 'Aviso',
 }
 
 interface Props {
-  m: MensagemCorreio
+  m: MensagemSocial
   respondendo: boolean
   coletando: boolean
   excluindo: boolean

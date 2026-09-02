@@ -16,7 +16,7 @@
 // regras que impedem o golpe (bloqueio, sessao dupla, quem pode aceitar, quem
 // pode cancelar) vivem dentro das funcoes `security definer` — uma policy de
 // escrita abriria rota paralela sem nenhuma delas, o mesmo furo que a PH-23
-// achou no chat mundial e que o Correio evita do mesmo jeito.
+// achou no chat mundial e que o Social evita do mesmo jeito.
 //
 // A LEITURA e RLS-direta: a policy da tabela ja limita a linha a quem esta nela.
 import { schema, supabase } from '@/lib/supabase'
@@ -28,7 +28,7 @@ import { descartarIdsConhecidos } from './playerRepository'
 import { COLUNAS_DE_POKE, rowToPoke } from './playerMapper'
 
 // As RPCs so existem no banco depois do `db push`, e o gerador de tipos so
-// conhece o schema atual — mesmo escape hatch de `correioRealtime.ts`,
+// conhece o schema atual — mesmo escape hatch de `socialRealtime.ts`,
 // `mercadoRpc.ts` e `acoesRpc.ts`.
 const db = supabase as unknown as {
   from: (tabela: string) => any
