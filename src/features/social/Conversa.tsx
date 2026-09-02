@@ -21,6 +21,7 @@ import * as social from '@/data/remote/socialRealtime'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
 import type { AnuncioParaConversa } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
+import { AcaoDeReserva } from './AcaoDeReserva'
 import { CardDoAnuncio } from './CardDoAnuncio'
 import { idsComCardDeAnuncio } from './cardsDoAnuncio'
 
@@ -79,6 +80,16 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
   const fimDoFio = useRef<HTMLDivElement>(null)
 
   const comCard = useMemo(() => idsComCardDeAnuncio(mensagens), [mensagens])
+
+  // O card mais RECENTE de um anuncio meu — o unico que ganha o formulario de
+  // reserva. Ver a nota no JSX.
+  const ultimoCardMeu = useMemo(() => {
+    let id: string | null = null
+    for (const m of mensagens) {
+      if (comCard.has(m.id) && m.contexto_anuncio?.sellerId === meuId) id = m.id
+    }
+    return id
+  }, [mensagens, comCard, meuId])
 
   // Carga inicial + marcar lidas. Refaz ao trocar de contato.
   useEffect(() => {
@@ -228,6 +239,17 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
                   argumento de um dos lados. */}
               {abreAnuncio && m.contexto_anuncio && (
                 <CardDoAnuncio ctx={m.contexto_anuncio} meuId={meuId} />
+              )}
+              {/* A acao de reservar so aparece pra quem PODE reservar: o
+                  vendedor, no card do proprio anuncio, e so no card mais
+                  recente do fio — repetir o formulario em cada card antigo
+                  ofereceria reservar por um preco de uma negociacao encerrada
+                  (PH-437). Leilao e somente-lance ficam de fora porque o
+                  servidor recusa os dois, e botao que so serve pra dar erro e
+                  pior que botao ausente. */}
+              {abreAnuncio && m.id === ultimoCardMeu && m.contexto_anuncio
+                && m.contexto_anuncio.modo !== 'leilao' && !m.contexto_anuncio.apenasOferta && (
+                <AcaoDeReserva ctx={m.contexto_anuncio} paraId={contato.userId} nick={contato.nick} />
               )}
             <div className={cn('flex', minha ? 'justify-end' : 'justify-start')}>
               <div
