@@ -210,6 +210,22 @@ export type EstagiosDeStat = Partial<Record<StatDeEstagio, number>>
 export const DURACAO_DE_ESTAGIO_SEGUNDOS = 6 * TURNO_SEGUNDOS
 
 /**
+ * Quanto prazo restante ja conta como "vai vencer" para a IA reaplicar o buff
+ * (PH-419).
+ *
+ * DOIS TURNOS, e nao um: a IA decide uma vez por acao, e entre a decisao e o
+ * golpe pousar passa o delay do proprio golpe. Com um turno de folga o buff
+ * vencia entre a escolha e a aplicacao em parte das corridas, e a renovacao
+ * chegava depois do buraco que ela existe pra evitar.
+ *
+ * Sem esta folga o prazo de 18s da PH-418 deixaria de ser DURACAO e passaria a
+ * ser TETO DE USO: a guarda da IA e "estagio abaixo do alvo", entao um POKE no
+ * alvo nunca reaplica, o buff cai aos 18s com o golpe pronto na mao, e ele
+ * recomeca do zero.
+ */
+export const FOLGA_DE_RENOVACAO_SEGUNDOS = 2 * TURNO_SEGUNDOS
+
+/**
  * De onde saiu um estagio de atributo (PH-121), quanto ele contribui e ate
  * quando (PH-418).
  *

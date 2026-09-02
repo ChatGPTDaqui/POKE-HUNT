@@ -16,6 +16,7 @@ import { golpesUtilizaveis } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
   multiplicadorDeAccuracyOuEvasion, nomeDoStatus, ESTAGIO_MAXIMO,
+  FOLGA_DE_RENOVACAO_SEGUNDOS,
   DURACAO_DE_ESTAGIO_SEGUNDOS, totalDeEstagio,
   type StatusCondition, type StatDeEstagio,
 } from '@/data/statusEffects'
@@ -25,6 +26,7 @@ import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
   limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico, curarStatus, comPrazoPadrao,
   registrarFonteDeEstagio, fonteDeTrait, apagarTodosOsEstagios,
+  prazoDaFonteDoGolpe, temFontePropriaViva,
 } from './statusSystem'
 import { traitDoPoke, type TraitId } from '@/data/traits'
 import {
@@ -1304,9 +1306,24 @@ function golpeDeApoioUtil(
   }
   if (ability.statChanges && ability.statChanges.length) {
     const destino = ability.statTarget === 'self' ? entity : defenderEntity
+    const proprio = destino === entity
     return ability.statChanges.some((m) => {
       const atual = destino.estagios[m.stat] ?? 0
-      return m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -ESTAGIO_ALVO_DA_IA
+      const abaixoDoAlvo = m.estagios > 0
+        ? atual < ESTAGIO_ALVO_DA_IA
+        : atual > -ESTAGIO_ALVO_DA_IA
+      if (abaixoDoAlvo) return true
+      // RENOVACAO PREVENTIVA (PH-419). Chegar no alvo deixava a IA parada ate o
+      // prazo vencer, e ai o estagio caia de +2 pra 0 de uma vez — o POKE passava
+      // a maior parte do tempo SEM o buff que a PH-418 promete, e o prazo virava
+      // teto de uso em vez de duracao.
+      //
+      // O gatilho e o prazo da fonte DESTE golpe, e nao "tem fonte viva": num
+      // auto-battler de campo aberto o atributo costuma ter fonte alheia junto
+      // (Rosnado de selvagem em atkFis), e renovar olhando o prazo do debuff do
+      // outro reaplicaria buff na hora errada.
+      const prazo = prazoDaFonteDoGolpe(destino, m.stat, ability.id, proprio)
+      return prazo != null && prazo <= FOLGA_DE_RENOVACAO_SEGUNDOS
     })
   }
 
@@ -1317,7 +1334,14 @@ function golpeDeApoioUtil(
     case 'rest':
       return entity.poke.hp / entity.poke.stats.hp <= 0.5 && !entity.poke.status
     case 'belly_drum':
-      return (entity.estagios.atkFis ?? 0) < ESTAGIO_MAXIMO && entity.poke.hp / entity.poke.stats.hp > 0.5
+      // BELLY DRUM E A EXCECAO NOMEADA DA PH-419, e por preco, nao por gosto: ele
+      // custa 50% do HP maximo e vai direto ao teto. Renovar preventivamente a
+      // cada 18s mataria o POKE de graca, entao ele fica FORA da renovacao (esta
+      // guarda vive no switch, que a renovacao nao alcanca) e ainda ganha a
+      // condicao extra: nao entra se ja existe buff PROPRIO de Ataque de pe.
+      return (entity.estagios.atkFis ?? 0) < ESTAGIO_MAXIMO
+        && entity.poke.hp / entity.poke.stats.hp > 0.5
+        && !temFontePropriaViva(entity, 'atkFis')
     case 'acupressure':
       return true // sempre sobe algum stat aleatorio em +2 — nunca e turno jogado fora
     case 'endure':

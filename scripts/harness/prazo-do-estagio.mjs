@@ -135,6 +135,32 @@ const REGIMES_COM_BUFF = [
   { nome: 'sofrido', especie: 'typhlosion', nivel: 25, hunt: 'campo_aberto_faixa2', forcar: 'defense_curl' },
 ]
 
+/**
+ * A terceira tabela existe porque a segunda NAO exercita a PH-419, e isso so
+ * apareceu ao medir.
+ *
+ * `defense_curl` vale +1, e `ESTAGIO_ALVO_DA_IA` e 2. Um POKE em +1 esta ABAIXO
+ * do alvo, entao a guarda antiga da IA ja queria reaplicar sempre — o buraco que
+ * a PH-419 fecha ("no alvo, nunca renova, o buff cai aos 18s") nunca acontece
+ * com ele. Medido: ligar a renovacao preventiva mexeu 8,1% -> 7,9%, 42,1% ->
+ * 42,1% e 62,9% -> 60,9%, ou seja ruido. Concluir "a PH-419 nao serve" dali
+ * seria concluir do cenario errado.
+ *
+ * `agility` vale +2 e fecha o alvo em UM uso, entao ele e o cenario da issue.
+ * Spearow porque aprende agility cedo e a mantem no nivel alto, o que deixa os
+ * tres regimes com a MESMA especie.
+ *
+ * O que a fracao de uptime mede aqui, e que a segunda tabela nao separa: com
+ * golpe de +1 o limite e a SELECAO DE ACAO (a IA prefere golpe de dano, e luta
+ * curta acaba antes de sobrar turno pra buff), e nao o prazo. Com golpe de +2 o
+ * limite passa a ser o prazo, que e o que a PH-419 endereca.
+ */
+const REGIMES_NO_TETO = [
+  { nome: 'apertado', especie: 'spearow', nivel: 25, hunt: 'campo_aberto_faixa1', forcar: 'agility' },
+  { nome: 'folgado', especie: 'spearow', nivel: 102, hunt: 'campo_aberto_faixa1', forcar: 'agility' },
+  { nome: 'sofrido', especie: 'spearow', nivel: 25, hunt: 'campo_aberto_faixa2', forcar: 'agility' },
+]
+
 function gameStateFalso(poke) {
   const dados = defaultGameStateData()
   dados.team = [poke]
@@ -279,7 +305,8 @@ function tabela(titulo, regimes) {
 }
 
 tabela(`elenco PADRAO (${REGIMES.map((r) => r.especie).join('/')})`, REGIMES)
-tabela('buff FORCADO no set ativo (typhlosion + defense_curl)', REGIMES_COM_BUFF)
+tabela('buff FORCADO de +1, ABAIXO do alvo da IA (typhlosion + defense_curl)', REGIMES_COM_BUFF)
+tabela('buff FORCADO de +2, NO alvo da IA (spearow + agility) — cenario da PH-419', REGIMES_NO_TETO)
 
 if (modeloAntigo) {
   console.log(

@@ -428,6 +428,40 @@ export function apagarTodosOsEstagios(entity: WorldEntity): void {
 }
 
 /**
+ * Prazo que sobra na fonte que ESTE golpe criou, ou `null` se ela nao existe
+ * mais (PH-419).
+ *
+ * A busca e pela mesma identidade que `registrarFonteDeEstagio` usa pra decidir
+ * renovacao — id, tipo e autoria. Perguntar so "tem fonte viva neste atributo"
+ * daria a resposta errada no caso que importa: um Rosnado do inimigo tambem e
+ * fonte de atkFis, e a IA nao renova o buff dela olhando o prazo do debuff
+ * alheio.
+ */
+export function prazoDaFonteDoGolpe(
+  entity: WorldEntity, stat: StatDeEstagio, abilityId: string, proprio: boolean,
+): number | null {
+  const fonte = entity.estagiosFonte?.[stat]?.find(
+    (f) => f.id === abilityId && f.tipo === 'golpe' && f.proprio === proprio,
+  )
+  if (!fonte) return null
+  // `expiraEm: null` e fonte permanente. Nada cria uma hoje, mas devolver 0 aqui
+  // faria a IA reaplicar pra sempre uma fonte que nunca vence.
+  return fonte.expiraEm ?? Number.POSITIVE_INFINITY
+}
+
+/**
+ * Se a entidade tem alguma fonte PROPRIA viva neste atributo (PH-419).
+ *
+ * Existe pro Belly Drum, que e a excecao nomeada da issue: ele custa 50% do HP
+ * maximo e vai direto ao teto, entao ele nao entra na renovacao preventiva e
+ * ainda recusa entrar quando o POKE ja tem buff proprio de Ataque de pe —
+ * empilhar o custo de HP em cima de um buff que ja existe e o pior negocio que
+ * a IA consegue fechar.
+ */
+export function temFontePropriaViva(entity: WorldEntity, stat: StatDeEstagio): boolean {
+  return Boolean(entity.estagiosFonte?.[stat]?.some((f) => f.proprio))
+}
+/**
  * Fonte nova com o prazo padrao (PH-418). Existe pra `DURACAO_DE_ESTAGIO_SEGUNDOS`
  * nao ficar repetida em cada um dos oito pontos que aplicam estagio.
  */
