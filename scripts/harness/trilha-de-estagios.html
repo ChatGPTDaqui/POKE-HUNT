@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<!-- OBRIGATORIO. Esta pagina mora em /scripts/harness/, e os imports do modulo
+     abaixo sao absolutos (/src/...). Sem a base, o Vite resolve o CSS e os
+     assets relativos a /scripts/harness/ e tudo cai em 404 silencioso — a
+     pagina abre sem estilo nenhum e a bancada "mostra" um layout que nao e o
+     do jogo. -->
+<base href="/" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bancada da trilha de estagios (PH-431)</title>
+<!--
+  A TRILHA, FORA DO JOGO
+
+  POR QUE ELA EXISTE. A tela de hunts so aparece depois de login, escolha de
+  inicial e carga de sessao — e o que precisa ser olhado aqui e puramente
+  visual: se dez nos ligados por um trilho LEEM como uma trilha, se o estagio
+  limpo se distingue do bloqueado de relance, e se a composicao de sub-bioma
+  conta a historia de o bioma afundar. Nada disso depende de estado de servidor.
+
+  O que ela NAO substitui: o comportamento de entrar na hunt, que passa pelo
+  `controller` e pela autoridade. Isso continua sendo teste e jogo real.
+
+  Como usar:  npm run dev  e abrir
+    http://localhost:5173/scripts/harness/trilha-de-estagios.html
+
+  Os botoes de cima trocam o progresso simulado, que e o que muda o estado dos
+  nos. `?bioma=marinho` abre direto num bioma.
+-->
+<style>
+  body { margin: 0; }
+  #barra {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; flex-wrap: wrap; gap: .5em; align-items: center;
+    padding: .6em .8em; background: #0e0e14; border-bottom: 1px solid #26262e;
+    font: 13px/1.4 system-ui, sans-serif; color: #b9b9c6;
+  }
+  #barra button {
+    border: 1px solid #3a3a44; background: #1a1a22; color: #d5d5e0;
+    border-radius: .4em; padding: .25em .6em; cursor: pointer; font: inherit;
+  }
+  #barra button[data-on="1"] { border-color: #6ee7a8; color: #6ee7a8; }
+  #palco { padding: .8em; max-width: 60em; margin: 0 auto; }
+</style>
+</head>
+<body class="bg-n900 text-n200">
+  <div id="barra">
+    <b>Progresso simulado:</b>
+    <button data-p="0">conta nova</button>
+    <button data-p="3">3 estágios no Marinho</button>
+    <button data-p="9">9 estágios em todos</button>
+    <button data-p="10">mundo completo</button>
+    <span id="onde"></span>
+  </div>
+  <div id="palco"></div>
+  <script type="module" src="/scripts/harness/trilha-de-estagios.tsx"></script>
+</body>
+</html>
