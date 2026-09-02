@@ -19,6 +19,7 @@ import type { StatusCondition } from '@/data/statusEffects'
 // linhas de dado que o servidor nunca le, porque quem valida missao la e a RPC
 // `reivindicar_missao`, consultando a tabela `missao_cadeia` no Postgres.
 import { chaveDaMissao, missaoDaChave } from '@/data/missaoChave'
+import { lerProgressoPorBioma, traduzirMapIdLegado } from '@/data/progressoDeBioma'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
@@ -352,7 +353,11 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     wallet: { gold: p.gold, diamonds: p.diamonds },
     unlockedMaps: p.unlocked_maps,
     unlockedContinents: p.unlocked_continents,
-    currentMapId: p.current_map_id,
+    // PH-429: mapId de faixa antiga (`mata_faixa1`) vira o estagio equivalente,
+    // e mapId desconhecido cai na hunt inicial. Sem isto o `buildMapWorld`
+    // estoura com "Mapa desconhecido" e a sessao inteira nao abre — o jogador
+    // fica sem jogo por causa de uma string gravada no mes passado.
+    currentMapId: traduzirMapIdLegado(p.current_map_id),
     // Campos JSONB: ver `fromJson` — valor ausente ou corrompido cai no
     // default do jogo em vez de propagar undefined.
     // MERGE com o default, nao substituicao. `fromJson` devolve o objeto do
@@ -385,11 +390,16 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     pokedexKills,
     missoesReivindicadas,
     especialidades,
-    // PH-224: MERGE com o default pelo mesmo motivo de autoToggles/autoSellConfig
+    // PH-429: `lerProgressoPorBioma` cobre os tres casos numa funcao — formato
+    // novo, formato de faixa antigo (traduzido) e entrada podre (default). O
+    // MERGE com o default que existia aqui nao serve mais: as chaves do formato
+    // antigo (`faixa1`) e do novo (`marinho`) sao disjuntas, entao um spread
+    // deixaria as duas no mesmo objeto e o gate leria a errada.
+    // Motivo original (PH-224), que continua valendo pro caso do default:
     // — linha gravada antes desta coluna existir (todo jogador ate 27/08) volta
     // sem a chave, e faixa ausente tem que virar 0, nao undefined (quebraria a
     // comparacao de indice do gate, PH-227).
-    biomaProgress: { ...defaults.biomaProgress, ...fromJson(p.bioma_progress, defaults.biomaProgress) },
+    biomaProgress: lerProgressoPorBioma(p.bioma_progress),
   }
 }
 

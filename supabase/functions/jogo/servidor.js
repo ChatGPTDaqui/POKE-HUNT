@@ -43458,7 +43458,7 @@ var GEOMETRIA = {
 		}
 	]
 };
-var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
+Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
 /**
 * PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
 * vencer o Lord do bioma N libera o bioma N+1. So existia como
@@ -43482,13 +43482,6 @@ var ORDEM_DOS_BIOMAS = [
 	"sombrio",
 	"igneo"
 ];
-function biomaProgressDefault() {
-	return {
-		faixa1: 0,
-		faixa2: 0,
-		faixa3: 0
-	};
-}
 Object.fromEntries(FAIXAS$1.map((f) => [f.id, f]));
 var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
 	sub,
@@ -46443,27 +46436,6 @@ function parseEstagioIdOuEspelho(mapId) {
 function quantidadeDeSalas(mapId) {
 	const estagio = parseEstagioIdOuEspelho(mapId);
 	return estagio ? salasDoEstagio(estagio.estagio) : SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1];
-}
-/**
-* Indice do bioma deste mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` quando o
-* mapId nao e de um estagio de bioma (hunt inicial, BOSS, Pesadelo).
-*
-* SUBSTITUI `biomas.ts#indiceDoBiomaNoMapId` (PH-426), que sabia ler so o
-* formato antigo `<bioma>_faixa<N>`. A funcao mora AQUI, e nao la, porque
-* `estagios.ts` ja importa `biomas.ts` — o contrario criaria ciclo, e
-* `ESTAGIOS` e calculado em tempo de import.
-*
-* O INVARIANTE QUE ELA CARREGA e o mesmo de antes: o gate server-side
-* (`authority/src/appSessao.ts#bloqueioDeBiomaPendente`) e o selo/ordem do menu
-* (`HuntMenu.tsx`) precisam concordar sobre "que bioma e esse mapId". Uma
-* funcao so, chamada pelos dois.
-*
-* ELA E TRANSITORIA. O gate por ORDEM de bioma morre na PH-430, quando os 12
-* biomas passam a nascer abertos e o eixo vira o estagio dentro do bioma.
-*/
-function indiceDoBiomaDoEstagio(mapId) {
-	const estagio = parseEstagioId(mapId);
-	return estagio ? ORDEM_DOS_BIOMAS.indexOf(estagio.bioma) : -1;
 }
 /**
 * Perfil de cada um dos 33 sub-biomas.
@@ -75607,6 +75579,179 @@ function tickClimaDeGolpe(world, dt) {
 	if (clima.turnosRestantes <= 0) reporClimaDeAmbiente(world);
 }
 //#endregion
+//#region src/data/progressoDeBioma.ts
+/**
+* O NOME MUDOU DE `BiomaProgress` PRA `ProgressoPorBioma` DE PROPOSITO.
+*
+* As duas formas sao objetos de numeros, e `Record<string, number>` aceita
+* `p['faixa1']` sem reclamar — quem lesse a chave antiga receberia `undefined`,
+* o `?? 0` transformaria em zero, e o gate trancaria o jogo inteiro em silencio.
+* Trocar o nome do tipo obriga o compilador a apontar cada lugar que precisava
+* ser relido. Foi a unica forma de tornar a mudanca de formato barulhenta.
+*/
+/** Progresso de conta nova: os 12 biomas em zero, nenhum estagio limpo. */
+function progressoPorBiomaDefault() {
+	return Object.fromEntries(BIOMAS.map((b) => [b.chave, 0]));
+}
+/** Maior estagio limpo do bioma. Bioma desconhecido ou ausente: 0. */
+function maiorEstagioLimpo(progresso, bioma) {
+	const bruto = progresso[bioma];
+	if (typeof bruto !== "number" || !Number.isFinite(bruto)) return 0;
+	return Math.min(Math.max(Math.trunc(bruto), 0), 10);
+}
+/**
+* Registra o estagio como limpo. NUNCA REGRIDE: limpar de novo um estagio
+* antigo (a caçada direcionada da PH-428, que e o ponto do redesenho) nao pode
+* desligar o estagio seguinte.
+*
+* Devolve um objeto novo — o estado do jogo e tratado como imutavel pelos
+* consumidores (store do Zustand, snapshot do flush).
+*/
+function comEstagioLimpo(progresso, bioma, estagio) {
+	if (!estagioValido(estagio)) return progresso;
+	if (estagio <= maiorEstagioLimpo(progresso, bioma)) return progresso;
+	return {
+		...progresso,
+		[bioma]: estagio
+	};
+}
+/**
+* O estagio esta liberado pra entrar?
+*
+* O estagio 1 de QUALQUER bioma esta sempre liberado — e o que faz os 12
+* biomas nascerem abertos. O estagio N pede o N-1 limpo.
+*
+* A MESMA FUNCAO E CHAMADA PELOS DOIS LADOS (gate da autoridade em
+* `appSessao.ts` e selo do menu em `HuntMenu.tsx`), pelo mesmo motivo que
+* `indiceDoBiomaDoEstagio` era compartilhada antes dela: quando os dois
+* calculam a mesma regra separado, eles divergem, e o jogador ve uma hunt
+* aberta que o servidor recusa.
+*/
+function estagioLiberado(progresso, bioma, estagio) {
+	if (!estagioValido(estagio)) return false;
+	if (estagio === 1) return true;
+	return maiorEstagioLimpo(progresso, bioma) >= estagio - 1;
+}
+/**
+* Mensagem de bloqueio do estagio, ou `null` se ele esta liberado.
+*
+* Mora aqui, e nao no gate do servidor nem na tela, porque as duas pontas
+* mostram o MESMO texto — o cliente pra explicar o cadeado, o servidor pra
+* recusar a sessao. Quando isso vivia em dois lugares (PH-227/229) a nota do
+* arquivo tinha que pedir que ninguem os deixasse divergir.
+*/
+function bloqueioDoEstagio(progresso, bioma, estagio) {
+	if (estagioLiberado(progresso, bioma, estagio)) return null;
+	return `Vença o Lord do estágio ${estagio - 1} para liberar este.`;
+}
+/**
+* As tres faixas antigas, e ate que estagio cada uma vale na traducao.
+*
+* A REGRA: faixa1 cobria Lv 1-30, que sao os estagios 1 a 3; faixa2 cobria Lv
+* 31-60 (estagios 4 a 6); faixa3 cobria Lv 61-90 (estagios 7 a 9). Quem venceu
+* o Lord de um bioma na faixa1 limpou, no vocabulario novo, tudo ate o estagio
+* 3 daquele bioma.
+*
+* O ESTAGIO 10 NAO E CONCEDIDO POR TRADUCAO NENHUMA, e isso e deliberado: ele
+* cobre Lv 91-100, conteudo que nao existia (o teto era 90). Ninguem pode ter
+* limpado o que nao existia — o jogador nao perde progresso e nao ganha o que
+* nao tinha.
+*/
+var ESTAGIO_DA_FAIXA_LEGADA = [
+	["faixa1", 3],
+	["faixa2", 6],
+	["faixa3", 9]
+];
+/**
+* A ordem dos biomas COMO ELA ERA quando os saves antigos foram escritos.
+*
+* Congelada aqui de propósito, em vez de ler `ORDEM_DOS_BIOMAS`: o numero
+* gravado em `faixa1` e um INDICE nessa lista, e se a lista mudar amanha a
+* traducao de um save de ontem passa a apontar pro bioma errado. Save antigo se
+* le com a regra antiga. A constante viva continua sendo usada pelo resto do
+* codigo enquanto ela existir (ela sai na PH-434).
+*/
+var ORDEM_LEGADA_DOS_BIOMAS = [
+	"campo_aberto",
+	"subterraneo",
+	"marinho",
+	"industrial",
+	"mata",
+	"aguas_interiores",
+	"urbano",
+	"gelido",
+	"aridos",
+	"sagrado",
+	"sombrio",
+	"igneo"
+];
+function ehFormatoLegado(bruto) {
+	return ESTAGIO_DA_FAIXA_LEGADA.some(([faixa]) => faixa in bruto);
+}
+/**
+* Le `players.bioma_progress` em qualquer um dos dois formatos.
+*
+* IDEMPOTENTE, e o teste tranca isso: rodar sobre o resultado dela nao muda
+* mais nada. Sem essa propriedade a traducao rodaria a cada carga e o valor
+* derivaria — e o caminho de carga roda muitas vezes por sessao, nao uma.
+*
+* Entrada podre (null, string, numero, chave que nao e bioma, valor que nao e
+* numero) devolve o default em vez de estourar: uma carga que falha derruba a
+* sessao inteira, e um progresso zerado e recuperavel (o servidor grava de
+* novo ao vencer o proximo Lord) enquanto uma sessao que nao abre nao e.
+*/
+function lerProgressoPorBioma(bruto) {
+	const base = progressoPorBiomaDefault();
+	if (bruto == null || typeof bruto !== "object" || Array.isArray(bruto)) return base;
+	const objeto = bruto;
+	if (ehFormatoLegado(objeto)) {
+		let traduzido = base;
+		for (const [faixa, estagio] of ESTAGIO_DA_FAIXA_LEGADA) {
+			const quantos = objeto[faixa];
+			if (typeof quantos !== "number" || !Number.isFinite(quantos)) continue;
+			const ate = Math.min(Math.trunc(quantos), ORDEM_LEGADA_DOS_BIOMAS.length);
+			for (let i = 0; i < ate; i++) traduzido = comEstagioLimpo(traduzido, ORDEM_LEGADA_DOS_BIOMAS[i], estagio);
+		}
+		return traduzido;
+	}
+	const lido = base;
+	for (const chave of Object.keys(base)) {
+		const valor = objeto[chave];
+		if (typeof valor !== "number" || !Number.isFinite(valor)) continue;
+		lido[chave] = Math.min(Math.max(Math.trunc(valor), 0), 10);
+	}
+	return lido;
+}
+/** Hunt pra onde cai quem estava num mapId que nao existe mais. */
+var HUNT_DE_REFUGIO = "route_46";
+var PADRAO_DE_FAIXA_LEGADA = /^(.+)_faixa([123])$/;
+/**
+* Traduz um mapId gravado (`players.current_map_id`, `game_sessions.map_id`)
+* pro formato de estagio.
+*
+* TRES CASOS, e o terceiro e o que importa:
+*
+*  - ja e estagio (`marinho_e7`): devolve igual;
+*  - e faixa antiga (`marinho_faixa2`): vira o PRIMEIRO estagio daquela faixa
+*    (faixa1 -> e1, faixa2 -> e4, faixa3 -> e7). O primeiro, e nao o ultimo,
+*    porque a faixa nao diz onde dentro dela o jogador estava — e comecar no
+*    piso e o erro barato: ele sobe de novo em minutos. Comecar no topo daria
+*    conteudo que ele talvez nao tivesse alcancado;
+*  - qualquer outra coisa: a hunt inicial. Um mapId desconhecido chegando em
+*    `buildMapWorld` estoura (`Mapa desconhecido: ...`) e derruba a sessao —
+*    era assim que a hunt de faixa saia do ar e levava o jogador com ela.
+*/
+function traduzirMapIdLegado(mapId) {
+	if (mapId == null || mapId === "") return null;
+	if (parseEstagioId(mapId)) return mapId;
+	if (!PADRAO_DE_FAIXA_LEGADA.test(mapId)) return mapId;
+	const m = PADRAO_DE_FAIXA_LEGADA.exec(mapId);
+	const bioma = m?.[1] ?? "";
+	const faixa = Number(m?.[2] ?? 0);
+	if (!ORDEM_DOS_BIOMAS.includes(bioma)) return HUNT_DE_REFUGIO;
+	return `${bioma}_e${(faixa - 1) * 3 + 1}`;
+}
+//#endregion
 //#region src/stores/gameStateDefaults.ts
 var STARTING_ITEMS = {
 	poke_ball: 500,
@@ -75678,7 +75823,7 @@ function defaultGameStateData() {
 		unlockedContinents: [...FAIXAS_INICIAIS],
 		missoesReivindicadas: {},
 		especialidades: especialidadeNiveisDefault(),
-		biomaProgress: biomaProgressDefault()
+		biomaProgress: progressoPorBiomaDefault()
 	};
 }
 /**
@@ -80184,25 +80329,34 @@ function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
 	return true;
 }
 /**
-* PH-226/236: vencer (matar OU capturar) o LORD avanca o indice de
-* `biomaProgress` da faixa atual — SO se o bioma resolvido for exatamente o
-* proximo esperado na ordem canonica (`ORDEM_DOS_BIOMAS`). Fora de ordem
-* (nao deveria acontecer com o enforcement de PH-227, mas e defesa em
-* profundidade — o motor nao confia cegamente no proprio estado do mundo)
-* nao mexe no indice: silencioso de proposito, mesma familia de decisao de
-* `resolverProtetorDaSala` nao logar/travar em cima de estado inconsistente.
+* Vencer (matar OU capturar) o LORD marca o ESTAGIO como limpo (PH-429/430).
 *
-* Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois
-* lados que rodam esse motor — resim do servidor e predicao do cliente.
+* O QUE ISTO ERA ATE A PH-429, e por que a regra virou outra. A versao antiga
+* avancava um indice na `ORDEM_DOS_BIOMAS` — "quantos biomas da faixa o
+* jogador venceu" — e so avancava se o bioma resolvido fosse exatamente o
+* PROXIMO esperado na ordem. Isso existia porque o gate era sequencial entre
+* biomas: vencer o Lord do bioma N liberava o N+1.
+*
+* O redesenho de 02/09 tirou essa ordem. Os 12 biomas nascem abertos e o
+* progresso e por bioma: o que se registra e "o maior estagio limpo DESTE
+* bioma", e o que ele libera e o estagio seguinte DELE. Com isso caem as duas
+* condicoes da versao antiga (o `indexOf` na ordem e o `atual !== indice`), e
+* `ORDEM_DOS_BIOMAS` deixa de participar da decisao.
+*
+* NAO REGRIDE, e essa e a parte nova que o redesenho EXIGE: `comEstagioLimpo`
+* ignora estagio menor ou igual ao ja limpo. Sem isso a caçada direcionada da
+* PH-428 (voltar a um estagio antigo pela especie que ele da) desligaria o
+* estagio seguinte a cada visita.
+*
+* Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois lados
+* que rodam esse motor — resim do servidor e predicao do cliente.
 */
 function avancarBiomaProgressSeForOProximo(world, gameState) {
 	const bioma = SUB_BIOMA_POR_CHAVE[world.sala?.chave ?? ""]?.bioma.chave;
 	if (!bioma) return;
-	const indice = ORDEM_DOS_BIOMAS.indexOf(bioma);
-	if (indice === -1) return;
-	const faixa = world.mapDef?.continent ?? "faixa1";
-	if ((gameState.biomaProgress[faixa] ?? 0) !== indice) return;
-	gameState.setBiomaProgress(faixa, indice + 1);
+	const doMapa = parseEstagioId(world.mapDef?.id ?? "");
+	if (!doMapa || doMapa.bioma !== bioma) return;
+	gameState.setBiomaProgress(bioma, doMapa.estagio);
 }
 function spawnEnemyAt(world, mapDef, ctx, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
@@ -80919,7 +81073,7 @@ function snapshotToGameState(snap, defaults) {
 		},
 		unlockedMaps: p.unlocked_maps,
 		unlockedContinents: p.unlocked_continents,
-		currentMapId: p.current_map_id,
+		currentMapId: traduzirMapIdLegado(p.current_map_id),
 		autoToggles: {
 			...defaults.autoToggles,
 			...fromJson(p.auto_toggles, defaults.autoToggles)
@@ -80945,10 +81099,7 @@ function snapshotToGameState(snap, defaults) {
 		pokedexKills,
 		missoesReivindicadas,
 		especialidades,
-		biomaProgress: {
-			...defaults.biomaProgress,
-			...fromJson(p.bioma_progress, defaults.biomaProgress)
-		}
+		biomaProgress: lerProgressoPorBioma(p.bioma_progress)
 	};
 }
 function gameStateToPlayerRow(userId, s) {
@@ -81261,8 +81412,8 @@ function criarEstadoDoJogador(dados) {
 			setEspecialidadeNivel: (tipo, trilha, nivel) => {
 				s.especialidades[tipo][trilha] = nivel;
 			},
-			setBiomaProgress: (faixa, indice) => {
-				s.biomaProgress[faixa] = indice;
+			setBiomaProgress: (bioma, estagio) => {
+				s.biomaProgress = comEstagioLimpo(s.biomaProgress, bioma, estagio);
 			},
 			setAutoToggle: (key, value) => {
 				s.autoToggles[key] = value;
@@ -82079,22 +82230,34 @@ async function sairDaHunt(cfg, userId, sessaoId) {
 	await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
 }
 /**
-* PH-227/236: mensagem de bloqueio (ou `null` se liberado) do gate
-* sequencial de bioma — vencer o Lord do bioma N libera o N+1 (PH-207/226).
+* Mensagem de bloqueio (ou `null` se liberado) do gate de ENTRADA.
 *
-* Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
-* inteiro so pra exercitar uma regra de negocio. `indiceDoBiomaDoEstagio`
-* e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
-* dois lados tem que concordar sobre "que bioma e esse mapId" E sobre o
-* texto exato da mensagem (`HuntMenu.tsx#bloqueioDeBiomaClient` espelha
-* esta string).
+* O EIXO DO GATE MUDOU NA PH-430, e este e o coracao da mudanca. Ate aqui ele
+* era SEQUENCIAL ENTRE BIOMAS: o mapId dizia qual bioma, o `grupo` (o
+* `continent`) dizia qual faixa, e a regra era "o indice deste bioma em
+* `ORDEM_DOS_BIOMAS` tem que caber no progresso daquela faixa" — vencer o Lord
+* do bioma N liberava o N+1 (PH-207/226/227).
+*
+* Com os 12 biomas nascendo abertos esse eixo deixa de existir. A regra agora e
+* o ESTAGIO DENTRO DO BIOMA: o estagio 1 de qualquer bioma esta sempre
+* liberado, e o estagio N pede o N-1 limpo NAQUELE bioma. Progresso de um bioma
+* nao libera nada em outro.
+*
+* O `grupo` SAIU DA ASSINATURA. Ele existia pra escolher qual das tres faixas
+* do progresso consultar, e nao ha mais faixa no progresso. O gate de
+* `continent` (o que o Campeao Lance libera) continua existindo e e checado
+* ANTES deste, no chamador — sao duas travas diferentes, e so uma mudou.
+*
+* Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP inteiro
+* so pra exercitar uma regra de negocio. E `bloqueioDoEstagio` e literalmente a
+* MESMA funcao que o menu chama (`HuntMenu.tsx#bloqueioDeBiomaClient`) — antes
+* os dois lados reimplementavam a regra e repetiam a string a mao, com um
+* comentario em cada arquivo pedindo que ninguem os deixasse divergir.
 */
-function bloqueioDeBiomaPendente(mapId, grupo, biomaProgress) {
-	const indiceEsperado = indiceDoBiomaDoEstagio(mapId);
-	if (indiceEsperado <= 0) return null;
-	if ((biomaProgress?.[grupo] ?? 0) >= indiceEsperado) return null;
-	const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1];
-	return `Vença o Lord de ${BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave} para liberar esta área.`;
+function bloqueioDeBiomaPendente(mapId, progresso) {
+	const doMapa = parseEstagioId(mapId);
+	if (!doMapa) return null;
+	return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio);
 }
 /**
 * Quanto tempo depois de fechada uma sessao ainda vale como "a hunt que o
@@ -82150,7 +82313,7 @@ async function abrirSessao(cfg, userId, req) {
 	if (MAPS[mapId].unlockCost != null && !estado.unlockedMaps.includes(mapId)) throw new ErroHttp(403, "hunt nao desbloqueada");
 	const grupo = MAPS[mapId].continent;
 	if (!estado.unlockedContinents.includes(grupo)) throw new ErroHttp(403, "Derrote o Campeao Lance para acessar esta area.");
-	const bloqueio = bloqueioDeBiomaPendente(mapId, grupo, estado.biomaProgress);
+	const bloqueio = bloqueioDeBiomaPendente(mapId, estado.biomaProgress);
 	if (bloqueio) throw new ErroHttp(403, bloqueio);
 	const anterior = await sessaoAberta(cfg, userId);
 	if (anterior) {

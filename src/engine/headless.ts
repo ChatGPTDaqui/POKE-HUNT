@@ -48,9 +48,15 @@ export { climaDaSala } from './systems/climaAmbiente'
 export {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, SALAS_POR_HUNT, ABATES_POR_SALA,
   BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId, biomaDoMapId, indiceDoBiomaNoMapId,
-  ORDEM_DOS_BIOMAS, biomaProgressDefault,
+  ORDEM_DOS_BIOMAS,
 } from '@/data/biomas'
-export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId, BiomaProgress } from '@/data/biomas'
+export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId } from '@/data/biomas'
+export {
+  progressoPorBiomaDefault, maiorEstagioLimpo, comEstagioLimpo, estagioLiberado,
+  bloqueioDoEstagio, lerProgressoPorBioma, traduzirMapIdLegado, HUNT_DE_REFUGIO,
+  ORDEM_LEGADA_DOS_BIOMAS,
+} from '@/data/progressoDeBioma'
+export type { ProgressoPorBioma } from '@/data/progressoDeBioma'
 export {
   ESTAGIOS, ESTAGIOS_POR_BIOMA, ESTAGIO_POR_ID, SALAS_POR_ESTAGIO, SALAS_POR_BIOMA,
   TETO_DO_MODO_NORMAL, estagioId, parseEstagioId, estagioValido, niveisDoEstagio,

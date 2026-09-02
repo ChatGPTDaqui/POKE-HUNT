@@ -9,7 +9,8 @@
 import type { PokeInstance } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { MAPS } from '@/data/maps'
-import { FAIXAS_INICIAIS, biomaProgressDefault, type BiomaProgress } from '@/data/biomas'
+import { FAIXAS_INICIAIS } from '@/data/biomas'
+import { progressoPorBiomaDefault, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 
 // Limite de POKEs em campo — no vanilla so aparecia como comentario em
@@ -178,7 +179,13 @@ export interface GameStateData {
   // cadeias (dual-type), e reivindicar numa nao reivindica a outra.
   missoesReivindicadas: Record<string, boolean>
   especialidades: EspecialidadeNiveis
-  biomaProgress: BiomaProgress
+  /**
+   * PH-429: um numero por BIOMA ("maior estagio ja limpo", 0 a 10), e nao mais
+   * tres inteiros por faixa. O NOME DO CAMPO ficou como estava de proposito —
+   * trocar obrigaria uma migracao do `persist` local, e o tipo novo ja e o que
+   * obriga o compilador a apontar cada leitura.
+   */
+  biomaProgress: ProgressoPorBioma
 }
 
 // Exportado porque o adaptador de persistencia precisa dos mesmos defaults
@@ -211,6 +218,6 @@ export function defaultGameStateData(): GameStateData {
     unlockedContinents: [...FAIXAS_INICIAIS],
     missoesReivindicadas: {},
     especialidades: especialidadeNiveisDefault(),
-    biomaProgress: biomaProgressDefault(),
+    biomaProgress: progressoPorBiomaDefault(),
   }
 }

@@ -11,10 +11,11 @@ import { pedirAcao } from '@/data/remote/autoridade'
 // de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
 import {
-  FAIXAS, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE,
-  type SubBiomaDef, type BiomaProgress,
+  FAIXAS, SUB_BIOMA_POR_CHAVE,
+  type SubBiomaDef,
 } from '@/data/biomas'
-import { indiceDoBiomaDoEstagio, quantidadeDeSalas } from '@/data/estagios'
+import { indiceDoBiomaDoEstagio, parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import { bloqueioDoEstagio, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { contextoDeSpawn } from '@/engine/systems/salaSystem'
 import type { HuntMapDef } from '@/data/huntTypes'
@@ -45,19 +46,21 @@ const CONTINENT_LABELS: Record<string, string> = {
 const TYPE_LIST = (Object.keys(TYPE_COLORS) as ElementType[]).sort()
 const fmt = new Intl.NumberFormat('pt-BR')
 
-// PH-229: mensagem de bloqueio do gate de bioma — espelha `bloqueioDeBiomaPendente`
-// (authority/src/appSessao.ts, PH-227), mas nao importa dela: aquele arquivo e
-// server-only (Deno, ErroHttp). O que os dois COMPARTILHAM de verdade e
-// `indiceDoBiomaDoEstagio` (data/estagios.ts) — sem isso os dois lados podiam
-// discordar sobre "que indice este mapId espera".
-function bloqueioDeBiomaClient(mapId: string, faixa: string, biomaProgress: BiomaProgress): string | null {
-  const indiceEsperado = indiceDoBiomaDoEstagio(mapId)
-  if (indiceEsperado <= 0) return null
-  const progresso = biomaProgress[faixa as keyof BiomaProgress] ?? 0
-  if (progresso >= indiceEsperado) return null
-  const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1]
-  const anteriorNome = BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave
-  return `Vença o Lord de ${anteriorNome} para liberar esta área.`
+/**
+ * Mensagem de bloqueio do gate de estagio (PH-430).
+ *
+ * ELA ENCOLHEU PORQUE A REGRA ENCOLHEU. Ate a PH-429 esta funcao espelhava a
+ * do servidor a mao — cada lado montava o indice na ordem dos biomas, olhava a
+ * faixa certa do progresso e escrevia a MESMA string, com um comentario em
+ * cada arquivo pedindo que ninguem os deixasse divergir. Agora as duas pontas
+ * chamam `bloqueioDoEstagio` (data/progressoDeBioma.ts), que e um modulo puro
+ * e importavel dos dois lados: a regra e o texto passaram a ter uma fonte so.
+ */
+function bloqueioDeBiomaClient(mapId: string, progresso: ProgressoPorBioma): string | null {
+  const doMapa = parseEstagioId(mapId)
+  // Hunt sem estagio (inicial, BOSS, Lance, Pesadelo) nao passa por este gate.
+  if (!doMapa) return null
+  return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio)
 }
 
 async function acionarHunt(
@@ -351,12 +354,12 @@ export function HuntMenu() {
       .filter((m) => (m.continent ?? 'faixa1') === continent)
       .filter((m) => huntHasType(m, typeFilter))
       .filter((m) => huntMatches(m, term))
-      // PH-229: ordem de PROGRESSAO do bioma (ORDEM_DOS_BIOMAS), nao mais por
-      // nivel — achado de pente fino: `levelRange` e IDENTICO pros 12 biomas
-      // da mesma faixa (todos cobrem a faixa inteira), entao o sort antigo
-      // degradava pra alfabetico, sem relacao nenhuma com o gate sequencial
-      // (PH-207/226/227) — o desbloqueio "pulava" pro meio do alfabeto sem
-      // logica visivel. Hunt sem bioma (indice -1: rota inicial) fica primeiro.
+      // Agrupa por BIOMA, e nao por nivel — achado de pente fino: `levelRange` era
+      // IDENTICO pros 12 biomas da mesma faixa, entao o sort antigo degradava pra
+      // alfabetico. PH-430: isto DEIXOU de ser ordem de progressao (nao ha mais
+      // ordem entre biomas) e virou so agrupamento estavel — o que a trilha da
+      // PH-431 substitui de vez. Hunt sem bioma (indice -1: rota inicial) fica
+      // primeiro.
       .sort((a, b) =>
         indiceDoBiomaDoEstagio(a.id) - indiceDoBiomaDoEstagio(b.id)
         || a.name.localeCompare(b.name))
@@ -434,8 +437,8 @@ export function HuntMenu() {
         const continentGated = !unlockedContinents.includes(mapContinent)
         // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
         // continente e ANTES do custo em ouro, mesma prioridade do servidor.
-        const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, mapContinent, biomaProgress)
-        const temProtetor = indiceDoBiomaDoEstagio(map.id) !== -1
+        const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, biomaProgress)
+        const temProtetor = parseEstagioId(map.id) != null
         // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
         // custo nasce liberada. Checar so a lista trancava visualmente as hunts
         // do Modo Pesadelo e as BOSS, que sao geradas em runtime e nunca entram

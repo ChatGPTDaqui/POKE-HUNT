@@ -34,8 +34,8 @@ import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
-import { ABATES_POR_SALA, ORDEM_DOS_BIOMAS, SUB_BIOMA_POR_CHAVE, type BiomaProgress } from '@/data/biomas'
-import { quantidadeDeSalas } from '@/data/estagios'
+import { ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
+import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
@@ -572,26 +572,37 @@ function garantirProtetorDaSala(
 }
 
 /**
- * PH-226/236: vencer (matar OU capturar) o LORD avanca o indice de
- * `biomaProgress` da faixa atual — SO se o bioma resolvido for exatamente o
- * proximo esperado na ordem canonica (`ORDEM_DOS_BIOMAS`). Fora de ordem
- * (nao deveria acontecer com o enforcement de PH-227, mas e defesa em
- * profundidade — o motor nao confia cegamente no proprio estado do mundo)
- * nao mexe no indice: silencioso de proposito, mesma familia de decisao de
- * `resolverProtetorDaSala` nao logar/travar em cima de estado inconsistente.
+ * Vencer (matar OU capturar) o LORD marca o ESTAGIO como limpo (PH-429/430).
  *
- * Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois
- * lados que rodam esse motor — resim do servidor e predicao do cliente.
+ * O QUE ISTO ERA ATE A PH-429, e por que a regra virou outra. A versao antiga
+ * avancava um indice na `ORDEM_DOS_BIOMAS` — "quantos biomas da faixa o
+ * jogador venceu" — e so avancava se o bioma resolvido fosse exatamente o
+ * PROXIMO esperado na ordem. Isso existia porque o gate era sequencial entre
+ * biomas: vencer o Lord do bioma N liberava o N+1.
+ *
+ * O redesenho de 02/09 tirou essa ordem. Os 12 biomas nascem abertos e o
+ * progresso e por bioma: o que se registra e "o maior estagio limpo DESTE
+ * bioma", e o que ele libera e o estagio seguinte DELE. Com isso caem as duas
+ * condicoes da versao antiga (o `indexOf` na ordem e o `atual !== indice`), e
+ * `ORDEM_DOS_BIOMAS` deixa de participar da decisao.
+ *
+ * NAO REGRIDE, e essa e a parte nova que o redesenho EXIGE: `comEstagioLimpo`
+ * ignora estagio menor ou igual ao ja limpo. Sem isso a caçada direcionada da
+ * PH-428 (voltar a um estagio antigo pela especie que ele da) desligaria o
+ * estagio seguinte a cada visita.
+ *
+ * Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois lados
+ * que rodam esse motor — resim do servidor e predicao do cliente.
  */
 function avancarBiomaProgressSeForOProximo(world: WorldState, gameState: GameStateStore): void {
   const bioma = SUB_BIOMA_POR_CHAVE[world.sala?.chave ?? '']?.bioma.chave
   if (!bioma) return
-  const indice = ORDEM_DOS_BIOMAS.indexOf(bioma)
-  if (indice === -1) return
-  const faixa = (world.mapDef?.continent ?? 'faixa1') as keyof BiomaProgress
-  const atual = gameState.biomaProgress[faixa] ?? 0
-  if (atual !== indice) return
-  gameState.setBiomaProgress(faixa, indice + 1)
+  // O estagio sai do mapId, e nao do `continent`: o `continent` e o grupo de
+  // gate (a ponte de faixa da PH-426) e nao diz QUAL dos tres estagios daquele
+  // grupo o jogador limpou.
+  const doMapa = parseEstagioId(world.mapDef?.id ?? '')
+  if (!doMapa || doMapa.bioma !== bioma) return
+  gameState.setBiomaProgress(bioma, doMapa.estagio)
 }
 
 function spawnEnemyAt(
