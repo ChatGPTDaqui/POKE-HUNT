@@ -1,7 +1,30 @@
-// Bancada: o quanto o contador de abates do CLIENTE e o do SERVIDOR divergem
-// dentro de uma sala (PH-258).
+// Bancada: o quanto DUAS SEQUENCIAS DE SORTEIO do mesmo motor divergem no ritmo
+// de abate dentro de uma sala (PH-258).
 //
-// POR QUE ISTO PRECISA SER MEDIDO
+// ATENCAO AO QUE ELA NAO MEDE (PH-423)
+// -----------------------------------------------------------------------------
+// Ela NAO mede a divergencia cliente-contra-servidor, e o nome do arquivo mais o
+// cabecalho original diziam que sim. `corrida()` e uma simulacao CONTINUA, e as
+// duas pontas comparadas abaixo sao duas chamadas dela com sementes diferentes —
+// uma apelidada de "servidor". Nenhum dos dois lados reconstroi o mundo por
+// janela, que e exatamente o que o servidor de verdade faz (`buildMapWorld` a
+// cada flush, POKE de volta no ponto de entrada). Logo:
+//
+//   - a RAMPA por janela nao entra na conta. Ela e o efeito dominante do
+//     problema real — medida em 3,5 a 6,0s por janela em
+//     custo-fixo-por-janela.mjs, o que come de 12% (janela de 30s) a 60%
+//     (janela de 10s) do tempo do servidor;
+//   - `Math.abs()` abaixo apaga a DIRECAO, e direcao era o achado que faltava:
+//     na bancada fiel o cliente esta a frente em 119 de 119 trocas na janela
+//     padrao, nunca atras. Aqui isso seria invisivel.
+//
+// O que ela mede de fato, e continua util pra isso: o piso de ruido que vem SO
+// da semente. Serve pra separar "e ruido de sorteio, some sozinho" de "e
+// estrutural" — mas o numero dela nao pode ser citado como a divergencia que o
+// jogador sente. Para essa, usar `troca-de-sala-sob-autoridade.mjs`, que
+// reconstroi a janela.
+//
+// POR QUE O RUIDO DE SEMENTE PRECISA SER MEDIDO
 // -----------------------------------------------------------------------------
 // As duas pontas rodam o MESMO motor, mas com sequencias de sorteio diferentes:
 // a do servidor sai da semente da sessao (que nunca sai de la, ver core/rng.ts)
