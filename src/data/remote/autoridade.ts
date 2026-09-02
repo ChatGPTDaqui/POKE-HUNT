@@ -17,6 +17,7 @@ import {
 import { mochilaCarregada } from '@/stores/mochilaStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
 import { SPECIES } from '@/data/pokes'
+import { preloadEspecies } from '@/data/preload'
 import { solicitarAvancoDeSala } from '@/engine/systems/salaSystem'
 import { agendarMesmoEmSegundoPlano, type TemporizadorCancelavel } from '@/core/temporizadorDeSegundoPlano'
 import type { ClimaTipo, SalaAtiva } from '@/engine/types'
@@ -158,16 +159,14 @@ function reconciliarPokeAtivoNoWorld(doServidor: GameStateData): void {
     // aba em segundo plano o carregamento de imagem fica suspenso e seguraria a
     // troca. O guard de `drawEntity` cobre os quadros sem arte.
     //
-    // IMPORT DINAMICO, e nao estatico no topo: `data/preload` puxa
-    // `render/sprites`, que e um dos modulos mais pesados do projeto. Este
-    // arquivo e importado por meia interface, e o import estatico engordou o
-    // grafo o bastante pra `reordenarReservas.test.ts` — que faz
-    // `await import('./controller')` — estourar o timeout de 5s da suite sob
-    // carga. O ramo aqui e raro (POKE saiu da equipe noutra aba); carregar o
-    // preload so quando ele acontece nao custa nada a ninguem.
-    void import('@/data/preload').then((m) => m.preloadEspecies(
-      [{ speciesId: substituto.speciesId, isShiny: substituto.isShiny }],
-    ))
+    // IMPORT ESTATICO (PH-410). Isto aqui ja foi um `import()` dinamico, posto
+    // na PH-396 pra "nao engordar o grafo deste arquivo". Nao engordava nem
+    // aliviava nada: `data/preload` e importado estaticamente por
+    // `GameCanvas.tsx` e `controller.ts`, entao ele cai no mesmo chunk de
+    // qualquer jeito — o build dizia isso em voz alta a cada execucao
+    // (`INEFFECTIVE_DYNAMIC_IMPORT`). A falha de teste que motivou a troca era
+    // outra coisa, reproduzida depois na `dev` limpa e corrigida pela PH-404.
+    void preloadEspecies([{ speciesId: substituto.speciesId, isShiny: substituto.isShiny }])
     // O jogador PRECISA saber: ele estava vendo um POKE lutar e o que rende de
     // verdade e outro. Trocar em silencio deixaria a tela certa e a leitura
     // errada ("por que meu POKE mudou sozinho?").
