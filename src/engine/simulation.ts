@@ -346,6 +346,63 @@ function randomSpawnPoint(
 }
 
 /**
+ * Um ponto ANDAVEL a distancia de combate do jogador (PH-423).
+ *
+ * Serve pra recolocar em campo um inimigo que a janela anterior ja tinha posto
+ * lado a lado com o POKE — hoje so o protetor retomado, ver
+ * `criarEntidadeDoProtetor`.
+ *
+ * A distancia pedida e um pouco MENOR que `engageRangeFor` (~39px = raio + raio
+ * + `MELEE_RANGE_PADDING`): nascer exatamente no limite deixa o primeiro tick
+ * decidindo entre `chase` e `engaged` por arredondamento de ponto flutuante, e
+ * um tick de perseguicao a mais nao custa nada. Nascer COLADO (distancia 0) e
+ * que seria errado — as duas entidades se sobrepondo fazem o passo de separacao
+ * de `movementSystem` empurrar as duas.
+ *
+ * Tenta 8 direcoes ao redor do jogador antes de desistir, porque a direcao unica
+ * cai em parede em sala apertada — e ai o protetor nascia dentro do bloco, de
+ * onde o pathfinder nao tira ele. Sem candidato andavel, devolve o ponto do
+ * jogador snapado pra celula aberta mais proxima: perder o espacamento e melhor
+ * que perder a validade do ponto, mesma regra de `randomSpawnPoint`.
+ *
+ * CONSOME ZERO RNG, E ISSO NAO E DETALHE. A primeira versao sorteava o angulo
+ * inicial com `randRange`, e isso quebra a invariante que o cabecalho de
+ * `criarEntidadeDoProtetor` declara: "recriar nunca sorteia de novo... a
+ * reconstrucao consome ZERO `rng`". O servidor persiste `rng_state`/`rng_draws`
+ * em `game_sessions` e reconstroi o mundo a cada flush — um sorteio a mais por
+ * reconstrucao desloca a sequencia inteira dali pra frente, o que muda spawn e
+ * dano de tudo que vem depois. Media na bancada, o efeito colateral foi visivel:
+ * a mediana da espera saltou de 15,0s pra 35,5s, nao por regressao real, mas
+ * porque a corrida virou outra trajetoria aleatoria e deixou de ser comparavel
+ * com a linha de base.
+ *
+ * O angulo sai do FACING do jogador, que e estado do mundo ja reconstruido —
+ * deterministico e, de bonus, poe o protetor onde o POKE ja esta olhando.
+ */
+function pontoEmAlcanceDeCombate(
+  mapDef: MapDef,
+  jogador: { x: number; y: number; radius: number; facing: Point },
+): Point {
+  const distancia = jogador.radius + RAIO_PADRAO_DE_INIMIGO + MELEE_RANGE_PADDING_LOCAL - 6
+  const inicial = Math.atan2(jogador.facing.y, jogador.facing.x)
+  for (let i = 0; i < 8; i++) {
+    const ang = inicial + (i * Math.PI) / 4
+    const x = jogador.x + Math.cos(ang) * distancia
+    const y = jogador.y + Math.sin(ang) * distancia
+    if (!isCellBlocked(mapDef, x, y)) return { x, y }
+  }
+  return nearestOpenPoint(mapDef, jogador.x, jogador.y) ?? { x: jogador.x, y: jogador.y }
+}
+
+// Espelho local de `MELEE_RANGE_PADDING` (combatSystem) e do raio com que
+// `createEnemyEntity` nasce. Locais, e nao importados, porque importar
+// `combatSystem` aqui fecharia o ciclo `simulation -> combatSystem -> simulation`
+// — o mesmo motivo pelo qual `garantirProtetorDaSala` e injetado de fora em
+// `garantirTransicaoDeQuotaFechada`.
+const MELEE_RANGE_PADDING_LOCAL = 10
+const RAIO_PADRAO_DE_INIMIGO = 15
+
+/**
  * PH-202/204/205/236: cria a entidade do protetor da sala atual — nova
  * (sorteando especie/nivel/IV do pool da sala) ou RECRIADA fielmente a
  * partir de um `ProtetorPendente` ja persistido. Recriar nunca sorteia de
@@ -374,7 +431,40 @@ function criarEntidadeDoProtetor(
       isShiny: protetorSalvo.isShiny, trait: protetorSalvo.trait, uid: protetorSalvo.uid,
     })
     poke.hp = protetorSalvo.hpAtual
-    const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId: protetorSalvo.encounterId })
+    // PROTETOR RETOMADO NASCE EM ALCANCE DE COMBATE (PH-423), e nao no cone de
+    // 250-550px em que um protetor NOVO aparece.
+    //
+    // O LIVELOCK QUE ISTO CONSERTA, medido em
+    // scripts/harness/troca-de-sala-sob-autoridade.mjs. O servidor reconstroi o
+    // mundo a cada janela de flush e a posicao NAO e persistida (so identidade e
+    // `hpAtual` sao). Entao, com janela curta, toda janela repetia a MESMA
+    // aproximacao parcial:
+    //
+    //   nasce a 250-550px -> persegue -> janela fecha a 114px -> mundo descartado
+    //   -> nasce a 250-550px de novo, com o rng restaurado e a mesma geometria
+    //
+    // `engageRangeFor` e ~39px (raio + raio + 10), entao 114px nunca vira luta.
+    // Sonda de 46 janelas seguidas numa sala travada: `dist=114` IDENTICO em
+    // todas, os dois em `chase` e nunca `engaged`, `hpAtual` congelado em 33 —
+    // "caiu 0". A sala nao avancava NUNCA, nao "devagar": 10 salas em 100 no piso
+    // de janela de producao (10s).
+    //
+    // O cao de guarda do impasse (PH-301) nao pega este caso de proposito: ele so
+    // conta tempo com os dois ENGAJADOS, pra nao trocar o protetor durante a
+    // caminhada legitima. Perseguicao que nunca converge fica no ponto cego dele
+    // — e `protetorSemDanoSegundos` tambem e efemero, entao nem acumularia entre
+    // janelas.
+    //
+    // POR QUE ISTO NAO E TRAPACA NEM MUDA BALANCEAMENTO: a posicao do protetor
+    // nunca foi persistida, logo nao ha estado fiel a preservar. Um protetor
+    // SALVO e, por definicao, um que o POKE ja encontrou numa janela anterior;
+    // recolocar ele a meio mapa de distancia e que era a ficcao. Protetor NOVO
+    // continua nascendo no cone (o ramo abaixo), entao a chegada dele na tela nao
+    // muda, e o spawn de selvagem comum nao e tocado — a taxa de farm fica igual.
+    const pontoDeRetomada = atacante ? pontoEmAlcanceDeCombate(mapDef, atacante) : point
+    const enemy = createEnemyEntity(counters, {
+      poke, x: pontoDeRetomada.x, y: pontoDeRetomada.y, encounterId: protetorSalvo.encounterId,
+    })
     enemy.isProtetor = true
     return { enemy, pendente: protetorSalvo }
   }

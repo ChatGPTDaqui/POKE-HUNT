@@ -33,20 +33,47 @@ const require = createRequire(import.meta.url);
 const RAIZ = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const { decodePng } = require(join(RAIZ, 'scripts', 'lib', 'png.js'));
 
-const ZOOM = 4;
-const CELULA_W = 90, CELULA_H = 80, QUADROS = 5;
+// KNOBS. Existem porque a folha completa (4 condicoes x 4 opacidades x 5
+// quadros) sai em 1800x5120, e nesse tamanho qualquer visualizador reduz a
+// imagem — o corpo volta pra ~50px e a pergunta "o glifo tapa a cara do POKE?"
+// deixa de ser respondivel justamente na bancada que existe pra responder ela.
+//
+//   ZOOM=8 OPACIDADES=0.75 QUADROS=2 node scripts/harness/condicao-sobre-o-corpo.mjs pikachu
+//   CONDICOES=veneno,congelamento node scripts/harness/condicao-sobre-o-corpo.mjs gengar
+const ZOOM = Number(process.env.ZOOM ?? 4);
+const QUADROS = Number(process.env.QUADROS ?? 5);
+const CELULA_W = 90, CELULA_H = 80;
 // Altura com que o corpo aparece em jogo. Nao e o raio da entidade (14-15): a
 // sprite de batalha e desenhada maior que a caixa de colisao.
-const ALTURA_CORPO = 34;
+const ALTURA_CORPO = Number(process.env.ALTURA_CORPO ?? 34);
 // Copia de render/sprites.ts. Ver COR_DE_STATUS_NO_CORPO e
 // FORCA_DA_TINTA_DE_STATUS em src/data/vfxTiras.ts.
 const FORCA_DA_TINTA = 0.45;
-const OPACIDADES = [0, 0.5, 0.75, 0.9];
+const OPACIDADES = (process.env.OPACIDADES ?? '0,0.5,0.75,0.9').split(',').map(Number);
 
-const CONDICOES = [
-  { nome: 'paralisia', arquivo: 'assets/status-vfx/paralisia.png', quadros: 20, tinta: '#ffdd33' },
-  { nome: 'queimadura', arquivo: 'assets/status-vfx/queimadura.png', quadros: 6, tinta: '#ff8a2b' },
+// AS QUATRO CONDICOES DO CANAL DE CORPO (PH-416). Veneno e congelamento
+// entraram nesta lista junto com a arte deles: ate a PH-370 os dois eram lidos
+// so pela tinta, e a pergunta que esta bancada faz — "a tinta sozinha comunica?"
+// — tem a MESMA resposta ruim para eles que tinha para paralisia e queimadura,
+// so muda o elenco que colide (Gengar e Nidoking sao roxos; Articuno e Lapras
+// sao ciano).
+//
+// `quadros: 16` nos quatro nao e coincidencia: e o `QUADROS` de
+// scripts/gerar-status-vfx.mjs, que gera os seis com a mesma contagem. Antes
+// eram 20 e 6, porque as artes vinham de dois efeitos diferentes do banco.
+const TODAS_AS_CONDICOES = [
+  { nome: 'veneno', arquivo: 'assets/status-vfx/veneno.png', quadros: 16, tinta: '#a040c8' },
+  { nome: 'queimadura', arquivo: 'assets/status-vfx/queimadura.png', quadros: 16, tinta: '#ff8a2b' },
+  { nome: 'paralisia', arquivo: 'assets/status-vfx/paralisia.png', quadros: 16, tinta: '#ffdd33' },
+  { nome: 'congelamento', arquivo: 'assets/status-vfx/congelamento.png', quadros: 16, tinta: '#3fe0ff' },
 ];
+const CONDICOES = process.env.CONDICOES
+  ? process.env.CONDICOES.split(',').map((n) => {
+    const c = TODAS_AS_CONDICOES.find((x) => x.nome === n.trim());
+    if (!c) throw new Error(`condicao desconhecida: ${n} (use ${TODAS_AS_CONDICOES.map((x) => x.nome).join('/')})`);
+    return c;
+  })
+  : TODAS_AS_CONDICOES;
 
 function png(width, height, rgba) {
   const bruto = Buffer.alloc((width * 4 + 1) * height);

@@ -399,3 +399,97 @@ describe('protetor resolvido sob autoridade nao respawna (PH-230)', () => {
     expect(world.salaCountdownRemaining).not.toBeNull()
   })
 })
+
+// PH-423: O LIVELOCK DA SALA QUE NUNCA AVANCA.
+//
+// O servidor reconstroi o mundo a cada janela de flush e a posicao NAO e
+// persistida (so identidade e `hpAtual`). Enquanto o protetor RETOMADO nascia no
+// mesmo cone de 250-550px de um protetor novo, toda janela curta repetia a mesma
+// aproximacao parcial e era descartada antes do contato:
+//
+//   nasce a 250-550px -> persegue -> janela fecha a ~114px -> mundo descartado
+//   -> nasce a 250-550px de novo, rng restaurado, geometria identica
+//
+// `engageRangeFor` e ~39px, entao 114px nunca virava luta. Sonda de 46 janelas
+// seguidas numa sala travada: `dist=114` IDENTICO em todas, os dois em `chase` e
+// nunca `engaged`, `hpAtual` congelado em 33 — "caiu 0". Medido em
+// scripts/harness/troca-de-sala-sob-autoridade.mjs: com janela de 30s (o padrao
+// de producao) 3 salas em 120 NUNCA avancavam; com o conserto, zero.
+//
+// O cao de guarda do impasse (PH-301) nao cobre isto de proposito — ele so conta
+// tempo com os dois ENGAJADOS, pra nao trocar o protetor durante a caminhada
+// legitima, e perseguicao que nao converge fica no ponto cego dele.
+describe('protetor retomado nasce em alcance de combate (PH-423)', () => {
+  /** Copia de `engageRangeFor` (combatSystem): raio + raio + MELEE_RANGE_PADDING. */
+  const alcanceDeCombate = (a: { radius: number }, b: { radius: number }) => a.radius + b.radius + 10
+
+  function reconstruirComProtetorSalvo(semente: number) {
+    const world = mundo(semente)
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    stepWorld(world, 0.1, useGameStateStore.getState(), { silent: true })
+    const protetorSalvo: ProtetorPendente = { ...world.protetorPendente!, hpAtual: 5 }
+
+    const poke = createPokeInstance(createRng(semente), 'charmander', 20)
+    const reconstruido = buildMapWorld(
+      HUNT, poke,
+      { seed: 0, rng: createRng(semente), counters: { entity: 1, effect: 1, pendingHit: 1 } },
+      { sala: world.sala!, protetorPendente: protetorSalvo },
+    )
+    return { reconstruido, protetorSalvo }
+  }
+
+  it('o protetor retomado nasce perto o bastante pra a luta comecar', () => {
+    // Varias sementes porque a posicao depende do facing e da grade de colisao:
+    // uma semente so poderia passar por acidente.
+    for (const semente of [53, 71, 97, 131, 199]) {
+      const { reconstruido } = reconstruirComProtetorSalvo(semente)
+      const protetor = reconstruido.enemies.find((e) => e.isProtetor)!
+      const jogador = reconstruido.player!
+      const dist = Math.hypot(protetor.x - jogador.x, protetor.y - jogador.y)
+      const alcance = alcanceDeCombate(jogador, protetor)
+
+      // O NUMERO QUE IMPORTA: dentro do alcance de combate. O comportamento
+      // antigo (cone de 250-550px) reprova aqui com uma ordem de grandeza de
+      // folga — sabotar `pontoEmAlcanceDeCombate` pra devolver o ponto de spawn
+      // deixa este caso vermelho.
+      expect(dist, `semente ${semente}: ${dist.toFixed(0)}px de ${alcance}px`)
+        .toBeLessThanOrEqual(alcance)
+      // E NAO sobreposto: duas entidades no mesmo ponto fazem o passo de
+      // separacao de movementSystem empurrar as duas.
+      expect(dist, `semente ${semente} colado no jogador`).toBeGreaterThan(0)
+    }
+  })
+
+  it('a retomada continua consumindo ZERO rng — a fidelidade da PH-217 nao regride', () => {
+    // A primeira versao deste conserto sorteava o angulo com `randRange`, o que
+    // desloca `rng_state` a cada reconstrucao e muda tudo que vem depois. Duas
+    // reconstrucoes com a MESMA semente tem que dar exatamente o mesmo mundo.
+    const a = reconstruirComProtetorSalvo(53)
+    const b = reconstruirComProtetorSalvo(53)
+    const pa = a.reconstruido.enemies.find((e) => e.isProtetor)!
+    const pb = b.reconstruido.enemies.find((e) => e.isProtetor)!
+    expect({ x: pa.x, y: pa.y }).toEqual({ x: pb.x, y: pb.y })
+    expect(a.reconstruido.rng.draws).toBe(b.reconstruido.rng.draws)
+    // E a identidade segue vindo do que foi persistido, nao de sorteio novo.
+    expect(pa.poke.uid).toBe(a.protetorSalvo.uid)
+    expect(pa.poke.hp).toBe(5)
+  })
+
+  it('protetor NOVO continua nascendo longe — o conserto e so pra retomada', () => {
+    // Protecao contra o conserto vazar pro caso geral: se protetor novo passasse
+    // a nascer colado, a chegada dele na tela mudaria e o jogador perderia o
+    // aviso visual de que algo entrou em campo.
+    const world = mundo(53)
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    stepWorld(world, 0.1, useGameStateStore.getState(), { silent: true })
+
+    const protetor = world.enemies.find((e) => e.isProtetor)!
+    const jogador = world.player!
+    const dist = Math.hypot(protetor.x - jogador.x, protetor.y - jogador.y)
+    expect(dist).toBeGreaterThan(alcanceDeCombate(jogador, protetor))
+  })
+})

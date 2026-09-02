@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   TIRA_POR_ELEMENTO, TIRA_AOE_POR_ELEMENTO, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
-  TIRA_POR_CONDICAO_NO_CORPO,
+  TIRA_POR_CONDICAO_NO_CORPO, QUADROS_DE_STATUS,
   todasAsTirasDeVfx, COR_DE_STATUS_NO_CORPO, orientacaoDaTira, type TiraDeVfx,
 } from './vfxTiras'
 import { TYPE_COLORS } from './typeColors'
@@ -103,21 +103,43 @@ describe('tiras de VFX', () => {
       .toEqual(['burn', 'freeze', 'paralysis', 'poison'])
   })
 
-  // PH-370. A regra deixou de ser "cor OU simbolo" e passou a ser "cor pra
-  // quatro, e simbolo TAMBEM pra dois deles". O teste diz isso explicitamente
-  // porque a alternativa — apagar a assercao acima — perderia a unica linha que
-  // registra que veneno e congelamento ficaram de fora de proposito.
-  it('paralisia e queimadura tem simbolo ALEM da tinta; veneno e congelamento so tinta', () => {
-    expect(Object.keys(TIRA_POR_CONDICAO_NO_CORPO).sort()).toEqual(['burn', 'paralysis'])
-    for (const status of ['burn', 'paralysis'] as const) {
-      expect(COR_DE_STATUS_NO_CORPO[status], `${status} continua tingindo o corpo`).toBeTruthy()
-    }
-    for (const status of ['poison', 'freeze'] as const) {
-      expect(TIRA_POR_CONDICAO_NO_CORPO[status], `${status} e so tinta`).toBeUndefined()
+  // PH-370 -> PH-416. A PH-370 poe simbolo em DOIS dos quatro status com tinta
+  // (paralisia e queimadura) e deixa veneno e congelamento so com a cor; a
+  // PH-416 fechou o conjunto. O teste compara as DUAS tabelas em vez de listar
+  // os quatro nomes duas vezes: o defeito que ele existe pra pegar e alguem
+  // acrescentar um status a uma tabela e esquecer a outra, e uma lista literal
+  // repetida nao pega isso — ela passa a mentir junto.
+  it('todo status que tinge o corpo tem TAMBEM glifo, e vice-versa', () => {
+    expect(Object.keys(TIRA_POR_CONDICAO_NO_CORPO).sort())
+      .toEqual(Object.keys(COR_DE_STATUS_NO_CORPO).sort())
+  })
+
+  // O par sono/confusao e o OUTRO canal (badge de 26px ao lado da cabeca), e
+  // ele nao pode virar o canal de corpo por descuido: sono nao tem cor de corpo
+  // nenhuma e confusao e status VOLATIL, que nem chega em `poke.status` — a
+  // chave que `TIRA_POR_CONDICAO_NO_CORPO` indexa. Uma entrada de `confusion`
+  // ali seria codigo morto que ninguem veria falhar.
+  it('sono e confusao ficam no canal de badge, fora das duas tabelas de corpo', () => {
+    for (const status of ['sleep', 'confusion'] as const) {
+      expect(TIRA_POR_CONDICAO_NO_CORPO[status], `${status} nao usa o canal de corpo`).toBeUndefined()
+      expect(COR_DE_STATUS_NO_CORPO[status], `${status} nao tinge o corpo`).toBeUndefined()
     }
   })
 
-  it('as duas artes de condicao entram no preload', () => {
+  // PH-416: as seis tiras de status saem do MESMO gerador com a mesma contagem
+  // de quadros. Contagem divergente foi a origem real de bug antes (a arte vinha
+  // de quatro efeitos diferentes do banco, com 20, 6, 21 e 16 quadros), e o
+  // sintoma e um borrao de meio-quadro que nao lanca erro nenhum.
+  it('as seis tiras de status tem a mesma contagem de quadros', () => {
+    const deStatus = [
+      TIRA_CONFUSAO, TIRA_SONO,
+      ...Object.values(TIRA_POR_CONDICAO_NO_CORPO).map((t) => t!),
+    ]
+    expect(deStatus).toHaveLength(6)
+    expect(new Set(deStatus.map((t) => t.quadros))).toEqual(new Set([QUADROS_DE_STATUS]))
+  })
+
+  it('as artes de condicao entram no preload', () => {
     // Status persistente aparece em todo combate. Fora do preload, o PRIMEIRO
     // POKE paralisado de cada sessao ficaria sem faisca por alguns frames — e
     // como o desenho degrada em silencio, ninguem notaria que o preload

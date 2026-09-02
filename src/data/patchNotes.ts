@@ -12,6 +12,72 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // UM item pra UMA issue (PH-423).
+  //
+  // A NOTA DIZ "NUNCA", E ISSO E O PONTO. O relato que abriu a issue foi "matei
+  // 30 mobs e o guardiao caiu, e a sala nao muda", e a primeira resposta que eu
+  // dei foi que era espera longa por design. Estava errado: medido, 3 salas em
+  // 120 no intervalo normal de sincronia NUNCA avancavam — nao "demoravam".
+  // Chamar de lentidao na nota repetiria o erro pro jogador.
+  //
+  // O QUE ELA NAO EXPLICA, de proposito: que existem duas contagens de abate (a
+  // da tela e a do servidor), que o mundo do servidor e reconstruido a cada
+  // sincronia, e que o guardiao renascia longe demais pra a luta comecar dentro
+  // da janela. E a explicacao certa e o jogador nao tem o que fazer com ela — ele
+  // precisa saber que travava, que nao trava mais, e que pode voltar a farmar
+  // ciclo longo sem medo.
+  //
+  // FICA DE FORA:
+  //   - as quatro hipoteses de causa que a medicao derrubou e as tres
+  //     infidelidades de bancada achadas no caminho: processo;
+  //   - a decomposicao pre-quota/guardiao e os numeros por tamanho de janela:
+  //     encanamento;
+  //   - que no caso do jogador MUITO ativo (sincronias muito curtas) o
+  //     travamento caiu de 10 pra 3 em 120 e ainda nao e zero. Isto NAO entra
+  //     porque prometer "resolvido" e depois o jogador travar seria pior que o
+  //     silencio — e a nota tambem nao vai ensinar ninguem a evitar clicar. Fica
+  //     na PH-423 como trabalho aberto.
+  {
+    version: '7.35',
+    date: '2026-09-02',
+    title: 'A sala não fica mais presa depois do Guardião',
+    highlights: [
+      'A CAÇADA NÃO TRAVA MAIS NA MESMA SALA. Existia um caso em que a sala parava de vez depois de as 30 kills fecharem: o Guardião ficava em campo, com a vida sempre cheia, e a área nunca mudava — só saía dali quem trocava de caçada. Medido antes do conserto, acontecia em 3 de cada 120 trocas de sala. Agora não acontece nenhuma vez.',
+      'O GUARDIÃO VOLTA PRA LUTA ONDE ELA PAROU. Quando você fecha o jogo ou o progresso é sincronizado no meio de uma briga com o Guardião, ele reaparece na sua frente com a vida que já tinha perdido, em vez de do outro lado da área. A briga continua de onde parou.',
+    ],
+  },
+  // UM item pra UMA issue (PH-416).
+  //
+  // A NOTA TEM DOIS FATOS E SO UM INTERESSA AO JOGADOR. O trabalho foi trocar as
+  // seis artes de status por um conjunto desenhado por um gerador so; o que o
+  // jogador ganha e que veneno e congelamento passaram a ter desenho, e que os
+  // seis agora se leem do mesmo jeito. O item conta o segundo.
+  //
+  // ELA RECONHECE A 7.24 EM VEZ DE REPETIR ELA, mesmo padrao da nota da 7.33: a
+  // 7.24 anunciou "POKE PARALISADO SOLTA FAISCA E QUEIMADO SOLTA BRASA", e essa
+  // promessa continua valendo — o desenho e outro, a coisa que ela prometia nao
+  // e nova. Reanunciar faria parecer que a 7.24 nao tinha entregado. Por isso o
+  // item 1 fala de VENENO e CONGELAMENTO, que sao os dois que nao tinham nada, e
+  // cita paralisia so como a comparacao que o jogador ja conhece.
+  //
+  // O "FICA DE FORA" DESTA VEZ E CURTO porque quase tudo do intervalo e
+  // encanamento, e o jogador nao ve nada disso:
+  //   - o gerador, o encoder de PNG e a saida do banco de arte antigo: quem
+  //     desenha e onde mora nao muda nada na tela;
+  //   - as tres correcoes que a bancada pegou (o anel que parecia moeda dropada,
+  //     o disco que virou faisca, o cranio que precisou de orbita maior): sao o
+  //     caminho ate a arte, nao a arte;
+  //   - a opacidade 0,75 e os dois canais de desenho: continuam iguais aos da
+  //     7.19, entao nao ha o que anunciar.
+  {
+    version: '7.34',
+    date: '2026-09-02',
+    title: 'Os seis status agora têm o mesmo desenho',
+    highlights: [
+      'VENENO E CONGELAMENTO GANHARAM SÍMBOLO. Eram os dois únicos status que só mudavam a cor do POKE, e num Gengar roxo ou num Lapras azul isso não dava pra ver — o mesmo problema que a paralisia tinha num Pikachu. Agora o envenenado carrega uma caveira e o congelado um floco de neve.',
+      'OS SEIS SÍMBOLOS VIRARAM UM CONJUNTO. Caveira, chama, raio, floco, "Z" e "?" — todos no mesmo tamanho, com o mesmo contorno e com as mesmas fagulhas girando em volta do corpo. Antes cada um vinha de um lugar diferente e tinha tamanho e ritmo próprios; dava pra confundir de longe qual era qual.',
+    ],
+  },
   // UM item pra UMA issue (PH-402). O intervalo tem dois commits e um deles e
   // back-merge.
   //

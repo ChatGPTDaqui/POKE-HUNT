@@ -444,45 +444,82 @@ export const TIRA_CURA_HP: TiraDeVfx = { url: `${RAIZ_STATUS}/cura-hp.png`, quad
  */
 export const TIRA_CURA_STATUS: TiraDeVfx = { url: `${RAIZ_STATUS}/cura-status.png`, quadros: 16 }
 
-/** "???" — fica em cima do POKE o tempo todo em que a confusao durar. */
-export const TIRA_CONFUSAO: TiraDeVfx = { url: `${RAIZ_STATUS}/confusao.png`, quadros: 21 }
-
 /**
- * "Zzz" — mesma ideia da confusao, pro sono. Unica arte deste lote que NAO
- * vem do banco: varri os 5691 efeitos e o banco tem o "???" mas nao tem
- * nenhum "zzz". Desenhada como pixel art por
- * `scripts/gerar-sprite-sono.mjs`.
+ * AS SEIS TIRAS DE STATUS SAO GERADAS (PH-416).
+ *
+ * `scripts/gerar-status-vfx.mjs` desenha as seis — veneno, queimadura,
+ * paralisia, congelamento, sono e confusao — com uma gramatica so: anel de
+ * faiscas orbitando o corpo (o canal "tem algo errado") mais um glifo de
+ * identidade em pixel art (o canal "qual status"). Contagem de quadros
+ * UNIFORME nas seis, e por isso `quadros: QUADROS_DE_STATUS` em todas em vez
+ * de um numero por arquivo.
+ *
+ * Antes disso eram tres origens e quatro geometrias: paralisia (214x181, 20
+ * quadros), queimadura (51x59, 6) e confusao (48x36, 21) vinham do banco `.dat`
+ * local por `tira_efeito.py`, sono (40x40, 16) era desenhada por um script
+ * proprio, e veneno e congelamento nao tinham arte nenhuma. O problema pratico
+ * nao era a falta de conjunto: `tira_efeito.py` le um banco de arte que nao
+ * esta no repositorio, entao ninguem sem aquele banco na maquina conseguia
+ * regerar uma tira de status.
+ *
+ * Duas geometrias sobrevivem, porque os dois canais de desenho de
+ * `render/sprites.ts` tem tamanho diferente por motivo medido (PH-370): 48x48
+ * pra quem e desenhado SOBRE O CORPO, 40x40 pro badge de 26px ao lado da
+ * cabeca. A gramatica e a mesma nas duas; muda a proporcao entre glifo e anel.
  */
-export const TIRA_SONO: TiraDeVfx = { url: `${RAIZ_STATUS}/sono.png`, quadros: 16 }
+export const QUADROS_DE_STATUS = 16
+
+/** "?" — fica em cima do POKE o tempo todo em que a confusao durar. */
+export const TIRA_CONFUSAO: TiraDeVfx = { url: `${RAIZ_STATUS}/confusao.png`, quadros: QUADROS_DE_STATUS }
+
+/** "Z" — mesma ideia da confusao, pro sono. */
+export const TIRA_SONO: TiraDeVfx = { url: `${RAIZ_STATUS}/sono.png`, quadros: QUADROS_DE_STATUS }
 
 /**
- * Simbolo CONSTANTE das duas condicoes que a tinta sozinha nao comunica.
+ * Simbolo CONSTANTE das condicoes que a tinta sozinha nao comunica.
  *
- * Ate a PH-370, sono e confusao eram os unicos status com desenho proprio, e os
- * outros quatro eram lidos SO por `COR_DE_STATUS_NO_CORPO`. A tinta entra a 45%
- * e multiplica os pixels da sprite, entao ela depende da cor do POKE ser
- * diferente da cor do status — e em dois casos ela nao e:
+ * A tinta entra a 45% e MULTIPLICA os pixels da sprite, entao ela depende de a
+ * cor do POKE ser diferente da cor do status. Em quatro grupos ela nao e:
  *
- *   paralisia (amarelo) em Pikachu, Raichu, Jolteon, Ampharos, Elekid,
- *   Electabuzz — e paralisia e o status que mais muda o combate, porque o POKE
- *   perde turno.
- *   queimadura (laranja) em Charizard, Charmander, Magmar, Flareon, Growlithe.
+ *   paralisia (amarelo)     Pikachu, Raichu, Jolteon, Ampharos, Elekid,
+ *                           Electabuzz — e paralisia e o status que mais muda o
+ *                           combate, porque o POKE perde turno.
+ *   queimadura (laranja)    Charizard, Charmander, Magmar, Flareon, Growlithe
+ *   veneno (roxo)           Gengar, Nidoking, Nidoqueen, Muk, Crobat
+ *   congelamento (ciano)    Articuno, Lapras, Vaporeon, Dewgong
  *
- * A tinta CONTINUA nos quatro: isto e um canal a mais, nao um substituto. Veneno
- * e congelamento ficam de fora porque roxo e ciano quase nao colidem com o
- * elenco, e porque simbolo em todo status transformaria a hunt cheia num
- * mostruario de icones.
+ * OS DOIS ULTIMOS ENTRARAM NA PH-416. A PH-370 os deixou de fora com o
+ * argumento de que "roxo e ciano quase nao colidem com o elenco" — e o argumento
+ * estava errado pelo mesmo teste que a propria PH-370 usou: composto em
+ * `scripts/harness/condicao-sobre-o-corpo.mjs`, no tamanho de jogo, um Gengar
+ * envenenado e indistinguivel de um Gengar saudavel, exatamente como o Pikachu
+ * paralisado era.
  *
- * As duas sao desenhadas SOBRE O CORPO e nao como badge de canto (o slot do
- * "Zzz"/"???"): as artes vem do banco em 214x181 e 51x59, feitas pra cobrir um
- * corpo. Reduzidas aos 26px do badge viravam um risco amarelo e uma mancha
- * laranja.
+ * A tinta CONTINUA nos quatro: isto e um canal a mais, nao um substituto. Ela e
+ * o sinal de LONGE (a cor do corpo muda e se le sem foco) e o glifo e o sinal de
+ * PERTO (diz qual status).
+ *
+ * SONO E CONFUSAO NAO ENTRAM AQUI, e nao e omissao: os dois usam o badge de
+ * canto (`TIRA_SONO`/`TIRA_CONFUSAO`, 26px fixos ao lado da cabeca), que e o
+ * canal deles desde sempre. Sono nao tem cor de corpo nenhuma — um POKE dormindo
+ * precisa ser lido pelo simbolo — e confusao e status VOLATIL, que vive em
+ * `entity.statusVolatil` e nao em `poke.status`, que e o campo que este mapa
+ * indexa.
+ *
+ * As quatro sao desenhadas SOBRE O CORPO com o glifo no canto superior direito
+ * do quadro. O canto, e nao o centro do topo, porque centrado o glifo cai em
+ * cima da CARA do POKE em toda especie de cabeca larga e baixa — medido no
+ * Gengar, onde o cranio tapava um olho e metade do sorriso.
  */
 export const TIRA_POR_CONDICAO_NO_CORPO: Partial<Record<StatusCondition, TiraDeVfx>> = {
-  // 2436 — faiscas amarelas em arco
-  paralysis: { url: `${RAIZ_STATUS}/paralisia.png`, quadros: 20 },
-  // 2438 — brasas laranja subindo
-  burn: { url: `${RAIZ_STATUS}/queimadura.png`, quadros: 6 },
+  // Cranio roxo
+  poison: { url: `${RAIZ_STATUS}/veneno.png`, quadros: QUADROS_DE_STATUS },
+  // Chama laranja
+  burn: { url: `${RAIZ_STATUS}/queimadura.png`, quadros: QUADROS_DE_STATUS },
+  // Raio amarelo
+  paralysis: { url: `${RAIZ_STATUS}/paralisia.png`, quadros: QUADROS_DE_STATUS },
+  // Floco de neve ciano
+  freeze: { url: `${RAIZ_STATUS}/congelamento.png`, quadros: QUADROS_DE_STATUS },
 }
 
 /**
@@ -496,10 +533,12 @@ export const TIRA_POR_CONDICAO_NO_CORPO: Partial<Record<StatusCondition, TiraDeV
  * confusao nao tem cor obvia e um POKE dormindo precisa ser lido pelo simbolo,
  * nao pelo tom.
  *
- * Paralisia e queimadura estao nas DUAS tabelas desde a PH-370, e isso e
- * proposito: a tinta diz "esta com status" a distancia e o simbolo diz QUAL,
- * inclusive quando o POKE tem a cor do proprio status. Ver
- * TIRA_POR_CONDICAO_NO_CORPO acima.
+ * As QUATRO chaves deste mapa estao TAMBEM em `TIRA_POR_CONDICAO_NO_CORPO`
+ * (paralisia e queimadura desde a PH-370, veneno e congelamento desde a
+ * PH-416), e isso e proposito: a tinta diz "esta com status" a distancia e o
+ * glifo diz QUAL, inclusive quando o POKE tem a cor do proprio status. As duas
+ * tabelas cobrem o mesmo conjunto de propósito — se elas divergirem de novo, e
+ * porque alguem acrescentou um status a uma e esqueceu a outra.
  */
 export const COR_DE_STATUS_NO_CORPO: Record<string, string> = {
   poison: '#a040c8',
