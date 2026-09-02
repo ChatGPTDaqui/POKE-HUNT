@@ -266,23 +266,48 @@ jobs:
         # tocado, e qualquer outra diferenca (coluna, tabela, RPC) continua
         # reprovando normal.
         #
-        # FIXAR O CLI NAO CONGELA A SAIDA DESTE PASSO (PH-417). A versao esta
-        # presa em 2.116.0 nos tres workflows desde a PH-290, e mesmo assim o
-        # mesmo commit (`ad4fb6b0`) passou aqui as 06:41 e reprovou as 11:56 de
-        # 2026-09-02. O motivo: `gen types typescript --linked` NAO gera local —
-        # ele pede o codegen a Management API, que e um servico versionado do
-        # lado deles. Naquele dia o gerador remoto passou a parentizar a
-        # restricao de generico dos helpers do fim do arquivo
-        # (`TableName extends (X extends {...} : never) = never`), dez linhas,
-        # zero mudanca de schema, e reprovou TODA PR aberta — inclusive as que
-        # nao tocam banco.
+        # ESTE PASSO REPROVOU TODA PR EM 2026-09-02, E O DIFF TINHA DUAS
+        # METADES MUITO DIFERENTES (PH-417). Vale registrar porque a primeira
+        # leitura do log levou a conclusao errada.
         #
-        # Consertado regenerando o arquivo, e NAO relaxando o gate: a
-        # normalizacao acima e cirurgica de proposito (uma linha nomeada), e
-        # normalizar formatacao de generico abriria a porta pra ignorar
-        # diferenca que importa. Se repetir, a saida e passar os DOIS lados por
-        # um formatador antes de comparar — nao perseguir a formatacao do
-        # gerador remoto a cada mudanca dele. Uma vez e acidente.
+        # Dezesseis hunks, e so uma metade era cosmetica:
+        #
+        #   6 hunks  `dev.missao_cadeia.tipo` e
+        #            `dev.species_evolution_options.stone_type` estavam
+        #            tipadas como `Database["dev"]["Enums"]["element_type"]` no
+        #            arquivo commitado, e o gerador emitia `["public"]`. O
+        #            gerador estava CERTO: as duas colunas sao declaradas
+        #            `public.element_type` nas migrations que as criaram
+        #            (20260831190001_missao_cadeia_dev.sql:10 e
+        #            20260831140001_todas_as_evolucoes_dev.sql:53, a primeira com
+        #            comentario explicando a escolha). Era staleness de verdade,
+        #            de quando o arquivo foi gerado por ultimo — nao formatacao.
+        #            As outras 18 referencias a `["dev"]["Enums"]["element_type"]`
+        #            no bloco `dev` estao certas e NAO mudaram: o schema `dev`
+        #            tem o enum proprio, e so essas duas colunas apontam pro de
+        #            `public`.
+        #   10 hunks o gerador passou a parentizar a restricao de generico dos
+        #            helpers do fim do arquivo
+        #            (`TableName extends (X extends {...} : never) = never`).
+        #            Cosmetico, e a metade que mudou de um dia pro outro.
+        #
+        # A LICAO DA SEGUNDA METADE: fixar o CLI nao congela a saida daqui. A
+        # versao esta presa em 2.116.0 nos tres workflows desde a PH-290, e
+        # mesmo assim o MESMO commit (`ad4fb6b0`) passou as 06:41 e reprovou as
+        # 11:56 do mesmo dia. `gen types typescript --linked` NAO gera local —
+        # pede o codegen a Management API, que e versionada do lado deles.
+        # Mesma familia da instabilidade que ja justifica a normalizacao da
+        # `PostgrestVersion` acima.
+        #
+        # A LICAO DA PRIMEIRA METADE E MAIS IMPORTANTE: o gate estava certo, e
+        # havia divergencia real escondida atras da cosmetica. Se ele tivesse
+        # sido relaxado pra "ignorar formatacao", as seis linhas de enum errado
+        # teriam passado junto. Por isso a normalizacao continua cirurgica —
+        # uma linha nomeada — e nao vira "ignora diferenca de forma".
+        #
+        # Se a cosmetica repetir, a saida e passar os DOIS lados por um
+        # formatador antes de comparar (o que preserva a deteccao de conteudo),
+        # e nao afrouxar o diff.
         run: |
           npm ci
           # PH-106: pelo wrapper, que re-linka se a credencial tiver sido
