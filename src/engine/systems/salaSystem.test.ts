@@ -25,7 +25,7 @@ import { ABATES_POR_SALA } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from '../types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 
 function mundo(semente: number): WorldState {
   const rng = createRng(semente)

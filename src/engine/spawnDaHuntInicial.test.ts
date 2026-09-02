@@ -24,7 +24,7 @@ import { getMap } from '@/data/maps'
 import { WILD_AGGRO_RADIUS } from '@/data/huntTypes'
 import { buildMapWorld, limiteDeInimigos } from './simulation'
 
-const HUNT_DE_BIOMA = 'mata_faixa1'
+const HUNT_DE_BIOMA = 'mata_e1'
 
 function mundoDaInicial(nivel: number, semente: number) {
   const rng = createRng(semente)

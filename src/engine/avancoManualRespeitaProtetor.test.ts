@@ -31,7 +31,7 @@ import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
 import { especialidadeNiveisDefault } from '@/data/especialidades'
 import type { WorldState } from './types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 
 /**
  * Mundo numa sala com a quota JA FECHADA — o unico estado em que o avanco

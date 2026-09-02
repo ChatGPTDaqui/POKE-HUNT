@@ -32,7 +32,7 @@ const PROTETOR: ProtetorPendente = {
 // So os campos que os helpers tocam — o resto de LinhaSessao nao importa aqui.
 function linhaBase(): LinhaSessao {
   return {
-    id: 's1', user_id: 'u1', map_id: 'igneo_faixa1', poke_uid: 'p1',
+    id: 's1', user_id: 'u1', map_id: 'igneo_e1', poke_uid: 'p1',
     seed: 1, rng_state: 0, rng_draws: 0, last_flush_at: '', simulated_seconds: 0,
     closed_at: null, flushing_since: null, sequence_index: 0, sequence_cleared: false,
     sala_indice: 0, sala_chave: 'volcano', sala_abates: 30, ciclos: 0,

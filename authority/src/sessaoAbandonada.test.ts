@@ -52,7 +52,7 @@ function sessao(segundosAtras: number, id = 'sessao-1') {
   return {
     id,
     user_id: USER,
-    map_id: 'mata_faixa1',
+    map_id: 'mata_e1',
     poke_uid: 'poke-1',
     seed: 1,
     rng_state: 1,

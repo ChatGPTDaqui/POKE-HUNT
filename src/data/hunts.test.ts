@@ -7,14 +7,15 @@
 // hunt com pool vazio so estoura quando alguem entra nela. Um sub-bioma
 // inalcancavel nao da erro em lugar nenhum.
 import { describe, expect, it } from 'vitest'
-import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID, TETO_DE_FATIA, POOL_MINIMO_PRA_TETO } from './huntSpawnOverrides'
+import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID, TETO_DE_FATIA, POOL_MINIMO_PRA_TETO, TETO_DE_GATILHO_APLICADO } from './huntSpawnOverrides'
 import { SPECIES, type Species } from './pokes'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import {
-  BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL, huntId,
+  BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL,
 } from './biomas'
+import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, zonaMaximaDoEstagio } from './estagios'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import { contextoDeSpawn, janelaDaSala } from '@/engine/systems/salaSystem'
 import { SALAS_POR_HUNT } from './biomas'
@@ -30,7 +31,9 @@ const wildSpecies = Object.keys(SPECIES_DATA).filter(
 
 const bossHunts = Object.values(MAPS).filter((m) => m.id.startsWith('boss_'))
 const nightmareHunts = Object.values(MAPS).filter((m) => m.id.startsWith('nightmare_'))
-// Hunts "normais": as 36 de bioma + a inicial. Sem o espelho do Pesadelo (mesma
+const ESTAGIOS = Array.from({ length: ESTAGIOS_POR_BIOMA }, (_, i) => i + 1)
+
+// Hunts "normais": as 120 de bioma + a inicial. Sem o espelho do Pesadelo (mesma
 // composicao, nivel deslocado), sem as BOSS (elenco proprio, curado a mao) e sem
 // o Treinamento (`noRewards`, ver data/trainingDummy.ts — fixture de teste, nao
 // concorre com bioma nenhum na grade nem no numero de inimigos em campo).
@@ -41,15 +44,16 @@ const huntsNormais = Object.values(MAPS).filter(
 const especiesDe = (encIds: string[]) => encIds.map((id) => ENCOUNTERS[id].speciesId)
 
 describe('estrutura', () => {
-  it('existe uma hunt por bioma x faixa, mais a inicial', () => {
+  it('existe uma hunt por bioma x estagio, mais a inicial', () => {
     for (const bioma of BIOMAS) {
-      for (const faixa of FAIXAS) {
-        const id = huntId(bioma.chave, faixa.id)
+      for (const estagio of ESTAGIOS) {
+        const id = estagioId(bioma.chave, estagio)
         expect(MAPS[id], `hunt ausente: ${id}`).toBeTruthy()
       }
     }
     expect(MAPS[STARTER_HUNT_ID]).toBeTruthy()
-    expect(huntsNormais.length).toBe(BIOMAS.length * FAIXAS.length + 1)
+    expect(huntsNormais.length).toBe(BIOMAS.length * ESTAGIOS_POR_BIOMA + 1)
+    expect(huntsNormais.length).toBe(121)
   })
 
   it('todo sub-bioma declarado em biomas.ts tem elenco gerado, e vice-versa', () => {
@@ -59,21 +63,32 @@ describe('estrutura', () => {
     expect([...gerados].filter((c) => !declarados.has(c)), 'gerado e nao agrupado em nenhum bioma').toEqual([])
   })
 
-  // Mais forte que "alcancavel em alguma faixa": TODA sala de TODA faixa
+  // Mais forte que "alcancavel em algum estagio": TODA sala de TODO estagio
   // precisa ter pool. Uma sala vazia nao da erro — o jogador entra e nada
-  // spawna. Foi assim que o Templo ficou mudo nas faixas II e III (todos os
-  // estagios dele ja tinham evoluido antes do Lv31 e as formas evoluidas
+  // spawna. Foi assim que o Templo ficou mudo nas faixas II e III (todas as
+  // formas dele ja tinham evoluido antes do Lv31 e as formas evoluidas
   // moravam noutro sub-bioma).
-  it('nenhuma sala fica com pool vazio em nenhuma faixa', () => {
+  //
+  // COM ESTAGIO DE 10 NIVEIS ESTE TESTE FICOU 3,3x MAIS APERTADO: sao 330
+  // pares (bioma x estagio x sub-bioma) contra os 99 de antes, e cada janela
+  // tem um terco da largura. Era o risco declarado do redesenho — e o motivo
+  // de o desenho de 9 zonas ter fracassado em 2026-08, quando a zona 2 ficava
+  // vazia em 11 dos 12 biomas. Passa hoje porque o elenco cresceu pra 386
+  // especies e as pools passaram a vir do PokeRogue por sub-bioma, e nao do
+  // tipo elemental. O menor pool medido e 2 (industrial_e5/laboratory).
+  it('nenhuma sala fica com pool vazio em nenhum estagio', () => {
     const vazios: string[] = []
+    let pares = 0
     for (const bioma of BIOMAS) {
-      for (const faixa of FAIXAS) {
+      for (const estagio of ESTAGIOS) {
         for (const sub of bioma.subBiomas) {
-          const pool = POOL_POR_SALA[huntId(bioma.chave, faixa.id)]?.[sub.chave] ?? []
-          if (pool.length === 0) vazios.push(`${bioma.chave}/${faixa.id}/${sub.chave}`)
+          pares++
+          const pool = POOL_POR_SALA[estagioId(bioma.chave, estagio)]?.[sub.chave] ?? []
+          if (pool.length === 0) vazios.push(`${bioma.chave}/e${estagio}/${sub.chave}`)
         }
       }
     }
+    expect(pares).toBe(330)
     expect(vazios).toEqual([])
   })
 
@@ -85,10 +100,26 @@ describe('estrutura', () => {
     }
   })
 
+  // PONTE, e nao desenho final: enquanto o gate for por `continent`, cada
+  // estagio herda o grupo da faixa que cobria aquele nivel (1-3 = faixa1,
+  // 4-6 = faixa2, 7-10 = faixa3). Trocar o eixo do gate pra estagio e a
+  // PH-430/PH-432; apagar o vocabulario de faixa e a PH-434. Este teste
+  // tranca a ponte pra ela nao derivar sem ninguem ver.
   it('o gate das hunts e o esperado: faixa1/faixa2 abertas, faixa3 e Pesadelo pelo Lance', () => {
+    const grupoEsperado = (estagio: number) =>
+      FAIXAS.find((f) => niveisDoEstagio(estagio)[1] <= f.niveis[1])?.id ?? 'faixa3'
+    expect(ESTAGIOS.map(grupoEsperado)).toEqual([
+      'faixa1', 'faixa1', 'faixa1',
+      'faixa2', 'faixa2', 'faixa2',
+      'faixa3', 'faixa3', 'faixa3',
+      // O estagio 10 (Lv 91-100) e conteudo novo, acima do antigo teto de 90:
+      // cai no grupo mais alto, junto com o resto do fim de jogo.
+      'faixa3',
+    ])
     for (const bioma of BIOMAS) {
-      for (const faixa of FAIXAS) {
-        expect(MAPS[huntId(bioma.chave, faixa.id)].continent).toBe(faixa.id)
+      for (const estagio of ESTAGIOS) {
+        expect(MAPS[estagioId(bioma.chave, estagio)].continent, `${bioma.chave} e${estagio}`)
+          .toBe(grupoEsperado(estagio))
       }
     }
     for (const m of nightmareHunts) expect(m.continent, m.id).toBe('nightmare')
@@ -178,17 +209,19 @@ describe('niveis', () => {
     expect(erros).toEqual([])
   })
 
-  it('as 3 faixas sao contiguas e o nome da hunt casa com a faixa dela', () => {
+  it('os 10 estagios sao contiguos e o nome da hunt casa com o estagio dela', () => {
     let esperado = 1
-    for (const faixa of FAIXAS) {
-      expect(faixa.niveis[0], `faixa ${faixa.nome} nao comeca onde a anterior acabou`).toBe(esperado)
-      esperado = faixa.niveis[1] + 1
+    for (const estagio of ESTAGIOS) {
+      const niveis = niveisDoEstagio(estagio)
+      expect(niveis[0], `estagio ${estagio} nao comeca onde o anterior acabou`).toBe(esperado)
+      esperado = niveis[1] + 1
     }
+    expect(esperado - 1).toBe(100)
     for (const bioma of BIOMAS) {
-      for (const faixa of FAIXAS) {
-        const map = MAPS[huntId(bioma.chave, faixa.id)]
-        expect(map.levelRange).toEqual(faixa.niveis)
-        expect(map.name).toBe(`${bioma.nome} ${faixa.nome}`)
+      for (const estagio of ESTAGIOS) {
+        const map = MAPS[estagioId(bioma.chave, estagio)]
+        expect(map.levelRange).toEqual(niveisDoEstagio(estagio))
+        expect(map.name).toBe(`${bioma.nome} ${estagio}`)
       }
     }
   })
@@ -262,18 +295,111 @@ describe('niveis', () => {
     expect(erros).toEqual([])
   })
 
+  // ESTE TESTE QUASE MORREU EM SILENCIO NA PH-426. Ele casava a hunt com a
+  // faixa por `f.niveis[0] === map.levelRange[0]` e pulava (`continue`) o que
+  // nao casasse. Com estagios, so os de numero 1, 4 e 7 comecam num piso de
+  // faixa — os outros 7 sairiam pela porta do `continue` e o teste passaria
+  // verde cobrindo 30% do que cobria antes. Agora ele fala a lingua do estagio
+  // e cobre os 120.
   it('toda especie respeita a propria zona minima', () => {
     const erros: string[] = []
-    for (const map of huntsNormais) {
-      if (map.id === STARTER_HUNT_ID) continue
-      const faixa = FAIXAS.find((f) => f.niveis[0] === map.levelRange[0])
-      if (!faixa) continue
-      for (const id of especiesDe(map.enemyPool)) {
-        const minima = zonaMinimaDaEspecie(id)
-        if (minima > faixa.zonaMaxima) erros.push(`${map.id} (ate zona ${faixa.zonaMaxima}) tem ${id} (minima ${minima})`)
+    let conferidos = 0
+    for (const bioma of BIOMAS) {
+      for (const estagio of ESTAGIOS) {
+        const map = MAPS[estagioId(bioma.chave, estagio)]
+        const zonaMaxima = zonaMaximaDoEstagio(estagio)
+        for (const encId of map.enemyPool) {
+          const enc = ENCOUNTERS[encId]
+          conferidos++
+          const minima = zonaMinimaDaEspecie(enc.speciesId)
+          if (minima <= zonaMaxima) continue
+          // A UNICA excecao, e ela e o dado vencendo a heuristica: forma que
+          // ja evoluiu antes de a zona dela abrir. Metapod existe em Lv7-9 e
+          // a zona minima dele e 1 (Lv11+), porque `PISO_POR_ESTAGIO` poe todo
+          // segundo estagio de evolucao na zona 1. Sem a excecao os quatro
+          // casulos somem do jogo — ver `zonaEfetiva` em huntSpawnOverrides.
+          // O criterio e estreito de proposito: vale so enquanto o encontro
+          // inteiro cabe abaixo do piso da zona exigida.
+          const pisoDaZona = minima * 10 + 1
+          if (enc.maxLevel < pisoDaZona) continue
+          erros.push(
+            `${map.id} (ate zona ${zonaMaxima}) tem ${enc.speciesId} ` +
+            `Lv${enc.minLevel}-${enc.maxLevel} (minima ${minima}, piso Lv${pisoDaZona})`,
+          )
+        }
       }
     }
+    // Guarda contra o teste se esvaziar sem ninguem ver — foi o que quase
+    // aconteceu aqui.
+    expect(conferidos).toBeGreaterThan(1000)
     expect(erros).toEqual([])
+  })
+
+  // As tres linhas que ja quebraram este arquivo, agora sob a regua de 10
+  // niveis. Cada uma cobre um caminho diferente de `nivelDeTroca`, e as tres
+  // sao regressao registrada — nao exemplo escolhido a esmo.
+  it('as linhas que ja quebraram continuam inteiras sob o estagio', () => {
+    const janelas = (speciesId: string): string[] => {
+      const vistas = new Set<string>()
+      for (const map of huntsNormais) {
+        if (map.id === STARTER_HUNT_ID) continue
+        for (const encId of map.enemyPool) {
+          const enc = ENCOUNTERS[encId]
+          if (enc.speciesId === speciesId) vistas.add(`${enc.minLevel}-${enc.maxLevel}`)
+        }
+      }
+      return [...vistas].sort((a, b) => Number(a.split('-')[0]) - Number(b.split('-')[0]))
+    }
+
+    // PH-332: `azurill` evolui por amizade (especial) e `marill` por nivel, no
+    // 18. E o caso que o teto pelo gatilho do alvo existe pra resolver — sem
+    // ele Marill some. Com estagio, o piso empurrado e 11 (e nao 31), entao a
+    // janela do meio fica com Lv11-17 em vez de um unico nivel.
+    expect(janelas('azurill')).toEqual(['1-10'])
+    expect(janelas('marill')).toEqual(['11-17'])
+    expect(janelas('azumarill')[0]).toBe('21-30')
+
+    // PH-145: os dois tem zona minima 5, entao o `+1` no estagio da origem e o
+    // unico separador. Scyther fica no estagio 6 (Lv51-60) e Scizor comeca no 7.
+    expect(janelas('scyther')).toEqual(['51-60'])
+    expect(janelas('scizor')[0]).toBe('61-70')
+
+    // PH-145: linha de tres com os DOIS gatilhos especiais, que so encadeia
+    // porque `desde` entra na conta.
+    expect(janelas('pichu')).toEqual(['1-10'])
+    expect(janelas('pikachu')[0]).toBe('11-20')
+    expect(janelas('raichu')[0]).toBe('51-60')
+
+    // PH-426: o casulo, que a faixa de 30 niveis escondia.
+    expect(janelas('metapod')).toEqual(['7-9'])
+  })
+
+  // O teto pelo gatilho do alvo (PH-332) ficou INERTE com a regua de 10
+  // niveis, e isso foi medido por sabotagem: trocar a condicao por `false` nao
+  // reprovava nenhum teste. Ele continua no codigo porque a proxima especie
+  // com evolucao especial cujo alvo evolui abaixo do piso empurrado o re-arma
+  // — e este teste e o alarme. Se ele ficar vermelho, o ramo voltou a valer e
+  // o caso novo precisa ser conferido a mao, nao aceito de bandeja.
+  it('o teto pelo gatilho do alvo nao morde em nenhuma linha do catalogo', () => {
+    expect([...TETO_DE_GATILHO_APLICADO].sort()).toEqual([])
+  })
+
+  it('so os quatro casulos usam a excecao da zona', () => {
+    // Se a excecao acima passar a cobrir mais gente, e sinal de que a regra de
+    // zona e a de nivel de evolucao divergiram noutro lugar — e isso precisa
+    // ser decidido, nao herdado.
+    const comExcecao = new Set<string>()
+    for (const bioma of BIOMAS) {
+      for (const estagio of ESTAGIOS) {
+        const map = MAPS[estagioId(bioma.chave, estagio)]
+        const zonaMaxima = zonaMaximaDoEstagio(estagio)
+        for (const encId of map.enemyPool) {
+          const enc = ENCOUNTERS[encId]
+          if (zonaMinimaDaEspecie(enc.speciesId) > zonaMaxima) comExcecao.add(enc.speciesId)
+        }
+      }
+    }
+    expect([...comExcecao].sort()).toEqual(['cascoon', 'kakuna', 'metapod', 'silcoon'])
   })
 })
 
@@ -397,7 +523,7 @@ describe('pesos de spawn', () => {
   //
   // O piso e 0,05% (uma aparicao a cada 2.000 abates, algo como 7 ciclos de
   // hunt). Medido no dado atual, a mais dificil e Sceptile com 0,13% em
-  // mata_faixa3/forest — entao ha folga de 2,6x, e o teste reprova por regressao
+  // mata_e7/forest — entao ha folga de 2,6x, e o teste reprova por regressao
   // e nao por ficar apertado.
   //
   // O QUE ELE JA PEGOU: sem limite de razao no desempate, o tier do Gen1/Gen2
@@ -564,7 +690,7 @@ describe('hunt inicial', () => {
 // Modo Pesadelo espelha a hunt de origem INTEIRA, salas incluidas
 // ---------------------------------------------------------------------------
 // A falha silenciosa: o espelho copiava mapa e encontros e nao o cadastro de
-// salas, entao `temSalas('nightmare_mata_faixa1')` dava `false` e aquelas 36
+// salas, entao `temSalas('nightmare_mata_e1')` dava `false` e aquelas 36
 // hunts rodavam como arena unica — sem sub-bioma, sem chip de sala, sem aviso
 // de nova area, sem janela de nivel por sala, e com o pool inteiro spawnando de
 // uma vez. Metade do conteudo de bioma com regra diferente da outra metade, e

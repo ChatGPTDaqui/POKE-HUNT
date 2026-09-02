@@ -48,7 +48,7 @@ function cenario() {
   // resultados diferentes e mediveis.
   jogadorPoke.trait = 'intimidate'
 
-  const world = buildMapWorld('mata_faixa1', jogadorPoke, { seed: 0, rng, counters })
+  const world = buildMapWorld('mata_e1', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
 
   const enemyPoke = createPokeInstance(rng, 'rattata', 40)

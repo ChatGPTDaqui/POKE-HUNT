@@ -1,7 +1,7 @@
 // PH-301: a sala nao pode travar para sempre porque o protetor e IMUNE ao
 // tipo do POKE.
 //
-// O TRAVAMENTO, medido em bancada antes da correcao (hunt `campo_aberto_faixa1`,
+// O TRAVAMENTO, medido em bancada antes da correcao (hunt `campo_aberto_e1`,
 // semente 4242, janelas de 30s do servidor): sala 4 em 30/30, protetor `ponyta`
 // com Flash Fire, POKE `charmander` Lv102 com os 4 golpes de FOGO que
 // `activeAbilitiesPadrao` da a ele. O POKE atravessa o mapa, engaja a 38px e
@@ -32,7 +32,7 @@ import { ABATES_POR_SALA } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from './types'
 
-const HUNT = 'campo_aberto_faixa1'
+const HUNT = 'campo_aberto_e1'
 // 'meadow' (Campina) e sub-bioma de `campo_aberto`, o primeiro de ORDEM_DOS_BIOMAS — pede Guardian
 // nas salas 1-9. Mesmo padrao de `protetor.test.ts`: a chave nao precisa ser
 // alcancavel pelo sorteio desta hunt pra exercitar a logica.

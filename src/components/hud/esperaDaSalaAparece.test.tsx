@@ -27,7 +27,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
 
-const MAPA = { id: 'mata_faixa1', name: 'Mata I', levelRange: [1, 30] }
+const MAPA = { id: 'mata_e1', name: 'Mata I', levelRange: [1, 30] }
 /** `grass` fica no bioma campo_aberto, que pede protetor — sala 3 pede Guardian. */
 const SALA_CHEIA = { indice: 2, chave: 'grass', abates: ABATES_POR_SALA, ciclos: 0 }
 const AVISO = 'Preparando a próxima área'

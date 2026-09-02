@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 import { avisoDeTetoDeHunt } from './controller'
 import { getMap } from '@/data/maps'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 const TETO = getMap(HUNT)!.levelRange[1] // Faixa I => 30
 
 describe('avisoDeTetoDeHunt', () => {

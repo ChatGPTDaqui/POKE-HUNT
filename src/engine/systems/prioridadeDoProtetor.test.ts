@@ -24,7 +24,7 @@ import { updateCombat } from './combatSystem'
 
 import type { EnemyEntity, WorldState } from '../types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 
 function mundo(semente = 11): WorldState {
   const rng = createRng(semente)

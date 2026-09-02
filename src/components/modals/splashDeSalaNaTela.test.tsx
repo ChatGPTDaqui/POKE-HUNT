@@ -23,7 +23,7 @@ import type { SalaAtiva } from '@/engine/types'
 
 /** `grass` existe em `SUB_BIOMA_POR_CHAVE` e se chama "Relvado". */
 const SALA: SalaAtiva = { indice: 2, chave: 'grass', abates: 0, ciclos: 0 }
-const MAPA = { id: 'mata_faixa1', name: 'Mata I', levelRange: [1, 30] }
+const MAPA = { id: 'mata_e1', name: 'Mata I', levelRange: [1, 30] }
 
 beforeEach(() => {
   vi.useFakeTimers()

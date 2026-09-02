@@ -19,7 +19,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
 
-const MAPA = { id: 'mata_faixa1', name: 'Mata I', levelRange: [1, 30] }
+const MAPA = { id: 'mata_e1', name: 'Mata I', levelRange: [1, 30] }
 
 function comOuro(gold: number, diamonds = 1_000_000) {
   useGameStateStore.setState({ wallet: { gold, diamonds } } as never, false)

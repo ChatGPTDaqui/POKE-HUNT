@@ -40,7 +40,7 @@ import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
 import { especialidadeNiveisDefault } from '@/data/especialidades'
 import type { WorldState } from './types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 
 /** Mundo numa sala de bioma com a quota fechada — o estado em que o toggle vale. */
 function mundoComQuotaFechada(indice: number, chave = 'forest'): WorldState {
