@@ -12,6 +12,54 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // QUATRO itens pra tres issues (PH-435, PH-436, PH-437). O quarto item e um
+  // defeito que veio de carona na PH-437 — ver mais abaixo.
+  //
+  // O RENAME ABRE A NOTA, e nao a feature maior, porque e o unico item que o
+  // jogador encontra SEM PROCURAR: ele abre o jogo e o menu tem outro nome. Uma
+  // nota que enterra isso no terceiro item deixa a primeira estranheza do dia
+  // sem explicacao.
+  //
+  // O ITEM DA RESERVA NAO PROMETE MERCADO MELHOR, e essa foi a decisao mais
+  // dificil da nota. O mecanismo e real e fecha um buraco real (nao havia como
+  // cobrar um preco combinado sem confiar na palavra do outro), mas quantos
+  // jogadores negociam preco por conversa hoje e coisa que nao esta medida. O
+  // item conta o que DA PRA FAZER e onde ficam os botoes; nao diz que "o
+  // comercio ficou mais justo". Mesma disciplina da 7.36 com o prazo dos buffs.
+  //
+  // O ITEM DO CONTADOR DE LANCES parece pequeno demais pra nota e NAO E: ele
+  // fazia a tela MENTIR. "0 lance(s)" num anuncio que tinha lance e a diferenca
+  // entre o vendedor voltar pra conferir e o vendedor achar que ninguem quis.
+  //
+  // FICA DE FORA:
+  //   - as duas PRs de `database.types.ts`: encanamento puro, zero efeito pro
+  //     jogador;
+  //   - o rename de identificador interno (diretorio, store, hooks): o jogador
+  //     ve "Social" no menu, e e disso que o primeiro item fala. O resto e
+  //     arrumacao de codigo;
+  //   - a escolha de estampar o anuncio NA mensagem em vez de criar uma linha
+  //     propria pra ele: e a decisao que faz o card chegar ao vivo e nao virar
+  //     rota de flood, mas o jogador ve o mesmo card das duas formas;
+  //   - o que a reserva RECUSA (leilao, somente-lance, anuncio com lance
+  //     pendente): sao guardas contra prender ouro de terceiro. Listar as
+  //     recusas na nota descreveria o que NAO acontece, e o jogador so encontra
+  //     isso se tentar — e ai a mensagem do servidor explica na hora;
+  //   - PH-425 e PH-426 (estagios por bioma e as 120 hunts): entraram na `dev`
+  //     no mesmo intervalo, sao de outra sessao e nao tem nota. Escrever a nota
+  //     do trabalho de outra pessoa sobre um redesenho em andamento seria
+  //     inventar o que ela quis dizer. Ficam pra quem as fez.
+  {
+    version: '7.37',
+    date: '2026-09-02',
+    title: 'O Correio virou Social, a conversa sabe de qual anúncio se trata, e o preço combinado dá pra cobrar',
+    highlights: [
+      'O CORREIO AGORA SE CHAMA SOCIAL, E O ÍCONE DEIXOU DE SER UM ENVELOPE. O nome era do tempo em que a tela era caixa de carta, com Entrada e Enviados separados. Ela é conversa por contato desde a 7.10 — com histórico, quem está online e a lista de amigos. Nada mudou de lugar dentro dela: só o nome e o ícone do menu.',
+      'QUEM PUXA CONVERSA POR UM ANÚNCIO CHEGA COM O ANÚNCIO NA MÃO. Antes o vendedor recebia "aceita 1.8M?" e não tinha como saber de qual dos POKEs dele o sujeito estava falando. Agora a conversa começa com um cartão do anúncio — foto, nível, IV e preço —, e os DOIS lados veem o mesmo cartão. Ele continua ali depois, no histórico da conversa, mostrando o valor que valia na hora, mesmo que o POKE já tenha sido vendido.',
+      'DOIS CAMINHOS NOVOS PRA COMEÇAR A CONVERSA. Na vitrine, "negociar" ao lado do nome do vendedor abre a conversa direto (antes era clicar no nome, abrir o perfil e de lá procurar "Conversar" — três telas, e o anúncio se perdia na primeira). E em "Anúncios Ativos", quem recebeu um lance agora tem um "Falar" pra responder com palavras em vez de só aceitar ou recusar um número.',
+      'DÁ PRA RESERVAR UM ANÚNCIO PRA UMA PESSOA, PELO PREÇO COMBINADO. Combinar 1.8M no lugar dos 2.5M anunciados não tinha como ser cumprido: baixar o preço deixava o POKE na vitrine de todo mundo, e o primeiro que passasse levava. Agora, dentro da conversa, o vendedor põe o valor acertado e reserva pra aquele jogador: o POKE sai da vitrine pública e só ele consegue comprar. O reservado recebe um aviso com o cartão e o preço, e vê "reservado para você" no anúncio. O vendedor solta a reserva quando quiser, em "Anúncios Ativos".',
+      'BUG CORRIGIDO: a aba "Anúncios Ativos" dizia "0 lance(s)" em anúncio que TINHA lance. O número certo estava ali do lado, na lista de lances recebidos, mas a linha do anúncio mostrava zero — quem batia o olho na lista achava que ninguém tinha se interessado.',
+    ],
+  },
   // TRES itens pra tres issues (PH-418, PH-421, PH-422). A PH-419 e a PH-420
   // entraram no mesmo intervalo e NAO tem item — ver o "fica de fora".
   //
