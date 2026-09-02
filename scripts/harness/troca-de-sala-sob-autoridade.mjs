@@ -16,11 +16,21 @@
 //      ponto de entrada;
 //   3. o intervalo de flush — 30s, e a resposta so chega no proximo.
 //
-// `divergencia-de-quota.mjs` mediu SO a primeira (mediana 32,6s, pior caso
-// 112s). Nenhuma bancada media a soma, que e o unico numero que o jogador sente.
-// E a soma nao e derivavel das partes: o pedido de flush ao fechar a quota, o
+// Nenhuma bancada media a soma, que e o unico numero que o jogador sente. E a
+// soma nao e derivavel das partes: o pedido de flush ao fechar a quota, o
 // protetor que nasce so quando a quota fecha e a regra de "nunca para tras" da
 // reconciliacao interagem.
+//
+// ESTE COMENTARIO CREDITAVA `divergencia-de-quota.mjs` com ter medido a primeira
+// (1) — "mediana 32,6s, pior caso 112s". ELE NAO MEDE ISSO (PH-423). Aquela
+// bancada roda a MESMA funcao continua duas vezes com sementes diferentes e
+// chama uma de "servidor": nao ha reconstrucao de janela em lado nenhum, entao o
+// que ela mede e ruido de SEMENTE, nao a divergencia cliente-servidor. E ela usa
+// `Math.abs()`, entao nao mostra direcao — e direcao e justamente o achado aqui
+// (o cliente nunca e observado atras: 0 de 119 no padrao de 30s).
+//
+// Os numeros dela sao reais; a etiqueta estava errada. Quem quiser a divergencia
+// de verdade tem que usar ESTA bancada, que e a que reconstroi a janela.
 //
 // A PERGUNTA QUE ELA RESPONDE
 // -----------------------------------------------------------------------------
@@ -135,10 +145,26 @@ function corrida(semente) {
   const rngDaSessao = createRng(semente)
   const salaInicial = novaSala(rngDaSessao, HUNT, 0, 0)
 
-  // Cliente: POKE e rng PROPRIOS. A predicao nao conhece a semente da sessao —
-  // e isso, e nao um detalhe da bancada, e a origem da divergencia medida.
+  const pokeServidor = createPokeInstance(createRng(semente), ESPECIE, NIVEL)
+
+  // Cliente: rng PROPRIO (a predicao nao conhece a semente da sessao — e isso, e
+  // nao um detalhe da bancada, e a origem da divergencia de contagem), mas o
+  // MESMO POKE.
+  //
+  // O POKE E CLONE, E NAO UMA SEGUNDA INSTANCIA SORTEADA (PH-423). Ate aqui a
+  // bancada fazia `createPokeInstance(rngCliente, ...)` de um lado e
+  // `createPokeInstance(createRng(semente), ...)` do outro: dois POKE com IVs e
+  // natureza DIFERENTES, logo com stats diferentes. No jogo os dois lados olham a
+  // MESMA linha de `pokemon_instances` — o cliente prediz com o POKE que ele tem
+  // na mochila, que e o mesmo que o servidor carrega.
+  //
+  // Isso nao era detalhe: a medicao de travamento em janela curta depende de o
+  // servidor conseguir fechar a quota, e um servidor sorteado com IV pior que o
+  // do cliente trava por motivo que o jogo nao tem. Clone estrutural mantem a
+  // divergencia que interessa (sorteio de combate e de spawn) e tira a que era
+  // artefato (stats).
+  const pokeCliente = structuredClone(pokeServidor)
   const rngCliente = createRng(semente * 7919 + 13)
-  const pokeCliente = createPokeInstance(rngCliente, ESPECIE, NIVEL)
   const gameStateCliente = gameStateFalso(pokeCliente)
   const cliente = buildMapWorld(
     HUNT, pokeCliente,
@@ -147,7 +173,6 @@ function corrida(semente) {
   )
   cliente.salaSobAutoridade = true
 
-  const pokeServidor = createPokeInstance(createRng(semente), ESPECIE, NIVEL)
   const gameStateServidor = gameStateFalso(pokeServidor)
   const estadoDoServidor = {
     seed: semente,
