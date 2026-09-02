@@ -7,12 +7,14 @@
 // simplesmente responde outra coisa.
 import { describe, expect, it } from 'vitest'
 
-import { BIOMAS } from './biomas'
+import { BIOMAS, ESTAGIOS_PARA_O_LANCE, GRUPOS_DO_LANCE, GRUPOS_INICIAIS } from './biomas'
 import { ESTAGIOS_POR_BIOMA } from './estagios'
 import {
   HUNT_DE_REFUGIO,
   ORDEM_LEGADA_DOS_BIOMAS,
+  biomasFaltandoParaOLance,
   bloqueioDoEstagio,
+  bloqueioDoLance,
   comEstagioLimpo,
   estagioLiberado,
   lerProgressoPorBioma,
@@ -282,5 +284,79 @@ describe('a ordem legada esta congelada', () => {
       'mata', 'aguas_interiores', 'urbano', 'gelido',
       'aridos', 'sagrado', 'sombrio', 'igneo',
     ])
+  })
+})
+
+// PH-432: o Campeao Lance ganhou um portao de ENTRADA, e ele nao tinha nenhum.
+//
+// O `continent` dele era `faixa2`, que nascia aberto — o duelo de Lv 55-65
+// estava disponivel no dia 1, com um POKE Lv 5 do outro lado. O que existia era
+// so o gate do que ele CONCEDE. A issue trocou o portao de lugar.
+describe('o portao do Campeao Lance', () => {
+  it('conta nova nao passa, e a mensagem nao lista os 12 nomes', () => {
+    const p = progressoPorBiomaDefault()
+    expect(biomasFaltandoParaOLance(p).length).toBe(12)
+    const msg = bloqueioDoLance(p)
+    expect(msg).toBeTruthy()
+    // Com 12 faltando o jogador nao precisa da lista, precisa saber que o
+    // Lance e conteudo de meio de jogo.
+    expect(msg).toContain('12 biomas')
+    expect(msg).toContain(String(ESTAGIOS_PARA_O_LANCE))
+  })
+
+  it('11 biomas no estagio 5 e um no 4 mantem o Lance bloqueado', () => {
+    const p = Object.fromEntries(BIOMAS.map((b) => [b.chave, 5]))
+    p['igneo'] = 4
+    expect(biomasFaltandoParaOLance(p)).toEqual(['igneo'])
+    // Com poucos faltando, a mensagem NOMEIA quais — "bloqueado" sem dizer o
+    // que fazer e o defeito que o gate de estagio corrigiu.
+    expect(bloqueioDoLance(p)).toContain('Igneo')
+  })
+
+  it('o 12o completar libera', () => {
+    const p = Object.fromEntries(BIOMAS.map((b) => [b.chave, 5]))
+    expect(biomasFaltandoParaOLance(p)).toEqual([])
+    expect(bloqueioDoLance(p)).toBeNull()
+  })
+
+  it('estagio ACIMA de 5 continua contando como cumprido', () => {
+    const p = Object.fromEntries(BIOMAS.map((b) => [b.chave, 10]))
+    expect(bloqueioDoLance(p)).toBeNull()
+    const misto = { ...Object.fromEntries(BIOMAS.map((b) => [b.chave, 5])), marinho: 9 }
+    expect(bloqueioDoLance(misto)).toBeNull()
+  })
+
+  it('ate tres faltando saem por extenso; acima disso, o numero', () => {
+    const tres = Object.fromEntries(BIOMAS.map((b) => [b.chave, 5]))
+    tres['igneo'] = 0; tres['mata'] = 0; tres['marinho'] = 0
+    const msgTres = bloqueioDoLance(tres)!
+    expect(msgTres).toContain('Mata')
+    expect(msgTres).not.toContain('3 biomas')
+
+    const quatro = { ...tres, urbano: 0 }
+    expect(bloqueioDoLance(quatro)).toContain('4 biomas')
+  })
+})
+
+// PH-432: os dois grupos de gate, trancados pelo VALOR e nao por comparacao
+// consigo mesmos.
+//
+// O teste de `hunts.test.ts` compara `MAPS.boss_lance.unlocksContinentOnClear`
+// com `GRUPOS_DO_LANCE` — os dois mudam juntos, entao ele passa verde mesmo se
+// alguem devolver `faixa3` a lista. Medido por sabotagem: era o unico ponto
+// desta issue sem guarda.
+describe('os grupos de gate que sobraram', () => {
+  it('o mundo nasce num grupo so, e o Lance concede so o Pesadelo', () => {
+    expect(GRUPOS_INICIAIS).toEqual(['biomas'])
+    // Se `faixa3` voltar pra ca, o estagio 7 inteiro fica atras do Campeao
+    // Lance de novo — a segunda trava que a PH-432 removeu, e que o gate de
+    // estagio ja cobre melhor.
+    expect(GRUPOS_DO_LANCE).toEqual(['nightmare'])
+  })
+
+  it('nenhum grupo de faixa sobrou nos dois', () => {
+    for (const g of [...GRUPOS_INICIAIS, ...GRUPOS_DO_LANCE]) {
+      expect(g.startsWith('faixa'), `${g} e grupo de faixa`).toBe(false)
+    }
   })
 })

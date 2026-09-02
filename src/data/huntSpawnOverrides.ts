@@ -53,8 +53,8 @@ import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
 import { TRAINING_MAP, TRAINING_MAP_ID, TRAINING_ENCOUNTER } from './trainingDummy'
 import {
-  BIOMAS, FAIXAS, GEOMETRIA, LOOT, MAX_INIMIGOS_HUNT_INICIAL,
-  type BiomaDef, type FaixaId,
+  BIOMAS, GEOMETRIA, GRUPOS_INICIAIS, LOOT, MAX_INIMIGOS_HUNT_INICIAL,
+  type BiomaDef,
 } from './biomas'
 import {
   ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, zonaMaximaDoEstagio,
@@ -173,27 +173,6 @@ function estagioDaZona(zona: number): number {
 /** O estagio que contem este nivel. Nivel acima do ultimo cai no ultimo. */
 function estagioDoNivel(nivel: number): number {
   return Math.min(Math.max(Math.ceil(nivel / 10), 1), ESTAGIOS_POR_BIOMA)
-}
-
-/**
- * Ate que estagio (inclusive) uma FAIXA antiga ia — a ponte que mantem o gate
- * de hoje de pe enquanto ele nao e trocado.
- *
- * `continent` continua sendo o grupo de gate (`FAIXAS_INICIAIS` abre faixa1 e
- * faixa2; o Lance abre faixa3 e o Pesadelo), e trocar isso e a PH-430/PH-432,
- * nao esta issue. Entao cada estagio herda o grupo da faixa que cobria aquele
- * nivel: estagios 1-3 = faixa1 (Lv 1-30), 4-6 = faixa2 (Lv 31-60), 7-10 =
- * faixa3 (Lv 61-100 — o estagio 10 e conteudo novo, acima do antigo teto de
- * 90, e cai no grupo mais alto).
- *
- * SEM ISSO O JOGO ABRE TODO DE UMA VEZ: `continent` de valor desconhecido nao
- * casa com grupo liberado nenhum, e o menu esconderia as 120 hunts. Com um
- * valor unico e aberto, o Modo Pesadelo deixaria de ser recompensa do Lance.
- * A ponte sai junto com o vocabulario de faixa, na PH-434.
- */
-function grupoDeGateDoEstagio(estagio: number): FaixaId {
-  const faixa = FAIXAS.find((f) => niveisDoEstagio(estagio)[1] <= f.niveis[1])
-  return (faixa ?? FAIXAS[FAIXAS.length - 1]).id
 }
 
 /**
@@ -483,12 +462,12 @@ function montarHunt(bioma: BiomaDef, estagio: number): void {
     description: `${bioma.nome} — níveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(', ')}.`,
     levelRange: [lo, hi],
     unlockCost: null,
-    // `continent` deixou de ser regiao e passou a ser o GRUPO DE GATE (ver
-    // data/biomas.ts): faixa1 e faixa2 nascem abertas, faixa3 e o Modo
-    // Pesadelo sao liberados por derrotar o Campeao Lance. O estagio herda o
-    // grupo da faixa que cobria aquele nivel — ponte temporaria, ver
-    // `grupoDeGateDoEstagio`.
-    continent: grupoDeGateDoEstagio(estagio),
+    // TODA hunt de bioma nasce no grupo aberto (PH-432). A ponte que a PH-426
+    // montou aqui — cada estagio herdando o grupo da faixa que cobria aquele
+    // nivel — morreu com o gate de estagio: barrar o estagio 7 inteiro atras do
+    // Campeao Lance era uma segunda trava dizendo, pior, o que
+    // `estagioLiberado` ja diz (o estagio N pede o N-1 daquele bioma).
+    continent: GRUPOS_INICIAIS[0],
     bounds: { ...GEOMETRIA.bounds },
     playerSpawn: { ...GEOMETRIA.playerSpawn },
     bg: { ...bioma.bg },
@@ -516,7 +495,7 @@ function montarHunt(bioma: BiomaDef, estagio: number): void {
     description: 'A primeira caçada. Só POKEs de tipo Normal, nível 1 a 2.',
     levelRange: [lo, hi],
     unlockCost: null,
-    continent: 'faixa1',
+    continent: GRUPOS_INICIAIS[0],
     bounds: { ...GEOMETRIA.bounds },
     playerSpawn: { ...GEOMETRIA.playerSpawn },
     // "hunt inicial e floresta padrão.jpg" — nome literal do arquivo pra essa hunt (leva 2026-08-15).

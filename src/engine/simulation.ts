@@ -1534,12 +1534,13 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1
   ) {
     world.sequenceCleared = true
-    // Lista: o Lance abre a faixa de nivel seguinte E o Modo Pesadelo.
+    // PH-432: a lista encolheu pra so o Modo Pesadelo. A faixa III que ele
+    // abria virou os estagios 7 a 10, que o proprio progresso do bioma libera.
     const grupos = world.mapDef.unlocksContinentOnClear
     const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g))
     for (const grupo of grupos) gameState.unlockContinent(grupo)
     if (!silent && algumEstavaTrancado) {
-      toastStore.getState().pushToast('Você derrotou o Campeão Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
+      toastStore.getState().pushToast('Você derrotou o Campeão Lance! O Modo Pesadelo foi liberado.', 'success', 'world')
     }
   }
 

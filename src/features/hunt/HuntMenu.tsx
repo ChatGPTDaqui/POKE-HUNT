@@ -15,7 +15,8 @@ import {
   type SubBiomaDef,
 } from '@/data/biomas'
 import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
-import { bloqueioDoEstagio, type ProgressoPorBioma } from '@/data/progressoDeBioma'
+import { bloqueioDoEstagio, bloqueioDoLance, type ProgressoPorBioma } from '@/data/progressoDeBioma'
+import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { MapaDeBiomas, TrilhaDoBioma } from './TrilhaDeEstagios'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { contextoDeSpawn } from '@/engine/systems/salaSystem'
@@ -36,13 +37,12 @@ import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { GameButton, GameCard, GameInput, GameSelect, SectionLabel, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
-
-// As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo
-// de gate (ver data/biomas.ts): as duas primeiras faixas nascem abertas, a
-// terceira e o Modo Pesadelo saem do Campeao Lance.
+// As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo de
+// gate; com a PH-432 sobraram DOIS (ver data/biomas.ts): o que nasce aberto e o
+// Modo Pesadelo, que sai do Campeao Lance.
 const CONTINENT_LABELS: Record<string, string> = {
-  ...Object.fromEntries(FAIXAS.map((f) => [f.id, `Faixa ${f.nome} · Lv ${f.niveis[0]}-${f.niveis[1]}`])),
-  nightmare: 'Modo Pesadelo',
+  biomas: "Mundo",
+  nightmare: "Modo Pesadelo",
 }
 const TYPE_LIST = (Object.keys(TYPE_COLORS) as ElementType[]).sort()
 const fmt = new Intl.NumberFormat('pt-BR')
@@ -58,6 +58,8 @@ const fmt = new Intl.NumberFormat('pt-BR')
  * e importavel dos dois lados: a regra e o texto passaram a ter uma fonte so.
  */
 function bloqueioDeBiomaClient(mapId: string, progresso: ProgressoPorBioma): string | null {
+  // PH-432: o Campeao Lance tem gate proprio — progresso 5 nos 12 biomas.
+  if (mapId === LANCE_MAP_ID) return bloqueioDoLance(progresso)
   const doMapa = parseEstagioId(mapId)
   // Hunt sem estagio (inicial, BOSS, Lance, Pesadelo) nao passa por este gate.
   if (!doMapa) return null

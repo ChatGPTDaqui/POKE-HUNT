@@ -9,7 +9,7 @@
 import type { PokeInstance } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { MAPS } from '@/data/maps'
-import { FAIXAS_INICIAIS } from '@/data/biomas'
+import { GRUPOS_INICIAIS } from '@/data/biomas'
 import { progressoPorBiomaDefault, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 
@@ -215,7 +215,7 @@ export function defaultGameStateData(): GameStateData {
     perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
     trainer: { name: 'Treinador', level: 1, exp: 0 },
     pokedexKills: {},
-    unlockedContinents: [...FAIXAS_INICIAIS],
+    unlockedContinents: [...GRUPOS_INICIAIS],
     missoesReivindicadas: {},
     especialidades: especialidadeNiveisDefault(),
     biomaProgress: progressoPorBiomaDefault(),

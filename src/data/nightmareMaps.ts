@@ -11,7 +11,7 @@
 // next `npm run planilha:aplicar` clobbering it. Confirmed with the user:
 // totally free, no unlockCost anywhere in here.
 import { SPECIES } from './pokes'
-import { GEOMETRIA, GRUPOS_DO_LANCE } from './biomas'
+import { GEOMETRIA, GRUPOS_DO_LANCE, GRUPOS_INICIAIS } from './biomas'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import type { ElementType, SpeciesDataEntry } from './generated/types'
 import { ESPERA_DE_TROCA_SEGUNDOS, type HuntMapDef, type HuntEncounter, type StatBlock } from './huntTypes'
@@ -245,7 +245,11 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
     // Fica na faixa2 (Lv31-60), que e exatamente onde o time dele cai
     // (Lv55-65): o jogador chega nele terminando a faixa2, e derrota-lo abre
     // a faixa3 e o Modo Pesadelo (ver unlocksContinentOnClear abaixo).
-    continent: 'faixa2',
+    // PH-432: o Lance vive no grupo aberto — quem barra a entrada dele agora e
+    // o progresso nos 12 biomas (`bloqueioDoLance`), nao o `continent`. Ate
+    // aqui ele estava em `faixa2`, que nascia aberta: o duelo de Lv 55-65
+    // estava disponivel no dia 1, sem exigencia nenhuma.
+    continent: GRUPOS_INICIAIS[0],
     bounds: { width: 1400, height: 900 },
     playerSpawn: { x: 700, y: 450 },
     bg: { primary: '#3e2f23', secondary: '#4a3829', image: TYPE_BACKGROUND_IMAGE.DRAGON ?? null },

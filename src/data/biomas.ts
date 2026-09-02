@@ -17,7 +17,7 @@
 // Escrito a mao de proposito: agrupamento tematico, peso e loot sao decisao de
 // game design, nao dado derivavel. As listas de especie, que sao grandes e
 // mudam com o roster, essas sim sao geradas.
-import type { ElementType, MapItemDrop } from './generated/types'
+import type { Continent, ElementType, MapItemDrop } from './generated/types'
 
 // ---------------------------------------------------------------------------
 // Faixas de nivel
@@ -49,11 +49,47 @@ export const FAIXAS: FaixaDef[] = [
   { id: 'faixa3', nome: 'III', niveis: [61, 90], zonaMaxima: 8 },
 ]
 
-// As faixas que um jogador novo ja pode entrar. A faixa3 e o Modo Pesadelo
-// (com as 11 hunts BOSS dentro dele) sao liberados por derrotar o Campeao
-// Lance, cujo time e Lv55-65 — exatamente o fim da faixa2.
-export const FAIXAS_INICIAIS: string[] = ['faixa1', 'faixa2']
-export const GRUPOS_DO_LANCE: string[] = ['faixa3', 'nightmare']
+/**
+ * O grupo de gate das hunts que nascem abertas.
+ *
+ * ERAM AS DUAS PRIMEIRAS FAIXAS ATE A PH-432, e o encolhimento aqui e o fim da
+ * ponte que a PH-426 tinha montado. O raciocinio: `continent` existe pra dizer
+ * "este conteudo esta liberado?", e nas hunts de bioma essa pergunta passou a
+ * ser respondida pelo ESTAGIO (PH-430 — o estagio 1 sempre aberto, o N pede o
+ * N-1). Manter as faixas aqui era uma segunda trava que dizia a mesma coisa com
+ * granularidade pior: ela barrava o estagio 7 inteiro atras do Campeao Lance
+ * quando o gate de estagio ja o barra atras do estagio 6.
+ *
+ * O que `continent` ainda decide de verdade e UMA coisa: o Modo Pesadelo (e as
+ * 11 hunts BOSS dentro dele) esta aberto? Isso continua sendo o premio do
+ * Lance.
+ */
+export const GRUPOS_INICIAIS: Continent[] = ['biomas']
+
+/**
+ * O que derrotar o Campeao Lance libera.
+ *
+ * Encolheu de `['faixa3', 'nightmare']` pra so o Pesadelo na PH-432: a faixa3
+ * deixou de existir como grupo, e o que era "a faixa III" agora sao os estagios
+ * 7 a 10, liberados um a um pelo proprio progresso do bioma.
+ */
+export const GRUPOS_DO_LANCE: Continent[] = ['nightmare']
+
+/**
+ * Quantos estagios de CADA um dos 12 biomas o jogador precisa ter limpo pra
+ * poder desafiar o Campeao Lance (PH-432).
+ *
+ * Cinco = a metade do modo normal, em toda parte do mapa. Era um gate por
+ * grupo de faixa, que com os 12 biomas independentes deixou de significar
+ * algo.
+ *
+ * COLISAO CONHECIDA E ACEITA: o estagio 5 cobre Lv 41-50, mas os estagios 6 a
+ * 10 ficam abertos o tempo todo (o gate e por bioma, nao global), entao o
+ * jogador tende a chegar ao Lance com o time em Lv 100 e o duelo — desenhado
+ * pra Lv 55-65 — vira formalidade. Registrado no desenho de 02/09 como
+ * consequencia aceita, e nao e escopo desta issue resolver.
+ */
+export const ESTAGIOS_PARA_O_LANCE = 5
 
 // Grupos que existiam antes das faixas e que nenhuma hunt usa mais. Save
 // antigo os carrega; sao traduzidos na carga, nunca propagados — 'kanto' vira
