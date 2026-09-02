@@ -280,7 +280,7 @@ export interface PerfilPublico {
   anunciosAtivos: number
 }
 
-// --- mercado, chat e correio ------------------------------------------------
+// --- mercado, chat e social ------------------------------------------------
 // Os tipos espelham server/src/mercado.ts e server/src/social.ts.
 
 export interface NivelDePreco { unitPrice: number; quantity: number }
@@ -404,7 +404,7 @@ export interface MensagemChat {
   created_at: string
 }
 
-export interface AnexoItemCorreio {
+export interface AnexoItemSocial {
   itemId: string
   quantity: number
 }
@@ -418,7 +418,7 @@ export interface AnexoItemCorreio {
  * especie e o nivel. Congelar stats aqui os deixaria velhos entre o envio e a
  * coleta, e o POKE nasceria diferente de todo outro da mesma especie.
  */
-export interface AnexoPokeCorreio {
+export interface AnexoPokeSocial {
   speciesId: string
   level: number
   isShiny?: boolean
@@ -437,7 +437,7 @@ export interface AnexoPokeCorreio {
  * `sellerId` viaja junto pro card saber de que lado da mesa o leitor está
  * ("anúncio seu" x "anúncio dele") sem precisar buscar nada.
  */
-export interface ContextoAnuncioCorreio {
+export interface ContextoAnuncioSocial {
   anuncioId: string
   sellerId: string
   speciesId: string
@@ -452,7 +452,7 @@ export interface ContextoAnuncioCorreio {
   apenasOferta: boolean
 }
 
-export interface MensagemCorreio {
+export interface MensagemSocial {
   id: string
   de_id: string | null
   de_nome: string
@@ -467,16 +467,16 @@ export interface MensagemCorreio {
   estado: 'pendente' | 'aceito' | 'recusado' | 'lido'
   created_at: string
   /** Itens anexados. Vazio na maioria das mensagens. */
-  anexo_itens?: AnexoItemCorreio[]
+  anexo_itens?: AnexoItemSocial[]
   /** POKE anexado (PH-164). Nulo em tudo que nao e recompensa de POKE. */
-  anexo_poke?: AnexoPokeCorreio | null
+  anexo_poke?: AnexoPokeSocial | null
   /** Carimbo de coleta — presente significa "ja recebido". */
   anexo_coletado_em?: string | null
   /**
    * Anúncio que abriu a negociação (PH-435). Nulo na esmagadora maioria das
    * mensagens — só a PRIMEIRA de cada entrada pelo Mercado carrega.
    */
-  contexto_anuncio?: ContextoAnuncioCorreio | null
+  contexto_anuncio?: ContextoAnuncioSocial | null
   /**
    * Exclusao e por lado e SOFT (PH-74): cada ponta some com a mensagem da
    * propria caixa sem tirar da outra. Por isso duas colunas em vez de um
@@ -546,8 +546,8 @@ export interface ConversaResumo {
   bloqueado: boolean
 }
 
-// Ranking/perfil/mercado/chat/correio saíram daqui na migração RPC-everything
-// (ver acoesRpc.ts, mercadoRpc.ts, chatRealtime.ts, correioRealtime.ts,
+// Ranking/perfil/mercado/chat/social saíram daqui na migração RPC-everything
+// (ver acoesRpc.ts, mercadoRpc.ts, chatRealtime.ts, socialRealtime.ts,
 // rankingRpc.ts) — só sessão continua HTTP, é a única coisa que ainda precisa
 // da Edge Function (simulação real de combate, ver _Architecture.md).
 export const servidor = {

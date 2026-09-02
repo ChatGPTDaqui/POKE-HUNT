@@ -11,9 +11,6 @@
 import { create } from 'zustand'
 import type { ChatTab } from '@/stores/toastStore'
 
-// Nomes em portugues porque sao os mesmos rotulos que aparecem no menu — o
-// handoff especifica esta uniao literalmente, e ter um `'team'` interno virando
-// `'Equipe'` na tela so cria uma traducao a mais pra manter.
 /**
  * Anúncio levado do Mercado pra dentro da conversa (PH-435).
  *
@@ -41,9 +38,12 @@ export interface AnuncioParaConversa {
   apenasOferta: boolean
 }
 
+// Nomes em portugues porque sao os mesmos rotulos que aparecem no menu — o
+// handoff especifica esta uniao literalmente, e ter um `'team'` interno virando
+// `'Equipe'` na tela so cria uma traducao a mais pra manter.
 export type ScreenName =
   | 'equipe' | 'mochila' | 'loja' | 'hunts' | 'pokedex'
-  | 'wiki' | 'config' | 'correio' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
+  | 'wiki' | 'config' | 'social' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
   | 'ranking' | 'tutoriais' | 'especialidades' | 'troca'
 
 // Reexportado do toastStore em vez de redeclarado: as duas listas ja
@@ -226,22 +226,22 @@ interface UiState {
   abrirPerfilPublico: (alvo: { userId: string; nome: string }) => void
   fecharPerfilPublico: () => void
 
-  // Conversa que o Correio deve abrir ASSIM QUE montar (PH-119).
+  // Conversa que o Social deve abrir ASSIM QUE montar (PH-119).
   //
-  // O Correio guarda o contato aberto em estado local, entao quem esta fora
+  // O Social guarda o contato aberto em estado local, entao quem esta fora
   // dele nao tem como dizer "abra ja falando com fulano" — que e exatamente o
   // caminho que a issue pede (do anuncio pro perfil, do perfil pra conversa).
-  // Consumido UMA vez e limpo pelo proprio Correio: sem isso, fechar o fio e
-  // reabrir o Correio reabriria o mesmo contato pra sempre.
+  // Consumido UMA vez e limpo pelo proprio Social: sem isso, fechar o fio e
+  // reabrir o Social reabriria o mesmo contato pra sempre.
   //
   // `anuncio` (PH-435) e o contexto da negociacao: quem abriu a conversa pela
   // vitrine (ou pelo lance recebido) chega com o anuncio na mao, e o fio ja
   // abre sabendo do que se trata. So o PREVIEW vem daqui — o snapshot que fica
   // gravado e o que o servidor monta, entao um preco desatualizado na tela nao
   // vira registro errado no historico.
-  correioContatoInicial: { userId: string; nick: string; anuncio?: AnuncioParaConversa } | null
-  abrirCorreioCom: (contato: { userId: string; nick: string; anuncio?: AnuncioParaConversa }) => void
-  consumirCorreioContatoInicial: () => void
+  socialContatoInicial: { userId: string; nick: string; anuncio?: AnuncioParaConversa } | null
+  abrirSocialCom: (contato: { userId: string; nick: string; anuncio?: AnuncioParaConversa }) => void
+  consumirSocialContatoInicial: () => void
 
   // Hunt Analyzer: aberto pelo card/chip de taxas do HUD. Mesma razao do perfil
   // pra nao ser uma `ScreenName` — nao vive no menu e abre por cima de qualquer
@@ -394,18 +394,18 @@ export const useUiStore = create<UiState>((set, get) => ({
     set((s) => ({ perfilPublicoAlvo: alvo, perfilOpen: false, winPos: { ...s.winPos, perfil: undefined } })),
   fecharPerfilPublico: () => set({ perfilPublicoAlvo: null }),
 
-  correioContatoInicial: null,
-  abrirCorreioCom: (contato) =>
+  socialContatoInicial: null,
+  abrirSocialCom: (contato) =>
     set((s) => ({
-      correioContatoInicial: contato,
-      currentScreen: 'correio',
+      socialContatoInicial: contato,
+      currentScreen: 'social',
       // Some com o perfil de terceiro: ele foi o caminho ate aqui, e deixa-lo
-      // aberto atras do Correio empilharia duas janelas sobre a mesma conversa.
+      // aberto atras do Social empilharia duas janelas sobre a mesma conversa.
       perfilPublicoAlvo: null,
       moreOpen: false,
       winPos: { ...s.winPos, panel: undefined },
     })),
-  consumirCorreioContatoInicial: () => set({ correioContatoInicial: null }),
+  consumirSocialContatoInicial: () => set({ socialContatoInicial: null }),
 
   analyzerOpen: false,
   setAnalyzerOpen: (analyzerOpen) =>

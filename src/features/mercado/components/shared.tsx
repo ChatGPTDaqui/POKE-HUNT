@@ -18,7 +18,7 @@ export function IconeItem({ itemId }: { itemId: string }) {
 }
 
 // Reexportado do controle compartilhado — a copia que vivia aqui era a unica
-// do jogo, e telas fora do mercado (perfil, correio) acabavam escrevendo a
+// do jogo, e telas fora do mercado (perfil, social) acabavam escrevendo a
 // sua propria string solta.
 export { Carregando } from '@/components/game/controls'
 

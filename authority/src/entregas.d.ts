@@ -22,7 +22,7 @@ export declare function enfileirarEntrega(cfg: Config, entrega: NovaEntrega): Pr
 /**
  * Mesma coisa que `enfileirarEntrega`, mas em lote: um unico INSERT
  * multi-linha, atomico no Postgres (tudo ou nada). Usar sempre que mais de
- * uma entrega nasce do mesmo evento (ex: anexo de correio com varios itens)
+ * uma entrega nasce do mesmo evento (ex: anexo de mensagem com varios itens)
  * pra nao correr risco de inserir a primeira metade e falhar no meio.
  */
 export declare function enfileirarEntregas(cfg: Config, entregas: NovaEntrega[]): Promise<void>;

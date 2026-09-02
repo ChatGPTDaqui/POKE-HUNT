@@ -22,7 +22,7 @@ export function validaSenha(senha: string): string | null {
 }
 
 // O nick e identidade publica: aparece no chat, no ranking, no Mercado e e o
-// que o Correio usa pra achar alguem. Dai os limites serem mais duros que os de
+// que o Social usa pra achar alguem. Dai os limites serem mais duros que os de
 // um campo de texto comum — e dai ele ser UNICO no banco (indice unico sobre
 // `lower(trainer_name)`).
 const MIN_NICK = 3

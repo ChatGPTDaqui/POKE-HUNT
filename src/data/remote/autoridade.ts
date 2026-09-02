@@ -530,12 +530,12 @@ export async function abrirSessaoDeHunt(
  * Recarrega o estado do servidor e aplica no cliente.
  *
  * Existe pro caso "o servidor me deve alguma coisa que so e creditada no
- * proximo request que grava" — entrega do Mercado, anexo de Correio coletado.
+ * proximo request que grava" — entrega do Mercado, anexo de Social coletado.
  * `GET /estado` e justamente esse request (ele carrega PARA ESCRITA e grava,
  * apesar de ser um GET; ver app.ts).
  *
  * `liquidar()` NAO serve aqui: ela chama `/sessao/flush`, que responde 409
- * quando nao ha hunt aberta — e coletar um item do Correio no Hospital e
+ * quando nao ha hunt aberta — e coletar um item do Social no Hospital e
  * exatamente esse caso. Foi assim que a primeira versao ficou: a coleta
  * carimbava a mensagem como recebida e o item so aparecia quando o jogador
  * entrasse numa hunt.

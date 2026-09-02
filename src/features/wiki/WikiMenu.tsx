@@ -99,7 +99,7 @@ function InicioTab() {
 
       <WikiCard title="3. Navegando pelos menus">
         A barra de baixo tem os atalhos principais: <b>Equipe</b>, <b>Mochila</b>, <b>Hunt</b> (o botão do
-        meio) e <b>Loja</b>. Tudo o mais — Pokedex, Mercado, Correio, Bestiário, Tasks, Calculadora, Ranking,
+        meio) e <b>Loja</b>. Tudo o mais — Pokedex, Mercado, Social, Bestiário, Tasks, Calculadora, Ranking,
         Wiki, Tutoriais, Configuracoes e o Hospital, quando voce esta numa hunt — vive atras do botao
         <b>Mais</b>, no fim da barra. Numa tela larga, Pokedex e Mercado sobem pra barra e saem do Mais. Os
         icones abaixo sao os MESMOS que aparecem no jogo.

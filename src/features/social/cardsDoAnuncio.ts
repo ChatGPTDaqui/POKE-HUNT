@@ -13,14 +13,14 @@
 // Escolhido em vez de um índice UNIQUE por (par, anúncio) no banco: a constraint
 // impediria a negociação legítima do mesmo POKE semanas depois, e custaria uma
 // migration pra resolver um problema que é de RENDERIZAÇÃO.
-import type { MensagemCorreio } from '@/data/remote/servidor'
+import type { MensagemSocial } from '@/data/remote/servidor'
 
 /**
  * Ids das mensagens que devem ser precedidas pelo card, na ordem cronológica em
  * que o fio é lido (mais antiga primeiro — a mesma ordem que `lerConversa`
  * devolve).
  */
-export function idsComCardDeAnuncio(mensagens: MensagemCorreio[]): Set<string> {
+export function idsComCardDeAnuncio(mensagens: MensagemSocial[]): Set<string> {
   const ids = new Set<string>()
   let ultimoVisto: string | null = null
   for (const m of mensagens) {

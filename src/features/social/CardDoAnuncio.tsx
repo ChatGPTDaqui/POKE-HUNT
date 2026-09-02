@@ -13,13 +13,13 @@ import { Coin, Diamond, Gavel, Storefront } from '@phosphor-icons/react'
 import { SPECIES } from '@/data/pokes'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { faceIconUrl } from '@/data/sprites'
-import type { ContextoAnuncioCorreio } from '@/data/remote/servidor'
+import type { ContextoAnuncioSocial } from '@/data/remote/servidor'
 import { cn } from '@/lib/utils'
 
 const fmt = new Intl.NumberFormat('pt-BR')
 
 interface Props {
-  ctx: ContextoAnuncioCorreio
+  ctx: ContextoAnuncioSocial
   /** Quem está lendo. Decide entre "seu anúncio" e "anúncio de quem você está falando". */
   meuId: string
   /**

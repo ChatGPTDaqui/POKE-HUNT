@@ -1,6 +1,6 @@
-// O correio como CONVERSA (PH-81), nao mais como caixa de cartas avulsas.
+// O social como CONVERSA (PH-81), nao mais como caixa de cartas avulsas.
 //
-// Antes daqui havia duas camadas, `correioRealtime.ts` (carta, por `para_id`) e
+// Antes daqui havia duas camadas, `socialRealtime.ts` (carta, por `para_id`) e
 // `dmRealtime.ts` (fio, por par, so entre amigos), e a mesma pessoa tinha duas
 // caixas com o mesmo interlocutor. `dmRealtime.ts` foi absorvido por este
 // arquivo junto com `friend_messages`; o que sobrou dele de melhor — a leitura
@@ -14,8 +14,8 @@
 import { schema, supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import type {
-  AmigoDetalhado, AnexoItemCorreio, BloqueadoRemoto, ContextoAnuncioCorreio, ConversaResumo,
-  MensagemCorreio,
+  AmigoDetalhado, AnexoItemSocial, BloqueadoRemoto, ContextoAnuncioSocial, ConversaResumo,
+  MensagemSocial,
 } from './servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { refetchEquipeInteira } from './acoesRpc'
@@ -36,7 +36,7 @@ async function userIdAtual(): Promise<string> {
   return id
 }
 
-export interface CaixaDoCorreio {
+export interface CaixaDoSocial {
   /** Um registro por CONTATO, mais recente primeiro. A tela inicial. */
   conversas: ConversaResumo[]
   /**
@@ -44,14 +44,14 @@ export interface CaixaDoCorreio {
    * aviso de sistema nao tem interlocutor (`de_id` nulo) e pedido de amizade e
    * uma decisao a tomar, nao uma fala num fio.
    */
-  avisos: MensagemCorreio[]
+  avisos: MensagemSocial[]
   amigos: AmigoDetalhado[]
   bloqueados: BloqueadoRemoto[]
   /** Soma das nao lidas de todas as conversas, mais os avisos pendentes. */
   naoLidas: number
 }
 
-export async function correio(): Promise<CaixaDoCorreio> {
+export async function social(): Promise<CaixaDoSocial> {
   const uid = await userIdAtual()
   const [fios, avisosQ, detalhes] = await Promise.all([
     db.rpc('conversas'),
@@ -68,7 +68,7 @@ export async function correio(): Promise<CaixaDoCorreio> {
   if (detalhes.error) throw new ErroServidor(409, detalhes.error.message)
 
   const conversas = (fios.data ?? []) as ConversaResumo[]
-  const avisos = (avisosQ.data ?? []) as unknown as MensagemCorreio[]
+  const avisos = (avisosQ.data ?? []) as unknown as MensagemSocial[]
   const retorno = (detalhes.data ?? {}) as { amigos?: AmigoDetalhado[]; bloqueados?: BloqueadoRemoto[] }
 
   const naoLidas = conversas.reduce((t, c) => t + c.naoLidas, 0)
@@ -95,7 +95,7 @@ export const PAGINA_CONVERSA = 30
  */
 export async function lerConversa(
   contatoId: string, antesDe?: string,
-): Promise<{ mensagens: MensagemCorreio[]; temMais: boolean }> {
+): Promise<{ mensagens: MensagemSocial[]; temMais: boolean }> {
   const uid = await userIdAtual()
 
   let q = db.from('mail_messages')
@@ -115,7 +115,7 @@ export async function lerConversa(
 
   // A exclusao e por LADO, e o filtro depende de qual lado eu sou em cada
   // linha — nao da pra expressar num `.is()` so. Feito aqui, sobre a pagina.
-  const linhas = ((data ?? []) as MensagemCorreio[]).filter((m) => (
+  const linhas = ((data ?? []) as MensagemSocial[]).filter((m) => (
     m.de_id === uid ? !m.excluido_remetente_em : !m.excluido_destinatario_em
   ))
   const temMais = linhas.length > PAGINA_CONVERSA
@@ -137,9 +137,9 @@ export async function lerConversa(
 export async function enviarMensagem(
   destino: { paraId?: string; paraNick?: string },
   corpo: string,
-  anexos: AnexoItemCorreio[] = [],
+  anexos: AnexoItemSocial[] = [],
   anuncioId?: string | null,
-): Promise<{ id: string; paraId: string; paraNome: string; contextoAnuncio: ContextoAnuncioCorreio | null }> {
+): Promise<{ id: string; paraId: string; paraNome: string; contextoAnuncio: ContextoAnuncioSocial | null }> {
   const { data, error } = await db.rpc('enviar_mensagem', {
     p_corpo: corpo,
     p_para_id: destino.paraId ?? null,
@@ -169,7 +169,7 @@ export async function enviarMensagem(
   // `contextoAnuncio` so existe em servidor com PH-435 aplicado; `?? null`
   // mantem o fio funcionando contra um `jogo-dev` mais velho em vez de deixar
   // `undefined` vazar pro estado da tela.
-  const r = data as { id: string; paraId: string; paraNome: string; contextoAnuncio?: ContextoAnuncioCorreio | null }
+  const r = data as { id: string; paraId: string; paraNome: string; contextoAnuncio?: ContextoAnuncioSocial | null }
   return { ...r, contextoAnuncio: r.contextoAnuncio ?? null }
 }
 
@@ -187,7 +187,7 @@ export async function excluirConversa(contatoId: string): Promise<{ apagadas: nu
   return { apagadas: (data as { apagadas: number }).apagadas }
 }
 
-export async function excluirCorreio(mensagemId: string): Promise<{ ok: boolean }> {
+export async function excluirSocial(mensagemId: string): Promise<{ ok: boolean }> {
   const { error } = await db.rpc('excluir_correio', { p_mensagem_id: mensagemId })
   if (error) throw new ErroServidor(409, error.message)
   return { ok: true }
@@ -248,7 +248,7 @@ export interface PokeRecebido {
 
 export interface ResultadoDaColeta {
   ok: boolean
-  itens: AnexoItemCorreio[]
+  itens: AnexoItemSocial[]
   poke: PokeRecebido | null
   mensagem: string
 }
@@ -301,10 +301,10 @@ export async function coletarAnexo(mensagemId: string): Promise<ResultadoDaColet
  * socket. `aoChegar` recebe a linha nova pra quem estiver com um fio aberto
  * poder anexar sem refetch; `aoMudar` avisa a lista pra recontar.
  */
-export function assinarCorreioAoVivo(
+export function assinarSocialAoVivo(
   userId: string,
   aoMudar: () => void,
-  aoChegar?: (m: MensagemCorreio) => void,
+  aoChegar?: (m: MensagemSocial) => void,
   /**
    * Sufixo do nome do canal. OBRIGATORIO quando ha mais de um assinante vivo ao
    * mesmo tempo — e ha: o menu escuta pra recontar os badges e o fio aberto
@@ -312,19 +312,19 @@ export function assinarCorreioAoVivo(
    *
    * `supabase.channel(nome)` com um nome JA INSCRITO devolve o MESMO canal, e o
    * `.on()` seguinte estoura com "cannot add postgres_changes callbacks after
-   * subscribe()". E o mesmo defeito que o comentario de `CorreioMenu.tsx`
+   * subscribe()". E o mesmo defeito que o comentario de `SocialMenu.tsx`
    * descreve pro caso de remontagem — aqui seriam dois componentes distintos
    * disputando um nome so.
    */
   sufixo = 'menu',
 ): () => void {
   const canal = supabase
-    .channel(`correio-${userId}-${sufixo}`)
+    .channel(`social-${userId}-${sufixo}`)
     .on(
       'postgres_changes',
       { event: '*', schema, table: 'mail_messages', filter: `para_id=eq.${userId}` },
       (payload) => {
-        if (payload.eventType === 'INSERT' && aoChegar) aoChegar(payload.new as unknown as MensagemCorreio)
+        if (payload.eventType === 'INSERT' && aoChegar) aoChegar(payload.new as unknown as MensagemSocial)
         aoMudar()
       },
     )

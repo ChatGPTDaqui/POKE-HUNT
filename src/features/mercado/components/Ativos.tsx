@@ -14,7 +14,7 @@ import { Carregando, IconeItem, Moeda } from './shared'
 import { TempoRestante } from './TempoRestante'
 
 export function Ativos() {
-  const abrirCorreioCom = useUiStore((s) => s.abrirCorreioCom)
+  const abrirSocialCom = useUiStore((s) => s.abrirSocialCom)
   const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'meus'],
     queryFn: () => mercadoRpc.mercadoMeus(),
@@ -92,7 +92,7 @@ export function Ativos() {
                   aria-label={`Falar com ${o.comprador}`}
                   onClick={() => {
                     const anuncio = anuncios.find((a) => a.id === o.listing_id)
-                    abrirCorreioCom({
+                    abrirSocialCom({
                       userId: o.buyer_id,
                       nick: o.comprador,
                       anuncio: anuncio ? anuncioParaConversa(anuncio) : undefined,

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 //
-// PH-164 — o correio passa a carregar POKE, e o cliente inteiro olhava so pra
+// PH-164 — o social passa a carregar POKE, e o cliente inteiro olhava so pra
 // `anexo_itens`.
 //
 // O modo de falha nao e cosmetico: uma carta so-com-POKE caia num caminho em que
@@ -14,12 +14,12 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { MensagemCorreio } from '@/data/remote/servidor'
-import type { PokeRecebido } from '@/data/remote/correioRealtime'
+import type { MensagemSocial } from '@/data/remote/servidor'
+import type { PokeRecebido } from '@/data/remote/socialRealtime'
 import { LinhaDeMensagem } from './LinhaDeMensagem'
 import { RecebimentoDePoke } from './RecebimentoDePoke'
 
-function carta(over: Partial<MensagemCorreio> = {}): MensagemCorreio {
+function carta(over: Partial<MensagemSocial> = {}): MensagemSocial {
   return {
     id: 'm1',
     de_id: null,
@@ -35,7 +35,7 @@ function carta(over: Partial<MensagemCorreio> = {}): MensagemCorreio {
 
 const ANEXO_EEVEE = { speciesId: 'eevee', level: 25, isShiny: false }
 
-function renderLinha(m: MensagemCorreio) {
+function renderLinha(m: MensagemSocial) {
   const fns = {
     onMarcarLida: vi.fn(),
     onResponderPedido: vi.fn(),
