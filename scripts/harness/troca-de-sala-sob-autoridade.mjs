@@ -182,6 +182,29 @@ function janelaDoServidor(estadoDoServidor, gameState, duracaoS, fases) {
     if (world.player?.fainted) fases.janelasComPokeCaido += 1
     fases.hpDoPokeNoFim.push(world.player?.poke?.hp ?? -1)
 
+    // SONDA DO HP CONGELADO (PH-423). Discrimina as duas explicacoes:
+    //   (1) o protetor nao e alcancado/engajado -> `dist` grande, `state` != engaged
+    //   (2) o espelho de HP nao roda -> `achou` false, e ai o `find` por uid falha
+    if (world.protetorPendente) {
+      const p = world.protetorPendente
+      const achado = world.enemies.find((e) => e.isProtetor && e.poke.uid === p.uid)
+      const qualquerProtetor = world.enemies.find((e) => e.isProtetor)
+      fases.sonda.push({
+        achou: !!achado,
+        haProtetorEmCampo: !!qualquerProtetor,
+        uidBate: qualquerProtetor ? qualquerProtetor.poke.uid === p.uid : null,
+        hpPendente: p.hpAtual,
+        hpEntidade: achado?.poke.hp ?? qualquerProtetor?.poke.hp ?? null,
+        estadoProtetor: (achado ?? qualquerProtetor)?.state ?? null,
+        estadoPlayer: world.player?.state ?? null,
+        inimigos: world.enemies.length,
+        dist: achado && world.player
+          ? Math.round(Math.hypot(achado.x - world.player.x, achado.y - world.player.y))
+          : null,
+        semDanoS: Math.round((world.protetorSemDanoSegundos ?? 0) * 10) / 10,
+      })
+    }
+
     const hp = world.protetorPendente?.hpAtual
     if (hp != null) {
       if (fases.hpDoProtetor.length === 0
@@ -199,7 +222,7 @@ function janelaDoServidor(estadoDoServidor, gameState, duracaoS, fases) {
 
 const fasesVazias = () => ({
   pre: 0, guardiao: 0, outro: 0, rampaS: 0, janelas: 0, semAbate: 0, duracaoS: 0,
-  hpDoProtetor: [], janelasComPokeCaido: 0, hpDoPokeNoFim: [],
+  hpDoProtetor: [], janelasComPokeCaido: 0, hpDoPokeNoFim: [], sonda: [],
 })
 
 /**
@@ -469,6 +492,23 @@ for (const e of todas.filter((x) => x.travou && x.fases?.hpDoProtetor.length)) {
     + `\n  min ${Math.min(...hp)} | max ${Math.max(...hp)}`
     + `\n  trajetoria: ${hp.slice(0, 14).join(' ')}${hp.length > 14 ? ' ...' : ''}`,
   )
+  const s = e.fases.sonda
+  if (s.length) {
+    const achou = s.filter((x) => x.achou).length
+    const emCampo = s.filter((x) => x.haProtetorEmCampo).length
+    console.log(
+      `  sonda em ${s.length} janelas: find por uid achou ${achou}`
+      + ` | protetor em campo ${emCampo}`,
+    )
+    for (const x of s.slice(0, 6)) {
+      console.log(
+        `    achou=${x.achou} emCampo=${x.haProtetorEmCampo} uidBate=${x.uidBate}`
+        + ` hpPend=${x.hpPendente} hpEnt=${x.hpEntidade}`
+        + ` estProt=${x.estadoProtetor} estPlayer=${x.estadoPlayer}`
+        + ` inimigos=${x.inimigos} dist=${x.dist} semDano=${x.semDanoS}s`,
+      )
+    }
+  }
 }
 
 process.exit(travadas > 0 ? 2 : 0)
