@@ -16,7 +16,8 @@ import { describe, expect, it } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
 import { getAbility } from '@/data/abilities'
-import { aplicarMudancasDeStat, aplicarEstagioUnico, fonteDeTrait, limparEstadoVolatil } from './statusSystem'
+import { aplicarMudancasDeStat, aplicarEstagioUnico, fonteDeTrait, limparEstadoVolatil, tickStatus } from './statusSystem'
+import { DURACAO_DE_ESTAGIO_SEGUNDOS, multiplicadorDeEstagio } from '@/data/statusEffects'
 import type { WorldEntity } from '../types'
 
 /** Entidade minima: so o que `aplicarMudancasDeStat` toca. */
@@ -44,8 +45,13 @@ describe('procedencia do estagio de atributo (PH-121)', () => {
 
     const fontes = usuario.estagiosFonte?.atkFis
     expect(fontes, 'estagio aplicado sem procedencia nenhuma').toBeDefined()
+    // PH-418: a fonte carrega tambem QUANTO ela vale e QUANTO tempo dura — sem
+    // os dois campos o total nao seria derivavel dela, e o total e derivado dela.
     expect(fontes).toEqual([
-      { id: 'swords_dance', tipo: 'golpe', proprio: true, deQuem: NOME('charmander') },
+      {
+        id: 'swords_dance', tipo: 'golpe', proprio: true, deQuem: NOME('charmander'),
+        estagios: 2, expiraEm: DURACAO_DE_ESTAGIO_SEGUNDOS,
+      },
     ])
   })
 
@@ -56,7 +62,10 @@ describe('procedencia do estagio de atributo (PH-121)', () => {
     aplicarMudancasDeStat(SEMPRE, atacante, alvo, ability)
 
     expect(alvo.estagiosFonte?.atkFis).toEqual([
-      { id: 'growl', tipo: 'golpe', proprio: false, deQuem: NOME('rattata') },
+      {
+        id: 'growl', tipo: 'golpe', proprio: false, deQuem: NOME('rattata'),
+        estagios: -1, expiraEm: DURACAO_DE_ESTAGIO_SEGUNDOS,
+      },
     ])
     // E nao suja o atacante: ele nao teve estagio nenhum.
     expect(atacante.estagiosFonte).toBeUndefined()
@@ -84,16 +93,25 @@ describe('procedencia do estagio de atributo (PH-121)', () => {
     expect(usuario.estagiosFonte?.atkFis).toHaveLength(1)
   })
 
-  it('estagio de volta a ZERO perde a fonte', () => {
-    // O selo desaparece da tela; manter a lista faria a proxima mudanca daquele
-    // atributo aparecer com o historico de uma situacao que ja passou.
+  it('total ZERO por cancelamento NAO apaga as fontes — quem esvazia a lista e o prazo', () => {
+    // ESTE TESTE FOI INVERTIDO NA PH-418, de proposito. Antes, total zero apagava
+    // a lista; com o total DERIVADO das fontes isso passou a ser errado, porque
+    // zero quase nunca e "acabou" — e cancelamento. Um Rosnado -1 sobre um Howl
+    // +1 da zero com as DUAS fontes vivas e prazos proprios, e quando o Rosnado
+    // vence o Howl volta a valer. Apagar no zero mataria essa volta, e o sintoma
+    // seria um buff que desaparece porque o inimigo debuffou na mesma hora, sem
+    // nada na tela explicando.
     const alvo = entidade('charmander')
-    aplicarEstagioUnico(alvo, 'speed', 2, fonteDeTrait(alvo, 'speed_boost'))
-    expect(alvo.estagiosFonte?.speed).toHaveLength(1)
+    aplicarEstagioUnico(alvo, 'atkFis', 1, { id: 'howl', tipo: 'golpe', proprio: true, deQuem: NOME('charmander') })
+    aplicarEstagioUnico(alvo, 'atkFis', -1, { id: 'growl', tipo: 'golpe', proprio: false, deQuem: NOME('rattata') })
 
-    aplicarEstagioUnico(alvo, 'speed', -2, fonteDeTrait(alvo, 'speed_boost'))
-    expect(alvo.estagios.speed).toBe(0)
-    expect(alvo.estagiosFonte?.speed).toBeUndefined()
+    expect(alvo.estagios.atkFis, 'cancelou: sai do cache').toBeUndefined()
+    expect(alvo.estagiosFonte?.atkFis, 'as duas fontes seguem vivas').toHaveLength(2)
+
+    // E o tempo, nao o total, que esvazia a lista.
+    tickStatus(SEMPRE, alvo, DURACAO_DE_ESTAGIO_SEGUNDOS, null)
+    expect(alvo.estagiosFonte?.atkFis, 'prazo vencido esvazia a chave').toBeUndefined()
+    expect(alvo.estagios.atkFis).toBeUndefined()
   })
 
   it('fonte de trait no PROPRIO dono marca `proprio`', () => {
@@ -118,27 +136,42 @@ describe('procedencia do estagio de atributo (PH-121)', () => {
     expect(fonteDeTrait(entidade('charmander'), undefined)).toBeUndefined()
   })
 
-  it('fim de luta apaga a procedencia junto com os estagios', () => {
-    // Fonte sobrevivendo faria o selo da proxima luta explicar um golpe que
-    // aconteceu em outra.
+  it('fim de luta apaga a procedencia DE TERCEIRO, e deixa a propria', () => {
+    // PH-418: quem decide o corte e o campo `proprio` da fonte. O selo da luta
+    // seguinte nao pode explicar um Rosnado de outra luta (por isso o de terceiro
+    // sai), mas a Danca das Espadas que o POKE usou nele mesmo tem prazo de 18s e
+    // o "fim de batalha" deste motor acontece no vao entre dois spawns — cortar
+    // ali era o que matava o buff em cerca de um segundo.
     const alvo = entidade('charmander')
     aplicarMudancasDeStat(SEMPRE, alvo, entidade('rattata'), getAbility('swords_dance')!)
-    expect(alvo.estagiosFonte?.atkFis).toBeDefined()
+    aplicarMudancasDeStat(SEMPRE, entidade('rattata'), alvo, getAbility('growl')!)
+    expect(alvo.estagios.atkFis, '+2 propria e -1 de terceiro').toBe(1)
 
     limparEstadoVolatil(alvo)
-    expect(alvo.estagios).toEqual({})
-    expect(alvo.estagiosFonte).toBeUndefined()
+
+    expect(alvo.estagios).toEqual({ atkFis: 2 })
+    expect((alvo.estagiosFonte?.atkFis ?? []).map((f) => f.id)).toEqual(['swords_dance'])
   })
 
-  it('nenhuma regra de combate le a procedencia', () => {
-    // A garantia de que isto e cosmetico: dois POKEs identicos, um com fonte
-    // registrada e outro sem, tem o MESMO multiplicador.
+  it('estagio SEM fonte deixou de ser possivel, e a procedencia deixou de ser cosmetica', () => {
+    // A PH-121 garantia o CONTRARIO: procedencia era enfeite de HUD e nenhuma
+    // regra a lia. A PH-418 mudou isso na raiz, e o teste tem que dizer a verdade
+    // nova, senao ele passa a mentir sobre a arquitetura — `estagios` e CACHE de
+    // `estagiosFonte`, e quem nao registra fonte nao aplica estagio.
+    //
+    // Por isso `aplicarEstagioUnico` sem fonte inventa uma anonima em vez de
+    // escrever solto: estagio sem fonte seria estagio sem PRAZO, ou seja eterno —
+    // o defeito exato que esta issue conserta.
     const comFonte = entidade('charmander')
     const semFonte = entidade('charmander')
     aplicarEstagioUnico(comFonte, 'atkFis', 2, fonteDeTrait(comFonte, 'moxie'))
     aplicarEstagioUnico(semFonte, 'atkFis', 2)
+
     expect(comFonte.estagios.atkFis).toBe(semFonte.estagios.atkFis)
+    expect(multiplicadorDeEstagio(comFonte.estagios.atkFis ?? 0))
+      .toBe(multiplicadorDeEstagio(semFonte.estagios.atkFis ?? 0))
     expect(comFonte.estagiosFonte?.atkFis).toHaveLength(1)
-    expect(semFonte.estagiosFonte?.atkFis).toBeUndefined()
+    expect(semFonte.estagiosFonte?.atkFis, 'fonte anonima, mas fonte').toHaveLength(1)
+    expect(semFonte.estagiosFonte?.atkFis?.[0].expiraEm).toBe(DURACAO_DE_ESTAGIO_SEGUNDOS)
   })
 })
