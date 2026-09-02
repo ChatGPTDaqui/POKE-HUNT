@@ -22,6 +22,15 @@
 //   4. QUANTO A CAMERA BALANCA. `renderer.ts#_computeCamera` trava no jogador
 //      sem suavizacao nenhuma. O deslocamento do jogador, vezes o zoom padrao,
 //      E o balanco do fundo inteiro em pixels de tela.
+//   5. A LARGURA DO PASSO LATERAL (PH-402). O motivo da segunda rodada: a
+//      primeira versao girava em torno do ponto medio e cada corpo percorria
+//      26px, o que na tela some. Esta e a medida que diz se o conserto pegou.
+//   6. A VARIEDADE DAS PERNAS (PH-402, terceira e quarta rodadas). Duas figuras
+//      fixas foram reprovadas na tela pelo mesmo motivo: o olho acha o padrao.
+//      Arco de pivo fixo leu como barca viking; oito deitado fecha sempre no
+//      mesmo ponto. O caminho virou uma sequencia de meia-luas sorteadas, e o
+//      que prova que ela e variada e a curvatura MUDAR de perna pra perna e os
+//      fins nao se repetirem.
 //
 // COMO RODAR
 //   npm run build:engine
@@ -84,6 +93,9 @@ let distMax = 0
 let fileiraAnterior = null
 let ancora = null
 let excursaoMax = 0
+let ultimaPerna = -1
+const curvas = []
+const finsDePerna = []
 
 for (let i = 0; i < ticks; i++) {
   world.player.poke.hp = world.player.poke.stats.hp
@@ -110,32 +122,62 @@ for (let i = 0; i < ticks; i++) {
   if (fileiraAnterior !== null && agora !== fileiraAnterior) trocasDeFileira++
   fileiraAnterior = agora
 
-  // O envelope da camera e medido a partir do ponto em que CADA encarada
-  // comeca (a `parKey` muda a cada POKE novo do Lance), e nao do inicio da
-  // corrida — o que interessa e o balanco dentro de um duelo, nao o passeio
-  // pela arena ao longo dos seis.
+  // O envelope e medido a partir do ponto em que CADA encarada comeca (a
+  // `parKey` muda a cada POKE novo do Lance), e nao do inicio da corrida — o
+  // que interessa e o balanco dentro de um duelo, nao o passeio pela arena ao
+  // longo dos seis.
+  //
+  // O inicio e o MEIO do arco (`desvio` nasce em 0), entao esta distancia e
+  // meio passo: o passo lateral cheio, de uma ponta a outra, e o dobro.
   if (!ancora || ancora.chave !== world.encarada.parKey) {
     ancora = { chave: world.encarada.parKey, x: world.player.x, y: world.player.y }
   }
   excursaoMax = Math.max(excursaoMax, Math.hypot(world.player.x - ancora.x, world.player.y - ancora.y))
+
+  // Uma amostra por PERNA nova: a curvatura sorteada e onde ela comecou (que e
+  // onde a anterior terminou).
+  const enc = world.encarada
+  if (enc.perna !== ultimaPerna) {
+    ultimaPerna = enc.perna
+    curvas.push(enc.raioDaCurva * enc.lado)
+    finsDePerna.push({ x: enc.centroX, y: enc.centroY })
+  }
 }
 
 const velocidadeMedia = amostrasDeVelocidade ? somaVelocidade / amostrasDeVelocidade : 0
 const segundosGirando = ticksGirando * PASSO
+
+// Quantos fins de perna caem quase em cima de um anterior. Num caminho fechado
+// isto vai a quase 100%; e o numero que distingue "sorteado" de "figura fixa".
+const repetidos = finsDePerna.filter((p, i) =>
+  finsDePerna.some((q, j) => j < i && Math.hypot(p.x - q.x, p.y - q.y) < 8),
+).length
+const paraUmLado = curvas.filter((c) => c > 0).length
+const curvasAbs = curvas.map(Math.abs)
+const mediaDaCurva = curvasAbs.reduce((a, b) => a + b, 0) / Math.max(1, curvasAbs.length)
+
 const linhas = [
   `arena ${ARENA}, ${SEGUNDOS}s de duelo a ${(1 / PASSO).toFixed(0)} fps`,
   '',
   `par em campo                  ${(ticksComPar * PASSO).toFixed(1).padStart(8)} s`,
   `dos quais girando             ${segundosGirando.toFixed(1).padStart(8)} s   (${((ticksGirando / Math.max(1, ticksComPar)) * 100).toFixed(0)}% do duelo)`,
-  `velocidade media do corpo     ${velocidadeMedia.toFixed(1).padStart(8)} px/s (a constante pede 30)`,
+  `quanto o par se afasta        ${excursaoMax.toFixed(0).padStart(8)} px    (raio; a coleira e 170)`,
+  `meia-luas percorridas         ${String(curvas.length).padStart(8)}`,
+  `  entortando pra um lado      ${String(paraUmLado).padStart(8)}    (metade = sorteio honesto; tudo ou nada = pendulo)`,
+  `  curvatura, media            ${mediaDaCurva.toFixed(0).padStart(8)} px    (sorteada entre 32 e 95)`,
+  `  terminando em ponto repetido${String(repetidos).padStart(8)}    (caminho fechado poria quase todas aqui)`,
+  `velocidade media do corpo     ${velocidadeMedia.toFixed(1).padStart(8)} px/s (teto: 58,5, o andar do inimigo)`,
   `troca de fileira do sheet     ${(trocasDeFileira / Math.max(0.001, segundosGirando)).toFixed(2).padStart(8)} /s   (acima de ~2/s le como estalo)`,
-  `distancia entre os dois       ${distMin.toFixed(1).padStart(8)} .. ${distMax.toFixed(1)} px`,
+  `distancia entre os dois       ${distMin.toFixed(1).padStart(8)} .. ${distMax.toFixed(1)} px  (tem que caber em 29..39)`,
   `balanco da camera             ${(excursaoMax * ZOOM_PADRAO).toFixed(0).padStart(8)} px de tela (raio, no zoom padrao ${ZOOM_PADRAO})`,
   '',
-  'Leitura: os dois numeros que condenam a escolha sao a velocidade media longe',
-  'de 30 (a arte de andar deixa de casar com o deslocamento) e a troca de fileira',
-  'acima de ~2/s (o sprite pisca de direcao). A distancia tem que caber em',
-  '(29, 39) — fora disso o par desengaja ou briga com a separacao de corpos.',
+  'Leitura: o que a tela reprovou duas vezes foi PADRAO, entao os numeros que',
+  'importam sao os da variedade — as meia-luas tem que entortar pros dois lados em',
+  'proporcao parecida, e os fins de perna nao podem se repetir. Os dois que',
+  'condenam a escolha sao a velocidade media ACIMA de 58,5 (a arte de andar fica',
+  'lenta pro deslocamento e o POKE patina) e a troca de fileira acima de ~2/s (o',
+  'sprite pisca de direcao). A distancia tem que caber em (29, 39) — fora disso o',
+  'par desengaja ou briga com a separacao de corpos.',
 ]
 // `console.log` some quando esta bancada e chamada de dentro de um runner;
 // `process.stdout.write` sempre sai.

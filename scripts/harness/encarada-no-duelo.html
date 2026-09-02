@@ -42,12 +42,20 @@
 
      ?especie=dragonite   qual POKE o jogador leva (padrao: charizard)
      ?zoom=1.5            zoom da camera (padrao: o do jogo)
-     ?arco=50             meia-abertura do arco em graus, so pra experimentar
-     ?vel=30              velocidade tangencial em px/s, so pra experimentar
+     ?passo=95            tamanho tipico de cada meia-lua, em px
+     ?coleira=170         ate onde o duelo pode se afastar de onde comecou, em px
+     ?vel=55              velocidade do corpo em px/s
 
-     `arco` e `vel` NAO mexem no jogo — a pagina os aplica reescrevendo os
-     valores no mundo dela. Servem pra achar o numero na tela antes de
-     escrever em `encaradaSystem.ts`.
+     Os tres escrevem em `world.encarada` (campos opcionais, ver
+     engine/types.ts#EstadoDaEncarada) e valem so nesta pagina — o jogo continua
+     com as constantes de `encaradaSystem.ts`. Servem pra achar o numero na tela
+     ANTES de escrever no motor: cada rodada anterior custou um ciclo de PR pra
+     descobrir que o numero estava errado.
+
+     `coleira` e o botao de quanto a camera passeia: `renderer.ts#_computeCamera`
+     trava no jogador sem suavizacao, entao o quanto o par se afasta E o quanto o
+     fundo inteiro anda junto. Diminuir aperta a danca em volta do ponto de
+     partida; aumentar deixa o duelo migrar pela arena.
 
   COMO RODAR
 
@@ -128,11 +136,17 @@ const mundos = [
 const zoom = Number(params.get('zoom'))
 if (Number.isFinite(zoom) && zoom > 0) for (const m of mundos) m.renderer.zoom = zoom
 
-// `arco` e `vel` reescrevem o estado do mundo da esquerda a cada tick, DEPOIS
-// do motor ter andado — e por isso que dao pra experimentar numero sem tocar em
-// `encaradaSystem.ts`. Ausentes, a pagina mostra exatamente o que o jogo faz.
-const arcoGraus = Number(params.get('arco'))
-const velExperimental = Number(params.get('vel'))
+// Os ajustes vao pros campos opcionais de `world.encarada`, aplicados DEPOIS de
+// cada passo (o estado nasce dentro do motor, e renasce a cada POKE novo do
+// Lance, entao reaplicar todo tick e o que garante que eles nao se percam).
+// Ausentes, a pagina mostra exatamente o que o jogo faz.
+const ajustes = {}
+const passo = Number(params.get('passo'))
+const coleira = Number(params.get('coleira'))
+const velocidade = Number(params.get('vel'))
+if (passo > 0) ajustes.passo = passo
+if (coleira > 0) ajustes.coleira = coleira
+if (velocidade > 0) ajustes.velocidade = velocidade
 
 const medidas = document.getElementById('medidas')
 let rodando = true
@@ -146,10 +160,7 @@ function passo(world) {
   if (world.player) world.player.poke.hp = world.player.poke.stats.hp
   for (const e of world.enemies) e.poke.hp = e.poke.stats.hp
   stepWorld(world, PASSO, gameState)
-  if (world.encarada && Number.isFinite(arcoGraus)) {
-    const limite = (arcoGraus * Math.PI) / 180
-    world.encarada.desvio = Math.max(-limite, Math.min(limite, world.encarada.desvio))
-  }
+  if (world.encarada) Object.assign(world.encarada, ajustes)
 }
 
 function texto(world, nome) {
@@ -157,26 +168,18 @@ function texto(world, nome) {
   const inimigo = world.enemies.find((e) => e.poke.hp > 0)
   if (!jogador || !inimigo) return `${nome}: sem par em campo`
   const dist = Math.hypot(inimigo.x - jogador.x, inimigo.y - jogador.y).toFixed(1)
-  const desvio = world.encarada ? ((world.encarada.desvio * 180) / Math.PI).toFixed(0) : '—'
-  const sentido = world.encarada ? (world.encarada.sentido > 0 ? 'horário' : 'anti-horário') : '—'
-  const trocas = world.encarada ? world.encarada.trocas : '—'
-  return `${nome}: distância ${dist}px · desvio ${desvio}° · ${sentido} · golpes trocados ${trocas} · anim ${jogador.battleAnim?.url?.split('/').pop() ?? 'placeholder'}`
+  const enc = world.encarada
+  const perna = enc ? enc.perna : '—'
+  const curva = enc ? `${enc.raioDaCurva.toFixed(0)}px ${enc.lado > 0 ? 'esq' : 'dir'}` : '—'
+  const sentido = enc ? (enc.arcoDaPerna > 0 ? 'horário' : 'anti-horário') : '—'
+  const trocas = enc ? enc.trocas : '—'
+  return `${nome}: distância ${dist}px · meia-lua nº${perna} (curva ${curva}, ${sentido}) · golpes trocados ${trocas} · anim ${jogador.battleAnim?.url?.split('/').pop() ?? 'placeholder'}`
 }
 
 function quadro() {
   if (rodando) {
     for (const m of mundos) {
-      if (velExperimental > 0 && m.world.mapDef?.encarada) {
-        // Aproximacao boa o bastante pra bancada: escala o desvio do tick
-        // inteiro pela razao entre a velocidade pedida e a do jogo (30px/s).
-        const antes = m.world.encarada?.desvio ?? 0
-        passo(m.world)
-        if (m.world.encarada) {
-          m.world.encarada.desvio = antes + (m.world.encarada.desvio - antes) * (velExperimental / 30)
-        }
-      } else {
-        passo(m.world)
-      }
+      passo(m.world)
       if (m.world.mapDef) m.renderer.renderMap(m.world.mapDef, m.world)
     }
     medidas.textContent = [texto(mundos[0].world, 'ligada  '), texto(mundos[1].world, 'desligada')].join('\n')
