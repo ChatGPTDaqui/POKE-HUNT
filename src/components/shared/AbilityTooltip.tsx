@@ -23,6 +23,7 @@ import {
   golpeTemEfeitoReal,
 } from '@/data/moveDescriptions'
 import { ROTULO_ESTAGIO } from '@/data/statLabels'
+import { formatarEstagio } from '@/data/textoDeEstagioEPrazo'
 import { nomeDoStatus } from '@/data/statusEffects'
 import { colorForType } from '@/data/typeColors'
 import type { PokeInstance } from '@/data/pokes'
@@ -62,10 +63,17 @@ export function efeitosDoGolpe(ability: Ability): string[] {
 
   for (const mudanca of ability.statChanges ?? []) {
     const chance = ability.statChance ?? 100
-    const sinal = mudanca.estagios > 0 ? '+' : ''
-    const alvo = ability.statTarget === 'self' ? 'em si' : 'no alvo'
+    // PH-421: o tooltip promete o RESULTADO, e nao o degrau. "Atk Fis +2" nao
+    // diz ao jogador que o Ataque DOBRA; "para 2x (+100%)" diz.
+    //
+    // A conta parte do zero de proposito: o tooltip e lido antes de escolher o
+    // golpe, e nesse instante nao existe "estagio atual" — o mesmo golpe pode
+    // cair num POKE neutro ou num ja buffado. Prometer o resultado a partir do
+    // neutro e a unica leitura que nao depende de estado que a tela nao tem.
+    const alvo = ability.statTarget === 'self' ? 'de quem usa' : 'do alvo'
     efeitos.push(
-      `${ROTULO_ESTAGIO[mudanca.stat]} ${sinal}${mudanca.estagios} ${alvo}${chance < 100 ? ` (${chance}%)` : ''}`,
+      `${ROTULO_ESTAGIO[mudanca.stat]} ${alvo} para ${formatarEstagio(mudanca.stat, mudanca.estagios)}`
+      + `${chance < 100 ? ` (${chance}%)` : ''}`,
     )
   }
 
@@ -80,7 +88,10 @@ export function efeitosDoGolpe(ability: Ability): string[] {
       : `Recuo: ${p}% do dano causado`)
   }
   if (ability.healPercent) efeitos.push(`Cura ${ability.healPercent}% do HP máximo`)
-  if (ability.flinchChance) efeitos.push(`${ability.flinchChance}% de tirar o turno do alvo`)
+  // PH-422: "turno" sai do texto de jogo tambem aqui. Nao e prazo, e a ACAO
+  // que o alvo perde — e essa e a palavra que o jogador entende sem precisar
+  // saber que este motor tem turno de 3s.
+  if (ability.flinchChance) efeitos.push(`${ability.flinchChance}% de tirar a ação do alvo`)
   if (ability.critStages) efeitos.push('Chance de crítico maior')
   if (ability.hazard) efeitos.push('Armadilha no campo inimigo')
   const clima = CLIMA_DO_GOLPE[ability.id]

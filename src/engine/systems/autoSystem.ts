@@ -5,7 +5,7 @@ import { TURNO_SEGUNDOS } from '@/data/abilities'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import { attemptCapture, type CaptureResult } from './captureSystem'
 import { heal } from '../entity'
-import { curarStatus } from './statusSystem'
+import { curarStatus, apagarTodosOsEstagios } from './statusSystem'
 import type { StatusCondition } from '@/data/statusEffects'
 import type { PokeInstance } from '@/data/pokes'
 import type { WorldState } from '../types'
@@ -143,6 +143,15 @@ export function updateAutoHeal(world: WorldState, gameState: GameStateStore, dt:
       player.poke.hp = Math.round(player.poke.stats.hp * revive.reviveHpPercent!)
       player.fainted = false
       player.state = 'wander'
+      // PH-418: quem levanta, levanta LIMPO. O prazo de 18s fez estagio
+      // sobreviver ao fim da luta, e sem esta linha ele sobrevive tambem a
+      // MORTE: o POKE volta com o Rosnado que o matou, morre de novo, e o bot
+      // queima a mochila de Revive num laco. `farmOffline` pegou exatamente
+      // isso — 50 Revives consumidos numa hora e `stoppedEarly` ligado.
+      //
+      // O pedido da PH-418 era buff que atravessa mudar de ALVO e derrotar o
+      // alvo, nao que atravessa o proprio desmaio; nos jogos, cair zera estagio.
+      apagarTodosOsEstagios(player)
       timers.treinador = COOLDOWN_DO_TREINADOR
       world.reviveCountdown = null
       events.push({ type: 'auto_revive', itemId: revive.id })

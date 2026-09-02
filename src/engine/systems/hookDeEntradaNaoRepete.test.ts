@@ -24,6 +24,7 @@ import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
 import { updateCombat } from './combatSystem'
+import { DURACAO_DE_ESTAGIO_SEGUNDOS } from '@/data/statusEffects'
 
 const PASSO = 1 / 60
 
@@ -94,19 +95,32 @@ describe('hook de entrada em combate do jogador (PH-235)', () => {
     updateCombat(world, PASSO, { silent: true })
     expect(player.entradaProcessada).toBe(false)
 
-    // Reengajou: e uma luta NOVA, e Intimidate vale de novo — como uma troca de
-    // POKE nos jogos reais.
+    // Reengajou: e uma luta NOVA, e Intimidate dispara de novo.
     //
-    // -2 e nao -1: `limparEstadoVolatil` do fim de batalha zera os estagios do
-    // JOGADOR, nao os do selvagem (ver updateCombat), entao o -1 anterior dele
-    // continua de pe e o novo disparo soma. Isso e comportamento de sempre deste
-    // motor e nao muda aqui; o que este teste garante e que houve UM disparo por
-    // engajamento, e nao um por frame — com o bug, o primeiro `updateCombat`
-    // sozinho ja teria chegado no piso -6.
+    // O QUE MUDOU NA PH-418: o segundo disparo RENOVA o prazo em vez de somar
+    // outro degrau, entao o estagio fica em -1 e nao vai pra -2. Este teste dizia
+    // -2 e agora diz -1 — e a mudanca esta certa, nao e o teste sendo afrouxado:
+    // renovar e o que impede um selvagem que engaja e desengaja em loop de afundar
+    // o oponente ate o piso -6, que e a mesma runaway que o Rosnado de multidao
+    // tinha. Somar por engajamento, com prazo de 18s por cima, seria pior que o
+    // comportamento antigo, porque antes o fim de batalha zerava.
+    //
+    // O que este teste sempre garantiu continua garantido: UM disparo por
+    // engajamento, e nao um por frame. So que agora a prova de que o segundo
+    // disparo aconteceu e o PRAZO ter voltado a encher — o degrau nao muda, e
+    // olhar so pra ele nao distingue "disparou de novo" de "nao disparou".
+    const prazoAntes = enemy.estagiosFonte!.atkFis![0].expiraEm!
+    expect(prazoAntes, 'os dois ticks anteriores gastaram prazo')
+      .toBeLessThan(DURACAO_DE_ESTAGIO_SEGUNDOS)
+
     enemy.state = 'engaged'
     enemy.targetId = player.id
     player.state = 'chase'
     updateCombat(world, PASSO, { silent: true })
-    expect(enemy.estagios.atkFis).toBe(-2)
+
+    expect(enemy.estagios.atkFis, 'renovou, nao somou').toBe(-1)
+    expect(enemy.estagiosFonte!.atkFis!, 'uma fonte, nao duas').toHaveLength(1)
+    expect(enemy.estagiosFonte!.atkFis![0].expiraEm!, 'o disparo novo encheu o prazo')
+      .toBeGreaterThan(prazoAntes)
   })
 })

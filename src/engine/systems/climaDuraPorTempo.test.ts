@@ -19,6 +19,7 @@ import { TURNO_SEGUNDOS } from '@/data/abilities'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { buildMapWorld, stepWorld } from '../simulation'
 import { criarInimigoDeTeste } from '../testes/inimigoDeTeste'
+import { darEstagio } from '../testes/estagioDeTeste'
 import { updateCombat } from './combatSystem'
 import {
   CLIMA_DE_GOLPE_TURNOS, CLIMA_DE_GOLPE_SEGUNDOS, climaDeAmbiente, tickClimaDeGolpe,
@@ -153,17 +154,22 @@ describe('fim de batalha nao derruba mais o clima de golpe (PH-329)', () => {
   })
 
   it('mas o resto do estado volatil de fim de batalha continua sendo limpo', () => {
-    // Guarda contra a correcao larga demais: a mudanca e SO sobre o clima. Os
-    // estagios de atributo tem que continuar voltando a zero, senao volta o bug
-    // que custou 27% das kills/hora (ver o comentario em combatSystem.ts).
+    // Guarda contra a correcao larga demais: a mudanca e SO sobre o clima. O
+    // estagio que o jogador SOFREU tem que continuar voltando a zero, senao volta
+    // o bug que custou 27% das kills/hora (ver o comentario em combatSystem.ts).
+    //
+    // PH-418 estreitou o corte: o que o POKE fez a si mesmo sobrevive por 18s. O
+    // teste passa a cobrir os dois lados, porque cortar de menos e cortar demais
+    // sao os dois defeitos possiveis aqui.
     const world = mundo()
     world.enemies = []
     const player = world.player!
-    player.estagios = { atkFis: -3 }
+    darEstagio(player, 'atkFis', -3, { proprio: false, id: 'growl' })
+    darEstagio(player, 'atkFis', 2, { id: 'swords_dance' })
 
     updateCombat(world, 0.1, { silent: true })
 
-    expect(player.estagios).toEqual({})
+    expect(player.estagios).toEqual({ atkFis: 2 })
   })
 })
 

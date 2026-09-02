@@ -194,16 +194,56 @@ export type StatDeEstagio = 'atkFis' | 'atkEsp' | 'def' | 'defEsp' | 'speed' | '
 export type EstagiosDeStat = Partial<Record<StatDeEstagio, number>>
 
 /**
- * De onde saiu um estagio de atributo (PH-121).
+ * Quanto tempo um estagio de atributo dura, em segundos (PH-418).
+ *
+ * SEIS TURNOS. Derivado de `TURNO_SEGUNDOS` e nunca escrito como `18`: o turno
+ * deste motor e tempo puro (`statusSystem#tickStatus` decrementa por `dt` e
+ * recarrega `TURNO_SEGUNDOS`), entao mudar a duracao do turno tem que mudar
+ * isto junto.
+ *
+ * Antes da PH-418 nao havia prazo nenhum: o estagio durava ate o "fim de
+ * batalha", que este motor define como *nenhum inimigo engajado*. Numa hunt de
+ * campo aberto isso acontece no vao entre um spawn e o proximo, ou seja, o buff
+ * proprio morria em cerca de um segundo. Mesmo defeito que o clima tinha antes
+ * da PH-329, e mesma correcao: a duracao e por tempo.
+ */
+export const DURACAO_DE_ESTAGIO_SEGUNDOS = 6 * TURNO_SEGUNDOS
+
+/**
+ * Quanto prazo restante ja conta como "vai vencer" para a IA reaplicar o buff
+ * (PH-419).
+ *
+ * DOIS TURNOS, e nao um: a IA decide uma vez por acao, e entre a decisao e o
+ * golpe pousar passa o delay do proprio golpe. Com um turno de folga o buff
+ * vencia entre a escolha e a aplicacao em parte das corridas, e a renovacao
+ * chegava depois do buraco que ela existe pra evitar.
+ *
+ * Sem esta folga o prazo de 18s da PH-418 deixaria de ser DURACAO e passaria a
+ * ser TETO DE USO: a guarda da IA e "estagio abaixo do alvo", entao um POKE no
+ * alvo nunca reaplica, o buff cai aos 18s com o golpe pronto na mao, e ele
+ * recomeca do zero.
+ */
+export const FOLGA_DE_RENOVACAO_SEGUNDOS = 2 * TURNO_SEGUNDOS
+
+/**
+ * De onde saiu um estagio de atributo (PH-121), quanto ele contribui e ate
+ * quando (PH-418).
  *
  * `estagios` guarda QUANTOS degraus, e so isso — o selo do HUD podia dizer
  * "Ataque −2" e nada mais. "De quem" e a metade util da informacao: baixar o
  * proprio Ataque (Hammer Arm) e levar Rosnado de um Rattata sao situacoes
  * diferentes, e a tela mostrava as duas igual.
  *
- * COSMETICO. Nenhuma regra de combate le isto — `multiplicadorDeStat` continua
- * lendo so `estagios`. Mora na entidade porque e ali que a informacao existe no
- * instante em que o estagio e aplicado; recalcular depois e impossivel.
+ * DEIXOU DE SER COSMETICO NA PH-418. A lista de fontes virou a fonte de
+ * verdade: `entity.estagios[stat]` e o TOTAL DERIVADO da soma das contribuicoes
+ * vivas (ver `totalDeEstagio`), clampado a +-6. Quem le continua lendo
+ * `estagios` — `multiplicadorDeStat`, dano, velocidade, precisao e o HUD nao
+ * mudaram uma linha —, mas quem ESCREVE tem que mexer na fonte e recalcular.
+ *
+ * Por que por fonte, e nao um prazo unico por atributo: o pedido e que reaplicar
+ * o mesmo buff RENOVE o prazo sem somar estagio, e que golpes DIFERENTES somem.
+ * Com um prazo so por atributo nao ha como distinguir "Danca das Espadas de
+ * novo" de "Danca das Espadas mais Howl".
  */
 export interface FonteDeEstagio {
   /** Id do golpe, ou da trait quando veio de hook de entrada (Intimidate). */
@@ -220,6 +260,38 @@ export interface FonteDeEstagio {
    * nao ha treinador adversario, so POKE selvagem.
    */
   deQuem: string
+  /**
+   * Quantos degraus ESTA fonte contribui, com sinal (PH-418). O total do
+   * atributo e a soma das fontes vivas.
+   */
+  estagios: number
+  /**
+   * Segundos que faltam. `null` = permanente (nao expira nem no tick).
+   *
+   * Nada hoje cria fonte permanente — todas nascem com
+   * `DURACAO_DE_ESTAGIO_SEGUNDOS`. O `null` existe porque um buff de item ou de
+   * especialidade cairia exatamente aqui, e sem o campo ele obrigaria a
+   * refatorar a estrutura inteira em vez de passar um valor.
+   */
+  expiraEm: number | null
+  /**
+   * Esta fonte EMPILHA em vez de renovar (PH-418).
+   *
+   * A regra geral e o contrario: reaplicar a mesma fonte renova o prazo e nao
+   * soma, senao Danca das Espadas a cada 3,0s com prazo de 18s daria Ataque 4x
+   * permanente.
+   *
+   * SPEED BOOST E MOODY SAO A EXCECAO, e nao por conveniencia: elas nao sao
+   * golpe reaplicado, sao habilidade que sobe um degrau POR TURNO. Nos jogos o
+   * Speed Boost acumula ate +6, e tratar cada turno como "renovacao" o
+   * congelaria em +1 — o teste `habilidades.test.ts` pegou exatamente isso.
+   *
+   * Cada aplicacao vira uma entrada propria com prazo proprio, entao no
+   * equilibrio ha uma entrada por turno vivo (6 entradas com prazo de 18s e
+   * turno de 3s) e o teto continua sendo +6. O prazo faz o papel que o fim de
+   * batalha fazia: a habilidade nao acumula pra sempre.
+   */
+  acumula?: boolean
 }
 
 /**
@@ -247,6 +319,40 @@ export function multiplicadorDeEstagio(estagio: number): number {
 
 export function multiplicadorDeStat(estagios: EstagiosDeStat | undefined, stat: StatDeEstagio): number {
   return multiplicadorDeEstagio(estagios?.[stat] ?? 0)
+}
+
+/**
+ * O total de um atributo a partir das fontes vivas (PH-418) — soma das
+ * contribuicoes, clampada a +-6.
+ *
+ * O CLAMP FICA AQUI, e nao na hora de aplicar, e isso muda o comportamento pro
+ * melhor: quatro Danca das Espadas (+2 cada, de fontes distintas) somam +8 e
+ * mostram +6; quando a primeira expira, sobram +6 e o total CONTINUA +6, em vez
+ * de cair pra +4. O excedente fica guardado enquanto as fontes viverem, o que e
+ * o que um jogador espera de "estou no maximo".
+ */
+export function totalDeEstagio(fontes: FonteDeEstagio[] | undefined): number {
+  if (!fontes?.length) return 0
+  let soma = 0
+  for (const f of fontes) soma += f.estagios
+  return Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, soma))
+}
+
+/**
+ * Desconta `dt` dos prazos e devolve as fontes que sobraram (PH-418).
+ *
+ * Fonte com `expiraEm: null` nunca sai. Fonte que zerou o prazo sai da lista —
+ * nao fica com prazo 0, porque `totalDeEstagio` soma tudo que esta na lista e
+ * uma fonte expirada continuaria contando.
+ */
+export function envelhecerFontes(fontes: FonteDeEstagio[], dt: number): FonteDeEstagio[] {
+  const vivas: FonteDeEstagio[] = []
+  for (const f of fontes) {
+    if (f.expiraEm == null) { vivas.push(f); continue }
+    const restante = f.expiraEm - dt
+    if (restante > 0) { f.expiraEm = restante; vivas.push(f) }
+  }
+  return vivas
 }
 
 /**

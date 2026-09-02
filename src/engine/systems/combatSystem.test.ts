@@ -15,6 +15,7 @@ import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { especialidadeNiveisDefault } from '@/data/especialidades'
 import { createEnemyEntity } from '../entity'
 import { criarInimigoDeTeste } from '../testes/inimigoDeTeste'
+import { darEstagio } from '../testes/estagioDeTeste'
 import { buildMapWorld } from '../simulation'
 import {
   updateCombat, multiplicadorDeAtaquePorTrait, multiplicadorDeDefesaPorTrait, velocidadeEfetiva,
@@ -741,12 +742,16 @@ describe('Fase 12: golpes de suporte sem dano', () => {
 
   it('Psych Up copia os estagios do ALVO pro usuario', () => {
     const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
-    player.estagios = { atkFis: -1 }
-    enemy.estagios = { atkFis: 3, speed: 1 }
+    darEstagio(player, 'atkFis', -1, { proprio: false, id: 'growl' })
+    darEstagio(enemy, 'atkFis', 3, { id: 'swords_dance' })
+    darEstagio(enemy, 'speed', 1, { id: 'agility' })
 
     resolverHit(world, player.id, enemy.id, 'psych_up')
 
+    // PH-418: copia as FONTES com prazo cheio, e nao o cache — senao o estagio
+    // copiado nasceria sem prazo e ficaria eterno no usuario.
     expect(player.estagios).toEqual({ atkFis: 3, speed: 1 })
+    expect(player.estagiosFonte?.atkFis?.map((f) => f.id)).toEqual(['swords_dance'])
   })
 
   it('Pain Split soma o HP dos dois e divide igual', () => {

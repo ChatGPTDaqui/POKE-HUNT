@@ -7,7 +7,9 @@
 // com uma pagina de texto dentro nao e lida — o limite curto e a feature.
 //
 // NUMERO NENHUM ESCRITO A MAO onde existe fonte: NATURE_BONUS, IV_MAX,
-// CHANCE_DE_TRAIT_OCULTA, RARITIES, STATUS_RULES e TURNO_SEGUNDOS entram por
+// CHANCE_DE_TRAIT_OCULTA, RARITIES e STATUS_RULES entram por import, e o prazo
+// em segundos vem de `textoDeEstagioEPrazo` (que deriva de TURNO_SEGUNDOS) — este
+// arquivo nao multiplica turno por segundo na mao desde a PH-422. Eles entram por
 // import. Mesmo motivo da Wiki ler formula ao vivo: numero copiado envelhece no
 // primeiro ajuste de balanceamento e passa a mentir sem quebrar nada.
 //
@@ -20,7 +22,7 @@ import { CHANCE_DE_TRAIT_OCULTA, nomeDaTrait } from './traits'
 import { descricaoDaTrait, motivoSemEfeito } from './traitInfo'
 import { RARITIES, type RarityKey } from './rarity'
 import { STAT_LABEL } from './statLabels'
-import { TURNO_SEGUNDOS } from './abilities'
+import { formatarPrazoEmTurnos, TEXTO_DE_RITMO_CONTINUO } from './textoDeEstagioEPrazo'
 // Os dois numeros do verbete de sala saem daqui, e nao escritos a mao: sao a
 // MESMA fonte que o motor usa pra decidir quando a sala vira. Ajustar o ritmo da
 // hunt sem tocar no texto e o modo de falha que a regra 3 do cabecalho descreve.
@@ -280,7 +282,7 @@ export function verbeteDoStatus(status: StatusAtivo | StatusCondition): Verbete 
   // volatilidade = 5) e a bolha virava lista.
   const efeitos: string[] = []
   if (regra?.danoPorTurnoFracaoDoMaximo) {
-    efeitos.push(`Perde 1/${Math.round(1 / regra.danoPorTurnoFracaoDoMaximo)} do HP máximo a cada ${TURNO_SEGUNDOS}s.`)
+    efeitos.push(`Perde 1/${Math.round(1 / regra.danoPorTurnoFracaoDoMaximo)} do HP máximo ${TEXTO_DE_RITMO_CONTINUO}.`)
   }
   if (regra?.multiplicadorDeDanoFisico != null && regra.multiplicadorDeDanoFisico !== 1) {
     efeitos.push(`Dano físico x${regra.multiplicadorDeDanoFisico}.`)
@@ -298,7 +300,9 @@ export function verbeteDoStatus(status: StatusAtivo | StatusCondition): Verbete 
   if (efeitos.length) corpo.push(efeitos.join(' '))
   if (regra?.imunidadesPorTipo.length) corpo.push(`Não pega em POKE de tipo ${lista(regra.imunidadesPorTipo)}.`)
 
-  if (turnos != null) corpo.push(`Faltam ${turnos} turno(s) — ${turnos * TURNO_SEGUNDOS}s.`)
+  // PH-422: uma conversao so, e ela mora em `textoDeEstagioEPrazo`. Aqui estava
+  // a segunda multiplicacao por TURNO_SEGUNDOS do projeto.
+  if (turnos != null) corpo.push(`Faltam ${formatarPrazoEmTurnos(turnos)}.`)
   else if (regra && regra.duracaoEmTurnos == null) corpo.push('Não passa sozinho: só item de cura ou o Hospital.')
 
   corpo.push(

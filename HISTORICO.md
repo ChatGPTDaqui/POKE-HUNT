@@ -5749,3 +5749,201 @@ origem do duelo). `renderer.ts#_computeCamera` trava no jogador SEM suavizacao n
 quanto o par anda e o quanto o fundo inteiro anda junto. E consequencia inseparavel do pedido —
 se o ponto final muda, o par sai do lugar. O botao barato e `COLEIRA_DA_ENCARADA`; o conserto de
 raiz seria suavizar a camera, e isso nunca foi pedido.
+
+---
+
+## 2026-09-02 (tarde) — a sala que nunca avancava: quatro mecanismos errados, tres bancadas mentindo
+
+Cinco issues, duas notas: PH-416 (7.34, VFX de status), PH-417 (tipos), PH-418 e PH-419 (bancadas),
+PH-423 (7.35, a sala). Promovida com fumaca verde nos dois ambientes.
+
+O resultado cabe em duas linhas. O que vale registrar e o processo, porque ele custou a maior parte
+do tempo e e repetivel: **errei o mecanismo quatro vezes** e **tres bancadas mediam outra coisa do
+que anunciavam**.
+
+### O relato, e a primeira resposta errada
+
+"Matei 30 mobs e o guardiao caiu, e a sala nao muda." Minha primeira resposta foi que era espera
+longa por design — a sala so avanca quando o protetor do SERVIDOR morre, e ele e mais devagar que a
+predicao local. O dono rejeitou: "pra mim a regra e clara, matou 30 e o guardiao esta derrotado, a
+sala deve mudar imediatamente".
+
+Ele estava certo, e a distincao importa: a regra no codigo E essa. O que falha e o mecanismo. Chamar
+de "regra" foi enquadrar um defeito como decisao de design — e isso encerra a investigacao antes de
+ela comecar.
+
+### O que o jogador ve, e por que nao e o que a autoridade ve
+
+Existem DOIS contadores de abate. A barra do HUD e **predicao do cliente**; quem decide a troca e o
+do servidor. Quando a barra marca 30/30 o servidor esta tipicamente em 17-28/30 — e o guardiao que o
+jogador viu morrer era o LOCAL: o do servidor nem nasceu, porque ele so nasce quando a quota DELE
+fecha (`garantirProtetorDaSala`, com gate em `sala.abates >= ABATES_POR_SALA`).
+
+### O mecanismo, na quinta tentativa
+
+O servidor reconstroi o mundo a cada janela de flush e **a posicao nao e persistida** — so
+identidade e `hpAtual` sao. O protetor RETOMADO nascia no mesmo cone de **250-550px** de um protetor
+novo, e `engageRangeFor` e **~39px** (`raio + raio + MELEE_RANGE_PADDING`). Entao toda janela
+repetia a mesma aproximacao parcial:
+
+    nasce a 250-550px -> persegue -> janela fecha a ~114px -> mundo descartado
+    -> nasce a 250-550px de novo, rng restaurado, geometria IDENTICA
+
+A sala nao ficava lenta: ficava **presa pra sempre**. Medido com a janela de 30s do flush padrao,
+**3 salas em 120 nunca avancavam**; no piso de janela de 10s, 10 em 100.
+
+A assinatura na sonda, 46 janelas seguidas de uma sala travada:
+
+    achou=true emCampo=true uidBate=true hpPend=33 hpEnt=33
+    estProt=chase estPlayer=chase inimigos=1 dist=114 semDano=0s
+
+`dist=114` **identico em todas**, os dois em `chase` e nunca `engaged`, `hpAtual` congelado em 33
+("caiu 0"), POKE **vivo em 100%** das janelas.
+
+O cao de guarda do impasse (PH-301) nao pega isto **de proposito**: ele so conta tempo com os dois
+ENGAJADOS, pra nao trocar o protetor durante a caminhada legitima. Perseguicao que nunca converge e
+o ponto cego dele — e `protetorSemDanoSegundos` tambem e efemero, entao nem acumularia entre
+janelas.
+
+### As quatro hipoteses derrubadas, na ordem
+
+Cada uma parecia obvia e foi morta pela medicao seguinte. Ficam registradas pra ninguem gastar de
+novo:
+
+1. **"o servidor e mais lento que o cliente."** Nao e: em janela de 30s ele rende **+16,8% MAIS**
+   abates que simulacao continua (`custo-fixo-por-janela.mjs`) — a caminhada e compensada pelo campo
+   ja cheio no inicio da janela.
+2. **"e latencia do flush."** Se fosse, janela maior pioraria (mais staleness). Janela de 90s e
+   MELHOR que 30s. Descartada por um teste discriminante de uma rodada.
+3. **"o POKE caminha do ponto de entrada ate os selvagens."** `randomSpawnPoint` nasce os selvagens
+   num CONE a frente do jogador, a curta distancia.
+4. **"o POKE caminha ate o PROTETOR, que nasce em ponto fixo."** `entradaDoInimigo` devolve `null`
+   quando `maxEnemies > 1`, entao o protetor TAMBEM cai no cone.
+
+A 3 e a 4 estavam certas em SUBSTANCIA (a distancia era o problema) e erradas no numero: eu li
+"cone perto do jogador" e conclui "nao ha caminhada", sem medir que o cone comeca em 250px e o
+combate exige 39px. **Ler a constante nao substitui medir a distancia.**
+
+### As tres bancadas que mediam outra coisa
+
+Este e o achado mais transferivel do dia, porque todas as tres produziram numero que eu ja tinha
+reportado como fato.
+
+1. **`troca-de-sala-sob-autoridade.mjs` dava POKE DIFERENTE aos dois lados** — dois
+   `createPokeInstance` sorteados, logo IVs e natureza distintos, logo stats distintos. No jogo os
+   dois olham a MESMA linha de `pokemon_instances`. E confundidor direto da medicao de travamento:
+   um servidor com IV pior trava por motivo que o jogo nao tem. Corrigido com `structuredClone`; a
+   trava **sobreviveu**.
+2. **A mesma bancada nao modelava `PISO_DE_JANELA_SEGUNDOS`.** Em producao, `aplicarFlush` nao
+   simula e nao move a ancora abaixo de 10s — o tempo represa. Como o pedido de quota fechada e o
+   extra da PH-393 criam janelas de poucos segundos DE PROPOSITO, cada uma era simulada como janela
+   real que rende quase nada, e todo numero de travamento saia inflado por um mecanismo que a
+   producao ja tem.
+3. **`divergencia-de-quota.mjs` nao mede cliente-contra-servidor** — e o nome do arquivo, o
+   cabecalho dele E o cabecalho da outra bancada afirmavam que sim. Ele roda a mesma funcao
+   CONTINUA duas vezes com sementes diferentes e apelida uma de "servidor": nenhuma reconstrucao de
+   janela em lado nenhum, logo a caminhada por janela fica inteira fora da conta. E o `Math.abs()`
+   apaga a DIRECAO, que era justamente o achado (na bancada fiel o cliente esta a frente em 119 de
+   119 trocas, nunca atras). Os numeros dele sao reais — sao o piso de ruido de SEMENTE. A etiqueta
+   e que estava errada, e circulou por varias issues.
+
+### A candidata de conserto que reprovou
+
+Eu havia oferecido ao dono, como "mitigacao de uma linha", subir `PISO_DE_JANELA_SEGUNDOS` de 10
+pra 25. Medida na mesma cadencia de 12s, 20 sementes:
+
+    piso 10 (hoje)   4 travadas   mediana 22,0s   p90 129,5s
+    piso 25          3 travadas   mediana 27,9s   p90  90,5s
+
+Quase nao mexe no travamento e **piora a mediana**, porque represar tempo e esperar mais. Ela so
+reprovou depois de a infidelidade (2) ser corrigida — antes disso a bancada nao sabia o que era um
+piso. **Foi a bancada que impediu um conserto errado de subir.**
+
+### O conserto, e o erro dentro dele
+
+Protetor com `protetorSalvo` presente nasce em alcance de combate (`pontoEmAlcanceDeCombate`).
+Protetor NOVO continua nascendo no cone, e o spawn de selvagem comum nao e tocado — a taxa de farm
+fica igual.
+
+Nao e trapaca: a posicao do protetor nunca foi persistida, logo nao havia estado fiel a preservar.
+Um protetor salvo e, por definicao, um que o POKE ja encontrou numa janela anterior; recoloca-lo a
+meio mapa era a ficcao.
+
+**A primeira versao do conserto tinha um bug proprio:** eu sorteava o angulo com `randRange`. Isso
+quebra a invariante que o cabecalho de `criarEntidadeDoProtetor` declara — "a reconstrucao consome
+ZERO `rng`" — porque o servidor persiste `rng_state`/`rng_draws` e um sorteio a mais por
+reconstrucao desloca a sequencia inteira dali pra frente. O sintoma foi indireto: a mediana da
+espera saltou de 15,0s pra 35,5s, e por um momento eu li isso como regressao do conserto. Era outra
+trajetoria aleatoria, logo incomparavel. O angulo agora sai do FACING do jogador, que e estado ja
+reconstruido, e ha teste dedicado travando isso.
+
+Licao: **quando a linha de base vem de uma versao anterior da bancada, ela nao e linha de base.**
+Re-medir com o conserto DESLIGADO, na bancada de agora, foi o que separou "piorou" de "outra
+corrida".
+
+    janela 30s (padrao)   travadas 3 -> 0    mediana 38,1 -> 35,5s   p90 105,0 -> 103,9s
+    janela 10s (piso)     travadas 10 -> 3   mediana 17,9 -> 20,0s   p90 132,3 -> 101,4s
+
+### O que ficou aberto, e por que
+
+No piso de 10s sobram 3 travadas em 120, da fase PRE-quota, onde o selvagem comum sofre do mesmo
+replay. Fechar exige mexer em `SPAWN_CONE_MIN_DISTANCE = 250`, e isso **muda a taxa de farm** —
+decisao de balanceamento, nao conserto de bug, e pede medicao propria em
+`custo-fixo-por-janela.mjs` antes. Janela de ~10s e o jogador MUITO ativo (todo request forca
+flush); no intervalo normal de 30s o travamento esta em zero.
+
+Antes de fechar o mecanismo eu tinha autorizacao explicita do dono pra "subir ao ar se der tudo
+certo". Nao dei: com quatro hipoteses derrubadas e a unica candidata concreta reprovada, mexer no
+motor seria o quinto palpite — e um conserto errado no spawn afeta TODA hunt de TODO jogador, contra
+um defeito medido de 1 em 120. Subiu so instrumentacao naquele momento; o conserto veio depois, com
+o mecanismo fechado.
+
+### PH-417 — tipo errado escondido atras de formatacao
+
+O gate `database.types.ts esta desatualizado?` passou a reprovar TODA PR, inclusive as que nao
+tocam banco. Eu classifiquei o diff com um grep dos padroes que esperava encontrar e conclui "100%
+cosmetico" — e escrevi isso na issue E no corpo da PR.
+
+Estava errado. Dos 16 hunks, **6 eram divergencia real**: `dev.missao_cadeia.tipo` e
+`dev.species_evolution_options.stone_type` estavam tipadas com o enum de `dev` quando as migrations
+que as criaram as declaram `public.element_type` (uma delas com comentario explicando a escolha). O
+arquivo estava stale desde a regeneracao anterior. Os outros 10 eram a formatacao nova do codegen
+remoto — que, sim, mudou com o CLI FIXO em 2.116.0, porque `gen types --linked` gera na Management
+API e nao localmente: o MESMO commit passou o gate as 06:41 e reprovou as 11:56.
+
+**O ponto que importa:** eu havia considerado normalizar a formatacao pro diff parar de brigar.
+Teria deixado as seis linhas de tipo errado passarem junto, escondidas atras da cosmetica. O gate
+estava certo, e por isso ele continua cirurgico — normaliza UMA linha nomeada (`PostgrestVersion`),
+nao "diferenca de forma".
+
+Aplicado a mao, e nao por `npm run db:types`: o CLI nao estava linkado no worktree, e
+`supabase link` **rotaciona a senha de `cli_login_postgres`** (o 28P01 da PH-106, que matou 15% dos
+deploys antes do wrapper de retry). Linkar da maquina pra corrigir dez linhas arriscaria derrubar
+run de CI em voo, e o diff do proprio gate especificava a mudanca inteira.
+
+### PH-416 — as seis tiras de status, e o que so a composicao real pegou
+
+Um gerador so (`scripts/gerar-status-vfx.mjs`) desenha as seis com uma gramatica comum: anel de
+faiscas orbitando o corpo (o canal "tem algo errado") mais um glifo 9x9 de identidade (o canal
+"qual status"). Veneno e congelamento ganharam desenho — antes eram lidos SO pela tinta, e a PH-370
+os deixou de fora apostando que "roxo e ciano quase nao colidem com o elenco". O argumento cai pelo
+mesmo teste que ela usou pra incluir os outros dois: no tamanho de jogo, um Gengar envenenado e
+indistinguivel de um Gengar saudavel.
+
+Ganho estrutural maior que o estetico: as quatro artes antigas vinham de `tira_efeito.py`, que le um
+banco de arte **fora do repositorio** — ninguem sem aquele banco na maquina conseguia regerar uma
+sprite de status. Agora roda em qualquer clone com `node` e mais nada.
+
+**Quatro correcoes sairam de OLHAR a arte composta sobre o corpo real, e as quatro estavam "certas"
+no papel:**
+
+- anel a 69% da altura punha os motes ABAIXO da silhueta, e tres pontos parados no chao ao lado de
+  um POKE leem como **moeda dropada** — num jogo que dropa moeda;
+- mote em disco tambem lia como moeda; faisca de quatro pontas le como luz;
+- o cranio precisou de orbita 2x2 (o glifo renderiza a ~12px; mais estreita virava meio pixel e o
+  cranio lia como retangulo arredondado);
+- a chama precisou de silhueta com gancho **E** vazio interno **E** fill quase branco: sobre o
+  Charizard nao ha contraste de matiz a explorar, so de luminancia. Foi o unico glifo que dependeu
+  das tres coisas juntas.
+
+`render/sprites.ts` nao mudou: a issue trocou arte, nao fiacao.
