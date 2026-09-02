@@ -40,7 +40,7 @@ import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './ent
 import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
 import { atualizarLure } from './systems/lureSystem'
-import { updateCombat, podeDanificar } from './systems/combatSystem'
+import { updateCombat, podeDanificar, apagarTodosOsEstagios } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
 import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { climaAmbienteDaSala, climaDeAmbiente, tickClimaDeGolpe } from './systems/climaAmbiente'
@@ -659,6 +659,14 @@ function trocarPorDesmaio(world: WorldState, gameState: GameStateStore, dt: numb
   player.fainted = false
   player.state = 'wander'
   player.targetId = null
+  // PH-418: o POKE que entra NAO herda estagio de atributo do que caiu.
+  //
+  // O prazo de 18s fez estagio sobreviver ao fim de batalha, e sem esta linha
+  // ele sobreviveria tambem a troca de POKE — um substituto que nunca lutou
+  // entraria com a Danca das Espadas do anterior, ou com o Rosnado que derrubou
+  // o anterior. Nos jogos, trocar zera; e o pedido era sobre mudar de ALVO, nao
+  // de POKE.
+  apagarTodosOsEstagios(player)
   // Entra pela BOLA AMARELA, nao no buraco onde o anterior caiu — e a mesma
   // regra que a bola verde da pro outro lado. Arte sem bola pintada nao move
   // ninguem: o substituto continua aparecendo no lugar do anterior, que e o

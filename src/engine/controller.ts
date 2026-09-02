@@ -328,6 +328,13 @@ export const controller = {
         draft.player.fainted = false
         draft.player.state = 'wander'
         draft.player.targetId = null
+        // PH-418: curar no Hospital tambem zera estagio de atributo. Com o prazo
+        // de 18s o estagio deixou de morrer no fim da luta, e sem esta linha um
+        // Rosnado levado na hunt anterior atravessaria a cura e a proxima
+        // entrada — "curei e meu POKE continua fraco" sem nada na tela
+        // explicando por quanto tempo.
+        draft.player.estagios = {}
+        draft.player.estagiosFonte = undefined
         draft.player.cooldowns = {}
       })
     }
@@ -377,6 +384,10 @@ export const controller = {
           draft.player.fainted = isDead(draft.player)
           draft.player.state = draft.player.fainted ? 'dead' : 'wander'
           draft.player.targetId = null
+          // PH-418: estagio de atributo nao atravessa troca de POKE — o que entra
+          // nao herda buff nem debuff de quem saiu.
+          draft.player.estagios = {}
+          draft.player.estagiosFonte = undefined
         }
       })
     })
@@ -443,6 +454,10 @@ export const controller = {
           draft.player.fainted = isDead(draft.player)
           draft.player.state = draft.player.fainted ? 'dead' : 'wander'
           draft.player.targetId = null
+          // PH-418: estagio de atributo nao atravessa troca de POKE — o que entra
+          // nao herda buff nem debuff de quem saiu.
+          draft.player.estagios = {}
+          draft.player.estagiosFonte = undefined
         }
       })
     })

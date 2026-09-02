@@ -154,6 +154,10 @@ function reconciliarPokeAtivoNoWorld(doServidor: GameStateData): void {
       draft.player.fainted = substituto.hp <= 0
       draft.player.state = draft.player.fainted ? 'dead' : 'wander'
       draft.player.targetId = null
+      // PH-418: estagio de atributo nao atravessa troca de POKE — o que entra
+      // nao herda buff nem debuff de quem saiu.
+      draft.player.estagios = {}
+      draft.player.estagiosFonte = undefined
     })
     // Preload solto, sem `await`, pelo mesmo motivo do `setActiveTeamIndex`: numa
     // aba em segundo plano o carregamento de imagem fica suspenso e seguraria a

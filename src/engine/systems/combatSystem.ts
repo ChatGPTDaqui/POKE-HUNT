@@ -15,13 +15,15 @@ import {
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
-  multiplicadorDeAccuracyOuEvasion, nomeDoStatus, ESTAGIO_MAXIMO, type StatusCondition, type StatDeEstagio,
+  multiplicadorDeAccuracyOuEvasion, nomeDoStatus, ESTAGIO_MAXIMO,
+  DURACAO_DE_ESTAGIO_SEGUNDOS, totalDeEstagio,
+  type StatusCondition, type StatDeEstagio,
 } from '@/data/statusEffects'
 import { corDoStatus } from '@/data/statusColors'
 import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
-  limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico, curarStatus,
+  limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico, curarStatus, comPrazoPadrao,
   registrarFonteDeEstagio, fonteDeTrait,
 } from './statusSystem'
 import { traitDoPoke, type TraitId } from '@/data/traits'
@@ -2407,13 +2409,51 @@ function curaBloqueada(entity: WorldEntity): boolean {
  */
 function registrarFonteDoProprioGolpe(
   entity: WorldEntity, stat: StatDeEstagio, ability: Ability,
+  /** Quantos degraus esta fonte vale (PH-418). */
+  estagios: number,
 ): void {
-  registrarFonteDeEstagio(entity, stat, {
+  registrarFonteDeEstagio(entity, stat, comPrazoPadrao({
     id: ability.id,
     tipo: 'golpe',
     proprio: true,
     deQuem: SPECIES[entity.poke.speciesId]?.name ?? entity.poke.speciesId,
-  })
+    estagios,
+  }))
+}
+
+/**
+ * Apaga estagio e fonte de todos os atributos (PH-418) — Haze, e a troca do
+ * POKE em campo.
+ *
+ * Os dois campos juntos, sempre: `estagios` e cache do que as fontes somam, e
+ * limpar um sem o outro deixa o estado inconsistente ate o proximo tick.
+ */
+export function apagarTodosOsEstagios(entity: WorldEntity): void {
+  entity.estagios = {}
+  entity.estagiosFonte = undefined
+}
+
+/**
+ * Copia as contribuicoes de estagio de `origem` para `destino` com o prazo
+ * cheio (PH-418) — Psych Up.
+ *
+ * Substitui o que o destino tinha, e nao soma: o golpe copia o estado do alvo,
+ * nao acumula com o proprio.
+ */
+function copiarEstagiosComPrazoCheio(origem: WorldEntity, destino: WorldEntity): void {
+  apagarTodosOsEstagios(destino)
+  if (!origem.estagiosFonte) return
+  const copia: NonNullable<WorldEntity['estagiosFonte']> = {}
+  for (const chave of Object.keys(origem.estagiosFonte) as StatDeEstagio[]) {
+    const fontes = origem.estagiosFonte[chave]
+    if (!fontes?.length) continue
+    copia[chave] = fontes.map((f) => ({
+      ...f,
+      expiraEm: f.expiraEm == null ? null : DURACAO_DE_ESTAGIO_SEGUNDOS,
+    }))
+    destino.estagios[chave] = totalDeEstagio(copia[chave])
+  }
+  destino.estagiosFonte = copia
 }
 
 // Troca os estagios de `stats` entre duas entidades (Guard Swap/Power Swap).
@@ -2432,6 +2472,10 @@ function trocarEstagios(a: WorldEntity, b: WorldEntity, stats: StatDeEstagio[]):
     // A PROCEDENCIA TROCA JUNTO (PH-121). Sem isto o selo mentiria depois de um
     // Guard Swap: o estagio que veio do outro POKE apareceria explicado pelo
     // golpe que o dono ANTIGO tinha usado.
+    //
+    // PH-418: com a fonte carregando contribuicao e prazo, trocar a lista troca
+    // o buff INTEIRO — inclusive quanto tempo falta. E o que Power Swap faz nos
+    // jogos: os dois trocam de modificador, e o modificador inclui a validade.
     const af = a.estagiosFonte?.[stat]
     const bf = b.estagiosFonte?.[stat]
     if (bf === undefined) { if (a.estagiosFonte) delete a.estagiosFonte[stat] }
@@ -3175,13 +3219,22 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     case 'haze':
       // Reseta TODOS os estagios dos DOIS lados — nao mexe em status (nem o
       // nao-volatil nem a confusao), so nos estagios de atributo.
-      attacker.estagios = {}
-      if (!isDead(target)) target.estagios = {}
+      //
+      // PH-418: apaga as FONTES, e nao so os numeros. Com o total derivado das
+      // fontes, zerar `estagios` sozinho seria desfeito no proximo tick — a
+      // primeira fonte a vencer recalcularia o total e o buff "apagado"
+      // reapareceria.
+      apagarTodosOsEstagios(attacker)
+      if (!isDead(target)) apagarTodosOsEstagios(target)
       break
     case 'psych_up':
       // Copia os estagios do ALVO pro usuario — golpe reconhecidamente ignora
       // Protect nos jogos reais (ver PROTECT_BYPASS_ABILITY_IDS).
-      if (!isDead(target)) attacker.estagios = { ...target.estagios }
+      //
+      // PH-418: copia as fontes COM PRAZO CHEIO, nao com o prazo que sobrou no
+      // alvo. Psych Up copia o estado, e herdar "faltam 1,2s" entregaria um buff
+      // que morre antes de ser usado — ilegivel na tela e inutil no combate.
+      if (!isDead(target)) copiarEstagiosComPrazoCheio(target, attacker)
       break
     case 'pain_split':
       if (!isDead(target)) {
@@ -3222,16 +3275,20 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // pro TETO de uma vez.
       const perda = Math.round(attacker.poke.stats.hp / 2)
       attacker.poke.hp = Math.max(1, attacker.poke.hp - perda)
-      attacker.estagios.atkFis = ESTAGIO_MAXIMO
-      registrarFonteDoProprioGolpe(attacker, 'atkFis', ability)
+      // PH-418: a contribuicao E o teto. Somada a qualquer outra fonte viva, o
+      // clamp de `totalDeEstagio` segura em +6 — que e o que "vai pro teto de
+      // uma vez" significa. E ganha prazo como qualquer outro estagio: sem
+      // prazo, este seria o unico buff eterno do jogo.
+      registrarFonteDoProprioGolpe(attacker, 'atkFis', ability, ESTAGIO_MAXIMO)
       break
     }
     case 'acupressure': {
       const stats: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 'speed']
       const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)]
-      const atual = attacker.estagios[stat] ?? 0
-      attacker.estagios[stat] = Math.min(ESTAGIO_MAXIMO, atual + 2)
-      registrarFonteDoProprioGolpe(attacker, stat, ability)
+      // A chave da fonte e (atributo, id do golpe), entao dois sorteios em
+      // atributos diferentes coexistem e somam; o mesmo atributo sorteado de
+      // novo renova o prazo em vez de empilhar. E a regra geral, sem excecao.
+      registrarFonteDoProprioGolpe(attacker, stat, ability, 2)
       break
     }
     case 'aromatherapy':
