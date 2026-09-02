@@ -145,6 +145,44 @@ export function parseEstagioId(mapId: string): EstagioDoMapId | null {
 }
 
 /**
+ * Prefixo que o espelho do Modo Pesadelo poe no mapId da hunt de origem
+ * (`nightmareMaps.ts#buildNightmareMirror`).
+ */
+export const PREFIXO_DO_PESADELO = 'nightmare_'
+
+/**
+ * Como `parseEstagioId`, mas aceita tambem o espelho do Pesadelo.
+ *
+ * DUAS FUNCOES DE PROPOSITO, e a diferenca importa. `parseEstagioId` e a
+ * ESTRITA: ela recusa o espelho porque quem pergunta "que bioma e este mapId"
+ * pro gate de progresso nao pode receber `nightmare_marinho` como bioma. Esta
+ * aqui e a PERMISSIVA, pra quem pergunta sobre a FORMA da hunt — quantas salas
+ * ela tem, que janela de nivel cada uma cobre — onde o espelho e identico a
+ * origem, porque ele copia a geometria e so desloca o nivel.
+ */
+export function parseEstagioIdOuEspelho(
+  mapId: string,
+): (EstagioDoMapId & { pesadelo: boolean }) | null {
+  const pesadelo = mapId.startsWith(PREFIXO_DO_PESADELO)
+  const semPrefixo = pesadelo ? mapId.slice(PREFIXO_DO_PESADELO.length) : mapId
+  const estagio = parseEstagioId(semPrefixo)
+  return estagio ? { ...estagio, pesadelo } : null
+}
+
+/**
+ * Quantas salas a hunt deste mapId tem.
+ *
+ * Hunt que nao e de estagio (a inicial, as BOSS, o Treinamento) nao tem sistema
+ * de salas — `temSalas()` responde `false` antes de alguem chegar aqui —, mas o
+ * fallback existe porque o caminho de spawn pergunta o numero ANTES de saber se
+ * a hunt tem salas. Devolver 0 ali daria divisao por zero na janela de nivel.
+ */
+export function quantidadeDeSalas(mapId: string): number {
+  const estagio = parseEstagioIdOuEspelho(mapId)
+  return estagio ? salasDoEstagio(estagio.estagio) : SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1]
+}
+
+/**
  * Indice do bioma deste mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` quando o
  * mapId nao e de um estagio de bioma (hunt inicial, BOSS, Pesadelo).
  *

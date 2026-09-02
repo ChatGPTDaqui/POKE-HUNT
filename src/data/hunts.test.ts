@@ -15,7 +15,7 @@ import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL,
 } from './biomas'
-import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, zonaMaximaDoEstagio } from './estagios'
+import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, quantidadeDeSalas, zonaMaximaDoEstagio } from './estagios'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import { contextoDeSpawn, janelaDaSala } from '@/engine/systems/salaSystem'
 import { SALAS_POR_HUNT } from './biomas'
@@ -503,7 +503,7 @@ describe('pesos de spawn', () => {
           for (const id of ctx.pool) {
             const fatia = ctx.peso(id) / total
             if (fatia > TETO_DE_FATIA + 1e-9) {
-              const janela = janelaDaSala(mapDef.levelRange, indice).join('-')
+              const janela = janelaDaSala(mapDef.levelRange, indice, quantidadeDeSalas(huntId)).join('-')
               erros.push(`${huntId}/${chave}#${indice} (Lv ${janela}) ${ENCOUNTERS[id].speciesId} = ${(fatia * 100).toFixed(1)}%`)
             }
           }

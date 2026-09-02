@@ -322,7 +322,7 @@ export class Renderer {
     // — `entity.isProtetor` so marca QUE e protetor. Resolvido uma vez por
     // frame (barato, `protetorDaSala` e pura) e repassado pra tag decidir o
     // texto.
-    const tipoDeProtetorAtual = protetorDaSala(world.sala)
+    const tipoDeProtetorAtual = protetorDaSala(world.sala, world.mapDef?.id ?? '')
     for (const enemy of world.enemies) {
       drawEntity(ctx, enemy)
       if (enemy.poke.hp > 0) {

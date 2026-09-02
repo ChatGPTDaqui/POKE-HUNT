@@ -6,7 +6,7 @@
 // (`docs/19-explicacao-flutuante.md`) enumera:
 //
 //   SALA      nao tinha explicacao NENHUMA. "Sala 3/10 Relvado 24 restam" nao
-//             diz que a hunt tem 10 salas, que cada uma pede 30 abates, nem o
+//             diz de quantas salas um estagio e feito, que cada uma pede 30 abates, nem o
 //             que acontece ao limpar a decima.
 //   CARTEIRA  tinha `title=` nativo com o valor cheio. No celular, onde o numero
 //             aparece ABREVIADO ("1B"), o valor exato simplesmente nao existia —
@@ -22,8 +22,9 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import {
-  SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS,
+  ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS,
 } from '@/data/biomas'
+import { SALAS_POR_ESTAGIO } from '@/data/estagios'
 import { SalaChip } from './SalaChip'
 import { Carteira } from './Carteira'
 
@@ -70,10 +71,10 @@ describe('o chip de sala explica o que e uma sala (PH-165)', () => {
     render(<SalaChip />)
     tocar(screen.getByText(NOME_DA_SALA))
 
-    // `SALAS_POR_HUNT` e `ABATES_POR_SALA` importados: se o ritmo da hunt mudar
+    // `SALAS_POR_ESTAGIO` e `ABATES_POR_SALA` importados: se o ritmo da hunt mudar
     // e o texto ficar pra tras, este caso fica vermelho em vez de a bolha passar
     // a mentir em silencio — que e o modo de falha da regra 3 do glossario.
-    expect(screen.getByText(new RegExp(`${SALAS_POR_HUNT} salas`))).toBeTruthy()
+    expect(screen.getByText(new RegExp(`de ${SALAS_POR_ESTAGIO[0]} a ${SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1]} salas`))).toBeTruthy()
     expect(screen.getByText(new RegExp(`${ABATES_POR_SALA} abates pra limpar`))).toBeTruthy()
   })
 
@@ -122,7 +123,7 @@ describe('o chip de sala explica o que e uma sala (PH-165)', () => {
     tocar(screen.getByText(NOME_DA_SALA))
     expect(screen.queryByText(/Guardião e Lorde/)).toBeNull()
     // O verbete de sala continua — quem saiu foi so o segundo.
-    expect(screen.getByText(new RegExp(`${SALAS_POR_HUNT} salas`))).toBeTruthy()
+    expect(screen.getByText(new RegExp(`de ${SALAS_POR_ESTAGIO[0]} a ${SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1]} salas`))).toBeTruthy()
   })
 
   it('fora de hunt nao ha chip nenhum', () => {

@@ -11,10 +11,10 @@ import { pedirAcao } from '@/data/remote/autoridade'
 // de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
 import {
-  FAIXAS, SALAS_POR_HUNT, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE,
+  FAIXAS, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE,
   type SubBiomaDef, type BiomaProgress,
 } from '@/data/biomas'
-import { indiceDoBiomaDoEstagio } from '@/data/estagios'
+import { indiceDoBiomaDoEstagio, quantidadeDeSalas } from '@/data/estagios'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { contextoDeSpawn } from '@/engine/systems/salaSystem'
 import type { HuntMapDef } from '@/data/huntTypes'
@@ -138,7 +138,7 @@ function salasDaHunt(mapId: string): { sub: SubBiomaDef; pool: string[] }[] {
  *
  * A "dominancia" de um tipo e a soma das odds de toda especie que o carrega.
  *
- * COM SALAS, A CHANCE E UMA MEDIA SOBRE AS 10 SALAS DO CICLO, e a conta passa
+ * COM SALAS, A CHANCE E UMA MEDIA SOBRE AS SALAS DO ESTAGIO, e a conta passa
  * pelo MESMO `contextoDeSpawn` que o motor usa pra sortear:
  *
  *   P(especie) = (1/SALAS) x SOMA_indice SOMA_sub  P(sub) x peso(sub, indice)
@@ -166,10 +166,16 @@ export function huntOdds(map: HuntMapDef): HuntOdds {
 
   const salas = salasDaHunt(map.id)
   if (salas.length > 0) {
+    // PH-427: quantas salas o estagio tem, e nao 10 fixas. Alem de errar a
+    // media, a constante antiga avaliava indices de sala que NAO EXISTEM (0 a 9
+    // num estagio de 3 salas): `janelaDaSala` devolvia janelas de nivel fora do
+    // caminho do jogador, entao o cartao anunciava especie que aquele estagio
+    // nunca sorteia. A soma continuava dando 100%, o que esconde o erro.
+    const totalDeSalas = quantidadeDeSalas(map.id)
     const somaPesoDeSala = salas.reduce((s, x) => s + x.sub.peso, 0)
     for (const { sub } of salas) {
-      const pSala = sub.peso / somaPesoDeSala / SALAS_POR_HUNT
-      for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+      const pSala = sub.peso / somaPesoDeSala / totalDeSalas
+      for (let indice = 0; indice < totalDeSalas; indice++) {
         const ctx = contextoDeSpawn(
           map.id, map.levelRange, { chave: sub.chave, indice, abates: 0, ciclos: 0 }, map.enemyPool,
         )
@@ -221,7 +227,7 @@ function SalasDaHunt({ mapId }: { mapId: string }) {
   return (
     <div className="flex flex-col gap-[.25em] rounded-[.5em] bg-n800/50 p-[.45em]">
       <div className="text-[.75em] text-n500">
-        {SALAS_POR_HUNT} salas · cada uma sorteia um sub-bioma
+        {quantidadeDeSalas(mapId)} salas · cada uma sorteia um sub-bioma
       </div>
       <div className="flex flex-wrap gap-[.35em]">
         {salas

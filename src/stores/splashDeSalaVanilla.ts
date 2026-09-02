@@ -33,13 +33,13 @@ export interface SplashDeSala {
   id: number
   sala: SalaAtiva
   /** A sala nova e a primeira do ciclo seguinte — texto proprio, como no toast. */
-  fechouCiclo: boolean
+  fechouEstagio: boolean
 }
 
 export interface SplashDeSalaState {
   atual: SplashDeSala | null
   /** Chamado pelo motor, do tick em que `aplicarTransicaoDeSala` roda. */
-  anunciarSala: (sala: SalaAtiva, fechouCiclo: boolean) => void
+  anunciarSala: (sala: SalaAtiva, fechouEstagio: boolean) => void
   /** Chamado pelo componente quando os 4 segundos acabam. */
   encerrar: (id: number) => void
   limpar: () => void
@@ -50,8 +50,8 @@ let proximoId = 1
 export const splashDeSalaStore = createStore<SplashDeSalaState>()((set) => ({
   atual: null,
 
-  anunciarSala: (sala, fechouCiclo) =>
-    set({ atual: { id: proximoId++, sala: { ...sala }, fechouCiclo } }),
+  anunciarSala: (sala, fechouEstagio) =>
+    set({ atual: { id: proximoId++, sala: { ...sala }, fechouEstagio } }),
 
   // POR ID, e nao um `encerrar()` seco: o temporizador do aviso ANTERIOR pode
   // disparar depois de um aviso novo ter entrado (troca de sala rapida), e um

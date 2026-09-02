@@ -25,7 +25,7 @@ function* salasComProtetor() {
     for (const chave of Object.keys(salas)) {
       for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
         const sala = { chave, indice, abates: 0, ciclos: 0 }
-        const tipo = protetorDaSala(sala)
+        const tipo = protetorDaSala(sala, huntId)
         if (!tipo) continue
         const ctx = contextoDeSpawn(huntId, mapDef.levelRange, sala, mapDef.enemyPool)
         yield { huntId, sala, tipo, ctx, doProtetor: contextoDoProtetor(huntId, ctx, sala, tipo) }

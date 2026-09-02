@@ -46,7 +46,7 @@ function fecharQuota(world: WorldState, opts?: { manualAdvance?: boolean }) {
  * `salas.test.ts#resolverProtetorSeHouver`.
  */
 function resolverProtetorSeHouver(world: WorldState) {
-  if (world.sala!.abates < ABATES_POR_SALA || !protetorDaSala(world.sala)) return
+  if (world.sala!.abates < ABATES_POR_SALA || !protetorDaSala(world.sala, HUNT)) return
   const gameState = useGameStateStore.getState()
   if (!world.protetorPendente) stepWorld(world, 0.1, gameState, { silent: true }) // nasce o protetor
   const protetor = world.enemies.find((e) => e.isProtetor)

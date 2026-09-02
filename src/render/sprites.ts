@@ -1579,7 +1579,7 @@ export function medirTextoDeCombate(
   // PH-236: mesma fonte de verdade do texto (`rotuloDeProtetor`) que
   // `drawNameLevelTag` usa pra desenhar — resolvido uma vez por chamada,
   // igual ao Renderer faz antes do loop de desenho.
-  const tipoDeProtetorAtual = protetorDaSala(world.sala)
+  const tipoDeProtetorAtual = protetorDaSala(world.sala, world.mapDef?.id ?? '')
   const fixas: Caixa[] = []
   for (const entidade of [world.player, ...world.enemies]) {
     if (!entidade || entidade.poke.hp <= 0) continue

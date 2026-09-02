@@ -26,7 +26,8 @@ import { formatarPrazoEmTurnos, TEXTO_DE_RITMO_CONTINUO } from './textoDeEstagio
 // Os dois numeros do verbete de sala saem daqui, e nao escritos a mao: sao a
 // MESMA fonte que o motor usa pra decidir quando a sala vira. Ajustar o ritmo da
 // hunt sem tocar no texto e o modo de falha que a regra 3 do cabecalho descreve.
-import { SALAS_POR_HUNT, ABATES_POR_SALA } from './biomas'
+import { ABATES_POR_SALA } from './biomas'
+import { SALAS_POR_ESTAGIO } from './estagios'
 import {
   SEGUNDOS_DE_IMUNIDADE_APOS_CURA,
   ehVolatil,
@@ -189,9 +190,9 @@ export const GLOSSARIO = {
   sala: {
     titulo: 'Sala',
     corpo: [
-      `Cada hunt tem ${SALAS_POR_HUNT} salas, e cada uma pede ${ABATES_POR_SALA} abates pra limpar.`,
+      `Cada estágio tem de ${SALAS_POR_ESTAGIO[0]} a ${SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1]} salas — mais salas nos estágios mais fundos —, e cada uma pede ${ABATES_POR_SALA} abates pra limpar.`,
       'A cada sala o cenário muda e os selvagens sobem de nível — a hunt afunda conforme você limpa.',
-      `Limpar a última fecha um ciclo: a hunt volta pra sala 1 e o contador de ciclos sobe.`,
+      `Limpar a última fecha o estágio: você enfrenta o Lord dele e o estágio seguinte abre.`,
     ],
     wiki: 'Hunts',
   },

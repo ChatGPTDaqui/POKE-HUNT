@@ -34,7 +34,8 @@ import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
-import { ABATES_POR_SALA, SALAS_POR_HUNT, ORDEM_DOS_BIOMAS, SUB_BIOMA_POR_CHAVE, type BiomaProgress } from '@/data/biomas'
+import { ABATES_POR_SALA, ORDEM_DOS_BIOMAS, SUB_BIOMA_POR_CHAVE, type BiomaProgress } from '@/data/biomas'
+import { quantidadeDeSalas } from '@/data/estagios'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
@@ -541,7 +542,7 @@ function garantirProtetorDaSala(
   player: PlayerEntity | null,
   entrada: Point | null,
 ): boolean {
-  const tipo = protetorDaSala(world.sala)
+  const tipo = protetorDaSala(world.sala, world.mapDef?.id ?? '')
   if (!tipo) {
     world.protetorPendente = null
     return false
@@ -955,7 +956,7 @@ export function buildMapWorld(
     // hunt), virou impossivel de ignorar com os 12 biomas habilitados
     // (PH-225): QUALQUER hunt de bioma, na abertura, tentava recriar um
     // protetor do nada.
-    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA ? protetorDaSala(sala) : null
+    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA ? protetorDaSala(sala, mapId) : null
     if (tipoDeProtetor) {
       // Sala em modo protetor (quota ja fechou, spawn normal fica suspenso
       // ate resolver). Recria FIEL quando `progresso.protetorPendente` ja
@@ -1253,7 +1254,14 @@ export function handleEnemyDefeated(
   // protetor (PH-202/225) ele virou o unico caminho que resta — o que deixava
   // o "avanco manual de sala" inerte no jogo inteiro sem nada quebrar.
   if (enemy.isProtetor) {
-    if (world.sala?.indice === SALAS_POR_HUNT - 1) avancarBiomaProgressSeForOProximo(world, gameState)
+    // PH-427: "a ultima sala" deixou de ser o indice 9. O estagio 1 tem 3
+    // salas e o Lord dele mora no indice 2 — com a constante antiga o credito
+    // de `bioma_progress` nunca acontecia em 9 dos 10 estagios, o jogador
+    // vencia o Lord e o bioma seguinte continuava trancado. Falha silenciosa:
+    // nada estoura, o Lord morre normalmente, o progresso simplesmente nao e
+    // escrito.
+    const ultimaDoEstagio = quantidadeDeSalas(world.mapDef?.id ?? '') - 1
+    if (world.sala?.indice === ultimaDoEstagio) avancarBiomaProgressSeForOProximo(world, gameState)
     resolverProtetorDaSala(world, world.mapDef!.id, { manualAdvance: opts.manualAdvance ?? false })
   }
 
@@ -1381,7 +1389,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.salaCountdownRemaining -= dt
     if (world.salaCountdownRemaining <= 0) {
       world.salaCountdownRemaining = null
-      const fechouCiclo = world.salaPendente?.indice === 0
+      const fechouEstagio = world.salaPendente?.indice === 0
       aplicarTransicaoDeSala(world, world.mapDef.id)
       if (world.mapDef) {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
@@ -1403,7 +1411,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
         // catch-up de aba oculta atravessam varias salas de uma vez, e nao ha
         // ninguem olhando.
         if (!silent && world.sala) {
-          splashDeSalaStore.getState().anunciarSala(world.sala, fechouCiclo)
+          splashDeSalaStore.getState().anunciarSala(world.sala, fechouEstagio)
         }
       }
     }
