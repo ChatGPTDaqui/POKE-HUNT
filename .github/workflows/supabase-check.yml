@@ -265,6 +265,24 @@ jobs:
         # temporarias antes do diff — o arquivo real commitado nunca e
         # tocado, e qualquer outra diferenca (coluna, tabela, RPC) continua
         # reprovando normal.
+        #
+        # FIXAR O CLI NAO CONGELA A SAIDA DESTE PASSO (PH-417). A versao esta
+        # presa em 2.116.0 nos tres workflows desde a PH-290, e mesmo assim o
+        # mesmo commit (`ad4fb6b0`) passou aqui as 06:41 e reprovou as 11:56 de
+        # 2026-09-02. O motivo: `gen types typescript --linked` NAO gera local —
+        # ele pede o codegen a Management API, que e um servico versionado do
+        # lado deles. Naquele dia o gerador remoto passou a parentizar a
+        # restricao de generico dos helpers do fim do arquivo
+        # (`TableName extends (X extends {...} : never) = never`), dez linhas,
+        # zero mudanca de schema, e reprovou TODA PR aberta — inclusive as que
+        # nao tocam banco.
+        #
+        # Consertado regenerando o arquivo, e NAO relaxando o gate: a
+        # normalizacao acima e cirurgica de proposito (uma linha nomeada), e
+        # normalizar formatacao de generico abriria a porta pra ignorar
+        # diferenca que importa. Se repetir, a saida e passar os DOIS lados por
+        # um formatador antes de comparar — nao perseguir a formatacao do
+        # gerador remoto a cada mudanca dele. Uma vez e acidente.
         run: |
           npm ci
           # PH-106: pelo wrapper, que re-linka se a credencial tiver sido
