@@ -37,11 +37,11 @@ function comEquipe(progresso = progressoPorBiomaDefault()) {
     team: [{ uid: 'p1', speciesId: 'charmander', level: 5, hp: 20, maxHp: 20 }],
     activeIndex: 0,
     unlockedMaps: [],
-    unlockedContinents: ['faixa1', 'faixa2'],
+    unlockedContinents: ['biomas'],
     biomaProgress: progresso,
   } as never, false)
   useWorldStore.setState({ mapDef: null } as never, false)
-  useUiStore.setState({ huntContinent: 'faixa1', huntSearchTerm: '', huntType: 'all' } as never, false)
+  useUiStore.setState({ huntContinent: 'biomas', huntSearchTerm: '', huntType: 'all' } as never, false)
 }
 
 beforeEach(() => { comEquipe() })

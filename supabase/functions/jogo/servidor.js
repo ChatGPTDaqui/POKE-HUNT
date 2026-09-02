@@ -42907,8 +42907,30 @@ var FAIXAS$1 = [
 		zonaMaxima: 8
 	}
 ];
-var FAIXAS_INICIAIS = ["faixa1", "faixa2"];
-var GRUPOS_DO_LANCE = ["faixa3", "nightmare"];
+/**
+* O grupo de gate das hunts que nascem abertas.
+*
+* ERAM AS DUAS PRIMEIRAS FAIXAS ATE A PH-432, e o encolhimento aqui e o fim da
+* ponte que a PH-426 tinha montado. O raciocinio: `continent` existe pra dizer
+* "este conteudo esta liberado?", e nas hunts de bioma essa pergunta passou a
+* ser respondida pelo ESTAGIO (PH-430 — o estagio 1 sempre aberto, o N pede o
+* N-1). Manter as faixas aqui era uma segunda trava que dizia a mesma coisa com
+* granularidade pior: ela barrava o estagio 7 inteiro atras do Campeao Lance
+* quando o gate de estagio ja o barra atras do estagio 6.
+*
+* O que `continent` ainda decide de verdade e UMA coisa: o Modo Pesadelo (e as
+* 11 hunts BOSS dentro dele) esta aberto? Isso continua sendo o premio do
+* Lance.
+*/
+var GRUPOS_INICIAIS = ["biomas"];
+/**
+* O que derrotar o Campeao Lance libera.
+*
+* Encolheu de `['faixa3', 'nightmare']` pra so o Pesadelo na PH-432: a faixa3
+* deixou de existir como grupo, e o que era "a faixa III" agora sao os estagios
+* 7 a 10, liberados um a um pelo proprio progresso do bioma.
+*/
+var GRUPOS_DO_LANCE = ["nightmare"];
 var LOOT = {
 	basico: [{
 		itemId: "potion",
@@ -43458,7 +43480,7 @@ var GEOMETRIA = {
 		}
 	]
 };
-Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
+var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
 /**
 * PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
 * vencer o Lord do bioma N libera o bioma N+1. So existia como
@@ -46211,7 +46233,7 @@ function buildLanceHunt() {
 			description: "Batalha contra o Campeão Lance — 6 POKEs Lendários em sequência (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o próximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.",
 			levelRange: [55, 65],
 			unlockCost: null,
-			continent: "faixa2",
+			continent: GRUPOS_INICIAIS[0],
 			bounds: {
 				width: 1400,
 				height: 900
@@ -46773,25 +46795,6 @@ function estagioDoNivel(nivel) {
 	return Math.min(Math.max(Math.ceil(nivel / 10), 1), 10);
 }
 /**
-* Ate que estagio (inclusive) uma FAIXA antiga ia — a ponte que mantem o gate
-* de hoje de pe enquanto ele nao e trocado.
-*
-* `continent` continua sendo o grupo de gate (`FAIXAS_INICIAIS` abre faixa1 e
-* faixa2; o Lance abre faixa3 e o Pesadelo), e trocar isso e a PH-430/PH-432,
-* nao esta issue. Entao cada estagio herda o grupo da faixa que cobria aquele
-* nivel: estagios 1-3 = faixa1 (Lv 1-30), 4-6 = faixa2 (Lv 31-60), 7-10 =
-* faixa3 (Lv 61-100 — o estagio 10 e conteudo novo, acima do antigo teto de
-* 90, e cai no grupo mais alto).
-*
-* SEM ISSO O JOGO ABRE TODO DE UMA VEZ: `continent` de valor desconhecido nao
-* casa com grupo liberado nenhum, e o menu esconderia as 120 hunts. Com um
-* valor unico e aberto, o Modo Pesadelo deixaria de ser recompensa do Lance.
-* A ponte sai junto com o vocabulario de faixa, na PH-434.
-*/
-function grupoDeGateDoEstagio(estagio) {
-	return (FAIXAS$1.find((f) => niveisDoEstagio(estagio)[1] <= f.niveis[1]) ?? FAIXAS$1[FAIXAS$1.length - 1]).id;
-}
-/**
 * Pares `origem->alvo` em que o teto pelo gatilho do alvo (PH-332) de fato
 * mordeu na montagem. Vazio hoje, e um teste tranca isso — ver o comentario do
 * ramo em `nivelDeTroca`.
@@ -46947,7 +46950,7 @@ function montarHunt(bioma, estagio) {
 		description: `${bioma.nome} — níveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(", ")}.`,
 		levelRange: [lo, hi],
 		unlockCost: null,
-		continent: grupoDeGateDoEstagio(estagio),
+		continent: GRUPOS_INICIAIS[0],
 		bounds: { ...GEOMETRIA.bounds },
 		playerSpawn: { ...GEOMETRIA.playerSpawn },
 		bg: { ...bioma.bg },
@@ -46968,7 +46971,7 @@ function montarHunt(bioma, estagio) {
 		description: "A primeira caçada. Só POKEs de tipo Normal, nível 1 a 2.",
 		levelRange: [lo, hi],
 		unlockCost: null,
-		continent: "faixa1",
+		continent: GRUPOS_INICIAIS[0],
 		bounds: { ...GEOMETRIA.bounds },
 		playerSpawn: { ...GEOMETRIA.playerSpawn },
 		bg: {
@@ -75645,6 +75648,35 @@ function bloqueioDoEstagio(progresso, bioma, estagio) {
 	return `Vença o Lord do estágio ${estagio - 1} para liberar este.`;
 }
 /**
+* Os biomas que ainda faltam pro jogador poder desafiar o Lance, na ordem em
+* que `BIOMAS` os lista. Vazio = liberado.
+*
+* Devolve a LISTA, e nao um booleano, porque a tela precisa dizer QUAIS faltam.
+* "Bloqueado" sem dizer o que fazer e o defeito que o gate de estagio (PH-430)
+* corrigiu; repeti-lo aqui seria voltar atras.
+*/
+function biomasFaltandoParaOLance(progresso) {
+	return BIOMAS.filter((b) => maiorEstagioLimpo(progresso, b.chave) < 5).map((b) => b.chave);
+}
+/**
+* Mensagem de bloqueio do Lance, ou `null` se ele esta liberado.
+*
+* O LANCE NAO TINHA GATE DE ENTRADA NENHUM ate a PH-432 — o `continent` dele e
+* `faixa2`, que nascia aberto, entao ele estava disponivel desde o dia 1 com um
+* time de Lv 55-65 esperando. O que existia era o gate do que ele CONCEDE. A
+* issue trocou o portao de lugar: agora e preciso ter chegado a metade do modo
+* normal nos 12 biomas.
+*
+* Igual a `bloqueioDoEstagio`, mora aqui pra as duas pontas — o gate da
+* autoridade e o cartao do menu — dizerem a MESMA coisa.
+*/
+function bloqueioDoLance(progresso) {
+	const faltando = biomasFaltandoParaOLance(progresso);
+	if (faltando.length === 0) return null;
+	const nomes = faltando.map((c) => BIOMA_POR_CHAVE[c]?.nome ?? c);
+	return `Limpe o estágio 5 de todos os 12 biomas — falta ${nomes.length <= 3 ? nomes.join(", ") : `${nomes.length} biomas`}.`;
+}
+/**
 * As tres faixas antigas, e ate que estagio cada uma vale na traducao.
 *
 * A REGRA: faixa1 cobria Lv 1-30, que sao os estagios 1 a 3; faixa2 cobria Lv
@@ -75813,7 +75845,7 @@ function defaultGameStateData() {
 			exp: 0
 		},
 		pokedexKills: {},
-		unlockedContinents: [...FAIXAS_INICIAIS],
+		unlockedContinents: [...GRUPOS_INICIAIS],
 		missoesReivindicadas: {},
 		especialidades: especialidadeNiveisDefault(),
 		biomaProgress: progressoPorBiomaDefault()
@@ -80785,7 +80817,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const grupos = world.mapDef.unlocksContinentOnClear;
 		const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g));
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
-		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Você derrotou o Campeão Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
+		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Você derrotou o Campeão Lance! O Modo Pesadelo foi liberado.", "success", "world");
 	}
 	if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
@@ -82308,6 +82340,10 @@ async function abrirSessao(cfg, userId, req) {
 	if (!estado.unlockedContinents.includes(grupo)) throw new ErroHttp(403, "Derrote o Campeao Lance para acessar esta area.");
 	const bloqueio = bloqueioDeBiomaPendente(mapId, estado.biomaProgress);
 	if (bloqueio) throw new ErroHttp(403, bloqueio);
+	if (mapId === "boss_lance") {
+		const doLance = bloqueioDoLance(estado.biomaProgress);
+		if (doLance) throw new ErroHttp(403, doLance);
+	}
 	const anterior = await sessaoAberta(cfg, userId);
 	if (anterior) {
 		await aplicarFlush(cfg, userId, anterior, { ignorarPiso: true });

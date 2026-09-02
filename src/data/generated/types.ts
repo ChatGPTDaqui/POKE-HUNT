@@ -213,10 +213,19 @@ export interface MapItemDrop {
 // pools do PokeRogue misturam as duas regioes e recortar por elas esvaziava
 // 12 dos 33 sub-biomas.
 //
-// `faixa1` e `faixa2` nascem abertas; `faixa3` e `nightmare` (que inclui as
-// 11 hunts BOSS) sao liberadas por derrotar o Campeao Lance, cujo time e
-// Lv55-65 — o fim exato da faixa2.
-export type Continent = 'faixa1' | 'faixa2' | 'faixa3' | 'nightmare'
+// PH-432: SOBRARAM DOIS. As tres faixas eram grupos de gate — `faixa1` e
+// `faixa2` nasciam abertas, `faixa3` e `nightmare` saiam do Campeao Lance — e
+// nas hunts de bioma esse eixo morreu: quem responde "este conteudo esta
+// liberado?" la e o ESTAGIO (data/progressoDeBioma.ts#estagioLiberado). O que
+// `continent` ainda decide de verdade e uma coisa so:
+//
+//   biomas      nasce aberto — as 120 hunts de estagio, a inicial e o Lance
+//   nightmare   o Modo Pesadelo e as 11 hunts BOSS, premio do Campeao Lance
+//
+// Os tres nomes de faixa continuam no tipo porque SAVE ANTIGO os carrega em
+// `players.unlocked_continents`, e a carga os traduz (gameStateStore). Eles
+// saem quando nao houver mais save com eles — ver PH-434.
+export type Continent = 'biomas' | 'nightmare' | 'faixa1' | 'faixa2' | 'faixa3'
 
 export interface MapDataEntry {
   id: string

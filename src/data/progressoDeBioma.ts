@@ -16,7 +16,7 @@
 // desenho, sem estado de jogador. Este e PERSISTENCIA: ele define uma forma que
 // vai pro banco, precisa sobreviver a save antigo e nao pode mudar sem
 // migration. Misturar os dois faria a regua parecer versionada.
-import { BIOMAS, ORDEM_DOS_BIOMAS } from './biomas'
+import { BIOMAS, BIOMA_POR_CHAVE, ESTAGIOS_PARA_O_LANCE, ORDEM_DOS_BIOMAS } from './biomas'
 import { ESTAGIOS_POR_BIOMA, estagioValido, parseEstagioId } from './estagios'
 
 /**
@@ -100,6 +100,46 @@ export function bloqueioDoEstagio(
 ): string | null {
   if (estagioLiberado(progresso, bioma, estagio)) return null
   return `Vença o Lord do estágio ${estagio - 1} para liberar este.`
+}
+
+// ---------------------------------------------------------------------------
+// O portao do Campeao Lance
+// ---------------------------------------------------------------------------
+/**
+ * Os biomas que ainda faltam pro jogador poder desafiar o Lance, na ordem em
+ * que `BIOMAS` os lista. Vazio = liberado.
+ *
+ * Devolve a LISTA, e nao um booleano, porque a tela precisa dizer QUAIS faltam.
+ * "Bloqueado" sem dizer o que fazer e o defeito que o gate de estagio (PH-430)
+ * corrigiu; repeti-lo aqui seria voltar atras.
+ */
+export function biomasFaltandoParaOLance(progresso: ProgressoPorBioma): string[] {
+  return BIOMAS
+    .filter((b) => maiorEstagioLimpo(progresso, b.chave) < ESTAGIOS_PARA_O_LANCE)
+    .map((b) => b.chave)
+}
+
+/**
+ * Mensagem de bloqueio do Lance, ou `null` se ele esta liberado.
+ *
+ * O LANCE NAO TINHA GATE DE ENTRADA NENHUM ate a PH-432 — o `continent` dele e
+ * `faixa2`, que nascia aberto, entao ele estava disponivel desde o dia 1 com um
+ * time de Lv 55-65 esperando. O que existia era o gate do que ele CONCEDE. A
+ * issue trocou o portao de lugar: agora e preciso ter chegado a metade do modo
+ * normal nos 12 biomas.
+ *
+ * Igual a `bloqueioDoEstagio`, mora aqui pra as duas pontas — o gate da
+ * autoridade e o cartao do menu — dizerem a MESMA coisa.
+ */
+export function bloqueioDoLance(progresso: ProgressoPorBioma): string | null {
+  const faltando = biomasFaltandoParaOLance(progresso)
+  if (faltando.length === 0) return null
+  const nomes = faltando.map((c) => BIOMA_POR_CHAVE[c]?.nome ?? c)
+  // Ate tres nomes por extenso; acima disso a lista domina o cartao e o numero
+  // comunica melhor. Com 12 faltando (conta nova) o jogador nao precisa da
+  // lista, precisa saber que o Lance e conteudo de meio de jogo.
+  const detalhe = nomes.length <= 3 ? nomes.join(', ') : `${nomes.length} biomas`
+  return `Limpe o estágio ${ESTAGIOS_PARA_O_LANCE} de todos os 12 biomas — falta ${detalhe}.`
 }
 
 // ---------------------------------------------------------------------------

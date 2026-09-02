@@ -13,7 +13,7 @@
 import { create } from 'zustand'
 import { persist, type PersistStorage } from 'zustand/middleware'
 import type { PokeInstance } from '@/data/pokes'
-import { FAIXAS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
+import { GRUPOS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
 import { comEstagioLimpo } from '@/data/progressoDeBioma'
 import type { EspecialidadeTrilha } from '@/data/especialidades'
 import type { ElementType } from '@/data/generated/types'
@@ -678,7 +678,7 @@ export const useGameStateStore = create<GameStateStore>()(
           // de graca o conteudo que acabou de virar gate do Lance. Espelha
           // a migration 20260814120000.
           unlockedContinents: [...new Set([
-            ...FAIXAS_INICIAIS,
+            ...GRUPOS_INICIAIS,
             ...(persisted.unlockedContinents || []).flatMap((c) =>
               c === 'kanto' ? GRUPOS_DO_LANCE : GRUPOS_LEGADOS.has(c) ? [] : [c]),
           ])],

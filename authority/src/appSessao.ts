@@ -11,7 +11,8 @@ import {
 } from './progresso.js'
 import {
   MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
-  parseEstagioId, bloqueioDoEstagio, type ProgressoPorBioma, type SalaAtiva,
+  parseEstagioId, bloqueioDoEstagio, bloqueioDoLance, LANCE_MAP_ID,
+  type ProgressoPorBioma, type SalaAtiva,
 } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
@@ -384,6 +385,14 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   // projeto: limite de negocio so no cliente vira bypass.
   const bloqueio = bloqueioDeBiomaPendente(mapId, estado.biomaProgress)
   if (bloqueio) throw new ErroHttp(403, bloqueio)
+
+  // PH-432: o Campeao Lance ganhou gate de ENTRADA, e ele nao tinha nenhum.
+  // O `continent` dele nascia aberto, entao o duelo de Lv 55-65 estava
+  // disponivel no dia 1 — o que existia era so o gate do que ele CONCEDE.
+  if (mapId === LANCE_MAP_ID) {
+    const doLance = bloqueioDoLance(estado.biomaProgress)
+    if (doLance) throw new ErroHttp(403, doLance)
+  }
 
   const anterior = await sessaoAberta(cfg, userId)
   if (anterior) {

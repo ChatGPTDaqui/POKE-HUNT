@@ -96,7 +96,8 @@ describe('PH-307: HP da sequencia atravessa a janela do servidor', () => {
     // nunca abria — que e exatamente o que producao mostrou.
     stepWorld(world, 0.1, gameState, { silent: true })
     expect(world.sequenceCleared).toBe(true)
-    expect(gameState.isContinentUnlocked('faixa3')).toBe(true)
+    // PH-432: o Lance concede SO o Modo Pesadelo. A "faixa III" que ele abria
+    // virou os estagios 7 a 10, liberados um a um pelo progresso do bioma.
     expect(gameState.isContinentUnlocked('nightmare')).toBe(true)
   })
 
