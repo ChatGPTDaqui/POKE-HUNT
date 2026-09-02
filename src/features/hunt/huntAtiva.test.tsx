@@ -19,10 +19,17 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
 import { MAPS } from '@/data/maps'
+import { parseEstagioId } from '@/data/estagios'
 import { HuntMenu } from './HuntMenu'
 
 // Duas hunts da MESMA faixa, pra as duas aparecerem na mesma aba sem filtro.
+//
+// PH-431: e SEM ESTAGIO. As 120 hunts de bioma sairam da lista de cards e
+// viraram a trilha de dois niveis; o que sobra em cartao e a hunt inicial, as
+// BOSS e o Lance. Pegar as duas primeiras de `MAPS` sem esse filtro escolhia
+// duas hunts que a lista nao desenha mais.
 const [PRIMEIRA, SEGUNDA] = Object.values(MAPS)
+  .filter((m) => parseEstagioId(m.id) == null)
   .filter((m) => (m.continent ?? 'faixa1') === 'faixa1')
   .slice(0, 2)
 

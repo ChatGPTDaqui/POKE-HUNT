@@ -14,8 +14,9 @@ import {
   FAIXAS, SUB_BIOMA_POR_CHAVE,
   type SubBiomaDef,
 } from '@/data/biomas'
-import { indiceDoBiomaDoEstagio, parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
 import { bloqueioDoEstagio, type ProgressoPorBioma } from '@/data/progressoDeBioma'
+import { MapaDeBiomas, TrilhaDoBioma } from './TrilhaDeEstagios'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { contextoDeSpawn } from '@/engine/systems/salaSystem'
 import type { HuntMapDef } from '@/data/huntTypes'
@@ -33,7 +34,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { TypeChip } from '@/components/shared/TypeChip'
-import { GameButton, GameCard, GameInput, GameSelect, SegmentedTabs, StickyHeader } from '@/components/game/controls'
+import { GameButton, GameCard, GameInput, GameSelect, SectionLabel, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
 // As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo
@@ -328,6 +329,11 @@ export function HuntMenu() {
   const setTypeFilter = useUiStore((s) => s.setHuntType)
 
   const [expandedMapId, setExpandedMapId] = useState<string | null>(null)
+  // Qual bioma o jogador abriu — `null` e o nivel 1 (os 12 cartoes). Estado
+  // LOCAL: ele nao precisa sobreviver a troca de tela, e o `focusHunt` da
+  // Pokedex, que e o unico caminho externo pra ca, aponta pra hunt especial ou
+  // pro bioma pelo uiStore.
+  const [biomaAberto, setBiomaAberto] = useState<string | null>(null)
   const acao = useAcaoPendente()
 
   // PH-244: qual hunt esta rodando AGORA.
@@ -348,21 +354,22 @@ export function HuntMenu() {
   const activePoke = team[activeIndex] ?? null
   const activeSpecies = activePoke ? (SPECIES[activePoke.speciesId] ?? null) : null
 
+  // A LISTA DE CARDS SO MOSTRA O QUE NAO E ESTAGIO DE BIOMA (PH-431).
+  //
+  // As 120 hunts de bioma sairam daqui e viraram a navegacao de dois niveis
+  // (`MapaDeBiomas` -> `TrilhaDoBioma`). O que sobra na lista e o que nao tem
+  // trilha: a hunt inicial, as 11 BOSS, o Campeao Lance e o espelho do Modo
+  // Pesadelo. Sao poucas, curadas a mao e sem progressao entre si — cartao e a
+  // forma certa pra elas, e continuar listando as 120 junto seria devolver a
+  // tela de 121 linhas que esta issue existe pra desfazer.
   const visibleMaps = useMemo(() => {
     const term = search.trim().toLowerCase()
     return Object.values(MAPS)
+      .filter((m) => parseEstagioId(m.id) == null)
       .filter((m) => (m.continent ?? 'faixa1') === continent)
       .filter((m) => huntHasType(m, typeFilter))
       .filter((m) => huntMatches(m, term))
-      // Agrupa por BIOMA, e nao por nivel — achado de pente fino: `levelRange` era
-      // IDENTICO pros 12 biomas da mesma faixa, entao o sort antigo degradava pra
-      // alfabetico. PH-430: isto DEIXOU de ser ordem de progressao (nao ha mais
-      // ordem entre biomas) e virou so agrupamento estavel — o que a trilha da
-      // PH-431 substitui de vez. Hunt sem bioma (indice -1: rota inicial) fica
-      // primeiro.
-      .sort((a, b) =>
-        indiceDoBiomaDoEstagio(a.id) - indiceDoBiomaDoEstagio(b.id)
-        || a.name.localeCompare(b.name))
+      .sort((a, b) => a.levelRange[0] - b.levelRange[0] || a.name.localeCompare(b.name))
   }, [continent, typeFilter, search])
 
   if (team.length === 0) {
@@ -380,6 +387,40 @@ export function HuntMenu() {
     )
   }
 
+  // NIVEL 2: o jogador escolheu um bioma e esta na trilha dele. A tela inteira
+  // troca — sem abas de faixa, sem busca, sem filtro de elemento: dentro de um
+  // bioma sao dez estagios em ordem, e filtrar dez itens nao ajuda ninguem.
+  if (biomaAberto) {
+    return (
+      <div className="flex flex-col gap-[.5em]">
+        <TrilhaDoBioma
+          biomaChave={biomaAberto}
+          progresso={biomaProgress}
+          mapaAtivoId={mapaAtivoId}
+          abertoId={expandedMapId}
+          entrandoId={acao.pendingKey?.startsWith('map:') ? acao.pendingKey.slice(4) : null}
+          onAbrir={setExpandedMapId}
+          onEntrar={(mapId) => {
+            const map = MAPS[mapId]
+            if (!map) return
+            const mapContinent = map.continent ?? 'faixa1'
+            const continentGated = !unlockedContinents.includes(mapContinent)
+            const bloqueio = continentGated ? null : bloqueioDeBiomaClient(mapId, biomaProgress)
+            const liberado = !continentGated && !bloqueio
+              && (map.unlockCost == null || unlockedMaps.includes(mapId))
+            if (mapId === mapaAtivoId) {
+              useUiStore.getState().closeScreen()
+              return
+            }
+            void acao.run(`map:${mapId}`, () => acionarHunt(map, liberado, continentGated, bloqueio))
+          }}
+          onVoltar={() => { setBiomaAberto(null); setExpandedMapId(null) }}
+        />
+      </div>
+    )
+  }
+
+  // NIVEL 1: os 12 biomas, mais a lista curta do que nao tem trilha.
   return (
     <div className="flex flex-col gap-[.5em]">
       <StickyHeader>
@@ -426,8 +467,17 @@ export function HuntMenu() {
         )}
       </StickyHeader>
 
+      {/* Os 12 biomas — o nivel 1 da navegacao. Vem ANTES da lista porque e
+          onde o jogador vai 99% das vezes: as hunts de cartao sao a inicial e
+          as de fim de jogo. */}
+      <SectionLabel>Biomas</SectionLabel>
+      <MapaDeBiomas progresso={biomaProgress} onEscolher={setBiomaAberto} />
+
+      {visibleMaps.length > 0 && <SectionLabel>Hunts especiais</SectionLabel>}
       {visibleMaps.length === 0 && (
-        <p className="text-n500">Nenhuma hunt encontrada (pode estar oculta pelo filtro de elemento).</p>
+        <p className="text-[.8em] text-n600">
+          Nenhuma hunt especial nesta aba (as hunts de bioma estão acima, na trilha de cada um).
+        </p>
       )}
 
       {visibleMaps.map((map) => {
