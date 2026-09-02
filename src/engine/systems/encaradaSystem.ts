@@ -12,34 +12,39 @@
 // O QUE ACONTECE AGORA
 //
 // Enquanto os dois estao engajados e nenhum deles esta no meio de uma pose, o
-// par oscila num arco em torno do proprio ponto medio, cada um virado pro outro.
-// A pose de ataque continua congelando o movimento (`updateMovement` ja segura a
-// posicao com `attackAnimTimer > 0`), entao o ritmo vira gira -> trava -> golpe
-// -> gira.
+// par percorre JUNTO uma sequencia de meia-luas SORTEADAS — as "pernas" —, cada
+// um virado pro outro. A pose de ataque continua congelando o movimento
+// (`updateMovement` ja segura a posicao com `attackAnimTimer > 0`) e encerra a
+// perna em curso, entao o ritmo vira gira -> trava -> golpe -> gira noutra
+// direcao.
 //
-// POR QUE ARCO, E NAO VOLTA COMPLETA
+// TRES VERSOES, E O QUE A TELA REPROVOU EM CADA UMA
 //
-// O raio disponivel e curto e nao da pra alargar sem mexer no combate:
-// `engageRangeFor` e `raioA + raioB + 10` = 39px, e `separarCorpos` empurra ate
-// a soma dos raios, 29px. Sobra uma orbita de raio ~17 em torno do ponto medio.
-// Nesse raio, uma volta completa lenta o bastante pra arte nao parecer acelerada
-// sai a ~13px/s — o POKE anda a 91 (jogador) / 58,5 (inimigo) px/s, entao a
-// animacao Walk viraria "correndo no lugar". Rapida o bastante pra arte ler
-// certo, a volta fecha em 3,6s e parece frenetico. O arco atende os dois: a
-// velocidade TANGENCIAL fica em 30px/s (leitura de arte correta) e o
-// deslocamento total fica preso num vai-e-vem de ~2s, que e o que se quer
-// mesmo — dois lutadores se medindo, nao um carrossel.
+// 1. GIRO EM TORNO DO PONTO MEDIO: invisivel, 26px de passo. O raio de cada
+//    corpo era metade da distancia entre os dois, e essa distancia e presa em
+//    (29, 39) pelo combate — nao havia numero a mexer.
+// 2. GIRO EM TORNO DE UM PIVO LATERAL FIXO: resolveu a largura (117px) e criou
+//    outro defeito. O caminho era um arco unico, sempre com a mesma barriga,
+//    percorrido pra la e pra ca — leu como o balanco de uma barca viking, que e
+//    literalmente o que um pendulo e.
+// 3. OITO DEITADO: alternou a curva, mas fecha sempre no mesmo ponto. Um
+//    trajeto que volta pro comeco toda volta e tao previsivel quanto o pendulo.
 //
-// De quebra, o arco resolve a camera: `renderer.ts#_computeCamera` trava no
-// jogador SEM suavizacao nenhuma, entao tudo que o jogador faz o fundo inteiro
-// faz junto. Uma volta completa arrastaria a cena em circulos o duelo todo.
+// A licao das tres e a mesma: QUALQUER figura fixa vira padrao, porque o olho
+// acha o padrao. Por isso nao ha figura — cada perna sorteia curvatura, lado e
+// tamanho, e termina num lugar que a anterior nao anuncia. Ver `sortearPerna`.
+//
+// O CONTRAPESO E A COLEIRA. `renderer.ts#_computeCamera` trava no jogador SEM
+// suavizacao nenhuma: tudo que o jogador faz, o fundo inteiro faz junto. Pernas
+// sorteadas sem limite sao um passeio aleatorio, e o duelo migraria pela arena
+// arrastando a cena junto ate raspar numa parede. Ver `COLEIRA_DA_ENCARADA`.
 import { deriveRng, nextFloat } from '@/core/rng'
 import { mapWalkRadius, type MapDef } from '@/data/maps'
 import { isDead } from '../entity'
 import { faceToward } from './animationSystem'
 import { imobilizadoPorStatus } from './statusSystem'
 import { empurrarCorpo } from './corpoNoMapa'
-import type { EnemyEntity, PlayerEntity, WorldState } from '../types'
+import type { EnemyEntity, EstadoDaEncarada, PlayerEntity, WorldState } from '../types'
 
 /**
  * A que distancia o par se encara.
@@ -61,25 +66,72 @@ import type { EnemyEntity, PlayerEntity, WorldState } from '../types'
  */
 export const DISTANCIA_DA_ENCARADA = 34
 
-/** Meia-abertura do arco. O par varre 100 graus no total, ida e volta. */
-const ARCO_MAXIMO = (50 * Math.PI) / 180
+/**
+ * Comprimento tipico de uma PERNA — uma meia-lua — em px. O botao do tamanho do
+ * passo.
+ *
+ * Cada perna sorteia +/-35% em cima disto: pernas todas do mesmo tamanho batem
+ * como metronomo mesmo com a curva variando.
+ *
+ * Nao briga com o combate: a distancia entre os dois nao depende do caminho, so
+ * de onde eles ficam em relacao ao ponto medio, que e sempre
+ * `DISTANCIA_DA_ENCARADA`. O caminho move os dois juntos.
+ */
+const PASSO_DA_PERNA = 95
+
+/**
+ * Faixa de curvatura das pernas: a que distancia do par cai o pivo.
+ *
+ * Perto, a meia-lua e fechada e o par gira quase em torno de si; longe, ela e
+ * aberta e vira quase um passo reto. Sortear DENTRO de uma faixa, em vez de um
+ * valor fixo, e metade do que impede a coreografia de virar padrao — a outra
+ * metade e o lado do pivo, tambem sorteado.
+ */
+const RAIO_DA_CURVA_MIN = 32
+const RAIO_DA_CURVA_MAX = 95
+
+/**
+ * Ate onde o duelo pode se afastar de onde comecou, em px.
+ *
+ * Pernas sorteadas sem coleira sao um passeio aleatorio, e passeio aleatorio nao
+ * fica onde comecou: o duelo migraria pela arena ate encostar numa parede e
+ * ficar raspando. 170px deixa a danca sair do lugar de verdade — que e o pedido
+ * — sem levar a luta pra fora do enquadramento em que ela comecou.
+ */
+const COLEIRA_DA_ENCARADA = 170
 
 /**
  * Velocidade TANGENCIAL, px/s. Escolhida pela leitura da arte, nao pelo relogio:
  * e ela que decide se o `Walk` do sheet PMD combina com o quanto o corpo anda.
  * A cadencia do quadro e fixa (`animationSystem`: `durations[frame] / 60`), nao
  * escala com velocidade — deslocar devagar demais e o que produz o pe deslizando.
+ *
+ * O TETO E O ANDAR DO PROPRIO POKE: 58,5px/s pro inimigo, 91 pro jogador
+ * (`entity.ts`). Acima disso a arte de andar passa a ficar LENTA demais pro
+ * deslocamento e o POKE parece patinar pra frente — o defeito oposto do pe
+ * deslizando, e igualmente visivel.
+ *
+ * Era 30 enquanto o passo tinha 26px de largura. Com as pernas de ~95px da
+ * PH-402, 30px/s levaria mais de 3s por meia-lua; 55 fecha em ~1,7s.
+ *
+ * E CONSTANTE ENTRE PERNAS DE CURVATURA DIFERENTE, e isso nao sai de graca: cada
+ * perna tem seu proprio raio, entao a mesma velocidade ANGULAR daria velocidades
+ * lineares diferentes — a meia-lua aberta correria o dobro da fechada, com a
+ * mesma cadencia de arte nas duas. Por isso o progresso e dividido pelo raio da
+ * perna, e nao contado em angulo.
  */
-const VELOCIDADE_DA_ENCARADA = 30
+const VELOCIDADE_DA_ENCARADA = 55
 
 /**
  * Teto do passo por tick, como multiplo da velocidade tangencial.
  *
- * O passo de um tick e tangencial + a correcao RADIAL que puxa o par de volta
- * pra `DISTANCIA_DA_ENCARADA`. No regime normal a correcao e quase zero, mas no
- * primeiro tick depois do engajamento ela vale a diferenca inteira entre onde
- * `separarCorpos` deixou os dois e os 34 — sem teto, isso pousaria como um
- * teleporte de alguns pixels.
+ * O alvo de cada tick e uma posicao ABSOLUTA, nao um deslocamento, entao o passo
+ * pode ser maior que o tangencial quando o corpo esta longe de onde deveria
+ * estar. No regime normal a diferenca e quase zero, mas ela vale muito em dois
+ * momentos reais: no primeiro tick depois do engajamento (onde `separarCorpos`
+ * deixou os dois contra os 34 da coreografia) e logo depois de uma parede ter
+ * segurado alguem por alguns ticks. Sem teto, os dois casos pousariam como
+ * teleporte.
  */
 const TETO_DO_PASSO = 2
 
@@ -88,31 +140,129 @@ const TETO_DO_PASSO = 2
  * desistir daquele sentido.
  *
  * Acontece de verdade: `empurrarCorpo` recusa o passo que cairia em parede
- * pintada, e um par encostado na borda da arena do Lance varreria o arco
- * inteiro contra a parede sem andar nada. Inverter e o conserto — o outro lado
- * do arco esta livre por construcao (foi de la que eles vieram).
+ * pintada, e um par encostado na borda da arena do Lance insistiria no mesmo
+ * trecho do caminho sem andar nada. Inverter e o conserto — o trecho anterior
+ * esta livre por construcao, foi de la que eles vieram.
  */
 const PARADO_ANTES_DE_INVERTER = 0.25
 
 /**
- * Horario ou anti-horario, re-sorteado a cada golpe trocado.
+ * Sorteia a PERNA seguinte: uma meia-lua com curvatura, lado e tamanho proprios,
+ * partindo de onde o par esta agora.
  *
- * Pedido explicito: pode continuar no mesmo sentido ou inverter, 50/50 — nao e
- * uma inversao garantida.
+ * POR QUE PERNAS SORTEADAS, E NAO UM CAMINHO FIXO
  *
- * NAO CONSOME `world.rng`. A sequencia principal e comparada entre a predicao do
- * cliente e o resim da autoridade (core/rng.ts), entao um sorteio a mais aqui
- * deslocaria tudo o que vem depois — mesma razao pela qual
- * `movementSystem#direcaoDeDesempate` deriva dos ids em vez de sortear.
- * `deriveRng` existe exatamente pra isto: uma sequencia paralela, funcao pura de
- * (par, contador), reproduzivel nas duas pontas sem gastar nada da principal.
+ * Foram duas tentativas de figura fixa, e a tela reprovou as duas pelo MESMO
+ * motivo de fundo — o olho acha o padrao:
  *
- * Exportada so pro teste: "50/50, e nao uma inversao garantida" e uma afirmacao
- * sobre a DISTRIBUICAO, e nao da pra medir distribuicao por fora sem rodar
- * centenas de duelos.
+ *  1. Arco unico em torno de um pivo fixo: a curva entortava sempre pro mesmo
+ *     lado, e o vai-e-vem leu como o balanco de uma barca viking.
+ *  2. Oito deitado: resolveu a curva alternada, mas fecha sempre no mesmo ponto,
+ *     e um trajeto que volta pro comeco toda volta e tao previsivel quanto o
+ *     pendulo.
+ *
+ * Aqui nao ha figura. Cada perna sorteia de novo de que lado fica o pivo (a
+ * barriga da curva), a que distancia ele fica (o quanto ela e fechada ou aberta)
+ * e quanto arco percorrer (o tamanho do passo) — entao cada meia-lua termina num
+ * lugar que a anterior nao anuncia.
+ *
+ * NAO CONSOME `world.rng`, pelo mesmo motivo de `sortearSentido`: a sequencia
+ * principal e reconferida pelo servidor, e um sorteio a mais aqui deslocaria
+ * tudo o que vem depois. `deriveRng` da uma sequencia paralela, funcao pura de
+ * (par, numero da perna).
+ *
+ * A COLEIRA. Sem ela isto e um passeio aleatorio, e passeio aleatorio nao fica
+ * onde comecou: o duelo migraria pela arena ate encostar numa parede e ficar
+ * raspando nela. Quando a perna sorteada terminaria longe demais da origem do
+ * duelo, o sinal do arco e trocado — a mesma curva, virada pro outro lado, que
+ * traz o par de volta. Trocar o SINAL, e nao sortear de novo, e o que mantem
+ * isto sem laco: um sorteio que pode falhar de novo precisaria de um limite de
+ * tentativas, e um limite de tentativas precisaria de um caso de desistencia.
  */
-export function sortearSentido(parKey: string, trocas: number): 1 | -1 {
-  return nextFloat(deriveRng(0, `encarada|${parKey}|${trocas}`)) < 0.5 ? 1 : -1
+export function sortearPerna(estado: EstadoDaEncarada, centroX: number, centroY: number, angulo: number): void {
+  const rng = deriveRng(0, `encarada-perna|${estado.parKey}|${estado.perna}`)
+  const passo = estado.passo ?? PASSO_DA_PERNA
+
+  estado.centroX = centroX
+  estado.centroY = centroY
+  estado.anguloBase = angulo
+  estado.lado = nextFloat(rng) < 0.5 ? 1 : -1
+  estado.raioDaCurva = RAIO_DA_CURVA_MIN + nextFloat(rng) * (RAIO_DA_CURVA_MAX - RAIO_DA_CURVA_MIN)
+  estado.progresso = 0
+
+  // O arco que percorre `passo` pixels neste raio. A variacao de +/-35% existe
+  // pra o RITMO tambem nao virar padrao: pernas todas do mesmo tamanho batem
+  // como metronomo mesmo com a curva mudando.
+  const comprimento = passo * (0.65 + nextFloat(rng) * 0.7)
+  const magnitude = comprimento / raioOrbitalDe(estado)
+  const sinal = nextFloat(rng) < 0.5 ? 1 : -1
+  estado.arcoDaPerna = magnitude * sinal
+
+  const fim = pontoDoFimDaPerna(estado)
+  const distDaOrigem = Math.hypot(fim.x - estado.origemX, fim.y - estado.origemY)
+  if (distDaOrigem > (estado.coleira ?? COLEIRA_DA_ENCARADA)) {
+    const espelho = { ...estado, arcoDaPerna: -estado.arcoDaPerna }
+    const fimEspelhado = pontoDoFimDaPerna(espelho)
+    const distEspelhada = Math.hypot(fimEspelhado.x - estado.origemX, fimEspelhado.y - estado.origemY)
+    if (distEspelhada < distDaOrigem) estado.arcoDaPerna = -estado.arcoDaPerna
+  }
+}
+
+/** O pivo desta perna: `raioDaCurva` px perpendicular ao eixo, do lado sorteado. */
+function pivoDaPerna(estado: EstadoDaEncarada): { x: number; y: number } {
+  const ux = Math.cos(estado.anguloBase)
+  const uy = Math.sin(estado.anguloBase)
+  return {
+    x: estado.centroX - uy * estado.raioDaCurva * estado.lado,
+    y: estado.centroY + ux * estado.raioDaCurva * estado.lado,
+  }
+}
+
+/**
+ * Distancia do CORPO ao pivo — o raio que ele de fato percorre.
+ *
+ * O corpo esta a meia distancia do centro ao longo do eixo, e o pivo esta
+ * perpendicular a ele: dois catetos, e o raio e a hipotenusa. Os dois corpos tem
+ * o mesmo raio (sao simetricos em relacao ao centro), entao a rotacao os leva
+ * juntos e a distancia entre eles nao muda.
+ */
+function raioOrbitalDe(estado: EstadoDaEncarada): number {
+  return Math.hypot(estado.raioDaCurva, DISTANCIA_DA_ENCARADA / 2)
+}
+
+/** Onde o ponto medio do par para, se esta perna for percorrida ate o fim. */
+function pontoDoFimDaPerna(estado: EstadoDaEncarada): { x: number; y: number } {
+  return girarEmTorno(estado.centroX, estado.centroY, pivoDaPerna(estado), estado.arcoDaPerna)
+}
+
+function girarEmTorno(x: number, y: number, pivo: { x: number; y: number }, angulo: number): { x: number; y: number } {
+  const cos = Math.cos(angulo)
+  const sen = Math.sin(angulo)
+  const dx = x - pivo.x
+  const dy = y - pivo.y
+  return { x: pivo.x + dx * cos - dy * sen, y: pivo.y + dx * sen + dy * cos }
+}
+
+/**
+ * Onde um dos dois corpos deve estar agora. `sinal` e -1 pro jogador e +1 pro
+ * inimigo — quem fica de que lado do eixo.
+ *
+ * A DISTANCIA ENTRE OS DOIS E EXATA POR CONSTRUCAO, e nao por correcao: os dois
+ * saem do mesmo ponto, deslocados meia distancia pra cada lado ao longo do mesmo
+ * angulo, e depois rodam em torno do mesmo pivo — rotacao rigida preserva
+ * distancia. Nao existe combinacao de curva, arco ou progresso que os afaste,
+ * que e o que mantem a coreografia incapaz de mexer no combate por mais que os
+ * numeros mudem depois.
+ *
+ * ABSOLUTO DENTRO DA PERNA, e nao incremental. A ancora e recalculada uma vez
+ * por perna, das posicoes reais — o que se auto-corrige depois de uma parede
+ * sem deixar o eixo derivar tick a tick, que foi o defeito da primeira versao.
+ */
+function alvoNoCaminho(estado: EstadoDaEncarada, sinal: 1 | -1): { x: number; y: number } {
+  const meia = DISTANCIA_DA_ENCARADA / 2
+  const partidaX = estado.centroX + Math.cos(estado.anguloBase) * meia * sinal
+  const partidaY = estado.centroY + Math.sin(estado.anguloBase) * meia * sinal
+  return girarEmTorno(partidaX, partidaY, pivoDaPerna(estado), estado.arcoDaPerna * estado.progresso)
 }
 
 /**
@@ -182,18 +332,31 @@ export function aplicarEncarada(world: WorldState, dt: number): void {
   const mapDef = world.mapDef!
 
   const parKey = `${jogador.id}|${inimigo.id}`
+  const meioX = (jogador.x + inimigo.x) / 2
+  const meioY = (jogador.y + inimigo.y) / 2
+  const dx = inimigo.x - jogador.x
+  const dy = inimigo.y - jogador.y
+  // Sobrepostos (`Math.atan2(0, 0)` e 0) so acontece antes de `separarCorpos`
+  // ter agido uma vez; 0 e tao bom quanto qualquer eixo, e a perna seguinte ja
+  // reancora a partir de posicoes separadas.
+  const eixoAgora = dx === 0 && dy === 0 ? 0 : Math.atan2(dy, dx)
+
   let estado = world.encarada
   if (!estado || estado.parKey !== parKey) {
-    const dx = inimigo.x - jogador.x
-    const dy = inimigo.y - jogador.y
     estado = {
       parKey,
-      // Sobrepostos (`Math.atan2(0, 0)` e 0) so acontece antes de
-      // `separarCorpos` ter agido uma vez; 0 e tao bom quanto qualquer eixo,
-      // e o proximo tick ja recalcula a partir de posicoes separadas.
-      anguloBase: dx === 0 && dy === 0 ? 0 : Math.atan2(dy, dx),
-      desvio: 0,
-      sentido: sortearSentido(parKey, 0),
+      // Onde o duelo comecou. So a COLEIRA le isto — o caminho em si sai da
+      // ancora da perna atual, logo abaixo.
+      origemX: meioX,
+      origemY: meioY,
+      centroX: meioX,
+      centroY: meioY,
+      anguloBase: eixoAgora,
+      perna: 0,
+      lado: 1,
+      raioDaCurva: RAIO_DA_CURVA_MIN,
+      arcoDaPerna: 0,
+      progresso: 1, // ja "terminada": o bloco de avanco sorteia a primeira
       trocas: 0,
       poseAtiva: jogador.attackAnimTimer > 0 || inimigo.attackAnimTimer > 0,
       paradoSegundos: 0,
@@ -205,10 +368,15 @@ export function aplicarEncarada(world: WorldState, dt: number): void {
   // somaria 30 trocas por golpe. Este e o unico acoplamento com o combate, e ele
   // e por OBSERVACAO — nenhum call site de ataque precisa saber que a encarada
   // existe, o que e o que impede um caminho novo de golpe de esquecer de avisar.
+  //
+  // O golpe ENCERRA a perna em curso. E o que faz a coreografia ter o ritmo da
+  // luta em vez de um ritmo proprio: cada troca de golpe recomeca a danca noutra
+  // direcao, em vez de o par retomar a curva de onde parou como se nada tivesse
+  // acontecido.
   const poseAgora = jogador.attackAnimTimer > 0 || inimigo.attackAnimTimer > 0
   if (poseAgora && !estado.poseAtiva) {
     estado.trocas += 1
-    estado.sentido = sortearSentido(parKey, estado.trocas)
+    estado.progresso = 1
   }
   estado.poseAtiva = poseAgora
 
@@ -218,46 +386,49 @@ export function aplicarEncarada(world: WorldState, dt: number): void {
   // `encarando` em false, entao a arte cai na pose de ataque ou em 'Idle'.
   if (poseAgora || imobilizadoPorStatus(jogador) || imobilizadoPorStatus(inimigo)) return
 
-  const raio = DISTANCIA_DA_ENCARADA / 2
-  const passoAngular = (VELOCIDADE_DA_ENCARADA / raio) * dt
-  let desvio = estado.desvio + estado.sentido * passoAngular
-  if (desvio > ARCO_MAXIMO) {
-    desvio = ARCO_MAXIMO
-    estado.sentido = -1
-  } else if (desvio < -ARCO_MAXIMO) {
-    desvio = -ARCO_MAXIMO
-    estado.sentido = 1
-  }
-  estado.desvio = desvio
+  const velocidade = estado.velocidade ?? VELOCIDADE_DA_ENCARADA
 
-  // O ponto medio sai das posicoes REAIS deste tick, e nao de um centro
-  // guardado. E o que faz a coreografia se auto-corrigir: se uma parede segurou
-  // um dos dois, o alvo do proximo tick ja considera onde eles de fato estao, em
-  // vez de puxar os dois pra um centro que nao existe mais.
-  const angulo = estado.anguloBase + desvio
-  const meioX = (jogador.x + inimigo.x) / 2
-  const meioY = (jogador.y + inimigo.y) / 2
-  const ux = Math.cos(angulo)
-  const uy = Math.sin(angulo)
+  // Perna terminada: sorteia a proxima a partir de ONDE O PAR ESTA DE VERDADE,
+  // e nao de onde a perna anterior deveria ter acabado. E aqui que a parede se
+  // resolve sozinha — o desvio que ela causou vira o ponto de partida legitimo
+  // do proximo trecho, em vez de um erro acumulado.
+  if (estado.progresso >= 1) {
+    estado.perna += 1
+    sortearPerna(estado, meioX, meioY, eixoAgora)
+  }
+
+  const raioOrbital = raioOrbitalDe(estado)
+  const arco = Math.abs(estado.arcoDaPerna)
+  // Arco degenerado (perna de comprimento zero) travaria a divisao; termina a
+  // perna e deixa a proxima entrar no tick seguinte.
+  estado.progresso = arco > 1e-6
+    ? Math.min(1, estado.progresso + (velocidade * dt) / (raioOrbital * arco))
+    : 1
 
   const mapCx = mapDef.bounds.width / 2
   const mapCy = mapDef.bounds.height / 2
   const mapRadius = mapWalkRadius(mapDef)
-  const teto = VELOCIDADE_DA_ENCARADA * TETO_DO_PASSO * dt
+  const teto = velocidade * TETO_DO_PASSO * dt
 
+  const alvoJogador = alvoNoCaminho(estado, -1)
+  const alvoInimigo = alvoNoCaminho(estado, 1)
   const antes = { jx: jogador.x, jy: jogador.y, ix: inimigo.x, iy: inimigo.y }
-  moverPara(jogador, meioX - ux * raio, meioY - uy * raio, teto, mapDef, mapCx, mapCy, mapRadius)
-  moverPara(inimigo, meioX + ux * raio, meioY + uy * raio, teto, mapDef, mapCx, mapCy, mapRadius)
+  moverPara(jogador, alvoJogador.x, alvoJogador.y, teto, mapDef, mapCx, mapCy, mapRadius)
+  moverPara(inimigo, alvoInimigo.x, alvoInimigo.y, teto, mapDef, mapCx, mapCy, mapRadius)
 
   const andou = Math.hypot(jogador.x - antes.jx, jogador.y - antes.jy)
     + Math.hypot(inimigo.x - antes.ix, inimigo.y - antes.iy)
   // 10% do passo esperado, e nao "zero": `empurrarCorpo` degrada por eixo, entao
   // um corpo contra a parede ainda desliza uma fracao. Preso e nao andar quase
   // nada, nao apenas nao andar nada.
-  if (andou < VELOCIDADE_DA_ENCARADA * dt * 0.1) {
+  if (andou < velocidade * dt * 0.1) {
     estado.paradoSegundos += dt
     if (estado.paradoSegundos >= PARADO_ANTES_DE_INVERTER) {
-      estado.sentido = estado.sentido === 1 ? -1 : 1
+      // Preso contra parede: abandona a perna. A proxima e sorteada de novo, e
+      // como o sorteio parte de onde o par ESTA, o par nao fica insistindo no
+      // mesmo trecho impossivel. Abandonar e melhor que inverter — inverter so
+      // devolveria o par pelo caminho de onde veio, e ele bateria de novo.
+      estado.progresso = 1
       estado.paradoSegundos = 0
     }
   } else {

@@ -407,16 +407,52 @@ export interface ProtetorPendente {
 export interface EstadoDaEncarada {
   /** `id` dos dois, pra detectar troca de POKE em campo (a sequencia do Lance). */
   parKey: string
-  /** Eixo do arco: o angulo do par no instante em que a encarada comecou. */
+  /**
+   * Ponto medio do par quando o DUELO comecou. So a coleira le: e a partir daqui
+   * que se mede o quanto a danca ja se afastou. Sem ela, pernas sorteadas viram
+   * um passeio aleatorio e o duelo migra pela arena ate raspar numa parede.
+   */
+  origemX: number
+  origemY: number
+  /**
+   * Ancora da PERNA atual — ponto medio e eixo do par quando ela comecou. As
+   * posicoes-alvo saem daqui por rotacao rigida, e nao de um centro recalculado
+   * a cada tick: sem ancora, alguns ticks de parede segurando um dos dois giram
+   * o eixo por acidente e o par sai derivando (PH-402).
+   */
+  centroX: number
+  centroY: number
   anguloBase: number
-  /** Deslocamento atual dentro do arco, em radianos, preso a +/- ARCO_MAXIMO. */
-  desvio: number
-  sentido: 1 | -1
+  /** Quantas pernas ja foram percorridas. Semente do sorteio da proxima. */
+  perna: number
+  /** De que lado do eixo cai o pivo desta perna — pra que lado a curva entorta. */
+  lado: 1 | -1
+  /** Distancia do pivo ao par nesta perna: o quanto a meia-lua e fechada. */
+  raioDaCurva: number
+  /** Arco total desta perna, com sinal. O sinal e o sentido do giro. */
+  arcoDaPerna: number
+  /** Quanto da perna atual ja foi percorrido, 0..1. Em 1 ela acabou. */
+  progresso: number
   /** Golpes trocados desde o inicio desta encarada. Semente do sorteio de sentido. */
   trocas: number
   /** Havia pose de ataque no tick anterior — usado pra achar a BORDA de subida. */
   poseAtiva: boolean
   paradoSegundos: number
+
+  // --- Ajuste fino, so pra bancada -------------------------------------------
+  // Sobrepoem as constantes de `encaradaSystem.ts` quando presentes. O JOGO
+  // nunca os escreve; quem escreve e `scripts/harness/encarada-no-duelo.html`,
+  // pra dar pra achar a sensacao certa mexendo na URL em vez de recompilar — a
+  // rodada anterior custou um ciclo inteiro de PR pra descobrir que o passo
+  // estava estreito demais.
+  //
+  // Moram AQUI, e nao numa variavel de modulo mutavel, de proposito: um ajuste
+  // global seria lido tambem pela simulacao do servidor, e um valor escrito de
+  // um lado so e a forma classica de cliente e autoridade discordarem em
+  // silencio. Por mundo, isso nao tem como acontecer.
+  passo?: number
+  coleira?: number
+  velocidade?: number
 }
 
 export type WorldEntity = PlayerEntity | EnemyEntity
