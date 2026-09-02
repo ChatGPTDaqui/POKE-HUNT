@@ -12,6 +12,76 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // UM item pra um intervalo de duas issues (PH-396 e PH-404).
+  //
+  // O achado e de QA, nao de jogador: nenhum jogador reclamou de ver o POKE
+  // errado em campo, e o caso reproduzido foi na conta de teste do dev. Ele
+  // entra mesmo assim porque o sintoma E visivel e o jogador que o vivesse nao
+  // teria como nomear o que aconteceu — a nota da o nome.
+  //
+  // A nota NAO diz "vendido, liberado ou mandado pra mochila noutra aba", que e
+  // a causa real: falar de "outra aba" ensina um caminho que quase ninguem usa e
+  // faz parecer que a culpa e de quem jogou. Diz o que o jogador via e o que
+  // acontece agora.
+  //
+  // FICA DE FORA (a lista de exclusao e o indice barato do intervalo seguinte):
+  //   - PH-404: aquecimento de import num arquivo de teste. Zero efeito visivel.
+  {
+    version: '7.32',
+    date: '2026-09-01',
+    title: 'Cada POKE no seu lugar, de novo',
+    highlights: [
+      'O POKE EM CAMPO É SEMPRE UM DA SUA EQUIPE. Em algumas situações a tela continuava mostrando lutando um POKE que já não estava na equipe, e só um recarregar da página resolvia. Agora o primeiro POKE da equipe entra no lugar na hora, com aviso na tela.',
+    ],
+  },
+  // CINCO itens pra seis issues do intervalo (PH-393 a PH-400), e a conta nao
+  // fecha de proposito — ver a lista de exclusao no fim.
+  //
+  // A ORDEM E POR QUANTO O JOGADOR PERDIA, nao por tamanho da mudanca. O
+  // primeiro item e um jogador farmando e RECEBENDO NADA; o ultimo e um
+  // solavanco de carregamento.
+  //
+  // O ITEM 1 (PH-399) E O MAIS IMPORTANTE DA NOTA e o mais difícil de escrever:
+  // a causa e um uid de sessao apontando pro POKE errado, e isso nao se conta
+  // pro jogador. O que ele viveu: trocou de POKE no meio da cacada e, a partir
+  // dali, ouro e XP pararam e a sala nunca mais avancou. Medido no dev: 703
+  // segundos de simulacao com um POKE morto de nivel 1, zero abates.
+  //
+  // A nota diz "conserte-se sozinho ao trocar de POKE de novo"? NAO — nao e
+  // verdade. A sessao presa so se resolve saindo da hunt, e e isso que esta
+  // escrito, porque um jogador que ainda esteja preso precisa saber o que FAZER.
+  //
+  // O ITEM 4 (PH-398) TIRA E DA ao mesmo tempo, e a frase diz os dois lados: o
+  // cartao por nivel e o que o usuario pediu, e ele nao aparecer mais sobre menu
+  // aberto e o que ninguem pediu mas todo mundo sentia.
+  //
+  // FORA DA NOTA, e cada um com o motivo:
+  //
+  //  - PH-393 (pedido extra de sala, espera de 33s -> 18s de mediana): e melhoria
+  //    de protocolo DENTRO do mesmo comportamento, e o item 1 ja cobre o sintoma
+  //    que o jogador relatou. Anunciar "a sala troca mais rapido" e ainda ter 18s
+  //    de espera convida o desmentido no primeiro minuto.
+  //  - as duas bancadas novas, o export de `reconciliarSalaDaAutoridade`, a
+  //    migration em si e os 60+ testes: encanamento.
+  //  - PH-396 (a tela mostrou em campo um POKE que o servidor nao tinha na
+  //    equipe) esta ABERTA e sem correcao. Meia-feature nao entra em nota.
+  //
+  // PH-397 NAO E MINHA E ENTRA IGUAL (item 5). A nota cobre o INTERVALO, nao as
+  // issues de quem escreve — foi por esquecer isso que a 7.13 e a 7.14 sairam
+  // retroativas.
+  {
+    version: '7.31',
+    date: '2026-09-01',
+    title: 'O Guardião fura a fila',
+    highlights: [
+      'TROCAR DE POKE NO MEIO DA CAÇADA PARAVA SEU GANHO. Ao colocar outro POKE em campo sem sair da hunt, o jogo continuava contando a caçada pelo POKE anterior — se ele estava fraco ou desmaiado, ouro e XP paravam de entrar e a sala nunca avançava. Corrigido. Se a sua caçada estiver assim agora, saia e entre nela de novo.',
+      'O GUARDIÃO E O LORDE VIRAM PRIORIDADE, MESMO COM O LURE LIGADO. Antes o POKE passava por eles sem atacar até terminar de reunir os selvagens, e a sala ficava travada esperando. Agora ele para tudo e vai para cima.',
+      'A ÁREA NOVA SE APRESENTA. Ao entrar numa sala, um aviso de 4 segundos mostra o nome do lugar, o número da sala e a faixa de nível dela — antes isso era um toast de canto igual ao de item encontrado.',
+      'CADA NÍVEL GANHA O SEU AVISO, com os atributos daquele nível e 4 segundos na tela. E ele não aparece mais por cima de menu, perfil ou painel aberto.',
+      'OS DOIS POKES SE ENCARAM NOS DUELOS. Na arena do Campeão Lance e nas caçadas BOSS, o par ficava parado entre um golpe e o outro — 83% do duelo. Agora eles circulam um ao redor do outro, virados de frente, e o sentido muda a cada golpe trocado.',
+      'O MAPA DA PRÓXIMA SALA CHEGA ANTES DE VOCÊ. A arte das outras salas da caçada e dos golpes do seu time é carregada em segundo plano, para nada travar no meio do jogo. Quem tem economia de dados ligada no aparelho continua sem esse download extra.',
+    ],
+  },
   // Dois itens, duas issues (PH-384 e PH-386), e eles NAO sao o mesmo assunto —
   // por isso vao como duas frases e nao uma. O primeiro e o corpo dos POKE no
   // campo; o segundo e a sala nao dizer que estava esperando.
