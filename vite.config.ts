@@ -102,6 +102,25 @@ export default defineConfig({
     // `import.meta.dirname` e o diretorio DESTA config, entao aponta pro arquivo
     // certo de onde quer que o vitest seja invocado.
     setupFiles: [path.resolve(import.meta.dirname, './src/testes/apiDoBrowserQueOJsdomNaoTem.ts')],
+    // 15s, e nao os 5s padrao (PH-411). O que estourava os 5s NAO era logica
+    // lenta: era `await import(...)` de modulo pesado escrito DENTRO do primeiro
+    // caso de um arquivo. O modulo fica em cache depois da primeira vez, entao o
+    // grafo inteiro cai no orcamento de quem chegou primeiro — e `import` e o
+    // item mais caro da suite com folga (1.953s de uma corrida de 214s de
+    // relogio, com os workers em paralelo).
+    //
+    // Ja aconteceu TRES vezes, em tres arquivos diferentes: `controller.test.ts`
+    // (PH-322), `reordenarReservas.test.ts` (PH-404) e
+    // `confirmacaoDaTrocaNoCliente.test.ts` (esta). Sao 20 arquivos com esse
+    // formato hoje; remendar um por um significa redescobrir a causa do zero a
+    // cada vez, sempre numa maquina ocupada, sempre parecendo falha de logica.
+    //
+    // 15s continua curto pra pegar teste travado de verdade — o caso mais lento
+    // daqui faz menos de 2s de trabalho real — e nao substitui os `beforeAll` de
+    // aquecimento das duas issues anteriores, que continuam protegendo o runner
+    // do CI (mais lento e compartilhado). Timeout individual por caso continua
+    // proibido: ele mascara logica lenta junto com import lento.
+    testTimeout: 15000,
   },
   build: {
     // Por padrao o Vite emite os chunks em `dist/assets/`, que colidiria com
