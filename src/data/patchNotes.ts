@@ -12,6 +12,54 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // TRES itens pra tres issues (PH-418, PH-421, PH-422). A PH-419 e a PH-420
+  // entraram no mesmo intervalo e NAO tem item — ver o "fica de fora".
+  //
+  // O ITEM DO BUFF NAO PROMETE IMPACTO, e essa foi a decisao mais dificil da
+  // nota. O prazo de 18s e real e esta medido, mas o alcance dele e estreito: no
+  // conjunto de 4 golpes que o jogo escolhe sozinho, golpe de buff aparece no
+  // Lv25 e SAI do conjunto do Lv40 pra cima, porque golpes melhores tomam os
+  // slots (medido em cinco especies). Ou seja, a maioria dos POKEs de nivel alto
+  // nao leva golpe de buff a nao ser que o jogador escolha levar.
+  //
+  // Escrever "seus buffs agora duram muito mais" seria a nota prometendo uma
+  // melhora que a maior parte dos jogadores nao vai sentir. O item conta o FATO
+  // (o efeito dura 18s e nao morre mais entre um bicho e o proximo) e deixa o
+  // jogador tirar a conclusao. Mesma disciplina da nota da 7.35, que se recusou
+  // a dizer "resolvido" sobre o caso que ainda nao era zero.
+  //
+  // O ITEM DO MULTIPLICADOR E O MAIS UTIL DOS TRES, e ele e o unico que muda o
+  // que o jogador SABE. "Ataque -1" era lido como "menos um ponto de Ataque"
+  // quando na verdade e 0,67x — o atributo cai um terco. Quem lia "-1" achava que
+  // tinha perdido quase nada e segurava luta ja perdida. O numero cru de estagio
+  // saiu de toda a tela de jogo; ele fica na wiki, junto da formula.
+  //
+  // FICA DE FORA:
+  //   - o corte de estagio por autoria (o que veio de outro POKE sai no fim da
+  //     luta, o proprio fica): e o que faz o prazo nao virar debuff eterno, mas
+  //     pro jogador nada MUDA — debuff recebido ja sumia no fim da luta antes;
+  //   - os tres caminhos de reanimacao que nao limpavam estagio, inclusive o
+  //     Hospital, que limpava so metade e deixava o Rosnado voltar sozinho. Isto
+  //     parece item de nota e NAO E: o defeito nasceu dentro desta mesma versao,
+  //     junto com o prazo, e nunca chegou ao ar. Anunciar conserto de bug que o
+  //     jogador nunca viu e inventar historico;
+  //   - a renovacao automatica do buff pelo bot (PH-419): medida, ela mexe o
+  //     tempo com buff aceso de 28,4% pra 29,8%, o que e ruido. Nao ha o que
+  //     prometer;
+  //   - a bancada do gate de promocao, a decomposicao por regime de nivel e o
+  //     achado do conjunto de golpes padrao (PH-420): processo e encanamento;
+  //   - que "turno" continua na wiki: nao e mudanca, e o lugar onde a palavra
+  //     precisa existir pra explicar a equivalencia.
+  {
+    version: '7.36',
+    date: '2026-09-02',
+    title: 'Buffs duram 18 segundos, e a tela diz o quanto o atributo mudou',
+    highlights: [
+      'AUMENTO E REDUÇÃO DE ATRIBUTO AGORA DURAM 18 SEGUNDOS. Antes, o efeito de um golpe como Dança das Espadas só valia enquanto houvesse briga acontecendo — no vão entre um bicho e o próximo ele já tinha ido embora, o que na prática era cerca de um segundo. Agora ele tem prazo próprio: dura 18 segundos, não cai quando você troca de alvo e não cai quando o alvo morre. Usar o mesmo golpe de novo renova o prazo em vez de somar mais um degrau.',
+      'A TELA PASSOU A DIZER QUANTO O ATRIBUTO REALMENTE MUDOU. Onde estava escrito "Ataque -1" agora está "Ataque 0,67x (−33%)", e no lugar de "+2" está "2x (+100%)". O número antigo enganava: "-1" parece um ponto de Ataque a menos, e é um terço do atributo embora. Vale pro selo do canto, pro número que sobe no POKE e pra descrição do golpe. Precisão e Evasão têm conta própria — lá, +1 é 1,33x.',
+      'PRAZO AGORA APARECE EM SEGUNDOS, NÃO EM TURNOS. Veneno, queimadura, clima de golpe: onde estava "3 turnos" agora está "9s". Um turno deste jogo sempre foi 3 segundos de relógio, então é a mesma informação dita de um jeito que dá pra usar. O dano contínuo virou "a cada 3s".',
+    ],
+  },
   // UM item pra UMA issue (PH-423).
   //
   // A NOTA DIZ "NUNCA", E ISSO E O PONTO. O relato que abriu a issue foi "matei
