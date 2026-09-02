@@ -490,6 +490,7 @@ export type Database = {
           anexo_itens: Json
           anexo_poke: Json | null
           assunto: string | null
+          contexto_anuncio: Json | null
           corpo: string
           created_at: string
           de_id: string | null
@@ -507,6 +508,7 @@ export type Database = {
           anexo_itens?: Json
           anexo_poke?: Json | null
           assunto?: string | null
+          contexto_anuncio?: Json | null
           corpo?: string
           created_at?: string
           de_id?: string | null
@@ -524,6 +526,7 @@ export type Database = {
           anexo_itens?: Json
           anexo_poke?: Json | null
           assunto?: string | null
+          contexto_anuncio?: Json | null
           corpo?: string
           created_at?: string
           de_id?: string | null
@@ -2424,6 +2427,7 @@ export type Database = {
       enviar_mensagem: {
         Args: {
           p_anexos?: Json
+          p_anuncio_id?: string
           p_corpo: string
           p_para_id?: string
           p_para_nick?: string
@@ -3225,6 +3229,7 @@ export type Database = {
           anexo_itens: Json
           anexo_poke: Json | null
           assunto: string | null
+          contexto_anuncio: Json | null
           corpo: string
           created_at: string
           de_id: string | null
@@ -3242,6 +3247,7 @@ export type Database = {
           anexo_itens?: Json
           anexo_poke?: Json | null
           assunto?: string | null
+          contexto_anuncio?: Json | null
           corpo?: string
           created_at?: string
           de_id?: string | null
@@ -3259,6 +3265,7 @@ export type Database = {
           anexo_itens?: Json
           anexo_poke?: Json | null
           assunto?: string | null
+          contexto_anuncio?: Json | null
           corpo?: string
           created_at?: string
           de_id?: string | null
@@ -5159,6 +5166,7 @@ export type Database = {
       enviar_mensagem: {
         Args: {
           p_anexos?: Json
+          p_anuncio_id?: string
           p_corpo: string
           p_para_id?: string
           p_para_nick?: string
