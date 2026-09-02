@@ -79,7 +79,7 @@ describe('world.pessimista: farm offline nunca renderiza melhor que ao vivo (PH-
   //
   // A PH-259 mexeu justamente nisso (spawn mais perto, campo que enche com o
   // nivel), e a media inverteu: 420,7 do pessimista contra 414,4 do otimista.
-  // Trocar de hunt nao ajuda — medido em `mata_faixa1`, a inversao fica maior
+  // Trocar de hunt nao ajuda — medido em `mata_e1`, a inversao fica maior
   // (59,2 contra 54,9). E afrouxar a margem so empurra o problema: com 80
   // sementes a razao NAO converge pra baixo de 1 (1,0029 com 40, 1,0034 com 80),
   // porque o residual e artefato de sorteio, nao efeito da flag.

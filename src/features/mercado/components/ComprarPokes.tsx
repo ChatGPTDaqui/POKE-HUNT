@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Coin, Diamond, Gavel } from '@phosphor-icons/react'
+import { BookmarkSimple, ChatCircleDots, Coin, Diamond, Gavel } from '@phosphor-icons/react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { type AnuncioMercado } from '@/data/remote/servidor'
 import { SPECIES } from '@/data/pokes'
@@ -12,7 +12,7 @@ import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { GameButton, GameCard, GameCheck, GameInput, GameSelect, Recolhivel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
-import { fmt, STALE_MS } from '../utils'
+import { anuncioParaConversa, fmt, STALE_MS } from '../utils'
 import { Carregando, Moeda } from './shared'
 import { TempoRestante } from './TempoRestante'
 import { useSegundosRestantes, proximoLanceMinimo } from '../tempoDeLeilao'
@@ -152,6 +152,7 @@ function LinhaDeLeilao({
 
 export function ComprarPokes() {
   const abrirPerfilPublico = useUiStore((s) => s.abrirPerfilPublico)
+  const abrirSocialCom = useUiStore((s) => s.abrirSocialCom)
   const meuId = useAuthStore((s) => s.user?.id ?? null)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const [busca, setBusca] = useState('')
@@ -374,16 +375,45 @@ export function ComprarPokes() {
                 {a.seller_id === meuId ? (
                   <span className="text-n400">{a.vendedor} (você)</span>
                 ) : (
-                  <button
-                    type="button"
-                    className="underline decoration-dotted underline-offset-2 transition-colors hover:text-n200"
-                    onClick={() => abrirPerfilPublico({ userId: a.seller_id, nome: a.vendedor ?? '?' })}
-                  >
-                    {a.vendedor}
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="underline decoration-dotted underline-offset-2 transition-colors hover:text-n200"
+                      onClick={() => abrirPerfilPublico({ userId: a.seller_id, nome: a.vendedor ?? '?' })}
+                    >
+                      {a.vendedor}
+                    </button>
+                    {/* PH-435: negociar direto, sem passar pelo perfil.
+                        O caminho do PH-119 tinha três telas (vitrine → perfil →
+                        conversa) e perdia o anúncio na primeira: o vendedor
+                        recebia "aceita 1.8M?" sem saber de qual POKE se tratava.
+                        Aqui o anúncio vai junto e vira card no fio dos dois. */}
+                    {' · '}
+                    <button
+                      type="button"
+                      aria-label={`Negociar ${SPECIES[a.species_id]?.name ?? a.species_id} com ${a.vendedor ?? 'o vendedor'}`}
+                      className="inline-flex items-center gap-[.2em] text-primary underline decoration-dotted underline-offset-2 transition-colors hover:text-n200"
+                      onClick={() => abrirSocialCom({
+                        userId: a.seller_id,
+                        nick: a.vendedor ?? '?',
+                        anuncio: anuncioParaConversa(a),
+                      })}
+                    >
+                      <ChatCircleDots aria-hidden /> negociar
+                    </button>
+                  </>
                 )}
                 {a.apenas_oferta && ` · ${a.ofertas ?? 0} oferta(s)`}
               </div>
+              {/* PH-437: este anuncio esta na vitrine DELE e de mais ninguem.
+                  Sem dizer isso, o comprador ve um preco que nao existe pra
+                  outros jogadores e nao tem como saber que ele foi combinado
+                  nem que ninguem vai passar na frente. */}
+              {a.reservado_para && a.reservado_para === meuId && (
+                <span className="mt-[.15em] flex w-fit items-center gap-[.2em] rounded-full bg-primary/15 px-[.4em] text-[.72em] text-primary">
+                  <BookmarkSimple aria-hidden weight="fill" /> reservado para você
+                </span>
+              )}
             </div>
             {a.modo === 'leilao' ? (
               <LinhaDeLeilao

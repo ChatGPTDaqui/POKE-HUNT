@@ -24,7 +24,7 @@ import { updateMovement } from './movementSystem'
 import { updateCombat } from './combatSystem'
 
 const PASSO = 1 / 60
-const HUNT = 'mata_faixa1' // hunt normal: `maxEnemies` 6, entao reunir 3 ou 4 cabe
+const HUNT = 'mata_e1' // hunt normal: `maxEnemies` 6, entao reunir 3 ou 4 cabe
 
 function cenario(
   { ligado = true, quantidade = 3, mapId = HUNT }:

@@ -7,7 +7,7 @@
 // `protetorDaSala` decide QUAL protetor a sala pede so pela chave do
 // sub-bioma — forcar `world.sala.chave = 'volcano'` direto (bypassando o
 // grafo de sub-biomas da hunt) e o mesmo padrao que `salas.test.ts` ja usa
-// pra 'jungle' em `mata_faixa1`: a chave nao precisa ser alcancavel de
+// pra 'jungle' em `mata_e1`: a chave nao precisa ser alcancavel de
 // verdade pelo sorteio daquela hunt pra exercitar a logica.
 import { describe, expect, it, beforeEach } from 'vitest'
 
@@ -21,7 +21,7 @@ import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState, ProtetorPendente } from './types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 
 function mundo(semente: number): WorldState {
   const rng = createRng(semente)

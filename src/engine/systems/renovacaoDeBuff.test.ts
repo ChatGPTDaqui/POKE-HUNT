@@ -50,7 +50,7 @@ function cenario() {
   const jogadorPoke = createPokeInstance(rng, 'spearow', 25)
   jogadorPoke.activeAbilities = ['agility']
 
-  const world = buildMapWorld('campo_aberto_faixa1', jogadorPoke, { seed: 0, rng, counters })
+  const world = buildMapWorld('campo_aberto_e1', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
 
   // HP alto de proposito: tira o overkill-guard do caminho (ver o topo). Sem
@@ -82,7 +82,7 @@ function cenarioBellyDrum() {
   const jogadorPoke = createPokeInstance(rng, 'makuhita', 25)
   jogadorPoke.activeAbilities = ['belly_drum']
 
-  const world = buildMapWorld('campo_aberto_faixa1', jogadorPoke, { seed: 0, rng, counters })
+  const world = buildMapWorld('campo_aberto_e1', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
 
   const enemy = criarInimigoDeTeste(world, 'rattata', 25, { x: player.x, y: player.y })

@@ -20,7 +20,7 @@ import { splashDeSalaStore } from '@/stores/splashDeSalaVanilla'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from './types'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 
 function mundo(): WorldState {
   const rng = createRng(7)

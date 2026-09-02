@@ -15,12 +15,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, cleanup, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { MensagemCorreio } from '@/data/remote/servidor'
+import type { MensagemSocial } from '@/data/remote/servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { LinhaDeMensagem } from './LinhaDeMensagem'
 import { ComporMensagem } from './ComporMensagem'
 
-function msg(over: Partial<MensagemCorreio> = {}): MensagemCorreio {
+function msg(over: Partial<MensagemSocial> = {}): MensagemSocial {
   return {
     id: 'm1',
     de_id: 'outro',
@@ -41,7 +41,7 @@ const acoes = () => ({
   onExcluir: vi.fn(),
 })
 
-function renderLinha(m: MensagemCorreio) {
+function renderLinha(m: MensagemSocial) {
   const fns = acoes()
   render(
     <LinhaDeMensagem

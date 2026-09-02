@@ -280,7 +280,7 @@ export interface PerfilPublico {
   anunciosAtivos: number
 }
 
-// --- mercado, chat e correio ------------------------------------------------
+// --- mercado, chat e social ------------------------------------------------
 // Os tipos espelham server/src/mercado.ts e server/src/social.ts.
 
 export interface NivelDePreco { unitPrice: number; quantity: number }
@@ -327,6 +327,17 @@ export interface AnuncioMercado {
   vendedor?: string
   ofertas?: number
   melhorOferta?: number | null
+  /**
+   * Comprador para quem este anúncio está reservado (PH-437). Nulo é o normal.
+   *
+   * Anúncio reservado sai da vitrine de todo mundo menos do vendedor e do
+   * próprio reservado — e `comprar_anuncio` recusa a compra de terceiro, que é
+   * onde a regra vive de verdade: o id do anúncio circula (o card da conversa
+   * carrega ele), então esconder da lista não impede chamada direta.
+   */
+  reservado_para?: string | null
+  /** Nome de quem reservou. Só vem da view — a tabela guarda apenas o uuid. */
+  reservado_nome?: string | null
 }
 
 export interface OfertaMercado {
@@ -404,7 +415,7 @@ export interface MensagemChat {
   created_at: string
 }
 
-export interface AnexoItemCorreio {
+export interface AnexoItemSocial {
   itemId: string
   quantity: number
 }
@@ -418,7 +429,7 @@ export interface AnexoItemCorreio {
  * especie e o nivel. Congelar stats aqui os deixaria velhos entre o envio e a
  * coleta, e o POKE nasceria diferente de todo outro da mesma especie.
  */
-export interface AnexoPokeCorreio {
+export interface AnexoPokeSocial {
   speciesId: string
   level: number
   isShiny?: boolean
@@ -426,7 +437,33 @@ export interface AnexoPokeCorreio {
   ivs?: Record<string, number>
 }
 
-export interface MensagemCorreio {
+/**
+ * Anúncio que originou a negociação (PH-435), COPIADO no instante do envio.
+ *
+ * É snapshot e não referência de propósito: `market_listings.status` vira
+ * `vendido`/`cancelado`, e ler o anúncio ao vivo faria o card de uma conversa
+ * de ontem mudar de preço sozinho — ou virar linha vazia depois da venda, que é
+ * justamente quando o registro do que foi combinado passa a importar.
+ *
+ * `sellerId` viaja junto pro card saber de que lado da mesa o leitor está
+ * ("anúncio seu" x "anúncio dele") sem precisar buscar nada.
+ */
+export interface ContextoAnuncioSocial {
+  anuncioId: string
+  sellerId: string
+  speciesId: string
+  level: number
+  isShiny: boolean
+  rarity: string
+  ivPercent: number
+  /** `null` em anúncio somente-lance e em leilão — os dois não têm preço fixo. */
+  price: number | null
+  currency: 'gold' | 'diamond'
+  modo: 'preco_fixo' | 'leilao'
+  apenasOferta: boolean
+}
+
+export interface MensagemSocial {
   id: string
   de_id: string | null
   de_nome: string
@@ -441,11 +478,16 @@ export interface MensagemCorreio {
   estado: 'pendente' | 'aceito' | 'recusado' | 'lido'
   created_at: string
   /** Itens anexados. Vazio na maioria das mensagens. */
-  anexo_itens?: AnexoItemCorreio[]
+  anexo_itens?: AnexoItemSocial[]
   /** POKE anexado (PH-164). Nulo em tudo que nao e recompensa de POKE. */
-  anexo_poke?: AnexoPokeCorreio | null
+  anexo_poke?: AnexoPokeSocial | null
   /** Carimbo de coleta — presente significa "ja recebido". */
   anexo_coletado_em?: string | null
+  /**
+   * Anúncio que abriu a negociação (PH-435). Nulo na esmagadora maioria das
+   * mensagens — só a PRIMEIRA de cada entrada pelo Mercado carrega.
+   */
+  contexto_anuncio?: ContextoAnuncioSocial | null
   /**
    * Exclusao e por lado e SOFT (PH-74): cada ponta some com a mensagem da
    * propria caixa sem tirar da outra. Por isso duas colunas em vez de um
@@ -515,8 +557,8 @@ export interface ConversaResumo {
   bloqueado: boolean
 }
 
-// Ranking/perfil/mercado/chat/correio saíram daqui na migração RPC-everything
-// (ver acoesRpc.ts, mercadoRpc.ts, chatRealtime.ts, correioRealtime.ts,
+// Ranking/perfil/mercado/chat/social saíram daqui na migração RPC-everything
+// (ver acoesRpc.ts, mercadoRpc.ts, chatRealtime.ts, socialRealtime.ts,
 // rankingRpc.ts) — só sessão continua HTTP, é a única coisa que ainda precisa
 // da Edge Function (simulação real de combate, ver _Architecture.md).
 export const servidor = {

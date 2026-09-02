@@ -49,7 +49,7 @@ function formatarData(iso: string | null): string {
 export function PerfilPublico() {
   const alvo = useUiStore((s) => s.perfilPublicoAlvo)
   const fechar = useUiStore((s) => s.fecharPerfilPublico)
-  const abrirCorreioCom = useUiStore((s) => s.abrirCorreioCom)
+  const abrirSocialCom = useUiStore((s) => s.abrirSocialCom)
   const meuId = useAuthStore((s) => s.user?.id ?? null)
 
   const { data, isLoading, isError } = useQuery({
@@ -145,12 +145,12 @@ export function PerfilPublico() {
             <>
               <GameButton
                 className="mt-[.2em] w-full"
-                onClick={() => abrirCorreioCom({ userId: data.userId, nick: data.nome })}
+                onClick={() => abrirSocialCom({ userId: data.userId, nick: data.nome })}
               >
                 <ChatCircle className="text-[1.1em]" /> Conversar
               </GameButton>
               <p className="px-[.2em] text-[.7em] leading-snug text-n500">
-                Abre o Correio já na conversa com {data.nome}. Não precisa ser amigo.
+                Abre o Social já na conversa com {data.nome}. Não precisa ser amigo.
               </p>
             </>
           )}

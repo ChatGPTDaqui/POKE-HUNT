@@ -1,7 +1,7 @@
 // ESC fecha a camada do TOPO, e so ela (PH-376).
 //
 // Uma varredura por `'Escape'` em `src/` devolvia UM arquivo antes disto
-// (`features/correio/RecebimentoDePoke.tsx`). Loja, Mochila, Bestiario, perfil
+// (`features/social/RecebimentoDePoke.tsx`). Loja, Mochila, Bestiario, perfil
 // do POKE, Hunt Analyzer, painel Auto e o proprio `ConfirmDialog` so fechavam
 // no X ou no clique fora. No celular o botao Voltar cobre esse caso
 // (`useVoltarFechaPainel`); no desktop — o regime `amplo` inteiro — nao havia

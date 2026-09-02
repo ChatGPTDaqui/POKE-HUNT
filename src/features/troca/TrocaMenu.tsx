@@ -232,7 +232,7 @@ export function TrocaMenu() {
         <ArrowsLeftRight className="text-[1.8em] text-n500" />
         <span className="text-[.9em] text-n300">Você não está em nenhuma troca.</span>
         <span className="text-[.8em] text-n500">
-          Convide alguem pelo Ranking ou pelo Correio — o icone de troca aparece ao lado do nome.
+          Convide alguem pelo Ranking ou pelo Social — o icone de troca aparece ao lado do nome.
         </span>
       </div>
     )

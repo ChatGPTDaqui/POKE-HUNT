@@ -5,7 +5,7 @@
 //   1. o perfil de terceiro mostrar dado privado. Não dá erro, não quebra nada:
 //      só expõe o ouro de outro jogador numa tela que ninguém pensou em
 //      auditar de novo;
-//   2. a conversa inicial ficar "grudada" — o Correio reabrir sempre o mesmo
+//   2. a conversa inicial ficar "grudada" — o Social reabrir sempre o mesmo
 //      contato porque ninguém limpou o pedido, e o jogador perder o acesso à
 //      lista sem entender por quê.
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -71,7 +71,7 @@ describe('o caminho anúncio → perfil → conversa (PH-119)', () => {
   beforeEach(() => {
     useUiStore.setState({
       perfilPublicoAlvo: null,
-      correioContatoInicial: null,
+      socialContatoInicial: null,
       perfilOpen: false,
       currentScreen: null,
     })
@@ -87,26 +87,26 @@ describe('o caminho anúncio → perfil → conversa (PH-119)', () => {
     expect(useUiStore.getState().perfilPublicoAlvo).toEqual({ userId: 'u1', nome: 'Fulano' })
   })
 
-  it('"Conversar" abre o Correio e fecha o perfil que levou até ele', () => {
+  it('"Conversar" abre o Social e fecha o perfil que levou até ele', () => {
     useUiStore.getState().abrirPerfilPublico({ userId: 'u1', nome: 'Fulano' })
-    useUiStore.getState().abrirCorreioCom({ userId: 'u1', nick: 'Fulano' })
+    useUiStore.getState().abrirSocialCom({ userId: 'u1', nick: 'Fulano' })
 
     const s = useUiStore.getState()
-    expect(s.currentScreen).toBe('correio')
-    expect(s.correioContatoInicial).toEqual({ userId: 'u1', nick: 'Fulano' })
+    expect(s.currentScreen).toBe('social')
+    expect(s.socialContatoInicial).toEqual({ userId: 'u1', nick: 'Fulano' })
     // Deixá-lo aberto empilharia duas janelas sobre a mesma conversa.
     expect(s.perfilPublicoAlvo).toBeNull()
   })
 
   it('o pedido de conversa é consumido UMA vez', () => {
-    // O bug que isto impede: o Correio relê `correioContatoInicial` a cada
-    // montagem. Sem limpar, fechar o fio e voltar ao Correio reabriria o mesmo
+    // O bug que isto impede: o Social relê `socialContatoInicial` a cada
+    // montagem. Sem limpar, fechar o fio e voltar ao Social reabriria o mesmo
     // contato para sempre, e a lista de conversas ficaria inalcançável.
-    useUiStore.getState().abrirCorreioCom({ userId: 'u1', nick: 'Fulano' })
-    expect(useUiStore.getState().correioContatoInicial).not.toBeNull()
+    useUiStore.getState().abrirSocialCom({ userId: 'u1', nick: 'Fulano' })
+    expect(useUiStore.getState().socialContatoInicial).not.toBeNull()
 
-    useUiStore.getState().consumirCorreioContatoInicial()
-    expect(useUiStore.getState().correioContatoInicial).toBeNull()
+    useUiStore.getState().consumirSocialContatoInicial()
+    expect(useUiStore.getState().socialContatoInicial).toBeNull()
   })
 
   it('fechar o perfil não deixa alvo pendurado', () => {

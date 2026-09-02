@@ -16,11 +16,11 @@
 // pra elas divergirem — e o CLAUDE.md ja registra que limite de negocio so no
 // cliente vira bypass.
 //
-// O nick e a chave porque foi assim que o Correio ja funcionava; esta issue nao
+// O nick e a chave porque foi assim que o Social ja funcionava; esta issue nao
 // precisou de nada novo no servidor. O que faltava era o jogador ter de onde
 // tirar o nick sem saber de cor, que e a queixa que a abriu.
 import { useMutation } from '@tanstack/react-query'
-import * as correioRpc from '@/data/remote/correioRealtime'
+import * as socialRpc from '@/data/remote/socialRealtime'
 import { ErroServidor } from '@/data/remote/servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
@@ -55,7 +55,7 @@ export function mesmoNick(a: string, b: string): boolean {
 export function usePedirAmizade(): PedidoDeAmizade {
   const meuNick = useGameStateStore((s) => s.trainer.name)
   const mutacao = useMutation({
-    mutationFn: (nick: string) => correioRpc.pedirAmizade(nick),
+    mutationFn: (nick: string) => socialRpc.pedirAmizade(nick),
     onSuccess: (r) => useToastStore.getState().pushToast(r.mensagem, 'success', 'world'),
     onError: (e: unknown) => useToastStore.getState().pushToast(
       e instanceof ErroServidor ? e.message : 'Não foi possível enviar o pedido.',

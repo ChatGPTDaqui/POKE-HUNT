@@ -43,7 +43,7 @@ describe('invariantes da simulacao', () => {
   })
 
   it('10 minutos de caçada nao produzem estado invalido', () => {
-    const { gameState } = cacar(20260809, 'mata_faixa1', 25)
+    const { gameState } = cacar(20260809, 'mata_e1', 25)
     const s = useGameStateStore.getState()
 
     expect(s.wallet.gold).toBeGreaterThanOrEqual(0)
@@ -82,7 +82,7 @@ describe('invariantes da simulacao', () => {
   })
 
   it('a Pokedex so registra especie real e contagem nao-negativa', () => {
-    cacar(777001, 'mata_faixa1', 20)
+    cacar(777001, 'mata_e1', 20)
     const s = useGameStateStore.getState()
     const entradas = Object.entries(s.pokedexKills)
     expect(entradas.length).toBeGreaterThan(0)
@@ -97,7 +97,7 @@ describe('invariantes da simulacao', () => {
   it('o POKE em campo so aparece uma vez no estado', () => {
     // `addCapturedPoke` empurra pra mochila; se algum caminho capturasse o
     // proprio POKE em campo (ou o duplicasse ao evoluir), so isto pegaria.
-    const { world } = cacar(31337, 'mata_faixa1', 30)
+    const { world } = cacar(31337, 'mata_e1', 30)
     const s = useGameStateStore.getState()
     const ativo = world.player!.poke
     const ocorrencias = [...s.team, ...s.bagPokes].filter((p) => p.uid === ativo.uid).length
@@ -110,7 +110,7 @@ describe('invariantes da simulacao', () => {
     const poke = createPokeInstance(rng, 'charmander', 40)
     gameState.addPokeToTeam(poke)
     gameState.setActiveIndex(0)
-    const world = buildMapWorld('mata_faixa1', poke, { seed: 0,
+    const world = buildMapWorld('mata_e1', poke, { seed: 0,
       rng: createRng(9090), counters: { entity: 1, effect: 1, pendingHit: 1 },
     })
     // O CADAVER TEM QUE SOBRAR PRA SER OLHADO (PH-130).

@@ -23,7 +23,7 @@ import { useUiStore } from '@/stores/uiStore'
 const SALA = { indice: 2, chave: 'grass', abates: 7, ciclos: 0 }
 
 /** `mapDef` de mentira: o trilho so le `name` e `levelRange` dele. */
-const MAPA = { id: 'mata_faixa1', name: 'Mata I', levelRange: [1, 30] }
+const MAPA = { id: 'mata_e1', name: 'Mata I', levelRange: [1, 30] }
 
 describe('sala no cabecalho (PH-272)', () => {
   beforeEach(() => {

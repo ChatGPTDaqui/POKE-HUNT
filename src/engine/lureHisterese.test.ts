@@ -41,7 +41,7 @@ function mundo(distanciaDoReunido: number): WorldState {
     leashRadius: COLEIRA, poke: { hp: 10, isShiny: false },
   }
   return {
-    player, enemies: [reunido, solto], mapDef: { id: 'mata_faixa1', passiveEnemies: false }, lure: null,
+    player, enemies: [reunido, solto], mapDef: { id: 'mata_e1', passiveEnemies: false }, lure: null,
   } as unknown as WorldState
 }
 

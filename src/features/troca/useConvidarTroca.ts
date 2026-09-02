@@ -5,7 +5,7 @@
 //
 // Mesmo motivo de `usePedirAmizade` (PH-214): os dois lugares que oferecem isto
 // mostram o outro jogador de formas diferentes — no Ranking ele e uma linha de
-// lista, no Correio e um contato de conversa. O que os dois compartilham e a
+// lista, no Social e um contato de conversa. O que os dois compartilham e a
 // chamada e o tratamento da resposta.
 //
 // A chave e o `userId`, e nao o nick, porque `abrir_troca` recebe uuid — e os

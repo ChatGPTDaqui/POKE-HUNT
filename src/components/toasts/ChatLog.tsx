@@ -22,7 +22,7 @@ import type { AnexoChat } from '@/data/remote/servidor'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { Explicacao } from '@/components/shared/Explicacao'
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
-import { usePedirAmizade } from '@/features/correio/usePedirAmizade'
+import { usePedirAmizade } from '@/features/social/usePedirAmizade'
 import { cn } from '@/lib/utils'
 
 export const TABS: { key: ChatTab; label: string }[] = [
