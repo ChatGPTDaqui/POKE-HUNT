@@ -48415,7 +48415,7 @@ function findEntityById(player, enemies, id) {
 //#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
-	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection, seguir = null, apontarPara = null } = params;
+	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection, statusStat, seguir = null, apontarPara = null } = params;
 	const id = `effect-${counters.effect++}`;
 	const lane = owner ? claimEffectLane(owner, id, laneSize) : 0;
 	return {
@@ -48444,6 +48444,7 @@ function createWorldEffect(counters, params) {
 		ballItemId,
 		success,
 		statusDirection,
+		statusStat,
 		laneSize,
 		ownerId: owner ? owner.id : null,
 		lane,
@@ -49917,9 +49918,9 @@ function reducaoDeDefesa(niveis, tipoDoGolpe) {
 }
 //#endregion
 //#region src/data/moveVfx.ts
-var RAIZ = "assets/move-vfx/golpes";
+var RAIZ$1 = "assets/move-vfx/golpes";
 var tira = (arquivo, quadros, extra) => ({
-	url: `${RAIZ}/${arquivo}.png`,
+	url: `${RAIZ$1}/${arquivo}.png`,
 	quadros,
 	...extra
 });
@@ -50167,17 +50168,34 @@ function ehDirecional(abilityId) {
 	return !!vfxDoGolpe(abilityId)?.single.direcional;
 }
 //#endregion
-//#region src/data/statusVfx.ts
+//#region src/data/estagioVfx.ts
+var RAIZ = "assets/estagio-vfx";
+`${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`, `${RAIZ}`;
+`${RAIZ}`;
 /**
-* A direcao do golpe: eleva atributo (`aumenta`) ou baixa/aplica condicao
-* negativa (`diminui`). Deriva do PRIMEIRO `statChanges` com sinal — golpe
-* misto (raro no dataset) usa so o primeiro. Sem `statChanges` (confusao,
-* veneno, sono, ...) cai em `diminui`: nenhum desses 18 status e benefico pra
-* quem recebe.
+* O par (atributo, direcao) do golpe, tirado da MESMA entrada de `statChanges`.
+*
+* ELES TEM QUE SAIR JUNTOS, e nao de duas funcoes independentes. Um golpe pode
+* mexer em varios atributos em sentidos opostos — Shell Smash sobe Ataque e
+* baixa Defesa —, entao derivar o atributo por uma regra ("o de maior modulo")
+* e a direcao por outra ("o primeiro") produziria par TORTO: escudo com motes
+* subindo num golpe que baixa a Defesa. A arte diria o contrario do que o jogo
+* fez.
+*
+* A entrada escolhida e a PRIMEIRA, que e a que `direcaoDoGolpeDeStatus` ja
+* usava desde a PH-367 — a direcao no ar hoje sai dela, e trocar o criterio
+* mudaria a direcao de golpes que ninguem pediu pra mudar.
+*
+* `null` = golpe de status que nao mexe em atributo (condicao). Quem chama
+* traduz isso na peca generica de condicao.
 */
-function direcaoDoGolpeDeStatus(statChanges) {
+function estagioDoGolpe(statChanges) {
 	const primeiro = statChanges?.[0];
-	return primeiro && primeiro.estagios > 0 ? "aumenta" : "diminui";
+	if (!primeiro) return null;
+	return {
+		stat: primeiro.stat,
+		direcao: primeiro.estagios > 0 ? "aumenta" : "diminui"
+	};
 }
 //#endregion
 //#region src/data/battleSpriteAnims.ts
@@ -77300,7 +77318,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			worldSize: (ability.radius ?? 0) * 2,
 			elementType: ability.type,
 			abilityId: ability.id,
-			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0,
+			statusDirection: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.direcao ?? "diminui" : void 0,
+			statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : void 0,
 			seguir: attacker
 		}));
 		const alguemComDamp = [world.player, ...world.enemies].some((e) => e && !isDead(e) && traitDoPoke(e.poke) === "damp");
@@ -77781,7 +77800,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
 			elementType: ability.type,
 			abilityId: ability.id,
-			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0,
+			statusDirection: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.direcao ?? "diminui" : void 0,
+			statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : void 0,
 			seguir: local,
 			apontarPara: mesmoLugar || !ehDirecional(ability.id) ? void 0 : attacker
 		}));

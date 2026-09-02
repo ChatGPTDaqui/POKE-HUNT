@@ -86,7 +86,7 @@ function selosDaEntidade(entidade: WorldEntity | null, prefixo: string): Badge[]
     if (!status) continue
     badges.push({
       key: `${prefixo}-status-${status.tipo}`,
-      url: statusVfxUrl(species.type, 'diminui'),
+      url: statusVfxUrl(species.type),
       Icone: null,
       // PH-422: prazo em SEGUNDOS. "3 turno(s)" nao diz nada a quem nunca viu
       // quanto vale um turno; o contador continua andando em degraus de
