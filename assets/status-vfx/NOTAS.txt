@@ -5,55 +5,130 @@ Mesmo formato das tiras de golpe (quadros lado a lado, altura cheia, largura
 do quadro deduzida de naturalWidth/quadros). Consumido por
 src/data/vfxTiras.ts e desenhado em render/sprites.ts#drawVfxSobreCorpo.
 
-cura-hp.png       36x38, 16 quadros — faisca vermelha, toca uma vez a cada
-                  ganho de HP, de QUALQUER fonte (poção, dreno, Wish, Ingrain,
-                  Water Absorb, enfermeira).
-cura-status.png   a MESMA arte, tingida de verde no exportador. Toca quando um
-                  status sai por fonte EXTERNA. Status que acaba sozinho (sono
-                  vencendo, congelamento derretendo no sorteio) nao dispara —
-                  a distincao sai de graca porque so a cura externa passa por
-                  statusSystem#curarStatus.
-confusao.png      48x36, 21 quadros — "???" ciano, constante enquanto durar.
-sono.png          40x40, 16 quadros — "Zzz", constante enquanto durar.
-paralisia.png     214x181, 20 quadros — faiscas amarelas, constante enquanto a
-                  paralisia durar. SOBRE O CORPO, nao no canto: a arte vem do
-                  banco feita pra cobrir um corpo e nos 26px do badge de canto
-                  virava um risco.
-queimadura.png    51x59, 6 quadros — brasas laranja, mesma ideia.
+AS SEIS TIRAS DE STATUS SAO GERADAS (PH-416)
+--------------------------------------------
+  node scripts/gerar-status-vfx.mjs
 
-REGERAR
--------
-  py POKE/PXG_2026/objectbuilder/tira_efeito.py 816 --recortar --out cura-hp.png
-  py POKE/PXG_2026/objectbuilder/tira_efeito.py 816 --recortar --matiz 0.33 \
-     --sat-min 0.55 --out cura-status.png
-  py POKE/PXG_2026/objectbuilder/tira_efeito.py 2638 --recortar --out confusao.png
-  py POKE/PXG_2026/objectbuilder/tira_efeito.py 2436 --recortar --out paralisia.png
-  py POKE/PXG_2026/objectbuilder/tira_efeito.py 2438 --recortar --out queimadura.png
-  node scripts/gerar-sprite-sono.mjs
+Sem entrada externa nenhuma: o script desenha os seis glifos como pixel art e
+escreve o PNG com um encoder proprio de 30 linhas. Roda em qualquer clone com
+`node` e mais nada.
 
-O "Zzz" e o unico DESENHADO e nao importado: varri os 5691 efeitos do banco e
-ele tem o "???" da confusao, mas nao tem nenhum "zzz". Tres letras saem mais
-barato que continuar procurando.
+  veneno.png        48x48, 16 quadros — cranio roxo. SOBRE O CORPO.
+  queimadura.png    48x48, 16 quadros — chama laranja. SOBRE O CORPO.
+  paralisia.png     48x48, 16 quadros — raio amarelo. SOBRE O CORPO.
+  congelamento.png  48x48, 16 quadros — floco ciano. SOBRE O CORPO.
+  sono.png          40x40, 16 quadros — "Z" branco azulado. BADGE DE CANTO.
+  confusao.png      40x40, 16 quadros — "?" violeta. BADGE DE CANTO.
 
-VENENO E CONGELAMENTO nao tem arquivo aqui: os dois sao lidos SO pela tinta no
-corpo (roxo e ciano, 45%) — ver COR_DE_STATUS_NO_CORPO em src/data/vfxTiras.ts.
-Roxo e ciano quase nao colidem com a cor do elenco, e simbolo em todo status
-transformaria a hunt cheia num mostruario de icones.
+A gramatica e uma so nas seis: anel de faiscas de quatro pontas orbitando numa
+elipse achatada (o canal "tem algo errado com este POKE") mais um glifo de
+identidade em pixel art 9x9 escalada em inteiro (o canal "qual status"). A
+identidade sai do GLIFO e da COR, nunca do movimento — dar a cada status uma
+animacao propria foi exatamente o que produziu o conjunto desencontrado que a
+PH-416 desfez.
 
-PARALISIA E QUEIMADURA estavam nessa lista ate a PH-370 (31/08) e sairam dela:
-as duas agora tem tinta E simbolo. O motivo e um caso concreto, nao gosto — a
-tinta multiplica os pixels da sprite, entao ela depende de a cor do POKE ser
-diferente da cor do status, e em dois grupos ela nao e:
+Duas geometrias, e so duas, porque os dois canais de desenho de
+render/sprites.ts tem tamanho diferente por motivo medido (PH-370):
+
+  SOBRE O CORPO   48x48. Desenhado centrado em `meioDoCorpo`, altura
+                  `max(24, alturaDoCorpo * 0.9)`, opacidade 0,75. O glifo fica
+                  no canto superior DIREITO do quadro; centrado no topo ele
+                  caia em cima da cara do POKE em toda especie de cabeca larga
+                  e baixa (no Gengar o cranio tapava um olho e metade do
+                  sorriso).
+  BADGE DE CANTO  40x40. Desenhado ao lado da cabeca com 26px FIXOS
+                  (ALTURA_SIMBOLO_DE_STATUS). Nesses 26px o anel quase
+                  desaparece, entao aqui o glifo e maior (escala 3 contra 2) e o
+                  anel e menor. A proporcao muda, a gramatica nao.
+
+O QUE HAVIA ANTES, E POR QUE SAIU
+---------------------------------
+Tres origens e quatro geometrias:
+
+  paralisia   214x181, 20 quadros   banco .dat, efeito 2436
+  queimadura   51x59,   6 quadros   banco .dat, efeito 2438
+  confusao     48x36,  21 quadros   banco .dat, efeito 2638 ("???")
+  sono         40x40,  16 quadros   scripts/gerar-sprite-sono.mjs (removido)
+  veneno       —                    nao existia: so a tinta roxa a 45%
+  congelamento —                    nao existia: so a tinta ciano a 45%
+
+O custo real nao era estetico. As quatro do banco saiam de
+
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py <id> --recortar --out <arquivo>
+
+que le um banco de arte que NAO esta no repositorio — entao ninguem sem aquele
+banco na maquina conseguia regerar uma tira de status. Desenhar aqui e a mesma
+troca que a PH-163 fez com os scripts de colisao: a derivacao passa a ser
+reproduzivel sem depender de arte que ninguem mais tem.
+
+VENENO E CONGELAMENTO ficaram fora ate a PH-416 com o argumento de que "roxo e
+ciano quase nao colidem com o elenco". O argumento estava errado, e pelo mesmo
+teste que a PH-370 usou pra incluir os outros dois: composto em
+scripts/harness/condicao-sobre-o-corpo.mjs, no tamanho de jogo, um Gengar
+envenenado e indistinguivel de um Gengar saudavel — exatamente como o Pikachu
+paralisado era. Os grupos que colidem:
 
   paralisia (amarelo)   Pikachu, Raichu, Jolteon, Ampharos, Elekid, Electabuzz
   queimadura (laranja)  Charizard, Charmander, Magmar, Flareon, Growlithe
+  veneno (roxo)         Gengar, Nidoking, Nidoqueen, Muk, Crobat
+  congelamento (ciano)  Articuno, Lapras, Vaporeon, Dewgong
 
-Medido em scripts/harness/condicao-sobre-o-corpo.mjs, que compoe a arte sobre o
-corpo REAL com a tinta ja aplicada: um Pikachu paralisado e um Charizard
-queimado ficam indistinguiveis dos saudaveis. Paralisia ainda e o status que
-mais muda o combate, porque o POKE perde turno.
+A TINTA CONTINUA nos quatro (COR_DE_STATUS_NO_CORPO): ela e o sinal de LONGE, o
+glifo e o sinal de PERTO. Um nao substitui o outro.
 
-A mesma bancada fixou a opacidade em 0.75. Em 0.5 (o valor que eu tinha
-escolhido por raciocinio, "condicao e estado de fundo") a faisca sobre o Pikachu
-fica um risco esverdeado quase invisivel; em 0.9 as brasas cobrem metade da
-sprite.
+SONO E CONFUSAO seguem no badge, e nao e omissao. Sono nao tem cor de corpo
+nenhuma — um POKE dormindo se le pelo simbolo, nao pelo tom — e confusao e
+status VOLATIL, que vive em `entity.statusVolatil` e nem chega em `poke.status`,
+que e a chave que TIRA_POR_CONDICAO_NO_CORPO indexa.
+
+O QUE A BANCADA DECIDIU, E NAO O RACIOCINIO
+-------------------------------------------
+Tres correcoes sairam de OLHAR a arte no tamanho de jogo, e as tres estavam
+"certas" no papel antes:
+
+  anel embaixo -> anel no meio    Com o anel a 69% da altura do quadro os motes
+                                  caem ABAIXO da silhueta, e tres pontos
+                                  parados no chao ao lado de um POKE leem como
+                                  MOEDA DROPADA. Num jogo que dropa moeda.
+  disco -> faisca de 4 pontas     Circulo solido de 2px de raio com contorno
+                                  escuro tambem le como moeda. A cruz de bracos
+                                  finos le como luz, que e o que ela e.
+  cranio de orbita 3x2 -> 2x2     O glifo renderiza a ~12px. Orbita mais
+                                  estreita virava meio pixel e o cranio lia como
+                                  um retangulo arredondado claro.
+
+A opacidade 0,75 vem da PH-370 e nao mudou: em 0,5 ("condicao e estado de
+fundo", escolhido por raciocinio) a faisca sobre o Pikachu fica um risco
+esverdeado quase invisivel; em 0,9 a arte cobre metade da sprite.
+
+BANCADAS
+--------
+  node scripts/harness/folha-de-status.mjs saida.png
+      As seis lado a lado, 4 quadros cada, escaladas 4x, sobre tres fundos
+      (quase preto, cinza, quase branco). Pergunta barata e anterior: o glifo
+      esta desenhado certo, o ciclo fecha, o contorno existe nos quatro lados.
+
+  ZOOM=10 QUADROS=2 OPACIDADES=0,0.75 CONDICOES=veneno \
+    node scripts/harness/condicao-sobre-o-corpo.mjs gengar saida.png
+      A que DECIDE: compoe sobre o corpo real, com a tinta ja aplicada, no
+      tamanho de jogo. A linha de opacidade 0 e o estado "so tinta" — sem ela
+      nao ha com o que comparar. Os POKE que interessam sao os que tem a cor do
+      proprio status (lista acima).
+
+FAISCA DE CURA — nao e status, e evento
+---------------------------------------
+Estas duas continuam vindo do banco: sao arte de EVENTO (tocam uma vez), nao
+condicao persistente, e nao fazem parte do conjunto padronizado pela PH-416.
+
+  cura-hp.png       36x38, 16 quadros — faisca vermelha, toca uma vez a cada
+                    ganho de HP, de QUALQUER fonte (poção, dreno, Wish, Ingrain,
+                    Water Absorb, enfermeira).
+  cura-status.png   a MESMA arte, tingida de verde no exportador. Toca quando um
+                    status sai por fonte EXTERNA. Status que acaba sozinho (sono
+                    vencendo, congelamento derretendo no sorteio) nao dispara —
+                    a distincao sai de graca porque so a cura externa passa por
+                    statusSystem#curarStatus.
+
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py 816 --recortar --out cura-hp.png
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py 816 --recortar --matiz 0.33 \
+     --sat-min 0.55 --out cura-status.png

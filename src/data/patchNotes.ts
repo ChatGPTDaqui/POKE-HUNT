@@ -12,6 +12,38 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // UM item pra UMA issue (PH-416).
+  //
+  // A NOTA TEM DOIS FATOS E SO UM INTERESSA AO JOGADOR. O trabalho foi trocar as
+  // seis artes de status por um conjunto desenhado por um gerador so; o que o
+  // jogador ganha e que veneno e congelamento passaram a ter desenho, e que os
+  // seis agora se leem do mesmo jeito. O item conta o segundo.
+  //
+  // ELA RECONHECE A 7.24 EM VEZ DE REPETIR ELA, mesmo padrao da nota da 7.33: a
+  // 7.24 anunciou "POKE PARALISADO SOLTA FAISCA E QUEIMADO SOLTA BRASA", e essa
+  // promessa continua valendo — o desenho e outro, a coisa que ela prometia nao
+  // e nova. Reanunciar faria parecer que a 7.24 nao tinha entregado. Por isso o
+  // item 1 fala de VENENO e CONGELAMENTO, que sao os dois que nao tinham nada, e
+  // cita paralisia so como a comparacao que o jogador ja conhece.
+  //
+  // O "FICA DE FORA" DESTA VEZ E CURTO porque quase tudo do intervalo e
+  // encanamento, e o jogador nao ve nada disso:
+  //   - o gerador, o encoder de PNG e a saida do banco de arte antigo: quem
+  //     desenha e onde mora nao muda nada na tela;
+  //   - as tres correcoes que a bancada pegou (o anel que parecia moeda dropada,
+  //     o disco que virou faisca, o cranio que precisou de orbita maior): sao o
+  //     caminho ate a arte, nao a arte;
+  //   - a opacidade 0,75 e os dois canais de desenho: continuam iguais aos da
+  //     7.19, entao nao ha o que anunciar.
+  {
+    version: '7.34',
+    date: '2026-09-02',
+    title: 'Os seis status agora têm o mesmo desenho',
+    highlights: [
+      'VENENO E CONGELAMENTO GANHARAM SÍMBOLO. Eram os dois únicos status que só mudavam a cor do POKE, e num Gengar roxo ou num Lapras azul isso não dava pra ver — o mesmo problema que a paralisia tinha num Pikachu. Agora o envenenado carrega uma caveira e o congelado um floco de neve.',
+      'OS SEIS SÍMBOLOS VIRARAM UM CONJUNTO. Caveira, chama, raio, floco, "Z" e "?" — todos no mesmo tamanho, com o mesmo contorno e com as mesmas fagulhas girando em volta do corpo. Antes cada um vinha de um lugar diferente e tinha tamanho e ritmo próprios; dava pra confundir de longe qual era qual.',
+    ],
+  },
   // UM item pra UMA issue (PH-402). O intervalo tem dois commits e um deles e
   // back-merge.
   //
