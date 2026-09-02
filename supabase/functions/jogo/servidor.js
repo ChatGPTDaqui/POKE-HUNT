@@ -48485,6 +48485,21 @@ function chanceDeDescongelar(tipo) {
 	return regraDoStatus(tipo)?.chanceDeDescongelarPorTurno ?? 0;
 }
 /**
+* Quanto tempo um estagio de atributo dura, em segundos (PH-418).
+*
+* SEIS TURNOS. Derivado de `TURNO_SEGUNDOS` e nunca escrito como `18`: o turno
+* deste motor e tempo puro (`statusSystem#tickStatus` decrementa por `dt` e
+* recarrega `TURNO_SEGUNDOS`), entao mudar a duracao do turno tem que mudar
+* isto junto.
+*
+* Antes da PH-418 nao havia prazo nenhum: o estagio durava ate o "fim de
+* batalha", que este motor define como *nenhum inimigo engajado*. Numa hunt de
+* campo aberto isso acontece no vao entre um spawn e o proximo, ou seja, o buff
+* proprio morria em cerca de um segundo. Mesmo defeito que o clima tinha antes
+* da PH-329, e mesma correcao: a duracao e por tempo.
+*/
+var DURACAO_DE_ESTAGIO_SEGUNDOS = 6 * TURNO_SEGUNDOS;
+/**
 * Multiplicador de um estagio, formula exata dos jogos: (2+n)/2 subindo e
 * 2/(2-n) descendo.
 *
@@ -48499,6 +48514,44 @@ function multiplicadorDeEstagio(estagio) {
 }
 function multiplicadorDeStat(estagios, stat) {
 	return multiplicadorDeEstagio(estagios?.[stat] ?? 0);
+}
+/**
+* O total de um atributo a partir das fontes vivas (PH-418) — soma das
+* contribuicoes, clampada a +-6.
+*
+* O CLAMP FICA AQUI, e nao na hora de aplicar, e isso muda o comportamento pro
+* melhor: quatro Danca das Espadas (+2 cada, de fontes distintas) somam +8 e
+* mostram +6; quando a primeira expira, sobram +6 e o total CONTINUA +6, em vez
+* de cair pra +4. O excedente fica guardado enquanto as fontes viverem, o que e
+* o que um jogador espera de "estou no maximo".
+*/
+function totalDeEstagio(fontes) {
+	if (!fontes?.length) return 0;
+	let soma = 0;
+	for (const f of fontes) soma += f.estagios;
+	return Math.max(-6, Math.min(6, soma));
+}
+/**
+* Desconta `dt` dos prazos e devolve as fontes que sobraram (PH-418).
+*
+* Fonte com `expiraEm: null` nunca sai. Fonte que zerou o prazo sai da lista —
+* nao fica com prazo 0, porque `totalDeEstagio` soma tudo que esta na lista e
+* uma fonte expirada continuaria contando.
+*/
+function envelhecerFontes(fontes, dt) {
+	const vivas = [];
+	for (const f of fontes) {
+		if (f.expiraEm == null) {
+			vivas.push(f);
+			continue;
+		}
+		const restante = f.expiraEm - dt;
+		if (restante > 0) {
+			f.expiraEm = restante;
+			vivas.push(f);
+		}
+	}
+	return vivas;
 }
 /**
 * Multiplicador de estagio de precisao/evasao — formula exata dos jogos, e
@@ -48924,21 +48977,19 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 		const protegeEsteStat = traitDoDestino != null && traitDoDestino in PROTECAO_DE_ESTAGIO && (protegido === null || protegido === mudanca.stat);
 		if (delta < 0 && vemDoOponente && protegeEsteStat) continue;
 		const antes = destino.estagios[mudanca.stat] ?? 0;
-		const depois = Math.max(-6, Math.min(6, antes + delta));
-		if (depois === antes) continue;
-		destino.estagios[mudanca.stat] = depois;
-		registrarFonteDeEstagio(destino, mudanca.stat, {
+		const depois = registrarFonteDeEstagio(destino, mudanca.stat, comPrazoPadrao({
 			id: ability.id,
 			tipo: "golpe",
 			proprio: destino === atacante,
-			deQuem: SPECIES[atacante.poke.speciesId]?.name ?? atacante.poke.speciesId
-		});
-		esquecerFonteSeZerado(destino, mudanca.stat);
+			deQuem: SPECIES[atacante.poke.speciesId]?.name ?? atacante.poke.speciesId,
+			estagios: delta
+		}));
+		if (depois < antes && vemDoOponente) sofreuQuedaDoOponente = true;
+		if (depois === antes) continue;
 		aplicadas.push({
 			stat: mudanca.stat,
 			estagios: depois - antes
 		});
-		if (delta < 0 && vemDoOponente) sofreuQuedaDoOponente = true;
 	}
 	const reacao = traitDoDestino ? REACAO_A_QUEDA_DE_ESTAGIO[traitDoDestino] : void 0;
 	if (sofreuQuedaDoOponente && reacao) {
@@ -48962,11 +49013,16 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 */
 function aplicarEstagioUnico(alvo, stat, delta, fonte) {
 	const antes = alvo.estagios[stat] ?? 0;
-	const depois = Math.max(-6, Math.min(6, antes + delta));
+	const depois = registrarFonteDeEstagio(alvo, stat, comPrazoPadrao({
+		...fonte ?? {
+			id: "anonimo",
+			tipo: "trait",
+			proprio: true,
+			deQuem: SPECIES[alvo.poke.speciesId]?.name ?? alvo.poke.speciesId
+		},
+		estagios: delta
+	}));
 	if (depois === antes) return null;
-	alvo.estagios[stat] = depois;
-	if (fonte) registrarFonteDeEstagio(alvo, stat, fonte);
-	esquecerFonteSeZerado(alvo, stat);
 	return {
 		stat,
 		estagios: depois - antes
@@ -48991,25 +49047,80 @@ function fonteDeTrait(dono, trait, destino = dono) {
 	};
 }
 /**
-* Anota a procedencia de um estagio (PH-121), deduplicando.
+* Anota a procedencia de um estagio (PH-121) e, desde a PH-418, a contribuicao
+* e o prazo dela — e este e o unico jeito de um estagio entrar.
 *
-* DEDUPLICA porque o mesmo golpe do mesmo POKE pode acertar dez vezes na mesma
-* luta, e a lista existe pra responder "quem fez isso", nao "quantas vezes".
-* Sem isto ela cresceria sem teto dentro de uma entidade que vive a luta toda.
+* REAPLICAR A MESMA FONTE RENOVA O PRAZO SEM SOMAR ESTAGIO. E o desenho pedido:
+* duas Dancas das Espadas seguidas dao +2 com prazo cheio, nao +4. Fontes
+* DIFERENTES somam, entao chegar ao teto exige golpes de buff distintos.
+*
+* Sem essa regra o pedido viraria outra coisa: Danca das Espadas recarrega em
+* 3,0s e o prazo e 18s, entao caberiam seis aplicacoes vivas — Ataque 4x
+* permanente. Do outro lado, Screech (1,5s de recarga, −2 de Defesa) fixaria a
+* Defesa do jogador em 25%.
+*
+* `magnitude` MAIOR EM MODULO SUBSTITUI: Growth no sol vale +2 onde normalmente
+* vale +1, e reaplicar com o sol aceso nao pode deixar o POKE preso no valor
+* fraco de antes.
+*
+* Devolve o total do atributo DEPOIS da mudanca — quem chama precisa dele pra
+* saber se houve mudanca de verdade (quem ja esta no teto nao sobe).
 */
 function registrarFonteDeEstagio(destino, stat, fonte) {
 	const mapa = destino.estagiosFonte ??= {};
 	const lista = mapa[stat] ??= [];
-	if (!lista.some((f) => f.id === fonte.id && f.tipo === fonte.tipo && f.proprio === fonte.proprio && f.deQuem === fonte.deQuem)) lista.push(fonte);
+	const existente = fonte.acumula ? void 0 : lista.find((f) => f.id === fonte.id && f.tipo === fonte.tipo && f.proprio === fonte.proprio);
+	if (existente) {
+		existente.expiraEm = fonte.expiraEm;
+		existente.deQuem = fonte.deQuem;
+		if (Math.abs(fonte.estagios) > Math.abs(existente.estagios)) existente.estagios = fonte.estagios;
+	} else lista.push(fonte);
+	return recalcularEstagio(destino, stat);
 }
 /**
-* Estagio de volta a 0 nao tem fonte — o selo desapareceu da tela, e manter a
-* lista faria a proxima mudanca daquele atributo aparecer com o historico de uma
-* situacao que ja passou.
+* Reescreve `estagios[stat]` a partir das fontes vivas (PH-418) e devolve o
+* total.
+*
+* `estagios` virou CACHE: a verdade e a lista de fontes. Toda escrita passa por
+* aqui, e nenhuma leitura precisou mudar — `multiplicadorDeStat`, a formula de
+* dano, a velocidade de movimento e o HUD continuam lendo `estagios`.
+*
+* Estagio 0 sai do objeto (`delete`) em vez de virar `0` explicito: e a
+* convencao do resto do arquivo, e o selo do HUD trata ausente e zero igual.
 */
-function esquecerFonteSeZerado(destino, stat) {
-	if ((destino.estagios[stat] ?? 0) !== 0) return;
-	if (destino.estagiosFonte) delete destino.estagiosFonte[stat];
+function recalcularEstagio(destino, stat) {
+	const fontes = destino.estagiosFonte?.[stat];
+	const total = totalDeEstagio(fontes);
+	if (total === 0) delete destino.estagios[stat];
+	else destino.estagios[stat] = total;
+	if (destino.estagiosFonte && (!fontes || fontes.length === 0)) delete destino.estagiosFonte[stat];
+	return total;
+}
+/**
+* Apaga estagio e fonte de todos os atributos (PH-418) — Haze, a troca do POKE
+* em campo, e todo caminho que levanta um POKE caido.
+*
+* Os dois campos juntos, sempre: `estagios` e cache do que as fontes somam, e
+* limpar um sem o outro NAO limpa nada — `recalcularEstagio` reescreve o cache
+* a partir das fontes que sobraram, no proximo tick. Foi o defeito real do
+* Hospital: ele zerava `estagios` e o Rosnado voltava sozinho.
+*
+* MORA AQUI, e nao no `combatSystem`, porque `autoSystem` precisa dele pro
+* auto-revive e ja importa este modulo — o caminho contrario abriria ciclo.
+*/
+function apagarTodosOsEstagios(entity) {
+	entity.estagios = {};
+	entity.estagiosFonte = void 0;
+}
+/**
+* Fonte nova com o prazo padrao (PH-418). Existe pra `DURACAO_DE_ESTAGIO_SEGUNDOS`
+* nao ficar repetida em cada um dos oito pontos que aplicam estagio.
+*/
+function comPrazoPadrao(fonte) {
+	return {
+		...fonte,
+		expiraEm: DURACAO_DE_ESTAGIO_SEGUNDOS
+	};
 }
 function aplicarEfeitosDoGolpe(rng, alvo, ability, clima) {
 	const congelado = statusNaoVolatil(alvo);
@@ -49041,23 +49152,31 @@ function curarStatus(entity, tipo) {
 	return curou;
 }
 /**
-* Zera o que os jogos zeram no fim da batalha: estagios de atributo, status
-* volatil (confusao) e o hook de entrada em combate (Intimidate/Download/
-* clima automatico — ver combatSystem.ts#resolveEntryHook). O nao-volatil NAO
-* sai daqui — ele sobrevive a batalha nos jogos, e e por isso que existe
-* Antidoto.
+* Zera o que os jogos zeram no fim da batalha: status volatil (confusao) e o
+* hook de entrada em combate (Intimidate/Download/clima automatico — ver
+* combatSystem.ts#resolveEntryHook). O nao-volatil NAO sai daqui — ele
+* sobrevive a batalha nos jogos, e e por isso que existe Antidoto.
+*
+* ESTAGIO DE ATRIBUTO SAIU DESTA LISTA NA PH-418, e essa e a mudanca central da
+* issue. O motivo do reset era real e esta medido no `combatSystem`: sem ele, o
+* debuff dos selvagens empilhava ate −6 e nunca voltava, e isso custava 27% das
+* kills/hora. Só que o "fim de batalha" deste motor e *nenhum inimigo
+* engajado*, o que numa hunt de campo aberto acontece no vao entre cada spawn —
+* entao o mesmo reset que protegia do debuff eterno matava o buff proprio em
+* cerca de um segundo. Agora quem limita e o PRAZO (18s por fonte), que resolve
+* os dois lados: debuff nao fica eterno e buff dura o que promete. Mesma troca
+* que o clima fez na PH-329.
 *
 * A imunidade de reaplicacao tambem nao e mexida: ela e sobre o tempo desde a
 * ultima cura, nao sobre a batalha.
 *
 * `estagioDeCritico` (Focus Energy) e `proximoGolpeCriticoGarantido` (Laser
-* Focus) sao volateis pelo mesmo motivo de `estagios`: contador/flag por
-* entidade de campo, nao pelo POKE — zeram junto no fim de luta.
+* Focus) CONTINUAM saindo aqui: sao contador/flag por entidade de campo, nao
+* tem prazo proprio, e sem o reset ficariam eternos — que e justamente o que a
+* PH-418 evitou dando prazo ao estagio.
 */
 function limparEstadoVolatil(entity) {
 	entity.statusVolatil = null;
-	entity.estagios = {};
-	entity.estagiosFonte = void 0;
 	entity.revelado = void 0;
 	entity.escudos = void 0;
 	entity.imuneAoTipoVolatil = void 0;
@@ -49113,6 +49232,21 @@ function danoDeClimaPorTurno(clima, hpMax, tipo1, tipo2) {
 function tickStatus(rng, entity, dt, clima = null) {
 	if (entity.imunidadeDeStatus > 0) entity.imunidadeDeStatus = Math.max(0, entity.imunidadeDeStatus - dt);
 	if (entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0) entity.curaBloqueadaAte = Math.max(0, entity.curaBloqueadaAte - dt);
+	if (entity.estagiosFonte) for (const chave of Object.keys(entity.estagiosFonte)) {
+		const fontes = entity.estagiosFonte[chave];
+		if (!fontes?.length) continue;
+		const vivas = envelhecerFontes(fontes, dt);
+		if (vivas.length === fontes.length) continue;
+		if (vivas.length === 0) {
+			delete entity.estagiosFonte[chave];
+			delete entity.estagios[chave];
+			continue;
+		}
+		entity.estagiosFonte[chave] = vivas;
+		const total = totalDeEstagio(vivas);
+		if (total === 0) delete entity.estagios[chave];
+		else entity.estagios[chave] = total;
+	}
 	if (entity.escudos) for (const chave of Object.keys(entity.escudos)) {
 		const restante = entity.escudos[chave] ?? 0;
 		if (restante > 0) entity.escudos[chave] = Math.max(0, restante - dt);
@@ -49175,7 +49309,10 @@ function tickStatus(rng, entity, dt, clima = null) {
 			entity.poke.status = null;
 		}
 	}
-	if (traitDaEntidade === "speed_boost") aplicarEstagioUnico(entity, "speed", 1, fonteDeTrait(entity, traitDaEntidade));
+	if (traitDaEntidade === "speed_boost") aplicarEstagioUnico(entity, "speed", 1, {
+		...fonteDeTrait(entity, traitDaEntidade),
+		acumula: true
+	});
 	if (traitDaEntidade === "moody") {
 		const opcoes = [
 			"atkFis",
@@ -49189,8 +49326,12 @@ function tickStatus(rng, entity, dt, clima = null) {
 		const sobe = opcoes[Math.floor(nextFloat(rng) * opcoes.length)];
 		const restantes = opcoes.filter((o) => o !== sobe);
 		const desce = restantes[Math.floor(nextFloat(rng) * restantes.length)];
-		aplicarEstagioUnico(entity, sobe, 2, fonteDeTrait(entity, traitDaEntidade));
-		aplicarEstagioUnico(entity, desce, -1, fonteDeTrait(entity, traitDaEntidade));
+		const fonteMoody = {
+			...fonteDeTrait(entity, traitDaEntidade),
+			acumula: true
+		};
+		aplicarEstagioUnico(entity, sobe, 2, fonteMoody);
+		aplicarEstagioUnico(entity, desce, -1, fonteMoody);
 	}
 	const vol = entity.statusVolatil;
 	if (vol && vol.turnosRestantes != null) {
@@ -76442,13 +76583,36 @@ function curaBloqueada(entity) {
 * especial (PH-121) — Belly Drum e Acupressure escrevem em `estagios` direto,
 * sem passar por `aplicarMudancasDeStat`, entao nao ganhariam fonte sozinhos.
 */
-function registrarFonteDoProprioGolpe(entity, stat, ability) {
-	registrarFonteDeEstagio(entity, stat, {
+function registrarFonteDoProprioGolpe(entity, stat, ability, estagios) {
+	registrarFonteDeEstagio(entity, stat, comPrazoPadrao({
 		id: ability.id,
 		tipo: "golpe",
 		proprio: true,
-		deQuem: SPECIES[entity.poke.speciesId]?.name ?? entity.poke.speciesId
-	});
+		deQuem: SPECIES[entity.poke.speciesId]?.name ?? entity.poke.speciesId,
+		estagios
+	}));
+}
+/**
+* Copia as contribuicoes de estagio de `origem` para `destino` com o prazo
+* cheio (PH-418) — Psych Up.
+*
+* Substitui o que o destino tinha, e nao soma: o golpe copia o estado do alvo,
+* nao acumula com o proprio.
+*/
+function copiarEstagiosComPrazoCheio(origem, destino) {
+	apagarTodosOsEstagios(destino);
+	if (!origem.estagiosFonte) return;
+	const copia = {};
+	for (const chave of Object.keys(origem.estagiosFonte)) {
+		const fontes = origem.estagiosFonte[chave];
+		if (!fontes?.length) continue;
+		copia[chave] = fontes.map((f) => ({
+			...f,
+			expiraEm: f.expiraEm == null ? null : DURACAO_DE_ESTAGIO_SEGUNDOS
+		}));
+		destino.estagios[chave] = totalDeEstagio(copia[chave]);
+	}
+	destino.estagiosFonte = copia;
 }
 function trocarEstagios(a, b, stats) {
 	for (const stat of stats) {
@@ -76872,11 +77036,11 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			attacker.destinyBondAtiva = true;
 			break;
 		case "haze":
-			attacker.estagios = {};
-			if (!isDead(target)) target.estagios = {};
+			apagarTodosOsEstagios(attacker);
+			if (!isDead(target)) apagarTodosOsEstagios(target);
 			break;
 		case "psych_up":
-			if (!isDead(target)) attacker.estagios = { ...target.estagios };
+			if (!isDead(target)) copiarEstagiosComPrazoCheio(target, attacker);
 			break;
 		case "pain_split":
 			if (!isDead(target)) {
@@ -76906,8 +77070,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		case "belly_drum": {
 			const perda = Math.round(attacker.poke.stats.hp / 2);
 			attacker.poke.hp = Math.max(1, attacker.poke.hp - perda);
-			attacker.estagios.atkFis = 6;
-			registrarFonteDoProprioGolpe(attacker, "atkFis", ability);
+			registrarFonteDoProprioGolpe(attacker, "atkFis", ability, 6);
 			break;
 		}
 		case "acupressure": {
@@ -76919,9 +77082,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 				"speed"
 			];
 			const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)];
-			const atual = attacker.estagios[stat] ?? 0;
-			attacker.estagios[stat] = Math.min(6, atual + 2);
-			registrarFonteDoProprioGolpe(attacker, stat, ability);
+			registrarFonteDoProprioGolpe(attacker, stat, ability, 2);
 			break;
 		}
 		case "aromatherapy":
@@ -78169,6 +78330,7 @@ function updateAutoHeal(world, gameState, dt) {
 			player.poke.hp = Math.round(player.poke.stats.hp * revive.reviveHpPercent);
 			player.fainted = false;
 			player.state = "wander";
+			apagarTodosOsEstagios(player);
 			timers.treinador = COOLDOWN_DO_TREINADOR;
 			world.reviveCountdown = null;
 			events.push({
@@ -79594,6 +79756,7 @@ function trocarPorDesmaio(world, gameState, dt, silent) {
 	player.fainted = false;
 	player.state = "wander";
 	player.targetId = null;
+	apagarTodosOsEstagios(player);
 	const entrada = spawnPointParaSala(world.mapDef.id, world.sala);
 	if (entrada) {
 		player.x = entrada.x;
