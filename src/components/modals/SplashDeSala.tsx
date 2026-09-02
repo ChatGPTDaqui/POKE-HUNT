@@ -21,7 +21,7 @@
 //    onde o `SalaChip` mora — o jogador ja olha pra la pra saber onde esta, e o
 //    centro do campo e onde o combate acontece.
 import { useEffect } from 'react'
-import { SALAS_POR_HUNT } from '@/data/biomas'
+import { quantidadeDeSalas } from '@/data/estagios'
 import { janelaDaSala, nomeDaSala } from '@/engine/systems/salaSystem'
 import { SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
 import { useJanelaSobreOCampo } from '@/stores/janelaSobreOCampo'
@@ -67,6 +67,8 @@ export function SplashDeSala() {
   const encerrar = useSplashDeSalaStore((s) => s.encerrar)
   const janelaAberta = useJanelaSobreOCampo()
   const faixa = useWorldStore((s) => s.mapDef?.levelRange)
+  // PH-427: o total de salas vem do estagio, nao de uma constante.
+  const salas = quantidadeDeSalas(useWorldStore((s) => s.mapDef?.id) ?? '')
 
   // O RELOGIO NAO DEPENDE DE ESTAR VISIVEL, e isso e proposital (ver a nota 2 do
   // topo). O efeito roda pelo `id`, entao ele tambem nao e reiniciado por
@@ -80,10 +82,10 @@ export function SplashDeSala() {
 
   if (!atual || janelaAberta) return null
 
-  const { sala, fechouCiclo } = atual
+  const { sala, fechouEstagio } = atual
   const nome = nomeDaSala(sala) ?? sala.chave
   const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.nome ?? null
-  const janela = faixa ? janelaDaSala(faixa, sala.indice) : null
+  const janela = faixa ? janelaDaSala(faixa, sala.indice, salas) : null
 
   return (
     <>
@@ -117,11 +119,11 @@ export function SplashDeSala() {
 
           <div className="relative flex flex-col items-center gap-[.15em]">
             <span className="text-[.62em] font-semibold uppercase tracking-[.18em] text-sky-300/90">
-              {fechouCiclo ? `Ciclo ${sala.ciclos} concluído` : 'Nova área'}
+              {fechouEstagio ? `Estágio concluído` : 'Nova área'}
             </span>
             <span className="text-[1.15em] font-black leading-tight text-n50">{nome}</span>
             <span className="flex items-center gap-[.5em] text-[.66em] text-n400">
-              <span className="tabular-nums">Sala {sala.indice + 1}/{SALAS_POR_HUNT}</span>
+              <span className="tabular-nums">Sala {sala.indice + 1}/{salas}</span>
               {janela && <span className="tabular-nums">Lv {janela[0]}-{janela[1]}</span>}
               {bioma && <span className="max-w-[8em] truncate">{bioma}</span>}
             </span>

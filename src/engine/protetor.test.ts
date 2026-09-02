@@ -17,11 +17,16 @@ import { buildMapWorld, stepWorld, handleEnemyDefeated } from './simulation'
 import {
   protetorDaSala, ESPERA_MAXIMA_PELA_AUTORIDADE, SALA_TRANSITION_COUNTDOWN,
 } from './systems/salaSystem'
-import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
+import { ABATES_POR_SALA } from '@/data/biomas'
+import { quantidadeDeSalas } from '@/data/estagios'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState, ProtetorPendente } from './types'
 
 const HUNT = 'mata_e1'
+// PH-427: o estagio 1 tem 3 salas, nao 10. Ler o numero da fonte em vez de
+// escrever 3 aqui e o que faz este arquivo continuar valendo se a curva de
+// SALAS_POR_ESTAGIO mudar.
+const SALAS = quantidadeDeSalas(HUNT)
 
 function mundo(semente: number): WorldState {
   const rng = createRng(semente)
@@ -31,33 +36,33 @@ function mundo(semente: number): WorldState {
 
 describe('protetorDaSala (logica pura)', () => {
   it('sem sala, nao pede protetor', () => {
-    expect(protetorDaSala(null)).toBeNull()
+    expect(protetorDaSala(null, HUNT)).toBeNull()
   })
 
   it('sub-bioma desconhecido (fora dos 12 de ORDEM_DOS_BIOMAS) nao pede protetor', () => {
-    expect(protetorDaSala({ indice: SALAS_POR_HUNT - 1, chave: 'chave-que-nao-existe', abates: 0, ciclos: 0 })).toBeNull()
+    expect(protetorDaSala({ indice: SALAS - 1, chave: 'chave-que-nao-existe', abates: 0, ciclos: 0 }, HUNT)).toBeNull()
   })
 
-  it('salas 1-9 de igneo pedem Guardian', () => {
-    for (let indice = 0; indice < SALAS_POR_HUNT - 1; indice++) {
-      expect(protetorDaSala({ indice, chave: 'volcano', abates: 0, ciclos: 0 })).toBe('guardian')
+  it('as salas antes da ultima, em igneo, pedem Guardian', () => {
+    for (let indice = 0; indice < SALAS - 1; indice++) {
+      expect(protetorDaSala({ indice, chave: 'volcano', abates: 0, ciclos: 0 }, HUNT)).toBe('guardian')
     }
   })
 
   it('a ultima sala de igneo pede o Lord', () => {
-    expect(protetorDaSala({ indice: SALAS_POR_HUNT - 1, chave: 'volcano', abates: 0, ciclos: 0 })).toBe('lord')
+    expect(protetorDaSala({ indice: SALAS - 1, chave: 'volcano', abates: 0, ciclos: 0 }, HUNT)).toBe('lord')
   })
 
   // PH-225: prova que nao esta hardcoded so pro piloto — 'jungle' e sub-bioma
   // de 'mata' (data/biomas.ts), o SEGUNDO bioma de ORDEM_DOS_BIOMAS.
-  it('salas 1-9 de outro bioma (mata) TAMBEM pedem Guardian', () => {
-    for (let indice = 0; indice < SALAS_POR_HUNT - 1; indice++) {
-      expect(protetorDaSala({ indice, chave: 'jungle', abates: 0, ciclos: 0 })).toBe('guardian')
+  it('as salas antes da ultima, em outro bioma (mata), TAMBEM pedem Guardian', () => {
+    for (let indice = 0; indice < SALAS - 1; indice++) {
+      expect(protetorDaSala({ indice, chave: 'jungle', abates: 0, ciclos: 0 }, HUNT)).toBe('guardian')
     }
   })
 
   it('a ultima sala de outro bioma (mata) TAMBEM pede o Lord', () => {
-    expect(protetorDaSala({ indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: 0, ciclos: 0 })).toBe('lord')
+    expect(protetorDaSala({ indice: SALAS - 1, chave: 'jungle', abates: 0, ciclos: 0 }, HUNT)).toBe('lord')
   })
 })
 
@@ -145,7 +150,7 @@ describe('protetor bloqueia o avanco de sala (PH-202)', () => {
 
   it('sala 10 do bioma piloto pede o LORD, no teto da faixa (nao so da janela)', () => {
     const world = mundo(51)
-    world.sala = { indice: SALAS_POR_HUNT - 1, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.sala = { indice: SALAS - 1, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
@@ -251,7 +256,7 @@ describe('avanco de biomaProgress ao vencer o Lord (PH-226)', () => {
   it('bioma esperado (indice bate com biomaProgress atual): avanca +1', () => {
     useGameStateStore.getState().setBiomaProgress('faixa1', INDICE_DE_MATA)
     const world = mundo(70)
-    world.sala = { indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.sala = { indice: SALAS - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
@@ -266,7 +271,7 @@ describe('avanco de biomaProgress ao vencer o Lord (PH-226)', () => {
   it('bioma fora de ordem (biomaProgress nao bate): NAO avanca — defesa em profundidade', () => {
     useGameStateStore.getState().setBiomaProgress('faixa1', 0) // esperava campo_aberto, nao mata
     const world = mundo(71)
-    world.sala = { indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.sala = { indice: SALAS - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
@@ -297,7 +302,7 @@ describe('avanco de biomaProgress ao vencer o Lord (PH-226)', () => {
     useGameStateStore.getState().setBiomaProgress('faixa1', INDICE_DE_MATA)
     useGameStateStore.getState().setBiomaProgress('faixa2', 99)
     const world = mundo(73)
-    world.sala = { indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.sala = { indice: SALAS - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()

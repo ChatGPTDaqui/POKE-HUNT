@@ -16,12 +16,14 @@ import {
   reconciliarSalaDaAutoridade, ESPERA_MAXIMA_PELA_AUTORIDADE, protetorDaSala,
 } from './systems/salaSystem'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
-import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
+import { ABATES_POR_SALA } from '@/data/biomas'
+import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, quantidadeDeSalas, salasDoEstagio } from '@/data/estagios'
 import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { SalaAtiva, WorldState } from './types'
 
 const HUNT = 'mata_e1'
+const SALAS = quantidadeDeSalas(HUNT)
 
 function mundo(semente: number, mapa = HUNT): WorldState {
   const rng = createRng(semente)
@@ -44,23 +46,23 @@ function mundo(semente: number, mapa = HUNT): WorldState {
  * caminho que nao existe mais em bioma nenhum do jogo.
  */
 /**
- * Devolve `avancou`/`fechouCiclo` igual `registrarAbate` devolveria — o
+ * Devolve `avancou`/`fechouEstagio` igual `registrarAbate` devolveria — o
  * sinal se perde de verdade quando a transicao arma via
  * `resolverProtetorDaSala` (o `armarTransicaoDeSala` interno descarta o
- * retorno), entao quem chama `abater()` esperando ler `fechouCiclo` no
+ * retorno), entao quem chama `abater()` esperando ler `fechouEstagio` no
  * evento do abate 30 precisa deste substituto.
  */
-function resolverProtetorSeHouver(world: WorldState): { avancou: boolean; fechouCiclo: boolean } {
-  if (world.sala!.abates < ABATES_POR_SALA || !protetorDaSala(world.sala)) {
-    return { avancou: false, fechouCiclo: false }
+function resolverProtetorSeHouver(world: WorldState): { avancou: boolean; fechouEstagio: boolean } {
+  if (world.sala!.abates < ABATES_POR_SALA || !protetorDaSala(world.sala, HUNT)) {
+    return { avancou: false, fechouEstagio: false }
   }
   const gameState = useGameStateStore.getState()
   if (!world.protetorPendente) tick(world, 0.1, gameState) // nasce o protetor
   const protetor = world.enemies.find((e) => e.isProtetor)
   if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
   world.enemies = world.enemies.filter((e) => !e.isProtetor)
-  const fechouCiclo = world.salaPendente?.indice === 0
-  return { avancou: world.salaCountdownRemaining != null, fechouCiclo }
+  const fechouEstagio = world.salaPendente?.indice === 0
+  return { avancou: world.salaCountdownRemaining != null, fechouEstagio }
 }
 
 /**
@@ -194,8 +196,8 @@ describe('salas', () => {
   it('fechar as 10 salas reinicia o ciclo em vez de acabar a hunt', () => {
     const world = mundo(3)
     // Um ciclo inteiro menos o ultimo abate.
-    const eventos = abater(world, ABATES_POR_SALA * SALAS_POR_HUNT)
-    const fechamentos = eventos.filter((e) => e.fechouCiclo)
+    const eventos = abater(world, ABATES_POR_SALA * SALAS)
+    const fechamentos = eventos.filter((e) => e.fechouEstagio)
 
     expect(fechamentos.length).toBe(1)
     expect(world.sala!.indice).toBe(0)
@@ -250,29 +252,42 @@ describe('salas', () => {
     expect(poolAtivo(HUNT, null, inteiro)).toBe(inteiro)
   })
 
-  // Uma faixa cobre 30 niveis. Sem a janela, a PRIMEIRA sala ja podia jogar um
+  // Uma faixa cobria 30 niveis. Sem a janela, a PRIMEIRA sala ja podia jogar um
   // POKE Lv30 contra quem acabou de sair do Hospital — medido no motor
   // headless: Charmander Lv25 morreu em 4 abates em 30 minutos de "Mata I", e
-  // com a janela fez 114 abates e chegou na sala 10.
-  it('a janela de nivel sobe com a sala e cobre a faixa inteira sem buraco', () => {
-    const faixa: [number, number] = [1, 30]
-    const janelas = Array.from({ length: SALAS_POR_HUNT }, (_, i) => janelaDaSala(faixa, i))
+  // com a janela fez 114 abates e chegou na ultima sala.
+  //
+  // PH-427: agora o teste roda nos 10 ESTAGIOS, cada um com o numero de salas
+  // dele (3 a 8). E o caso mais apertado do sistema: 10 niveis divididos por 8
+  // salas dao degraus de 1,25 nivel, e varias salas ficam com janela de um
+  // unico nivel. Nenhum buraco e nenhuma inversao pode aparecer ai.
+  it('a janela cobre o estagio inteiro, sem buraco, nos 10 estagios', () => {
+    for (let estagio = 1; estagio <= ESTAGIOS_POR_BIOMA; estagio++) {
+      const niveis = niveisDoEstagio(estagio)
+      const salas = salasDoEstagio(estagio)
+      const janelas = Array.from({ length: salas }, (_, i) => janelaDaSala(niveis, i, salas))
+      const onde = `estagio ${estagio} (${salas} salas, Lv ${niveis[0]}-${niveis[1]})`
 
-    expect(janelas[0][0]).toBe(1)
-    expect(janelas[SALAS_POR_HUNT - 1][1]).toBe(30)
-    for (const [lo, hi] of janelas) {
-      expect(lo).toBeGreaterThanOrEqual(1)
-      expect(hi).toBeLessThanOrEqual(30)
-      expect(hi).toBeGreaterThanOrEqual(lo)
-    }
-    // Contigua: a sala seguinte nunca comeca depois do fim da anterior, senao
-    // haveria nivel nenhuma sala alcanca.
-    for (let i = 1; i < janelas.length; i++) {
-      expect(janelas[i][0], `buraco entre a sala ${i} e a ${i + 1}`).toBeLessThanOrEqual(janelas[i - 1][1] + 1)
-    }
-    // E monotonica: a hunt afunda, nunca volta.
-    for (let i = 1; i < janelas.length; i++) {
-      expect(janelas[i][0]).toBeGreaterThanOrEqual(janelas[i - 1][0])
+      // O criterio de aceite da issue: a primeira sala comeca no PISO do
+      // estagio e a ultima termina no TETO dele.
+      expect(janelas[0][0], `${onde}: a sala 1 nao comeca no piso`).toBe(niveis[0])
+      expect(janelas[salas - 1][1], `${onde}: a ultima sala nao chega no teto`).toBe(niveis[1])
+
+      for (const [lo, hi] of janelas) {
+        expect(lo, onde).toBeGreaterThanOrEqual(niveis[0])
+        expect(hi, onde).toBeLessThanOrEqual(niveis[1])
+        expect(hi, onde).toBeGreaterThanOrEqual(lo)
+      }
+      // Contigua: a sala seguinte nunca comeca depois do fim da anterior, senao
+      // haveria nivel que nenhuma sala alcanca.
+      for (let i = 1; i < janelas.length; i++) {
+        expect(janelas[i][0], `${onde}: buraco entre a sala ${i} e a ${i + 1}`)
+          .toBeLessThanOrEqual(janelas[i - 1][1] + 1)
+      }
+      // E monotonica: a hunt afunda, nunca volta.
+      for (let i = 1; i < janelas.length; i++) {
+        expect(janelas[i][0], onde).toBeGreaterThanOrEqual(janelas[i - 1][0])
+      }
     }
   })
 
@@ -283,9 +298,28 @@ describe('salas', () => {
       { seed: 0, rng: createRng(9), counters: { entity: 1, effect: 1, pendingHit: 1 } },
       { sala: { indice: 0, chave: 'tall-grass', abates: 0, ciclos: 0 } },
     )
-    const [, teto] = janelaDaSala(world.mapDef!.levelRange, 0)
+    const [, teto] = janelaDaSala(world.mapDef!.levelRange, 0, SALAS)
     for (const inimigo of world.enemies) {
       expect(inimigo.poke.level, `${inimigo.poke.speciesId} acima da janela da sala 1`).toBeLessThanOrEqual(teto)
+    }
+  })
+
+  // O criterio de aceite da PH-427, nomeado: o Lord muda de endereco conforme
+  // o estagio. Com a constante antiga (indice 9 fixo) o estagio 1 nunca teria
+  // Lord — a sala 3 pediria Guardian pra sempre e o estagio nunca fecharia.
+  it('o Lord mora na ULTIMA sala do estagio, e a ultima muda com o estagio', () => {
+    const casos: [number, number][] = [[1, 3], [10, 8]]
+    for (const [estagio, salasEsperadas] of casos) {
+      const mapId = estagioId('mata', estagio)
+      expect(quantidadeDeSalas(mapId), `estagio ${estagio}`).toBe(salasEsperadas)
+      for (let indice = 0; indice < salasEsperadas - 1; indice++) {
+        expect(protetorDaSala({ indice, chave: 'jungle', abates: 0, ciclos: 0 }, mapId), `e${estagio} sala ${indice + 1}`)
+          .toBe('guardian')
+      }
+      expect(
+        protetorDaSala({ indice: salasEsperadas - 1, chave: 'jungle', abates: 0, ciclos: 0 }, mapId),
+        `e${estagio} sala ${salasEsperadas}`,
+      ).toBe('lord')
     }
   })
 })
@@ -376,7 +410,11 @@ describe('sala sob autoridade do servidor', () => {
   it('ciclo NOVO conta como avanco, mesmo com indice menor', () => {
     const world = mundo(11)
     const primeira = world.sala!.chave
-    world.sala = { indice: 9, chave: primeira, abates: ABATES_POR_SALA, ciclos: 0 }
+    // PH-427: a ULTIMA sala do estagio, lida da fonte. Era 9 fixo, um indice
+    // que nem existe num estagio de 3 salas — e com a posicao comparavel agora
+    // multiplicada pelas salas DO ESTAGIO (`ciclos * salas + indice`), o 9
+    // ficava adiante do ciclo novo e a reconciliacao recusava o avanco.
+    world.sala = { indice: SALAS - 1, chave: primeira, abates: ABATES_POR_SALA, ciclos: 0 }
     const outra = Object.keys(POOL_POR_SALA[HUNT]).find((c) => c !== primeira)!
 
     reconciliarSalaDaAutoridade(world, { indice: 0, chave: outra, abates: 0, ciclos: 1 })

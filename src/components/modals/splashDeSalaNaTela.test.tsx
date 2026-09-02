@@ -23,7 +23,9 @@ import type { SalaAtiva } from '@/engine/types'
 
 /** `grass` existe em `SUB_BIOMA_POR_CHAVE` e se chama "Relvado". */
 const SALA: SalaAtiva = { indice: 2, chave: 'grass', abates: 0, ciclos: 0 }
-const MAPA = { id: 'mata_e1', name: 'Mata I', levelRange: [1, 30] }
+// PH-427: o estagio 1 tem 3 salas e cobre Lv 1-10 — a sala do fixture (indice
+// 2) e a ULTIMA dele, e o splash diz "Sala 3/3".
+const MAPA = { id: 'mata_e1', name: 'Mata 1', levelRange: [1, 10] }
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -48,17 +50,17 @@ describe('splash de chegada em sala nova, na tela (PH-395)', () => {
     const texto = document.body.textContent ?? ''
     expect(texto).toContain('Relvado')
     expect(texto).toContain('Nova área')
-    expect(texto).toContain('Sala 3/10')
+    expect(texto).toContain('Sala 3/3')
     // A faixa da SALA, nao a da hunt: e ela que sobe conforme o jogador avanca.
     expect(texto).toMatch(/Lv \d+-\d+/)
   })
 
-  it('fechar ciclo troca o texto de cima', () => {
+  it('fechar o estagio troca o texto de cima', () => {
     splashDeSalaStore.getState().anunciarSala({ ...SALA, indice: 0, ciclos: 2 }, true)
     render(<SplashDeSala />)
 
     const texto = document.body.textContent ?? ''
-    expect(texto).toContain('Ciclo 2 concluído')
+    expect(texto).toContain('Estágio concluído')
     expect(texto).not.toContain('Nova área')
   })
 

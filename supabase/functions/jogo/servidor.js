@@ -46410,6 +46410,41 @@ function parseEstagioId(mapId) {
 	};
 }
 /**
+* Prefixo que o espelho do Modo Pesadelo poe no mapId da hunt de origem
+* (`nightmareMaps.ts#buildNightmareMirror`).
+*/
+var PREFIXO_DO_PESADELO = "nightmare_";
+/**
+* Como `parseEstagioId`, mas aceita tambem o espelho do Pesadelo.
+*
+* DUAS FUNCOES DE PROPOSITO, e a diferenca importa. `parseEstagioId` e a
+* ESTRITA: ela recusa o espelho porque quem pergunta "que bioma e este mapId"
+* pro gate de progresso nao pode receber `nightmare_marinho` como bioma. Esta
+* aqui e a PERMISSIVA, pra quem pergunta sobre a FORMA da hunt — quantas salas
+* ela tem, que janela de nivel cada uma cobre — onde o espelho e identico a
+* origem, porque ele copia a geometria e so desloca o nivel.
+*/
+function parseEstagioIdOuEspelho(mapId) {
+	const pesadelo = mapId.startsWith(PREFIXO_DO_PESADELO);
+	const estagio = parseEstagioId(pesadelo ? mapId.slice(10) : mapId);
+	return estagio ? {
+		...estagio,
+		pesadelo
+	} : null;
+}
+/**
+* Quantas salas a hunt deste mapId tem.
+*
+* Hunt que nao e de estagio (a inicial, as BOSS, o Treinamento) nao tem sistema
+* de salas — `temSalas()` responde `false` antes de alguem chegar aqui —, mas o
+* fallback existe porque o caminho de spawn pergunta o numero ANTES de saber se
+* a hunt tem salas. Devolver 0 ali daria divisao por zero na janela de nivel.
+*/
+function quantidadeDeSalas(mapId) {
+	const estagio = parseEstagioIdOuEspelho(mapId);
+	return estagio ? salasDoEstagio(estagio.estagio) : SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1];
+}
+/**
 * Indice do bioma deste mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` quando o
 * mapId nao e de um estagio de bioma (hunt inicial, BOSS, Pesadelo).
 *
@@ -75445,8 +75480,19 @@ function triggerAttackAnim(entity, isAoe, target) {
 //#region src/engine/systems/climaAmbiente.ts
 /**
 * Identidade da sala DENTRO da sessao. `indice` sozinho nao serve: ele volta a
-* 0 a cada ciclo de 10 salas, e o jogador que desse a volta cairia sempre no
+* 0 a cada volta no estagio, e o jogador que desse a volta cairia sempre no
 * mesmo clima da primeira sala.
+*
+* `SALAS_POR_HUNT` AQUI E MULTIPLICADOR DE SEMENTE, E NAO CONTAGEM DE SALA, e
+* por isso ele NAO virou `salasDaHunt(mapId)` na PH-427. Duas razoes:
+*
+*  - trocar o multiplicador reembaralha o clima de toda sala de todo jogador,
+*    de graca, sem nenhum ganho — o valor so precisa deixar a identidade
+*    unica;
+*  - 10 e maior que o maior estagio (8 salas), entao `ciclos * 10 + indice`
+*    continua injetivo. Usar o numero de salas do estagio faria a identidade
+*    depender do estagio, e a mesma sala teria clima diferente conforme o
+*    degrau — o oposto de "a sala tem um clima".
 */
 function posicaoDaSala(sala) {
 	return sala.ciclos * 10 + sala.indice;
@@ -79164,20 +79210,27 @@ function novaSala(rng, mapId, indice, ciclos) {
 * A janela de nivel da sala: a hunt AFUNDA conforme as salas sao limpas.
 *
 * BUG DE BALANCEAMENTO QUE ISTO CORRIGE, medido no motor headless: uma faixa
-* cobre 30 niveis, entao sem janela a primeira sala da "Mata I" (Lv1-30) ja
+* cobria 30 niveis, entao sem janela a primeira sala da "Mata I" (Lv1-30) ja
 * podia jogar um Butterfree Lv30 contra um POKE recem-saido do Hospital. Um
 * Charmander Lv25 morreu em 4 abates numa simulacao de 30 minutos, gastando 21
 * pocoes no caminho. As zonas antigas tinham 10 niveis e nao expunham isso.
 *
-* A sala 1 fica na base da faixa e a 10 no topo — o que da a mecanica de salas
-* um significado mecanico (a hunt fica mais dura conforme voce avanca) alem da
-* variedade de sub-bioma.
+* A primeira sala fica na base do estagio e a ultima no topo — o que da a
+* mecanica de salas um significado mecanico (a hunt fica mais dura conforme
+* voce avanca) alem da variedade de sub-bioma.
+*
+* `salas` E PARAMETRO E NAO CONSTANTE DESDE A PH-427, porque o estagio agora
+* tem de 3 a 8 salas conforme o numero dele — e o degrau, que era sempre
+* 30/10 = 3 niveis, passa a variar de 10/3 (3,3 niveis) a 10/8 (1,25 nivel).
+* Com estagio de 10 niveis e 8 salas, os degraus arredondam pra 1 nivel cada e
+* varias salas ficam com janela de 1 unico nivel — o que e o desenho, nao um
+* defeito: o estagio inteiro cobre 10 niveis e a sala e um decimo dele.
 */
-function janelaDaSala(faixa, indice) {
+function janelaDaSala(faixa, indice, salas) {
 	const [lo, hi] = faixa;
 	const largura = hi - lo;
-	if (largura <= 0) return [lo, hi];
-	const passo = largura / 10;
+	if (largura <= 0 || salas <= 0) return [lo, hi];
+	const passo = largura / salas;
 	const inicio = Math.round(lo + passo * indice);
 	const fim = Math.round(lo + passo * (indice + 1));
 	return [Math.max(lo, inicio), Math.max(Math.max(lo, inicio), Math.min(hi, fim))];
@@ -79208,7 +79261,7 @@ var cacheDePesos = /* @__PURE__ */ new Map();
 * Memoizado porque `contextoDeSpawn` roda a cada spawn (milhares de vezes por
 * flush no farm offline) e a resposta so depende de (mapa, sub-bioma, indice da
 * sala) — a janela de nivel sai do indice, e o pool sai dos dois. O cache e
-* limitado por construcao: mapas com sala x sub-biomas deles x `SALAS_POR_HUNT`.
+* limitado por construcao: mapas com sala x sub-biomas deles x salas do estagio.
 */
 function pesosDaSala(chave, subBioma, pool) {
 	const pronto = cacheDePesos.get(chave);
@@ -79238,7 +79291,7 @@ function contextoDeSpawn(mapId, faixa, sala, fallback) {
 		pool,
 		peso: (id) => getEncounter(id)?.weight ?? 0
 	};
-	const janela = janelaDaSala(faixa, sala.indice);
+	const janela = janelaDaSala(faixa, sala.indice, quantidadeDeSalas(mapId));
 	const naJanela = pool.filter((id) => {
 		const enc = getEncounter(id);
 		return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0];
@@ -79334,17 +79387,24 @@ function contextoDoProtetor(mapId, ctx, sala, tipo) {
 * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
 * "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
 * o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
-* o ultimo da ordem, tendo protetor). Salas 1-9 (indice 0-8) pedem Guardian ao
-* fechar a quota; a ultima sala (indice SALAS_POR_HUNT-1) pede o Lord da
-* faixa. Pura — nao sorteia nada, so decide QUAL protetor a sala pede, se
-* pedir algum. A entidade em si (RNG, criacao) fica em simulation.ts, que ja
-* importa este modulo — colocar aqui criaria import circular.
+* o ultimo da ordem, tendo protetor). Toda sala menos a ultima pede Guardian ao
+* fechar a quota; a ULTIMA SALA DO ESTAGIO pede o Lord. Pura — nao sorteia
+* nada, so decide QUAL protetor a sala pede, se pedir algum. A entidade em si
+* (RNG, criacao) fica em simulation.ts, que ja importa este modulo — colocar
+* aqui criaria import circular.
+*
+* `mapId` ENTROU NA ASSINATURA NA PH-427, e nao e conveniencia: antes a ultima
+* sala era sempre o indice 9, agora ela e o indice `quantidadeDeSalas(mapId) - 1`,
+* que vale 2 no estagio 1 e 7 no estagio 10. A `SalaAtiva` nao carrega o
+* estagio (ela guarda sub-bioma, indice, abates e ciclos, e e isso que vai pro
+* banco), entao a informacao so pode vir do mapId. Sem ele, o estagio 1 nunca
+* teria Lord — a sala 3 pediria Guardian pra sempre e o estagio nunca fecharia.
 */
-function protetorDaSala(sala) {
+function protetorDaSala(sala, mapId) {
 	if (!sala) return null;
 	const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave;
 	if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null;
-	return sala.indice >= 9 ? "lord" : "guardian";
+	return sala.indice >= quantidadeDeSalas(mapId) - 1 ? "lord" : "guardian";
 }
 /**
 * Conta um abate na sala atual. Ao fechar a quota, NAO troca de sala na
@@ -79363,28 +79423,28 @@ function registrarAbate(world, mapId, opts = {}) {
 	const sala = world.sala;
 	if (!sala) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	sala.abates += 1;
 	if (sala.abates < 30) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	if (world.salaSobAutoridade) {
 		sala.abates = 30;
 		return {
 			avancou: false,
-			fechouCiclo: false
+			fechouEstagio: false
 		};
 	}
 	sala.abates = 30;
-	if (protetorDaSala(sala)) return {
+	if (protetorDaSala(sala, mapId)) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	if (opts.manualAdvance) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	return armarTransicaoDeSala(world, mapId);
 }
@@ -79405,7 +79465,7 @@ function registrarAbate(world, mapId, opts = {}) {
 * recusar.
 */
 function salaTravadaPeloProtetor(world) {
-	return protetorDaSala(world.sala) != null && !world.protetorResolvido;
+	return protetorDaSala(world.sala, world.mapDef?.id ?? "") != null && !world.protetorResolvido;
 }
 /**
 * Avanco manual (PH-178/179): forca a transicao mesmo com o toggle ligado —
@@ -79433,11 +79493,11 @@ function solicitarAvancoDeSala(world, mapId) {
 	const sala = world.sala;
 	if (!sala || sala.abates < 30) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	if (salaTravadaPeloProtetor(world)) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	return armarTransicaoDeSala(world, mapId);
 }
@@ -79445,16 +79505,16 @@ function armarTransicaoDeSala(world, mapId) {
 	const sala = world.sala;
 	if (!sala) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	if (world.salaCountdownRemaining != null || world.salaPendente) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	const proximo = sala.indice + 1;
-	const fechouCiclo = proximo >= 10;
-	const indice = fechouCiclo ? 0 : proximo;
-	const ciclos = fechouCiclo ? sala.ciclos + 1 : sala.ciclos;
+	const fechouEstagio = proximo >= quantidadeDeSalas(mapId);
+	const indice = fechouEstagio ? 0 : proximo;
+	const ciclos = fechouEstagio ? sala.ciclos + 1 : sala.ciclos;
 	world.salaPendente = novaSala(world.rng, mapId, indice, ciclos) ?? {
 		...sala,
 		indice,
@@ -79464,7 +79524,7 @@ function armarTransicaoDeSala(world, mapId) {
 	world.salaCountdownRemaining = 3;
 	return {
 		avancou: true,
-		fechouCiclo
+		fechouEstagio
 	};
 }
 /**
@@ -79820,10 +79880,10 @@ var celebracaoStore = createStore()((set) => ({
 var proximoId = 1;
 var splashDeSalaStore = createStore()((set) => ({
 	atual: null,
-	anunciarSala: (sala, fechouCiclo) => set({ atual: {
+	anunciarSala: (sala, fechouEstagio) => set({ atual: {
 		id: proximoId++,
 		sala: { ...sala },
-		fechouCiclo
+		fechouEstagio
 	} }),
 	encerrar: (id) => set((estado) => estado.atual?.id === id ? { atual: null } : estado),
 	limpar: () => set({ atual: null })
@@ -80111,7 +80171,7 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 * de recriacao.
 */
 function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
-	const tipo = protetorDaSala(world.sala);
+	const tipo = protetorDaSala(world.sala, world.mapDef?.id ?? "");
 	if (!tipo) {
 		world.protetorPendente = null;
 		return false;
@@ -80287,7 +80347,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 	const enemies = [];
 	let protetorPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
-		const tipoDeProtetor = sala && sala.abates >= 30 ? protetorDaSala(sala) : null;
+		const tipoDeProtetor = sala && sala.abates >= 30 ? protetorDaSala(sala, mapId) : null;
 		if (tipoDeProtetor) {
 			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
@@ -80457,7 +80517,8 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		}
 	}
 	if (enemy.isProtetor) {
-		if (world.sala?.indice === 9) avancarBiomaProgressSeForOProximo(world, gameState);
+		const ultimaDoEstagio = quantidadeDeSalas(world.mapDef?.id ?? "") - 1;
+		if (world.sala?.indice === ultimaDoEstagio) avancarBiomaProgressSeForOProximo(world, gameState);
 		resolverProtetorDaSala(world, world.mapDef.id, { manualAdvance: opts.manualAdvance ?? false });
 	}
 	return {
@@ -80507,7 +80568,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.salaCountdownRemaining -= dt;
 		if (world.salaCountdownRemaining <= 0) {
 			world.salaCountdownRemaining = null;
-			const fechouCiclo = world.salaPendente?.indice === 0;
+			const fechouEstagio = world.salaPendente?.indice === 0;
 			aplicarTransicaoDeSala(world, world.mapDef.id);
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
@@ -80517,7 +80578,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 					world.enemies.push(enemy);
 				}
 				world.respawnTimer = world.mapDef.respawnDelay;
-				if (!silent && world.sala) splashDeSalaStore.getState().anunciarSala(world.sala, fechouCiclo);
+				if (!silent && world.sala) splashDeSalaStore.getState().anunciarSala(world.sala, fechouEstagio);
 			}
 		}
 		if (!silent) updateAnimations(world, dt);
@@ -81836,7 +81897,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
 	}, { upsert: "user_id,conquista" });
-	const tipoDeProtetor = world.protetorPendente ? protetorDaSala(world.sala) : null;
+	const tipoDeProtetor = world.protetorPendente ? protetorDaSala(world.sala, world.mapDef?.id ?? "") : null;
 	await chamarRpc(cfg, "gravar_flush_de_sessao", {
 		p_simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
 		p_session_id: sessao.id,

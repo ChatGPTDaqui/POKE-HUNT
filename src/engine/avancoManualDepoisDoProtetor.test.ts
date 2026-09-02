@@ -36,11 +36,13 @@ import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld } from './simulation'
 import { resolverProtetorDaSala, salaTravadaPeloProtetor } from './systems/salaSystem'
-import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
+import { ABATES_POR_SALA } from '@/data/biomas'
+import { quantidadeDeSalas } from '@/data/estagios'
 import { especialidadeNiveisDefault } from '@/data/especialidades'
 import type { WorldState } from './types'
 
 const HUNT = 'mata_e1'
+const SALAS = quantidadeDeSalas(HUNT)
 
 /** Mundo numa sala de bioma com a quota fechada — o estado em que o toggle vale. */
 function mundoComQuotaFechada(indice: number, chave = 'forest'): WorldState {
@@ -131,10 +133,10 @@ describe('o toggle de avanco manual vale depois do protetor (PH-292)', () => {
     // desta funcao (`avancarBiomaProgressSeForOProximo`, em
     // `handleEnemyDefeated`). Segurar a transicao aqui nao pode custar o
     // progresso — este caso guarda a fronteira entre as duas coisas.
-    const world = mundoComQuotaFechada(SALAS_POR_HUNT - 1)
+    const world = mundoComQuotaFechada(SALAS - 1)
     resolverProtetorDaSala(world, HUNT, { manualAdvance: true })
     expect(world.salaCountdownRemaining).toBeNull()
-    expect(world.sala?.indice).toBe(SALAS_POR_HUNT - 1)
+    expect(world.sala?.indice).toBe(SALAS - 1)
     expect(world.sala?.ciclos, 'o ciclo so fecha quando a sala de fato virar').toBe(0)
   })
 })

@@ -33,8 +33,19 @@ import type { Clima, ClimaTipo, SalaAtiva, WorldState } from '../types'
 
 /**
  * Identidade da sala DENTRO da sessao. `indice` sozinho nao serve: ele volta a
- * 0 a cada ciclo de 10 salas, e o jogador que desse a volta cairia sempre no
+ * 0 a cada volta no estagio, e o jogador que desse a volta cairia sempre no
  * mesmo clima da primeira sala.
+ *
+ * `SALAS_POR_HUNT` AQUI E MULTIPLICADOR DE SEMENTE, E NAO CONTAGEM DE SALA, e
+ * por isso ele NAO virou `salasDaHunt(mapId)` na PH-427. Duas razoes:
+ *
+ *  - trocar o multiplicador reembaralha o clima de toda sala de todo jogador,
+ *    de graca, sem nenhum ganho — o valor so precisa deixar a identidade
+ *    unica;
+ *  - 10 e maior que o maior estagio (8 salas), entao `ciclos * 10 + indice`
+ *    continua injetivo. Usar o numero de salas do estagio faria a identidade
+ *    depender do estagio, e a mesma sala teria clima diferente conforme o
+ *    degrau — o oposto de "a sala tem um clima".
  */
 function posicaoDaSala(sala: SalaAtiva): number {
   return sala.ciclos * SALAS_POR_HUNT + sala.indice

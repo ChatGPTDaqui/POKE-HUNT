@@ -27,11 +27,13 @@ import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld } from './simulation'
 import { solicitarAvancoDeSala, salaTravadaPeloProtetor } from './systems/salaSystem'
-import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
+import { ABATES_POR_SALA } from '@/data/biomas'
+import { quantidadeDeSalas } from '@/data/estagios'
 import { especialidadeNiveisDefault } from '@/data/especialidades'
 import type { WorldState } from './types'
 
 const HUNT = 'mata_e1'
+const SALAS = quantidadeDeSalas(HUNT)
 
 /**
  * Mundo numa sala com a quota JA FECHADA — o unico estado em que o avanco
@@ -56,7 +58,7 @@ function mundoComQuotaFechada(indice: number, chave: string): WorldState {
 
 describe('a bancada monta o estado que o bug precisa', () => {
   it('a sala nasce com a quota fechada e pedindo protetor', () => {
-    const world = mundoComQuotaFechada(SALAS_POR_HUNT - 1, 'forest')
+    const world = mundoComQuotaFechada(SALAS - 1, 'forest')
     expect(world.sala?.abates).toBe(ABATES_POR_SALA)
     expect(
       salaTravadaPeloProtetor(world),
@@ -69,7 +71,7 @@ describe('solicitarAvancoDeSala respeita o protetor (PH-291)', () => {
   it('sala 10 (LORD) com protetor vivo: NAO avanca', () => {
     // O caso caro. O Lord da sala 10 e a unica porta de entrada de
     // `bioma_progress`; pular ele fecha o ciclo sem creditar nada, pra sempre.
-    const world = mundoComQuotaFechada(SALAS_POR_HUNT - 1, 'forest')
+    const world = mundoComQuotaFechada(SALAS - 1, 'forest')
     const antes = { ...world.sala! }
 
     const r = solicitarAvancoDeSala(world, HUNT)
@@ -91,7 +93,7 @@ describe('solicitarAvancoDeSala respeita o protetor (PH-291)', () => {
     // O outro lado da guarda. Um corte cego (sempre recusar em sala com
     // protetor) quebraria o avanco manual justamente depois de o jogador ter
     // feito o trabalho — e ninguem ia ligar as duas coisas.
-    const world = mundoComQuotaFechada(SALAS_POR_HUNT - 1, 'forest')
+    const world = mundoComQuotaFechada(SALAS - 1, 'forest')
     world.protetorResolvido = true
 
     const r = solicitarAvancoDeSala(world, HUNT)
