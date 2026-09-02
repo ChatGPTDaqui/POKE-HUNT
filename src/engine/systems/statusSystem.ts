@@ -411,6 +411,23 @@ export function recalcularEstagio(destino: WorldEntity, stat: StatDeEstagio): nu
 }
 
 /**
+ * Apaga estagio e fonte de todos os atributos (PH-418) — Haze, a troca do POKE
+ * em campo, e todo caminho que levanta um POKE caido.
+ *
+ * Os dois campos juntos, sempre: `estagios` e cache do que as fontes somam, e
+ * limpar um sem o outro NAO limpa nada — `recalcularEstagio` reescreve o cache
+ * a partir das fontes que sobraram, no proximo tick. Foi o defeito real do
+ * Hospital: ele zerava `estagios` e o Rosnado voltava sozinho.
+ *
+ * MORA AQUI, e nao no `combatSystem`, porque `autoSystem` precisa dele pro
+ * auto-revive e ja importa este modulo — o caminho contrario abriria ciclo.
+ */
+export function apagarTodosOsEstagios(entity: WorldEntity): void {
+  entity.estagios = {}
+  entity.estagiosFonte = undefined
+}
+
+/**
  * Fonte nova com o prazo padrao (PH-418). Existe pra `DURACAO_DE_ESTAGIO_SEGUNDOS`
  * nao ficar repetida em cada um dos oito pontos que aplicam estagio.
  */

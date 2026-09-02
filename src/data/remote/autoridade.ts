@@ -19,6 +19,7 @@ import { ABATES_POR_SALA } from '@/data/biomas'
 import { SPECIES } from '@/data/pokes'
 import { preloadEspecies } from '@/data/preload'
 import { solicitarAvancoDeSala } from '@/engine/systems/salaSystem'
+import { apagarTodosOsEstagios } from '@/engine/systems/statusSystem'
 import { agendarMesmoEmSegundoPlano, type TemporizadorCancelavel } from '@/core/temporizadorDeSegundoPlano'
 import type { ClimaTipo, SalaAtiva } from '@/engine/types'
 import { supabase, schema, url as supabaseUrl, anonKey } from '@/lib/supabase'
@@ -156,8 +157,7 @@ function reconciliarPokeAtivoNoWorld(doServidor: GameStateData): void {
       draft.player.targetId = null
       // PH-418: estagio de atributo nao atravessa troca de POKE — o que entra
       // nao herda buff nem debuff de quem saiu.
-      draft.player.estagios = {}
-      draft.player.estagiosFonte = undefined
+      apagarTodosOsEstagios(draft.player)
     })
     // Preload solto, sem `await`, pelo mesmo motivo do `setActiveTeamIndex`: numa
     // aba em segundo plano o carregamento de imagem fica suspenso e seguraria a

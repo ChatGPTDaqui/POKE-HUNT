@@ -24,7 +24,7 @@ import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
   limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico, curarStatus, comPrazoPadrao,
-  registrarFonteDeEstagio, fonteDeTrait,
+  registrarFonteDeEstagio, fonteDeTrait, apagarTodosOsEstagios,
 } from './statusSystem'
 import { traitDoPoke, type TraitId } from '@/data/traits'
 import {
@@ -2419,18 +2419,6 @@ function registrarFonteDoProprioGolpe(
     deQuem: SPECIES[entity.poke.speciesId]?.name ?? entity.poke.speciesId,
     estagios,
   }))
-}
-
-/**
- * Apaga estagio e fonte de todos os atributos (PH-418) — Haze, e a troca do
- * POKE em campo.
- *
- * Os dois campos juntos, sempre: `estagios` e cache do que as fontes somam, e
- * limpar um sem o outro deixa o estado inconsistente ate o proximo tick.
- */
-export function apagarTodosOsEstagios(entity: WorldEntity): void {
-  entity.estagios = {}
-  entity.estagiosFonte = undefined
 }
 
 /**

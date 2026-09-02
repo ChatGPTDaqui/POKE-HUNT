@@ -19,6 +19,7 @@ import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { preloadEspecies, preloadHunt, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
 import type { Point } from './types'
+import { apagarTodosOsEstagios } from './systems/statusSystem'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
 
@@ -333,7 +334,10 @@ export const controller = {
         // Rosnado levado na hunt anterior atravessaria a cura e a proxima
         // entrada — "curei e meu POKE continua fraco" sem nada na tela
         // explicando por quanto tempo.
-        draft.player.estagios = {}
+        // Os DOIS campos: zerar so `estagios` nao limpava nada, porque
+        // `recalcularEstagio` reescreve o cache a partir das fontes vivas no
+        // proximo tick — o Rosnado voltava sozinho depois da cura.
+        apagarTodosOsEstagios(draft.player)
         draft.player.estagiosFonte = undefined
         draft.player.cooldowns = {}
       })
@@ -496,6 +500,9 @@ export const controller = {
             draft.player.poke.hp = Math.round(draft.player.poke.stats.hp * revivePercent)
             draft.player.fainted = false
             draft.player.state = 'wander'
+            // PH-418: mesma regra do auto-revive — cair zera estagio. Sem isto,
+            // o Revive da mochila e o do bot discordavam sobre o mesmo evento.
+            apagarTodosOsEstagios(draft.player)
           }
         })
         syncActivePokeToGameState(useWorldStore.getState(), gameState)
