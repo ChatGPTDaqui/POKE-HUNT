@@ -1,0 +1,220 @@
+<!doctype html>
+<!--
+  Bancada: a DIRECAO da arte de estagio se le em movimento? (PH-416)
+
+  POR QUE ELA EXISTE, E O QUE A FOLHA DE CONTATO NAO RESOLVE
+  ---------------------------------------------------------------------------
+  `folha-de-estagio.mjs` prova legibilidade de FORMA: os oito glifos se separam,
+  e sobrevivem a reducao pra 26px. Ela nao prova nada sobre DIRECAO, porque a
+  direcao mora inteira no movimento dos motes — no `aumenta` eles nascem embaixo
+  e sobem, no `diminui` nascem em cima e caem — e quadro parado nao mostra
+  movimento.
+
+  Tres tentativas de por direcao na FORMA foram reprovadas antes de chegar aqui
+  (chevron sob o glifo, eco do glifo, e a posicao do glifo no quadro), e a
+  decisao final foi a que o `statIcones.ts` ja tinha tomado na PH-121: a direcao
+  nao mora no glifo, ela vem dos outros canais. Esta pagina e o que verifica se o
+  canal que sobrou — o movimento — de fato funciona.
+
+  O QUE ELA IMITA DO JOGO, E O QUE NAO IMITA
+  ---------------------------------------------------------------------------
+  IMITA   o ritmo (`STATUS_VFX_DURATION` de ~1,1s pra tira inteira, o mesmo que
+          `drawEstagioEffect` usa via `effectProgress`), o tamanho de desenho
+          (48px), a tinta por tipo com o MESMO `multiply` + `destination-in` de
+          `sprites.ts`, e o `imageSmoothingEnabled = false`.
+  NAO IMITA  o POKE por baixo, o fundo da hunt e a tinta de status no corpo. Pra
+          isso existe `condicao-sobre-o-corpo.mjs`, que compoe sobre a sprite
+          real.
+
+  COMO RODAR
+    node scripts/gerar-estagio-vfx.mjs
+    npm run dev    (o plugin de assets do vite.config.ts serve `assets/`)
+    abrir http://localhost:5173/scripts/harness/folha-de-estagio.html
+
+  Abrir o arquivo direto do disco NAO funciona: o navegador bloqueia a leitura de
+  `assets/` por `file://`, e as tiras saem em branco.
+-->
+<meta charset="utf-8">
+<title>PH-416 — a direção se lê em movimento?</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: 24px; background: #171320; color: #e7e2f0;
+    font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
+  }
+  h1 { font-size: 17px; margin: 0 0 4px; }
+  p.nota { margin: 0 0 20px; color: #a79fbe; max-width: 62ch; }
+  .controles { display: flex; gap: 18px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+  label { display: flex; gap: 6px; align-items: center; }
+  select, input { background: #241d33; color: inherit; border: 1px solid #3d3253; border-radius: 6px; padding: 4px 6px; }
+  table { border-collapse: collapse; }
+  th { font-weight: 600; font-size: 12px; color: #a79fbe; text-align: left; padding: 0 10px 6px; }
+  td { padding: 6px 10px; }
+  td.nome { font-family: ui-monospace, monospace; font-size: 12px; color: #cfc6e6; }
+  /* Tres fundos, o mesmo criterio da folha de contato: contraste sobre corpo
+     colorido e o que derrubou glifo na PH-416. */
+  .fundo-escuro { background: #2a1e3a; }
+  .fundo-quente { background: #d86a1e; }
+  .fundo-claro  { background: #dce4ee; }
+  canvas { display: block; image-rendering: pixelated; }
+</style>
+
+<h1>A direção se lê em movimento?</h1>
+<p class="nota">
+  Cada linha é um atributo; as colunas de cada fundo mostram <b>aumenta</b> e <b>diminui</b>
+  lado a lado. A pergunta é uma só: sem olhar o rótulo, dá para dizer qual é qual?
+  A forma é idêntica nos dois de propósito — quem carrega a direção é o movimento dos motes,
+  mais a borda do selo, o contador e o flutuante, que a página não desenha.
+</p>
+
+<div class="controles">
+  <label>tipo do golpe
+    <select id="tipo"></select>
+  </label>
+  <label>tamanho
+    <select id="tamanho">
+      <option value="48">48px (quadro cheio)</option>
+      <option value="26" selected>26px (tamanho de jogo)</option>
+      <option value="96">96px (inspeção)</option>
+    </select>
+  </label>
+  <label>ciclo
+    <input id="ciclo" type="range" min="400" max="3000" step="100" value="1100">
+    <span id="cicloLabel">1100ms</span>
+  </label>
+</div>
+
+<table id="grade"></table>
+
+<script type="module">
+  // As cores saem do MESMO lugar que o jogo usa. Copiar a paleta aqui faria a
+  // bancada mentir no dia em que alguem reequilibrar um tipo.
+  const { TYPE_COLORS } = await import('/src/data/typeColors.ts')
+  const { TIRA_POR_ESTAGIO, TIRA_DE_CONDICAO_APLICADA } = await import('/src/data/estagioVfx.ts')
+
+  const ATRIBUTOS = Object.keys(TIRA_POR_ESTAGIO)
+  const FUNDOS = ['fundo-escuro', 'fundo-quente', 'fundo-claro']
+
+  const tipoSel = document.getElementById('tipo')
+  for (const t of Object.keys(TYPE_COLORS)) {
+    const o = document.createElement('option')
+    o.value = t; o.textContent = t
+    if (t === 'NORMAL') o.selected = true
+    tipoSel.append(o)
+  }
+
+  const carregar = (url) => new Promise((ok, falha) => {
+    const img = new Image()
+    img.onload = () => ok(img)
+    // Falha ALTO: tira faltando com `onerror` silencioso deixaria a celula
+    // vazia, e celula vazia numa bancada de arte le como "a arte esta ruim".
+    img.onerror = () => falha(new Error(`nao carregou: ${url}`))
+    img.src = `/${url}`
+  })
+
+  const pecas = []
+  for (const stat of ATRIBUTOS) {
+    pecas.push({
+      nome: stat,
+      aumenta: await carregar(TIRA_POR_ESTAGIO[stat].aumenta.url),
+      diminui: await carregar(TIRA_POR_ESTAGIO[stat].diminui.url),
+      quadros: TIRA_POR_ESTAGIO[stat].aumenta.quadros,
+    })
+  }
+  const condicao = await carregar(TIRA_DE_CONDICAO_APLICADA.url)
+
+  // Um canvas offscreen SO, module-level, igual ao `canvasDeEstagio` de
+  // sprites.ts e pelo mesmo motivo: um por celula por frame seria uma alocacao
+  // de textura por 60fps vezes 45 celulas.
+  const off = document.createElement('canvas')
+  const offCtx = off.getContext('2d')
+
+  /**
+   * A MESMA sequencia de tres passadas de `drawEstagioEffect`. Se ela divergir,
+   * a bancada aprova arte que o jogo desenha diferente — foi assim que a PH-423
+   * achou bancada mentindo.
+   */
+  function desenhar(ctx, img, quadro, lado, cor, tamanho) {
+    if (off.width < lado) off.width = lado
+    if (off.height < lado) off.height = lado
+    offCtx.globalCompositeOperation = 'source-over'
+    offCtx.clearRect(0, 0, off.width, off.height)
+    offCtx.imageSmoothingEnabled = false
+    offCtx.drawImage(img, quadro * lado, 0, lado, lado, 0, 0, lado, lado)
+    offCtx.globalCompositeOperation = 'multiply'
+    offCtx.fillStyle = cor
+    offCtx.fillRect(0, 0, lado, lado)
+    offCtx.globalCompositeOperation = 'destination-in'
+    offCtx.drawImage(img, quadro * lado, 0, lado, lado, 0, 0, lado, lado)
+
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(off, 0, 0, lado, lado, 0, 0, tamanho, tamanho)
+  }
+
+  const grade = document.getElementById('grade')
+  const celulas = []
+
+  function montar(tamanho) {
+    grade.innerHTML = ''
+    celulas.length = 0
+    const cab = document.createElement('tr')
+    cab.append(document.createElement('th'))
+    for (const f of FUNDOS) {
+      const th = document.createElement('th')
+      th.colSpan = 2
+      th.textContent = f === 'fundo-escuro' ? 'corpo escuro' : f === 'fundo-quente' ? 'corpo quente' : 'corpo claro'
+      cab.append(th)
+    }
+    grade.append(cab)
+
+    const linhas = [...pecas.map((p) => p), { nome: 'condicao', aumenta: condicao, diminui: condicao, quadros: 16 }]
+    for (const peca of linhas) {
+      const tr = document.createElement('tr')
+      const nome = document.createElement('td')
+      nome.className = 'nome'
+      nome.textContent = peca.nome
+      tr.append(nome)
+      for (const fundo of FUNDOS) {
+        for (const direcao of ['aumenta', 'diminui']) {
+          const td = document.createElement('td')
+          td.className = fundo
+          const c = document.createElement('canvas')
+          c.width = tamanho; c.height = tamanho
+          td.append(c)
+          tr.append(td)
+          celulas.push({ ctx: c.getContext('2d'), img: peca[direcao], quadros: peca.quadros })
+        }
+      }
+      grade.append(tr)
+    }
+  }
+
+  let tamanho = Number(document.getElementById('tamanho').value)
+  let ciclo = Number(document.getElementById('ciclo').value)
+  montar(tamanho)
+
+  document.getElementById('tamanho').addEventListener('change', (e) => {
+    tamanho = Number(e.target.value)
+    montar(tamanho)
+  })
+  document.getElementById('ciclo').addEventListener('input', (e) => {
+    ciclo = Number(e.target.value)
+    document.getElementById('cicloLabel').textContent = `${ciclo}ms`
+  })
+
+  function loop() {
+    const cor = TYPE_COLORS[tipoSel.value]
+    // Fase contínua amostrada por `floor(fase * quadros)`, igual ao
+    // `effectProgress` do jogo — e não um contador de quadro próprio, que
+    // andaria no ritmo do requestAnimationFrame da máquina.
+    const fase = (performance.now() % ciclo) / ciclo
+    for (const cel of celulas) {
+      const lado = cel.img.naturalHeight
+      const quadro = Math.min(cel.quadros - 1, Math.floor(fase * cel.quadros))
+      desenhar(cel.ctx, cel.img, quadro, lado, cor, tamanho)
+    }
+    requestAnimationFrame(loop)
+  }
+  loop()
+</script>
