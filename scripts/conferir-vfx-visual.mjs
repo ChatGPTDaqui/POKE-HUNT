@@ -26,10 +26,24 @@ const SAIDA = join(RAIZ, 'scripts', 'body-block-refs', '_conferencia', 'vfx');
 
 // Lidas de render/sprites.ts, nao copiadas: numero copiado envelhece calado, e
 // era o proprio caso desta leva — a escala base mudou de 1.6 pra 1.05.
+//
+// A REGEX VAI EM LITERAL, e nao montada com string (PH-409). Ela ja foi
+// `new RegExp('const ' + nome + '\s*=\s*([\d.]+)')`, e dentro de aspas simples
+// `\s` nao e a classe de espaco: e a letra `s`. O que chegava ao RegExp era
+// `const NOME s*=s*([d.]+)`, que nao casa com linha nenhuma do fonte — entao
+// esta funcao devolvia o `padrao` SEMPRE, e a conferencia media contra o numero
+// copiado que ela existe pra nao usar. `oxlint` avisava (`no-useless-escape`) e
+// o aviso vinha sendo lido como estilo.
 function constanteDoDesenho(nome, padrao) {
   const src = readFileSync(join(RAIZ, 'src', 'render', 'sprites.ts'), 'utf8');
-  const m = new RegExp('const ' + nome + '\s*=\s*([\d.]+)').exec(src);
-  return m ? Number(m[1]) : padrao;
+  const m = new RegExp(`const ${nome}\\s*=\\s*([\\d.]+)`).exec(src);
+  if (!m) {
+    // Alto e claro: cair no padrao significa que a conferencia deixou de medir o
+    // codigo. Silenciar aqui e como o defeito passou despercebido.
+    console.warn(`  AVISO: ${nome} nao encontrada em render/sprites.ts — usando o padrao ${padrao}`);
+    return padrao;
+  }
+  return Number(m[1]);
 }
 const IMPACT_BASE_SIZE = constanteDoDesenho('IMPACT_BASE_SIZE', 44);
 const ESCALA_VFX_SINGLE = constanteDoDesenho('ESCALA_VFX_SINGLE', 1.05);
