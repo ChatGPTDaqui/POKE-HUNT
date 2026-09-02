@@ -214,7 +214,13 @@ export async function mercadoMeus(): Promise<{
   const uid = await userIdAtual()
   const [ordens, anuncios, ofertasRecebidas, minhasOfertas] = await Promise.all([
     db.from('market_orders').select('*').eq('user_id', uid).eq('status', 'ativa').order('created_at', { ascending: false }),
-    db.from('market_listings').select('*').eq('seller_id', uid).eq('status', 'ativo').order('created_at', { ascending: false }),
+    // Le da VIEW, e nao da tabela (PH-437). A view ja filtra `status = 'ativo'`
+    // e mostra ao vendedor os proprios anuncios reservados, e ela traz duas
+    // colunas que a tabela nao tem: `reservado_nome` (a tabela so guarda o
+    // uuid, e "reservado para 8f3a…" nao diz nada) e `ofertas` — que esta tela
+    // ja lia e sempre vinha `undefined`, mostrando "0 lance(s)" em anuncio com
+    // lance.
+    db.from('mercado_anuncios_ativos').select('*').eq('seller_id', uid).order('created_at', { ascending: false }),
     db.from('mercado_ofertas_recebidas').select('*').eq('seller_id', uid),
     // Embed do anuncio (PH-101): a tela precisa do `modo` pra nao oferecer
     // "Cancelar" num lance de leilao, que o servidor recusa. `market_offers.
@@ -228,7 +234,12 @@ export async function mercadoMeus(): Promise<{
   estourarSeErro(ofertasRecebidas.error); estourarSeErro(minhasOfertas.error)
   return {
     ordens: (ordens.data ?? []) as OrdemMercado[],
-    anuncios: (anuncios.data ?? []) as AnuncioMercado[],
+    // Mesmo achatamento de `melhor_oferta` que `mercadoPokes` faz: a view
+    // devolve a coluna em snake_case e a tela le `melhorOferta`. Sem isto o
+    // campo viria `undefined` — silenciosamente, porque o cast nao verifica.
+    anuncios: (anuncios.data ?? []).map((r: Linha): AnuncioMercado => ({
+      ...(r as unknown as AnuncioMercado), melhorOferta: r.melhor_oferta ?? null,
+    })),
     ofertasRecebidas: (ofertasRecebidas.data ?? []).map((r: Linha): OfertaRecebida => ({
       id: r.id, listing_id: r.listing_id, buyer_id: r.buyer_id, valor: r.valor,
       currency: r.currency, status: r.status, created_at: r.created_at,
@@ -542,6 +553,26 @@ export async function cancelarAnuncio(anuncioId: string) {
   // A mensagem que a RPC devolve e "o POKE voltou pra sua mochila". Sem esta
   // linha, a tela dizia isso mostrando uma mochila sem ele (PH-324).
   await refetchAposAnuncio(pokeUid)
+  return { mensagem: data?.mensagem as string | undefined }
+}
+
+/**
+ * Reserva um anuncio pra UM comprador, pelo preco combinado (PH-437).
+ *
+ * Preco e destinatario vao na mesma chamada porque vao na mesma transacao no
+ * servidor: separados, existiria uma janela com o anuncio ja mais barato e
+ * ainda publico — e a vitrine ordena por preco crescente, ou seja o POKE
+ * apareceria no TOPO da lista pra todo mundo exatamente nessa janela.
+ *
+ * `paraId` nulo LIMPA a reserva e nao mexe no preco.
+ */
+export async function reservarAnuncio(corpo: { anuncioId: string; paraId: string | null; price?: number | null }) {
+  const { data, error } = await db.rpc('reservar_anuncio', {
+    p_anuncio_id: corpo.anuncioId,
+    p_para_id: corpo.paraId,
+    p_price: corpo.price ?? null,
+  })
+  estourarSeErro(error)
   return { mensagem: data?.mensagem as string | undefined }
 }
 

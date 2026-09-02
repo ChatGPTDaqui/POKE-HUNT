@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ChatCircleDots, Coin, Diamond, Gavel } from '@phosphor-icons/react'
+import { BookmarkSimple, ChatCircleDots, Coin, Diamond, Gavel } from '@phosphor-icons/react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { type AnuncioMercado } from '@/data/remote/servidor'
 import { SPECIES } from '@/data/pokes'
@@ -405,6 +405,15 @@ export function ComprarPokes() {
                 )}
                 {a.apenas_oferta && ` · ${a.ofertas ?? 0} oferta(s)`}
               </div>
+              {/* PH-437: este anuncio esta na vitrine DELE e de mais ninguem.
+                  Sem dizer isso, o comprador ve um preco que nao existe pra
+                  outros jogadores e nao tem como saber que ele foi combinado
+                  nem que ninguem vai passar na frente. */}
+              {a.reservado_para && a.reservado_para === meuId && (
+                <span className="mt-[.15em] flex w-fit items-center gap-[.2em] rounded-full bg-primary/15 px-[.4em] text-[.72em] text-primary">
+                  <BookmarkSimple aria-hidden weight="fill" /> reservado para você
+                </span>
+              )}
             </div>
             {a.modo === 'leilao' ? (
               <LinhaDeLeilao
