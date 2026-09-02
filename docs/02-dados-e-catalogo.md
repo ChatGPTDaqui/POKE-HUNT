@@ -11,8 +11,17 @@
 
 Conteúdo de jogo — espécies, movesets, golpes, itens, fórmulas, tabela de tipos — vem hoje da
 **PokeAPI**, filtrado para o jogo **Pokémon Ultra Sun/Ultra Moon** (Gen VII), conferido contra
-a Bulbapedia. `scripts/usum/catalog.json` (251 espécies) é esse dado, **commitado no
-repositório** — não uma leitura ao vivo da API.
+a Bulbapedia. `scripts/usum/catalog.json` (**386 espécies** — Kanto, Johto e Hoenn, desde a
+PH-332 em 31/08; eram 251 antes dela) é esse dado, **commitado no repositório** — não uma
+leitura ao vivo da API.
+
+O elenco que o **cliente** recebe é menor: **380**. `syncSpeciesAndMoves` só emite as espécies
+alcançáveis — starters, lendárias, as que aparecem em alguma hunt, e a cadeia de evolução
+completa dessas. As 6 que sobram (`vulpix`, `ninetales`, `chansey`, `blissey`, `mr__mime`,
+`shuckle`) não aparecem em hunt nenhuma nem são destino de evolução de quem aparece, então
+ficam fora do bundle de propósito. O **banco** recebe as 386, porque `catalog:migrar` popula do
+catálogo inteiro. Diferença por construção, não defeito — mas ela é o motivo de nenhuma feature
+poder derivar a mesma lista dos dois lados (ver `src/data/missoes.ts`).
 
 ```
 npm run usum:baixar   scripts/fetch-usum-catalog.js   PokeAPI -> scripts/usum/catalog.json (commitado)

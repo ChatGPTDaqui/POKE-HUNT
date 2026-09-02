@@ -65,34 +65,72 @@ mover atributo nenhum, e "ganhou: " sem nada depois pareceria bug.
 
 ## Evolução
 
-Evolução é 100% por **nível** (`species.evolvesAtLevel`, da planilha). Não existe gatilho de
-troca, felicidade ou item segurado no dado original.
+> **Esta seção foi reescrita em 02/09 (PH-414).** A versão anterior descrevia o modelo de
+> antes da PH-145: "evolução é 100% por nível", uma tabela `SPECIAL_EVOLUTIONS` escrita à mão
+> com nove pares, e Slowking como caso impossível de representar. Nada disso é verdade desde
+> 31/08 — e a tabela citada não existe mais no código. O histórico está no fim da seção,
+> porque é ele que explica os campos de compatibilidade.
 
-### Evolução especial (as 9 cadeias de troca)
+**Os destinos de evolução vêm do catálogo**, com o gate de cada um. `species.evolutionOptions`
+é a lista, e cada opção traz `{ to, atLevel, isSpecial, stoneType? }`. Medido no gerado em
+02/09: **170 espécies evoluem**, por **182 arestas**; **8 têm ramo** (mais de um destino),
+**35 têm ao menos uma aresta especial** e **6 declaram `stoneType` próprio**.
 
-Para as espécies cuja evolução na Gen 1/2 exigia **troca**, a planilha nunca preencheu
-`evolvesTo` — ficariam presas para sempre. Quais das 251 são trade-only vem de conhecimento
-de Pokémon Gen 1/2, não da planilha (que não tem coluna de "método de evolução").
+`data/pokes.ts` faz um passe no load que:
 
-`data/pokes.ts#SPECIAL_EVOLUTIONS` costura 9 pares no `SPECIES` já construído, uma vez no
-load: kadabra, machoke, haunter, graveler, onix, scyther, seadra, poliwhirl, porygon.
+- **descarta opção cujo destino não está no elenco** — um `to` que `SPECIES` não tem viraria
+  um botão que a tela de evolução não sabe desenhar. Na prática nunca corta nada (o gerador já
+  filtra pelo mesmo critério); é rede para quem recortar o elenco por outro critério;
+- **mantém `evolvesTo` / `evolvesAtLevel` / `isSpecialEvolution` apontando para o PRIMEIRO
+  destino** — é o que todo leitor que ainda não conhece ramo lê (Pokédex, estágio de evolução,
+  save antigo). Leitor novo usa `opcoesDeEvolucao(species)`, que sempre devolve lista.
 
-Custo: **nível 80** (`SPECIAL_EVOLUTION_LEVEL`) + **20 Stones** do tipo primário
-(`SPECIAL_EVOLUTION_STONE_COUNT`). O tipo **primário**, ignorando o secundário — desempate
-explícito.
+### Evolução especial: o gate, e de quem é o tipo da pedra
 
-`evolvePokeInstance(pokeInstance, gameState)` devolve três coisas distintas:
+Evolução marcada `isSpecial` cobra **nível 80** (`SPECIAL_EVOLUTION_LEVEL`) + **40 Stones**
+(`SPECIAL_EVOLUTION_STONE_COUNT`).
+
+De qual tipo, é a parte que tem decisão embutida (`evolutionStoneRequirement`):
+
+- com `stoneType` na opção, é ele — é o que separa os cinco caminhos do Eevee (Flareon cobra
+  FIRE, Vaporeon WATER, Jolteon ELECTRIC, Espeon PSYCHIC, Umbreon DARK);
+- sem `stoneType`, é o tipo **primário da origem**, ignorando o secundário. Não é descuido: é
+  o comportamento que as evoluções de troca sempre tiveram, e trocar para "tipo do destino"
+  faria `onix → steelix` deixar de cobrar ROCK e passar a cobrar STEEL no meio do caminho de
+  quem já estava juntando.
+
+`evolvePokeInstance(pokeInstance, gameState, alvo?)` devolve três coisas distintas, e **não
+muta `gameState`** — só lê (`hasItem`), nunca remove item:
 
 | Retorno | Significado |
 |---|---|
-| `null` | Nível não atingido |
+| `null` | Sem opção disponível (nível não atingido), **ou** `alvo` fora das disponíveis |
 | `{ blocked: 'stones', required }` | Nível ok, faltam Stones. **Inventário intocado** |
-| `{ species, newAbilities, updatedPoke }` | Evoluiu, Stones deduzidas |
+| `{ species, newAbilities, updatedPoke, stoneReq }` | Pode evoluir; `stoneReq` volta para o chamador decidir **quando** debitar |
 
-Slowpoke → Slowking (o único dos 10 casos reais de trade-evolution fora) **não** foi
-implementado: Slowpoke já evolui por nível para Slowbro (dado real), e o modelo só suporta
-um `evolvesTo` por espécie. Não é dead-end para consertar — é uma segunda opção de evolução
-que este sistema nunca teve como representar.
+Quem debita é o chamador, e essa separação é a correção da PH-12: no servidor as Stones saem
+na hora (a ação já está confirmada); no cliente otimista, só depois de `pedirAcao` confirmar.
+Mutar aqui dentro fazia Stone desaparecer numa evolução que o servidor recusava.
+
+`alvo` fora das opções disponíveis é **recusado**, não ignorado — cair no primeiro evoluiria
+para outra coisa, que o jogador não pediu. O servidor faz a mesma checagem; a daqui só evita a
+chamada em vão.
+
+### Histórico: por que existem `evolvesTo` e `evolvesAtLevel`
+
+Até a PH-145 a fonte tinha uma coluna de destino e um gatilho de nível, e nada mais cabia
+nela. Daí duas tabelas escritas à mão neste repositório — `SPECIAL_EVOLUTIONS` (as nove
+cadeias de troca da Gen 1/2: kadabra, machoke, haunter, graveler, onix, scyther, seadra,
+poliwhirl, porygon) e `EVOLUCOES_RAMIFICADAS` (só Tyrogue) — e a consequência de que quem só
+era destino de pedra/troca/amizade **nunca entrava no elenco**: sem caminho, ninguém chegava
+lá. Foram 19 espécies liberadas quando o gate caiu.
+
+As duas tabelas foram removidas. Os três campos escalares ficaram por compatibilidade, e é só
+isso que eles são.
+
+Slowking era o exemplo canônico do que o modelo antigo não representava (Slowpoke já evolui
+por nível para Slowbro, e cabia um destino só). **Hoje está implementado**: `slowpoke` tem as
+duas arestas — `slowbro` no nível 37, `slowking` como especial com pedra WATER.
 
 ### Armadilha ao evoluir tarde
 
