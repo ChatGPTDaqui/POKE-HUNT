@@ -34,7 +34,7 @@ import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
-import { ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
+import { SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
 import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
 import type { ProgressoPorBioma } from '@/data/progressoDeBioma'
 
@@ -56,6 +56,7 @@ import {
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
   estagioJaLimpo, proximoEstagioLiberado,
+  comunsEsgotados, quotaDeAbatesDaSala, salaDeveProtetor, ESPERA_MAXIMA_PELA_AUTORIDADE,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -67,6 +68,7 @@ import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { splashDeSalaStore } from '@/stores/splashDeSalaVanilla'
 import type {
   ClimaTipo, EnemyEntity, EnemyHazards, Point, PlayerEntity, SalaAtiva, WorldState, ProtetorPendente,
+  ProtetorDaAutoridade,
 } from './types'
 
 export const STARTER_LEVEL = 1
@@ -544,26 +546,51 @@ function garantirProtetorDaSala(
   player: PlayerEntity | null,
   entrada: Point | null,
 ): boolean {
-  // PH-428: estagio ja limpo nao repoe protetor. O corte fica AQUI, no unico
-  // lugar que CRIA a entidade, e nao so no gate de avanco: sem ele o Guardian
-  // continuaria nascendo, so nao travaria nada — um bicho de 40x o HP normal em
-  // campo sem funcao.
-  const tipo = world.estagioJaLimpo ? null : protetorDaSala(world.sala, world.mapDef?.id ?? '')
+  // PH-473: as tres condicoes ("estagio ja limpo nao repoe", "ja caiu nesta
+  // sala", "esta sala pede protetor") passaram a morar em `salaDeveProtetor`.
+  // Elas eram escritas aqui, em `registrarAbate`, em `salaTravadaPeloProtetor`
+  // e — sem o `estagioJaLimpo` — no `SalaChip` da tela.
+  //
+  // PH-428: o corte de estagio limpo fica AQUI, no unico lugar que CRIA a
+  // entidade, e nao so no gate de avanco: sem ele o Guardian continuaria
+  // nascendo, so nao travaria nada — um bicho de 40x o HP normal em campo sem
+  // funcao.
+  //
+  // PH-230: protetor ja resolvido devolve `false`, e nao `true`. Sem isso a
+  // sala pedia um protetor novo a cada tick (respawn infinito) e o `true` daqui
+  // segurava pra sempre o early-return de `garantirTransicaoDeQuotaFechada`,
+  // matando o fallback de espera da autoridade.
+  const mapIdDoMundo = world.mapDef?.id ?? ''
+  const tipo = salaDeveProtetor(world.sala, mapIdDoMundo, world)
+    ? protetorDaSala(world.sala, mapIdDoMundo)
+    : null
   if (!tipo) {
     world.protetorPendente = null
     return false
   }
-  // PH-230: o protetor DESTA sala ja caiu e a sala ainda nao avancou — o caso
-  // normal sob `salaSobAutoridade`, onde quem avanca a sala e o flush do
-  // servidor e nao `resolverProtetorDaSala`. Sem este corte a sala pedia um
-  // protetor novo a cada tick (respawn infinito) e o `true` daqui segurava pra
-  // sempre o early-return de `garantirTransicaoDeQuotaFechada`, matando o
-  // fallback de espera da autoridade. `false` = a sala nao bloqueia mais o
-  // avanco.
-  if (world.protetorResolvido) return false
   // Ja resolvido nesta mesma instancia de mundo (chamada de novo no mesmo
   // tick, ou protetor ja spawnado e ainda vivo) — idempotente, nao recria.
   if (world.protetorPendente) return true
+  // PH-475: SOB AUTORIDADE O CLIENTE NAO SORTEIA O CHEFE.
+  //
+  // Ele sorteava, e o sorteio dele era predicao com sequencia PROPRIA — podia
+  // sair outra especie, e o HP dos dois nao se falava. O jogador matava um
+  // chefe que o servidor nao contava e depois via a sala trocar no meio da
+  // luta contra o proximo. Agora ele espera o `protetor` do flush e ADOTA
+  // (`adotarProtetorDaAutoridade`), do mesmo jeito que ja faz com `sala` e
+  // `clima`.
+  //
+  // O `true` daqui e o que mantem a sala travada enquanto o chefe nao chega —
+  // sem ele `garantirTransicaoDeQuotaFechada` cairia no palpite de sala.
+  //
+  // A ESCAPATORIA CONTRA SERVIDOR MUDO FICA. Passado
+  // `ESPERA_MAXIMA_PELA_AUTORIDADE` de silencio (o relogio anda em
+  // `garantirTransicaoDeQuotaFechada`, e toda resposta o zera), o cliente volta
+  // a sortear o proprio: contra uma Edge fora do ar, a alternativa e a hunt
+  // travada pra sempre com a barra em 29/30, que e pior que a divergencia.
+  if (world.salaSobAutoridade && world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) {
+    return true
+  }
 
   const ctx = contextoDoProtetor(
     mapDef.id,
@@ -575,6 +602,91 @@ function garantirProtetorDaSala(
   world.enemies.push(enemy)
   world.protetorPendente = pendente
   return true
+}
+
+/**
+ * O protetor que a AUTORIDADE decidiu, entrando no mundo local (PH-475).
+ *
+ * Mesma porta que `reconciliarSalaDaAutoridade` e `definirClimaDeAmbiente`: o
+ * cliente para de adivinhar e passa a espelhar. Chamado do `liquidar()` da
+ * camada de autoridade, DEPOIS da reconciliacao de sala — a ordem importa,
+ * porque a troca de sala zera `protetorResolvido` e limpa os inimigos.
+ *
+ * MORA AQUI, E NAO EM `salaSystem.ts`, pelo mesmo motivo que
+ * `garantirProtetorDaSala`: criar a entidade usa `criarEntidadeDoProtetor`,
+ * `createPokeInstance` e `createEnemyEntity`, e todos eles importam o
+ * `salaSystem` — a funcao la geraria import circular.
+ *
+ * QUATRO CASOS, e cada um vem de um estado real do servidor:
+ *
+ *  - `undefined` — a resposta nao trouxe o campo. Servidor mais velho que o
+ *    cliente (as duas pontas sobem por pipelines diferentes no mesmo push, ver
+ *    `reconciliarSalaDaAutoridade`). Nada muda: o comportamento antigo continua
+ *    valendo, com o cliente sorteando o proprio depois do silencio.
+ *  - `null` — hunt sem sala (inicial, BOSS, Lance). Nao ha protetor pra
+ *    espelhar e nao ha nada a limpar.
+ *  - `resolvido` — o chefe do servidor caiu. O cliente para de mostrar chefe e
+ *    a sala destrava; o `protetorResolvido` local sobe mesmo que o cliente
+ *    nunca tenha visto esse chefe.
+ *  - `pendente` — ha chefe vivo la. Mesmo `uid`: espelha o HP. `uid` diferente
+ *    (ou nenhum local): remove o que houver e recria FIEL a partir do dado do
+ *    servidor, que e o mesmo caminho que `buildMapWorld` usa pra reconstruir
+ *    uma janela — nao ha sorteio, e zero RNG e consumido.
+ */
+export function adotarProtetorDaAutoridade(
+  world: WorldState, daAutoridade: ProtetorDaAutoridade | null | undefined,
+): void {
+  if (daAutoridade === undefined || daAutoridade === null) return
+  if (!world.mapDef || !world.sala) return
+
+  const removerLocais = () => {
+    world.enemies = world.enemies.filter((e) => !e.isProtetor)
+    world.protetorPendente = null
+  }
+
+  if (daAutoridade.resolvido) {
+    // NAO chama `resolverProtetorDaSala`: aquele arma a transicao de sala, e
+    // quem decide a sala aqui e o proprio flush (`reconciliarSalaDaAutoridade`,
+    // que rodou logo antes desta chamada). Armar as duas coisas poria uma sala
+    // predita por cima da autoritativa.
+    removerLocais()
+    world.protetorResolvido = true
+    return
+  }
+
+  const vindo = daAutoridade.pendente
+  if (!vindo) {
+    // O servidor ainda nao chegou na quota dele. O cliente nao inventa chefe —
+    // `garantirProtetorDaSala` ja se recusa a sortear sob autoridade — e
+    // tambem nao apaga o que ja adotou: um `pendente` ausente numa resposta
+    // atrasada nao e "o chefe morreu".
+    return
+  }
+
+  if (world.protetorPendente?.uid === vindo.uid) {
+    // Mesmo chefe: so o HP anda. E o caso comum, uma vez por flush.
+    world.protetorPendente.hpAtual = vindo.hpAtual
+    const emCampo = world.enemies.find((e) => e.isProtetor && e.poke.uid === vindo.uid)
+    if (emCampo) emCampo.poke.hp = vindo.hpAtual
+    return
+  }
+
+  // Chefe diferente (ou nenhum): adota o de la.
+  removerLocais()
+  const tipo = protetorDaSala(world.sala, world.mapDef.id)
+  if (!tipo) return
+  const ctx = contextoDoProtetor(
+    world.mapDef.id,
+    contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool),
+    world.sala,
+    tipo,
+  )
+  const { enemy, pendente } = criarEntidadeDoProtetor(
+    world, world.mapDef, ctx, tipo, vindo, world.player, entradaDoInimigo(world.mapDef, world.sala),
+  )
+  aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
+  world.enemies.push(enemy)
+  world.protetorPendente = pendente
 }
 
 /**
@@ -986,7 +1098,42 @@ export function buildMapWorld(
     // hunt), virou impossivel de ignorar com os 12 biomas habilitados
     // (PH-225): QUALQUER hunt de bioma, na abertura, tentava recriar um
     // protetor do nada.
-    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA && !base.estagioJaLimpo
+    // PH-473: a quota que conta aqui e a de COMUNS (29), nao os 30 — o
+    // protetor e o 30o abate, entao a sala entra em modo protetor quando o 29o
+    // comum cai. `protetorResolvido: false` porque o mundo esta nascendo: o
+    // flag e efemero e nunca chega aqui como true.
+    const quota = quotaDeAbatesDaSala(sala, mapId, {
+      estagioJaLimpo: base.estagioJaLimpo, protetorResolvido: false,
+    })
+    // PH-472: O CHEFE JA CAIU NESTA SALA, e a linha persistida diz isso.
+    //
+    // `sala_protetor` com `hp_atual = 0` e o marcador de "resolvido" que
+    // atravessa a janela — a mesma semantica de tres valores que a PH-307 deu
+    // ao `sequence_hp` logo abaixo (`null` = sem informacao, `> 0` = luta em
+    // andamento, `0` = ja caiu). Antes disto o flush DELETAVA a linha ao
+    // resolver, e a ausencia dela le igual a "nunca nasceu": esta funcao
+    // sorteava um protetor novo com HP cheio, e o jogador que matou o chefe no
+    // fim de uma janela o encontrava inteiro na seguinte.
+    //
+    // O flag entra em `base.protetorResolvido` e o resto sai de graca:
+    // `salaDeveProtetor` ja o consulta, entao `garantirProtetorDaSala` nao
+    // recria e `garantirTransicaoDeQuotaFechada` arma a transicao no primeiro
+    // tique.
+    const chefeJaCaiu = (progresso?.protetorPendente?.hpAtual ?? 1) <= 0
+    if (chefeJaCaiu) {
+      base.protetorResolvido = true
+      // E O MARCADOR SE REESCREVE, senao o conserto so adia o bug uma janela.
+      //
+      // `payloadDoProtetorOuDoCaido` grava a linha a partir de
+      // `protetorPendente` OU de `protetorCaido`. Sem esta atribuicao a janela
+      // que le o marcador o descartaria: ela nasceria com os dois nulos, o
+      // flush dela mandaria `p_protetor: null`, a RPC DELETARIA a linha, e a
+      // janela seguinte voltaria a ler "nunca nasceu" e sortearia um chefe
+      // novo. O marcador tem que sobreviver ate a sala de fato trocar — e e
+      // `aplicarTransicaoDeSala` quem o limpa.
+      base.protetorCaido = progresso?.protetorPendente ?? null
+    }
+    const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo && !chefeJaCaiu
       ? protetorDaSala(sala, mapId)
       : null
     if (tipoDeProtetor) {
@@ -1585,7 +1732,27 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // este corte aqui `aliveCount` (que so conta o protetor, 1) ficava abaixo
   // de `maxEnemies` e este respawn enchia a sala com mobs comuns do lado do
   // protetor — achado revisando PH-217 (ChatGPTDaqui, #182).
-  if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente) {
+  //
+  // PH-473: `!world.protetorPendente` olha a ENTIDADE em campo, e o pedido do
+  // dono e sobre a CONTAGEM ("nenhum outro POKE nascendo depois do 30o").
+  // `comunsEsgotados` fecha as frestas em que a contagem diz "acabou" e a
+  // entidade nao esta la:
+  //
+  //  1. o tick em que o abate que fecha a quota acontece. O laco de abates roda
+  //     ANTES deste bloco e o spawn do protetor roda no inicio do tick
+  //     SEGUINTE (`garantirTransicaoDeQuotaFechada`), entao existe um tick com
+  //     a quota fechada e nenhum protetor em campo.
+  //  2. quota fechada e protetor fora do mundo local. Hoje o cliente sorteia o
+  //     proprio protetor e essa janela e de um tick; ela deixa de ser curta
+  //     quando ele passar a ADOTAR o do servidor (PH-475) — ai nao ha protetor
+  //     local nenhum ate o primeiro flush que o carregue.
+  //
+  // HONESTIDADE SOBRE A COBERTURA: sabotar este gate deixa
+  // `protetorEO30oAbate.test.ts` VERDE — medido. A unica fresta que ele fecha
+  // hoje dura um tick, e o harness nao a alcanca; ele e defesa em profundidade
+  // para a PH-475, que torna a fresta (2) longa e observavel.
+  if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn
+    && !world.protetorPendente && !comunsEsgotados(world, world.mapDef.id)) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)

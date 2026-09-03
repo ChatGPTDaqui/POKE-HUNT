@@ -1,6 +1,18 @@
 # NOVO POKE IDLE — Inventário completo de UI
 
-Documento de referência para redesign. Descreve **cada** tela, painel, janela, modal, balão,
+> **REGISTRO HISTÓRICO — retrata a UI ANTES do redesenho de 2026-09-02.**
+>
+> Ele foi escrito como referência **para** um redesenho, e o redesenho aconteceu (PH-425→442, em
+> produção desde 02/09). O que este documento descreve deixou de existir em pontos centrais:
+>
+> - fala em **faixa**, vocabulário removido na PH-434 — hoje o modelo é **bioma + estágio**;
+> - não conhece a **trilha de estágios**, que é a navegação principal de hunts;
+> - fala em **Correio**, que virou **Social** na PH-436.
+>
+> Vale como retrato do que existia e como inventário de padrões de UI que sobreviveram — **não
+> como descrição do jogo atual**. Cabeçalho posto na PH-468 (2026-09-03).
+
+Descreve **cada** tela, painel, janela, modal, balão,
 tooltip e botão que existe hoje no jogo, com posição, conteúdo, estados e o que cada controle faz.
 Escrito a partir do código real (`src/`), não de memória.
 

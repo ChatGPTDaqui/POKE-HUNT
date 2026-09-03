@@ -34,7 +34,7 @@ import {
   CAPTURE_ANIM_ANCHOR_Y,
 } from '@/data/captureAnim'
 import { vfxDoGolpe } from '@/data/moveVfx'
-import { statusVfxUrl } from '@/data/statusVfx'
+import { tiraDeEstagio } from '@/data/estagioVfx'
 import {
   tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
   TIRA_POR_CONDICAO_NO_CORPO, FPS_DA_ARTE_DE_EFEITO, PISO_DE_PROLONGAMENTO,
@@ -1394,34 +1394,80 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
 // `drawImage` so pega o quadro que o GIF esta mostrando naquele instante,
 // de graca. Usado so por golpe de STATUS (data/statusVfx.ts, altura fixa):
 // o impacto de DANO migrou pros dois lotes de tira (data/vfxTiras.ts).
-function drawGifEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect, url: string, altura: number): boolean {
-  // Mesma ordem de `drawQuadroDeTira`, pelo mesmo motivo (PH-82): pegar a
-  // imagem e o que inicia o download. Aqui o defeito era menos visivel porque
-  // `data/preload.ts` ja aquece os VFX de status na entrada da hunt — mas
-  // qualquer cena que nao passe por aquele preload cairia no mesmo buraco.
-  const img = getOrLoadImage(url)
-  if (!img.complete || img.naturalWidth === 0) return false
-
-  const progress = effectProgress(effect)
-  const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
-  const alpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
-
-  const largura = altura * (img.naturalWidth / img.naturalHeight)
-
-  ctx.save()
-  ctx.globalAlpha = alpha
-  ctx.imageSmoothingEnabled = false
-  ctx.drawImage(img, effect.targetX! - largura / 2, effect.targetY! - altura / 2, largura, altura)
-  ctx.restore()
-  return true
-}
 
 const STATUS_VFX_ALTURA = 48
 
-function drawStatusEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): boolean {
-  const url = statusVfxUrl(effect.elementType, effect.statusDirection!)
-  if (!url) return false
-  return drawGifEffect(ctx, effect, url, STATUS_VFX_ALTURA)
+/**
+ * Canvas fora da tela pra TINGIR a arte de estagio com a cor do tipo do golpe.
+ *
+ * Separado do `canvasDeTinta` da tinta de status de propósito: aquele guarda o
+ * recorte da sprite do POKE e e redimensionado pelo tamanho dela, e os dois
+ * seriam reescritos no mesmo frame (POKE envenenado levando Rosnado).
+ */
+const canvasDeEstagio: HTMLCanvasElement | null =
+  typeof document !== 'undefined' ? document.createElement('canvas') : null
+
+/**
+ * A arte de mudanca de atributo: tira gerada, por ATRIBUTO, tingida pelo TIPO
+ * do golpe (PH-416).
+ *
+ * POR QUE `multiply` E NAO `source-atop`: a arte e gerada quase branca com
+ * contorno quase preto, e o contorno e o que faz ela existir sobre um POKE
+ * claro. `source-atop` pinta a cor sobre TODO pixel opaco e apagaria o contorno
+ * junto. Com `multiply`, branco x cor = cor e contorno x cor = contorno.
+ *
+ * SAO TRES PASSADAS, e a terceira nao e enfeite: `multiply` no canvas 2D compoe
+ * com `source-over` por baixo, entao onde o fundo e transparente o resultado e a
+ * COR CRUA — o retangulo inteiro sairia pintado. O `destination-in` no fim
+ * recorta de volta pelo alpha da propria arte.
+ */
+function drawEstagioEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): boolean {
+  const tira = tiraDeEstagio(effect.statusStat, effect.statusDirection)
+  if (!tira) return false
+
+  // `getOrLoadImage` ANTES de qualquer outra checagem, e a ordem e a licao da
+  // PH-82 escrita em `drawQuadroDeTira`: e ele quem DISPARA o download. A
+  // primeira versao desta funcao checava o canvas primeiro, e ai a primeira
+  // chamada saia no `return false` sem nunca pedir a imagem — a seguinte fazia o
+  // mesmo, pra sempre. Foi o teste da PH-367 que pegou.
+  const img = getOrLoadImage(tira.url)
+  if (!img.complete || img.naturalWidth === 0) return false
+  // Sem canvas (ambiente sem `document`) nao ha como tingir. A imagem ja foi
+  // pedida acima, entao o proximo frame num ambiente real acha ela no cache.
+  if (!canvasDeEstagio) return false
+
+  const lado = img.naturalHeight
+  const progresso = effectProgress(effect)
+  const quadro = Math.min(tira.quadros - 1, Math.floor(progresso * tira.quadros))
+  const fade = progresso < HOLD_PORTION ? 1 : 1 - (progresso - HOLD_PORTION) / (1 - HOLD_PORTION)
+
+  if (canvasDeEstagio.width < lado) canvasDeEstagio.width = lado
+  if (canvasDeEstagio.height < lado) canvasDeEstagio.height = lado
+  const off = canvasDeEstagio.getContext('2d')
+  if (!off) return false
+
+  off.globalCompositeOperation = 'source-over'
+  off.clearRect(0, 0, canvasDeEstagio.width, canvasDeEstagio.height)
+  off.imageSmoothingEnabled = false
+  off.drawImage(img, quadro * lado, 0, lado, lado, 0, 0, lado, lado)
+
+  off.globalCompositeOperation = 'multiply'
+  off.fillStyle = colorForType(effect.elementType)
+  off.fillRect(0, 0, lado, lado)
+
+  off.globalCompositeOperation = 'destination-in'
+  off.drawImage(img, quadro * lado, 0, lado, lado, 0, 0, lado, lado)
+
+  ctx.save()
+  ctx.globalAlpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
+  ctx.imageSmoothingEnabled = false
+  ctx.drawImage(
+    canvasDeEstagio, 0, 0, lado, lado,
+    effect.targetX! - STATUS_VFX_ALTURA / 2, effect.targetY! - STATUS_VFX_ALTURA / 2,
+    STATUS_VFX_ALTURA, STATUS_VFX_ALTURA,
+  )
+  ctx.restore()
+  return true
 }
 
 function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
@@ -1443,7 +1489,7 @@ function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): 
   // Sem arte propria (FLYING/DRAGON sem sheet no catalogo — ver statusVfx.ts)
   // ou enquanto o GIF ainda baixa, cai no burst/anel procedural de sempre —
   // mesmo padrao de fallback do resto do arquivo, nao um caminho de erro novo.
-  if (effect.statusDirection && !temArtePropria && drawStatusEffect(ctx, effect)) return
+  if (effect.statusDirection && !temArtePropria && drawEstagioEffect(ctx, effect)) return
   if (effect.isAoe) drawAoeRing(ctx, effect)
   else drawImpactBurst(ctx, effect)
 }

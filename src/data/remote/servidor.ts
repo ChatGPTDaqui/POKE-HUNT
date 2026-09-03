@@ -17,7 +17,7 @@ import { supabase } from '@/lib/supabase'
 import { mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import type { PokeInstance } from '@/data/pokes'
-import type { ClimaTipo, SalaAtiva } from '@/engine/types'
+import type { ClimaTipo, ProtetorDaAutoridade, SalaAtiva } from '@/engine/types'
 
 const BASE = (import.meta.env.VITE_SERVIDOR_URL || '').replace(/\/$/, '')
 
@@ -216,6 +216,21 @@ export interface RespostaFlush extends RespostaComEstado {
    * cliente mantem o clima que ja tem, em vez de assumir ceu limpo.
    */
   clima?: ClimaTipo | null
+  /**
+   * O PROTETOR da sala, do jeito que a autoridade o conhece (PH-475).
+   *
+   * Mesma razao de `sala` e `clima` logo acima, com consequencia maior. Sem
+   * este campo o cliente sorteava o proprio chefe com a sequencia de predicao
+   * dele: podia ser outra ESPECIE, e o HP dos dois nao se falava. O jogador
+   * matava um chefe que o servidor nao contava ("matei o chefe e nada
+   * aconteceu") e depois via a sala trocar no meio da luta contra o proximo
+   * ("a sala trocou durante o chefe").
+   *
+   * Ausente (nao nula) quando o servidor e mais velho que este cliente: ai o
+   * comportamento antigo continua valendo, com o cliente sorteando o proprio
+   * depois do tempo de silencio.
+   */
+  protetor?: ProtetorDaAutoridade | null
 }
 
 /**

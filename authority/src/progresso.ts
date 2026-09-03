@@ -5,9 +5,10 @@ import {
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
-  solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, ABATES_POR_SALA, protetorDaSala,
+  solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, protetorDaSala,
+  quotaDeAbatesDaSala,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
-  type ClimaTipo, type ProtetorPendente,
+  type ClimaTipo, type ProtetorPendente, type ProtetorDaAutoridade,
 } from '#engine'
 import {
   ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
@@ -254,6 +255,41 @@ export function protetorDaLinha(s: LinhaSessao): ProtetorPendente | null {
  * (`protetorDaSala(world.sala)`, ver `simularSessao`), porque o motor nunca
  * guardou o proprio tipo no objeto persistido.
  */
+/**
+ * O que gravar em `sala_protetor` (PH-472): o protetor VIVO, ou o marcador do
+ * que JA CAIU, ou nada.
+ *
+ * Os tres estados, e por que os tres precisam existir:
+ *
+ *     vivo (hpAtual > 0)   a janela seguinte recria fiel, sem re-sortear
+ *     caido (hpAtual = 0)  a janela seguinte NAO recria, e a sala destrava
+ *     null                 a sala nao pede protetor, ou trocou
+ *
+ * Antes disto o segundo e o terceiro eram o MESMO valor (`null` → a RPC deleta
+ * a linha), e a ausencia da linha le igual a "nunca nasceu nesta sala":
+ * `buildMapWorld` sorteava um protetor novo com HP cheio. Ver
+ * `WorldState.protetorCaido`.
+ *
+ * O TIPO SAI DAQUI TAMBEM. `payloadDoProtetor` exige `tipo` (a coluna tem
+ * `check (tipo in ('guardian','lord'))`), e `world.protetorPendente` nunca
+ * carregou o proprio tipo — quem o re-deriva e `protetorDaSala`, que e pura.
+ * No caso do caido a sala e a MESMA que travou pro protetor nascer, entao a
+ * re-derivacao continua valendo: o tipo nao muda debaixo dele.
+ */
+export function payloadDoProtetorOuDoCaido(
+  world: { protetorPendente: ProtetorPendente | null; protetorCaido: ProtetorPendente | null; sala: SalaAtiva | null; mapDef: { id: string } | null },
+  tipoDoVivo: string | null,
+): Record<string, unknown> | null {
+  if (world.protetorPendente) return payloadDoProtetor(world.protetorPendente, tipoDoVivo)
+  if (!world.protetorCaido) return null
+  const tipo = protetorDaSala(world.sala, world.mapDef?.id ?? '')
+  // Sem tipo a coluna recusaria a linha (`not null` + check). Nao acontece —
+  // um protetor so cai numa sala que o pedia —, e por isso mesmo o caso nao
+  // merece virar linha silenciosamente perdida.
+  if (!tipo) return null
+  return payloadDoProtetor({ ...world.protetorCaido, hpAtual: 0 }, tipo)
+}
+
 export function payloadDoProtetor(
   bp: ProtetorPendente | null, tipo: string | null,
 ): Record<string, unknown> | null {
@@ -926,6 +962,14 @@ export interface ResultadoFlush {
    */
   clima: ClimaTipo | null
   /**
+   * O protetor da sala, do jeito que o SERVIDOR o conhece (PH-475).
+   *
+   * `null` na hunt sem sala. Ver `ProtetorDaAutoridade` no motor: o cliente
+   * parou de sortear o proprio chefe e passou a adotar este — sem o campo,
+   * cliente e servidor lutavam contra protetores diferentes na mesma sala.
+   */
+  protetor: ProtetorDaAutoridade | null
+  /**
    * A cacada acabou sozinha e a sessao TEM que ser fechada pelo chamador.
    *
    * Hoje so ha um motivo: o POKE desmaiou e nao ha como reanima-lo (auto-revive
@@ -1262,7 +1306,12 @@ async function simularSessao(
   // "gasto e nao creditado" que o comentario de `aplicarFlush` ja avisa pra
   // nunca deixar acontecer. Reporta no retorno em vez de lancar.
   let avancoDeSalaAplicado = false
-  if (forcarAvancoDeSala && world.sala && world.sala.abates >= ABATES_POR_SALA) {
+  // PH-473: a quota vigente, e nao os 30 fixos. Com o protetor de pe ela e 29 —
+  // `solicitarAvancoDeSala` continua recusando enquanto ele nao cai, entao o
+  // gate aqui nao afrouxa nada; ele so para de exigir um abate que a regra nova
+  // nao pede.
+  if (forcarAvancoDeSala && world.sala
+    && world.sala.abates >= quotaDeAbatesDaSala(world.sala, sessao.map_id, world)) {
     if (world.salaCountdownRemaining == null && !world.salaPendente) {
       solicitarAvancoDeSala(world, sessao.map_id)
     }
@@ -1384,9 +1433,20 @@ async function simularSessao(
     p_sala_abates: world.sala?.abates ?? 0,
     p_ciclos: world.sala?.ciclos ?? 0,
     // PH-241/236: protetor vivo persistido pra proxima janela recriar sem
-    // re-sortear; `null` quando o protetor foi resolvido nesta janela e a
-    // sala liberou (a funcao DELETA a linha de sala_protetor nesse caso).
-    p_protetor: payloadDoProtetor(world.protetorPendente, tipoDeProtetor),
+    // re-sortear.
+    //
+    // PH-472: E O CHEFE CAIDO TAMBEM, com `hpAtual: 0`. Antes esta linha
+    // mandava `null` quando o protetor era resolvido na janela, e a RPC
+    // DELETAVA a linha de `sala_protetor` — e a ausencia dela le igual a
+    // "nunca nasceu nesta sala". `buildMapWorld` entao sorteava um protetor
+    // NOVO com HP cheio, e o jogador que matou o chefe no fim de uma janela o
+    // encontrava inteiro na seguinte.
+    //
+    // Mesma solucao de tres valores da PH-307 pro POKE da sequencia, e ela nao
+    // pede coluna nova: `sala_protetor.hp_atual` e `integer not null` sem
+    // CHECK, entao 0 e armazenavel. `null` aqui passou a significar so uma
+    // coisa — a sala nao pede protetor, ou trocou.
+    p_protetor: payloadDoProtetorOuDoCaido(world, tipoDeProtetor),
   })
 
   return {
@@ -1404,6 +1464,19 @@ async function simularSessao(
     // propriedade da sala. Mandar o efetivo faria o cliente tratar um golpe
     // passageiro como o tempo do lugar.
     clima: world.climaAmbiente?.tipo ?? null,
+    // PH-475: o PROTETOR autoritativo, pelo mesmo argumento de `sala` e
+    // `clima`. Sem este campo havia dois chefes por sala — o do servidor,
+    // sorteado com a semente da sessao, e o do cliente, sorteado com a
+    // sequencia de predicao dele — possivelmente de especies diferentes e com
+    // HPs que nao se falavam. Ver `ProtetorDaAutoridade` em engine/types.ts
+    // pros dois sintomas que isso produzia.
+    //
+    // `null` (e nao um objeto com os dois campos vazios) quando a hunt nao tem
+    // sala: la nao existe protetor de sala nenhum, e o cliente nao precisa
+    // limpar nada.
+    protetor: world.sala
+      ? { pendente: world.protetorPendente ?? null, resolvido: world.protetorResolvido }
+      : null,
     encerrada: resumo.stoppedEarly ? 'desmaio' : null,
     avancoDeSalaAplicado,
   }

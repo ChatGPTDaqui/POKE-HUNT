@@ -21,7 +21,7 @@ import type { ElementType } from '@/data/generated/types'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
 import type { Ability } from '@/data/abilities'
 import type { ResolvedBattleAnim } from '@/data/battleSprites'
-import type { StatusAtivo, EstagiosDeStat, EstagiosFonte } from '@/data/statusEffects'
+import type { StatusAtivo, EstagiosDeStat, EstagiosFonte, StatDeEstagio } from '@/data/statusEffects'
 import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
@@ -398,6 +398,47 @@ export interface ProtetorPendente {
 }
 
 /**
+ * O protetor da sala, do jeito que a AUTORIDADE o conhece (PH-475).
+ *
+ * POR QUE ESTE CAMPO TINHA QUE EXISTIR. A resposta de flush e autoritativa
+ * sobre `sala` e `clima` e nao dizia nada sobre o protetor — entao havia DOIS
+ * protetores por sala: o do servidor, sorteado com a semente da sessao e
+ * persistido em `sala_protetor`, e o do cliente, sorteado por
+ * `garantirProtetorDaSala` com a sequencia LOCAL, que e predicao. Podiam ser
+ * ESPECIES DIFERENTES, e o HP deles nao se falava.
+ *
+ * O que o jogador vivia, e foi o relato:
+ *
+ *  1. ele matava o protetor local; `resolverProtetorDaSala` sai sem avancar
+ *     nada sob autoridade (de proposito), e a sala ficava parada — "matei o
+ *     chefe e nada aconteceu";
+ *  2. minutos depois o servidor matava o DELE, o flush trazia a sala seguinte,
+ *     e `aplicarTransicaoDeSala` zerava `world.enemies` no meio da luta — "a
+ *     sala trocou enquanto eu lutava com o chefe".
+ *
+ * E o mesmo argumento que o campo `clima` ja registra ("o cliente nao tem a
+ * semente, sem este campo os dois lados derivariam climas diferentes"), com
+ * consequencia maior: o clima erra o dano, o protetor erra o pedagio da sala.
+ */
+export interface ProtetorDaAutoridade {
+  /**
+   * O protetor VIVO da sala do servidor, com o HP dele. `null` quando nao ha —
+   * e o `resolvido` ao lado e quem diz se e "ainda nao nasceu" ou "ja caiu".
+   */
+  pendente: ProtetorPendente | null
+  /**
+   * O protetor DESTA sala ja foi derrotado no servidor.
+   *
+   * Separado de `pendente: null` porque os dois estados pedem coisas opostas do
+   * cliente: "ainda nao nasceu" e esperar, "ja caiu" e parar de mostrar chefe e
+   * liberar a sala. Foi exatamente essa ambiguidade — a linha de
+   * `sala_protetor` sendo APAGADA nos dois casos — que fez o protetor renascer
+   * com HP cheio na janela seguinte (PH-472).
+   */
+  resolvido: boolean
+}
+
+/**
  * PH-397: a coreografia de encarada de UM par em duelo.
  *
  * Mora aqui e nao em `systems/encaradaSystem.ts` pela mesma convencao de
@@ -506,9 +547,18 @@ export interface WorldEffect {
   // dos 0,35s de vida do impacto, e a arte apontaria pra outro lugar no meio
   // da animacao.
   anguloDeAtaque?: number
-  // Presente so em `abilityEffect` de golpe de STATUS (ver data/statusVfx.ts)
-  // — troca o burst de impacto normal pela arte de buff/debuff por tipo.
+  // Presente so em `abilityEffect` de golpe de STATUS — troca o burst de
+  // impacto normal pela arte de buff/debuff (data/estagioVfx.ts).
   statusDirection?: 'aumenta' | 'diminui'
+  // QUAL atributo o golpe mexeu (PH-416). Ausente com `statusDirection`
+  // presente = golpe de condicao, que nao mexe em atributo nenhum e usa a peca
+  // generica.
+  //
+  // Anda no EFEITO, e nao e derivado na hora de desenhar, pelo mesmo motivo do
+  // `anguloDeAtaque` logo acima: o efeito sobrevive ao golpe, e recalcular na
+  // hora do desenho leria o estado do POKE 1,1s depois — depois de outro golpe
+  // ter mexido em outro atributo.
+  statusStat?: StatDeEstagio
   ballItemId?: string
   success?: boolean
   laneSize: number
@@ -789,8 +839,50 @@ export interface WorldState {
    * (versao antiga, sem sistema de protetor) volta a sortear um protetor — mas
    * ai o teto e um por janela, nao um por tick, e o fallback tem folga pra
    * acumular e disparar.
+   *
+   * PH-472: ELE DEIXOU DE SER SO EFEMERO. `protetorCaido`, abaixo, e o que
+   * carrega a mesma informacao ATRAVES da janela — e a nota deste campo
+   * descrevia o buraco sem o chamar de buraco ("uma reconstrucao contra um
+   * servidor que NAO avancou volta a sortear um protetor"). Voltava contra o
+   * servidor ATUAL tambem, sempre que o chefe caia perto da borda da janela.
    */
   protetorResolvido: boolean
+  /**
+   * PH-472: o protetor que JA CAIU nesta sala, guardado so pra atravessar a
+   * janela de flush.
+   *
+   * O BUG QUE ISTO FECHA. `protetorResolvido` e efemero e nao tinha coluna. O
+   * que o flush gravava era `sala_abates` cheio e o DELETE da linha de
+   * `sala_protetor` — e a AUSENCIA dessa linha significa as duas coisas
+   * opostas: "nunca nasceu nesta sala" e "ja morreu". `buildMapWorld` lia o
+   * estado ambiguo e escolhia a leitura errada: sorteava um protetor NOVO, com
+   * HP cheio. O jogador matava o chefe no fim de uma janela e o chefe voltava
+   * inteiro na seguinte.
+   *
+   * A SOLUCAO E A DA PH-307, e por isso ela nao pede coluna nova. Aquela issue
+   * resolveu a MESMA ambiguidade pro POKE da sequencia do Campeao Lance com
+   * tres valores numa coluna que ja existia (`sequence_hp`: `null` = sem
+   * informacao, `> 0` = luta em andamento, `0` = ja caiu). `sala_protetor.
+   * hp_atual` e `integer not null` sem CHECK, entao `hp_atual = 0` e
+   * armazenavel hoje:
+   *
+   *     linha ausente     a sala nunca sorteou protetor (ou a sala trocou)
+   *     hp_atual > 0      luta em andamento — recria fiel, como sempre
+   *     hp_atual = 0      o protetor DESTA sala ja caiu — nao recria
+   *
+   * POR QUE UM CAMPO PROPRIO, e nao manter `protetorPendente` com `hpAtual: 0`.
+   * `protetorPendente != null` significa "ha protetor VIVO" em tres gates que
+   * ja custaram issue cada um: o `return true` de `garantirProtetorDaSala`
+   * (PH-230), o gate de respawn de selvagem comum (PH-217) e o espelho de HP
+   * com o cao de guarda do impasse (PH-301). O de respawn erraria pro lado
+   * ruim — o campo ficaria vazio pra sempre depois do chefe, desfazendo o
+   * "farm volta enquanto espera a autoridade" que a PH-475 documenta.
+   *
+   * Este campo e lido por DOIS lugares e mais nenhum: `payloadDoProtetor` (que
+   * o grava como `hpAtual: 0`) e `buildMapWorld` (que le a linha de volta).
+   * Nenhum gate existente muda.
+   */
+  protetorCaido: ProtetorPendente | null
   /**
    * O jogador ja fechou este estagio alguma vez? (PH-428)
    *

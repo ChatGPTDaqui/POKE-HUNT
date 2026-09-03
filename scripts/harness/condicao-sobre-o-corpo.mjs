@@ -66,6 +66,13 @@ const TODAS_AS_CONDICOES = [
   { nome: 'queimadura', arquivo: 'assets/status-vfx/queimadura.png', quadros: 16, tinta: '#ff8a2b' },
   { nome: 'paralisia', arquivo: 'assets/status-vfx/paralisia.png', quadros: 16, tinta: '#ffdd33' },
   { nome: 'congelamento', arquivo: 'assets/status-vfx/congelamento.png', quadros: 16, tinta: '#3fe0ff' },
+  // AS DUAS DE CURA (PH-416, segunda leva). Elas nao tem tinta de corpo — cura
+  // nao pinta o POKE —, entao `tinta: null` desliga a multiplicacao e a linha de
+  // opacidade 0 mostra o corpo CRU. Continuam valendo a pena aqui: a pergunta
+  // desta bancada e "o glifo sobrevive sobre o corpo, no tamanho de jogo?", e
+  // ela nao depende de haver tinta.
+  { nome: 'cura-hp', arquivo: 'assets/status-vfx/cura-hp.png', quadros: 16, tinta: null },
+  { nome: 'cura-status', arquivo: 'assets/status-vfx/cura-status.png', quadros: 16, tinta: null },
 ];
 const CONDICOES = process.env.CONDICOES
   ? process.env.CONDICOES.split(',').map((n) => {
@@ -130,7 +137,13 @@ let linha = 0;
 for (const cond of CONDICOES) {
   const tira = decodePng(readFileSync(join(RAIZ, cond.arquivo)));
   const L = Math.floor(tira.width / cond.quadros);
-  const rgb = [1, 3, 5].map((i) => parseInt(cond.tinta.slice(i, i + 2), 16));
+  // `tinta: null` = efeito que nao pinta o corpo (as duas de cura). Multiplicar
+  // por branco e identidade, entao o mesmo caminho serve pros dois casos sem
+  // ramo extra — e a linha de opacidade 0 vira "corpo cru", que e o estado
+  // anterior correto pra elas.
+  const rgb = cond.tinta
+    ? [1, 3, 5].map((i) => parseInt(cond.tinta.slice(i, i + 2), 16))
+    : [255, 255, 255];
   // A tinta MULTIPLICA os pixels opacos e mistura com o original, igual ao
   // desenho — pintar por cima daria outra coisa e a comparacao mentiria.
   const corpo = Buffer.from(idle.rgba);

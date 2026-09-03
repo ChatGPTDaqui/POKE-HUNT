@@ -15,6 +15,7 @@
 // DIRECIONADA (nenhum estagio fica obsoleto — voltar ao 3 pela especie que ele
 // da e uma escolha, nao um retrocesso). Uma grade de dez quadrados nao conta
 // nenhuma das duas; uma trilha conta as duas de relance.
+import { CircleNotch } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 
 import { BIOMAS, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, type BiomaDef } from '@/data/biomas'
@@ -29,6 +30,9 @@ import { MAPS } from '@/data/maps'
 import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
 import { SPECIES, type Species } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
+import { SegmentedTabs } from '@/components/game/controls'
+import { LinhaDeEspecie } from './LinhaDeEspecie'
+import { elencoDoEstagio, subBiomasDoEstagio } from './elencoDoEstagio'
 import { cn } from '@/lib/utils'
 
 /**
@@ -98,6 +102,54 @@ export function especiesDoEstagio(mapId: string): Species[] {
 // ---------------------------------------------------------------------------
 // Nivel 1 — os 12 biomas
 // ---------------------------------------------------------------------------
+/**
+ * O icone do bioma: a arte dele, com a cor dele em volta (PH-469).
+ *
+ * O QUE ELE SUBSTITUI, E POR QUE. Era um circulo cheio de
+ * `colorForType(bioma.tipo)`. Doze circulos de cor solida nao distinguem
+ * LUGAR: a cor diz o elemento (e dois biomas de elemento vizinho ficam
+ * quase iguais), e o jogador esta escolhendo onde cacar, nao qual tipo.
+ * A arte de cada bioma ja existia desde a PH-441 e aparecia so no nivel 2.
+ *
+ * A COR NAO SAI — ela vira a BORDA. Ela continua sendo o unico canal que
+ * agrupa bioma por elemento, e ela e o que le de relance numa grade de 12;
+ * a arte e o que responde "que lugar e esse" quando o olho para. Trocar um
+ * pelo outro perderia metade da leitura, ter os dois nao custa nada.
+ *
+ * DUAS CAMADAS, mesmo raciocinio do `FundoDoBioma`: a cor de tema (`bg.primary`)
+ * e o piso enquanto a miniatura nao chega, e a arte entra com transicao. Sem
+ * o piso, a grade de 12 pisca doze quadrados vazios na primeira abertura.
+ */
+function IconeDoBioma({ bioma, cor }: { bioma: BiomaDef; cor: string }) {
+  const [carregou, setCarregou] = useState(false)
+  return (
+    <span
+      aria-hidden
+      className="relative block h-[2.4em] w-[2.4em] shrink-0 overflow-hidden rounded-[.5em]"
+      style={{
+        background: bioma.bg.primary,
+        // Borda por `box-shadow` inset, e nao `border`: `border` come area da
+        // caixa e a arte teria que ser reencaixada; o inset desenha o anel
+        // POR CIMA da arte, entao a miniatura continua preenchendo o quadrado
+        // inteiro. O halo externo e o mesmo do circulo antigo.
+        boxShadow: `inset 0 0 0 .14em ${cor}, 0 0 10px ${cor}55`,
+      }}
+    >
+      <img
+        src={urlDaMiniaturaDoBioma(bioma.chave)}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setCarregou(true)}
+        className={cn(
+          'h-full w-full object-cover transition-opacity duration-300',
+          carregou ? 'opacity-100' : 'opacity-0',
+        )}
+      />
+    </span>
+  )
+}
+
 function CartaoDeBioma({
   bioma, progresso, onEscolher,
 }: {
@@ -119,10 +171,7 @@ function CartaoDeBioma({
       )}
     >
       <div className="flex min-w-0 items-center gap-[.45em]">
-        <span
-          className="h-[2em] w-[2em] shrink-0 rounded-full"
-          style={{ background: cor, boxShadow: `0 0 10px ${cor}66` }}
-        />
+        <IconeDoBioma bioma={bioma} cor={cor} />
         <div className="min-w-0 flex-1">
           <div className="truncate font-medium text-n100">{bioma.nome}</div>
           {/* O SELO VAI EMBAIXO, E NAO AO LADO DO NOME. Na bancada, com ele na
@@ -200,6 +249,21 @@ export function MapaDeBiomas({
  */
 export function urlDoFundoDoBioma(chave: string): string {
   return `assets/biome-selector/${chave}.jpg`
+}
+
+/**
+ * A MINIATURA da arte do bioma (PH-469), para o icone do cartao de nivel 1.
+ *
+ * NAO E A MESMA ARTE REDIMENSIONADA POR CSS, e a diferenca e de megabytes. As
+ * 12 originais tem 2048px e somam 39 MB — elas existem pra ser o FUNDO da
+ * trilha, onde uma delas por vez ocupa a tela e o peso se paga. O seletor
+ * desenha as DOZE ao mesmo tempo num icone de ~2em: apontar o `<img>` pra
+ * original faria a tela de 12 cartoes baixar 39 MB pra preencher 12
+ * quadradinhos. `scripts/gerar-miniaturas-de-bioma.py` gera o recorte de 256px
+ * em WebP — as 12 juntas dao 241 KB, 160x menos.
+ */
+export function urlDaMiniaturaDoBioma(chave: string): string {
+  return `assets/biome-selector/mini/${chave}.webp`
 }
 
 /**
@@ -308,8 +372,18 @@ const ROTULO_DO_ESTADO: Record<EstadoDoEstagio, string> = {
   bloqueado: '',
 }
 
+/**
+ * O verde de "concluido" (PH-469).
+ *
+ * Literal, e nao `var(--color-ok)`: o anel do no e desenhado por `box-shadow`
+ * inline com opacidade concatenada (`${COR}88`), e `color-mix`/`var()` dentro
+ * de uma string de sombra montada a mao nao aceita o sufixo de alfa. O valor e
+ * o mesmo `--color-ok` do tema.
+ */
+const VERDE_DE_LIMPO = '#22c55e'
+
 function NoNoMapa({
-  estagio, estado, cor, x, y, selecionado, ehAtiva, onSelecionar,
+  estagio, estado, cor, x, y, selecionado, ehAtiva, onSelecionar, onDestacar,
 }: {
   estagio: number
   estado: EstadoDoEstagio
@@ -319,14 +393,32 @@ function NoNoMapa({
   selecionado: boolean
   ehAtiva: boolean
   onSelecionar: () => void
+  /** Ponteiro/foco entrou (`true`) ou saiu (`false`) — quem monta a dica e a trilha. */
+  onDestacar: (dentro: boolean) => void
 }) {
   const bloqueado = estado === 'bloqueado'
+  const limpo = estado === 'limpo'
+  // O ANEL E O ESTADO (PH-469). Antes o estagio limpo trocava o CONTEUDO do no
+  // (`✓` no lugar do numero) e ganhava a cor do bioma como preenchimento. Isso
+  // apagava a identidade do no: numa trilha com seis estagios limpos, os seis
+  // eram o mesmo simbolo, e o jogador nao respondia "estou no 7" olhando o mapa
+  // — tinha que contar os circulos. O numero passa a ficar SEMPRE, e o que muda
+  // e o anel: verde = concluido, cor do bioma = disponivel, cinza = bloqueado.
+  const corDoAnel = bloqueado ? '#3a3a44' : limpo ? VERDE_DE_LIMPO : cor
   return (
     <button
       type="button"
       onClick={onSelecionar}
+      // SO PONTEIRO, sem `onFocus`. O pedido e "ao passar a seta em cima", e o
+      // teclado ja tem resposta melhor: o `aria-label` abaixo e lido pelo leitor
+      // de tela e a tecla de acao abre o painel, que carrega TUDO o que a dica
+      // resume. Abrir a dica no foco tambem duplicaria a informacao na tela,
+      // porque o clique de mouse deixa o no focado E sob o cursor.
+      onMouseEnter={() => onDestacar(true)}
+      onMouseLeave={() => onDestacar(false)}
       aria-label={`Estágio ${estagio}`}
       aria-pressed={selecionado}
+      data-estado={estado}
       className={cn(
         'absolute z-[2] flex h-[2.4em] w-[2.4em] -translate-x-1/2 -translate-y-1/2',
         'items-center justify-center rounded-full text-[.85em] font-bold transition-transform',
@@ -339,19 +431,25 @@ function NoNoMapa({
       style={{
         left: `${x * 100}%`,
         top: `${y * 100}%`,
-        background: bloqueado ? '#1a1a22' : estado === 'limpo' ? cor : '#12121a',
-        color: bloqueado ? '#6b6b78' : estado === 'limpo' ? '#0b0b0f' : cor,
-        // Anel duplo: o de dentro na cor do estado, o de fora PRETO. As artes
+        // Fundo escuro nos QUATRO estados, pra o numero ter sempre o mesmo
+        // contraste. O estagio limpo tinha preenchimento na cor do bioma, e
+        // isso obrigava o numero a virar quase-preto — dois esquemas de
+        // contraste na mesma trilha.
+        background: bloqueado ? '#1a1a22' : '#12121a',
+        color: bloqueado ? '#6b6b78' : corDoAnel,
+        // Anel duplo: o de dentro na cor do ESTADO, o de fora PRETO. As artes
         // tem area clara, e um anel claro sobre neve some — o contorno escuro
-        // e o que garante a silhueta do no em qualquer foto.
+        // e o que garante a silhueta do no em qualquer foto. O anel do limpo e
+        // mais grosso: ele e o unico canal que sobrou pra "concluido", entao
+        // ele precisa ganhar a comparacao de relance contra o anel do liberado.
         boxShadow: bloqueado
           ? 'inset 0 0 0 .14em #3a3a44, 0 0 0 .16em rgba(0,0,0,.75)'
-          : `inset 0 0 0 .16em ${cor}, 0 0 0 .16em rgba(0,0,0,.75), 0 0 .9em ${cor}88`,
+          : `inset 0 0 0 ${limpo ? '.22em' : '.16em'} ${corDoAnel}, 0 0 0 .16em rgba(0,0,0,.75), 0 0 .9em ${corDoAnel}88`,
         outline: selecionado ? '.18em solid #f4f4f6' : undefined,
         outlineOffset: '.12em',
       }}
     >
-      {estado === 'limpo' ? '✓' : estagio}
+      {estagio}
       {ehAtiva && (
         <span
           aria-hidden
@@ -360,6 +458,87 @@ function NoNoMapa({
         />
       )}
     </button>
+  )
+}
+
+/**
+ * A dica que aparece ao passar o cursor num no (PH-469).
+ *
+ * POR QUE NAO O `Explicacao`/base-ui. A bolha padrao do projeto e portada pro
+ * `document.body` e ancora no `firstElementChild` do gatilho (ver
+ * `components/shared/Explicacao.tsx` e a armadilha do `display: contents`). O
+ * no da trilha e um `<button>` posicionado em `absolute` por `left`/`top` em
+ * porcentagem: envolve-lo num gatilho tiraria o posicionamento do proprio
+ * elemento. Aqui a dica mora DENTRO da caixa do mapa, que e o que garante que
+ * ela nunca escapa do cartao, e a posicao dela sai das MESMAS coordenadas do
+ * caminho — nao ha segunda fonte de verdade pra sair de sincronia.
+ *
+ * ELA NAO SUBSTITUI O PAINEL. O painel embaixo responde "o que tem la" com
+ * calma (elenco, composicao completa, bloqueio); a dica responde "o que e este
+ * ponto" sem gastar um clique — o que, com dez pontos espalhados, era o custo
+ * de comparar dois estagios.
+ */
+const ROTULO_CURTO_DO_ESTADO: Record<EstadoDoEstagio, string> = {
+  limpo: 'concluído',
+  atual: 'continue aqui',
+  liberado: 'liberado',
+  bloqueado: 'bloqueado',
+}
+
+function DicaDoEstagio({
+  estagio, estado, x, y, niveis, salas, composicao, ehAtiva,
+}: {
+  estagio: number
+  estado: EstadoDoEstagio
+  x: number
+  y: number
+  niveis: readonly [number, number]
+  salas: number
+  composicao: { chave: string; nome: string; pct: number }[]
+  ehAtiva: boolean
+}) {
+  // A dica vai PRA CIMA do no na metade de baixo do mapa e pra baixo na metade
+  // de cima — senao ela sai da caixa nos nos das pontas (o estagio 1 fica a 10%
+  // da altura e o 10 a 90%).
+  const acima = y > 0.5
+  return (
+    <div
+      role="tooltip"
+      aria-hidden
+      className={cn(
+        'pointer-events-none absolute z-[3] w-[11em] -translate-x-1/2 rounded-[.5em]',
+        'border border-n700 bg-n900/95 p-[.45em] text-left shadow-lg',
+        acima ? '-translate-y-[calc(100%+1.6em)]' : 'translate-y-[1.6em]',
+      )}
+      style={{
+        // Centro preso entre 18% e 82% pra a caixa de 11em nao vazar nas
+        // laterais; o `-translate-x-1/2` centra a dica nesse ponto, nao no no.
+        left: `${Math.min(Math.max(x, 0.18), 0.82) * 100}%`,
+        top: `${y * 100}%`,
+      }}
+    >
+      <div className="flex items-baseline gap-[.35em]">
+        <b className="text-[.9em] text-n100">Estágio {estagio}</b>
+        <span className="text-[.72em] text-n400">Lv {niveis[0]}-{niveis[1]}</span>
+      </div>
+      <div className="text-[.7em] text-n500">
+        {salas} salas · {ROTULO_CURTO_DO_ESTADO[estado]}
+        {ehAtiva && <span className="font-bold text-ok"> · em caçada</span>}
+      </div>
+      {composicao.length > 0 && (
+        <div className="mt-[.25em] flex flex-col gap-[.1em] text-[.7em] text-n300">
+          {composicao.slice(0, 3).map((s) => (
+            <div key={s.chave} className="flex justify-between gap-[.4em]">
+              <span className="min-w-0 truncate">{s.nome}</span>
+              <b className="tabular-nums text-n100">{Math.round(s.pct)}%</b>
+            </div>
+          ))}
+          {composicao.length > 3 && (
+            <div className="text-n600">+{composicao.length - 3} sub-biomas</div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -441,8 +620,18 @@ function LinhaDoCaminho({
  * A troca e a das duas referencias que o dono mandou: o mapa responde "onde
  * estou e pra onde vou", o painel responde "o que tem la".
  */
+/**
+ * Valor da aba "o estagio inteiro".
+ *
+ * Uma string sentinela e nao `null` porque `SegmentedTabs` e tipado em
+ * `T extends string` — o `null` fica na fronteira do componente
+ * (`elencoDoEstagio` recebe `null` pra dizer "sem recorte"), e nao no meio da
+ * fileira de abas.
+ */
+const DO_ESTAGIO = '__estagio__'
+
 function PainelDoEstagio({
-  bioma, estagio, estado, progresso, ehAtiva, entrando, onEntrar,
+  bioma, estagio, estado, progresso, ehAtiva, entrando, pokeEmCampo, onEntrar,
 }: {
   bioma: BiomaDef
   estagio: number
@@ -450,12 +639,23 @@ function PainelDoEstagio({
   progresso: ProgressoPorBioma
   ehAtiva: boolean
   entrando: boolean
+  /** O POKE em campo, pra a coluna de efetividade. `null` a esconde. */
+  pokeEmCampo: Species | null
   onEntrar: () => void
 }) {
   const mapId = estagioId(bioma.chave, estagio)
   const [lo, hi] = niveisDoEstagio(estagio)
-  const composicao = useMemo(() => composicaoDoEstagio(bioma, estagio), [bioma, estagio])
-  const especies = useMemo(() => especiesDoEstagio(mapId), [mapId])
+  // Qual sub-bioma o jogador esta olhando; `null` = o estagio inteiro. O
+  // componente e remontado por `key={mapId}` na trilha, entao trocar de estagio
+  // volta pro estagio inteiro sozinho — sem `useEffect` de sincronizacao.
+  const [recorte, setRecorte] = useState<string | null>(null)
+  const subBiomas = useMemo(() => subBiomasDoEstagio(bioma, estagio), [bioma, estagio])
+  // A conta e pesada o bastante pra memoizar: ela roda `contextoDeSpawn` uma vez
+  // por (sub-bioma x indice de sala) — ate 4 x 8 = 32 chamadas, cada uma com o
+  // recorte de janela de nivel e a apara de teto. O cache de `contextoDeSpawn`
+  // absorve a repeticao entre renders, este `useMemo` absorve a de dentro do
+  // mesmo render.
+  const elenco = useMemo(() => elencoDoEstagio(bioma, estagio, recorte), [bioma, estagio, recorte])
   const bloqueio = bloqueioDoEstagio(progresso, bioma.chave, estagio)
   const bloqueado = estado === 'bloqueado'
 
@@ -480,53 +680,134 @@ function PainelDoEstagio({
             EM CAÇADA
           </span>
         )}
-        <span className="flex-1" />
-        <button
-          type="button"
-          disabled={bloqueado || entrando}
-          onClick={onEntrar}
-          className={cn(
-            'shrink-0 rounded-[.4em] px-[.7em] py-[.25em] text-[.85em] font-medium',
-            bloqueado
-              ? 'cursor-not-allowed bg-n800 text-n600'
-              : ehAtiva
-                ? 'bg-ok/20 text-ok hover:bg-ok/30'
-                : 'bg-n700 text-n100 hover:bg-n600',
-          )}
-        >
-          {entrando ? 'Entrando...' : bloqueado ? 'Bloqueado' : ehAtiva ? 'Voltar' : 'Entrar'}
-        </button>
       </div>
 
       {bloqueado && bloqueio && <div className="text-[.78em] text-warn">{bloqueio}</div>}
 
-      {/* A COMPOSICAO DE SUB-BIOMA e o que conta que o bioma afunda: no Marinho
-          a Praia cai de 60% pra 0% e o Leito Oceanico sobe de 0% pra 79% ao
-          descer os dez. Sub-bioma de peso zero nao aparece — a ausencia dele E
-          a historia. */}
-      <div className="flex flex-wrap gap-[.3em]">
-        {composicao.map((s) => (
-          <span
-            key={s.chave}
-            className="rounded-[.35em] bg-n800 px-[.4em] py-[.1em] text-[.72em] text-n300"
-          >
-            {s.nome} <b className="text-n100">{Math.round(s.pct)}%</b>
-          </span>
+      {/* A COMPOSICAO DE SUB-BIOMA VIROU A FILEIRA DE ABAS (PH-470).
+          Ela era uma fileira de chips SEPARADA da lista de POKEs, e as duas
+          respondiam meia pergunta cada: os chips diziam "a Praia sai em 38% das
+          salas" e a lista dizia "estas 40 especies aparecem no estagio", sem
+          cruzamento. O jogador que quer uma especie de um sub-bioma especifico
+          — que e o ponto da cacada direcionada da PH-428 — nao tinha como saber
+          a chance DELA dentro dali.
+
+          Como aba, o mesmo chip agora FILTRA: a porcentagem continua visivel no
+          rotulo e clicar recalcula a lista como se toda sala caisse naquele
+          sub-bioma.
+
+          A COMPOSICAO E O QUE CONTA QUE O BIOMA AFUNDA: no Marinho a Praia cai
+          de 60% pra 0% e o Leito Oceanico sobe de 0% pra 79% ao descer os dez.
+          Sub-bioma de peso zero nao aparece — a ausencia dele E a historia. */}
+      {subBiomas.length > 0 && (
+        <SegmentedTabs
+          value={recorte ?? DO_ESTAGIO}
+          onChange={(v) => setRecorte(v === DO_ESTAGIO ? null : v)}
+          options={[
+            { value: DO_ESTAGIO, label: 'Estágio' },
+            ...subBiomas.map((s) => ({ value: s.chave, label: `${s.nome} ${Math.round(s.pct)}%` })),
+          ]}
+        />
+      )}
+
+      <div className="text-[.72em] text-n500">
+        {elenco.length} POKEs
+        {recorte
+          ? ` em ${subBiomas.find((s) => s.chave === recorte)?.nome ?? recorte}`
+          : ' neste estágio'}
+        {/* Sem esta frase o jogador soma a % do painel com a da sala em que
+            esta e as duas nao fecham — a do painel ja inclui o sorteio de
+            sub-bioma e a media sobre as salas. */}
+        <span className="text-n600">
+          {recorte
+            ? ' — chance dentro deste sub-bioma'
+            : ' — chance já considerando o sorteio de sala'}
+        </span>
+      </div>
+      <div className="flex flex-col gap-[.15em]">
+        {elenco.map((e) => (
+          <LinhaDeEspecie
+            key={e.encounterId}
+            species={e.species}
+            pct={e.pct}
+            ativo={pokeEmCampo}
+            guardian={e.guardian}
+            lord={e.lord}
+          />
         ))}
       </div>
 
-      <div className="text-[.72em] text-n500">POKEs deste estágio ({especies.length})</div>
-      <div className="flex flex-wrap gap-[.25em]">
-        {especies.map((sp) => (
-          <span
-            key={sp.id}
-            className="rounded-[.35em] bg-n800 px-[.4em] py-[.1em] text-[.72em] text-n300"
-          >
-            {sp.name}
-          </span>
-        ))}
-      </div>
+      <BotaoDeEntrar
+        cor={colorForType(bioma.tipo)}
+        bloqueado={bloqueado}
+        entrando={entrando}
+        ehAtiva={ehAtiva}
+        onEntrar={onEntrar}
+      />
     </div>
+  )
+}
+
+/**
+ * O botao de entrar no estagio (PH-469).
+ *
+ * ELE SAIU DA LINHA DO CABECALHO, e o motivo e hierarquia, nao tamanho. Ele
+ * estava inline entre o rotulo "3 salas" e o selo de estado, com `text-[.85em]`
+ * — o mesmo peso visual do texto que ele estava ao lado. Numa tela cuja unica
+ * acao e "entrar nesse estagio", a acao era o elemento mais discreto do painel.
+ * Agora ele fecha o painel, ocupa a largura toda e e o unico elemento grande.
+ *
+ * A COR VEM DO BIOMA porque ela e o unico fio que liga o botao ao lugar em que
+ * ele entra — o mesmo tom do anel dos nos e do caminho percorrido. Fora do
+ * caminho feliz ela cede: bloqueado e cinza (a acao nao existe) e "voltar ao
+ * campo" e verde (o mesmo verde de "EM CAÇADA" no resto do jogo).
+ *
+ * NAO USA `GameButton` de proposito: os cinco `variant` dele sao pilulas de
+ * `text-[.85em]` pra barra de acao e trilho, e o `primary` e a pilula clara
+ * (conteudo escuro sobre fundo claro) — nenhum deles cobre "o botao principal
+ * de uma tela, na cor do contexto". Estender o design system com um sexto
+ * variant usado uma vez so seria pior: a proxima tela herdaria a decisao desta.
+ */
+function BotaoDeEntrar({
+  cor, bloqueado, entrando, ehAtiva, onEntrar,
+}: {
+  cor: string
+  bloqueado: boolean
+  entrando: boolean
+  ehAtiva: boolean
+  onEntrar: () => void
+}) {
+  const rotulo = entrando ? 'Entrando...' : bloqueado ? 'Bloqueado' : ehAtiva ? 'Voltar ao campo' : 'Entrar'
+  // Verde literal e nao `var(--color-ok)`: entra em gradiente e em sombra com
+  // sufixo de alfa concatenado, que `var()` nao aceita. Ver `VERDE_DE_LIMPO`.
+  const acento = ehAtiva ? VERDE_DE_LIMPO : cor
+  return (
+    <button
+      type="button"
+      disabled={bloqueado || entrando}
+      onClick={onEntrar}
+      aria-busy={entrando || undefined}
+      className={cn(
+        'jogo-botao mt-[.15em] flex w-full cursor-pointer items-center justify-center gap-[.4em]',
+        'rounded-[.55em] border-2 py-[.55em] text-[1.05em] font-black uppercase tracking-[.12em]',
+        'transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
+        bloqueado || entrando
+          ? 'cursor-not-allowed border-n700 bg-n800 text-n600'
+          : 'text-n50 hover:brightness-115 active:translate-y-[.06em]',
+      )}
+      style={bloqueado || entrando ? undefined : {
+        borderColor: acento,
+        // Gradiente na cor do bioma, escuro embaixo: o botao lê como uma placa
+        // iluminada por cima, que e o que o distingue de um retangulo chapado
+        // sem custar uma imagem.
+        background: `linear-gradient(180deg, ${acento}55 0%, ${acento}22 55%, rgba(0,0,0,.35) 100%)`,
+        boxShadow: `0 0 .9em ${acento}55, inset 0 .05em 0 ${acento}88`,
+        textShadow: '0 .08em .2em rgba(0,0,0,.85)',
+      }}
+    >
+      {entrando && <CircleNotch className="animate-spin" aria-hidden />}
+      {rotulo}
+    </button>
   )
 }
 
@@ -534,13 +815,23 @@ function PainelDoEstagio({
 // A trilha
 // ---------------------------------------------------------------------------
 export function TrilhaDoBioma({
-  biomaChave, progresso, mapaAtivoId, abertoId, entrandoId, onAbrir, onEntrar, onVoltar,
+  biomaChave, progresso, mapaAtivoId, abertoId, entrandoId, pokeEmCampo,
+  onAbrir, onEntrar, onVoltar,
 }: {
   biomaChave: string
   progresso: ProgressoPorBioma
   mapaAtivoId: string | null
   abertoId: string | null
   entrandoId: string | null
+  /**
+   * O POKE em campo, pra a coluna de efetividade do elenco (PH-470).
+   *
+   * Vem por PROP e nao de `useGameStateStore` aqui dentro: este modulo e a
+   * arvore de navegacao e nao le store nenhum hoje — o `HuntMenu` ja tem o
+   * POKE ativo em maos pra o proprio cartao, e puxar o store aqui daria dois
+   * lugares lendo a mesma coisa com risco de divergir na ordem de render.
+   */
+  pokeEmCampo: Species | null
   onAbrir: (mapId: string | null) => void
   onEntrar: (mapId: string) => void
   onVoltar: () => void
@@ -551,6 +842,9 @@ export function TrilhaDoBioma({
   const limpo = maiorEstagioLimpo(progresso, bioma.chave)
   const cor = colorForType(bioma.tipo)
   const pontos = caminhoDoBioma(bioma.chave)
+  // Qual no o cursor/foco esta em cima (PH-469). Estado LOCAL e nao no store:
+  // ele morre com a tela e ninguem mais precisa dele.
+  const [destacado, setDestacado] = useState<number | null>(null)
 
   // O painel abre no estagio ATUAL quando o jogador entra no bioma, e nao
   // vazio: chegar num mapa e ter que adivinhar qual dos dez clicar e o mesmo
@@ -599,18 +893,53 @@ export function TrilhaDoBioma({
               selecionado={selecionado === estagio}
               ehAtiva={mapaAtivoId === mapId}
               onSelecionar={() => onAbrir(mapId)}
+              onDestacar={(dentro) => setDestacado(dentro ? estagio : (atual) => (atual === estagio ? null : atual))}
             />
           )
         })}
+        {/* A dica do no destacado, montada aqui e nao dentro do `NoNoMapa`: o no
+            e um `<button>` de 2.4em com `overflow` proprio e um filho de 11em
+            dentro dele herdaria a escala e o `-translate` do no. Uma dica so na
+            tela por vez tambem e o certo — duas abertas seria estado
+            impossivel.
+
+            O NO SELECIONADO NAO GANHA DICA. O painel logo abaixo ja mostra tudo
+            o que ela resume, e com mais detalhe; abrir as duas repetiria "Estágio
+            N", "Lv x-y" e a composicao no mesmo instante da tela. E acontece
+            sempre, nao e caso de canto: clicar num no deixa o cursor em cima
+            dele. */}
+        {destacado != null && destacado !== selecionado && (() => {
+          const [x, y] = pontos[destacado - 1]
+          const mapId = estagioId(bioma.chave, destacado)
+          return (
+            <DicaDoEstagio
+              estagio={destacado}
+              estado={estadoDoEstagio(progresso, bioma.chave, destacado)}
+              x={x}
+              y={y}
+              niveis={niveisDoEstagio(destacado)}
+              salas={quantidadeDeSalas(mapId)}
+              composicao={composicaoDoEstagio(bioma, destacado)}
+              ehAtiva={mapaAtivoId === mapId}
+            />
+          )
+        })()}
       </div>
 
       <PainelDoEstagio
+        // A CHAVE E O RESET (PH-470): trocar de estagio remonta o painel, e a
+        // aba de sub-bioma volta pro estagio inteiro sozinha. Sem ela, clicar no
+        // estagio 7 com a aba "Praia" aberta manteria "Praia" selecionada — num
+        // estagio onde a Praia pode ter peso zero, o que deixaria a lista vazia
+        // sem nada explicando.
+        key={estagioId(bioma.chave, selecionado)}
         bioma={bioma}
         estagio={selecionado}
         estado={estadoDoEstagio(progresso, bioma.chave, selecionado)}
         progresso={progresso}
         ehAtiva={mapaAtivoId === estagioId(bioma.chave, selecionado)}
         entrando={entrandoId === estagioId(bioma.chave, selecionado)}
+        pokeEmCampo={pokeEmCampo}
         onEntrar={() => onEntrar(estagioId(bioma.chave, selecionado))}
       />
     </div>

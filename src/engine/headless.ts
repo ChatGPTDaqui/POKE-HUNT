@@ -36,6 +36,12 @@ export { novaSala, temSalas, solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, p
 // Sem ela a bancada teria que reimplementar a reconciliacao, e mediria a copia
 // em vez do jogo.
 export { reconciliarSalaDaAutoridade } from './systems/salaSystem'
+// PH-473: o servidor precisa da MESMA quota que o cliente — o gate de avanco
+// manual dele comparava com os 30 fixos.
+export { quotaDeAbatesDaSala, salaDeveProtetor, ABATES_COMUNS_POR_SALA } from './systems/salaSystem'
+// PH-475: a bancada de troca de sala precisa espelhar o protetor da autoridade
+// no cliente — sem isso ela mede um cliente que nunca ve chefe.
+export { adotarProtetorDaAutoridade } from './simulation'
 export type { AvancoDeSala, TipoDeProtetor } from './systems/salaSystem'
 // PH-301: "este POKE consegue causar dano naquele?" — a pergunta que o sorteio
 // do protetor passou a fazer. Exportada pra bancada
@@ -74,7 +80,9 @@ export {
   MAX_ACTIVE_ABILITIES, activeAbilitiesPadrao, ehGolpeAoeDeNivel50, golpesUtilizaveis,
 } from '@/data/activeAbilities'
 
-export type { WorldState, WorldCounters, SalaAtiva, ClimaTipo, ProtetorPendente } from './types'
+export type {
+  WorldState, WorldCounters, SalaAtiva, ClimaTipo, ProtetorPendente, ProtetorDaAutoridade,
+} from './types'
 
 // Regras de economia e progressao usadas pelas ACOES do jogador (comprar,
 // vender, desbloquear, evoluir). O servidor chama exatamente estas — nao ha uma

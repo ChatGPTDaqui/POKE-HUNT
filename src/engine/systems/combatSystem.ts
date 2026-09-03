@@ -49,7 +49,7 @@ import type { PokeInstance } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
 import { bonusDeAtaque, reducaoDeDefesa } from '@/data/especialidades'
 import { ehDirecional } from '@/data/moveVfx'
-import { direcaoDoGolpeDeStatus } from '@/data/statusVfx'
+import { estagioDoGolpe } from '@/data/estagioVfx'
 
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
@@ -2551,7 +2551,13 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         // buff/debuff mesmo que acerte 0 alvos de verdade — mesmo espirito
         // do resto do jogo, que mostra a animacao do golpe independente do
         // resultado (ver announceAbility).
-        statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
+        // PH-416: a direcao E o atributo saem do MESMO `statChanges[0]`, por
+        // `estagioDoGolpe`. Derivar os dois por regras diferentes produziria par
+        // torto — escudo com motes subindo num golpe que baixa Defesa.
+        statusDirection: !isDamagingAbility(ability)
+          ? (estagioDoGolpe(ability.statChanges)?.direcao ?? 'diminui')
+          : undefined,
+        statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : undefined,
         // O anel e centrado em quem lancou: se ele anda durante os 1,2s de
         // animacao, a arte anda junto em vez de ficar plantada onde ele estava.
         seguir: attacker,
@@ -3382,7 +3388,11 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
       elementType: ability.type,
       abilityId: ability.id,
-      statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
+      // PH-416: ver a nota no ramo de area, logo acima.
+      statusDirection: !isDamagingAbility(ability)
+        ? (estagioDoGolpe(ability.statChanges)?.direcao ?? 'diminui')
+        : undefined,
+      statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : undefined,
       // A arte pousa em cima de `local` (o alvo, ou quem de fato recebeu o
       // status) e acompanha ele pelo 1,0-1,1s que dura.
       seguir: local,

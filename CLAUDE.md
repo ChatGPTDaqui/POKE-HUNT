@@ -4,7 +4,7 @@
 
 ## Stack
 
-React 19 · Vite 8 · TypeScript strict · Tailwind CSS 4 · shadcn/ui (Radix via `@base-ui/react`) · Zustand (`gameStateStore` persistente, `worldStore` efêmero) · TanStack Query 5 · Supabase (migração em andamento, ver `SPEC-supabase-migration.md`) · oxlint · Vitest
+React 19 · Vite 8 · TypeScript strict · Tailwind CSS 4 · shadcn/ui (Radix via `@base-ui/react`) · Zustand (`gameStateStore` persistente, `worldStore` efêmero) · TanStack Query 5 · Supabase (Postgres + Auth + Edge Functions; a migração de `localStorage` terminou) · oxlint · Vitest
 
 ## Comandos
 

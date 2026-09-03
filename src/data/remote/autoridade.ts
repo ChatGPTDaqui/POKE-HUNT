@@ -19,6 +19,7 @@ import { ABATES_POR_SALA } from '@/data/biomas'
 import { SPECIES } from '@/data/pokes'
 import { preloadEspecies } from '@/data/preload'
 import { solicitarAvancoDeSala } from '@/engine/systems/salaSystem'
+import { adotarProtetorDaAutoridade } from '@/engine/simulation'
 import { apagarTodosOsEstagios } from '@/engine/systems/statusSystem'
 import { agendarMesmoEmSegundoPlano, type TemporizadorCancelavel } from '@/core/temporizadorDeSegundoPlano'
 import type { ClimaTipo, SalaAtiva } from '@/engine/types'
@@ -626,6 +627,19 @@ export async function liquidar(): Promise<void> {
           + ` Janela do flush: ${r.segundosCreditados}s.`,
         )
       }
+    }
+    // PH-475: O CHEFE DA SALA TAMBEM VEM DE LA, e DEPOIS da sala.
+    //
+    // A ordem nao e estetica: `definirSala` acima pode trocar de sala, e a
+    // troca zera `protetorResolvido` e limpa os inimigos. Adotar antes faria a
+    // transicao apagar o chefe que a gente acabou de espelhar.
+    //
+    // Duas chamadas de store em vez de uma: `definirSala` e a porta da REGRA de
+    // sala e nao devia crescer pra carregar o chefe junto. O custo e um render
+    // extra por flush, num store que ja e reescrito 60x por segundo pelo laco
+    // de jogo.
+    if (r.protetor !== undefined) {
+      useWorldStore.getState().update((draft) => adotarProtetorDaAutoridade(draft, r.protetor))
     }
     // Ritmo do proximo flush: janela produtiva mantem 30s, janela vazia estica
     // (ver INTERVALO_FLUSH_MAX_MS).

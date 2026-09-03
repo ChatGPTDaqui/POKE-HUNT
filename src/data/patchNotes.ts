@@ -12,6 +12,63 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // SETE itens pra nove issues (PH-416, PH-469 a PH-476), e a nota mais dificil
+  // de ordenar em muito tempo: quatro itens sao de TELA e tres corrigem defeito
+  // que o dono relatou jogando.
+  //
+  // A TELA DE HUNTS ABRE A NOTA, como na 7.38, e pelo mesmo motivo: e o unico
+  // item que o jogador encontra SEM PROCURAR. Ele abre o jogo, vai cacar, e a
+  // tela e outra.
+  //
+  // O ITEM DO CHEFE JUNTA TRES ISSUES (PH-472, PH-473, PH-475) num item so, e
+  // isso e regra deste arquivo e nao economia de texto: eram tres causas
+  // somadas de UM sintoma, e o jogador nunca soube que eram tres. Ele viu "matei
+  // o chefe e nada aconteceu" e "a sala trocou no meio da luta". A nota conta o
+  // sintoma.
+  //
+  // DOIS ITENS SAO DE BALANCEAMENTO E DIZEM ISSO, porque nenhum dos dois e so
+  // conserto:
+  //
+  //   a curva de profundidade (PH-476)  muda a composicao de spawn de TODA
+  //                                     hunt de bioma. O que a tela anunciava
+  //                                     desde a 7.38 passou a valer de verdade —
+  //                                     ou seja, o que aparece nas salas mudou.
+  //   o chefe como 30o abate (PH-473)   um selvagem comum a menos por sala, 55
+  //                                     salas por bioma.
+  //
+  // Descobrir mudanca de balanceamento cacando e o pior jeito de descobrir, e a
+  // regua deste arquivo ja mandou anunciar isso na 7.36.
+  //
+  // O ITEM DA ARTE DE STATUS FALA DO EIXO, e nao de "arte nova". A troca que
+  // importa nao e estetica: antes, Ataque caindo e Velocidade caindo desenhavam
+  // EXATAMENTE a mesma coisa, e o unico jeito de saber qual atributo mudou era
+  // ler o texto flutuante.
+  //
+  // FICA DE FORA:
+  //   - PH-474 (o chip da sala pedia um Guardian que nao existe em estagio ja
+  //     limpo): cabe no item do chefe, e sozinho nao merece linha;
+  //   - as duas tiras de arte de CURA que NAO entraram. Elas foram geradas,
+  //     compostas na bancada e ficaram piores que a arte atual; anunciar o que
+  //     nao mudou e pior que silencio;
+  //   - a bancada de troca de sala que media a coisa errada, o encoder de PNG
+  //     deduplicado, os arquivos de NOTAS de arte, a regua da folha de contato,
+  //     o pre-carregamento das tiras novas e a arrumacao do controller. Tudo
+  //     encanamento, zero efeito na tela alem dos itens abaixo.
+  {
+    version: '7.40',
+    date: '2026-09-03',
+    title: 'A tela de hunts diz o que tem lá dentro, e o chefe da sala finalmente conta',
+    highlights: [
+      'A TELA DE HUNTS SE LÊ DE RELANCE AGORA. Cada bioma aparece com uma miniatura da arte dele em vez de uma bolinha de cor, com a borda na cor do elemento. Dentro do bioma, o número do estágio fica sempre visível — antes o estágio concluído virava um "✓" e você não conseguia dizer "estou no 7" sem contar os círculos; agora concluído é uma borda verde em volta do número. E passar o cursor sobre um estágio mostra a faixa de nível, quantas salas ele tem e os sub-biomas dele, sem precisar clicar.',
+      'CADA ESTÁGIO VOLTOU A DIZER QUEM APARECE LÁ, E COM QUE CHANCE. A lista de POKEs era só nomes num chip cinza. Agora cada um vem com o retrato, os tipos, a porcentagem de aparição e — se você tem um POKE em campo — o quanto ele bate naquela espécie (4x, 2x, ½x, ¼x, imune). Quem pode aparecer como Guardião ou como Lorde vem marcado.',
+      'E DÁ PRA VER A CHANCE DENTRO DE UM SUB-BIOMA ESPECÍFICO. As abas em cima da lista trocam entre o estágio inteiro e cada sub-bioma dele. Se você quer uma espécie que só sai na Praia, a aba Praia mostra a chance dela ali dentro — no estágio inteiro aquele número vem diluído pelo sorteio de sala.',
+      'ENTRAR NUMA ÁREA VIROU UMA APRESENTAÇÃO. Ao entrar num estágio e a cada troca de sala, a arte do lugar ocupa a tela com um zoom lento e o nome dela em letreiro. Não é espera nova: a entrada já esperava a caçada carregar e a troca de sala já congelava o jogo por três segundos — antes, o que aparecia era "Entrando em nova área..." e um número, sem dizer qual área.',
+      'BUG CORRIGIDO: O CHEFE DA SALA. Ele tinha três defeitos somados, e você viu os três. Matar o Guardião não fazia nada e a sala continuava parada. A sala às vezes trocava sozinha no meio da luta contra ele. E quando ele morria perto do fim de uma caçada em segundo plano, voltava inteiro depois, com a luta de minutos zerada. A causa comum era o servidor e a sua tela lutando contra chefes DIFERENTES na mesma sala, cada um com o seu — agora é um só, e é o do servidor. Nenhum progresso foi perdido: o que quebrava era a contagem, não o que você ganhou.',
+      'O CHEFE AGORA É O 30º POKE DA SALA, E NÃO O 31º. A barra de abates para em 29/30 quando ele entra em campo — é ela dizendo "falta o chefe" — e o abate dele fecha os 30 e leva pra sala seguinte no mesmo instante. Antes a barra chegava a 30/30 e a sala ficava parada esperando um abate que ela não tinha onde contar, o que se lia como travamento. Um selvagem comum a menos por sala, e nenhum outro nasce depois que ele aparece.',
+      'BUG CORRIGIDO: O BIOMA NÃO AFUNDAVA DE VERDADE. Desde a atualização do mapa do mundo, a trilha mostra a composição de sub-bioma mudando ao longo dos dez estágios — no Marinho a Praia sai de 60% e desaparece, o Leito Oceânico chega a 79%. Isso estava só na tela: o sorteio das salas continuava usando a mesma proporção nos dez estágios, e no fundo do Marinho a Praia aparecia em quase um terço das salas. Agora vale de verdade, e por isso O QUE APARECE NAS SALAS MUDOU em toda hunt de bioma — o estágio fundo entrega o sub-bioma fundo, como ele sempre anunciou.',
+      'A ARTE DE GOLPE QUE MUDA ATRIBUTO AGORA DIZ QUAL ATRIBUTO. Ela era escolhida pelo tipo elemental do golpe, então Ataque caindo e Velocidade caindo desenhavam exatamente a mesma coisa e o único diferenciador era o texto flutuante. Agora cada atributo tem desenho próprio — punho, escudo, asa, alvo — e a cor do tipo do golpe entra por cima, então um Rosnado de POISON continua saindo roxo.',
+    ],
+  },
   // DOIS itens pra duas issues (PH-447, PH-448). A nota mais curta em muito
   // tempo, e a primeira que anuncia um defeito que ESTA nota anterior causou.
   //
