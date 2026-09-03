@@ -14,6 +14,17 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    // PH-458. `tsBuildInfoFile` acima NAO basta: sem `incremental`, o `tsc -b`
+    // grava um arquivo de 25KB que nao carrega estado de programa nenhum, e
+    // recompila tudo toda vez. Medido: FRIO 16,8s, QUENTE 16,8s, TOCADO 16,8s —
+    // zero de economia. Com esta linha o arquivo passa a 740KB e o QUENTE cai
+    // pra 0,9s (-95%).
+    //
+    // NAO ENFRAQUECE A CHECAGEM, e isso foi provado e nao suposto: erro de tipo
+    // real injetado com o cache quente reprova em 5,5s com a mensagem certa. E
+    // o CI roda `npx tsc -b --force`, que ignora o cache de qualquer jeito —
+    // ele nunca confia neste arquivo.
+    "incremental": true,
     "jsx": "react-jsx",
 
     /* Linting */
