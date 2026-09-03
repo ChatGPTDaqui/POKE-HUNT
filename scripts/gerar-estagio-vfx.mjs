@@ -20,7 +20,8 @@
 //    icones bem pequenos"
 //
 // Entao a peca deixou de ser cena e virou SELO: um quadro so, 21x13, desenhado
-// acima da cabeca. Sem motes, sem animacao de quadro — o movimento que sobrou e
+// no flanco do alvo (era acima da cabeca ate a PH-485, e ali ele caia em cima da
+// placa de nome). Sem motes, sem animacao de quadro — o movimento que sobrou e
 // a subida/descida de 6px que o motor faz com o proprio selo, e ela e de graca.
 //
 // A GRAMATICA DO SELO
@@ -65,7 +66,7 @@ const QUADROS = 1
  * A escala do pixel art, e ela DECIDE o tamanho do selo inteiro.
  *
  * 1, e o numero foi MEDIDO na bancada `selo-sobre-o-poke.mjs`, que compoe o selo
- * acima do CORPO REAL no tamanho de jogo — a sprite de batalha aparece com ~34px
+ * ao lado do CORPO REAL no tamanho de jogo — a sprite de batalha aparece com ~34px
  * de altura de mundo (`ALTURA_CORPO` em `condicao-sobre-o-corpo.mjs`).
  *
  *   escala 1   21x13   38% da altura do corpo   <- escolhida

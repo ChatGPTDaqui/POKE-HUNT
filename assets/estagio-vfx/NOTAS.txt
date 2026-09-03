@@ -2,7 +2,7 @@ SELO DE MUDANCA DE ATRIBUTO (PH-416, refeito na PH-480)
 =======================================================
 
 Quadro UNICO por peca. Consumido por src/data/estagioVfx.ts e desenhado em
-render/sprites.ts#drawSeloDeEstagio, 1:1 em unidade de mundo.
+render/sprites.ts#drawSeloDeEstagio, 1:1 em unidade de mundo, no flanco do alvo.
 
 AS 15 PECAS SAO GERADAS
 -----------------------
@@ -36,7 +36,7 @@ de dano. Pedido do dono, textual:
    icones bem pequenos, apenas para indicar essa mudanca de status, ou seja,
    ataque mais, ataque menos, velocidade"
 
-Entao: quadro unico, 21x13, acima da cabeca. O movimento que sobrou (subir 6px
+Entao: quadro unico, 21x13, no FLANCO ESQUERDO do alvo. O movimento que sobrou (subir 6px
 ou descer 6px ao longo da vida do efeito) e feito pelo motor com a peca inteira,
 e nao custa arquivo.
 
@@ -86,6 +86,11 @@ COMO CONFERIR
   node scripts/harness/selo-sobre-o-poke.mjs pikachu
     O selo acima do CORPO REAL no tamanho de jogo. Ela julga a PROPORCAO, que e
     a pergunta da PH-480 — e a unica que a folha de contato nao responde.
+
+ONDE O SELO FICA MUDOU DE NOVO NA PH-485. A PH-480 o pos acima da cabeca, e QA
+ao vivo mostrou que aquela faixa e da PLACA DE NOME (barra de HP em -13 a -8 do
+topo da cabeca, nivel em -15, nome em -26). Ele foi pro flanco esquerdo, na
+altura do corpo — ver a nota de SELO_VAO_LATERAL em render/sprites.ts.
 
 A pagina irma `folha-de-estagio.html` FOI APAGADA na PH-480, e nao esquecida: ela
 existia pra julgar a DIRECAO em movimento, quando a direcao morava nos motes ao
