@@ -70,9 +70,9 @@ import {
   createRng, createPokeInstance, buildMapWorld, stepWorld, defaultGameStateData,
 } from '../../authority/engine/headless.js'
 
-const HUNT = 'campo_aberto_faixa1'
+const HUNT = 'campo_aberto_e1'
 // NIVEL do POKE do jogador. 102 era fixo no codigo e e MUITO acima do que a
-// hunt pede (`campo_aberto_faixa1` e faixa I) — nesse nivel o protetor cai no
+// hunt pede (`campo_aberto_e1`) — nesse nivel o protetor cai no
 // primeiro contato e a bancada nao mede nada. `NIVEL=25 node ...` reproduz a
 // condicao de quem esta jogando a faixa de verdade. Ver a sweep no fim.
 const NIVEL = Number(process.env.NIVEL ?? 102)

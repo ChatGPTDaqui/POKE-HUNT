@@ -81,7 +81,7 @@ const TURNO_SEGUNDOS = Number(
     .exec(readFileSync(new URL('../../src/data/generated/formulas.generated.ts', import.meta.url), 'utf8'))[1],
 )
 
-const HUNT = process.env.HUNT ?? 'campo_aberto_faixa1'
+const HUNT = process.env.HUNT ?? 'campo_aberto_e1'
 const SEGUNDOS = Number(process.env.SEGUNDOS ?? 180)
 const SEMENTES = Number(process.env.SEMENTES ?? 12)
 const PASSO = 1 / 60
@@ -107,7 +107,7 @@ const REGIMES = [
   { nome: 'folgado  (Nv102 entei)', especie: 'entei', nivel: 102 },
   {
     nome: 'sofrido  (Nv25 charm/faixa2)', especie: 'charmander', nivel: 25,
-    hunt: 'campo_aberto_faixa2',
+    hunt: 'campo_aberto_e4',
   },
 ]
 

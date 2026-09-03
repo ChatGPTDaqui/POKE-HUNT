@@ -51,7 +51,7 @@ import {
   createRng, createPokeInstance, buildMapWorld, stepWorld, defaultGameStateData,
 } from '../../authority/engine/headless.js'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 const NIVEL = 25
 const PASSO = 0.1
 const ABATES_POR_SALA = 30
