@@ -13,7 +13,7 @@
 import { create } from 'zustand'
 import { persist, type PersistStorage } from 'zustand/middleware'
 import type { PokeInstance } from '@/data/pokes'
-import { GRUPOS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
+import { traduzirGruposLiberados } from '@/data/biomas'
 import { comEstagioLimpo } from '@/data/progressoDeBioma'
 import type { EspecialidadeTrilha } from '@/data/especialidades'
 import type { ElementType } from '@/data/generated/types'
@@ -667,21 +667,14 @@ export const useGameStateStore = create<GameStateStore>()(
           perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now(), ...(persisted.perfStats || {}) },
           trainer: { name: 'Treinador', level: 1, exp: 0, ...(persisted.trainer || {}) },
           pokedexKills: persisted.pokedexKills || {},
-          // As faixas iniciais entram SEMPRE, nao so como default: um save
-          // escrito antes desta leva guarda os grupos antigos e sem isto o
-          // jogador ficaria sem hunt nenhuma.
-          //
-          // Os tres grupos legados sao TRADUZIDOS, nao carregados adiante:
-          // 'kanto' era o que o Lance liberava, entao vira o que ele libera
-          // hoje; 'johto' vira as faixas iniciais; e 'nightmare' antigo e
-          // DESCARTADO — ele nascia aberto pra todo mundo, e mante-lo daria
-          // de graca o conteudo que acabou de virar gate do Lance. Espelha
-          // a migration 20260814120000.
-          unlockedContinents: [...new Set([
-            ...GRUPOS_INICIAIS,
-            ...(persisted.unlockedContinents || []).flatMap((c) =>
-              c === 'kanto' ? GRUPOS_DO_LANCE : GRUPOS_LEGADOS.has(c) ? [] : [c]),
-          ])],
+          // PH-447: A FORMULA SAIU DAQUI e virou `traduzirGruposLiberados`
+          // (data/biomas.ts). Ela estava escrita inline neste `merge`, e o
+          // caminho REMOTO de carga (remote/playerMapper.ts) nao tinha
+          // tradução nenhuma — repassava `unlocked_continents` cru. Os dois
+          // caminhos discordavam sobre o que o jogador tem liberado, e o
+          // remoto, que e o que vale sob autoridade, era o errado: o jogo
+          // inteiro respondia "Derrote o Campeao Lance" em producao.
+          unlockedContinents: traduzirGruposLiberados(persisted.unlockedContinents),
         }
       },
     },

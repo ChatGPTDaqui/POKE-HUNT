@@ -11,7 +11,7 @@ import {
 } from './progresso.js'
 import {
   MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
-  parseEstagioId, bloqueioDoEstagio, bloqueioDoLance, LANCE_MAP_ID,
+  parseEstagioId, bloqueioDoEstagio, bloqueioDoLance, LANCE_MAP_ID, grupoLiberado,
   type ProgressoPorBioma, type SalaAtiva,
 } from '#engine'
 
@@ -375,8 +375,17 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   // `nightmare`, premio do Lance; ver data/biomas.ts). Ele deixou de ser regiao
   // quando as hunts viraram biomas tematicos, e encolheu de novo na PH-432,
   // quando o gate de estagio passou a responder o que as faixas respondiam.
+  //
+  // PH-447: A PERGUNTA PASSOU POR `grupoLiberado`, e nao mais por
+  // `unlockedContinents.includes(grupo)` na mao. Esta linha, do jeito antigo,
+  // trancou o jogo INTEIRO em producao: a PH-434 renomeou o grupo aberto de
+  // `faixa1`/`faixa2` pra `biomas`, nenhuma migration reescreveu
+  // `players.unlocked_continents`, e as 8 linhas do banco nao continham
+  // `'biomas'` — 403 em toda hunt, inclusive a Rota 46 inicial e o estagio 1
+  // de todo bioma. O grupo que nasce aberto agora e liberado por DEFINICAO; a
+  // lista da linha decide so o que o Lance concede, que e o unico gate real.
   const grupo = MAPS[mapId].continent
-  if (!estado.unlockedContinents.includes(grupo)) {
+  if (!grupoLiberado(grupo, estado.unlockedContinents)) {
     throw new ErroHttp(403, 'Derrote o Campeao Lance para acessar esta area.')
   }
   // PH-430: gate de ESTAGIO (era sequencial entre biomas, PH-207/226/227) —

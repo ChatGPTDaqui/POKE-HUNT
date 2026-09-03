@@ -20,6 +20,7 @@ import type { StatusCondition } from '@/data/statusEffects'
 // `reivindicar_missao`, consultando a tabela `missao_cadeia` no Postgres.
 import { chaveDaMissao, missaoDaChave } from '@/data/missaoChave'
 import { lerProgressoPorBioma, traduzirMapIdLegado } from '@/data/progressoDeBioma'
+import { traduzirGruposLiberados } from '@/data/biomas'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
@@ -352,7 +353,20 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     lockedItems,
     wallet: { gold: p.gold, diamonds: p.diamonds },
     unlockedMaps: p.unlocked_maps,
-    unlockedContinents: p.unlocked_continents,
+    // PH-447: TRADUZIDO, e nao repassado cru. Esta linha era
+    // `p.unlocked_continents` direto, e era O bug: a coluna guarda o
+    // vocabulario da epoca em que o save foi escrito (`faixa1`/`faixa2`, de
+    // antes da PH-434), nenhuma migration a reescreveu, e o gate de continente
+    // pergunta se ela contem `'biomas'`. Nas 8 linhas de producao ela nao
+    // continha — e TODA hunt do jogo passou a responder "Derrote o Campeao
+    // Lance antes de acessar Mundo", inclusive a Rota 46 inicial.
+    //
+    // A MESMA funcao que o `merge` do `persist` usa (stores/gameStateStore.ts).
+    // Os dois caminhos de carga tinham que concordar e nao concordavam: aquele
+    // traduzia inline, este nao traduzia nada. O gate ainda tem a defesa
+    // propria de `grupoLiberado`, mas linha limpa aqui e o que impede o lixo de
+    // voltar pro banco no flush seguinte.
+    unlockedContinents: traduzirGruposLiberados(p.unlocked_continents),
     // PH-429: mapId de faixa antiga (`mata_faixa1`) vira o estagio equivalente,
     // e mapId desconhecido cai na hunt inicial. Sem isto o `buildMapWorld`
     // estoura com "Mapa desconhecido" e a sessao inteira nao abre — o jogador
