@@ -5,7 +5,9 @@
   POR QUE ELA EXISTE, E O QUE A FOLHA DE CONTATO NAO RESOLVE
   ---------------------------------------------------------------------------
   `folha-de-estagio.mjs` prova legibilidade de FORMA: os oito glifos se separam,
-  e sobrevivem a reducao pra 26px. Ela nao prova nada sobre DIRECAO, porque a
+  e sobrevivem ao encolhimento de estresse (26px, ver `TAMANHO_DE_ESTRESSE` la —
+  a arte e desenhada 1:1 com `STATUS_VFX_ALTURA = 48`, e 26 e o piso de um
+  canvas escalado em tela pequena). Ela nao prova nada sobre DIRECAO, porque a
   direcao mora inteira no movimento dos motes — no `aumenta` eles nascem embaixo
   e sobem, no `diminui` nascem em cima e caem — e quadro parado nao mostra
   movimento.
@@ -73,8 +75,8 @@
   </label>
   <label>tamanho
     <select id="tamanho">
-      <option value="48">48px (quadro cheio)</option>
-      <option value="26" selected>26px (tamanho de jogo)</option>
+      <option value="48" selected>48px (tamanho de jogo, 1:1)</option>
+      <option value="26">26px (estresse — canvas escalado em tela pequena)</option>
       <option value="96">96px (inspeção)</option>
     </select>
   </label>

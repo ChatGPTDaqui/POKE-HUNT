@@ -12,15 +12,42 @@
 // O repositorio nao tem dependencia de imagem e nao vai ganhar uma por isto —
 // 30 linhas resolvem, e e a mesma troca que a PH-163 fez com os scripts de
 // colisao: script versionado no lugar de ferramenta externa.
+//
+// QUEM USA ELE HOJE, E QUEM AINDA NAO: os dois GERADORES de arte
+// (`gerar-status-vfx.mjs` e `gerar-estagio-vfx.mjs`) importam daqui. Sobram seis
+// copias inline em scripts de DIAGNOSTICO — `conferir-mira-vfx`,
+// `conferir-vfx-visual`, `conferir-walk-block`, `harness/condicao-sobre-o-corpo`,
+// `harness/folha-de-candidatos-vfx`, `harness/folha-de-status`.
+//
+// Elas ficaram de fora de proposito, e a distincao importa: as duas de geracao
+// escrevem arte que VAI PRO JOGO, entao divergirem produz asset com bytes
+// diferentes sem ninguem notar — o risco que este arquivo existe pra fechar. As
+// seis de diagnostico escrevem folha de contato gitignored: se uma delas
+// divergir, o pior caso e a folha sair um pixel diferente da outra folha.
+// Unifica-las e limpeza de valor menor, e nao entra numa issue de arte.
 import { deflateSync } from 'node:zlib'
 
 /** Uma tira/imagem RGBA em PNG. `rgba` e Uint8Array de `width * height * 4`. */
 export function png(width, height, rgba) {
+  const esperado = width * height * 4
+  // A checagem existe porque o modo de falha sem ela e SILENCIOSO: um buffer
+  // curto vira linhas lidas fora dos limites e o PNG sai com lixo no rodape,
+  // sem erro nenhum. Um a mais e quase sempre largura/altura trocadas.
+  if (rgba.length !== esperado) {
+    throw new Error(`png(${width}, ${height}) esperava ${esperado} bytes de RGBA, recebeu ${rgba.length}`)
+  }
   const bruto = Buffer.alloc(height * (1 + width * 4))
   for (let y = 0; y < height; y++) {
     // Byte 0 de cada linha e o tipo de filtro; 0 = nenhum.
     bruto[y * (1 + width * 4)] = 0
-    Buffer.from(rgba.buffer, y * width * 4, width * 4).copy(bruto, y * (1 + width * 4) + 1)
+    // `rgba.byteOffset` NAO PODE FALTAR NESTA CONTA. Sem ele a leitura ignora
+    // onde a view comeca dentro do ArrayBuffer: com um `Uint8Array` recem
+    // alocado (offset 0) da no mesmo, e por isso os dois chamadores de hoje
+    // funcionam — mas passar uma `subarray()` ou uma view de um buffer
+    // compartilhado emitiria PNG de lixo, sem erro, e o bug apareceria como
+    // "a arte saiu estranha".
+    Buffer.from(rgba.buffer, rgba.byteOffset + y * width * 4, width * 4)
+      .copy(bruto, y * (1 + width * 4) + 1)
   }
 
   const crcTabela = []

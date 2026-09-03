@@ -2,18 +2,20 @@
 //
 // POR QUE ELA EXISTE, E POR QUE ZOOM SOZINHO MENTE
 // -----------------------------------------------------------------------------
-// Pixel art de 9x9 escalada 3x parece otima a 144px e pode virar mancha a 26px,
-// que e a altura real do badge (`ALTURA_SIMBOLO_DE_STATUS`). As duas leituras
-// mentem sozinhas, em direcoes opostas:
+// Pixel art de 9x9 escalada 3x parece otima a 144px e pode virar mancha quando
+// encolhe. As duas leituras mentem sozinhas, em direcoes opostas:
 //
-//   ZOOM              mostra o desenho e ESCONDE que ele nao sobrevive a
-//                     reducao. Foi olhando so o zoom que a primeira passada
-//                     aprovou dois escudos ocos que se separavam por 2px.
-//   TAMANHO DE JOGO   mostra a verdade e nao deixa avaliar o traco.
+//   ZOOM        mostra o desenho e ESCONDE que ele nao sobrevive a reducao. Foi
+//               olhando so o zoom que a primeira passada aprovou dois escudos
+//               ocos que se separavam por 2px.
+//   ENCOLHIDO   mostra o que sobra e nao deixa avaliar o traco.
 //
-// Entao a folha tem as duas: 3x do quadro original, e o MESMO quadro reduzido a
-// 26px por media de area e ampliado 4x de volta. A coluna da direita e a que
-// decide.
+// Entao a folha tem as duas: 3x do quadro original, e o MESMO quadro reduzido
+// por media de area e ampliado 4x de volta. A coluna da direita e a que decide.
+//
+// A COLUNA DA DIREITA E ESTRESSE, NAO "TAMANHO DE JOGO" — ver
+// `TAMANHO_DE_ESTRESSE` abaixo. Esta arte e desenhada 1:1 em unidade de mundo, e
+// o encolhimento real depende da escala do canvas em cada aparelho.
 //
 // TRES FUNDOS, e nao um. Contraste sobre corpo colorido e o que derrubou glifo
 // na PH-416 (o cranio sobre o Gengar roxo, a chama sobre o Charizard laranja), e
@@ -35,8 +37,26 @@ import { tira, pecas } from '../gerar-estagio-vfx.mjs'
 
 const LADO = 48
 const ZOOM = 3
-/** A altura real do badge no jogo. Ver `ALTURA_SIMBOLO_DE_STATUS`. */
-const TAMANHO_DE_JOGO = 26
+/**
+ * O tamanho da coluna de ESTRESSE — e ele NAO e "o tamanho de jogo".
+ *
+ * O comentario que estava aqui dizia "a altura real do badge no jogo, ver
+ * `ALTURA_SIMBOLO_DE_STATUS`", e isso e de OUTRO canal: 26px e a altura fixa do
+ * badge de canto (sono, confusao). Esta familia e desenhada com
+ * `STATUS_VFX_ALTURA = 48` (`render/sprites.ts#drawEstagioEffect`) — a MESMA
+ * medida da arte de origem, ou seja 1:1 em unidade de mundo.
+ *
+ * POR QUE O NUMERO FICA EM 26 mesmo assim: 1:1 tornaria esta coluna uma copia
+ * da outra, e a pergunta que ela responde continua valendo, porque 48 e unidade
+ * de MUNDO e nao pixel de tela — o canvas e escalado pro viewport, e num celular
+ * esses 48 chegam menores. Sem medir o fator em cada aparelho, o que sobra e um
+ * piso conservador, e 26 e um piso que a arte ja passa.
+ *
+ * O que mudou, entao, foi a AFIRMACAO: esta coluna nao mostra o tamanho de
+ * jogo, ela mostra o pior encolhimento plausivel. Arte que passa aqui passa no
+ * jogo; arte que falha aqui pode ainda estar aceitavel.
+ */
+const TAMANHO_DE_ESTRESSE = 26
 const ZOOM_PEQUENO = 4
 const QUADROS_MOSTRADOS = [0, 5, 10]
 
@@ -75,7 +95,7 @@ function reduzir(src, srcL, sx, destino) {
 const LISTA = pecas()
 const CELULA = LADO * ZOOM
 const LINHA = CELULA + 6
-const LARGURA = QUADROS_MOSTRADOS.length * CELULA + QUADROS_MOSTRADOS.length * TAMANHO_DE_JOGO * ZOOM_PEQUENO + 16
+const LARGURA = QUADROS_MOSTRADOS.length * CELULA + QUADROS_MOSTRADOS.length * TAMANHO_DE_ESTRESSE * ZOOM_PEQUENO + 16
 const ALTURA = LISTA.length * LINHA + 8
 const folha = new Uint8Array(LARGURA * ALTURA * 4)
 
@@ -114,13 +134,13 @@ LISTA.forEach(([nome, direcao], linha) => {
   const topo = 4 + linha * LINHA
   QUADROS_MOSTRADOS.forEach((f, k) => compor(4 + k * CELULA, topo, buf, largura, f * LADO, LADO, ZOOM))
   QUADROS_MOSTRADOS.forEach((f, k) => {
-    const pequeno = reduzir(buf, largura, f * LADO, TAMANHO_DE_JOGO)
-    const dx = 8 + QUADROS_MOSTRADOS.length * CELULA + k * TAMANHO_DE_JOGO * ZOOM_PEQUENO
-    compor(dx, topo, pequeno, TAMANHO_DE_JOGO, 0, TAMANHO_DE_JOGO, ZOOM_PEQUENO)
+    const pequeno = reduzir(buf, largura, f * LADO, TAMANHO_DE_ESTRESSE)
+    const dx = 8 + QUADROS_MOSTRADOS.length * CELULA + k * TAMANHO_DE_ESTRESSE * ZOOM_PEQUENO
+    compor(dx, topo, pequeno, TAMANHO_DE_ESTRESSE, 0, TAMANHO_DE_ESTRESSE, ZOOM_PEQUENO)
   })
 })
 
 mkdirSync('scripts/harness/saida-estagio', { recursive: true })
 writeFileSync('scripts/harness/saida-estagio/folha-de-contato.png', png(LARGURA, ALTURA, folha))
-console.log(`folha ${LARGURA}x${ALTURA}: ${QUADROS_MOSTRADOS.length} quadros em ${ZOOM}x + os mesmos reduzidos a ${TAMANHO_DE_JOGO}px`)
+console.log(`folha ${LARGURA}x${ALTURA}: ${QUADROS_MOSTRADOS.length} quadros em ${ZOOM}x + os mesmos reduzidos a ${TAMANHO_DE_ESTRESSE}px`)
 LISTA.forEach(([n, d], i) => console.log(`  linha ${i + 1}: ${n}-${d}`))
