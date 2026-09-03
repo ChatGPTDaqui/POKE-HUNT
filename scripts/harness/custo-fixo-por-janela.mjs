@@ -57,7 +57,10 @@ import {
   defaultGameStateData, LIVE_SIM_STEP_SECONDS,
 } from '../../authority/engine/headless.js'
 
-const HUNT = 'mata_faixa1'
+// PH-434: era `mata_faixa1`, um mapId que deixou de existir quando as hunts
+// viraram estagios (PH-426) — a bancada estourava com "Mapa desconhecido". O
+// estagio 1 e o equivalente mais proximo: mesmo bioma, comeco da progressao.
+const HUNT = 'mata_e1'
 const SEGUNDOS_TOTAIS = 900 // 15 min de hunt
 const SEMENTES = [7, 101, 2029, 4242, 31337, 55555, 8080, 90210]
 const JANELAS = [3, 5, 8, 10, 12, 15, 20, 30, SEGUNDOS_TOTAIS]
