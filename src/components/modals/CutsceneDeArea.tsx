@@ -31,6 +31,12 @@
 // imagem da tela de carregamento esta chegando apos o anuncio". Agora quem
 // segura a revelacao e a imagem; o rodape (a contagem, o "Carregando") entra
 // antes de propósito, porque ele e a prova de que algo esta acontecendo.
+//
+// ESTE GATE E A UNICA COISA QUE GARANTE ISSO (PH-486). A PH-483 tinha um
+// segundo mecanismo — `enterMap` esperava a arte antes de abrir a cena — e ele
+// era so uma otimizacao do caso comum que, em rede lenta, deixava o jogador ate
+// 15s sem tela de carregamento nenhuma. Ele saiu; o gate ficou. Se alguem
+// remover o gate por achar que o aquecimento cobre, o defeito volta.
 import { useState } from 'react'
 
 import { useFaixaDoCampo } from '@/hooks/useFaixaDoCampo'

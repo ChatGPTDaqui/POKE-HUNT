@@ -62,15 +62,17 @@ function comTimeout(promessa: Promise<unknown>, ms: number): Promise<void> {
 }
 
 /**
- * A arte da TELA DE CARREGAMENTO, aquecida antes de a tela de carregamento
- * aparecer (PH-483).
+ * A arte da TELA DE CARREGAMENTO, aquecida em paralelo com a abertura dela
+ * (PH-483, corrigida na PH-486).
  *
  * Parece circular e nao e: a cutscene e a tela que o jogador olha ENQUANTO a
- * hunt carrega, e ela tem arte propria (o fundo do bioma). Quando essa arte
- * chegava junto com todo o resto, o letreiro subia primeiro e a imagem entrava
- * depois — "a imagem da tela de carregamento esta chegando apos o anuncio", nas
- * palavras do dono. Um arquivo, esperado antes de abrir a cena; quem mostra a
- * espera nesse intervalo e o botao "Entrando...".
+ * hunt carrega, e ela tem arte propria (o fundo do bioma). Um arquivo, pedido
+ * cedo pra o `<img>` da cena acha-lo quente.
+ *
+ * NAO SE ESPERA POR ELA ANTES DE ABRIR A CENA, e a PH-483 tentou: em Slow 3G
+ * isso dava ate 15 segundos sem tela de carregamento nenhuma. Quem garante que o
+ * letreiro nao precede a arte e o gate dentro de `CutsceneDeArea`, nao esta
+ * funcao — ver a nota em `engine/controller.ts#enterMap`.
  *
  * `null`/vazio resolve na hora: hunt sem arte cai na cor do bioma, que ja e o
  * piso da cutscene.

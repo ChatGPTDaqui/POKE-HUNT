@@ -244,6 +244,34 @@ describe('a cutscene de ENTRADA', () => {
     expect(doFinally).toBeLessThan(fecha)
   })
 
+  it('a cutscene abre ANTES de qualquer espera de arte (PH-486)', () => {
+    // O DEFEITO QUE ISTO TRAVA foi medido em QA ao vivo com Slow 3G: a PH-483
+    // esperava a arte da cena com `await` ANTES de abrir a cena, e o jogador
+    // ficava ate 15 segundos olhando um botao "Entrando..." sem tela de
+    // carregamento nenhuma.
+    //
+    // A ordem e o que importa, e ela e legivel no fonte. Um `await` novo entre o
+    // inicio de `enterMap` e o `abrir()` traz o defeito de volta sem quebrar
+    // nada mais.
+    // LINHAS DE CODIGO, e nao o texto cru: a nota que explica a issue cita
+    // `await preloadArteDeCena(...)` como o que NAO fazer, e um `indexOf` no
+    // arquivo inteiro acha o comentario primeiro. Foi o que aconteceu na
+    // primeira versao deste caso.
+    const linhas = fonteDoController.split('\n').filter((l) => !l.trim().startsWith('//'))
+    const chamadas = linhas.filter((l) => l.includes('preloadArteDeCena('))
+    expect(chamadas, 'o aquecimento da arte da cena sumiu').toHaveLength(1)
+    expect(chamadas[0], 'esperar a arte antes de abrir a cena e o defeito da PH-486')
+      .not.toContain('await')
+    expect(chamadas[0], 'sem `void` o lint acusa promessa solta').toContain('void ')
+
+    // E a ORDEM: aquecer depois de abrir seria correto tambem, mas aquecer
+    // ANTES faz a imagem chegar mais cedo de graca. O que nao pode e esperar.
+    const iAquece = linhas.findIndex((l) => l.includes('preloadArteDeCena('))
+    const iAbre = linhas.findIndex((l) => l.includes('useCutsceneStore.getState().abrir('))
+    expect(iAbre).toBeGreaterThan(-1)
+    expect(iAquece).toBeLessThan(iAbre)
+  })
+
   it('a cutscene abre DEPOIS das guardas locais', () => {
     // Slot vazio e POKE caido recusam sem tocar na rede e ja avisam por toast.
     // Abrir antes delas seria um flash de tela cheia pra fechar no mesmo tick.

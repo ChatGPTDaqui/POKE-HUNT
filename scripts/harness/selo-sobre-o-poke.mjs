@@ -18,7 +18,7 @@
 // -----------------------------------------------------------------------------
 // IMITA   a altura do corpo em unidade de mundo, o selo desenhado 1:1 (nunca
 //         reescalado — ver `SELO_LARGURA` em data/estagioVfx.ts), a folga acima
-//         da cabeca (`SELO_FOLGA`) e a tinta por DIRECAO com o mesmo `multiply`
+//         do corpo (`SELO_VAO_LATERAL`) e a tinta por DIRECAO com o mesmo `multiply`
 //         de `sprites.ts`.
 // NAO IMITA  o fundo da hunt, o deslocamento ao longo da vida do efeito e a
 //         coluna de numeros de dano. O fundo entra como duas faixas
@@ -48,8 +48,15 @@ const ESCALAS = (process.env.ESCALAS ?? '1,2').split(',').map(Number)
 const ZOOM = Number(process.env.ZOOM ?? 5)
 /** Medido, nao chutado — ver `ALTURA_CORPO` em `condicao-sobre-o-corpo.mjs`. */
 const ALTURA_CORPO = Number(process.env.ALTURA_CORPO ?? 34)
-/** Copia de `render/sprites.ts#SELO_FOLGA`. */
-const FOLGA = Number(process.env.FOLGA ?? 10)
+/**
+ * Copia de `render/sprites.ts#SELO_VAO_LATERAL`: o vao entre o corpo e o selo.
+ *
+ * O selo mora no FLANCO desde a PH-485 — acima da cabeca ele caia em cima da
+ * placa de nome. Esta bancada julga PROPORCAO (o selo e pequeno perto do POKE?),
+ * e a proporcao nao muda com o lado; quem trava a posicao e
+ * `seloDeEstagioForaDaPlaca.test.ts`, por coordenada.
+ */
+const VAO = Number(process.env.VAO ?? 2)
 
 /** As duas cores de `sprites.ts` — a tinta e por DIRECAO desde a PH-480. */
 const COR = { aumenta: [0x4a, 0xde, 0x80], diminui: [0xfb, 0x71, 0x85] }
@@ -92,8 +99,11 @@ const LISTA = pecas().filter(([nome, direcao]) => (
   !FILTRO || FILTRO.includes(nome) || FILTRO.includes(`${nome}-${direcao}`)
 ))
 if (LISTA.length === 0) throw new Error(`PECAS=${process.env.PECAS} nao casou com nenhuma peca`)
-const CELULA_L = 64
-const CELULA_A = ALTURA_CORPO + 40
+// 96 e nao 64: com o selo no FLANCO ESQUERDO (PH-485) a peca sai 35px a
+// esquerda do centro do corpo, e numa celula de 64 ela era cortada pela borda —
+// a bancada mostrava meio selo e ninguem descobria pelo codigo.
+const CELULA_L = 96
+const CELULA_A = ALTURA_CORPO + 24
 const L = CELULA_L * ESCALAS.length * ZOOM
 const A = CELULA_A * LISTA.length * ZOOM
 const folha = new Uint8Array(L * A * 4)
@@ -164,14 +174,14 @@ LISTA.forEach(([nome, direcao], linha) => {
     const { largura: sl, altura: sa } = dimensoesDoSelo(escala)
     const { buf } = selo(nome, direcao, escala)
     const centroX = coluna * CELULA_L * ZOOM + (CELULA_L * ZOOM) / 2
-    // O corpo pousa na base da celula; o selo, `FOLGA` acima do topo dele.
+    // O corpo pousa na base da celula; o selo, no flanco esquerdo dele.
     const corpoTopo = topoDaLinha + (CELULA_A - ALTURA_CORPO - 2) * ZOOM
     compor(
       Math.round(centroX - (corpo.largura * ZOOM) / 2), corpoTopo,
       corpo.buf, corpo.largura, corpo.altura, ZOOM, null,
     )
     compor(
-      Math.round(centroX - (sl * ZOOM) / 2), corpoTopo - (FOLGA + sa) * ZOOM,
+      Math.round(centroX - (corpo.largura / 2 + VAO + sl) * ZOOM), corpoTopo + 4 * ZOOM,
       buf, sl, sa, ZOOM, COR[direcao] ?? COR.diminui,
     )
   })
