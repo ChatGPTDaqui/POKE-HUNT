@@ -25,6 +25,9 @@ import { BIOMAS, BIOMA_POR_CHAVE } from '@/data/biomas'
 import { ESTAGIOS_POR_BIOMA, estagioId, pesosDoEstagio } from '@/data/estagios'
 import { bloqueioDoEstagio, progressoPorBiomaDefault } from '@/data/progressoDeBioma'
 import { distribuicaoDeSala } from '@/engine/systems/salaSystem'
+import { bestOffensiveMultiplier } from '@/data/typeMatchups'
+import { SPECIES } from '@/data/pokes'
+import { elencoDoEstagio } from './elencoDoEstagio'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -289,10 +292,18 @@ describe('o painel de detalhe do estagio', () => {
 
     // No fundo do Marinho o Leito Oceanico domina — a leitura que a trilha
     // inteira existe pra dar.
+    //
+    // PH-470: a fileira de chips de sub-bioma virou a fileira de ABAS, e a
+    // porcentagem continua no rotulo. O texto "POKEs deste estágio" virou
+    // "N POKEs neste estágio", com o numero, porque a lista deixou de ser chips
+    // de nome e passou a ser linha por especie.
     const doEstagio = composicaoDoEstagio(BIOMA_POR_CHAVE['marinho'], 10)
     expect(doEstagio[0].chave).toBe('seabed')
-    expect(screen.getByText(/POKEs deste estágio/)).toBeTruthy()
-    expect(screen.getAllByText(new RegExp(doEstagio[0].nome)).length).toBeGreaterThan(0)
+    expect(screen.getByText(/POKEs neste estágio/)).toBeTruthy()
+    const abaDoDominante = screen.getByRole('button', {
+      name: new RegExp(`^${doEstagio[0].nome} \\d+%$`),
+    })
+    expect(abaDoDominante).toBeTruthy()
   })
 
   it('o no da hunt ativa aparece marcado, e o painel dela oferece "Voltar"', async () => {
@@ -395,5 +406,109 @@ describe('a leitura da trilha (PH-469)', () => {
     // Ele e o gancho do alvo minimo de toque — sem a classe, o botao principal
     // da tela e o unico que ignora a regra de dedo (`[data-toque]`, index.css).
     expect(entrar.className).toContain('jogo-botao')
+  })
+})
+
+// PH-470 — o elenco do estagio volta a dizer alguma coisa.
+//
+// A trilha listava o elenco por NOME, em chips cinza. O cartao de hunt antigo
+// mostrava face, tipo, chance e efetividade; a navegacao em dois niveis
+// (PH-431) tirou as 120 hunts de bioma daquela lista e deixou as quatro
+// informacoes so pro conteudo de fim de jogo — que e onde o jogador menos
+// precisa escolher.
+//
+// A conta em si tem teste proprio, contra o SORTEIO amostrado, em
+// `elencoDoEstagio.test.ts`. Aqui o alvo e a tela.
+describe('o elenco do estagio (PH-470)', () => {
+  async function abrirMarinho(estagio: number, progresso = 9) {
+    const user = userEvent.setup()
+    comEquipe({ ...progressoPorBiomaDefault(), marinho: progresso })
+    render(<HuntMenu />)
+    await user.click(screen.getByText('Marinho'))
+    await user.click(screen.getByRole('button', { name: `Estágio ${estagio}` }))
+    return user
+  }
+
+  it('cada especie vem com face, chance e o badge de efetividade do POKE em campo', async () => {
+    await abrirMarinho(3)
+    const marinho = BIOMA_POR_CHAVE['marinho']
+    const elenco = elencoDoEstagio(marinho, 3)
+    // Guarda anti-vacuo: o estagio tem elenco de verdade.
+    expect(elenco.length).toBeGreaterThan(3)
+
+    const primeira = elenco[0]
+    const nome = screen.getByText(primeira.species.name)
+    const linha = nome.parentElement!
+    // FACE: `faceIconUrl` devolve `null` pra especie sem arte e a linha cai num
+    // quadrado colorido — as duas formas contam como "tem retrato", e o que
+    // nao pode e a linha ser so texto, que era o estado anterior.
+    const face = linha.querySelector('img')
+    expect(face?.getAttribute('src') ?? '', `${primeira.species.name} sem face`)
+      .toContain(primeira.species.id)
+    // CHANCE: com uma decimal, do jeito que a linha formata.
+    expect(linha.textContent).toContain(`${primeira.pct.toFixed(1)}%`)
+    // EFETIVIDADE: o time do helper e um charmander (FIRE). Contra o elenco
+    // aquatico do Marinho ha pelo menos uma linha com multiplicador != 1, e o
+    // badge so aparece nesses casos de proposito.
+    const comBadge = elenco
+      .map((e) => bestOffensiveMultiplier(SPECIES['charmander'], e.species))
+      .filter((m) => m !== 1)
+    expect(comBadge.length, 'nenhuma especie deste estagio tem efetividade != 1x').toBeGreaterThan(0)
+    expect(screen.getAllByText(/^(4x|2x|½x|¼x|imune)$/).length).toBeGreaterThan(0)
+  })
+
+  it('a tag de protetor aparece, e o vocabulario e GUARDIAN/LORD', async () => {
+    // Nunca "boss" nem "chefe" em texto de UI de bioma: "boss" nomeia TRES
+    // sistemas distintos neste projeto (ver CLAUDE.md), e este e o unico dos
+    // tres que usa estes dois nomes.
+    const marinho = BIOMA_POR_CHAVE['marinho']
+    // Acha um estagio do Marinho que de fato marca alguem — depender do 3 seria
+    // amarrar o teste a um dado de balanceamento.
+    const estagio = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      .find((e) => elencoDoEstagio(marinho, e).some((x) => x.guardian || x.lord))
+    expect(estagio, 'nenhum estagio do Marinho marca protetor').toBeTruthy()
+
+    await abrirMarinho(estagio!, 10)
+    const tags = screen.getAllByText(/★ (GUARDIAN|LORD)/)
+    expect(tags.length).toBeGreaterThan(0)
+    // E NAO em todas as linhas: o pool degradado de `contextoDoProtetor` faria
+    // isso, e a tag deixaria de informar.
+    const elenco = elencoDoEstagio(marinho, estagio!)
+    expect(tags.length).toBeLessThan(elenco.length)
+    expect(document.body.textContent).not.toMatch(/\bBOSS\b|\bchefe\b/i)
+  })
+
+  it('clicar na aba de um sub-bioma recalcula a lista e a chance', async () => {
+    const user = await abrirMarinho(3)
+    const marinho = BIOMA_POR_CHAVE['marinho']
+    const doEstagio = elencoDoEstagio(marinho, 3)
+    const daPraia = elencoDoEstagio(marinho, 3, 'beach')
+    const alvo = daPraia[0]
+    const noEstagio = doEstagio.find((e) => e.encounterId === alvo.encounterId)!
+    // Guarda anti-vacuo: as duas contas TEM que diferir, senao a aba nao faz
+    // nada e o teste passaria sem medir nada.
+    expect(alvo.pct).toBeGreaterThan(noEstagio.pct)
+
+    const linhaDe = (nome: string) => screen.getByText(nome).parentElement!.textContent
+    expect(linhaDe(alvo.species.name)).toContain(`${noEstagio.pct.toFixed(1)}%`)
+
+    const aba = screen.getByRole('button', { name: /^Praia \d+%$/ })
+    await user.click(aba)
+
+    expect(screen.getByText(/POKEs em Praia/)).toBeTruthy()
+    expect(linhaDe(alvo.species.name)).toContain(`${alvo.pct.toFixed(1)}%`)
+  })
+
+  it('trocar de estagio volta a aba pro estagio inteiro', async () => {
+    // Sem o reset, clicar no estagio 10 com a aba "Praia" aberta manteria
+    // "Praia" — e no fundo do Marinho a Praia tem peso ZERO, o que deixaria a
+    // lista vazia sem nada explicando.
+    const user = await abrirMarinho(3, 10)
+    await user.click(screen.getByRole('button', { name: /^Praia \d+%$/ }))
+    expect(screen.getByText(/POKEs em Praia/)).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: 'Estágio 10' }))
+    expect(screen.getByText(/POKEs neste estágio/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: /^Praia \d+%$/ })).toBeNull()
   })
 })

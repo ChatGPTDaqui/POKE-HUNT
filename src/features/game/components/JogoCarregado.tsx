@@ -8,6 +8,7 @@ import { DefeatModal } from '@/components/modals/DefeatModal'
 import { LanceCountdownModal, LanceVictoryReturn } from '@/components/modals/LanceModals'
 import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
 import { SalaCountdownModal } from '@/components/modals/SalaCountdownModal'
+import { CutsceneDeEntrada } from '@/components/modals/CutsceneDeEntrada'
 import { SplashDeSala } from '@/components/modals/SplashDeSala'
 import { ViagemAoHospitalOverlay } from '@/components/modals/ViagemAoHospitalOverlay'
 import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
@@ -101,6 +102,9 @@ export function JogoCarregado() {
             <LanceCountdownModal />
             <LanceVictoryReturn />
             <SalaCountdownModal />
+            {/* PH-471: a tela de carregamento da entrada em hunt. Fica FORA do
+                `hasStarter` de cima? Nao: sem inicial nao ha hunt pra entrar. */}
+            <CutsceneDeEntrada />
             <ViagemAoHospitalOverlay />
           </>
         )}
