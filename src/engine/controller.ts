@@ -17,7 +17,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useCutsceneStore } from '@/stores/cutsceneStore'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
-import { preloadEspecies, preloadHunt, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
+import { preloadEspecies, preloadHunt, preloadArteDeCena, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
 import type { Point } from './types'
 import { apagarTodosOsEstagios } from './systems/statusSystem'
@@ -109,7 +109,7 @@ export const controller = {
     // As duas acima recusam sem tocar na rede e ja avisam por toast — abrir uma
     // tela de carregamento pra fecha-la no mesmo tick seria um flash preto sem
     // motivo. Daqui pra baixo a entrada e uma espera de verdade: round-trip a
-    // Edge mais `preloadHunt`, com teto de 4s.
+    // Edge mais `preloadHunt`, com teto de TETO_DE_CARREGAMENTO_MS.
     //
     // O `finally` fecha em TODO caminho, e isso e o ponto: a entrada pode ser
     // recusada pelo servidor (hunt trancada, POKE que nao e da equipe, sessao
@@ -117,6 +117,26 @@ export const controller = {
     // tela de carregamento que nao carrega nada — sem botao, porque a cutscene
     // engole o clique de proposito.
     const doMapa = getMap(mapId)
+    // A CUTSCENE ABRE PRIMEIRO, E A ARTE AQUECE EM PARALELO (PH-486).
+    //
+    // A PH-483 fazia o contrario — `await preloadArteDeCena(...)` ANTES do
+    // `abrir()` —, e QA ao vivo com Slow 3G mostrou o preco: ate 15 segundos
+    // olhando um botao escrito "Entrando...", sem tela de carregamento nenhuma,
+    // e so entao a cena abrindo com o teto da PH-484 ja correndo.
+    //
+    // Foi uma troca de defeito por defeito: matou "o letreiro aparece antes da
+    // imagem" e criou "espera sem feedback", que e pior — some com a unica coisa
+    // que dizia ao jogador que algo estava acontecendo.
+    //
+    // E O AQUECIMENTO NUNCA FOI O QUE GARANTIA A PROMESSA DA PH-483. Quem
+    // garante e o gate dentro de `CutsceneDeArea`, que so revela o letreiro
+    // quando a imagem decodifica. Este aquecimento so antecipava o caso comum
+    // (arte ja em cache, em que ele resolve no mesmo tick), e no caso raro
+    // (rede lenta) era exatamente ele que estragava.
+    //
+    // Sem `await` de propósito: o download continua, e a cena o consome pelo
+    // `<img>` dela quando chegar.
+    void preloadArteDeCena(doMapa?.bg?.image)
     const idDaCutscene = useCutsceneStore.getState().abrir({
       arte: doMapa?.bg?.image ?? null,
       corDeFundo: doMapa?.bg?.primary ?? '#0b0b12',

@@ -12,6 +12,47 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // TRES itens pra sete issues (PH-480 a PH-486), e a nota e curta de proposito:
+  // o dono pediu "patch notes ultra sucintos" na leva passada e a 7.40 saiu
+  // longa demais, teve que ser reescrita e promovida de novo. A licao nao
+  // expira com a nota em que ela apareceu.
+  //
+  // O ITEM DO SELO ABRE A NOTA porque e o unico que o jogador ja estava vendo
+  // dar errado — foi ele que abriu a leva, com a frase "estao sendo aplicados
+  // como se fossem sprites de ataque". Ele diz O QUE MUDOU NA TELA, e nao a
+  // causa: que a peca tinha 48x48 no meio do corpo e que o fallback dela era a
+  // arte de impacto do TIPO nao ajuda ninguem a jogar.
+  //
+  // O ITEM DA PORCENTAGEM E DE LINGUAGEM, e vale linha propria. "0,75x" e
+  // "-25%" dizem a mesma coisa e sao lidos de formas diferentes por publicos
+  // diferentes — e essa foi exatamente a queixa. Ele lista onde aparece, porque
+  // sao tres lugares e o jogador so encontra dois sozinho.
+  //
+  // O ITEM DO CARREGAMENTO CORRIGE UMA FRASE DESTA MESMA SERIE. A 7.40 anunciou
+  // "a arte do lugar OCUPA A TELA", e era verdade demais: ela cobria o trilho, a
+  // doca e o menu do rodape. Anunciar a correcao de um comportamento que a nota
+  // anterior anunciou e obrigatorio — quem leu a 7.40 esperava tela cheia.
+  //
+  // FICA DE FORA:
+  //   - PH-484 (teto de 15s na cutscene): nao tem sintoma que o jogador
+  //     reconheca. Ele so aparece quando a entrada trava, que e o caso raro;
+  //   - PH-485 e PH-486, e o criterio e o mesmo que deixou a PH-440 fora da
+  //     7.38: sao regressoes que nasceram e morreram DENTRO desta leva, na
+  //     `dev`. Nenhum jogador as sofreu. O criterio vale nas duas direcoes,
+  //     senao nao e criterio;
+  //   - a arte regerada (15 arquivos, de 28 kB pra 2,1 kB), as duas bancadas, o
+  //     teto de preload que subiu de 4s pra 15s e os quatro arquivos de teste
+  //     novos. Encanamento.
+  {
+    version: '7.41',
+    date: '2026-09-03',
+    title: 'O indicador de atributo virou um selo, e a tela de carregamento saiu da frente',
+    highlights: [
+      'O EFEITO DE MUDANÇA DE ATRIBUTO VIROU UM SELO PEQUENO, ao lado do POKE. Antes era uma peça do tamanho de um golpe, desenhada em cima do corpo — ela lia como ataque e cobria a arte do golpe de verdade. Agora é um ícone com o símbolo do atributo e uma seta: verde subindo, vermelho descendo.',
+      'O JOGO DIZ "−25%" NO LUGAR DE "0,75x". Vale pro número que sobe no POKE, pro selo do canto e pra descrição do golpe. O multiplicador continua na descrição, entre parênteses, para quem quiser a conta exata.',
+      'A TELA DE CARREGAMENTO NÃO COBRE MAIS OS MENUS, e não aparece pela metade. Ela fica só na área do campo — dá pra abrir a Mochila enquanto a área carrega —, e o nome do lugar só entra junto com a imagem, em vez de antes dela.',
+    ],
+  },
   // SETE itens pra nove issues (PH-416, PH-469 a PH-476), e a nota mais dificil
   // de ordenar em muito tempo: quatro itens sao de TELA e tres corrigem defeito
   // que o dono relatou jogando.

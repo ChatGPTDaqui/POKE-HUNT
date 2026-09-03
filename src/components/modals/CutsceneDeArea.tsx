@@ -1,4 +1,5 @@
-// A apresentacao de uma area, em tela cheia, com zoom-in (PH-471).
+// A apresentacao de uma area, dentro do campo de batalha, com zoom-in (PH-471,
+// confinada na PH-482, revelacao unica na PH-483).
 //
 // O QUE ELA SUBSTITUI. Entrar num estagio era um round-trip sem nada na tela
 // alem do rotulo "Entrando..." dentro do botao; e a troca de sala congelava o
@@ -7,17 +8,38 @@
 // `splashDeSalaVanilla.ts` ja registrava.
 //
 // O PONTO DE DESENHO: os segundos JA EXISTEM e JA SAO DE ESPERA. A entrada
-// espera a sessao abrir no servidor e a arte pre-carregar (`preloadHunt`, teto
-// de 4s); a troca de sala congela movimento e combate por 3s de propósito. A
-// cutscene OCUPA esse tempo — ela nao acrescenta nenhum.
+// espera a sessao abrir no servidor e a arte pre-carregar (`preloadHunt`); a
+// troca de sala congela movimento e combate por 3s de propósito. A cutscene
+// OCUPA esse tempo — ela nao acrescenta nenhum.
 //
-// POR QUE ELA COBRE A DOCA E O TRILHO, ao contrario de `CampoOverlay`. Aquela
-// moldura foi feita para "aviso que pertence ao campo" e deixa a HUD de fora por
-// pedido explicito (ver o cabecalho dela). Aqui a intencao e a oposta: e uma
-// TELA DE CARREGAMENTO, e HUD visivel por cima de uma tela de carregamento diz
-// que o jogo esta rodando — que e justamente o que nao esta.
+// ELA NAO E MAIS TELA CHEIA (PH-482), E A DECISAO ANTERIOR ERA A OPOSTA. Este
+// cabecalho dizia, ate aqui: "HUD visivel por cima de uma tela de carregamento
+// diz que o jogo esta rodando — que e justamente o que nao esta". O dono
+// decidiu o contrario, textual: "a tela de carregamento dos subbiomas nao
+// podera ser tela inteira, pois isso atrapalharia a jogabilidade do jogador, que
+// estaria navegando em outros menus. Entao ela ficara apenas no campo proprio do
+// campo de batalha, sem sobressair sobre outros menus".
+//
+// Entao ela usa a MESMA faixa que `CampoOverlay` — o retangulo entre o trilho de
+// status e o rodape medido — e volta a valer o pedido que aquele arquivo ja
+// registrava: "restrinja a renderizacao desses overlays estritamente a area do
+// background". A cutscene era a excecao; a excecao acabou.
+//
+// A ARTE E O LETREIRO ENTRAM JUNTOS (PH-483). Ate aqui o letreiro subia na hora
+// e a imagem chegava depois, por `onLoad`, com meio segundo de fade — o jogador
+// lia o nome da area sobre um retangulo de cor chapada. Pedido do dono: "a
+// imagem da tela de carregamento esta chegando apos o anuncio". Agora quem
+// segura a revelacao e a imagem; o rodape (a contagem, o "Carregando") entra
+// antes de propósito, porque ele e a prova de que algo esta acontecendo.
+//
+// ESTE GATE E A UNICA COISA QUE GARANTE ISSO (PH-486). A PH-483 tinha um
+// segundo mecanismo — `enterMap` esperava a arte antes de abrir a cena — e ele
+// era so uma otimizacao do caso comum que, em rede lenta, deixava o jogador ate
+// 15s sem tela de carregamento nenhuma. Ele saiu; o gate ficou. Se alguem
+// remover o gate por achar que o aquecimento cobre, o defeito volta.
 import { useState } from 'react'
 
+import { useFaixaDoCampo } from '@/hooks/useFaixaDoCampo'
 import { cn } from '@/lib/utils'
 
 /**
@@ -40,6 +62,12 @@ import { cn } from '@/lib/utils'
  * sala, 3s). Ele NAO precisa terminar — a cena sai quando o carregamento
  * termina, e um zoom cortado no meio le como movimento interrompido, que e
  * exatamente o que aconteceu.
+ *
+ * O TETO DE 15s DA PH-484 NAO MEXEU NESTES 4,5s, e a distincao e a issue toda:
+ * o teto limita o TEMPO EM TELA, nao a velocidade do movimento. Esticar o zoom
+ * pra 15s deixaria a troca de sala (3s) com um movimento de escala 1 pra 1,028 —
+ * imperceptivel, ou seja, o efeito sumiria justo no caso mais frequente. Ver
+ * `CutsceneDeEntrada`.
  */
 const CSS = `
 @keyframes cutscene-zoom {
@@ -119,38 +147,55 @@ export function CutsceneDeArea({
   /** Canto de baixo — contagem regressiva, ou o aviso de carregando. */
   rodape?: React.ReactNode
 }) {
-  const [carregou, setCarregou] = useState(false)
+  // `null` = ainda esperando; `true` = decodificada; `false` = nao vai chegar.
+  //
+  // OS TRES ESTADOS SAO NECESSARIOS, e o terceiro e o que impede o novo modo de
+  // falha que a PH-483 poderia ter criado: arte com 404 nunca dispara `onLoad`,
+  // e sem `onError` o letreiro ficaria escondido pelo tempo inteiro da cena.
+  const [arteChegou, setArteChegou] = useState<boolean | null>(arte ? null : false)
+  const revelar = arteChegou !== null
+  const faixa = useFaixaDoCampo()
+
   return (
-    // `fixed inset-0` e z-[58]: acima do `CampoOverlay` (55) e do
+    // A faixa do campo (PH-482), e z-[58]: acima do `CampoOverlay` (55) e do
     // `LanceVictoryReturn` (55), abaixo do `ConfirmDialog` (60) — uma
     // confirmacao aberta continua sendo a coisa mais importante da tela, mesmo
     // durante um carregamento.
     //
-    // `pointer-events-auto` de proposito: ela ENGOLE o clique enquanto esta na
-    // tela. Deixar passar significaria o jogador acertando um botao da doca que
-    // ele nao pode ver.
+    // `pointer-events-auto` de proposito, e agora ele custa menos: ela engole o
+    // clique DENTRO da faixa (nao adianta clicar no campo enquanto ele carrega),
+    // e o resto da tela — trilho, doca, menu do rodape — continua respondendo,
+    // que e o pedido da PH-482.
     <div
       role="status"
       aria-live="polite"
       aria-label={`Entrando em ${titulo}`}
-      className="pointer-events-auto fixed inset-0 z-[58] flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: corDeFundo }}
+      className="pointer-events-auto fixed right-0 left-0 z-[58] flex flex-col items-center justify-center overflow-hidden rounded-[.6em]"
+      style={{ ...faixa, background: corDeFundo }}
     >
       <style>{CSS}</style>
-      {/* A ARTE NAO SEGURA A CENA. `onLoad` acende a opacidade, e a saida da
-          cutscene depende do CARREGAMENTO DA HUNT e nao deste `<img>` — arte que
-          nunca chega (404, rede ruim) deixaria o jogador preso numa tela de
-          carregamento que nao carrega nada. Sem ela sobra a cor do bioma, que e
-          o piso, e o letreiro, que e a informacao. */}
+      {/* A ARTE SEGURA O LETREIRO, E NAO A CENA (PH-483). Enquanto ela nao
+          decodifica, o que fica na tela e a cor do bioma mais o rodape — e nunca
+          o nome da area sobre um retangulo vazio. O que ela continua NAO
+          segurando e a SAIDA da cutscene: quem fecha e o carregamento da hunt
+          (ou o teto de 15s), nao este `<img>`. */}
       {arte && (
         <img
           src={arte}
           alt=""
           aria-hidden
-          onLoad={() => setCarregou(true)}
+          // O `ref` NAO e redundante com o `onLoad`, e a diferenca e a arte que
+          // ja esta no cache — o caso NORMAL, porque `controller#enterMap`
+          // aquece a arte antes de abrir a cena (PH-483) e o aquecimento de
+          // segundo plano aquece a das outras salas. Imagem que ja chegou pode
+          // nao disparar `load` de novo; `complete` responde na hora e a cena
+          // nasce inteira, sem um quadro de cor chapada.
+          ref={(el) => { if (el?.complete && el.naturalWidth > 0) setArteChegou(true) }}
+          onLoad={() => setArteChegou(true)}
+          onError={() => setArteChegou(false)}
           className={cn(
-            'cutscene-arte absolute inset-0 h-full w-full object-cover transition-opacity duration-500',
-            carregou ? 'opacity-100' : 'opacity-0',
+            'cutscene-arte absolute inset-0 h-full w-full object-cover transition-opacity duration-300',
+            arteChegou ? 'opacity-100' : 'opacity-0',
           )}
         />
       )}
@@ -163,7 +208,7 @@ export function CutsceneDeArea({
         className="cutscene-veu absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-black/85"
       />
       <div className="relative flex flex-col items-center gap-[1.2em]">
-        <LetreiroDaArea titulo={titulo} subtitulo={subtitulo} />
+        {revelar && <LetreiroDaArea titulo={titulo} subtitulo={subtitulo} />}
         {rodape}
       </div>
     </div>

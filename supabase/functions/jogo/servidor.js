@@ -48996,20 +48996,10 @@ var STATS_DE_BASE_3 = /* @__PURE__ */ new Set(["accuracy", "evasion"]);
 function multiplicadorDoStat(stat, estagio) {
 	return STATS_DE_BASE_3.has(stat) ? multiplicadorDeAccuracyOuEvasion(estagio) : multiplicadorDeEstagio(estagio);
 }
-/**
-* `2x`, `0,67x`, `1,33x` — sempre com virgula decimal, e sem decimal quando o
-* valor e inteiro.
-*
-* Inteiro sem `,00` porque `2x` e o caso mais comum (Danca das Espadas) e
-* `2,00x` parece precisao que o numero nao tem. Duas casas de teto nos outros
-* porque uma so colapsaria 0,67 e 0,71 (−1 e −5 de Ataque) no mesmo texto.
-*
-* O ZERO A DIREITA CAI: `1,5x`, e nao `1,50x`. Sao numeros de HUD, lidos de
-* relance no meio da luta, e a casa que nao informa nada so ocupa espaco.
-*/
-function formatarMultiplicador(mult) {
-	const arredondado = Math.round(mult * 100) / 100;
-	return `${Number.isInteger(arredondado) ? String(arredondado) : arredondado.toFixed(2).replace(/0$/, "").replace(".", ",")}x`;
+/** `+100%`, `−33%`. Menos com sinal tipografico, que e o que a tela usa. */
+function formatarVariacao(mult) {
+	const pct = Math.round((mult - 1) * 100);
+	return pct >= 0 ? `+${pct}%` : `−${Math.abs(pct)}%`;
 }
 `${TURNO_SEGUNDOS}`;
 //#endregion
@@ -76990,7 +76980,7 @@ var ROTULO_DE_STAT = {
 function anunciarEstagios(world, alvo, mudancas) {
 	const texto = mudancas.map((m) => {
 		const total = alvo.estagios[m.stat] ?? 0;
-		return `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${formatarMultiplicador(multiplicadorDoStat(m.stat, total))}`;
+		return `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${formatarVariacao(multiplicadorDoStat(m.stat, total))}`;
 	}).join("  ");
 	world.effects.push(createWorldEffect(world.counters, {
 		type: "abilityName",

@@ -34,7 +34,7 @@ import {
   CAPTURE_ANIM_ANCHOR_Y,
 } from '@/data/captureAnim'
 import { vfxDoGolpe } from '@/data/moveVfx'
-import { tiraDeEstagio } from '@/data/estagioVfx'
+import { tiraDeEstagio, SELO_LARGURA, SELO_ALTURA } from '@/data/estagioVfx'
 import {
   tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
   TIRA_POR_CONDICAO_NO_CORPO, FPS_DA_ARTE_DE_EFEITO, PISO_DE_PROLONGAMENTO,
@@ -1230,7 +1230,18 @@ function encostoNoAlvo(effect: WorldEffect, tira: TiraDeVfx): [number, number] {
   ]
 }
 
-function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
+/**
+ * `permitirTiraDeTipo = false` corta as DUAS camadas emprestadas — a tira de
+ * tipo e o burst procedural — e deixa so a arte do proprio golpe (PH-480).
+ *
+ * Existe por causa do golpe de STATUS: as duas camadas de fallback sao arte de
+ * IMPACTO, e um Rosnado que caisse nelas desenhava a explosao de NORMAL no peito
+ * do alvo. Um `boolean` no lugar de duplicar a funcao porque o que muda e so
+ * onde ela para, e as duas primeiras camadas sao identicas nos dois casos.
+ */
+function drawImpactBurst(
+  ctx: CanvasRenderingContext2D, effect: WorldEffect, permitirTiraDeTipo = true,
+): void {
   // Arte POR GOLPE antes da arte por tipo (data/moveVfx.ts): Bullet Punch e
   // STEEL, e sem esta consulta ele desenharia o mesmo aco de Metal Claw.
   const arteDoGolpe = vfxDoGolpe(effect.abilityId)
@@ -1245,6 +1256,8 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
       opacidadeDoEfeito(effect, arteDoGolpe.single), effect.anguloDeAtaque,
     )) return
   }
+
+  if (!permitirTiraDeTipo) return
 
   const tira = tiraDoElemento(effect.elementType)
   if (tira) {
@@ -1303,7 +1316,10 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
   ctx.restore()
 }
 
-function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
+/** `permitirTiraDeTipo`: ver a nota de `drawImpactBurst` (PH-480). */
+function drawAoeRing(
+  ctx: CanvasRenderingContext2D, effect: WorldEffect, permitirTiraDeTipo = true,
+): void {
   // `worldSize` e o DIAMETRO real da area de efeito (ability.radius * 2), entao
   // a arte sai exatamente do tamanho do que o golpe atinge — a mesma regra que
   // o anel procedural ja seguia.
@@ -1319,6 +1335,8 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
       effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect, arteDoGolpe.aoe),
     )) return
   }
+
+  if (!permitirTiraDeTipo) return
 
   // Arte de AREA por TIPO (data/vfxTiras.ts#TIRA_AOE_POR_ELEMENTO), a camada
   // que faltava. Sem ela, area caia direto na tira de IMPACTO logo abaixo — e
@@ -1395,10 +1413,57 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
 // de graca. Usado so por golpe de STATUS (data/statusVfx.ts, altura fixa):
 // o impacto de DANO migrou pros dois lotes de tira (data/vfxTiras.ts).
 
-const STATUS_VFX_ALTURA = 48
+/**
+ * O selo mora no FLANCO do corpo, e nao acima da cabeca (PH-485).
+ *
+ * A PH-480 o colocou acima da cabeca com folga de 10, e QA ao vivo mostrou que
+ * essa faixa ja e da PLACA DE NOME. As medidas, a partir do topo da cabeca:
+ *
+ *   barra de HP   -13 a -8   (`drawHpBar`: y = topo - 8 - height, height 5)
+ *   nivel         -15
+ *   nome          -26
+ *   selo (era)    -23 a -10  <- em cima dos dois primeiros
+ *
+ * E NAO DAVA PRA CORRIGIR SO SUBINDO O SELO: entre o nome (-26) e a coluna de
+ * numeros de dano (`EFFECT_BASE_GAP`, -44) sobram 14px, e o selo precisa de 19
+ * com o deslocamento. A vertical acima da cabeca esta cheia.
+ *
+ * O flanco esta vazio, e os tres vizinhos provam: a coluna de numeros fica a
+ * esquerda mas de -44 pra cima, a porcentagem de HP fica a direita da barra, e
+ * o nome do golpe fica ABAIXO do corpo (`y + groundOffset + 14`).
+ */
+const SELO_VAO_LATERAL = 2
+/**
+ * Quanto abaixo do topo da cabeca o selo comeca.
+ *
+ * 4, e o numero e o que sobra: subindo 6 no `aumenta`, o topo do selo chega a
+ * -2 do topo da cabeca, e a barra de HP comeca em -8. Com 0 ele encostaria.
+ */
+const SELO_DESCIDA_NO_CORPO = 4
+/** Quanto o selo anda ao longo da vida — pra cima se subiu, pra baixo se caiu. */
+const SELO_DESLOCAMENTO = 6
 
 /**
- * Canvas fora da tela pra TINGIR a arte de estagio com a cor do tipo do golpe.
+ * A meia-largura VISUAL do corpo — a mesma conta que a sombra usa
+ * (`drawShadow#baseWidth`), porque as duas respondem a mesma pergunta: onde o
+ * POKE acaba na horizontal.
+ */
+function visualHalfWidth(entity: WorldEntity): number {
+  if (!entity.battleAnim) return entity.radius
+  return (entity.battleAnim.frameWidth * effectiveScale(entity)) / 2
+}
+
+/**
+ * A cor do selo, pela DIRECAO. As mesmas duas do texto flutuante de estagio
+ * (`combatSystem#anunciarEstagios`), e isso e proposital: o selo e o flutuante
+ * dizem a mesma coisa no mesmo instante, e cores diferentes leriam como dois
+ * eventos.
+ */
+const SELO_COR_SOBE = '#4ade80'
+const SELO_COR_DESCE = '#fb7185'
+
+/**
+ * Canvas fora da tela pra TINGIR o selo com a cor da direcao.
  *
  * Separado do `canvasDeTinta` da tinta de status de propósito: aquele guarda o
  * recorte da sprite do POKE e e redimensionado pelo tamanho dela, e os dois
@@ -1408,8 +1473,17 @@ const canvasDeEstagio: HTMLCanvasElement | null =
   typeof document !== 'undefined' ? document.createElement('canvas') : null
 
 /**
- * A arte de mudanca de atributo: tira gerada, por ATRIBUTO, tingida pelo TIPO
- * do golpe (PH-416).
+ * O SELO de mudanca de atributo: 21x13, glifo do atributo mais seta de direcao,
+ * no FLANCO ESQUERDO do alvo (PH-416, refeito na PH-480, reposicionado na
+ * PH-485).
+ *
+ * ONDE ELE FICA E METADE DA CORRECAO, E JA ERROU DUAS VEZES. Ate a PH-480 a
+ * peca tinha 48x48 e era desenhada em `effect.targetY`, que e o meio do corpo —
+ * mesmo lugar e mesmo tamanho da arte de impacto de um golpe de dano, e por isso
+ * ela LIA como um ataque e cobria a arte do golpe. A PH-480 a mudou pra acima da
+ * cabeca, e QA ao vivo mostrou que ali mora a placa de nome. A PH-485 a levou
+ * pro flanco — ver a nota de `SELO_VAO_LATERAL`, que traz as medidas dos
+ * vizinhos.
  *
  * POR QUE `multiply` E NAO `source-atop`: a arte e gerada quase branca com
  * contorno quase preto, e o contorno e o que faz ela existir sobre um POKE
@@ -1421,7 +1495,9 @@ const canvasDeEstagio: HTMLCanvasElement | null =
  * COR CRUA — o retangulo inteiro sairia pintado. O `destination-in` no fim
  * recorta de volta pelo alpha da propria arte.
  */
-function drawEstagioEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): boolean {
+function drawSeloDeEstagio(
+  ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState,
+): boolean {
   const tira = tiraDeEstagio(effect.statusStat, effect.statusDirection)
   if (!tira) return false
 
@@ -1436,60 +1512,91 @@ function drawEstagioEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): 
   // pedida acima, entao o proximo frame num ambiente real acha ela no cache.
   if (!canvasDeEstagio) return false
 
-  const lado = img.naturalHeight
   const progresso = effectProgress(effect)
-  const quadro = Math.min(tira.quadros - 1, Math.floor(progresso * tira.quadros))
   const fade = progresso < HOLD_PORTION ? 1 : 1 - (progresso - HOLD_PORTION) / (1 - HOLD_PORTION)
 
-  if (canvasDeEstagio.width < lado) canvasDeEstagio.width = lado
-  if (canvasDeEstagio.height < lado) canvasDeEstagio.height = lado
+  if (canvasDeEstagio.width < SELO_LARGURA) canvasDeEstagio.width = SELO_LARGURA
+  if (canvasDeEstagio.height < SELO_ALTURA) canvasDeEstagio.height = SELO_ALTURA
   const off = canvasDeEstagio.getContext('2d')
   if (!off) return false
 
   off.globalCompositeOperation = 'source-over'
   off.clearRect(0, 0, canvasDeEstagio.width, canvasDeEstagio.height)
   off.imageSmoothingEnabled = false
-  off.drawImage(img, quadro * lado, 0, lado, lado, 0, 0, lado, lado)
+  off.drawImage(img, 0, 0, SELO_LARGURA, SELO_ALTURA, 0, 0, SELO_LARGURA, SELO_ALTURA)
 
   off.globalCompositeOperation = 'multiply'
-  off.fillStyle = colorForType(effect.elementType)
-  off.fillRect(0, 0, lado, lado)
+  off.fillStyle = effect.statusDirection === 'aumenta' ? SELO_COR_SOBE : SELO_COR_DESCE
+  off.fillRect(0, 0, SELO_LARGURA, SELO_ALTURA)
 
   off.globalCompositeOperation = 'destination-in'
-  off.drawImage(img, quadro * lado, 0, lado, lado, 0, 0, lado, lado)
+  off.drawImage(img, 0, 0, SELO_LARGURA, SELO_ALTURA, 0, 0, SELO_LARGURA, SELO_ALTURA)
+
+  // O corpo sai da ENTIDADE quando ela ainda esta em campo; quando nao esta (o
+  // alvo morreu no mesmo frame), o ponto do efeito e o piso. Sem o fallback o
+  // selo sumiria justo no golpe que derruba.
+  const dono = entidadeSeguida(effect, world)
+  const centroX = dono?.x ?? effect.targetX!
+  const topo = dono ? dono.y - visualTopOffset(dono) : effect.targetY!
+  const meiaLargura = dono ? visualHalfWidth(dono) : 0
+  const anda = SELO_DESLOCAMENTO * progresso * (effect.statusDirection === 'aumenta' ? -1 : 1)
 
   ctx.save()
   ctx.globalAlpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
   ctx.imageSmoothingEnabled = false
   ctx.drawImage(
-    canvasDeEstagio, 0, 0, lado, lado,
-    effect.targetX! - STATUS_VFX_ALTURA / 2, effect.targetY! - STATUS_VFX_ALTURA / 2,
-    STATUS_VFX_ALTURA, STATUS_VFX_ALTURA,
+    canvasDeEstagio, 0, 0, SELO_LARGURA, SELO_ALTURA,
+    // FLANCO ESQUERDO (PH-485). Esquerdo e nao direito porque a direita da placa
+    // de nome e onde a porcentagem de HP escreve (`drawHpBar`, "a DIREITA da
+    // barra... a lateral e o unico lugar livre").
+    Math.round(centroX - meiaLargura - SELO_VAO_LATERAL - SELO_LARGURA),
+    Math.round(topo + SELO_DESCIDA_NO_CORPO + anda),
+    SELO_LARGURA, SELO_ALTURA,
   )
   ctx.restore()
   return true
 }
 
-function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
+function drawAbilityEffect(
+  ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState,
+): void {
   // A camada por GOLPE (data/moveVfx.ts) vence a de tipo, e isso inclui o VFX
-  // de status por tipo+direcao. Ate a PH-367 nao incluia: `drawStatusEffect`
-  // era tentado ANTES e devolvia true pra todo golpe de status cujo TIPO tem
-  // GIF, entao a arte propria de `charm` (FAIRY), `taunt` (DARK) e
-  // `spider_web` (BUG) nunca chegava na tela — as tres estao em disco,
-  // cadastradas, cobertas pelo teste de existencia de arquivo e documentadas
-  // como "a camada de golpe vence a de tipo". So `dragon_dance` aparecia, e
-  // por acidente: DRAGON esta fora de TIPOS_COM_ARTE.
+  // de status. Ate a PH-367 nao incluia: `drawStatusEffect` era tentado ANTES e
+  // devolvia true pra todo golpe de status cujo TIPO tem GIF, entao a arte
+  // propria de `charm` (FAIRY), `taunt` (DARK) e `spider_web` (BUG) nunca
+  // chegava na tela — as tres estao em disco, cadastradas, cobertas pelo teste
+  // de existencia de arquivo e documentadas como "a camada de golpe vence a de
+  // tipo". So `dragon_dance` aparecia, e por acidente: DRAGON esta fora de
+  // TIPOS_COM_ARTE.
   //
   // A guarda olha o RAMO que vai desenhar, e nao a existencia da entrada:
-  // golpe de status de AREA sem `aoe` proprio continua no GIF, que le melhor
-  // que a tira de area do tipo. Mesma logica da precedencia de
-  // drawImpactBurst/drawAoeRing, escrita uma vez aqui.
+  // golpe de status de AREA sem `aoe` proprio nao herda a tira de area do tipo.
   const arteDoGolpe = vfxDoGolpe(effect.abilityId)
   const temArtePropria = effect.isAoe ? !!arteDoGolpe?.aoe : !!arteDoGolpe?.single
-  // Sem arte propria (FLYING/DRAGON sem sheet no catalogo — ver statusVfx.ts)
-  // ou enquanto o GIF ainda baixa, cai no burst/anel procedural de sempre —
-  // mesmo padrao de fallback do resto do arquivo, nao um caminho de erro novo.
-  if (effect.statusDirection && !temArtePropria && drawEstagioEffect(ctx, effect)) return
+
+  // GOLPE DE STATUS SAI POR AQUI, SEMPRE — e este `return` e a metade da PH-480
+  // que nao e arte.
+  //
+  // O que acontecia antes: quando o selo nao desenhava (imagem ainda baixando,
+  // ou golpe com arte propria), a execucao caia em `drawImpactBurst`/
+  // `drawAoeRing`, e essas duas tentam a TIRA DE TIPO — que e literalmente a
+  // arte de impacto de ataque. Um Rosnado desenhava a explosao de NORMAL no
+  // peito do alvo. Era isso que o dono estava vendo quando disse que os efeitos
+  // de status "estao sendo aplicados como se fossem sprites de ataque".
+  //
+  // Entao: o selo sempre; a arte do PROPRIO golpe tambem, quando existe (ela e
+  // do golpe, nao emprestada de tipo nenhum, e agora nao disputa espaco com o
+  // selo — um fica no corpo, o outro acima da cabeca); e o burst procedural de
+  // tipo, nunca.
+  if (effect.statusDirection) {
+    drawSeloDeEstagio(ctx, effect, world)
+    if (temArtePropria) {
+      if (effect.isAoe) drawAoeRing(ctx, effect, false)
+      else drawImpactBurst(ctx, effect, false)
+    }
+    return
+  }
+
   if (effect.isAoe) drawAoeRing(ctx, effect)
   else drawImpactBurst(ctx, effect)
 }
@@ -1536,6 +1643,25 @@ function drawCaptureAnim(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
     largura, altura,
   )
   ctx.restore()
+}
+
+/**
+ * A entidade que o efeito ACOMPANHA (`seguir` em `createWorldEffect`), quando
+ * ela ainda esta em campo.
+ *
+ * Irma de `resolveEffectOwner`, e as duas nao dao no mesmo: `ownerId` e quem
+ * LANCOU, `seguirId` e em quem a arte pousou. Pro selo de estagio o que importa
+ * e o segundo — ele mora acima da cabeca de QUEM RECEBEU a mudanca, que num
+ * golpe em si mesmo (Danca das Espadas) e o proprio atacante e num Rosnado e o
+ * alvo.
+ *
+ * `null` quando o alvo saiu de campo no mesmo frame; quem chama cai no ponto
+ * gravado no efeito.
+ */
+function entidadeSeguida(effect: WorldEffect, world: WorldState): WorldEntity | null {
+  if (!effect.seguirId) return null
+  if (world.player && world.player.id === effect.seguirId) return world.player
+  return world.enemies.find((e) => e.id === effect.seguirId) || null
 }
 
 function resolveEffectOwner(effect: WorldEffect, world: WorldState): WorldEntity | null {
@@ -1853,7 +1979,7 @@ export function drawEffect(
   const desvio = desvios?.get(effect.id) ?? 0
   if (effect.type === 'damageNumber') return drawDamageNumber(ctx, effect, world, desvio)
   if (effect.type === 'abilityName') return drawAbilityName(ctx, effect, world, desvio)
-  if (effect.type === 'abilityEffect') return drawAbilityEffect(ctx, effect)
+  if (effect.type === 'abilityEffect') return drawAbilityEffect(ctx, effect, world)
   if (effect.type === 'captureAnim') return drawCaptureAnim(ctx, effect)
 }
 

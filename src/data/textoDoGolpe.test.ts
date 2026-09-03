@@ -20,7 +20,7 @@ describe('efeitosDoGolpe — numeros lidos do dado', () => {
     expect(efeitosDoGolpe(getAbility('ember')!)).toContain('Queimado (10%)')
   })
 
-  it('estagio de atributo diz o MULTIPLICADOR prometido, e nao o degrau (PH-421)', () => {
+  it('estagio de atributo diz a PORCENTAGEM prometida, e nao o degrau (PH-421, PH-481)', () => {
     // TESTE INVERTIDO NA PH-421, e a inversao e o ponto da issue: ele afirmava
     // 'Atk Fís -1 no alvo' e 'Atk Fís +2 em si'. Esse texto e o defeito — '-1'
     // e lido como 'menos um ponto de Ataque' e na verdade e 0,67x, um terco do
@@ -29,8 +29,8 @@ describe('efeitosDoGolpe — numeros lidos do dado', () => {
     //
     // Chance certa continua sem '(100%)' no rotulo, porque chance certa nao e
     // informacao — isso nao mudou.
-    expect(efeitosDoGolpe(getAbility('growl')!)).toContain('Atk Fís do alvo para 0,67x (−33%)')
-    expect(efeitosDoGolpe(getAbility('swords_dance')!)).toContain('Atk Fís de quem usa para 2x (+100%)')
+    expect(efeitosDoGolpe(getAbility('growl')!)).toContain('Atk Fís do alvo em −33% (0,67x)')
+    expect(efeitosDoGolpe(getAbility('swords_dance')!)).toContain('Atk Fís de quem usa em +100% (2x)')
   })
 
   it('dreno diz de QUE o percentual e — foi o mal-entendido que abriu a issue', () => {

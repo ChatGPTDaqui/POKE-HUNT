@@ -13,6 +13,11 @@
 // `stores/splashDeSalaVanilla.ts` ja registrava por escrito. O jogador ficava
 // tres segundos parado olhando um numero.
 //
+// E ELA VOLTOU PRA FAIXA DO `CampoOverlay` NA PH-482, sem perder o que ganhou
+// aqui: a cutscene inteira passou a viver no retangulo do campo (pedido do dono
+// — "sem sobressair sobre outros menus"), entao esta tela agora tem a moldura da
+// versao antiga E a informacao da versao nova.
+//
 // O TEMPO NAO MUDOU. `SALA_TRANSITION_COUNTDOWN` continua em 3s e continua
 // congelando movimento e combate — a cutscene OCUPA esses segundos com a arte e
 // o nome do lugar que esta entrando, em vez de acrescentar espera.
