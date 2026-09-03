@@ -1217,6 +1217,10 @@ async function simularSessao(
       protetorPendente: protetorDaLinha(sessao),
     },
     estado.especialidades,
+    // PH-428: o servidor precisa da MESMA leitura que o cliente sobre "este
+    // estagio ja foi limpo". Sem ela ele reporia o Guardian que o cliente nao
+    // mostra, e a sala travaria em 30/30 sem nada na tela explicando.
+    estado.biomaProgress,
   )
   // Pior caso SO quando o intervalo caracteriza ausencia — ver
   // LIMIAR_OFFLINE_SEGUNDOS. Jogo ao vivo resolve o combate normalmente.
@@ -1337,7 +1341,7 @@ async function simularSessao(
   // `protetorDaSala(world.sala)` re-derivado (nao lido de `world.protetorPendente`,
   // que nao carrega o proprio tipo) — pura, sem RNG, e a sala fica travada
   // enquanto o protetor existe, entao reavaliar aqui e seguro.
-  const tipoDeProtetor = world.protetorPendente ? protetorDaSala(world.sala) : null
+  const tipoDeProtetor = world.protetorPendente ? protetorDaSala(world.sala, world.mapDef?.id ?? '') : null
   await chamarRpc(cfg, 'gravar_flush_de_sessao', {
     // `resumo.simulatedSeconds` e nao `segundos`: os dois so divergem quando a
     // simulacao PAROU antes do fim do intervalo (POKE caido), e ai creditar o

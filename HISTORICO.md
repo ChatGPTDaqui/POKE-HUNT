@@ -5947,3 +5947,370 @@ no papel:**
   das tres coisas juntas.
 
 `render/sprites.ts` nao mudou: a issue trocou arte, nao fiacao.
+
+---
+
+## 2026-09-02 (noite) — a negociacao ganha contexto e desfecho, e duas bancadas que fingiram a `dev` quebrada
+
+Quatro issues, uma nota: PH-435 (card do anuncio na conversa), PH-436 (Correio vira Social),
+PH-437 (reserva de anuncio), PH-438 (nota 7.37). Promovida na
+[PR #436](https://github.com/ChatGPTDaqui/POKE-HUNT/pull/436), deploy verde e
+`fumaca-de-producao.mjs` verde nos dois ambientes. Back-merge na #437.
+
+O pedido do dono foi um: **"ao iniciar conversa pelo anuncio, um card do anuncio deve preceder a
+conversa, pra ambos saberem exatamente do que estao falando"**. Ele cabe em duas telas. O que a
+sessao encontrou foi que a frase seguinte do pedido — "tudo deve ocorrer de forma a facilitar a
+negociacao entre os jogadores" — nao tinha como ser cumprida: **a negociacao nao tinha desfecho.**
+
+### O card: "para AMBOS saberem" mata a solucao facil
+
+A implementacao barata seria um banner no cliente, vindo do `uiStore`. Ela morre na primeira
+palavra do requisito: so o comprador veria. O contexto tem que **persistir no servidor**.
+
+Persistido, sobram duas formas, e uma esta errada por causa de duas linhas que ja existiam no
+codigo:
+
+- **linha propria de `tipo = 'anuncio'`** — `Conversa.tsx:88` descarta no Realtime tudo que nao e
+  `tipo === 'texto'`. O card nunca apareceria AO VIVO pro outro lado, so depois de um F5. E o rate
+  limit de `enviar_mensagem` conta `where tipo = 'texto'`: linha de outro tipo passa **por fora**
+  dele, e clicar em laco no "negociar" da vitrine encheria o fio do vendedor de graca.
+- **coluna na propria mensagem** — `mail_messages.contexto_anuncio jsonb`, estampada por
+  `enviar_mensagem` quando recebe `p_anuncio_id`. O tipo continua `'texto'`: Realtime e rate limit
+  seguem valendo **sem uma linha nova em nenhum dos dois**.
+
+A segunda. A licao generalizavel: antes de escolher a forma de um dado novo, procurar o que ja
+FILTRA por forma. Os dois pontos que decidiram aqui eram um `if` de guarda e um `where` — nenhum
+apareceria numa discussao de modelagem.
+
+**Snapshot, e nao referencia.** O jsonb copia especie/nivel/IV/shiny/preco/moeda/modo. Ler o
+anuncio ao vivo faria o card de uma conversa de ontem **mudar de preco sozinho** — ou virar linha
+vazia depois da venda, exatamente quando o registro do que foi combinado passa a importar. Mesmo
+padrao de `anexo_poke` (PH-164).
+
+**Card repetido resolvido na RENDERIZACAO** (`idsComCardDeAnuncio`), nao com indice UNIQUE por
+(par, anuncio). A constraint impediria renegociar o mesmo POKE semanas depois e custaria migration
+para resolver um problema de tela. A regra e a de divisor de data: o card aparece quando o assunto
+MUDA — e "muda" se mede contra o ultimo anuncio VISTO no fio, nao contra a mensagem anterior. O
+caso que decide a forma e `A, nada, A`: comparando com a anterior, uma fala solta no meio reabriria
+o mesmo card do outro lado dela.
+
+### A armadilha que teria derrubado o correio inteiro com a migration verde
+
+`enviar_mensagem` ganhou um quinto parametro. **`create or replace function` com lista de
+argumentos diferente nao substitui: cria SOBRECARGA.** Com as duas assinaturas vivas, toda chamada
+do PostgREST que omite `p_anuncio_id` casa nas duas candidatas (a nova tem default) e volta
+
+    could not choose the best candidate function
+
+ou seja: o correio para de mandar mensagem, e a migration "funcionou". Por isso a de 4 argumentos e
+**dropada** antes de a de 5 nascer. E `grant` e **por assinatura, nao por nome** — sem reemitir,
+a funcao nasce sem `execute` para `authenticated` e todo envio volta 42501.
+
+As duas coisas viraram teste sobre o texto da migration (`contextoDoAnuncioNaMensagem.test.ts`),
+provado sabotando: remover o `drop function` reprova.
+
+O `database.types.ts` confirmou de lado que pegou: cada schema apareceu com **uma** assinatura de
+`enviar_mensagem`.
+
+### O buraco real: nao havia como cobrar o preco combinado
+
+Com o card, os dois lados sabem de qual POKE falam. Combinar 1.8M no lugar de 2.5M tambem dava. O
+que nao dava era **fechar**:
+
+- nao existe RPC para alterar o preco de um anuncio ativo;
+- cancelar e reanunciar mais barato expoe o POKE na vitrine PUBLICA, e a vitrine ordena por preco
+  crescente — o POKE aparece no TOPO da lista de todo mundo;
+- a mesa de troca nao resolve: `TIPOS_DE_OFERTA = ['poke', 'item']` (`src/data/troca.ts:75`) —
+  **nao existe perna de ouro**.
+
+Dava para conversar, dava para combinar, e nao dava para fechar sem confiar na palavra do outro.
+`market_listings.reservado_para` + `reservar_anuncio(anuncio, para, preco)` e o menor mecanismo que
+fecha isso.
+
+**Duas camadas, e elas protegem de coisas diferentes.** A view esconde o anuncio reservado de
+terceiros — conveniencia de tela. `comprar_anuncio` **recusa a compra** — e a regra. O id do anuncio
+circula (o card da conversa carrega ele), entao esconder da lista nao impede chamada direta, e
+limite que so existe no cliente vira 502.
+
+**Preco e reserva no MESMO update.** Separados, existe uma janela com o anuncio ja barato e ainda
+publico — e e justamente a ordenacao por preco crescente que poe o POKE no topo da vitrine
+exatamente nela.
+
+**O aviso ao reservado entra por insert direto**, entao nao passa pelo rate limit de
+`enviar_mensagem`. O que ocupa o lugar dele e `is distinct from`: reserva identica a que ja vale
+nao gera mensagem nova, o que mata o laco reservar/liberar como forma de encher o fio de alguem.
+Foi a unica guarda anti-flood que precisou ser inventada, e ela nasceu de perguntar "por onde este
+caminho novo escapa do limite que ja existe".
+
+Recusados, cada um por ouro de terceiro em escrow: leilao, `apenas_oferta`, e anuncio com lance
+pendente. `on delete set null` na coluna: conta apagada libera o anuncio. `cascade` apagaria o
+anuncio e prenderia o POKE num registro morto; `restrict` deixaria a linha reservada para um id
+inexistente — POKE invendavel para sempre.
+
+**De lambuja**, um defeito antigo: `mercadoMeus` lia os anuncios da TABELA, e a tela ja mostrava
+`a.ofertas ?? 0` — que vinha sempre `undefined`. A aba dizia **"0 lance(s)" em anuncio com lance**.
+Passou a ler da view, que e tambem quem sabe o NOME de quem reservou (a tabela guarda so o uuid).
+
+### O rename, e a excecao que o criterio de aceite nao previa
+
+PH-436 trocou Correio por Social no cliente inteiro: chave de tela, diretorio, store, hooks,
+`queryKey`, arquivos de teste. O criterio de aceite dizia "zero identificador `correio` fora de
+migration e patch note publicado" — e ele estava **errado por omissao**. Sobra uma terceira classe:
+**nome de funcao no Postgres** (`excluir_correio`, `marcar_correio_lido`, `coletar_anexo_correio`).
+A string e a chave da chamada; renomear so no cliente quebra as tres RPCs.
+
+Em vez de deixar isso como acordo verbal, virou `src/nomeDaTelaSocial.test.ts`, que varre `src/**`
+e permite exatamente essas tres. O icone do dock deixou de ser envelope junto — era a ultima peca
+da interface afirmando que aquilo e carta.
+
+### Duas bancadas mentindo, de novo
+
+**11 testes vermelhos que nao eram da `dev`.** Depois de puxar a `dev`, `authority/src/` reprovou
+com
+
+    TypeError: indiceDoBiomaDoEstagio is not a function
+     ❯ bloqueioDeBiomaPendente authority/src/appSessao.ts:242:26
+
+apontando uma linha do codigo-fonte, como se a branch de outra sessao tivesse quebrado a `dev`.
+Cheguei a rodar a suite numa `dev` limpa para confirmar — e confirmou, porque o problema era meu:
+`authority/engine/headless.js` e **gitignored**, foi gerado antes de PH-425/426 entrarem, e `git
+pull` nunca o atualiza. `npm run build:engine` (981ms) zerou os 11. Toda funcao nova exportada pelo
+motor por outra sessao vira um `is not a function` local.
+
+**`git fetch origin dev origin/main` aborta inteiro.** O nome certo e `main`; `origin/main` e o
+remote-tracking, nao o refspec. O `dev` que vem ANTES dele no comando **nao e atualizado** — o fetch
+morre no segundo argumento e nada e escrito. A branch criada em seguida nasceu sem o commit de
+tipos que tinha acabado de entrar, e o gate reprovou com "database.types.ts esta desatualizado"
+listando justamente as colunas do commit ausente: sintoma que parece erro de schema e e erro de
+topologia.
+
+As duas sao a mesma familia: a instrumentacao mentiu antes de o fato existir. Um ref por comando, e
+`build:engine` antes de acreditar em falha de `authority/`.
+
+### O fluxo de tipos, duas vezes na mesma sessao
+
+Duas migrations, dois pares de PR. O gate compara `database.types.ts` com o schema **remoto**, entao
+a PR da migration NAO pode trazer os tipos (reprovaria a si mesma) e o arquivo so pode ser
+regenerado depois do merge, baixando o artefato do proprio job `tipos` com `gh run download`. O job
+`deploy` passa e o `tipos` **reprova de proposito**, com a mensagem dizendo o remedio. Funcionou
+igual nas duas voltas. Entre o merge e a PR de tipos, qualquer PR aberta de qualquer pessoa reprova
+— por isso as duas metades saem na mesma sessao.
+
+### A promocao carregou trabalho de outra sessao sem nota
+
+O intervalo `main..dev` tinha **PH-425 e PH-426** (estagios por bioma; as 120 hunts de estagio
+substituindo as 36 de faixa), de outra sessao, ambas `Feito` no Jira e **sem entrada no
+changelog** — conferido com `git diff origin/main origin/dev -- src/data/patchNotes.ts`, que voltou
+vazio.
+
+A decisao foi levada ao dono em vez de resolvida sozinha, porque promover embute duas coisas que
+nao sao minhas: por no ar um redesenho de mundo em andamento, e faze-lo em silencio. Ele mandou
+promover tudo. Escrever a nota das duas ficou de fora de proposito — nota do trabalho de outra
+pessoa sobre redesenho em andamento e deduzir a intencao dela —, e virou **PH-439**, com a
+instrucao de datar 02/09 e nao o dia em que for escrita.
+
+### Verificacao alem da fumaca
+
+`fumaca-de-producao.mjs` prova que o jogo CARREGA, e nao que a migration chegou com os grants
+certos. Uma sonda extra chamou `reservar_anuncio` em producao com um uuid inventado: a funcao
+levanta antes de qualquer escrita, entao o teste e nao-destrutivo e distingue os tres casos que
+importam — 404 (rota inexistente), 42501 (grant faltando) e a recusa tratada. Voltou
+`Este anuncio nao esta mais disponivel.`, com a view expondo `reservado_para`/`reservado_nome` e
+`contexto_anuncio` legivel.
+
+**Nao foi validado**: o fluxo de dois jogadores no navegador (card chegando ao vivo do outro lado,
+reserva bloqueando o terceiro). Precisa de duas contas na porta 5173 e do ambiente `jogo-dev` — a
+conta de teste em producao e virgem e a trava de sessao dupla derruba a outra aba.
+
+## 2026-09-02/03 (madrugada) — o redesenho da progressao inteiro, e tres achados que nao estavam em issue nenhuma
+
+Treze issues: PH-425 a PH-434 (a fila do redesenho), mais PH-440 (perda de dado), PH-441 (arte de
+fundo) e PH-442 (a trilha espacial). Todas mergeadas na `dev`. **Nada promovido pra `main`** — a nota
+7.38 (PH-444) e este registro (PH-445) sao o que faltava pro gate de promocao.
+
+A sessao comecou recuperando outra: a anterior ("redesenho de estagio") criou as 10 issues e a
+branch, e o PC do dono desligou antes da primeira linha de codigo. O trabalho recuperado era **10
+issues e zero codigo**.
+
+### O que o redesenho trocou
+
+As 3 faixas de 30 niveis (teto 90) viraram **10 estagios de 10 niveis por bioma** (teto 100). Sao
+120 hunts no lugar de 36, os 12 biomas nascem abertos com progresso independente, e o menu deixou
+de ser lista pra virar mapa: escolhe o bioma, entra na trilha dos 10 estagios.
+
+A divisao em 10 degraus **ja existia invisivel** dentro da faixa — `salaSystem#janelaDaSala`
+partia os 30 niveis em 10 pedacos, um por sala. O que faltava nao era a matematica: era mostrar e
+deixar escolher.
+
+### Achado 1: perda de dado real em producao, e o teste nao pegaria
+
+A PH-429 trocou o formato de `players.bioma_progress`. Conferindo a migration no banco depois do
+merge — a obrigacao do `CLAUDE.md` de olhar o run e o dado —, apareceram **duas linhas com os dois
+formatos misturados**.
+
+Elas nasceram assim: a migration converteu; em seguida o **cliente ainda publicado em producao**
+(bundle antigo) carregou, fez `{...defaults, ...doBanco}` com `defaults = {faixa1: 0, faixa2: 0,
+faixa3: 0}` e regravou no flush. Resultado: chaves de faixa **zeradas** ao lado das chaves de bioma
+corretas.
+
+O leitor novo decidia o formato pela presenca de qualquer chave `faixa*`, traduzia so os zeros e
+**descartava o progresso de bioma**. Reproduzido com o objeto literal do banco: uma conta com os 12
+biomas fechados voltava **inteiramente zerada**, sem erro em lugar nenhum. E a migration deixou de
+ser idempotente — o filtro voltava a casar com aquelas linhas.
+
+**A licao geral:** migracao de formato com cliente antigo no ar tem **TRES estados**, nao dois.
+Enquanto houver bundle velho escrevendo na mesma coluna, os dois formatos nao sao mutuamente
+exclusivos, e isso nao e caso de borda — e o estado normal de qualquer janela entre o deploy da
+`dev` e a promocao. O leitor tem que **mesclar pelo maximo**, nao escolher um caminho.
+
+Os 8 casos de traducao cobriam formato novo, formato antigo e entrada podre. O misto nao e nenhum
+dos tres, e nada no codigo sugeria que ele pudesse existir.
+
+### Achado 2: quatro POKEs sumiram do jogo, e a faixa larga escondia a contradicao
+
+Metapod, Kakuna, Silcoon e Cascoon existem em Lv 7-9 e evoluem no 10. A zona minima deles e 1
+(Lv 11+), porque `spawnStrength.PISO_POR_ESTAGIO` poe todo segundo estagio de evolucao na zona 1.
+
+**As duas regras sempre se contradisseram** — a zona so abre depois de a forma ja ter evoluido. A
+faixa1 ia de Lv1 a Lv30 com `zonaMaxima` 2, entao a janela [7,9] cabia dentro dela e ninguem
+reparava. Com estagio de 10 niveis, o estagio 1 recusava por forca e o estagio 2 nao alcancava por
+nivel: os quatro sumiram do jogo inteiro. Pego pela guarda "toda especie selvagem tem pelo menos
+uma hunt".
+
+**Qual regra cede:** `PISO_POR_ESTAGIO` e heuristica de PERCEPCAO ("forma evoluida na zona de
+estreia le como bug"); o nivel de evolucao do catalogo e o DADO. Um Metapod em Lv 7-9 le como
+exatamente certo, porque Caterpie evolui no 7.
+
+**O padrao que isso revela:** granularidade menor nao so reparticiona o conteudo — ela **transforma
+tolerancia em conflito**. Toda regra que hoje "cabe" numa faixa de 30 niveis e candidata a quebrar
+em 10.
+
+### Achado 3: oito bancadas estavam mortas
+
+Ao fazer a PH-433, oito arquivos de `scripts/harness/` pediam `<bioma>_faixa<N>`, id morto desde a
+PH-426, e **todos estouravam com `Mapa desconhecido` na primeira linha**. Entre eles, os que
+produziram numeros que hoje justificam constantes do jogo: a janela minima de flush, os 120s de
+`ESPERA_MAXIMA_PELA_AUTORIDADE`, o prazo de buff.
+
+Bancada quebrada **nao reprova nada**: nao roda em CI, nao tem teste, e ninguem a executa ate
+precisar refazer uma medicao — quando o numero antigo ja esta na nota de uma constante como se fosse
+reproduzivel. A regra "protótipo vai pro git" so cumpre o proposito se o protótipo **ainda roda**.
+As oito foram corrigidas, uma foi executada ate o fim pra provar, e um teste novo trava o formato.
+
+### A sabotagem passou verde tres vezes, e cada vez ensinou algo
+
+A regra de sabotar o codigo e ver o teste ficar vermelho ja existia como prova de que o teste vale.
+Aqui ela virou outra coisa: **o jeito de descobrir qual linha nenhum teste cobre.**
+
+- **Uma linha critica sem cobertura.** O credito de `bioma_progress` ao vencer o Lord comparava com
+  o indice 9 fixo — verdade so num estagio de 10 salas, e nenhum estagio tem 10. Em **9 dos 10
+  estagios** o jogador venceria o Lord e o progresso nunca seria escrito. Nada estoura.
+- **Um teste que virou tautologia.** `hunts.test.ts` comparava `unlocksContinentOnClear` com
+  `GRUPOS_DO_LANCE`; os dois mudam juntos, entao devolver `faixa3` a lista passava verde.
+- **Codigo que virou inerte.** O teto do PH-332 deixou de ser alcancavel com a regua de 10 niveis.
+  Em vez de apagar (a proxima especie re-arma o ramo em silencio), o disparo passou a ser registrado
+  e um teste trava a lista em vazio — codigo morto **com alarme**.
+
+E um quarto caso, achado sem sabotagem: `toda especie respeita a propria zona minima` casava a hunt
+com a faixa por `f.niveis[0] === map.levelRange[0]` e pulava o que nao casasse. Com estagios, so os
+de numero 1, 4 e 7 comecam num piso de faixa — o teste passaria **verde cobrindo 30% do que
+cobria**.
+
+### A bancada visual pegou o que o teste nao pega
+
+Os 12 testes de componente da trilha (PH-431) passaram **na primeira execucao, com tres defeitos
+visuais dentro**: "Campo Aberto" virava "Ca…" porque o selo dividia a linha com o nome; o estagio
+bloqueado usava `opacity`, que apagava tambem a linha que diz o que falta pra liberar; e o trilho
+nao encostava nos nos, porque os segmentos eram ancorados em 50% da altura do item.
+
+Teste de componente pergunta "o texto esta no DOM". Nenhum pergunta "isto esta legivel".
+
+**E a bancada mentiu uma vez.** O `<body>` dela usava `bg-n950`, classe que **nao existe** na paleta
+(a escala vai de `n900` a `n100`). O fundo ficava branco, e o estagio com `opacity` parecia *mais
+claro* que o liberado — um defeito que nao existia no jogo. Fui corrigir a coisa errada antes de
+olhar a paleta. Fundo de bancada precisa ser o fundo real, nao um parecido.
+
+### A pergunta que valeu a pena fazer
+
+A PH-428 dizia "sem protetor e sem quota; o jogador fica na sala/sub-bioma escolhido e caca". **"Sem
+quota" tinha duas leituras** que produzem jogos diferentes: a sala nunca mais troca (o jogador trava
+num sub-bioma que nem escolheu, e a tabela de porcentagem do estagio nunca e amostrada) ou a sala
+troca sem o protetor no caminho.
+
+Perguntado, o dono respondeu com uma **terceira**, melhor que as duas: *"tera como selecionar
+previamente se ao concluir o estagio, o jogador deseja repetir o estagio ou avancar para o proximo
+(caso haja proximo)"*. O controle virou dele, escolhido antes, em vez de regra implicita do sistema.
+
+### A forma da trilha mudou depois de pronta
+
+A PH-431 entregou a trilha como **lista vertical** com um trilho ligando dez cartoes. O dono mandou
+duas referencias de mapa de fases e a forma que ele queria era outra: **o no vive SOBRE a arte, e o
+caminho tem forma no espaco**. Virou a PH-442.
+
+O no espacial **nao cabe** o que a lista mostrava — faixa de nivel, composicao com porcentagem,
+contagem de salas, mensagem de bloqueio. Foi por isso que a primeira versao virou lista. A troca e a
+das referencias: o mapa responde "onde estou e pra onde vou", o painel responde "o que tem la".
+
+O caminho **desce**, e isso nao e estetica: as 12 artes (PH-441) foram desenhadas acompanhando a
+profundidade do bioma. Um caminho que subisse poria o estagio 10 na praia — a arte contando o
+contrario da mecanica.
+
+### O custo, medido
+
+A PH-433 fez um A/B de verdade: o bundle da Edge e versionado, e o commit da PH-425 guarda a versao
+de 36 hunts. 15 processos novos de cada, ordem alternada.
+
+```
+36 hunts    289 ms (255-389)   10,7 MB de heap   230,8 KB gzip
+120 hunts   335 ms (293-440)   12,8 MB de heap   238,9 KB gzip
+            +46 ms (+15,8%)    +2,1 MB           +3,5%
+```
+
+**Cabe como esta.** 46 ms sao 0,15% de uma janela de flush de 30s.
+
+A primeira medicao **nao era conclusiva**, e isso ficou escrito no arquivo: com 7 rodadas o delta
+(+90 ms) era MENOR que a dispersao de cada lado (±270 ms). Subir pra 15 e ler tambem o **delta dos
+minimos** — a rodada menos poluida de cada lado — resolveu: as duas leituras convergem (+38 vs
++46 ms), e e a convergencia que separa sinal de maquina.
+
+**O risco estava no lugar errado.** A issue supunha peso de bundle. Nao e: o bundle quase nao cresce
+porque o codigo e o mesmo — o que mudou foi o numero de voltas do laco.
+
+### Duas pontes temporarias, montadas e derrubadas na mesma sessao
+
+A PH-426 precisou manter o gate por `continent` de pe enquanto ele nao era trocado: cada estagio
+herdava o grupo da faixa que cobria aquele nivel. A PH-432 a derrubou — barrar o estagio 7 inteiro
+atras do Campeao Lance era uma segunda trava dizendo, pior, o que `estagioLiberado` ja diz.
+
+Sobraram **dois** grupos: `biomas` (aberto) e `nightmare` (premio do Lance).
+
+### O Lance nao tinha portao nenhum
+
+A PH-432 dizia que ele era "liberado por grupo de faixa". **Nao era**: `GRUPOS_DO_LANCE` e o que ele
+ABRE, nao o que abre ele. O `continent` dele era `faixa2`, que nascia aberto — o duelo de Lv 55-65
+estava disponivel **no dia 1**, com um POKE Lv 5 do outro lado. Agora pede o estagio 5 nos 12
+biomas.
+
+**Consequencia a vigiar na promocao:** nenhum jogador atual tem progresso 5 nos 12 biomas, entao na
+pratica o Lance fica indisponivel ate subirem. Era a intencao do desenho, mas e regressao de acesso
+pra quem ja estava la. O numero esta numa constante so (`ESTAGIOS_PARA_O_LANCE`).
+
+### O que NAO foi implementado
+
+- **Modo Pesadelo como "novo jogo"** (Lv 101-200, copia dos 12 biomas, 24 estados de progresso) e
+  **hunts BOSS por elemento**: desenhados em 02/09, **nao existem em codigo**. A nota 7.38 nao os
+  promete.
+- **Tempo real por sala nunca foi medido.** `SALAS_POR_ESTAGIO` (3,4,4,5,5,6,6,7,7,8) e chute
+  declarado — palavra do dono, "por enquanto". E o numero que decide se o novato ve o primeiro Lord
+  em 10 minutos ou numa hora. Quando medir, tem que ser contra o **servidor publicado**: headless e
+  conta real ja discordaram por quase 6x no dimensionamento da hunt inicial.
+- **Nivel do POKE e infinito e o conteudo topa em 200** — buraco de fim de jogo, a resolver antes de
+  desenhar a tabela de XP.
+
+### Nota de processo: paralelismo recusado, com motivo
+
+O dono liberou trabalhar em paralelo "se isso nao comprometer a integridade do projeto". Recusei, e
+o motivo ficou medido: a fila era **cadeia, nao leque** (PH-428/430/431/432 dependem todas do
+formato de progresso da PH-429); **ja havia um segundo ator na `dev`** — outra sessao empurrou
+PH-435/436/437 durante o trabalho, e minhas PRs ficaram `BEHIND` tres vezes; e worktree neste repo
+exige `node_modules` proprio, com o guardrail local recusando comando no isolamento.

@@ -51,10 +51,10 @@ vi.mock('./progresso.js', async (importOriginal) => {
     carregarEstado: vi.fn(async () => ({
       team: [{ uid: 'poke-1', hp: 30 }],
       unlockedMaps: [MAPA],
-      unlockedContinents: ['faixa1'],
+      unlockedContinents: ['biomas'],
       // Alto o bastante pra liberar qualquer bioma da faixa: o gate sequencial
       // (PH-227) nao esta sob teste aqui.
-      biomaProgress: { faixa1: 99, faixa2: 99, faixa3: 99, nightmare: 99 },
+      biomaProgress: { mata: 10, marinho: 10 },
     })),
     aplicarFlush: vi.fn(async () => null),
   }

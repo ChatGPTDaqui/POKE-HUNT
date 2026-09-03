@@ -33,7 +33,7 @@ function cenario() {
     items: { potion: 99, antidote: 99 },
     autoToggles: {
       autoPot: true, autoCatch: false, autoRevive: false,
-      autoStatus: true, avancoManualDeSala: false,
+      autoStatus: true, avancoManualDeSala: false, avancarDeEstagio: false,
     },
   })
   return { world, player, gameState: useGameStateStore.getState() }

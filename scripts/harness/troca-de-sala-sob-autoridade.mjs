@@ -58,7 +58,7 @@
 // COMO RODAR
 //   npm run build:engine
 //   node scripts/harness/troca-de-sala-sob-autoridade.mjs
-//   node scripts/harness/troca-de-sala-sob-autoridade.mjs --hunt=igneo_faixa1 --nivel=40
+//   node scripts/harness/troca-de-sala-sob-autoridade.mjs --hunt=igneo_e1 --nivel=40
 import {
   createRng, restoreRng, createPokeInstance, buildMapWorld, stepWorld,
   reconciliarSalaDaAutoridade, defaultGameStateData, novaSala, ABATES_POR_SALA,
@@ -70,7 +70,7 @@ const opcao = (nome, padrao) => {
   return a ? a.slice(nome.length + 3) : padrao
 }
 
-const HUNT = opcao('hunt', 'mata_faixa1')
+const HUNT = opcao('hunt', 'mata_e1')
 const NIVEL = Number(opcao('nivel', 25))
 const ESPECIE = opcao('especie', 'typhlosion')
 const PASSO = 0.1

@@ -42887,28 +42887,30 @@ var COLISAO_POR_ARTE = {
 };
 //#endregion
 //#region src/data/biomas.ts
-var FAIXAS$1 = [
-	{
-		id: "faixa1",
-		nome: "I",
-		niveis: [1, 30],
-		zonaMaxima: 2
-	},
-	{
-		id: "faixa2",
-		nome: "II",
-		niveis: [31, 60],
-		zonaMaxima: 5
-	},
-	{
-		id: "faixa3",
-		nome: "III",
-		niveis: [61, 90],
-		zonaMaxima: 8
-	}
-];
-var FAIXAS_INICIAIS = ["faixa1", "faixa2"];
-var GRUPOS_DO_LANCE = ["faixa3", "nightmare"];
+/**
+* O grupo de gate das hunts que nascem abertas.
+*
+* ERAM AS DUAS PRIMEIRAS FAIXAS ATE A PH-432, e o encolhimento aqui e o fim da
+* ponte que a PH-426 tinha montado. O raciocinio: `continent` existe pra dizer
+* "este conteudo esta liberado?", e nas hunts de bioma essa pergunta passou a
+* ser respondida pelo ESTAGIO (PH-430 — o estagio 1 sempre aberto, o N pede o
+* N-1). Manter as faixas aqui era uma segunda trava que dizia a mesma coisa com
+* granularidade pior: ela barrava o estagio 7 inteiro atras do Campeao Lance
+* quando o gate de estagio ja o barra atras do estagio 6.
+*
+* O que `continent` ainda decide de verdade e UMA coisa: o Modo Pesadelo (e as
+* 11 hunts BOSS dentro dele) esta aberto? Isso continua sendo o premio do
+* Lance.
+*/
+var GRUPOS_INICIAIS = ["biomas"];
+/**
+* O que derrotar o Campeao Lance libera.
+*
+* Encolheu de `['faixa3', 'nightmare']` pra so o Pesadelo na PH-432: a faixa3
+* deixou de existir como grupo, e o que era "a faixa III" agora sao os estagios
+* 7 a 10, liberados um a um pelo proprio progresso do bioma.
+*/
+var GRUPOS_DO_LANCE = ["nightmare"];
 var LOOT = {
 	basico: [{
 		itemId: "potion",
@@ -43459,37 +43461,6 @@ var GEOMETRIA = {
 	]
 };
 var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
-/**
-* PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
-* vencer o Lord do bioma N libera o bioma N+1. So existia como
-* tabela no vault (`_Architecture.md`, brainstorm 16/08, referencia: sequencia
-* de ginasios Kanto+Johto) — `BIOMAS` acima esta em ordem ARBITRARIA de
-* insercao (campo_aberto, mata, marinho, ...), que NAO bate com esta ordem.
-* Nao usar `BIOMAS.map(b => b.chave)` no lugar disto — e exatamente o furo que
-* esta constante fecha.
-*/
-var ORDEM_DOS_BIOMAS = [
-	"campo_aberto",
-	"subterraneo",
-	"marinho",
-	"industrial",
-	"mata",
-	"aguas_interiores",
-	"urbano",
-	"gelido",
-	"aridos",
-	"sagrado",
-	"sombrio",
-	"igneo"
-];
-function biomaProgressDefault() {
-	return {
-		faixa1: 0,
-		faixa2: 0,
-		faixa3: 0
-	};
-}
-Object.fromEntries(FAIXAS$1.map((f) => [f.id, f]));
 var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
 	sub,
 	bioma
@@ -46218,7 +46189,7 @@ function buildLanceHunt() {
 			description: "Batalha contra o Campeão Lance — 6 POKEs Lendários em sequência (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o próximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.",
 			levelRange: [55, 65],
 			unlockCost: null,
-			continent: "faixa2",
+			continent: GRUPOS_INICIAIS[0],
 			bounds: {
 				width: 1400,
 				height: 900
@@ -46292,7 +46263,7 @@ var TRAINING_MAP = {
 	description: "Um boneco de treino (Wobbuffet, nunca revida) pra testar a força do seu time com segurança. Sem ouro, XP, item ou captura — só pra medir: acompanhe \"Mobs/h\" no Hunt Analyzer.",
 	levelRange: [TREINO_LEVEL, TREINO_LEVEL],
 	unlockCost: null,
-	continent: "faixa1",
+	continent: GRUPOS_INICIAIS[0],
 	bounds: {
 		width: 1e3,
 		height: 700
@@ -46410,25 +46381,39 @@ function parseEstagioId(mapId) {
 	};
 }
 /**
-* Indice do bioma deste mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` quando o
-* mapId nao e de um estagio de bioma (hunt inicial, BOSS, Pesadelo).
-*
-* SUBSTITUI `biomas.ts#indiceDoBiomaNoMapId` (PH-426), que sabia ler so o
-* formato antigo `<bioma>_faixa<N>`. A funcao mora AQUI, e nao la, porque
-* `estagios.ts` ja importa `biomas.ts` — o contrario criaria ciclo, e
-* `ESTAGIOS` e calculado em tempo de import.
-*
-* O INVARIANTE QUE ELA CARREGA e o mesmo de antes: o gate server-side
-* (`authority/src/appSessao.ts#bloqueioDeBiomaPendente`) e o selo/ordem do menu
-* (`HuntMenu.tsx`) precisam concordar sobre "que bioma e esse mapId". Uma
-* funcao so, chamada pelos dois.
-*
-* ELA E TRANSITORIA. O gate por ORDEM de bioma morre na PH-430, quando os 12
-* biomas passam a nascer abertos e o eixo vira o estagio dentro do bioma.
+* Prefixo que o espelho do Modo Pesadelo poe no mapId da hunt de origem
+* (`nightmareMaps.ts#buildNightmareMirror`).
 */
-function indiceDoBiomaDoEstagio(mapId) {
-	const estagio = parseEstagioId(mapId);
-	return estagio ? ORDEM_DOS_BIOMAS.indexOf(estagio.bioma) : -1;
+var PREFIXO_DO_PESADELO = "nightmare_";
+/**
+* Como `parseEstagioId`, mas aceita tambem o espelho do Pesadelo.
+*
+* DUAS FUNCOES DE PROPOSITO, e a diferenca importa. `parseEstagioId` e a
+* ESTRITA: ela recusa o espelho porque quem pergunta "que bioma e este mapId"
+* pro gate de progresso nao pode receber `nightmare_marinho` como bioma. Esta
+* aqui e a PERMISSIVA, pra quem pergunta sobre a FORMA da hunt — quantas salas
+* ela tem, que janela de nivel cada uma cobre — onde o espelho e identico a
+* origem, porque ele copia a geometria e so desloca o nivel.
+*/
+function parseEstagioIdOuEspelho(mapId) {
+	const pesadelo = mapId.startsWith(PREFIXO_DO_PESADELO);
+	const estagio = parseEstagioId(pesadelo ? mapId.slice(10) : mapId);
+	return estagio ? {
+		...estagio,
+		pesadelo
+	} : null;
+}
+/**
+* Quantas salas a hunt deste mapId tem.
+*
+* Hunt que nao e de estagio (a inicial, as BOSS, o Treinamento) nao tem sistema
+* de salas — `temSalas()` responde `false` antes de alguem chegar aqui —, mas o
+* fallback existe porque o caminho de spawn pergunta o numero ANTES de saber se
+* a hunt tem salas. Devolver 0 ali daria divisao por zero na janela de nivel.
+*/
+function quantidadeDeSalas(mapId) {
+	const estagio = parseEstagioIdOuEspelho(mapId);
+	return estagio ? salasDoEstagio(estagio.estagio) : SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1];
 }
 /**
 * Perfil de cada um dos 33 sub-biomas.
@@ -46766,25 +46751,6 @@ function estagioDoNivel(nivel) {
 	return Math.min(Math.max(Math.ceil(nivel / 10), 1), 10);
 }
 /**
-* Ate que estagio (inclusive) uma FAIXA antiga ia — a ponte que mantem o gate
-* de hoje de pe enquanto ele nao e trocado.
-*
-* `continent` continua sendo o grupo de gate (`FAIXAS_INICIAIS` abre faixa1 e
-* faixa2; o Lance abre faixa3 e o Pesadelo), e trocar isso e a PH-430/PH-432,
-* nao esta issue. Entao cada estagio herda o grupo da faixa que cobria aquele
-* nivel: estagios 1-3 = faixa1 (Lv 1-30), 4-6 = faixa2 (Lv 31-60), 7-10 =
-* faixa3 (Lv 61-100 — o estagio 10 e conteudo novo, acima do antigo teto de
-* 90, e cai no grupo mais alto).
-*
-* SEM ISSO O JOGO ABRE TODO DE UMA VEZ: `continent` de valor desconhecido nao
-* casa com grupo liberado nenhum, e o menu esconderia as 120 hunts. Com um
-* valor unico e aberto, o Modo Pesadelo deixaria de ser recompensa do Lance.
-* A ponte sai junto com o vocabulario de faixa, na PH-434.
-*/
-function grupoDeGateDoEstagio(estagio) {
-	return (FAIXAS$1.find((f) => niveisDoEstagio(estagio)[1] <= f.niveis[1]) ?? FAIXAS$1[FAIXAS$1.length - 1]).id;
-}
-/**
 * Pares `origem->alvo` em que o teto pelo gatilho do alvo (PH-332) de fato
 * mordeu na montagem. Vazio hoje, e um teste tranca isso — ver o comentario do
 * ramo em `nivelDeTroca`.
@@ -46940,7 +46906,7 @@ function montarHunt(bioma, estagio) {
 		description: `${bioma.nome} — níveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(", ")}.`,
 		levelRange: [lo, hi],
 		unlockCost: null,
-		continent: grupoDeGateDoEstagio(estagio),
+		continent: GRUPOS_INICIAIS[0],
 		bounds: { ...GEOMETRIA.bounds },
 		playerSpawn: { ...GEOMETRIA.playerSpawn },
 		bg: { ...bioma.bg },
@@ -46961,7 +46927,7 @@ function montarHunt(bioma, estagio) {
 		description: "A primeira caçada. Só POKEs de tipo Normal, nível 1 a 2.",
 		levelRange: [lo, hi],
 		unlockCost: null,
-		continent: "faixa1",
+		continent: GRUPOS_INICIAIS[0],
 		bounds: { ...GEOMETRIA.bounds },
 		playerSpawn: { ...GEOMETRIA.playerSpawn },
 		bg: {
@@ -75445,8 +75411,19 @@ function triggerAttackAnim(entity, isAoe, target) {
 //#region src/engine/systems/climaAmbiente.ts
 /**
 * Identidade da sala DENTRO da sessao. `indice` sozinho nao serve: ele volta a
-* 0 a cada ciclo de 10 salas, e o jogador que desse a volta cairia sempre no
+* 0 a cada volta no estagio, e o jogador que desse a volta cairia sempre no
 * mesmo clima da primeira sala.
+*
+* `SALAS_POR_HUNT` AQUI E MULTIPLICADOR DE SEMENTE, E NAO CONTAGEM DE SALA, e
+* por isso ele NAO virou `salasDaHunt(mapId)` na PH-427. Duas razoes:
+*
+*  - trocar o multiplicador reembaralha o clima de toda sala de todo jogador,
+*    de graca, sem nenhum ganho — o valor so precisa deixar a identidade
+*    unica;
+*  - 10 e maior que o maior estagio (8 salas), entao `ciclos * 10 + indice`
+*    continua injetivo. Usar o numero de salas do estagio faria a identidade
+*    depender do estagio, e a mesma sala teria clima diferente conforme o
+*    degrau — o oposto de "a sala tem um clima".
 */
 function posicaoDaSala(sala) {
 	return sala.ciclos * 10 + sala.indice;
@@ -75561,6 +75538,201 @@ function tickClimaDeGolpe(world, dt) {
 	if (clima.turnosRestantes <= 0) reporClimaDeAmbiente(world);
 }
 //#endregion
+//#region src/data/progressoDeBioma.ts
+/**
+* O NOME MUDOU DE `BiomaProgress` PRA `ProgressoPorBioma` DE PROPOSITO.
+*
+* As duas formas sao objetos de numeros, e `Record<string, number>` aceita
+* `p['faixa1']` sem reclamar — quem lesse a chave antiga receberia `undefined`,
+* o `?? 0` transformaria em zero, e o gate trancaria o jogo inteiro em silencio.
+* Trocar o nome do tipo obriga o compilador a apontar cada lugar que precisava
+* ser relido. Foi a unica forma de tornar a mudanca de formato barulhenta.
+*/
+/** Progresso de conta nova: os 12 biomas em zero, nenhum estagio limpo. */
+function progressoPorBiomaDefault() {
+	return Object.fromEntries(BIOMAS.map((b) => [b.chave, 0]));
+}
+/** Maior estagio limpo do bioma. Bioma desconhecido ou ausente: 0. */
+function maiorEstagioLimpo(progresso, bioma) {
+	const bruto = progresso[bioma];
+	if (typeof bruto !== "number" || !Number.isFinite(bruto)) return 0;
+	return Math.min(Math.max(Math.trunc(bruto), 0), 10);
+}
+/**
+* Registra o estagio como limpo. NUNCA REGRIDE: limpar de novo um estagio
+* antigo (a caçada direcionada da PH-428, que e o ponto do redesenho) nao pode
+* desligar o estagio seguinte.
+*
+* Devolve um objeto novo — o estado do jogo e tratado como imutavel pelos
+* consumidores (store do Zustand, snapshot do flush).
+*/
+function comEstagioLimpo(progresso, bioma, estagio) {
+	if (!estagioValido(estagio)) return progresso;
+	if (estagio <= maiorEstagioLimpo(progresso, bioma)) return progresso;
+	return {
+		...progresso,
+		[bioma]: estagio
+	};
+}
+/**
+* O estagio esta liberado pra entrar?
+*
+* O estagio 1 de QUALQUER bioma esta sempre liberado — e o que faz os 12
+* biomas nascerem abertos. O estagio N pede o N-1 limpo.
+*
+* A MESMA FUNCAO E CHAMADA PELOS DOIS LADOS (gate da autoridade em
+* `appSessao.ts` e selo do menu em `HuntMenu.tsx`), pelo mesmo motivo que
+* `indiceDoBiomaDoEstagio` era compartilhada antes dela: quando os dois
+* calculam a mesma regra separado, eles divergem, e o jogador ve uma hunt
+* aberta que o servidor recusa.
+*/
+function estagioLiberado(progresso, bioma, estagio) {
+	if (!estagioValido(estagio)) return false;
+	if (estagio === 1) return true;
+	return maiorEstagioLimpo(progresso, bioma) >= estagio - 1;
+}
+/**
+* Mensagem de bloqueio do estagio, ou `null` se ele esta liberado.
+*
+* Mora aqui, e nao no gate do servidor nem na tela, porque as duas pontas
+* mostram o MESMO texto — o cliente pra explicar o cadeado, o servidor pra
+* recusar a sessao. Quando isso vivia em dois lugares (PH-227/229) a nota do
+* arquivo tinha que pedir que ninguem os deixasse divergir.
+*/
+function bloqueioDoEstagio(progresso, bioma, estagio) {
+	if (estagioLiberado(progresso, bioma, estagio)) return null;
+	return `Vença o Lord do estágio ${estagio - 1} para liberar este.`;
+}
+/**
+* Os biomas que ainda faltam pro jogador poder desafiar o Lance, na ordem em
+* que `BIOMAS` os lista. Vazio = liberado.
+*
+* Devolve a LISTA, e nao um booleano, porque a tela precisa dizer QUAIS faltam.
+* "Bloqueado" sem dizer o que fazer e o defeito que o gate de estagio (PH-430)
+* corrigiu; repeti-lo aqui seria voltar atras.
+*/
+function biomasFaltandoParaOLance(progresso) {
+	return BIOMAS.filter((b) => maiorEstagioLimpo(progresso, b.chave) < 5).map((b) => b.chave);
+}
+/**
+* Mensagem de bloqueio do Lance, ou `null` se ele esta liberado.
+*
+* O LANCE NAO TINHA GATE DE ENTRADA NENHUM ate a PH-432 — o `continent` dele e
+* `faixa2`, que nascia aberto, entao ele estava disponivel desde o dia 1 com um
+* time de Lv 55-65 esperando. O que existia era o gate do que ele CONCEDE. A
+* issue trocou o portao de lugar: agora e preciso ter chegado a metade do modo
+* normal nos 12 biomas.
+*
+* Igual a `bloqueioDoEstagio`, mora aqui pra as duas pontas — o gate da
+* autoridade e o cartao do menu — dizerem a MESMA coisa.
+*/
+function bloqueioDoLance(progresso) {
+	const faltando = biomasFaltandoParaOLance(progresso);
+	if (faltando.length === 0) return null;
+	const nomes = faltando.map((c) => BIOMA_POR_CHAVE[c]?.nome ?? c);
+	return `Limpe o estágio 5 de todos os 12 biomas — falta ${nomes.length <= 3 ? nomes.join(", ") : `${nomes.length} biomas`}.`;
+}
+/**
+* As tres faixas antigas, e ate que estagio cada uma vale na traducao.
+*
+* A REGRA: faixa1 cobria Lv 1-30, que sao os estagios 1 a 3; faixa2 cobria Lv
+* 31-60 (estagios 4 a 6); faixa3 cobria Lv 61-90 (estagios 7 a 9). Quem venceu
+* o Lord de um bioma na faixa1 limpou, no vocabulario novo, tudo ate o estagio
+* 3 daquele bioma.
+*
+* O ESTAGIO 10 NAO E CONCEDIDO POR TRADUCAO NENHUMA, e isso e deliberado: ele
+* cobre Lv 91-100, conteudo que nao existia (o teto era 90). Ninguem pode ter
+* limpado o que nao existia — o jogador nao perde progresso e nao ganha o que
+* nao tinha.
+*/
+var ESTAGIO_DA_FAIXA_LEGADA = [
+	["faixa1", 3],
+	["faixa2", 6],
+	["faixa3", 9]
+];
+/**
+* A ordem dos biomas COMO ELA ERA quando os saves antigos foram escritos.
+*
+* Congelada aqui de propósito, em vez de ler `ORDEM_DOS_BIOMAS`: o numero
+* gravado em `faixa1` e um INDICE nessa lista, e se a lista mudar amanha a
+* traducao de um save de ontem passa a apontar pro bioma errado. Save antigo se
+* le com a regra antiga. A constante viva continua sendo usada pelo resto do
+* codigo enquanto ela existir (ela sai na PH-434).
+*/
+var ORDEM_LEGADA_DOS_BIOMAS = [
+	"campo_aberto",
+	"subterraneo",
+	"marinho",
+	"industrial",
+	"mata",
+	"aguas_interiores",
+	"urbano",
+	"gelido",
+	"aridos",
+	"sagrado",
+	"sombrio",
+	"igneo"
+];
+/**
+* Le `players.bioma_progress` em qualquer um dos dois formatos.
+*
+* IDEMPOTENTE, e o teste tranca isso: rodar sobre o resultado dela nao muda
+* mais nada. Sem essa propriedade a traducao rodaria a cada carga e o valor
+* derivaria — e o caminho de carga roda muitas vezes por sessao, nao uma.
+*
+* Entrada podre (null, string, numero, chave que nao e bioma, valor que nao e
+* numero) devolve o default em vez de estourar: uma carga que falha derruba a
+* sessao inteira, e um progresso zerado e recuperavel (o servidor grava de
+* novo ao vencer o proximo Lord) enquanto uma sessao que nao abre nao e.
+*/
+function lerProgressoPorBioma(bruto) {
+	const base = progressoPorBiomaDefault();
+	if (bruto == null || typeof bruto !== "object" || Array.isArray(bruto)) return base;
+	const objeto = bruto;
+	let lido = base;
+	for (const chave of Object.keys(base)) {
+		const valor = objeto[chave];
+		if (typeof valor !== "number" || !Number.isFinite(valor)) continue;
+		lido[chave] = Math.min(Math.max(Math.trunc(valor), 0), 10);
+	}
+	for (const [faixa, estagio] of ESTAGIO_DA_FAIXA_LEGADA) {
+		const quantos = objeto[faixa];
+		if (typeof quantos !== "number" || !Number.isFinite(quantos)) continue;
+		const ate = Math.min(Math.trunc(quantos), ORDEM_LEGADA_DOS_BIOMAS.length);
+		for (let i = 0; i < ate; i++) lido = comEstagioLimpo(lido, ORDEM_LEGADA_DOS_BIOMAS[i], estagio);
+	}
+	return lido;
+}
+/** Hunt pra onde cai quem estava num mapId que nao existe mais. */
+var HUNT_DE_REFUGIO = "route_46";
+var PADRAO_DE_FAIXA_LEGADA = /^(.+)_faixa([123])$/;
+/**
+* Traduz um mapId gravado (`players.current_map_id`, `game_sessions.map_id`)
+* pro formato de estagio.
+*
+* TRES CASOS, e o terceiro e o que importa:
+*
+*  - ja e estagio (`marinho_e7`): devolve igual;
+*  - e faixa antiga (`marinho_faixa2`): vira o PRIMEIRO estagio daquela faixa
+*    (faixa1 -> e1, faixa2 -> e4, faixa3 -> e7). O primeiro, e nao o ultimo,
+*    porque a faixa nao diz onde dentro dela o jogador estava — e comecar no
+*    piso e o erro barato: ele sobe de novo em minutos. Comecar no topo daria
+*    conteudo que ele talvez nao tivesse alcancado;
+*  - qualquer outra coisa: a hunt inicial. Um mapId desconhecido chegando em
+*    `buildMapWorld` estoura (`Mapa desconhecido: ...`) e derruba a sessao —
+*    era assim que a hunt de faixa saia do ar e levava o jogador com ela.
+*/
+function traduzirMapIdLegado(mapId) {
+	if (mapId == null || mapId === "") return null;
+	if (parseEstagioId(mapId)) return mapId;
+	if (!PADRAO_DE_FAIXA_LEGADA.test(mapId)) return mapId;
+	const m = PADRAO_DE_FAIXA_LEGADA.exec(mapId);
+	const bioma = m?.[1] ?? "";
+	const faixa = Number(m?.[2] ?? 0);
+	if (!BIOMA_POR_CHAVE[bioma]) return HUNT_DE_REFUGIO;
+	return `${bioma}_e${(faixa - 1) * 3 + 1}`;
+}
+//#endregion
 //#region src/stores/gameStateDefaults.ts
 var STARTING_ITEMS = {
 	poke_ball: 500,
@@ -75605,7 +75777,8 @@ function defaultGameStateData() {
 			autoCatch: false,
 			autoRevive: false,
 			autoStatus: true,
-			avancoManualDeSala: false
+			avancoManualDeSala: false,
+			avancarDeEstagio: false
 		},
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
@@ -75629,10 +75802,10 @@ function defaultGameStateData() {
 			exp: 0
 		},
 		pokedexKills: {},
-		unlockedContinents: [...FAIXAS_INICIAIS],
+		unlockedContinents: [...GRUPOS_INICIAIS],
 		missoesReivindicadas: {},
 		especialidades: especialidadeNiveisDefault(),
-		biomaProgress: biomaProgressDefault()
+		biomaProgress: progressoPorBiomaDefault()
 	};
 }
 /**
@@ -79164,20 +79337,27 @@ function novaSala(rng, mapId, indice, ciclos) {
 * A janela de nivel da sala: a hunt AFUNDA conforme as salas sao limpas.
 *
 * BUG DE BALANCEAMENTO QUE ISTO CORRIGE, medido no motor headless: uma faixa
-* cobre 30 niveis, entao sem janela a primeira sala da "Mata I" (Lv1-30) ja
+* cobria 30 niveis, entao sem janela a primeira sala da "Mata I" (Lv1-30) ja
 * podia jogar um Butterfree Lv30 contra um POKE recem-saido do Hospital. Um
 * Charmander Lv25 morreu em 4 abates numa simulacao de 30 minutos, gastando 21
 * pocoes no caminho. As zonas antigas tinham 10 niveis e nao expunham isso.
 *
-* A sala 1 fica na base da faixa e a 10 no topo — o que da a mecanica de salas
-* um significado mecanico (a hunt fica mais dura conforme voce avanca) alem da
-* variedade de sub-bioma.
+* A primeira sala fica na base do estagio e a ultima no topo — o que da a
+* mecanica de salas um significado mecanico (a hunt fica mais dura conforme
+* voce avanca) alem da variedade de sub-bioma.
+*
+* `salas` E PARAMETRO E NAO CONSTANTE DESDE A PH-427, porque o estagio agora
+* tem de 3 a 8 salas conforme o numero dele — e o degrau, que era sempre
+* 30/10 = 3 niveis, passa a variar de 10/3 (3,3 niveis) a 10/8 (1,25 nivel).
+* Com estagio de 10 niveis e 8 salas, os degraus arredondam pra 1 nivel cada e
+* varias salas ficam com janela de 1 unico nivel — o que e o desenho, nao um
+* defeito: o estagio inteiro cobre 10 niveis e a sala e um decimo dele.
 */
-function janelaDaSala(faixa, indice) {
+function janelaDaSala(faixa, indice, salas) {
 	const [lo, hi] = faixa;
 	const largura = hi - lo;
-	if (largura <= 0) return [lo, hi];
-	const passo = largura / 10;
+	if (largura <= 0 || salas <= 0) return [lo, hi];
+	const passo = largura / salas;
 	const inicio = Math.round(lo + passo * indice);
 	const fim = Math.round(lo + passo * (indice + 1));
 	return [Math.max(lo, inicio), Math.max(Math.max(lo, inicio), Math.min(hi, fim))];
@@ -79208,7 +79388,7 @@ var cacheDePesos = /* @__PURE__ */ new Map();
 * Memoizado porque `contextoDeSpawn` roda a cada spawn (milhares de vezes por
 * flush no farm offline) e a resposta so depende de (mapa, sub-bioma, indice da
 * sala) — a janela de nivel sai do indice, e o pool sai dos dois. O cache e
-* limitado por construcao: mapas com sala x sub-biomas deles x `SALAS_POR_HUNT`.
+* limitado por construcao: mapas com sala x sub-biomas deles x salas do estagio.
 */
 function pesosDaSala(chave, subBioma, pool) {
 	const pronto = cacheDePesos.get(chave);
@@ -79238,7 +79418,7 @@ function contextoDeSpawn(mapId, faixa, sala, fallback) {
 		pool,
 		peso: (id) => getEncounter(id)?.weight ?? 0
 	};
-	const janela = janelaDaSala(faixa, sala.indice);
+	const janela = janelaDaSala(faixa, sala.indice, quantidadeDeSalas(mapId));
 	const naJanela = pool.filter((id) => {
 		const enc = getEncounter(id);
 		return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0];
@@ -79331,20 +79511,33 @@ function contextoDoProtetor(mapId, ctx, sala, tipo) {
 	return doProtetor;
 }
 /**
-* PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
+* PH-202/225: todo bioma tem protetor (pivo 27/08 sobre o
 * "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
 * o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
-* o ultimo da ordem, tendo protetor). Salas 1-9 (indice 0-8) pedem Guardian ao
-* fechar a quota; a ultima sala (indice SALAS_POR_HUNT-1) pede o Lord da
-* faixa. Pura — nao sorteia nada, so decide QUAL protetor a sala pede, se
-* pedir algum. A entidade em si (RNG, criacao) fica em simulation.ts, que ja
-* importa este modulo — colocar aqui criaria import circular.
+* o ultimo da ordem, tendo protetor). Toda sala menos a ultima pede Guardian ao
+* fechar a quota; a ULTIMA SALA DO ESTAGIO pede o Lord. Pura — nao sorteia
+* nada, so decide QUAL protetor a sala pede, se pedir algum. A entidade em si
+* (RNG, criacao) fica em simulation.ts, que ja importa este modulo — colocar
+* aqui criaria import circular.
+*
+* `mapId` ENTROU NA ASSINATURA NA PH-427, e nao e conveniencia: antes a ultima
+* sala era sempre o indice 9, agora ela e o indice `quantidadeDeSalas(mapId) - 1`,
+* que vale 2 no estagio 1 e 7 no estagio 10. A `SalaAtiva` nao carrega o
+* estagio (ela guarda sub-bioma, indice, abates e ciclos, e e isso que vai pro
+* banco), entao a informacao so pode vir do mapId. Sem ele, o estagio 1 nunca
+* teria Lord — a sala 3 pediria Guardian pra sempre e o estagio nunca fecharia.
 */
-function protetorDaSala(sala) {
+function protetorDaSala(sala, mapId) {
 	if (!sala) return null;
 	const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave;
-	if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null;
-	return sala.indice >= 9 ? "lord" : "guardian";
+	if (!bioma || !BIOMA_POR_CHAVE[bioma]) return null;
+	return sala.indice >= quantidadeDeSalas(mapId) - 1 ? "lord" : "guardian";
+}
+/** O jogador ja fechou o estagio desta hunt alguma vez? */
+function estagioJaLimpo(mapId, progresso) {
+	const doMapa = parseEstagioId(mapId);
+	if (!doMapa) return false;
+	return maiorEstagioLimpo(progresso, doMapa.bioma) >= doMapa.estagio;
 }
 /**
 * Conta um abate na sala atual. Ao fechar a quota, NAO troca de sala na
@@ -79363,28 +79556,28 @@ function registrarAbate(world, mapId, opts = {}) {
 	const sala = world.sala;
 	if (!sala) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	sala.abates += 1;
 	if (sala.abates < 30) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	if (world.salaSobAutoridade) {
 		sala.abates = 30;
 		return {
 			avancou: false,
-			fechouCiclo: false
+			fechouEstagio: false
 		};
 	}
 	sala.abates = 30;
-	if (protetorDaSala(sala)) return {
+	if (!world.estagioJaLimpo && protetorDaSala(sala, mapId)) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	if (opts.manualAdvance) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	return armarTransicaoDeSala(world, mapId);
 }
@@ -79405,7 +79598,8 @@ function registrarAbate(world, mapId, opts = {}) {
 * recusar.
 */
 function salaTravadaPeloProtetor(world) {
-	return protetorDaSala(world.sala) != null && !world.protetorResolvido;
+	if (world.estagioJaLimpo) return false;
+	return protetorDaSala(world.sala, world.mapDef?.id ?? "") != null && !world.protetorResolvido;
 }
 /**
 * Avanco manual (PH-178/179): forca a transicao mesmo com o toggle ligado —
@@ -79433,11 +79627,11 @@ function solicitarAvancoDeSala(world, mapId) {
 	const sala = world.sala;
 	if (!sala || sala.abates < 30) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	if (salaTravadaPeloProtetor(world)) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	return armarTransicaoDeSala(world, mapId);
 }
@@ -79445,16 +79639,16 @@ function armarTransicaoDeSala(world, mapId) {
 	const sala = world.sala;
 	if (!sala) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	if (world.salaCountdownRemaining != null || world.salaPendente) return {
 		avancou: false,
-		fechouCiclo: false
+		fechouEstagio: false
 	};
 	const proximo = sala.indice + 1;
-	const fechouCiclo = proximo >= 10;
-	const indice = fechouCiclo ? 0 : proximo;
-	const ciclos = fechouCiclo ? sala.ciclos + 1 : sala.ciclos;
+	const fechouEstagio = proximo >= quantidadeDeSalas(mapId);
+	const indice = fechouEstagio ? 0 : proximo;
+	const ciclos = fechouEstagio ? sala.ciclos + 1 : sala.ciclos;
 	world.salaPendente = novaSala(world.rng, mapId, indice, ciclos) ?? {
 		...sala,
 		indice,
@@ -79464,7 +79658,7 @@ function armarTransicaoDeSala(world, mapId) {
 	world.salaCountdownRemaining = 3;
 	return {
 		avancou: true,
-		fechouCiclo
+		fechouEstagio
 	};
 }
 /**
@@ -79583,6 +79777,22 @@ function aplicarTransicaoDeSala(world, mapId) {
 		}
 	}
 }
+/**
+* O mapId do estagio SEGUINTE deste, se ele existir e estiver liberado.
+* `null` quando nao ha pra onde ir (PH-428).
+*
+* DUAS RECUSAS, e as duas caem em "repetir": o estagio 10 nao tem seguinte, e
+* um seguinte ainda bloqueado nao pode ser aberto. Devolver o mapId nesses
+* casos faria o cliente pedir uma sessao que o gate da autoridade (PH-430)
+* recusa com 403 — o jogador veria a hunt parar sozinha, sem explicacao.
+*/
+function proximoEstagioLiberado(mapId, progresso) {
+	const doMapa = parseEstagioId(mapId);
+	if (!doMapa) return null;
+	const proximo = doMapa.estagio + 1;
+	if (!estagioLiberado(progresso, doMapa.bioma, proximo)) return null;
+	return estagioId(doMapa.bioma, proximo);
+}
 //#endregion
 //#region src/engine/systems/pokedexSystem.ts
 function recordPokedexKill(gameState, speciesId, isShiny) {
@@ -79620,6 +79830,8 @@ function emptyWorldState(seed = randomSeed()) {
 		sala: null,
 		protetorPendente: null,
 		protetorResolvido: false,
+		estagioJaLimpo: false,
+		avancarParaEstagio: null,
 		protetorSemDanoSegundos: 0,
 		salaCountdownRemaining: null,
 		salaPendente: null,
@@ -79820,10 +80032,10 @@ var celebracaoStore = createStore()((set) => ({
 var proximoId = 1;
 var splashDeSalaStore = createStore()((set) => ({
 	atual: null,
-	anunciarSala: (sala, fechouCiclo) => set({ atual: {
+	anunciarSala: (sala, fechouEstagio) => set({ atual: {
 		id: proximoId++,
 		sala: { ...sala },
-		fechouCiclo
+		fechouEstagio
 	} }),
 	encerrar: (id) => set((estado) => estado.atual?.id === id ? { atual: null } : estado),
 	limpar: () => set({ atual: null })
@@ -80111,7 +80323,7 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 * de recriacao.
 */
 function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
-	const tipo = protetorDaSala(world.sala);
+	const tipo = world.estagioJaLimpo ? null : protetorDaSala(world.sala, world.mapDef?.id ?? "");
 	if (!tipo) {
 		world.protetorPendente = null;
 		return false;
@@ -80124,25 +80336,34 @@ function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
 	return true;
 }
 /**
-* PH-226/236: vencer (matar OU capturar) o LORD avanca o indice de
-* `biomaProgress` da faixa atual — SO se o bioma resolvido for exatamente o
-* proximo esperado na ordem canonica (`ORDEM_DOS_BIOMAS`). Fora de ordem
-* (nao deveria acontecer com o enforcement de PH-227, mas e defesa em
-* profundidade — o motor nao confia cegamente no proprio estado do mundo)
-* nao mexe no indice: silencioso de proposito, mesma familia de decisao de
-* `resolverProtetorDaSala` nao logar/travar em cima de estado inconsistente.
+* Vencer (matar OU capturar) o LORD marca o ESTAGIO como limpo (PH-429/430).
 *
-* Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois
-* lados que rodam esse motor — resim do servidor e predicao do cliente.
+* O QUE ISTO ERA ATE A PH-429, e por que a regra virou outra. A versao antiga
+* avancava um indice na `ORDEM_DOS_BIOMAS` — "quantos biomas da faixa o
+* jogador venceu" — e so avancava se o bioma resolvido fosse exatamente o
+* PROXIMO esperado na ordem. Isso existia porque o gate era sequencial entre
+* biomas: vencer o Lord do bioma N liberava o N+1.
+*
+* O redesenho de 02/09 tirou essa ordem. Os 12 biomas nascem abertos e o
+* progresso e por bioma: o que se registra e "o maior estagio limpo DESTE
+* bioma", e o que ele libera e o estagio seguinte DELE. Com isso caem as duas
+* condicoes da versao antiga (o `indexOf` na ordem e o `atual !== indice`), e
+* `ORDEM_DOS_BIOMAS` deixa de participar da decisao.
+*
+* NAO REGRIDE, e essa e a parte nova que o redesenho EXIGE: `comEstagioLimpo`
+* ignora estagio menor ou igual ao ja limpo. Sem isso a caçada direcionada da
+* PH-428 (voltar a um estagio antigo pela especie que ele da) desligaria o
+* estagio seguinte a cada visita.
+*
+* Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois lados
+* que rodam esse motor — resim do servidor e predicao do cliente.
 */
 function avancarBiomaProgressSeForOProximo(world, gameState) {
 	const bioma = SUB_BIOMA_POR_CHAVE[world.sala?.chave ?? ""]?.bioma.chave;
 	if (!bioma) return;
-	const indice = ORDEM_DOS_BIOMAS.indexOf(bioma);
-	if (indice === -1) return;
-	const faixa = world.mapDef?.continent ?? "faixa1";
-	if ((gameState.biomaProgress[faixa] ?? 0) !== indice) return;
-	gameState.setBiomaProgress(faixa, indice + 1);
+	const doMapa = parseEstagioId(world.mapDef?.id ?? "");
+	if (!doMapa || doMapa.bioma !== bioma) return;
+	gameState.setBiomaProgress(bioma, doMapa.estagio);
 }
 function spawnEnemyAt(world, mapDef, ctx, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
@@ -80266,8 +80487,9 @@ function aplicarHazardsAoInimigo(rng, hazards, enemy) {
 	}
 	if (hazards.stickyWeb) enemy.estagios.speed = (enemy.estagios.speed ?? 0) - 1;
 }
-function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis) {
+function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis, progressoDeBioma) {
 	const base = novoMundo(carry);
+	base.estagioJaLimpo = progressoDeBioma != null && estagioJaLimpo(mapId, progressoDeBioma);
 	const sala = temSalas(mapId) ? progresso?.sala ?? novaSala(base.rng, mapId, 0, 0) : null;
 	const mapDef = mapDefParaSala(mapId, sala);
 	if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`);
@@ -80287,7 +80509,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 	const enemies = [];
 	let protetorPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
-		const tipoDeProtetor = sala && sala.abates >= 30 ? protetorDaSala(sala) : null;
+		const tipoDeProtetor = sala && sala.abates >= 30 && !base.estagioJaLimpo ? protetorDaSala(sala, mapId) : null;
 		if (tipoDeProtetor) {
 			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
@@ -80457,7 +80679,8 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		}
 	}
 	if (enemy.isProtetor) {
-		if (world.sala?.indice === 9) avancarBiomaProgressSeForOProximo(world, gameState);
+		const ultimaDoEstagio = quantidadeDeSalas(world.mapDef?.id ?? "") - 1;
+		if (world.sala?.indice === ultimaDoEstagio) avancarBiomaProgressSeForOProximo(world, gameState);
 		resolverProtetorDaSala(world, world.mapDef.id, { manualAdvance: opts.manualAdvance ?? false });
 	}
 	return {
@@ -80507,7 +80730,8 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.salaCountdownRemaining -= dt;
 		if (world.salaCountdownRemaining <= 0) {
 			world.salaCountdownRemaining = null;
-			const fechouCiclo = world.salaPendente?.indice === 0;
+			const fechouEstagio = world.salaPendente?.indice === 0;
+			if (fechouEstagio && gameState.autoToggles.avancarDeEstagio) world.avancarParaEstagio = proximoEstagioLiberado(world.mapDef.id, gameState.biomaProgress);
 			aplicarTransicaoDeSala(world, world.mapDef.id);
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
@@ -80517,7 +80741,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 					world.enemies.push(enemy);
 				}
 				world.respawnTimer = world.mapDef.respawnDelay;
-				if (!silent && world.sala) splashDeSalaStore.getState().anunciarSala(world.sala, fechouCiclo);
+				if (!silent && world.sala) splashDeSalaStore.getState().anunciarSala(world.sala, fechouEstagio);
 			}
 		}
 		if (!silent) updateAnimations(world, dt);
@@ -80577,7 +80801,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const grupos = world.mapDef.unlocksContinentOnClear;
 		const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g));
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
-		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Você derrotou o Campeão Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
+		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Você derrotou o Campeão Lance! O Modo Pesadelo foi liberado.", "success", "world");
 	}
 	if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
@@ -80858,7 +81082,7 @@ function snapshotToGameState(snap, defaults) {
 		},
 		unlockedMaps: p.unlocked_maps,
 		unlockedContinents: p.unlocked_continents,
-		currentMapId: p.current_map_id,
+		currentMapId: traduzirMapIdLegado(p.current_map_id),
 		autoToggles: {
 			...defaults.autoToggles,
 			...fromJson(p.auto_toggles, defaults.autoToggles)
@@ -80884,10 +81108,7 @@ function snapshotToGameState(snap, defaults) {
 		pokedexKills,
 		missoesReivindicadas,
 		especialidades,
-		biomaProgress: {
-			...defaults.biomaProgress,
-			...fromJson(p.bioma_progress, defaults.biomaProgress)
-		}
+		biomaProgress: lerProgressoPorBioma(p.bioma_progress)
 	};
 }
 function gameStateToPlayerRow(userId, s) {
@@ -81200,8 +81421,8 @@ function criarEstadoDoJogador(dados) {
 			setEspecialidadeNivel: (tipo, trilha, nivel) => {
 				s.especialidades[tipo][trilha] = nivel;
 			},
-			setBiomaProgress: (faixa, indice) => {
-				s.biomaProgress[faixa] = indice;
+			setBiomaProgress: (bioma, estagio) => {
+				s.biomaProgress = comEstagioLimpo(s.biomaProgress, bioma, estagio);
 			},
 			setAutoToggle: (key, value) => {
 				s.autoToggles[key] = value;
@@ -81799,7 +82020,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 			ciclos: Number(sessao.ciclos ?? 0)
 		} : null,
 		protetorPendente: protetorDaLinha(sessao)
-	}, estado.especialidades);
+	}, estado.especialidades, estado.biomaProgress);
 	const offline = segundos > 120;
 	world.pessimista = offline;
 	const pausado = offline && true;
@@ -81836,7 +82057,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
 	}, { upsert: "user_id,conquista" });
-	const tipoDeProtetor = world.protetorPendente ? protetorDaSala(world.sala) : null;
+	const tipoDeProtetor = world.protetorPendente ? protetorDaSala(world.sala, world.mapDef?.id ?? "") : null;
 	await chamarRpc(cfg, "gravar_flush_de_sessao", {
 		p_simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
 		p_session_id: sessao.id,
@@ -82018,22 +82239,34 @@ async function sairDaHunt(cfg, userId, sessaoId) {
 	await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
 }
 /**
-* PH-227/236: mensagem de bloqueio (ou `null` se liberado) do gate
-* sequencial de bioma — vencer o Lord do bioma N libera o N+1 (PH-207/226).
+* Mensagem de bloqueio (ou `null` se liberado) do gate de ENTRADA.
 *
-* Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
-* inteiro so pra exercitar uma regra de negocio. `indiceDoBiomaDoEstagio`
-* e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
-* dois lados tem que concordar sobre "que bioma e esse mapId" E sobre o
-* texto exato da mensagem (`HuntMenu.tsx#bloqueioDeBiomaClient` espelha
-* esta string).
+* O EIXO DO GATE MUDOU NA PH-430, e este e o coracao da mudanca. Ate aqui ele
+* era SEQUENCIAL ENTRE BIOMAS: o mapId dizia qual bioma, o `grupo` (o
+* `continent`) dizia qual faixa, e a regra era "o indice deste bioma em
+* `ORDEM_DOS_BIOMAS` tem que caber no progresso daquela faixa" — vencer o Lord
+* do bioma N liberava o N+1 (PH-207/226/227).
+*
+* Com os 12 biomas nascendo abertos esse eixo deixa de existir. A regra agora e
+* o ESTAGIO DENTRO DO BIOMA: o estagio 1 de qualquer bioma esta sempre
+* liberado, e o estagio N pede o N-1 limpo NAQUELE bioma. Progresso de um bioma
+* nao libera nada em outro.
+*
+* O `grupo` SAIU DA ASSINATURA. Ele existia pra escolher qual das tres faixas
+* do progresso consultar, e nao ha mais faixa no progresso. O gate de
+* `continent` (o que o Campeao Lance libera) continua existindo e e checado
+* ANTES deste, no chamador — sao duas travas diferentes, e so uma mudou.
+*
+* Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP inteiro
+* so pra exercitar uma regra de negocio. E `bloqueioDoEstagio` e literalmente a
+* MESMA funcao que o menu chama (`HuntMenu.tsx#bloqueioDeBiomaClient`) — antes
+* os dois lados reimplementavam a regra e repetiam a string a mao, com um
+* comentario em cada arquivo pedindo que ninguem os deixasse divergir.
 */
-function bloqueioDeBiomaPendente(mapId, grupo, biomaProgress) {
-	const indiceEsperado = indiceDoBiomaDoEstagio(mapId);
-	if (indiceEsperado <= 0) return null;
-	if ((biomaProgress?.[grupo] ?? 0) >= indiceEsperado) return null;
-	const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1];
-	return `Vença o Lord de ${BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave} para liberar esta área.`;
+function bloqueioDeBiomaPendente(mapId, progresso) {
+	const doMapa = parseEstagioId(mapId);
+	if (!doMapa) return null;
+	return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio);
 }
 /**
 * Quanto tempo depois de fechada uma sessao ainda vale como "a hunt que o
@@ -82089,8 +82322,12 @@ async function abrirSessao(cfg, userId, req) {
 	if (MAPS[mapId].unlockCost != null && !estado.unlockedMaps.includes(mapId)) throw new ErroHttp(403, "hunt nao desbloqueada");
 	const grupo = MAPS[mapId].continent;
 	if (!estado.unlockedContinents.includes(grupo)) throw new ErroHttp(403, "Derrote o Campeao Lance para acessar esta area.");
-	const bloqueio = bloqueioDeBiomaPendente(mapId, grupo, estado.biomaProgress);
+	const bloqueio = bloqueioDeBiomaPendente(mapId, estado.biomaProgress);
 	if (bloqueio) throw new ErroHttp(403, bloqueio);
+	if (mapId === "boss_lance") {
+		const doLance = bloqueioDoLance(estado.biomaProgress);
+		if (doLance) throw new ErroHttp(403, doLance);
+	}
 	const anterior = await sessaoAberta(cfg, userId);
 	if (anterior) {
 		await aplicarFlush(cfg, userId, anterior, { ignorarPiso: true });

@@ -9,7 +9,8 @@
 import type { PokeInstance } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { MAPS } from '@/data/maps'
-import { FAIXAS_INICIAIS, biomaProgressDefault, type BiomaProgress } from '@/data/biomas'
+import { GRUPOS_INICIAIS } from '@/data/biomas'
+import { progressoPorBiomaDefault, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 
 // Limite de POKEs em campo — no vanilla so aparecia como comentario em
@@ -143,7 +144,19 @@ export interface GameStateData {
   wallet: { gold: number; diamonds: number }
   unlockedMaps: string[]
   currentMapId: string | null
-  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean; avancoManualDeSala: boolean }
+  /**
+   * `avancarDeEstagio` (PH-428): ao limpar a ULTIMA sala do estagio, entra no
+   * estagio seguinte em vez de repetir o mesmo.
+   *
+   * PADRAO `false` — REPETIR — e isso e decisao, nao inercia. Este e um jogo
+   * idle: o normal e o jogador escolher onde deixar rodando e sair. Avancar
+   * sozinho tiraria ele do estagio que ele escolheu pela especie que caca ali,
+   * que e a mecanica central do redesenho.
+   */
+  autoToggles: {
+    autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean
+    avancoManualDeSala: boolean; avancarDeEstagio: boolean
+  }
   autoPotRules: AutoPotRule[]
   autoCatchConfig: AutoCatchConfig
   autoCatchRules: AutoCatchRule[]
@@ -178,7 +191,13 @@ export interface GameStateData {
   // cadeias (dual-type), e reivindicar numa nao reivindica a outra.
   missoesReivindicadas: Record<string, boolean>
   especialidades: EspecialidadeNiveis
-  biomaProgress: BiomaProgress
+  /**
+   * PH-429: um numero por BIOMA ("maior estagio ja limpo", 0 a 10), e nao mais
+   * tres inteiros por faixa. O NOME DO CAMPO ficou como estava de proposito —
+   * trocar obrigaria uma migracao do `persist` local, e o tipo novo ja e o que
+   * obriga o compilador a apontar cada leitura.
+   */
+  biomaProgress: ProgressoPorBioma
 }
 
 // Exportado porque o adaptador de persistencia precisa dos mesmos defaults
@@ -198,7 +217,10 @@ export function defaultGameStateData(): GameStateData {
     // save antigo (que nao tem a chave) cai neste default via o merge em
     // gameStateStore — ou seja, quem ja jogava ganha a cura sem precisar
     // descobrir o interruptor.
-    autoToggles: { autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true, avancoManualDeSala: false },
+    autoToggles: {
+      autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true,
+      avancoManualDeSala: false, avancarDeEstagio: false,
+    },
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
     autoCatchRules: [],
@@ -208,9 +230,9 @@ export function defaultGameStateData(): GameStateData {
     perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
     trainer: { name: 'Treinador', level: 1, exp: 0 },
     pokedexKills: {},
-    unlockedContinents: [...FAIXAS_INICIAIS],
+    unlockedContinents: [...GRUPOS_INICIAIS],
     missoesReivindicadas: {},
     especialidades: especialidadeNiveisDefault(),
-    biomaProgress: biomaProgressDefault(),
+    biomaProgress: progressoPorBiomaDefault(),
   }
 }

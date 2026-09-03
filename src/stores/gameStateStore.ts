@@ -13,7 +13,8 @@
 import { create } from 'zustand'
 import { persist, type PersistStorage } from 'zustand/middleware'
 import type { PokeInstance } from '@/data/pokes'
-import { FAIXAS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
+import { GRUPOS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
+import { comEstagioLimpo } from '@/data/progressoDeBioma'
 import type { EspecialidadeTrilha } from '@/data/especialidades'
 import type { ElementType } from '@/data/generated/types'
 import { useToastStore } from '@/stores/toastStore'
@@ -99,7 +100,7 @@ export interface GameStateActions {
   // PH-226/236: diferente de missao/especialidade (so menu), esta E chamada
   // pela simulacao — vencer o Lord avanca o indice dentro de
   // handleEnemyDefeated (simulation.ts), nao so por acao de tela.
-  setBiomaProgress: (faixa: string, indice: number) => void
+  setBiomaProgress: (bioma: string, estagio: number) => void
 
   // Acoes do painel Auto + AbilityHUD (Fase 6). No vanilla essas telas
   // mutavam o objeto direto (`gameState.autoToggles.autoPot = !...`,
@@ -532,8 +533,11 @@ export const useGameStateStore = create<GameStateStore>()(
         }))
       },
 
-      setBiomaProgress: (faixa, indice) => {
-        set((state) => ({ biomaProgress: { ...state.biomaProgress, [faixa]: indice } }))
+      setBiomaProgress: (bioma, estagio) => {
+        // NUNCA REGRIDE: limpar de novo um estagio antigo (a caçada direcionada
+        // da PH-428) nao pode desligar o estagio seguinte. A regra mora em
+        // `comEstagioLimpo` pra o servidor aplicar a mesma.
+        set((state) => ({ biomaProgress: comEstagioLimpo(state.biomaProgress, bioma, estagio) }))
       },
 
       setAutoToggle: (key, value) => {
@@ -674,7 +678,7 @@ export const useGameStateStore = create<GameStateStore>()(
           // de graca o conteudo que acabou de virar gate do Lance. Espelha
           // a migration 20260814120000.
           unlockedContinents: [...new Set([
-            ...FAIXAS_INICIAIS,
+            ...GRUPOS_INICIAIS,
             ...(persisted.unlockedContinents || []).flatMap((c) =>
               c === 'kanto' ? GRUPOS_DO_LANCE : GRUPOS_LEGADOS.has(c) ? [] : [c]),
           ])],

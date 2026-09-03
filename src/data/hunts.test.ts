@@ -13,9 +13,9 @@ import { SPECIES_DATA } from './generated/pokes.generated'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import {
-  BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL,
+  BIOMAS, GRUPOS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL,
 } from './biomas'
-import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, zonaMaximaDoEstagio } from './estagios'
+import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, quantidadeDeSalas, zonaMaximaDoEstagio } from './estagios'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import { contextoDeSpawn, janelaDaSala } from '@/engine/systems/salaSystem'
 import { SALAS_POR_HUNT } from './biomas'
@@ -100,28 +100,23 @@ describe('estrutura', () => {
     }
   })
 
-  // PONTE, e nao desenho final: enquanto o gate for por `continent`, cada
-  // estagio herda o grupo da faixa que cobria aquele nivel (1-3 = faixa1,
-  // 4-6 = faixa2, 7-10 = faixa3). Trocar o eixo do gate pra estagio e a
-  // PH-430/PH-432; apagar o vocabulario de faixa e a PH-434. Este teste
-  // tranca a ponte pra ela nao derivar sem ninguem ver.
-  it('o gate das hunts e o esperado: faixa1/faixa2 abertas, faixa3 e Pesadelo pelo Lance', () => {
-    const grupoEsperado = (estagio: number) =>
-      FAIXAS.find((f) => niveisDoEstagio(estagio)[1] <= f.niveis[1])?.id ?? 'faixa3'
-    expect(ESTAGIOS.map(grupoEsperado)).toEqual([
-      'faixa1', 'faixa1', 'faixa1',
-      'faixa2', 'faixa2', 'faixa2',
-      'faixa3', 'faixa3', 'faixa3',
-      // O estagio 10 (Lv 91-100) e conteudo novo, acima do antigo teto de 90:
-      // cai no grupo mais alto, junto com o resto do fim de jogo.
-      'faixa3',
-    ])
+  // PH-432: A PONTE DE FAIXA MORREU. Ate aqui cada estagio herdava o grupo de
+  // gate da faixa que cobria aquele nivel (1-3 = faixa1, 4-6 = faixa2, 7-10 =
+  // faixa3), o que barrava o estagio 7 inteiro atras do Campeao Lance quando o
+  // gate de ESTAGIO (PH-430) ja o barra atras do estagio 6 — duas travas
+  // dizendo a mesma coisa, a de fora com granularidade pior.
+  //
+  // Sobraram DOIS grupos, e `continent` decide uma coisa so: o Modo Pesadelo
+  // esta aberto?
+  it("o gate das hunts sao dois grupos: o mundo aberto e o Pesadelo pelo Lance", () => {
     for (const bioma of BIOMAS) {
       for (const estagio of ESTAGIOS) {
         expect(MAPS[estagioId(bioma.chave, estagio)].continent, `${bioma.chave} e${estagio}`)
-          .toBe(grupoEsperado(estagio))
+          .toBe(GRUPOS_INICIAIS[0])
       }
     }
+    // A hunt inicial tambem: ela e a primeira tela do jogo.
+    expect(MAPS[STARTER_HUNT_ID].continent).toBe(GRUPOS_INICIAIS[0])
     for (const m of nightmareHunts) expect(m.continent, m.id).toBe('nightmare')
     // A hunt do Lance e a excecao entre as `boss_`: ela tem que estar num grupo
     // ABERTO, senao so seria alcancavel depois de ja ter sido vencida.
@@ -129,7 +124,7 @@ describe('estrutura', () => {
       if (m.id === 'boss_lance') continue
       expect(m.continent, m.id).toBe('nightmare')
     }
-    expect(FAIXAS_INICIAIS).toContain(MAPS.boss_lance.continent)
+    expect(GRUPOS_INICIAIS).toContain(MAPS.boss_lance.continent)
     expect(MAPS.boss_lance.unlocksContinentOnClear).toEqual(GRUPOS_DO_LANCE)
   })
 })
@@ -503,7 +498,7 @@ describe('pesos de spawn', () => {
           for (const id of ctx.pool) {
             const fatia = ctx.peso(id) / total
             if (fatia > TETO_DE_FATIA + 1e-9) {
-              const janela = janelaDaSala(mapDef.levelRange, indice).join('-')
+              const janela = janelaDaSala(mapDef.levelRange, indice, quantidadeDeSalas(huntId)).join('-')
               erros.push(`${huntId}/${chave}#${indice} (Lv ${janela}) ${ENCOUNTERS[id].speciesId} = ${(fatia * 100).toFixed(1)}%`)
             }
           }

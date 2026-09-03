@@ -27,7 +27,7 @@
 // O elenco NAO e recortado por estagio: ele continua vindo do sub-bioma. O que
 // o estagio carrega e so a tabela de porcentagem. E isso que mantem o dado
 // gerado no lugar e evita curar 120 listas a mao.
-import { BIOMAS, ORDEM_DOS_BIOMAS, type BiomaDef, type SubBiomaDef } from './biomas'
+import { BIOMAS, type BiomaDef, type SubBiomaDef } from './biomas'
 
 // ---------------------------------------------------------------------------
 // A regua
@@ -145,25 +145,41 @@ export function parseEstagioId(mapId: string): EstagioDoMapId | null {
 }
 
 /**
- * Indice do bioma deste mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` quando o
- * mapId nao e de um estagio de bioma (hunt inicial, BOSS, Pesadelo).
- *
- * SUBSTITUI `biomas.ts#indiceDoBiomaNoMapId` (PH-426), que sabia ler so o
- * formato antigo `<bioma>_faixa<N>`. A funcao mora AQUI, e nao la, porque
- * `estagios.ts` ja importa `biomas.ts` — o contrario criaria ciclo, e
- * `ESTAGIOS` e calculado em tempo de import.
- *
- * O INVARIANTE QUE ELA CARREGA e o mesmo de antes: o gate server-side
- * (`authority/src/appSessao.ts#bloqueioDeBiomaPendente`) e o selo/ordem do menu
- * (`HuntMenu.tsx`) precisam concordar sobre "que bioma e esse mapId". Uma
- * funcao so, chamada pelos dois.
- *
- * ELA E TRANSITORIA. O gate por ORDEM de bioma morre na PH-430, quando os 12
- * biomas passam a nascer abertos e o eixo vira o estagio dentro do bioma.
+ * Prefixo que o espelho do Modo Pesadelo poe no mapId da hunt de origem
+ * (`nightmareMaps.ts#buildNightmareMirror`).
  */
-export function indiceDoBiomaDoEstagio(mapId: string): number {
-  const estagio = parseEstagioId(mapId)
-  return estagio ? ORDEM_DOS_BIOMAS.indexOf(estagio.bioma) : -1
+export const PREFIXO_DO_PESADELO = 'nightmare_'
+
+/**
+ * Como `parseEstagioId`, mas aceita tambem o espelho do Pesadelo.
+ *
+ * DUAS FUNCOES DE PROPOSITO, e a diferenca importa. `parseEstagioId` e a
+ * ESTRITA: ela recusa o espelho porque quem pergunta "que bioma e este mapId"
+ * pro gate de progresso nao pode receber `nightmare_marinho` como bioma. Esta
+ * aqui e a PERMISSIVA, pra quem pergunta sobre a FORMA da hunt — quantas salas
+ * ela tem, que janela de nivel cada uma cobre — onde o espelho e identico a
+ * origem, porque ele copia a geometria e so desloca o nivel.
+ */
+export function parseEstagioIdOuEspelho(
+  mapId: string,
+): (EstagioDoMapId & { pesadelo: boolean }) | null {
+  const pesadelo = mapId.startsWith(PREFIXO_DO_PESADELO)
+  const semPrefixo = pesadelo ? mapId.slice(PREFIXO_DO_PESADELO.length) : mapId
+  const estagio = parseEstagioId(semPrefixo)
+  return estagio ? { ...estagio, pesadelo } : null
+}
+
+/**
+ * Quantas salas a hunt deste mapId tem.
+ *
+ * Hunt que nao e de estagio (a inicial, as BOSS, o Treinamento) nao tem sistema
+ * de salas — `temSalas()` responde `false` antes de alguem chegar aqui —, mas o
+ * fallback existe porque o caminho de spawn pergunta o numero ANTES de saber se
+ * a hunt tem salas. Devolver 0 ali daria divisao por zero na janela de nivel.
+ */
+export function quantidadeDeSalas(mapId: string): number {
+  const estagio = parseEstagioIdOuEspelho(mapId)
+  return estagio ? salasDoEstagio(estagio.estagio) : SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1]
 }
 
 // ---------------------------------------------------------------------------

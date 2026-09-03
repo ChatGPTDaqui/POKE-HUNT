@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest'
 import { SPECIES } from './pokes'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { zonaMinimaDaEspecie } from './spawnStrength'
-import { FAIXAS } from './biomas'
+
 
 const RELATORIO = import.meta.glob('/scripts/relatorio-gen3.mjs', {
   query: '?raw', import: 'default', eager: true,
@@ -49,12 +49,19 @@ describe('a cópia da regra no relatório da Gen III (PH-146)', () => {
     ])
   })
 
-  it('a tabela de faixas é idêntica à de biomas.ts', () => {
-    const bloco = fonte.match(/const FAIXAS = \[([\s\S]*?)\n\]/)![1]
-    const copiado = [...bloco.matchAll(/nome: '([IV]+)', niveis: \[(\d+), (\d+)\], zonaMaxima: (\d+)/g)]
-      .map((m) => ({ nome: m[1], niveis: [Number(m[2]), Number(m[3])], zonaMaxima: Number(m[4]) }))
-    expect(copiado).toEqual(FAIXAS.map((f) => ({ nome: f.nome, niveis: f.niveis, zonaMaxima: f.zonaMaxima })))
-  })
+  // A COMPARACAO DA TABELA DE FAIXAS SAIU NA PH-434, e a razao importa: ela
+  // conferia a copia do script contra `biomas.FAIXAS`, que deixou de existir.
+  // O mundo passou a ser 10 estagios de 10 niveis por bioma (data/estagios.ts).
+  //
+  // O SCRIPT NAO FOI ATUALIZADO DE PROPOSITO. `relatorio-gen3.mjs` e um
+  // relatorio DATADO — ele descreve como a Geracao III foi alocada em 2026-08,
+  // sob as faixas que valiam naquele dia. Reescreve-lo pra falar de estagio
+  // faria ele mentir sobre o que foi decidido la atras; e o mesmo motivo pelo
+  // qual migration e patch note antigos ficam com o nome antigo.
+  //
+  // O QUE ESTE ARQUIVO CONTINUA SEGURANDO e o que continua valendo: a tabela de
+  // BST -> zona e a formula de `zonaMinimaDaEspecie`, que o redesenho NAO
+  // tocou. O eixo de forca e o mesmo; o que mudou foi onde cada zona cai.
 
   it('a zona calculada pela cópia bate com a do jogo nas 245 espécies', () => {
     // A prova de verdade: rodar a fórmula copiada e a real lado a lado. As duas

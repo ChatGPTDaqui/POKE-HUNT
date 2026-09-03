@@ -34,7 +34,7 @@ import {
   createRng, createPokeInstance, buildMapWorld, podeDanificar, ABATES_POR_SALA,
 } from '../../authority/engine/headless.js'
 
-const HUNT = 'campo_aberto_faixa1'
+const HUNT = 'campo_aberto_e1'
 const ESPECIE = process.env.ESPECIE ?? 'charmander'
 const NIVEL = Number(process.env.NIVEL ?? 102)
 const SEMENTES = Number(process.env.SEMENTES ?? 120)

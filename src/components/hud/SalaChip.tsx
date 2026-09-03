@@ -17,7 +17,8 @@
 // carteira e treinador, os tres mais urgentes que "qual sala".
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { SALAS_POR_HUNT, ABATES_POR_SALA } from '@/data/biomas'
+import { ABATES_POR_SALA } from '@/data/biomas'
+import { quantidadeDeSalas } from '@/data/estagios'
 import { janelaDaSala, nomeDaSala, protetorDaSala } from '@/engine/systems/salaSystem'
 import { avancarSalaManualmente } from '@/data/remote/autoridade'
 import { GameButton } from '@/components/game/controls'
@@ -45,6 +46,10 @@ export function salaNoTrilho(mode: DeviceMode): boolean {
 export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   const sala = useWorldStore((s) => s.sala)
   const faixa = useWorldStore((s) => s.mapDef?.levelRange)
+  // PH-427: quantas salas o estagio tem sai do mapId, nao de uma constante — a
+  // `SalaAtiva` nao carrega o estagio dela.
+  const mapId = useWorldStore((s) => s.mapDef?.id)
+  const salas = quantidadeDeSalas(mapId ?? '')
   const countdown = useWorldStore((s) => s.salaCountdownRemaining)
   // PH-291: a marca vale por SALA e diz que o protetor daquela sala ja caiu.
   // Sem ela a tela nao tem como distinguir "sala pede protetor" de "protetor ja
@@ -60,7 +65,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   const nome = nomeDaSala(sala)
   // A janela sobe com a sala: a hunt afunda conforme voce limpa. Mostrar so o
   // intervalo da HUNT (Lv1-30) esconderia justamente isso.
-  const janela = faixa ? janelaDaSala(faixa, sala.indice) : null
+  const janela = faixa ? janelaDaSala(faixa, sala.indice, salas) : null
   const restantes = Math.max(0, ABATES_POR_SALA - sala.abates)
   const progresso = Math.min(1, sala.abates / ABATES_POR_SALA)
   // PH-291: a sala pede protetor e ele ainda nao caiu. Enquanto isso for
@@ -68,7 +73,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // precisa dizer por que 30/30 nao esta avancando. `solicitarAvancoDeSala` faz
   // a mesma pergunta do lado do motor; aqui e so pra o jogador nao clicar num
   // botao que o servidor vai recusar.
-  const tipoDeProtetor = protetorDaSala(sala)
+  const tipoDeProtetor = protetorDaSala(sala, mapId ?? '')
   const travadaPeloProtetor = tipoDeProtetor != null && !protetorResolvido
   const quotaFechada = sala.abates >= ABATES_POR_SALA
   // PH-180: so aparece com a quota FECHADA, o toggle ligado (senao a sala ja
@@ -113,7 +118,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // respondeu a pergunta errada. Os dois continuam a um passar de mouse OU a um
   // toque, na bolha; e na versao de baixo (compacto) continuam escritos.
   const detalhes = [
-    `Sala ${sala.indice + 1} de ${SALAS_POR_HUNT}`,
+    `Sala ${sala.indice + 1} de ${salas}`,
     nome,
     janela ? `selvagens de Lv ${janela[0]} a ${janela[1]}` : null,
     `faltam ${restantes} de ${ABATES_POR_SALA} abates`,
@@ -160,7 +165,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
     <Explicacao
       envolve="bloco"
       side="bottom"
-      rotulo={`Sala ${sala.indice + 1} de ${SALAS_POR_HUNT}`}
+      rotulo={`Sala ${sala.indice + 1} de ${salas}`}
       conteudo={
         <div className="flex flex-col gap-[.4em] text-left">
           <span className="font-medium text-n100">{detalhes}</span>
@@ -175,7 +180,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
         — ele e leitura, nao acao. */}
     <div className="flex min-w-0 items-center gap-[.6em]">
       <span className="shrink-0 text-[.72em] tabular-nums text-n400">
-        Sala <b className="font-medium text-n100">{sala.indice + 1}</b>/{SALAS_POR_HUNT}
+        Sala <b className="font-medium text-n100">{sala.indice + 1}</b>/{salas}
       </span>
       <span className="min-w-0 truncate text-[.78em] font-medium text-n100">{nome}</span>
       {janela && !embutido && (

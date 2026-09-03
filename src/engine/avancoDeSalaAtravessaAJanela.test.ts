@@ -47,7 +47,11 @@ function mundoComQuotaFechada(semente: number): WorldState {
   const world = buildMapWorld(
     HUNT, poke,
     { seed: 0, rng: createRng(semente), counters: { entity: 1, effect: 1, pendingHit: 1 } },
-    { sala: { indice: 2, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 } },
+    // PH-427: sala 1 de 3 (o estagio 1 tem 3 salas). Era o indice 2, que virou
+    // a ULTIMA do estagio — e a ultima fecha o estagio e volta pro indice 0,
+    // entao o `indiceAntes + 1` que este teste afirma deixaria de valer. O caso
+    // aqui e a transicao atravessar a janela do flush, e Guardian serve igual.
+    { sala: { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 } },
   )
   world.respawnTimer = 999
   return world

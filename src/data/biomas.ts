@@ -17,43 +17,71 @@
 // Escrito a mao de proposito: agrupamento tematico, peso e loot sao decisao de
 // game design, nao dado derivavel. As listas de especie, que sao grandes e
 // mudam com o roster, essas sim sao geradas.
-import type { ElementType, MapItemDrop } from './generated/types'
+import type { Continent, ElementType, MapItemDrop } from './generated/types'
 
 // ---------------------------------------------------------------------------
-// Faixas de nivel
+// AS TRES FAIXAS DE NIVEL SAIRAM DAQUI NA PH-434
 // ---------------------------------------------------------------------------
-// Sao 3, e nao as 9 zonas de 10 niveis do desenho antigo, porque o elenco nao
-// da pra mais: medido nas 209 especies alocadas, a zona 2 fica VAZIA em 11 dos
-// 12 biomas. Nove degraus sobre esse dado produziam hunts de 1 especie.
+// `FAIXAS`, `FaixaDef`, `FaixaId` e `FAIXA_POR_ID` descreviam o mundo em tres
+// degraus de 30 niveis, com teto em 90. O redesenho de 02/09 trocou isso por 10
+// ESTAGIOS de 10 niveis por bioma, com teto em 100 (data/estagios.ts), e as
+// pecas foram saindo issue a issue: as hunts (PH-426), o motor de salas
+// (PH-427), o progresso (PH-429), o gate (PH-430) e o portao do Campeao Lance
+// (PH-432). Esta issue apaga o que sobrou.
 //
-// O teto continua Lv90 — acima disso e Modo Pesadelo (+100, piso 150) e as
-// hunts BOSS (Lv300).
-export type FaixaId = 'faixa1' | 'faixa2' | 'faixa3'
+// Sairam junto `huntId(bioma, faixa)`, `biomaDoMapId` e `indiceDoBiomaNoMapId`:
+// os tres liam ou montavam o mapId no formato `<bioma>_faixa<N>`, que nenhuma
+// hunt usa mais.
+//
+// O QUE NAO SAIU, E POR QUE. A traducao do save antigo continua lendo
+// `{faixa1, faixa2, faixa3}` e `<bioma>_faixa<N>` — ha linha no banco com os
+// dois formatos convivendo (ver PH-440), e enquanto houver, ler o formato
+// velho e obrigacao. Ela mora em data/progressoDeBioma.ts, isolada, com a
+// ordem dos biomas CONGELADA junto dela (`ORDEM_LEGADA_DOS_BIOMAS`): save
+// antigo se le com a regra antiga, e a regra antiga nao pode depender de uma
+// constante viva que muda amanha.
 
-export interface FaixaDef {
-  id: FaixaId
-  nome: string
-  /** Faixa fechada de nivel; o cartao, o nome e o spawn saem toda daqui. */
-  niveis: [number, number]
-  /**
-   * Zona maxima de `spawnStrength.zonaMinimaDaEspecie` que cabe nesta faixa.
-   * A especie entra na hunt cuja faixa alcanca a zona minima dela — e o eixo
-   * de FORCA que impede Tyranitar de nascer na primeira hunt.
-   */
-  zonaMaxima: number
-}
+/**
+ * O grupo de gate das hunts que nascem abertas.
+ *
+ * ERAM AS DUAS PRIMEIRAS FAIXAS ATE A PH-432, e o encolhimento aqui e o fim da
+ * ponte que a PH-426 tinha montado. O raciocinio: `continent` existe pra dizer
+ * "este conteudo esta liberado?", e nas hunts de bioma essa pergunta passou a
+ * ser respondida pelo ESTAGIO (PH-430 — o estagio 1 sempre aberto, o N pede o
+ * N-1). Manter as faixas aqui era uma segunda trava que dizia a mesma coisa com
+ * granularidade pior: ela barrava o estagio 7 inteiro atras do Campeao Lance
+ * quando o gate de estagio ja o barra atras do estagio 6.
+ *
+ * O que `continent` ainda decide de verdade e UMA coisa: o Modo Pesadelo (e as
+ * 11 hunts BOSS dentro dele) esta aberto? Isso continua sendo o premio do
+ * Lance.
+ */
+export const GRUPOS_INICIAIS: Continent[] = ['biomas']
 
-export const FAIXAS: FaixaDef[] = [
-  { id: 'faixa1', nome: 'I', niveis: [1, 30], zonaMaxima: 2 },
-  { id: 'faixa2', nome: 'II', niveis: [31, 60], zonaMaxima: 5 },
-  { id: 'faixa3', nome: 'III', niveis: [61, 90], zonaMaxima: 8 },
-]
+/**
+ * O que derrotar o Campeao Lance libera.
+ *
+ * Encolheu de `['faixa3', 'nightmare']` pra so o Pesadelo na PH-432: a faixa3
+ * deixou de existir como grupo, e o que era "a faixa III" agora sao os estagios
+ * 7 a 10, liberados um a um pelo proprio progresso do bioma.
+ */
+export const GRUPOS_DO_LANCE: Continent[] = ['nightmare']
 
-// As faixas que um jogador novo ja pode entrar. A faixa3 e o Modo Pesadelo
-// (com as 11 hunts BOSS dentro dele) sao liberados por derrotar o Campeao
-// Lance, cujo time e Lv55-65 — exatamente o fim da faixa2.
-export const FAIXAS_INICIAIS: string[] = ['faixa1', 'faixa2']
-export const GRUPOS_DO_LANCE: string[] = ['faixa3', 'nightmare']
+/**
+ * Quantos estagios de CADA um dos 12 biomas o jogador precisa ter limpo pra
+ * poder desafiar o Campeao Lance (PH-432).
+ *
+ * Cinco = a metade do modo normal, em toda parte do mapa. Era um gate por
+ * grupo de faixa, que com os 12 biomas independentes deixou de significar
+ * algo.
+ *
+ * COLISAO CONHECIDA E ACEITA: o estagio 5 cobre Lv 41-50, mas os estagios 6 a
+ * 10 ficam abertos o tempo todo (o gate e por bioma, nao global), entao o
+ * jogador tende a chegar ao Lance com o time em Lv 100 e o duelo — desenhado
+ * pra Lv 55-65 — vira formalidade. Registrado no desenho de 02/09 como
+ * consequencia aceita, e nao e escopo desta issue resolver.
+ */
+export const ESTAGIOS_PARA_O_LANCE = 5
 
 // Grupos que existiam antes das faixas e que nenhuma hunt usa mais. Save
 // antigo os carrega; sao traduzidos na carga, nunca propagados — 'kanto' vira
@@ -80,7 +108,19 @@ export const GRUPOS_DO_LANCE: string[] = ['faixa3', 'nightmare']
 // (faixas iniciais + os dois grupos do Lance so pra quem tinha 'kanto'),
 // entao nenhuma linha carrega mais o 'nightmare' gratuito que este filtro
 // existia pra barrar. O unico 'nightmare' que chega aqui hoje foi conquistado.
-export const GRUPOS_LEGADOS: ReadonlySet<string> = new Set(['johto', 'kanto'])
+// PH-434: as TRES FAIXAS entraram nesta lista. Save escrito antes do redesenho
+// carrega `faixa1`/`faixa2`/`faixa3` em `unlocked_continents`, e nenhuma hunt
+// tem mais esse `continent` — mante-las na lista do jogador nao quebra nada,
+// mas deixa lixo que ninguem sabe se ainda importa, pra sempre. Descartar na
+// carga e o mesmo tratamento que 'johto' levou.
+//
+// `faixa3` NAO precisa virar 'nightmare' no lugar: quem venceu o Lance ja tem
+// 'nightmare' na lista (os dois eram concedidos juntos), entao o Pesadelo
+// sobrevive por conta propria. Traduzir daria o Pesadelo de graca a quem nunca
+// o venceu — o mesmo bug que a nota do 'nightmare' acima descreve.
+export const GRUPOS_LEGADOS: ReadonlySet<string> = new Set([
+  'johto', 'kanto', 'faixa1', 'faixa2', 'faixa3',
+])
 
 // ---------------------------------------------------------------------------
 // Loot por sub-bioma
@@ -412,81 +452,36 @@ export const BIOMA_POR_CHAVE: Record<string, BiomaDef> = Object.fromEntries(
   BIOMAS.map((b) => [b.chave, b])
 )
 
-/**
- * PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
- * vencer o Lord do bioma N libera o bioma N+1. So existia como
- * tabela no vault (`_Architecture.md`, brainstorm 16/08, referencia: sequencia
- * de ginasios Kanto+Johto) — `BIOMAS` acima esta em ordem ARBITRARIA de
- * insercao (campo_aberto, mata, marinho, ...), que NAO bate com esta ordem.
- * Nao usar `BIOMAS.map(b => b.chave)` no lugar disto — e exatamente o furo que
- * esta constante fecha.
- */
-export const ORDEM_DOS_BIOMAS: readonly string[] = [
-  'campo_aberto',
-  'subterraneo',
-  'marinho',
-  'industrial',
-  'mata',
-  'aguas_interiores',
-  'urbano',
-  'gelido',
-  'aridos',
-  'sagrado',
-  'sombrio',
-  'igneo',
-]
+// A ORDEM CANONICA DOS 12 BIOMAS SAIU DAQUI NA PH-434.
+//
+// Ela existia pro gate SEQUENCIAL (PH-223/226/227): vencer o Lord do bioma N
+// liberava o N+1. Esse eixo morreu na PH-430 — os 12 nascem abertos e o
+// progresso e por bioma, independente.
+//
+// A LISTA NAO SUMIU, ELA MUDOU DE DONO. O unico lugar que ainda precisa dela e
+// a traducao do save antigo, onde o numero gravado em `faixa1` e um INDICE
+// nessa sequencia. La ela vive CONGELADA
+// (data/progressoDeBioma.ts#ORDEM_LEGADA_DOS_BIOMAS), e isso e o ponto: uma
+// constante viva mudaria amanha e faria a traducao de um save de ontem apontar
+// pro bioma errado, sem erro nenhum.
 
-/**
- * PH-224: `players.bioma_progress` (migration PH-200) — indice de quantos
- * biomas da FAIXA o jogador ja venceu (posicao em `ORDEM_DOS_BIOMAS`), nao
- * lista de biomas liberados. Uma faixa por chave porque o gate e independente
- * entre as 3 (a Faixa II reinicia do zero, mesma decisao do brainstorm 16/08).
- */
-export interface BiomaProgress {
-  faixa1: number
-  faixa2: number
-  faixa3: number
-}
-
-export function biomaProgressDefault(): BiomaProgress {
-  return { faixa1: 0, faixa2: 0, faixa3: 0 }
-}
-
-export const FAIXA_POR_ID: Record<string, FaixaDef> = Object.fromEntries(
-  FAIXAS.map((f) => [f.id, f])
-)
-
-/** Id da hunt de um bioma numa faixa. Estavel: e o que vai pro banco. */
-export function huntId(bioma: string, faixa: FaixaId): string {
-  return `${bioma}_${faixa}`
-}
-
-/**
- * LEGADO (PH-426): le so o formato antigo `<bioma>_faixa<N>`, que nenhuma hunt
- * usa mais — as hunts agora sao `<bioma>_e<N>`. Quem precisa do bioma de um
- * mapId hoje chama `estagios.ts#parseEstagioId` /
- * `estagios.ts#indiceDoBiomaDoEstagio`, que sao as funcoes que o gate
- * server-side e o menu compartilham.
- *
- * Continua aqui porque save antigo ainda carrega o formato velho em
- * `players.current_map` e em `game_sessions` vivas, e a traducao dele (PH-429)
- * precisa saber le-lo. Sai junto com o vocabulario de faixa, na PH-434.
- */
-export function biomaDoMapId(mapId: string, faixa: string): string | null {
-  return mapId.endsWith(`_${faixa}`) ? mapId.slice(0, -(faixa.length + 1)) : null
-}
-
-/**
- * Indice do bioma embutido no mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` se
- * o mapId nao tem bioma (hunt inicial/BOSS/Nightmare) ou o bioma nao esta na
- * ordem (nao deveria acontecer com os 12 habilitados, PH-225 — defesa em
- * profundidade). Usado pelo gate server-side (PH-227) E pelo sort/selo do
- * menu (PH-229).
- */
-export function indiceDoBiomaNoMapId(mapId: string, faixa: string): number {
-  const bioma = biomaDoMapId(mapId, faixa)
-  return bioma ? ORDEM_DOS_BIOMAS.indexOf(bioma) : -1
-}
+// O TIPO `BiomaProgress` E O `biomaProgressDefault()` SAIRAM DAQUI NA PH-429.
+//
+// Eles descreviam o formato de tres inteiros por faixa ("quantos biomas da
+// ORDEM o jogador venceu naquela faixa"), que deixou de existir: o progresso
+// agora e um numero por BIOMA, "maior estagio ja limpo". A forma nova, o
+// default, a traducao do save antigo e o gate moram em
+// `data/progressoDeBioma.ts`.
+//
+// FORAM APAGADOS, E NAO MANTIDOS COMO ALIAS, de propósito. As duas formas sao
+// objetos de numeros e conviveriam sem o compilador reclamar — quem lesse
+// `progresso.faixa1` no formato novo receberia `undefined`, viraria zero, e o
+// gate trancaria o jogo inteiro sem nenhum erro. Apagar transforma cada leitura
+// remanescente em erro de compilacao.
+//
+// A traducao do formato antigo continua existindo (ela precisa, ha save no
+// banco), mas com a ordem dos biomas CONGELADA junto dela — ver
+// `ORDEM_LEGADA_DOS_BIOMAS`.
 
 export const SUB_BIOMA_POR_CHAVE: Record<string, { sub: SubBiomaDef; bioma: BiomaDef }> =
   Object.fromEntries(

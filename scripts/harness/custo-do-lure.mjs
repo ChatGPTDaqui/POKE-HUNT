@@ -23,7 +23,7 @@
 // o do servidor, não o de um build de teste.
 import { createRng, createPokeInstance, buildMapWorld, stepWorld, defaultGameStateData, OFFLINE_SIM_STEP_SECONDS } from '../../authority/engine/headless.js'
 
-const HUNT = 'mata_faixa1'
+const HUNT = 'mata_e1'
 const SEGUNDOS = 1800 // 30 min de ausência: a janela típica de um `/estado` atrasado
 const PASSO = OFFLINE_SIM_STEP_SECONDS
 

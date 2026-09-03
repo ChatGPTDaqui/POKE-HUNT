@@ -116,9 +116,9 @@ const PASSO = 0.1
 //             realmente apanha, e por isso o unico em que o debuff recebido tem
 //             chance de virar espiral.
 const REGIMES = [
-  { nome: 'apertado', especie: 'charmander', nivel: 25, hunt: 'campo_aberto_faixa1' },
-  { nome: 'folgado', especie: 'entei', nivel: 102, hunt: 'campo_aberto_faixa1' },
-  { nome: 'sofrido', especie: 'charmander', nivel: 25, hunt: 'campo_aberto_faixa2' },
+  { nome: 'apertado', especie: 'charmander', nivel: 25, hunt: 'campo_aberto_e1' },
+  { nome: 'folgado', especie: 'entei', nivel: 102, hunt: 'campo_aberto_e1' },
+  { nome: 'sofrido', especie: 'charmander', nivel: 25, hunt: 'campo_aberto_e4' },
 ]
 
 /**
@@ -130,9 +130,9 @@ const REGIMES = [
  * bicho conversam.
  */
 const REGIMES_COM_BUFF = [
-  { nome: 'apertado', especie: 'typhlosion', nivel: 25, hunt: 'campo_aberto_faixa1', forcar: 'defense_curl' },
-  { nome: 'folgado', especie: 'typhlosion', nivel: 102, hunt: 'campo_aberto_faixa1', forcar: 'defense_curl' },
-  { nome: 'sofrido', especie: 'typhlosion', nivel: 25, hunt: 'campo_aberto_faixa2', forcar: 'defense_curl' },
+  { nome: 'apertado', especie: 'typhlosion', nivel: 25, hunt: 'campo_aberto_e1', forcar: 'defense_curl' },
+  { nome: 'folgado', especie: 'typhlosion', nivel: 102, hunt: 'campo_aberto_e1', forcar: 'defense_curl' },
+  { nome: 'sofrido', especie: 'typhlosion', nivel: 25, hunt: 'campo_aberto_e4', forcar: 'defense_curl' },
 ]
 
 /**
@@ -156,9 +156,9 @@ const REGIMES_COM_BUFF = [
  * limite passa a ser o prazo, que e o que a PH-419 endereca.
  */
 const REGIMES_NO_TETO = [
-  { nome: 'apertado', especie: 'spearow', nivel: 25, hunt: 'campo_aberto_faixa1', forcar: 'agility' },
-  { nome: 'folgado', especie: 'spearow', nivel: 102, hunt: 'campo_aberto_faixa1', forcar: 'agility' },
-  { nome: 'sofrido', especie: 'spearow', nivel: 25, hunt: 'campo_aberto_faixa2', forcar: 'agility' },
+  { nome: 'apertado', especie: 'spearow', nivel: 25, hunt: 'campo_aberto_e1', forcar: 'agility' },
+  { nome: 'folgado', especie: 'spearow', nivel: 102, hunt: 'campo_aberto_e1', forcar: 'agility' },
+  { nome: 'sofrido', especie: 'spearow', nivel: 25, hunt: 'campo_aberto_e4', forcar: 'agility' },
 ]
 
 function gameStateFalso(poke) {

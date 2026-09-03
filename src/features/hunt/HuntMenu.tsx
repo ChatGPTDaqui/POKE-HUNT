@@ -11,10 +11,13 @@ import { pedirAcao } from '@/data/remote/autoridade'
 // de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
 import {
-  FAIXAS, SALAS_POR_HUNT, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE,
-  type SubBiomaDef, type BiomaProgress,
+  GRUPOS_INICIAIS, SUB_BIOMA_POR_CHAVE,
+  type SubBiomaDef,
 } from '@/data/biomas'
-import { indiceDoBiomaDoEstagio } from '@/data/estagios'
+import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import { bloqueioDoEstagio, bloqueioDoLance, type ProgressoPorBioma } from '@/data/progressoDeBioma'
+import { LANCE_MAP_ID } from '@/data/nightmareMaps'
+import { MapaDeBiomas, TrilhaDoBioma } from './TrilhaDeEstagios'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { contextoDeSpawn } from '@/engine/systems/salaSystem'
 import type { HuntMapDef } from '@/data/huntTypes'
@@ -32,32 +35,35 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { TypeChip } from '@/components/shared/TypeChip'
-import { GameButton, GameCard, GameInput, GameSelect, SegmentedTabs, StickyHeader } from '@/components/game/controls'
+import { GameButton, GameCard, GameInput, GameSelect, SectionLabel, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
-
-// As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo
-// de gate (ver data/biomas.ts): as duas primeiras faixas nascem abertas, a
-// terceira e o Modo Pesadelo saem do Campeao Lance.
+// As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo de
+// gate; com a PH-432 sobraram DOIS (ver data/biomas.ts): o que nasce aberto e o
+// Modo Pesadelo, que sai do Campeao Lance.
 const CONTINENT_LABELS: Record<string, string> = {
-  ...Object.fromEntries(FAIXAS.map((f) => [f.id, `Faixa ${f.nome} · Lv ${f.niveis[0]}-${f.niveis[1]}`])),
-  nightmare: 'Modo Pesadelo',
+  biomas: "Mundo",
+  nightmare: "Modo Pesadelo",
 }
 const TYPE_LIST = (Object.keys(TYPE_COLORS) as ElementType[]).sort()
 const fmt = new Intl.NumberFormat('pt-BR')
 
-// PH-229: mensagem de bloqueio do gate de bioma — espelha `bloqueioDeBiomaPendente`
-// (authority/src/appSessao.ts, PH-227), mas nao importa dela: aquele arquivo e
-// server-only (Deno, ErroHttp). O que os dois COMPARTILHAM de verdade e
-// `indiceDoBiomaDoEstagio` (data/estagios.ts) — sem isso os dois lados podiam
-// discordar sobre "que indice este mapId espera".
-function bloqueioDeBiomaClient(mapId: string, faixa: string, biomaProgress: BiomaProgress): string | null {
-  const indiceEsperado = indiceDoBiomaDoEstagio(mapId)
-  if (indiceEsperado <= 0) return null
-  const progresso = biomaProgress[faixa as keyof BiomaProgress] ?? 0
-  if (progresso >= indiceEsperado) return null
-  const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1]
-  const anteriorNome = BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave
-  return `Vença o Lord de ${anteriorNome} para liberar esta área.`
+/**
+ * Mensagem de bloqueio do gate de estagio (PH-430).
+ *
+ * ELA ENCOLHEU PORQUE A REGRA ENCOLHEU. Ate a PH-429 esta funcao espelhava a
+ * do servidor a mao — cada lado montava o indice na ordem dos biomas, olhava a
+ * faixa certa do progresso e escrevia a MESMA string, com um comentario em
+ * cada arquivo pedindo que ninguem os deixasse divergir. Agora as duas pontas
+ * chamam `bloqueioDoEstagio` (data/progressoDeBioma.ts), que e um modulo puro
+ * e importavel dos dois lados: a regra e o texto passaram a ter uma fonte so.
+ */
+function bloqueioDeBiomaClient(mapId: string, progresso: ProgressoPorBioma): string | null {
+  // PH-432: o Campeao Lance tem gate proprio — progresso 5 nos 12 biomas.
+  if (mapId === LANCE_MAP_ID) return bloqueioDoLance(progresso)
+  const doMapa = parseEstagioId(mapId)
+  // Hunt sem estagio (inicial, BOSS, Lance, Pesadelo) nao passa por este gate.
+  if (!doMapa) return null
+  return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio)
 }
 
 async function acionarHunt(
@@ -71,7 +77,7 @@ async function acionarHunt(
     return
   }
   if (continentGated) {
-    const mapContinent = map.continent || FAIXAS[0].id
+    const mapContinent = map.continent || GRUPOS_INICIAIS[0]
     useToastStore.getState().pushToast(
       `Derrote o Campeão Lance antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
       'error', 'world',
@@ -114,7 +120,7 @@ async function acionarHunt(
 // nota la), nao no useState local daqui.
 export function focusHunt(map: HuntMapDef) {
   const ui = useUiStore.getState()
-  ui.setHuntContinent(map.continent ?? 'faixa1')
+  ui.setHuntContinent(map.continent ?? GRUPOS_INICIAIS[0])
   ui.setHuntSearchTerm(map.name)
   ui.setHuntType('all')
 }
@@ -138,7 +144,7 @@ function salasDaHunt(mapId: string): { sub: SubBiomaDef; pool: string[] }[] {
  *
  * A "dominancia" de um tipo e a soma das odds de toda especie que o carrega.
  *
- * COM SALAS, A CHANCE E UMA MEDIA SOBRE AS 10 SALAS DO CICLO, e a conta passa
+ * COM SALAS, A CHANCE E UMA MEDIA SOBRE AS SALAS DO ESTAGIO, e a conta passa
  * pelo MESMO `contextoDeSpawn` que o motor usa pra sortear:
  *
  *   P(especie) = (1/SALAS) x SOMA_indice SOMA_sub  P(sub) x peso(sub, indice)
@@ -166,10 +172,16 @@ export function huntOdds(map: HuntMapDef): HuntOdds {
 
   const salas = salasDaHunt(map.id)
   if (salas.length > 0) {
+    // PH-427: quantas salas o estagio tem, e nao 10 fixas. Alem de errar a
+    // media, a constante antiga avaliava indices de sala que NAO EXISTEM (0 a 9
+    // num estagio de 3 salas): `janelaDaSala` devolvia janelas de nivel fora do
+    // caminho do jogador, entao o cartao anunciava especie que aquele estagio
+    // nunca sorteia. A soma continuava dando 100%, o que esconde o erro.
+    const totalDeSalas = quantidadeDeSalas(map.id)
     const somaPesoDeSala = salas.reduce((s, x) => s + x.sub.peso, 0)
     for (const { sub } of salas) {
-      const pSala = sub.peso / somaPesoDeSala / SALAS_POR_HUNT
-      for (let indice = 0; indice < SALAS_POR_HUNT; indice++) {
+      const pSala = sub.peso / somaPesoDeSala / totalDeSalas
+      for (let indice = 0; indice < totalDeSalas; indice++) {
         const ctx = contextoDeSpawn(
           map.id, map.levelRange, { chave: sub.chave, indice, abates: 0, ciclos: 0 }, map.enemyPool,
         )
@@ -221,7 +233,7 @@ function SalasDaHunt({ mapId }: { mapId: string }) {
   return (
     <div className="flex flex-col gap-[.25em] rounded-[.5em] bg-n800/50 p-[.45em]">
       <div className="text-[.75em] text-n500">
-        {SALAS_POR_HUNT} salas · cada uma sorteia um sub-bioma
+        {quantidadeDeSalas(mapId)} salas · cada uma sorteia um sub-bioma
       </div>
       <div className="flex flex-wrap gap-[.35em]">
         {salas
@@ -319,6 +331,11 @@ export function HuntMenu() {
   const setTypeFilter = useUiStore((s) => s.setHuntType)
 
   const [expandedMapId, setExpandedMapId] = useState<string | null>(null)
+  // Qual bioma o jogador abriu — `null` e o nivel 1 (os 12 cartoes). Estado
+  // LOCAL: ele nao precisa sobreviver a troca de tela, e o `focusHunt` da
+  // Pokedex, que e o unico caminho externo pra ca, aponta pra hunt especial ou
+  // pro bioma pelo uiStore.
+  const [biomaAberto, setBiomaAberto] = useState<string | null>(null)
   const acao = useAcaoPendente()
 
   // PH-244: qual hunt esta rodando AGORA.
@@ -332,28 +349,29 @@ export function HuntMenu() {
   const mapaAtivo = mapaAtivoId ? MAPS[mapaAtivoId] : null
 
   const continents = useMemo(
-    () => [...new Set(Object.values(MAPS).map((m) => m.continent ?? 'faixa1'))],
+    () => [...new Set(Object.values(MAPS).map((m) => m.continent ?? GRUPOS_INICIAIS[0]))],
     [],
   )
 
   const activePoke = team[activeIndex] ?? null
   const activeSpecies = activePoke ? (SPECIES[activePoke.speciesId] ?? null) : null
 
+  // A LISTA DE CARDS SO MOSTRA O QUE NAO E ESTAGIO DE BIOMA (PH-431).
+  //
+  // As 120 hunts de bioma sairam daqui e viraram a navegacao de dois niveis
+  // (`MapaDeBiomas` -> `TrilhaDoBioma`). O que sobra na lista e o que nao tem
+  // trilha: a hunt inicial, as 11 BOSS, o Campeao Lance e o espelho do Modo
+  // Pesadelo. Sao poucas, curadas a mao e sem progressao entre si — cartao e a
+  // forma certa pra elas, e continuar listando as 120 junto seria devolver a
+  // tela de 121 linhas que esta issue existe pra desfazer.
   const visibleMaps = useMemo(() => {
     const term = search.trim().toLowerCase()
     return Object.values(MAPS)
-      .filter((m) => (m.continent ?? 'faixa1') === continent)
+      .filter((m) => parseEstagioId(m.id) == null)
+      .filter((m) => (m.continent ?? GRUPOS_INICIAIS[0]) === continent)
       .filter((m) => huntHasType(m, typeFilter))
       .filter((m) => huntMatches(m, term))
-      // PH-229: ordem de PROGRESSAO do bioma (ORDEM_DOS_BIOMAS), nao mais por
-      // nivel — achado de pente fino: `levelRange` e IDENTICO pros 12 biomas
-      // da mesma faixa (todos cobrem a faixa inteira), entao o sort antigo
-      // degradava pra alfabetico, sem relacao nenhuma com o gate sequencial
-      // (PH-207/226/227) — o desbloqueio "pulava" pro meio do alfabeto sem
-      // logica visivel. Hunt sem bioma (indice -1: rota inicial) fica primeiro.
-      .sort((a, b) =>
-        indiceDoBiomaDoEstagio(a.id) - indiceDoBiomaDoEstagio(b.id)
-        || a.name.localeCompare(b.name))
+      .sort((a, b) => a.levelRange[0] - b.levelRange[0] || a.name.localeCompare(b.name))
   }, [continent, typeFilter, search])
 
   if (team.length === 0) {
@@ -371,6 +389,40 @@ export function HuntMenu() {
     )
   }
 
+  // NIVEL 2: o jogador escolheu um bioma e esta na trilha dele. A tela inteira
+  // troca — sem abas de faixa, sem busca, sem filtro de elemento: dentro de um
+  // bioma sao dez estagios em ordem, e filtrar dez itens nao ajuda ninguem.
+  if (biomaAberto) {
+    return (
+      <div className="flex flex-col gap-[.5em]">
+        <TrilhaDoBioma
+          biomaChave={biomaAberto}
+          progresso={biomaProgress}
+          mapaAtivoId={mapaAtivoId}
+          abertoId={expandedMapId}
+          entrandoId={acao.pendingKey?.startsWith('map:') ? acao.pendingKey.slice(4) : null}
+          onAbrir={setExpandedMapId}
+          onEntrar={(mapId) => {
+            const map = MAPS[mapId]
+            if (!map) return
+            const mapContinent = map.continent ?? GRUPOS_INICIAIS[0]
+            const continentGated = !unlockedContinents.includes(mapContinent)
+            const bloqueio = continentGated ? null : bloqueioDeBiomaClient(mapId, biomaProgress)
+            const liberado = !continentGated && !bloqueio
+              && (map.unlockCost == null || unlockedMaps.includes(mapId))
+            if (mapId === mapaAtivoId) {
+              useUiStore.getState().closeScreen()
+              return
+            }
+            void acao.run(`map:${mapId}`, () => acionarHunt(map, liberado, continentGated, bloqueio))
+          }}
+          onVoltar={() => { setBiomaAberto(null); setExpandedMapId(null) }}
+        />
+      </div>
+    )
+  }
+
+  // NIVEL 1: os 12 biomas, mais a lista curta do que nao tem trilha.
   return (
     <div className="flex flex-col gap-[.5em]">
       <StickyHeader>
@@ -417,19 +469,28 @@ export function HuntMenu() {
         )}
       </StickyHeader>
 
+      {/* Os 12 biomas — o nivel 1 da navegacao. Vem ANTES da lista porque e
+          onde o jogador vai 99% das vezes: as hunts de cartao sao a inicial e
+          as de fim de jogo. */}
+      <SectionLabel>Biomas</SectionLabel>
+      <MapaDeBiomas progresso={biomaProgress} onEscolher={setBiomaAberto} />
+
+      {visibleMaps.length > 0 && <SectionLabel>Hunts especiais</SectionLabel>}
       {visibleMaps.length === 0 && (
-        <p className="text-n500">Nenhuma hunt encontrada (pode estar oculta pelo filtro de elemento).</p>
+        <p className="text-[.8em] text-n600">
+          Nenhuma hunt especial nesta aba (as hunts de bioma estão acima, na trilha de cada um).
+        </p>
       )}
 
       {visibleMaps.map((map) => {
         // Gate por continente (Kanto so depois do Campeao Lance) — separado do
         // gate de custo em ouro por mapa, e checado antes dele.
-        const mapContinent = map.continent ?? 'faixa1'
+        const mapContinent = map.continent ?? GRUPOS_INICIAIS[0]
         const continentGated = !unlockedContinents.includes(mapContinent)
         // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
         // continente e ANTES do custo em ouro, mesma prioridade do servidor.
-        const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, mapContinent, biomaProgress)
-        const temProtetor = indiceDoBiomaDoEstagio(map.id) !== -1
+        const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, biomaProgress)
+        const temProtetor = parseEstagioId(map.id) != null
         // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
         // custo nasce liberada. Checar so a lista trancava visualmente as hunts
         // do Modo Pesadelo e as BOSS, que sao geradas em runtime e nunca entram

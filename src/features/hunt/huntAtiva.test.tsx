@@ -19,11 +19,19 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
 import { MAPS } from '@/data/maps'
+import { parseEstagioId } from '@/data/estagios'
+import { BIOMAS } from '@/data/biomas'
 import { HuntMenu } from './HuntMenu'
 
 // Duas hunts da MESMA faixa, pra as duas aparecerem na mesma aba sem filtro.
+//
+// PH-431: e SEM ESTAGIO. As 120 hunts de bioma sairam da lista de cards e
+// viraram a trilha de dois niveis; o que sobra em cartao e a hunt inicial, as
+// BOSS e o Lance. Pegar as duas primeiras de `MAPS` sem esse filtro escolhia
+// duas hunts que a lista nao desenha mais.
 const [PRIMEIRA, SEGUNDA] = Object.values(MAPS)
-  .filter((m) => (m.continent ?? 'faixa1') === 'faixa1')
+  .filter((m) => parseEstagioId(m.id) == null)
+  .filter((m) => (m.continent ?? 'biomas') === 'biomas')
   .slice(0, 2)
 
 function comEquipe() {
@@ -34,7 +42,11 @@ function comEquipe() {
     }],
     activeIndex: 0,
     unlockedMaps: Object.keys(MAPS),
-    unlockedContinents: ['faixa1', 'faixa2', 'faixa3', 'nightmare'],
+    unlockedContinents: ['biomas', 'nightmare'],
+    // PH-432: o Campeao Lance ganhou gate de entrada (estagio 5 nos 12 biomas),
+    // e ele e uma das duas hunts que sobraram na lista de cartoes. Sem
+    // progresso, o botao dele diz "Bloqueado" e o teste nao acha "Entrar".
+    biomaProgress: Object.fromEntries(BIOMAS.map((b) => [b.chave, 5])),
   } as never)
 }
 
@@ -62,7 +74,7 @@ function cardDa(nome: string): HTMLElement {
 
 beforeEach(() => {
   comEquipe()
-  useUiStore.setState({ huntContinent: 'faixa1', huntSearchTerm: '', huntType: 'all' } as never)
+  useUiStore.setState({ huntContinent: 'biomas', huntSearchTerm: '', huntType: 'all' } as never)
 })
 afterEach(() => { entrarNaHunt(null); cleanup() })
 

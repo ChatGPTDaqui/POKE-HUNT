@@ -34,7 +34,9 @@ import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
-import { ABATES_POR_SALA, SALAS_POR_HUNT, ORDEM_DOS_BIOMAS, SUB_BIOMA_POR_CHAVE, type BiomaProgress } from '@/data/biomas'
+import { ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
+import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import type { ProgressoPorBioma } from '@/data/progressoDeBioma'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
@@ -53,6 +55,7 @@ import {
   contextoDeSpawn, lootAtivo, novaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
+  estagioJaLimpo, proximoEstagioLiberado,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -541,7 +544,11 @@ function garantirProtetorDaSala(
   player: PlayerEntity | null,
   entrada: Point | null,
 ): boolean {
-  const tipo = protetorDaSala(world.sala)
+  // PH-428: estagio ja limpo nao repoe protetor. O corte fica AQUI, no unico
+  // lugar que CRIA a entidade, e nao so no gate de avanco: sem ele o Guardian
+  // continuaria nascendo, so nao travaria nada — um bicho de 40x o HP normal em
+  // campo sem funcao.
+  const tipo = world.estagioJaLimpo ? null : protetorDaSala(world.sala, world.mapDef?.id ?? '')
   if (!tipo) {
     world.protetorPendente = null
     return false
@@ -571,26 +578,37 @@ function garantirProtetorDaSala(
 }
 
 /**
- * PH-226/236: vencer (matar OU capturar) o LORD avanca o indice de
- * `biomaProgress` da faixa atual — SO se o bioma resolvido for exatamente o
- * proximo esperado na ordem canonica (`ORDEM_DOS_BIOMAS`). Fora de ordem
- * (nao deveria acontecer com o enforcement de PH-227, mas e defesa em
- * profundidade — o motor nao confia cegamente no proprio estado do mundo)
- * nao mexe no indice: silencioso de proposito, mesma familia de decisao de
- * `resolverProtetorDaSala` nao logar/travar em cima de estado inconsistente.
+ * Vencer (matar OU capturar) o LORD marca o ESTAGIO como limpo (PH-429/430).
  *
- * Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois
- * lados que rodam esse motor — resim do servidor e predicao do cliente.
+ * O QUE ISTO ERA ATE A PH-429, e por que a regra virou outra. A versao antiga
+ * avancava um indice na `ORDEM_DOS_BIOMAS` — "quantos biomas da faixa o
+ * jogador venceu" — e so avancava se o bioma resolvido fosse exatamente o
+ * PROXIMO esperado na ordem. Isso existia porque o gate era sequencial entre
+ * biomas: vencer o Lord do bioma N liberava o N+1.
+ *
+ * O redesenho de 02/09 tirou essa ordem. Os 12 biomas nascem abertos e o
+ * progresso e por bioma: o que se registra e "o maior estagio limpo DESTE
+ * bioma", e o que ele libera e o estagio seguinte DELE. Com isso caem as duas
+ * condicoes da versao antiga (o `indexOf` na ordem e o `atual !== indice`), e
+ * `ORDEM_DOS_BIOMAS` deixa de participar da decisao.
+ *
+ * NAO REGRIDE, e essa e a parte nova que o redesenho EXIGE: `comEstagioLimpo`
+ * ignora estagio menor ou igual ao ja limpo. Sem isso a caçada direcionada da
+ * PH-428 (voltar a um estagio antigo pela especie que ele da) desligaria o
+ * estagio seguinte a cada visita.
+ *
+ * Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois lados
+ * que rodam esse motor — resim do servidor e predicao do cliente.
  */
 function avancarBiomaProgressSeForOProximo(world: WorldState, gameState: GameStateStore): void {
   const bioma = SUB_BIOMA_POR_CHAVE[world.sala?.chave ?? '']?.bioma.chave
   if (!bioma) return
-  const indice = ORDEM_DOS_BIOMAS.indexOf(bioma)
-  if (indice === -1) return
-  const faixa = (world.mapDef?.continent ?? 'faixa1') as keyof BiomaProgress
-  const atual = gameState.biomaProgress[faixa] ?? 0
-  if (atual !== indice) return
-  gameState.setBiomaProgress(faixa, indice + 1)
+  // O estagio sai do mapId, e nao do `continent`: o `continent` e o grupo de
+  // gate (a ponte de faixa da PH-426) e nao diz QUAL dos tres estagios daquele
+  // grupo o jogador limpou.
+  const doMapa = parseEstagioId(world.mapDef?.id ?? '')
+  if (!doMapa || doMapa.bioma !== bioma) return
+  gameState.setBiomaProgress(bioma, doMapa.estagio)
 }
 
 function spawnEnemyAt(
@@ -896,8 +914,21 @@ export function buildMapWorld(
   carry?: SequenciaDeSorteio,
   progresso?: ProgressoDaSessao,
   especialidadeNiveis?: EspecialidadeNiveis | null,
+  /**
+   * O progresso por bioma do jogador, so pra decidir se o estagio JA FOI
+   * limpo (PH-428) — estagio fechado nao repoe Guardian nem Lord.
+   *
+   * Entra como PARAMETRO, e nao lido de um store: este motor roda tambem na
+   * Edge Function, onde nao ha store nenhum. Mesmo motivo de
+   * `especialidadeNiveis` acima.
+   */
+  progressoDeBioma?: ProgressoPorBioma,
 ): WorldState {
   const base = novoMundo(carry)
+  // PH-428: decidido UMA VEZ aqui. `protetorDaSala` continua PURA (ela responde
+  // a forma da sala) e quem sabe a verdade do jogador e o mundo — o renderer e
+  // o desenho de sprite chamam aquela sem ter estado de jogador em maos.
+  base.estagioJaLimpo = progressoDeBioma != null && estagioJaLimpo(mapId, progressoDeBioma)
 
   // A sala tem que ser decidida ANTES do primeiro spawn: e ela que diz qual
   // pool esta ativo (e, com body-block por sala, qual grade de colisao/ponto
@@ -955,7 +986,9 @@ export function buildMapWorld(
     // hunt), virou impossivel de ignorar com os 12 biomas habilitados
     // (PH-225): QUALQUER hunt de bioma, na abertura, tentava recriar um
     // protetor do nada.
-    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA ? protetorDaSala(sala) : null
+    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA && !base.estagioJaLimpo
+      ? protetorDaSala(sala, mapId)
+      : null
     if (tipoDeProtetor) {
       // Sala em modo protetor (quota ja fechou, spawn normal fica suspenso
       // ate resolver). Recria FIEL quando `progresso.protetorPendente` ja
@@ -1253,7 +1286,14 @@ export function handleEnemyDefeated(
   // protetor (PH-202/225) ele virou o unico caminho que resta — o que deixava
   // o "avanco manual de sala" inerte no jogo inteiro sem nada quebrar.
   if (enemy.isProtetor) {
-    if (world.sala?.indice === SALAS_POR_HUNT - 1) avancarBiomaProgressSeForOProximo(world, gameState)
+    // PH-427: "a ultima sala" deixou de ser o indice 9. O estagio 1 tem 3
+    // salas e o Lord dele mora no indice 2 — com a constante antiga o credito
+    // de `bioma_progress` nunca acontecia em 9 dos 10 estagios, o jogador
+    // vencia o Lord e o bioma seguinte continuava trancado. Falha silenciosa:
+    // nada estoura, o Lord morre normalmente, o progresso simplesmente nao e
+    // escrito.
+    const ultimaDoEstagio = quantidadeDeSalas(world.mapDef?.id ?? '') - 1
+    if (world.sala?.indice === ultimaDoEstagio) avancarBiomaProgressSeForOProximo(world, gameState)
     resolverProtetorDaSala(world, world.mapDef!.id, { manualAdvance: opts.manualAdvance ?? false })
   }
 
@@ -1381,7 +1421,21 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.salaCountdownRemaining -= dt
     if (world.salaCountdownRemaining <= 0) {
       world.salaCountdownRemaining = null
-      const fechouCiclo = world.salaPendente?.indice === 0
+      const fechouEstagio = world.salaPendente?.indice === 0
+      // PH-428: FECHOU O ESTAGIO — o toggle do jogador decide o que vem agora.
+      //
+      // `repetir` (padrao) e o comportamento de sempre: volta a sala 1 do mesmo
+      // estagio. `avancar` pede a hunt seguinte. O padrao e repetir de
+      // proposito: este e um jogo idle, e o normal e o jogador escolher onde
+      // deixar rodando e sair — avancar sozinho o tiraria do estagio que ele
+      // escolheu pela especie que caca ali.
+      //
+      // CAI EM REPETIR quando nao ha pra onde ir: no estagio 10, ou com o
+      // seguinte ainda bloqueado. O jogador nunca fica parado esperando uma
+      // hunt que nao vai abrir.
+      if (fechouEstagio && gameState.autoToggles.avancarDeEstagio) {
+        world.avancarParaEstagio = proximoEstagioLiberado(world.mapDef.id, gameState.biomaProgress)
+      }
       aplicarTransicaoDeSala(world, world.mapDef.id)
       if (world.mapDef) {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
@@ -1403,7 +1457,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
         // catch-up de aba oculta atravessam varias salas de uma vez, e nao ha
         // ninguem olhando.
         if (!silent && world.sala) {
-          splashDeSalaStore.getState().anunciarSala(world.sala, fechouCiclo)
+          splashDeSalaStore.getState().anunciarSala(world.sala, fechouEstagio)
         }
       }
     }
@@ -1515,12 +1569,13 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1
   ) {
     world.sequenceCleared = true
-    // Lista: o Lance abre a faixa de nivel seguinte E o Modo Pesadelo.
+    // PH-432: a lista encolheu pra so o Modo Pesadelo. A faixa III que ele
+    // abria virou os estagios 7 a 10, que o proprio progresso do bioma libera.
     const grupos = world.mapDef.unlocksContinentOnClear
     const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g))
     for (const grupo of grupos) gameState.unlockContinent(grupo)
     if (!silent && algumEstavaTrancado) {
-      toastStore.getState().pushToast('Você derrotou o Campeão Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
+      toastStore.getState().pushToast('Você derrotou o Campeão Lance! O Modo Pesadelo foi liberado.', 'success', 'world')
     }
   }
 

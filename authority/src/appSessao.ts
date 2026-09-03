@@ -11,8 +11,8 @@ import {
 } from './progresso.js'
 import {
   MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
-  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, indiceDoBiomaDoEstagio,
-  type BiomaProgress, type SalaAtiva,
+  parseEstagioId, bloqueioDoEstagio, bloqueioDoLance, LANCE_MAP_ID,
+  type ProgressoPorBioma, type SalaAtiva,
 } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
@@ -226,29 +226,38 @@ async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promis
 }
 
 /**
- * PH-227/236: mensagem de bloqueio (ou `null` se liberado) do gate
- * sequencial de bioma — vencer o Lord do bioma N libera o N+1 (PH-207/226).
+ * Mensagem de bloqueio (ou `null` se liberado) do gate de ENTRADA.
  *
- * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
- * inteiro so pra exercitar uma regra de negocio. `indiceDoBiomaDoEstagio`
- * e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
- * dois lados tem que concordar sobre "que bioma e esse mapId" E sobre o
- * texto exato da mensagem (`HuntMenu.tsx#bloqueioDeBiomaClient` espelha
- * esta string).
+ * O EIXO DO GATE MUDOU NA PH-430, e este e o coracao da mudanca. Ate aqui ele
+ * era SEQUENCIAL ENTRE BIOMAS: o mapId dizia qual bioma, o `grupo` (o
+ * `continent`) dizia qual faixa, e a regra era "o indice deste bioma em
+ * `ORDEM_DOS_BIOMAS` tem que caber no progresso daquela faixa" — vencer o Lord
+ * do bioma N liberava o N+1 (PH-207/226/227).
+ *
+ * Com os 12 biomas nascendo abertos esse eixo deixa de existir. A regra agora e
+ * o ESTAGIO DENTRO DO BIOMA: o estagio 1 de qualquer bioma esta sempre
+ * liberado, e o estagio N pede o N-1 limpo NAQUELE bioma. Progresso de um bioma
+ * nao libera nada em outro.
+ *
+ * O `grupo` SAIU DA ASSINATURA. Ele existia pra escolher qual das tres faixas
+ * do progresso consultar, e nao ha mais faixa no progresso. O gate de
+ * `continent` (o que o Campeao Lance libera) continua existindo e e checado
+ * ANTES deste, no chamador — sao duas travas diferentes, e so uma mudou.
+ *
+ * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP inteiro
+ * so pra exercitar uma regra de negocio. E `bloqueioDoEstagio` e literalmente a
+ * MESMA funcao que o menu chama (`HuntMenu.tsx#bloqueioDeBiomaClient`) — antes
+ * os dois lados reimplementavam a regra e repetiam a string a mao, com um
+ * comentario em cada arquivo pedindo que ninguem os deixasse divergir.
  */
 export function bloqueioDeBiomaPendente(
-  mapId: string, grupo: string, biomaProgress: BiomaProgress,
+  mapId: string, progresso: ProgressoPorBioma,
 ): string | null {
-  const indiceEsperado = indiceDoBiomaDoEstagio(mapId)
-  // Bioma sem protetor habilitado (indice -1, nao acontece hoje com os 12
-  // todos habilitados — PH-225) ou o PRIMEIRO da ordem (indice 0) libera
-  // automatico, sem checar nada — nao ha "Lord anterior" pra vencer.
-  if (indiceEsperado <= 0) return null
-  const progresso = (biomaProgress?.[grupo as keyof BiomaProgress] ?? 0) as number
-  if (progresso >= indiceEsperado) return null
-  const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1]
-  const anteriorNome = BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave
-  return `Vença o Lord de ${anteriorNome} para liberar esta área.`
+  const doMapa = parseEstagioId(mapId)
+  // Hunt sem estagio — a inicial, as BOSS, a do Lance, o espelho do Pesadelo —
+  // nunca e barrada por esta regra. Cada uma tem o gate proprio dela.
+  if (!doMapa) return null
+  return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio)
 }
 
 /**
@@ -362,20 +371,28 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   if (temCusto && !estado.unlockedMaps.includes(mapId)) {
     throw new ErroHttp(403, 'hunt nao desbloqueada')
   }
-  // `continent` e o GRUPO DE GATE da hunt (faixa1/faixa2/faixa3/nightmare, ver
-  // data/biomas.ts) — deixou de ser regiao quando as hunts viraram biomas
-  // tematicos. A faixa III e o Modo Pesadelo (com as 11 BOSS dentro) so entram
-  // depois do Campeao Lance.
+  // `continent` e o GRUPO DE GATE da hunt — sobraram DOIS (`biomas`, aberto, e
+  // `nightmare`, premio do Lance; ver data/biomas.ts). Ele deixou de ser regiao
+  // quando as hunts viraram biomas tematicos, e encolheu de novo na PH-432,
+  // quando o gate de estagio passou a responder o que as faixas respondiam.
   const grupo = MAPS[mapId].continent
   if (!estado.unlockedContinents.includes(grupo)) {
     throw new ErroHttp(403, 'Derrote o Campeao Lance para acessar esta area.')
   }
-  // PH-227: gate sequencial de bioma (PH-207/226) — sem isto, qualquer
-  // jogador chama esta rota direto (curl/devtools) com o mapId de um bioma
-  // ainda bloqueado e entra mesmo assim. Regra do projeto: limite de
-  // negocio so no cliente vira bypass.
-  const bloqueio = bloqueioDeBiomaPendente(mapId, grupo, estado.biomaProgress)
+  // PH-430: gate de ESTAGIO (era sequencial entre biomas, PH-207/226/227) —
+  // sem isto, qualquer jogador chama esta rota direto (curl/devtools) com o
+  // mapId de um estagio ainda bloqueado e entra mesmo assim. Regra do
+  // projeto: limite de negocio so no cliente vira bypass.
+  const bloqueio = bloqueioDeBiomaPendente(mapId, estado.biomaProgress)
   if (bloqueio) throw new ErroHttp(403, bloqueio)
+
+  // PH-432: o Campeao Lance ganhou gate de ENTRADA, e ele nao tinha nenhum.
+  // O `continent` dele nascia aberto, entao o duelo de Lv 55-65 estava
+  // disponivel no dia 1 — o que existia era so o gate do que ele CONCEDE.
+  if (mapId === LANCE_MAP_ID) {
+    const doLance = bloqueioDoLance(estado.biomaProgress)
+    if (doLance) throw new ErroHttp(403, doLance)
+  }
 
   const anterior = await sessaoAberta(cfg, userId)
   if (anterior) {

@@ -1,6 +1,12 @@
-// Salas: uma hunt e percorrida em 10 salas, e cada sala e um SUB-BIOMA
-// sorteado do bioma daquela hunt (ver data/biomas.ts). Limpar a sala leva pra
-// proxima; limpar as 10 fecha um ciclo e recomeca.
+// Salas: uma hunt e percorrida em salas, e cada sala e um SUB-BIOMA sorteado do
+// bioma daquela hunt (ver data/biomas.ts e data/estagios.ts). Limpar a sala
+// leva pra proxima; limpar a ultima fecha o ESTAGIO e recomeca.
+//
+// QUANTAS SALAS DEIXOU DE SER 10 FIXAS (PH-427). Agora vem do estagio: 3 no
+// estagio 1, subindo ate 8 no estagio 10 (`SALAS_POR_ESTAGIO`). Todo lugar que
+// comparava com `SALAS_POR_HUNT` passou a perguntar `quantidadeDeSalas(mapId)` — e
+// mapId virou parametro de funcoes que antes so precisavam da sala, porque a
+// `SalaAtiva` sabe o sub-bioma dela mas NAO sabe de que estagio ela e.
 //
 // ---------------------------------------------------------------------------
 // POR QUE "QUOTA DE ABATES" E NAO "MATAR TODOS OS INIMIGOS EM CAMPO"
@@ -25,7 +31,9 @@
 // recomeca no ciclo 1, sala 1.
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
-import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
+import { ABATES_POR_SALA, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
+import { estagioId, parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import { estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA, aparaOTeto } from '@/data/huntSpawnOverrides'
 import {
@@ -138,24 +146,33 @@ export function novaSala(rng: Rng, mapId: string, indice: number, ciclos: number
  * A janela de nivel da sala: a hunt AFUNDA conforme as salas sao limpas.
  *
  * BUG DE BALANCEAMENTO QUE ISTO CORRIGE, medido no motor headless: uma faixa
- * cobre 30 niveis, entao sem janela a primeira sala da "Mata I" (Lv1-30) ja
+ * cobria 30 niveis, entao sem janela a primeira sala da "Mata I" (Lv1-30) ja
  * podia jogar um Butterfree Lv30 contra um POKE recem-saido do Hospital. Um
  * Charmander Lv25 morreu em 4 abates numa simulacao de 30 minutos, gastando 21
  * pocoes no caminho. As zonas antigas tinham 10 niveis e nao expunham isso.
  *
- * A sala 1 fica na base da faixa e a 10 no topo — o que da a mecanica de salas
- * um significado mecanico (a hunt fica mais dura conforme voce avanca) alem da
- * variedade de sub-bioma.
+ * A primeira sala fica na base do estagio e a ultima no topo — o que da a
+ * mecanica de salas um significado mecanico (a hunt fica mais dura conforme
+ * voce avanca) alem da variedade de sub-bioma.
+ *
+ * `salas` E PARAMETRO E NAO CONSTANTE DESDE A PH-427, porque o estagio agora
+ * tem de 3 a 8 salas conforme o numero dele — e o degrau, que era sempre
+ * 30/10 = 3 niveis, passa a variar de 10/3 (3,3 niveis) a 10/8 (1,25 nivel).
+ * Com estagio de 10 niveis e 8 salas, os degraus arredondam pra 1 nivel cada e
+ * varias salas ficam com janela de 1 unico nivel — o que e o desenho, nao um
+ * defeito: o estagio inteiro cobre 10 niveis e a sala e um decimo dele.
  */
-export function janelaDaSala(faixa: [number, number], indice: number): [number, number] {
+export function janelaDaSala(
+  faixa: [number, number], indice: number, salas: number,
+): [number, number] {
   const [lo, hi] = faixa
   const largura = hi - lo
-  if (largura <= 0) return [lo, hi]
-  const passo = largura / SALAS_POR_HUNT
+  if (largura <= 0 || salas <= 0) return [lo, hi]
+  const passo = largura / salas
   const inicio = Math.round(lo + passo * indice)
   const fim = Math.round(lo + passo * (indice + 1))
-  // A primeira sala inclui o piso da faixa; as outras comecam onde a anterior
-  // acabou. `Math.max(inicio, fim)` cobre faixa curta demais pra 10 degraus.
+  // A primeira sala inclui o piso do estagio; as outras comecam onde a anterior
+  // acabou. `Math.max(inicio, fim)` cobre janela curta demais pros degraus.
   return [Math.max(lo, inicio), Math.max(Math.max(lo, inicio), Math.min(hi, fim))]
 }
 
@@ -216,7 +233,7 @@ const cacheDePesos = new Map<string, Map<string, number>>()
  * Memoizado porque `contextoDeSpawn` roda a cada spawn (milhares de vezes por
  * flush no farm offline) e a resposta so depende de (mapa, sub-bioma, indice da
  * sala) — a janela de nivel sai do indice, e o pool sai dos dois. O cache e
- * limitado por construcao: mapas com sala x sub-biomas deles x `SALAS_POR_HUNT`.
+ * limitado por construcao: mapas com sala x sub-biomas deles x salas do estagio.
  */
 function pesosDaSala(chave: string, subBioma: string, pool: string[]): Map<string, number> {
   const pronto = cacheDePesos.get(chave)
@@ -255,7 +272,7 @@ export function contextoDeSpawn(
   // Sem sala o pool de sorteio E o `enemyPool` da hunt, que ja levou a apara do
   // fallback em `huntSpawnOverrides` — o peso guardado no encontro ja e o final.
   if (!sala) return { pool, peso: (id) => getEncounter(id)?.weight ?? 0 }
-  const janela = janelaDaSala(faixa, sala.indice)
+  const janela = janelaDaSala(faixa, sala.indice, quantidadeDeSalas(mapId))
   const naJanela = pool.filter((id) => {
     const enc = getEncounter(id)
     return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0]
@@ -391,20 +408,38 @@ export function contextoDoProtetor(
 }
 
 /**
- * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
+ * PH-202/225: todo bioma tem protetor (pivo 27/08 sobre o
  * "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
  * o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
- * o ultimo da ordem, tendo protetor). Salas 1-9 (indice 0-8) pedem Guardian ao
- * fechar a quota; a ultima sala (indice SALAS_POR_HUNT-1) pede o Lord da
- * faixa. Pura — nao sorteia nada, so decide QUAL protetor a sala pede, se
- * pedir algum. A entidade em si (RNG, criacao) fica em simulation.ts, que ja
- * importa este modulo — colocar aqui criaria import circular.
+ * o ultimo da ordem, tendo protetor). Toda sala menos a ultima pede Guardian ao
+ * fechar a quota; a ULTIMA SALA DO ESTAGIO pede o Lord. Pura — nao sorteia
+ * nada, so decide QUAL protetor a sala pede, se pedir algum. A entidade em si
+ * (RNG, criacao) fica em simulation.ts, que ja importa este modulo — colocar
+ * aqui criaria import circular.
+ *
+ * `mapId` ENTROU NA ASSINATURA NA PH-427, e nao e conveniencia: antes a ultima
+ * sala era sempre o indice 9, agora ela e o indice `quantidadeDeSalas(mapId) - 1`,
+ * que vale 2 no estagio 1 e 7 no estagio 10. A `SalaAtiva` nao carrega o
+ * estagio (ela guarda sub-bioma, indice, abates e ciclos, e e isso que vai pro
+ * banco), entao a informacao so pode vir do mapId. Sem ele, o estagio 1 nunca
+ * teria Lord — a sala 3 pediria Guardian pra sempre e o estagio nunca fecharia.
  */
-export function protetorDaSala(sala: SalaAtiva | null): TipoDeProtetor | null {
+export function protetorDaSala(sala: SalaAtiva | null, mapId: string): TipoDeProtetor | null {
   if (!sala) return null
   const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave
-  if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null
-  return sala.indice >= SALAS_POR_HUNT - 1 ? 'lord' : 'guardian'
+  // PH-434: era `ORDEM_DOS_BIOMAS.includes`, e a pergunta nunca foi sobre
+  // ORDEM — e "este sub-bioma pertence a um bioma de verdade?". A ordem entre
+  // biomas morreu na PH-430; usa-la aqui deixava viva uma constante que so
+  // sobrevivia pra traduzir save antigo.
+  if (!bioma || !BIOMA_POR_CHAVE[bioma]) return null
+  return sala.indice >= quantidadeDeSalas(mapId) - 1 ? 'lord' : 'guardian'
+}
+
+/** O jogador ja fechou o estagio desta hunt alguma vez? */
+export function estagioJaLimpo(mapId: string, progresso: ProgressoPorBioma): boolean {
+  const doMapa = parseEstagioId(mapId)
+  if (!doMapa) return false
+  return maiorEstagioLimpo(progresso, doMapa.bioma) >= doMapa.estagio
 }
 
 export function nomeDaSala(sala: SalaAtiva | null): string | null {
@@ -416,7 +451,7 @@ export interface AvancoDeSala {
   /** Quota fechou neste abate — a contagem regressiva de transicao comecou. */
   avancou: boolean
   /** A sala que vai entrar em vigor e a primeira do ciclo seguinte. */
-  fechouCiclo: boolean
+  fechouEstagio: boolean
 }
 
 /**
@@ -434,10 +469,10 @@ export interface AvancoDeSala {
  */
 export function registrarAbate(world: WorldState, mapId: string, opts: { manualAdvance?: boolean } = {}): AvancoDeSala {
   const sala = world.sala
-  if (!sala) return { avancou: false, fechouCiclo: false }
+  if (!sala) return { avancou: false, fechouEstagio: false }
 
   sala.abates += 1
-  if (sala.abates < ABATES_POR_SALA) return { avancou: false, fechouCiclo: false }
+  if (sala.abates < ABATES_POR_SALA) return { avancou: false, fechouEstagio: false }
   // SOB AUTORIDADE REMOTA O CLIENTE NAO SORTEIA SALA. Ele conta abate (a barra
   // do HUD precisa andar a cada morte, nao de 30 em 30 segundos) e para aqui: a
   // sala seguinte chega pelo flush, por `reconciliarSalaDaAutoridade`.
@@ -460,7 +495,7 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
   // impedir. Quem cede e a predicao, que e o lado sem autoridade.
   if (world.salaSobAutoridade) {
     sala.abates = ABATES_POR_SALA
-    return { avancou: false, fechouCiclo: false }
+    return { avancou: false, fechouEstagio: false }
   }
   // Cap: sem isto, matar mais de um inimigo no MESMO tick (AOE) ou o jogo
   // continuar rodando por um instante antes do proximo tick congelar
@@ -477,12 +512,16 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
   // zerava `world.enemies` — apagando o protetor que
   // `garantirTransicaoDeQuotaFechada` ainda ia criar no tick seguinte — e a
   // sala avancava sem o jogador nunca ter visto o protetor resolver nada.
-  if (protetorDaSala(sala)) return { avancou: false, fechouCiclo: false }
+  // PH-428: num estagio ja limpo a sala avanca direto — Guardian e Lord existem
+  // pra travar a PRIMEIRA limpeza, e num estagio fechado eles seriam so pedagio.
+  if (!world.estagioJaLimpo && protetorDaSala(sala, mapId)) {
+    return { avancou: false, fechouEstagio: false }
+  }
   // Toggle ligado + janela curta (jogador ativo): fecha a quota mas nao
   // sorteia nem arma a transicao — fica em 30/30 ate o avanco manual
   // (`avancarSalaManualmente`, endpoint PH-178). Cap acima ja preservado:
   // nao poluir `sala_abates` mesmo parado.
-  if (opts.manualAdvance) return { avancou: false, fechouCiclo: false }
+  if (opts.manualAdvance) return { avancou: false, fechouEstagio: false }
   return armarTransicaoDeSala(world, mapId)
 }
 
@@ -503,7 +542,9 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
  * recusar.
  */
 export function salaTravadaPeloProtetor(world: WorldState): boolean {
-  return protetorDaSala(world.sala) != null && !world.protetorResolvido
+  // PH-428: estagio ja limpo nao tem protetor pra travar nada.
+  if (world.estagioJaLimpo) return false
+  return protetorDaSala(world.sala, world.mapDef?.id ?? '') != null && !world.protetorResolvido
 }
 
 /**
@@ -530,29 +571,38 @@ export function salaTravadaPeloProtetor(world: WorldState): boolean {
  */
 export function solicitarAvancoDeSala(world: WorldState, mapId: string): AvancoDeSala {
   const sala = world.sala
-  if (!sala || sala.abates < ABATES_POR_SALA) return { avancou: false, fechouCiclo: false }
-  if (salaTravadaPeloProtetor(world)) return { avancou: false, fechouCiclo: false }
+  if (!sala || sala.abates < ABATES_POR_SALA) return { avancou: false, fechouEstagio: false }
+  if (salaTravadaPeloProtetor(world)) return { avancou: false, fechouEstagio: false }
   return armarTransicaoDeSala(world, mapId)
 }
 
 function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
   const sala = world.sala
-  if (!sala) return { avancou: false, fechouCiclo: false }
+  if (!sala) return { avancou: false, fechouEstagio: false }
   if (world.salaCountdownRemaining != null || world.salaPendente) {
-    return { avancou: false, fechouCiclo: false }
+    return { avancou: false, fechouEstagio: false }
   }
 
   const proximo = sala.indice + 1
-  const fechouCiclo = proximo >= SALAS_POR_HUNT
-  const indice = fechouCiclo ? 0 : proximo
-  const ciclos = fechouCiclo ? sala.ciclos + 1 : sala.ciclos
+  const fechouEstagio = proximo >= quantidadeDeSalas(mapId)
+  const indice = fechouEstagio ? 0 : proximo
+  const ciclos = fechouEstagio ? sala.ciclos + 1 : sala.ciclos
 
-  // Nao ha "fim de hunt": o ciclo reinicia. Um fim faria 6 horas de farm
-  // offline valerem os poucos minutos ate a sala 10 — o oposto do que um jogo
-  // idle precisa.
+  // O QUE `fechouEstagio` SINALIZA, E O QUE ELE AINDA NAO FAZ (PH-427).
+  //
+  // Ele diz que a ULTIMA sala do estagio foi limpa — o que, com o Lord na
+  // ultima sala, e o mesmo que "o Lord caiu e o estagio fechou". A tela usa
+  // isso pro anuncio, e quem GRAVA o avanco de estagio e libera o seguinte e o
+  // servidor, na PH-430. Aqui o motor so avisa.
+  //
+  // E O CICLO CONTINUA REINICIANDO, de proposito: nao ha "fim de hunt". Um fim
+  // faria 6 horas de farm offline valerem os poucos minutos ate a ultima sala
+  // — o oposto do que um jogo idle precisa. O que muda com o redesenho e que
+  // estagio JA LIMPO para de repor protetor e quota (PH-428); o farm em si
+  // segue.
   world.salaPendente = novaSala(world.rng, mapId, indice, ciclos) ?? { ...sala, indice, abates: 0, ciclos }
   world.salaCountdownRemaining = SALA_TRANSITION_COUNTDOWN
-  return { avancou: true, fechouCiclo }
+  return { avancou: true, fechouEstagio }
 }
 
 /**
@@ -844,7 +894,16 @@ export function reconciliarSalaDaAutoridade(
   // inteira: toda sala da autoridade caia como "anterior" e era descartada, o
   // HUD seguia mostrando sub-bioma sorteado localmente e o pool/loot creditados
   // vinham de outro lugar, sem nada na tela denunciando.
-  const posicao = (s: SalaAtiva) => s.ciclos * SALAS_POR_HUNT + s.indice
+  // POSICAO COMPARAVEL ENTRE DUAS SALAS DA MESMA HUNT. O multiplicador tem que
+  // ser o numero de salas DESTE estagio (PH-427): com 8 salas, `ciclos * 10 +
+  // indice` deixaria a sala 0 do ciclo 1 (posicao 10) parecer ADIANTE da sala 7
+  // do ciclo 0 (posicao 7) — o que e verdade — mas com 3 salas o mesmo 10
+  // faria a sala 0 do ciclo 1 valer 10 contra 2 da ultima do ciclo 0, criando
+  // um buraco de 7 posicoes que nao existe. A comparacao continua correta em
+  // sinal, mas as posicoes deixariam de ser contiguas, e qualquer conta futura
+  // de "quantas salas de diferenca" mentiria.
+  const salas = quantidadeDeSalas(world.mapDef?.id ?? '')
+  const posicao = (s: SalaAtiva) => s.ciclos * salas + s.indice
   if (!world.salaPredita && posicao(sala) < posicao(atual)) return
 
   // A BARRA FECHA ANTES DO AVISO (PH-258).
@@ -958,4 +1017,24 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   }
 }
 
-export { SALAS_POR_HUNT, ABATES_POR_SALA }
+export { ABATES_POR_SALA }
+export { quantidadeDeSalas }
+
+/**
+ * O mapId do estagio SEGUINTE deste, se ele existir e estiver liberado.
+ * `null` quando nao ha pra onde ir (PH-428).
+ *
+ * DUAS RECUSAS, e as duas caem em "repetir": o estagio 10 nao tem seguinte, e
+ * um seguinte ainda bloqueado nao pode ser aberto. Devolver o mapId nesses
+ * casos faria o cliente pedir uma sessao que o gate da autoridade (PH-430)
+ * recusa com 403 — o jogador veria a hunt parar sozinha, sem explicacao.
+ */
+export function proximoEstagioLiberado(
+  mapId: string, progresso: ProgressoPorBioma,
+): string | null {
+  const doMapa = parseEstagioId(mapId)
+  if (!doMapa) return null
+  const proximo = doMapa.estagio + 1
+  if (!estagioLiberado(progresso, doMapa.bioma, proximo)) return null
+  return estagioId(doMapa.bioma, proximo)
+}

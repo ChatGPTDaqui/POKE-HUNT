@@ -20,12 +20,12 @@
 // voltaria a ser escrita.
 import { describe, expect, it } from 'vitest'
 
-import { FAIXAS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
+import { GRUPOS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
 
 /** A mesma traducao que `gameStateStore.ts#merge` aplica na hidratacao. */
 function traduzirNaCarga(gravados: string[]): string[] {
   return [...new Set([
-    ...FAIXAS_INICIAIS,
+    ...GRUPOS_INICIAIS,
     ...gravados.flatMap((c) => (
       c === 'kanto' ? GRUPOS_DO_LANCE : GRUPOS_LEGADOS.has(c) ? [] : [c]
     )),
@@ -42,13 +42,13 @@ describe('gate do Campeao Lance sobrevive ao reload', () => {
   })
 
   it('quem derrotou o Lance continua com os dois grupos depois da carga', () => {
-    const gravado = [...FAIXAS_INICIAIS, ...GRUPOS_DO_LANCE]
+    const gravado = [...GRUPOS_INICIAIS, ...GRUPOS_DO_LANCE]
     const carregado = traduzirNaCarga(gravado)
     for (const grupo of GRUPOS_DO_LANCE) expect(carregado).toContain(grupo)
   })
 
   it('quem NAO derrotou o Lance nao ganha nada de graca', () => {
-    const carregado = traduzirNaCarga([...FAIXAS_INICIAIS])
+    const carregado = traduzirNaCarga([...GRUPOS_INICIAIS])
     for (const grupo of GRUPOS_DO_LANCE) expect(carregado).not.toContain(grupo)
   })
 
@@ -61,6 +61,6 @@ describe('gate do Campeao Lance sobrevive ao reload', () => {
 
   it('as faixas iniciais entram sempre, mesmo em save que nao as tinha', () => {
     const carregado = traduzirNaCarga([])
-    for (const faixa of FAIXAS_INICIAIS) expect(carregado).toContain(faixa)
+    for (const faixa of GRUPOS_INICIAIS) expect(carregado).toContain(faixa)
   })
 })

@@ -70,7 +70,7 @@ describe('splash de chegada em sala nova (PH-395)', () => {
     expect(atual!.sala.chave).toBe(pendente.chave)
     // A sala anunciada e a que esta em campo — nao a pendente de antes.
     expect(world.sala!.chave).toBe(atual!.sala.chave)
-    expect(atual!.fechouCiclo).toBe(false)
+    expect(atual!.fechouEstagio).toBe(false)
   })
 
   it('fechar ciclo vem marcado, pra a tela poder dizer outra coisa', () => {
@@ -80,7 +80,7 @@ describe('splash de chegada em sala nova (PH-395)', () => {
 
     passarATransicao(world, { silent: false })
 
-    expect(splashDeSalaStore.getState().atual?.fechouCiclo).toBe(true)
+    expect(splashDeSalaStore.getState().atual?.fechouEstagio).toBe(true)
   })
 
   it('simulacao silenciosa NAO anuncia', () => {
