@@ -12,6 +12,42 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // DOIS itens, e o primeiro e o unico que importa de verdade nesta nota.
+  //
+  // O ITEM DO BOT ABRE, E DIZ AO JOGADOR QUE ELE PRECISA AGIR. Isto nao e um
+  // "corrigimos um bug": a configuracao que ele salvou entre 02/09 e 03/09 NAO
+  // FOI GRAVADA, e ninguem vai descobrir isso sozinho — na sessao tudo
+  // funcionava, e so voltava ao antigo no F5. Um item que so dissesse "bug
+  // corrigido" deixaria o jogador com o bot rodando na configuracao velha sem
+  // motivo pra ir conferir.
+  //
+  // A CAUSA NAO ENTRA. "A RPC validava os toggles por lista branca e o `raise`
+  // derrubava a transacao inteira" nao ajuda ninguem a jogar. O que ajuda e:
+  // o que parou de funcionar, por quanto tempo, e o que fazer agora.
+  //
+  // O PRAZO E OBRIGATORIO, mesma regra da 7.39: quem nao mexeu em automacao
+  // naquela janela nao perdeu nada, e sem a data essa pessoa vai procurar um
+  // problema que nunca teve.
+  //
+  // O SEGUNDO ITEM JUNTA AS DUAS MUDANCAS DE TELA num item so porque sao a
+  // mesma tela e o mesmo gesto: o jogador abre a trilha, escolhe o estagio,
+  // decide o que fazer ao terminar e entra. Dois itens separados dariam a elas
+  // um peso que elas nao tem ao lado do primeiro.
+  //
+  // FICA DE FORA: o teste que amarra as chaves do cliente a lista branca do SQL
+  // (e o que impede a terceira vez, e nao muda nada na tela), a extracao da
+  // sincronizacao pra fora do painel de Automacoes, e a migration que subiu com
+  // lixo dentro e reprovou o deploy antes de aplicar — essa ultima nao chegou a
+  // existir pro jogador.
+  {
+    version: '7.42',
+    date: '2026-09-03',
+    title: 'As configurações do bot voltaram a salvar — confira as suas',
+    highlights: [
+      'IMPORTANTE: ENTRE 2 E 3 DE SETEMBRO, NENHUMA CONFIGURAÇÃO DE AUTOMAÇÃO ESTAVA SENDO SALVA. Auto-catch, bola escolhida, regras de poção, regras por espécie, itens de cura e auto-venda — tudo funcionava na sessão e voltava ao antigo ao recarregar. Já está corrigido, mas o que você configurou nessa janela se perdeu: abra Automações e confira suas escolhas.',
+      'A TELA DE HUNTS FICOU MAIS DIRETA. O botão de entrar subiu para o topo do painel do estágio, ao lado do nome dele, e a opção "Avançar de estágio ao concluir" saiu de Automações e passou a ficar ali embaixo — onde você escolhe o estágio é onde faz sentido decidir se, ao limpá-lo, quer seguir para o próximo ou repetir.',
+    ],
+  },
   // TRES itens pra sete issues (PH-480 a PH-486), e a nota e curta de proposito:
   // o dono pediu "patch notes ultra sucintos" na leva passada e a 7.40 saiu
   // longa demais, teve que ser reescrita e promovida de novo. A licao nao
