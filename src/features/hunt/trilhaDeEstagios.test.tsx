@@ -395,17 +395,53 @@ describe('a leitura da trilha (PH-469)', () => {
     expect(screen.queryByRole('tooltip', { hidden: true })).toBeNull()
   })
 
-  it('o botao de entrar ocupa a largura do painel, e nao a do proprio texto', async () => {
+  it('o botao de entrar fica no topo do painel, ancorado a direita (PH-491)', async () => {
+    // MUDOU NA PH-491, por pedido do dono: "mover o botão 'entrar' para o topo
+    // direito do quadro onde fica os sub-biomas". Até aqui ele fechava o painel
+    // com `w-full`.
+    //
+    // O que este caso trava NÃO é a posição por si — é que a volta pro
+    // cabeçalho não desfaça o que a PH-469 comprou. Lá ele estava inline entre
+    // "3 salas" e o selo de estado, com o mesmo peso visual do texto ao lado, e
+    // a única ação da tela era o elemento mais discreto dela.
     const user = userEvent.setup()
     comEquipe({ ...progressoPorBiomaDefault(), marinho: 3 })
     render(<HuntMenu />)
     await user.click(screen.getByText('Marinho'))
 
     const entrar = screen.getByRole('button', { name: 'Entrar' })
-    expect(entrar.className).toContain('w-full')
+    // Ancorado à direita, e sem encolher quando os rótulos à esquerda apertam —
+    // a 390px ele desce pra própria linha (o cabeçalho é `flex-wrap`) em vez de
+    // virar uma pílula espremida.
+    expect(entrar.className).toContain('ml-auto')
+    expect(entrar.className).toContain('shrink-0')
+    expect(entrar.className, 'voltou a fechar o painel').not.toContain('w-full')
+    // O PESO fica. `font-black` + caixa alta + borda de 2px é o que o separa
+    // dos quatro rótulos da mesma linha.
+    expect(entrar.className).toContain('font-black')
+    expect(entrar.className).toContain('uppercase')
+    expect(entrar.className).toContain('border-2')
     // Ele e o gancho do alvo minimo de toque — sem a classe, o botao principal
     // da tela e o unico que ignora a regra de dedo (`[data-toque]`, index.css).
     expect(entrar.className).toContain('jogo-botao')
+
+    // E ele está DENTRO do cabeçalho, junto do rótulo do estágio — não solto
+    // no fim do painel. `Estágio 4` e o botão dividem o mesmo pai.
+    const rotulo = screen.getByText('Estágio 4')
+    expect(rotulo.parentElement, 'o botão saiu da linha do cabeçalho')
+      .toBe(entrar.parentElement)
+  })
+
+  it('o painel do estagio traz o "avançar ao concluir" (PH-490)', async () => {
+    // Ele morava no painel de Automações, a dois menus daqui. A decisão que ele
+    // governa — repito este estágio ou vou pro seguinte? — é tomada olhando a
+    // trilha, escolhendo o estágio pela espécie que se caça nele.
+    const user = userEvent.setup()
+    comEquipe({ ...progressoPorBiomaDefault(), marinho: 3 })
+    render(<HuntMenu />)
+    await user.click(screen.getByText('Marinho'))
+
+    expect(screen.getByText('Avançar de estágio ao concluir')).toBeTruthy()
   })
 })
 
