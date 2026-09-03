@@ -32,7 +32,8 @@
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
-import { quantidadeDeSalas } from '@/data/estagios'
+import { estagioId, parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import { estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA, aparaOTeto } from '@/data/huntSpawnOverrides'
 import {
@@ -430,6 +431,13 @@ export function protetorDaSala(sala: SalaAtiva | null, mapId: string): TipoDePro
   return sala.indice >= quantidadeDeSalas(mapId) - 1 ? 'lord' : 'guardian'
 }
 
+/** O jogador ja fechou o estagio desta hunt alguma vez? */
+export function estagioJaLimpo(mapId: string, progresso: ProgressoPorBioma): boolean {
+  const doMapa = parseEstagioId(mapId)
+  if (!doMapa) return false
+  return maiorEstagioLimpo(progresso, doMapa.bioma) >= doMapa.estagio
+}
+
 export function nomeDaSala(sala: SalaAtiva | null): string | null {
   if (!sala) return null
   return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave
@@ -500,7 +508,11 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
   // zerava `world.enemies` — apagando o protetor que
   // `garantirTransicaoDeQuotaFechada` ainda ia criar no tick seguinte — e a
   // sala avancava sem o jogador nunca ter visto o protetor resolver nada.
-  if (protetorDaSala(sala, mapId)) return { avancou: false, fechouEstagio: false }
+  // PH-428: num estagio ja limpo a sala avanca direto — Guardian e Lord existem
+  // pra travar a PRIMEIRA limpeza, e num estagio fechado eles seriam so pedagio.
+  if (!world.estagioJaLimpo && protetorDaSala(sala, mapId)) {
+    return { avancou: false, fechouEstagio: false }
+  }
   // Toggle ligado + janela curta (jogador ativo): fecha a quota mas nao
   // sorteia nem arma a transicao — fica em 30/30 ate o avanco manual
   // (`avancarSalaManualmente`, endpoint PH-178). Cap acima ja preservado:
@@ -526,7 +538,9 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
  * recusar.
  */
 export function salaTravadaPeloProtetor(world: WorldState): boolean {
-  return protetorDaSala(world.sala, world.mapDef?.id ?? "") != null && !world.protetorResolvido
+  // PH-428: estagio ja limpo nao tem protetor pra travar nada.
+  if (world.estagioJaLimpo) return false
+  return protetorDaSala(world.sala, world.mapDef?.id ?? '') != null && !world.protetorResolvido
 }
 
 /**
@@ -1001,3 +1015,22 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
 
 export { ABATES_POR_SALA }
 export { quantidadeDeSalas }
+
+/**
+ * O mapId do estagio SEGUINTE deste, se ele existir e estiver liberado.
+ * `null` quando nao ha pra onde ir (PH-428).
+ *
+ * DUAS RECUSAS, e as duas caem em "repetir": o estagio 10 nao tem seguinte, e
+ * um seguinte ainda bloqueado nao pode ser aberto. Devolver o mapId nesses
+ * casos faria o cliente pedir uma sessao que o gate da autoridade (PH-430)
+ * recusa com 403 — o jogador veria a hunt parar sozinha, sem explicacao.
+ */
+export function proximoEstagioLiberado(
+  mapId: string, progresso: ProgressoPorBioma,
+): string | null {
+  const doMapa = parseEstagioId(mapId)
+  if (!doMapa) return null
+  const proximo = doMapa.estagio + 1
+  if (!estagioLiberado(progresso, doMapa.bioma, proximo)) return null
+  return estagioId(doMapa.bioma, proximo)
+}

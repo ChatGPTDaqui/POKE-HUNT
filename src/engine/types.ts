@@ -792,6 +792,33 @@ export interface WorldState {
    */
   protetorResolvido: boolean
   /**
+   * O jogador ja fechou este estagio alguma vez? (PH-428)
+   *
+   * Calculado UMA VEZ em `buildMapWorld`, a partir do progresso do jogador, e
+   * nao perguntado a cada tick: `protetorDaSala` e chamada tambem pelo
+   * renderer e pelo desenho de sprite, que nao tem o estado do jogador em
+   * maos. Um flag no mundo deixa a pergunta pura onde ela precisa ser pura e
+   * respondida onde ela precisa ser verdadeira.
+   *
+   * Efemero como `protetorResolvido`: o servidor reconstroi o mundo a cada
+   * flush e recalcula.
+   */
+  estagioJaLimpo: boolean
+  /**
+   * O mapId do estagio pra onde a hunt deve ir assim que o estagio fechar
+   * (PH-428), ou `null` pra repetir o mesmo.
+   *
+   * PEDIDO, E NAO ACAO. Trocar de estagio e trocar de HUNT — abre sessao nova
+   * no servidor, com gate de entrada e heranca de sala —, e nada disso cabe
+   * dentro de um tick sincrono do motor. O motor deixa o pedido no mundo e
+   * quem executa e o laco do jogo, que pode esperar a resposta.
+   *
+   * Efemero, e so o cliente le. O servidor NAO avanca o estagio sozinho: ele
+   * simula a hunt que a sessao aponta, e a sessao so muda quando o cliente
+   * pede.
+   */
+  avancarParaEstagio: string | null
+  /**
    * PH-301: ha quantos segundos o protetor esta ENGAJADO sem perder um ponto
    * de HP. Zera a cada ponto de dano e a cada troca de protetor; ao passar de
    * `PROTETOR_SEM_DANO_LIMITE` (simulation.ts) o protetor e trocado por outro.

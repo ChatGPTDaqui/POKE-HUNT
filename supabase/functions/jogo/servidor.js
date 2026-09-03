@@ -75821,7 +75821,8 @@ function defaultGameStateData() {
 			autoCatch: false,
 			autoRevive: false,
 			autoStatus: true,
-			avancoManualDeSala: false
+			avancoManualDeSala: false,
+			avancarDeEstagio: false
 		},
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
@@ -79576,6 +79577,12 @@ function protetorDaSala(sala, mapId) {
 	if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null;
 	return sala.indice >= quantidadeDeSalas(mapId) - 1 ? "lord" : "guardian";
 }
+/** O jogador ja fechou o estagio desta hunt alguma vez? */
+function estagioJaLimpo(mapId, progresso) {
+	const doMapa = parseEstagioId(mapId);
+	if (!doMapa) return false;
+	return maiorEstagioLimpo(progresso, doMapa.bioma) >= doMapa.estagio;
+}
 /**
 * Conta um abate na sala atual. Ao fechar a quota, NAO troca de sala na
 * hora — sorteia a proxima (o "carregamento" adiantado, pra UI ja saber o
@@ -79608,7 +79615,7 @@ function registrarAbate(world, mapId, opts = {}) {
 		};
 	}
 	sala.abates = 30;
-	if (protetorDaSala(sala, mapId)) return {
+	if (!world.estagioJaLimpo && protetorDaSala(sala, mapId)) return {
 		avancou: false,
 		fechouEstagio: false
 	};
@@ -79635,6 +79642,7 @@ function registrarAbate(world, mapId, opts = {}) {
 * recusar.
 */
 function salaTravadaPeloProtetor(world) {
+	if (world.estagioJaLimpo) return false;
 	return protetorDaSala(world.sala, world.mapDef?.id ?? "") != null && !world.protetorResolvido;
 }
 /**
@@ -79813,6 +79821,22 @@ function aplicarTransicaoDeSala(world, mapId) {
 		}
 	}
 }
+/**
+* O mapId do estagio SEGUINTE deste, se ele existir e estiver liberado.
+* `null` quando nao ha pra onde ir (PH-428).
+*
+* DUAS RECUSAS, e as duas caem em "repetir": o estagio 10 nao tem seguinte, e
+* um seguinte ainda bloqueado nao pode ser aberto. Devolver o mapId nesses
+* casos faria o cliente pedir uma sessao que o gate da autoridade (PH-430)
+* recusa com 403 — o jogador veria a hunt parar sozinha, sem explicacao.
+*/
+function proximoEstagioLiberado(mapId, progresso) {
+	const doMapa = parseEstagioId(mapId);
+	if (!doMapa) return null;
+	const proximo = doMapa.estagio + 1;
+	if (!estagioLiberado(progresso, doMapa.bioma, proximo)) return null;
+	return estagioId(doMapa.bioma, proximo);
+}
 //#endregion
 //#region src/engine/systems/pokedexSystem.ts
 function recordPokedexKill(gameState, speciesId, isShiny) {
@@ -79850,6 +79874,8 @@ function emptyWorldState(seed = randomSeed()) {
 		sala: null,
 		protetorPendente: null,
 		protetorResolvido: false,
+		estagioJaLimpo: false,
+		avancarParaEstagio: null,
 		protetorSemDanoSegundos: 0,
 		salaCountdownRemaining: null,
 		salaPendente: null,
@@ -80341,7 +80367,7 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 * de recriacao.
 */
 function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
-	const tipo = protetorDaSala(world.sala, world.mapDef?.id ?? "");
+	const tipo = world.estagioJaLimpo ? null : protetorDaSala(world.sala, world.mapDef?.id ?? "");
 	if (!tipo) {
 		world.protetorPendente = null;
 		return false;
@@ -80505,8 +80531,9 @@ function aplicarHazardsAoInimigo(rng, hazards, enemy) {
 	}
 	if (hazards.stickyWeb) enemy.estagios.speed = (enemy.estagios.speed ?? 0) - 1;
 }
-function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis) {
+function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis, progressoDeBioma) {
 	const base = novoMundo(carry);
+	base.estagioJaLimpo = progressoDeBioma != null && estagioJaLimpo(mapId, progressoDeBioma);
 	const sala = temSalas(mapId) ? progresso?.sala ?? novaSala(base.rng, mapId, 0, 0) : null;
 	const mapDef = mapDefParaSala(mapId, sala);
 	if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`);
@@ -80526,7 +80553,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 	const enemies = [];
 	let protetorPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
-		const tipoDeProtetor = sala && sala.abates >= 30 ? protetorDaSala(sala, mapId) : null;
+		const tipoDeProtetor = sala && sala.abates >= 30 && !base.estagioJaLimpo ? protetorDaSala(sala, mapId) : null;
 		if (tipoDeProtetor) {
 			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
@@ -80748,6 +80775,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (world.salaCountdownRemaining <= 0) {
 			world.salaCountdownRemaining = null;
 			const fechouEstagio = world.salaPendente?.indice === 0;
+			if (fechouEstagio && gameState.autoToggles.avancarDeEstagio) world.avancarParaEstagio = proximoEstagioLiberado(world.mapDef.id, gameState.biomaProgress);
 			aplicarTransicaoDeSala(world, world.mapDef.id);
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
@@ -82036,7 +82064,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 			ciclos: Number(sessao.ciclos ?? 0)
 		} : null,
 		protetorPendente: protetorDaLinha(sessao)
-	}, estado.especialidades);
+	}, estado.especialidades, estado.biomaProgress);
 	const offline = segundos > 120;
 	world.pessimista = offline;
 	const pausado = offline && true;

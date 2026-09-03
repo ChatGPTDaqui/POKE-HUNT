@@ -428,6 +428,20 @@ function AbaDeAutomacoes() {
         ligado={autoToggles.avancoManualDeSala}
         aoLigar={(v) => setAutoToggle('avancoManualDeSala', v)}
       />
+
+      {/* PH-428: o que fazer AO CONCLUIR o estágio. Escolhido antes, e não
+          perguntado na hora — o estágio pode fechar com o jogador longe da
+          tela, que é o normal num idle.
+
+          O padrão é REPETIR de propósito: o jogador escolhe um estágio pela
+          espécie que caça ali (a caçada direcionada é o ponto do redesenho), e
+          avançar sozinho o tiraria justamente de onde ele quis ficar. */}
+      <BlocoAuto
+        titulo="Avançar de estágio ao concluir"
+        dica="Ao limpar a última sala do estágio, entra no estágio seguinte em vez de repetir o mesmo. Se não houver próximo — ou se ele ainda estiver bloqueado — o estágio atual repete."
+        ligado={autoToggles.avancarDeEstagio}
+        aoLigar={(v) => setAutoToggle('avancarDeEstagio', v)}
+      />
     </div>
   )
 }
