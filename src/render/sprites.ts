@@ -1414,15 +1414,44 @@ function drawAoeRing(
 // o impacto de DANO migrou pros dois lotes de tira (data/vfxTiras.ts).
 
 /**
- * Onde o selo pousa, em unidade de mundo acima do ponto do efeito.
+ * O selo mora no FLANCO do corpo, e nao acima da cabeca (PH-485).
  *
- * 10 e escolhido contra o `EFFECT_BASE_GAP` de 44 da coluna de numeros: o selo
- * tem 13 de altura e sobe/desce ate 6, entao ele ocupa de -29 a -10 do topo da
- * cabeca. A faixa dos numeros de dano comeca em -44. Os dois nao se encostam.
+ * A PH-480 o colocou acima da cabeca com folga de 10, e QA ao vivo mostrou que
+ * essa faixa ja e da PLACA DE NOME. As medidas, a partir do topo da cabeca:
+ *
+ *   barra de HP   -13 a -8   (`drawHpBar`: y = topo - 8 - height, height 5)
+ *   nivel         -15
+ *   nome          -26
+ *   selo (era)    -23 a -10  <- em cima dos dois primeiros
+ *
+ * E NAO DAVA PRA CORRIGIR SO SUBINDO O SELO: entre o nome (-26) e a coluna de
+ * numeros de dano (`EFFECT_BASE_GAP`, -44) sobram 14px, e o selo precisa de 19
+ * com o deslocamento. A vertical acima da cabeca esta cheia.
+ *
+ * O flanco esta vazio, e os tres vizinhos provam: a coluna de numeros fica a
+ * esquerda mas de -44 pra cima, a porcentagem de HP fica a direita da barra, e
+ * o nome do golpe fica ABAIXO do corpo (`y + groundOffset + 14`).
  */
-const SELO_FOLGA = 10
+const SELO_VAO_LATERAL = 2
+/**
+ * Quanto abaixo do topo da cabeca o selo comeca.
+ *
+ * 4, e o numero e o que sobra: subindo 6 no `aumenta`, o topo do selo chega a
+ * -2 do topo da cabeca, e a barra de HP comeca em -8. Com 0 ele encostaria.
+ */
+const SELO_DESCIDA_NO_CORPO = 4
 /** Quanto o selo anda ao longo da vida — pra cima se subiu, pra baixo se caiu. */
 const SELO_DESLOCAMENTO = 6
+
+/**
+ * A meia-largura VISUAL do corpo — a mesma conta que a sombra usa
+ * (`drawShadow#baseWidth`), porque as duas respondem a mesma pergunta: onde o
+ * POKE acaba na horizontal.
+ */
+function visualHalfWidth(entity: WorldEntity): number {
+  if (!entity.battleAnim) return entity.radius
+  return (entity.battleAnim.frameWidth * effectiveScale(entity)) / 2
+}
 
 /**
  * A cor do selo, pela DIRECAO. As mesmas duas do texto flutuante de estagio
@@ -1444,13 +1473,17 @@ const canvasDeEstagio: HTMLCanvasElement | null =
   typeof document !== 'undefined' ? document.createElement('canvas') : null
 
 /**
- * O SELO de mudanca de atributo: 40x24, glifo do atributo mais seta de direcao,
- * ACIMA DA CABECA do alvo (PH-416, refeito na PH-480).
+ * O SELO de mudanca de atributo: 21x13, glifo do atributo mais seta de direcao,
+ * no FLANCO ESQUERDO do alvo (PH-416, refeito na PH-480, reposicionado na
+ * PH-485).
  *
- * ONDE ELE FICA E METADE DA CORRECAO. Ate a PH-480 esta peca tinha 48x48 e era
- * desenhada em `effect.targetY`, que e o meio do corpo — mesmo lugar e mesmo
- * tamanho da arte de impacto de um golpe de dano, e por isso ela LIA como um
- * ataque e cobria a arte do golpe. Agora ela sai da area do corpo.
+ * ONDE ELE FICA E METADE DA CORRECAO, E JA ERROU DUAS VEZES. Ate a PH-480 a
+ * peca tinha 48x48 e era desenhada em `effect.targetY`, que e o meio do corpo —
+ * mesmo lugar e mesmo tamanho da arte de impacto de um golpe de dano, e por isso
+ * ela LIA como um ataque e cobria a arte do golpe. A PH-480 a mudou pra acima da
+ * cabeca, e QA ao vivo mostrou que ali mora a placa de nome. A PH-485 a levou
+ * pro flanco — ver a nota de `SELO_VAO_LATERAL`, que traz as medidas dos
+ * vizinhos.
  *
  * POR QUE `multiply` E NAO `source-atop`: a arte e gerada quase branca com
  * contorno quase preto, e o contorno e o que faz ela existir sobre um POKE
@@ -1499,11 +1532,13 @@ function drawSeloDeEstagio(
   off.globalCompositeOperation = 'destination-in'
   off.drawImage(img, 0, 0, SELO_LARGURA, SELO_ALTURA, 0, 0, SELO_LARGURA, SELO_ALTURA)
 
-  // O topo da cabeca sai da ENTIDADE quando ela ainda esta em campo; quando nao
-  // esta (o alvo morreu no mesmo frame), o ponto do efeito e o piso. Sem o
-  // fallback o selo sumiria justo no golpe que derruba.
+  // O corpo sai da ENTIDADE quando ela ainda esta em campo; quando nao esta (o
+  // alvo morreu no mesmo frame), o ponto do efeito e o piso. Sem o fallback o
+  // selo sumiria justo no golpe que derruba.
   const dono = entidadeSeguida(effect, world)
+  const centroX = dono?.x ?? effect.targetX!
   const topo = dono ? dono.y - visualTopOffset(dono) : effect.targetY!
+  const meiaLargura = dono ? visualHalfWidth(dono) : 0
   const anda = SELO_DESLOCAMENTO * progresso * (effect.statusDirection === 'aumenta' ? -1 : 1)
 
   ctx.save()
@@ -1511,8 +1546,11 @@ function drawSeloDeEstagio(
   ctx.imageSmoothingEnabled = false
   ctx.drawImage(
     canvasDeEstagio, 0, 0, SELO_LARGURA, SELO_ALTURA,
-    Math.round((dono?.x ?? effect.targetX!) - SELO_LARGURA / 2),
-    Math.round(topo - SELO_FOLGA - SELO_ALTURA + anda),
+    // FLANCO ESQUERDO (PH-485). Esquerdo e nao direito porque a direita da placa
+    // de nome e onde a porcentagem de HP escreve (`drawHpBar`, "a DIREITA da
+    // barra... a lateral e o unico lugar livre").
+    Math.round(centroX - meiaLargura - SELO_VAO_LATERAL - SELO_LARGURA),
+    Math.round(topo + SELO_DESCIDA_NO_CORPO + anda),
     SELO_LARGURA, SELO_ALTURA,
   )
   ctx.restore()
