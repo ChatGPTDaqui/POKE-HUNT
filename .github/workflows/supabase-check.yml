@@ -253,6 +253,17 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
+          # Sem isto todo run baixava o registry inteiro de novo — nao havia
+          # UMA ocorrencia de `cache` nos workflows ate 03/09 (PH-453).
+          #
+          # Os DOIS lockfiles na chave, e nao so o da raiz: `build-check` roda
+          # `npm ci` duas vezes (raiz e `authority/`). Chave unica pros quatro
+          # workflows de proposito — assim o primeiro run a rodar aquece o cache
+          # de todos os outros, em vez de cada um manter o seu.
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            authority/package-lock.json
 
       - name: database.types.ts esta desatualizado?
         # PostgrestVersion reflete a versao do servidor detectada NA HORA da
