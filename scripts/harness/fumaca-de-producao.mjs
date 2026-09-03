@@ -70,13 +70,32 @@ const PRINCIPAL = 'C:/Users/Mark2/Documents/NOVO POKE IDLE'
 const env = { ...lerEnv(join(RAIZ, '.env')), ...lerEnv(join(PRINCIPAL, '.env')) }
 const local = { ...lerEnv(join(RAIZ, '.env.local')), ...lerEnv(join(PRINCIPAL, '.env.local')) }
 
-const URL_BASE = local.VITE_SUPABASE_URL || env.SUPABASE_URL
-const ANON = local.VITE_SUPABASE_ANON_KEY
-const SENHA = env.CONTA_TESTE_SENHA
+/**
+ * Arquivo primeiro, `process.env` depois (PH-460).
+ *
+ * A ORDEM NAO E ARBITRARIA. Trocada, uma variavel esquecida no shell de quem
+ * opera passaria por cima do `.env` sem avisar — e este script aponta pra
+ * PRODUCAO. Com o arquivo na frente, o comportamento local continua exatamente
+ * o de antes e o `process.env` so entra onde nao havia nada.
+ *
+ * Ele existe porque no runner do Actions nao ha `.env` NENHUM: nem o do
+ * worktree, nem o caminho absoluto de Windows logo acima (que la nao existe e
+ * `lerEnv` engole em silencio). Sem este fallback o passo de fumaca do
+ * `supabase-deploy.yml` sairia com "Faltando ..." em toda promocao.
+ */
+const doAmbiente = (nome) => {
+  const v = process.env[nome]
+  return v && v.trim() ? v.trim() : undefined
+}
+
+const URL_BASE = local.VITE_SUPABASE_URL || env.SUPABASE_URL || doAmbiente('VITE_SUPABASE_URL') || doAmbiente('SUPABASE_URL')
+const ANON = local.VITE_SUPABASE_ANON_KEY || doAmbiente('VITE_SUPABASE_ANON_KEY')
+const SENHA = env.CONTA_TESTE_SENHA || doAmbiente('CONTA_TESTE_SENHA')
 const CONTA = 'claude@teste.pokehunt.local'
 
 if (!URL_BASE || !ANON || !SENHA) {
-  console.error('Faltando VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY / CONTA_TESTE_SENHA no .env')
+  console.error('Faltando VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY / CONTA_TESTE_SENHA')
+  console.error(`Procurei no .env/.env.local de ${RAIZ} e de ${PRINCIPAL}, e depois no ambiente.`)
   process.exit(1)
 }
 

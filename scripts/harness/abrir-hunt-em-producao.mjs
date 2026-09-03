@@ -70,16 +70,33 @@ function lerEnv(caminho) {
 const env = lerEnv(join(RAIZ, '.env'))
 const local = lerEnv(join(RAIZ, '.env.local'))
 
-const URL_BASE = local.VITE_SUPABASE_URL || env.SUPABASE_URL
-const ANON = local.VITE_SUPABASE_ANON_KEY
-const SENHA = env.CONTA_TESTE_SENHA
+/**
+ * Arquivo primeiro, `process.env` depois (PH-460).
+ *
+ * A ORDEM NAO E ARBITRARIA. Trocada, uma variavel esquecida no shell de quem
+ * opera passaria por cima do `.env` sem avisar — e esta bancada aponta pra
+ * PRODUCAO. Com o arquivo na frente, o comportamento local continua exatamente
+ * o de antes e o `process.env` so entra onde nao havia nada.
+ *
+ * Ele existe porque no runner do Actions nao ha `.env` nenhum, e sem isto o
+ * passo de verificacao do `supabase-deploy.yml` sairia com "Falta ..." em toda
+ * promocao.
+ */
+const doAmbiente = (nome) => {
+  const v = process.env[nome]
+  return v && v.trim() ? v.trim() : undefined
+}
+
+const URL_BASE = local.VITE_SUPABASE_URL || env.SUPABASE_URL || doAmbiente('VITE_SUPABASE_URL') || doAmbiente('SUPABASE_URL')
+const ANON = local.VITE_SUPABASE_ANON_KEY || doAmbiente('VITE_SUPABASE_ANON_KEY')
+const SENHA = env.CONTA_TESTE_SENHA || doAmbiente('CONTA_TESTE_SENHA')
 const CONTA = 'claude@teste.pokehunt.local'
 const ORIGEM = 'https://poke-hunt-euj.pages.dev'
 const FUNCAO = 'jogo'
 
 if (!URL_BASE || !ANON || !SENHA) {
   console.error('Falta VITE_SUPABASE_URL/SUPABASE_URL, VITE_SUPABASE_ANON_KEY ou CONTA_TESTE_SENHA')
-  console.error(`Procurei em ${join(RAIZ, '.env')} e ${join(RAIZ, '.env.local')}`)
+  console.error(`Procurei em ${join(RAIZ, '.env')}, ${join(RAIZ, '.env.local')} e no ambiente`)
   process.exit(1)
 }
 
