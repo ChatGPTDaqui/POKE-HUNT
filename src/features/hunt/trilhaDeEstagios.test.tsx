@@ -24,6 +24,7 @@ import userEvent from '@testing-library/user-event'
 import { BIOMAS, BIOMA_POR_CHAVE } from '@/data/biomas'
 import { ESTAGIOS_POR_BIOMA, estagioId, pesosDoEstagio } from '@/data/estagios'
 import { bloqueioDoEstagio, progressoPorBiomaDefault } from '@/data/progressoDeBioma'
+import { distribuicaoDeSala } from '@/engine/systems/salaSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -69,20 +70,53 @@ describe('estadoDoEstagio (a regra por tras do no)', () => {
 })
 
 describe('a composicao exibida e a que o jogo sorteia', () => {
-  it('sai da MESMA funcao que o sorteio de sala consome, nos 120 estagios', () => {
-    // Se a tela recalculasse a porcentagem por conta propria, ela poderia
-    // divergir do motor sem nada quebrar — e o jogador so descobriria caçando.
+  // ESTE TITULO ERA FALSO ATE A PH-476, e o caso abaixo e a correcao dele.
+  //
+  // A versao original comparava `composicaoDoEstagio` (tela) com
+  // `pesosDoEstagio` (tabela) e se chamava "sai da MESMA funcao que o sorteio
+  // de sala consome". As duas sempre concordaram — a tela LE a tabela. O
+  // sorteio, que e a terceira ponta e a unica que decide, ponderava pelo peso
+  // ESTATICO de `data/biomas.ts` e nunca abria a tabela: no Marinho 10 a tela
+  // dizia "Praia 0%" e o jogo entregava Praia em 32% das salas. Um teste que
+  // confirma o esperado contra o esperado passa verde por anos.
+  //
+  // Agora a comparacao e contra `distribuicaoDeSala`, que descreve o que
+  // `sortearSala` FAZ — e ha amostragem do sorteio de verdade em
+  // `src/engine/sorteioDeSalaSegueOEstagio.test.ts`.
+  it('sai da distribuicao que o SORTEIO aplica, nos 120 estagios', () => {
     for (const bioma of BIOMAS) {
       for (let e = 1; e <= ESTAGIOS_POR_BIOMA; e++) {
         const daTela = composicaoDoEstagio(bioma, e)
-        const doMotor = pesosDoEstagio(bioma, e)
+        const doSorteio = distribuicaoDeSala(estagioId(bioma.chave, e))
         for (const s of daTela) {
-          expect(s.pct, `${bioma.chave} e${e} ${s.chave}`).toBeCloseTo(doMotor[s.chave] * 100, 6)
+          expect(s.pct, `${bioma.chave} e${e} ${s.chave}`).toBeCloseTo((doSorteio[s.chave] ?? 0) * 100, 4)
+        }
+        // E o inverso: nada que o sorteio produz fica FORA da tela. Sem esta
+        // metade, a tela poderia omitir um sub-bioma inteiro e continuar
+        // "concordando" com o sorteio nos que ela mostra.
+        for (const chave of Object.keys(doSorteio)) {
+          expect(daTela.some((s) => s.chave === chave), `${bioma.chave} e${e}: ${chave} sorteado e nao exibido`).toBe(true)
         }
         // A soma do que a tela mostra fecha 100%: o que ela esconde e so o
         // sub-bioma de peso zero, que nao e sorteado neste estagio.
         const soma = daTela.reduce((a, s) => a + s.pct, 0)
         expect(soma, `${bioma.chave} e${e}`).toBeCloseTo(100, 4)
+      }
+    }
+  })
+
+  it('a tabela de dados e a distribuicao do sorteio nao divergem', () => {
+    // Caso auxiliar, e declarado como tal: ele confere as DUAS pontas que ja
+    // concordavam antes da PH-476 (`composicaoDoEstagio` le `pesosDoEstagio`).
+    // Ele nao substitui o caso acima; ele impede que a curva seja mexida em
+    // `estagios.ts` sem o sorteio acompanhar.
+    for (const bioma of BIOMAS) {
+      for (let e = 1; e <= ESTAGIOS_POR_BIOMA; e++) {
+        const daCurva = pesosDoEstagio(bioma, e)
+        const doSorteio = distribuicaoDeSala(estagioId(bioma.chave, e))
+        for (const [chave, peso] of Object.entries(daCurva)) {
+          expect(doSorteio[chave] ?? 0, `${bioma.chave} e${e} ${chave}`).toBeCloseTo(peso, 6)
+        }
       }
     }
   })

@@ -32,7 +32,7 @@
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { ABATES_POR_SALA, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
-import { estagioId, parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import { estagioId, parseEstagioId, pesosDoEstagio, quantidadeDeSalas } from '@/data/estagios'
 import { estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA, aparaOTeto } from '@/data/huntSpawnOverrides'
@@ -124,16 +124,80 @@ function candidatas(mapId: string): SubBiomaDef[] {
 }
 
 /**
- * Sorteia o sub-bioma da proxima sala, ponderado pelo `peso` de cada um.
+ * O peso de sorteio de cada sub-bioma candidato desta hunt (PH-476).
+ *
+ * O BUG QUE ISTO CONSERTA, E ELE ERA A MECANICA CENTRAL DO REDESENHO. Ate aqui
+ * `sortearSala` ponderava por `s.peso` — o peso ESTATICO de `data/biomas.ts`,
+ * que e o mesmo nos dez estagios de um bioma. `pesosDoEstagio` (a curva de
+ * profundidade da PH-425) era calculada, guardada em
+ * `ESTAGIO_POR_ID[...].pesosDeSubBioma`, exibida na trilha, anunciada na nota
+ * 7.38 — e NUNCA consultada por quem sorteia. Medido nos dados reais:
+ *
+ *   marinho e10    tela: sea 21%, seabed 79%       sorteio: sea 53%, beach 32%, seabed 16%
+ *   campo   e10    tela: plains 13%, meadow 62%    sorteio: plains 31%, meadow 19%, town 19%
+ *
+ * A coluna do sorteio era IDENTICA nos dez estagios. O jogador escolhia o
+ * estagio 10 do Marinho pelo Leito Oceanico e recebia Praia num terco das
+ * salas — a arte, o texto e a mecanica contando coisas diferentes, sem nada
+ * quebrar.
+ *
+ * PESO ZERO E AUSENCIA, e essa e a metade da curva que importa: o sub-bioma
+ * some do estagio. Filtrar antes do `weightedPick` (em vez de passar 0 pra
+ * ele) mantem o atalho de "um candidato so" valendo e deixa explicito que a
+ * lista de candidatos DEPENDE do estagio.
+ *
+ * HUNT SEM ESTAGIO CONTINUA NO PESO ESTATICO. A inicial, as BOSS, o Campeao
+ * Lance e o espelho do Pesadelo nao tem curva de profundidade — la `sub.peso` e
+ * o peso certo, e nao um fallback.
+ */
+function pesoDeSorteioDaSala(mapId: string): { opcoes: SubBiomaDef[]; peso: (s: SubBiomaDef) => number } {
+  const opcoes = candidatas(mapId)
+  const doMapa = parseEstagioId(mapId)
+  const bioma = doMapa ? BIOMA_POR_CHAVE[doMapa.bioma] : null
+  if (!doMapa || !bioma) return { opcoes, peso: (s) => s.peso }
+
+  const pesos = pesosDoEstagio(bioma, doMapa.estagio)
+  const alcancaveis = opcoes.filter((s) => (pesos[s.chave] ?? 0) > 0)
+  // Defesa em profundidade: se a curva zerar TODOS os candidatos, sortear
+  // ninguem seria pior que sortear pelo peso antigo — `novaSala` devolveria
+  // `null` e a hunt ficaria presa no sub-bioma anterior. Nao acontece com os
+  // dados de hoje (`pesosPorProfundidade` sempre deixa pelo menos um acima de
+  // zero), e por isso mesmo o caso nao merece silencio.
+  if (alcancaveis.length === 0) return { opcoes, peso: (s) => s.peso }
+  return { opcoes: alcancaveis, peso: (s) => pesos[s.chave] ?? 0 }
+}
+
+/**
+ * Sorteia o sub-bioma da proxima sala, ponderado pelo peso do ESTAGIO (PH-476)
+ * — ou pelo peso estatico, nas hunts que nao tem estagio.
  *
  * Consome a sequencia semeada do mundo de proposito: quem decide qual sala vem
  * e o servidor, pela mesma semente que decide shiny, IV e raridade.
  */
 export function sortearSala(rng: Rng, mapId: string): string | null {
-  const opcoes = candidatas(mapId)
+  const { opcoes, peso } = pesoDeSorteioDaSala(mapId)
   if (opcoes.length === 0) return null
   if (opcoes.length === 1) return opcoes[0].chave
-  return weightedPick(rng, opcoes, (s) => s.peso).chave
+  return weightedPick(rng, opcoes, peso).chave
+}
+
+/**
+ * A distribuicao que `sortearSala` de fato aplica, como probabilidade.
+ *
+ * Existe pra a TELA e o TESTE poderem perguntar "o que o sorteio faz?" sem
+ * reimplementar a ponderacao — que e exatamente como a PH-476 passou
+ * despercebida: a trilha comparava a si mesma com a tabela de dados, e as duas
+ * concordavam porque nenhuma das duas era o sorteio.
+ *
+ * Soma 1 sobre os sub-biomas alcancaveis; `{}` na hunt sem salas.
+ */
+export function distribuicaoDeSala(mapId: string): Record<string, number> {
+  const { opcoes, peso } = pesoDeSorteioDaSala(mapId)
+  const soma = opcoes.reduce((s, o) => s + peso(o), 0)
+  if (!(soma > 0)) return {}
+  const saida: Record<string, number> = {}
+  for (const o of opcoes) saida[o.chave] = peso(o) / soma
+  return saida
 }
 
 export function novaSala(rng: Rng, mapId: string, indice: number, ciclos: number): SalaAtiva | null {
