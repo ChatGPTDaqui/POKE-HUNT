@@ -12,6 +12,36 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // DOIS itens pra duas issues (PH-447, PH-448). A nota mais curta em muito
+  // tempo, e a primeira que anuncia um defeito que ESTA nota anterior causou.
+  //
+  // O ITEM DO BUG DIZ O QUE O JOGADOR VIU, E NAO A CAUSA. Ele viu tudo
+  // bloqueado pedindo o Campeao Lance — inclusive a primeira cacada do jogo,
+  // que nunca teve cadeado nenhum. A causa (o nome de um grupo de gate, uma
+  // coluna do banco no vocabulario antigo, uma migration que faltou) nao cabe
+  // aqui: ela nao explica nada pra quem clicou e levou "Derrote o Campeao
+  // Lance". Ele tambem diz QUANTO TEMPO durou, porque quem nao abriu o jogo
+  // nessa janela nao viu nada, e um item sem prazo faz essa pessoa procurar um
+  // problema que nunca teve.
+  //
+  // POR QUE ANUNCIAR EM VEZ DE ENTERRAR. A regua deste arquivo manda anunciar
+  // bug VISIVEL corrigido, e a 7.38 acabou de deixar a PH-440 de fora pelo
+  // criterio oposto — aquele defeito viveu so na `dev` e nenhum jogador o
+  // sofreu. Este saiu em producao e foi encontrado jogando. O criterio e o
+  // mesmo nas duas direcoes, senao ele nao e criterio.
+  //
+  // FICA DE FORA: o par de migration, o helper do gate, a fonte unica da
+  // traducao, os tres arquivos de teste novos e a extracao do corpo do card —
+  // encanamento e arrumacao, sem efeito na tela alem dos dois itens abaixo.
+  {
+    version: '7.39',
+    date: '2026-09-03',
+    title: 'O mundo destrancado, e a primeira caçada onde ela devia estar',
+    highlights: [
+      'BUG CORRIGIDO: POR CERCA DE 40 MINUTOS, NENHUMA HUNT ABRIA. Se você entrou no jogo na madrugada de 03/09, logo depois da atualização do mapa do mundo, toda hunt respondia "Derrote o Campeão Lance antes de acessar Mundo" — os 12 biomas e até a Rota 46, a primeira caçada, que nunca teve cadeado nenhum. Era a atualização anterior perguntando pelo nome errado ao conferir o que você tem liberado. Está resolvido, e o seu progresso não foi afetado: nada foi perdido nem zerado, era só a porta que não abria.',
+      'A ROTA 46 (INICIAL) SUBIU PRO TOPO DA TELA DE HUNTS. Ela é a primeira caçada do jogo, de Lv 1 a 2, e estava lá embaixo, junto do Campeão Lance e do Modo Pesadelo — quem acabava de escolher o inicial tinha que rolar a tela inteira, passando por tudo o que ainda não pode jogar, pra achar a única hunt feita pra ele. Agora ela aparece antes dos biomas.',
+    ],
+  },
   // OITO itens pra TREZE issues (PH-425 a PH-434, mais PH-440, PH-441 e
   // PH-442) — o maior intervalo que uma nota deste arquivo ja cobriu, e por
   // isso o que mais precisou de corte.
