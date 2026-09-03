@@ -84,4 +84,33 @@ describe('os toggles de auto do cliente batem com a RPC (PH-492)', () => {
     // metade, e o sintoma aparece só no ambiente que ficou pra trás.
     expect(listaBrancaVigente('dev')!.sort()).toEqual(listaBrancaVigente('public')!.sort())
   })
+
+  it.each(['public', 'dev'] as const)('a migration vigente do %s é SQL, e não texto qualquer', (schema) => {
+    // ESTE CASO EXISTE PORQUE A PRIMEIRA VERSÃO DESTE ARQUIVO PASSOU NUM .sql
+    // QUEBRADO. A migration da PH-492 foi gerada por script, e o script
+    // concatenou uma FUNÇÃO onde devia ir o texto do cabeçalho — o fonte da
+    // função foi parar dentro do arquivo. A suíte ficou verde (o regex da lista
+    // branca achava o que procurava) e o `db push` do CI caiu com
+    // `syntax error at or near "schema" (SQLSTATE 42601)`.
+    //
+    // A lição: o teste olhava o pedaço que interessava e nunca o arquivo. Aqui
+    // ele olha o arquivo.
+    //
+    // Não é um parser de SQL — é a guarda barata que pega o acidente real:
+    // antes do primeiro statement só pode haver comentário ou linha vazia, e os
+    // delimitadores de corpo têm que fechar.
+    const caminho = Object.keys(MIGRATIONS)
+      .filter((c) => MIGRATIONS[c].includes(`FUNCTION ${schema}.configurar_auto`))
+      .sort()
+      .at(-1)!
+    const texto = MIGRATIONS[caminho]
+
+    const preambulo = texto.slice(0, texto.indexOf('CREATE OR REPLACE FUNCTION')).split(/\r?\n/)
+    const lixo = preambulo.filter((l) => l.trim() !== '' && !l.trimStart().startsWith('--'))
+    expect(lixo, `${caminho}: linha que não é comentário antes do primeiro statement`).toEqual([])
+
+    // `$function$` abre e fecha o corpo. Ímpar = arquivo truncado ou colado
+    // errado, e o erro do banco nesse caso é ilegível.
+    expect(texto.split('$function$').length - 1, `${caminho}: $function$ desbalanceado`).toBe(2)
+  })
 })
