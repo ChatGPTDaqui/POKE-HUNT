@@ -24,8 +24,6 @@ import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
 import { SPECIES, type Species } from '@/data/pokes'
 import { colorForType, TYPE_COLORS } from '@/data/typeColors'
-import { bestOffensiveMultiplier } from '@/data/typeMatchups'
-import { faceIconUrl } from '@/data/sprites'
 import type { ElementType } from '@/data/generated/types'
 import { unlockMap } from '@/engine/systems/economySystem'
 import { controller } from '@/engine/controller'
@@ -34,7 +32,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
-import { TypeChip } from '@/components/shared/TypeChip'
+import { LinhaDeEspecie } from './LinhaDeEspecie'
 import { GameButton, GameCard, GameInput, GameSelect, SectionLabel, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 // As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo de
@@ -254,44 +252,14 @@ function SalasDaHunt({ mapId }: { mapId: string }) {
   )
 }
 
-// Cor/rotulo do multiplicador ofensivo, mesma paleta de
-// `TypeWeaknessSection` (vantagem verde, fraqueza laranja/vermelha, imune
-// cinza) — nao inventa cor nova pro mesmo conceito.
-function badgeEfetividade(mult: number): { rotulo: string; cor: string } | null {
-  if (mult === 1) return null // neutro: nao informa nada, so ruido na lista
-  if (mult === 0) return { rotulo: 'imune', cor: 'var(--color-n500)' }
-  if (mult >= 4) return { rotulo: '4x', cor: '#4ade80' }
-  if (mult >= 2) return { rotulo: '2x', cor: '#4ade80' }
-  if (mult <= 0.25) return { rotulo: '¼x', cor: 'var(--color-warn)' }
-  return { rotulo: '½x', cor: 'var(--color-warn)' }
-}
-
-function SpeciesRow({ sp, pct, activeSpecies }: { sp: Species; pct: number; activeSpecies: Species | null }) {
-  const url = faceIconUrl(sp.id)
-  const badge = activeSpecies ? badgeEfetividade(bestOffensiveMultiplier(activeSpecies, sp)) : null
-  return (
-    <div className="flex items-center gap-[.5em] text-[.85em]">
-      {url ? (
-        <img src={url} alt="" className="h-[1.6em] w-[1.6em] shrink-0 object-contain" />
-      ) : (
-        <span className="h-[1.6em] w-[1.6em] shrink-0 rounded-[.3em]" style={{ background: sp.color }} />
-      )}
-      <TypeChip type={sp.type} />
-      {sp.type2 && <TypeChip type={sp.type2} />}
-      <span className="flex-1 truncate">{sp.name}</span>
-      {badge && (
-        <span
-          className="tabular-nums text-[.9em] font-semibold"
-          style={{ color: badge.cor }}
-          title={`Seu POKE ativo (${activeSpecies!.name}) contra ${sp.name}`}
-        >
-          {badge.rotulo}
-        </span>
-      )}
-      <span className="tabular-nums text-n400">{pct.toFixed(1)}%</span>
-    </div>
-  )
-}
+// A LINHA DE ESPECIE SAIU DAQUI (PH-470), junto com `badgeEfetividade`.
+//
+// Ela mostrava face, tipo, efetividade e chance — e a navegacao em dois niveis
+// (PH-431) tirou as 120 hunts de bioma desta lista, deixando essas quatro
+// informacoes so pro conteudo de fim de jogo. A trilha, que e onde o jogador de
+// fato escolhe onde cacar, listava o elenco por NOME e mais nada.
+//
+// Agora as duas telas usam `LinhaDeEspecie`, que ganhou a tag de protetor.
 
 // Uma hunt "bate" na busca pelo proprio nome OU por qualquer especie que possa
 // aparecer nela.
@@ -428,6 +396,7 @@ export function HuntMenu() {
           mapaAtivoId={mapaAtivoId}
           abertoId={expandedMapId}
           entrandoId={acao.pendingKey?.startsWith('map:') ? acao.pendingKey.slice(4) : null}
+          pokeEmCampo={activeSpecies}
           onAbrir={setExpandedMapId}
           onEntrar={(mapId) => {
             const map = MAPS[mapId]
@@ -592,7 +561,7 @@ export function HuntMenu() {
               <span className="text-n600"> — chance considerando o sorteio de sala</span>
             </div>
             {odds.species.map(({ id, species: sp, pct }) => (
-              <SpeciesRow key={id} sp={sp} pct={pct} activeSpecies={activeSpecies} />
+              <LinhaDeEspecie key={id} species={sp} pct={pct} ativo={activeSpecies} />
             ))}
           </div>
         )}
