@@ -30,6 +30,7 @@ import { useVoltarFechaPainel } from '../hooks/useVoltarFechaPainel'
 import { useCommitOnLevelUp } from '../hooks/useCommitOnLevelUp'
 import { useTutorialInicial } from '../hooks/useTutorialInicial'
 import { useAvisoDeEstoqueNoChat } from '../hooks/useAvisoDeEstoqueNoChat'
+import { useSincronizarAuto } from '../hooks/useSincronizarAuto'
 
 export function JogoCarregado() {
   const hasStarter = useHasStarter()
@@ -46,6 +47,10 @@ export function JogoCarregado() {
   useCommitOnLevelUp()
   useTutorialInicial(hasStarter)
   useAvisoDeEstoqueNoChat()
+  // PH-490: aqui, e nao dentro do painel de Automações. Ver a nota do hook — com
+  // ele preso ao painel, mudar um toggle de outra tela nunca chegava ao
+  // servidor.
+  useSincronizarAuto()
 
   return (
     <div

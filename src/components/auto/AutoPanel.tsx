@@ -13,14 +13,13 @@
 //    era workaround pra nao reconstruir DOM interativo debaixo do ponteiro.
 //    Aqui as contagens saem de selectors do Zustand.
 //  - `controller.save()` apos cada mutacao: o `persist` grava sozinho.
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Warning } from '@phosphor-icons/react'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { getEncounter } from '@/data/enemies'
 import { BEST_POTION_OPTION } from '@/engine/systems/autoSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
 import { GameButton, GameCheck, GameInput, GameSelect, GameSwitch, SegmentedTabs } from '@/components/game/controls'
 import { estoqueDoItemDeRegra, itensEmUso, LIMIAR_ESTOQUE_BAIXO, FAMILIA_REVIVE } from './estoqueBaixo'
@@ -159,22 +158,12 @@ function AbaDeAutomacoes() {
   const updateAutoCatchRule = useGameStateStore((s) => s.updateAutoCatchRule)
   const removeAutoCatchRule = useGameStateStore((s) => s.removeAutoCatchRule)
 
-  // A config de auto e sincronizada em BLOCO quando muda, em vez de rotear os
-  // 14 pontos de mutacao um a um — ver sincronizarAuto(). Nao e cosmetico: o
-  // servidor le estas regras ao decidir usar pocao/bola durante a simulacao.
-  //
-  // O primeiro disparo e ignorado de proposito: ele aconteceria logo apos o
-  // estado chegar DO servidor, e mandaria os mesmos valores de volta a cada
-  // abertura do painel.
-  const primeiraSync = useRef(true)
-  useEffect(() => {
-    if (primeiraSync.current) {
-      primeiraSync.current = false
-      return
-    }
-    sincronizarAuto()
-  }, [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules, autoStatusConfig])
-
+  // A SINCRONIZACAO COM O SERVIDOR NAO MORA MAIS AQUI (PH-490). Ela era um
+  // `useEffect` deste componente, e isso valia enquanto TODO controle de auto
+  // ficava dentro deste painel. Com o "Avançar de estágio ao concluir" na
+  // trilha do bioma, um toggle mudado com este painel FECHADO nunca chegaria ao
+  // servidor — e o servidor le essa config na simulacao. Agora ela e
+  // `useSincronizarAuto`, montado uma vez em `JogoCarregado`.
   const huntSpecies = useCurrentHuntSpecies()
   const opcoesPocao = useOpcoes(POTION_OPTIONS, autoToggles.autoPot, {
     id: BEST_POTION_OPTION, nome: 'Escolher melhor', quantidade: null,
@@ -429,19 +418,14 @@ function AbaDeAutomacoes() {
         aoLigar={(v) => setAutoToggle('avancoManualDeSala', v)}
       />
 
-      {/* PH-428: o que fazer AO CONCLUIR o estágio. Escolhido antes, e não
-          perguntado na hora — o estágio pode fechar com o jogador longe da
-          tela, que é o normal num idle.
+      {/* "Avançar de estágio ao concluir" (PH-428) MUDOU DE TELA na PH-490:
+          ele agora vive no painel do estágio, na trilha do bioma. A decisão que
+          ele governa — repito este estágio ou vou pro seguinte? — é tomada
+          olhando a trilha, e aqui ela ficava a dois menus de distância do
+          pensamento que a origina.
 
-          O padrão é REPETIR de propósito: o jogador escolhe um estágio pela
-          espécie que caça ali (a caçada direcionada é o ponto do redesenho), e
-          avançar sozinho o tiraria justamente de onde ele quis ficar. */}
-      <BlocoAuto
-        titulo="Avançar de estágio ao concluir"
-        dica="Ao limpar a última sala do estágio, entra no estágio seguinte em vez de repetir o mesmo. Se não houver próximo — ou se ele ainda estiver bloqueado — o estágio atual repete."
-        ligado={autoToggles.avancarDeEstagio}
-        aoLigar={(v) => setAutoToggle('avancarDeEstagio', v)}
-      />
+          O toggle continua o mesmo (`autoToggles.avancarDeEstagio`), global e
+          com padrão `false`. O que mudou foi onde se clica nele. */}
     </div>
   )
 }
