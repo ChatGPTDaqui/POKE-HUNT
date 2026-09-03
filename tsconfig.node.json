@@ -12,6 +12,9 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    // Mesmo motivo do `tsconfig.app.json` (PH-458): sem esta linha o
+    // `.tsbuildinfo` deste projeto nasce com 51 BYTES e nao guarda nada.
+    "incremental": true,
 
     /* Linting */
     "noUnusedLocals": true,
