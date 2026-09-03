@@ -513,6 +513,25 @@ export const SALAS_POR_HUNT = 10
  */
 export const ABATES_POR_SALA = 30
 
+/**
+ * Dos 30, quantos sao SELVAGEM COMUM numa sala que tem protetor (PH-473).
+ *
+ * O PROTETOR E O 30o, e nao o 31o. Ate aqui a quota eram 30 comuns e o Guardian
+ * (ou o Lord, na ultima sala) nascia DEPOIS dela — o abate dele era um 31o que
+ * a barra do HUD nao tinha onde contar. O que o jogador via era a barra em
+ * 30/30 e a sala parada: ele lia "completei a sala e ela travou".
+ *
+ * Com o protetor DENTRO da conta, a barra chega a 29/30 com a quota de comuns
+ * fechada, e o 30o abate — o dele — fecha a sala no mesmo instante.
+ *
+ * SALA SEM PROTETOR CONTINUA EM 30 COMUNS: hunt sem estagio (a inicial, as
+ * BOSS, o Campeao Lance) e estagio ja limpo, onde o protetor nao e reposto
+ * (PH-428). Quem decide qual dos dois vale e `quotaDeAbatesDaSala`, em
+ * `engine/systems/salaSystem.ts` — nao dividir essa decisao entre os seis
+ * pontos que comparam com a quota e o ponto de ela ser uma funcao.
+ */
+export const ABATES_COMUNS_POR_SALA = ABATES_POR_SALA - 1
+
 export const BIOMA_POR_CHAVE: Record<string, BiomaDef> = Object.fromEntries(
   BIOMAS.map((b) => [b.chave, b])
 )

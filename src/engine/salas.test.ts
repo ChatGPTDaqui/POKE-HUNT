@@ -16,7 +16,7 @@ import {
   reconciliarSalaDaAutoridade, ESPERA_MAXIMA_PELA_AUTORIDADE, protetorDaSala,
 } from './systems/salaSystem'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
-import { ABATES_POR_SALA } from '@/data/biomas'
+import { ABATES_POR_SALA, ABATES_COMUNS_POR_SALA } from '@/data/biomas'
 import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, quantidadeDeSalas, salasDoEstagio } from '@/data/estagios'
 import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -53,16 +53,37 @@ function mundo(semente: number, mapa = HUNT): WorldState {
  * evento do abate 30 precisa deste substituto.
  */
 function resolverProtetorSeHouver(world: WorldState): { avancou: boolean; fechouEstagio: boolean } {
-  if (world.sala!.abates < ABATES_POR_SALA || !protetorDaSala(world.sala, HUNT)) {
+  // PH-473: a quota que faz o protetor nascer e a de COMUNS (29) — ele e o 30o
+  // abate, nao o 31o. Este guard era `< ABATES_POR_SALA` e passou a sair cedo
+  // sempre, porque `registrarAbate` agora capa em 29 enquanto o protetor esta
+  // de pe: o helper "resolvia" um protetor que nunca ia nascer.
+  if (world.sala!.abates < ABATES_COMUNS_POR_SALA || !protetorDaSala(world.sala, HUNT)) {
     return { avancou: false, fechouEstagio: false }
   }
   const gameState = useGameStateStore.getState()
   if (!world.protetorPendente) tick(world, 0.1, gameState) // nasce o protetor
-  const protetor = world.enemies.find((e) => e.isProtetor)
-  if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
-  world.enemies = world.enemies.filter((e) => !e.isProtetor)
+  matarProtetor(world, gameState)
   const fechouEstagio = world.salaPendente?.indice === 0
   return { avancou: world.salaCountdownRemaining != null, fechouEstagio }
+}
+
+/**
+ * Mata o protetor em campo e CONTA o abate dele (PH-473).
+ *
+ * O abate do protetor e o 30o da sala. No jogo quem conta e o laco de kills do
+ * `stepWorld`; estes helpers chamam `handleEnemyDefeated` na mao, entao a
+ * contagem e responsabilidade deles — sem isto a sala ficaria eternamente em
+ * 29/30 nos testes e a barra do HUD que eles descrevem nao seria a do jogo.
+ */
+function matarProtetor(
+  world: WorldState, gameState: ReturnType<typeof useGameStateStore.getState>,
+): boolean {
+  const protetor = world.enemies.find((e) => e.isProtetor)
+  if (!protetor) return false
+  handleEnemyDefeated(world, protetor, gameState, { silent: true })
+  world.enemies = world.enemies.filter((e) => !e.isProtetor)
+  registrarAbate(world, world.mapDef!.id)
+  return true
 }
 
 /**
@@ -74,11 +95,7 @@ function resolverProtetorSeHouver(world: WorldState): { avancou: boolean; fechou
  */
 function tick(world: WorldState, dt: number, gameState: ReturnType<typeof useGameStateStore.getState>) {
   stepWorld(world, dt, gameState, { silent: true })
-  if (world.protetorPendente) {
-    const protetor = world.enemies.find((e) => e.isProtetor)
-    if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
-    world.enemies = world.enemies.filter((e) => !e.isProtetor)
-  }
+  if (world.protetorPendente) matarProtetor(world, gameState)
 }
 
 /**
@@ -127,10 +144,10 @@ describe('salas', () => {
     const world = mundo(2)
     const antes = world.sala!.chave
 
-    const parciais = abater(world, ABATES_POR_SALA - 1)
+    const parciais = abater(world, ABATES_COMUNS_POR_SALA - 1)
     expect(parciais.every((e) => !e.avancou)).toBe(true)
     expect(world.sala!.indice).toBe(0)
-    expect(world.sala!.abates).toBe(ABATES_POR_SALA - 1)
+    expect(world.sala!.abates).toBe(ABATES_COMUNS_POR_SALA - 1)
     expect(world.salaCountdownRemaining).toBeNull()
 
     // O abate que fecha a quota so ARMA a transicao — a sala AINDA e a
@@ -138,10 +155,17 @@ describe('salas', () => {
     // sala com protetor habilitado NAO arma no proprio abate — so depois de
     // resolver o protetor que nasce por causa dele (registrarAbate se
     // recusa de proposito, ver salaSystem.ts#registrarAbate).
+    //
+    // PH-473: E A QUOTA DE COMUNS SAO 29, nao 30. O protetor e o 30o abate,
+    // entao a barra para em 29/30 ate ele cair — o cap de `registrarAbate` e a
+    // quota vigente, e nao o total. Antes disto ela ia a 30/30 e a sala nao
+    // avancava, que e a leitura "completei a sala e ela travou".
     const ultimo = registrarAbate(world, world.mapDef!.id)
     expect(ultimo.avancou).toBe(false)
-    expect(world.sala!.abates).toBe(ABATES_POR_SALA)
+    expect(world.sala!.abates).toBe(ABATES_COMUNS_POR_SALA)
     resolverProtetorSeHouver(world)
+    // O abate do protetor fecha os 30.
+    expect(world.sala!.abates).toBe(ABATES_POR_SALA)
     expect(world.sala!.indice).toBe(0)
     expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
     expect(world.salaPendente).not.toBeNull()
@@ -196,7 +220,7 @@ describe('salas', () => {
   it('fechar as 10 salas reinicia o ciclo em vez de acabar a hunt', () => {
     const world = mundo(3)
     // Um ciclo inteiro menos o ultimo abate.
-    const eventos = abater(world, ABATES_POR_SALA * SALAS)
+    const eventos = abater(world, ABATES_COMUNS_POR_SALA * SALAS)
     const fechamentos = eventos.filter((e) => e.fechouEstagio)
 
     expect(fechamentos.length).toBe(1)
@@ -347,7 +371,10 @@ describe('sala sob autoridade do servidor', () => {
 
     expect(world.sala!.chave).toBe(daPrimeira)
     expect(world.sala!.indice).toBe(0)
-    expect(world.sala!.abates).toBe(ABATES_POR_SALA) // com teto, sem estourar a quota
+    // PH-473: o teto sob autoridade e a QUOTA VIGENTE, e com o protetor de pe
+    // ela e 29 — a barra do cliente nao pode ir a 30/30 antes de o chefe cair,
+    // senao ela volta a dizer "sala completa" com a sala parada.
+    expect(world.sala!.abates).toBe(ABATES_COMUNS_POR_SALA) // com teto, sem estourar a quota
     expect(world.salaPendente).toBeNull()
     expect(world.salaCountdownRemaining).toBeNull()
   })
@@ -748,12 +775,19 @@ describe('transicao de sala nao deixa lixo pra tras (PH-258)', () => {
     // ninguem morre, a quota nunca fecha. F5 era a unica saida.
     const world = mundo(77)
     const gameState = useGameStateStore.getState()
-    world.salaSobAutoridade = true
     world.sala!.abates = ABATES_POR_SALA
 
     // Um tick pra o protetor da sala nascer (sem resolver — e esse o caso).
+    //
+    // PH-475: A AUTORIDADE SO LIGA DEPOIS DISSO. Sob `salaSobAutoridade` o
+    // cliente parou de sortear o proprio chefe (ele ADOTA o do flush), entao um
+    // tick com a autoridade ja ligada nao faz nascer ninguem e o cenario deste
+    // caso — "protetor em campo quando a sala troca" — nao se monta. O chefe
+    // nasce pelo caminho local, que e o mesmo `criarEntidadeDoProtetor`, e a
+    // autoridade entra em vigor em seguida.
     stepWorld(world, 0.1, gameState, { silent: true })
     expect(world.protetorPendente, 'o cenario exige protetor pendente').not.toBeNull()
+    world.salaSobAutoridade = true
 
     // O servidor manda a sala seguinte.
     const proxima = { indice: 1, chave: world.sala!.chave, abates: 0, ciclos: 0 }

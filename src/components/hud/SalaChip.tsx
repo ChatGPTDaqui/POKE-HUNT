@@ -19,7 +19,9 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
 import { quantidadeDeSalas } from '@/data/estagios'
-import { janelaDaSala, nomeDaSala, protetorDaSala } from '@/engine/systems/salaSystem'
+import {
+  janelaDaSala, nomeDaSala, protetorDaSala, quotaDeAbatesDaSala, salaDeveProtetor,
+} from '@/engine/systems/salaSystem'
 import { avancarSalaManualmente } from '@/data/remote/autoridade'
 import { GameButton } from '@/components/game/controls'
 import { Explicacao, BolhaDoVerbete } from '@/components/shared/Explicacao'
@@ -55,6 +57,14 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // Sem ela a tela nao tem como distinguir "sala pede protetor" de "protetor ja
   // resolvido", e ofereceria o avanco num estado que o servidor recusa.
   const protetorResolvido = useWorldStore((s) => s.protetorResolvido)
+  // PH-474: ESTE CAMPO FALTAVA, e a falta dele mentia na tela. Em estagio ja
+  // limpo o motor nao repoe protetor (PH-428) e `salaTravadaPeloProtetor`
+  // devolve `false` — mas este componente reescrevia a regra a mao SEM ele, e
+  // `protetorDaSala` (que e pura) continua respondendo 'guardian'/'lord' pra
+  // qualquer sala de bioma. Resultado: o chip mandava derrotar um Guardian que
+  // nao existe e nunca ia nascer, e escondia o botao de avanco manual que o
+  // servidor teria aceitado.
+  const estagioLimpo = useWorldStore((s) => s.estagioJaLimpo)
   // PH-386: quem decide a sala e o servidor, e o cliente so descobre no flush.
   // Sem este flag a tela nao tem como distinguir "a sala vai trocar em 3s" de
   // "a sala esta esperando resposta" — ver `esperandoAAutoridade` abaixo.
@@ -66,16 +76,23 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // A janela sobe com a sala: a hunt afunda conforme voce limpa. Mostrar so o
   // intervalo da HUNT (Lv1-30) esconderia justamente isso.
   const janela = faixa ? janelaDaSala(faixa, sala.indice, salas) : null
+  // O DENOMINADOR CONTINUA 30 nos dois casos, e isso e de proposito (PH-473):
+  // o protetor E o 30o abate, entao a barra em 29/30 com a quota de comuns
+  // fechada e exatamente a leitura "falta o chefe". Antes ela ia a 30/30 e a
+  // sala nao avancava, e o jogador lia "completei a sala e ela travou".
   const restantes = Math.max(0, ABATES_POR_SALA - sala.abates)
   const progresso = Math.min(1, sala.abates / ABATES_POR_SALA)
   // PH-291: a sala pede protetor e ele ainda nao caiu. Enquanto isso for
   // verdade NENHUM caminho avanca — nem o automatico, nem o manual —, e a tela
-  // precisa dizer por que 30/30 nao esta avancando. `solicitarAvancoDeSala` faz
-  // a mesma pergunta do lado do motor; aqui e so pra o jogador nao clicar num
-  // botao que o servidor vai recusar.
-  const tipoDeProtetor = protetorDaSala(sala, mapId ?? '')
-  const travadaPeloProtetor = tipoDeProtetor != null && !protetorResolvido
-  const quotaFechada = sala.abates >= ABATES_POR_SALA
+  // precisa dizer por que a barra nao esta avancando.
+  //
+  // PH-473/474: A PERGUNTA VEM DO MOTOR AGORA. Ela era reescrita aqui, sem o
+  // `estagioJaLimpo`, e as duas pontas divergiam em silencio — mesmo defeito
+  // que a PH-429/430 corrigiu na mensagem de bloqueio de estagio.
+  const estadoDoProtetor = { estagioJaLimpo: estagioLimpo, protetorResolvido }
+  const travadaPeloProtetor = salaDeveProtetor(sala, mapId ?? '', estadoDoProtetor)
+  const tipoDeProtetor = travadaPeloProtetor ? protetorDaSala(sala, mapId ?? '') : null
+  const quotaFechada = sala.abates >= quotaDeAbatesDaSala(sala, mapId ?? '', estadoDoProtetor)
   // PH-180: so aparece com a quota FECHADA, o toggle ligado (senao a sala ja
   // trocou sozinha) e sem transicao em andamento (o clique nao tem o que
   // fazer enquanto o overlay de "Entrando em nova area" ja esta na tela).

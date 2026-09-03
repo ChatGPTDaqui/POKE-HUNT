@@ -15,9 +15,9 @@ import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld, handleEnemyDefeated } from './simulation'
 import {
-  protetorDaSala, ESPERA_MAXIMA_PELA_AUTORIDADE, SALA_TRANSITION_COUNTDOWN,
+  protetorDaSala, ESPERA_MAXIMA_PELA_AUTORIDADE, SALA_TRANSITION_COUNTDOWN, registrarAbate,
 } from './systems/salaSystem'
-import { ABATES_POR_SALA } from '@/data/biomas'
+import { ABATES_POR_SALA, ABATES_COMUNS_POR_SALA } from '@/data/biomas'
 import { quantidadeDeSalas } from '@/data/estagios'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState, ProtetorPendente } from './types'
@@ -328,16 +328,29 @@ describe('protetor resolvido sob autoridade nao respawna (PH-230)', () => {
    */
   function protetorCaidoSobAutoridade(semente: number): WorldState {
     const world = mundo(semente)
-    world.salaSobAutoridade = true
-    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_COMUNS_POR_SALA, ciclos: 0 }
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
 
+    // PH-475: O CHEFE NASCE ANTES DE LIGAR A AUTORIDADE, e essa ordem e o
+    // assunto da issue. Sob `salaSobAutoridade` o cliente parou de sortear o
+    // proprio protetor — ele ADOTA o que vier no flush — entao um `stepWorld`
+    // com a autoridade ja ligada nao faz nascer ninguem. O helper monta o
+    // chefe pelo caminho local, que e o mesmo `criarEntidadeDoProtetor` que a
+    // adocao usa, e so depois liga a autoridade: o estado resultante ("chefe
+    // desta sala caiu, sob autoridade") e o mesmo que o de antes.
     stepWorld(world, 0.1, gameState, { silent: true })
     const protetor = world.enemies.find((e) => e.isProtetor)
     expect(protetor).toBeDefined()
+    world.salaSobAutoridade = true
     handleEnemyDefeated(world, protetor!, gameState, { silent: true })
+    // PH-473: o abate do chefe e o 30o da sala. No jogo quem conta e o laco de
+    // kills do `stepWorld`; este helper mata na mao, entao a contagem e dele —
+    // sem ela a sala fica em 29/30 com o chefe ja resolvido, um estado que o
+    // jogo nao produz, e o fallback de predicao nunca dispara (a quota de uma
+    // sala sem chefe devido volta a ser 30).
+    registrarAbate(world, world.mapDef!.id)
     world.enemies = world.enemies.filter((e) => e !== protetor)
     return world
   }
