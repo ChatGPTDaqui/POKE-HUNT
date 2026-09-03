@@ -10,8 +10,12 @@ AS SEIS TIRAS DE STATUS SAO GERADAS (PH-416)
   node scripts/gerar-status-vfx.mjs
 
 Sem entrada externa nenhuma: o script desenha os seis glifos como pixel art e
-escreve o PNG com um encoder proprio de 30 linhas. Roda em qualquer clone com
-`node` e mais nada.
+escreve o PNG com o encoder compartilhado (scripts/vfx/png.mjs, de 30 linhas).
+Roda em qualquer clone com `node` e mais nada.
+
+O encoder era uma copia dentro deste script; virou modulo na PH-416, quando o
+gerador de arte de atributo ia fazer a terceira. Regerar as seis com o encoder
+compartilhado sai BYTE A BYTE identico — foi assim que a troca se provou segura.
 
   veneno.png        48x48, 16 quadros — cranio roxo. SOBRE O CORPO.
   queimadura.png    48x48, 16 quadros — chama laranja. SOBRE O CORPO.

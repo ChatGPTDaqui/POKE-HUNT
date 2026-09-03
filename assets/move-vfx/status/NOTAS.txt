@@ -1,23 +1,53 @@
-Arte de efeito de golpe de STATUS (buff/debuff/condicao), por tipo
-elemental. Consumido por src/data/statusVfx.ts.
+FUNDO DO SELO DE CONDICAO NO HUD, POR TIPO ELEMENTAL
+====================================================
 
-  aumenta/<tipo>.gif  -> golpe que ELEVA um atributo. A direcao e do
-                         EFEITO, nao de quem lanca: Growl no oponente e
-                         "diminui" do lado de quem recebe.
-  diminui/<tipo>.gif  -> golpe que baixa atributo, ou aplica condicao
-                         (confusao/veneno/sono/etc — sem estagio pra
-                         medir direcao, tratado como "diminui").
+Consumido por src/data/statusVfx.ts, desenhado por
+src/components/hud/StatusEffectsBar.tsx.
 
-FLYING e DRAGON nao tem arte: caem no mesmo fallback procedural que os
-outros tipos sem VFX dedicado. Comportamento padrao, nao modo degradado.
+  diminui/<tipo>.gif  -> fundo do selo de condicao (veneno, queimadura,
+                         paralisia, sono, congelamento, confusao), tingido pelo
+                         tipo PRIMARIO DO PROPRIO POKE.
+
+FLYING e DRAGON nao tem arte: o catalogo de origem nao tinha nenhum arquivo pra
+esses dois. Caem no fallback, comportamento padrao e nao modo degradado.
+
+O QUE ESTE ACERVO ERA, E O QUE SOBROU DELE (PH-416)
+---------------------------------------------------
+Ele nasceu como a arte de TODO golpe de status do mundo: 32 GIFs, 16 tipos x 2
+direcoes (`aumenta`/`diminui`), escolhidos pelo tipo do golpe e pela direcao do
+efeito.
+
+Aquele eixo nunca respondeu QUAL atributo mudou — Ataque caindo e Velocidade
+caindo desenhavam a mesma coisa. A arte de mudanca de atributo saiu daqui pra
+../../estagio-vfx/ (ver o NOTAS.txt de la), que varia por ATRIBUTO e recebe a
+cor do tipo no desenho.
+
+AS 16 TIRAS DE `aumenta/` FORAM REMOVIDAS porque ficaram sem nenhum consumidor:
+o selo do HUD sempre pediu `diminui` (condicao e sempre algo ruim), e nao havia
+segundo chamador. As de `diminui/` continuam, com um consumidor so e
+documentado.
 
 GIF, nao PNG-sequence: `drawImage` de uma <img> apontada pra um GIF anima
-sozinho — o navegador atualiza o bitmap conforme o GIF avanca, e o motor
-so precisa desenhar a MESMA Image() a cada frame. Sem fatiar quadro a
-quadro.
+sozinho — o navegador atualiza o bitmap conforme o GIF avanca, e quem desenha so
+precisa desenhar a MESMA Image() a cada frame. Sem fatiar quadro a quadro.
 
-PENDENCIA: a selecao destes 32 GIFs foi feita por opacidade de pixel
-(descartando quadro vazio e quadro quase totalmente opaco), nao por
-julgamento visual contra o fundo da hunt. CONFERIR NO JOGO antes de
-considerar definitivo — e o mesmo criterio de contraste descrito em
-../NOTAS.txt.
+DIVIDA CONHECIDA, E ELA E DE HUD, NAO DE ARTE
+---------------------------------------------
+O selo seria melhor servido pela arte de ../../status-vfx/, que tem simbolo POR
+CONDICAO — cranio pra veneno, floco pra congelamento (`TIRA_POR_CONDICAO_NO_CORPO`
+em src/data/vfxTiras.ts). Hoje o selo desenha a mesma coisa pros seis status e o
+unico diferenciador e o rotulo.
+
+Trocar isso e mexer no HUD de condicao, com verificacao visual propria — nao e o
+mesmo assunto que trocar a arte de atributo. Registrado, nao esquecido.
+
+A PENDENCIA ANTIGA CAIU JUNTO
+-----------------------------
+O NOTAS anterior avisava que a selecao destes GIFs foi feita por OPACIDADE DE
+PIXEL (descartando quadro vazio e quadro quase totalmente opaco), nao por
+julgamento visual contra o fundo da hunt — e pedia conferir no jogo.
+
+Isso continua verdade para os 16 que sobraram, e o risco encolheu: eles nao
+desenham mais sobre a cena, so atras de um selo pequeno de HUD, sobre fundo
+controlado. O criterio que importa agora e contraste com o texto do selo, nao
+com a arte de fundo do bioma.

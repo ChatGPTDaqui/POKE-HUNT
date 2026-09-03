@@ -46,7 +46,8 @@
 // glifo amarelo sobre um Pikachu (que a tinta de paralisia ja deixou amarelo)
 // nao tem borda nenhuma — o caso concreto da PH-370.
 import { writeFileSync } from 'node:fs'
-import { deflateSync } from 'node:zlib'
+
+import { png } from './vfx/png.mjs'
 
 // Uniforme nos seis. Vale 16 e nao 20 porque as duas fases que consomem a tira
 // (`CICLO_CONDICAO_MS` 2000ms sobre o corpo, `CICLO_SIMBOLO_MS` 1400ms no
@@ -252,6 +253,7 @@ const BADGE = {
   anel: { cy: 31, rx: 13, ry: 4, motes: 4, raioFrente: 2, raioTras: 1 },
 }
 
+
 // Quanto o anel "respira" ao longo do ciclo, em fracao do raio. Uma volta
 // completa dos motes ja da movimento; a respiracao existe pra o anel nao ficar
 // legivel como um numero fixo de pontos girando, que a 8fps le como catraca.
@@ -362,44 +364,17 @@ function tira(nome, geo) {
 }
 
 // ---------------------------------------------------------------------------
-// PNG minimo (RGBA8, sem filtro)
-// ---------------------------------------------------------------------------
-// Herdado de gerar-sprite-sono.mjs, que este script substitui: o repositorio
-// nao tem dependencia de imagem e um encoder de 30 linhas evita adicionar uma.
-
-function png(width, height, rgba) {
-  const bruto = Buffer.alloc(height * (1 + width * 4))
-  for (let y = 0; y < height; y++) {
-    bruto[y * (1 + width * 4)] = 0
-    Buffer.from(rgba.buffer, y * width * 4, width * 4).copy(bruto, y * (1 + width * 4) + 1)
-  }
-  const crcTabela = []
-  for (let n = 0; n < 256; n++) {
-    let c = n
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1
-    crcTabela[n] = c >>> 0
-  }
-  const crc = (b) => {
-    let c = 0xffffffff
-    for (const x of b) c = crcTabela[(c ^ x) & 0xff] ^ (c >>> 8)
-    return (c ^ 0xffffffff) >>> 0
-  }
-  const chunk = (tipo, dados) => {
-    const len = Buffer.alloc(4); len.writeUInt32BE(dados.length)
-    const corpo = Buffer.concat([Buffer.from(tipo, 'ascii'), dados])
-    const c = Buffer.alloc(4); c.writeUInt32BE(crc(corpo))
-    return Buffer.concat([len, corpo, c])
-  }
-  const ihdr = Buffer.alloc(13)
-  ihdr.writeUInt32BE(width, 0); ihdr.writeUInt32BE(height, 4)
-  ihdr[8] = 8; ihdr[9] = 6
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', ihdr),
-    chunk('IDAT', deflateSync(bruto, { level: 9 })),
-    chunk('IEND', Buffer.alloc(0)),
-  ])
-}
+// O ENCODER PNG SAIU DAQUI (PH-416).
+//
+// Ele era uma copia de 30 linhas, herdada de `gerar-sprite-sono.mjs`, e o
+// gerador de estagio ia fazer a TERCEIRA. Encoder duplicado nao e problema
+// estetico: o primeiro que ganhar uma correcao deixa o outro para tras em
+// silencio, e os dois conjuntos de arte passam a sair com bytes diferentes sem
+// ninguem notar. Foi o que quase aconteceu — `scripts/vfx/png.mjs` ganhou a
+// correcao do `byteOffset` e a guarda de tamanho, e esta copia nao tinha
+// nenhuma das duas.
+//
+// Agora ele vive em `scripts/vfx/png.mjs`, importado no topo.
 
 // ---------------------------------------------------------------------------
 

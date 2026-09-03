@@ -1,0 +1,81 @@
+ARTE DE GOLPE QUE MUDA ATRIBUTO (PH-416)
+========================================
+
+Mesmo formato das outras tiras do jogo: quadros lado a lado, altura cheia,
+largura do quadro deduzida de naturalWidth/quadros. Consumido por
+src/data/estagioVfx.ts e desenhado em
+render/sprites.ts#drawEstagioEffect.
+
+AS 15 TIRAS SAO GERADAS
+-----------------------
+  node scripts/gerar-estagio-vfx.mjs
+
+Sem entrada externa nenhuma: o script desenha os glifos como pixel art e
+escreve o PNG com o encoder compartilhado (scripts/vfx/png.mjs). Roda em
+qualquer clone com `node` e mais nada — nao depende do banco de arte .dat que
+NAO esta no repositorio.
+
+  atkFis-{aumenta,diminui}.png     48x48, 16 quadros — punho
+  atkEsp-{aumenta,diminui}.png     48x48, 16 quadros — espiral
+  def-{aumenta,diminui}.png        48x48, 16 quadros — escudo
+  defEsp-{aumenta,diminui}.png     48x48, 16 quadros — escudo com brilho
+  speed-{aumenta,diminui}.png      48x48, 16 quadros — asa/tracos de velocidade
+  accuracy-{aumenta,diminui}.png   48x48, 16 quadros — alvo
+  evasion-{aumenta,diminui}.png    48x48, 16 quadros — silhueta em fuga
+  condicao.png                     48x48, 16 quadros — ampulheta
+
+O EIXO DA ARTE E O ATRIBUTO, E ISSO E O PONTO
+---------------------------------------------
+A arte anterior escolhia por TIPO ELEMENTAL + direcao: 32 GIFs em
+../move-vfx/status/, 16 tipos x 2 direcoes. Aquele eixo nunca respondeu a
+pergunta que o jogador faz — QUAL atributo mudou. Ataque caindo e Velocidade
+caindo desenhavam exatamente a mesma coisa, e o unico diferenciador era o texto
+flutuante.
+
+O TIPO NAO SE PERDE. A arte sai quase branca (#f4f8ff) e a cor do tipo entra no
+DESENHO, por `multiply` (ver drawEstagioEffect). Um Rosnado de POISON sai roxo e
+um de FIRE sai laranja, sem custar arquivo: assar a cor daria 15 x 16 tipos =
+240 arquivos.
+
+`multiply` e nao `source-atop`, e a diferenca importa: `source-atop` pinta a cor
+sobre TODO pixel opaco e apagaria o contorno escuro, que e o que faz a arte
+existir sobre um POKE claro. Com `multiply`, branco x cor = cor, e contorno x
+cor = contorno.
+
+POR QUE UM PAR POR ATRIBUTO, E NAO UMA TIRA TOCADA AO CONTRARIO
+---------------------------------------------------------------
+Os motes APAGAM no fim do percurso. De tras pra frente eles acenderiam no fim, e
+o efeito leria como algo se juntando em vez de se dissipando. 15 arquivos a
+~1,9 KB e mais barato que essa complexidade no motor.
+
+A DIRECAO MORA NO MOVIMENTO: no `aumenta` os motes nascem embaixo e sobem, no
+`diminui` nascem em cima e caem. Quadro parado NAO mostra isso — julgar direcao
+exige a pagina de movimento (abaixo), nao a folha de contato.
+
+A GRAMATICA E A MESMA DAS SEIS DE CONDICAO
+------------------------------------------
+Glifo de identidade em pixel art 9x9 escalada em inteiro (3x, 27px dos 48) mais
+motes animados. 9x9 e o PISO medido: a 7x7 um cranio, um floco e um "?" colapsam
+todos no mesmo blob de 3x3 (nota em scripts/gerar-status-vfx.mjs).
+
+O contorno de 2px sai numa PASSADA FINAL sobre os pixels acesos, e nao junto do
+desenho: contornar inline pinta borda em cima do mote seguinte quando dois se
+tocam.
+
+`pintar` se recusa a sobrescrever pixel MAIS opaco. E isso que deixa desenhar os
+motes primeiro e o glifo depois sem os motes comerem a linha do glifo.
+
+COMO CONFERIR
+-------------
+  node scripts/harness/folha-de-estagio.mjs
+    Folha de contato em scripts/harness/saida-estagio/ (gitignored): 3 quadros a
+    3x sobre tres fundos (escuro/laranja/claro) mais os MESMOS reduzidos ao
+    tamanho de estresse e ampliados de volta. A coluna reduzida e a que decide.
+    Ela e ESTRESSE e nao "tamanho de jogo": a arte e desenhada 1:1 em unidade de
+    mundo (STATUS_VFX_ALTURA = 48), e o encolhimento real depende da escala do
+    canvas no aparelho.
+
+  npm run dev + /scripts/harness/folha-de-estagio.html
+    Toca as tiras no ritmo real (~1,1s, STATUS_VFX_DURATION) com a MESMA tinta
+    de tipo do jogo. E a unica leitura que julga DIRECAO. `file://` nao serve:
+    o navegador nao carrega `assets/` de la.
