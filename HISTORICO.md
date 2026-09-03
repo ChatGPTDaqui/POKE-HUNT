@@ -6121,3 +6121,196 @@ importam — 404 (rota inexistente), 42501 (grant faltando) e a recusa tratada. 
 **Nao foi validado**: o fluxo de dois jogadores no navegador (card chegando ao vivo do outro lado,
 reserva bloqueando o terceiro). Precisa de duas contas na porta 5173 e do ambiente `jogo-dev` — a
 conta de teste em producao e virgem e a trava de sessao dupla derruba a outra aba.
+
+## 2026-09-02/03 (madrugada) — o redesenho da progressao inteiro, e tres achados que nao estavam em issue nenhuma
+
+Treze issues: PH-425 a PH-434 (a fila do redesenho), mais PH-440 (perda de dado), PH-441 (arte de
+fundo) e PH-442 (a trilha espacial). Todas mergeadas na `dev`. **Nada promovido pra `main`** — a nota
+7.38 (PH-444) e este registro (PH-445) sao o que faltava pro gate de promocao.
+
+A sessao comecou recuperando outra: a anterior ("redesenho de estagio") criou as 10 issues e a
+branch, e o PC do dono desligou antes da primeira linha de codigo. O trabalho recuperado era **10
+issues e zero codigo**.
+
+### O que o redesenho trocou
+
+As 3 faixas de 30 niveis (teto 90) viraram **10 estagios de 10 niveis por bioma** (teto 100). Sao
+120 hunts no lugar de 36, os 12 biomas nascem abertos com progresso independente, e o menu deixou
+de ser lista pra virar mapa: escolhe o bioma, entra na trilha dos 10 estagios.
+
+A divisao em 10 degraus **ja existia invisivel** dentro da faixa — `salaSystem#janelaDaSala`
+partia os 30 niveis em 10 pedacos, um por sala. O que faltava nao era a matematica: era mostrar e
+deixar escolher.
+
+### Achado 1: perda de dado real em producao, e o teste nao pegaria
+
+A PH-429 trocou o formato de `players.bioma_progress`. Conferindo a migration no banco depois do
+merge — a obrigacao do `CLAUDE.md` de olhar o run e o dado —, apareceram **duas linhas com os dois
+formatos misturados**.
+
+Elas nasceram assim: a migration converteu; em seguida o **cliente ainda publicado em producao**
+(bundle antigo) carregou, fez `{...defaults, ...doBanco}` com `defaults = {faixa1: 0, faixa2: 0,
+faixa3: 0}` e regravou no flush. Resultado: chaves de faixa **zeradas** ao lado das chaves de bioma
+corretas.
+
+O leitor novo decidia o formato pela presenca de qualquer chave `faixa*`, traduzia so os zeros e
+**descartava o progresso de bioma**. Reproduzido com o objeto literal do banco: uma conta com os 12
+biomas fechados voltava **inteiramente zerada**, sem erro em lugar nenhum. E a migration deixou de
+ser idempotente — o filtro voltava a casar com aquelas linhas.
+
+**A licao geral:** migracao de formato com cliente antigo no ar tem **TRES estados**, nao dois.
+Enquanto houver bundle velho escrevendo na mesma coluna, os dois formatos nao sao mutuamente
+exclusivos, e isso nao e caso de borda — e o estado normal de qualquer janela entre o deploy da
+`dev` e a promocao. O leitor tem que **mesclar pelo maximo**, nao escolher um caminho.
+
+Os 8 casos de traducao cobriam formato novo, formato antigo e entrada podre. O misto nao e nenhum
+dos tres, e nada no codigo sugeria que ele pudesse existir.
+
+### Achado 2: quatro POKEs sumiram do jogo, e a faixa larga escondia a contradicao
+
+Metapod, Kakuna, Silcoon e Cascoon existem em Lv 7-9 e evoluem no 10. A zona minima deles e 1
+(Lv 11+), porque `spawnStrength.PISO_POR_ESTAGIO` poe todo segundo estagio de evolucao na zona 1.
+
+**As duas regras sempre se contradisseram** — a zona so abre depois de a forma ja ter evoluido. A
+faixa1 ia de Lv1 a Lv30 com `zonaMaxima` 2, entao a janela [7,9] cabia dentro dela e ninguem
+reparava. Com estagio de 10 niveis, o estagio 1 recusava por forca e o estagio 2 nao alcancava por
+nivel: os quatro sumiram do jogo inteiro. Pego pela guarda "toda especie selvagem tem pelo menos
+uma hunt".
+
+**Qual regra cede:** `PISO_POR_ESTAGIO` e heuristica de PERCEPCAO ("forma evoluida na zona de
+estreia le como bug"); o nivel de evolucao do catalogo e o DADO. Um Metapod em Lv 7-9 le como
+exatamente certo, porque Caterpie evolui no 7.
+
+**O padrao que isso revela:** granularidade menor nao so reparticiona o conteudo — ela **transforma
+tolerancia em conflito**. Toda regra que hoje "cabe" numa faixa de 30 niveis e candidata a quebrar
+em 10.
+
+### Achado 3: oito bancadas estavam mortas
+
+Ao fazer a PH-433, oito arquivos de `scripts/harness/` pediam `<bioma>_faixa<N>`, id morto desde a
+PH-426, e **todos estouravam com `Mapa desconhecido` na primeira linha**. Entre eles, os que
+produziram numeros que hoje justificam constantes do jogo: a janela minima de flush, os 120s de
+`ESPERA_MAXIMA_PELA_AUTORIDADE`, o prazo de buff.
+
+Bancada quebrada **nao reprova nada**: nao roda em CI, nao tem teste, e ninguem a executa ate
+precisar refazer uma medicao — quando o numero antigo ja esta na nota de uma constante como se fosse
+reproduzivel. A regra "protótipo vai pro git" so cumpre o proposito se o protótipo **ainda roda**.
+As oito foram corrigidas, uma foi executada ate o fim pra provar, e um teste novo trava o formato.
+
+### A sabotagem passou verde tres vezes, e cada vez ensinou algo
+
+A regra de sabotar o codigo e ver o teste ficar vermelho ja existia como prova de que o teste vale.
+Aqui ela virou outra coisa: **o jeito de descobrir qual linha nenhum teste cobre.**
+
+- **Uma linha critica sem cobertura.** O credito de `bioma_progress` ao vencer o Lord comparava com
+  o indice 9 fixo — verdade so num estagio de 10 salas, e nenhum estagio tem 10. Em **9 dos 10
+  estagios** o jogador venceria o Lord e o progresso nunca seria escrito. Nada estoura.
+- **Um teste que virou tautologia.** `hunts.test.ts` comparava `unlocksContinentOnClear` com
+  `GRUPOS_DO_LANCE`; os dois mudam juntos, entao devolver `faixa3` a lista passava verde.
+- **Codigo que virou inerte.** O teto do PH-332 deixou de ser alcancavel com a regua de 10 niveis.
+  Em vez de apagar (a proxima especie re-arma o ramo em silencio), o disparo passou a ser registrado
+  e um teste trava a lista em vazio — codigo morto **com alarme**.
+
+E um quarto caso, achado sem sabotagem: `toda especie respeita a propria zona minima` casava a hunt
+com a faixa por `f.niveis[0] === map.levelRange[0]` e pulava o que nao casasse. Com estagios, so os
+de numero 1, 4 e 7 comecam num piso de faixa — o teste passaria **verde cobrindo 30% do que
+cobria**.
+
+### A bancada visual pegou o que o teste nao pega
+
+Os 12 testes de componente da trilha (PH-431) passaram **na primeira execucao, com tres defeitos
+visuais dentro**: "Campo Aberto" virava "Ca…" porque o selo dividia a linha com o nome; o estagio
+bloqueado usava `opacity`, que apagava tambem a linha que diz o que falta pra liberar; e o trilho
+nao encostava nos nos, porque os segmentos eram ancorados em 50% da altura do item.
+
+Teste de componente pergunta "o texto esta no DOM". Nenhum pergunta "isto esta legivel".
+
+**E a bancada mentiu uma vez.** O `<body>` dela usava `bg-n950`, classe que **nao existe** na paleta
+(a escala vai de `n900` a `n100`). O fundo ficava branco, e o estagio com `opacity` parecia *mais
+claro* que o liberado — um defeito que nao existia no jogo. Fui corrigir a coisa errada antes de
+olhar a paleta. Fundo de bancada precisa ser o fundo real, nao um parecido.
+
+### A pergunta que valeu a pena fazer
+
+A PH-428 dizia "sem protetor e sem quota; o jogador fica na sala/sub-bioma escolhido e caca". **"Sem
+quota" tinha duas leituras** que produzem jogos diferentes: a sala nunca mais troca (o jogador trava
+num sub-bioma que nem escolheu, e a tabela de porcentagem do estagio nunca e amostrada) ou a sala
+troca sem o protetor no caminho.
+
+Perguntado, o dono respondeu com uma **terceira**, melhor que as duas: *"tera como selecionar
+previamente se ao concluir o estagio, o jogador deseja repetir o estagio ou avancar para o proximo
+(caso haja proximo)"*. O controle virou dele, escolhido antes, em vez de regra implicita do sistema.
+
+### A forma da trilha mudou depois de pronta
+
+A PH-431 entregou a trilha como **lista vertical** com um trilho ligando dez cartoes. O dono mandou
+duas referencias de mapa de fases e a forma que ele queria era outra: **o no vive SOBRE a arte, e o
+caminho tem forma no espaco**. Virou a PH-442.
+
+O no espacial **nao cabe** o que a lista mostrava — faixa de nivel, composicao com porcentagem,
+contagem de salas, mensagem de bloqueio. Foi por isso que a primeira versao virou lista. A troca e a
+das referencias: o mapa responde "onde estou e pra onde vou", o painel responde "o que tem la".
+
+O caminho **desce**, e isso nao e estetica: as 12 artes (PH-441) foram desenhadas acompanhando a
+profundidade do bioma. Um caminho que subisse poria o estagio 10 na praia — a arte contando o
+contrario da mecanica.
+
+### O custo, medido
+
+A PH-433 fez um A/B de verdade: o bundle da Edge e versionado, e o commit da PH-425 guarda a versao
+de 36 hunts. 15 processos novos de cada, ordem alternada.
+
+```
+36 hunts    289 ms (255-389)   10,7 MB de heap   230,8 KB gzip
+120 hunts   335 ms (293-440)   12,8 MB de heap   238,9 KB gzip
+            +46 ms (+15,8%)    +2,1 MB           +3,5%
+```
+
+**Cabe como esta.** 46 ms sao 0,15% de uma janela de flush de 30s.
+
+A primeira medicao **nao era conclusiva**, e isso ficou escrito no arquivo: com 7 rodadas o delta
+(+90 ms) era MENOR que a dispersao de cada lado (±270 ms). Subir pra 15 e ler tambem o **delta dos
+minimos** — a rodada menos poluida de cada lado — resolveu: as duas leituras convergem (+38 vs
++46 ms), e e a convergencia que separa sinal de maquina.
+
+**O risco estava no lugar errado.** A issue supunha peso de bundle. Nao e: o bundle quase nao cresce
+porque o codigo e o mesmo — o que mudou foi o numero de voltas do laco.
+
+### Duas pontes temporarias, montadas e derrubadas na mesma sessao
+
+A PH-426 precisou manter o gate por `continent` de pe enquanto ele nao era trocado: cada estagio
+herdava o grupo da faixa que cobria aquele nivel. A PH-432 a derrubou — barrar o estagio 7 inteiro
+atras do Campeao Lance era uma segunda trava dizendo, pior, o que `estagioLiberado` ja diz.
+
+Sobraram **dois** grupos: `biomas` (aberto) e `nightmare` (premio do Lance).
+
+### O Lance nao tinha portao nenhum
+
+A PH-432 dizia que ele era "liberado por grupo de faixa". **Nao era**: `GRUPOS_DO_LANCE` e o que ele
+ABRE, nao o que abre ele. O `continent` dele era `faixa2`, que nascia aberto — o duelo de Lv 55-65
+estava disponivel **no dia 1**, com um POKE Lv 5 do outro lado. Agora pede o estagio 5 nos 12
+biomas.
+
+**Consequencia a vigiar na promocao:** nenhum jogador atual tem progresso 5 nos 12 biomas, entao na
+pratica o Lance fica indisponivel ate subirem. Era a intencao do desenho, mas e regressao de acesso
+pra quem ja estava la. O numero esta numa constante so (`ESTAGIOS_PARA_O_LANCE`).
+
+### O que NAO foi implementado
+
+- **Modo Pesadelo como "novo jogo"** (Lv 101-200, copia dos 12 biomas, 24 estados de progresso) e
+  **hunts BOSS por elemento**: desenhados em 02/09, **nao existem em codigo**. A nota 7.38 nao os
+  promete.
+- **Tempo real por sala nunca foi medido.** `SALAS_POR_ESTAGIO` (3,4,4,5,5,6,6,7,7,8) e chute
+  declarado — palavra do dono, "por enquanto". E o numero que decide se o novato ve o primeiro Lord
+  em 10 minutos ou numa hora. Quando medir, tem que ser contra o **servidor publicado**: headless e
+  conta real ja discordaram por quase 6x no dimensionamento da hunt inicial.
+- **Nivel do POKE e infinito e o conteudo topa em 200** — buraco de fim de jogo, a resolver antes de
+  desenhar a tabela de XP.
+
+### Nota de processo: paralelismo recusado, com motivo
+
+O dono liberou trabalhar em paralelo "se isso nao comprometer a integridade do projeto". Recusei, e
+o motivo ficou medido: a fila era **cadeia, nao leque** (PH-428/430/431/432 dependem todas do
+formato de progresso da PH-429); **ja havia um segundo ator na `dev`** — outra sessao empurrou
+PH-435/436/437 durante o trabalho, e minhas PRs ficaram `BEHIND` tres vezes; e worktree neste repo
+exige `node_modules` proprio, com o guardrail local recusando comando no isolamento.
