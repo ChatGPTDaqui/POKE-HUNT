@@ -48,6 +48,10 @@ export { climaDaSala } from './systems/climaAmbiente'
 export {
   BIOMAS, GRUPOS_INICIAIS, GRUPOS_DO_LANCE, ESTAGIOS_PARA_O_LANCE, ABATES_POR_SALA,
   BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE,
+  // PH-447: o gate de continente da autoridade passa por aqui. Sem o helper, o
+  // servidor voltaria a perguntar `unlockedContinents.includes(grupo)` na mao,
+  // que e a linha que trancou o jogo inteiro.
+  grupoLiberado, traduzirGruposLiberados,
 } from '@/data/biomas'
 export type { BiomaDef, SubBiomaDef } from '@/data/biomas'
 export {
