@@ -12,6 +12,55 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // OITO itens pra TREZE issues (PH-425 a PH-434, mais PH-440, PH-441 e
+  // PH-442) — o maior intervalo que uma nota deste arquivo ja cobriu, e por
+  // isso o que mais precisou de corte.
+  //
+  // A NOTA ABRE PELO MENU, e nao pela mudanca maior. A regua de niveis mudou
+  // por baixo de tudo, mas o jogador nao "ve" uma regua: ele abre a tela de
+  // hunts e ela e outra. O primeiro item tem que ser a primeira estranheza do
+  // dia, como o rename foi na 7.37.
+  //
+  // O ITEM DO FARM LIVRE FOI O MAIS DIFICIL DE ESCREVER, porque a coisa boa
+  // dele e uma AUSENCIA: o Guardian que nao aparece mais. Anunciar ausencia
+  // sem antes lembrar que ela existia nao comunica nada, entao o item diz o
+  // que acontecia ANTES numa oracao e o que acontece agora na seguinte.
+  //
+  // NENHUM ITEM PROMETE MODO PESADELO NOVO NEM BOSS POR ELEMENTO. As duas
+  // coisas foram DESENHADAS em 02/09 e nao existem em codigo. A nota so fala
+  // do que esta jogavel — a 7.36 ja teve a disciplina de nao prometer impacto
+  // que nao media, e prometer feature que nao existe seria pior.
+  //
+  // O ITEM DOS QUATRO POKES parece pequeno e NAO E: Metapod, Kakuna, Silcoon e
+  // Cascoon nao nasciam em lugar nenhum do jogo. Especie ausente e o modo de
+  // falha mais silencioso que este projeto tem — ela continua no Bestiario, com
+  // sprite e moveset, e so nunca aparece.
+  //
+  // FICA DE FORA:
+  //   - PH-433 (bancada de medicao) e PH-434 (limpeza do vocabulario de
+  //     faixa): ferramenta e arrumacao de codigo, zero efeito na tela;
+  //   - o encanamento de PH-426/429/430 (como as 120 hunts sao montadas, o
+  //     formato do progresso no banco, o gate no servidor). O que o jogador ve
+  //     disso ja esta nos itens da trilha e dos biomas abertos;
+  //   - a PH-440, que corrigiu perda de progresso na traducao do save antigo.
+  //     O defeito viveu so na `dev`: o cliente que o tinha nunca foi
+  //     publicado, entao nenhum jogador perdeu nada. Anunciar conserto de bug
+  //     que ninguem sofreu so assusta.
+  {
+    version: '7.38',
+    date: '2026-09-02',
+    title: 'O mapa do mundo: 12 biomas abertos, 10 estágios em cada, e o nível vai até 100',
+    highlights: [
+      'A TELA DE HUNTS VIROU UM MAPA. Antes era uma lista de cards com "Mata I", "Mata II", "Mata III". Agora você escolhe o BIOMA e entra nele: dentro, os 10 estágios aparecem como uma trilha desenhada sobre a arte do lugar, com o caminho descendo do raso pro fundo. Cada bioma tem arte própria, e a trilha acompanha ela — no Marinho você começa na praia e termina no leito oceânico, entre os corais.',
+      'AS TRÊS FAIXAS DE NÍVEL ACABARAM. Cada bioma passou a ter 10 estágios de 10 níveis, cobrindo do Lv 1 ao Lv 100 — o teto era 90. "De 1 a 30 é muita margem" era o problema: você entrava numa hunt que anunciava trinta níveis e não tinha como escolher onde dentro dela caçar. Agora o estágio diz exatamente a faixa, e você escolhe.',
+      'CADA ESTÁGIO MOSTRA O QUE TEM DENTRO, ANTES DE VOCÊ ENTRAR. Clicando num nó da trilha você vê a faixa de nível, os POKEs que podem aparecer, e a porcentagem de cada sub-bioma. E essa porcentagem MUDA ao longo da trilha: no estágio 1 do Marinho a Praia é 60% e o Leito Oceânico não existe; no estágio 10 a Praia sumiu e o Leito é 79%. O bioma afunda conforme você avança.',
+      'OS 12 BIOMAS ESTÃO ABERTOS DESDE O COMEÇO, E O PROGRESSO DE CADA UM É SEPARADO. Não há mais ordem entre eles: dá pra estar no estágio 7 do Marinho e no 2 do Ígneo ao mesmo tempo. Dentro do bioma a sequência continua — o estágio seguinte pede o Lord do anterior. Um bioma vem marcado como recomendado pra quem está começando; é sugestão, não cadeado.',
+      'ESTÁGIO QUE VOCÊ JÁ FECHOU VIRA FARM LIVRE. Antes, voltar a um lugar limpo cobrava o Guardião a cada 30 abates e o Lord no fim, de novo. Agora não nasce protetor nenhum num estágio que você já venceu: você entra e caça. É o que torna possível voltar a um estágio antigo só pela espécie que aparece lá, abrindo mão do ouro e do XP dos estágios altos.',
+      'VOCÊ ESCOLHE, ANTES, O QUE ACONTECE AO CONCLUIR O ESTÁGIO. No painel Auto tem uma opção nova: ao limpar a última sala, o jogo repete o mesmo estágio (o padrão) ou entra no seguinte. Repetir é o padrão porque você normalmente escolheu aquele lugar por algum motivo — e se não houver próximo, ou ele ainda estiver bloqueado, o atual repete sozinho.',
+      'O CAMPEÃO LANCE AGORA PRECISA SER MERECIDO. Ele estava disponível desde o primeiro dia, com um time de Lv 55-65 esperando qualquer um que clicasse. Agora ele pede o estágio 5 limpo nos 12 biomas — a metade do mundo — e o card diz quantos faltam e quais. O que ele concede continua o mesmo.',
+      'BUG CORRIGIDO: QUATRO POKES NÃO NASCIAM EM LUGAR NENHUM. Metapod, Kakuna, Silcoon e Cascoon — as quatro formas de casulo — existiam no Bestiário, com sprite e golpes, e nunca apareciam numa hunt. Eles vivem entre o Lv 7 e o Lv 9, uma janela curta demais pra caber nas regras antigas. Agora aparecem no estágio 1 dos biomas onde a linha deles mora.',
+    ],
+  },
   // QUATRO itens pra tres issues (PH-435, PH-436, PH-437). O quarto item e um
   // defeito que veio de carona na PH-437 — ver mais abaixo.
   //
