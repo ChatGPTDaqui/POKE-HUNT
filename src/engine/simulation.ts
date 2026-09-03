@@ -34,7 +34,7 @@ import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
-import { ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
+import { SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
 import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
 import type { ProgressoPorBioma } from '@/data/progressoDeBioma'
 
@@ -56,6 +56,7 @@ import {
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
   estagioJaLimpo, proximoEstagioLiberado,
+  comunsEsgotados, quotaDeAbatesDaSala, salaDeveProtetor,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -544,23 +545,28 @@ function garantirProtetorDaSala(
   player: PlayerEntity | null,
   entrada: Point | null,
 ): boolean {
-  // PH-428: estagio ja limpo nao repoe protetor. O corte fica AQUI, no unico
-  // lugar que CRIA a entidade, e nao so no gate de avanco: sem ele o Guardian
-  // continuaria nascendo, so nao travaria nada — um bicho de 40x o HP normal em
-  // campo sem funcao.
-  const tipo = world.estagioJaLimpo ? null : protetorDaSala(world.sala, world.mapDef?.id ?? '')
+  // PH-473: as tres condicoes ("estagio ja limpo nao repoe", "ja caiu nesta
+  // sala", "esta sala pede protetor") passaram a morar em `salaDeveProtetor`.
+  // Elas eram escritas aqui, em `registrarAbate`, em `salaTravadaPeloProtetor`
+  // e — sem o `estagioJaLimpo` — no `SalaChip` da tela.
+  //
+  // PH-428: o corte de estagio limpo fica AQUI, no unico lugar que CRIA a
+  // entidade, e nao so no gate de avanco: sem ele o Guardian continuaria
+  // nascendo, so nao travaria nada — um bicho de 40x o HP normal em campo sem
+  // funcao.
+  //
+  // PH-230: protetor ja resolvido devolve `false`, e nao `true`. Sem isso a
+  // sala pedia um protetor novo a cada tick (respawn infinito) e o `true` daqui
+  // segurava pra sempre o early-return de `garantirTransicaoDeQuotaFechada`,
+  // matando o fallback de espera da autoridade.
+  const mapIdDoMundo = world.mapDef?.id ?? ''
+  const tipo = salaDeveProtetor(world.sala, mapIdDoMundo, world)
+    ? protetorDaSala(world.sala, mapIdDoMundo)
+    : null
   if (!tipo) {
     world.protetorPendente = null
     return false
   }
-  // PH-230: o protetor DESTA sala ja caiu e a sala ainda nao avancou — o caso
-  // normal sob `salaSobAutoridade`, onde quem avanca a sala e o flush do
-  // servidor e nao `resolverProtetorDaSala`. Sem este corte a sala pedia um
-  // protetor novo a cada tick (respawn infinito) e o `true` daqui segurava pra
-  // sempre o early-return de `garantirTransicaoDeQuotaFechada`, matando o
-  // fallback de espera da autoridade. `false` = a sala nao bloqueia mais o
-  // avanco.
-  if (world.protetorResolvido) return false
   // Ja resolvido nesta mesma instancia de mundo (chamada de novo no mesmo
   // tick, ou protetor ja spawnado e ainda vivo) — idempotente, nao recria.
   if (world.protetorPendente) return true
@@ -986,7 +992,14 @@ export function buildMapWorld(
     // hunt), virou impossivel de ignorar com os 12 biomas habilitados
     // (PH-225): QUALQUER hunt de bioma, na abertura, tentava recriar um
     // protetor do nada.
-    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA && !base.estagioJaLimpo
+    // PH-473: a quota que conta aqui e a de COMUNS (29), nao os 30 — o
+    // protetor e o 30o abate, entao a sala entra em modo protetor quando o 29o
+    // comum cai. `protetorResolvido: false` porque o mundo esta nascendo: o
+    // flag e efemero e nunca chega aqui como true.
+    const quota = quotaDeAbatesDaSala(sala, mapId, {
+      estagioJaLimpo: base.estagioJaLimpo, protetorResolvido: false,
+    })
+    const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo
       ? protetorDaSala(sala, mapId)
       : null
     if (tipoDeProtetor) {
@@ -1585,7 +1598,27 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // este corte aqui `aliveCount` (que so conta o protetor, 1) ficava abaixo
   // de `maxEnemies` e este respawn enchia a sala com mobs comuns do lado do
   // protetor — achado revisando PH-217 (ChatGPTDaqui, #182).
-  if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente) {
+  //
+  // PH-473: `!world.protetorPendente` olha a ENTIDADE em campo, e o pedido do
+  // dono e sobre a CONTAGEM ("nenhum outro POKE nascendo depois do 30o").
+  // `comunsEsgotados` fecha as frestas em que a contagem diz "acabou" e a
+  // entidade nao esta la:
+  //
+  //  1. o tick em que o abate que fecha a quota acontece. O laco de abates roda
+  //     ANTES deste bloco e o spawn do protetor roda no inicio do tick
+  //     SEGUINTE (`garantirTransicaoDeQuotaFechada`), entao existe um tick com
+  //     a quota fechada e nenhum protetor em campo.
+  //  2. quota fechada e protetor fora do mundo local. Hoje o cliente sorteia o
+  //     proprio protetor e essa janela e de um tick; ela deixa de ser curta
+  //     quando ele passar a ADOTAR o do servidor (PH-475) — ai nao ha protetor
+  //     local nenhum ate o primeiro flush que o carregue.
+  //
+  // HONESTIDADE SOBRE A COBERTURA: sabotar este gate deixa
+  // `protetorEO30oAbate.test.ts` VERDE — medido. A unica fresta que ele fecha
+  // hoje dura um tick, e o harness nao a alcanca; ele e defesa em profundidade
+  // para a PH-475, que torna a fresta (2) longa e observavel.
+  if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn
+    && !world.protetorPendente && !comunsEsgotados(world, world.mapDef.id)) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)

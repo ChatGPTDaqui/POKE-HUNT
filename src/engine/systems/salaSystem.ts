@@ -31,7 +31,10 @@
 // recomeca no ciclo 1, sala 1.
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
-import { ABATES_POR_SALA, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
+import {
+  ABATES_POR_SALA, ABATES_COMUNS_POR_SALA, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, LOOT,
+  type SubBiomaDef,
+} from '@/data/biomas'
 import { estagioId, parseEstagioId, pesosDoEstagio, quantidadeDeSalas } from '@/data/estagios'
 import { estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
@@ -511,6 +514,79 @@ export function nomeDaSala(sala: SalaAtiva | null): string | null {
   return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave
 }
 
+/** Os dois campos de mundo que decidem se a sala ainda deve protetor. */
+export interface EstadoDoProtetorDaSala {
+  estagioJaLimpo: boolean
+  protetorResolvido: boolean
+}
+
+/**
+ * Esta sala ainda DEVE um protetor?
+ *
+ * TRES CONDICOES, E AS TRES JA MORAVAM ESPALHADAS. Ela e a mesma pergunta que
+ * `registrarAbate`, `garantirTransicaoDeQuotaFechada`, `garantirProtetorDaSala`
+ * e o `SalaChip` da tela faziam cada um por conta propria — e o chip esquecia o
+ * `estagioJaLimpo`, entao em estagio limpo ele mandava derrotar um Guardian que
+ * nao existe e escondia o botao de avanco (PH-474). Uma funcao, quatro
+ * chamadores.
+ *
+ * Recebe o estado por interface, e nao o `WorldState` inteiro, porque
+ * `buildMapWorld` precisa dela ANTES de o mundo existir.
+ */
+export function salaDeveProtetor(
+  sala: SalaAtiva | null, mapId: string, estado: EstadoDoProtetorDaSala,
+): boolean {
+  // PH-428: estagio ja limpo nao repoe protetor — Guardian e Lord existem pra
+  // travar a PRIMEIRA limpeza, e num estagio fechado seriam so pedagio.
+  if (estado.estagioJaLimpo) return false
+  // PH-230: ja caiu nesta sala. `protetorDaSala` e pura e continua respondendo
+  // "esta sala pede protetor" pra sempre; sem este corte a sala pediria outro a
+  // cada tick.
+  if (estado.protetorResolvido) return false
+  return protetorDaSala(sala, mapId) != null
+}
+
+/**
+ * Quantos abates fecham ESTA sala (PH-473).
+ *
+ * `ABATES_COMUNS_POR_SALA` (29) enquanto a sala deve protetor — ele e o 30o. Os
+ * `ABATES_POR_SALA` (30) cheios quando ela nao deve: hunt sem estagio, estagio
+ * ja limpo, ou protetor ja derrotado.
+ *
+ * O DENOMINADOR DA BARRA CONTINUA SENDO 30 nos dois casos. Isto e o numerador
+ * que fecha a sala, nao o total exibido — a barra em 29/30 com a quota de
+ * comuns fechada e justamente o que diz "falta o chefe".
+ */
+export function quotaDeAbatesDaSala(
+  sala: SalaAtiva | null, mapId: string, estado: EstadoDoProtetorDaSala,
+): number {
+  return salaDeveProtetor(sala, mapId, estado) ? ABATES_COMUNS_POR_SALA : ABATES_POR_SALA
+}
+
+/**
+ * A sala ja matou todos os selvagens COMUNS que devia — nenhum outro nasce
+ * (PH-473).
+ *
+ * O pedido do dono e literal: "nao havera nenhum outro Pokemon nascendo apos o
+ * numero 30, em que o 30 seja o boss". O gate de respawn de `simulation.ts` ja
+ * suspendia o repovoamento com protetor VIVO em campo (`!protetorPendente`),
+ * mas havia duas frestas: o tick entre o 29o abate e o spawn do protetor, e o
+ * caminho sob autoridade, onde o protetor do servidor pode nao ter espelho
+ * local. Nas duas o campo voltava a encher de bicho comum.
+ *
+ * DEPOIS QUE O PROTETOR CAI, O REPOVOAMENTO VOLTA — de proposito, e nao por
+ * descuido. Sob autoridade a sala so troca quando o servidor manda, o que pode
+ * levar minutos (ver `ESPERA_MAXIMA_PELA_AUTORIDADE`), e deixar o campo vazio
+ * nesse intervalo tiraria o farm do jogador em troca de nada: a sala ja esta
+ * decidida. Os abates extras nao contam — `registrarAbate` capa na quota.
+ */
+export function comunsEsgotados(world: WorldState, mapId: string): boolean {
+  const sala = world.sala
+  if (!sala) return false
+  if (!salaDeveProtetor(sala, mapId, world)) return false
+  return sala.abates >= ABATES_COMUNS_POR_SALA
+}
+
 export interface AvancoDeSala {
   /** Quota fechou neste abate — a contagem regressiva de transicao comecou. */
   avancou: boolean
@@ -536,7 +612,11 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
   if (!sala) return { avancou: false, fechouEstagio: false }
 
   sala.abates += 1
-  if (sala.abates < ABATES_POR_SALA) return { avancou: false, fechouEstagio: false }
+  // PH-473: a quota depende de a sala ainda dever protetor. Enquanto deve, sao
+  // 29 comuns (o protetor e o 30o); depois que ele cai — ou onde ele nao
+  // existe — sao os 30 cheios.
+  const quota = quotaDeAbatesDaSala(sala, mapId, world)
+  if (sala.abates < quota) return { avancou: false, fechouEstagio: false }
   // SOB AUTORIDADE REMOTA O CLIENTE NAO SORTEIA SALA. Ele conta abate (a barra
   // do HUD precisa andar a cada morte, nao de 30 em 30 segundos) e para aqui: a
   // sala seguinte chega pelo flush, por `reconciliarSalaDaAutoridade`.
@@ -558,7 +638,7 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
   // abertura — o reroll gratis que a nota do topo deste arquivo existe pra
   // impedir. Quem cede e a predicao, que e o lado sem autoridade.
   if (world.salaSobAutoridade) {
-    sala.abates = ABATES_POR_SALA
+    sala.abates = quota
     return { avancou: false, fechouEstagio: false }
   }
   // Cap: sem isto, matar mais de um inimigo no MESMO tick (AOE) ou o jogo
@@ -567,18 +647,23 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
   // ja esta armada — inofensivo pro jogo, mas polui o valor persistido
   // (server/src/progresso.ts#sala_abates) com numero que nunca reflete a
   // quota real.
-  sala.abates = ABATES_POR_SALA
-  // PH-202/203: sala do bioma piloto nunca arma transicao por conta propria
-  // (nem no 30o abate normal, nem no proprio abate do protetor) — quem arma e
+  //
+  // PH-473: o cap e a QUOTA VIGENTE, nao os 30 fixos. Com o protetor ainda de
+  // pe a quota e 29, e capar em 30 poria a barra do HUD cheia antes de ele
+  // cair — que e exatamente a leitura errada que esta issue existe pra
+  // desfazer ("completei a sala e ela travou").
+  sala.abates = quota
+  // PH-202/203: sala de bioma nunca arma transicao por conta propria (nem no
+  // ultimo abate comum, nem no proprio abate do protetor) — quem arma e
   // `resolverProtetorDaSala`, e so depois que o protetor cair. Sem este corte,
-  // o 30o abate (quase sempre um inimigo comum, o protetor ainda nem nasceu)
-  // armava a contagem regressiva NA HORA e `aplicarTransicaoDeSala` 3s depois
-  // zerava `world.enemies` — apagando o protetor que
-  // `garantirTransicaoDeQuotaFechada` ainda ia criar no tick seguinte — e a
-  // sala avancava sem o jogador nunca ter visto o protetor resolver nada.
+  // o abate que fecha a quota de comuns armava a contagem regressiva NA HORA e
+  // `aplicarTransicaoDeSala` 3s depois zerava `world.enemies` — apagando o
+  // protetor que `garantirTransicaoDeQuotaFechada` ainda ia criar no tick
+  // seguinte — e a sala avancava sem o jogador nunca ter visto o protetor
+  // resolver nada.
   // PH-428: num estagio ja limpo a sala avanca direto — Guardian e Lord existem
   // pra travar a PRIMEIRA limpeza, e num estagio fechado eles seriam so pedagio.
-  if (!world.estagioJaLimpo && protetorDaSala(sala, mapId)) {
+  if (salaDeveProtetor(sala, mapId, world)) {
     return { avancou: false, fechouEstagio: false }
   }
   // Toggle ligado + janela curta (jogador ativo): fecha a quota mas nao
@@ -604,11 +689,13 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
  * dois lugares que nao se enxergam: o avanco manual logo abaixo e o `SalaChip`
  * da tela — que precisa dela pra nao oferecer um botao que o servidor vai
  * recusar.
+ *
+ * PH-473: virou casca de `salaDeveProtetor`. A regra era escrita aqui e o
+ * `SalaChip` a reescrevia sem o `estagioJaLimpo` (PH-474); agora as duas pontas
+ * chamam a mesma funcao.
  */
 export function salaTravadaPeloProtetor(world: WorldState): boolean {
-  // PH-428: estagio ja limpo nao tem protetor pra travar nada.
-  if (world.estagioJaLimpo) return false
-  return protetorDaSala(world.sala, world.mapDef?.id ?? '') != null && !world.protetorResolvido
+  return salaDeveProtetor(world.sala, world.mapDef?.id ?? '', world)
 }
 
 /**
@@ -635,7 +722,9 @@ export function salaTravadaPeloProtetor(world: WorldState): boolean {
  */
 export function solicitarAvancoDeSala(world: WorldState, mapId: string): AvancoDeSala {
   const sala = world.sala
-  if (!sala || sala.abates < ABATES_POR_SALA) return { avancou: false, fechouEstagio: false }
+  // PH-473: a quota vigente, e nao os 30 fixos — com o protetor de pe ela e 29,
+  // e a linha seguinte e quem barra o avanco enquanto ele nao cai.
+  if (!sala || sala.abates < quotaDeAbatesDaSala(sala, mapId, world)) return { avancou: false, fechouEstagio: false }
   if (salaTravadaPeloProtetor(world)) return { avancou: false, fechouEstagio: false }
   return armarTransicaoDeSala(world, mapId)
 }
@@ -748,7 +837,8 @@ export function garantirTransicaoDeQuotaFechada(
   garantirProtetorDaSala?: () => boolean,
 ): void {
   const sala = world.sala
-  if (!sala || sala.abates < ABATES_POR_SALA) {
+  // PH-473: quota vigente (29 com protetor de pe, 30 sem).
+  if (!sala || sala.abates < quotaDeAbatesDaSala(sala, mapId, world)) {
     world.salaEsperaDaAutoridade = 0
     return
   }
@@ -1081,7 +1171,7 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   }
 }
 
-export { ABATES_POR_SALA }
+export { ABATES_POR_SALA, ABATES_COMUNS_POR_SALA }
 export { quantidadeDeSalas }
 
 /**

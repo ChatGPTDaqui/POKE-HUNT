@@ -6,6 +6,7 @@ import {
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, ABATES_POR_SALA, protetorDaSala,
+  quotaDeAbatesDaSala,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
   type ClimaTipo, type ProtetorPendente,
 } from '#engine'
@@ -1262,7 +1263,12 @@ async function simularSessao(
   // "gasto e nao creditado" que o comentario de `aplicarFlush` ja avisa pra
   // nunca deixar acontecer. Reporta no retorno em vez de lancar.
   let avancoDeSalaAplicado = false
-  if (forcarAvancoDeSala && world.sala && world.sala.abates >= ABATES_POR_SALA) {
+  // PH-473: a quota vigente, e nao os 30 fixos. Com o protetor de pe ela e 29 —
+  // `solicitarAvancoDeSala` continua recusando enquanto ele nao cai, entao o
+  // gate aqui nao afrouxa nada; ele so para de exigir um abate que a regra nova
+  // nao pede.
+  if (forcarAvancoDeSala && world.sala
+    && world.sala.abates >= quotaDeAbatesDaSala(world.sala, sessao.map_id, world)) {
     if (world.salaCountdownRemaining == null && !world.salaPendente) {
       solicitarAvancoDeSala(world, sessao.map_id)
     }

@@ -21,7 +21,7 @@ import { buildMapWorld, stepWorld, handleEnemyDefeated } from '../simulation'
 import {
   registrarAbate, garantirTransicaoDeQuotaFechada, solicitarAvancoDeSala, protetorDaSala,
 } from './salaSystem'
-import { ABATES_POR_SALA } from '@/data/biomas'
+import { ABATES_COMUNS_POR_SALA } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from '../types'
 
@@ -35,7 +35,8 @@ function mundo(semente: number): WorldState {
 
 /** Fecha a quota sem avancar de fato — mesmo helper de `abates - 1` que salas.test.ts usa. */
 function fecharQuota(world: WorldState, opts?: { manualAdvance?: boolean }) {
-  for (let i = 0; i < ABATES_POR_SALA - 1; i++) registrarAbate(world, world.mapDef!.id)
+  // PH-473: a quota de COMUNS sao 29 — o protetor e o 30o abate.
+  for (let i = 0; i < ABATES_COMUNS_POR_SALA - 1; i++) registrarAbate(world, world.mapDef!.id)
   return registrarAbate(world, world.mapDef!.id, opts)
 }
 
@@ -46,12 +47,17 @@ function fecharQuota(world: WorldState, opts?: { manualAdvance?: boolean }) {
  * `salas.test.ts#resolverProtetorSeHouver`.
  */
 function resolverProtetorSeHouver(world: WorldState) {
-  if (world.sala!.abates < ABATES_POR_SALA || !protetorDaSala(world.sala, HUNT)) return
+  // PH-473: o protetor nasce quando a quota de COMUNS (29) fecha.
+  if (world.sala!.abates < ABATES_COMUNS_POR_SALA || !protetorDaSala(world.sala, HUNT)) return
   const gameState = useGameStateStore.getState()
   if (!world.protetorPendente) stepWorld(world, 0.1, gameState, { silent: true }) // nasce o protetor
   const protetor = world.enemies.find((e) => e.isProtetor)
-  if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
+  if (!protetor) return
+  handleEnemyDefeated(world, protetor, gameState, { silent: true })
   world.enemies = world.enemies.filter((e) => !e.isProtetor)
+  // O abate DELE e o 30o da sala — no jogo quem conta e o laco de kills do
+  // stepWorld; aqui, que mata na mao, a contagem e do teste.
+  registrarAbate(world, world.mapDef!.id)
 }
 
 describe('avanco manual de sala (PH-177/181)', () => {
@@ -78,7 +84,8 @@ describe('avanco manual de sala (PH-177/181)', () => {
     expect(world.salaCountdownRemaining).toBeNull()
     expect(world.salaPendente).toBeNull()
     // Cap preservado: quota fechada nao poluiu `sala.abates` alem do teto.
-    expect(world.sala!.abates).toBe(ABATES_POR_SALA)
+    // PH-473: o teto e a quota VIGENTE, e com o protetor de pe ela e 29.
+    expect(world.sala!.abates).toBe(ABATES_COMUNS_POR_SALA)
   })
 
   it('registrarAbate: abates extras alem da quota nao estouram o cap com manualAdvance true', () => {
@@ -86,7 +93,7 @@ describe('avanco manual de sala (PH-177/181)', () => {
     fecharQuota(world, { manualAdvance: true })
     registrarAbate(world, world.mapDef!.id, { manualAdvance: true })
     registrarAbate(world, world.mapDef!.id, { manualAdvance: true })
-    expect(world.sala!.abates).toBe(ABATES_POR_SALA)
+    expect(world.sala!.abates).toBe(ABATES_COMUNS_POR_SALA)
   })
 
   it('garantirTransicaoDeQuotaFechada: manualAdvance false reavanca sozinha (livelock fix preservado)', () => {
@@ -115,7 +122,7 @@ describe('avanco manual de sala (PH-177/181)', () => {
     garantirTransicaoDeQuotaFechada(world, world.mapDef!.id, 0, true)
     expect(world.salaCountdownRemaining).toBeNull()
     expect(world.salaPendente).toBeNull()
-    expect(world.sala!.abates).toBe(ABATES_POR_SALA)
+    expect(world.sala!.abates).toBe(ABATES_COMUNS_POR_SALA)
   })
 
   it('stepWorld: toggle ligado trava a sala (opts.offline ausente = janela curta)', () => {
