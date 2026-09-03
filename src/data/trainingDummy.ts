@@ -26,6 +26,7 @@
 // atencao vira exatamente um placar comparavel: quantos bonecos de treino seu
 // time abate por hora.
 import type { HuntMapDef, HuntEncounter } from './huntTypes'
+import { GRUPOS_INICIAIS } from './biomas'
 
 export const TRAINING_MAP_ID = 'treinamento'
 const TRAINING_ENCOUNTER_ID = 'treinamento_wobbuffet'
@@ -58,7 +59,8 @@ export const TRAINING_MAP: HuntMapDef = {
   description: 'Um boneco de treino (Wobbuffet, nunca revida) pra testar a força do seu time com segurança. Sem ouro, XP, item ou captura — só pra medir: acompanhe "Mobs/h" no Hunt Analyzer.',
   levelRange: [TREINO_LEVEL, TREINO_LEVEL],
   unlockCost: null,
-  continent: 'faixa1', // nasce liberada pra qualquer conta, do primeiro POKE ao ultimo
+  // Nasce liberada pra qualquer conta, do primeiro POKE ao ultimo.
+  continent: GRUPOS_INICIAIS[0],
   bounds: { width: 1000, height: 700 },
   playerSpawn: { x: 500, y: 470 },
   bg: { primary: '#2c2f3a', secondary: '#3a3f52', image: 'assets/hunt-backgrounds/dojo.jpg' },

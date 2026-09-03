@@ -16,7 +16,7 @@
 // desenho, sem estado de jogador. Este e PERSISTENCIA: ele define uma forma que
 // vai pro banco, precisa sobreviver a save antigo e nao pode mudar sem
 // migration. Misturar os dois faria a regua parecer versionada.
-import { BIOMAS, BIOMA_POR_CHAVE, ESTAGIOS_PARA_O_LANCE, ORDEM_DOS_BIOMAS } from './biomas'
+import { BIOMAS, BIOMA_POR_CHAVE, ESTAGIOS_PARA_O_LANCE } from './biomas'
 import { ESTAGIOS_POR_BIOMA, estagioValido, parseEstagioId } from './estagios'
 
 /**
@@ -286,7 +286,7 @@ export function traduzirMapIdLegado(mapId: string | null | undefined): string | 
   const m = PADRAO_DE_FAIXA_LEGADA.exec(mapId)
   const bioma = m?.[1] ?? ''
   const faixa = Number(m?.[2] ?? 0)
-  if (!ORDEM_DOS_BIOMAS.includes(bioma)) return HUNT_DE_REFUGIO
+  if (!BIOMA_POR_CHAVE[bioma]) return HUNT_DE_REFUGIO
   const primeiroEstagio = (faixa - 1) * 3 + 1
   return `${bioma}_e${primeiroEstagio}`
 }

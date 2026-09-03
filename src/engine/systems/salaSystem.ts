@@ -31,7 +31,7 @@
 // recomeca no ciclo 1, sala 1.
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
-import { ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
+import { ABATES_POR_SALA, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { estagioId, parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
 import { estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
@@ -408,7 +408,7 @@ export function contextoDoProtetor(
 }
 
 /**
- * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
+ * PH-202/225: todo bioma tem protetor (pivo 27/08 sobre o
  * "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
  * o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
  * o ultimo da ordem, tendo protetor). Toda sala menos a ultima pede Guardian ao
@@ -427,7 +427,11 @@ export function contextoDoProtetor(
 export function protetorDaSala(sala: SalaAtiva | null, mapId: string): TipoDeProtetor | null {
   if (!sala) return null
   const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave
-  if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null
+  // PH-434: era `ORDEM_DOS_BIOMAS.includes`, e a pergunta nunca foi sobre
+  // ORDEM — e "este sub-bioma pertence a um bioma de verdade?". A ordem entre
+  // biomas morreu na PH-430; usa-la aqui deixava viva uma constante que so
+  // sobrevivia pra traduzir save antigo.
+  if (!bioma || !BIOMA_POR_CHAVE[bioma]) return null
   return sala.indice >= quantidadeDeSalas(mapId) - 1 ? 'lord' : 'guardian'
 }
 

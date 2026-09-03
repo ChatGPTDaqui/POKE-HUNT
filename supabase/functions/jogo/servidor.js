@@ -42887,26 +42887,6 @@ var COLISAO_POR_ARTE = {
 };
 //#endregion
 //#region src/data/biomas.ts
-var FAIXAS$1 = [
-	{
-		id: "faixa1",
-		nome: "I",
-		niveis: [1, 30],
-		zonaMaxima: 2
-	},
-	{
-		id: "faixa2",
-		nome: "II",
-		niveis: [31, 60],
-		zonaMaxima: 5
-	},
-	{
-		id: "faixa3",
-		nome: "III",
-		niveis: [61, 90],
-		zonaMaxima: 8
-	}
-];
 /**
 * O grupo de gate das hunts que nascem abertas.
 *
@@ -43481,30 +43461,6 @@ var GEOMETRIA = {
 	]
 };
 var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
-/**
-* PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
-* vencer o Lord do bioma N libera o bioma N+1. So existia como
-* tabela no vault (`_Architecture.md`, brainstorm 16/08, referencia: sequencia
-* de ginasios Kanto+Johto) — `BIOMAS` acima esta em ordem ARBITRARIA de
-* insercao (campo_aberto, mata, marinho, ...), que NAO bate com esta ordem.
-* Nao usar `BIOMAS.map(b => b.chave)` no lugar disto — e exatamente o furo que
-* esta constante fecha.
-*/
-var ORDEM_DOS_BIOMAS = [
-	"campo_aberto",
-	"subterraneo",
-	"marinho",
-	"industrial",
-	"mata",
-	"aguas_interiores",
-	"urbano",
-	"gelido",
-	"aridos",
-	"sagrado",
-	"sombrio",
-	"igneo"
-];
-Object.fromEntries(FAIXAS$1.map((f) => [f.id, f]));
 var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
 	sub,
 	bioma
@@ -46307,7 +46263,7 @@ var TRAINING_MAP = {
 	description: "Um boneco de treino (Wobbuffet, nunca revida) pra testar a força do seu time com segurança. Sem ouro, XP, item ou captura — só pra medir: acompanhe \"Mobs/h\" no Hunt Analyzer.",
 	levelRange: [TREINO_LEVEL, TREINO_LEVEL],
 	unlockCost: null,
-	continent: "faixa1",
+	continent: GRUPOS_INICIAIS[0],
 	bounds: {
 		width: 1e3,
 		height: 700
@@ -75773,7 +75729,7 @@ function traduzirMapIdLegado(mapId) {
 	const m = PADRAO_DE_FAIXA_LEGADA.exec(mapId);
 	const bioma = m?.[1] ?? "";
 	const faixa = Number(m?.[2] ?? 0);
-	if (!ORDEM_DOS_BIOMAS.includes(bioma)) return HUNT_DE_REFUGIO;
+	if (!BIOMA_POR_CHAVE[bioma]) return HUNT_DE_REFUGIO;
 	return `${bioma}_e${(faixa - 1) * 3 + 1}`;
 }
 //#endregion
@@ -79555,7 +79511,7 @@ function contextoDoProtetor(mapId, ctx, sala, tipo) {
 	return doProtetor;
 }
 /**
-* PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
+* PH-202/225: todo bioma tem protetor (pivo 27/08 sobre o
 * "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
 * o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
 * o ultimo da ordem, tendo protetor). Toda sala menos a ultima pede Guardian ao
@@ -79574,7 +79530,7 @@ function contextoDoProtetor(mapId, ctx, sala, tipo) {
 function protetorDaSala(sala, mapId) {
 	if (!sala) return null;
 	const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave;
-	if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null;
+	if (!bioma || !BIOMA_POR_CHAVE[bioma]) return null;
 	return sala.indice >= quantidadeDeSalas(mapId) - 1 ? "lord" : "guardian";
 }
 /** O jogador ja fechou o estagio desta hunt alguma vez? */

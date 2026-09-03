@@ -523,7 +523,7 @@ export const useUiStore = create<UiState>((set, get) => ({
     set({ vidaNoCenario })
   },
 
-  huntContinent: 'faixa1',
+  huntContinent: 'biomas',
   huntSearchTerm: '',
   huntType: 'all',
   setHuntContinent: (huntContinent) => set({ huntContinent }),

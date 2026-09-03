@@ -242,12 +242,9 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
     description: 'Batalha contra o Campeão Lance — 6 POKEs Lendários em sequência (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o próximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.',
     levelRange: [55, 65],
     unlockCost: null,
-    // Fica na faixa2 (Lv31-60), que e exatamente onde o time dele cai
-    // (Lv55-65): o jogador chega nele terminando a faixa2, e derrota-lo abre
-    // a faixa3 e o Modo Pesadelo (ver unlocksContinentOnClear abaixo).
     // PH-432: o Lance vive no grupo aberto — quem barra a entrada dele agora e
     // o progresso nos 12 biomas (`bloqueioDoLance`), nao o `continent`. Ate
-    // aqui ele estava em `faixa2`, que nascia aberta: o duelo de Lv 55-65
+    // aqui ele vivia num grupo que nascia aberto: o duelo de Lv 55-65
     // estava disponivel no dia 1, sem exigencia nenhuma.
     continent: GRUPOS_INICIAIS[0],
     bounds: { width: 1400, height: 900 },
