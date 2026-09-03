@@ -70,14 +70,121 @@ function serveGameAssets(): Plugin {
   }
 }
 
+// ---------------------------------------------------------------------------
+// PH-457 — isolamento por arquivo so onde ele e necessario.
+//
+// O isolamento (`isolate: true`, o padrao) recria o registro de modulos pra
+// CADA arquivo de teste. Medido nesta arvore: com ele, a suite cheia leva 55s;
+// sem ele, 45s — mas 3 arquivos passam a falhar por vazamento de estado global
+// entre arquivos, e a contagem oscila conforme a ordem, que e o pior modo de
+// falha que existe.
+//
+// Os tres sao exatamente os que chamam `vi.mock`, e a razao e estrutural: o
+// `vi.mock` mexe no registro de modulos do worker, que sem isolamento e
+// compartilhado com todo arquivo que rodar depois. Fora dele, ninguem mexe.
+//
+// Entao a divisao e por CONTEUDO, e nao por uma lista escrita na mao: um teste
+// novo com `vi.mock` cai sozinho no projeto isolado, e um que perde o `vi.mock`
+// migra sozinho pro rapido. Lista manual envelheceria em silencio, e o modo de
+// falha dela seria intermitente e dependente de ordem.
+//
+// A VARREDURA SAI DE `process.cwd()`, e nao do diretorio desta config. Isto e
+// deliberado e e o que mantem `authority/` funcionando: ele NAO tem config
+// propria e `cd authority && npx vitest run` (o que o CI faz) sobe a arvore ate
+// aqui. Com a varredura na raiz da CORRIDA, rodar da raiz classifica os testes
+// da raiz e rodar de `authority/` classifica os de `authority/` — cada
+// invocacao ve o proprio conjunto. Varrer o diretorio da config faria a
+// invocacao de `authority/` tentar rodar a suite inteira.
+const RAIZ_DA_CORRIDA = process.cwd()
+// Por NOME de pasta, em qualquer profundidade.
+const PASTAS_IGNORADAS = new Set(['node_modules', 'dist', '.git', '.claude'])
+// Por CAMINHO, a partir da raiz da corrida. `engine` nao pode entrar na lista
+// por nome: `src/engine/` e o motor do jogo e tem teste de verdade; quem sai e
+// so `authority/engine/`, que e bundle gerado por `npm run build:engine`.
+const CAMINHOS_IGNORADOS = new Set(['authority/engine'])
+const PADRAO_DE_TESTE = /\.(test|spec)\.[cm]?[jt]sx?$/
+
+function acharTestes(dir: string, saida: string[] = []): string[] {
+  let entradas
+  try {
+    entradas = fs.readdirSync(dir, { withFileTypes: true })
+  } catch {
+    return saida
+  }
+  for (const e of entradas) {
+    const cheio = path.join(dir, e.name)
+    if (e.isDirectory()) {
+      if (PASTAS_IGNORADAS.has(e.name)) continue
+      if (CAMINHOS_IGNORADOS.has(path.relative(RAIZ_DA_CORRIDA, cheio).split(path.sep).join('/'))) continue
+      acharTestes(cheio, saida)
+    } else if (PADRAO_DE_TESTE.test(e.name)) {
+      saida.push(cheio)
+    }
+  }
+  return saida
+}
+
+/**
+ * `vi.mock` e `vi.doMock` sao os unicos que registram no grafo de modulos do
+ * worker. `vi.fn`, `vi.spyOn` e `vi.clearAllMocks` nao — eles vivem dentro do
+ * caso e nao vazam entre arquivos.
+ */
+const MEXE_NO_REGISTRO = /\bvi\s*\.\s*(mock|doMock)\s*\(/
+
+const relativo = (p: string) => path.relative(RAIZ_DA_CORRIDA, p).split(path.sep).join('/')
+
+const todosOsTestes = acharTestes(RAIZ_DA_CORRIDA)
+const comMock: string[] = []
+const semMock: string[] = []
+for (const arq of todosOsTestes) {
+  let fonte = ''
+  try {
+    fonte = fs.readFileSync(arq, 'utf8')
+  } catch {
+    // Ilegivel: vai pro lado seguro (isolado).
+    comMock.push(relativo(arq))
+    continue
+  }
+  ;(MEXE_NO_REGISTRO.test(fonte) ? comMock : semMock).push(relativo(arq))
+}
+
+const EXCLUIR = ['**/node_modules/**', '**/dist/**', '.claude/**', 'authority/engine/**']
+const COMUM = {
+  exclude: EXCLUIR,
+  setupFiles: [path.resolve(import.meta.dirname, './src/testes/apiDoBrowserQueOJsdomNaoTem.ts')],
+  testTimeout: 15000,
+  pool: 'threads' as const,
+}
+
+// UMA definicao so, usada pela config da raiz E por cada projeto de teste.
+//
+// PROJETO NAO HERDA `plugins` NEM `resolve` DA RAIZ: cada um e um config de
+// Vite proprio. Sem isto, 127 dos 279 arquivos reprovam de uma vez — o alias
+// `@` nao resolve e o JSX nao e transformado. Foi assim que isto foi
+// descoberto, e e por isso que o alias mora nesta constante em vez de aparecer
+// escrito duas vezes: duas copias divergem, e a divergencia se manifesta como
+// meia suite reprovando de uma vez.
+const ALIAS = { '@': path.resolve(import.meta.dirname, './src') }
+
+// Projeto com include vazio faz o vitest reprovar com "No test files found".
+// Um conjunto sem nenhum arquivo mockado (ou sem nenhum puro) e estado
+// possivel — `authority/` sozinho ja e quase isso —, entao o projeto so entra
+// na lista se tiver arquivo.
+const projetoDeTeste = (nome: string, include: string[], isolate: boolean) => ({
+  plugins: [react(), tailwindcss()],
+  resolve: { alias: ALIAS },
+  test: { ...COMUM, name: nome, include, isolate },
+})
+
+const projetos = [
+  semMock.length ? projetoDeTeste('puro', semMock, false) : null,
+  comMock.length ? projetoDeTeste('mockado', comMock, true) : null,
+].filter((p) => p !== null)
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), serveGameAssets()],
-  resolve: {
-    alias: {
-      '@': path.resolve(import.meta.dirname, './src'),
-    },
-  },
+  resolve: { alias: ALIAS },
   // Sem `environment` aqui de proposito: o padrao do Vitest ja e o ambiente
   // 'node', que serve pra quase todo teste deste projeto (motor e dado puro).
   // jsdom custa ~10x mais pra subir, entao so os testes de componente o pedem,
@@ -128,11 +235,11 @@ export default defineConfig({
     // processo, entao o custo de partida do runtime e do resolvedor de modulo e
     // pago uma vez por worker em vez de uma vez por processo.
     //
-    // O que isso NAO muda: cada arquivo continua isolado (`isolate` fica no
-    // padrao `true`), entao `vi.mock` e estado global de modulo seguem se
-    // comportando igual. Desligar isolamento e outra conversa, mede -44% e
-    // quebra 3 a 5 arquivos por vazamento entre eles (PH-457).
+    // O isolamento por arquivo nao sumiu: ele passou a valer so onde e
+    // necessario, pela divisao em `projects` montada logo acima deste
+    // `defineConfig` (PH-457).
     pool: 'threads',
+    projects: projetos,
   },
   build: {
     // Por padrao o Vite emite os chunks em `dist/assets/`, que colidiria com
