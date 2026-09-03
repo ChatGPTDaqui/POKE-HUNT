@@ -23,6 +23,7 @@ import { faceIconUrl, spriteUrl } from './sprites'
 import { todasAsTirasDeVfx } from './vfxTiras'
 import { todosOsIconesDeHabilidade } from './abilityIcons'
 import { todosOsVfxDeStatus } from './statusVfx'
+import { urlsDeEstagio } from './estagioVfx'
 import { todasAsTirasDeProps } from '@/render/ambienteProps'
 import { primeImage } from '@/render/sprites'
 import { CENA_HOSPITAL } from './hospital'
@@ -133,6 +134,17 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   const efeitos = [
     ...todasAsTirasDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus(),
     ...todasAsTirasDeProps(),
+    // PH-416: as 15 tiras de mudanca de atributo. 28 kB no total — mais baratas
+    // que as 8 da animacao de bola logo abaixo, e com o mesmo argumento: golpe
+    // de status e das primeiras coisas que acontecem numa hunt (o auto-play usa
+    // o que o POKE sabe, e Growl/Tail Whip/Leer estao no comeco de quase toda
+    // linha evolutiva). Sem elas, o primeiro Rosnado da sessao desenha o
+    // fallback procedural enquanto o PNG baixa — silencioso, e por isso mesmo
+    // fica assim pra sempre se ninguem cruzar as listas.
+    //
+    // ESTE ERA O BURACO DA PH-416: `urlsDeEstagio` nasceu documentada como "usada
+    // pelo preload" e nenhum lugar a chamava fora do teste.
+    ...urlsDeEstagio(),
     // PH-400: as tiras da animacao de bola (8 arquivos, 170 kB no total). Ficavam
     // de fora e a PRIMEIRA captura da sessao desenhava nada por alguns quadros —
     // e a primeira captura acontece no comeco, quando o cache esta mais frio.

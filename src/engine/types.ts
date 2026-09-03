@@ -21,7 +21,7 @@ import type { ElementType } from '@/data/generated/types'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
 import type { Ability } from '@/data/abilities'
 import type { ResolvedBattleAnim } from '@/data/battleSprites'
-import type { StatusAtivo, EstagiosDeStat, EstagiosFonte } from '@/data/statusEffects'
+import type { StatusAtivo, EstagiosDeStat, EstagiosFonte, StatDeEstagio } from '@/data/statusEffects'
 import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
@@ -547,9 +547,18 @@ export interface WorldEffect {
   // dos 0,35s de vida do impacto, e a arte apontaria pra outro lugar no meio
   // da animacao.
   anguloDeAtaque?: number
-  // Presente so em `abilityEffect` de golpe de STATUS (ver data/statusVfx.ts)
-  // — troca o burst de impacto normal pela arte de buff/debuff por tipo.
+  // Presente so em `abilityEffect` de golpe de STATUS — troca o burst de
+  // impacto normal pela arte de buff/debuff (data/estagioVfx.ts).
   statusDirection?: 'aumenta' | 'diminui'
+  // QUAL atributo o golpe mexeu (PH-416). Ausente com `statusDirection`
+  // presente = golpe de condicao, que nao mexe em atributo nenhum e usa a peca
+  // generica.
+  //
+  // Anda no EFEITO, e nao e derivado na hora de desenhar, pelo mesmo motivo do
+  // `anguloDeAtaque` logo acima: o efeito sobrevive ao golpe, e recalcular na
+  // hora do desenho leria o estado do POKE 1,1s depois — depois de outro golpe
+  // ter mexido em outro atributo.
+  statusStat?: StatDeEstagio
   ballItemId?: string
   success?: boolean
   laneSize: number
