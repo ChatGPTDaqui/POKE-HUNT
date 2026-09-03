@@ -1,37 +1,35 @@
-(schema) => [
-'-- PH-492: `configurar_auto` passa a aceitar o toggle `avancarDeEstagio`.',
-'--',
-'-- O DEFEITO QUE ISTO CORRIGE ESTEVE EM PRODUCAO DESDE 02/09, e ele nao era',
-'-- "uma opcao nao salva": a RPC valida os toggles por lista branca e o `raise`',
-'-- derruba a TRANSACAO INTEIRA. Como o cliente manda `autoToggles` cru num',
-'-- batch unico (data/remote/autoridade.ts#sincronizarAuto), a presenca da chave',
-'-- nova fazia o batch inteiro falhar — e NENHUMA configuracao de auto era',
-'-- gravada: os seis toggles, bola padrao e shiny, regras de pocao, regras de',
-'-- captura por especie, itens de cura de status e a auto-venda.',
-'--',
-'-- Confirmado por chamada real contra o schema `dev` antes de escrever isto:',
-'--   avancarDeEstagio sozinho    -> 400 P0001 "toggle desconhecido"',
-'--   autoPot sozinho (controle)  -> 200 {"ok": true}',
-'--   o batch que o cliente manda -> 400 P0001',
-'--',
-'-- O erro era silencioso: `sincronizarAuto` termina em `.catch(reportarErro)`,',
-'-- sem refetch e sem travar a tela. O jogador via a config funcionar na sessao',
-'-- (o motor local le o store) e voltar ao antigo no F5.',
-'--',
-'-- E A MESMA ARMADILHA PELA SEGUNDA VEZ. A migration de 26/08 ja a documentou,',
-'-- e a de 28/08 a repetiu por escrito ao acrescentar `lureConfig`. A PH-428',
-'-- (02/09) levou o toggle novo pro cliente E pro bundle da Edge — que ja tem o',
-'-- `if (fechouEstagio && gameState.autoToggles.avancarDeEstagio)` — e deixou a',
-'-- migration pra tras. Meia entrega.',
-'--',
-'-- A CORRECAO ESTRUTURAL NAO E ESTE ARQUIVO, e sim o teste que a PH-492 traz',
-'-- junto: a lista branca daqui e as chaves de `autoToggles` sao a MESMA regra',
-'-- escrita em duas linguagens, e ate agora nada as amarrava.',
-'--',
-'-- Unica mudanca de comportamento: a chave a mais na lista branca. O resto da',
-'-- funcao e reproduzido igual porque `CREATE OR REPLACE` exige o corpo inteiro.',
-'',
-].join('\n')-- public.configurar_auto
+-- PH-492: `configurar_auto` passa a aceitar o toggle `avancarDeEstagio`.
+--
+-- O DEFEITO QUE ISTO CORRIGE ESTEVE EM PRODUCAO DESDE 02/09, e ele nao era
+-- "uma opcao nao salva": a RPC valida os toggles por lista branca e o `raise`
+-- derruba a TRANSACAO INTEIRA. Como o cliente manda `autoToggles` cru num
+-- batch unico (data/remote/autoridade.ts#sincronizarAuto), a presenca da chave
+-- nova fazia o batch inteiro falhar — e NENHUMA configuracao de auto era
+-- gravada: os seis toggles, bola padrao e shiny, regras de pocao, regras de
+-- captura por especie, itens de cura de status e a auto-venda.
+--
+-- Confirmado por chamada real contra o schema `dev` antes de escrever isto:
+--   avancarDeEstagio sozinho    -> 400 P0001 "toggle desconhecido"
+--   autoPot sozinho (controle)  -> 200 {"ok": true}
+--   o batch que o cliente manda -> 400 P0001
+--
+-- O erro era silencioso: `sincronizarAuto` termina em `.catch(reportarErro)`,
+-- sem refetch e sem travar a tela. O jogador via a config funcionar na sessao
+-- (o motor local le o store) e voltar ao antigo no F5.
+--
+-- E A MESMA ARMADILHA PELA SEGUNDA VEZ. A migration de 26/08 ja a documentou,
+-- e a de 28/08 a repetiu por escrito ao acrescentar `lureConfig`. A PH-428
+-- (02/09) levou o toggle novo pro cliente E pro bundle da Edge e deixou a
+-- migration pra tras. Meia entrega.
+--
+-- A CORRECAO ESTRUTURAL NAO E ESTE ARQUIVO, e sim o teste que a PH-492 traz
+-- junto: a lista branca daqui e as chaves de `autoToggles` sao a MESMA regra
+-- escrita em duas linguagens, e ate agora nada as amarrava.
+--
+-- Unica mudanca de comportamento: a chave a mais na lista branca. O resto da
+-- funcao e reproduzido igual porque `CREATE OR REPLACE` exige o corpo inteiro.
+
+-- public.configurar_auto
 CREATE OR REPLACE FUNCTION public.configurar_auto(p_patch jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
