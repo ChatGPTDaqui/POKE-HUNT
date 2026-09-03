@@ -880,15 +880,27 @@ export function TrilhaDoBioma({
   onEntrar: (mapId: string) => void
   onVoltar: () => void
 }) {
+  // O HOOK VEM ANTES DA GUARDA, e a ordem nao e estilo.
+  //
+  // Ate aqui era `if (!bioma) return null` e SO ENTAO o `useState` — o unico
+  // `error` do oxlint no projeto (`react-hooks(rules-of-hooks)`). Nunca estourou
+  // porque `biomaChave` sempre resolve hoje: quem monta a trilha vem da lista
+  // dos 12 biomas. E defeito LATENTE, e o modo de falha e feio: no dia em que
+  // uma chave invalida chegar (deep link, bioma removido, estado persistido
+  // velho), a MESMA instancia passa a renderizar ora com hook ora sem, a ordem
+  // dos hooks desalinha, e o sintoma nao e tela em branco — e estado de outro
+  // hook aparecendo no lugar errado.
+  //
+  // Qual no o cursor/foco esta em cima (PH-469). Estado LOCAL e nao no store:
+  // ele morre com a tela e ninguem mais precisa dele.
+  const [destacado, setDestacado] = useState<number | null>(null)
+
   const bioma = BIOMA_POR_CHAVE[biomaChave]
   if (!bioma) return null
 
   const limpo = maiorEstagioLimpo(progresso, bioma.chave)
   const cor = colorForType(bioma.tipo)
   const pontos = caminhoDoBioma(bioma.chave)
-  // Qual no o cursor/foco esta em cima (PH-469). Estado LOCAL e nao no store:
-  // ele morre com a tela e ninguem mais precisa dele.
-  const [destacado, setDestacado] = useState<number | null>(null)
 
   // O painel abre no estagio ATUAL quando o jogador entra no bioma, e nao
   // vazio: chegar num mapa e ter que adivinhar qual dos dez clicar e o mesmo

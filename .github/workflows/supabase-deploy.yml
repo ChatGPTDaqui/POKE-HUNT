@@ -185,3 +185,84 @@ jobs:
           fi
 
           echo "### Producao verificada: login, \`/estado\`, CORS e abertura de hunt" >> "$GITHUB_STEP_SUMMARY"
+
+      # O BURACO QUE ESTE PASSO FECHA, e ele foi visto acontecer em 03/09.
+      #
+      # As duas bancadas acima conferem login, `/estado`, CORS e abertura de
+      # hunt — tudo EDGE. Nenhuma delas olha qual bundle o Cloudflare Pages esta
+      # servindo, e o Pages e um pipeline SEPARADO deste workflow.
+      #
+      # Resultado observado na promocao da 7.42: o deploy fechou VERDE, as duas
+      # bancadas deram TUDO OK, e o cliente em producao ainda era o da 7.41. Deu
+      # certo por espera, nao por verificacao — se o build do Pages tivesse
+      # falhado calado, este job teria dito sucesso do mesmo jeito.
+      #
+      # POR QUE ELE NAO REPROVA O JOB. A regra do `CLAUDE.md` e "promocao
+      # vermelha, reverte producao primeiro". Pages atrasado NAO e producao
+      # quebrada: o banco e a Edge ja estao no ar e o jogo funciona: o que falta
+      # e o cliente novo. Reverter por isso seria trocar um atraso cosmetico por
+      # um rollback de verdade. Mesmo raciocinio do ramo INCONCLUSIVO acima.
+      - name: O CLIENTE publicado e o desta promocao?
+        run: |
+          set -uo pipefail
+
+          # A VERSAO da nota mais nova e o carimbo que prova qual build esta no
+          # ar: ela muda a cada promocao e vive no mesmo commit que o resto.
+          VERSAO=$(grep -m1 -oE "version: *'[^']+'" src/data/patchNotes.ts | grep -oE "[0-9]+\.[0-9]+")
+          if [ -z "$VERSAO" ]; then
+            echo "::warning::Nao consegui ler a versao da nota mais nova — verificacao do cliente pulada."
+            exit 0
+          fi
+          # Ponto no regex casa qualquer caractere; escapar deixa `7.42` sem
+          # casar com `7142`.
+          RE=$(printf '%s' "$VERSAO" | sed 's/\./\\./g')
+
+          # A ORIGEM e a mesma dos harnesses (`abrir-hunt-em-producao.mjs`).
+          ORIGEM="https://poke-hunt-euj.pages.dev"
+
+          # Ate 10 minutos. Em 03/09 o Pages levou alguns minutos depois de o
+          # deploy da Edge fechar; o teto existe pra o passo nao ficar preso.
+          # O BUNDLE VAI PRA ARQUIVO ANTES DO GREP, e isto e correcao de defeito
+          # medido, nao estilo: `curl ... | grep -q` faz o grep sair no primeiro
+          # casamento e fechar o pipe, o curl morre escrevendo
+          # ("curl: Failed writing body") e o `set -o pipefail` reprova a
+          # pipeline INTEIRA. Ou seja: o bundle continha a versao e a checagem
+          # dizia que nao. Falso negativo justamente no passo que existe pra nao
+          # mentir. Pego rodando o script — `bash -n` passa nele.
+          ACHOU=0
+          for _ in $(seq 1 20); do
+            curl -sS --max-time 20 "$ORIGEM/" -o indice.html || true
+            BUNDLE=$(grep -oE '/build/index-[A-Za-z0-9_-]+\.js' indice.html | head -1 || true)
+            if [ -n "$BUNDLE" ]; then
+              curl -sS --max-time 60 "$ORIGEM$BUNDLE" -o cliente.js || true
+              # `version:.7\.42` casa com aspas simples, duplas OU crase — o
+              # minificador ja usou as tres. Ancorar em `version:` e o que evita
+              # o falso positivo: `7.42` solto aparece em coordenada de SVG.
+              if grep -qE "version:.${RE}" cliente.js; then
+                ACHOU=1
+                break
+              fi
+            fi
+            sleep 30
+          done
+          rm -f indice.html cliente.js
+
+          if [ "$ACHOU" = "1" ]; then
+            echo "### Cliente publicado confere: a nota $VERSAO esta no bundle em producao" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "::warning::O Pages ainda nao publicou o cliente desta promocao (nota $VERSAO). Edge e banco JA estao no ar."
+          {
+            echo "### O CLIENTE ainda nao e o desta promocao"
+            echo ""
+            echo "Depois de 10 minutos, o bundle em producao nao contem a nota \`$VERSAO\`."
+            echo ""
+            echo "**Isto nao e producao quebrada** — banco e Edge ja estao no ar e o jogo funciona. O que falta e o build do Cloudflare Pages, que e um pipeline separado deste workflow."
+            echo ""
+            echo "Conferir na mao (o bundle tem que conter a versao da nota mais nova):"
+            echo ""
+            echo '```'
+            echo "curl -s $ORIGEM/ | grep -oE '/build/index-[A-Za-z0-9_-]+\.js'"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
