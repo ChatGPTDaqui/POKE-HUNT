@@ -122,7 +122,20 @@ async function entrar() {
     body: JSON.stringify({ email: CONTA, password: SENHA }),
   })
   const j = await r.json()
-  if (!r.ok) throw new Error(`login HTTP ${r.status}: ${j.error_description || j.msg || ''}`)
+  if (!r.ok) {
+    const msg = `login HTTP ${r.status}: ${j.error_description || j.msg || ''}`
+    // Credencial recusada (400/401/403) NAO e producao quebrada, e sim
+    // configuracao (PH-463) — sai 2, o codigo de inconclusivo que esta bancada
+    // ja usa. Importa porque ela roda como passo do `supabase-deploy.yml`, e a
+    // regra do projeto manda REVERTER quando a promocao fica vermelha: segredo
+    // mal colado nao pode disparar revert. 5xx e rede continuam sendo producao.
+    if (r.status === 400 || r.status === 401 || r.status === 403) {
+      const e = new Error(msg)
+      e.inconclusivo = true
+      throw e
+    }
+    throw new Error(msg)
+  }
   return j.access_token
 }
 
@@ -203,14 +216,29 @@ try {
   codigo = await conferir()
 } catch (e) {
   console.error(`\nERRO: ${e.message}`)
-  codigo = 1
+  codigo = e.inconclusivo ? 2 : 1
 } finally {
   await fecharSessao()
 }
 
 console.log(
   codigo === 0 ? '\n=== TUDO OK — hunt ABRE em producao, e os gates que devem recusar recusam ==='
-  : codigo === 2 ? '\n=== INCONCLUSIVO — a conta de teste nao estava em estado de cacar ==='
+  : codigo === 2 ? '\n=== INCONCLUSIVO — a credencial ou a conta de teste nao permitiram concluir ==='
   : '\n=== REPROVOU — ver as linhas FALHOU acima ===',
 )
-process.exit(codigo)
+
+// `process.exitCode` e NAO `process.exit()` (PH-463).
+//
+// `process.exit()` derruba o processo com sockets do `fetch` ainda abertos, e no
+// Windows isso aborta com
+//   Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), src\win\async.c:94
+// deixando codigo de saida 3221226505 (0xC0000409) no lugar do 0/1/2. Medido
+// aqui: a bancada imprimia INCONCLUSIVO e devolvia 3221226505.
+//
+// Isso importa porque este script e passo do `supabase-deploy.yml`: um codigo
+// corrompido nao e 0 nem 2, entao seria lido como "producao quebrada" e
+// dispararia revert de producao por causa de uma senha errada.
+//
+// Com `exitCode`, o node encerra sozinho quando os sockets fecham, com o codigo
+// certo.
+process.exitCode = codigo

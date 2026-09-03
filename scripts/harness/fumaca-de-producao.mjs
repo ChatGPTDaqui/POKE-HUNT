@@ -110,6 +110,20 @@ const AMBIENTES = [
   { nome: 'staging', funcao: 'jogo-dev', origem: 'https://dev.poke-hunt-euj.pages.dev' },
 ]
 
+/**
+ * Credencial errada NAO e producao quebrada (PH-463).
+ *
+ * A distincao existe porque este script virou passo do `supabase-deploy.yml`, e
+ * la ele decide entre "deixa a promocao verde" e "deixa vermelha" — e a regra do
+ * projeto manda REVERTER quando a promocao fica vermelha. Um segredo mal colado
+ * nao pode disparar revert de producao.
+ *
+ * 400/401/403 no login e o servidor dizendo "essa credencial nao presta": e
+ * problema de configuracao. Qualquer outra coisa (5xx, rede, timeout) e o
+ * servidor nao respondendo — isso E producao, e tem que reprovar.
+ */
+class CredencialRuim extends Error {}
+
 async function entrar(origem) {
   const r = await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
     method: 'POST',
@@ -117,7 +131,11 @@ async function entrar(origem) {
     body: JSON.stringify({ email: CONTA, password: SENHA }),
   })
   const j = await r.json()
-  if (!r.ok) throw new Error(`login HTTP ${r.status}: ${j.error_description || j.msg || ''}`)
+  if (!r.ok) {
+    const msg = `login HTTP ${r.status}: ${j.error_description || j.msg || ''}`
+    if (r.status === 400 || r.status === 401 || r.status === 403) throw new CredencialRuim(msg)
+    throw new Error(msg)
+  }
   return j.access_token
 }
 
@@ -129,6 +147,11 @@ async function conferir({ nome, funcao, origem }) {
   try {
     token = await entrar(origem)
   } catch (e) {
+    if (e instanceof CredencialRuim) {
+      console.log(`  LOGIN  INCONCLUSIVO — ${e.message}`)
+      console.log('  -> credencial recusada. Isto e configuracao, nao producao quebrada.')
+      return 'inconclusivo'
+    }
     console.log(`  LOGIN  FALHOU — ${e.message}`)
     return false
   }
@@ -168,10 +191,26 @@ console.log(`Banco: ${URL_BASE}`)
 console.log(`Conta: ${CONTA}`)
 
 let todosOk = true
+let algumInconclusivo = false
 for (const amb of AMBIENTES.filter((a) => pedidos.includes(a.nome))) {
-  const ok = await conferir(amb)
-  todosOk = todosOk && ok
+  const r = await conferir(amb)
+  if (r === 'inconclusivo') algumInconclusivo = true
+  else todosOk = todosOk && r
 }
 
-console.log(`\n=== ${todosOk ? 'TUDO OK — o jogo CARREGA nos ambientes conferidos' : 'REPROVOU — ver a linha marcada FALHOU acima'} ===`)
-process.exit(todosOk ? 0 : 1)
+// TRES saidas, e nao duas (PH-463). O 2 e o que impede um segredo mal colado de
+// virar revert de producao quando este script roda como passo do deploy — mesma
+// convencao de `abrir-hunt-em-producao.mjs`.
+// `process.exitCode` e NAO `process.exit()` (PH-463). `process.exit()` derruba o
+// processo com sockets do `fetch` abertos, e no Windows isso aborta com
+//   Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), src\win\async.c:94
+// devolvendo 3221226505 no lugar do codigo real. Como este script e passo do
+// `supabase-deploy.yml`, um codigo corrompido seria lido como "producao
+// quebrada" e dispararia revert por causa de uma senha errada.
+if (algumInconclusivo) {
+  console.log('\n=== INCONCLUSIVO — a credencial foi recusada; isto e configuracao, nao producao ===')
+  process.exitCode = 2
+} else {
+  console.log(`\n=== ${todosOk ? 'TUDO OK — o jogo CARREGA nos ambientes conferidos' : 'REPROVOU — ver a linha marcada FALHOU acima'} ===`)
+  process.exitCode = todosOk ? 0 : 1
+}

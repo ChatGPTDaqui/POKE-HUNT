@@ -54,30 +54,63 @@ jobs:
   sincronizar:
     runs-on: ubuntu-latest
     steps:
-      - name: Tem token pra abrir a PR?
+      - name: Tem token pra abrir a PR, e ele funciona?
         id: token
         env:
           BACK_MERGE_TOKEN: ${{ secrets.BACK_MERGE_TOKEN }}
         run: |
-          if [ -z "${BACK_MERGE_TOKEN}" ]; then
+          # BRANCO CONTA COMO AUSENTE (PH-463). `-z` e falso pra uma string com
+          # so um `\n`, e `gh secret set NOME` sem `--body` le da entrada padrao:
+          # entrada vazia cria um segredo que EXISTE e nao e vazio. Sem este
+          # `tr -d`, esse segredo passaria pela guarda e o passo seguinte rodaria
+          # com um token que nao autentica.
+          LIMPO=$(printf '%s' "${BACK_MERGE_TOKEN:-}" | tr -d '[:space:]')
+
+          if [ -n "${LIMPO}" ]; then
+            # VALIDA ANTES DE ESCREVER QUALQUER COISA (PH-463). Chamada barata e
+            # somente-leitura. Token ruim tem que cair no MESMO caminho de "sem
+            # segredo" — avisa e sai 0 —, e nunca reprovar a promocao: isto aqui
+            # e conveniencia, e a regra do projeto manda REVERTER quando a
+            # promocao fica vermelha. Segredo mal colado nao pode virar
+            # investigacao de revert em producao.
+            if GH_TOKEN="${BACK_MERGE_TOKEN}" gh api user --jq .login > /dev/null 2>&1; then
+              echo "tem=1" >> "$GITHUB_OUTPUT"
+              echo "BACK_MERGE_TOKEN presente e autenticando."
+              exit 0
+            fi
             echo "tem=0" >> "$GITHUB_OUTPUT"
-            echo "::warning::BACK_MERGE_TOKEN nao configurado — back-merge automatico pulado, faca na mao."
+            echo "::warning::BACK_MERGE_TOKEN existe mas NAO autentica — back-merge pulado, faca na mao."
             {
-              echo "### Back-merge automatico pulado"
+              echo "### Back-merge automatico pulado: o token nao autentica"
               echo ""
-              echo "O segredo \`BACK_MERGE_TOKEN\` nao existe neste repo."
+              echo "O segredo \`BACK_MERGE_TOKEN\` existe, mas \`gh api user\` recusou."
               echo ""
-              echo "Sem ele a PR seria aberta pelo \`GITHUB_TOKEN\`, e PR aberta pelo \`GITHUB_TOKEN\` nao dispara \`pull_request\`: \`check\` e \`build-check\` nunca rodariam e a PR ficaria presa pra sempre."
+              echo "Causa mais comum: \`gh secret set BACK_MERGE_TOKEN\` rodado sem \`--body\` e sem colar nada, o que grava um segredo em branco ou truncado. Refazer colando o PAT quando ele pedir."
               echo ""
-              echo "Para ligar, com um PAT que tenha escopo \`repo\`:"
-              echo ""
-              echo '```'
-              echo "gh secret set BACK_MERGE_TOKEN --repo ChatGPTDaqui/POKE-HUNT"
-              echo '```'
+              echo "O PAT precisa de **Contents: write** e **Pull requests: write** neste repositorio."
             } >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "tem=1" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          # Daqui pra baixo so chega quem nao tem segredo nenhum (ou tem um em
+          # branco, que conta como nao ter).
+          echo "tem=0" >> "$GITHUB_OUTPUT"
+          echo "::warning::BACK_MERGE_TOKEN nao configurado — back-merge automatico pulado, faca na mao."
+          {
+            echo "### Back-merge automatico pulado"
+            echo ""
+            echo "O segredo \`BACK_MERGE_TOKEN\` nao existe neste repo, ou esta em branco."
+            echo ""
+            echo "Sem ele a PR seria aberta pelo \`GITHUB_TOKEN\`, e PR aberta pelo \`GITHUB_TOKEN\` nao dispara \`pull_request\`: \`check\` e \`build-check\` nunca rodariam e a PR ficaria presa pra sempre."
+            echo ""
+            echo "Para ligar, com um PAT que tenha **Contents: write** e **Pull requests: write** neste repositorio:"
+            echo ""
+            echo '```'
+            echo "gh secret set BACK_MERGE_TOKEN --repo ChatGPTDaqui/POKE-HUNT"
+            echo '```'
+            echo ""
+            echo "Ele PEDE o valor e le da entrada padrao — colar o PAT quando pedir. Rodar sem colar nada grava um segredo em branco."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: A dev ja tem este commit?
         id: precisa
@@ -111,13 +144,22 @@ jobs:
           CURTO="${GITHUB_SHA:0:7}"
           BRANCH="sync/main-para-dev-${CURTO}"
 
-          # Cria a ref pela API. Ja existir (re-run do mesmo push) nao e erro.
-          if gh api "repos/${GITHUB_REPOSITORY}/git/refs" \
+          # Cria a ref pela API. Ja existir (re-run do mesmo push) nao e erro —
+          # mas SO isso nao e erro.
+          #
+          # A versao anterior tinha um `else` que dizia "ja existia" pra qualquer
+          # falha, inclusive `401 Bad credentials` (PH-463). O run morria duas
+          # linhas abaixo, no `gh pr list`, com o log afirmando uma causa errada.
+          # Aqui o motivo real e impresso, e so "ja existe" segue adiante.
+          if ERRO=$(gh api "repos/${GITHUB_REPOSITORY}/git/refs" \
                -f "ref=refs/heads/${BRANCH}" \
-               -f "sha=${GITHUB_SHA}" > /dev/null 2>&1; then
+               -f "sha=${GITHUB_SHA}" 2>&1 > /dev/null); then
             echo "branch ${BRANCH} criada"
+          elif printf '%s' "${ERRO}" | grep -qi "already exists"; then
+            echo "branch ${BRANCH} ja existia (re-run do mesmo push)"
           else
-            echo "branch ${BRANCH} ja existia"
+            echo "::error::Nao consegui criar ${BRANCH}: ${ERRO}"
+            exit 1
           fi
 
           # Corpo em arquivo: markdown com crase e quebra de linha dentro de um
