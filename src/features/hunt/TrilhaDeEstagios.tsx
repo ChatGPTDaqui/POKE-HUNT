@@ -30,6 +30,9 @@ import { MAPS } from '@/data/maps'
 import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
 import { SPECIES, type Species } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
+import { SegmentedTabs } from '@/components/game/controls'
+import { LinhaDeEspecie } from './LinhaDeEspecie'
+import { elencoDoEstagio, subBiomasDoEstagio } from './elencoDoEstagio'
 import { cn } from '@/lib/utils'
 
 /**
@@ -617,8 +620,18 @@ function LinhaDoCaminho({
  * A troca e a das duas referencias que o dono mandou: o mapa responde "onde
  * estou e pra onde vou", o painel responde "o que tem la".
  */
+/**
+ * Valor da aba "o estagio inteiro".
+ *
+ * Uma string sentinela e nao `null` porque `SegmentedTabs` e tipado em
+ * `T extends string` — o `null` fica na fronteira do componente
+ * (`elencoDoEstagio` recebe `null` pra dizer "sem recorte"), e nao no meio da
+ * fileira de abas.
+ */
+const DO_ESTAGIO = '__estagio__'
+
 function PainelDoEstagio({
-  bioma, estagio, estado, progresso, ehAtiva, entrando, onEntrar,
+  bioma, estagio, estado, progresso, ehAtiva, entrando, pokeEmCampo, onEntrar,
 }: {
   bioma: BiomaDef
   estagio: number
@@ -626,12 +639,23 @@ function PainelDoEstagio({
   progresso: ProgressoPorBioma
   ehAtiva: boolean
   entrando: boolean
+  /** O POKE em campo, pra a coluna de efetividade. `null` a esconde. */
+  pokeEmCampo: Species | null
   onEntrar: () => void
 }) {
   const mapId = estagioId(bioma.chave, estagio)
   const [lo, hi] = niveisDoEstagio(estagio)
-  const composicao = useMemo(() => composicaoDoEstagio(bioma, estagio), [bioma, estagio])
-  const especies = useMemo(() => especiesDoEstagio(mapId), [mapId])
+  // Qual sub-bioma o jogador esta olhando; `null` = o estagio inteiro. O
+  // componente e remontado por `key={mapId}` na trilha, entao trocar de estagio
+  // volta pro estagio inteiro sozinho — sem `useEffect` de sincronizacao.
+  const [recorte, setRecorte] = useState<string | null>(null)
+  const subBiomas = useMemo(() => subBiomasDoEstagio(bioma, estagio), [bioma, estagio])
+  // A conta e pesada o bastante pra memoizar: ela roda `contextoDeSpawn` uma vez
+  // por (sub-bioma x indice de sala) — ate 4 x 8 = 32 chamadas, cada uma com o
+  // recorte de janela de nivel e a apara de teto. O cache de `contextoDeSpawn`
+  // absorve a repeticao entre renders, este `useMemo` absorve a de dentro do
+  // mesmo render.
+  const elenco = useMemo(() => elencoDoEstagio(bioma, estagio, recorte), [bioma, estagio, recorte])
   const bloqueio = bloqueioDoEstagio(progresso, bioma.chave, estagio)
   const bloqueado = estado === 'bloqueado'
 
@@ -660,30 +684,56 @@ function PainelDoEstagio({
 
       {bloqueado && bloqueio && <div className="text-[.78em] text-warn">{bloqueio}</div>}
 
-      {/* A COMPOSICAO DE SUB-BIOMA e o que conta que o bioma afunda: no Marinho
-          a Praia cai de 60% pra 0% e o Leito Oceanico sobe de 0% pra 79% ao
-          descer os dez. Sub-bioma de peso zero nao aparece — a ausencia dele E
-          a historia. */}
-      <div className="flex flex-wrap gap-[.3em]">
-        {composicao.map((s) => (
-          <span
-            key={s.chave}
-            className="rounded-[.35em] bg-n800 px-[.4em] py-[.1em] text-[.72em] text-n300"
-          >
-            {s.nome} <b className="text-n100">{Math.round(s.pct)}%</b>
-          </span>
-        ))}
-      </div>
+      {/* A COMPOSICAO DE SUB-BIOMA VIROU A FILEIRA DE ABAS (PH-470).
+          Ela era uma fileira de chips SEPARADA da lista de POKEs, e as duas
+          respondiam meia pergunta cada: os chips diziam "a Praia sai em 38% das
+          salas" e a lista dizia "estas 40 especies aparecem no estagio", sem
+          cruzamento. O jogador que quer uma especie de um sub-bioma especifico
+          — que e o ponto da cacada direcionada da PH-428 — nao tinha como saber
+          a chance DELA dentro dali.
 
-      <div className="text-[.72em] text-n500">POKEs deste estágio ({especies.length})</div>
-      <div className="flex flex-wrap gap-[.25em]">
-        {especies.map((sp) => (
-          <span
-            key={sp.id}
-            className="rounded-[.35em] bg-n800 px-[.4em] py-[.1em] text-[.72em] text-n300"
-          >
-            {sp.name}
-          </span>
+          Como aba, o mesmo chip agora FILTRA: a porcentagem continua visivel no
+          rotulo e clicar recalcula a lista como se toda sala caisse naquele
+          sub-bioma.
+
+          A COMPOSICAO E O QUE CONTA QUE O BIOMA AFUNDA: no Marinho a Praia cai
+          de 60% pra 0% e o Leito Oceanico sobe de 0% pra 79% ao descer os dez.
+          Sub-bioma de peso zero nao aparece — a ausencia dele E a historia. */}
+      {subBiomas.length > 0 && (
+        <SegmentedTabs
+          value={recorte ?? DO_ESTAGIO}
+          onChange={(v) => setRecorte(v === DO_ESTAGIO ? null : v)}
+          options={[
+            { value: DO_ESTAGIO, label: 'Estágio' },
+            ...subBiomas.map((s) => ({ value: s.chave, label: `${s.nome} ${Math.round(s.pct)}%` })),
+          ]}
+        />
+      )}
+
+      <div className="text-[.72em] text-n500">
+        {elenco.length} POKEs
+        {recorte
+          ? ` em ${subBiomas.find((s) => s.chave === recorte)?.nome ?? recorte}`
+          : ' neste estágio'}
+        {/* Sem esta frase o jogador soma a % do painel com a da sala em que
+            esta e as duas nao fecham — a do painel ja inclui o sorteio de
+            sub-bioma e a media sobre as salas. */}
+        <span className="text-n600">
+          {recorte
+            ? ' — chance dentro deste sub-bioma'
+            : ' — chance já considerando o sorteio de sala'}
+        </span>
+      </div>
+      <div className="flex flex-col gap-[.15em]">
+        {elenco.map((e) => (
+          <LinhaDeEspecie
+            key={e.encounterId}
+            species={e.species}
+            pct={e.pct}
+            ativo={pokeEmCampo}
+            guardian={e.guardian}
+            lord={e.lord}
+          />
         ))}
       </div>
 
@@ -765,13 +815,23 @@ function BotaoDeEntrar({
 // A trilha
 // ---------------------------------------------------------------------------
 export function TrilhaDoBioma({
-  biomaChave, progresso, mapaAtivoId, abertoId, entrandoId, onAbrir, onEntrar, onVoltar,
+  biomaChave, progresso, mapaAtivoId, abertoId, entrandoId, pokeEmCampo,
+  onAbrir, onEntrar, onVoltar,
 }: {
   biomaChave: string
   progresso: ProgressoPorBioma
   mapaAtivoId: string | null
   abertoId: string | null
   entrandoId: string | null
+  /**
+   * O POKE em campo, pra a coluna de efetividade do elenco (PH-470).
+   *
+   * Vem por PROP e nao de `useGameStateStore` aqui dentro: este modulo e a
+   * arvore de navegacao e nao le store nenhum hoje — o `HuntMenu` ja tem o
+   * POKE ativo em maos pra o proprio cartao, e puxar o store aqui daria dois
+   * lugares lendo a mesma coisa com risco de divergir na ordem de render.
+   */
+  pokeEmCampo: Species | null
   onAbrir: (mapId: string | null) => void
   onEntrar: (mapId: string) => void
   onVoltar: () => void
@@ -867,12 +927,19 @@ export function TrilhaDoBioma({
       </div>
 
       <PainelDoEstagio
+        // A CHAVE E O RESET (PH-470): trocar de estagio remonta o painel, e a
+        // aba de sub-bioma volta pro estagio inteiro sozinha. Sem ela, clicar no
+        // estagio 7 com a aba "Praia" aberta manteria "Praia" selecionada — num
+        // estagio onde a Praia pode ter peso zero, o que deixaria a lista vazia
+        // sem nada explicando.
+        key={estagioId(bioma.chave, selecionado)}
         bioma={bioma}
         estagio={selecionado}
         estado={estadoDoEstagio(progresso, bioma.chave, selecionado)}
         progresso={progresso}
         ehAtiva={mapaAtivoId === estagioId(bioma.chave, selecionado)}
         entrando={entrandoId === estagioId(bioma.chave, selecionado)}
+        pokeEmCampo={pokeEmCampo}
         onEntrar={() => onEntrar(estagioId(bioma.chave, selecionado))}
       />
     </div>
