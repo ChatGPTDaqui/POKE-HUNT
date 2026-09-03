@@ -17,7 +17,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useCutsceneStore } from '@/stores/cutsceneStore'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
-import { preloadEspecies, preloadHunt, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
+import { preloadEspecies, preloadHunt, preloadArteDeCena, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
 import type { Point } from './types'
 import { apagarTodosOsEstagios } from './systems/statusSystem'
@@ -109,7 +109,7 @@ export const controller = {
     // As duas acima recusam sem tocar na rede e ja avisam por toast — abrir uma
     // tela de carregamento pra fecha-la no mesmo tick seria um flash preto sem
     // motivo. Daqui pra baixo a entrada e uma espera de verdade: round-trip a
-    // Edge mais `preloadHunt`, com teto de 4s.
+    // Edge mais `preloadHunt`, com teto de TETO_DE_CARREGAMENTO_MS.
     //
     // O `finally` fecha em TODO caminho, e isso e o ponto: a entrada pode ser
     // recusada pelo servidor (hunt trancada, POKE que nao e da equipe, sessao
@@ -117,6 +117,21 @@ export const controller = {
     // tela de carregamento que nao carrega nada — sem botao, porque a cutscene
     // engole o clique de proposito.
     const doMapa = getMap(mapId)
+    // A ARTE DA CUTSCENE E AQUECIDA ANTES DE A CUTSCENE ABRIR (PH-483).
+    //
+    // Ate aqui ela era pedida pelo proprio `<img>` da cena: o letreiro subia na
+    // hora e a imagem chegava depois, com meio segundo de fade por cima da cor
+    // do bioma. Pedido do dono, textual: "a imagem da tela de carregamento esta
+    // chegando apos o anuncio".
+    //
+    // Quem espera aqui e o botao "Entrando..." do painel de hunt, que ja e um
+    // estado de espera legitimo e visivel. Com a imagem quente, a cutscene nasce
+    // inteira — arte e letreiro no mesmo quadro.
+    //
+    // `preloadArteDeCena` tem o mesmo teto do resto: arte que nao chega (404,
+    // rede morta) nao pode segurar a entrada pra sempre, e a cena tem o
+    // `onError` dela pra esse caso.
+    await preloadArteDeCena(doMapa?.bg?.image)
     const idDaCutscene = useCutsceneStore.getState().abrir({
       arte: doMapa?.bg?.image ?? null,
       corDeFundo: doMapa?.bg?.primary ?? '#0b0b12',

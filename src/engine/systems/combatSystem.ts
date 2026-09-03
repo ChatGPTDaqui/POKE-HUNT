@@ -21,7 +21,7 @@ import {
   type StatusCondition, type StatDeEstagio,
 } from '@/data/statusEffects'
 import { corDoStatus } from '@/data/statusColors'
-import { formatarMultiplicador, multiplicadorDoStat } from '@/data/textoDeEstagioEPrazo'
+import { formatarVariacao, multiplicadorDoStat } from '@/data/textoDeEstagioEPrazo'
 import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
@@ -2015,10 +2015,19 @@ function anunciarEstagios(world: WorldState, alvo: WorldEntity, mudancas: StatCh
   // Ataque sobe 2,0/1,5 = +33%, e nao +50%. Um flutuante dizendo "+50%" na
   // segunda Danca das Espadas estaria aritmeticamente errado. O total e sempre
   // verdade e e o numero com que se decide continuar a luta ou fugir.
+  // PH-481: PORCENTAGEM, e nao multiplicador. `Ataque 0,67x` era o texto ate
+  // aqui, e o dono foi textual sobre ele: "a forma que estamos descrevendo o
+  // aumento ou a diminuicao de status e uma forma que o publico nao entende com
+  // facilidade. Entao ao inves de colocar 0.75, colocaremos -25% de perda".
+  //
+  // So a porcentagem, sem o `(0,67x)` ao lado que o tooltip mostra: este texto
+  // e lido de relance, no meio da luta, e ele ja concorre por espaco com o
+  // numero de dano (a faixa util tem 169px de mundo — ver a nota de `drawEffect`
+  // sobre o `rewardText`).
   const texto = mudancas
     .map((m) => {
       const total = alvo.estagios[m.stat] ?? 0
-      return `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${formatarMultiplicador(multiplicadorDoStat(m.stat, total))}`
+      return `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${formatarVariacao(multiplicadorDoStat(m.stat, total))}`
     })
     .join('  ')
   world.effects.push(createWorldEffect(world.counters, {

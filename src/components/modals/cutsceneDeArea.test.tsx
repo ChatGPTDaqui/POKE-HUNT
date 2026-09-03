@@ -1,13 +1,20 @@
 // @vitest-environment jsdom
 //
-// PH-471 — a cutscene de area, nos dois momentos em que ela roda.
+// PH-471 — a cutscene de area, nos dois momentos em que ela roda. Mais o que a
+// PH-482 (faixa do campo), a PH-483 (revelacao unica) e a PH-484 (teto de 15s)
+// acrescentaram.
 //
 // O QUE CADA CASO AQUI IMPEDE, e todos falham em silencio:
 //
 //   - a cutscene DEPENDER DA ARTE pra sair. Arte que nunca chega (404, rede
 //     ruim, `assets/` nao servido) prenderia o jogador numa tela de
 //     carregamento que nao carrega nada — e ela engole o clique de proposito,
-//     entao nao haveria saida.
+//     entao nao haveria saida. Desde a PH-483 a arte segura o LETREIRO, e nada
+//     mais; a saida continua sendo o carregamento da hunt, com o teto por baixo.
+//   - a cutscene VOLTAR A SER TELA CHEIA. O sintoma (nao dar pra abrir a mochila
+//     durante o carregamento) nao quebra nada sozinho.
+//   - o teto da cutscene DIVERGIR do teto do preload. Ver
+//     `data/tetoDeCarregamento.ts`.
 //   - a cutscene FICAR PRESA quando a entrada e recusada. `enterMap` recusa por
 //     quatro caminhos (slot vazio, POKE caido, servidor negando, rede caindo), e
 //     um `return` novo sem fechamento seria invisivel no code review.
@@ -16,14 +23,16 @@
 //     mantido por meses.
 //   - `prefers-reduced-motion` SUMIR. Todo bloco de keyframes do projeto tem o
 //     `@media` de reduce; um bloco novo sem ele nao quebra nada e ninguem nota.
-import { describe, expect, it, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import { act, render, screen, cleanup, fireEvent } from '@testing-library/react'
 
 import fonteDoController from '@/engine/controller.ts?raw'
 import { SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
 import { MAPS, backgroundParaSala } from '@/data/maps'
 import { useWorldStore } from '@/stores/worldStore'
 import { useCutsceneStore } from '@/stores/cutsceneStore'
+import { TETO_DE_CARREGAMENTO_MS } from '@/data/tetoDeCarregamento'
+import { PRELOAD_TIMEOUT_MS } from '@/data/preload'
 import { CutsceneDeArea } from './CutsceneDeArea'
 import { CutsceneDeEntrada } from './CutsceneDeEntrada'
 import { SalaCountdownModal } from './SalaCountdownModal'
@@ -59,11 +68,65 @@ describe('a cena em si', () => {
     expect(img?.className).toContain('opacity-0')
   })
 
-  it('o letreiro NAO espera a arte', () => {
-    // Se o texto dependesse do `carregou`, arte que nao chega deixaria a cena
-    // muda — e o nome do lugar e a unica coisa que a cutscene tem a dizer.
-    render(<CutsceneDeArea arte="assets/nunca-chega.jpg" corDeFundo="#000" titulo="Leito Oceânico" subtitulo={null} />)
+  it('o letreiro ESPERA a arte, e entra junto com ela (PH-483)', () => {
+    // INVERTIDO NA PH-483, e a inversao e pedido do dono: "a imagem da tela de
+    // carregamento esta chegando apos o anuncio". O texto entrando primeiro
+    // sobre um retangulo de cor chapada era exatamente o defeito.
+    //
+    // O que continua protegido e o que a versao anterior protegia: a cena nao
+    // fica MUDA. O rodape (a contagem, o "Carregando") entra na hora, e o
+    // letreiro chega no mesmo quadro da arte.
+    render(
+      <CutsceneDeArea
+        arte="assets/demora.jpg" corDeFundo="#000" titulo="Leito Oceânico" subtitulo={null}
+        rodape={<span>Carregando</span>}
+      />,
+    )
+    expect(screen.queryByText('Leito Oceânico'), 'o letreiro nao pode preceder a arte').toBeNull()
+    expect(screen.getByText('Carregando'), 'o rodape entra na hora').toBeTruthy()
+
+    fireEvent.load(document.querySelector('img')!)
     expect(screen.getByText('Leito Oceânico')).toBeTruthy()
+  })
+
+  it('arte que NAO chega libera o letreiro pelo `onError` (PH-483)', () => {
+    // O modo de falha que a PH-483 poderia ter criado: 404 ou `assets/` nao
+    // servido nunca dispara `load`, e sem `onError` a cena ficaria sem nome pelo
+    // tempo inteiro em que estivesse na tela.
+    render(<CutsceneDeArea arte="assets/404.jpg" corDeFundo="#000" titulo="Praia" subtitulo={null} />)
+    expect(screen.queryByText('Praia')).toBeNull()
+    fireEvent.error(document.querySelector('img')!)
+    expect(screen.getByText('Praia')).toBeTruthy()
+  })
+
+  it('arte JA no cache nasce revelada, sem um quadro de cor chapada (PH-483)', () => {
+    // O caso NORMAL depois da PH-483: `controller#enterMap` aquece a arte antes
+    // de abrir a cena. Imagem ja completa pode nao disparar `load` de novo, e sem
+    // o `ref` que olha `complete` a cena piscaria a cor do bioma justamente no
+    // caminho que a issue otimizou.
+    const original = Object.getOwnPropertyDescriptor(window.HTMLImageElement.prototype, 'complete')
+    Object.defineProperty(window.HTMLImageElement.prototype, 'complete', { configurable: true, get: () => true })
+    Object.defineProperty(window.HTMLImageElement.prototype, 'naturalWidth', { configurable: true, get: () => 2048 })
+    try {
+      render(<CutsceneDeArea arte="assets/quente.jpg" corDeFundo="#000" titulo="Recife" subtitulo={null} />)
+      expect(screen.getByText('Recife')).toBeTruthy()
+    } finally {
+      if (original) Object.defineProperty(window.HTMLImageElement.prototype, 'complete', original)
+    }
+  })
+
+  it('fica dentro da faixa do campo, e nao em tela cheia (PH-482)', () => {
+    // Pedido do dono: "ela ficara apenas no campo proprio do campo de batalha,
+    // sem sobressair sobre outros menus". `inset-0` de volta cobriria o trilho e
+    // a doca outra vez, e o sintoma (nao dar pra abrir a mochila durante o
+    // carregamento) nao quebra teste nenhum sozinho.
+    render(<CutsceneDeArea arte={null} corDeFundo="#000" titulo="X" subtitulo={null} />)
+    const cena = screen.getByRole('status')
+    expect(cena.className, 'tela cheia de novo').not.toContain('inset-0')
+    // A faixa e a MESMA de `CampoOverlay` — `top`/`bottom` calculados, e nao
+    // zerados.
+    expect(cena.style.top).toBeTruthy()
+    expect(cena.style.bottom).toBeTruthy()
   })
 
   it('respeita `prefers-reduced-motion`', () => {
@@ -99,8 +162,43 @@ describe('a cutscene de ENTRADA', () => {
       subtitulo: 'Lv 21-30',
     })
     render(<CutsceneDeEntrada />)
-    expect(screen.getByText('Marinho 3')).toBeTruthy()
     expect(screen.getByText('Carregando')).toBeTruthy()
+    // PH-483: o letreiro entra junto com a arte. O jsdom nao baixa recurso
+    // nenhum, entao o `load` e disparado a mao — no navegador ele chega sozinho,
+    // e quase sempre no primeiro quadro, porque `enterMap` ja aqueceu o arquivo.
+    fireEvent.load(document.querySelector('img')!)
+    expect(screen.getByText('Marinho 3')).toBeTruthy()
+  })
+
+  it('fecha sozinha depois de 15s, mesmo com a entrada em voo (PH-484)', () => {
+    // O buraco que isto fecha: `enterMap` que NAO resolve (Edge pendurada, rede
+    // caindo no meio do round-trip) deixava a cena na tela pra sempre. Ela engole
+    // o clique e nao tem botao — o jogo inteiro ficava trancado atras dela.
+    vi.useFakeTimers()
+    try {
+      useCutsceneStore.getState().abrir({
+        arte: null, corDeFundo: '#000', titulo: 'Presa', subtitulo: null,
+      })
+      render(<CutsceneDeEntrada />)
+      expect(screen.getByRole('status')).toBeTruthy()
+
+      // Um pouco ANTES do teto ela ainda esta la — senao o caso passaria com
+      // qualquer teto, inclusive zero.
+      act(() => { vi.advanceTimersByTime(TETO_DE_CARREGAMENTO_MS - 1000) })
+      expect(screen.queryByRole('status'), 'saiu antes da hora').toBeTruthy()
+
+      act(() => { vi.advanceTimersByTime(1001) })
+      expect(useCutsceneStore.getState().cena, 'a cena tinha que ter fechado').toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('o teto da cutscene e o MESMO do preload', () => {
+    // Se divergirem, um dos dois defeitos aparece e nenhum lanca erro: cutscene
+    // menor entra com a arte ainda baixando; cutscene maior deixa o jogador
+    // olhando um carregamento que ja desistiu. Ver `data/tetoDeCarregamento.ts`.
+    expect(PRELOAD_TIMEOUT_MS).toBe(TETO_DE_CARREGAMENTO_MS)
   })
 
   it('`fechar` com id VELHO nao apaga a cena atual', () => {
@@ -176,6 +274,7 @@ describe('a cutscene de TROCA DE SALA', () => {
   it('DIZ QUAL AREA — era o defeito da versao anterior', () => {
     const chave = comTransicao(1, 3)
     render(<SalaCountdownModal />)
+    fireEvent.load(document.querySelector('img')!)
     const nome = SUB_BIOMA_POR_CHAVE[chave].sub.nome
     // Guarda anti-vacuo: o sub-bioma existe e tem nome proprio.
     expect(nome).toBeTruthy()
@@ -203,6 +302,7 @@ describe('a cutscene de TROCA DE SALA', () => {
     // critério de `fechouEstagio` em `armarTransicaoDeSala`.
     comTransicao(0, 1)
     render(<SalaCountdownModal />)
+    fireEvent.load(document.querySelector('img')!)
     expect(screen.getByText('Estágio concluído')).toBeTruthy()
   })
 })

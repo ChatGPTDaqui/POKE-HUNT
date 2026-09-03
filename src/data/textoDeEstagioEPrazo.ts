@@ -71,19 +71,25 @@ export function formatarVariacao(mult: number): string {
 }
 
 /**
- * O texto completo de um estagio: `2x (+100%)`.
+ * O texto completo de um estagio: `+100% (2x)`.
  *
- * Multiplicador na FRENTE e porcentagem entre parenteses, e a ordem foi
- * escolhida: "+100% de Ataque" vai ser lido como "+100% de dano", e nao e — a
- * formula de dano tem defesa, tipo e critico depois. `2x de Ataque` nao promete
- * isso, e a porcentagem entre parenteses fica como leitura secundaria.
+ * A ORDEM INVERTEU NA PH-481, e a inversao e pedido do dono, textual: "a forma
+ * que estamos descrevendo o aumento ou a diminuicao de status e uma forma que o
+ * publico nao entende com facilidade. Entao ao inves de colocar 0.75,
+ * colocaremos -25% de perda".
  *
- * Estagio ZERO devolve `1x (+0%)` em vez de string vazia: quem chama decide se
+ * O que a ordem anterior protegia continua valendo como RESSALVA, e por isso o
+ * multiplicador nao sumiu: "+100% de Ataque" pode ser lido como "+100% de dano",
+ * e nao e — a formula de dano tem defesa, tipo e critico depois. So que essa
+ * ressalva custava a leitura principal para o publico inteiro, e o dono decidiu
+ * a troca. O `(2x)` fica ao lado, para quem quiser a conta exata.
+ *
+ * Estagio ZERO devolve `+0% (1x)` em vez de string vazia: quem chama decide se
  * mostra, e devolver vazio faria a tela concatenar texto quebrado.
  */
 export function formatarEstagio(stat: StatDeEstagio, estagio: number): string {
   const mult = multiplicadorDoStat(stat, estagio)
-  return `${formatarMultiplicador(mult)} (${formatarVariacao(mult)})`
+  return `${formatarVariacao(mult)} (${formatarMultiplicador(mult)})`
 }
 
 /**

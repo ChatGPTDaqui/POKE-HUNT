@@ -90,6 +90,11 @@ const ENGOLIDOS: [string, string][] = [
   ['spider_web', 'BUG'],
 ]
 
+// PH-480: a arte de IMPACTO por tipo — a que golpe de status nao pode pedir em
+// caminho nenhum. Ela e a explosao de ataque, e era nela que Rosnado caia
+// quando o selo ainda estava baixando.
+const { tiraDoElemento, tiraDeAreaDoElemento } = await import('@/data/vfxTiras')
+
 describe('arte propria de golpe de status', () => {
   beforeEach(() => { pedidas = [] })
 
@@ -100,18 +105,23 @@ describe('arte propria de golpe de status', () => {
     }
   })
 
-  it.each(ENGOLIDOS)('%s pede a arte do golpe, nao a generica', async (golpe, tipo) => {
+  it.each(ENGOLIDOS)('%s pede a arte do golpe E o selo — os dois (PH-480)', async (golpe, tipo) => {
+    // MUDOU NA PH-480, e a mudanca e de propósito. Ate aqui os dois disputavam o
+    // mesmo espaco (48x48 no meio do corpo), entao um tinha que vencer. Agora o
+    // selo tem 40x24 e mora ACIMA DA CABECA: os dois cabem, e cada um diz uma
+    // coisa — a arte do golpe diz QUAL golpe, o selo diz QUAL atributo e pra
+    // que lado. O que a PH-367 protegia (a arte nomeada chegar na tela)
+    // continua valendo.
     const { drawEffect } = await spritesNovo()
     drawEffect(ctxFalso(), efeitoDeStatus(golpe, tipo), mundoVazio)
-    expect(pedidas, `${golpe} tem arte propria e ela tem que vencer a do tipo`)
+    expect(pedidas, `${golpe} tem arte propria e ela tem que chegar na tela`)
       .toContain(vfxDoGolpe(golpe)!.single.url)
-    expect(pedidas, `${golpe} nao deveria nem tentar a arte generica`)
-      .not.toContain(arteGenerica())
+    expect(pedidas, `${golpe} tambem ganha o selo de atributo`).toContain(arteGenerica())
   })
 
-  it('golpe de status SEM arte propria cai na tira por atributo', async () => {
-    // O outro lado da guarda: os ~194 golpes de status restantes continuam no caminho de
-    // comportamento. `growl` e NORMAL/status/aoe e nao tem entrada em
+  it('golpe de status SEM arte propria desenha o selo', async () => {
+    // O outro lado da guarda: os ~194 golpes de status restantes continuam no
+    // caminho de comportamento. `growl` e NORMAL/status/aoe e nao tem entrada em
     // VFX_POR_GOLPE.
     expect(vfxDoGolpe('growl')).toBeNull()
     const { drawEffect } = await spritesNovo()
@@ -119,14 +129,49 @@ describe('arte propria de golpe de status', () => {
     expect(pedidas).toContain(arteGenerica())
   })
 
-  it('golpe de status de AREA com arte so de alvo-unico fica na tira por atributo', async () => {
+  it('golpe de status de AREA com arte so de alvo-unico desenha o selo', async () => {
     // A guarda olha o RAMO, nao a existencia da entrada. `charm` tem `single` e
     // nao tem `aoe`; num efeito de area, deixar a arte de golpe vencer levaria
-    // o desenho pra tira de AREA do tipo — arte generica, e ainda por cima
-    // esticada pro diametro do splash. A tira le melhor.
+    // o desenho pra tira de AREA do tipo — arte de ataque, e ainda por cima
+    // esticada pro diametro do splash.
     expect(vfxDoGolpe('charm')?.aoe).toBeUndefined()
     const { drawEffect } = await spritesNovo()
     drawEffect(ctxFalso(), efeitoDeStatus('charm', 'FAIRY', true), mundoVazio)
     expect(pedidas).toContain(arteGenerica())
+  })
+})
+
+// PH-480: "os efeitos de status estao sendo aplicados como se fossem sprites de
+// ataque, sobrepondo as sprites de ataque" — pedido do dono, com o defeito
+// nomeado. A causa era esta: quando o selo nao desenhava, a execucao seguia pro
+// burst, que tenta a tira de tipo, que E a arte de impacto de ataque.
+describe('golpe de status nunca empresta arte de ataque (PH-480)', () => {
+  beforeEach(() => { pedidas = [] })
+
+  it('alvo unico: nem a tira de impacto do tipo', async () => {
+    const doTipo = tiraDoElemento('NORMAL' as never)
+    expect(doTipo, 'sem tira de NORMAL o caso nao mede nada').toBeTruthy()
+    const { drawEffect } = await spritesNovo()
+    drawEffect(ctxFalso(), efeitoDeStatus('growl', 'NORMAL'), mundoVazio)
+    expect(pedidas).not.toContain(doTipo!.url)
+  })
+
+  it('area: nem a tira de area do tipo', async () => {
+    const deArea = tiraDeAreaDoElemento('NORMAL' as never)
+    expect(deArea, 'sem tira de area de NORMAL o caso nao mede nada').toBeTruthy()
+    const { drawEffect } = await spritesNovo()
+    drawEffect(ctxFalso(), efeitoDeStatus('growl', 'NORMAL', true), mundoVazio)
+    expect(pedidas).not.toContain(deArea!.url)
+  })
+
+  it('golpe de DANO continua usando a tira do tipo — a guarda e so do status', async () => {
+    // O contra-caso, e ele e obrigatorio: cortar a tira de tipo pra todo mundo
+    // apagaria a arte de impacto do jogo inteiro, e o teste acima passaria
+    // igual.
+    const doTipo = tiraDoElemento('NORMAL' as never)
+    const { drawEffect } = await spritesNovo()
+    const dano = { ...efeitoDeStatus('tackle', 'NORMAL'), statusDirection: undefined, statusStat: undefined }
+    drawEffect(ctxFalso(), dano as never, mundoVazio)
+    expect(pedidas).toContain(doTipo!.url)
   })
 })

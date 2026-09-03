@@ -8,9 +8,12 @@
 // loga, e nao quebra teste nenhum — ele aparece como golpe de status desenhando
 // o burst genérico de sempre. Foi exatamente esse silencio que deixou as 23
 // artes por golpe nunca aparecerem na tela por meses (PH-82).
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   TIRA_POR_ESTAGIO, TIRA_DE_CONDICAO_APLICADA, QUADROS_DE_ESTAGIO,
+  SELO_LARGURA, SELO_ALTURA,
   estagioDoGolpe, tiraDeEstagio, urlsDeEstagio,
 } from './estagioVfx'
 import { ROTULO_ESTAGIO } from './statLabels'
@@ -56,6 +59,23 @@ describe('arte de mudanca de atributo (PH-416)', () => {
       TIRA_DE_CONDICAO_APLICADA.quadros,
     ])
     expect([...quadros]).toEqual([QUADROS_DE_ESTAGIO])
+  })
+
+  it('o arquivo no disco tem o tamanho que o codigo desenha (PH-480)', () => {
+    // O TAMANHO DECLARADO E O TAMANHO DESENHADO, e os dois tem que ser o mesmo:
+    // `drawSeloDeEstagio` desenha 1:1 em SELO_LARGURA x SELO_ALTURA sem olhar o
+    // `naturalWidth`. Se alguem rodar um gerador antigo (48x48, 16 quadros), o
+    // desenho recorta o canto superior esquerdo da tira e nao reclama de nada —
+    // aparece meio glifo na tela e mais nada.
+    //
+    // Le o IHDR direto: largura e altura sao os bytes 16..24 de todo PNG, e
+    // trazer um decodificador pra isso seria dependencia por 8 bytes.
+    for (const url of urlsDeEstagio()) {
+      const bytes = readFileSync(join(process.cwd(), url))
+      const largura = bytes.readUInt32BE(16)
+      const altura = bytes.readUInt32BE(20)
+      expect([largura, altura], url).toEqual([SELO_LARGURA * QUADROS_DE_ESTAGIO, SELO_ALTURA])
+    }
   })
 })
 
