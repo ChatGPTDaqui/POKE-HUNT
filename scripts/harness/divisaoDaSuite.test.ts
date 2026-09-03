@@ -17,6 +17,19 @@
 // diretorio proprio, e compara com o que a config montou. Duas implementacoes
 // independentes chegando no mesmo conjunto e o que da valor a comparacao —
 // reusar a funcao da config aqui seria a funcao concordando consigo mesma.
+//
+// POR QUE ELE MORA EM `scripts/harness/` E NAO EM `src/testes/`.
+// Ele importa `vite.config.ts`, que esta na RAIZ. Dentro de `src/` isso reprova
+// o `npm run build:engine`, que roda
+// `tsc -p tsconfig.app.json --declaration --emitDeclarationOnly --rootDir src`:
+//
+//   error TS6059: File 'vite.config.ts' is not under 'rootDir' 'src'.
+//
+// E `npx tsc -b` local NAO pega isso — ele nao passa `--rootDir`. Descoberto no
+// CI, com a PR ja aberta, que e exatamente o que a regra "verificar do jeito
+// que o CI verifica" existe pra evitar. Aqui fora de `src/` o problema some, e
+// o lugar ate faz mais sentido: isto e ferramenta de verificacao, nao codigo de
+// produto.
 import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
