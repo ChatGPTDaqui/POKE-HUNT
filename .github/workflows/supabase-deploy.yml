@@ -41,6 +41,17 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
+          # Sem isto todo run baixava o registry inteiro de novo — nao havia
+          # UMA ocorrencia de `cache` nos workflows ate 03/09 (PH-453).
+          #
+          # Os DOIS lockfiles na chave, e nao so o da raiz: `build-check` roda
+          # `npm ci` duas vezes (raiz e `authority/`). Chave unica pros quatro
+          # workflows de proposito — assim o primeiro run a rodar aquece o cache
+          # de todos os outros, em vez de cada um manter o seu.
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            authority/package-lock.json
 
       - run: npm ci
 
@@ -49,3 +60,75 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      # PH-460 — a obrigacao pos-promocao deixa de depender de alguem lembrar.
+      #
+      # `check` e `build-check` NAO verificam que o app sobe: o primeiro olha
+      # migration e tipos, o segundo roda `tsc` e teste, e nenhum abre o jogo.
+      # Isso ja falhou DUAS vezes com deploy verde — PH-134 (cliente quebrado
+      # por env ausente) e PH-293 (cliente carregando a tela e nunca o jogo, por
+      # CORS). O `CLAUDE.md` obriga conferir na mao desde entao; aqui a maquina
+      # passa a fazer, na hora certa, sempre.
+      #
+      # AS DUAS BANCADAS, e nao so a fumaca. `fumaca-de-producao.mjs` confere
+      # login, `/estado` e CORS nos dois ambientes, e deu "TUDO OK" duas vezes em
+      # 02/09 com TODA hunt do jogo bloqueada — o 409 de HP mascarava o gate.
+      # Quem pega gate de hunt quebrado e `abrir-hunt-em-producao.mjs` (PH-451).
+      #
+      # DUAS TENTATIVAS. Um 429 de rate limit do auth transformaria a promocao
+      # em vermelho, e a regra do projeto manda REVERTER quando a promocao fica
+      # vermelha. Falso positivo aqui custa um revert desnecessario em producao,
+      # entao a segunda tentativa vale mais que a deteccao 15s mais cedo.
+      - name: O jogo CARREGA em producao?
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          CONTA_TESTE_SENHA: ${{ secrets.CONTA_TESTE_SENHA }}
+        run: |
+          set -uo pipefail
+
+          if [ -z "${VITE_SUPABASE_URL}" ] || [ -z "${VITE_SUPABASE_ANON_KEY}" ] || [ -z "${CONTA_TESTE_SENHA}" ]; then
+            echo "::warning::Faltam secrets — a verificacao de producao NAO rodou. Confira na mao."
+            {
+              echo "### A verificacao de producao NAO rodou"
+              echo ""
+              echo "Faltam secrets no repo. Enquanto isso, a obrigacao do \`CLAUDE.md\` continua sendo manual:"
+              echo ""
+              echo '```'
+              echo "node scripts/harness/fumaca-de-producao.mjs"
+              echo "node scripts/harness/abrir-hunt-em-producao.mjs"
+              echo '```'
+              echo ""
+              echo "Para ligar:"
+              echo ""
+              echo '```'
+              echo "gh secret set VITE_SUPABASE_URL      --repo ChatGPTDaqui/POKE-HUNT"
+              echo "gh secret set VITE_SUPABASE_ANON_KEY --repo ChatGPTDaqui/POKE-HUNT"
+              echo "gh secret set CONTA_TESTE_SENHA      --repo ChatGPTDaqui/POKE-HUNT"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          conferir() {
+            echo "== $1 =="
+            if node "$1"; then
+              return 0
+            fi
+            echo "::warning::$1 reprovou na 1a tentativa; repetindo em 15s antes de reprovar a promocao."
+            sleep 15
+            node "$1"
+          }
+
+          RUIM=0
+          conferir scripts/harness/fumaca-de-producao.mjs      || RUIM=1
+          conferir scripts/harness/abrir-hunt-em-producao.mjs  || RUIM=1
+
+          if [ "$RUIM" != "0" ]; then
+            echo "### PRODUCAO REPROVOU a verificacao pos-deploy" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "A regra do \`CLAUDE.md\` e reverter primeiro e investigar depois." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "### Producao verificada: login, \`/estado\`, CORS e abertura de hunt" >> "$GITHUB_STEP_SUMMARY"

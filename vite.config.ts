@@ -121,6 +121,18 @@ export default defineConfig({
     // do CI (mais lento e compartilhado). Timeout individual por caso continua
     // proibido: ele mascara logica lenta junto com import lento.
     testTimeout: 15000,
+    // `threads` (worker_threads) e nao o padrao `forks` (um processo filho por
+    // worker). O que domina a suite NAO e rodar teste: numa corrida cheia o
+    // proprio vitest reporta `import` como o item mais caro com folga (578s
+    // somados entre workers, contra 79s de `tests`). Thread compartilha o
+    // processo, entao o custo de partida do runtime e do resolvedor de modulo e
+    // pago uma vez por worker em vez de uma vez por processo.
+    //
+    // O que isso NAO muda: cada arquivo continua isolado (`isolate` fica no
+    // padrao `true`), entao `vi.mock` e estado global de modulo seguem se
+    // comportando igual. Desligar isolamento e outra conversa, mede -44% e
+    // quebra 3 a 5 arquivos por vazamento entre eles (PH-457).
+    pool: 'threads',
   },
   build: {
     // Por padrao o Vite emite os chunks em `dist/assets/`, que colidiria com
