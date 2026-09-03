@@ -1,6 +1,16 @@
 # Spec: migração de localStorage para Postgres (Supabase)
 
-Status: rascunho para revisão. Nenhum código alterado ainda.
+> **REGISTRO HISTÓRICO — a migração descrita aqui está CONCLUÍDA.**
+>
+> Este documento é o desenho de antes da execução, guardado porque é onde as decisões e os
+> descartes estão explicados. **Não é o estado atual do sistema.** Produção roda em Supabase com
+> Postgres, Auth, ~20 RPCs `security definer` e a autoridade em Edge Function.
+>
+> Para como o sistema roda **hoje**, ver `docs/01-arquitetura.md`, `docs/04-autoridade-do-servidor.md`
+> e `docs/11-operacao.md`. Cabeçalho corrigido na PH-468 (2026-09-03), depois de o `CLAUDE.md`
+> passar meses apontando para cá como "migração em andamento".
+
+Status original do rascunho, preservado: *rascunho para revisão, nenhum código alterado ainda*.
 
 ## 1. Estado atual (baseline)
 
