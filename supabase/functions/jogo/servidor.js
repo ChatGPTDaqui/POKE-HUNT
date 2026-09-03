@@ -42911,6 +42911,71 @@ var GRUPOS_INICIAIS = ["biomas"];
 * 7 a 10, liberados um a um pelo proprio progresso do bioma.
 */
 var GRUPOS_DO_LANCE = ["nightmare"];
+var GRUPOS_LEGADOS = /* @__PURE__ */ new Set([
+	"johto",
+	"kanto",
+	"faixa1",
+	"faixa2",
+	"faixa3"
+]);
+/**
+* O grupo de gate da hunt esta liberado pra este jogador?
+*
+* PH-447: GRUPO INICIAL E LIBERADO POR DEFINICAO, E NAO POR ESTAR NA LISTA DA
+* LINHA. Ate aqui as duas pontas perguntavam
+* `unlockedContinents.includes(grupo)` direto, e isso amarrou "o mundo esta
+* aberto?" ao CONTEUDO de `players.unlocked_continents` — uma coluna escrita
+* por saves antigos, com nome de grupo que o codigo ja renomeou duas vezes.
+*
+* O ESTRAGO REAL, medido em producao em 02/09: a PH-434 trocou
+* `GRUPOS_INICIAIS` de `['faixa1','faixa2']` pra `['biomas']`, nenhuma
+* migration reescreveu a coluna, e as 8 linhas do banco continuaram com
+* `faixa1`/`faixa2`. Resultado: `includes('biomas')` falso pra todo mundo, e
+* TODA hunt do jogo — a Rota 46 inicial e os 120 estagios de bioma — respondeu
+* "Derrote o Campeao Lance antes de acessar Mundo". O jogo inteiro trancado,
+* com deploy verde e 2977 testes passando.
+*
+* Por que a checagem por definicao e a resposta certa, e nao so a migration: o
+* grupo inicial NUNCA pode estar fechado. Ele e o que nasce aberto — e a
+* pergunta "o jogador desbloqueou o que nasce aberto?" nao tem resposta util,
+* so tem resposta errada. O que `continent` decide de verdade e uma coisa so
+* (o Modo Pesadelo, premio do Lance), e essa continua vindo da lista.
+*
+* Fica ao lado de `GRUPOS_INICIAIS` porque as duas pontas chamam a MESMA
+* funcao — o gate da autoridade (`appSessao.ts`) e o menu (`HuntMenu.tsx`).
+* Mesmo motivo de `bloqueioDoEstagio` morar em `progressoDeBioma.ts`: regra
+* calculada em dois lugares diverge, e o jogador ve hunt aberta que o servidor
+* recusa.
+*/
+function grupoLiberado(grupo, liberados) {
+	if (GRUPOS_INICIAIS.includes(grupo)) return true;
+	return liberados.includes(grupo);
+}
+/**
+* Traduz `unlocked_continents` de um save pro vocabulario de hoje.
+*
+* A FONTE UNICA DA TRADUCAO (PH-447). Ela existia SO no `merge` do `persist`
+* (`stores/gameStateStore.ts`), e o caminho remoto — `remote/playerMapper.ts`,
+* que e o que vale sob autoridade — repassava a coluna crua. Os dois caminhos
+* de carga discordavam sobre o que o jogador tem liberado, e o remoto era o
+* errado.
+*
+* Pior: `stores/gateDoLance.test.ts` COPIAVA esta formula em vez de importa-la
+* ("a mesma traducao que o merge aplica"), entao o teste provava a copia e
+* ninguem cobria o caminho remoto. E o modo de falha que
+* `docs/` chama de "concordar na formula nao basta".
+*
+* As tres regras, na ordem:
+*
+*  - `GRUPOS_INICIAIS` entram SEMPRE, mesmo em save que nao os tinha (e o caso
+*    de todo save escrito antes da PH-434);
+*  - `'kanto'` era o que o Lance liberava, entao vira o que ele libera hoje;
+*  - o resto de `GRUPOS_LEGADOS` (`'johto'`, `faixa1..3`) e DESCARTADO. Ver a
+*    nota de `GRUPOS_LEGADOS` acima pro porque `'nightmare'` nao esta la.
+*/
+function traduzirGruposLiberados(gravados) {
+	return [.../* @__PURE__ */ new Set([...GRUPOS_INICIAIS, ...(gravados ?? []).flatMap((c) => c === "kanto" ? GRUPOS_DO_LANCE : GRUPOS_LEGADOS.has(c) ? [] : [c])])];
+}
 var LOOT = {
 	basico: [{
 		itemId: "potion",
@@ -81081,7 +81146,7 @@ function snapshotToGameState(snap, defaults) {
 			diamonds: p.diamonds
 		},
 		unlockedMaps: p.unlocked_maps,
-		unlockedContinents: p.unlocked_continents,
+		unlockedContinents: traduzirGruposLiberados(p.unlocked_continents),
 		currentMapId: traduzirMapIdLegado(p.current_map_id),
 		autoToggles: {
 			...defaults.autoToggles,
@@ -82321,7 +82386,7 @@ async function abrirSessao(cfg, userId, req) {
 	if (poke.hp <= 0) throw new ErroHttp(409, "Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.");
 	if (MAPS[mapId].unlockCost != null && !estado.unlockedMaps.includes(mapId)) throw new ErroHttp(403, "hunt nao desbloqueada");
 	const grupo = MAPS[mapId].continent;
-	if (!estado.unlockedContinents.includes(grupo)) throw new ErroHttp(403, "Derrote o Campeao Lance para acessar esta area.");
+	if (!grupoLiberado(grupo, estado.unlockedContinents)) throw new ErroHttp(403, "Derrote o Campeao Lance para acessar esta area.");
 	const bloqueio = bloqueioDeBiomaPendente(mapId, estado.biomaProgress);
 	if (bloqueio) throw new ErroHttp(403, bloqueio);
 	if (mapId === "boss_lance") {

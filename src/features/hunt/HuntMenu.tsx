@@ -11,7 +11,7 @@ import { pedirAcao } from '@/data/remote/autoridade'
 // de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
 import {
-  GRUPOS_INICIAIS, SUB_BIOMA_POR_CHAVE,
+  GRUPOS_INICIAIS, SUB_BIOMA_POR_CHAVE, grupoLiberado,
   type SubBiomaDef,
 } from '@/data/biomas'
 import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
@@ -406,7 +406,9 @@ export function HuntMenu() {
             const map = MAPS[mapId]
             if (!map) return
             const mapContinent = map.continent ?? GRUPOS_INICIAIS[0]
-            const continentGated = !unlockedContinents.includes(mapContinent)
+            // PH-447: `grupoLiberado`, e nao `includes` na mao — era esta linha
+            // que fazia o estagio 1 de todo bioma pedir o Campeao Lance.
+            const continentGated = !grupoLiberado(mapContinent, unlockedContinents)
             const bloqueio = continentGated ? null : bloqueioDeBiomaClient(mapId, biomaProgress)
             const liberado = !continentGated && !bloqueio
               && (map.unlockCost == null || unlockedMaps.includes(mapId))
@@ -483,10 +485,16 @@ export function HuntMenu() {
       )}
 
       {visibleMaps.map((map) => {
-        // Gate por continente (Kanto so depois do Campeao Lance) — separado do
-        // gate de custo em ouro por mapa, e checado antes dele.
+        // Gate por continente (hoje: so o Modo Pesadelo, premio do Campeao
+        // Lance) — separado do gate de custo em ouro por mapa, e checado antes
+        // dele.
+        //
+        // PH-447: por `grupoLiberado`, e nao por `includes` na mao. O grupo que
+        // nasce aberto e liberado por definicao; perguntar se a coluna do banco
+        // o contem foi o que trancou o jogo inteiro quando a PH-434 renomeou o
+        // grupo e nenhuma migration reescreveu a coluna.
         const mapContinent = map.continent ?? GRUPOS_INICIAIS[0]
-        const continentGated = !unlockedContinents.includes(mapContinent)
+        const continentGated = !grupoLiberado(mapContinent, unlockedContinents)
         // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
         // continente e ANTES do custo em ouro, mesma prioridade do servidor.
         const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, biomaProgress)

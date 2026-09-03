@@ -20,17 +20,26 @@
 // voltaria a ser escrita.
 import { describe, expect, it } from 'vitest'
 
-import { GRUPOS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
+import {
+  GRUPOS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS, traduzirGruposLiberados,
+} from '@/data/biomas'
 
-/** A mesma traducao que `gameStateStore.ts#merge` aplica na hidratacao. */
-function traduzirNaCarga(gravados: string[]): string[] {
-  return [...new Set([
-    ...GRUPOS_INICIAIS,
-    ...gravados.flatMap((c) => (
-      c === 'kanto' ? GRUPOS_DO_LANCE : GRUPOS_LEGADOS.has(c) ? [] : [c]
-    )),
-  ])]
-}
+// PH-447: ESTE ARQUIVO COPIAVA A TRADUCAO, E A COPIA CUSTOU UMA PRODUCAO
+// TRANCADA.
+//
+// Aqui existia uma `traduzirNaCarga` local — a formula do `merge` reescrita a
+// mao, com o comentario "a mesma traducao que gameStateStore.ts#merge aplica na
+// hidratacao". Os cinco casos abaixo passavam contra a copia, e a copia estava
+// certa. O que estava errado era o codigo que este arquivo nao executava:
+// `remote/playerMapper.ts`, o caminho de carga que vale sob autoridade, nao
+// traduzia NADA — repassava `unlocked_continents` cru. Quando a PH-434
+// renomeou o grupo que nasce aberto, o gate de continente reprovou as 8 linhas
+// de producao e TODA hunt do jogo respondeu "Derrote o Campeao Lance" — com
+// estes testes verdes.
+//
+// Agora ela IMPORTA a funcao de producao. Teste que reimplementa a regra prova
+// a reimplementacao: ele nao pode reprovar o codigo, porque nao o chama.
+const traduzirNaCarga = traduzirGruposLiberados
 
 describe('gate do Campeao Lance sobrevive ao reload', () => {
   it('nenhum grupo que o Lance concede pode estar na lista de legados', () => {
