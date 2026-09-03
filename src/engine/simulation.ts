@@ -1105,7 +1105,35 @@ export function buildMapWorld(
     const quota = quotaDeAbatesDaSala(sala, mapId, {
       estagioJaLimpo: base.estagioJaLimpo, protetorResolvido: false,
     })
-    const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo
+    // PH-472: O CHEFE JA CAIU NESTA SALA, e a linha persistida diz isso.
+    //
+    // `sala_protetor` com `hp_atual = 0` e o marcador de "resolvido" que
+    // atravessa a janela — a mesma semantica de tres valores que a PH-307 deu
+    // ao `sequence_hp` logo abaixo (`null` = sem informacao, `> 0` = luta em
+    // andamento, `0` = ja caiu). Antes disto o flush DELETAVA a linha ao
+    // resolver, e a ausencia dela le igual a "nunca nasceu": esta funcao
+    // sorteava um protetor novo com HP cheio, e o jogador que matou o chefe no
+    // fim de uma janela o encontrava inteiro na seguinte.
+    //
+    // O flag entra em `base.protetorResolvido` e o resto sai de graca:
+    // `salaDeveProtetor` ja o consulta, entao `garantirProtetorDaSala` nao
+    // recria e `garantirTransicaoDeQuotaFechada` arma a transicao no primeiro
+    // tique.
+    const chefeJaCaiu = (progresso?.protetorPendente?.hpAtual ?? 1) <= 0
+    if (chefeJaCaiu) {
+      base.protetorResolvido = true
+      // E O MARCADOR SE REESCREVE, senao o conserto so adia o bug uma janela.
+      //
+      // `payloadDoProtetorOuDoCaido` grava a linha a partir de
+      // `protetorPendente` OU de `protetorCaido`. Sem esta atribuicao a janela
+      // que le o marcador o descartaria: ela nasceria com os dois nulos, o
+      // flush dela mandaria `p_protetor: null`, a RPC DELETARIA a linha, e a
+      // janela seguinte voltaria a ler "nunca nasceu" e sortearia um chefe
+      // novo. O marcador tem que sobreviver ate a sala de fato trocar — e e
+      // `aplicarTransicaoDeSala` quem o limpa.
+      base.protetorCaido = progresso?.protetorPendente ?? null
+    }
+    const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo && !chefeJaCaiu
       ? protetorDaSala(sala, mapId)
       : null
     if (tipoDeProtetor) {

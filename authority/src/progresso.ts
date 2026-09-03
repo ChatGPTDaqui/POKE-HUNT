@@ -255,6 +255,41 @@ export function protetorDaLinha(s: LinhaSessao): ProtetorPendente | null {
  * (`protetorDaSala(world.sala)`, ver `simularSessao`), porque o motor nunca
  * guardou o proprio tipo no objeto persistido.
  */
+/**
+ * O que gravar em `sala_protetor` (PH-472): o protetor VIVO, ou o marcador do
+ * que JA CAIU, ou nada.
+ *
+ * Os tres estados, e por que os tres precisam existir:
+ *
+ *     vivo (hpAtual > 0)   a janela seguinte recria fiel, sem re-sortear
+ *     caido (hpAtual = 0)  a janela seguinte NAO recria, e a sala destrava
+ *     null                 a sala nao pede protetor, ou trocou
+ *
+ * Antes disto o segundo e o terceiro eram o MESMO valor (`null` → a RPC deleta
+ * a linha), e a ausencia da linha le igual a "nunca nasceu nesta sala":
+ * `buildMapWorld` sorteava um protetor novo com HP cheio. Ver
+ * `WorldState.protetorCaido`.
+ *
+ * O TIPO SAI DAQUI TAMBEM. `payloadDoProtetor` exige `tipo` (a coluna tem
+ * `check (tipo in ('guardian','lord'))`), e `world.protetorPendente` nunca
+ * carregou o proprio tipo — quem o re-deriva e `protetorDaSala`, que e pura.
+ * No caso do caido a sala e a MESMA que travou pro protetor nascer, entao a
+ * re-derivacao continua valendo: o tipo nao muda debaixo dele.
+ */
+export function payloadDoProtetorOuDoCaido(
+  world: { protetorPendente: ProtetorPendente | null; protetorCaido: ProtetorPendente | null; sala: SalaAtiva | null; mapDef: { id: string } | null },
+  tipoDoVivo: string | null,
+): Record<string, unknown> | null {
+  if (world.protetorPendente) return payloadDoProtetor(world.protetorPendente, tipoDoVivo)
+  if (!world.protetorCaido) return null
+  const tipo = protetorDaSala(world.sala, world.mapDef?.id ?? '')
+  // Sem tipo a coluna recusaria a linha (`not null` + check). Nao acontece —
+  // um protetor so cai numa sala que o pedia —, e por isso mesmo o caso nao
+  // merece virar linha silenciosamente perdida.
+  if (!tipo) return null
+  return payloadDoProtetor({ ...world.protetorCaido, hpAtual: 0 }, tipo)
+}
+
 export function payloadDoProtetor(
   bp: ProtetorPendente | null, tipo: string | null,
 ): Record<string, unknown> | null {
@@ -1398,9 +1433,20 @@ async function simularSessao(
     p_sala_abates: world.sala?.abates ?? 0,
     p_ciclos: world.sala?.ciclos ?? 0,
     // PH-241/236: protetor vivo persistido pra proxima janela recriar sem
-    // re-sortear; `null` quando o protetor foi resolvido nesta janela e a
-    // sala liberou (a funcao DELETA a linha de sala_protetor nesse caso).
-    p_protetor: payloadDoProtetor(world.protetorPendente, tipoDeProtetor),
+    // re-sortear.
+    //
+    // PH-472: E O CHEFE CAIDO TAMBEM, com `hpAtual: 0`. Antes esta linha
+    // mandava `null` quando o protetor era resolvido na janela, e a RPC
+    // DELETAVA a linha de `sala_protetor` — e a ausencia dela le igual a
+    // "nunca nasceu nesta sala". `buildMapWorld` entao sorteava um protetor
+    // NOVO com HP cheio, e o jogador que matou o chefe no fim de uma janela o
+    // encontrava inteiro na seguinte.
+    //
+    // Mesma solucao de tres valores da PH-307 pro POKE da sequencia, e ela nao
+    // pede coluna nova: `sala_protetor.hp_atual` e `integer not null` sem
+    // CHECK, entao 0 e armazenavel. `null` aqui passou a significar so uma
+    // coisa — a sala nao pede protetor, ou trocou.
+    p_protetor: payloadDoProtetorOuDoCaido(world, tipoDeProtetor),
   })
 
   return {

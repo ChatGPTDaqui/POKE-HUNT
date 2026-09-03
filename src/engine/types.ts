@@ -839,8 +839,50 @@ export interface WorldState {
    * (versao antiga, sem sistema de protetor) volta a sortear um protetor — mas
    * ai o teto e um por janela, nao um por tick, e o fallback tem folga pra
    * acumular e disparar.
+   *
+   * PH-472: ELE DEIXOU DE SER SO EFEMERO. `protetorCaido`, abaixo, e o que
+   * carrega a mesma informacao ATRAVES da janela — e a nota deste campo
+   * descrevia o buraco sem o chamar de buraco ("uma reconstrucao contra um
+   * servidor que NAO avancou volta a sortear um protetor"). Voltava contra o
+   * servidor ATUAL tambem, sempre que o chefe caia perto da borda da janela.
    */
   protetorResolvido: boolean
+  /**
+   * PH-472: o protetor que JA CAIU nesta sala, guardado so pra atravessar a
+   * janela de flush.
+   *
+   * O BUG QUE ISTO FECHA. `protetorResolvido` e efemero e nao tinha coluna. O
+   * que o flush gravava era `sala_abates` cheio e o DELETE da linha de
+   * `sala_protetor` — e a AUSENCIA dessa linha significa as duas coisas
+   * opostas: "nunca nasceu nesta sala" e "ja morreu". `buildMapWorld` lia o
+   * estado ambiguo e escolhia a leitura errada: sorteava um protetor NOVO, com
+   * HP cheio. O jogador matava o chefe no fim de uma janela e o chefe voltava
+   * inteiro na seguinte.
+   *
+   * A SOLUCAO E A DA PH-307, e por isso ela nao pede coluna nova. Aquela issue
+   * resolveu a MESMA ambiguidade pro POKE da sequencia do Campeao Lance com
+   * tres valores numa coluna que ja existia (`sequence_hp`: `null` = sem
+   * informacao, `> 0` = luta em andamento, `0` = ja caiu). `sala_protetor.
+   * hp_atual` e `integer not null` sem CHECK, entao `hp_atual = 0` e
+   * armazenavel hoje:
+   *
+   *     linha ausente     a sala nunca sorteou protetor (ou a sala trocou)
+   *     hp_atual > 0      luta em andamento — recria fiel, como sempre
+   *     hp_atual = 0      o protetor DESTA sala ja caiu — nao recria
+   *
+   * POR QUE UM CAMPO PROPRIO, e nao manter `protetorPendente` com `hpAtual: 0`.
+   * `protetorPendente != null` significa "ha protetor VIVO" em tres gates que
+   * ja custaram issue cada um: o `return true` de `garantirProtetorDaSala`
+   * (PH-230), o gate de respawn de selvagem comum (PH-217) e o espelho de HP
+   * com o cao de guarda do impasse (PH-301). O de respawn erraria pro lado
+   * ruim — o campo ficaria vazio pra sempre depois do chefe, desfazendo o
+   * "farm volta enquanto espera a autoridade" que a PH-475 documenta.
+   *
+   * Este campo e lido por DOIS lugares e mais nenhum: `payloadDoProtetor` (que
+   * o grava como `hpAtual: 0`) e `buildMapWorld` (que le a linha de volta).
+   * Nenhum gate existente muda.
+   */
+  protetorCaido: ProtetorPendente | null
   /**
    * O jogador ja fechou este estagio alguma vez? (PH-428)
    *

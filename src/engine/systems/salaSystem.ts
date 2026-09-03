@@ -771,6 +771,19 @@ export function resolverProtetorDaSala(
   mapId: string,
   opts: { manualAdvance?: boolean } = {},
 ): void {
+  // PH-472: a IDENTIDADE do protetor caido fica guardada, e nao descartada.
+  //
+  // Ela e o que `payloadDoProtetor` precisa pra gravar a linha de
+  // `sala_protetor` com `hp_atual = 0` — o marcador que atravessa a janela e
+  // diz "o chefe DESTA sala ja caiu". Sem ele o flush apagava a linha, e a
+  // ausencia dela le igual a "nunca nasceu": a janela seguinte sorteava um
+  // protetor novo com HP cheio. Ver `WorldState.protetorCaido`.
+  //
+  // `?? world.protetorCaido` porque esta funcao e idempotente por contrato
+  // (chamada de novo no mesmo tick por AOE que mata dois): a segunda chamada
+  // ja encontra `protetorPendente` nulo e nao pode apagar o que a primeira
+  // guardou.
+  world.protetorCaido = world.protetorPendente ?? world.protetorCaido
   world.protetorPendente = null
   // PH-230: marcar ANTES do corte de autoridade abaixo. Sem esta linha, sob
   // `salaSobAutoridade` a sala nao avanca (por design) e nada registra que o
@@ -1039,6 +1052,8 @@ export function reconciliarSalaDaAutoridade(
     world.salaPredita = false
     // PH-230: sala entrando direto (nao havia sala) nao herda marca de protetor.
     world.protetorResolvido = false
+    // PH-472: nem o chefe caido da sala que nao existia.
+    world.protetorCaido = null
     aplicarClima()
     return
   }
@@ -1131,6 +1146,10 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   world.salaPendente = null
   // PH-230: sala nova, protetor novo — a marca vale por SALA, nao pela sessao.
   world.protetorResolvido = false
+  // PH-472: e o chefe caido da sala ANTERIOR nao pode ser gravado como o chefe
+  // caido da sala nova — seria o mesmo defeito de `protetorPendente` pendurado
+  // que a PH-258 corrigiu, so que pelo lado da persistencia.
+  world.protetorCaido = null
   // O PROTETOR FICA NA SALA QUE PASSOU (PH-258), e esquecer esta linha matava a
   // hunt inteira em silencio.
   //

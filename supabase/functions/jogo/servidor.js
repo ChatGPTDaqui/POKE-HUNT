@@ -79861,6 +79861,7 @@ function armarTransicaoDeSala(world, mapId) {
 * outra sala.
 */
 function resolverProtetorDaSala(world, mapId, opts = {}) {
+	world.protetorCaido = world.protetorPendente ?? world.protetorCaido;
 	world.protetorPendente = null;
 	world.protetorResolvido = true;
 	if (world.salaSobAutoridade) return;
@@ -79942,6 +79943,7 @@ function aplicarTransicaoDeSala(world, mapId) {
 	world.sala = pendente;
 	world.salaPendente = null;
 	world.protetorResolvido = false;
+	world.protetorCaido = null;
 	world.protetorPendente = null;
 	world.clima = null;
 	definirClimaDeAmbiente(world, world.salaSobAutoridade ? null : climaAmbienteDaSala(world.seed, world.sala));
@@ -80021,6 +80023,7 @@ function emptyWorldState(seed = randomSeed()) {
 		sala: null,
 		protetorPendente: null,
 		protetorResolvido: false,
+		protetorCaido: null,
 		estagioJaLimpo: false,
 		avancarParaEstagio: null,
 		protetorSemDanoSegundos: 0,
@@ -80705,7 +80708,12 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis,
 			estagioJaLimpo: base.estagioJaLimpo,
 			protetorResolvido: false
 		});
-		const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo ? protetorDaSala(sala, mapId) : null;
+		const chefeJaCaiu = (progresso?.protetorPendente?.hpAtual ?? 1) <= 0;
+		if (chefeJaCaiu) {
+			base.protetorResolvido = true;
+			base.protetorCaido = progresso?.protetorPendente ?? null;
+		}
+		const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo && !chefeJaCaiu ? protetorDaSala(sala, mapId) : null;
 		if (tipoDeProtetor) {
 			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
@@ -81843,6 +81851,37 @@ function protetorDaLinha(s) {
 * (`protetorDaSala(world.sala)`, ver `simularSessao`), porque o motor nunca
 * guardou o proprio tipo no objeto persistido.
 */
+/**
+* O que gravar em `sala_protetor` (PH-472): o protetor VIVO, ou o marcador do
+* que JA CAIU, ou nada.
+*
+* Os tres estados, e por que os tres precisam existir:
+*
+*     vivo (hpAtual > 0)   a janela seguinte recria fiel, sem re-sortear
+*     caido (hpAtual = 0)  a janela seguinte NAO recria, e a sala destrava
+*     null                 a sala nao pede protetor, ou trocou
+*
+* Antes disto o segundo e o terceiro eram o MESMO valor (`null` → a RPC deleta
+* a linha), e a ausencia da linha le igual a "nunca nasceu nesta sala":
+* `buildMapWorld` sorteava um protetor novo com HP cheio. Ver
+* `WorldState.protetorCaido`.
+*
+* O TIPO SAI DAQUI TAMBEM. `payloadDoProtetor` exige `tipo` (a coluna tem
+* `check (tipo in ('guardian','lord'))`), e `world.protetorPendente` nunca
+* carregou o proprio tipo — quem o re-deriva e `protetorDaSala`, que e pura.
+* No caso do caido a sala e a MESMA que travou pro protetor nascer, entao a
+* re-derivacao continua valendo: o tipo nao muda debaixo dele.
+*/
+function payloadDoProtetorOuDoCaido(world, tipoDoVivo) {
+	if (world.protetorPendente) return payloadDoProtetor(world.protetorPendente, tipoDoVivo);
+	if (!world.protetorCaido) return null;
+	const tipo = protetorDaSala(world.sala, world.mapDef?.id ?? "");
+	if (!tipo) return null;
+	return payloadDoProtetor({
+		...world.protetorCaido,
+		hpAtual: 0
+	}, tipo);
+}
 function payloadDoProtetor(bp, tipo) {
 	if (!bp) return null;
 	return {
@@ -82267,7 +82306,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		p_sala_chave: world.sala?.chave ?? null,
 		p_sala_abates: world.sala?.abates ?? 0,
 		p_ciclos: world.sala?.ciclos ?? 0,
-		p_protetor: payloadDoProtetor(world.protetorPendente, tipoDeProtetor)
+		p_protetor: payloadDoProtetorOuDoCaido(world, tipoDeProtetor)
 	});
 	return {
 		segundosCreditados: segundos,
