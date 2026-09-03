@@ -170,25 +170,65 @@ describe('a cutscene de ENTRADA', () => {
     expect(screen.getByText('Marinho 3')).toBeTruthy()
   })
 
-  it('fecha sozinha depois de 15s, mesmo com a entrada em voo (PH-484)', () => {
-    // O buraco que isto fecha: `enterMap` que NAO resolve (Edge pendurada, rede
-    // caindo no meio do round-trip) deixava a cena na tela pra sempre. Ela engole
-    // o clique e nao tem botao — o jogo inteiro ficava trancado atras dela.
+  it('aos 15s a cena FICA e oferece saída, em vez de sumir (PH-489)', () => {
+    // INVERTIDO NA PH-489, e a inversão corrige a PH-484. Aquela issue leu "o
+    // efeito do zoom in deverá ter uma duração máxima de 15 segundos" na
+    // acepção estrita — a TELA some aos 15s — e em Slow 3G o QA mostrou o
+    // preço: a tela de carregamento sumindo com a entrada ainda em voo, e o
+    // jogador de volta no painel com o jogo montando por baixo.
+    //
+    // O que tornou seguro deixar a cena ficar foi a PH-482: ela não é mais tela
+    // cheia, então uma cena presa não tranca o jogo — os menus respondem por
+    // fora dela.
+    // `fireEvent` e nao `userEvent`: o segundo precisa de relogio real ou de
+    // `advanceTimers` casado, e com `useFakeTimers` ligado ele pendura o caso.
     vi.useFakeTimers()
     try {
-      useCutsceneStore.getState().abrir({
+      const idDaCena = useCutsceneStore.getState().abrir({
         arte: null, corDeFundo: '#000', titulo: 'Presa', subtitulo: null,
       })
       render(<CutsceneDeEntrada />)
-      expect(screen.getByRole('status')).toBeTruthy()
+      expect(screen.getByText('Carregando')).toBeTruthy()
 
-      // Um pouco ANTES do teto ela ainda esta la — senao o caso passaria com
-      // qualquer teto, inclusive zero.
+      // ANTES do teto não há botão — senão o caso passaria com qualquer teto,
+      // inclusive zero.
       act(() => { vi.advanceTimersByTime(TETO_DE_CARREGAMENTO_MS - 1000) })
-      expect(screen.queryByRole('status'), 'saiu antes da hora').toBeTruthy()
+      expect(screen.queryByRole('button', { name: /sair/i }), 'botão cedo demais').toBeNull()
 
       act(() => { vi.advanceTimersByTime(1001) })
-      expect(useCutsceneStore.getState().cena, 'a cena tinha que ter fechado').toBeNull()
+      expect(useCutsceneStore.getState().cena?.id, 'a cena NÃO pode sumir sozinha').toBe(idDaCena)
+      expect(screen.queryByText('Carregando'), 'o rodapé tinha que ter trocado').toBeNull()
+
+      // E o botão fecha de verdade. `pointer-events-auto` próprio: a cena
+      // engole o clique, e sem ele o botão existiria sem responder.
+      fireEvent.click(screen.getByRole('button', { name: /sair/i }))
+      expect(useCutsceneStore.getState().cena, 'o botão não fechou a cena').toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('a cena SEGUINTE não nasce com o botão de sair (PH-489)', () => {
+    // O estado de "demorou" é por CENA. Sem zerá-lo na troca de `id`, uma
+    // entrada demorada deixaria a flag ligada e a hunt seguinte abriria
+    // oferecendo saída antes de esperar coisa nenhuma.
+    vi.useFakeTimers()
+    try {
+      useCutsceneStore.getState().abrir({
+        arte: null, corDeFundo: '#000', titulo: 'Demorada', subtitulo: null,
+      })
+      const { rerender } = render(<CutsceneDeEntrada />)
+      act(() => { vi.advanceTimersByTime(TETO_DE_CARREGAMENTO_MS + 1000) })
+      expect(screen.getByRole('button', { name: /sair/i })).toBeTruthy()
+
+      act(() => {
+        useCutsceneStore.getState().abrir({
+          arte: null, corDeFundo: '#000', titulo: 'Nova', subtitulo: null,
+        })
+      })
+      rerender(<CutsceneDeEntrada />)
+      expect(screen.queryByRole('button', { name: /sair/i }), 'herdou o botão da cena anterior').toBeNull()
+      expect(screen.getByText('Carregando')).toBeTruthy()
     } finally {
       vi.useRealTimers()
     }
