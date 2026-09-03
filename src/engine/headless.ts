@@ -46,11 +46,10 @@ export { podeDanificar, golpeAnuladoPorImunidade } from './systems/combatSystem'
 // tem a semente da sessao pra derivar o dele.
 export { climaDaSala } from './systems/climaAmbiente'
 export {
-  BIOMAS, FAIXAS, GRUPOS_INICIAIS, GRUPOS_DO_LANCE, ESTAGIOS_PARA_O_LANCE, SALAS_POR_HUNT, ABATES_POR_SALA,
-  BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId, biomaDoMapId, indiceDoBiomaNoMapId,
-  ORDEM_DOS_BIOMAS,
+  BIOMAS, GRUPOS_INICIAIS, GRUPOS_DO_LANCE, ESTAGIOS_PARA_O_LANCE, ABATES_POR_SALA,
+  BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE,
 } from '@/data/biomas'
-export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId } from '@/data/biomas'
+export type { BiomaDef, SubBiomaDef } from '@/data/biomas'
 export {
   progressoPorBiomaDefault, maiorEstagioLimpo, comEstagioLimpo, estagioLiberado,
   bloqueioDoEstagio, lerProgressoPorBioma, traduzirMapIdLegado, HUNT_DE_REFUGIO,
@@ -61,7 +60,7 @@ export type { ProgressoPorBioma } from '@/data/progressoDeBioma'
 export {
   ESTAGIOS, ESTAGIOS_POR_BIOMA, ESTAGIO_POR_ID, SALAS_POR_ESTAGIO, SALAS_POR_BIOMA,
   TETO_DO_MODO_NORMAL, estagioId, parseEstagioId, estagioValido, niveisDoEstagio,
-  zonaMaximaDoEstagio, salasDoEstagio, pesosDoEstagio, indiceDoBiomaDoEstagio,
+  zonaMaximaDoEstagio, salasDoEstagio, pesosDoEstagio,
 } from '@/data/estagios'
 export type { EstagioDef, EstagioDoMapId } from '@/data/estagios'
 export { LANCE_MAP_ID } from '@/data/nightmareMaps'

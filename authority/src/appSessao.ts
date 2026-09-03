@@ -371,10 +371,10 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   if (temCusto && !estado.unlockedMaps.includes(mapId)) {
     throw new ErroHttp(403, 'hunt nao desbloqueada')
   }
-  // `continent` e o GRUPO DE GATE da hunt (faixa1/faixa2/faixa3/nightmare, ver
-  // data/biomas.ts) — deixou de ser regiao quando as hunts viraram biomas
-  // tematicos. A faixa III e o Modo Pesadelo (com as 11 BOSS dentro) so entram
-  // depois do Campeao Lance.
+  // `continent` e o GRUPO DE GATE da hunt — sobraram DOIS (`biomas`, aberto, e
+  // `nightmare`, premio do Lance; ver data/biomas.ts). Ele deixou de ser regiao
+  // quando as hunts viraram biomas tematicos, e encolheu de novo na PH-432,
+  // quando o gate de estagio passou a responder o que as faixas respondiam.
   const grupo = MAPS[mapId].continent
   if (!estado.unlockedContinents.includes(grupo)) {
     throw new ErroHttp(403, 'Derrote o Campeao Lance para acessar esta area.')

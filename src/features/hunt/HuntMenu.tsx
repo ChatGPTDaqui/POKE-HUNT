@@ -11,7 +11,7 @@ import { pedirAcao } from '@/data/remote/autoridade'
 // de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
 import {
-  FAIXAS, SUB_BIOMA_POR_CHAVE,
+  GRUPOS_INICIAIS, SUB_BIOMA_POR_CHAVE,
   type SubBiomaDef,
 } from '@/data/biomas'
 import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
@@ -77,7 +77,7 @@ async function acionarHunt(
     return
   }
   if (continentGated) {
-    const mapContinent = map.continent || FAIXAS[0].id
+    const mapContinent = map.continent || GRUPOS_INICIAIS[0]
     useToastStore.getState().pushToast(
       `Derrote o Campeão Lance antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
       'error', 'world',
@@ -120,7 +120,7 @@ async function acionarHunt(
 // nota la), nao no useState local daqui.
 export function focusHunt(map: HuntMapDef) {
   const ui = useUiStore.getState()
-  ui.setHuntContinent(map.continent ?? 'faixa1')
+  ui.setHuntContinent(map.continent ?? GRUPOS_INICIAIS[0])
   ui.setHuntSearchTerm(map.name)
   ui.setHuntType('all')
 }
@@ -349,7 +349,7 @@ export function HuntMenu() {
   const mapaAtivo = mapaAtivoId ? MAPS[mapaAtivoId] : null
 
   const continents = useMemo(
-    () => [...new Set(Object.values(MAPS).map((m) => m.continent ?? 'faixa1'))],
+    () => [...new Set(Object.values(MAPS).map((m) => m.continent ?? GRUPOS_INICIAIS[0]))],
     [],
   )
 
@@ -368,7 +368,7 @@ export function HuntMenu() {
     const term = search.trim().toLowerCase()
     return Object.values(MAPS)
       .filter((m) => parseEstagioId(m.id) == null)
-      .filter((m) => (m.continent ?? 'faixa1') === continent)
+      .filter((m) => (m.continent ?? GRUPOS_INICIAIS[0]) === continent)
       .filter((m) => huntHasType(m, typeFilter))
       .filter((m) => huntMatches(m, term))
       .sort((a, b) => a.levelRange[0] - b.levelRange[0] || a.name.localeCompare(b.name))
@@ -405,7 +405,7 @@ export function HuntMenu() {
           onEntrar={(mapId) => {
             const map = MAPS[mapId]
             if (!map) return
-            const mapContinent = map.continent ?? 'faixa1'
+            const mapContinent = map.continent ?? GRUPOS_INICIAIS[0]
             const continentGated = !unlockedContinents.includes(mapContinent)
             const bloqueio = continentGated ? null : bloqueioDeBiomaClient(mapId, biomaProgress)
             const liberado = !continentGated && !bloqueio
@@ -485,7 +485,7 @@ export function HuntMenu() {
       {visibleMaps.map((map) => {
         // Gate por continente (Kanto so depois do Campeao Lance) — separado do
         // gate de custo em ouro por mapa, e checado antes dele.
-        const mapContinent = map.continent ?? 'faixa1'
+        const mapContinent = map.continent ?? GRUPOS_INICIAIS[0]
         const continentGated = !unlockedContinents.includes(mapContinent)
         // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
         // continente e ANTES do custo em ouro, mesma prioridade do servidor.

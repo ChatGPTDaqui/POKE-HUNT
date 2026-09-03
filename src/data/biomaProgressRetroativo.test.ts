@@ -1,5 +1,5 @@
 // A ordem canonica dos biomas COPIADA na migration de backfill (PH-284) e a
-// mesma de `ORDEM_DOS_BIOMAS`.
+// mesma de `ORDEM_LEGADA_DOS_BIOMAS`.
 //
 // Ela e copiada porque nao existe tabela de biomas no banco — o SQL nao tem de
 // onde derivar. Copia sem trava e onde o "uma fonte" morre: o dia em que um
@@ -11,7 +11,7 @@
 // fica vermelho no CI e obriga a decisao consciente (nova migration de backfill
 // com a ordem nova, ou congelar esta como historica e excluir do teste).
 import { describe, expect, it } from 'vitest'
-import { ORDEM_DOS_BIOMAS } from './biomas'
+import { ORDEM_LEGADA_DOS_BIOMAS } from './progressoDeBioma'
 
 const MIGRATIONS = import.meta.glob('/supabase/migrations/*.sql', {
   query: '?raw', import: 'default', eager: true,
@@ -35,12 +35,12 @@ describe('backfill de bioma_progress (PH-284)', () => {
     ])
   })
 
-  it.each(BACKFILL)('%s usa exatamente ORDEM_DOS_BIOMAS', (nome, sql) => {
+  it.each(BACKFILL)('%s usa exatamente ORDEM_LEGADA_DOS_BIOMAS', (nome, sql) => {
     expect(
       ordemNoSql(sql),
-      `${nome}: a ordem do SQL divergiu de ORDEM_DOS_BIOMAS (src/data/biomas.ts). `
+      `${nome}: a ordem do SQL divergiu de ORDEM_LEGADA_DOS_BIOMAS (src/data/biomas.ts). `
       + 'O backfill creditaria bioma diferente do que o gate exige.',
-    ).toEqual([...ORDEM_DOS_BIOMAS])
+    ).toEqual([...ORDEM_LEGADA_DOS_BIOMAS])
   })
 
   it.each(BACKFILL)('%s so SOBE o indice — nunca zera nem regride', (nome, sql) => {

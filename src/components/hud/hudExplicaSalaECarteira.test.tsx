@@ -22,7 +22,7 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import {
-  ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS,
+  ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, BIOMAS,
 } from '@/data/biomas'
 import { SALAS_POR_ESTAGIO } from '@/data/estagios'
 import { SalaChip } from './SalaChip'
@@ -42,7 +42,7 @@ function tocar(elemento: HTMLElement): void {
  * protetor" passaria por acidente, medindo a chave errada em vez da regra.
  */
 const CHAVE = Object.keys(SUB_BIOMA_POR_CHAVE)
-  .find((k) => SUB_BIOMA_POR_CHAVE[k].bioma.chave === ORDEM_DOS_BIOMAS[0])!
+  .find((k) => SUB_BIOMA_POR_CHAVE[k].bioma.chave === BIOMAS[0].chave)!
 
 function porNaSala(indice: number, abates: number, ciclos = 0) {
   useWorldStore.setState({
