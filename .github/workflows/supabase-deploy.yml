@@ -87,7 +87,18 @@ jobs:
         run: |
           set -uo pipefail
 
-          if [ -z "${VITE_SUPABASE_URL}" ] || [ -z "${VITE_SUPABASE_ANON_KEY}" ] || [ -z "${CONTA_TESTE_SENHA}" ]; then
+          # BRANCO CONTA COMO AUSENTE (PH-463). `-z` e falso pra uma string com
+          # so um `\n`, e `gh secret set NOME` sem `--body` le da entrada padrao:
+          # entrada vazia grava um segredo que EXISTE e nao e vazio. Sem esta
+          # limpeza, esse segredo passaria a guarda, as bancadas rodariam com
+          # credencial invalida, o job ficaria VERMELHO — e a regra do projeto
+          # manda reverter producao quando a promocao fica vermelha. Ou seja: um
+          # segredo mal colado dispararia um revert desnecessario.
+          U=$(printf '%s' "${VITE_SUPABASE_URL:-}" | tr -d '[:space:]')
+          A=$(printf '%s' "${VITE_SUPABASE_ANON_KEY:-}" | tr -d '[:space:]')
+          S=$(printf '%s' "${CONTA_TESTE_SENHA:-}" | tr -d '[:space:]')
+
+          if [ -z "$U" ] || [ -z "$A" ] || [ -z "$S" ]; then
             echo "::warning::Faltam secrets — a verificacao de producao NAO rodou. Confira na mao."
             {
               echo "### A verificacao de producao NAO rodou"
@@ -110,25 +121,67 @@ jobs:
             exit 0
           fi
 
+          # TRES resultados, e nao dois (PH-463). As bancadas separam
+          # "configuracao ruim" de "producao quebrada", e a diferenca decide
+          # entre deixar a promocao verde ou disparar um revert:
+          #
+          #   0  passou
+          #   2  INCONCLUSIVO — credencial recusada (400/401/403 no login).
+          #      E segredo errado, nao produto quebrado. 5xx e rede continuam
+          #      caindo no 1, porque ai o servidor E o problema.
+          #   1  producao reprovou de verdade
+          #
+          # Sem esta separacao, colar o segredo errado deixaria a promocao
+          # vermelha e a regra do `CLAUDE.md` mandaria reverter producao — por
+          # um erro de configuracao que nao quebrou nada.
           conferir() {
             echo "== $1 =="
-            if node "$1"; then
-              return 0
-            fi
+            node "$1"
+            local c=$?
+            [ "$c" = "0" ] && return 0
+            [ "$c" = "2" ] && return 2
             echo "::warning::$1 reprovou na 1a tentativa; repetindo em 15s antes de reprovar a promocao."
             sleep 15
             node "$1"
           }
 
           RUIM=0
-          conferir scripts/harness/fumaca-de-producao.mjs      || RUIM=1
-          conferir scripts/harness/abrir-hunt-em-producao.mjs  || RUIM=1
+          INCONCLUSIVO=0
+          for BANCADA in scripts/harness/fumaca-de-producao.mjs scripts/harness/abrir-hunt-em-producao.mjs; do
+            conferir "$BANCADA"
+            case $? in
+              0) ;;
+              2) INCONCLUSIVO=1 ;;
+              *) RUIM=1 ;;
+            esac
+          done
 
           if [ "$RUIM" != "0" ]; then
-            echo "### PRODUCAO REPROVOU a verificacao pos-deploy" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "A regra do \`CLAUDE.md\` e reverter primeiro e investigar depois." >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "### PRODUCAO REPROVOU a verificacao pos-deploy"
+              echo ""
+              echo "A regra do \`CLAUDE.md\` e reverter primeiro e investigar depois."
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 1
+          fi
+
+          if [ "$INCONCLUSIVO" != "0" ]; then
+            echo "::warning::Credencial recusada — a verificacao de producao NAO concluiu. Confira na mao."
+            {
+              echo "### A verificacao NAO concluiu: a credencial foi recusada"
+              echo ""
+              echo "O login da conta de teste voltou 400/401/403. Isso e **segredo errado, nao producao quebrada** — por isso a promocao segue verde."
+              echo ""
+              echo "Causa mais comum: \`gh secret set NOME\` rodado sem \`--body\` e sem colar nada, o que grava um segredo em branco ou truncado."
+              echo ""
+              echo "Enquanto isso a obrigacao do \`CLAUDE.md\` continua manual:"
+              echo ""
+              echo '```'
+              echo "node scripts/harness/fumaca-de-producao.mjs"
+              echo "node scripts/harness/abrir-hunt-em-producao.mjs"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
 
           echo "### Producao verificada: login, \`/estado\`, CORS e abertura de hunt" >> "$GITHUB_STEP_SUMMARY"
