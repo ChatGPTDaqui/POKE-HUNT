@@ -23,39 +23,39 @@ import {
 
 /** Base 2: Ataque, Defesa, Velocidade. */
 const BASE_2: Record<number, string> = {
-  6: '4x (+300%)',
-  5: '3,5x (+250%)',
-  4: '3x (+200%)',
-  3: '2,5x (+150%)',
-  2: '2x (+100%)',
-  1: '1,5x (+50%)',
-  0: '1x (+0%)',
-  [-1]: '0,67x (−33%)',
-  [-2]: '0,5x (−50%)',
-  [-3]: '0,4x (−60%)',
-  [-4]: '0,33x (−67%)',
-  [-5]: '0,29x (−71%)',
-  [-6]: '0,25x (−75%)',
+  6: '+300% (4x)',
+  5: '+250% (3,5x)',
+  4: '+200% (3x)',
+  3: '+150% (2,5x)',
+  2: '+100% (2x)',
+  1: '+50% (1,5x)',
+  0: '+0% (1x)',
+  [-1]: '−33% (0,67x)',
+  [-2]: '−50% (0,5x)',
+  [-3]: '−60% (0,4x)',
+  [-4]: '−67% (0,33x)',
+  [-5]: '−71% (0,29x)',
+  [-6]: '−75% (0,25x)',
 }
 
 /** Base 3: Precisao e Evasao. */
 const BASE_3: Record<number, string> = {
-  6: '3x (+200%)',
-  5: '2,67x (+167%)',
-  4: '2,33x (+133%)',
-  3: '2x (+100%)',
-  2: '1,67x (+67%)',
-  1: '1,33x (+33%)',
-  0: '1x (+0%)',
-  [-1]: '0,75x (−25%)',
-  [-2]: '0,6x (−40%)',
-  [-3]: '0,5x (−50%)',
-  [-4]: '0,43x (−57%)',
+  6: '+200% (3x)',
+  5: '+167% (2,67x)',
+  4: '+133% (2,33x)',
+  3: '+100% (2x)',
+  2: '+67% (1,67x)',
+  1: '+33% (1,33x)',
+  0: '+0% (1x)',
+  [-1]: '−25% (0,75x)',
+  [-2]: '−40% (0,6x)',
+  [-3]: '−50% (0,5x)',
+  [-4]: '−57% (0,43x)',
   // 3/8 = 0,375, que arredonda pra 0,38x — e a variacao e −62%, e nao −63%:
   // `Math.round(-62.5)` da −62 em JS (o desempate de .5 vai pro maior, e pra
   // numero negativo isso e "menos negativo"). Registrado porque parece typo.
-  [-5]: '0,38x (−62%)',
-  [-6]: '0,33x (−67%)',
+  [-5]: '−62% (0,38x)',
+  [-6]: '−67% (0,33x)',
 }
 
 describe('texto de estagio de atributo (PH-421)', () => {
@@ -90,7 +90,7 @@ describe('texto de estagio de atributo (PH-421)', () => {
     // desenvolvedor tem que ESCOLHER qual, em vez de herdar a base 2 em silencio.
     for (const stat of Object.keys(ROTULO_ESTAGIO) as StatDeEstagio[]) {
       expect(multiplicadorDoStat(stat, 2), stat).toBeGreaterThan(1)
-      expect(formatarEstagio(stat, 2), stat).toMatch(/^\d+(,\d+)?x \(\+\d+%\)$/)
+      expect(formatarEstagio(stat, 2), stat).toMatch(/^\+\d+% \(\d+(,\d+)?x\)$/)
     }
   })
 

@@ -32,11 +32,24 @@ import { SUB_BIOMA_POR_CHAVE } from './biomas'
 import { SPECIES } from './pokes'
 import { nivelDeAprendizado } from './activeAbilities'
 import { vfxDoGolpe } from './moveVfx'
+import { TETO_DE_CARREGAMENTO_MS } from './tetoDeCarregamento'
 
 // Teto de tempo pra NAO transformar uma rede ruim em "o botao Entrar nao
 // funciona". Estourado o prazo, a cena entra do mesmo jeito e o que faltou
 // termina de carregar por tras (o guard em `drawEntity` cobre o intervalo).
-export const PRELOAD_TIMEOUT_MS = 4000
+//
+// ERA 4000 ATE A PH-483, e a troca e pedido do dono, textual: "eu estou vendo
+// muitas coisas que estao indo ao ar para o jogador sem estar devidamente
+// carregado, como o background... eu preciso que todos os conteudos sejam
+// carregados previamente antes de aparecer para o jogador, mesmo que isso custe
+// carregamento". Com 4s, uma hunt com pool grande em 4G entrava com metade da
+// arte ainda no ar — o que o teto media era o pior caso, e o pior caso estava
+// acontecendo.
+//
+// O NUMERO NAO MORA MAIS AQUI porque ele tem que casar com o teto da cutscene —
+// ver `data/tetoDeCarregamento.ts`, que explica o que quebra quando os dois
+// divergem.
+export const PRELOAD_TIMEOUT_MS = TETO_DE_CARREGAMENTO_MS
 
 function comTimeout(promessa: Promise<unknown>, ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -46,6 +59,25 @@ function comTimeout(promessa: Promise<unknown>, ms: number): Promise<void> {
       resolve()
     })
   })
+}
+
+/**
+ * A arte da TELA DE CARREGAMENTO, aquecida antes de a tela de carregamento
+ * aparecer (PH-483).
+ *
+ * Parece circular e nao e: a cutscene e a tela que o jogador olha ENQUANTO a
+ * hunt carrega, e ela tem arte propria (o fundo do bioma). Quando essa arte
+ * chegava junto com todo o resto, o letreiro subia primeiro e a imagem entrava
+ * depois — "a imagem da tela de carregamento esta chegando apos o anuncio", nas
+ * palavras do dono. Um arquivo, esperado antes de abrir a cena; quem mostra a
+ * espera nesse intervalo e o botao "Entrando...".
+ *
+ * `null`/vazio resolve na hora: hunt sem arte cai na cor do bioma, que ja e o
+ * piso da cutscene.
+ */
+export function preloadArteDeCena(url: string | null | undefined): Promise<void> {
+  if (!url) return Promise.resolve()
+  return comTimeout(primeImage(url), PRELOAD_TIMEOUT_MS)
 }
 
 /**
@@ -134,7 +166,8 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   const efeitos = [
     ...todasAsTirasDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus(),
     ...todasAsTirasDeProps(),
-    // PH-416: as 15 tiras de mudanca de atributo. 28 kB no total — mais baratas
+    // PH-416: os 15 selos de mudanca de atributo. 3,2 kB no total desde a
+    // PH-480 (eram 28 kB como tira de 16 quadros) — mais baratos
     // que as 8 da animacao de bola logo abaixo, e com o mesmo argumento: golpe
     // de status e das primeiras coisas que acontecem numa hunt (o auto-play usa
     // o que o POKE sabe, e Growl/Tail Whip/Leer estao no comeco de quase toda

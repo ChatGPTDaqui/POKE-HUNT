@@ -64,7 +64,7 @@ export function efeitosDoGolpe(ability: Ability): string[] {
   for (const mudanca of ability.statChanges ?? []) {
     const chance = ability.statChance ?? 100
     // PH-421: o tooltip promete o RESULTADO, e nao o degrau. "Atk Fis +2" nao
-    // diz ao jogador que o Ataque DOBRA; "para 2x (+100%)" diz.
+    // diz ao jogador que o Ataque DOBRA; "em +100% (2x)" diz.
     //
     // A conta parte do zero de proposito: o tooltip e lido antes de escolher o
     // golpe, e nesse instante nao existe "estagio atual" — o mesmo golpe pode
@@ -72,7 +72,9 @@ export function efeitosDoGolpe(ability: Ability): string[] {
     // neutro e a unica leitura que nao depende de estado que a tela nao tem.
     const alvo = ability.statTarget === 'self' ? 'de quem usa' : 'do alvo'
     efeitos.push(
-      `${ROTULO_ESTAGIO[mudanca.stat]} ${alvo} para ${formatarEstagio(mudanca.stat, mudanca.estagios)}`
+      // PH-481: "para 0,67x" virou "em −33%". A preposicao muda junto com o
+      // numero — "para −33%" leria como se o atributo virasse um valor negativo.
+      `${ROTULO_ESTAGIO[mudanca.stat]} ${alvo} em ${formatarEstagio(mudanca.stat, mudanca.estagios)}`
       + `${chance < 100 ? ` (${chance}%)` : ''}`,
     )
   }

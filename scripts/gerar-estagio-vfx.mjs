@@ -1,67 +1,117 @@
-// Gerador da arte de MUDANCA DE ATRIBUTO — uma tira por atributo x direcao.
+// Gerador do SELO de MUDANCA DE ATRIBUTO — uma peca por atributo x direcao.
 //
-// O QUE ELE SUBSTITUI, E POR QUE
+// O QUE ELE SUBSTITUI, E POR QUE (duas vezes)
 // -----------------------------------------------------------------------------
-// A arte antiga eram 32 GIFs em `assets/move-vfx/status/{aumenta,diminui}/` —
-// 16 tipos elementais x 2 direcoes, garimpados de acervo. Ela varia com o TIPO
-// do POKE e com a direcao, e NUNCA com o atributo: Ataque caindo e Velocidade
-// caindo desenhavam exatamente a mesma coisa. E o mesmo defeito que a PH-121 ja
-// tinha corrigido no selo do HUD e que continuava de pe no mundo.
+// PRIMEIRA VEZ (PH-416). A arte era 32 GIFs em
+// `assets/move-vfx/status/{aumenta,diminui}/` — 16 tipos elementais x 2
+// direcoes, garimpados de acervo. Ela variava com o TIPO do POKE e com a
+// direcao, e NUNCA com o atributo: Ataque caindo e Velocidade caindo desenhavam
+// exatamente a mesma coisa. A partir da PH-416 a arte varia com o ATRIBUTO, que
+// e a informacao que o jogador nao tem por nenhum outro canal.
 //
-// Agora a arte varia com o ATRIBUTO, que e a informacao que o jogador nao tem
-// por nenhum outro canal, e a COR vem do tipo do golpe, aplicada no desenho
-// (`sprites.ts`). Assar a cor daria 15 x 16 tipos = 240 arquivos.
+// SEGUNDA VEZ (PH-480), e e esta a arte que o arquivo gera hoje. A peca da
+// PH-416 era uma TIRA de 16 quadros de 48x48 desenhada no CENTRO DO CORPO do
+// alvo — mesmo lugar, mesmo tamanho e mesma duracao da arte de impacto de um
+// golpe de dano. Pedido do dono, textual:
 //
-// A GRAMATICA, E O QUE ELA HERDA DA PH-416
+//   "os efeitos de status ficaram muito ruins, eles estao sendo aplicados como
+//    se fossem sprites de ataque, sobrepondo as sprites de ataque. Como eles sao
+//    apenas indicador de alteracao de stats, vamos fazer algo bem simples, uns
+//    icones bem pequenos"
+//
+// Entao a peca deixou de ser cena e virou SELO: um quadro so, 21x13, desenhado
+// acima da cabeca. Sem motes, sem animacao de quadro — o movimento que sobrou e
+// a subida/descida de 6px que o motor faz com o proprio selo, e ela e de graca.
+//
+// A GRAMATICA DO SELO
 // -----------------------------------------------------------------------------
-//   GLIFO 9x9        o canal "QUAL atributo". Mesma grade, mesmo peso de traco
-//                    e mesmo contorno da arte de condicao, pra as duas familias
-//                    parecerem do mesmo jogo. Escala 3 (27px dos 48), que e a
-//                    proporcao que o badge da PH-416 usa.
-//   MOTES            o canal "SUBIU ou DESCEU", por MOVIMENTO: nascem embaixo e
-//                    sobem, ou nascem em cima e caem, convergindo no destino.
-//   ARTE SEM COR     quase branca com contorno escuro. A cor e do tipo, no
-//                    desenho.
+//   GLIFO 9x9        o canal "QUAL atributo". Os mesmos nove por nove da
+//                    PH-416, em escala 1 — 9px de verdade, que e a resolucao em
+//                    que eles foram desenhados.
+//   SETA 5x7         o canal "SUBIU ou DESCEU". Ela agora e obrigatoria: sem os
+//                    motes, a direcao nao tem outro canal na FORMA.
+//   ARTE SEM COR     quase branca com contorno escuro. A cor entra no desenho —
+//                    e desde a PH-480 ela e a cor da DIRECAO (verde/vermelho),
+//                    nao a do tipo elemental. Num selo de 13px de altura o que
+//                    o jogador precisa ler e subiu-ou-desceu; o tipo do golpe ja
+//                    esta dito pelo resto da cena.
 //
-// A PH-416 usa anel ORBITANDO porque la o efeito e um ESTADO que persiste; aqui
-// e um LANCAMENTO, um instante — e orbita nao tem cima nem baixo.
-//
-// A DIRECAO NAO ESTA NO GLIFO, E ISSO FOI MEDIDO
+// POR QUE A SETA VOLTOU, DEPOIS DE A PH-416 TER REPROVADO DIRECAO NA FORMA
 // -----------------------------------------------------------------------------
-// Tres tentativas de por direcao na FORMA, todas reprovadas em folha de contato
-// no tamanho de jogo:
-//
-//   1. so os motes            duas pecas identicas em quadro parado;
-//   2. chevron sob o glifo    as 15 pecas viraram o mesmo borrao — o chevron
-//                             acrescenta silhueta e come a distincao que o
-//                             glifo existe pra dar;
-//   3. eco do glifo           o glifo solido cobre o eco e sobra uma faixa de
-//                             5px, que em forma cheia (escudo) sai reta e le
-//                             como artefato de render.
-//
-// A quarta resposta e a que o `statIcones.ts` ja tinha escrito na PH-121: "A
-// DIRECAO NAO MORA AQUI de proposito. Ela ja e comunicada por dois canais no
-// selo, e duplicar no icone gastaria a unica coisa que o icone tem pra dizer:
-// QUAL atributo." Hoje sao TRES canais, nao dois — a PH-421 acrescentou o
-// flutuante, que diz `Ataque 2x` contra `Ataque 0,67x`.
-//
-// Cada par continua tendo DUAS tiras (o glifo e o mesmo, os motes correm ao
-// contrario) porque tocar a tira invertida no motor inverteria tambem o
-// esmaecimento dos motes — eles apagam no fim do percurso, e de tras pra frente
-// acenderiam no fim. 15 arquivos a ~1,9KB e mais barato que essa complexidade.
+// A PH-416 reprovou tres tentativas de por direcao na forma (so os motes;
+// chevron SOB o glifo; eco do glifo) e todas falharam pelo mesmo motivo: elas
+// disputavam a MESMA silhueta que o glifo usa pra dizer qual atributo e. A seta
+// aqui nao disputa nada — ela mora numa segunda coluna do selo, ao lado do
+// glifo, com o proprio contorno. E ela e obrigatoria porque o canal que
+// carregava a direcao (o movimento dos motes ao longo de 16 quadros) deixou de
+// existir.
 //
 // COMO RODAR
 //   node scripts/gerar-estagio-vfx.mjs
 //
 // COMO OLHAR O RESULTADO
-//   node scripts/harness/folha-de-estagio.mjs   (folha de contato, com o teste
-//   de reducao pra 26px — o unico que diz se a arte sobrevive ao tamanho real)
+//   node scripts/harness/folha-de-estagio.mjs   (folha de contato: o selo 1:1,
+//   ampliado, e sobre os tres fundos)
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { png } from './vfx/png.mjs'
 
-/** Uniforme com a arte de condicao da PH-416, pelo mesmo motivo dela. */
-const QUADROS = 16
-const LADO = 48
+/**
+ * O selo tem UM quadro. A constante existe pra o resto do arquivo (e a bancada)
+ * nao ter que saber disso por um `1` solto.
+ */
+const QUADROS = 1
+
+/**
+ * A escala do pixel art, e ela DECIDE o tamanho do selo inteiro.
+ *
+ * 1, e o numero foi MEDIDO na bancada `selo-sobre-o-poke.mjs`, que compoe o selo
+ * acima do CORPO REAL no tamanho de jogo — a sprite de batalha aparece com ~34px
+ * de altura de mundo (`ALTURA_CORPO` em `condicao-sobre-o-corpo.mjs`).
+ *
+ *   escala 1   21x13   38% da altura do corpo   <- escolhida
+ *   escala 2   40x24   71% da altura do corpo
+ *   (a peca anterior, PH-416)  48x48  141% do corpo, e desenhada no meio dele)
+ *
+ * Julgar o selo sozinho responde a pergunta errada, e foi assim que a peca
+ * anterior passou: numa folha de contato ela parecia do tamanho certo. Sobre o
+ * corpo, ela era MAIOR que o POKE inteiro — e era exatamente isso que fazia ela
+ * ler como cena de ataque em vez de indicador. Na escala 2 o selo ainda fica
+ * quase tao largo quanto o Pikachu; so a 1 ele le como chapa pequena ao lado da
+ * cabeca, que e o pedido ("uns icones bem pequenos").
+ *
+ * INTEIRA por obrigacao: pixel art em escala fracionaria amostra irregular e o
+ * traco de 1px do glifo some em metade das linhas. Escala 1 significa os 9x9
+ * desenhados 1:1, que e a resolucao em que eles foram feitos.
+ */
+export const GLIFO_ESCALA_PADRAO = 1
+
+/**
+ * As medidas do selo saem da SOMA das pecas, e nao de gosto:
+ *
+ *   margem + glifo (9x9) + vao + seta (5x7) + margem   de largura
+ *   margem + glifo (9x9) + margem                      de altura
+ *
+ * A margem e `contorno + 1`: o contorno precisa caber inteiro dentro do quadro,
+ * senao ele sai cortado na borda e a peca le como recortada.
+ *
+ * O VAO E 3 (em unidade de grade), e nao 1. Com 1 os contornos de glifo e seta
+ * se encostam e fecham o vao inteiro numa barra escura — as duas pecas viram uma
+ * silhueta so. Com 3 sobra vao transparente no meio, que e o que separa.
+ */
+export function dimensoesDoSelo(escala = GLIFO_ESCALA_PADRAO) {
+  const contorno = escala
+  const margem = contorno + 1
+  return {
+    escala,
+    contorno,
+    margem,
+    largura: margem * 2 + (9 + 3 + 5) * escala,
+    altura: margem * 2 + 9 * escala,
+  }
+}
+
+export const SELO_LARGURA = dimensoesDoSelo().largura
+export const SELO_ALTURA = dimensoesDoSelo().altura
 
 // ---------------------------------------------------------------------------
 // Glifos — pixel art 9x9, `#` aceso
@@ -190,7 +240,7 @@ export const GLIFOS = {
 
 /**
  * Quase branco, e nao branco puro: o `multiply` do desenho usa o valor do pixel
- * como fator, entao 255 puro devolveria a cor do tipo sem nenhuma variacao de
+ * como fator, entao 255 puro devolveria a cor da direcao sem nenhuma variacao de
  * luminancia e o glifo ficaria chapado.
  */
 const BRANCO = [0xf4, 0xf8, 0xff]
@@ -205,83 +255,98 @@ const BRANCO = [0xf4, 0xf8, 0xff]
  * meio pixel e desaparece.
  */
 const CONTORNO = [0x14, 0x0c, 0x1e, 235]
-const CONTORNO_PX = 2
-const GLIFO_ESCALA = 3
-const MOTES = 5
 
-/** Uma tira horizontal RGBA — quadro `f` nas colunas [f*LADO, f*LADO+LADO). */
-export function tira(nome, direcao) {
-  const largura = QUADROS * LADO
-  const buf = new Uint8Array(largura * LADO * 4)
+/**
+ * A seta, 5x7. Ela e o canal de DIRECAO do selo — o unico, desde que os motes
+ * sairam junto com os 16 quadros.
+ *
+ * Haste de 1px de largura e cabeca de 5: e o menor desenho que ainda le como
+ * seta em escala 2 (10x14 de verdade). Com haste de 3 a peca vira um "T" gordo
+ * ao lado do glifo e as duas silhuetas competem.
+ */
+const SETA_CIMA = [
+  '..#..',
+  '.###.',
+  '#####',
+  '..#..',
+  '..#..',
+  '..#..',
+  '..#..',
+]
+
+/** A de baixo e a de cima espelhada na vertical — nao um segundo desenho. */
+const SETA_BAIXO = [...SETA_CIMA].reverse()
+
+/**
+ * Um selo RGBA de SELO_LARGURA x SELO_ALTURA, quadro unico.
+ *
+ * `direcao` vira a seta. `condicao` e a peca sem atributo (golpe que aplica
+ * veneno/sono/confusao) e sai SEM seta, centrada: nao ha estagio pra medir
+ * direcao ali, e uma seta inventada mentiria.
+ */
+export function selo(nome, direcao, escala = GLIFO_ESCALA_PADRAO) {
+  const { largura, altura, margem, contorno: CONTORNO_PX } = dimensoesDoSelo(escala)
+  const GLIFO_ESCALA = escala
+  const SETA_ESCALA = escala
+  const buf = new Uint8Array(largura * altura * 4)
   const glifo = GLIFOS[nome]
+  const comSeta = nome !== 'condicao'
 
-  const indice = (f, x, y) => (y * largura + f * LADO + x) * 4
-  const dentro = (x, y) => x >= 0 && y >= 0 && x < LADO && y < LADO
-  const aceso = (f, x, y) => dentro(x, y) && buf[indice(f, x, y) + 3] > 0
-  const pintar = (f, x, y, [r, g, b], a = 255) => {
+  const indice = (x, y) => (y * largura + x) * 4
+  const dentro = (x, y) => x >= 0 && y >= 0 && x < largura && y < altura
+  const aceso = (x, y) => dentro(x, y) && buf[indice(x, y) + 3] > 0
+  const pintar = (x, y, [r, g, b], a = 255) => {
     if (!dentro(x, y)) return
-    const i = indice(f, x, y)
-    // Nao sobrescreve pixel mais opaco: o glifo entra depois dos motes e um mote
-    // que passe atras dele nao pode comer o traco.
+    const i = indice(x, y)
+    // Mesma regra da PH-416: nao sobrescreve pixel mais opaco. Aqui ela protege
+    // o glifo do contorno da seta quando os dois se encostam no vao de 2px.
     if (buf[i + 3] >= a) return
     buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = a
   }
 
-  const glifoLargura = glifo[0].length * GLIFO_ESCALA
-  const glifoX = Math.round((LADO - glifoLargura) / 2)
-  const glifoTopo = Math.round((LADO - glifo.length * GLIFO_ESCALA) / 2)
-
-  for (let f = 0; f < QUADROS; f++) {
-    const fase = f / QUADROS
-
-    for (let m = 0; m < MOTES; m++) {
-      // Fase propria por mote, deslocada: sem isto a coluna pulsa junto e le
-      // como piscada em vez de fluxo.
-      const p = (fase + m / MOTES) % 1
-      const y = direcao === 'aumenta'
-        ? Math.round((LADO - 4) - p * (LADO - 10))
-        : Math.round(6 + p * (LADO - 10))
-      // CONVERGE no destino em vez de abrir simetrico. Abrindo nas duas pontas,
-      // subir e descer davam a MESMA silhueta.
-      const abertura = direcao === 'aumenta' ? (1 - p) : p
-      const x = Math.round(LADO / 2 + Math.sin(m * 2.4) * 15 * abertura)
-      const raio = p < 0.7 ? 2 : 1
-      const alpha = Math.round(255 * Math.min(1, (1 - p) * 2.2))
-      for (let dy = -raio; dy <= raio; dy++) {
-        for (let dx = -raio; dx <= raio; dx++) {
-          if (dx * dx + dy * dy > raio * raio + 1) continue
-          pintar(f, x + dx, y + dy, BRANCO, alpha)
+  const estampar = (grade, escala, x0, y0) => {
+    for (let gy = 0; gy < grade.length; gy++) {
+      for (let gx = 0; gx < grade[gy].length; gx++) {
+        if (grade[gy][gx] !== '#') continue
+        for (let sy = 0; sy < escala; sy++) {
+          for (let sx = 0; sx < escala; sx++) pintar(x0 + gx * escala + sx, y0 + gy * escala + sy, BRANCO)
         }
       }
-    }
-
-    // Balanco de 1px pra o glifo nao ficar cravado no quadro.
-    const balanco = Math.round(Math.sin(fase * Math.PI * 2))
-    for (let gy = 0; gy < glifo.length; gy++) {
-      for (let gx = 0; gx < glifo[gy].length; gx++) {
-        if (glifo[gy][gx] !== '#') continue
-        for (let sy = 0; sy < GLIFO_ESCALA; sy++) {
-          for (let sx = 0; sx < GLIFO_ESCALA; sx++) {
-            pintar(f, glifoX + gx * GLIFO_ESCALA + sx, glifoTopo + balanco + gy * GLIFO_ESCALA + sy, BRANCO)
-          }
-        }
-      }
-    }
-
-    // Contorno por ULTIMO, olhando o que ficou aceso — contornar durante o
-    // desenho pintaria borda em cima do mote seguinte quando dois se encostam.
-    for (let passo = 0; passo < CONTORNO_PX; passo++) {
-      const borda = []
-      for (let y = 0; y < LADO; y++) {
-        for (let x = 0; x < LADO; x++) {
-          if (aceso(f, x, y)) continue
-          if (aceso(f, x - 1, y) || aceso(f, x + 1, y) || aceso(f, x, y - 1) || aceso(f, x, y + 1)) borda.push([x, y])
-        }
-      }
-      for (const [x, y] of borda) pintar(f, x, y, CONTORNO.slice(0, 3), CONTORNO[3])
     }
   }
-  return { buf, largura, altura: LADO }
+
+  const glifoLargura = glifo[0].length * GLIFO_ESCALA
+  const glifoAltura = glifo.length * GLIFO_ESCALA
+  const glifoTopo = Math.round((altura - glifoAltura) / 2)
+  // Com seta, o glifo mora na coluna da esquerda; sem ela, no centro do selo.
+  const glifoX = comSeta ? margem : Math.round((largura - glifoLargura) / 2)
+  estampar(glifo, GLIFO_ESCALA, glifoX, glifoTopo)
+
+  if (comSeta) {
+    const seta = direcao === 'aumenta' ? SETA_CIMA : SETA_BAIXO
+    const setaLargura = seta[0].length * SETA_ESCALA
+    const setaAltura = seta.length * SETA_ESCALA
+    estampar(
+      seta, SETA_ESCALA,
+      largura - margem - setaLargura,
+      Math.round((altura - setaAltura) / 2),
+    )
+  }
+
+  // Contorno por ULTIMO, olhando o que ficou aceso — contornar durante o desenho
+  // pintaria borda em cima do vizinho que ainda nao existe.
+  for (let passo = 0; passo < CONTORNO_PX; passo++) {
+    const borda = []
+    for (let y = 0; y < altura; y++) {
+      for (let x = 0; x < largura; x++) {
+        if (aceso(x, y)) continue
+        if (aceso(x - 1, y) || aceso(x + 1, y) || aceso(x, y - 1) || aceso(x, y + 1)) borda.push([x, y])
+      }
+    }
+    for (const [x, y] of borda) pintar(x, y, CONTORNO.slice(0, 3), CONTORNO[3])
+  }
+
+  return { buf, largura, altura }
 }
 
 /** Os sete atributos de estagio, na ordem de `ROTULO_ESTAGIO`. */
@@ -303,13 +368,13 @@ if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || proce
   mkdirSync('assets/estagio-vfx', { recursive: true })
   let total = 0
   for (const [nome, direcao] of pecas()) {
-    const { buf, largura, altura } = tira(nome, direcao)
+    const { buf, largura, altura } = selo(nome, direcao)
     const arquivo = nome === 'condicao' ? 'condicao.png' : `${nome}-${direcao}.png`
     const saida = `assets/estagio-vfx/${arquivo}`
     const bytes = png(largura, altura, buf)
     writeFileSync(saida, bytes)
     total += bytes.length
-    console.log(`${saida}: ${QUADROS} quadros de ${LADO}x${LADO} (${bytes.length} bytes)`)
+    console.log(`${saida}: ${QUADROS} quadro de ${largura}x${altura} (${bytes.length} bytes)`)
   }
-  console.log(`\n${pecas().length} tiras, ${total} bytes no total`)
+  console.log(`\n${pecas().length} selos, ${total} bytes no total`)
 }

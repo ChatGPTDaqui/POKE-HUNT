@@ -20,7 +20,7 @@ import { faceIconUrl } from '@/data/sprites'
 import { nomeDoStatus, type StatusAtivo } from '@/data/statusEffects'
 import { statusVfxUrl } from '@/data/statusVfx'
 import { ROTULO_ESTAGIO } from '@/data/statLabels'
-import { formatarEstagio, formatarMultiplicador, formatarPrazoEmTurnos, multiplicadorDoStat } from '@/data/textoDeEstagioEPrazo'
+import { formatarEstagio, formatarVariacao, formatarPrazoEmTurnos, multiplicadorDoStat } from '@/data/textoDeEstagioEPrazo'
 import { ICONE_DE_ESTAGIO } from '@/data/statIcones'
 import { getAbility } from '@/data/abilities'
 import { nomeDaTrait } from '@/data/traits'
@@ -111,12 +111,16 @@ function selosDaEntidade(entidade: WorldEntity | null, prefixo: string): Badge[]
       // Sem `url`: o icone do ATRIBUTO e o que este selo tem pra dizer.
       url: null,
       Icone: ICONE_DE_ESTAGIO[stat],
-      // PH-421: o selo diz o MULTIPLICADOR, nao o degrau. "-1" e lido como
-      // "menos um ponto de Ataque" e na verdade e 0,67x — um terco do atributo
-      // embora. O degrau nao aparece mais em lugar nenhum de jogo; ele fica na
-      // wiki, junto da formula.
+      // PH-421: o selo diz o EFEITO, nao o degrau. "-1" e lido como "menos um
+      // ponto de Ataque" e na verdade e um terco do atributo embora. O degrau
+      // nao aparece mais em lugar nenhum de jogo; ele fica na wiki, junto da
+      // formula.
+      //
+      // PH-481: e o efeito e dito em PORCENTAGEM. O contador do selo tem espaco
+      // pra um numero so e ele passa a ser `−33%`; o multiplicador continua no
+      // titulo, dentro do `formatarEstagio`, pra quem abrir o detalhe.
       titulo: `${ROTULO_ESTAGIO[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} — ${formatarEstagio(stat, valor)}`,
-      contador: formatarMultiplicador(multiplicadorDoStat(stat, valor)),
+      contador: formatarVariacao(multiplicadorDoStat(stat, valor)),
       aumenta: valor > 0,
       verbete: GLOSSARIO.estagioDeAtributo,
       fontes: entidade.estagiosFonte?.[stat] ?? [],

@@ -1,22 +1,33 @@
-// Arte do golpe que muda ATRIBUTO, por atributo e direcao (PH-416).
+// O SELO de mudanca de ATRIBUTO, por atributo e direcao (PH-416, refeito na
+// PH-480).
 //
-// O QUE ELA SUBSTITUI
+// O QUE ELE SUBSTITUI, DUAS VEZES
 // -----------------------------------------------------------------------------
-// `statusVfx.ts` escolhia a arte por TIPO ELEMENTAL + direcao: 32 GIFs, 16 tipos
-// x 2 direcoes. Aquele eixo nunca respondeu a pergunta que o jogador faz — QUAL
-// atributo mudou. Ataque caindo e Velocidade caindo desenhavam exatamente a
-// mesma coisa, e o unico diferenciador era o texto flutuante.
+// PH-416: `statusVfx.ts` escolhia a arte por TIPO ELEMENTAL + direcao — 32 GIFs,
+// 16 tipos x 2 direcoes. Aquele eixo nunca respondeu a pergunta que o jogador
+// faz, QUAL atributo mudou: Ataque caindo e Velocidade caindo desenhavam
+// exatamente a mesma coisa. E o mesmo defeito que a PH-121 corrigiu no selo do
+// HUD ("os icones escolhidos nao estao conseguindo a representatividade visual
+// adequada", com captura) e que continuava de pe no mundo.
 //
-// E o mesmo defeito que a PH-121 corrigiu no selo do HUD ("os icones escolhidos
-// nao estao conseguindo a representatividade visual adequada", com captura) e
-// que continuava de pe no mundo.
+// PH-480: a peca da PH-416 era uma TIRA de 16 quadros de 48x48 desenhada no
+// CENTRO DO CORPO do alvo — mesmo lugar, mesmo tamanho e mesma duracao da arte
+// de impacto de um golpe de dano. Pedido do dono, textual: "os efeitos de status
+// ficaram muito ruins, eles estao sendo aplicados como se fossem sprites de
+// ataque, sobrepondo as sprites de ataque. Como eles sao apenas indicador de
+// alteracao de stats, vamos fazer algo bem simples, uns icones bem pequenos".
 //
-// POR QUE O TIPO NAO SE PERDE
+// Entao a peca virou SELO: um quadro so, 21x13, glifo do atributo mais seta de
+// direcao, desenhado ACIMA DA CABECA (`sprites.ts#drawSeloDeEstagio`).
+//
+// A COR AGORA E A DA DIRECAO, E NAO A DO TIPO
 // -----------------------------------------------------------------------------
-// A arte e gerada quase BRANCA, e a cor do tipo entra no desenho
-// (`sprites.ts#drawEstagioEffect`) por `multiply`. Assim o eixo do tipo continua
-// existindo — um Rosnado de POISON sai roxo e um de FIRE sai laranja — sem
-// custar arquivo: assar a cor daria 15 x 16 tipos = 240 arquivos.
+// A arte continua sendo gerada quase BRANCA e a cor entra no desenho por
+// `multiply` — o que mudou e QUAL cor. Ate a PH-480 era a do tipo elemental, e
+// isso fazia sentido quando a peca era uma cena de 48px no corpo do alvo. Num
+// selo de 13px de altura o canal de cor tem lugar pra UMA informacao, e a que o
+// jogador precisa e subiu-ou-desceu; o tipo do golpe ja esta dito pelo resto da
+// cena (a arte do proprio golpe, a cor do nome que flutua).
 //
 // `multiply` e nao `source-atop`, e a diferenca importa: `source-atop` pinta a
 // cor sobre TODO pixel opaco e apagaria o contorno escuro, que e o que faz a
@@ -28,22 +39,36 @@ import type { TiraDeVfx } from './vfxTiras'
 const RAIZ = 'assets/estagio-vfx'
 
 /**
- * Uniforme nas 15, igual a arte de condicao da PH-416 — por isso a constante em
- * vez de um numero por arquivo.
+ * UM quadro. O selo nao anima: o movimento que ele tem e a subida/descida que o
+ * desenho faz com a peca inteira, e ela nao custa arquivo.
+ *
+ * A constante sobrevive a troca (era 16) porque `TiraDeVfx` continua sendo o
+ * formato — quem desenha deduz a largura do quadro por `naturalWidth/quadros`, e
+ * com 1 isso e o arquivo inteiro.
  */
-export const QUADROS_DE_ESTAGIO = 16
+export const QUADROS_DE_ESTAGIO = 1
+
+/**
+ * O tamanho do selo em unidade de MUNDO, 1:1 com o arquivo (`21x13`, gerado por
+ * `scripts/gerar-estagio-vfx.mjs`).
+ *
+ * 1:1 e obrigatorio, nao economia: e pixel art com traco de 1px, e qualquer
+ * escala nao-inteira racha o traco — a mesma licao que
+ * `CAPTURE_ANIM_DRAW_SCALE` carrega em `sprites.ts`.
+ */
+export const SELO_LARGURA = 21
+export const SELO_ALTURA = 13
 
 export type DirecaoDeEstagio = 'aumenta' | 'diminui'
 
 /**
- * As 14 tiras de atributo. Um par por atributo, e o par existe porque o
- * movimento dos motes e a unica coisa que difere: no `aumenta` eles nascem
- * embaixo e sobem, no `diminui` nascem em cima e caem.
+ * Os 14 selos de atributo. Um par por atributo, e o par existe porque a SETA
+ * difere: no `aumenta` ela aponta pra cima, no `diminui` pra baixo.
  *
- * POR QUE NAO UMA TIRA SO TOCADA AO CONTRARIO: os motes APAGAM no fim do
- * percurso. De tras pra frente eles acenderiam no fim, e o efeito leria como
- * algo se juntando em vez de se dissipando. 15 arquivos a ~1,9KB e mais barato
- * que essa complexidade no motor.
+ * POR QUE DOIS ARQUIVOS E NAO UM ESPELHADO NO DESENHO: espelhar no canvas
+ * inverteria o GLIFO junto, e metade deles tem lateralidade (a lamina diagonal
+ * do `atkFis`, o chevron do `speed`). 15 arquivos a ~140 bytes — o conjunto
+ * inteiro pesa 2,1 kB — e mais barato que um `scale(1,-1)` seletivo no motor.
  */
 export const TIRA_POR_ESTAGIO: Record<StatDeEstagio, Record<DirecaoDeEstagio, TiraDeVfx>> = {
   atkFis: {
@@ -88,6 +113,9 @@ export const TIRA_POR_ESTAGIO: Record<StatDeEstagio, Record<DirecaoDeEstagio, Ti
  * fica no corpo (`TIRA_POR_CONDICAO_NO_CORPO`, PH-416). Esta peca e so o
  * lancamento, e a ampulheta diz o que ela tem pra dizer — comecou a correr um
  * prazo, que desde a PH-422 o jogo mostra em segundos.
+ *
+ * E a unica das 15 SEM SETA: nao ha estagio pra medir direcao numa condicao, e
+ * uma seta inventada mentiria. A ampulheta fica centrada no selo.
  */
 export const TIRA_DE_CONDICAO_APLICADA: TiraDeVfx = {
   url: `${RAIZ}/condicao.png`,

@@ -4,10 +4,12 @@
 // `HuntMenu` ja sabe que uma entrada esta em voo (chave `map:<id>`), e por um
 // instante pareceu bastar. Nao basta por duas razoes:
 //
-//   1. A CUTSCENE COBRE A TELA INTEIRA, e o painel de hunt e um filho da camada
-//      de janelas. Uma cutscene renderizada dentro dele ficaria ABAIXO do
+//   1. A CUTSCENE NAO PERTENCE AO PAINEL DE HUNT, e o painel e um filho da
+//      camada de janelas. Uma cutscene renderizada dentro dele ficaria ABAIXO do
 //      proprio painel — e o painel fecha no fim da entrada, o que arrancaria a
 //      cutscene junto no exato momento em que ela deveria estar terminando.
+//      (Desde a PH-482 ela nao e mais tela cheia, e vive na faixa do campo; o
+//      argumento nao muda, porque ele e sobre ARVORE e nao sobre tamanho.)
 //   2. ENTRAR NUMA HUNT NAO ACONTECE SO PELO CLIQUE. O boot reentra na hunt
 //      gravada (PH-93) e a vitoria do Lance devolve o jogador ao campo; as duas
 //      passam por `controller.enterMap` e nenhuma passa pelo `HuntMenu`. Com o
