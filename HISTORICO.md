@@ -5947,3 +5947,177 @@ no papel:**
   das tres coisas juntas.
 
 `render/sprites.ts` nao mudou: a issue trocou arte, nao fiacao.
+
+---
+
+## 2026-09-02 (noite) — a negociacao ganha contexto e desfecho, e duas bancadas que fingiram a `dev` quebrada
+
+Quatro issues, uma nota: PH-435 (card do anuncio na conversa), PH-436 (Correio vira Social),
+PH-437 (reserva de anuncio), PH-438 (nota 7.37). Promovida na
+[PR #436](https://github.com/ChatGPTDaqui/POKE-HUNT/pull/436), deploy verde e
+`fumaca-de-producao.mjs` verde nos dois ambientes. Back-merge na #437.
+
+O pedido do dono foi um: **"ao iniciar conversa pelo anuncio, um card do anuncio deve preceder a
+conversa, pra ambos saberem exatamente do que estao falando"**. Ele cabe em duas telas. O que a
+sessao encontrou foi que a frase seguinte do pedido — "tudo deve ocorrer de forma a facilitar a
+negociacao entre os jogadores" — nao tinha como ser cumprida: **a negociacao nao tinha desfecho.**
+
+### O card: "para AMBOS saberem" mata a solucao facil
+
+A implementacao barata seria um banner no cliente, vindo do `uiStore`. Ela morre na primeira
+palavra do requisito: so o comprador veria. O contexto tem que **persistir no servidor**.
+
+Persistido, sobram duas formas, e uma esta errada por causa de duas linhas que ja existiam no
+codigo:
+
+- **linha propria de `tipo = 'anuncio'`** — `Conversa.tsx:88` descarta no Realtime tudo que nao e
+  `tipo === 'texto'`. O card nunca apareceria AO VIVO pro outro lado, so depois de um F5. E o rate
+  limit de `enviar_mensagem` conta `where tipo = 'texto'`: linha de outro tipo passa **por fora**
+  dele, e clicar em laco no "negociar" da vitrine encheria o fio do vendedor de graca.
+- **coluna na propria mensagem** — `mail_messages.contexto_anuncio jsonb`, estampada por
+  `enviar_mensagem` quando recebe `p_anuncio_id`. O tipo continua `'texto'`: Realtime e rate limit
+  seguem valendo **sem uma linha nova em nenhum dos dois**.
+
+A segunda. A licao generalizavel: antes de escolher a forma de um dado novo, procurar o que ja
+FILTRA por forma. Os dois pontos que decidiram aqui eram um `if` de guarda e um `where` — nenhum
+apareceria numa discussao de modelagem.
+
+**Snapshot, e nao referencia.** O jsonb copia especie/nivel/IV/shiny/preco/moeda/modo. Ler o
+anuncio ao vivo faria o card de uma conversa de ontem **mudar de preco sozinho** — ou virar linha
+vazia depois da venda, exatamente quando o registro do que foi combinado passa a importar. Mesmo
+padrao de `anexo_poke` (PH-164).
+
+**Card repetido resolvido na RENDERIZACAO** (`idsComCardDeAnuncio`), nao com indice UNIQUE por
+(par, anuncio). A constraint impediria renegociar o mesmo POKE semanas depois e custaria migration
+para resolver um problema de tela. A regra e a de divisor de data: o card aparece quando o assunto
+MUDA — e "muda" se mede contra o ultimo anuncio VISTO no fio, nao contra a mensagem anterior. O
+caso que decide a forma e `A, nada, A`: comparando com a anterior, uma fala solta no meio reabriria
+o mesmo card do outro lado dela.
+
+### A armadilha que teria derrubado o correio inteiro com a migration verde
+
+`enviar_mensagem` ganhou um quinto parametro. **`create or replace function` com lista de
+argumentos diferente nao substitui: cria SOBRECARGA.** Com as duas assinaturas vivas, toda chamada
+do PostgREST que omite `p_anuncio_id` casa nas duas candidatas (a nova tem default) e volta
+
+    could not choose the best candidate function
+
+ou seja: o correio para de mandar mensagem, e a migration "funcionou". Por isso a de 4 argumentos e
+**dropada** antes de a de 5 nascer. E `grant` e **por assinatura, nao por nome** — sem reemitir,
+a funcao nasce sem `execute` para `authenticated` e todo envio volta 42501.
+
+As duas coisas viraram teste sobre o texto da migration (`contextoDoAnuncioNaMensagem.test.ts`),
+provado sabotando: remover o `drop function` reprova.
+
+O `database.types.ts` confirmou de lado que pegou: cada schema apareceu com **uma** assinatura de
+`enviar_mensagem`.
+
+### O buraco real: nao havia como cobrar o preco combinado
+
+Com o card, os dois lados sabem de qual POKE falam. Combinar 1.8M no lugar de 2.5M tambem dava. O
+que nao dava era **fechar**:
+
+- nao existe RPC para alterar o preco de um anuncio ativo;
+- cancelar e reanunciar mais barato expoe o POKE na vitrine PUBLICA, e a vitrine ordena por preco
+  crescente — o POKE aparece no TOPO da lista de todo mundo;
+- a mesa de troca nao resolve: `TIPOS_DE_OFERTA = ['poke', 'item']` (`src/data/troca.ts:75`) —
+  **nao existe perna de ouro**.
+
+Dava para conversar, dava para combinar, e nao dava para fechar sem confiar na palavra do outro.
+`market_listings.reservado_para` + `reservar_anuncio(anuncio, para, preco)` e o menor mecanismo que
+fecha isso.
+
+**Duas camadas, e elas protegem de coisas diferentes.** A view esconde o anuncio reservado de
+terceiros — conveniencia de tela. `comprar_anuncio` **recusa a compra** — e a regra. O id do anuncio
+circula (o card da conversa carrega ele), entao esconder da lista nao impede chamada direta, e
+limite que so existe no cliente vira 502.
+
+**Preco e reserva no MESMO update.** Separados, existe uma janela com o anuncio ja barato e ainda
+publico — e e justamente a ordenacao por preco crescente que poe o POKE no topo da vitrine
+exatamente nela.
+
+**O aviso ao reservado entra por insert direto**, entao nao passa pelo rate limit de
+`enviar_mensagem`. O que ocupa o lugar dele e `is distinct from`: reserva identica a que ja vale
+nao gera mensagem nova, o que mata o laco reservar/liberar como forma de encher o fio de alguem.
+Foi a unica guarda anti-flood que precisou ser inventada, e ela nasceu de perguntar "por onde este
+caminho novo escapa do limite que ja existe".
+
+Recusados, cada um por ouro de terceiro em escrow: leilao, `apenas_oferta`, e anuncio com lance
+pendente. `on delete set null` na coluna: conta apagada libera o anuncio. `cascade` apagaria o
+anuncio e prenderia o POKE num registro morto; `restrict` deixaria a linha reservada para um id
+inexistente — POKE invendavel para sempre.
+
+**De lambuja**, um defeito antigo: `mercadoMeus` lia os anuncios da TABELA, e a tela ja mostrava
+`a.ofertas ?? 0` — que vinha sempre `undefined`. A aba dizia **"0 lance(s)" em anuncio com lance**.
+Passou a ler da view, que e tambem quem sabe o NOME de quem reservou (a tabela guarda so o uuid).
+
+### O rename, e a excecao que o criterio de aceite nao previa
+
+PH-436 trocou Correio por Social no cliente inteiro: chave de tela, diretorio, store, hooks,
+`queryKey`, arquivos de teste. O criterio de aceite dizia "zero identificador `correio` fora de
+migration e patch note publicado" — e ele estava **errado por omissao**. Sobra uma terceira classe:
+**nome de funcao no Postgres** (`excluir_correio`, `marcar_correio_lido`, `coletar_anexo_correio`).
+A string e a chave da chamada; renomear so no cliente quebra as tres RPCs.
+
+Em vez de deixar isso como acordo verbal, virou `src/nomeDaTelaSocial.test.ts`, que varre `src/**`
+e permite exatamente essas tres. O icone do dock deixou de ser envelope junto — era a ultima peca
+da interface afirmando que aquilo e carta.
+
+### Duas bancadas mentindo, de novo
+
+**11 testes vermelhos que nao eram da `dev`.** Depois de puxar a `dev`, `authority/src/` reprovou
+com
+
+    TypeError: indiceDoBiomaDoEstagio is not a function
+     ❯ bloqueioDeBiomaPendente authority/src/appSessao.ts:242:26
+
+apontando uma linha do codigo-fonte, como se a branch de outra sessao tivesse quebrado a `dev`.
+Cheguei a rodar a suite numa `dev` limpa para confirmar — e confirmou, porque o problema era meu:
+`authority/engine/headless.js` e **gitignored**, foi gerado antes de PH-425/426 entrarem, e `git
+pull` nunca o atualiza. `npm run build:engine` (981ms) zerou os 11. Toda funcao nova exportada pelo
+motor por outra sessao vira um `is not a function` local.
+
+**`git fetch origin dev origin/main` aborta inteiro.** O nome certo e `main`; `origin/main` e o
+remote-tracking, nao o refspec. O `dev` que vem ANTES dele no comando **nao e atualizado** — o fetch
+morre no segundo argumento e nada e escrito. A branch criada em seguida nasceu sem o commit de
+tipos que tinha acabado de entrar, e o gate reprovou com "database.types.ts esta desatualizado"
+listando justamente as colunas do commit ausente: sintoma que parece erro de schema e e erro de
+topologia.
+
+As duas sao a mesma familia: a instrumentacao mentiu antes de o fato existir. Um ref por comando, e
+`build:engine` antes de acreditar em falha de `authority/`.
+
+### O fluxo de tipos, duas vezes na mesma sessao
+
+Duas migrations, dois pares de PR. O gate compara `database.types.ts` com o schema **remoto**, entao
+a PR da migration NAO pode trazer os tipos (reprovaria a si mesma) e o arquivo so pode ser
+regenerado depois do merge, baixando o artefato do proprio job `tipos` com `gh run download`. O job
+`deploy` passa e o `tipos` **reprova de proposito**, com a mensagem dizendo o remedio. Funcionou
+igual nas duas voltas. Entre o merge e a PR de tipos, qualquer PR aberta de qualquer pessoa reprova
+— por isso as duas metades saem na mesma sessao.
+
+### A promocao carregou trabalho de outra sessao sem nota
+
+O intervalo `main..dev` tinha **PH-425 e PH-426** (estagios por bioma; as 120 hunts de estagio
+substituindo as 36 de faixa), de outra sessao, ambas `Feito` no Jira e **sem entrada no
+changelog** — conferido com `git diff origin/main origin/dev -- src/data/patchNotes.ts`, que voltou
+vazio.
+
+A decisao foi levada ao dono em vez de resolvida sozinha, porque promover embute duas coisas que
+nao sao minhas: por no ar um redesenho de mundo em andamento, e faze-lo em silencio. Ele mandou
+promover tudo. Escrever a nota das duas ficou de fora de proposito — nota do trabalho de outra
+pessoa sobre redesenho em andamento e deduzir a intencao dela —, e virou **PH-439**, com a
+instrucao de datar 02/09 e nao o dia em que for escrita.
+
+### Verificacao alem da fumaca
+
+`fumaca-de-producao.mjs` prova que o jogo CARREGA, e nao que a migration chegou com os grants
+certos. Uma sonda extra chamou `reservar_anuncio` em producao com um uuid inventado: a funcao
+levanta antes de qualquer escrita, entao o teste e nao-destrutivo e distingue os tres casos que
+importam — 404 (rota inexistente), 42501 (grant faltando) e a recusa tratada. Voltou
+`Este anuncio nao esta mais disponivel.`, com a view expondo `reservado_para`/`reservado_nome` e
+`contexto_anuncio` legivel.
+
+**Nao foi validado**: o fluxo de dois jogadores no navegador (card chegando ao vivo do outro lado,
+reserva bloqueando o terceiro). Precisa de duas contas na porta 5173 e do ambiente `jogo-dev` — a
+conta de teste em producao e virgem e a trava de sessao dupla derruba a outra aba.
