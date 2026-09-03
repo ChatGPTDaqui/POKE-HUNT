@@ -31,6 +31,8 @@ import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
 import { SPECIES, type Species } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
 import { SegmentedTabs } from '@/components/game/controls'
+import { BlocoAuto } from '@/components/auto/BlocoAuto'
+import { useGameStateStore } from '@/stores/gameStateStore'
 import { LinhaDeEspecie } from './LinhaDeEspecie'
 import { elencoDoEstagio, subBiomasDoEstagio } from './elencoDoEstagio'
 import { cn } from '@/lib/utils'
@@ -649,6 +651,12 @@ function PainelDoEstagio({
   // componente e remontado por `key={mapId}` na trilha, entao trocar de estagio
   // volta pro estagio inteiro sozinho — sem `useEffect` de sincronizacao.
   const [recorte, setRecorte] = useState<string | null>(null)
+  // PH-490: o "avançar ao concluir" passou a morar aqui. Selecionado do store
+  // pelo campo, e não o objeto `autoToggles` inteiro — assinar o objeto faria
+  // este painel re-renderizar a cada mudança de auto-catch e auto-pot, e ele
+  // recalcula o elenco do estágio.
+  const avancarDeEstagio = useGameStateStore((s) => s.autoToggles.avancarDeEstagio)
+  const setAutoToggle = useGameStateStore((s) => s.setAutoToggle)
   const subBiomas = useMemo(() => subBiomasDoEstagio(bioma, estagio), [bioma, estagio])
   // A conta e pesada o bastante pra memoizar: ela roda `contextoDeSpawn` uma vez
   // por (sub-bioma x indice de sala) — ate 4 x 8 = 32 chamadas, cada uma com o
@@ -680,6 +688,17 @@ function PainelDoEstagio({
             EM CAÇADA
           </span>
         )}
+        {/* PH-491: o botão fecha a linha do cabeçalho, à direita. `ml-auto`
+            empurra; `shrink-0` impede que os quatro rótulos à esquerda o
+            espremam a 390px — o cabeçalho é `flex-wrap`, então em tela estreita
+            ele desce inteiro pra própria linha em vez de encolher. */}
+        <BotaoDeEntrar
+          cor={colorForType(bioma.tipo)}
+          bloqueado={bloqueado}
+          entrando={entrando}
+          ehAtiva={ehAtiva}
+          onEntrar={onEntrar}
+        />
       </div>
 
       {bloqueado && bloqueio && <div className="text-[.78em] text-warn">{bloqueio}</div>}
@@ -737,12 +756,23 @@ function PainelDoEstagio({
         ))}
       </div>
 
-      <BotaoDeEntrar
-        cor={colorForType(bioma.tipo)}
-        bloqueado={bloqueado}
-        entrando={entrando}
-        ehAtiva={ehAtiva}
-        onEntrar={onEntrar}
+      {/* O QUE ACONTECE QUANDO ESTE ESTÁGIO ACABAR (PH-490).
+          Este toggle morava no painel de Automações, a dois menus daqui — e a
+          decisão que ele governa ("repito este estágio ou vou pro seguinte?") é
+          tomada olhando esta trilha, escolhendo este estágio pela espécie que
+          se caça nele. Ele fecha o painel porque é a última pergunta: primeiro
+          o que tem aqui dentro, depois o que fazer ao terminar.
+
+          Continua GLOBAL, e não por estágio: é o mesmo `autoToggles` que o
+          servidor lê na simulação. Quem manda a mudança pro servidor é o
+          `useSincronizarAuto` montado em `JogoCarregado` — antes da PH-490 o
+          efeito vivia dentro do painel de Automações, e um toggle mudado daqui
+          com aquele painel fechado nunca teria chegado lá. */}
+      <BlocoAuto
+        titulo="Avançar de estágio ao concluir"
+        dica="Ao limpar a última sala do estágio, entra no estágio seguinte em vez de repetir o mesmo. Se não houver próximo — ou se ele ainda estiver bloqueado — o estágio atual repete."
+        ligado={avancarDeEstagio}
+        aoLigar={(v) => setAutoToggle('avancarDeEstagio', v)}
       />
     </div>
   )
@@ -751,11 +781,22 @@ function PainelDoEstagio({
 /**
  * O botao de entrar no estagio (PH-469).
  *
- * ELE SAIU DA LINHA DO CABECALHO, e o motivo e hierarquia, nao tamanho. Ele
- * estava inline entre o rotulo "3 salas" e o selo de estado, com `text-[.85em]`
- * — o mesmo peso visual do texto que ele estava ao lado. Numa tela cuja unica
- * acao e "entrar nesse estagio", a acao era o elemento mais discreto do painel.
- * Agora ele fecha o painel, ocupa a largura toda e e o unico elemento grande.
+ * ELE VOLTOU PRA LINHA DO CABECALHO NA PH-491, E ISSO NAO DESFAZ A PH-469.
+ * Pedido do dono: "mover o botão 'entrar' para o topo direito do quadro onde
+ * fica os sub-biomas".
+ *
+ * O que a PH-469 corrigiu foi HIERARQUIA, e nao posicao: ele estava inline
+ * entre o rotulo "3 salas" e o selo de estado, com `text-[.85em]` — o mesmo
+ * peso visual do texto ao lado dele. Numa tela cuja unica acao e "entrar nesse
+ * estagio", a acao era o elemento mais discreto do painel.
+ *
+ * Entao ele volta ANCORADO A DIREITA (`ml-auto`) e mantendo o peso: fundo na
+ * cor do bioma, caixa alta, borda de 2px, tracking aberto. Ele nao e mais um
+ * rotulo no meio de rotulos — e a unica peca colorida da linha. O que mudou foi
+ * a posicao; a hierarquia que a PH-469 comprou fica.
+ *
+ * EM TELA ESTREITA ele desce inteiro pra propria linha: o cabecalho e
+ * `flex-wrap` e o botao e `shrink-0`. Encolher seria voltar ao defeito de 2026.
  *
  * A COR VEM DO BIOMA porque ela e o unico fio que liga o botao ao lugar em que
  * ele entra — o mesmo tom do anel dos nos e do caminho percorrido. Fora do
@@ -788,8 +829,11 @@ function BotaoDeEntrar({
       onClick={onEntrar}
       aria-busy={entrando || undefined}
       className={cn(
-        'jogo-botao mt-[.15em] flex w-full cursor-pointer items-center justify-center gap-[.4em]',
-        'rounded-[.55em] border-2 py-[.55em] text-[1.05em] font-black uppercase tracking-[.12em]',
+        // `ml-auto` empurra pro canto direito do cabecalho; `shrink-0` impede
+        // que os quatro rotulos a esquerda o espremam. Sem `w-full` desde a
+        // PH-491 — ele deixou de fechar o painel e passou a fechar a LINHA.
+        'jogo-botao ml-auto flex shrink-0 cursor-pointer items-center justify-center gap-[.4em]',
+        'rounded-[.55em] border-2 px-[.9em] py-[.35em] text-[.95em] font-black uppercase tracking-[.12em]',
         'transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
         bloqueado || entrando
           ? 'cursor-not-allowed border-n700 bg-n800 text-n600'
