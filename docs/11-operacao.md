@@ -437,6 +437,20 @@ exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
    push`/`edge:publicar` manual fora desse fluxo**, a menos que seja diagnóstico pontual (a seção
    de Diagnóstico de 502 abaixo já é esse caso legítimo).
 
+   **Esse mesmo run também VERIFICA produção** (PH-460): depois de publicar a Edge, ele roda
+   `fumaca-de-producao.mjs` e `abrir-hunt-em-producao.mjs` contra produção. Por isso **ler o
+   resumo do job, não só a cor** — verde tem três leituras:
+
+   | resumo do job | o que aconteceu | o que fazer |
+   |---|---|---|
+   | `Producao verificada: login, /estado, CORS e abertura de hunt` | as duas bancadas passaram | nada |
+   | `A verificacao de producao NAO rodou` | faltam os secrets `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `CONTA_TESTE_SENHA` | rodar as duas bancadas na mão |
+   | `A verificacao NAO concluiu: a credencial foi recusada` | secret existe mas está errado ou em branco | corrigir o secret e rodar as duas na mão |
+
+   **Vermelho nesse passo é produção quebrada de verdade**, não configuração: credencial recusada
+   (400/401/403 no login) sai com código 2 e vira aviso, justamente para que um segredo mal colado
+   não dispare a regra de reverter (PH-463). O que reprova é 5xx, rede, ou resposta errada.
+
 ### Se o gate (`supabase-check.yml`) falhar e não estiver claro por quê
 
 - **"Migration aplicada no remoto sem arquivo local"** → `npx supabase migration list --linked`
