@@ -18,7 +18,7 @@ import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
 import { bloqueioDoEstagio, bloqueioDoLance, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { MapaDeBiomas, TrilhaDoBioma } from './TrilhaDeEstagios'
-import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
+import { POOL_POR_SALA, STARTER_HUNT_ID } from '@/data/huntSpawnOverrides'
 import { contextoDeSpawn } from '@/engine/systems/salaSystem'
 import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
@@ -374,6 +374,33 @@ export function HuntMenu() {
       .sort((a, b) => a.levelRange[0] - b.levelRange[0] || a.name.localeCompare(b.name))
   }, [continent, typeFilter, search])
 
+  /**
+   * A Rota 46 inicial, separada do resto da lista (PH-448).
+   *
+   * Ela e renderizada ACIMA dos 12 biomas, e as outras hunts de cartao (as 11
+   * BOSS, o Campeao Lance, o espelho do Pesadelo) continuam embaixo. O motivo
+   * e a ordem de leitura de quem acabou de escolher o inicial: a Rota 46 e a
+   * PRIMEIRA cacada do jogo, Lv 1 a 2, e estava no mesmo balde do conteudo de
+   * fim de jogo — abaixo dos 12 biomas, exigindo rolar a tela inteira.
+   *
+   * SAI DE `visibleMaps`, E NAO DE `MAPS`: assim ela obedece a aba de
+   * continente, a busca e o filtro de elemento como qualquer outro card. Um
+   * card fixo no topo que ignora o filtro ativo e um card que o jogador nao
+   * entende por que continua ali depois de filtrar.
+   *
+   * `?? null` e nao `undefined`: o JSX abaixo testa a variavel direto, e
+   * `undefined` renderizaria igual — mas `null` diz "procurei e nao esta na
+   * lista filtrada", que e a unica razao pela qual ela pode faltar.
+   */
+  const huntInicial = useMemo(
+    () => visibleMaps.find((m) => m.id === STARTER_HUNT_ID) ?? null,
+    [visibleMaps],
+  )
+  const huntsEspeciais = useMemo(
+    () => visibleMaps.filter((m) => m.id !== STARTER_HUNT_ID),
+    [visibleMaps],
+  )
+
   if (team.length === 0) {
     return (
       <GameCard className="p-[.6em]">
@@ -420,6 +447,155 @@ export function HuntMenu() {
           }}
           onVoltar={() => { setBiomaAberto(null); setExpandedMapId(null) }}
         />
+      </div>
+    )
+  }
+
+  // PH-448: O CORPO DO CARD SAIU DO `.map()` E VIROU FUNCAO, e a razao e a
+  // ordem da tela, nao estetica. A Rota 46 inicial passou a ser renderizada
+  // ACIMA dos 12 biomas, e o resto das hunts de cartao continua embaixo — sao
+  // duas posicoes com o MESMO card. Duplicar ~135 linhas de marcacao pra isso
+  // seria garantir que as duas versoes divergem na primeira mudanca.
+  //
+  // Funcao no corpo do componente, e nao componente proprio: ela fecha sobre
+  // dez pecas de estado (`acao`, `expandedMapId`, `mapaAtivoId`,
+  // `unlockedContinents`, `biomaProgress`, `activeSpecies`, ...) que um
+  // componente extraido teria que receber como prop uma por uma. Nao e hook,
+  // entao nao ha ordem de hook pra respeitar.
+  const cardDeHunt = (map: HuntMapDef) => {
+    // Gate por continente (hoje: so o Modo Pesadelo, premio do Campeao
+    // Lance) — separado do gate de custo em ouro por mapa, e checado antes
+    // dele.
+    //
+    // PH-447: por `grupoLiberado`, e nao por `includes` na mao. O grupo que
+    // nasce aberto e liberado por definicao; perguntar se a coluna do banco
+    // o contem foi o que trancou o jogo inteiro quando a PH-434 renomeou o
+    // grupo e nenhuma migration reescreveu a coluna.
+    const mapContinent = map.continent ?? GRUPOS_INICIAIS[0]
+    const continentGated = !grupoLiberado(mapContinent, unlockedContinents)
+    // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
+    // continente e ANTES do custo em ouro, mesma prioridade do servidor.
+    const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, biomaProgress)
+    const temProtetor = parseEstagioId(map.id) != null
+    // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
+    // custo nasce liberada. Checar so a lista trancava visualmente as hunts
+    // do Modo Pesadelo e as BOSS, que sao geradas em runtime e nunca entram
+    // na coluna `unlocked_maps` do banco.
+    const unlocked = !continentGated && !bloqueioDeBioma
+      && (map.unlockCost == null || unlockedMaps.includes(map.id))
+    const odds = huntOdds(map)
+    const expanded = expandedMapId === map.id
+    const key = `map:${map.id}`
+    const pending = acao.isPending(key)
+
+    // PH-244: esta e a hunt em que o jogador esta agora.
+    const ehAtiva = map.id === mapaAtivoId
+
+    return (
+      <div
+        key={map.id}
+        className={cn(
+          'overflow-hidden rounded-[.7em] border bg-n900',
+          // Borda, e nao so o selo: a borda le de relance na lista rolando,
+          // e o selo responde "por que este esta diferente" quando o olho
+          // para nele. Um canal sozinho obriga a ler cada card.
+          ehAtiva ? 'border-ok' : 'border-n800',
+        )}
+      >
+        <div
+          onClick={() => setExpandedMapId(expanded ? null : map.id)}
+          className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-n800"
+        >
+          <span
+            className="h-[2.2em] w-[2.2em] shrink-0 rounded-full"
+            style={{
+              background: huntSwatchColor(map),
+              boxShadow: `0 0 10px ${huntSwatchColor(map)}66`,
+            }}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-medium">
+              {map.name}{' '}
+              <span className="font-normal text-n400">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
+              {/* PH-229/236: selo de protetor — motor exige Guardian/Lord
+                  em toda sala de todo bioma (PH-225), entao vale pra
+                  qualquer hunt que pertenca a ORDEM_DOS_BIOMAS. Selo
+                  generico ("PROTETOR", nao "GUARDIAN"/"LORD"): este card
+                  e da tela de SELEÇÃO de hunt, uma hunt inteira tem os
+                  DOIS tipos (Guardian nas salas 1-9, Lord na 10) — nao
+                  ha um "tipo" unico pra condicionar aqui, so a tag
+                  dentro da hunt ativa (drawNameLevelTag, sprites.ts)
+                  sabe qual protetor esta na tela agora. */}
+              {temProtetor && (
+                <span className="ml-[.4em] rounded-[.3em] bg-[#ff4d4d33] px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-[#ff4d4d]">
+                  ★ PROTETOR
+                </span>
+              )}
+              {/* PH-244: o segundo canal da hunt ativa. Depois do selo de
+                  boss porque os dois podem coexistir, e "onde eu estou" e
+                  a informacao mais recente das duas. */}
+              {ehAtiva && (
+                <span className="ml-[.4em] rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-ok">
+                  EM CAÇADA
+                </span>
+              )}
+            </div>
+            {/* A linha de custo/gate so aparece quando ha bloqueio: com a
+                hunt liberada, "Desbloqueado" seria ruido — o proprio botao
+                "Entrar" ja diz isso. */}
+            {!unlocked && (
+              <div className="mt-[.15em] text-[.75em] text-warn">
+                {continentGated
+                  ? 'Derrote o Campeão Lance para desbloquear'
+                  : bloqueioDeBioma
+                    ? bloqueioDeBioma
+                    : `Custo: ${fmt.format(map.unlockCost ?? 0)} ouro`}
+              </div>
+            )}
+          </div>
+          {/* PH-244: na hunt ATIVA o botao volta pro campo em vez de
+              "entrar" de novo.
+              Nao e so o rotulo: `controller.enterMap` no MESMO mapa abre uma
+              sessao nova no servidor, remonta o mundo e chama `resetStats`
+              — ou seja, zera o painel de taxa de farm sem o jogador ter
+              pedido nada. Um botao "Entrar" ao lado de um selo "EM CAÇADA"
+              e uma contradicao que convida exatamente a esse clique. */}
+          {ehAtiva ? (
+            <GameButton variant="primary" onClick={(e) => {
+              e.stopPropagation()
+              useUiStore.getState().closeScreen()
+            }}>
+              Voltar ao campo
+            </GameButton>
+          ) : (
+            <GameButton
+              variant={unlocked ? 'primary' : 'ghost'}
+              disabled={pending || acao.pendingKey != null}
+              onClick={(e) => {
+                e.stopPropagation()
+                void acao.run(key, () => acionarHunt(map, unlocked, continentGated, bloqueioDeBioma))
+              }}
+            >
+              {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated || bloqueioDeBioma ? 'Bloqueado' : 'Desbloquear'}
+            </GameButton>
+          )}
+        </div>
+
+        {expanded && (
+          <div className="flex flex-col gap-[.4em] border-t border-n800 p-[.55em]">
+            <SalasDaHunt mapId={map.id} />
+            <div className="text-[.75em] text-n500">
+              Pokemons de {map.name}
+              {/* A % ja e a real: P(sala) x P(especie | sala). Sem dizer
+                  isso, o jogador soma as porcentagens do card com as da
+                  sala em que esta e nao fecham. */}
+              <span className="text-n600"> — chance considerando o sorteio de sala</span>
+            </div>
+            {odds.species.map(({ id, species: sp, pct }) => (
+              <SpeciesRow key={id} sp={sp} pct={pct} activeSpecies={activeSpecies} />
+            ))}
+          </div>
+        )}
       </div>
     )
   }
@@ -471,156 +647,31 @@ export function HuntMenu() {
         )}
       </StickyHeader>
 
-      {/* Os 12 biomas — o nivel 1 da navegacao. Vem ANTES da lista porque e
-          onde o jogador vai 99% das vezes: as hunts de cartao sao a inicial e
-          as de fim de jogo. */}
+      {/* PH-448: A ROTA 46 VEM ANTES DOS BIOMAS.
+          Ela e a PRIMEIRA cacada do jogo (Lv 1 a 2, so tipo Normal) e estava
+          no mesmo balde das hunts de fim de jogo, embaixo dos 12 biomas:
+          quem acabava de escolher o inicial tinha que rolar a tela inteira
+          pra achar a unica hunt feita pra ele.
+
+          Ela continua sujeita a busca e ao filtro de elemento — sai de
+          `visibleMaps`, e nao de `MAPS` — porque um card que ignora o filtro
+          ativo e um card que o jogador nao entende por que esta ali. */}
+      {huntInicial && cardDeHunt(huntInicial)}
+
+      {/* Os 12 biomas — o nivel 1 da navegacao. Vem ANTES da lista de cartao
+          porque e onde o jogador vai 99% das vezes: o que sobra na lista sao
+          as hunts de fim de jogo. */}
       <SectionLabel>Biomas</SectionLabel>
       <MapaDeBiomas progresso={biomaProgress} onEscolher={setBiomaAberto} />
 
-      {visibleMaps.length > 0 && <SectionLabel>Hunts especiais</SectionLabel>}
-      {visibleMaps.length === 0 && (
+      {huntsEspeciais.length > 0 && <SectionLabel>Hunts especiais</SectionLabel>}
+      {huntsEspeciais.length === 0 && !huntInicial && (
         <p className="text-[.8em] text-n600">
           Nenhuma hunt especial nesta aba (as hunts de bioma estão acima, na trilha de cada um).
         </p>
       )}
 
-      {visibleMaps.map((map) => {
-        // Gate por continente (hoje: so o Modo Pesadelo, premio do Campeao
-        // Lance) — separado do gate de custo em ouro por mapa, e checado antes
-        // dele.
-        //
-        // PH-447: por `grupoLiberado`, e nao por `includes` na mao. O grupo que
-        // nasce aberto e liberado por definicao; perguntar se a coluna do banco
-        // o contem foi o que trancou o jogo inteiro quando a PH-434 renomeou o
-        // grupo e nenhuma migration reescreveu a coluna.
-        const mapContinent = map.continent ?? GRUPOS_INICIAIS[0]
-        const continentGated = !grupoLiberado(mapContinent, unlockedContinents)
-        // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
-        // continente e ANTES do custo em ouro, mesma prioridade do servidor.
-        const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, biomaProgress)
-        const temProtetor = parseEstagioId(map.id) != null
-        // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
-        // custo nasce liberada. Checar so a lista trancava visualmente as hunts
-        // do Modo Pesadelo e as BOSS, que sao geradas em runtime e nunca entram
-        // na coluna `unlocked_maps` do banco.
-        const unlocked = !continentGated && !bloqueioDeBioma
-          && (map.unlockCost == null || unlockedMaps.includes(map.id))
-        const odds = huntOdds(map)
-        const expanded = expandedMapId === map.id
-        const key = `map:${map.id}`
-        const pending = acao.isPending(key)
-
-        // PH-244: esta e a hunt em que o jogador esta agora.
-        const ehAtiva = map.id === mapaAtivoId
-
-        return (
-          <div
-            key={map.id}
-            className={cn(
-              'overflow-hidden rounded-[.7em] border bg-n900',
-              // Borda, e nao so o selo: a borda le de relance na lista rolando,
-              // e o selo responde "por que este esta diferente" quando o olho
-              // para nele. Um canal sozinho obriga a ler cada card.
-              ehAtiva ? 'border-ok' : 'border-n800',
-            )}
-          >
-            <div
-              onClick={() => setExpandedMapId(expanded ? null : map.id)}
-              className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-n800"
-            >
-              <span
-                className="h-[2.2em] w-[2.2em] shrink-0 rounded-full"
-                style={{
-                  background: huntSwatchColor(map),
-                  boxShadow: `0 0 10px ${huntSwatchColor(map)}66`,
-                }}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">
-                  {map.name}{' '}
-                  <span className="font-normal text-n400">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
-                  {/* PH-229/236: selo de protetor — motor exige Guardian/Lord
-                      em toda sala de todo bioma (PH-225), entao vale pra
-                      qualquer hunt que pertenca a ORDEM_DOS_BIOMAS. Selo
-                      generico ("PROTETOR", nao "GUARDIAN"/"LORD"): este card
-                      e da tela de SELEÇÃO de hunt, uma hunt inteira tem os
-                      DOIS tipos (Guardian nas salas 1-9, Lord na 10) — nao
-                      ha um "tipo" unico pra condicionar aqui, so a tag
-                      dentro da hunt ativa (drawNameLevelTag, sprites.ts)
-                      sabe qual protetor esta na tela agora. */}
-                  {temProtetor && (
-                    <span className="ml-[.4em] rounded-[.3em] bg-[#ff4d4d33] px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-[#ff4d4d]">
-                      ★ PROTETOR
-                    </span>
-                  )}
-                  {/* PH-244: o segundo canal da hunt ativa. Depois do selo de
-                      boss porque os dois podem coexistir, e "onde eu estou" e
-                      a informacao mais recente das duas. */}
-                  {ehAtiva && (
-                    <span className="ml-[.4em] rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-ok">
-                      EM CAÇADA
-                    </span>
-                  )}
-                </div>
-                {/* A linha de custo/gate so aparece quando ha bloqueio: com a
-                    hunt liberada, "Desbloqueado" seria ruido — o proprio botao
-                    "Entrar" ja diz isso. */}
-                {!unlocked && (
-                  <div className="mt-[.15em] text-[.75em] text-warn">
-                    {continentGated
-                      ? 'Derrote o Campeão Lance para desbloquear'
-                      : bloqueioDeBioma
-                        ? bloqueioDeBioma
-                        : `Custo: ${fmt.format(map.unlockCost ?? 0)} ouro`}
-                  </div>
-                )}
-              </div>
-              {/* PH-244: na hunt ATIVA o botao volta pro campo em vez de
-                  "entrar" de novo.
-                  Nao e so o rotulo: `controller.enterMap` no MESMO mapa abre uma
-                  sessao nova no servidor, remonta o mundo e chama `resetStats`
-                  — ou seja, zera o painel de taxa de farm sem o jogador ter
-                  pedido nada. Um botao "Entrar" ao lado de um selo "EM CAÇADA"
-                  e uma contradicao que convida exatamente a esse clique. */}
-              {ehAtiva ? (
-                <GameButton variant="primary" onClick={(e) => {
-                  e.stopPropagation()
-                  useUiStore.getState().closeScreen()
-                }}>
-                  Voltar ao campo
-                </GameButton>
-              ) : (
-                <GameButton
-                  variant={unlocked ? 'primary' : 'ghost'}
-                  disabled={pending || acao.pendingKey != null}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    void acao.run(key, () => acionarHunt(map, unlocked, continentGated, bloqueioDeBioma))
-                  }}
-                >
-                  {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated || bloqueioDeBioma ? 'Bloqueado' : 'Desbloquear'}
-                </GameButton>
-              )}
-            </div>
-
-            {expanded && (
-              <div className="flex flex-col gap-[.4em] border-t border-n800 p-[.55em]">
-                <SalasDaHunt mapId={map.id} />
-                <div className="text-[.75em] text-n500">
-                  Pokemons de {map.name}
-                  {/* A % ja e a real: P(sala) x P(especie | sala). Sem dizer
-                      isso, o jogador soma as porcentagens do card com as da
-                      sala em que esta e nao fecham. */}
-                  <span className="text-n600"> — chance considerando o sorteio de sala</span>
-                </div>
-                {odds.species.map(({ id, species: sp, pct }) => (
-                  <SpeciesRow key={id} sp={sp} pct={pct} activeSpecies={activeSpecies} />
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      })}
+      {huntsEspeciais.map(cardDeHunt)}
     </div>
   )
 }
