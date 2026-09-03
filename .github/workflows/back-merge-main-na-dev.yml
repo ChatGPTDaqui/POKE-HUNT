@@ -1,0 +1,163 @@
+name: Back-merge main na dev
+
+# PH-456 — o encanamento que hoje cai em tarefa humana.
+#
+# Toda promocao `dev`->`main` deixa a `dev` um commit atras, e a promocao
+# seguinte nasceria BEHIND. A correcao e sempre a mesma PR de back-merge, com o
+# mesmo texto: PH-380, PH-383, PH-387, PH-389, PH-392, PH-403, PH-406, PH-415,
+# PH-446, PH-450 — dez issues identicas so em agosto/setembro. Das ultimas 200
+# PRs mergeadas, 24 nao alteraram uma linha.
+#
+# QUATRO COISAS QUE PARECEM DETALHE E NAO SAO
+# ---------------------------------------------------------------------------
+# 1. BRANCH TEMPORARIA, nunca `head: main`. PR com a `main` como head fica
+#    BLOCKED no GitHub e nao mergeia nunca. Por isso o commit da `main` vira
+#    `sync/main-para-dev-<sha>` antes.
+#
+# 2. `--merge`, e NAO `--squash`. O back-merge existe pra fazer os commits da
+#    `main` virarem ancestrais reais da `dev`. Squash colapsaria tudo num commit
+#    novo, a `main` continuaria fora da ancestralidade, e a proxima promocao
+#    voltaria a mostrar diferenca fantasma. Os back-merges feitos na mao usaram
+#    merge commit (ver PR #457) — isto so repete o que ja funcionava.
+#
+# 3. PRECISA DE UM TOKEN QUE NAO SEJA O `GITHUB_TOKEN`. Evento criado com o
+#    `GITHUB_TOKEN` nao dispara workflow — e regra do GitHub, contra recursao, e
+#    vale pra `push`, `pull_request` e ate `workflow_dispatch`. Como `check` e
+#    `build-check` sao obrigatorios e disparam por `pull_request`, uma PR aberta
+#    com o `GITHUB_TOKEN` esperaria pra sempre dois checks que nunca vao rodar:
+#    presa, sem erro nenhum aparecendo. Por isso o segredo `BACK_MERGE_TOKEN`.
+#
+# 4. SEM `checkout`. Este repo tem ~592MB de pack (242MB de entrada de script,
+#    decisao tomada na PH-163), e `git merge-base` exigiria `fetch-depth: 0` —
+#    um clone inteiro por promocao pra responder uma pergunta de uma linha. A
+#    API `compare` responde a mesma coisa sem baixar nada.
+#
+# SEM O SEGREDO ELE AVISA E SAI, em vez de reprovar. Isto e conveniencia, nao
+# portao: quem protege a `dev` continua sendo `check` + `build-check`, que este
+# workflow nao toca. Reprovar em toda promocao ensinaria a ignorar vermelho, que
+# e o oposto do que o projeto precisa — e back-merge esquecido ja aparece
+# sozinho na promocao seguinte, como BEHIND.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: back-merge-main-na-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tem token pra abrir a PR?
+        id: token
+        env:
+          BACK_MERGE_TOKEN: ${{ secrets.BACK_MERGE_TOKEN }}
+        run: |
+          if [ -z "${BACK_MERGE_TOKEN}" ]; then
+            echo "tem=0" >> "$GITHUB_OUTPUT"
+            echo "::warning::BACK_MERGE_TOKEN nao configurado — back-merge automatico pulado, faca na mao."
+            {
+              echo "### Back-merge automatico pulado"
+              echo ""
+              echo "O segredo \`BACK_MERGE_TOKEN\` nao existe neste repo."
+              echo ""
+              echo "Sem ele a PR seria aberta pelo \`GITHUB_TOKEN\`, e PR aberta pelo \`GITHUB_TOKEN\` nao dispara \`pull_request\`: \`check\` e \`build-check\` nunca rodariam e a PR ficaria presa pra sempre."
+              echo ""
+              echo "Para ligar, com um PAT que tenha escopo \`repo\`:"
+              echo ""
+              echo '```'
+              echo "gh secret set BACK_MERGE_TOKEN --repo ChatGPTDaqui/POKE-HUNT"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "tem=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: A dev ja tem este commit?
+        id: precisa
+        if: steps.token.outputs.tem == '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # `compare/dev...<sha>` visto DA dev: se a dev ja contem o commit, ele
+          # aparece como `behind` (ou `identical`). `ahead`/`diverged` significa
+          # que a dev nao tem.
+          ESTADO=$(gh api "repos/${GITHUB_REPOSITORY}/compare/dev...${GITHUB_SHA}" --jq '.status')
+          echo "compare dev...${GITHUB_SHA} = ${ESTADO}"
+          case "${ESTADO}" in
+            identical|behind)
+              echo "precisa=0" >> "$GITHUB_OUTPUT"
+              echo "### Back-merge desnecessario: a dev ja contem \`${GITHUB_SHA}\` (\`${ESTADO}\`)." >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            *)
+              echo "precisa=1" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Criar a branch temporaria e abrir a PR
+        if: steps.token.outputs.tem == '1' && steps.precisa.outputs.precisa == '1'
+        env:
+          # PAT de proposito, nao o GITHUB_TOKEN — ver o comentario 3 do topo.
+          GH_TOKEN: ${{ secrets.BACK_MERGE_TOKEN }}
+        run: |
+          set -euo pipefail
+          CURTO="${GITHUB_SHA:0:7}"
+          BRANCH="sync/main-para-dev-${CURTO}"
+
+          # Cria a ref pela API. Ja existir (re-run do mesmo push) nao e erro.
+          if gh api "repos/${GITHUB_REPOSITORY}/git/refs" \
+               -f "ref=refs/heads/${BRANCH}" \
+               -f "sha=${GITHUB_SHA}" > /dev/null 2>&1; then
+            echo "branch ${BRANCH} criada"
+          else
+            echo "branch ${BRANCH} ja existia"
+          fi
+
+          # Corpo em arquivo: markdown com crase e quebra de linha dentro de um
+          # argumento de shell e receita de escape errado.
+          cat > /tmp/corpo.md <<CORPO
+          Aberta pelo workflow \`back-merge-main-na-dev.yml\` (PH-456).
+
+          A promocao \`dev\`->\`main\` deixou a \`dev\` um commit atras. Sem este merge, a promocao seguinte nasceria BEHIND.
+
+          Commit da \`main\` que esta voltando: \`${GITHUB_SHA}\`
+
+          **Merge commit de proposito, nao squash.** O objetivo do back-merge e a \`main\` virar ancestral real da \`dev\`. Squash criaria um commit novo e deixaria a ancestralidade quebrada — que e exatamente o problema que ele existe pra resolver.
+
+          Passa pelos mesmos \`check\` e \`build-check\` obrigatorios de qualquer outra PR.
+          CORPO
+
+          # Abre a PR se ainda nao houver uma. O numero sai SEMPRE de `pr list`,
+          # e nao de raspar a URL que o `pr create` imprime: uma linha de aviso
+          # do gh terminada em digito daria o numero errado sem avisar.
+          JA=$(gh pr list --head "${BRANCH}" --base dev --state open --json number --jq '.[0].number // empty')
+          if [ -z "${JA}" ]; then
+            gh pr create \
+              --base dev \
+              --head "${BRANCH}" \
+              --title "[back-merge] main -> dev (${CURTO})" \
+              --body-file /tmp/corpo.md
+          fi
+          NUMERO=$(gh pr list --head "${BRANCH}" --base dev --state open --json number --jq '.[0].number // empty')
+          if [ -z "${NUMERO}" ]; then
+            echo "::error::Nao consegui achar a PR de back-merge para ${BRANCH}."
+            exit 1
+          fi
+
+          # `--merge`, nao `--squash`: ver o comentario 2 do topo.
+          gh pr merge --auto --merge "${NUMERO}"
+
+          {
+            echo "### Back-merge aberto"
+            echo ""
+            echo "- branch: \`${BRANCH}\`"
+            echo "- PR: #${NUMERO}"
+            echo "- auto-merge armado (\`--merge\`); entra sozinho quando \`check\` e \`build-check\` ficarem verdes"
+          } >> "$GITHUB_STEP_SUMMARY"
