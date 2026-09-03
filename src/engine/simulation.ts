@@ -56,7 +56,7 @@ import {
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
   estagioJaLimpo, proximoEstagioLiberado,
-  comunsEsgotados, quotaDeAbatesDaSala, salaDeveProtetor,
+  comunsEsgotados, quotaDeAbatesDaSala, salaDeveProtetor, ESPERA_MAXIMA_PELA_AUTORIDADE,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -68,6 +68,7 @@ import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { splashDeSalaStore } from '@/stores/splashDeSalaVanilla'
 import type {
   ClimaTipo, EnemyEntity, EnemyHazards, Point, PlayerEntity, SalaAtiva, WorldState, ProtetorPendente,
+  ProtetorDaAutoridade,
 } from './types'
 
 export const STARTER_LEVEL = 1
@@ -570,6 +571,26 @@ function garantirProtetorDaSala(
   // Ja resolvido nesta mesma instancia de mundo (chamada de novo no mesmo
   // tick, ou protetor ja spawnado e ainda vivo) — idempotente, nao recria.
   if (world.protetorPendente) return true
+  // PH-475: SOB AUTORIDADE O CLIENTE NAO SORTEIA O CHEFE.
+  //
+  // Ele sorteava, e o sorteio dele era predicao com sequencia PROPRIA — podia
+  // sair outra especie, e o HP dos dois nao se falava. O jogador matava um
+  // chefe que o servidor nao contava e depois via a sala trocar no meio da
+  // luta contra o proximo. Agora ele espera o `protetor` do flush e ADOTA
+  // (`adotarProtetorDaAutoridade`), do mesmo jeito que ja faz com `sala` e
+  // `clima`.
+  //
+  // O `true` daqui e o que mantem a sala travada enquanto o chefe nao chega —
+  // sem ele `garantirTransicaoDeQuotaFechada` cairia no palpite de sala.
+  //
+  // A ESCAPATORIA CONTRA SERVIDOR MUDO FICA. Passado
+  // `ESPERA_MAXIMA_PELA_AUTORIDADE` de silencio (o relogio anda em
+  // `garantirTransicaoDeQuotaFechada`, e toda resposta o zera), o cliente volta
+  // a sortear o proprio: contra uma Edge fora do ar, a alternativa e a hunt
+  // travada pra sempre com a barra em 29/30, que e pior que a divergencia.
+  if (world.salaSobAutoridade && world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) {
+    return true
+  }
 
   const ctx = contextoDoProtetor(
     mapDef.id,
@@ -581,6 +602,91 @@ function garantirProtetorDaSala(
   world.enemies.push(enemy)
   world.protetorPendente = pendente
   return true
+}
+
+/**
+ * O protetor que a AUTORIDADE decidiu, entrando no mundo local (PH-475).
+ *
+ * Mesma porta que `reconciliarSalaDaAutoridade` e `definirClimaDeAmbiente`: o
+ * cliente para de adivinhar e passa a espelhar. Chamado do `liquidar()` da
+ * camada de autoridade, DEPOIS da reconciliacao de sala — a ordem importa,
+ * porque a troca de sala zera `protetorResolvido` e limpa os inimigos.
+ *
+ * MORA AQUI, E NAO EM `salaSystem.ts`, pelo mesmo motivo que
+ * `garantirProtetorDaSala`: criar a entidade usa `criarEntidadeDoProtetor`,
+ * `createPokeInstance` e `createEnemyEntity`, e todos eles importam o
+ * `salaSystem` — a funcao la geraria import circular.
+ *
+ * QUATRO CASOS, e cada um vem de um estado real do servidor:
+ *
+ *  - `undefined` — a resposta nao trouxe o campo. Servidor mais velho que o
+ *    cliente (as duas pontas sobem por pipelines diferentes no mesmo push, ver
+ *    `reconciliarSalaDaAutoridade`). Nada muda: o comportamento antigo continua
+ *    valendo, com o cliente sorteando o proprio depois do silencio.
+ *  - `null` — hunt sem sala (inicial, BOSS, Lance). Nao ha protetor pra
+ *    espelhar e nao ha nada a limpar.
+ *  - `resolvido` — o chefe do servidor caiu. O cliente para de mostrar chefe e
+ *    a sala destrava; o `protetorResolvido` local sobe mesmo que o cliente
+ *    nunca tenha visto esse chefe.
+ *  - `pendente` — ha chefe vivo la. Mesmo `uid`: espelha o HP. `uid` diferente
+ *    (ou nenhum local): remove o que houver e recria FIEL a partir do dado do
+ *    servidor, que e o mesmo caminho que `buildMapWorld` usa pra reconstruir
+ *    uma janela — nao ha sorteio, e zero RNG e consumido.
+ */
+export function adotarProtetorDaAutoridade(
+  world: WorldState, daAutoridade: ProtetorDaAutoridade | null | undefined,
+): void {
+  if (daAutoridade === undefined || daAutoridade === null) return
+  if (!world.mapDef || !world.sala) return
+
+  const removerLocais = () => {
+    world.enemies = world.enemies.filter((e) => !e.isProtetor)
+    world.protetorPendente = null
+  }
+
+  if (daAutoridade.resolvido) {
+    // NAO chama `resolverProtetorDaSala`: aquele arma a transicao de sala, e
+    // quem decide a sala aqui e o proprio flush (`reconciliarSalaDaAutoridade`,
+    // que rodou logo antes desta chamada). Armar as duas coisas poria uma sala
+    // predita por cima da autoritativa.
+    removerLocais()
+    world.protetorResolvido = true
+    return
+  }
+
+  const vindo = daAutoridade.pendente
+  if (!vindo) {
+    // O servidor ainda nao chegou na quota dele. O cliente nao inventa chefe —
+    // `garantirProtetorDaSala` ja se recusa a sortear sob autoridade — e
+    // tambem nao apaga o que ja adotou: um `pendente` ausente numa resposta
+    // atrasada nao e "o chefe morreu".
+    return
+  }
+
+  if (world.protetorPendente?.uid === vindo.uid) {
+    // Mesmo chefe: so o HP anda. E o caso comum, uma vez por flush.
+    world.protetorPendente.hpAtual = vindo.hpAtual
+    const emCampo = world.enemies.find((e) => e.isProtetor && e.poke.uid === vindo.uid)
+    if (emCampo) emCampo.poke.hp = vindo.hpAtual
+    return
+  }
+
+  // Chefe diferente (ou nenhum): adota o de la.
+  removerLocais()
+  const tipo = protetorDaSala(world.sala, world.mapDef.id)
+  if (!tipo) return
+  const ctx = contextoDoProtetor(
+    world.mapDef.id,
+    contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool),
+    world.sala,
+    tipo,
+  )
+  const { enemy, pendente } = criarEntidadeDoProtetor(
+    world, world.mapDef, ctx, tipo, vindo, world.player, entradaDoInimigo(world.mapDef, world.sala),
+  )
+  aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
+  world.enemies.push(enemy)
+  world.protetorPendente = pendente
 }
 
 /**

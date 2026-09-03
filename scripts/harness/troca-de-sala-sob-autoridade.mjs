@@ -62,6 +62,7 @@
 import {
   createRng, restoreRng, createPokeInstance, buildMapWorld, stepWorld,
   reconciliarSalaDaAutoridade, defaultGameStateData, novaSala, ABATES_POR_SALA,
+  adotarProtetorDaAutoridade, quotaDeAbatesDaSala,
 } from '../../authority/engine/headless.js'
 
 const args = process.argv.slice(2)
@@ -215,6 +216,10 @@ function janelaDoServidor(estadoDoServidor, gameState, duracaoS, fases) {
   }
   estadoDoServidor.sala = world.sala ? { ...world.sala } : null
   estadoDoServidor.protetorPendente = world.protetorPendente ?? null
+  // PH-475: a resposta de flush passou a carregar o protetor do servidor, e o
+  // cliente adota. Sem espelhar isto aqui, esta bancada media um cliente que
+  // NUNCA ve chefe — e o "0 travadas" que ela imprimiria seria fiacao, nao fato.
+  estadoDoServidor.protetorResolvido = world.protetorResolvido ?? false
   estadoDoServidor.rngState = rng.state
   estadoDoServidor.rngDraws = rng.draws
   return estadoDoServidor.sala
@@ -267,6 +272,7 @@ function corrida(semente) {
     poke: pokeServidor,
     sala: { ...salaInicial },
     protetorPendente: null,
+    protetorResolvido: false,
     rngState: rngDaSessao.state,
     rngDraws: rngDaSessao.draws,
   }
@@ -297,7 +303,12 @@ function corrida(semente) {
     t += 1
     passosNestaSala += 1
 
-    if (quotaFechadaEm == null && (cliente.sala?.abates ?? 0) >= ABATES_POR_SALA) {
+    // PH-473: a quota VIGENTE (29 com chefe devido, 30 sem). Comparar com os 30
+    // fixos aqui fazia `quotaFechadaEm` so ligar quando `reconciliarSala` forcava
+    // a barra pra cheia na troca — a medida virava "o countdown de 3s", uniforme
+    // e sem relacao com a espera real.
+    if (quotaFechadaEm == null
+      && (cliente.sala?.abates ?? 0) >= quotaDeAbatesDaSala(cliente.sala, HUNT, cliente)) {
       quotaFechadaEm = t
       abatesDoServidorNaQuota = estadoDoServidor.sala?.abates ?? 0
     }
@@ -363,6 +374,15 @@ function corrida(semente) {
       )
       abatesDoServidorNaResposta = salaDoServidor?.abates ?? 0
       reconciliarSalaDaAutoridade(cliente, salaDoServidor ? { ...salaDoServidor } : null, undefined)
+      // PH-475: e o PROTETOR do servidor entra junto, DEPOIS da sala — a mesma
+      // ordem de `liquidar()`, porque a troca de sala zera `protetorResolvido` e
+      // limpa os inimigos.
+      adotarProtetorDaAutoridade(cliente, {
+        pendente: estadoDoServidor.protetorPendente
+          ? { ...estadoDoServidor.protetorPendente }
+          : null,
+        resolvido: estadoDoServidor.protetorResolvido,
+      })
     }
 
     const agora = chaveDaSala(cliente.sala)

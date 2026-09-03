@@ -534,6 +534,14 @@ async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Res
     // sob autoridade deixava o jogador sem clima nenhum pelo resto da hunt.
     // Passou pela suite inteira: so aparece chamando a funcao publicada.
     clima: resultado.clima,
+    // PH-475: o PROTETOR autoritativo. Mesma armadilha do `clima` acima, e ela
+    // ja custou uma sessao: o motor resolve o campo e a ROTA nao o repassa —
+    // nada estoura, `tsc` nao reclama (o objeto do `json()` nao tem tipo
+    // declarado) e o cliente le "campo ausente", que significa "servidor
+    // velho, mantenha o que tem". O sintoma seria o cliente voltando a
+    // sortear o proprio chefe depois de 120s, exatamente o bug que a PH-475
+    // existe pra fechar.
+    protetor: resultado.protetor,
     // `estadoParcial` anda SEMPRE junto de `estado`: e ele que diz ao cliente se
     // `bagPokes` e a mochila inteira ou so as capturas desta janela. Mandar o
     // estado sem a marca e a unica forma de esta otimizacao virar perda de dado
@@ -569,6 +577,10 @@ async function avancarSala(cfg: Config, userId: string, parcial: boolean): Promi
     sessaoEncerrada: resultado.encerrada,
     sala: resultado.sala,
     clima: resultado.clima,
+    // PH-475: idem — o avanco manual devolve o mesmo formato do flush, e um
+    // campo a menos aqui faria a resposta do botao "Proximo Nivel" mentir
+    // enquanto a do flush periodico dizia a verdade.
+    protetor: resultado.protetor,
     // `false` quando a sala nao estava mais travada em 30/30 ao fim da
     // simulacao (corrida rara: outro flush avancou primeiro) — nao e erro,
     // o cliente so nao tem uma sala nova pra aplicar.

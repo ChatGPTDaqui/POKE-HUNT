@@ -79377,16 +79377,63 @@ function candidatas(mapId) {
 	return bioma.subBiomas.filter((s) => (salas[s.chave]?.length ?? 0) > 0);
 }
 /**
-* Sorteia o sub-bioma da proxima sala, ponderado pelo `peso` de cada um.
+* O peso de sorteio de cada sub-bioma candidato desta hunt (PH-476).
+*
+* O BUG QUE ISTO CONSERTA, E ELE ERA A MECANICA CENTRAL DO REDESENHO. Ate aqui
+* `sortearSala` ponderava por `s.peso` — o peso ESTATICO de `data/biomas.ts`,
+* que e o mesmo nos dez estagios de um bioma. `pesosDoEstagio` (a curva de
+* profundidade da PH-425) era calculada, guardada em
+* `ESTAGIO_POR_ID[...].pesosDeSubBioma`, exibida na trilha, anunciada na nota
+* 7.38 — e NUNCA consultada por quem sorteia. Medido nos dados reais:
+*
+*   marinho e10    tela: sea 21%, seabed 79%       sorteio: sea 53%, beach 32%, seabed 16%
+*   campo   e10    tela: plains 13%, meadow 62%    sorteio: plains 31%, meadow 19%, town 19%
+*
+* A coluna do sorteio era IDENTICA nos dez estagios. O jogador escolhia o
+* estagio 10 do Marinho pelo Leito Oceanico e recebia Praia num terco das
+* salas — a arte, o texto e a mecanica contando coisas diferentes, sem nada
+* quebrar.
+*
+* PESO ZERO E AUSENCIA, e essa e a metade da curva que importa: o sub-bioma
+* some do estagio. Filtrar antes do `weightedPick` (em vez de passar 0 pra
+* ele) mantem o atalho de "um candidato so" valendo e deixa explicito que a
+* lista de candidatos DEPENDE do estagio.
+*
+* HUNT SEM ESTAGIO CONTINUA NO PESO ESTATICO. A inicial, as BOSS, o Campeao
+* Lance e o espelho do Pesadelo nao tem curva de profundidade — la `sub.peso` e
+* o peso certo, e nao um fallback.
+*/
+function pesoDeSorteioDaSala(mapId) {
+	const opcoes = candidatas(mapId);
+	const doMapa = parseEstagioId(mapId);
+	const bioma = doMapa ? BIOMA_POR_CHAVE[doMapa.bioma] : null;
+	if (!doMapa || !bioma) return {
+		opcoes,
+		peso: (s) => s.peso
+	};
+	const pesos = pesosDoEstagio(bioma, doMapa.estagio);
+	const alcancaveis = opcoes.filter((s) => (pesos[s.chave] ?? 0) > 0);
+	if (alcancaveis.length === 0) return {
+		opcoes,
+		peso: (s) => s.peso
+	};
+	return {
+		opcoes: alcancaveis,
+		peso: (s) => pesos[s.chave] ?? 0
+	};
+}
+/**
+* Sorteia o sub-bioma da proxima sala, ponderado pelo peso do ESTAGIO (PH-476)
+* — ou pelo peso estatico, nas hunts que nao tem estagio.
 *
 * Consome a sequencia semeada do mundo de proposito: quem decide qual sala vem
 * e o servidor, pela mesma semente que decide shiny, IV e raridade.
 */
 function sortearSala(rng, mapId) {
-	const opcoes = candidatas(mapId);
+	const { opcoes, peso } = pesoDeSorteioDaSala(mapId);
 	if (opcoes.length === 0) return null;
 	if (opcoes.length === 1) return opcoes[0].chave;
-	return weightedPick(rng, opcoes, (s) => s.peso).chave;
+	return weightedPick(rng, opcoes, peso).chave;
 }
 function novaSala(rng, mapId, indice, ciclos) {
 	const chave = sortearSala(rng, mapId);
@@ -79605,6 +79652,61 @@ function estagioJaLimpo(mapId, progresso) {
 	return maiorEstagioLimpo(progresso, doMapa.bioma) >= doMapa.estagio;
 }
 /**
+* Esta sala ainda DEVE um protetor?
+*
+* TRES CONDICOES, E AS TRES JA MORAVAM ESPALHADAS. Ela e a mesma pergunta que
+* `registrarAbate`, `garantirTransicaoDeQuotaFechada`, `garantirProtetorDaSala`
+* e o `SalaChip` da tela faziam cada um por conta propria — e o chip esquecia o
+* `estagioJaLimpo`, entao em estagio limpo ele mandava derrotar um Guardian que
+* nao existe e escondia o botao de avanco (PH-474). Uma funcao, quatro
+* chamadores.
+*
+* Recebe o estado por interface, e nao o `WorldState` inteiro, porque
+* `buildMapWorld` precisa dela ANTES de o mundo existir.
+*/
+function salaDeveProtetor(sala, mapId, estado) {
+	if (estado.estagioJaLimpo) return false;
+	if (estado.protetorResolvido) return false;
+	return protetorDaSala(sala, mapId) != null;
+}
+/**
+* Quantos abates fecham ESTA sala (PH-473).
+*
+* `ABATES_COMUNS_POR_SALA` (29) enquanto a sala deve protetor — ele e o 30o. Os
+* `ABATES_POR_SALA` (30) cheios quando ela nao deve: hunt sem estagio, estagio
+* ja limpo, ou protetor ja derrotado.
+*
+* O DENOMINADOR DA BARRA CONTINUA SENDO 30 nos dois casos. Isto e o numerador
+* que fecha a sala, nao o total exibido — a barra em 29/30 com a quota de
+* comuns fechada e justamente o que diz "falta o chefe".
+*/
+function quotaDeAbatesDaSala(sala, mapId, estado) {
+	return salaDeveProtetor(sala, mapId, estado) ? 29 : 30;
+}
+/**
+* A sala ja matou todos os selvagens COMUNS que devia — nenhum outro nasce
+* (PH-473).
+*
+* O pedido do dono e literal: "nao havera nenhum outro Pokemon nascendo apos o
+* numero 30, em que o 30 seja o boss". O gate de respawn de `simulation.ts` ja
+* suspendia o repovoamento com protetor VIVO em campo (`!protetorPendente`),
+* mas havia duas frestas: o tick entre o 29o abate e o spawn do protetor, e o
+* caminho sob autoridade, onde o protetor do servidor pode nao ter espelho
+* local. Nas duas o campo voltava a encher de bicho comum.
+*
+* DEPOIS QUE O PROTETOR CAI, O REPOVOAMENTO VOLTA — de proposito, e nao por
+* descuido. Sob autoridade a sala so troca quando o servidor manda, o que pode
+* levar minutos (ver `ESPERA_MAXIMA_PELA_AUTORIDADE`), e deixar o campo vazio
+* nesse intervalo tiraria o farm do jogador em troca de nada: a sala ja esta
+* decidida. Os abates extras nao contam — `registrarAbate` capa na quota.
+*/
+function comunsEsgotados(world, mapId) {
+	const sala = world.sala;
+	if (!sala) return false;
+	if (!salaDeveProtetor(sala, mapId, world)) return false;
+	return sala.abates >= 29;
+}
+/**
 * Conta um abate na sala atual. Ao fechar a quota, NAO troca de sala na
 * hora — sorteia a proxima (o "carregamento" adiantado, pra UI ja saber o
 * nome/pool antes do overlay sumir) e arma `salaCountdownRemaining`.
@@ -79624,19 +79726,20 @@ function registrarAbate(world, mapId, opts = {}) {
 		fechouEstagio: false
 	};
 	sala.abates += 1;
-	if (sala.abates < 30) return {
+	const quota = quotaDeAbatesDaSala(sala, mapId, world);
+	if (sala.abates < quota) return {
 		avancou: false,
 		fechouEstagio: false
 	};
 	if (world.salaSobAutoridade) {
-		sala.abates = 30;
+		sala.abates = quota;
 		return {
 			avancou: false,
 			fechouEstagio: false
 		};
 	}
-	sala.abates = 30;
-	if (!world.estagioJaLimpo && protetorDaSala(sala, mapId)) return {
+	sala.abates = quota;
+	if (salaDeveProtetor(sala, mapId, world)) return {
 		avancou: false,
 		fechouEstagio: false
 	};
@@ -79661,10 +79764,13 @@ function registrarAbate(world, mapId, opts = {}) {
 * dois lugares que nao se enxergam: o avanco manual logo abaixo e o `SalaChip`
 * da tela — que precisa dela pra nao oferecer um botao que o servidor vai
 * recusar.
+*
+* PH-473: virou casca de `salaDeveProtetor`. A regra era escrita aqui e o
+* `SalaChip` a reescrevia sem o `estagioJaLimpo` (PH-474); agora as duas pontas
+* chamam a mesma funcao.
 */
 function salaTravadaPeloProtetor(world) {
-	if (world.estagioJaLimpo) return false;
-	return protetorDaSala(world.sala, world.mapDef?.id ?? "") != null && !world.protetorResolvido;
+	return salaDeveProtetor(world.sala, world.mapDef?.id ?? "", world);
 }
 /**
 * Avanco manual (PH-178/179): forca a transicao mesmo com o toggle ligado —
@@ -79690,7 +79796,7 @@ function salaTravadaPeloProtetor(world) {
 */
 function solicitarAvancoDeSala(world, mapId) {
 	const sala = world.sala;
-	if (!sala || sala.abates < 30) return {
+	if (!sala || sala.abates < quotaDeAbatesDaSala(sala, mapId, world)) return {
 		avancou: false,
 		fechouEstagio: false
 	};
@@ -79768,15 +79874,15 @@ function resolverProtetorDaSala(world, mapId, opts = {}) {
 */
 function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = false, garantirProtetorDaSala) {
 	const sala = world.sala;
-	if (!sala || sala.abates < 30) {
+	if (!sala || sala.abates < quotaDeAbatesDaSala(sala, mapId, world)) {
 		world.salaEsperaDaAutoridade = 0;
 		return;
 	}
 	if (world.salaPendente || world.salaCountdownRemaining != null) return;
+	if (world.salaSobAutoridade) world.salaEsperaDaAutoridade += dt;
 	if (garantirProtetorDaSala?.()) return;
 	if (world.salaSobAutoridade) {
 		if (world.salaPredita) return;
-		world.salaEsperaDaAutoridade += dt;
 		if (world.salaEsperaDaAutoridade < 120) return;
 		world.salaEsperaDaAutoridade = 0;
 		if (armarTransicaoDeSala(world, mapId).avancou) world.salaPredita = true;
@@ -80388,13 +80494,14 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 * de recriacao.
 */
 function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
-	const tipo = world.estagioJaLimpo ? null : protetorDaSala(world.sala, world.mapDef?.id ?? "");
+	const mapIdDoMundo = world.mapDef?.id ?? "";
+	const tipo = salaDeveProtetor(world.sala, mapIdDoMundo, world) ? protetorDaSala(world.sala, mapIdDoMundo) : null;
 	if (!tipo) {
 		world.protetorPendente = null;
 		return false;
 	}
-	if (world.protetorResolvido) return false;
 	if (world.protetorPendente) return true;
+	if (world.salaSobAutoridade && world.salaEsperaDaAutoridade < 120) return true;
 	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDoProtetor(mapDef.id, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), world.sala, tipo), tipo, protetorSalvo, player, entrada);
 	world.enemies.push(enemy);
 	world.protetorPendente = pendente;
@@ -80574,7 +80681,11 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis,
 	const enemies = [];
 	let protetorPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
-		const tipoDeProtetor = sala && sala.abates >= 30 && !base.estagioJaLimpo ? protetorDaSala(sala, mapId) : null;
+		const quota = quotaDeAbatesDaSala(sala, mapId, {
+			estagioJaLimpo: base.estagioJaLimpo,
+			protetorResolvido: false
+		});
+		const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo ? protetorDaSala(sala, mapId) : null;
 		if (tipoDeProtetor) {
 			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
@@ -80868,7 +80979,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
 		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Você derrotou o Campeão Lance! O Modo Pesadelo foi liberado.", "success", "world");
 	}
-	if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente) {
+	if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente && !comunsEsgotados(world, world.mapDef.id)) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
@@ -82100,7 +82211,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		})
 	});
 	let avancoDeSalaAplicado = false;
-	if (forcarAvancoDeSala && world.sala && world.sala.abates >= 30) {
+	if (forcarAvancoDeSala && world.sala && world.sala.abates >= quotaDeAbatesDaSala(world.sala, sessao.map_id, world)) {
 		if (world.salaCountdownRemaining == null && !world.salaPendente) solicitarAvancoDeSala(world, sessao.map_id);
 		let restante = 3 + LIVE_SIM_STEP_SECONDS;
 		while (world.salaCountdownRemaining != null && restante > 0) {
@@ -82146,6 +82257,10 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		piso,
 		sala: world.sala,
 		clima: world.climaAmbiente?.tipo ?? null,
+		protetor: world.sala ? {
+			pendente: world.protetorPendente ?? null,
+			resolvido: world.protetorResolvido
+		} : null,
 		encerrada: resumo.stoppedEarly ? "desmaio" : null,
 		avancoDeSalaAplicado
 	};
@@ -82486,6 +82601,7 @@ async function flush(cfg, userId, parcial) {
 		sessaoEncerrada: resultado.encerrada,
 		sala: resultado.sala,
 		clima: resultado.clima,
+		protetor: resultado.protetor,
 		estadoParcial: parcial,
 		estado: resultado.estado
 	});
@@ -82519,6 +82635,7 @@ async function avancarSala(cfg, userId, parcial) {
 		sessaoEncerrada: resultado.encerrada,
 		sala: resultado.sala,
 		clima: resultado.clima,
+		protetor: resultado.protetor,
 		avancoAplicado: resultado.avancoDeSalaAplicado,
 		estadoParcial: parcial,
 		estado: resultado.estado

@@ -398,6 +398,47 @@ export interface ProtetorPendente {
 }
 
 /**
+ * O protetor da sala, do jeito que a AUTORIDADE o conhece (PH-475).
+ *
+ * POR QUE ESTE CAMPO TINHA QUE EXISTIR. A resposta de flush e autoritativa
+ * sobre `sala` e `clima` e nao dizia nada sobre o protetor — entao havia DOIS
+ * protetores por sala: o do servidor, sorteado com a semente da sessao e
+ * persistido em `sala_protetor`, e o do cliente, sorteado por
+ * `garantirProtetorDaSala` com a sequencia LOCAL, que e predicao. Podiam ser
+ * ESPECIES DIFERENTES, e o HP deles nao se falava.
+ *
+ * O que o jogador vivia, e foi o relato:
+ *
+ *  1. ele matava o protetor local; `resolverProtetorDaSala` sai sem avancar
+ *     nada sob autoridade (de proposito), e a sala ficava parada — "matei o
+ *     chefe e nada aconteceu";
+ *  2. minutos depois o servidor matava o DELE, o flush trazia a sala seguinte,
+ *     e `aplicarTransicaoDeSala` zerava `world.enemies` no meio da luta — "a
+ *     sala trocou enquanto eu lutava com o chefe".
+ *
+ * E o mesmo argumento que o campo `clima` ja registra ("o cliente nao tem a
+ * semente, sem este campo os dois lados derivariam climas diferentes"), com
+ * consequencia maior: o clima erra o dano, o protetor erra o pedagio da sala.
+ */
+export interface ProtetorDaAutoridade {
+  /**
+   * O protetor VIVO da sala do servidor, com o HP dele. `null` quando nao ha —
+   * e o `resolvido` ao lado e quem diz se e "ainda nao nasceu" ou "ja caiu".
+   */
+  pendente: ProtetorPendente | null
+  /**
+   * O protetor DESTA sala ja foi derrotado no servidor.
+   *
+   * Separado de `pendente: null` porque os dois estados pedem coisas opostas do
+   * cliente: "ainda nao nasceu" e esperar, "ja caiu" e parar de mostrar chefe e
+   * liberar a sala. Foi exatamente essa ambiguidade — a linha de
+   * `sala_protetor` sendo APAGADA nos dois casos — que fez o protetor renascer
+   * com HP cheio na janela seguinte (PH-472).
+   */
+  resolvido: boolean
+}
+
+/**
  * PH-397: a coreografia de encarada de UM par em duelo.
  *
  * Mora aqui e nao em `systems/encaradaSystem.ts` pela mesma convencao de

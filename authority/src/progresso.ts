@@ -8,7 +8,7 @@ import {
   solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, ABATES_POR_SALA, protetorDaSala,
   quotaDeAbatesDaSala,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
-  type ClimaTipo, type ProtetorPendente,
+  type ClimaTipo, type ProtetorPendente, type ProtetorDaAutoridade,
 } from '#engine'
 import {
   ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
@@ -927,6 +927,14 @@ export interface ResultadoFlush {
    */
   clima: ClimaTipo | null
   /**
+   * O protetor da sala, do jeito que o SERVIDOR o conhece (PH-475).
+   *
+   * `null` na hunt sem sala. Ver `ProtetorDaAutoridade` no motor: o cliente
+   * parou de sortear o proprio chefe e passou a adotar este — sem o campo,
+   * cliente e servidor lutavam contra protetores diferentes na mesma sala.
+   */
+  protetor: ProtetorDaAutoridade | null
+  /**
    * A cacada acabou sozinha e a sessao TEM que ser fechada pelo chamador.
    *
    * Hoje so ha um motivo: o POKE desmaiou e nao ha como reanima-lo (auto-revive
@@ -1410,6 +1418,19 @@ async function simularSessao(
     // propriedade da sala. Mandar o efetivo faria o cliente tratar um golpe
     // passageiro como o tempo do lugar.
     clima: world.climaAmbiente?.tipo ?? null,
+    // PH-475: o PROTETOR autoritativo, pelo mesmo argumento de `sala` e
+    // `clima`. Sem este campo havia dois chefes por sala — o do servidor,
+    // sorteado com a semente da sessao, e o do cliente, sorteado com a
+    // sequencia de predicao dele — possivelmente de especies diferentes e com
+    // HPs que nao se falavam. Ver `ProtetorDaAutoridade` em engine/types.ts
+    // pros dois sintomas que isso produzia.
+    //
+    // `null` (e nao um objeto com os dois campos vazios) quando a hunt nao tem
+    // sala: la nao existe protetor de sala nenhum, e o cliente nao precisa
+    // limpar nada.
+    protetor: world.sala
+      ? { pendente: world.protetorPendente ?? null, resolvido: world.protetorResolvido }
+      : null,
     encerrada: resumo.stoppedEarly ? 'desmaio' : null,
     avancoDeSalaAplicado,
   }

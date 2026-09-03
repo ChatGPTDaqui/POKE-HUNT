@@ -849,6 +849,19 @@ export function garantirTransicaoDeQuotaFechada(
   // de novo e sortear um SEGUNDO protetor por cima da transicao que ja estava
   // a caminho.
   if (world.salaPendente || world.salaCountdownRemaining != null) return
+  // PH-475: O RELOGIO DE SILENCIO ANDA ANTES DO GATE DO PROTETOR.
+  //
+  // Ele andava DEPOIS, e isso passou a travar a sala pra sempre quando o
+  // cliente parou de sortear o proprio chefe: `garantirProtetorDaSala` devolve
+  // `true` enquanto o chefe do servidor nao chega, o `return` da linha seguinte
+  // cortava o tick, e o relogio que decide "o servidor emudeceu" nunca saia do
+  // zero. Contra uma Edge fora do ar a hunt ficaria em 29/30 pra sempre — e a
+  // escapatoria que o proprio `garantirProtetorDaSala` documenta (voltar a
+  // sortear depois de `ESPERA_MAXIMA_PELA_AUTORIDADE`) nunca dispararia.
+  //
+  // Continua medindo SILENCIO e nao espera: `reconciliarSalaDaAutoridade` zera
+  // este contador a cada resposta que chega, qualquer que seja o conteudo dela.
+  if (world.salaSobAutoridade) world.salaEsperaDaAutoridade += dt
   if (garantirProtetorDaSala?.()) return
   if (world.salaSobAutoridade) {
     // Sob autoridade remota quem sorteia e o servidor, e o cliente espera o
@@ -917,7 +930,10 @@ export function garantirTransicaoDeQuotaFechada(
     //    area nova que o servidor vai desmentir no flush seguinte.
     //
     // Ver `salaEsperaDaAutoridade` em types.ts.
-    world.salaEsperaDaAutoridade += dt
+    //
+    // PH-475: O `+= dt` SAIU DAQUI e subiu pra antes do gate do protetor — ver
+    // a nota la. Ele ficava atras de um `return` que passou a disparar em toda
+    // sala com chefe devido, e o relogio nunca andava.
     if (world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) return
     world.salaEsperaDaAutoridade = 0
     const armada = armarTransicaoDeSala(world, mapId)

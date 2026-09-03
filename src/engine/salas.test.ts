@@ -775,12 +775,19 @@ describe('transicao de sala nao deixa lixo pra tras (PH-258)', () => {
     // ninguem morre, a quota nunca fecha. F5 era a unica saida.
     const world = mundo(77)
     const gameState = useGameStateStore.getState()
-    world.salaSobAutoridade = true
     world.sala!.abates = ABATES_POR_SALA
 
     // Um tick pra o protetor da sala nascer (sem resolver — e esse o caso).
+    //
+    // PH-475: A AUTORIDADE SO LIGA DEPOIS DISSO. Sob `salaSobAutoridade` o
+    // cliente parou de sortear o proprio chefe (ele ADOTA o do flush), entao um
+    // tick com a autoridade ja ligada nao faz nascer ninguem e o cenario deste
+    // caso — "protetor em campo quando a sala troca" — nao se monta. O chefe
+    // nasce pelo caminho local, que e o mesmo `criarEntidadeDoProtetor`, e a
+    // autoridade entra em vigor em seguida.
     stepWorld(world, 0.1, gameState, { silent: true })
     expect(world.protetorPendente, 'o cenario exige protetor pendente').not.toBeNull()
+    world.salaSobAutoridade = true
 
     // O servidor manda a sala seguinte.
     const proxima = { indice: 1, chave: world.sala!.chave, abates: 0, ciclos: 0 }
