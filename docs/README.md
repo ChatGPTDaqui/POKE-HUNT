@@ -55,6 +55,7 @@ esses pontos. Tornar o repositório público exige, antes, decidir o que sai daq
 | [17-geracao-iii-preparada.md](17-geracao-iii-preparada.md) | As 135 espécies de Hoenn prontas na base, e o que ligá-las exige — em ordem |
 | [18-animacoes-do-pmd-disponiveis.md](18-animacoes-do-pmd-disponiveis.md) | Que animações o acervo PMD tem além das 6 usadas, para quantas espécies, e quanto custam |
 | [19-explicacao-flutuante.md](19-explicacao-flutuante.md) | O que o jogo explica na bolha, o que explica no `title=` que não abre no celular, e o que não explica |
+| [20-por-que-cada-regra-existe.md](20-por-que-cada-regra-existe.md) | O incidente por trás de cada regra do `CLAUDE.md` — o imperativo fica lá, o motivo mora aqui |
 
 ## Como isto se relaciona com os outros arquivos do repositório
 
