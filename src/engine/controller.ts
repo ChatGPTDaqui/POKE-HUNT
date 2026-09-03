@@ -3,7 +3,7 @@
 // Tudo aqui toca as stores do navegador. O nucleo de simulacao vive em
 // simulation.ts justamente pra poder rodar headless no servidor sem arrastar
 // isto junto — ver a nota de topo de la.
-import { SPECIES, createPokeInstance } from '@/data/pokes'
+import { SPECIES, createPokeInstance, type PokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
 import { evolvePokeInstance } from './systems/progressionSystem'
 import { resetStats } from './systems/farmRates'
@@ -15,6 +15,7 @@ import {
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
+import { useCutsceneStore } from '@/stores/cutsceneStore'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { preloadEspecies, preloadHunt, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
@@ -103,8 +104,46 @@ export const controller = {
       }
       return false
     }
+    // A CUTSCENE ABRE AQUI, DEPOIS DAS DUAS GUARDAS LOCAIS (PH-471).
+    //
+    // As duas acima recusam sem tocar na rede e ja avisam por toast — abrir uma
+    // tela de carregamento pra fecha-la no mesmo tick seria um flash preto sem
+    // motivo. Daqui pra baixo a entrada e uma espera de verdade: round-trip a
+    // Edge mais `preloadHunt`, com teto de 4s.
+    //
+    // O `finally` fecha em TODO caminho, e isso e o ponto: a entrada pode ser
+    // recusada pelo servidor (hunt trancada, POKE que nao e da equipe, sessao
+    // invalida) ou estourar por rede, e sem ele o jogador ficaria olhando uma
+    // tela de carregamento que nao carrega nada — sem botao, porque a cutscene
+    // engole o clique de proposito.
+    const doMapa = getMap(mapId)
+    const idDaCutscene = useCutsceneStore.getState().abrir({
+      arte: doMapa?.bg?.image ?? null,
+      corDeFundo: doMapa?.bg?.primary ?? '#0b0b12',
+      titulo: doMapa?.name ?? 'Nova área',
+      subtitulo: doMapa ? `Lv ${doMapa.levelRange[0]}-${doMapa.levelRange[1]}` : null,
+    })
+    try {
+      return await this.entrarDeFato(mapId, activePoke, avisar, opcoes?.retomando ?? false)
+    } finally {
+      useCutsceneStore.getState().fechar(idDaCutscene)
+    }
+  },
+
+  /**
+   * O corpo da entrada, separado so pra o `finally` da cutscene cobrir todos os
+   * `return` sem repetir o fechamento em cada um (PH-471). Nao ha regra nova
+   * aqui — a ordem dos passos e a mesma de antes.
+   */
+  async entrarDeFato(
+    mapId: string,
+    activePoke: PokeInstance,
+    avisar: boolean,
+    retomando: boolean,
+  ): Promise<boolean> {
+    const gameState = useGameStateStore.getState()
     const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid, {
-      avisarErro: avisar, retomando: opcoes?.retomando ?? false,
+      avisarErro: avisar, retomando,
     })
     if (!sessao.ok) return false
     // Arte de TODA especie do pool na memoria antes de a cena aparecer — senao o
