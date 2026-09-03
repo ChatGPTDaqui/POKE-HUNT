@@ -136,6 +136,7 @@ export const controller = {
       mapId, activePoke, useWorldStore.getState(),
       sessao.sala ? { sala: sessao.sala, clima: sessao.clima ?? null } : undefined,
       gameState.especialidades,
+      gameState.biomaProgress,
     )
     // Com sessao aberta no servidor, a sala seguinte tambem e DELE (ver
     // engine/systems/salaSystem.ts#registrarAbate): a simulacao local para de

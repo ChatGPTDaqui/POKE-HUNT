@@ -36,6 +36,7 @@ import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
 import { ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
 import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import type { ProgressoPorBioma } from '@/data/progressoDeBioma'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
@@ -54,6 +55,7 @@ import {
   contextoDeSpawn, lootAtivo, novaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
+  estagioJaLimpo, proximoEstagioLiberado,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -542,7 +544,11 @@ function garantirProtetorDaSala(
   player: PlayerEntity | null,
   entrada: Point | null,
 ): boolean {
-  const tipo = protetorDaSala(world.sala, world.mapDef?.id ?? '')
+  // PH-428: estagio ja limpo nao repoe protetor. O corte fica AQUI, no unico
+  // lugar que CRIA a entidade, e nao so no gate de avanco: sem ele o Guardian
+  // continuaria nascendo, so nao travaria nada — um bicho de 40x o HP normal em
+  // campo sem funcao.
+  const tipo = world.estagioJaLimpo ? null : protetorDaSala(world.sala, world.mapDef?.id ?? '')
   if (!tipo) {
     world.protetorPendente = null
     return false
@@ -908,8 +914,21 @@ export function buildMapWorld(
   carry?: SequenciaDeSorteio,
   progresso?: ProgressoDaSessao,
   especialidadeNiveis?: EspecialidadeNiveis | null,
+  /**
+   * O progresso por bioma do jogador, so pra decidir se o estagio JA FOI
+   * limpo (PH-428) — estagio fechado nao repoe Guardian nem Lord.
+   *
+   * Entra como PARAMETRO, e nao lido de um store: este motor roda tambem na
+   * Edge Function, onde nao ha store nenhum. Mesmo motivo de
+   * `especialidadeNiveis` acima.
+   */
+  progressoDeBioma?: ProgressoPorBioma,
 ): WorldState {
   const base = novoMundo(carry)
+  // PH-428: decidido UMA VEZ aqui. `protetorDaSala` continua PURA (ela responde
+  // a forma da sala) e quem sabe a verdade do jogador e o mundo — o renderer e
+  // o desenho de sprite chamam aquela sem ter estado de jogador em maos.
+  base.estagioJaLimpo = progressoDeBioma != null && estagioJaLimpo(mapId, progressoDeBioma)
 
   // A sala tem que ser decidida ANTES do primeiro spawn: e ela que diz qual
   // pool esta ativo (e, com body-block por sala, qual grade de colisao/ponto
@@ -967,7 +986,9 @@ export function buildMapWorld(
     // hunt), virou impossivel de ignorar com os 12 biomas habilitados
     // (PH-225): QUALQUER hunt de bioma, na abertura, tentava recriar um
     // protetor do nada.
-    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA ? protetorDaSala(sala, mapId) : null
+    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA && !base.estagioJaLimpo
+      ? protetorDaSala(sala, mapId)
+      : null
     if (tipoDeProtetor) {
       // Sala em modo protetor (quota ja fechou, spawn normal fica suspenso
       // ate resolver). Recria FIEL quando `progresso.protetorPendente` ja
@@ -1401,6 +1422,20 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     if (world.salaCountdownRemaining <= 0) {
       world.salaCountdownRemaining = null
       const fechouEstagio = world.salaPendente?.indice === 0
+      // PH-428: FECHOU O ESTAGIO — o toggle do jogador decide o que vem agora.
+      //
+      // `repetir` (padrao) e o comportamento de sempre: volta a sala 1 do mesmo
+      // estagio. `avancar` pede a hunt seguinte. O padrao e repetir de
+      // proposito: este e um jogo idle, e o normal e o jogador escolher onde
+      // deixar rodando e sair — avancar sozinho o tiraria do estagio que ele
+      // escolheu pela especie que caca ali.
+      //
+      // CAI EM REPETIR quando nao ha pra onde ir: no estagio 10, ou com o
+      // seguinte ainda bloqueado. O jogador nunca fica parado esperando uma
+      // hunt que nao vai abrir.
+      if (fechouEstagio && gameState.autoToggles.avancarDeEstagio) {
+        world.avancarParaEstagio = proximoEstagioLiberado(world.mapDef.id, gameState.biomaProgress)
+      }
       aplicarTransicaoDeSala(world, world.mapDef.id)
       if (world.mapDef) {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)

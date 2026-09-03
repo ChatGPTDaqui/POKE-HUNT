@@ -144,7 +144,19 @@ export interface GameStateData {
   wallet: { gold: number; diamonds: number }
   unlockedMaps: string[]
   currentMapId: string | null
-  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean; avancoManualDeSala: boolean }
+  /**
+   * `avancarDeEstagio` (PH-428): ao limpar a ULTIMA sala do estagio, entra no
+   * estagio seguinte em vez de repetir o mesmo.
+   *
+   * PADRAO `false` — REPETIR — e isso e decisao, nao inercia. Este e um jogo
+   * idle: o normal e o jogador escolher onde deixar rodando e sair. Avancar
+   * sozinho tiraria ele do estagio que ele escolheu pela especie que caca ali,
+   * que e a mecanica central do redesenho.
+   */
+  autoToggles: {
+    autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean
+    avancoManualDeSala: boolean; avancarDeEstagio: boolean
+  }
   autoPotRules: AutoPotRule[]
   autoCatchConfig: AutoCatchConfig
   autoCatchRules: AutoCatchRule[]
@@ -205,7 +217,10 @@ export function defaultGameStateData(): GameStateData {
     // save antigo (que nao tem a chave) cai neste default via o merge em
     // gameStateStore — ou seja, quem ja jogava ganha a cura sem precisar
     // descobrir o interruptor.
-    autoToggles: { autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true, avancoManualDeSala: false },
+    autoToggles: {
+      autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true,
+      avancoManualDeSala: false, avancarDeEstagio: false,
+    },
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
     autoCatchRules: [],

@@ -1217,6 +1217,10 @@ async function simularSessao(
       protetorPendente: protetorDaLinha(sessao),
     },
     estado.especialidades,
+    // PH-428: o servidor precisa da MESMA leitura que o cliente sobre "este
+    // estagio ja foi limpo". Sem ela ele reporia o Guardian que o cliente nao
+    // mostra, e a sala travaria em 30/30 sem nada na tela explicando.
+    estado.biomaProgress,
   )
   // Pior caso SO quando o intervalo caracteriza ausencia — ver
   // LIMIAR_OFFLINE_SEGUNDOS. Jogo ao vivo resolve o combate normalmente.

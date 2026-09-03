@@ -10,6 +10,7 @@ import { useEffect, useRef } from 'react'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { stepWorld, LIVE_SIM_STEP_SECONDS } from './simulation'
+import { controller } from './controller'
 import { recordSimulatedSeconds } from './clockDrift'
 
 // Mesma constante que o resim do servidor usa fora do regime offline
@@ -58,6 +59,20 @@ export function useGameLoop(active: boolean, onLiveTick?: () => void): void {
         })
         delta -= step
         simulated += step
+      }
+      // PH-428: o motor pediu pra avancar de estagio (o toggle do jogador esta
+      // ligado e a ultima sala caiu). Quem EXECUTA e aqui, e nao o motor:
+      // trocar de estagio abre sessao nova no servidor, e nada disso cabe
+      // dentro de um tick sincrono.
+      //
+      // O pedido e limpo ANTES do `await`: sem isso, cada tick dos ~200ms que
+      // a abertura de sessao leva releria o mesmo pedido e dispararia outra
+      // — o mesmo padrao de duplo-disparo que a trava de sessao dupla existe
+      // pra impedir do lado do banco.
+      const alvo = useWorldStore.getState().avancarParaEstagio
+      if (alvo) {
+        useWorldStore.getState().update((draft) => { draft.avancarParaEstagio = null })
+        void controller.enterMap(alvo, { silencioso: true })
       }
       recordSimulatedSeconds(simulated)
       onLiveTickRef.current?.()
