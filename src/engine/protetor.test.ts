@@ -103,25 +103,47 @@ describe('protetor bloqueia o avanco de sala (PH-202)', () => {
     useGameStateStore.getState().resetToDefaults()
   })
 
-  it('quota fechada numa sala do bioma piloto nao avanca sozinha — nasce um protetor em vez disso', () => {
+  // A REGRA E "NAO AVANCA ENQUANTO O PROTETOR ESTIVER DE PE", e este teste passou
+  // a medir isso em vez de um instante.
+  //
+  // A versao anterior rodava 60 ticks (6 s) e conferia o estado NO FIM: protetor
+  // ainda pendente, sala ainda no indice 0. Isso presumia, sem dizer, que o
+  // protetor sobrevive 6 segundos — e sobreviver nao e a regra. Quando a PH-502
+  // trocou a tabela de chance, o protetor de recuo desta sala sintetica passou a
+  // ser um Azurill Lv4 (antes era outra especie), o Charmander Lv20 do teste o
+  // resolveu no tick 44 e a sala avancou — comportamento CORRETO, teste
+  // vermelho.
+  //
+  // Medido na hora de decidir o conserto, com quatro sementes: o protetor nasce
+  // no tick 0 em todas, a sala fica travada enquanto ele existe em todas, e o
+  // avanco acontece so depois de ele ser resolvido. O mecanismo estava certo; a
+  // regua do teste e que era um instante em vez do invariante.
+  it('quota fechada numa sala do bioma piloto nao avanca enquanto o protetor esta de pe', () => {
     const world = mundo(50)
     world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
 
-    for (let i = 0; i < 60; i++) stepWorld(world, 0.1, gameState, { silent: true })
-
-    expect(world.sala!.indice).toBe(0)
-    expect(world.salaPendente).toBeNull()
-    expect(world.salaCountdownRemaining).toBeNull()
-    expect(world.protetorPendente).not.toBeNull()
-    expect(world.enemies.length).toBe(1)
-    expect(world.enemies[0].isProtetor).toBe(true)
-    // IV minimo 20 (vs. 0 do rollIvs padrao) — a decisao de forca do protetor.
-    for (const iv of Object.values(world.protetorPendente!.ivs)) {
-      expect(iv).toBeGreaterThanOrEqual(20)
+    let viuProtetor = false
+    for (let i = 0; i < 60; i++) {
+      stepWorld(world, 0.1, gameState, { silent: true })
+      if (!world.protetorPendente) continue
+      viuProtetor = true
+      // O INVARIANTE, conferido em TODO tick em que o protetor existe.
+      expect(world.sala!.indice, `tick ${i}`).toBe(0)
+      expect(world.salaPendente, `tick ${i}`).toBeNull()
+      expect(world.salaCountdownRemaining, `tick ${i}`).toBeNull()
+      expect(world.enemies.length, `tick ${i}`).toBe(1)
+      expect(world.enemies[0].isProtetor, `tick ${i}`).toBe(true)
+      // IV minimo 20 (vs. 0 do rollIvs padrao) — a decisao de forca do protetor.
+      for (const iv of Object.values(world.protetorPendente.ivs)) {
+        expect(iv, `tick ${i}`).toBeGreaterThanOrEqual(20)
+      }
     }
+    // Contra o teste passar de vacuo: se o protetor nunca nascer, o laco acima
+    // nao afirma nada e o teste fica verde sem medir.
+    expect(viuProtetor, 'o protetor nunca nasceu — a quota fechada avancou sozinha').toBe(true)
   })
 
   it('protetor vivo suspende o respawn de mob comum (nao enche a sala do lado dele)', () => {

@@ -102,3 +102,6 @@ branches-apagadas-*.txt
 # em outra maquina.
 authority/tsconfig.tsbuildinfo
 scripts/.gerado/
+
+# Saida de bancada: relatorio gerado, nao fonte. Reproduzivel rodando a bancada.
+scripts/harness/saida/

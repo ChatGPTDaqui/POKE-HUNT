@@ -48,7 +48,7 @@
 //     faz) faria o Gyarados herdar o peso `muito_comum` do Magikarp — o dado
 //     mais bem fundamentado do projeto destruido em silencio.
 import { SPECIES } from './pokes'
-import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
+import { ELENCO_DO_SUB_BIOMA, ELENCO_POR_ESTAGIO } from './generated/elencoPorEstagio.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
 import { TRAINING_MAP, TRAINING_MAP_ID, TRAINING_ENCOUNTER } from './trainingDummy'
@@ -313,15 +313,33 @@ function nivelDeTroca(speciesId: string, desde: number): number | null {
   return porNivel == null ? null : Math.max(porNivel, desde + 1)
 }
 
-/** Raizes das linhas evolutivas presentes em `especies`, sem duplicar. */
-function raizesDe(especies: Iterable<string>): string[] {
-  const raizes: string[] = []
-  for (const id of especies) {
-    let atual = id
-    for (let i = 0; i < 10 && PRE_EVOLUCAO[atual]; i++) atual = PRE_EVOLUCAO[atual]
-    if (!raizes.includes(atual)) raizes.push(atual)
-  }
-  return raizes
+// `raizesDe` SAIU NA PH-502. Ela derivava as raizes da lista de especies do
+// sub-bioma, na hora da montagem; agora a raiz vem PRONTA na tabela de elenco,
+// que e quem carrega a fatia de aparicao junto.
+//
+// Foi apagada e nao mantida "por garantia" de proposito: as duas fontes de raiz
+// conviveriam sem o compilador reclamar, e a divergencia entre elas seria a
+// fatia de uma linha indo pra outra linha — sem erro nenhum.
+
+/**
+ * A raiz da linha evolutiva desta especie — o inicio da cadeia.
+ *
+ * A CHAVE DA TABELA DE ELENCO E A RAIZ, e por isso o sorteio da sala precisa
+ * desta funcao: dado um encontro (que e uma FORMA), ela diz de que linha veio a
+ * fatia. Ver `salaSystem#pesosDaSala`.
+ *
+ * O MESMO GRAFO DOS DOIS LADOS, E ISSO NAO E COINCIDENCIA. O gerador
+ * (`scripts/lib/linhas-evolutivas.mjs`) monta a aresta de `evolutionOptions[0]`
+ * filtrado pelo elenco, que e exatamente o que `data/pokes.ts` faz ao reescrever
+ * `evolvesTo` na carga — e ele ABORTA se os dois deixarem de bater. Sem esse
+ * acordo, a fatia de uma linha cairia em outra linha, calada.
+ */
+export function raizDaLinha(speciesId: string): string {
+  let atual = speciesId
+  // Teto de 10: a linha mais longa do catalogo tem 3 formas, e o teto existe
+  // pra um elo circular novo nao travar o motor no meio de um flush.
+  for (let i = 0; i < 10 && PRE_EVOLUCAO[atual]; i++) atual = PRE_EVOLUCAO[atual]
+  return atual
 }
 
 interface Trecho {
@@ -437,9 +455,21 @@ function montarHunt(bioma: BiomaDef, estagio: number): void {
 
   const porSala: Record<string, string[]> = {}
   for (const sub of bioma.subBiomas) {
-    const doSub = new Set(SUB_BIOMA_ESPECIES[sub.chave] ?? [])
+    // QUEM MORA AQUI NESTE ESTAGIO SAI DA TABELA DE ELENCO (PH-502), e nao mais
+    // da lista inteira do sub-bioma.
+    //
+    // A diferenca e o eixo novo: `SUB_BIOMA_ESPECIES` e a mesma lista nos dez
+    // estagios, e o unico recorte por estagio era a janela de nivel. Agora o
+    // ELENCO tambem muda com a profundidade, porque ele vem dos locais reais
+    // dos jogos que caem naquele estagio — `cave` no estagio 2 e o Monte Lua
+    // (Zubat, Geodude, Paras) e no estagio 8 e a Caverna Cerulean.
+    //
+    // `ELENCO_DO_SUB_BIOMA` e o filtro de FORMA, e nao a lista de linhas: ele
+    // diz quais formas `trechosDaLinha` pode recortar aqui. Ver a nota dele no
+    // arquivo gerado pra por que ele nao e `SUB_BIOMA_ESPECIES`.
+    const doSub = new Set(ELENCO_DO_SUB_BIOMA[sub.chave] ?? [])
     const ids: string[] = []
-    for (const raiz of raizesDe(doSub)) {
+    for (const [raiz] of ELENCO_POR_ESTAGIO[sub.chave]?.[estagio] ?? []) {
       for (const trecho of trechosDaLinha(raiz, estagio, doSub)) ids.push(addEncounter(id, trecho))
     }
     porSala[sub.chave] = ids
@@ -554,6 +584,32 @@ for (const bioma of BIOMAS) {
 // usa `peso / soma`, entao peso fixo mudaria de significado a cada mudanca de
 // pool. Com fatia alvo `t` e soma `S` no resto:  w/(S+w) = t  =>  w = t*S/(1-t).
 export const TETO_DE_FATIA = 0.35
+// ELE CONTINUA EM 0,35 DEPOIS DA PH-503, E A DECISAO DE NAO SUBIR FOI MEDIDA.
+//
+// Com a tabela de elenco da PH-502, o teto deixou de decidir a chance: ele
+// mordia em 1.355 das 1.815 salas (75%) e passou a morder em 567 (31%), com a
+// mediana do top-1 caindo de 35,0% pra 27,3% — ou seja, a sala TIPICA passou a
+// ser decidida pelo dado.
+//
+// O plano era subir pra 0,40 pra reduzir ainda mais essa mordida. O sweep
+// mostrou que isso PIORA o jogo, na direcao oposta:
+//
+//   teto   salas no teto   especies com melhor caso < 2%
+//   0,35        31%                  27
+//   0,40        25%                  29
+//   0,45        21%                  30
+//   0,50        15%                  34
+//
+// O teto redistribui massa do dominante pra CAUDA. Afrouxa-lo devolve a fatia
+// pro dominante e sufoca justamente as especies que ja aparecem pouco — a lista
+// de <2% inclui Snorlax, Heracross e Pinsir, que sao o elenco que o jogador
+// quer cacar. A mediana nao se move em nenhum dos quatro valores, entao o que se
+// compraria com 0,40 seria so o numero "quantas vezes o teto morde", que nao e
+// o que importa: o defeito antigo era o teto ACHATAR o ranking inteiro num
+// valor unico em 75% das salas, e nao a existencia de um teto.
+//
+// Fica em 0,35, e ele agora apara extremo real — Unown nas Ruinas de Alph (que
+// nos jogos e 100% do lugar), Shuppet no Monte Pira, Rattata na Torre Broto.
 // Abaixo disto o teto e aritmeticamente impossivel: com 2 especies o minimo ja
 // e 50%. Com 3 o minimo e 33,3%, que cabe — entao 3 e o menor pool aparavel, e
 // nao 5. O 5 anterior era herdado de quando a apara so existia no nivel da

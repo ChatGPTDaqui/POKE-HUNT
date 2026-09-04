@@ -269,6 +269,29 @@ export type TierDeProtetor = 'BOSS' | 'BOSS_RARE' | 'BOSS_SUPER_RARE' | 'BOSS_UL
 
 export type SubBiomaTiers = Record<string, Record<TierSelvagem | TierDeProtetor, string[]>>
 
+// Escritos por `scripts/gerar-elenco-por-estagio.mjs` (PH-502). Substituem a
+// pilha "faixa de tier do PokeRogue + desempate + colapso + teto de 35%" como
+// fonte da chance de aparicao dentro de uma sala.
+/**
+ * Uma linha da tabela de elenco: `[raiz da linha evolutiva, fatia]`.
+ *
+ * TUPLA E NAO OBJETO, e a razao e o tamanho: sao 4.266 linhas em 330 tabelas, e
+ * este modulo esta no grafo da Edge Function — ele e montado a cada cold start,
+ * dentro da janela de flush. Nomes de campo repetidos 4.266 vezes custariam
+ * mais que a informacao.
+ *
+ * A `fatia` e da LINHA, e nao da forma. Qual forma nasce sai da janela de nivel
+ * da sala; a proveniencia de cada linha (de que local real, de que vaga) vive em
+ * `scripts/elenco-por-estagio.auditoria.json`, fora do bundle.
+ */
+export type LinhaDeElenco = readonly [linha: string, fatia: number]
+
+/** Sub-bioma -> estagio (1..10) -> tabela que soma 1. */
+export type ElencoPorEstagio = Record<string, Record<number, readonly LinhaDeElenco[]>>
+
+/** Sub-bioma -> toda especie que pode nascer nele, familias inteiras. */
+export type ElencoDoSubBioma = Record<string, readonly string[]>
+
 /**
  * Pesos de clima de cada sub-bioma (PH-140), vindos do `weatherPool` do
  * PokeRogue. `limpo` e o peso de CEU LIMPO — nao a ausencia de tabela: um
