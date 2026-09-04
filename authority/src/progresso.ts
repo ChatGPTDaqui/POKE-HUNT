@@ -4,7 +4,7 @@ import {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
-  OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
+  OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS,
   solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, protetorDaSala,
   quotaDeAbatesDaSala,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
@@ -121,6 +121,31 @@ export const PISO_DE_JANELA_SEGUNDOS = 10
  * (`npm run edge:publicar`). Nao basta mergear — o deploy dela e manual.
  */
 export const FARM_OFFLINE_PAUSADO = true
+
+/**
+ * Quanto tempo de um intervalo bruto vira simulação de verdade (PH-495).
+ *
+ * EXPORTADA E PURA DE PROPÓSITO. Ela nasceu inline dentro de `aplicarFlush`, e
+ * o teste que a cobria REESCREVIA a regra em vez de chamá-la — a sabotagem
+ * (voltar ao descarte) passou verde nos 11 casos. Uma função de decisão que o
+ * teste não consegue chamar não está testada; está descrita. É a mesma lição
+ * que a PH-494 pagou hoje, com o `playerMapper`.
+ *
+ * A REGRA, e as duas direções que ela precisa segurar:
+ *
+ *   até LIMIAR_OFFLINE_SEGUNDOS   credita tudo (jogo ao vivo, cadência normal)
+ *   acima, com o farm pausado     APARA no limiar — não descarta
+ *   acima, com o farm religado    credita tudo, até MAX_SEGUNDOS_POR_FLUSH
+ *
+ * O aparo é o conserto e o teto é a guarda: uma janela de 25 minutos credita 2,
+ * e uma de 6 horas também credita 2. Ninguém acumula tempo parado pra sacar
+ * depois, e esconder a aba nunca rende mais do que jogar olhando.
+ */
+export function segundosACreditar(segundos: number): number {
+  const offline = segundos > LIMIAR_OFFLINE_SEGUNDOS
+  const aparado = offline && FARM_OFFLINE_PAUSADO
+  return aparado ? Math.min(segundos, LIMIAR_OFFLINE_SEGUNDOS) : segundos
+}
 
 // LIMIAR_OFFLINE_SEGUNDOS vem do engine compartilhado (src/engine/simulation.ts)
 // — o farm offline sem servidor (GameShell.tsx) precisa do MESMO limiar pra
@@ -1271,29 +1296,65 @@ async function simularSessao(
   const offline = segundos > LIMIAR_OFFLINE_SEGUNDOS
   world.pessimista = offline
 
-  // Farm offline pausado: o intervalo de AUSENCIA nao roda. Sai um resumo
-  // vazio, e o `last_flush_at` ja avancou pra agora la no claim — o tempo
-  // parado e descartado, nao represado. Ver FARM_OFFLINE_PAUSADO.
+  // O INTERVALO LONGO E APARADO, E NAO MAIS DESCARTADO (PH-495).
+  //
+  // O QUE ESTAVA ERRADO, e e o sistema se contradizendo:
+  //
+  //   SESSAO_INATIVA_SEGUNDOS (30 min, appSessao.ts)  a sessao esta VIVA
+  //   LIMIAR_OFFLINE_SEGUNDOS (120s, aqui)            o intervalo e AUSENCIA
+  //
+  // Entre 2 e 30 minutos as duas reguas discordavam: o sistema considerava a
+  // sessao viva (por isso ela chega aqui — sessao abandonada e fechada antes,
+  // em `sessaoAberta`, e nunca alcanca `aplicarFlush`) e jogava fora TODO o
+  // tempo dela. `createEmptySummary()` nao credita nada: zero abate, zero XP,
+  // zero ouro, e — o que abriu esta issue — zero avanco de sala.
+  //
+  // ONDE ISSO MORDIA. O cabecalho de `SESSAO_INATIVA_SEGUNDOS` diz que "o
+  // cliente flusha a cada 30s e nunca deixa passar mais que 90s enquanto a aba
+  // esta viva". Essa premissa nao sobrevive ao navegador: uma aba em segundo
+  // plano tem os timers estrangulados (o Chrome cai pra 1 por minuto, e menos
+  // ainda depois de 5 minutos oculta), entao o intervalo passa dos 120s com o
+  // jogador ali, jogando.
+  //
+  // MEDIDO EM PRODUCAO, em sessoes de jogador real, 04/09:
+  //
+  //   parede   creditado   %       abates
+  //   3018s     229s       7,6%     18
+  //   1835s     264s      14,4%     10
+  //   7938s    2794s      35,2%      7
+  //
+  // Cinquenta minutos de jogo pagos como quatro. E a sala nao troca porque
+  // quem a troca e o servidor, e o contador dele nunca chega na quota — o
+  // cliente mostra 30/30 (ele simula localmente) e espera pra sempre.
+  //
+  // O CONSERTO E APARAR, NAO CREDITAR TUDO. `Math.min` mantem a propriedade que
+  // o descarte existia pra garantir: ninguem acumula tempo parado pra sacar
+  // depois. Uma janela de 25 minutos credita 2; uma de 6 horas credita 2. O
+  // farm offline continua pausado pra AUSENCIA de verdade — quem fecha a aba e
+  // volta horas depois tem a sessao fechada por abandono (30 min) e abre uma
+  // NOVA, que nem passa por aqui.
+  //
+  // E NAO CRIA INCENTIVO PRA ESCONDER A ABA: com a aba visivel o jogador
+  // credita ~100% do tempo; com ela estrangulada, no maximo 120s por flush.
+  // Jogar olhando continua sendo estritamente melhor.
   //
   // Cai aqui DEPOIS de `buildMapWorld` de proposito: o mundo precisa existir
   // pra o `rng_state` ser gravado adiante e a sequencia de sorteio nao voltar
-  // pro comeco quando o farm for religado.
-  const pausado = offline && FARM_OFFLINE_PAUSADO
+  // pro comeco.
+  const segundosCreditados = segundosACreditar(segundos)
 
   // PH-37: fora do regime offline, o passo precisa bater com o do client ao
   // vivo (useGameLoop.ts, 1/60s) — senao o resim do servidor e o client
   // desalinham a sequencia de sorteios de RNG so pelo tamanho do passo, e o
   // level-up do POKE que o client mostrou nunca e confirmado. Ver
   // LIVE_SIM_STEP_SECONDS em simulation.ts pro raciocinio completo.
-  const resumo = pausado
-    ? createEmptySummary()
-    : simulateWorldSeconds({
-      world,
-      gameState: store,
-      seconds: segundos,
-      stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
-      stepFn: (w, dt, opts) => stepWorld(w, dt, store, { ...opts, offline }),
-    })
+  const resumo = simulateWorldSeconds({
+    world,
+    gameState: store,
+    seconds: segundosCreditados,
+    stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
+    stepFn: (w, dt, opts) => stepWorld(w, dt, store, { ...opts, offline }),
+  })
 
   // PH-178: avanco manual de sala. So depois da simulacao normal do
   // intervalo — a quota pode ter fechado no MEIO desta janela, e e essa sala
@@ -1330,11 +1391,19 @@ async function simularSessao(
 
   // O piso so existe pra impedir que o pior caso degenere pra zero — nao tem o
   // que fazer num flush de jogo ao vivo.
-  // O piso do farm offline (nunca menos que 50% da taxa online medida) tambem
-  // sai de cena enquanto pausado: ele existe pra impedir que o PIOR CASO da
-  // simulacao degenere pra zero. Com a simulacao desligada, zero e o resultado
-  // pretendido — aplicar o piso pagaria justamente o que a pausa quer nao pagar.
-  const piso = offline && !pausado ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO
+  //
+  // PH-495: ELE VOLTA PRO CASO APARADO. Enquanto a janela longa era DESCARTADA,
+  // o piso saia de cena com razao — zero era o resultado pretendido, e aplicar
+  // o piso pagaria justamente o que a pausa queria nao pagar. Agora a janela
+  // aparada e SIMULADA de verdade, com `world.pessimista` ligado: e exatamente
+  // o cenario que o piso existe pra cobrir.
+  //
+  // E ele nao vaza pra escala errada: `aplicarPiso` multiplica por
+  // `resumo.simulatedSeconds` — o tempo REALMENTE simulado, ou seja os 120s
+  // aparados, e nao os 50 minutos brutos. Um piso proporcional ao intervalo cru
+  // seria a porta de entrada do farm de aba escondida que este conserto se
+  // recusa a abrir.
+  const piso = offline ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO
 
   // A taxa "online medida" que o piso usa de referencia so pode vir de jogo ao
   // vivo. Sem isto ela nunca sairia do zero: `recordKill` vive dentro de um
