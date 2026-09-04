@@ -223,7 +223,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
           servidor recusa. Aparece com ou sem o toggle: o motivo e o mesmo. */}
       {quotaFechada && travadaPeloProtetor && (
         <span className="shrink-0 text-[.7em] font-medium text-warn">
-          Derrote o {tipoDeProtetor === 'lord' ? 'Lorde' : 'Guardião'}
+          Derrote o {tipoDeProtetor === 'lord' ? 'Lord' : 'Guardião'}
         </span>
       )}
       {/* PH-386: ver `esperandoAAutoridade`. Cor neutra e nao `warn`: nada esta

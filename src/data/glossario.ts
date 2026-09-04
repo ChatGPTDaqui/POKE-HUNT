@@ -202,11 +202,14 @@ export const GLOSSARIO = {
     wiki: 'Hunts',
   },
 
+  // PH-509: era "Lorde" aqui e "LORD" na tag em campo, pro MESMO chefe. Os dois
+  // nomes valem em portugues, e e justamente por isso que a escolha tinha que
+  // ser feita e travada — ver `vocabularioDoChefeDeSala.test.ts`.
   protetorDaSala: {
-    titulo: 'Guardião e Lorde',
+    titulo: 'Guardião e Lord',
     corpo: [
-      'Sala com Guardião ou Lorde não avança só com os abates: enquanto ele estiver vivo, ela fica parada mesmo com a barra cheia.',
-      'O Lorde é o último, e derrotar ele é o que libera o próximo bioma no menu de hunts.',
+      'Sala com Guardião ou Lord não avança só com os abates: enquanto ele estiver vivo, ela fica parada mesmo com a barra cheia.',
+      'O Lord é o último do estágio, e derrotar ele é o que libera o estágio seguinte daquele bioma.',
     ],
     wiki: 'Hunts',
   },
