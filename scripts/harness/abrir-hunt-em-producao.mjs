@@ -151,6 +151,52 @@ async function fecharSessao() {
   } catch { /* melhor engolir aqui que mascarar a falha real com um erro de limpeza */ }
 }
 
+/**
+ * Pede uma hunt, com UMA retentativa quando o servidor nao respondeu (PH-496).
+ *
+ * O QUE CONTA COMO "nao respondeu": 5xx e erro de rede. Nao e leniencia —
+ * `authority/src/appSessao.ts` responde a todo caso conhecido com 200, 400,
+ * 403 ou 409, e nenhum deles vira 5xx. Um 5xx e sempre transporte, e o painel
+ * abaixo continua julgando o STATUS DE NEGOCIO com a mesma dureza de antes:
+ * 403 onde se esperava 200 reprova na primeira tentativa, sem retentativa
+ * nenhuma.
+ *
+ * UMA retentativa, e nao um laco. Se a segunda tambem nao responder, a bancada
+ * REPROVA — e tem que reprovar. Este e o unico gate que separa "deploy verde"
+ * de "producao verificada", e ele existe porque duas promocoes passaram verdes
+ * com o jogo quebrado (PH-134, PH-293). Uma bancada que insiste ate passar nao
+ * verifica nada.
+ *
+ * E O CLIENTE DE VERDADE E MENOS TOLERANTE QUE ISTO, o que vale registrar:
+ * `servidor.ts#abrirSessao` nao e retentavel e usa timeout de 15s. Ou seja, o
+ * jogador que tentasse entrar naquela janela de 160s teria desistido antes.
+ * A retentativa aqui existe pra a bancada nao reprovar a promocao por um
+ * engasgo da plataforma no segundo seguinte ao deploy — nao pra fingir que o
+ * engasgo nao aconteceu, e por isso ela sempre imprime.
+ */
+async function pedirHunt(mapId, pokeUid) {
+  let msPrimeira = 0
+  for (let tentativa = 1; tentativa <= 2; tentativa++) {
+    const t0 = Date.now()
+    try {
+      const r = await fetch(`${URL_BASE}/functions/v1/${FUNCAO}/sessao/abrir`, {
+        method: 'POST', headers: cabecalhos,
+        body: JSON.stringify({ mapId, pokeUid }),
+      })
+      const corpo = await r.text()
+      if (r.status < 500 || tentativa === 2) return { r, corpo, tentativas: tentativa, msPrimeira }
+      msPrimeira = Date.now() - t0
+    } catch (e) {
+      if (tentativa === 2) throw e
+      msPrimeira = Date.now() - t0
+    }
+    // Pausa curta antes da segunda: no caso medido a rota respondeu em 1,1s
+    // um segundo depois do 504.
+    await new Promise((r) => setTimeout(r, 2000))
+  }
+  throw new Error('inalcancavel')
+}
+
 async function conferir() {
   const token = await entrar()
   cabecalhos = {
@@ -186,13 +232,39 @@ async function conferir() {
   }
   console.log(`  POKE pronto: ${equipe[0].speciesId} Lv${equipe[0].level}, HP ${equipe[0].hp}\n`)
 
+  // AQUECIMENTO (PH-496). O passo anterior do `supabase-deploy.yml` PUBLICA a
+  // Edge Function, e a primeira chamada que chega durante a troca de versao
+  // pode ficar pendurada ate o teto do gateway. Medido no run 33863344889:
+  // `sessao/abrir` levou 160.016 ms e voltou 504; a chamada seguinte, mesma
+  // rota, um segundo depois, levou 1.108 ms. Todas as outras ficaram abaixo de
+  // 1,5s.
+  //
+  // O `/estado` acima NAO serve de aquecimento: ele passou em 1s naquele mesmo
+  // run e ainda assim o `abrir` seguinte pendurou — a rota de sessao faz outro
+  // caminho. Entao o aquecimento e um `abrir` de verdade, DESCARTADO, com o
+  // tempo dele impresso: se ele demorar, o numero fica no log em vez de virar
+  // uma reprovacao sem explicacao.
+  const t0Aquece = Date.now()
+  try {
+    const aquece = await fetch(`${URL_BASE}/functions/v1/${FUNCAO}/sessao/abrir`, {
+      method: 'POST', headers: cabecalhos,
+      body: JSON.stringify({ mapId: PAINEL[0].mapId, pokeUid: equipe[0].uid }),
+    })
+    if (aquece.ok) await fecharSessao()
+    console.log(`  aquecimento: HTTP ${aquece.status} em ${((Date.now() - t0Aquece) / 1000).toFixed(1)}s (descartado)\n`)
+  } catch (e) {
+    console.log(`  aquecimento: falhou em ${((Date.now() - t0Aquece) / 1000).toFixed(1)}s (descartado) — ${e.message}\n`)
+  }
+
   let reprovou = false
   for (const { mapId, espera, porque } of PAINEL) {
-    const r = await fetch(`${URL_BASE}/functions/v1/${FUNCAO}/sessao/abrir`, {
-      method: 'POST', headers: cabecalhos,
-      body: JSON.stringify({ mapId, pokeUid: equipe[0].uid }),
-    })
-    const corpo = await r.text()
+    const { r, corpo, tentativas, msPrimeira } = await pedirHunt(mapId, equipe[0].uid)
+    if (tentativas > 1) {
+      // A RETENTATIVA APARECE NO LOG, SEMPRE. Engolir em silencio trocaria um
+      // falso vermelho por um falso verde, que e pior: 5xx tambem e o que
+      // producao de verdade caindo parece.
+      console.log(`  (retentativa em ${mapId}: a 1a tentativa levou ${(msPrimeira / 1000).toFixed(1)}s e nao respondeu)`)
+    }
     // Sessao aberta e fechada NA HORA: a proxima linha do painel abre outra, e
     // duas sessoes na mesma conta e o caso que a trava de sessao dupla recusa.
     if (r.ok) await fecharSessao()
