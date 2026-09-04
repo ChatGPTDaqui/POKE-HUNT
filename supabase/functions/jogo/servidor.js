@@ -49889,6 +49889,36 @@ function tentarAgir(rng, entity, calcularAutoDano) {
 	}
 	return { agir: true };
 }
+/**
+* O POKE CAIU: apaga tudo que a luta pendurou nele.
+*
+* PH-493, bug relatado pelo dono do projeto: "ao morrer o pokemon continua com
+* status negativo. e ao reviver ele continua com status negativo."
+*
+* As DUAS metades eram verdade, e a segunda e a que doia. `apagarTodosOsEstagios`
+* ja rodava nos dois caminhos de revive desde a PH-418, mas a CONDICAO
+* (veneno/queimadura/paralisia/sono/congelamento) nunca foi limpa em lugar
+* nenhum do desmaio: `poke.status` mora na instancia do POKE, que e a mesma que
+* o `gameStateStore` guarda e o flush grava. Um POKE que caiu envenenado
+* levantava envenenado, e o veneno o derrubava de novo — o mesmo laco que a
+* PH-418 fechou pro estagio, pela outra porta.
+*
+* Nos jogos reais desmaiar troca a condicao por "FNT" e reviver devolve o POKE
+* limpo; aqui o efeito e o mesmo por um caminho so.
+*
+* CHAMADA NO DESMAIO, e nao so no revive, porque o jogador OLHA o POKE caido: a
+* tinta de veneno no corpo e o selo na faixa de efeitos continuavam acesos em
+* cima de um POKE que nao age mais, que e a primeira metade da queixa.
+*
+* `curarStatus` sem `tipo` limpa nao-volatil E volatil e liga a imunidade curta
+* de reaplicacao — o mesmo caminho do Centro Pokemon. A faisca de cura que ela
+* acende e desejavel: e o aviso de que o POKE voltou limpo.
+*/
+function limparEfeitosAoDesmaiar(entity) {
+	curarStatus(entity);
+	limparEstadoVolatil(entity);
+	apagarTodosOsEstagios(entity);
+}
 //#endregion
 //#region src/data/abilityCategory.ts
 /** O bloco de atributos que este POKE tem (ou tera) exatamente no nivel 50. */
@@ -75850,8 +75880,8 @@ function defaultGameStateData() {
 			autoCatch: false,
 			autoRevive: false,
 			autoStatus: true,
-			avancoManualDeSala: false,
-			avancarDeEstagio: false
+			avancarDeEstagio: false,
+			recuarSePerder: false
 		},
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
@@ -77343,6 +77373,55 @@ function trocarEstagios(a, b, stats) {
 		} else (b.estagiosFonte ??= {})[stat] = af;
 	}
 }
+/**
+* A ORDEM EM QUE OS GOLPES DO MESMO INSTANTE RESOLVEM: o mais RAPIDO primeiro.
+*
+* PH-493, pedido do dono do projeto: "se os dois atacam ao mesmo tempo os dois
+* tomam dano, mesmo se um deles morrer... em caso o pokemon mais veloz derrotar
+* o outro com o golpe, o pokemon derrotado nao efetuara o golpe."
+*
+* O CANCELAMENTO JA EXISTIA E NUNCA DISPARAVA. `resolveHit` desiste na primeira
+* linha quando o atacante ja esta morto — mas dois golpes disparados no mesmo
+* tick nascem com o MESMO `HIT_LAND_DELAY`, entao pousam no mesmo tick, e a
+* ordem de resolucao era a de ENFILEIRAMENTO. Quem tivesse enfileirado antes
+* batia primeiro, independentemente de Velocidade, e o segundo ja estava com o
+* dano gravado antes de a guarda poder olhar pra ele. Resultado: troca mutua em
+* todo duelo simetrico — exatamente o que o dono descreveu.
+*
+* Ordenar aqui e o conserto INTEIRO: com o rapido resolvendo primeiro, a guarda
+* de `resolveHit` cancela o hit do derrotado sozinha, sem estado novo e sem
+* mexer em dano, precisao ou cooldown.
+*
+* A VELOCIDADE E A EFETIVA (`velocidadeEfetiva`), e nao `stats.speed` cru:
+* paralisia corta pela metade, Danca das Espadas nao mexe nela, e Swift Swim na
+* chuva dobra. O jogador que gastou um turno em Rosnado de Velocidade tem que
+* ver isso decidir a troca — senao o atributo decide o RITMO das acoes mas nao
+* decide quem age primeiro, que e meia mecanica.
+*
+* DESEMPATE POR `hit.id`, e ele nao e enfeite: `id` e `hit-<contador>`, sortido
+* pelo mesmo contador determinista do mundo, entao dois POKE de Velocidade
+* identica resolvem na mesma ordem no cliente e no resim da autoridade. Cair no
+* `sort` "estavel do V8" seria depender da ordem de enfileiramento, que e
+* justamente o que este ordenador existe pra tirar do caminho.
+*
+* ATACANTE SUMIDO vai pro fim (velocidade -Infinity): ele nao vai concretizar
+* nada de qualquer forma (`resolveHit` devolve na primeira linha), e coloca-lo
+* na frente so atrasaria quem tem dano de verdade pra aplicar.
+*/
+function ordenarPorVelocidade(world, hits) {
+	if (hits.length < 2) return hits;
+	const clima = world.clima?.tipo ?? null;
+	const velocidade = /* @__PURE__ */ new Map();
+	for (const hit of hits) {
+		if (velocidade.has(hit.attackerId)) continue;
+		const atacante = findEntityById(world.player, world.enemies, hit.attackerId);
+		velocidade.set(hit.attackerId, atacante ? velocidadeEfetiva(atacante, clima) : -Infinity);
+	}
+	return [...hits].sort((a, b) => {
+		const diff = velocidade.get(b.attackerId) - velocidade.get(a.attackerId);
+		return diff !== 0 ? diff : a.id.localeCompare(b.id);
+	});
+}
 function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const attacker = findEntityById(world.player, world.enemies, hit.attackerId);
 	if (!attacker) return;
@@ -78000,7 +78079,7 @@ function updateCombat(world, dt, opts = {}) {
 	}
 	world.effects = world.effects.filter((e) => !effectDone(e));
 	for (const hit of world.pendingHits) hit.timer -= dt;
-	const landed = world.pendingHits.filter((hit) => hit.timer <= 0);
+	const landed = ordenarPorVelocidade(world, world.pendingHits.filter((hit) => hit.timer <= 0));
 	world.pendingHits = world.pendingHits.filter((hit) => hit.timer > 0);
 	for (const hit of landed) resolveHit(world, hit, defeatedEnemyIds, () => {
 		playerJustFainted = true;
@@ -79043,7 +79122,7 @@ function updateAutoHeal(world, gameState, dt) {
 			player.poke.hp = Math.round(player.poke.stats.hp * revive.reviveHpPercent);
 			player.fainted = false;
 			player.state = "wander";
-			apagarTodosOsEstagios(player);
+			limparEfeitosAoDesmaiar(player);
 			timers.treinador = COOLDOWN_DO_TREINADOR;
 			world.reviveCountdown = null;
 			events.push({
@@ -79976,6 +80055,28 @@ function proximoEstagioLiberado(mapId, progresso) {
 	if (!estagioLiberado(progresso, doMapa.bioma, proximo)) return null;
 	return estagioId(doMapa.bioma, proximo);
 }
+/**
+* O mapId do estagio ANTERIOR a este, se ele existir. `null` no estagio 1 e em
+* qualquer hunt que nao seja de estagio (PH-493).
+*
+* O ESPELHO de `proximoEstagioLiberado`, e a assimetria e proposital: aqui NAO
+* se consulta `estagioLiberado`. Recuar so acontece a partir de um estagio em
+* que o jogador ja esta, e chegar nele exigiu limpar o anterior — logo o
+* anterior esta liberado por construcao. Consultar o progresso abriria um caso
+* novo sem valor: um jogador cujo save perdeu o progresso ficaria preso num
+* estagio que o esta matando, que e exatamente a situacao que o recuo existe pra
+* resolver.
+*
+* `parseEstagioId` devolve `null` pra Rota 46, hunts BOSS e a do Lance — nenhuma
+* delas tem estagio anterior, e nas duas ultimas morrer ja e definitivo.
+*/
+function estagioAnterior(mapId) {
+	const doMapa = parseEstagioId(mapId);
+	if (!doMapa) return null;
+	const anterior = doMapa.estagio - 1;
+	if (anterior < 1) return null;
+	return estagioId(doMapa.bioma, anterior);
+}
 //#endregion
 //#region src/engine/systems/pokedexSystem.ts
 function recordPokedexKill(gameState, speciesId, isShiny) {
@@ -80016,6 +80117,7 @@ function emptyWorldState(seed = randomSeed()) {
 		protetorCaido: null,
 		estagioJaLimpo: false,
 		avancarParaEstagio: null,
+		desmaiosRecentes: [],
 		protetorSemDanoSegundos: 0,
 		salaCountdownRemaining: null,
 		salaPendente: null,
@@ -80889,9 +80991,38 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		droppedItems: loot.droppedItems
 	};
 }
+/**
+* Conta mais uma derrota e, se a janela fechou, PEDE o recuo de estagio.
+*
+* REUSA `world.avancarParaEstagio`, o canal que a PH-428 abriu pro avanco. Nao e
+* economia de campo: trocar de estagio e trocar de HUNT (sessao nova no
+* servidor, gate de entrada, heranca de sala) e nada disso cabe num tick
+* sincrono — o motor deixa o PEDIDO e quem executa e `useGameLoop`. Recuar tem
+* exatamente a mesma forma que avancar; o que muda e o mapId. Um segundo campo
+* daria dois pedidos podendo estar armados ao mesmo tempo, e ninguem decidindo
+* qual vence.
+*
+* A LISTA ZERA AO DISPARAR. Sem isso o pedido seria rearmado em todo desmaio
+* seguinte dentro da janela, e o jogador recuaria dois estagios por um unico
+* episodio.
+*
+* `estagioAnterior` devolvendo `null` (estagio 1, Rota 46, hunt BOSS, Lance)
+* deixa o jogador onde esta, de proposito: nao ha pra onde recuar, e no estagio
+* 1 o problema nao e o estagio.
+*/
+function registrarDesmaioParaRecuo(world, gameState) {
+	world.desmaiosRecentes.push(0);
+	if (!gameState.autoToggles.recuarSePerder) return;
+	if (world.desmaiosRecentes.length < 3) return;
+	if (!world.mapDef) return;
+	const anterior = estagioAnterior(world.mapDef.id);
+	world.desmaiosRecentes = [];
+	if (!anterior) return;
+	world.avancarParaEstagio = anterior;
+}
 function stepWorld(world, dt, gameState, opts = {}) {
 	const silent = opts.silent ?? false;
-	const manualAdvance = (gameState.autoToggles.avancoManualDeSala ?? false) && !(opts.offline ?? false);
+	const manualAdvance = false;
 	if (!world.player) return [];
 	if (!world.mapDef) {
 		if (!silent) updateAnimations(world, dt);
@@ -80959,7 +81090,10 @@ function stepWorld(world, dt, gameState, opts = {}) {
 	}
 	for (const enemy of world.enemies) if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
 	world.enemies = world.enemies.filter((e) => !isDead(e) || (e.deathRemovalTimer ?? 0) > 0 || world.mapDef.keepCorpses);
+	if (world.desmaiosRecentes.length > 0) world.desmaiosRecentes = world.desmaiosRecentes.map((idade) => idade + dt).filter((idade) => idade <= 15);
 	if (playerJustFainted && world.player) {
+		registrarDesmaioParaRecuo(world, gameState);
+		limparEfeitosAoDesmaiar(world.player);
 		const expAntesDaPenalidade = world.player.poke.exp;
 		const penaltyResult = applyDeathExpPenalty(world.player.poke);
 		world.player.poke = penaltyResult.poke;

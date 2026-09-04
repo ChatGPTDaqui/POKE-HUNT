@@ -30,7 +30,7 @@ import { abilityIconUrl } from '@/data/abilityIcons'
 import { colorForType } from '@/data/typeColors'
 import { controller } from '@/engine/controller'
 import { segundosAtePoderUsar, cooldownProprio } from '@/engine/entity'
-import { cooldownTotalDoGolpe } from '@/engine/systems/combatSystem'
+import { cooldownTotalDoGolpe, recargaEfetivaDoGolpe } from '@/engine/systems/combatSystem'
 import { useWorldStore } from '@/stores/worldStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { AbilityTooltip, descricaoDoGolpe } from '@/components/shared/AbilityTooltip'
@@ -504,10 +504,21 @@ function SheetDoGolpe({
           />
           <Ficha verbete="precisao" rotulo="Precisão" valor={`${ability.accuracy ?? 100}%`} />
           <Ficha verbete="pp" rotulo="PP" valor={String(ability.pp)} />
+          {/* PH-493: A RECARGA REAL, e nao a nominal do catalogo.
+              `ability.cooldown` e o numero derivado do PP antes de a Velocidade
+              dividir e antes do piso do turno — a ficha prometia um tempo e o
+              combate entregava outro, que foi a queixa do dono do projeto. Ver
+              `recargaEfetivaDoGolpe`.
+
+              `poke.stats.speed` e a Velocidade BASE: a ficha e lida com o jogo
+              aberto e o POKE podendo estar paralisado ou buffado, mas ela
+              descreve o GOLPE, e um numero que muda enquanto o jogador le nao
+              serve de referencia. Quem quer o valor do instante tem a barra de
+              recarga do proprio slot, que usa a Velocidade efetiva. */}
           <Ficha
             verbete="recarga"
             rotulo="Recarga"
-            valor={ability.cooldown != null ? `${ability.cooldown.toFixed(1)}s` : '—'}
+            valor={ability.cooldown != null ? `${recargaEfetivaDoGolpe(ability, poke.stats.speed).toFixed(1)}s` : '—'}
           />
           <Ficha
             verbete="area"

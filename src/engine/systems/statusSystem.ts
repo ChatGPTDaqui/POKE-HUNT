@@ -981,3 +981,34 @@ export function tentarAgir(rng: Rng, entity: WorldEntity, calcularAutoDano: (pod
   }
   return { agir: true }
 }
+
+/**
+ * O POKE CAIU: apaga tudo que a luta pendurou nele.
+ *
+ * PH-493, bug relatado pelo dono do projeto: "ao morrer o pokemon continua com
+ * status negativo. e ao reviver ele continua com status negativo."
+ *
+ * As DUAS metades eram verdade, e a segunda e a que doia. `apagarTodosOsEstagios`
+ * ja rodava nos dois caminhos de revive desde a PH-418, mas a CONDICAO
+ * (veneno/queimadura/paralisia/sono/congelamento) nunca foi limpa em lugar
+ * nenhum do desmaio: `poke.status` mora na instancia do POKE, que e a mesma que
+ * o `gameStateStore` guarda e o flush grava. Um POKE que caiu envenenado
+ * levantava envenenado, e o veneno o derrubava de novo — o mesmo laco que a
+ * PH-418 fechou pro estagio, pela outra porta.
+ *
+ * Nos jogos reais desmaiar troca a condicao por "FNT" e reviver devolve o POKE
+ * limpo; aqui o efeito e o mesmo por um caminho so.
+ *
+ * CHAMADA NO DESMAIO, e nao so no revive, porque o jogador OLHA o POKE caido: a
+ * tinta de veneno no corpo e o selo na faixa de efeitos continuavam acesos em
+ * cima de um POKE que nao age mais, que e a primeira metade da queixa.
+ *
+ * `curarStatus` sem `tipo` limpa nao-volatil E volatil e liga a imunidade curta
+ * de reaplicacao — o mesmo caminho do Centro Pokemon. A faisca de cura que ela
+ * acende e desejavel: e o aviso de que o POKE voltou limpo.
+ */
+export function limparEfeitosAoDesmaiar(entity: WorldEntity): void {
+  curarStatus(entity)
+  limparEstadoVolatil(entity)
+  apagarTodosOsEstagios(entity)
+}

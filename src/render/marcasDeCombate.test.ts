@@ -69,19 +69,46 @@ describe('marca do meu POKE e do alvo (PH-189)', () => {
     expect(elipses[1].rx).toBeLessThan(elipses[0].rx)
   })
 
-  it('a marca do alvo sao quatro colchetes em VOLTA do corpo, nao um anel', () => {
+  // PH-493: o alvo DESCEU PRO CHAO. Era colchete nos quatro cantos do corpo, e
+  // o dono do projeto pediu um alvo vermelho embaixo do POKE, "nao muito
+  // grande", fazendo par com o anel azul do jogador. Este bloco troca de
+  // afirmacao junto — um teste que continuasse exigindo os 12 pontos do
+  // colchete seria o teste que codifica o comportamento antigo.
+  it('a marca do alvo e um alvo no CHAO, embaixo do corpo', () => {
     const { ctx, elipses, linhas } = ctxEspiao()
-    drawMarcaDoAlvo(ctx, entidade('enemy-1'))
-    expect(elipses).toHaveLength(0)
-    // 4 cantos x 3 pontos (moveTo + 2 lineTo) = 12 pontos.
-    expect(linhas).toHaveLength(12)
-    const xs = linhas.map((p) => p.x)
-    const ys = linhas.map((p) => p.y)
-    // Cerca o corpo dos dois lados nos dois eixos.
-    expect(Math.min(...xs)).toBeLessThan(100)
-    expect(Math.max(...xs)).toBeGreaterThan(100)
-    expect(Math.min(...ys)).toBeLessThan(100)
-    expect(Math.max(...ys)).toBeGreaterThan(100)
+    const alvo = entidade('enemy-1')
+    drawMarcaDoAlvo(ctx, alvo)
+    expect(elipses).toHaveLength(1)
+    expect(elipses[0].x).toBeCloseTo(alvo.x, 5)
+    // No chao: na altura dos pes, nunca acima do centro do corpo.
+    expect(elipses[0].y).toBeGreaterThanOrEqual(alvo.y)
+    // Os quatro tracos de mira: 4 x (moveTo + lineTo) = 8 pontos.
+    expect(linhas).toHaveLength(8)
+  })
+
+  it('o alvo e MENOR que o anel do jogador — as duas marcas dividem o mesmo chao', () => {
+    // "Nao muito grande" era o pedido, e o caso extremo e os dois POKE
+    // encostados pra lutar: com raios iguais as duas marcas viram um borrao so
+    // justamente no instante em que distinguir importa.
+    const doJogador = ctxEspiao()
+    drawMarcaDoJogador(doJogador.ctx, entidade('player-1'))
+    const doAlvo = ctxEspiao()
+    drawMarcaDoAlvo(doAlvo.ctx, entidade('enemy-1'))
+    expect(doAlvo.elipses[0].rx).toBeLessThan(doJogador.elipses[0].rx)
+  })
+
+  it('as duas marcas continuam de FORMA diferente, e nao so de cor', () => {
+    // Distinguir so por vermelho/azul falha pra quem nao separa as duas cores,
+    // e elas aparecem juntas em toda luta. O jogador sao dois aneis
+    // concentricos; o alvo e um anel so, com tracos de mira.
+    const doJogador = ctxEspiao()
+    drawMarcaDoJogador(doJogador.ctx, entidade('player-1'))
+    const doAlvo = ctxEspiao()
+    drawMarcaDoAlvo(doAlvo.ctx, entidade('enemy-1'))
+    expect(doJogador.elipses.length).toBeGreaterThanOrEqual(2)
+    expect(doAlvo.elipses).toHaveLength(1)
+    expect(doJogador.linhas).toHaveLength(0)
+    expect(doAlvo.linhas.length).toBeGreaterThan(0)
   })
 })
 

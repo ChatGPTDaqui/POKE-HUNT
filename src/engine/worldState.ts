@@ -38,6 +38,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     protetorCaido: null,
     estagioJaLimpo: false,
     avancarParaEstagio: null,
+    desmaiosRecentes: [],
     protetorSemDanoSegundos: 0,
     salaCountdownRemaining: null,
     salaPendente: null,

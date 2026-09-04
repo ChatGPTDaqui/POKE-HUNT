@@ -1227,3 +1227,26 @@ export function proximoEstagioLiberado(
   if (!estagioLiberado(progresso, doMapa.bioma, proximo)) return null
   return estagioId(doMapa.bioma, proximo)
 }
+
+/**
+ * O mapId do estagio ANTERIOR a este, se ele existir. `null` no estagio 1 e em
+ * qualquer hunt que nao seja de estagio (PH-493).
+ *
+ * O ESPELHO de `proximoEstagioLiberado`, e a assimetria e proposital: aqui NAO
+ * se consulta `estagioLiberado`. Recuar so acontece a partir de um estagio em
+ * que o jogador ja esta, e chegar nele exigiu limpar o anterior — logo o
+ * anterior esta liberado por construcao. Consultar o progresso abriria um caso
+ * novo sem valor: um jogador cujo save perdeu o progresso ficaria preso num
+ * estagio que o esta matando, que e exatamente a situacao que o recuo existe pra
+ * resolver.
+ *
+ * `parseEstagioId` devolve `null` pra Rota 46, hunts BOSS e a do Lance — nenhuma
+ * delas tem estagio anterior, e nas duas ultimas morrer ja e definitivo.
+ */
+export function estagioAnterior(mapId: string): string | null {
+  const doMapa = parseEstagioId(mapId)
+  if (!doMapa) return null
+  const anterior = doMapa.estagio - 1
+  if (anterior < 1) return null
+  return estagioId(doMapa.bioma, anterior)
+}

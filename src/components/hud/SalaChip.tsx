@@ -16,14 +16,11 @@
 // ele la significaria tirar outra coisa do trilho — e o que sobra la e HP,
 // carteira e treinador, os tres mais urgentes que "qual sala".
 import { useWorldStore } from '@/stores/worldStore'
-import { useGameStateStore } from '@/stores/gameStateStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
 import { quantidadeDeSalas } from '@/data/estagios'
 import {
   janelaDaSala, nomeDaSala, protetorDaSala, quotaDeAbatesDaSala, salaDeveProtetor,
 } from '@/engine/systems/salaSystem'
-import { avancarSalaManualmente } from '@/data/remote/autoridade'
-import { GameButton } from '@/components/game/controls'
 import { Explicacao, BolhaDoVerbete } from '@/components/shared/Explicacao'
 import { verbete } from '@/data/glossario'
 import type { DeviceMode } from '@/stores/uiStore'
@@ -69,7 +66,6 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // Sem este flag a tela nao tem como distinguir "a sala vai trocar em 3s" de
   // "a sala esta esperando resposta" — ver `esperandoAAutoridade` abaixo.
   const salaSobAutoridade = useWorldStore((s) => s.salaSobAutoridade)
-  const avancoManualLigado = useGameStateStore((s) => s.autoToggles.avancoManualDeSala)
   if (!sala) return null
 
   const nome = nomeDaSala(sala)
@@ -93,10 +89,10 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   const travadaPeloProtetor = salaDeveProtetor(sala, mapId ?? '', estadoDoProtetor)
   const tipoDeProtetor = travadaPeloProtetor ? protetorDaSala(sala, mapId ?? '') : null
   const quotaFechada = sala.abates >= quotaDeAbatesDaSala(sala, mapId ?? '', estadoDoProtetor)
-  // PH-180: so aparece com a quota FECHADA, o toggle ligado (senao a sala ja
-  // trocou sozinha) e sem transicao em andamento (o clique nao tem o que
-  // fazer enquanto o overlay de "Entrando em nova area" ja esta na tela).
-  const podeAvancarManual = avancoManualLigado && quotaFechada && countdown == null && !travadaPeloProtetor
+  // PH-180 punha um botao "Próximo Nível" aqui, visivel so com o toggle
+  // "Avanço manual de sala" ligado. PH-493: o toggle saiu do jogo, e o botao
+  // saiu com ele — sem toggle ele nunca apareceria, e um botao que nao aparece
+  // e so um caminho de codigo esperando divergir.
 
   // A ESPERA PARA DE SER SILENCIOSA (PH-386).
   //
@@ -121,13 +117,14 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // explicacao nenhuma, e exatamente o relato "a sala nao esta trocando".
   //
   // `salaSobAutoridade` no predicado: no jogo local a transicao e imediata e
-  // este estado nao existe. `!avancoManualLigado` porque ali quem esta sendo
-  // esperado e o CLIQUE, nao o servidor — e o botao ao lado ja diz isso.
+  // este estado nao existe. O termo `!avancoManualLigado` saiu na PH-493 junto
+  // com o toggle — ele existia pro caso em que quem estava sendo esperado era o
+  // CLIQUE do jogador, e nao o servidor. Sem o toggle, "30/30 parado" so tem
+  // uma causa, e e esta.
   const esperandoAAutoridade = quotaFechada
     && salaSobAutoridade
     && !travadaPeloProtetor
     && countdown == null
-    && !avancoManualLigado
 
   // O QUE NAO CABE NO CHIP (PH-272). No trilho, `Lv X-Y` e o numero do ciclo
   // saem de cena pra o NOME do sub-bioma caber inteiro — o nome e a resposta pra
@@ -239,15 +236,6 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
       )}
     </div>
     </Explicacao>
-      {podeAvancarManual && (
-        <GameButton
-          variant="ghost"
-          className="shrink-0 px-[.5em] py-[.15em] text-[.68em]"
-          onClick={() => void avancarSalaManualmente()}
-        >
-          Próximo Nível
-        </GameButton>
-      )}
     </div>
   )
 }

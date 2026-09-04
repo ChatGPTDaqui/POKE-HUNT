@@ -43,7 +43,7 @@ import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
 import { atualizarLure } from './systems/lureSystem'
 import { updateCombat, podeDanificar } from './systems/combatSystem'
-import { aplicarStatus, apagarTodosOsEstagios } from './systems/statusSystem'
+import { aplicarStatus, apagarTodosOsEstagios, limparEfeitosAoDesmaiar } from './systems/statusSystem'
 import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { climaAmbienteDaSala, climaDeAmbiente, tickClimaDeGolpe } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
@@ -55,7 +55,7 @@ import {
   contextoDeSpawn, lootAtivo, novaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
-  estagioJaLimpo, proximoEstagioLiberado,
+  estagioJaLimpo, proximoEstagioLiberado, estagioAnterior,
   comunsEsgotados, quotaDeAbatesDaSala, salaDeveProtetor, ESPERA_MAXIMA_PELA_AUTORIDADE,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
@@ -1460,6 +1460,54 @@ export function handleEnemyDefeated(
   }
 }
 
+// ---------- Recuar se perder (PH-493) ----------
+
+/**
+ * Quantas derrotas, e em quanto tempo, devolvem o jogador ao estagio anterior.
+ *
+ * Os dois numeros sao o pedido do dono do projeto, textual: "caso o pokemon do
+ * jogador seja derrotado 3 vezes em um intervalo de 15 segundos, ele retorna
+ * para o estagio anterior".
+ *
+ * 15s e curto de proposito e a conta fecha: entre uma derrota e a seguinte tem
+ * que caber o Auto-Revive (`AUTO_REVIVE_DELAY`, 5s) ou a troca por desmaio, mais
+ * o tempo de o POKE novo ser derrubado. Tres derrotas nessa janela so acontecem
+ * quando o inimigo mata em um ou dois golpes — que e exatamente a leitura "este
+ * estagio esta acima do meu time", e nao "tive azar".
+ */
+export const DERROTAS_PARA_RECUAR = 3
+export const JANELA_DE_RECUO_SEGUNDOS = 15
+
+/**
+ * Conta mais uma derrota e, se a janela fechou, PEDE o recuo de estagio.
+ *
+ * REUSA `world.avancarParaEstagio`, o canal que a PH-428 abriu pro avanco. Nao e
+ * economia de campo: trocar de estagio e trocar de HUNT (sessao nova no
+ * servidor, gate de entrada, heranca de sala) e nada disso cabe num tick
+ * sincrono — o motor deixa o PEDIDO e quem executa e `useGameLoop`. Recuar tem
+ * exatamente a mesma forma que avancar; o que muda e o mapId. Um segundo campo
+ * daria dois pedidos podendo estar armados ao mesmo tempo, e ninguem decidindo
+ * qual vence.
+ *
+ * A LISTA ZERA AO DISPARAR. Sem isso o pedido seria rearmado em todo desmaio
+ * seguinte dentro da janela, e o jogador recuaria dois estagios por um unico
+ * episodio.
+ *
+ * `estagioAnterior` devolvendo `null` (estagio 1, Rota 46, hunt BOSS, Lance)
+ * deixa o jogador onde esta, de proposito: nao ha pra onde recuar, e no estagio
+ * 1 o problema nao e o estagio.
+ */
+function registrarDesmaioParaRecuo(world: WorldState, gameState: GameStateStore): void {
+  world.desmaiosRecentes.push(0)
+  if (!gameState.autoToggles.recuarSePerder) return
+  if (world.desmaiosRecentes.length < DERROTAS_PARA_RECUAR) return
+  if (!world.mapDef) return
+  const anterior = estagioAnterior(world.mapDef.id)
+  world.desmaiosRecentes = []
+  if (!anterior) return
+  world.avancarParaEstagio = anterior
+}
+
 // ---------- Tick de passo fixo ----------
 
 // Compartilhado pelo loop ao vivo (silent:false) e os 2 sistemas headless
@@ -1473,7 +1521,17 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // authority/progresso.ts). Calculado uma vez e repassado pros dois pontos
   // que decidem avanco de sala (`garantirTransicaoDeQuotaFechada` e
   // `registrarAbate`), senao um dos dois fica desatualizado com o toggle.
-  const manualAdvance = (gameState.autoToggles.avancoManualDeSala ?? false) && !(opts.offline ?? false)
+  // PH-493: SEMPRE FALSO. O toggle "Avanço manual de sala" saiu do jogo a
+  // pedido do dono do projeto (ver `AutoPanel`), e este era o unico ponto que
+  // podia liga-lo.
+  //
+  // A OPCAO CONTINUA NO `salaSystem`, dormente, e isso e escolha. Ela atravessa
+  // tres funcoes (`registrarAbate`, `garantirTransicaoDeQuotaFechada`,
+  // `resolverProtetorDaSala`) que sao a parte mais incidentada deste motor —
+  // so em 03/09 foram quatro correcoes de avanco de sala (PH-472 a PH-475). Os
+  // testes que descrevem a semantica dela ficam de pe junto: se o dono pedir o
+  // botao de volta, e uma linha aqui, e nao uma reescrita do avanco de sala.
+  const manualAdvance = false
   if (!world.player) return []
 
   if (!world.mapDef) {
@@ -1651,7 +1709,28 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // visiveis em vez de desaparecer apos o periodo de graca usual.
   world.enemies = world.enemies.filter((e) => !isDead(e) || (e.deathRemovalTimer ?? 0) > 0 || world.mapDef!.keepCorpses)
 
+  // A JANELA DO "RECUAR SE PERDER" ANDA TODO TICK, e nao so quando alguem cai
+  // (PH-493): a lista guarda IDADES, e idade que nao envelhece nunca sai da
+  // janela. Antes do bloco de desmaio, pra a derrota deste tick entrar com
+  // idade 0 e nao ja envelhecida por um passo.
+  if (world.desmaiosRecentes.length > 0) {
+    world.desmaiosRecentes = world.desmaiosRecentes
+      .map((idade) => idade + dt)
+      .filter((idade) => idade <= JANELA_DE_RECUO_SEGUNDOS)
+  }
+
   if (playerJustFainted && world.player) {
+    registrarDesmaioParaRecuo(world, gameState)
+    // PH-493: QUEM CAI, CAI LIMPO. Veneno, queimadura, paralisia, confusao e
+    // estagio saem no mesmo instante do desmaio — ver a nota longa em
+    // `statusSystem#limparEfeitosAoDesmaiar`. Antes disto a condicao ficava
+    // colada na instancia do POKE (que e a mesma do `gameStateStore`), entao o
+    // POKE caido continuava pintado de roxo na tela E levantava envenenado
+    // depois do Revive.
+    //
+    // ANTES da penalidade de EXP so por ordem de leitura; as duas sao
+    // independentes.
+    limparEfeitosAoDesmaiar(world.player)
     // Roda mesmo quando silent — mesma regra de todo outro pipeline de
     // recompensa/penalidade aqui, so o toast e ao-vivo-so.
     const expAntesDaPenalidade = world.player.poke.exp

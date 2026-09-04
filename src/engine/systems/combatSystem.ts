@@ -572,6 +572,16 @@ const WISH_HEAL_PERCENT = 0.5
 // Ambos editaveis pela planilha (ver CLAUDE.md "Balanceamento de economia")
 // com fallback batendo o valor hardcoded antigo.
 const SPEED_REFERENCE = formulaEngine.evalOrDefault('ATTACK_SPEED_REFERENCE', 100)
+/**
+ * A Velocidade de referencia, exportada pra tela (PH-493).
+ *
+ * A bolha do golpe pode ser aberta SEM POKE nenhum (`poke` e opcional em
+ * `AbilityTooltip` — item linkado no chat, por exemplo), e ali a recarga
+ * precisa de uma Velocidade pra dividir. A referencia e a escolha honesta: com
+ * ela `scaledCooldown` devolve exatamente a recarga nominal do catalogo, que e
+ * o numero "do golpe", sem dono.
+ */
+export const VELOCIDADE_DE_REFERENCIA = SPEED_REFERENCE
 const BASE_ATTACK_INTERVAL = formulaEngine.evalOrDefault('BASIC_ATTACK_COOLDOWN', 2)
 // O turno. Um numero so, em vez dos dois que existiam antes: o `TICK_MS` de
 // 1400ms (que convertia PP em cooldown) e este cooldown global de 2s, que na
@@ -604,6 +614,39 @@ export function engageRangeFor(attacker: WorldEntity, defender: WorldEntity): nu
  */
 export function cooldownTotalDoGolpe(entity: WorldEntity, ability: Ability, clima: ClimaTipo | null = null): number {
   return scaledCooldown(ability, velocidadeEfetiva(entity, clima))
+}
+
+/**
+ * QUANTO TEMPO REALMENTE PASSA entre dois usos deste golpe, com esta
+ * Velocidade — o numero que a ficha e a bolha do golpe mostram (PH-493).
+ *
+ * O QUE ESTAVA ERRADO. As duas telas escreviam `ability.cooldown` cru, e esse
+ * campo e a recarga NOMINAL derivada do PP (`abilities.ts#cooldownFromPp`) —
+ * antes de tudo que o combate faz com ela. Duas coisas mexem no numero, e as
+ * duas o jogador sente:
+ *
+ *   1. VELOCIDADE. `scaledCooldown` divide pela Velocidade sobre a referencia
+ *      de 100. Um POKE de Velocidade 200 recarrega na METADE do tempo escrito,
+ *      um de Velocidade 50 no DOBRO. A ficha nem citava o atributo.
+ *   2. O TURNO. Toda acao passa por `globalCooldown = MIN_ACTION_GAP` (o turno,
+ *      3s desde a PH-376), entao NENHUM golpe sai antes disso, por mais rapido
+ *      que ele seja no papel. Golpe de recarga nominal 1,4s exibia "1.4s" e
+ *      saia de 3 em 3 segundos — mais que o DOBRO do prometido, e essa e a
+ *      queixa que o dono do projeto trouxe.
+ *
+ * O `Math.max` e nao a soma pelo mesmo motivo de `segundosAtePoderUsar`: os
+ * dois relogios correm ao mesmo tempo, e quem manda e o maior.
+ *
+ * `velocidade` entra crua em vez de uma `WorldEntity` porque os dois maiores
+ * leitores nao tem entidade nenhuma: a ficha do golpe na tela de Status e a
+ * bolha do slot recebem uma `PokeInstance`. Quem tem a entidade viva passa
+ * `velocidadeEfetiva(...)` e ve o numero COM paralisia, estagio e clima; quem
+ * so tem a instancia passa `poke.stats.speed` e ve o caso neutro — a mesma
+ * escolha que a lista de efeitos do tooltip ja faz ("o tooltip e lido antes de
+ * escolher o golpe, e nesse instante nao existe estagio atual").
+ */
+export function recargaEfetivaDoGolpe(ability: Ability, velocidade: number): number {
+  return Math.max(scaledCooldown(ability, velocidade), MIN_ACTION_GAP)
 }
 
 /**
@@ -2519,6 +2562,56 @@ function trocarEstagios(a: WorldEntity, b: WorldEntity, stats: StatDeEstagio[]):
 // Aplica o dano/texto/efeito-de-golpe/tratamento-de-derrota de um hit
 // enfileirado — chamado quando seu timer chega a 0, ou seja, quando a pose
 // Shoot/Charge do atacante ja terminou de tocar.
+/**
+ * A ORDEM EM QUE OS GOLPES DO MESMO INSTANTE RESOLVEM: o mais RAPIDO primeiro.
+ *
+ * PH-493, pedido do dono do projeto: "se os dois atacam ao mesmo tempo os dois
+ * tomam dano, mesmo se um deles morrer... em caso o pokemon mais veloz derrotar
+ * o outro com o golpe, o pokemon derrotado nao efetuara o golpe."
+ *
+ * O CANCELAMENTO JA EXISTIA E NUNCA DISPARAVA. `resolveHit` desiste na primeira
+ * linha quando o atacante ja esta morto — mas dois golpes disparados no mesmo
+ * tick nascem com o MESMO `HIT_LAND_DELAY`, entao pousam no mesmo tick, e a
+ * ordem de resolucao era a de ENFILEIRAMENTO. Quem tivesse enfileirado antes
+ * batia primeiro, independentemente de Velocidade, e o segundo ja estava com o
+ * dano gravado antes de a guarda poder olhar pra ele. Resultado: troca mutua em
+ * todo duelo simetrico — exatamente o que o dono descreveu.
+ *
+ * Ordenar aqui e o conserto INTEIRO: com o rapido resolvendo primeiro, a guarda
+ * de `resolveHit` cancela o hit do derrotado sozinha, sem estado novo e sem
+ * mexer em dano, precisao ou cooldown.
+ *
+ * A VELOCIDADE E A EFETIVA (`velocidadeEfetiva`), e nao `stats.speed` cru:
+ * paralisia corta pela metade, Danca das Espadas nao mexe nela, e Swift Swim na
+ * chuva dobra. O jogador que gastou um turno em Rosnado de Velocidade tem que
+ * ver isso decidir a troca — senao o atributo decide o RITMO das acoes mas nao
+ * decide quem age primeiro, que e meia mecanica.
+ *
+ * DESEMPATE POR `hit.id`, e ele nao e enfeite: `id` e `hit-<contador>`, sortido
+ * pelo mesmo contador determinista do mundo, entao dois POKE de Velocidade
+ * identica resolvem na mesma ordem no cliente e no resim da autoridade. Cair no
+ * `sort` "estavel do V8" seria depender da ordem de enfileiramento, que e
+ * justamente o que este ordenador existe pra tirar do caminho.
+ *
+ * ATACANTE SUMIDO vai pro fim (velocidade -Infinity): ele nao vai concretizar
+ * nada de qualquer forma (`resolveHit` devolve na primeira linha), e coloca-lo
+ * na frente so atrasaria quem tem dano de verdade pra aplicar.
+ */
+function ordenarPorVelocidade(world: WorldState, hits: PendingHit[]): PendingHit[] {
+  if (hits.length < 2) return hits
+  const clima = world.clima?.tipo ?? null
+  const velocidade = new Map<string, number>()
+  for (const hit of hits) {
+    if (velocidade.has(hit.attackerId)) continue
+    const atacante = findEntityById(world.player, world.enemies, hit.attackerId)
+    velocidade.set(hit.attackerId, atacante ? velocidadeEfetiva(atacante, clima) : -Infinity)
+  }
+  return [...hits].sort((a, b) => {
+    const diff = velocidade.get(b.attackerId)! - velocidade.get(a.attackerId)!
+    return diff !== 0 ? diff : a.id.localeCompare(b.id)
+  })
+}
+
 function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string[], onPlayerFainted: () => void, silent: boolean): void {
   const attacker = findEntityById(world.player, world.enemies, hit.attackerId)
   if (!attacker) return
@@ -3639,7 +3732,7 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   world.effects = world.effects.filter((e) => !effectDone(e))
 
   for (const hit of world.pendingHits) hit.timer -= dt
-  const landed = world.pendingHits.filter((hit) => hit.timer <= 0)
+  const landed = ordenarPorVelocidade(world, world.pendingHits.filter((hit) => hit.timer <= 0))
   world.pendingHits = world.pendingHits.filter((hit) => hit.timer > 0)
   for (const hit of landed) {
     resolveHit(world, hit, defeatedEnemyIds, () => {

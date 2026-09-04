@@ -169,3 +169,16 @@ export function urlsDeEstagio(): string[] {
     TIRA_DE_CONDICAO_APLICADA.url,
   ]
 }
+
+/**
+ * A URL da peca de CONDICAO aplicada — a unica que o desenho ainda pede.
+ *
+ * PH-493: o selo de ATRIBUTO virou texto (`+Atk`, `−Vel`), entao as 14 tiras de
+ * `TIPO_POR_ESTAGIO` nao chegam mais na tela e sairam do preload. Elas ficam
+ * declaradas e em disco de proposito — desfazer a troca e voltar uma funcao de
+ * desenho, nao regerar arte —, mas quem preloada precisa pedir SO o que
+ * desenha.
+ */
+export function urlDeCondicaoAplicada(): string {
+  return TIRA_DE_CONDICAO_APLICADA.url
+}

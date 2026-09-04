@@ -314,9 +314,18 @@ export class Renderer {
     // "meu" nem alvo, e uma mira sobrando em cima de um mob leria como ordem.
     const jogadorVivo = world.player && !world.player.fainted ? world.player : null
     const idDoAlvo = jogadorVivo?.targetId ?? null
-    // Antes dos corpos: e marca de CHAO, e passar por cima de quem anda nela
-    // leria como efeito de golpe.
+    // Antes dos corpos: as DUAS sao marca de CHAO, e passar por cima de quem
+    // anda nelas leria como efeito de golpe.
+    //
+    // PH-493: o alvo desceu pro chao junto com o anel. Ate aqui ele era
+    // desenhado DEPOIS dos corpos, porque era colchete em volta do corpo do
+    // inimigo; agora que e um alvo pintado no piso, vir depois o poria por cima
+    // do proprio POKE que ele marca.
     if (jogadorVivo) drawMarcaDoJogador(ctx, jogadorVivo)
+    if (idDoAlvo) {
+      const alvo = world.enemies.find((e) => e.id === idDoAlvo)
+      if (alvo && alvo.poke.hp > 0) drawMarcaDoAlvo(ctx, alvo)
+    }
 
     // PH-236: tipo do protetor (Guardian/Lord) vem da sala, nao da entidade
     // — `entity.isProtetor` so marca QUE e protetor. Resolvido uma vez por
@@ -343,13 +352,6 @@ export class Renderer {
       // seria apagar um dado que so existe aqui (PH-193).
       drawHpBar(ctx, jogadorVivo)
       drawNameLevelTag(ctx, jogadorVivo)
-    }
-
-    // Depois dos corpos: o colchete e uma mira em volta do alvo, e o proprio
-    // POKE o cobriria se viesse antes.
-    if (idDoAlvo) {
-      const alvo = world.enemies.find((e) => e.id === idDoAlvo)
-      if (alvo && alvo.poke.hp > 0) drawMarcaDoAlvo(ctx, alvo)
     }
 
     // Segunda passada de layout do texto flutuante (PH-189): a raia que o motor

@@ -32,6 +32,15 @@ name: Back-merge main na dev
 #    um clone inteiro por promocao pra responder uma pergunta de uma linha. A
 #    API `compare` responde a mesma coisa sem baixar nada.
 #
+# 5. SEM `checkout`, TODO `gh` PRECISA DE `GH_REPO` (run 33820296827). Visto na
+#    primeira vez que este workflow rodou de verdade: `gh pr list/create/merge`
+#    nao tem argumento de repositorio, e sem ele o `gh` chama `git remote` pra
+#    adivinhar. Sem checkout nao existe `.git`, e o passo morre em
+#    `failed to run git: fatal: not a git repository`. As chamadas `gh api`
+#    passaram porque montam a URL com `${GITHUB_REPOSITORY}` na mao — foi
+#    exatamente isso que fez a criacao da ref funcionar e a PR nao. `GH_REPO`
+#    no ambiente do passo resolve pros dois formatos de uma vez.
+#
 # SEM O SEGREDO ELE AVISA E SAI, em vez de reprovar. Isto e conveniencia, nao
 # portao: quem protege a `dev` continua sendo `check` + `build-check`, que este
 # workflow nao toca. Reprovar em toda promocao ensinaria a ignorar vermelho, que
@@ -139,6 +148,9 @@ jobs:
         env:
           # PAT de proposito, nao o GITHUB_TOKEN — ver o comentario 3 do topo.
           GH_TOKEN: ${{ secrets.BACK_MERGE_TOKEN }}
+          # Sem isto, `gh pr ...` tenta descobrir o repo pelo `git remote` e
+          # morre, porque este job nao faz checkout — ver o comentario 5.
+          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           CURTO="${GITHUB_SHA:0:7}"

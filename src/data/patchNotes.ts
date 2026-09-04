@@ -12,6 +12,45 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // QUATRO itens pra sete mudancas (PH-493), e o corte tem regra.
+  //
+  // O BUG DO STATUS ABRE, e ele nao e "mais um bug corrigido": o POKE
+  // levantava com o veneno que o matou e morria de novo, queimando a mochila de
+  // Revive num laco. Quem deixou o jogo rodando sozinho PERDEU TEMPO por causa
+  // disso, e e a unica coisa desta nota que custou alguma coisa ao jogador.
+  //
+  // A ORDEM POR VELOCIDADE E O ITEM QUE MUDA COMO SE JOGA, e por isso vem
+  // logo depois. Ele muda o valor de um atributo — Velocidade deixou de ser so
+  // "ritmo de golpe" e passou a decidir quem age primeiro num empate —, e essa
+  // e informacao que o jogador usa pra montar equipe. Sem ele na nota, a
+  // mudanca aconteceria em silencio numa conta que ninguem refaz.
+  //
+  // OS DOIS DE TELA VAO JUNTOS num item so: alvo no chao e sigla de atributo
+  // sao a mesma pergunta ("o que esta acontecendo com quem?"), respondida em
+  // dois lugares da mesma cena. Separa-los daria a eles um peso que eles nao
+  // tem ao lado dos dois de cima.
+  //
+  // O ULTIMO E O UNICO QUE PEDE ACAO: um botao sumiu e outro nasceu. O que
+  // sumiu precisa ser dito porque quem o usava vai procurar por ele.
+  //
+  // FICA DE FORA: a recarga que a ficha mostrava errada — ela e mecanica que o
+  // jogador nao decide nada com (o combate nunca mudou, so o numero escrito) —,
+  // a migration da lista branca, o teste de ordem de golpe e a limpeza da arte
+  // de status que saiu do preload.
+  //
+  // NAO ENTRA A CAUSA DE NADA. "A condicao mora na instancia do POKE e o
+  // desmaio nao a limpava" nao ajuda ninguem a jogar.
+  {
+    version: '7.44',
+    date: '2026-09-04',
+    title: 'Quem cai, levanta limpo — e o mais rápido bate primeiro',
+    highlights: [
+      'SEU POKE NÃO LEVANTA MAIS ENVENENADO. Ao ser derrotado, ele perdia o HP mas GUARDAVA o veneno, a queimadura, a paralisia e os atributos derrubados — e voltava do Revive com tudo aquilo em cima, para cair de novo em seguida. Quem deixava o jogo rodando sozinho perdia a mochila de Revive nesse laço. Agora desmaiar limpa tudo.',
+      'VELOCIDADE PASSOU A DECIDIR QUEM ATACA PRIMEIRO. Quando os dois golpes caíam no mesmo instante, os dois causavam dano — mesmo quando um dos POKE era derrotado ali. Agora o mais rápido resolve antes, e quem cai não devolve o golpe. Velocidade deixou de ser só "ataca mais vezes" e virou também "ataca primeiro".',
+      'FICOU MAIS FÁCIL LER A LUTA. O inimigo que você está atacando ganhou um alvo vermelho no chão, embaixo dele — par do círculo do seu POKE, e não mais os colchetes em volta do corpo. E as mudanças de atributo pararam de usar símbolo: agora aparecem escritas, "+Atk", "−Vel", tanto no campo quanto na faixa de efeitos.',
+      'DOIS BOTÕES MUDARAM. "Avanço manual de sala" saiu do jogo — as salas trocam sozinhas, sempre. No lugar, na trilha do bioma e ao lado de "Avançar de estágio ao concluir", nasceu "RECUAR SE PERDER": se o seu POKE for derrotado 3 vezes em 15 segundos, o jogo volta para o estágio anterior em vez de deixar você apanhando num estágio alto demais.',
+    ],
+  },
   // UM item. A nota mais curta do arquivo, e ela existe por CRITERIO, nao por
   // capricho.
   //

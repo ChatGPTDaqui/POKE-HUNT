@@ -78,12 +78,8 @@ describe('a espera pela sala nova aparece na tela (PH-386)', () => {
     expect(texto).not.toContain(AVISO)
   })
 
-  it('com avanco manual ligado quem esta sendo esperado e o CLIQUE, nao o servidor', () => {
-    const gs = useGameStateStore.getState()
-    gs.setAutoToggle('avancoManualDeSala', true)
-    const texto = montar({})
-    expect(texto).toContain('Próximo Nível')
-    expect(texto, 'dizer "preparando" ao lado do botao esconde que a vez e do jogador')
-      .not.toContain(AVISO)
-  })
+  // O caso "com avanco manual ligado quem esta sendo esperado e o CLIQUE" saiu
+  // na PH-493: o toggle e o botao "Próximo Nível" nao existem mais, entao
+  // "30/30 parado" passou a ter uma causa so — o servidor — e e ela que os
+  // casos acima medem.
 })

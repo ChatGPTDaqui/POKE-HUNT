@@ -126,6 +126,11 @@ export const GLOSSARIO = {
     titulo: 'Recarga',
     corpo: [
       'Tempo até o golpe poder ser usado de novo. Sai do PP do golpe e da Velocidade do POKE — POKE mais rápido recarrega mais rápido.',
+      // PH-493: A SEGUNDA FRASE E METADE DO CONSERTO. A ficha mostrava a recarga
+      // nominal do catalogo, sem a Velocidade e sem este piso, e o jogador via
+      // "1.4s" num golpe que saia de 3 em 3 segundos. O numero passou a ser o
+      // real; esta linha explica por que ele nunca desce mais que isso.
+      `Nenhum golpe sai antes de ${TEXTO_DE_RITMO_CONTINUO.replace('a cada ', '')} — esse é o turno do jogo, e ele vale para todos. Por isso um golpe muito rápido mostra sempre esse mesmo tempo.`,
     ],
     wiki: 'Combate',
   },
