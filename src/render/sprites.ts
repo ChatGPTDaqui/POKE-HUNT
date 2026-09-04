@@ -35,6 +35,7 @@ import {
 } from '@/data/captureAnim'
 import { vfxDoGolpe } from '@/data/moveVfx'
 import { tiraDeEstagio, SELO_LARGURA, SELO_ALTURA } from '@/data/estagioVfx'
+import { textoDoSelo } from '@/data/statLabels'
 import {
   tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
   TIRA_POR_CONDICAO_NO_CORPO, FPS_DA_ARTE_DE_EFEITO, PISO_DE_PROLONGAMENTO,
@@ -567,46 +568,66 @@ export function drawMarcaDoJogador(ctx: CanvasRenderingContext2D, entity: WorldE
   ctx.restore()
 }
 
-/** Comprimento do braco de cada colchete, como fracao do lado da caixa. */
-const BRACO_DO_COLCHETE = 0.3
+/**
+ * Fracao da largura do corpo que o alvo ocupa no chao.
+ *
+ * MENOR que o anel do jogador (0.42) de proposito, e o pedido foi literalmente
+ * "nao muito grande": as duas marcas dividem a mesma linha de chao e um alvo do
+ * tamanho do anel viraria um borrao unico quando os dois POKE se encostam pra
+ * lutar — que e exatamente o instante em que o jogador precisa distinguir os
+ * dois.
+ */
+const RAIO_DO_ALVO = 0.34
+/** Quanto o traco da mira passa pra fora da elipse, em fracao do raio. */
+const SAIDA_DA_MIRA = 0.28
 
 /**
- * Colchetes nos quatro cantos do corpo do alvo atual.
+ * Alvo no chao embaixo do POKE inimigo que estou atacando.
  *
- * Em volta do CORPO (e nao no chao) porque a pergunta e outra: "em quem estou
- * batendo" e sobre o alvo, e o retangulo de mira e a convencao que responde isso
- * sem texto. Desenhado DEPOIS dos corpos, senao o proprio POKE o cobriria.
+ * ERA colchete em volta do CORPO ate a PH-493 (ver `marcasDeCombate.test.ts`).
+ * Trocado a pedido do dono do projeto: com a placa de nome/HP em cima e a
+ * camada de VFX por perto, o colchete disputava o topo do corpo com tudo que ja
+ * mora ali, e a arte de golpe o cobria justamente no frame do impacto. No chao
+ * ele fica no unico lugar da cena que continua livre — a mesma razao que ja
+ * tinha posto o anel do jogador la (ver `drawMarcaDoJogador`).
  *
- * Cantos e nao retangulo fechado: fechado vira uma moldura que compete com a
- * silhueta do POKE — quatro cantos leem como mira e deixam o corpo inteiro
- * visivel.
+ * CONTINUA SENDO OUTRA FORMA, e nao so outra cor. O anel do jogador sao dois
+ * circulos concentricos; este e um circulo com quatro tracos de mira saindo dos
+ * eixos. Distinguir so por vermelho/azul falharia pra quem nao separa as duas
+ * cores, e as duas marcas aparecem juntas em toda luta.
+ *
+ * Desenhado ANTES dos corpos (ver `Renderer#renderMap`), pelo mesmo motivo do
+ * anel do jogador: e marca de chao, e passar por cima de quem anda nela leria
+ * como efeito de golpe.
  */
 export function drawMarcaDoAlvo(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
-  const bounds = spriteBounds(entity)
-  const meio = entity.radius * 1.2
-  const caixa = bounds ?? { x: entity.x - meio, y: entity.y - meio, w: meio * 2, h: meio * 2 }
-  // Afasta com o pulso: a mira "respira" em volta do alvo, o que a separa de
-  // qualquer coisa estatica desenhada no cenario.
-  const folga = 2 + pulsoDaMarca() * 2
-  const x0 = caixa.x - folga
-  const y0 = caixa.y - folga
-  const x1 = caixa.x + caixa.w + folga
-  const y1 = caixa.y + caixa.h + folga
-  const bx = Math.max(4, caixa.w * BRACO_DO_COLCHETE)
-  const by = Math.max(4, caixa.h * BRACO_DO_COLCHETE)
+  const groundY = entity.y + groundOffset(entity)
+  const baseWidth = entity.battleAnim
+    ? entity.battleAnim.frameWidth * effectiveScale(entity)
+    : entity.radius * 2
+  // "Respira" com o mesmo pulso do anel do jogador: as duas marcas sao o mesmo
+  // vocabulario, e uma pulsando enquanto a outra fica parada leria como duas
+  // coisas sem relacao.
+  const rx = baseWidth * RAIO_DO_ALVO * (0.94 + pulsoDaMarca() * 0.12)
+  const ry = rx * 0.35
+  const cy = groundY - 1
 
   ctx.save()
   ctx.strokeStyle = COR_DA_MARCA_DO_ALVO
   ctx.lineWidth = 2
   ctx.lineCap = 'round'
-  ctx.globalAlpha = 0.95
-  for (const [cx, cy, sx, sy] of [
-    [x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1],
-  ] as const) {
+  ctx.globalAlpha = 0.6 + pulsoDaMarca() * 0.35
+  ctx.beginPath()
+  ctx.ellipse(entity.x, cy, rx, ry, 0, 0, Math.PI * 2)
+  ctx.stroke()
+
+  // Os quatro tracos da mira, saindo dos eixos da elipse. Sao o que faz o
+  // desenho ler como ALVO e nao como um segundo anel de chao.
+  ctx.lineWidth = 1.5
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
     ctx.beginPath()
-    ctx.moveTo(cx, cy + sy * by)
-    ctx.lineTo(cx, cy)
-    ctx.lineTo(cx + sx * bx, cy)
+    ctx.moveTo(entity.x + dx * rx * (1 - SAIDA_DA_MIRA), cy + dy * ry * (1 - SAIDA_DA_MIRA))
+    ctx.lineTo(entity.x + dx * rx * (1 + SAIDA_DA_MIRA), cy + dy * ry * (1 + SAIDA_DA_MIRA))
     ctx.stroke()
   }
   ctx.restore()
@@ -1463,7 +1484,7 @@ const SELO_COR_SOBE = '#4ade80'
 const SELO_COR_DESCE = '#fb7185'
 
 /**
- * Canvas fora da tela pra TINGIR o selo com a cor da direcao.
+ * Canvas fora da tela pra TINGIR a peca de CONDICAO com a cor da direcao.
  *
  * Separado do `canvasDeTinta` da tinta de status de propósito: aquele guarda o
  * recorte da sprite do POKE e e redimensionado pelo tamanho dela, e os dois
@@ -1473,17 +1494,8 @@ const canvasDeEstagio: HTMLCanvasElement | null =
   typeof document !== 'undefined' ? document.createElement('canvas') : null
 
 /**
- * O SELO de mudanca de atributo: 21x13, glifo do atributo mais seta de direcao,
- * no FLANCO ESQUERDO do alvo (PH-416, refeito na PH-480, reposicionado na
- * PH-485).
- *
- * ONDE ELE FICA E METADE DA CORRECAO, E JA ERROU DUAS VEZES. Ate a PH-480 a
- * peca tinha 48x48 e era desenhada em `effect.targetY`, que e o meio do corpo —
- * mesmo lugar e mesmo tamanho da arte de impacto de um golpe de dano, e por isso
- * ela LIA como um ataque e cobria a arte do golpe. A PH-480 a mudou pra acima da
- * cabeca, e QA ao vivo mostrou que ali mora a placa de nome. A PH-485 a levou
- * pro flanco — ver a nota de `SELO_VAO_LATERAL`, que traz as medidas dos
- * vizinhos.
+ * A peca de 21x13 da CONDICAO aplicada — o ramo que sobrou de arte depois que a
+ * PH-493 trocou o selo de ATRIBUTO por texto (ver `drawSeloDeEstagio`).
  *
  * POR QUE `multiply` E NAO `source-atop`: a arte e gerada quase branca com
  * contorno quase preto, e o contorno e o que faz ela existir sobre um POKE
@@ -1495,10 +1507,10 @@ const canvasDeEstagio: HTMLCanvasElement | null =
  * COR CRUA — o retangulo inteiro sairia pintado. O `destination-in` no fim
  * recorta de volta pelo alpha da propria arte.
  */
-function drawSeloDeEstagio(
+function drawSeloDeCondicao(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState,
 ): boolean {
-  const tira = tiraDeEstagio(effect.statusStat, effect.statusDirection)
+  const tira = tiraDeEstagio(null, effect.statusDirection)
   if (!tira) return false
 
   // `getOrLoadImage` ANTES de qualquer outra checagem, e a ordem e a licao da
@@ -1532,9 +1544,6 @@ function drawSeloDeEstagio(
   off.globalCompositeOperation = 'destination-in'
   off.drawImage(img, 0, 0, SELO_LARGURA, SELO_ALTURA, 0, 0, SELO_LARGURA, SELO_ALTURA)
 
-  // O corpo sai da ENTIDADE quando ela ainda esta em campo; quando nao esta (o
-  // alvo morreu no mesmo frame), o ponto do efeito e o piso. Sem o fallback o
-  // selo sumiria justo no golpe que derruba.
   const dono = entidadeSeguida(effect, world)
   const centroX = dono?.x ?? effect.targetX!
   const topo = dono ? dono.y - visualTopOffset(dono) : effect.targetY!
@@ -1546,13 +1555,105 @@ function drawSeloDeEstagio(
   ctx.imageSmoothingEnabled = false
   ctx.drawImage(
     canvasDeEstagio, 0, 0, SELO_LARGURA, SELO_ALTURA,
-    // FLANCO ESQUERDO (PH-485). Esquerdo e nao direito porque a direita da placa
-    // de nome e onde a porcentagem de HP escreve (`drawHpBar`, "a DIREITA da
-    // barra... a lateral e o unico lugar livre").
     Math.round(centroX - meiaLargura - SELO_VAO_LATERAL - SELO_LARGURA),
     Math.round(topo + SELO_DESCIDA_NO_CORPO + anda),
     SELO_LARGURA, SELO_ALTURA,
   )
+  ctx.restore()
+  return true
+}
+
+/**
+ * A altura da caixa do selo em unidade de MUNDO — o corpo da fonte, e o que
+ * as medidas de vizinhanca de `SELO_DESCIDA_NO_CORPO` continuam usando.
+ *
+ * 11 e nao os 13 da arte antiga: o texto tem contorno de 3px de largura total
+ * (`SELO_CONTORNO`), e sem encolher o corpo a caixa cresceria e voltaria a
+ * encostar na barra de HP — o defeito da PH-485.
+ */
+export const SELO_ALTURA_DO_TEXTO = 11
+const SELO_FONTE = `bold ${SELO_ALTURA_DO_TEXTO}px system-ui, -apple-system, "Segoe UI", sans-serif`
+/**
+ * O contorno escuro por baixo da letra.
+ *
+ * Nao e enfeite: o selo cai em cima do cenario da hunt, e ele varia de grama
+ * clara a lava. A arte anterior resolvia isso com o contorno DESENHADO no PNG
+ * (ver a nota de `multiply` que estava aqui) — em texto, o contorno e o
+ * `strokeText`. Sem ele, `+Vel` verde sobre Route 46 some, que e a licao do
+ * PH-141 e do rotulo do alvo na `StatusEffectsBar`.
+ */
+const SELO_CONTORNO = 3
+const SELO_COR_DO_CONTORNO = 'rgba(12,14,20,0.85)'
+
+/**
+ * O SELO de mudanca de atributo: `+Atk` / `−Vel`, no FLANCO ESQUERDO do alvo
+ * (PH-416, refeito na PH-480, reposicionado na PH-485, virou TEXTO na PH-493).
+ *
+ * POR QUE TEXTO, E NAO MAIS UM DESENHO. Esta peca ja trocou de arte duas vezes
+ * pela mesma queixa — a de tipo elemental nao dizia QUAL atributo mudou
+ * (PH-416), e o glifo de 21x13 que a substituiu continuava exigindo que o
+ * jogador aprendesse um vocabulario novo pra ler "Ataque especial caiu". O dono
+ * do projeto cortou o problema pela raiz: "retirar os simbolos... substituir
+ * pelas abreviacoes de letras". `+Atk` nao precisa de legenda.
+ *
+ * ONDE ELE FICA E METADE DA CORRECAO, E JA ERROU DUAS VEZES — a geometria
+ * abaixo e a mesma da PH-485 e continua trancada por
+ * `seloDeEstagioForaDaPlaca.test.ts`. Ate a PH-480 a peca tinha 48x48 e era
+ * desenhada em `effect.targetY`, o meio do corpo: mesmo lugar e mesmo tamanho da
+ * arte de impacto de um golpe de dano, e por isso ela LIA como um ataque. A
+ * PH-480 a mudou pra acima da cabeca, e QA ao vivo mostrou que ali mora a placa
+ * de nome. A PH-485 a levou pro flanco — ver a nota de `SELO_VAO_LATERAL`, que
+ * traz as medidas dos vizinhos.
+ *
+ * `textAlign = 'right'`: a largura do texto varia (`+Vel` e `−AtkE` nao medem
+ * igual) e o que precisa ficar fixo e a BORDA que encosta no corpo. Ancorar pela
+ * esquerda faria a sigla mais longa avancar por cima do POKE.
+ */
+function drawSeloDeEstagio(
+  ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState,
+): boolean {
+  const stat = effect.statusStat
+  const direcao = effect.statusDirection
+  if (!direcao) return false
+  // SEM ATRIBUTO A PECA CONTINUA SENDO ARTE, e isto nao e meia-migracao. Um
+  // golpe de status que aplica CONDICAO (Toxic, Sing, Thunder Wave) nao tem
+  // atributo nenhum pra abreviar — nao existe "+Atk" pra veneno. Esse caso cai
+  // na peca generica de condicao (`TIRA_DE_CONDICAO_APLICADA`), que e o que ele
+  // sempre desenhou, e o pedido da PH-493 e sobre "alteracao de status" no
+  // sentido de ATRIBUTO. Trocar ele junto apagaria o unico aviso visual de que
+  // uma condicao pegou.
+  if (!stat) return drawSeloDeCondicao(ctx, effect, world)
+
+  const progresso = effectProgress(effect)
+  const fade = progresso < HOLD_PORTION ? 1 : 1 - (progresso - HOLD_PORTION) / (1 - HOLD_PORTION)
+
+  // O corpo sai da ENTIDADE quando ela ainda esta em campo; quando nao esta (o
+  // alvo morreu no mesmo frame), o ponto do efeito e o piso. Sem o fallback o
+  // selo sumiria justo no golpe que derruba.
+  const dono = entidadeSeguida(effect, world)
+  const centroX = dono?.x ?? effect.targetX!
+  const topo = dono ? dono.y - visualTopOffset(dono) : effect.targetY!
+  const meiaLargura = dono ? visualHalfWidth(dono) : 0
+  const anda = SELO_DESLOCAMENTO * progresso * (direcao === 'aumenta' ? -1 : 1)
+
+  // FLANCO ESQUERDO (PH-485). Esquerdo e nao direito porque a direita da placa
+  // de nome e onde a porcentagem de HP escreve (`drawHpBar`, "a DIREITA da
+  // barra... a lateral e o unico lugar livre").
+  const x = Math.round(centroX - meiaLargura - SELO_VAO_LATERAL)
+  const y = Math.round(topo + SELO_DESCIDA_NO_CORPO + anda)
+
+  ctx.save()
+  ctx.globalAlpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
+  ctx.font = SELO_FONTE
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'top'
+  ctx.lineJoin = 'round'
+  ctx.lineWidth = SELO_CONTORNO
+  ctx.strokeStyle = SELO_COR_DO_CONTORNO
+  ctx.fillStyle = direcao === 'aumenta' ? SELO_COR_SOBE : SELO_COR_DESCE
+  const texto = textoDoSelo(stat, direcao === 'aumenta')
+  ctx.strokeText(texto, x, y)
+  ctx.fillText(texto, x, y)
   ctx.restore()
   return true
 }

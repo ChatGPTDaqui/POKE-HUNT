@@ -31,7 +31,7 @@ import { SalaChip } from './SalaChip'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
-import { ABATES_COMUNS_POR_SALA, ABATES_POR_SALA } from '@/data/biomas'
+import { ABATES_POR_SALA } from '@/data/biomas'
 
 const MAPA = { id: 'mata_e1', name: 'Mata I', levelRange: [1, 30] }
 /** `grass` fica num bioma de verdade, entao `protetorDaSala` responde 'guardian'. */
@@ -70,29 +70,13 @@ describe('estagio limpo nao pede protetor na tela (PH-474)', () => {
     expect(texto, 'pede pra derrotar um protetor que nao vai nascer').not.toContain('Derrote o')
   })
 
-  it('estagio JA LIMPO com avanco manual ligado OFERECE o botao de avancar', () => {
-    useGameStateStore.getState().setAutoToggle('avancoManualDeSala', true)
-    const texto = montar({ estagioJaLimpo: true })
-    expect(texto, 'o botao de avanco sumiu num estado que o servidor aceita')
-      .toContain('Próximo Nível')
-  })
-
-  it('estagio NAO limpo com protetor de pe NAO oferece o botao', () => {
-    // O outro lado da regra: o botao continua escondido onde o servidor
-    // recusaria o avanco. Um botao que da erro e pior que botao nenhum.
-    useGameStateStore.getState().setAutoToggle('avancoManualDeSala', true)
-    const texto = montar({ estagioJaLimpo: false })
-    expect(texto).not.toContain('Próximo Nível')
-  })
-
-  it('em estagio limpo a quota volta a ser os 30 comuns (PH-473)', () => {
-    // Sem protetor nao ha 30o abate de chefe: a sala so fecha nos 30 comuns.
-    // Com 29 a quota esta ABERTA, e o botao de avanco nao pode aparecer.
-    useGameStateStore.getState().setAutoToggle('avancoManualDeSala', true)
-    const texto = montar({
-      estagioJaLimpo: true,
-      sala: { ...SALA, abates: ABATES_COMUNS_POR_SALA },
-    })
-    expect(texto).not.toContain('Próximo Nível')
-  })
+  // OS TRES CASOS DO BOTAO "Próximo Nível" SAIRAM NA PH-493, junto com o
+  // toggle "Avanço manual de sala" que os habilitava — nao ha mais botao pra
+  // aparecer nem pra esconder. O que eles protegiam continua coberto pelos dois
+  // casos acima: a pergunta "esta sala pede protetor?" e a mesma, e e ela que a
+  // PH-474 tinha errado.
+  //
+  // O terceiro deles (PH-473, "em estagio limpo a quota volta a ser os 30
+  // comuns") media a quota ATRAVES do botao. A quota em si continua trancada
+  // por `quotaDeAbatesDaSala`, no `salaSystem.test.ts`, que e onde ela mora.
 })

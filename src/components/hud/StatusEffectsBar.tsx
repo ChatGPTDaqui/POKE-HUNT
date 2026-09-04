@@ -19,9 +19,9 @@ import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { nomeDoStatus, type StatusAtivo } from '@/data/statusEffects'
 import { statusVfxUrl } from '@/data/statusVfx'
-import { ROTULO_ESTAGIO } from '@/data/statLabels'
+import { ROTULO_ESTAGIO, textoDoSelo } from '@/data/statLabels'
 import { formatarEstagio, formatarVariacao, formatarPrazoEmTurnos, multiplicadorDoStat } from '@/data/textoDeEstagioEPrazo'
-import { ICONE_DE_ESTAGIO } from '@/data/statIcones'
+
 import { getAbility } from '@/data/abilities'
 import { nomeDaTrait } from '@/data/traits'
 import type { FonteDeEstagio, StatDeEstagio } from '@/data/statusEffects'
@@ -42,11 +42,16 @@ interface Badge {
   key: string
   url: string | null
   /**
-   * Icone do ATRIBUTO, quando o selo e de estagio (PH-121). Substitui a `url`:
-   * a arte de `statusVfxUrl` varia com o tipo do POKE e com a direcao, nunca
-   * com o atributo, entao Ataque e Velocidade desenhavam a mesma coisa.
+   * A SIGLA do atributo, quando o selo e de estagio: `+Atk`, `−Vel`.
+   *
+   * PH-121 tinha posto um icone Phosphor aqui, porque a arte de `statusVfxUrl`
+   * variava com o tipo do POKE e com a direcao, nunca com o atributo — Ataque e
+   * Velocidade desenhavam a mesma coisa. A PH-493 troca o icone pela sigla, a
+   * pedido do dono do projeto: espada/escudo/vento ainda exigiam que o jogador
+   * aprendesse um vocabulario, e `+Atk` nao exige nada. Substitui a `url` pelo
+   * mesmo motivo que o icone substituia.
    */
-  Icone: typeof ICONE_DE_ESTAGIO[StatDeEstagio] | null
+  sigla: string | null
   titulo: string
   contador: string | null
   aumenta: boolean
@@ -87,7 +92,7 @@ function selosDaEntidade(entidade: WorldEntity | null, prefixo: string): Badge[]
     badges.push({
       key: `${prefixo}-status-${status.tipo}`,
       url: statusVfxUrl(species.type),
-      Icone: null,
+      sigla: null,
       // PH-422: prazo em SEGUNDOS. "3 turno(s)" nao diz nada a quem nunca viu
       // quanto vale um turno; o contador continua andando em degraus de
       // TURNO_SEGUNDOS porque `turnosRestantes` so cai quando o relogio fecha.
@@ -108,9 +113,9 @@ function selosDaEntidade(entidade: WorldEntity | null, prefixo: string): Badge[]
     if (valor === 0) continue
     badges.push({
       key: `${prefixo}-estagio-${stat}`,
-      // Sem `url`: o icone do ATRIBUTO e o que este selo tem pra dizer.
+      // Sem `url`: a sigla do ATRIBUTO e o que este selo tem pra dizer.
       url: null,
-      Icone: ICONE_DE_ESTAGIO[stat],
+      sigla: textoDoSelo(stat, valor > 0),
       // PH-421: o selo diz o EFEITO, nao o degrau. "-1" e lido como "menos um
       // ponto de Ataque" e na verdade e um terco do atributo embora. O degrau
       // nao aparece mais em lugar nenhum de jogo; ele fica na wiki, junto da
@@ -289,27 +294,35 @@ function FileiraDeSelos({ badges, coarse }: { badges: Badge[]; coarse: boolean }
       {badges.map((badge) => (
         <BadgeDoEfeito key={badge.key} badge={badge} coarse={coarse}>
           <div
-            className="relative flex h-[1.7em] w-[1.7em] items-center justify-center overflow-hidden rounded-[.4em] border"
+            // LARGURA AUTOMATICA no selo de sigla, e nao o quadrado de 1.7em
+            // (PH-493): `−AtkE` e `+Vel` nao medem igual, e uma caixa fixa
+            // cortaria a sigla mais longa — que e justamente a que precisa das
+            // quatro letras pra nao virar o mesmo texto de `AtkF`. A ALTURA
+            // continua fixa: os selos de condicao (que sao imagem quadrada) e os
+            // de atributo dividem a mesma fileira, e altura desigual leria como
+            // duas fileiras.
+            className="relative flex h-[1.7em] min-w-[1.7em] shrink-0 items-center justify-center overflow-hidden rounded-[.4em] border px-[.15em]"
             style={{
               borderColor: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)',
               background: 'color-mix(in srgb, var(--color-n900) 80%, transparent)',
             }}
           >
-            {badge.Icone ? (
-              // `weight="bold"`, e nao `fill` nem `regular`. Conferido no
-              // harness: com `fill` o escudo da Defesa virava um borrao vermelho
-              // sem forma e Def. Esp. ficava um quadrado verde com uma estrela —
-              // a silhueta (a unica coisa que o icone tem pra dizer) se perdia
-              // justamente nos dois atributos mais parecidos entre si.
-              // `regular` e fino demais em 1.7em com o contador por cima. A cor
-              // segue a direcao, igual a borda.
-              <badge.Icone
-                size="70%"
-                weight="bold"
-                aria-hidden
-                color={badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)'}
-                style={{ marginBottom: '.25em' }}
-              />
+            {badge.sigla ? (
+              // A sigla ocupa o mesmo slot que o icone ocupava, com a mesma
+              // folga embaixo — o contador de multiplicador mora na faixa
+              // inferior e sobreporia o texto sem ela. A cor segue a direcao,
+              // igual a borda: o sinal (`+`/`−`) e a cor dizem a mesma coisa por
+              // dois canais, que e o que faz o selo funcionar pra quem nao
+              // separa verde de vermelho.
+              <span
+                className="text-[.6em] font-bold leading-none whitespace-nowrap"
+                style={{
+                  color: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)',
+                  marginBottom: '.4em',
+                }}
+              >
+                {badge.sigla}
+              </span>
             ) : badge.url ? (
               <img
                 src={badge.url}

@@ -1,30 +1,36 @@
-// PH-480/PH-485: o selo de mudanca de atributo nao ocupa espaco de mais ninguem.
+// PH-480/PH-485/PH-493: o selo de mudanca de atributo nao ocupa espaco de
+// mais ninguem.
 //
 // O DEFEITO QUE ISTO TRAVA JA ACONTECEU DUAS VEZES, e as duas em silencio — a
-// arte continua aparecendo, so que por cima de outra coisa:
+// peca continua aparecendo, so que por cima de outra coisa:
 //
-//   PH-480  a peca tinha 48x48 e era desenhada no MEIO DO CORPO, no mesmo lugar
+//   PH-480  ela tinha 48x48 e era desenhada no MEIO DO CORPO, no mesmo lugar
 //           e tamanho da arte de impacto de um golpe de dano. Pedido do dono:
 //           "estao sendo aplicados como se fossem sprites de ataque".
 //   PH-485  movida pra ACIMA DA CABECA, ela caiu em cima da PLACA DE NOME — a
 //           barra de HP (-13 a -8 do topo da cabeca) e o numero do nivel (-15).
 //           Achado so em QA ao vivo, porque nenhum teste olhava coordenada.
 //
-// Entao o que este arquivo mede e GEOMETRIA, e nao "desenhou": as coordenadas do
-// `drawImage` sao observaveis, e sao elas que dizem se a peca pisa em alguem.
+// Entao o que este arquivo mede e GEOMETRIA, e nao "desenhou": as coordenadas
+// sao observaveis, e sao elas que dizem se a peca pisa em alguem.
 //
-// POR QUE O `document` FALSO. `sprites.ts` cria o canvas de tinta no
-// carregamento do modulo (`canvasDeEstagio`), e sem ele `drawSeloDeEstagio`
-// desiste antes de desenhar. O ambiente padrao da suite e `node`, e jsdom nao
-// serve tambem: o `getContext('2d')` dele devolve `null` sem a dependencia
-// nativa `canvas`, o que daria o MESMO falso verde por outro caminho.
+// A PECA VIROU TEXTO NA PH-493 (`+Atk` / `−Vel`, no lugar do glifo de 21x13), e
+// este arquivo mudou de instrumento junto: o observavel deixou de ser o
+// `drawImage` e passou a ser o par `strokeText`/`fillText`. As assercoes de
+// vizinhanca sao as MESMAS — trocar o desenho nao pode reabrir o defeito da
+// PH-485, e um teste que so perguntasse "escreveu?" deixaria passar exatamente
+// isso.
+//
+// A CAIXA DO TEXTO sai de `textAlign='right'` + `textBaseline='top'`: o (x,y)
+// que chega no `fillText` e o canto SUPERIOR DIREITO, e a largura vem do
+// `measureText` do proprio ctx — por isso o espiao devolve uma largura de
+// verdade em vez de zero.
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { SELO_LARGURA, SELO_ALTURA } from '@/data/estagioVfx'
 
 class ImagemPronta {
   complete = true
-  naturalWidth = SELO_LARGURA
-  naturalHeight = SELO_ALTURA
+  naturalWidth = 21
+  naturalHeight = 13
   #src = ''
   set src(valor: string) { this.#src = valor }
   get src() { return this.#src }
@@ -45,8 +51,11 @@ vi.stubGlobal('document', {
   }),
 })
 
-/** Cada `drawImage` desta corrida, na ordem, com os argumentos crus. */
-let desenhos: unknown[][] = []
+/** Cada escrita desta corrida: o texto e o canto superior direito dele. */
+let escritas: { texto: string; x: number; y: number }[] = []
+
+/** Largura por caractere do `measureText` falso — so precisa ser > 0 e estavel. */
+const LARGURA_POR_LETRA = 6
 
 function ctxEspiao() {
   return new Proxy({}, {
@@ -55,7 +64,12 @@ function ctxEspiao() {
       if (prop === 'createRadialGradient' || prop === 'createLinearGradient') {
         return () => ({ addColorStop() {} })
       }
-      if (prop === 'drawImage') return (...args: unknown[]) => { desenhos.push(args) }
+      if (prop === 'measureText') {
+        return (t: string) => ({ width: t.length * LARGURA_POR_LETRA })
+      }
+      if (prop === 'fillText') {
+        return (texto: string, x: number, y: number) => { escritas.push({ texto, x, y }) }
+      }
       return () => {}
     },
   }) as unknown as CanvasRenderingContext2D
@@ -93,35 +107,44 @@ const mundo = { player: null, enemies: [ALVO] } as never
 
 // Aquecimento fora de qualquer `it` (PH-129/PH-411): a primeira importacao de
 // `sprites.ts` custa ~550ms e cairia dentro do primeiro caso.
-const { drawEffect } = await import('./sprites')
+const { drawEffect, SELO_ALTURA_DO_TEXTO } = await import('./sprites')
 
-/** O desenho do selo e o unico com destino do tamanho exato da peca. */
+/** A caixa do selo, a partir do canto superior direito que o `fillText` recebe. */
 function retanguloDoSelo() {
-  const d = desenhos.find((x) => x[7] === SELO_LARGURA && x[8] === SELO_ALTURA)
-  if (!d) return null
-  const [x, y] = [d[5] as number, d[6] as number]
-  return { x, y, direita: x + SELO_LARGURA, baixo: y + SELO_ALTURA }
+  const e = escritas.find((x) => /^[+−]/.test(x.texto))
+  if (!e) return null
+  return {
+    x: e.x - e.texto.length * LARGURA_POR_LETRA,
+    y: e.y,
+    direita: e.x,
+    baixo: e.y + SELO_ALTURA_DO_TEXTO,
+    texto: e.texto,
+  }
 }
 
-describe('a geometria do selo de estagio (PH-480/PH-485)', () => {
-  beforeEach(() => { desenhos = [] })
+describe('a geometria do selo de estagio (PH-480/PH-485/PH-493)', () => {
+  beforeEach(() => { escritas = [] })
 
-  it('desenha 1:1, no tamanho do arquivo', () => {
-    // 1:1 nao e economia: e pixel art com traco de 1px, e escala nao-inteira
-    // racha o traco (a mesma licao de `CAPTURE_ANIM_DRAW_SCALE`).
+  it('escreve a SIGLA com o sinal, e nao desenha glifo nenhum', () => {
+    // PH-493: o pedido foi textual — "retirar os simbolos... substituir pelas
+    // abreviacoes de letras como -Atk, +Vel". `atkFis` caindo tem que virar
+    // `−AtkF`, e o sinal e o segundo canal (o primeiro e a cor) que diz a
+    // direcao pra quem nao separa verde de vermelho.
     drawEffect(ctxEspiao(), efeitoDeStatus('diminui'), mundo)
-    const d = desenhos.find((x) => x[7] === SELO_LARGURA && x[8] === SELO_ALTURA)
-    expect(d, 'o selo nao foi desenhado').toBeDefined()
-    expect([d![3], d![4]], 'recorte de origem').toEqual([SELO_LARGURA, SELO_ALTURA])
+    expect(retanguloDoSelo()?.texto).toBe('−AtkF')
+    escritas = []
+    drawEffect(ctxEspiao(), efeitoDeStatus('aumenta'), mundo)
+    expect(retanguloDoSelo()?.texto).toBe('+AtkF')
   })
 
   it('NAO invade a faixa da placa de nome — o defeito da PH-485', () => {
-    // Este e o caso que faltava. O selo da PH-480 ficava em -23 a -10 do topo da
-    // cabeca, ou seja em cima da barra de HP e do nivel, e nenhum teste da suite
-    // olhava coordenada — so apareceu abrindo o jogo.
+    // Este e o caso que faltava quando a peca era arte. O selo da PH-480 ficava
+    // em -23 a -10 do topo da cabeca, ou seja em cima da barra de HP e do
+    // nivel, e nenhum teste da suite olhava coordenada — so apareceu abrindo o
+    // jogo. A troca por texto nao pode reabrir isso.
     for (const direcao of ['aumenta', 'diminui'] as const) {
       for (const idade of [0, 0.25, 0.5, 0.75, 0.99]) {
-        desenhos = []
+        escritas = []
         drawEffect(ctxEspiao(), efeitoDeStatus(direcao, idade), mundo)
         const s = retanguloDoSelo()!
         const invade = s.y < PLACA_BAIXO && s.baixo > PLACA_CIMA
@@ -152,19 +175,18 @@ describe('a geometria do selo de estagio (PH-480/PH-485)', () => {
   })
 
   it('sobe quando o atributo sobe e desce quando ele desce', () => {
-    // O deslocamento e o unico movimento que sobrou depois de a tira de 16
-    // quadros virar quadro unico. Se ele sumir, o selo fica plantado e o par
-    // aumenta/diminui vira a mesma coisa em movimento.
+    // O deslocamento e o unico movimento que a peca tem. Se ele sumir, o selo
+    // fica plantado e o par aumenta/diminui vira a mesma coisa em movimento.
     drawEffect(ctxEspiao(), efeitoDeStatus('aumenta', 0.1), mundo)
     const cedoSubindo = retanguloDoSelo()!.y
-    desenhos = []
+    escritas = []
     drawEffect(ctxEspiao(), efeitoDeStatus('aumenta', 0.5), mundo)
     expect(retanguloDoSelo()!.y, 'aumenta tem que subir na tela (y menor)').toBeLessThan(cedoSubindo)
 
-    desenhos = []
+    escritas = []
     drawEffect(ctxEspiao(), efeitoDeStatus('diminui', 0.1), mundo)
     const cedoDescendo = retanguloDoSelo()!.y
-    desenhos = []
+    escritas = []
     drawEffect(ctxEspiao(), efeitoDeStatus('diminui', 0.5), mundo)
     expect(retanguloDoSelo()!.y, 'diminui tem que descer na tela (y maior)').toBeGreaterThan(cedoDescendo)
   })
@@ -172,7 +194,7 @@ describe('a geometria do selo de estagio (PH-480/PH-485)', () => {
   it('sem a entidade em campo (alvo abatido no mesmo quadro) ainda desenha', () => {
     // O alvo pode morrer no golpe que aplicou o status. Sem o fallback, o selo
     // sumiria justo ai — e o jogador perderia a unica indicacao do que mudou.
-    desenhos = []
+    escritas = []
     drawEffect(ctxEspiao(), efeitoDeStatus('diminui'), { player: null, enemies: [] } as never)
     expect(retanguloDoSelo(), 'o selo sumiu quando o alvo saiu de campo').not.toBeNull()
   })
