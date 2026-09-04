@@ -125,39 +125,16 @@ describe('avanco manual de sala (PH-177/181)', () => {
     expect(world.sala!.abates).toBe(ABATES_COMUNS_POR_SALA)
   })
 
-  it('stepWorld: toggle ligado trava a sala (opts.offline ausente = janela curta)', () => {
-    const world = mundo(15)
-    useGameStateStore.getState().setAutoToggle('avancoManualDeSala', true)
-    fecharQuota(world, { manualAdvance: true })
-    expect(world.salaCountdownRemaining).toBeNull()
-
-    // Um tick a mais (janela curta, sem `offline`) nao pode reavancar sozinho
-    // — e o furo que `garantirTransicaoDeQuotaFechada` cobre, agora visto
-    // atraves do `stepWorld` real (o call site que a producao usa).
-    stepWorld(world, 0.1, useGameStateStore.getState(), { silent: true })
-    expect(world.salaCountdownRemaining).toBeNull()
-    expect(world.salaPendente).toBeNull()
-  })
-
-  it('stepWorld: toggle ligado + opts.offline true avanca mesmo assim (farm offline real ignora o toggle)', () => {
-    const world = mundo(16)
-    useGameStateStore.getState().setAutoToggle('avancoManualDeSala', true)
-    fecharQuota(world, { manualAdvance: true })
-    expect(world.salaCountdownRemaining).toBeNull()
-
-    // PH-225: sala com protetor habilitado — o primeiro tick so faz o
-    // protetor nascer (`offline` nao pula essa parte, so a espera de
-    // autoridade/manual advance mais abaixo em
-    // garantirTransicaoDeQuotaFechada). Resolve o protetor antes de checar
-    // se a transicao arma.
-    stepWorld(world, 0.1, useGameStateStore.getState(), { silent: true, offline: true })
-    const protetor = world.enemies.find((e) => e.isProtetor)
-    if (protetor) handleEnemyDefeated(world, protetor, useGameStateStore.getState(), { silent: true })
-    world.enemies = world.enemies.filter((e) => !e.isProtetor)
-
-    expect(world.salaCountdownRemaining).not.toBeNull()
-    expect(world.salaPendente).not.toBeNull()
-  })
+  // OS DOIS CASOS DE `stepWorld` COM O TOGGLE LIGADO SAIRAM NA PH-493. Eles
+  // mediam o caminho toggle -> `stepWorld` -> `manualAdvance`, e o toggle
+  // "Avanço manual de sala" nao existe mais: `stepWorld` passa `false` fixo, e
+  // um teste que ligasse o toggle agora estaria afirmando o contrario do codigo.
+  //
+  // A OPCAO `manualAdvance` CONTINUA VIVA no `salaSystem`, dormente, e os casos
+  // que descrevem a semantica dela (os de `registrarAbate` e
+  // `garantirTransicaoDeQuotaFechada`, acima) ficam de pe de proposito: se o
+  // dono pedir o botao de volta, e uma linha em `stepWorld` — e nao uma
+  // reescrita do avanco de sala, que e a parte mais incidentada deste motor.
 
   it('solicitarAvancoDeSala: sala travada avanca; sala nao travada nao faz nada', () => {
     const world = mundo(17)

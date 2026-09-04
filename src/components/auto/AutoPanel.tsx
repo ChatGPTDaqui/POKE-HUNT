@@ -405,18 +405,15 @@ function AbaDeAutomacoes() {
         </div>
       </BlocoAuto>
 
-      {/* PH-292: a dica passou a citar o Guardiao. O texto antigo dizia so "ao
-          fechar a quota (30/30)", e desde que toda sala de bioma ganhou protetor
-          esse deixou de ser o momento em que a sala espera: ela para primeiro no
-          protetor, e o toggle so entra em cena depois que ele cai. Descrever um
-          passo que nao existe mais faz o jogador concluir que o toggle esta
-          quebrado — foi exatamente o que aconteceu. */}
-      <BlocoAuto
-        titulo="Avanço manual de sala"
-        dica="Depois de fechar a quota (30/30) e derrotar o Guardião, a sala espera você clicar em 'Próximo Nível' em vez de trocar sozinha. Os selvagens continuam nascendo enquanto você fica."
-        ligado={autoToggles.avancoManualDeSala}
-        aoLigar={(v) => setAutoToggle('avancoManualDeSala', v)}
-      />
+      {/* "Avanço manual de sala" (PH-177/178/179/180/292) SAIU DAQUI na PH-493,
+          a pedido do dono do projeto — pedido duas vezes na mesma mensagem.
+
+          Ele não foi só escondido: o campo saiu do estado e TODO leitor dele foi
+          cortado (`simulation#stepWorld`, `autoridade#observarQuotaDeSala`,
+          `SalaChip`). Esconder o botão deixando o campo persistido de pé
+          estrandaria justamente quem o tinha LIGADO — a sala ficaria esperando
+          pra sempre um clique num botão que não está mais na tela, e isso lê
+          como "a sala travou". */}
 
       {/* "Avançar de estágio ao concluir" (PH-428) MUDOU DE TELA na PH-490:
           ele agora vive no painel do estágio, na trilha do bioma. A decisão que

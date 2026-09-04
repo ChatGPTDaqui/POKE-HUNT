@@ -152,10 +152,25 @@ export interface GameStateData {
    * idle: o normal e o jogador escolher onde deixar rodando e sair. Avancar
    * sozinho tiraria ele do estagio que ele escolheu pela especie que caca ali,
    * que e a mecanica central do redesenho.
+   *
+   * `recuarSePerder` (PH-493): o PAR do de cima, e do outro lado. Tres derrotas
+   * dentro de `JANELA_DE_RECUO_SEGUNDOS` devolvem o jogador ao estagio
+   * ANTERIOR. Pedido do dono do projeto, e a leitura e "o estagio esta acima do
+   * meu time": num idle o jogador nao esta olhando, e sem isto ele volta depois
+   * de uma hora pra encontrar um POKE que morreu, reviveu e morreu de novo o
+   * tempo todo, sem progresso nenhum.
+   *
+   * PADRAO `false` pelo mesmo motivo do irmao: sair sozinho do estagio que o
+   * jogador escolheu e uma decisao dele, nao do jogo.
+   *
+   * `avancoManualDeSala` (PH-177) SAIU na PH-493 — ver o comentario em
+   * `AutoPanel`. Nao ha migracao de save: a chave que sobrar em `auto_toggles`
+   * de quem ja jogava simplesmente deixa de ser lida (o merge do `persist`
+   * ignora chave desconhecida), e nenhum caminho do motor pergunta por ela.
    */
   autoToggles: {
     autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean
-    avancoManualDeSala: boolean; avancarDeEstagio: boolean
+    avancarDeEstagio: boolean; recuarSePerder: boolean
   }
   autoPotRules: AutoPotRule[]
   autoCatchConfig: AutoCatchConfig
@@ -219,7 +234,7 @@ export function defaultGameStateData(): GameStateData {
     // descobrir o interruptor.
     autoToggles: {
       autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true,
-      avancoManualDeSala: false, avancarDeEstagio: false,
+      avancarDeEstagio: false, recuarSePerder: false,
     },
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },

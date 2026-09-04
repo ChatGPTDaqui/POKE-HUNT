@@ -20,7 +20,7 @@ import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { preloadEspecies, preloadHunt, preloadArteDeCena, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
 import type { Point } from './types'
-import { apagarTodosOsEstagios } from './systems/statusSystem'
+import { apagarTodosOsEstagios, limparEfeitosAoDesmaiar } from './systems/statusSystem'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
 
@@ -562,7 +562,13 @@ export const controller = {
             draft.player.state = 'wander'
             // PH-418: mesma regra do auto-revive — cair zera estagio. Sem isto,
             // o Revive da mochila e o do bot discordavam sobre o mesmo evento.
-            apagarTodosOsEstagios(draft.player)
+            //
+            // PH-493: e a CONDICAO sai junto. O desmaio ja limpa os dois
+            // (`stepWorld`), entao aqui e cinto e suspensorio — e ele paga por
+            // si: um POKE que ja estava caido ANTES desta versao tem a condicao
+            // gravada na instancia, e sem esta linha ele levantaria envenenado
+            // pra sempre, porque o desmaio dele aconteceu no codigo antigo.
+            limparEfeitosAoDesmaiar(draft.player)
           }
         })
         syncActivePokeToGameState(useWorldStore.getState(), gameState)

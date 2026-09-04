@@ -15,6 +15,7 @@ import {
   type Ability,
 } from '@/data/abilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
+import { recargaEfetivaDoGolpe, VELOCIDADE_DE_REFERENCIA } from '@/engine/systems/combatSystem'
 import {
   AVISO_DANO_POR_REGRA_PROPRIA,
   AVISO_OHKO_DESLIGADO,
@@ -174,7 +175,20 @@ export function AbilityTooltip({
               </span>
             )}
             <span>PP {ability.pp}</span>
-            {ability.cooldown != null && <span>Recarga {ability.cooldown.toFixed(1)}s</span>}
+            {/* PH-493: a recarga REAL, e nao mais `ability.cooldown` cru.
+                Aquele campo e a recarga nominal derivada do PP, antes de a
+                Velocidade dividir e antes do piso do turno — e era ele que
+                fazia a bolha prometer "1.4s" num golpe que sai de 3 em 3
+                segundos. Ver `recargaEfetivaDoGolpe`.
+
+                `poke.stats.speed`, e nao a Velocidade efetiva: aqui nao ha
+                entidade em campo, e a bolha e lida ANTES de escolher o golpe —
+                mesma leitura neutra que `efeitosDoGolpe` acima ja adota. */}
+            {ability.cooldown != null && (
+              <span>
+                Recarga {recargaEfetivaDoGolpe(ability, poke?.stats.speed ?? VELOCIDADE_DE_REFERENCIA).toFixed(1)}s
+              </span>
+            )}
             {ability.target === 'aoe' && <span>Área (raio {ability.radius ?? AOE_RADIUS})</span>}
           </div>
 

@@ -5,7 +5,7 @@ import { TURNO_SEGUNDOS } from '@/data/abilities'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import { attemptCapture, type CaptureResult } from './captureSystem'
 import { heal } from '../entity'
-import { curarStatus, apagarTodosOsEstagios } from './statusSystem'
+import { curarStatus, limparEfeitosAoDesmaiar } from './statusSystem'
 import type { StatusCondition } from '@/data/statusEffects'
 import type { PokeInstance } from '@/data/pokes'
 import type { WorldState } from '../types'
@@ -151,7 +151,13 @@ export function updateAutoHeal(world: WorldState, gameState: GameStateStore, dt:
       //
       // O pedido da PH-418 era buff que atravessa mudar de ALVO e derrotar o
       // alvo, nao que atravessa o proprio desmaio; nos jogos, cair zera estagio.
-      apagarTodosOsEstagios(player)
+      // PH-493: a CONDICAO sai junto do estagio. O paragrafo acima descreve o
+      // laco de Revive queimado em sequencia; com veneno sobrevivendo ao
+      // desmaio ele existia por uma segunda porta, e essa nem `farmOffline`
+      // pegava — o POKE levantava com 50% de HP e o tique de veneno o derrubava
+      // de novo. Redundante com o desmaio (`stepWorld`) de proposito: save
+      // antigo tem POKE ja caido COM condicao gravada.
+      limparEfeitosAoDesmaiar(player)
       timers.treinador = COOLDOWN_DO_TREINADOR
       world.reviveCountdown = null
       events.push({ type: 'auto_revive', itemId: revive.id })

@@ -23,7 +23,7 @@ import { faceIconUrl, spriteUrl } from './sprites'
 import { todasAsTirasDeVfx } from './vfxTiras'
 import { todosOsIconesDeHabilidade } from './abilityIcons'
 import { todosOsVfxDeStatus } from './statusVfx'
-import { urlsDeEstagio } from './estagioVfx'
+import { urlDeCondicaoAplicada } from './estagioVfx'
 import { todasAsTirasDeProps } from '@/render/ambienteProps'
 import { primeImage } from '@/render/sprites'
 import { CENA_HOSPITAL } from './hospital'
@@ -168,18 +168,21 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   const efeitos = [
     ...todasAsTirasDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus(),
     ...todasAsTirasDeProps(),
-    // PH-416: os 15 selos de mudanca de atributo. 3,2 kB no total desde a
-    // PH-480 (eram 28 kB como tira de 16 quadros) — mais baratos
-    // que as 8 da animacao de bola logo abaixo, e com o mesmo argumento: golpe
-    // de status e das primeiras coisas que acontecem numa hunt (o auto-play usa
-    // o que o POKE sabe, e Growl/Tail Whip/Leer estao no comeco de quase toda
-    // linha evolutiva). Sem elas, o primeiro Rosnado da sessao desenha o
-    // fallback procedural enquanto o PNG baixa — silencioso, e por isso mesmo
-    // fica assim pra sempre se ninguem cruzar as listas.
+    // PH-416: o selo de status. Golpe de status e das primeiras coisas que
+    // acontecem numa hunt (o auto-play usa o que o POKE sabe, e Growl/Tail
+    // Whip/Leer estao no comeco de quase toda linha evolutiva), e sem o preload
+    // o primeiro deles desenha nada enquanto o PNG baixa — silencioso, e por
+    // isso mesmo fica assim pra sempre se ninguem cruzar as listas. Era esse o
+    // buraco da PH-416: `urlsDeEstagio` nasceu documentada como "usada pelo
+    // preload" e nenhum lugar a chamava fora do teste.
     //
-    // ESTE ERA O BURACO DA PH-416: `urlsDeEstagio` nasceu documentada como "usada
-    // pelo preload" e nenhum lugar a chamava fora do teste.
-    ...urlsDeEstagio(),
+    // PH-493: SO A PECA DE CONDICAO. As 14 de ATRIBUTO sairam da tela — o selo
+    // de atributo virou texto (`+Atk`, `−Vel`) e nao pede arquivo nenhum. Elas
+    // continuam declaradas e em disco de proposito (a reversao e trocar uma
+    // funcao de desenho), mas baixar arte que ninguem desenha e exatamente o
+    // avesso do buraco acima: em vez de arte cadastrada e nunca na tela, tráfego
+    // pago por nada.
+    urlDeCondicaoAplicada(),
     // PH-400: as tiras da animacao de bola (8 arquivos, 170 kB no total). Ficavam
     // de fora e a PRIMEIRA captura da sessao desenhava nada por alguns quadros —
     // e a primeira captura acontece no comeco, quando o cache esta mais frio.
