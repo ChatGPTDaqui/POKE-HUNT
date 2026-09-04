@@ -656,6 +656,10 @@ function PainelDoEstagio({
   // este painel re-renderizar a cada mudança de auto-catch e auto-pot, e ele
   // recalcula o elenco do estágio.
   const avancarDeEstagio = useGameStateStore((s) => s.autoToggles.avancarDeEstagio)
+  // PH-493: o par simetrico. Selecionado campo a campo pelo mesmo motivo do de
+  // cima — assinar o objeto `autoToggles` inteiro faria este painel
+  // re-renderizar (e recalcular o elenco do estágio) a cada auto-catch.
+  const recuarSePerder = useGameStateStore((s) => s.autoToggles.recuarSePerder)
   const setAutoToggle = useGameStateStore((s) => s.setAutoToggle)
   const subBiomas = useMemo(() => subBiomasDoEstagio(bioma, estagio), [bioma, estagio])
   // A conta e pesada o bastante pra memoizar: ela roda `contextoDeSpawn` uma vez
@@ -773,6 +777,26 @@ function PainelDoEstagio({
         dica="Ao limpar a última sala do estágio, entra no estágio seguinte em vez de repetir o mesmo. Se não houver próximo — ou se ele ainda estiver bloqueado — o estágio atual repete."
         ligado={avancarDeEstagio}
         aoLigar={(v) => setAutoToggle('avancarDeEstagio', v)}
+      />
+
+      {/* O PAR DO DE CIMA, PELO OUTRO LADO (PH-493). Pedido do dono do projeto,
+          e ele nomeou o lugar: "ficará ao lado do botão 'Avançar ao concluir'".
+
+          Os dois respondem a mesma pergunta — quando é hora de trocar de
+          estágio? —, um pelo sucesso e outro pelo fracasso, e é por isso que
+          ficam colados. Num idle o jogador não está olhando: sem este, ele volta
+          depois de uma hora e encontra um POKE que morreu, reviveu e morreu de
+          novo o tempo todo, com a mochila de Revive vazia e zero progresso.
+
+          Três derrotas em 15 segundos, e os dois números estão em
+          `simulation.ts#DERROTAS_PARA_RECUAR`/`JANELA_DE_RECUO_SEGUNDOS` — a
+          dica os cita por extenso porque o jogador não tem outro lugar onde
+          lê-los. */}
+      <BlocoAuto
+        titulo="Recuar se perder"
+        dica="Se o seu POKE for derrotado 3 vezes em 15 segundos, volta para o estágio anterior em vez de continuar apanhando. No estágio 1 não há para onde voltar — ali ele não faz nada."
+        ligado={recuarSePerder}
+        aoLigar={(v) => setAutoToggle('recuarSePerder', v)}
       />
     </div>
   )

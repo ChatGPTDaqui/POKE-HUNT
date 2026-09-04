@@ -818,12 +818,14 @@ function observarQuotaDeSala(): void {
     // tela): nao ha o que pedir.
     if (estado.salaPendente || estado.salaCountdownRemaining != null) return
     if (sala.abates < ABATES_POR_SALA) return
-    // PH-177/179: toggle ligado, a quota fechada FICA fechada ate o jogador
-    // clicar "Proximo Nivel" (avancarSalaManualmente). Sem este corte, o
-    // observador martelaria `/sessao/flush` a cada 5s pra sempre — o motivo
-    // original da repeticao (servidor pode estar 1-2 abates atras) e
-    // transitorio; com avanco manual, "sala travada" passa a durar minutos.
-    if (useGameStateStore.getState().autoToggles.avancoManualDeSala) return
+    // PH-177/179 tinha um corte aqui: com o "Avanço manual de sala" ligado, a
+    // quota fechada FICAVA fechada ate o jogador clicar "Proximo Nivel", e sem
+    // o corte o observador martelaria `/sessao/flush` a cada 5s pra sempre.
+    //
+    // PH-493: o toggle saiu do jogo, entao a condicao que o corte protegia nao
+    // existe mais — "sala travada esperando clique" deixou de ser um estado
+    // possivel. A repeticao de 5s volta a ser o que sempre foi: transitoria,
+    // enquanto o servidor alcanca os ultimos abates.
     const chave = `${sala.ciclos}:${sala.indice}`
     const agora = Date.now()
     // Sala nova: o extra volta a estar disponivel, e o numero do servidor zera —

@@ -33,6 +33,12 @@ class ImagemPronta {
 
 vi.stubGlobal('Image', ImagemPronta)
 
+// PH-493: o selo de ATRIBUTO virou TEXTO (`+Atk` / `−Vel`), entao ele nao
+// aparece mais em `pedidas` — nenhuma imagem e pedida por ele. O observavel
+// passou a ser o `fillText`, e o espiao registra os dois canais: o que foi
+// PEDIDO como arte e o que foi ESCRITO.
+let escritas: string[] = []
+
 function ctxFalso() {
   return new Proxy({}, {
     get: (_alvo, prop) => {
@@ -40,6 +46,8 @@ function ctxFalso() {
       if (prop === 'createRadialGradient' || prop === 'createLinearGradient') {
         return () => ({ addColorStop() {} })
       }
+      if (prop === 'measureText') return (t: string) => ({ width: t.length * 6 })
+      if (prop === 'fillText') return (texto: string) => { escritas.push(texto) }
       return () => {}
     },
   }) as unknown as CanvasRenderingContext2D
@@ -79,8 +87,11 @@ const { vfxDoGolpe } = await import('@/data/moveVfx')
 // PH-416: o fallback de golpe de status deixou de ser o GIF por TIPO e passou a
 // ser a tira por ATRIBUTO. O que este arquivo testa nao mudou — a precedencia
 // da arte por golpe sobre a arte generica — so o nome da generica.
-const { tiraDeEstagio } = await import('@/data/estagioVfx')
-const arteGenerica = () => tiraDeEstagio('atkFis', 'diminui')!.url
+// PH-493: o selo de ATRIBUTO deixou de ser arte e virou a SIGLA em texto. O que
+// este arquivo mede continua sendo a precedencia da arte por golpe sobre a
+// generica — so que a generica agora e uma escrita, e nao um arquivo.
+const { textoDoSelo } = await import('@/data/statLabels')
+const seloEsperado = () => textoDoSelo('atkFis', false)
 
 // Os tres golpes de status que tinham arte propria engolida, com o TIPO que
 // causava o engolimento. Sao dados, nao suposicao: cada um sai do cadastro.
@@ -101,7 +112,7 @@ describe('arte propria de golpe de status', () => {
   it('os tres golpes continuam tendo arte propria (senao o teste nao mede nada)', () => {
     for (const [golpe, tipo] of ENGOLIDOS) {
       expect(vfxDoGolpe(golpe)?.single.url, golpe).toBeDefined()
-      expect(arteGenerica(), tipo).toBeTruthy()
+      expect(seloEsperado(), tipo).toBeTruthy()
     }
   })
 
@@ -113,10 +124,11 @@ describe('arte propria de golpe de status', () => {
     // que lado. O que a PH-367 protegia (a arte nomeada chegar na tela)
     // continua valendo.
     const { drawEffect } = await spritesNovo()
+    escritas = []
     drawEffect(ctxFalso(), efeitoDeStatus(golpe, tipo), mundoVazio)
     expect(pedidas, `${golpe} tem arte propria e ela tem que chegar na tela`)
       .toContain(vfxDoGolpe(golpe)!.single.url)
-    expect(pedidas, `${golpe} tambem ganha o selo de atributo`).toContain(arteGenerica())
+    expect(escritas, `${golpe} tambem ganha o selo de atributo`).toContain(seloEsperado())
   })
 
   it('golpe de status SEM arte propria desenha o selo', async () => {
@@ -125,8 +137,9 @@ describe('arte propria de golpe de status', () => {
     // VFX_POR_GOLPE.
     expect(vfxDoGolpe('growl')).toBeNull()
     const { drawEffect } = await spritesNovo()
+    escritas = []
     drawEffect(ctxFalso(), efeitoDeStatus('growl', 'NORMAL', true), mundoVazio)
-    expect(pedidas).toContain(arteGenerica())
+    expect(escritas).toContain(seloEsperado())
   })
 
   it('golpe de status de AREA com arte so de alvo-unico desenha o selo', async () => {
@@ -136,8 +149,9 @@ describe('arte propria de golpe de status', () => {
     // esticada pro diametro do splash.
     expect(vfxDoGolpe('charm')?.aoe).toBeUndefined()
     const { drawEffect } = await spritesNovo()
+    escritas = []
     drawEffect(ctxFalso(), efeitoDeStatus('charm', 'FAIRY', true), mundoVazio)
-    expect(pedidas).toContain(arteGenerica())
+    expect(escritas).toContain(seloEsperado())
   })
 })
 

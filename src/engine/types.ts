@@ -911,6 +911,24 @@ export interface WorldState {
    */
   avancarParaEstagio: string | null
   /**
+   * Ha quantos segundos cada uma das derrotas recentes do jogador aconteceu
+   * (PH-493) — o contador do "Recuar se perder".
+   *
+   * IDADE, e nao carimbo de relogio. O motor nao tem relogio de parede: ele
+   * anda por `dt`, e o mesmo `stepWorld` roda ao vivo, no catch-up de aba
+   * oculta e no resim do servidor, em passos de tamanho diferente. Guardar
+   * `Date.now()` faria a janela de 15s medir tempo REAL numa simulacao que pode
+   * ter avancado 200 segundos de jogo num unico laco.
+   *
+   * EFEMERO, e isso e limitacao conhecida e aceita: o mundo e reconstruido a
+   * cada janela de flush (~30s) e a lista nasce vazia. Uma sequencia de tres
+   * derrotas partida ao meio por um flush nao dispara o recuo. Persistir isso
+   * custaria coluna nova em `players` — a linha mais quente do banco — pra uma
+   * automacao de conveniencia; o caso que o dono descreveu (o POKE morrendo em
+   * laco, sem progresso) dispara de novo em 15 segundos de qualquer forma.
+   */
+  desmaiosRecentes: number[]
+  /**
    * PH-301: ha quantos segundos o protetor esta ENGAJADO sem perder um ponto
    * de HP. Zera a cada ponto de dano e a cada troca de protetor; ao passar de
    * `PROTETOR_SEM_DANO_LIMITE` (simulation.ts) o protetor e trocado por outro.
