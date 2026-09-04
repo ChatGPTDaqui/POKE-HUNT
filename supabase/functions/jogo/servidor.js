@@ -75911,6 +75911,29 @@ function defaultGameStateData() {
 		biomaProgress: progressoPorBiomaDefault()
 	};
 }
+function CHAVES_DE_AUTO_TOGGLE() {
+	return Object.keys(defaultGameStateData().autoToggles);
+}
+/**
+* Deixa passar so as chaves conhecidas, caindo no default pra cada uma que
+* faltar ou vier com tipo errado.
+*
+* `typeof !== 'boolean'` e nao `!!valor`: um `"false"` (string) gravado por
+* engano viraria `true`, e um `null` viraria `false` em vez do default do jogo
+* — que pra `autoStatus` significa desligar sozinho uma automacao que nasce
+* ligada.
+*/
+function sanearAutoToggles(bruto) {
+	const padrao = defaultGameStateData().autoToggles;
+	if (!bruto || typeof bruto !== "object") return padrao;
+	const entrada = bruto;
+	const limpo = { ...padrao };
+	for (const chave of CHAVES_DE_AUTO_TOGGLE()) {
+		const valor = entrada[chave];
+		if (typeof valor === "boolean") limpo[chave] = valor;
+	}
+	return limpo;
+}
 /**
 * Fracao da coleira (`enemy.leashRadius`) a partir da qual o jogador SEGURA a
 * posicao esperando o retardatario.
@@ -81411,10 +81434,7 @@ function snapshotToGameState(snap, defaults) {
 		unlockedMaps: p.unlocked_maps,
 		unlockedContinents: traduzirGruposLiberados(p.unlocked_continents),
 		currentMapId: traduzirMapIdLegado(p.current_map_id),
-		autoToggles: {
-			...defaults.autoToggles,
-			...fromJson(p.auto_toggles, defaults.autoToggles)
-		},
+		autoToggles: sanearAutoToggles(p.auto_toggles),
 		autoPotRules: fromJson(p.auto_pot_rules, defaults.autoPotRules),
 		autoCatchConfig: fromJson(p.auto_catch_config, defaults.autoCatchConfig),
 		autoCatchRules,

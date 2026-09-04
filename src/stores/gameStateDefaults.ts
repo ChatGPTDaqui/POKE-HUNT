@@ -251,3 +251,59 @@ export function defaultGameStateData(): GameStateData {
     biomaProgress: progressoPorBiomaDefault(),
   }
 }
+
+/**
+ * SO as chaves de `autoToggles` que ESTA versao do jogo conhece.
+ *
+ * PH-494, defeito em producao com causa embaraçosa: a PH-493 tirou
+ * `avancoManualDeSala` do cliente e da lista branca de `configurar_auto`, mas
+ * NAO do banco — a chave continua dentro do jsonb `auto_toggles` de todo
+ * jogador que ja existia, porque ela esteve no default desde a PH-177 e nada
+ * apaga chave de jsonb.
+ *
+ * O caminho de volta fechava o circulo sozinho: `playerMapper` espalha o jsonb
+ * inteiro dentro de `autoToggles` (`{ ...defaults, ...fromJson(...) }`), a
+ * chave orfa entra no store, e `sincronizarAuto` manda `s.autoToggles` CRU de
+ * volta. A RPC valida por lista branca com `raise`, que derruba a TRANSACAO
+ * INTEIRA — e nenhuma configuracao de auto era gravada. Exatamente o dano da
+ * PH-492, pela porta oposta: la faltava a chave no SQL, aqui sobra a chave no
+ * cliente.
+ *
+ * O FILTRO MORA NA FRONTEIRA, e nao no `sincronizarAuto`, porque a fronteira e
+ * a unica coisa que da pra provar: o store passa a NUNCA conter chave que o
+ * jogo nao conhece, e ai nao importa quantos lugares leiam `autoToggles`.
+ * `sincronizarAuto` filtra de novo por cima — o custo e um `Object.keys` e o
+ * que ele compra e nao depender de todo caminho futuro pro store passar por
+ * aqui.
+ *
+ * DERIVADO do default, e nao escrito a mao: uma lista literal aqui viraria a
+ * terceira cópia da mesma verdade (o tipo, o default e a lista) e divergiria na
+ * primeira mudanca. `togglesDeAutoBatemComORpc.test.ts` ja amarra o default ao
+ * SQL; isto amarra o filtro ao default.
+ */
+export type ChaveDeAutoToggle = keyof GameStateData['autoToggles']
+
+export function CHAVES_DE_AUTO_TOGGLE(): ChaveDeAutoToggle[] {
+  return Object.keys(defaultGameStateData().autoToggles) as ChaveDeAutoToggle[]
+}
+
+/**
+ * Deixa passar so as chaves conhecidas, caindo no default pra cada uma que
+ * faltar ou vier com tipo errado.
+ *
+ * `typeof !== 'boolean'` e nao `!!valor`: um `"false"` (string) gravado por
+ * engano viraria `true`, e um `null` viraria `false` em vez do default do jogo
+ * — que pra `autoStatus` significa desligar sozinho uma automacao que nasce
+ * ligada.
+ */
+export function sanearAutoToggles(bruto: unknown): GameStateData['autoToggles'] {
+  const padrao = defaultGameStateData().autoToggles
+  if (!bruto || typeof bruto !== 'object') return padrao
+  const entrada = bruto as Record<string, unknown>
+  const limpo = { ...padrao }
+  for (const chave of CHAVES_DE_AUTO_TOGGLE()) {
+    const valor = entrada[chave]
+    if (typeof valor === 'boolean') limpo[chave] = valor
+  }
+  return limpo
+}
