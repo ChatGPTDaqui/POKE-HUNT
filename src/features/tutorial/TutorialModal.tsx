@@ -48,7 +48,7 @@ export function TutorialModal() {
           <div className="flex gap-[.4em]">
             <GameButton onClick={anterior} disabled={passo === 0}>Voltar</GameButton>
             <GameButton variant="primary" onClick={proximo}>
-              {ultimo ? 'Entendi' : 'Proximo'}
+              {ultimo ? 'Entendi' : 'Próximo'}
             </GameButton>
           </div>
         </div>

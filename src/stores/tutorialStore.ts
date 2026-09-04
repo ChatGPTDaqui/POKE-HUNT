@@ -6,7 +6,10 @@
 // marca gravada la seria apagada no primeiro flush. E tambem e a semantica
 // certa: "ja vi a explicacao" e por aparelho/pessoa, nao por save.
 import { create } from 'zustand'
-import { TUTORIAL_BOT, tutorialPorId, type Tutorial } from '@/data/tutoriais'
+import {
+  TUTORIAL_BOAS_VINDAS, TUTORIAL_BOT, TUTORIAL_CAPTURA, TUTORIAL_ESTAGIOS,
+  tutorialPorId, type Tutorial,
+} from '@/data/tutoriais'
 
 const CHAVE_VISTOS = 'novo-poke-idle:tutoriais-vistos'
 
@@ -79,8 +82,27 @@ export const useTutorialStore = create<TutorialState>((set, get) => ({
 
   anterior: () => set((s) => ({ passo: Math.max(0, s.passo - 1) })),
 
+  // NAO SUBSTITUI UM TUTORIAL JA ABERTO, e este `return` e conserto de bug, nao
+  // preferencia (PH-507).
+  //
+  // `abrir` troca `aberto` sem marcar nada como visto, e quem marca e `fechar`.
+  // Entao dois disparos automaticos na mesma volta do boot — o que acontece com
+  // quem chega com a mochila ja cheia e nunca viu nenhum dos dois — faziam o
+  // segundo APAGAR o primeiro da tela sem registrar que ele passou. O primeiro
+  // ficava inedito pra sempre e reaparecia em todo boot, com o mesmo par
+  // brigando de novo.
+  //
+  // "O primeiro a chegar ganha" e a semantica certa aqui, e nao uma fila: e a
+  // mesma escolha de `celebracaoStore` ("celebracao e do momento"). Uma fila
+  // entregaria dois ou tres modais em sequencia no minuto 1, que e exatamente o
+  // excesso que a reformulacao de 04/09 foi feita pra cortar. O tutorial
+  // preterido continua inedito e dispara no proximo gesto ou no proximo boot.
+  //
+  // `abrir` (o caminho do menu "Repetir Tutoriais") NAO tem essa guarda: ali o
+  // jogador pediu, e pedido explicito manda sobre disparo automatico.
   abrirSeInedito: (id) => {
-    if (get().vistos.has(id)) return
+    const { vistos, aberto } = get()
+    if (aberto || vistos.has(id)) return
     get().abrir(id)
   },
 
@@ -90,4 +112,4 @@ export const useTutorialStore = create<TutorialState>((set, get) => ({
   },
 }))
 
-export { TUTORIAL_BOT }
+export { TUTORIAL_BOAS_VINDAS, TUTORIAL_BOT, TUTORIAL_CAPTURA, TUTORIAL_ESTAGIOS }

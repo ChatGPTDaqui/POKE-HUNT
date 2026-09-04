@@ -16,7 +16,7 @@
 // da e uma escolha, nao um retrocesso). Uma grade de dez quadrados nao conta
 // nenhuma das duas; uma trilha conta as duas de relance.
 import { CircleNotch } from '@phosphor-icons/react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { BIOMAS, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, type BiomaDef } from '@/data/biomas'
 import {
@@ -33,6 +33,7 @@ import { colorForType } from '@/data/typeColors'
 import { SegmentedTabs } from '@/components/game/controls'
 import { BlocoAuto } from '@/components/auto/BlocoAuto'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { useTutorialStore, TUTORIAL_ESTAGIOS } from '@/stores/tutorialStore'
 import { LinhaDeEspecie } from './LinhaDeEspecie'
 import { elencoDoEstagio, subBiomasDoEstagio } from './elencoDoEstagio'
 import { cn } from '@/lib/utils'
@@ -918,6 +919,23 @@ export function TrilhaDoBioma({
   // Qual no o cursor/foco esta em cima (PH-469). Estado LOCAL e nao no store:
   // ele morre com a tela e ninguem mais precisa dele.
   const [destacado, setDestacado] = useState<number | null>(null)
+
+  // O tutorial de estagios dispara AQUI, e nao no `HuntMenu` (PH-507).
+  //
+  // Abrir a trilha de um bioma e o unico gesto do jogo em que o jogador toma
+  // uma decisao de progressao — e o momento em que "o estagio N+1 pede o Lord
+  // do estagio N" deixa de ser trivia e passa a decidir onde ele clica.
+  //
+  // PENDURAR NA LISTA DE HUNTS SERIA PIOR: ela abre no minuto 1, logo depois do
+  // tutorial de boas-vindas, e os dois modais brigariam pela tela. A guarda de
+  // `abrirSeInedito` impede o empilhamento, mas o resultado seria o de estagios
+  // nunca aparecer no boot e o de boas-vindas parecer ter sumido.
+  //
+  // Sem `[]` proposital na lista de dependencias: o efeito precisa rodar na
+  // MONTAGEM da trilha, e a trilha e montada e desmontada a cada bioma aberto.
+  useEffect(() => {
+    useTutorialStore.getState().abrirSeInedito(TUTORIAL_ESTAGIOS)
+  }, [])
 
   const bioma = BIOMA_POR_CHAVE[biomaChave]
   if (!bioma) return null
