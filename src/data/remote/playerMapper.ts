@@ -9,6 +9,7 @@ import type { Database } from '@/lib/database.types'
 import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, LureConfig, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
 import type { ElementType } from '@/data/generated/types'
 import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
+import { sanearAutoToggles } from '@/stores/gameStateDefaults'
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { NATURES_NEUTRAS, type NatureKey } from '@/data/natures'
@@ -379,7 +380,16 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     // JSONB gravado antes de ele existir) voltaria `undefined` — falsy — e a
     // automacao nasceria desligada pra todo jogador antigo, sem nada no jogo
     // explicando por que. Foi o que aconteceria com `autoStatus`.
-    autoToggles: { ...defaults.autoToggles, ...fromJson(p.auto_toggles, defaults.autoToggles) },
+    // PH-494: FILTRADO, e nao mais espalhado cru. O merge com o default
+    // continua (o parágrafo acima explica por que ele existe), mas agora quem o
+    // faz é `sanearAutoToggles`, que descarta chave que este jogo não conhece.
+    //
+    // Sem o filtro, uma chave ÓRFÃ no jsonb — `avancoManualDeSala`, que saiu do
+    // jogo na PH-493 e ficou gravada em todo jogador antigo — entrava no store
+    // e voltava pro servidor no próximo `sincronizarAuto`, onde a lista branca
+    // da RPC a recusa com `raise` e derruba o batch inteiro. Nenhuma
+    // configuração de auto era gravada, e o único sinal era um toast.
+    autoToggles: sanearAutoToggles(p.auto_toggles),
     autoPotRules: fromJson<AutoPotRule[]>(p.auto_pot_rules, defaults.autoPotRules),
     autoCatchConfig: fromJson<AutoCatchConfig>(p.auto_catch_config, defaults.autoCatchConfig),
     autoCatchRules,

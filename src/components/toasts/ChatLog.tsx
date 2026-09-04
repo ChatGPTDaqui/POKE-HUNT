@@ -249,9 +249,26 @@ export function ChatLog() {
   // isto "recolher" so tirava altura — a barra continuava atravessando a tela
   // com as quatro abas, e a janela nao saia da frente de nada. A largura fica
   // guardada em `width` e volta inteira ao expandir.
+  // ENCOSTADA NA BORDA ESQUERDA (PH-494), e nao mais a `.8em` dela. Pedido do
+  // dono do projeto: "mover o chat do jogo para a esquerda, tocando a tela".
+  //
+  // O vao de `.8em` fazia a janela LER como solta no meio do campo de jogo — o
+  // cenario aparecia dos dois lados dela, e o olho a tratava como mais um
+  // elemento sobre a cena em vez de uma borda da interface. Zero encosta, e a
+  // leitura vira "isto e a moldura, aquilo e o jogo".
+  //
+  // A margem SO some na horizontal. O `bottom` continua acima do rodape medido
+  // pelo mesmo motivo de sempre (a doca da HUD ocupa ate 52em centralizados e a
+  // janela cobria os slots Equipe e Mochila) — encostar embaixo tambem poria a
+  // janela por cima da doca, que e o defeito que aquele calculo existe pra
+  // evitar.
+  //
+  // ARRASTAR CONTINUA GANHANDO: `pos` vem primeiro no ternario. Quem quiser a
+  // janela solta arrasta, e `winPos.chat` nao e persistido de proposito (ver
+  // uiStore) — recarregar devolve ela pra ca.
   const style: CSSProperties = pos
     ? { left: pos.x, top: pos.y, ...(open ? { width } : {}) }
-    : { left: '.8em', bottom, ...(open ? { width } : {}) }
+    : { left: 0, bottom, ...(open ? { width } : {}) }
 
   return (
     <div
@@ -259,7 +276,13 @@ export function ChatLog() {
       style={{ ...style, height: open ? '21em' : 'auto' }}
       className={cn(
         'vidro-flutua pointer-events-auto absolute z-[21] flex max-h-[72vh] max-w-[min(28em,94vw)]',
-        'flex-col overflow-hidden rounded-xl',
+        'flex-col overflow-hidden',
+        // CANTOS DA ESQUERDA RETOS ENQUANTO ELA ESTA ENCOSTADA (PH-494). Canto
+        // arredondado contra a borda da tela deixa passar uma lasca de cenario
+        // dentro do que devia ser a moldura — e a lasca e o que denuncia que a
+        // janela nao encosta de verdade. Arrastada (`pos`), ela volta a ser uma
+        // janela solta e recupera os quatro cantos.
+        pos ? 'rounded-xl' : 'rounded-r-xl',
         // O piso de largura e pra JANELA ABERTA nao virar uma coluna estreita
         // demais pra ler mensagem. Recolhida ela nao tem mensagem nenhuma, e o
         // piso so deixava um retangulo vazio de 12em ao lado da palavra "Chat".
