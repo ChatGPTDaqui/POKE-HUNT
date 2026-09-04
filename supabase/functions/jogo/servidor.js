@@ -81952,6 +81952,28 @@ function porLotesDeId(ids) {
 var CONQUISTA_LANCE = "boss_lance";
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
 /**
+* Quanto tempo de um intervalo bruto vira simulação de verdade (PH-495).
+*
+* EXPORTADA E PURA DE PROPÓSITO. Ela nasceu inline dentro de `aplicarFlush`, e
+* o teste que a cobria REESCREVIA a regra em vez de chamá-la — a sabotagem
+* (voltar ao descarte) passou verde nos 11 casos. Uma função de decisão que o
+* teste não consegue chamar não está testada; está descrita. É a mesma lição
+* que a PH-494 pagou hoje, com o `playerMapper`.
+*
+* A REGRA, e as duas direções que ela precisa segurar:
+*
+*   até LIMIAR_OFFLINE_SEGUNDOS   credita tudo (jogo ao vivo, cadência normal)
+*   acima, com o farm pausado     APARA no limiar — não descarta
+*   acima, com o farm religado    credita tudo, até MAX_SEGUNDOS_POR_FLUSH
+*
+* O aparo é o conserto e o teto é a guarda: uma janela de 25 minutos credita 2,
+* e uma de 6 horas também credita 2. Ninguém acumula tempo parado pra sacar
+* depois, e esconder a aba nunca rende mais do que jogar olhando.
+*/
+function segundosACreditar(segundos) {
+	return segundos > 120 && true ? Math.min(segundos, 120) : segundos;
+}
+/**
 * PH-217/236/241: reconstroi o `ProtetorPendente` da linha da sessao (via
 * `sala_protetor` embutido) pra passar ao `buildMapWorld`, ou `null` quando
 * nao ha protetor pendente.
@@ -82402,11 +82424,10 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	}, estado.especialidades, estado.biomaProgress);
 	const offline = segundos > 120;
 	world.pessimista = offline;
-	const pausado = offline && true;
-	const resumo = pausado ? createEmptySummary() : simulateWorldSeconds({
+	const resumo = simulateWorldSeconds({
 		world,
 		gameState: store,
-		seconds: segundos,
+		seconds: segundosACreditar(segundos),
 		stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
 		stepFn: (w, dt, opts) => stepWorld(w, dt, store, {
 			...opts,
@@ -82423,7 +82444,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		}
 		avancoDeSalaAplicado = true;
 	}
-	const piso = offline && !pausado ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO;
+	const piso = offline ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO;
 	if (!offline) recordBatch(store, {
 		gold: resumo.gold,
 		xp: resumo.xp,
