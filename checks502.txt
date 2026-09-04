@@ -1,0 +1,3 @@
+Cloudflare Pages	pass	0	https://dash.cloudflare.com/?to=/afcba46ce039e450a9136dc96e8032b1/pages/view/poke-hunt/0c60b65a-d573-45e2-b44d-4d2fba7784e8	
+build-check	pass	3m34s	https://github.com/ChatGPTDaqui/POKE-HUNT/actions/runs/33818357562/job/100855324817	
+check	pass	7m0s	https://github.com/ChatGPTDaqui/POKE-HUNT/actions/runs/33818354126/job/100855315233	

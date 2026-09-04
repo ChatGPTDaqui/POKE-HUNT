@@ -12,6 +12,30 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // UM item. A nota mais curta do arquivo, e ela existe por CRITERIO, nao por
+  // capricho.
+  //
+  // O defeito ESTEVE EM PRODUCAO — o teto de 15s entrou junto na 7.41 —, e a
+  // regua deste arquivo manda anunciar bug visivel corrigido. E a mesma regra
+  // que fez a 7.39 anunciar o mundo destrancado e que fez a 7.38 DEIXAR DE FORA
+  // um defeito que so viveu na `dev`. O criterio vale nas duas direcoes.
+  //
+  // QUEM VIU ISSO E MINORIA, e o item diz a condicao em vez de fingir que foi
+  // geral: em rede normal a entrada leva menos de dois segundos e os 15s nunca
+  // chegavam. Sem a condicao, quem nunca passou por isso procura um problema
+  // que nao teve — mesmo raciocinio da janela de datas na 7.42.
+  //
+  // O QUE NAO ENTRA NO TEXTO: que o teto continua existindo, que ele nao
+  // cancela a entrada, e que o zoom sempre durou 4,5s. Sao a mecanica por tras,
+  // e o jogador nao decide nada com elas.
+  {
+    version: '7.43',
+    date: '2026-09-04',
+    title: 'A tela de carregamento não desaparece mais sozinha',
+    highlights: [
+      'QUANDO A ENTRADA NUMA ÁREA DEMORAVA MUITO — internet ruim, servidor lento —, a tela de carregamento sumia sozinha depois de 15 segundos e você voltava para a lista de hunts com o jogo ainda montando por baixo. Agora ela fica, avisa que está demorando e oferece um botão para sair dali quando você quiser.',
+    ],
+  },
   // DOIS itens, e o primeiro e o unico que importa de verdade nesta nota.
   //
   // O ITEM DO BOT ABRE, E DIZ AO JOGADOR QUE ELE PRECISA AGIR. Isto nao e um
