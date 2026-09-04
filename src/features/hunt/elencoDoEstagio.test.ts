@@ -119,10 +119,36 @@ describe('a chance exibida e a que o sorteio produz', () => {
     expect(subBiomasDoEstagio(marinho, 3).length).toBeGreaterThan(1)
     expect(daPraia.length).toBeGreaterThan(0)
 
-    const naPraia = daPraia[0]
-    const mesmoNoEstagio = doEstagio.find((e) => e.encounterId === naPraia.encounterId)
-    expect(mesmoNoEstagio, 'a especie da Praia nao aparece no estagio').toBeTruthy()
-    expect(naPraia.pct).toBeGreaterThan(mesmoNoEstagio!.pct)
+    // MEDE O INVARIANTE QUE E VERDADE, E DUAS TENTATIVAS ERRADAS ENSINARAM QUAL
+    // ELE E (PH-503).
+    //
+    // A versao original pegava `daPraia[0]` — a especie mais comum da Praia — e
+    // exigia que ela fosse estritamente maior no recorte. Quebrou com a tabela
+    // de elenco da PH-502: a linha do topo e justamente a que bate no
+    // `TETO_DE_FATIA` nos DOIS calculos, e 35% nao e maior que 35%.
+    //
+    // A segunda tentativa exigiu que NINGUEM caisse do estagio pro recorte. Isso
+    // e FALSO, e o dado mostrou: `marinho_e3_wailmer` da 24,7% na Praia e 27,7%
+    // no estagio. Wailmer e bem mais comum no Mar Aberto, e a media do estagio
+    // (que soma P(sub-bioma) x P(especie | sub-bioma) sobre todos os
+    // sub-biomas) sobe acima do valor dele na Praia. O argumento do denominador
+    // nao vale pra quem TAMBEM mora ao lado.
+    //
+    // O invariante verdadeiro e sobre quem e EXCLUSIVO do sub-bioma: pra essa
+    // especie, `pctNoEstagio = P(Praia) x pctNaPraia` com `P(Praia) < 1`, entao
+    // ela e necessariamente maior no recorte. E e exatamente ela que justifica a
+    // aba existir.
+    const outrosSubs = subBiomasDoEstagio(marinho, 3).filter((s) => s.chave !== 'beach')
+    const idsVizinhos = new Set(
+      outrosSubs.flatMap((s) => elencoDoEstagio(marinho, 3, s.chave).map((x) => x.encounterId)),
+    )
+    const exclusivas = daPraia
+      .map((x) => ({ praia: x, estagio: doEstagio.find((e) => e.encounterId === x.encounterId) }))
+      .filter((p) => p.estagio != null && !idsVizinhos.has(p.praia.encounterId))
+    expect(exclusivas.length, 'a Praia nao tem especie exclusiva neste estagio').toBeGreaterThan(0)
+    for (const p of exclusivas) {
+      expect(p.praia.pct, p.praia.encounterId).toBeGreaterThan(p.estagio!.pct + 1e-9)
+    }
   })
 
   it('sub-bioma de peso zero no estagio nao aparece na lista de abas', () => {

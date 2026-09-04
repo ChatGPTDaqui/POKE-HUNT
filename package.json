@@ -24,6 +24,8 @@
     "subbiomas:extrair": "node scripts/pokerogue/extrair-biomas.mjs",
     "subbiomas:gerar": "node scripts/gerar-subbiomas.mjs",
     "tiers:gerar": "node scripts/gerar-spawn-tiers.mjs",
+    "encontros:derivar": "node scripts/derivar-encontros-por-local.mjs",
+    "elenco:gerar": "node scripts/gerar-elenco-por-estagio.mjs",
     "faces:emocao": "node scripts/importar-faces-emocao.mjs",
     "sprites:topo": "node scripts/gerar-topo-dos-sprites.mjs",
     "especies:importar": "node scripts/importar-especies-novas.mjs",

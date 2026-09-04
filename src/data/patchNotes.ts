@@ -12,6 +12,36 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // TRES itens, e a ordem entre eles e a ordem do que o jogador percebe
+  // primeiro: quem aparece, com que frequencia, e o numero que a tela mostrava.
+  //
+  // O QUE ENTRA E O RESULTADO, E NAO A FONTE. O trabalho foi ler o encontro
+  // selvagem real de Kanto, Johto e Hoenn (1.610 encontros, 286 locais, tirados
+  // dos disassemblies) e montar uma tabela de elenco e chance por
+  // (sub-bioma, estagio). Nada disso entra na nota: pro jogador o que mudou e
+  // que a Praia tem bicho de praia e o Leito Oceanico tem bicho de fundo do mar.
+  //
+  // O NUMERO DO ITEM 2 ENTRA, e ele e o que faz o item ser verificavel em vez de
+  // vago: "uma especie era um terco da sala em 3 de cada 4 salas" e um relato do
+  // que estava quebrado. "Melhoramos a variedade" nao e.
+  //
+  // NAO ENTRA: a espinha de pesquisa, o gerador, o mapa de 286 locais, a curva
+  // de profundidade, o teto de fatia, o custo de bundle, as bancadas. Nada disso
+  // ajuda ninguem a jogar.
+  //
+  // O ITEM 3 E UM BUG DE TELA e vai junto de proposito: ele mexe no MESMO numero
+  // que o item 2: separar em duas versoes faria o jogador comparar a % de antes
+  // com a de agora achando que sao a mesma medicao.
+  {
+    version: '7.47',
+    date: '2026-09-04',
+    title: 'Cada estágio de cada bioma tem o elenco e as chances refeitos',
+    highlights: [
+      'QUEM APARECE EM CADA LUGAR AGORA VEM DOS JOGOS ORIGINAIS, e muda conforme você avança dentro do bioma. A Mata começa na floresta de entrada, com Caterpie, Weedle e os casulos; o Mato Alto vem no meio e a Selva no fundo. O Marinho abre na Praia, passa pelo Mar Aberto e termina no Leito Oceânico, com Wailord e Lanturn. Os Áridos vão dos Ermos ao Deserto e daí à Terra Devastada. São 120 estágios com elenco próprio.',
+      'AS CHANCES PARARAM DE SER TODAS IGUAIS. Antes, em 3 de cada 4 salas do jogo uma única espécie ocupava um terço de tudo que nascia — o mesmo terço, em quase toda sala. Agora a frequência de cada POKE é a que ele tem nos jogos originais no lugar equivalente. Também não existe mais sala onde só um POKE aparece: toda sala sorteia pelo menos três espécies.',
+      'A LISTA DE POKÉMONS NO CARTÃO DA HUNT MOSTRAVA PORCENTAGEM ERRADA. Ela era calculada com uma composição de salas diferente da que a caçada usa de verdade, e o erro era grande justamente nos estágios mais fundos: no Marinho 10, o Leito Oceânico aparecia como 16% quando o jogo sorteia 79%. Espécies que aquele estágio nem produz apareciam na lista. Corrigido — a chance na tela é a chance do sorteio.',
+    ],
+  },
   // UM item, e ele e o mais importante que este arquivo publicou em semanas.
   //
   // O QUE ACONTECIA: quem jogava com a aba do jogo ATRAS de outra janela perdia

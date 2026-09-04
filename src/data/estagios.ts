@@ -249,9 +249,35 @@ export const PERFIL_POR_SUB_BIOMA: Record<string, PerfilDeProfundidade> = {
   grass: { profundidade: 0.45, pico: 10 },
   meadow: { profundidade: 0.85, pico: 8 },
 
-  // mata — do mato alto da borda ao fundo da selva.
-  'tall-grass': { profundidade: 0.15, pico: 10 },
-  forest: { profundidade: 0.45, pico: 10 },
+  // mata — da floresta de entrada pro mato alto, e dai pro fundo da selva.
+  //
+  // A ORDEM DE `forest` E `tall-grass` FOI INVERTIDA NA PH-501, E ELA E A UNICA
+  // CORRECAO QUE O DADO REAL DOS JOGOS IMPOS A ESTA TABELA.
+  //
+  // A tabela inteira foi escrita por sensacao em 02/09 (PH-425). A bancada
+  // `scripts/harness/conferir-profundidade-dos-sub-biomas.mjs` compara a ordem
+  // de cada bioma com o NIVEL REAL dos locais de Gen I-III que alimentam cada
+  // sub-bioma, e 8 dos 10 biomas testaveis CONCORDARAM — a sensacao estava
+  // certa quase toda. Aqui ela estava errada, e por 21 niveis:
+  //
+  //   forest      Lv  5,2  — Bosque Viridiana (3-6), Floresta Ilex (5-7),
+  //                          Bosque Petalburgo (5-6). A floresta-tutorial dos
+  //                          TRES jogos, sempre logo depois da primeira cidade.
+  //   tall-grass  Lv 26,3  — as rotas 119 a 123 de Hoenn, capim comprido de
+  //                          meio de jogo (Zangoose, Seviper, Kecleon, Tropius).
+  //
+  // A leitura antiga ("o mato alto e a borda, a floresta e o meio") e defensavel
+  // como imagem, mas nao e o que os jogos fazem: em nenhum deles o capim
+  // comprido vem antes da primeira floresta. E o custo de manter a inversao era
+  // alto — o estagio 1 da Mata sortearia o elenco de Lv 24-28 rebaixado pela
+  // janela de nivel, em vez de entregar Caterpie, Weedle e Pikachu no Bosque
+  // Viridiana, que e o encontro mais reconhecivel da serie.
+  //
+  // O outro desacordo da bancada (Marinho: `sea` Lv 21,8 contra `beach` Lv 22,2)
+  // NAO virou mudanca: sao quatro decimos de nivel, e Tentacool — 60% da vaga de
+  // agua em quase todo local — domina a media dos dois lados. Ruido, nao sinal.
+  forest: { profundidade: 0.15, pico: 10 },
+  'tall-grass': { profundidade: 0.5, pico: 10 },
   jungle: { profundidade: 0.95, pico: 10 },
 
   // marinho — a costa fica pra tras e o mapa afunda.
