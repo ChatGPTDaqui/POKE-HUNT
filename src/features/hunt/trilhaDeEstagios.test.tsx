@@ -519,11 +519,20 @@ describe('o elenco do estagio (PH-470)', () => {
     const marinho = BIOMA_POR_CHAVE['marinho']
     const doEstagio = elencoDoEstagio(marinho, 3)
     const daPraia = elencoDoEstagio(marinho, 3, 'beach')
-    const alvo = daPraia[0]
-    const noEstagio = doEstagio.find((e) => e.encounterId === alvo.encounterId)!
-    // Guarda anti-vacuo: as duas contas TEM que diferir, senao a aba nao faz
-    // nada e o teste passaria sem medir nada.
-    expect(alvo.pct).toBeGreaterThan(noEstagio.pct)
+    // O ALVO E A PRIMEIRA ESPECIE CUJA % DE FATO MUDA entre as duas contas, e
+    // nao a primeira da lista (PH-503). A mais comum da Praia e justamente a
+    // que bate no `TETO_DE_FATIA` nos dois calculos, entao ela renderiza o mesmo
+    // numero nas duas telas e nao serve pra provar que a aba recalculou —
+    // escolher `daPraia[0]` deixava o teste vermelho por um motivo que nao e o
+    // dele.
+    const par = daPraia
+      .map((x) => ({ alvo: x, noEstagio: doEstagio.find((e) => e.encounterId === x.encounterId) }))
+      .find((p) => p.noEstagio != null && p.alvo.pct > p.noEstagio.pct + 1e-9)
+    // Guarda anti-vacuo: as duas contas TEM que diferir em ALGUEM, senao a aba
+    // nao faz nada e o teste passaria sem medir nada.
+    expect(par, 'nenhuma especie muda de % entre o estagio e a Praia').toBeTruthy()
+    const alvo = par!.alvo
+    const noEstagio = par!.noEstagio!
 
     const linhaDe = (nome: string) => screen.getByText(nome).parentElement!.textContent
     expect(linhaDe(alvo.species.name)).toContain(`${noEstagio.pct.toFixed(1)}%`)
