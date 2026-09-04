@@ -12,6 +12,44 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // DOIS itens, e o primeiro e uma REPETICAO — de proposito.
+  //
+  // O ITEM DO BOT E QUASE O MESMO TEXTO DA 7.42, E ISSO NAO E DESCUIDO. A 7.42
+  // anunciou exatamente este defeito ("entre 2 e 3 de setembro, nenhuma
+  // configuracao de automacao estava sendo salva") e ele VOLTOU no dia
+  // seguinte, pela porta oposta: la faltava a chave nova no banco, aqui sobrava
+  // uma chave velha no jogo. Pro jogador e a mesma perda, e a mesma acao —
+  // conferir as escolhas dele.
+  //
+  // ENTAO A NOTA TEM QUE DIZER QUE E DE NOVO. Repetir o aviso sem admitir que
+  // ja tinha sido anunciado trata o jogador como quem nao le as notas: quem leu
+  // a 7.42, conferiu a configuracao e a viu voltar ao antigo hoje merece saber
+  // que o problema era o mesmo e que desta vez foi fechado dos dois lados.
+  //
+  // A JANELA DE DATAS E OBRIGATORIA, mesma regra da 7.39 e da 7.42: quem nao
+  // mexeu em automacao entre a noite de 03/09 e a manha de 04/09 nao perdeu
+  // nada, e sem a data essa pessoa vai procurar um problema que nunca teve.
+  //
+  // O ITEM DO CHAT E COSMETICO e vale UMA linha. Ele entra porque o jogador VE
+  // (a janela mudou de lugar na tela) e porque quem estranhar a mudanca merece
+  // achar a explicacao na nota em vez de achar que quebrou.
+  //
+  // FICA DE FORA: a causa tecnica inteira (chave orfa em jsonb, lista branca de
+  // RPC, transacao abortada), o filtro na fronteira, a migration que apaga a
+  // chave e o teste de fiacao. Nada disso ajuda ninguem a jogar.
+  //
+  // NAO ENTRA a sala que nao troca aos 30 abates: nao foi reproduzida, esta em
+  // apuracao (PH-495) e anunciar correcao de algo que nao se sabe se estava
+  // quebrado e pior que nao anunciar nada.
+  {
+    version: '7.45',
+    date: '2026-09-04',
+    title: 'As configurações do bot pararam de salvar DE NOVO — e agora fechamos os dois lados',
+    highlights: [
+      'IMPORTANTE, E É A SEGUNDA VEZ: ENTRE A NOITE DE 3 E A MANHÃ DE 4 DE SETEMBRO, NENHUMA CONFIGURAÇÃO DE AUTOMAÇÃO ESTAVA SENDO SALVA. É o mesmo defeito que a versão 7.42 anunciou dois dias atrás, voltando por outro caminho — auto-catch, bola escolhida, regras de poção, regras por espécie, itens de cura e auto-venda funcionavam na sessão e voltavam ao antigo ao recarregar. Abra Automações e confira suas escolhas. Desta vez a trava foi posta nos dois lados, e não só em um.',
+      'A JANELA DE CHAT ENCOSTOU NA BORDA ESQUERDA da tela, em vez de flutuar com um vão. Arrastar continua funcionando como antes.',
+    ],
+  },
   // QUATRO itens pra sete mudancas (PH-493), e o corte tem regra.
   //
   // O BUG DO STATUS ABRE, e ele nao e "mais um bug corrigido": o POKE
