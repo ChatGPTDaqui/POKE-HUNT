@@ -83,6 +83,48 @@ describe('farm offline: POKE caido para a simulacao', () => {
     expect(resumo.kills).toBeGreaterThan(0)
   })
 
+  // PH-508 — O BUG DE PRODUCAO QUE ESTE ARQUIVO NAO PEGAVA.
+  //
+  // Todos os casos acima usam `addItem('revive', ...)`, o Revive COMUM. E a
+  // condicao de parada checava exatamente esse id literal
+  // (`hasItem('revive', 1)`), enquanto quem USA o item — `melhorRevive` — varre
+  // a familia inteira (`kind === 'revive'`) e aceita `max_revive` igual.
+  //
+  // As duas regras precisavam concordar e nao concordavam, e o teste passava
+  // porque testava so o caso em que elas por acaso concordam. Medido em
+  // producao: um jogador com 149 `max_revive` e ZERO `revive` era expulso da
+  // hunt com o toast "Seu POKE desmaiou" TODA vez que voltava ao jogo, com a
+  // mochila cheia de revive. Eram 2 dos 6 jogadores com Auto-Revive ligado.
+  //
+  // O `removeItem` no comeco NAO E ZELO A MAIS: o `beforeEach` deste arquivo
+  // nao limpa `items`, e a store e um singleton — os 50 Revives comuns do caso
+  // anterior sobrevivem ate aqui. Sem zerar, este teste passaria por causa
+  // deles e nao provaria nada, que e o modo de falha mais caro de um teste de
+  // regressao.
+  it('nao para quando o unico revive da mochila e Max Revive (PH-508)', () => {
+    const gameState = useGameStateStore.getState()
+    gameState.setAutoToggle('autoRevive', true)
+    gameState.removeItem('revive', gameState.items.revive ?? 0)
+    gameState.addItem('max_revive', 50)
+
+    // A premissa do caso, afirmada em voz alta: se um dia o `beforeEach` passar
+    // a limpar itens (ou o id mudar), estas duas linhas falham antes do resto e
+    // dizem por que.
+    expect(gameState.hasItem('revive', 1)).toBe(false)
+    expect(gameState.hasItem('max_revive', 1)).toBe(true)
+
+    const { poke, world, correr } = simular('route_46', 25)
+    poke.hp = 0
+    world.player!.poke.hp = 0
+    world.player!.fainted = true
+
+    const resumo = correr()
+
+    expect(resumo.stoppedEarly).toBe(false)
+    expect(resumo.simulatedSeconds).toBeCloseTo(UMA_HORA, 0)
+    expect(resumo.kills).toBeGreaterThan(0)
+  })
+
   it('hunt BOSS ignora auto-revive e para mesmo com Revive na mochila', () => {
     // `autoSystem` desliga reanimacao em hunt BOSS (`noRespawn`) de proposito.
     // Sem espelhar essa regra na condicao de parada, o laco considerava o POKE
