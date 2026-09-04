@@ -2,7 +2,7 @@
 // distinta de mob comum — motor correto (spawn normal suspenso), so faltava
 // a apresentacao. `LEGENDARY_SPECIES_IDS` (Modo Pesadelo) ja tinha barra de
 // HP grande; este arquivo tranca que o protetor por sala/andar (isProtetor)
-// ganha o MESMO tratamento mais 3 sinais novos: sprite maior, tag "GUARDIAN"/
+// ganha o MESMO tratamento mais 3 sinais novos: sprite maior, tag "GUARDIÃO"/
 // "LORD" no nome (conforme o tipo, PH-236), aura pulsante.
 import { describe, expect, it } from 'vitest'
 
@@ -45,32 +45,32 @@ function entidade(isProtetor: boolean, speciesId = 'charizard'): WorldEntity {
   } as unknown as WorldEntity
 }
 
-describe('tag "GUARDIAN"/"LORD" no nome (PH-228/236)', () => {
+describe('tag "GUARDIÃO"/"LORD" no nome (PH-228/236)', () => {
   it('protetor ganha a tag, mob comum nao', () => {
     const { ctx, escritas } = ctxEspiao()
     drawNameLevelTag(ctx, entidade(true), 'guardian')
-    expect(escritas.some((t) => t.includes('GUARDIAN'))).toBe(true)
+    expect(escritas.some((t) => t.includes('GUARDIÃO'))).toBe(true)
 
     const semProtetor = ctxEspiao()
     drawNameLevelTag(semProtetor.ctx, entidade(false), 'guardian')
-    expect(semProtetor.escritas.some((t) => t.includes('GUARDIAN') || t.includes('LORD'))).toBe(false)
+    expect(semProtetor.escritas.some((t) => t.includes('GUARDIÃO') || t.includes('LORD'))).toBe(false)
   })
 
-  it('tipo lord mostra LORD, tipo guardian (ou tipo ausente) mostra GUARDIAN', () => {
+  it('tipo lord mostra LORD, tipo guardian (ou tipo ausente) mostra GUARDIÃO', () => {
     const doLord = ctxEspiao()
     drawNameLevelTag(doLord.ctx, entidade(true), 'lord')
     expect(doLord.escritas.some((t) => t.includes('LORD'))).toBe(true)
-    expect(doLord.escritas.some((t) => t.includes('GUARDIAN'))).toBe(false)
+    expect(doLord.escritas.some((t) => t.includes('GUARDIÃO'))).toBe(false)
 
     const doGuardian = ctxEspiao()
     drawNameLevelTag(doGuardian.ctx, entidade(true), 'guardian')
-    expect(doGuardian.escritas.some((t) => t.includes('GUARDIAN'))).toBe(true)
+    expect(doGuardian.escritas.some((t) => t.includes('GUARDIÃO'))).toBe(true)
 
     // Sem tipo (nao deveria acontecer em produção com isProtetor=true, mas
-    // e a rede de seguranca): cai no fallback GUARDIAN, nunca undefined na tela.
+    // e a rede de seguranca): cai no fallback GUARDIÃO, nunca undefined na tela.
     const semTipo = ctxEspiao()
     drawNameLevelTag(semTipo.ctx, entidade(true))
-    expect(semTipo.escritas.some((t) => t.includes('GUARDIAN'))).toBe(true)
+    expect(semTipo.escritas.some((t) => t.includes('GUARDIÃO'))).toBe(true)
   })
 })
 

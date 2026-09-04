@@ -885,7 +885,7 @@ const PROTETOR_TAG_COLOR = '#ff4d4d'
 // string ali e aqui vira caixa medida errada no dia em que so um dos dois
 // mudar.
 export function rotuloDeProtetor(tipoDeProtetor?: 'guardian' | 'lord' | null): string {
-  return tipoDeProtetor === 'lord' ? '★ LORD ★' : '★ GUARDIAN ★'
+  return tipoDeProtetor === 'lord' ? '★ LORD ★' : '★ GUARDIÃO ★'
 }
 
 export function drawNameLevelTag(

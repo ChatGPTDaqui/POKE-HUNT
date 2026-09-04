@@ -16,6 +16,7 @@ import type { PokeInstance } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from '../types'
+import { podeAutoReanimar } from './autoSystem'
 
 export interface KillResult {
   /** Loot do abate MAIS o que a auto-venda rendeu neste evento, se rendeu. */
@@ -232,15 +233,21 @@ export function simulateWorldSeconds({
     }
 
     if (world.player.fainted) {
-      // Hunts BOSS desligam auto-revive por completo (autoSystem.ts), nao
-      // importa a config do jogador. Sem espelhar isso aqui, um POKE morto numa
-      // BOSS com Revive na mochila era considerado "recuperavel": o laco rodava
-      // as 6 horas inteiras com um cadaver em campo, sem `stoppedEarly` e sem
-      // nenhum abate — o relatorio nao tinha como explicar o zero.
-      const canRecover = !isBossHunt
-        && gameState.autoToggles.autoRevive
-        && gameState.hasItem('revive', 1)
-      if (!canRecover) {
+      // A PERGUNTA E DE `autoSystem`, E NAO DAQUI (PH-508).
+      //
+      // Esta linha era `!isBossHunt && autoToggles.autoRevive &&
+      // gameState.hasItem('revive', 1)` — e o ultimo termo, o id LITERAL do
+      // Revive comum, era o bug: quem usa o item e `melhorRevive`, que aceita a
+      // familia inteira (`max_revive` incluso). Um jogador com 149 Max Revives
+      // e zero Revive comum era tratado como "sem jeito de reanimar", a
+      // ausencia encerrava por desmaio e ele era expulso da hunt TODA vez que
+      // voltava ao jogo.
+      //
+      // `podeAutoReanimar` responde as tres partes num lugar so — a hunt BOSS
+      // (que precisa ser espelhada aqui: sem isso o laco rodava as 6 horas com
+      // um cadaver em campo, sem `stoppedEarly` e sem abate, e o relatorio nao
+      // tinha como explicar o zero), o toggle, e o inventario.
+      if (!podeAutoReanimar(gameState, isBossHunt)) {
         summary.stoppedEarly = true
         break
       }
