@@ -12,6 +12,41 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // TRES itens, e a ordem deles e deliberada: o que o jogador PERDEU vem
+  // primeiro, e nao a feature nova.
+  //
+  // O ITEM 1 E O UNICO QUE PODE TER CUSTADO ALGO A ALGUEM, e por isso abre a
+  // nota. Quem leu na Wiki que o auto-catch vinha ligado e nao entendeu por que
+  // nada era capturado tinha um problema real, causado por texto errado. O item
+  // diz o que era falso E o que e verdade, porque "corrigimos a Wiki" nao
+  // resolveria o caso dessa pessoa — ela precisa saber que tem um interruptor
+  // pra ligar.
+  //
+  // O NUMERO DE CADA CORRECAO ENTRA (21 lendarios, 12 biomas, 10 estagios) e e
+  // o que torna o item conferivel em vez de vago: o jogador abre a tela e ve.
+  //
+  // FICA DE FORA a causa raiz, que e a parte da qual eu tenho mais orgulho e a
+  // que menos interessa a ele: que os dois arquivos nao tinham teste nenhum,
+  // que a copy passou a ler os numeros por `import` do proprio codigo, e que
+  // existe agora um teste que reprova o vocabulario morto. Isso e encanamento,
+  // e a regua deste arquivo corta encanamento — inclusive o bonito.
+  //
+  // FICA DE FORA TAMBEM o conserto do `abrirSeInedito`, e este e o corte menos
+  // obvio: e um bug de verdade, mas NUNCA ALCANCOU NINGUEM. Ele so podia
+  // acontecer com dois tutoriais disparando na mesma volta do boot, e ate esta
+  // versao existia UM disparo so. Anunciar como "corrigido" faria o jogador
+  // procurar na memoria um problema que ele nao teve — a mesma razao pela qual
+  // a 7.43 precisou dizer em que condicao o defeito dela aparecia.
+  {
+    version: '7.48',
+    date: '2026-09-04',
+    title: 'O tutorial e a Wiki foram refeitos — e a Wiki estava mentindo',
+    highlights: [
+      'A WIKI DIZIA QUE O AUTO-CATCH E O AUTO-REVIVE JÁ VINHAM LIGADOS. Não vinham, e não vêm: os dois nascem DESLIGADOS, porque gastam item a cada uso. Se você leu aquilo e ficou sem entender por que nenhum POKE era capturado, era isso — ligue o Auto-Catch no botão de robô, ao lado dos golpes. Só o Auto-Pot e o Auto-Status vêm ligados.',
+      'O TUTORIAL AGORA COMEÇA PELO QUE IMPORTA, E É CURTO. Ele tinha 6 passos sobre configuração de automação avançada antes de você ter visto uma caçada — e o tutorial que ensinava a JOGAR ficava escondido num menu. Agora são 3 passos no primeiro acesso (seu POKE luta sozinho, comece pela Rota 46, curar é de graça), e as outras explicações aparecem na hora em que servem: ao abrir o painel de automações, ao abrir a trilha de um bioma, e quando o seu primeiro POKE capturado chega na mochila.',
+      'A WIKI GANHOU AS SEÇÕES QUE FALTAVAM E DESCREVE O JOGO DE HOJE. Ela ainda explicava um mundo dividido em dois continentes, com "faixas de nível" e 11 lendários — hoje são 12 biomas de 10 estágios cada, e 21 lendários. Entrou o que nunca tinha sido explicado em lugar nenhum: como os estágios e as salas funcionam, por que a barra para em 29 de 30 e o que são o Guardião e o Lord, os seis climas e o efeito de cada um, Especialidades, Missões, o Mercado e o que é o escrow, Troca, Ranking, e por que vender captura rende muito mais que abater. As abas foram reagrupadas em cinco por assunto, em vez de sete soltas.',
+    ],
+  },
   // TRES itens, e a ordem entre eles e a ordem do que o jogador percebe
   // primeiro: quem aparece, com que frequencia, e o numero que a tela mostrava.
   //
