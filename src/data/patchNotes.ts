@@ -12,6 +12,39 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // DOIS itens, e o primeiro e desproporcionalmente mais importante que o
+  // segundo — o que e exatamente por que eles vao na mesma nota e nesta ordem.
+  //
+  // O ITEM 1 CUSTOU TEMPO DE JOGO A QUEM CAIU NELE, e nao e "um bug corrigido":
+  // a cacada ENCERRAVA, entao o periodo que ele passou fora nao rendeu. Como na
+  // 7.46, isso precisa ser dito com todas as letras — quem perdeu horas merece
+  // saber que perdeu, e nao descobrir sozinho que o relatorio vinha vazio.
+  //
+  // A CONDICAO E OBRIGATORIA, mesma regra da 7.43 e da 7.42: isto so acontecia
+  // com quem tinha Max Revive E ZERO Revive comum. Quem tem os dois nunca viu
+  // nada. Sem a condicao, essa pessoa procura na memoria um problema que nao
+  // teve.
+  //
+  // O NUMERO ENTRA porque torna o item conferivel: "Max Revive" e "Revive"
+  // sao dois itens que o jogador ve na mochila dele, e ele consegue olhar.
+  //
+  // NAO ENTRA a causa tecnica — a guarda checando o id literal enquanto o
+  // atuador varria a familia, a funcao unica que passou a responder as duas, o
+  // teste que faltava. E encanamento, e a regua deste arquivo corta encanamento.
+  //
+  // O ITEM 2 E PEQUENO E VAI JUNTO MESMO ASSIM, porque a regua manda anunciar
+  // texto de UI que muda: quem leu "GUARDIAN" ontem e "GUARDIÃO" hoje merece
+  // uma linha dizendo que e a mesma coisa. Ele NAO ganha nota propria — seria
+  // dar a um rename o mesmo peso de uma cacada que encerrava sozinha.
+  {
+    version: '7.49',
+    date: '2026-09-04',
+    title: 'Quem só tinha Max Revive voltava sempre com o POKE desmaiado',
+    highlights: [
+      'SE OS SEUS REVIVES ERAM TODOS MAX REVIVE, E VOCÊ NÃO TINHA NENHUM REVIVE COMUM, o jogo não reconhecia que dava pra reanimar seu POKE enquanto você estava fora. Ao voltar, ele estava desmaiado no Hospital com o aviso "a caçada foi encerrada" — e, como a caçada tinha parado, o tempo que você passou fora não rendeu nada. Acontecia toda vez, e a mochila cheia de Max Revive não ajudava. Corrigido: agora Max Revive conta como revive também. Quem tinha os dois tipos nunca passou por isso, e o que foi perdido antes desta versão não volta.',
+      'O CHEFE DA SALA AGORA SE CHAMA GUARDIÃO EM TODO LUGAR. Ele aparecia como "GUARDIAN" na etiqueta em campo, "Guardião" no aviso da sala e "Lorde" na explicação — três nomes para a mesma coisa. Ficou Guardião nas salas do meio e Lord na última, do jeito que a Wiki já dizia.',
+    ],
+  },
   // TRES itens, e a ordem deles e deliberada: o que o jogador PERDEU vem
   // primeiro, e nao a feature nova.
   //
