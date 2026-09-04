@@ -12,6 +12,39 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // UM item, e ele e o mais importante que este arquivo publicou em semanas.
+  //
+  // O QUE ACONTECIA: quem jogava com a aba do jogo ATRAS de outra janela perdia
+  // quase todo o progresso. O navegador estrangula os relogios de uma aba em
+  // segundo plano, o jogo demorava demais pra falar com o servidor, e o
+  // servidor tratava aquele intervalo como "o jogador saiu" — e descartava.
+  // Medido em contas reais: 50 minutos de jogo creditados como 4.
+  //
+  // A SALA PARADA EM 30/30 ERA SINTOMA DISSO, e por isso os dois vao no MESMO
+  // item em vez de dois. Quem troca a sala e o servidor; com o tempo
+  // descartado, o contador dele nunca chegava na quota, e a tela ficava
+  // mostrando 30/30 pra sempre. Separar em dois itens sugeriria duas correcoes
+  // e faria o jogador procurar duas mudancas.
+  //
+  // O NUMERO ENTRA, e ele e o que torna o item verificavel em vez de vago:
+  // "50 minutos creditados como 4" e a diferenca entre uma frase de marketing e
+  // um relato do que estava quebrado.
+  //
+  // NAO ENTRA A CAUSA TECNICA — duas reguas do sistema discordando entre 2 e 30
+  // minutos, o aparo no lugar do descarte, o piso voltando pro caso aparado.
+  // Nada disso ajuda ninguem a jogar.
+  //
+  // NAO PROMETO RECUPERAR O QUE SE PERDEU, porque nao da: o tempo descartado
+  // nao foi represado em lugar nenhum. Dizer "corrigido" sem dizer isso deixaria
+  // o jogador esperando um credito retroativo que nao vem.
+  {
+    version: '7.46',
+    date: '2026-09-04',
+    title: 'Jogar com a aba em segundo plano parou de comer seu progresso',
+    highlights: [
+      'SE VOCÊ DEIXAVA O JOGO ABERTO ATRÁS DE OUTRA JANELA, QUASE TODO O PROGRESSO DAQUELE TEMPO ERA PERDIDO. O navegador desacelera abas em segundo plano, o jogo demorava a falar com o servidor, e o servidor entendia isso como "saiu do jogo" — jogando o período fora. Em contas reais, 50 minutos de caçada foram creditados como 4. Era também o motivo de a sala travar em 30/30 e nunca trocar: quem troca a sala é o servidor, e o contador dele nunca chegava lá. Corrigido. O que foi perdido antes desta versão não volta.',
+    ],
+  },
   // DOIS itens, e o primeiro e uma REPETICAO — de proposito.
   //
   // O ITEM DO BOT E QUASE O MESMO TEXTO DA 7.42, E ISSO NAO E DESCUIDO. A 7.42
