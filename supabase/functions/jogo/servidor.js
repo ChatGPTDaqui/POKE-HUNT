@@ -50217,10 +50217,7 @@ var TYPE_BACKGROUND_IMAGE = {
 function bossBackgroundImage(species) {
 	return TYPE_BACKGROUND_IMAGE[species.type] || (species.type2 ? TYPE_BACKGROUND_IMAGE[species.type2] : void 0) || null;
 }
-var LEVEL_OFFSET = 100;
-var BOSS_LEVEL = 300;
-var NIGHTMARE_MIN_LEVEL = 150;
-var shiftLevel = (level) => Math.max(level + LEVEL_OFFSET, NIGHTMARE_MIN_LEVEL);
+var shiftLevel = (level) => Math.max(level + 100, 150);
 /**
 * `sourcePorSala` e o cadastro de salas das hunts espelhadas
 * (huntSpawnOverrides.ts#POOL_POR_SALA). Ele entra aqui porque o espelho e quem
@@ -50292,8 +50289,8 @@ function buildBossHunts() {
 		encounters[encId] = {
 			id: encId,
 			speciesId,
-			minLevel: BOSS_LEVEL,
-			maxLevel: BOSS_LEVEL,
+			minLevel: 300,
+			maxLevel: 300,
 			aggroRadius: 175,
 			wanderRadius: 60,
 			weight: 1
@@ -50301,8 +50298,8 @@ function buildBossHunts() {
 		maps[mapId] = {
 			id: mapId,
 			name: `BOSS ${species.name}`,
-			description: `Covil do lendário ${species.name} (nível ${BOSS_LEVEL}) — aparece uma única vez, sem respawn.`,
-			levelRange: [BOSS_LEVEL, BOSS_LEVEL],
+			description: `Covil do lendário ${species.name} (nível 300) — aparece uma única vez, sem respawn.`,
+			levelRange: [300, 300],
 			unlockCost: null,
 			continent: "nightmare",
 			bounds: {

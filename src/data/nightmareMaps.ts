@@ -55,8 +55,13 @@ function bossBackgroundImage(species: SpeciesDataEntry): string | null {
   return TYPE_BACKGROUND_IMAGE[species.type] || (species.type2 ? TYPE_BACKGROUND_IMAGE[species.type2] : undefined) || null
 }
 
-const LEVEL_OFFSET = 100
-const BOSS_LEVEL = 300
+// OS TRES SAO `export` DESDE A PH-507 porque a Wiki os LE em vez de digitar os
+// numeros no texto. Eram privados, e a consequencia era previsivel: a Wiki
+// afirmava "11 hunts BOSS" e "os 11 lendarios" muito depois de a Geracao III
+// ter subido esse numero pra 21. Numero digitado a mao em copy nao tem quem o
+// corrija — `LEGENDARY_SPECIES_IDS.length` tem.
+export const LEVEL_OFFSET = 100
+export const BOSS_LEVEL = 300
 // Floor applied on top of the +100 offset (explicit user request: "os
 // pokemons do modo pesadelo mais fracos agora possuem o lvl 150") — the
 // weakest base hunt (Route 46 Inicial, ~Lv1-2) would only reach ~101-102
@@ -64,7 +69,7 @@ const BOSS_LEVEL = 300
 // instead. Kanto's mirrored zones already clear 150 on their own (their base
 // levels got their own +50 bump, see sync-planilha.js#KANTO_BANDS), so the
 // floor only ever kicks in for the low Johto zones.
-const NIGHTMARE_MIN_LEVEL = 150
+export const NIGHTMARE_MIN_LEVEL = 150
 const shiftLevel = (level: number) => Math.max(level + LEVEL_OFFSET, NIGHTMARE_MIN_LEVEL)
 
 // Recebe as hunts normais em vez de ler `MAPS_DATA` direto: o espelho tem

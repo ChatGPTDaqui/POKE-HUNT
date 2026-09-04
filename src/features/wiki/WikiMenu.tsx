@@ -4,7 +4,7 @@
 import { useState, type ReactNode } from 'react'
 import {
   Backpack, BookOpen, Books, Drop, FirstAid, Fire, Gear, Lightning, MapTrifold, Moon,
-  Question, Robot, Scales, Snowflake, Storefront, UsersThree, type Icon,
+  Question, Robot, Scales, Snowflake, Storefront, Trophy, UsersThree, type Icon,
 } from '@phosphor-icons/react'
 import { TYPE_CHART, getEffectiveness } from '@/data/generated/typeChart.generated'
 import { colorForType, TYPE_COLORS } from '@/data/typeColors'
@@ -23,7 +23,15 @@ import { STATUS_RULES } from '@/data/generated/status.generated'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
+import { TYPED_AOE_LEVEL } from '@/data/typedAoeMoves'
+import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
+import { BIOMAS } from '@/data/biomas'
+import { MAX_TEAM_SIZE } from '@/stores/gameStateDefaults'
 import type { TraitId } from '@/data/traits'
+import { WikiCard } from './WikiCard'
+import { MundoTab } from './abaMundo'
+import { ProgressoTab } from './abaProgresso'
+import { JogadoresTab } from './abaJogadores'
 
 const ALL_TYPES = Object.keys(TYPE_COLORS) as ElementType[]
 
@@ -58,99 +66,147 @@ function ChipList({ types }: { types: ElementType[] }) {
   )
 }
 
-function WikiCard({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="rounded-lg border bg-n900 p-3">
-      <div className="mb-1.5 text-[.9em] font-medium">{title}</div>
-      <div className="text-[.8em] leading-relaxed text-n400">{children}</div>
-    </div>
-  )
-}
-
-function InicioTab() {
+// ---------------------------------------------------------------------------
+// A ABA DE ABERTURA, REESCRITA EM 04/09 (PH-507)
+// ---------------------------------------------------------------------------
+// A versao anterior tinha TRES afirmacoes falsas, e as tres foram conferidas
+// contra o codigo antes de sair:
+//
+//  1. "Deixe auto-pot, auto-catch e auto-revive ligados (vem ativados por
+//     padrao)". `stores/gameStateDefaults.ts` diz `autoPot: true`,
+//     `autoCatch: false`, `autoRevive: false`. Dois dos tres nascem
+//     DESLIGADOS, e o proprio tutorial do jogo dizia o contrario da Wiki — o
+//     jogador lia os dois e nao sabia em qual acreditar.
+//
+//  2. "O Novo Continente (Kanto) e liberado depois de derrotar o Campeao
+//     Lance". A separacao por regiao acabou; o mundo e 12 biomas, e o gate do
+//     Lance virou `progressoDeBioma.ts#bloqueioDoLance` (estagio 5 nos 12
+//     biomas), que e um pre-requisito PARA enfrenta-lo, e nao um premio dele.
+//
+//  3. "Cada hunt tem uma faixa de nivel recomendada". As faixas de 30 niveis
+//     morreram na PH-425; a regua e 10 estagios de 10 niveis por bioma.
+//
+// O CONTEUDO DE MUNDO SAIU DAQUI e virou a aba `MundoTab`, que e onde
+// progressao mora agora. Esta aba responde uma pergunta so: "acabei de entrar,
+// o que eu faco?".
+function ComecandoTab() {
   return (
     <div className="space-y-2">
-      <WikiCard title="Bem-vindo(a) ao NOVO POKE IDLE!">
-        Este e um jogo <b>idle</b>: seu POKE ativo anda e luta sozinho contra os selvagens de cada hunt, sem
-        precisar apertar nenhum botao de ataque — seu trabalho e escolher onde caçar, cuidar do seu time e
-        gerenciar recursos (itens, ouro, capturas).
+      <WikiCard title="Bem-vindo ao NOVO POKE IDLE">
+        Este é um jogo <b>idle</b>: seu POKE em campo anda e luta sozinho contra os selvagens, e você nunca
+        aperta um botão de ataque. Seu trabalho é decidir <b>onde caçar</b>, cuidar do time e gerenciar o que
+        você ganha — itens, ouro e capturas.
+        <br />
+        <br />
+        Isto é um guia de referência: use as abas acima pra achar o sistema que te interessa. Se você só quer
+        começar a jogar, os três cartões seguintes bastam.
       </WikiCard>
 
-      <WikiCard title="1. Escolhendo seu inicial">
-        Na primeira vez que voce abre o jogo, escolhe um dos 3 iniciais classicos (Charmander, Squirtle ou
-        Bulbasaur). Ele comeca no Nivel 1 e ja pode ser levado direto pra Hunt Inicial — nao existe risco de
-        cruzar com inimigos fortes logo de cara, essa hunt tem o nivel dos selvagens travado bem baixo.
+      <WikiCard title="1. Seu inicial, e a primeira caçada">
+        Na primeira vez que você abre o jogo, escolhe um dos 3 iniciais clássicos (Charmander, Squirtle ou
+        Bulbasaur). Ele começa no Nível 1 e já pode ir direto pra caçada.
+        <br />
+        <br />
+        Comece pela <b>Rota 46 (Inicial)</b>: ela fica no topo da lista de hunts, acima do mapa dos biomas, e é
+        a única feita pro nível 1 — só aparecem POKEs de nível 1 e 2, então não existe risco de cruzar com algo
+        forte logo de cara. Os biomas vêm depois, quando seu POKE tiver nível pra eles.
       </WikiCard>
 
       <WikiCard title="2. Como funciona o combate automático">
-        Assim que voce entra numa hunt, seu POKE ativo comeca a andar pelo mapa sozinho procurando o inimigo
-        selvagem mais proximo. Ao chegar perto o suficiente ele engaja em combate automaticamente e usa seus
-        golpes por conta propria (dentre os que estao prontos/fora de cooldown, o de maior dano estimado
-        contra aquele alvo — dando preferencia a golpes em area sempre que acertariam 2 ou mais inimigos ao
-        mesmo tempo). Depois de derrotar o inimigo, ele imediatamente escolhe um novo alvo e continua a
-        caçada — seu POKE nunca fica parado esperando ordem.
+        Ao entrar numa caçada, seu POKE começa a andar pelo mapa procurando o selvagem vivo mais próximo. Ao
+        chegar perto ele engaja e escolhe os golpes sozinho: entre os que estão fora de recarga, o de maior
+        dano estimado contra aquele alvo — com preferência por golpe em área sempre que ele acertaria 2 ou mais
+        inimigos ao mesmo tempo. Derrotado o inimigo, ele escolhe outro imediatamente. Seu POKE nunca fica
+        parado esperando ordem.
         <br />
         <br />
-        Você pode <b>desligar</b> um golpe específico da rotação automática: no celular, toque no ícone dele e
-        use o botao no fim da ficha; no computador, duplo clique no icone
-        na barra de habilidades (a barra fixa no centro inferior da tela, entre os dois lados do HUD) — util
-        pra evitar que a IA gaste um golpe fraco quando um mais forte esta quase pronto.
+        Se houver um <b>shiny</b> vivo na caçada, ele passa a ser o alvo prioritário automaticamente.
+        <br />
+        <br />
+        Você pode <b>desligar</b> um golpe específico da rotação: no celular, toque no ícone dele e use o botão
+        no fim da ficha; no computador, duplo clique no ícone na barra de habilidades. É útil pra impedir que a
+        IA gaste um golpe fraco quando um mais forte está quase pronto.
       </WikiCard>
 
-      <WikiCard title="3. Navegando pelos menus">
+      <WikiCard title="3. As automações não vêm todas ligadas">
+        <b>Auto-Pot</b> (usar poção) e <b>Auto-Status</b> (curar veneno, queimadura, paralisia, congelamento)
+        nascem <b>LIGADOS</b>. <b>Auto-Catch</b> (jogar bola) e <b>Auto-Revive</b> nascem{' '}
+        <b>DESLIGADOS</b> — os dois gastam item a cada uso, e nenhum deles deve começar consumindo seu estoque
+        sem você pedir.
+        <br />
+        <br />
+        Tudo isso vive no botão de <b>robô</b>, na barra de ação ao lado dos golpes, onde você também escolhe
+        qual item cada automação deve gastar. Se você quer capturar, é lá que se liga o Auto-Catch — sem ele,
+        nenhum POKE é capturado, porque não existe botão manual de jogar bola.
+      </WikiCard>
+
+      <WikiCard title="4. Navegando pelos menus">
         A barra de baixo tem os atalhos principais: <b>Equipe</b>, <b>Mochila</b>, <b>Hunt</b> (o botão do
-        meio) e <b>Loja</b>. Tudo o mais — Pokedex, Mercado, Social, Bestiário, Tasks, Calculadora, Ranking,
-        Wiki, Tutoriais, Configuracoes e o Hospital, quando voce esta numa hunt — vive atras do botao
-        <b>Mais</b>, no fim da barra. Numa tela larga, Pokedex e Mercado sobem pra barra e saem do Mais. Os
-        icones abaixo sao os MESMOS que aparecem no jogo.
+        meio) e <b>Loja</b>. Tudo o mais — Pokedex, Mercado, Social, Bestiário, Tasks, Especialidades,
+        Calculadora, Ranking, Wiki, Tutoriais, Configurações e o Hospital, quando você está numa caçada — vive
+        atrás do botão <b>Mais</b>, no fim da barra. Numa tela larga, Pokedex e Mercado sobem pra barra e saem
+        do Mais. Os ícones abaixo são os MESMOS que aparecem no jogo.
         <ul className="mt-[.5em] flex flex-col gap-[.4em]">
           <LinhaDeMenu Icon={UsersThree} nome="Equipe">
-            seus ate 6 POKEs ativos, trocar quem esta em campo, evoluir, ver status completos.
+            seus até {MAX_TEAM_SIZE} POKEs ativos, trocar quem está em campo, evoluir, ver atributos
+            completos.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={Backpack} nome="Mochila">
-            POKEs capturados extras e todos os seus itens (bolas, pocoes, revives, Stones).
+            POKEs capturados extras e todos os seus itens (bolas, poções, revives, Pedras).
           </LinhaDeMenu>
           <LinhaDeMenu Icon={MapTrifold} nome="Hunt">
-            escolher onde caçar (ver item 4 abaixo).
+            escolher onde caçar — a Rota 46 no topo, e o mapa dos {BIOMAS.length} biomas abaixo dela.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={Storefront} nome="Loja">
-            comprar itens e vender POKEs/itens por ouro.
+            comprar itens e vender POKEs e itens por ouro.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={BookOpen} nome="Pokedex">
-            registro de toda especie do jogo, mesmo as que voce nunca capturou, com onde encontrar cada
-            uma (incluindo fraquezas/resistencias).
+            registro de toda espécie do jogo, mesmo as que você nunca capturou, com fraquezas,
+            resistências e onde encontrar cada uma.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={Scales} nome="Mercado">
-            comprar e vender com outros jogadores: itens por livro de ofertas, POKEs por anuncio.
+            comprar e vender com outros jogadores: itens por livro de ofertas, POKEs por anúncio.
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={Trophy} nome="Tasks">
+            cadeias de missões de abate por tipo elemental, cada uma pagando ouro.
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={Lightning} nome="Especialidades">
+            progressão de dano e defesa por tipo elemental, paga com Pedras — vale pra conta inteira.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={Books} nome="Wiki">
-            este guia que voce esta lendo agora.
+            este guia que você está lendo agora.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={FirstAid} nome="Hospital">
             clique na enfermeira em campo pra curar seu time por completo, de graça.
           </LinhaDeMenu>
-          <LinhaDeMenu Icon={Robot} nome="Auto">
-            o botao de robo na barra de acao, ao lado dos golpes — liga/desliga auto-pot, auto-catch e
-            auto-revive, e configura qual item cada automacao deve usar.
+          <LinhaDeMenu Icon={Robot} nome="Automações">
+            o botão de robô na barra de ação, ao lado dos golpes — liga e desliga auto-pot, auto-status,
+            auto-catch, auto-revive e auto-venda, e configura qual item cada uma deve usar.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={Gear} nome="Configurações">
-            reiniciar o jogo e ver o historico de atualizacoes (Patch-notes).
+            reiniciar o jogo e ver o histórico de atualizações (Patch-notes).
           </LinhaDeMenu>
         </ul>
       </WikiCard>
 
-      <WikiCard title="4. Progredindo nas Hunts">
-        Cada hunt tem uma faixa de nivel recomendada e um conjunto de especies proprio (organizadas por
-        bioma/tipo elemental — ver a aba "Efetividade de Tipos" e a Pokedex pra saber onde cada tipo
-        aparece). Conforme seu POKE ativo sobe de nivel, procure hunts com niveis mais altos pra continuar
-        evoluindo com desafio real. O Novo Continente (Kanto) e liberado depois de derrotar o Campeao Lance,
-        o chefe final de Johto — e o Modo Pesadelo (espelho de toda hunt em nivel bem mais alto, incluindo as
-        hunts BOSS dos 11 lendarios) fica disponivel a qualquer momento, sem custo, pra quem quiser um
-        desafio maior ainda.
-        <br />
-        <br />
-        Deixe <b>auto-pot</b>, <b>auto-catch</b> e <b>auto-revive</b> ligados (vem ativados por padrão) pra
-        caçar sem precisar intervir manualmente — configure as bolas/pocoes preferidas no painel Auto.
+      <WikiCard title="5. Ajustando o que você vê">
+        A câmera começa afastada — você vê mais mapa ao redor do seu POKE do que o enquadramento original
+        mostrava. Isso é só o ponto de partida: dentro de uma caçada, as lupas <b>+</b> e <b>−</b> à esquerda
+        da barra de golpes ajustam o zoom livremente, e no computador o <b>Ctrl + roda do mouse</b> faz o
+        mesmo.
+      </WikiCard>
+
+      <WikiCard title="6. Onde continuar">
+        Cada aba desta Wiki é um bloco de assunto:
+        <ul className="mt-[.4em] flex flex-col gap-[.3em] pl-[1.1em]" style={{ listStyleType: 'disc' }}>
+          <li>
+            <b>Mundo</b> — os biomas, os estágios, as salas, os chefes de sala, o clima, o Campeão Lance e o
+            Modo Pesadelo. <b>Comece por aqui</b> se você não sabe pra onde ir.
+          </li>
+          <li><b>Combate</b> — tipos, status, como o dano é calculado, natureza e habilidade.</li>
+          <li><b>Progresso</b> — captura, raridade, evolução, Especialidades, missões e economia.</li>
+          <li><b>Jogadores</b> — Mercado, Troca, Social, chat e Ranking.</li>
+        </ul>
       </WikiCard>
     </div>
   )
@@ -326,77 +382,78 @@ function RaridadesTab() {
         performance e no chat.
       </WikiCard>
 
-      <WikiCard title="Lendarios">
-        Os 11 Pokemon lendarios do Dex nao aparecem em nenhuma hunt normal — eles sao exclusivos das 11{' '}
-        <b>hunts BOSS</b> do Modo Pesadelo (um confronto único e fixo por lendário, nível bem alto, sem
-        respawn). Em campo eles ganham uma escala visual 1.5x maior que o normal pra refletir o quao imponente
-        e essa luta — isso e visual/de apresentacao, a raridade sorteada neles continua seguindo a mesma
-        tabela acima. A barra de HP deles e a mesma de qualquer selvagem; a barra grande ficou sendo so do{' '}
-        <b>protetor</b> de sala/andar.
+      <WikiCard title="Lendários">
+        Os <b>{LEGENDARY_SPECIES_IDS.length} POKEs lendários</b> do Dex não aparecem em nenhuma caçada normal —
+        eles são exclusivos das <b>hunts BOSS</b> do Modo Pesadelo, uma por lendário: confronto único e fixo,
+        nível bem alto, sem respawn. Em campo eles são desenhados maiores que o normal pra refletir o tamanho
+        da luta, mas isso é apresentação: a raridade sorteada neles segue a mesma tabela acima.
+        <br />
+        <br />
+        A barra de vida deles é a mesma de qualquer selvagem. A barra grande no topo é do <b>chefe de sala</b>{' '}
+        (Guardião ou Lord), e não do lendário.
       </WikiCard>
     </div>
   )
 }
 
-function MecanicasTab() {
+// AS MECANICAS DE CAMPO, e nao mais "Mecanicas" solto (PH-507).
+//
+// A aba antiga era um balde: captura, aggro, camera, area e recarga no mesmo
+// lugar, sem nada em comum a nao ser "nao cabia nas outras seis abas". Dois
+// verbetes saem daqui pra onde eles pertencem — a captura vira `abaProgresso`
+// (ela e sobre o que voce GANHA, e o resto da economia esta la) e o campo de
+// visao vira a aba de abertura (e um controle de tela, nao uma mecanica de
+// jogo). O que sobra sao as tres regras que governam o combate em campo, e o
+// nivel do golpe de area agora vem de `TYPED_AOE_LEVEL`.
+function MecanicasDeCampoTab() {
   return (
     <div className="space-y-2">
-      <WikiCard title="Sistema de captura">
-        A captura e <b>sempre automática</b> — não existe um botão pra jogar a bola manualmente. Sempre que um
-        selvagem e derrotado (com <b>auto-catch</b> ligado no painel 🤖 Auto), o jogo tenta usar a bola
-        configurada e rola uma chance de sucesso baseada em 3 fatores: a <b>taxa de captura real</b> da
-        especie (dado da planilha/Gen2 — quanto menor, mais raro e dificil de capturar), o{' '}
-        <b>multiplicador da bola</b> usada (bolas melhores capturam mais fácil) e um multiplicador global fixo
-        de balanceamento. Todo POKE capturado entra na mochila resetado pro <b>Nível 1</b>, independente do
-        nivel que tinha em campo — e sempre carrega consigo a raridade e o status shiny que foram sorteados no
-        momento em que apareceu.
-      </WikiCard>
-
-      <WikiCard title="Odio / agressividade (lure)">
-        Cada selvagem tem um raio de <b>agressividade</b> (aggro) — a distância a partir da qual ele nota seu
-        POKE e começa a se aproximar. Esse alcance foi calibrado pra ser <b>moderado</b>: o selvagem só
-        persegue de uma distancia media, nunca do mapa inteiro. Uma vez que a perseguição começa, existe um
-        raio de <b>desistencia</b> (leash) mais generoso — se você (ou ele) se afastar demais depois de já ter
-        engajado, o selvagem desiste e volta a vagar perto do seu ponto de nascimento original, em vez de te
-        seguir pra sempre.
+      <WikiCard title="Agressividade e desistência (aggro e leash)">
+        Cada selvagem tem um raio de <b>agressividade</b> — a distância a partir da qual ele nota seu POKE e
+        começa a se aproximar. Esse alcance é <b>moderado</b> de propósito: o selvagem persegue de uma
+        distância média, nunca do mapa inteiro.
         <br />
         <br />
-        Do lado do jogador: seu POKE ativo sempre foca o inimigo vivo mais proximo no mapa inteiro (ou o shiny
-        mais proximo, se houver algum shiny vivo na hunt — prioridade automatica sobre qualquer outro alvo) e
-        redefine esse alvo a cada abate, então ele caça ativamente pelo mapa em vez de ficar parado numa unica
-        posicao esperando os selvagens virem.
-      </WikiCard>
-
-      <WikiCard title="Distância de visão (camera/FOV)">
-        A camera comeca com um campo de visao 160% maior que o padrao original (voce ve mais mapa ao redor do
-        seu POKE do que veria em 100%), tanto durante as hunts quanto na cena do Hospital. Isso e só o ponto
-        de partida — o zoom ainda pode ser ajustado livremente pelas lupas + e − a esquerda da barra de golpes
-        (so dentro de uma hunt) ou por Ctrl+Scroll do mouse, pra qualquer lado.
-      </WikiCard>
-
-      <WikiCard title="Habilidades em área (AoE)">
-        Alguns golpes (marcados com uma bolinha verde no icone da barra de habilidades) atingem{' '}
-        <b>todos os alvos</b> dentro de um raio fixo ao redor de quem usou o golpe, em vez de só um alvo único
-        — o efeito visual em campo (o anel se expandindo) e desenhado exatamente do tamanho real dessa area,
-        então dá pra ver visualmente quem vai ser atingido. Sempre que algum golpe AOE disponivel acertaria 2
-        ou mais inimigos ao mesmo tempo, a IA de combate o escolhe direto — mesmo que exista um golpe
-        single-target pronto com mais poder.
+        Uma vez começada a perseguição, existe um raio de <b>desistência</b> mais generoso: se a distância
+        entre vocês crescer demais depois do engajamento, ele desiste e volta a vagar perto de onde nasceu, em
+        vez de te seguir pra sempre.
         <br />
         <br />
-        Todo POKE, ao atingir o <b>Nível 50</b>, aprende automaticamente um golpe em área exclusivo tematizado
-        pelo seu próprio tipo elemental primario — a categoria de dano (Fisico ou Especial) desse golpe não e
-        fixa: é decidida na hora, comparando o Atk Fisico e o Atk Especial daquele POKE especifico e usando o
-        maior dos dois.
+        Do seu lado, seu POKE foca o inimigo vivo <b>mais próximo do mapa inteiro</b> — ou o <b>shiny</b> mais
+        próximo, se houver algum vivo, que tem prioridade automática sobre qualquer outro alvo — e reescolhe o
+        alvo a cada abate. Ele caça ativamente pelo mapa em vez de esperar os selvagens vierem.
       </WikiCard>
 
-      <WikiCard title="Sistema de recarga (tempo de ação)">
-        Cada golpe tem seu proprio cooldown individual, calculado a partir do PP real daquele golpe na
-        planilha: <b>menos PP significa mais tempo de recarga</b> (um golpe de 5 PP recarrega bem mais lento
-        que um de 35 PP). Esse cooldown ainda e ajustado pela <b>Velocidade</b> do seu POKE — quanto maior a
-        Velocidade, mais rapido todos os golpes recarregam. O Ataque Basico (o golpe universal de reserva que
-        todo POKE sempre tem, tipo "Struggle") e a unica excecao: seu cooldown e fixo, nao depende de PP nem
-        de Velocidade. Enquanto um golpe esta em uso, o POKE fica parado no lugar — ele so volta a se mover
-        depois que a acao termina.
+      <WikiCard title="Golpes em área (AoE)">
+        Alguns golpes — marcados com uma bolinha verde no ícone da barra de habilidades — atingem{' '}
+        <b>todos os alvos</b> dentro de um raio ao redor de quem usou, em vez de um alvo só. O anel que se
+        expande em campo é desenhado <b>exatamente do tamanho real</b> da área, então dá pra ver quem vai ser
+        atingido antes de acontecer.
+        <br />
+        <br />
+        Sempre que um golpe em área disponível acertaria <b>2 ou mais</b> inimigos ao mesmo tempo, a IA o
+        escolhe direto — mesmo que exista um golpe de alvo único pronto e mais forte.
+        <br />
+        <br />
+        Todo POKE, ao atingir o <b>Nível {TYPED_AOE_LEVEL}</b>, aprende automaticamente um golpe em área
+        exclusivo, tematizado pelo próprio tipo elemental primário. A categoria de dano dele{' '}
+        <b>não é fixa</b>: é decidida na hora, comparando o Ataque Físico e o Ataque Especial daquele POKE e
+        usando o maior dos dois — então ele nunca é o golpe errado pra quem o aprendeu.
+      </WikiCard>
+
+      <WikiCard title="Recarga — por que alguns golpes demoram tanto">
+        Cada golpe tem a própria recarga, e ela sai do <b>PP</b> real daquele golpe:{' '}
+        <b>menos PP significa mais tempo de recarga</b> — um golpe de 5 PP volta bem mais devagar que um de 35
+        PP. É a tradução do "usos limitados" dos jogos originais para um jogo que roda sozinho.
+        <br />
+        <br />
+        Em cima disso entra a <b>Velocidade</b> do seu POKE: quanto maior, mais rápido <i>todos</i> os golpes
+        recarregam. É o que faz Velocidade valer mesmo num jogo sem ordem de turno.
+        <br />
+        <br />
+        O <b>Ataque Básico</b> — o golpe de reserva que todo POKE sempre tem — é a única exceção: a recarga
+        dele é fixa e não depende de PP nem de Velocidade. E enquanto um golpe está em execução o POKE fica{' '}
+        <b>parado</b>: ele só volta a andar quando a ação termina.
       </WikiCard>
     </div>
   )
@@ -1013,32 +1070,87 @@ function TracosTab() {
   )
 }
 
-type WikiTab = 'inicio' | 'tipos' | 'raridades' | 'mecanicas' | 'tracos' | 'status' | 'combate'
+// ---------------------------------------------------------------------------
+// A NAVEGACAO EM DOIS NIVEIS (PH-507)
+// ---------------------------------------------------------------------------
+// A Wiki tinha SETE abas planas numa fileira, e a reformulacao acrescentou tres
+// blocos de conteudo que nunca existiram (Mundo, Progresso, Jogadores). Onze
+// abas planas nao e uma opcao: `SegmentedTabs` rola na horizontal no celular a
+// partir de cinco, e uma fileira rolavel de onze e o mesmo que esconder seis
+// delas — o jogador nao sabe procurar o que ele nao ve.
+//
+// A SAIDA E AGRUPAR POR PERGUNTA, e nao por sistema. Cada grupo responde uma:
+//
+//   Começando   "acabei de entrar, o que eu faco?"
+//   Mundo       "pra onde eu vou?"
+//   Combate     "por que esse numero de dano?"
+//   Progresso   "como eu fico mais forte?"
+//   Jogadores   "como eu negocio com outra pessoa?"
+//
+// Cinco cabem na fileira sem rolagem no celular, que era o limite medido.
+//
+// POR QUE O SEGUNDO NIVEL SO EXISTE EM DOIS GRUPOS. Combate tem quatro
+// ferramentas pesadas (a tabela 18x18, os status, as formulas, as traits) e
+// Progresso tem duas (a tabela de raridade e o resto). Empilhar as quatro de
+// Combate num scroll unico dariam ~700 linhas de rolagem pra chegar na ultima.
+// Mundo, Começando e Jogadores sao prosa curta e cabem empilhados — dar a eles
+// uma segunda fileira de botoes seria navegacao a mais pra conteudo de menos.
+type Grupo = 'comecando' | 'mundo' | 'combate' | 'progresso' | 'jogadores'
+type SubCombate = 'tipos' | 'campo' | 'numeros' | 'status' | 'tracos'
+type SubProgresso = 'geral' | 'raridade'
+
+const GRUPOS: { value: Grupo; label: string }[] = [
+  { value: 'comecando', label: 'Começando' },
+  { value: 'mundo', label: 'Mundo' },
+  { value: 'combate', label: 'Combate' },
+  { value: 'progresso', label: 'Progresso' },
+  { value: 'jogadores', label: 'Jogadores' },
+]
+
+const SUB_COMBATE: { value: SubCombate; label: string }[] = [
+  { value: 'tipos', label: 'Tipos' },
+  { value: 'campo', label: 'Em campo' },
+  { value: 'numeros', label: 'Dano' },
+  { value: 'status', label: 'Status' },
+  { value: 'tracos', label: 'Natureza' },
+]
+
+const SUB_PROGRESSO: { value: SubProgresso; label: string }[] = [
+  { value: 'geral', label: 'Progressão' },
+  { value: 'raridade', label: 'Raridade e Shiny' },
+]
 
 export function WikiMenu() {
-  const [tab, setTab] = useState<WikiTab>('inicio')
+  const [grupo, setGrupo] = useState<Grupo>('comecando')
+  const [subCombate, setSubCombate] = useState<SubCombate>('tipos')
+  const [subProgresso, setSubProgresso] = useState<SubProgresso>('geral')
+
   return (
     <div className="flex flex-col gap-[.55em]">
-      <SegmentedTabs
-        value={tab}
-        onChange={setTab}
-        options={[
-          { value: 'inicio', label: 'Primeiros Passos' },
-          { value: 'tipos', label: 'Efetividade' },
-          { value: 'raridades', label: 'Raridades' },
-          { value: 'mecanicas', label: 'Mecânicas' },
-          { value: 'tracos', label: 'Natureza e Habilidade' },
-          { value: 'status', label: 'Status' },
-          { value: 'combate', label: 'Combate' },
-        ]}
-      />
-      {tab === 'inicio' && <InicioTab />}
-      {tab === 'tipos' && <TiposTab />}
-      {tab === 'raridades' && <RaridadesTab />}
-      {tab === 'mecanicas' && <MecanicasTab />}
-      {tab === 'tracos' && <TracosTab />}
-      {tab === 'status' && <StatusTab />}
-      {tab === 'combate' && <CombateTab />}
+      <SegmentedTabs value={grupo} onChange={setGrupo} options={GRUPOS} />
+
+      {grupo === 'comecando' && <ComecandoTab />}
+      {grupo === 'mundo' && <MundoTab />}
+      {grupo === 'jogadores' && <JogadoresTab />}
+
+      {grupo === 'combate' && (
+        <>
+          <SegmentedTabs value={subCombate} onChange={setSubCombate} options={SUB_COMBATE} />
+          {subCombate === 'tipos' && <TiposTab />}
+          {subCombate === 'campo' && <MecanicasDeCampoTab />}
+          {subCombate === 'numeros' && <CombateTab />}
+          {subCombate === 'status' && <StatusTab />}
+          {subCombate === 'tracos' && <TracosTab />}
+        </>
+      )}
+
+      {grupo === 'progresso' && (
+        <>
+          <SegmentedTabs value={subProgresso} onChange={setSubProgresso} options={SUB_PROGRESSO} />
+          {subProgresso === 'geral' && <ProgressoTab />}
+          {subProgresso === 'raridade' && <RaridadesTab />}
+        </>
+      )}
     </div>
   )
 }
