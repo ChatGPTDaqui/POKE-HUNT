@@ -13,7 +13,7 @@
 //    era workaround pra nao reconstruir DOM interativo debaixo do ponteiro.
 //    Aqui as contagens saem de selectors do Zustand.
 //  - `controller.save()` apos cada mutacao: o `persist` grava sozinho.
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Warning } from '@phosphor-icons/react'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
@@ -21,6 +21,7 @@ import { getEncounter } from '@/data/enemies'
 import { BEST_POTION_OPTION } from '@/engine/systems/autoSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
+import { useTutorialStore, TUTORIAL_BOT } from '@/stores/tutorialStore'
 import { GameButton, GameCheck, GameInput, GameSelect, GameSwitch, SegmentedTabs } from '@/components/game/controls'
 import { estoqueDoItemDeRegra, itensEmUso, LIMIAR_ESTOQUE_BAIXO, FAMILIA_REVIVE } from './estoqueBaixo'
 import { usePrevisaoDeConsumo, formatarTempoRestante, rotuloDoRecurso } from './consumo'
@@ -447,6 +448,23 @@ const ABAS: { value: AbaDoBot; label: string }[] = [
  */
 export function AutoPanel() {
   const [aba, setAba] = useState<AbaDoBot>('automacoes')
+
+  // O tutorial do Bot dispara ao ABRIR este painel, e nao no primeiro boot
+  // (PH-507).
+  //
+  // Ele ERA o primeiro contato do jogador com o jogo: 6 passos sobre regra por
+  // especie, prioridade de bola e comportamento em hunt BOSS, antes de ele ter
+  // visto uma hunt. Nenhum daqueles passos se decide sem o painel na frente.
+  // Aqui a informacao chega no momento em que ela serve — o jogador acabou de
+  // abrir os interruptores e precisa saber quais estao ligados.
+  //
+  // Sem `[]` proposital: o painel monta a cada abertura, e e a montagem que e o
+  // gesto. `abrirSeInedito` cuida do "uma vez so" e de nao empilhar com outro
+  // tutorial ja aberto.
+  useEffect(() => {
+    useTutorialStore.getState().abrirSeInedito(TUTORIAL_BOT)
+  }, [])
+
   return (
     <div className="flex flex-col gap-[.5em] text-[.8em]">
       <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
