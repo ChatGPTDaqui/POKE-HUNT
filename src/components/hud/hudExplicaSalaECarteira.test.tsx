@@ -94,7 +94,7 @@ describe('o chip de sala explica o que e uma sala (PH-165)', () => {
     //
     //   "o protetor esta vivo" — verdadeiro desde o primeiro segundo da sala.
     //   Tambem nao corta: visto na tela, a sala 9 recem-entrada, com 0 de 30
-    //   abates, ja ensinava a regra do Lorde.
+    //   abates, ja ensinava a regra do Lord.
     //
     // O corte tem de ser a QUOTA FECHADA, o mesmo predicado do aviso "Derrote o
     // Guardiao" que o chip ja mostra. Ele importa porque a soma dos dois
@@ -106,7 +106,7 @@ describe('o chip de sala explica o que e uma sala (PH-165)', () => {
     // Sala em andamento, protetor vivo: a regra AINDA nao aparece.
     render(<SalaChip />)
     tocar(screen.getByText(NOME_DA_SALA))
-    expect(screen.queryByText(/Guardião e Lorde/)).toBeNull()
+    expect(screen.queryByText(/Guardião e Lord/)).toBeNull()
 
     // Quota fechada e sala parada: agora sim, e e a resposta pra "por que 30/30
     // nao avanca".
@@ -114,14 +114,14 @@ describe('o chip de sala explica o que e uma sala (PH-165)', () => {
     porNaSala(2, ABATES_POR_SALA)
     render(<SalaChip />)
     tocar(screen.getByText(NOME_DA_SALA))
-    expect(screen.getByText(/Guardião e Lorde/)).toBeTruthy()
+    expect(screen.getByText(/Guardião e Lord/)).toBeTruthy()
 
     // Mesma sala fechada, protetor ja derrubado: a regra sai e a bolha encolhe.
     cleanup()
     useWorldStore.setState({ protetorResolvido: true } as never, false)
     render(<SalaChip />)
     tocar(screen.getByText(NOME_DA_SALA))
-    expect(screen.queryByText(/Guardião e Lorde/)).toBeNull()
+    expect(screen.queryByText(/Guardião e Lord/)).toBeNull()
     // O verbete de sala continua — quem saiu foi so o segundo.
     expect(screen.getByText(new RegExp(`de ${SALAS_POR_ESTAGIO[0]} a ${SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1]} salas`))).toBeTruthy()
   })

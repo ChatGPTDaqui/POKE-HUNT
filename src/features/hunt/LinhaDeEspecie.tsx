@@ -54,17 +54,17 @@ function TagDeProtetor({ guardian, lord }: { guardian: boolean; lord: boolean })
     <span
       title={
         lord && guardian
-          ? 'Pode aparecer como Guardian nas salas iniciais e como Lord na última'
+          ? 'Pode aparecer como Guardião nas salas iniciais e como Lord na última'
           : lord
             ? 'Pode aparecer como Lord na última sala do estágio'
-            : 'Pode aparecer como Guardian nas salas iniciais'
+            : 'Pode aparecer como Guardião nas salas iniciais'
       }
       className={cn(
         'shrink-0 rounded-[.3em] px-[.35em] py-[.05em] text-[.68em] font-bold',
         ehLord ? 'bg-gold/20 text-gold' : 'bg-[#ff4d4d26] text-[#ff6b6b]',
       )}
     >
-      {ehLord ? '★ LORD' : '★ GUARDIAN'}
+      {ehLord ? '★ LORD' : '★ GUARDIÃO'}
     </span>
   )
 }
