@@ -35,13 +35,19 @@ import {
   ABATES_POR_SALA, ABATES_COMUNS_POR_SALA, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, LOOT,
   type SubBiomaDef,
 } from '@/data/biomas'
-import { estagioId, parseEstagioId, pesosDoEstagio, quantidadeDeSalas } from '@/data/estagios'
+import {
+  estagioId, parseEstagioId, parseEstagioIdOuEspelho, pesosDoEstagio, quantidadeDeSalas,
+} from '@/data/estagios'
 import { estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
-import { POOL_POR_SALA, aparaOTeto } from '@/data/huntSpawnOverrides'
+import { POOL_POR_SALA, aparaOTeto, raizDaLinha } from '@/data/huntSpawnOverrides'
+import { ELENCO_POR_ESTAGIO } from '@/data/generated/elencoPorEstagio.generated'
+// `pesosPorTier` e as faixas de chefe continuam aqui, e SO pro protetor: o
+// elenco de Guardian/Lord vem do pool de chefe do PokeRogue, que e dado que os
+// jogos reais nao tem (nao existe chefe de sala neles). O sorteio SELVAGEM
+// deixou de usar tier na PH-503 — ver `pesosDaSala`.
 import {
-  pesosPorTier, tierDaEspecie, TIERS_SELVAGENS, TIERS_DE_PROTETOR,
-  CHANCE_DO_TIER_DE_PROTETOR,
+  pesosPorTier, TIERS_DE_PROTETOR, CHANCE_DO_TIER_DE_PROTETOR,
 } from '@/data/spawnPorTier'
 import { SUB_BIOMA_TIERS } from '@/data/generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from '@/data/generated/spawnTiers.generated'
@@ -282,52 +288,136 @@ export interface ContextoDeSpawn {
 const cacheDePesos = new Map<string, Map<string, number>>()
 
 /**
- * Pesos do pool ativo: tier do PokeRogue decide a fatia, tier real de encontro
- * dos jogos desempata dentro dela, teto de fatia apara o que sobrar.
+ * Pesos do pool ativo: a fatia da LINHA sai da tabela de elenco
+ * (`ELENCO_POR_ESTAGIO`, PH-502), repartida entre as FORMAS que a janela de
+ * nivel da sala alcanca.
  *
- * A CHANCE VEM DO TIER, E NAO MAIS DO PESO DO ENCONTRO. O peso guardado em
- * `encounter.weight` e a frequencia real da especie nos jogos (Gen1/Gen2 por
- * disassembly, Gen3 por pokeemerald) e ele continua valendo onde nao ha
- * sub-bioma — hunt inicial, hunts BOSS, Campeao Lance. Dentro de uma sala ele
- * vira DESEMPATE: quem manda e o tier que o PokeRogue da aquela especie
- * NAQUELE lugar, que e a informacao que faltava (o mesmo Zubat e comum na
- * caverna e nao existe na praia, e um numero global nao sabe disso).
+ * A PILHA DE QUATRO CAMADAS SAIU DAQUI (PH-503). Ate a PH-502 a chance era o
+ * produto de: peso de sub-bioma, faixa de tier do PokeRogue, desempate pelo
+ * `spawn_tier` real limitado a 4:1, e o teto de fatia. Medido nas 1.815 salas do
+ * jogo, a ULTIMA dominava — 1.355 delas (75%) tinham a especie mais comum
+ * travada em exatamente 35%, e a mediana da fatia do top-1 no jogo inteiro era
+ * 35,0%. O numero que o jogador via era o teto, e nao um desenho.
  *
- * Especie sem tier no sub-bioma cai em COMMON. Nao e defesa: acontece de
- * verdade quando o pool da sala nao tem ninguem na janela de nivel e o fallback
- * traz o `enemyPool` da hunt inteira, com especie de sub-bioma vizinho junto.
+ * Agora a fatia vem de uma tabela por (sub-bioma, estagio) que soma 1 por
+ * construcao, montada do encontro REAL dos jogos (pret/pokered,
+ * pret/pokecrystal, pret/pokeemerald) com o pool do PokeRogue preenchendo o que
+ * o dado real nao cobre. Sem faixa de tier, sem colapso de tier vazio, sem
+ * limite de razao no desempate. O teto continua, mas como apara de extremo:
+ * medido, ele morde em 21% das tabelas em vez de 75% das salas.
+ *
+ * A REPARTICAO DENTRO DA LINHA E PELA SOBREPOSICAO COM A JANELA, e ela importa
+ * nas salas em que o gatilho de evolucao cai no meio: um estagio 1 com janela
+ * Lv 5-8 alcanca Caterpie (1-6) e Metapod (7-9), e a fatia da linha se divide
+ * 2:2 entre os dois. Repartir igual daria o mesmo resultado aqui e o resultado
+ * errado numa janela Lv 6-9, onde Caterpie cabe em um nivel e Metapod em tres.
+ *
+ * Linha da tabela sem nenhuma forma no pool tem a fatia DESCARTADA e o resto e
+ * renormalizado — e o caso do fallback, quando a sala nao tem ninguem na janela
+ * e entra o `enemyPool` da hunt inteira, com encontro de sub-bioma vizinho que
+ * esta tabela nao conhece.
  *
  * Memoizado porque `contextoDeSpawn` roda a cada spawn (milhares de vezes por
  * flush no farm offline) e a resposta so depende de (mapa, sub-bioma, indice da
  * sala) — a janela de nivel sai do indice, e o pool sai dos dois. O cache e
  * limitado por construcao: mapas com sala x sub-biomas deles x salas do estagio.
  */
-function pesosDaSala(chave: string, subBioma: string, pool: string[]): Map<string, number> {
+function pesosDaSala(
+  chave: string, subBioma: string, estagio: number | null,
+  pool: string[], janela: [number, number] | null,
+): Map<string, number> {
   const pronto = cacheDePesos.get(chave)
   if (pronto) return pronto
-  const pesos = aparaOTeto(pesosPorTier(
-    pool,
-    (id) => {
-      const sp = getEncounter(id)?.speciesId
-      const tier = sp ? tierDaEspecie(subBioma, sp) : null
-      return tier == null ? 0 : TIERS_SELVAGENS.indexOf(tier)
-    },
-    (id) => {
-      const sp = getEncounter(id)?.speciesId
-      return sp ? SPAWN_WEIGHT_BY_SPECIES[sp] ?? 0 : 0
-    },
-  ))
-  cacheDePesos.set(chave, pesos)
-  return pesos
+
+  const tabela = estagio == null ? undefined : ELENCO_POR_ESTAGIO[subBioma]?.[estagio]
+  const fatiaDaLinha = new Map<string, number>(tabela ?? [])
+
+  // Agrupa o pool ativo por linha evolutiva: e a linha que carrega a fatia.
+  const porLinha = new Map<string, string[]>()
+  for (const id of pool) {
+    const sp = getEncounter(id)?.speciesId
+    if (!sp) continue
+    const raiz = raizDaLinha(sp)
+    const lista = porLinha.get(raiz)
+    if (lista) lista.push(id)
+    else porLinha.set(raiz, [id])
+  }
+
+  const pesos = new Map<string, number>()
+  for (const [raiz, ids] of porLinha) {
+    const fatia = fatiaDaLinha.get(raiz) ?? 0
+    if (!(fatia > 0)) continue
+    // `janela` NULA E O MODO DE RECUO, e ali ela nao pode pesar.
+    //
+    // BUG REAL QUE ISTO CONSERTA, pego pela guarda "todo pool de sala fecha o
+    // sorteio com o peso DA SALA": `industrial_e3/factory#4/machop` saia com
+    // peso ZERO. No recuo o pool inteiro da sala entra, inclusive forma que a
+    // janela NAO alcanca — e a sobreposicao dela e 0. Com a irma alcancando, a
+    // fatia da linha ia inteira pra irma e a forma fora da janela ficava
+    // insorteavel dentro de um pool que a anuncia.
+    //
+    // Nao da pra "so tratar o zero": o recuo existe porque a janela nao serviu
+    // ali, entao repartir por sobreposicao no recuo e usar o criterio que acabou
+    // de ser abandonado. Reparte igual entre as formas da linha.
+    //
+    // Fora do recuo o zero nao acontece por construcao: `naJanela` so aceita
+    // encontro cujo intervalo INTERSECTA a janela, e intersecao garante
+    // sobreposicao de pelo menos 1 nivel.
+    const sobreposicao = janela == null ? null : ids.map((id) => {
+      const enc = getEncounter(id)
+      if (!enc) return 0
+      return Math.max(0, Math.min(enc.maxLevel, janela[1]) - Math.max(enc.minLevel, janela[0]) + 1)
+    })
+    const soma = sobreposicao?.reduce((a, b) => a + b, 0) ?? 0
+    ids.forEach((id, i) => {
+      pesos.set(id, fatia * (sobreposicao && soma > 0 ? sobreposicao[i] / soma : 1 / ids.length))
+    })
+  }
+
+  // Nenhuma linha do pool esta na tabela: acontece so no fallback de sub-bioma
+  // vizinho. Peso igual pra todos, que e o mesmo que o pool inteiro sem
+  // informacao — melhor que sala que nao spawna nada.
+  if (pesos.size === 0) for (const id of pool) pesos.set(id, 1 / pool.length)
+
+  const total = [...pesos.values()].reduce((a, b) => a + b, 0)
+  if (total > 0) for (const [id, p] of pesos) pesos.set(id, p / total)
+
+  const aparado = aparaOTeto(pesos)
+  cacheDePesos.set(chave, aparado)
+  return aparado
 }
+
+/**
+ * Quantas especies uma sala precisa poder sortear. Abaixo disto o recorte por
+ * janela de nivel e ABANDONADO e vale o pool inteiro da sala.
+ *
+ * ERA "PELO MENOS UMA" ATE A PH-503, E ESSE PISO NAO SEGURAVA O PIOR CASO DO
+ * JOGO. Medido com a tabela de elenco nova: `urbano_e3/dojo` na sala 4 ficava
+ * com pool de UM — Meditite em 100% da sala — e `industrial_e5/factory` com
+ * dois, Machoke em 60%. Nao e defeito da tabela (o gerador tranca tabela de uma
+ * linha so): e a janela de nivel da sala, que num estagio de 4 salas cobre 2 ou
+ * 3 niveis e pode alcancar uma unica FORMA.
+ *
+ * Trinta abates numa sala de uma especie so e o pior tipo de sala que existe:
+ * nao ha variedade, nao ha Pokedex e a barra nao anda mais rapido por isso.
+ * Alargar o recorte custa o oposto — um bicho um pouco fora do nivel da sala —
+ * e isso e barato, porque o nivel do spawn e APARADO na faixa do proprio
+ * encontro (`simulation.ts`: `lo = max(enc.minLevel, min(jmin, enc.maxLevel))`),
+ * entao nada nasce fora do que aquela forma permite.
+ *
+ * TRES, e nao dois, pelo mesmo motivo de `MINIMO_DE_CANDIDATOS_A_PROTETOR`: com
+ * dois, a apara de teto nao se aplica (`POOL_MINIMO_PRA_TETO` e 3) e um deles
+ * pode ficar com 60% ou mais.
+ */
+export const MINIMO_DE_ESPECIES_NA_SALA = 3
 
 /**
  * O que pode nascer AGORA: o pool da sala, recortado pela janela de nivel dela.
  *
- * O recorte tem fallback: se nenhum encontro da sala alcanca a janela (a sala 1
- * de uma faixa cujo sub-bioma so tem forma evoluida, por exemplo), vale o pool
- * inteiro da sala. Sala que nao spawna nada e pior que sala fora do nivel — o
- * jogador ficaria num mapa vazio sem nenhum erro na tela.
+ * O recorte tem fallback: se a janela alcanca menos de
+ * `MINIMO_DE_ESPECIES_NA_SALA` encontros (a sala 1 de um estagio cujo sub-bioma
+ * so tem forma evoluida, por exemplo), vale o pool inteiro da sala. Sala que
+ * spawna uma especie so e pior que sala fora do nivel.
  */
 export function contextoDeSpawn(
   mapId: string,
@@ -344,8 +434,17 @@ export function contextoDeSpawn(
     const enc = getEncounter(id)
     return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0]
   })
-  const ativo = naJanela.length > 0 ? naJanela : pool
-  const pesos = pesosDaSala(`${mapId}|${sala.chave}|${sala.indice}`, sala.chave, ativo)
+  const noRecuo = naJanela.length < MINIMO_DE_ESPECIES_NA_SALA
+  const ativo = noRecuo ? pool : naJanela
+  // O ESPELHO DO PESADELO USA A TABELA DA HUNT DE ORIGEM, e por isso o parse e o
+  // permissivo. Ele copia a geometria e o elenco e so desloca o nivel em +100
+  // (nightmareMaps.ts), entao a composicao do estagio 7 do Marinho vale igual no
+  // `nightmare_marinho_e7` — o que muda e a forca do bicho, nao quem ele e.
+  const doMapa = parseEstagioIdOuEspelho(mapId)
+  const pesos = pesosDaSala(
+    `${mapId}|${sala.chave}|${sala.indice}`, sala.chave, doMapa?.estagio ?? null, ativo,
+    noRecuo ? null : janela,
+  )
   return { pool: ativo, janela, peso: (id) => pesos.get(id) ?? 0 }
 }
 

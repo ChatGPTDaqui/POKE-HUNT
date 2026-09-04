@@ -8,6 +8,33 @@
 > uma arquitetura que não roda mais. Ver [13](13-divergencias-conhecidas.md) para o registro
 > dessa classe de erro ("sistema inteiro faltando/trocado", não só constante desatualizada).
 
+> ## ⚠ Estado deste documento — atrasado, e o aviso acima vale para ele mesmo (PH-505)
+>
+> **Este documento está atrás de três levas.** O parágrafo acima diz, sobre a versão anterior
+> dele, que manter conteúdo velho como se fosse atual "seria pior que não ter documento nenhum:
+> alguém tomaria decisão de balanceamento em cima de uma arquitetura que não roda mais". Ele
+> está nesse estado. O bloco abaixo é o aviso, **não é o conserto** — a reescrita é a PH-505.
+>
+> Remendar as três linhas que a leva mais recente invalidou, deixando 41 menções a "faixa" de
+> pé, produziria um documento metade novo e metade morto — pior de ler que um honestamente
+> marcado como atrasado.
+>
+> | O que o documento diz | O que vale hoje | Quem mudou |
+> |---|---|---|
+> | "Camada 2 — faixa", "as 3 faixas são contíguas", `faixa1`/`faixa2`/`faixa3` (41 menções) | **ESTÁGIO**: 10 por bioma, 10 níveis cada, teto Lv 100 — `data/estagios.ts` | PH-425/434, 02/09 |
+> | "Existe uma hunt por bioma × faixa" | **120 hunts** (12 biomas × 10 estágios) | PH-426 |
+> | "Gate esperado: faixa1/faixa2 abertas, faixa3 e Pesadelo só pelo Lance" | `GRUPOS_INICIAIS = ['biomas']`, `GRUPOS_DO_LANCE = ['nightmare']`; o gate de conteúdo é o ESTÁGIO | PH-430/432 |
+> | Seção "Terceiras evoluções em 0,2%", com `SHARE_TERCEIRA_EVOLUCAO` e `LIMITE_ZONA_DE_FINAIS` | **as duas constantes não existem mais em `src/` nenhum.** Quem limita concentração é `TETO_DE_FATIA` por SALA e `MINIMO_DE_ESPECIES_NA_SALA` | — |
+> | Camada 1: "quem aparece em cada sub-bioma vem de `subBiomas.generated.ts`, derivado das pools do PokeRogue" | a chance e o elenco vêm de **`generated/elencoPorEstagio.generated.ts`**, montado do encontro real de Gen I-III (pret/pokered, pokecrystal, pokeemerald). O PokeRogue é **preenchimento** do que o dado real não cobre, e a fonte única dos 11 sub-biomas sem análogo (`town`, `jungle`, `snowy-forest`, `metropolis`, `slum`, `dojo`, `construction-site`, `factory`, `fairy-cave`, `abyss`, `space`) | PH-498→504, 04/09 |
+> | Camada 1: `peso` do sub-bioma decide a chance da sala | quem sorteia a sala usa a **curva de profundidade** (`estagios.ts#pesosDoEstagio`), não o `peso` base. `salaSystem#distribuicaoDeSala` é a fonte única disso, e a tela lê a mesma função | PH-476, e PH-497 no lado da tela |
+> | "Nenhuma espécie passa de 35% de uma hunt com 5+ espécies" | o teto é medido **por SALA, em todo índice**; e há guardas novas em `elencoPorEstagio.test.ts` e `cartaoDaHuntBateNoSorteio.test.ts` que esta lista não menciona | PH-498→504 |
+> | "Hunt inicial: só Sentret/Hoothoot/Rattata (todos NORMAL), 80/20 Lv1/Lv2" | **9 espécies**, pesos 76/21/3 em Lv 1-3, e ela deixou de ser só-NORMAL de propósito | PH-259 e a leva do Lv3 |
+>
+> **Enquanto este bloco existir, a fonte é o código**, e o comentário de topo de cada arquivo
+> citado acima carrega o porquê da decisão. Uma coisa que o documento acerta e que continua
+> valendo inteira: a lista de invariantes existe porque **toda falha aqui é silenciosa** — uma
+> espécie sem hunt continua no Bestiário, com sprite e moveset, e só nunca aparece.
+
 ## Como uma hunt é montada hoje
 
 Tudo em `src/data/huntSpawnOverrides.ts`, `biomas.ts` e `spawnStrength.ts`, em runtime:
