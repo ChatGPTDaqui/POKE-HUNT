@@ -6,6 +6,7 @@
 // sempre. Assim cada tela tem um caminho so, e ligar/desligar a autoridade nao
 // exige mexer em nenhuma tela.
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
+import { sanearAutoToggles } from '@/stores/gameStateDefaults'
 import { useToastStore } from '@/stores/toastStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { servidor, servidorAtivo, ErroServidor, detalheDeErro, type RespostaFlush } from './servidor'
@@ -983,7 +984,15 @@ export function sincronizarAuto(): void {
   void executarAcaoRpc({
     tipo: 'configurarAuto',
     patch: {
-      toggles: s.autoToggles,
+      // PH-494: FILTRADO na saída também, e não só na entrada
+      // (`playerMapper`). A fronteira de leitura é o conserto; este aqui é o
+      // que não depende de todo caminho futuro pro store passar por lá.
+      //
+      // Custa um `Object.keys` por sincronização e compra o seguinte: uma
+      // chave que o jogo não conhece NUNCA sai daqui, e a RPC — que valida por
+      // lista branca com `raise` e derruba a transação inteira — não tem como
+      // reprovar o batch por causa de lixo herdado do banco.
+      toggles: sanearAutoToggles(s.autoToggles),
       catchConfig: s.autoCatchConfig,
       potRules: s.autoPotRules,
       catchRules: s.autoCatchRules,
@@ -1038,7 +1047,10 @@ export function sincronizarAutoAoSair(): void {
   if (!servidorAtivo()) return
   const s = useGameStateStore.getState()
   const patch = {
-    toggles: s.autoToggles,
+    // PH-494: mesmo filtro do . Este caminho e o do fechamento
+    // da aba (), e uma chave orfa aqui reprovaria a ULTIMA gravacao
+    // da sessao — a que ninguem ve falhar, porque a aba ja fechou.
+    toggles: sanearAutoToggles(s.autoToggles),
     catchConfig: s.autoCatchConfig,
     potRules: s.autoPotRules,
     catchRules: s.autoCatchRules,
