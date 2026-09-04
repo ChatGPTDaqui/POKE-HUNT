@@ -180,7 +180,22 @@ async function medir() {
     })
     flushes++
     if (!r.ok) {
-      console.log(`  flush #${flushes}: HTTP ${r.status} em ${seg(agora() - t0)}s — nao conta pra medida`)
+      console.log(`  flush #${flushes}: HTTP ${r.status} em ${seg(agora() - t0)}s`)
+      // 409 NAO E RUIDO: e "nenhuma sessao aberta" (appSessao.ts), ou seja
+      // ALGUEM MAIS mexeu na conta de teste — outra bancada, outro processo, ou
+      // uma aba aberta. Daqui pra frente o que o script mede nao e mais a sala
+      // do jogo, e sim a disputa entre dois donos da mesma sessao.
+      //
+      // ABORTA COMO INCONCLUSIVO, e nao continua. ACONTECEU NA PRIMEIRA
+      // MEDICAO: rodei o `abrir-hunt-em-producao.mjs` na mesma conta enquanto
+      // esta media, o `finally` dele fechou a sessao daqui, e o log encheu de
+      // 409 aos 28/30. Se o script tivesse seguido em silencio ate o teto, a
+      // leitura teria sido "TRAVADA" — e eu teria cacado um bug que nao existe.
+      if (r.status === 409) {
+        console.log('\nINCONCLUSIVO: a sessao foi fechada por outro processo (HTTP 409).')
+        console.log('Rode esta bancada SOZINHA — sem outra bancada nem aba do jogo na conta de teste.')
+        return 2
+      }
       if (agora() - inicio > TETO_PARA_FECHAR_QUOTA_S * 1000) return 2
       continue
     }
