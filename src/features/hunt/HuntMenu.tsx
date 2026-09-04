@@ -19,7 +19,7 @@ import { bloqueioDoEstagio, bloqueioDoLance, type ProgressoPorBioma } from '@/da
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { MapaDeBiomas, TrilhaDoBioma } from './TrilhaDeEstagios'
 import { POOL_POR_SALA, STARTER_HUNT_ID } from '@/data/huntSpawnOverrides'
-import { contextoDeSpawn } from '@/engine/systems/salaSystem'
+import { contextoDeSpawn, distribuicaoDeSala } from '@/engine/systems/salaSystem'
 import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
 import { SPECIES, type Species } from '@/data/pokes'
@@ -147,8 +147,36 @@ function salasDaHunt(mapId: string): { sub: SubBiomaDef; pool: string[] }[] {
  *
  *   P(especie) = (1/SALAS) x SOMA_indice SOMA_sub  P(sub) x peso(sub, indice)
  *
- * Cada indice de sala pesa igual porque o ciclo passa uma vez por cada um; o
- * sub-bioma pesa pelo `peso` dele em data/biomas.ts.
+ * Cada indice de sala pesa igual porque o ciclo passa uma vez por cada um.
+ *
+ * O `P(sub)` VEM DE `distribuicaoDeSala`, E ISSO E O CONSERTO DA PH-497. Ate
+ * aqui ele saia de `sub.peso` — o peso BASE de data/biomas.ts, que e uma media
+ * de bioma inteiro ("10 = corriqueiro, 3 = o lugar raro"). Mas quem sorteia a
+ * sala e `salaSystem#sortearSala`, e ele usa a CURVA DE PROFUNDIDADE de
+ * data/estagios.ts, que muda do estagio 1 ao 10. Sao dois numeros diferentes, e
+ * o cartao anunciava o que o motor nao faz.
+ *
+ * MEDIDO NOS 120 ESTAGIOS ANTES DO CONSERTO: divergencia media de 19,6 pontos
+ * percentuais, e 41 pares (estagio, sub-bioma) que a tela anunciava e o motor
+ * NUNCA sorteia. Os piores:
+ *
+ *   subterraneo_e1       Caverna         tela 63%  x  motor  0%
+ *   gelido_e1            Caverna de Gelo tela 63%  x  motor  0%
+ *   aguas_interiores_e10 Lago            tela 63%  x  motor  0%
+ *   marinho_e10          Leito Oceanico  tela 16%  x  motor 79%
+ *
+ * `estagios.ts#pesosDoEstagio` diz, no proprio comentario, que a tela e o
+ * sorteio precisam ler a MESMA funcao "senao a tela promete uma composicao e a
+ * sala entrega outra". A tela era quem estava fora. Como este mesmo `huntOdds`
+ * decide a cor do cartao (`huntSwatchColor`, pelo tipo dominante), a cor tambem
+ * saia do numero errado.
+ *
+ * POR QUE NENHUM TESTE PEGOU: `hunts.test.ts` tinha "as chances mostradas em
+ * cada hunt somam 100%", e somar 100 nao diz nada sobre estar certo — uma
+ * distribuicao errada normalizada tambem soma 100. E o mesmo modo de falha da
+ * PH-476 (a trilha comparava a si mesma com a tabela de dados, e as duas
+ * concordavam porque nenhuma das duas era o sorteio), um nivel acima. A guarda
+ * nova compara `P(sub)` da tela com `distribuicaoDeSala` par por par.
  *
  * O INDICE ENTRA NA CONTA, E ELE NAO ENTRAVA. A versao anterior somava
  * `P(sala) x peso do encontro / soma do pool` uma vez por sub-bioma, e isso
@@ -176,9 +204,16 @@ export function huntOdds(map: HuntMapDef): HuntOdds {
     // caminho do jogador, entao o cartao anunciava especie que aquele estagio
     // nunca sorteia. A soma continuava dando 100%, o que esconde o erro.
     const totalDeSalas = quantidadeDeSalas(map.id)
-    const somaPesoDeSala = salas.reduce((s, x) => s + x.sub.peso, 0)
+    // A MESMA distribuicao que `sortearSala` aplica, e ja normalizada pra somar
+    // 1 sobre os sub-biomas ALCANCAVEIS neste estagio — nao ha o que
+    // renormalizar aqui, e sub-bioma que a curva zerou simplesmente nao vem.
+    const distribuicao = distribuicaoDeSala(map.id)
     for (const { sub } of salas) {
-      const pSala = sub.peso / somaPesoDeSala / totalDeSalas
+      const pSala = (distribuicao[sub.chave] ?? 0) / totalDeSalas
+      // Peso zero e AUSENCIA (ver `pesoDeSorteioDaSala`): o sub-bioma nao existe
+      // neste estagio, e somar 0 seria so gastar 3 a 8 chamadas de
+      // `contextoDeSpawn` por sub-bioma pra nao mudar nada.
+      if (!(pSala > 0)) continue
       for (let indice = 0; indice < totalDeSalas; indice++) {
         const ctx = contextoDeSpawn(
           map.id, map.levelRange, { chave: sub.chave, indice, abates: 0, ciclos: 0 }, map.enemyPool,
@@ -201,6 +236,14 @@ export function huntOdds(map: HuntMapDef): HuntOdds {
   const species = encounters
     .map((enc) => ({ id: enc.id, species: SPECIES[enc.speciesId], pct: (pesoPorEncontro.get(enc.id) ?? 0) * 100 }))
     .filter((entry) => entry.species != null)
+    // CHANCE ZERO SAI DA LISTA (PH-497). `map.enemyPool` e a uniao dos pools de
+    // TODOS os sub-biomas do bioma, e a curva de profundidade zera parte deles
+    // em cada estagio — entao ha especie no pool da hunt que este estagio nao
+    // pode produzir. Ate aqui ela aparecia com um numero errado e diferente de
+    // zero, o que escondia o problema; com o P(sala) certo ela apareceria como
+    // "0.0%", que e uma linha pior: uma lista chamada "Pokemons de Marinho 10"
+    // anunciando um Krabby que aquele estagio nunca sorteia.
+    .filter((entry) => entry.pct > 0)
     .sort((a, b) => b.pct - a.pct)
 
   const typeTotals = new Map<ElementType, number>()
