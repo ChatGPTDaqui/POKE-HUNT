@@ -84666,6 +84666,43 @@ function melhorCuraDeStatus(gameState, status) {
 function melhorRevive(gameState) {
 	return Object.values(ITEMS).filter((item) => "kind" in item && item.kind === "revive" && item.reviveHpPercent != null && gameState.hasItem(item.id, 1)).sort((a, b) => a.buyPrice - b.buyPrice)[0] ?? null;
 }
+/**
+* O POKE desmaiado tem como voltar sozinho? UMA fonte pra essa pergunta.
+*
+* ---------------------------------------------------------------------------
+* ELA EXISTE POR CAUSA DE UM BUG DE PRODUCAO (PH-508)
+* ---------------------------------------------------------------------------
+* `offlineSimSystem` decidia isso por conta propria, com
+* `gameState.hasItem('revive', 1)` — o ID LITERAL do Revive comum. Mas quem
+* de fato usa o item e `melhorRevive`, que varre a FAMILIA (`kind === 'revive'`)
+* e aceita `max_revive` igual.
+*
+* As duas regras precisavam concordar e nao concordavam. Medido em producao: um
+* jogador com 149 `max_revive` e ZERO `revive` tinha `canRecover === false` com
+* a mochila cheia de revive — a simulacao da ausencia encerrava por "desmaio",
+* expulsava ele da hunt e mandava o toast "Cure na Enfermeira", TODA vez que
+* ele voltava ao jogo. Deterministico, nao esporadico. `melhorRevive` teria
+* achado o Max Revive; a execucao nunca chegava lá.
+*
+* Eram 2 dos 6 jogadores com Auto-Revive ligado — 33%, incluindo o dono do
+* projeto.
+*
+* POR QUE ISTO E UMA FUNCAO E NAO UM `hasItem` MELHOR: o predicado tem tres
+* partes (hunt BOSS, o toggle, e existir item da familia), e a de hunt BOSS nao
+* e sobre inventario nenhum. Deixar as tres juntas aqui e o que impede o
+* proximo call site de reconstruir duas e esquecer a terceira — que e
+* exatamente o que aconteceu.
+*
+* `isBossHunt` VEM POR PARAMETRO, e nao de `world`, porque quem chama ja o tem
+* calculado dos dois lados (`updateAutoHeal` do `world.mapDef.noRespawn`,
+* `simulateOffline` do proprio laco) e passar o mundo inteiro so pra reler uma
+* flag acoplaria este predicado a forma do `WorldState`.
+*/
+function podeAutoReanimar(gameState, isBossHunt) {
+	if (isBossHunt) return false;
+	if (!gameState.autoToggles.autoRevive) return false;
+	return melhorRevive(gameState) !== null;
+}
 function updateAutoHeal(world, gameState, dt) {
 	const player = world.player;
 	const events = [];
@@ -86827,7 +86864,7 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 			}
 		}
 		if (world.player.fainted) {
-			if (!(!isBossHunt && gameState.autoToggles.autoRevive && gameState.hasItem("revive", 1))) {
+			if (!podeAutoReanimar(gameState, isBossHunt)) {
 				summary.stoppedEarly = true;
 				break;
 			}
