@@ -38,6 +38,34 @@ const BASE = 'https://pokeapi.co/api/v2';
 const USUM_VERSION_GROUP = 'ultra-sun-ultra-moon';
 const USUM_GENERATION = 'generation-vii';
 
+// Chave de especie: o id que o JOGO usa, derivado do nome da PokeAPI.
+//
+// Morava em `fetch-usum-catalog.js` e subiu pra ca quando ganhou o segundo
+// consumidor (`gerar-maquinas.js`, PH-512). Duplicar as excecoes seria pedir
+// pra divergirem: uma matriz de compatibilidade indexada por `mr_mime` contra
+// um catalogo indexado por `mr__mime` nao da erro, so deixa a especie sem
+// nenhuma Maquina compativel — e ninguem olha.
+const EXCECOES_DE_CHAVE = {
+  // `MR__MIME` no pokemon_constants.asm da pret, com underscore duplo — e a
+  // chave que o jogo ja usa. "Normalizar" pra mr_mime geraria um id que nao
+  // existe em lugar nenhum.
+  'mr-mime': 'mr__mime',
+  // idem: a chave historica veio de `FARFETCH_D`.
+  farfetchd: 'farfetch_d',
+};
+
+function chaveDeEspecie(nomeApi) {
+  return EXCECOES_DE_CHAVE[nomeApi] || nomeApi.replace(/-/g, '_');
+}
+
+/**
+ * Chave de golpe: o id que o jogo usa. O catalogo do motor nao tem UMA chave
+ * com hifen (conferido: 0 de 526), entao a normalizacao e sempre esta.
+ */
+function chaveDeGolpe(nomeApi) {
+  return nomeApi.replace(/-/g, '_');
+}
+
 function cachePath(url) {
   const safe = url.replace(BASE + '/', '').replace(/[^a-z0-9]+/gi, '_');
   return path.join(CACHE_DIR, `${safe}.json`);
@@ -400,6 +428,8 @@ module.exports = {
   carregarOrdemDeVersionGroups,
   valoresDeGolpeNoUsum,
   tiposNoUsum,
+  chaveDeEspecie,
+  chaveDeGolpe,
   golpesDeNivelNoUsum,
   golpesDeMaquinaNoVersionGroup,
   removerGolpesDeRecordador,
