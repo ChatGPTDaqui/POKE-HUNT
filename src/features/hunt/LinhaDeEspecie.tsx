@@ -14,6 +14,8 @@ import { faceIconUrl } from '@/data/sprites'
 import { bestOffensiveMultiplier } from '@/data/typeMatchups'
 import type { Species } from '@/data/pokes'
 import { TypeChip } from '@/components/shared/TypeChip'
+import { Explicacao, BolhaDoVerbete } from '@/components/shared/Explicacao'
+import { verbete } from '@/data/glossario'
 import { cn } from '@/lib/utils'
 
 /**
@@ -50,22 +52,43 @@ export function badgeEfetividade(mult: number): { rotulo: string; cor: string } 
 function TagDeProtetor({ guardian, lord }: { guardian: boolean; lord: boolean }) {
   if (!guardian && !lord) return null
   const ehLord = lord
+  // ONDE ESTE SELO APARECE nesta selecao — a frase que muda entre os tres casos.
+  // Fica ACIMA do verbete na bolha: o verbete explica o que um protetor E (e e o
+  // MESMO texto do `SalaChip`, por `verbete('protetorDaSala')`), e esta linha diz
+  // o que ele significa NESTA linha da lista. Repetir a definicao aqui a mao
+  // criaria a segunda copia que a PH-509 acabou de eliminar.
+  const ondeAparece = lord && guardian
+    ? 'Pode aparecer como Guardião nas salas iniciais e como Lord na última.'
+    : lord
+      ? 'Pode aparecer como Lord na última sala do estágio.'
+      : 'Pode aparecer como Guardião nas salas iniciais.'
   return (
-    <span
-      title={
-        lord && guardian
-          ? 'Pode aparecer como Guardião nas salas iniciais e como Lord na última'
-          : lord
-            ? 'Pode aparecer como Lord na última sala do estágio'
-            : 'Pode aparecer como Guardião nas salas iniciais'
-      }
+    <Explicacao
+      // ERA `title=` NATIVO (PH-511), que NAO EXISTE NO TOQUE — no celular esta
+      // tag ficava sem legenda nenhuma. Ver `docs/19-explicacao-flutuante.md`.
+      //
+      // `Explicacao` cru e nao `<Palavra>`: `Palavra` desenha sublinhado
+      // pontilhado, feito pra palavra no meio de uma frase. Aqui o gatilho e um
+      // SELO com fundo e cor propria, e o sublinhado brigaria com ele.
+      //
+      // `envolve` fica no padrao `inline`: o gatilho tem caixa propria, entao
+      // nao cai na armadilha da PH-296 (bolha de `bloco` ancorando em 0,0
+      // porque `display: contents` nao gera caixa).
+      conteudo={(
+        <div className="flex flex-col gap-[.4em]">
+          <span>{ondeAparece}</span>
+          <BolhaDoVerbete v={verbete('protetorDaSala')} />
+        </div>
+      )}
+      rotulo={ehLord ? 'Lord' : 'Guardião'}
       className={cn(
         'shrink-0 rounded-[.3em] px-[.35em] py-[.05em] text-[.68em] font-bold',
         ehLord ? 'bg-gold/20 text-gold' : 'bg-[#ff4d4d26] text-[#ff6b6b]',
       )}
+      tabIndex={0}
     >
       {ehLord ? '★ LORD' : '★ GUARDIÃO'}
-    </span>
+    </Explicacao>
   )
 }
 
@@ -98,13 +121,24 @@ export function LinhaDeEspecie({
       <span className="min-w-0 flex-1 truncate">{species.name}</span>
       <TagDeProtetor guardian={guardian} lord={lord} />
       {badge && (
-        <span
+        // ERA `title=` NATIVO (PH-511), e este era o PIOR dos tres desta tela.
+        // O selo mostra so `2x`, `4x`, `½x` ou `¼x` numa cor — sem a legenda, o
+        // numero nao diz DE QUEM CONTRA QUEM, e e justamente o dado que decide
+        // se vale entrar naquela hunt. No celular era um numero solto.
+        <Explicacao
+          conteudo={(
+            <span>
+              Dano do seu POKE em campo (<b>{ativo!.name}</b>) contra{' '}
+              <b>{species.name}</b>, pela efetividade de tipo.
+            </span>
+          )}
+          rotulo={`Efetividade contra ${species.name}`}
           className="shrink-0 tabular-nums text-[.9em] font-semibold"
-          style={{ color: badge.cor }}
-          title={`Seu POKE ativo (${ativo!.name}) contra ${species.name}`}
+          estilo={{ color: badge.cor }}
+          tabIndex={0}
         >
           {badge.rotulo}
-        </span>
+        </Explicacao>
       )}
       {pct != null && (
         <span className="shrink-0 tabular-nums text-n400">{pct.toFixed(1)}%</span>

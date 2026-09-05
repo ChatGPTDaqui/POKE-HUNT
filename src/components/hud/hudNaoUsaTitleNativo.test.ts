@@ -33,43 +33,17 @@
 // componente React (`<Sheet>`). So a primeira transforma `title` em atributo do
 // DOM.
 import { describe, expect, it } from 'vitest'
+import { titlesNativos } from '@/lib/tituloNativo'
 
 const FONTES = import.meta.glob('./*.tsx', {
   query: '?raw', import: 'default', eager: true,
 }) as Record<string, string>
 
-/** Remove comentario de bloco, de linha e comentario JSX. */
-function semComentarios(fonte: string): string {
-  return fonte
-    .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
-}
-
-/**
- * Cada `title=` que pertence a uma tag de ELEMENTO HTML, com a linha.
- *
- * Anda pra tras a partir do `title=` ate o `<` que abre a tag e olha a primeira
- * letra do nome. Sem parser de JSX de verdade: o que se procura aqui e uma unica
- * forma sintatica, e um parser inteiro pra isso seria mais codigo pra manter que
- * a regra que ele checa.
- */
-function titlesNativos(fonte: string): number[] {
-  const limpo = semComentarios(fonte)
-  const linhas: number[] = []
-  const re = /\btitle\s*=/g
-  let m: RegExpExecArray | null
-  while ((m = re.exec(limpo)) != null) {
-    const abertura = limpo.lastIndexOf('<', m.index)
-    if (abertura === -1) continue
-    const nome = limpo.slice(abertura + 1, abertura + 2)
-    // Minuscula = elemento HTML. Maiuscula = componente React (prop).
-    if (nome >= 'a' && nome <= 'z') {
-      linhas.push(limpo.slice(0, m.index).split('\n').length)
-    }
-  }
-  return linhas
-}
+// As DUAS funcoes abaixo sairam daqui na PH-511, pra `lib/tituloNativo.ts`:
+// `features/hunt` passou a ter o mesmo portao, e duas copias da mesma regra
+// sintatica e a classe de bug que a PH-508 custou caro. O porque de cada
+// detalhe (a regra de maiuscula/minuscula, o falso positivo de `<Sheet title>`)
+// mora la agora.
 
 describe('a HUD nao volta a usar `title=` nativo (PH-165)', () => {
   it('a varredura enxerga os arquivos da HUD', () => {
