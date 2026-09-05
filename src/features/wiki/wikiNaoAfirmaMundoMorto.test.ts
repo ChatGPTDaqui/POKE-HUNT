@@ -60,6 +60,13 @@ import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 const FONTES: Record<string, string> = {
   ...(import.meta.glob('./*.tsx', { query: '?raw', import: 'default', eager: true }) as Record<string, string>),
   ...(import.meta.glob('/src/data/tutoriais.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>),
+  // PH-512: O GLOSSARIO ENTROU, e a lacuna era real. `glossario.ts` e copy de
+  // jogador tanto quanto uma aba da Wiki — sao as bolhas que explicam cada
+  // rotulo da HUD —, e ficava de fora deste portao so porque o teste nasceu
+  // olhando a Wiki. Descoberto ao tirar o PP de tela: o verbete `pp` teria
+  // sobrevivido aqui, explicando um numero que nao existe mais em lugar nenhum,
+  // e nenhum teste diria nada.
+  ...(import.meta.glob('/src/data/glossario.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>),
 }
 
 /**
@@ -123,6 +130,16 @@ const PROIBIDOS: Proibido[] = [
     re: /\b11\s+hunts?\s+BOSS\b/i,
     porque:
       `sao ${LEGENDARY_SPECIES_IDS.length}, uma por lendario. Use LEGENDARY_SPECIES_IDS.length.`,
+  },
+  {
+    re: /\bPP\b/,
+    porque:
+      'PH-512: o PP saiu de TODA tela do jogador — da ficha do AbilityHud, da bolha do '
+      + 'AbilityTooltip e do verbete do glossario. Ele nunca foi recurso gasto aqui (nenhum golpe '
+      + 'fica indisponivel por falta dele), era so a variavel de onde a Recarga e derivada. '
+      + 'Explicar a recarga por um numero que o jogador nao ve em lugar nenhum e pior do que nao '
+      + 'explicar. Escreva a REGRA ("golpe forte volta mais devagar") e a alavanca que ele controla '
+      + '(Velocidade). O campo `pp` continua no dado do golpe e no motor — o que morreu foi a copy.',
   },
 ]
 

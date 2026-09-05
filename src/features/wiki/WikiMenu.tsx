@@ -442,9 +442,9 @@ function MecanicasDeCampoTab() {
       </WikiCard>
 
       <WikiCard title="Recarga — por que alguns golpes demoram tanto">
-        Cada golpe tem a própria recarga, e ela sai do <b>PP</b> real daquele golpe:{' '}
-        <b>menos PP significa mais tempo de recarga</b> — um golpe de 5 PP volta bem mais devagar que um de 35
-        PP. É a tradução do "usos limitados" dos jogos originais para um jogo que roda sozinho.
+        Cada golpe tem a própria recarga, e a regra é simples: <b>golpe forte volta mais devagar</b>. Um
+        golpe pesado pode levar três vezes o tempo de um golpe leve. É a tradução do "usos limitados" dos
+        jogos originais para um jogo que roda sozinho — aqui nenhum golpe se esgota, ele só demora a voltar.
         <br />
         <br />
         Em cima disso entra a <b>Velocidade</b> do seu POKE: quanto maior, mais rápido <i>todos</i> os golpes
@@ -452,7 +452,7 @@ function MecanicasDeCampoTab() {
         <br />
         <br />
         O <b>Ataque Básico</b> — o golpe de reserva que todo POKE sempre tem — é a única exceção: a recarga
-        dele é fixa e não depende de PP nem de Velocidade. E enquanto um golpe está em execução o POKE fica{' '}
+        dele é fixa e não muda com a Velocidade. E enquanto um golpe está em execução o POKE fica{' '}
         <b>parado</b>: ele só volta a andar quando a ação termina.
       </WikiCard>
     </div>
@@ -752,10 +752,10 @@ function CombateTab() {
         continuo, e cada POKE age assim que estiver pronto (golpe fora de cooldown), sem esperar a "vez" de
         ninguem. A unidade de tempo usada nas contas abaixo (duracao de status/escudo/trava, etc.) e o{' '}
         <b>turno</b>, que aqui equivale a <b>{TURNO_SEGUNDOS} segundos</b> reais — o mesmo intervalo mínimo entre
-        duas ações de um POKE (o <b>cooldown global</b>, ver PP/Velocidade na aba Mecânicas) — na prática, um
+        duas ações de um POKE (o <b>cooldown global</b>, ver Recarga/Velocidade na aba Mecânicas) — na prática, um
         golpe so recarrega mais rapido que isso se a Velocidade do POKE for maior que a referencia de{' '}
         {SPEED_REFERENCE_WIKI}. O Ataque Basico foge dessa regra: seu cooldown e sempre fixo em{' '}
-        {BASIC_ATTACK_COOLDOWN_WIKI}s, sem depender de PP nem de Velocidade. Por causa disso,{' '}
+        {BASIC_ATTACK_COOLDOWN_WIKI}s, sem depender da Velocidade. Por causa disso,{' '}
         <b>não existe sistema de prioridade de golpe</b> (o que faria um golpe como {nomeDoGolpe('quick_attack')}{' '}
         agir sempre primeiro, independente de Velocidade): todo golpe passa pelo mesmo cano de resolucao, sem
         fila nem ordem especial — {nomeDoGolpe('wide_guard')} e {nomeDoGolpe('quick_guard')} existem no catalogo

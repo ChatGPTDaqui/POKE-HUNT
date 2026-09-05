@@ -493,9 +493,15 @@ function SheetDoGolpe({
           </Palavra>
         </div>
 
-        {/* Cada rotulo desta grade era jargao sem legenda: "PP 5" nao diz que
-            aqui o PP nao e gasto, e "Recarga 8.0s" nao diz que ela sai do PP e
-            da Velocidade. Os cinco explicam a si mesmos agora. */}
+        {/* Cada rotulo desta grade era jargao sem legenda, e os quatro explicam
+            a si mesmos agora.
+
+            PH-512: O PP SAIU DAQUI, e nao foi enxugada de tela. Ele nunca foi
+            um recurso neste jogo — nada fica indisponivel por falta dele —, era
+            so a variavel de onde a recarga e derivada. Mostrar os dois lado a
+            lado pedia que o jogador fizesse a conta que o motor ja fez: a
+            Recarga logo abaixo E a resposta, em segundos, ja com a Velocidade
+            aplicada e ja com o piso do turno. O PP continua no dado do golpe. */}
         <div className="grid grid-cols-2 gap-[.4em] text-[.85em]">
           <Ficha
             verbete="danoBase"
@@ -503,7 +509,6 @@ function SheetDoGolpe({
             valor={ability.power > 0 ? String(ability.power) : '—'}
           />
           <Ficha verbete="precisao" rotulo="Precisão" valor={`${ability.accuracy ?? 100}%`} />
-          <Ficha verbete="pp" rotulo="PP" valor={String(ability.pp)} />
           {/* PH-493: A RECARGA REAL, e nao a nominal do catalogo.
               `ability.cooldown` e o numero derivado do PP antes de a Velocidade
               dividir e antes do piso do turno — a ficha prometia um tempo e o
