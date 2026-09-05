@@ -96,18 +96,10 @@ const NIVEL_DE_EVOLUCAO_ESPECIAL = 80;
 // saves silenciosamente, entao elas NAO sao derivadas do nome da PokeAPI sem
 // conferencia: o resultado e validado contra as 251 chaves de spawn-tiers.json
 // e o script ESTOURA se alguma nao casar.
-const EXCECOES_DE_CHAVE = {
-  // `MR__MIME` no pokemon_constants.asm da pret, com underscore duplo — e a
-  // chave que o jogo ja usa. "Normalizar" pra mr_mime geraria um id que nao
-  // existe em lugar nenhum.
-  'mr-mime': 'mr__mime',
-  // idem: a chave historica veio de `FARFETCH_D`.
-  farfetchd: 'farfetch_d',
-};
-
-function chaveDeEspecie(nomeApi) {
-  return EXCECOES_DE_CHAVE[nomeApi] || nomeApi.replace(/-/g, '_');
-}
+// Subiu pra `lib/pokeapi.js` quando `gerar-maquinas.js` (PH-512) virou o
+// segundo consumidor. Reexportado aqui com o nome de sempre pra nao mexer nos
+// ~20 call sites abaixo.
+const { chaveDeEspecie } = api;
 
 // ---------------------------------------------------------------------------
 // Enums do jogo
@@ -640,7 +632,7 @@ async function main() {
   if (semTier.length && DEX_MAX === DEX_MAX_PADRAO) {
     throw new Error(
       `chaves de especie divergiram de spawn-tiers.json: ${semTier.map((e) => e.chave).join(', ')}. ` +
-      'Chave de especie e identidade (save/arte/tabelas do jogo) — corrija EXCECOES_DE_CHAVE, nunca a lista de tiers.'
+      'Chave de especie e identidade (save/arte/tabelas do jogo) — corrija EXCECOES_DE_CHAVE em lib/pokeapi.js, nunca a lista de tiers.'
     );
   }
   if (semTier.length) {
