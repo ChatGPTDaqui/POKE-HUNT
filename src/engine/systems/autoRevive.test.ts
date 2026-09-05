@@ -96,4 +96,39 @@ describe('auto-revive (PH-144)', () => {
     expect(updateAutoHeal(world, gameState, 0.1)).toEqual([])
     expect(player.fainted).toBe(true)
   })
+
+  // PH-510 — A JANELA DE GRAÇA EXISTE DE VERDADE, e este caso é o que prova.
+  //
+  // Os 5 segundos de contagem (`AUTO_REVIVE_DELAY`) começam sem olhar o
+  // inventário, e é fácil ler isso como descuido. Não é: a Loja fica na barra
+  // durante a caçada, e o cabeçalho de `CampoOverlay` registra o pedido
+  // explícito do dono para o aviso não cobrir os menus — "durante os 5 segundos
+  // da contagem do Auto-Revive o jogador não conseguia nem abrir a Mochila pra
+  // ver se ainda tinha Revive, que é exatamente o que ele quer fazer naquele
+  // momento". A contagem é o prazo para ele correr e comprar.
+  //
+  // SEM ESTE TESTE a próxima pessoa que ler `autoSystem.ts:161` vê um predicado
+  // que "esqueceu" o inventário, acrescenta a checagem, e mata a janela sem
+  // saber que ela era o ponto. A PH-510 chegou a considerar exatamente isso.
+  it('comprar um revive DURANTE a contagem ainda reanima ao chegar a zero', () => {
+    const barato = REVIVES[0]
+    const zerado = Object.fromEntries(REVIVES.map((i) => [i.id, 0]))
+    const { world, player, gameState } = cenario(zerado)
+
+    // A contagem está correndo e a mochila está vazia: nada acontece ainda.
+    world.reviveCountdown = 3
+    expect(updateAutoHeal(world, gameState, 0.1)).toEqual([])
+    expect(player.fainted).toBe(true)
+
+    // O jogador corre na Loja no meio da contagem.
+    useGameStateStore.getState().addItem(barato.id, 1)
+
+    // O prazo termina — e agora existe o que gastar.
+    world.reviveCountdown = 0
+    const eventos = updateAutoHeal(world, useGameStateStore.getState(), 0.1)
+
+    expect(eventos).toEqual([{ type: 'auto_revive', itemId: barato.id }])
+    expect(player.fainted).toBe(false)
+    expect(player.poke.hp).toBeGreaterThan(0)
+  })
 })

@@ -34,6 +34,7 @@ import { useToastStore } from '@/stores/toastStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { LinhaDeEspecie } from './LinhaDeEspecie'
 import { GameButton, GameCard, GameInput, GameSelect, SectionLabel, SegmentedTabs, StickyHeader } from '@/components/game/controls'
+import { Explicacao } from '@/components/shared/Explicacao'
 import { cn } from '@/lib/utils'
 // As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo de
 // gate; com a PH-432 sobraram DOIS (ver data/biomas.ts): o que nasce aberto e o
@@ -281,14 +282,25 @@ function SalasDaHunt({ mapId }: { mapId: string }) {
           .slice()
           .sort((a, b) => b.sub.peso - a.sub.peso)
           .map(({ sub, pool }) => (
-            <span
+            // ERA `title=` NATIVO (PH-511) — invisivel no toque. A porcentagem
+            // aparece no chip, mas "quantas especies" e "que loot" so existiam
+            // no hover, e sao os dois dados que dizem se o sub-bioma vale.
+            <Explicacao
               key={sub.chave}
+              conteudo={(
+                <span>
+                  <b>{sub.nome}</b> — {pool.length} espécie{pool.length === 1 ? '' : 's'} podem nascer aqui,
+                  com loot <b>{sub.loot}</b>. A porcentagem é a chance de uma sala deste estágio
+                  sortear este sub-bioma.
+                </span>
+              )}
+              rotulo={sub.nome}
               className="rounded-[.35em] border border-n700 px-[.45em] py-[.2em] text-[.72em]"
-              title={`${pool.length} espécies · loot ${sub.loot}`}
+              tabIndex={0}
             >
               {sub.nome}{' '}
               <b className="tabular-nums font-medium text-n300">{((sub.peso / total) * 100).toFixed(0)}%</b>
-            </span>
+            </Explicacao>
           ))}
       </div>
     </div>
