@@ -115,7 +115,22 @@ export const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is
  * `pokeToRow` (escrita) continua montando a linha inteira — o corte e so de
  * LEITURA.
  */
-export type LinhaLidaDePoke = Omit<PokemonRow, 'user_id' | 'updated_at'>
+// `golpes_de_maquina` ENTRA NO OMIT, e sai dele depois (PH-512).
+//
+// A coluna existe no schema desde 20260905120000, entao `PokemonRow` a declara
+// como obrigatoria. Mas `COLUNAS_DE_POKE` ainda NAO a seleciona, e este tipo
+// existe justamente pra dizer "quais colunas vem de verdade na leitura" — sem o
+// omit ele passaria a prometer um campo que chega `undefined`, que e o oposto
+// do que o comentario acima promete.
+//
+// Ela so pode entrar no `select` depois de a migration alcancar PRODUCAO: pedir
+// ao PostgREST uma coluna que o schema `public` ainda nao tem faz a leitura
+// INTEIRA do POKE falhar — nenhum POKE carrega, e nao so o campo novo falta.
+// Hoje ela existe so no `dev`.
+//
+// Quando a coluna entrar em `COLUNAS_DE_POKE`, esta linha do omit sai junto, no
+// mesmo commit. As duas andam sempre juntas.
+export type LinhaLidaDePoke = Omit<PokemonRow, 'user_id' | 'updated_at' | 'golpes_de_maquina'>
 
 /**
  * Especies desconhecidas ja avisadas — o aviso e por ESPECIE, nao por POKE.

@@ -1254,6 +1254,7 @@ export type Database = {
           created_at: string
           disabled_abilities: Json
           exp: number
+          golpes_de_maquina: string[]
           hp: number
           id: string
           is_shiny: boolean
@@ -1289,6 +1290,7 @@ export type Database = {
           created_at?: string
           disabled_abilities?: Json
           exp?: number
+          golpes_de_maquina?: string[]
           hp: number
           id?: string
           is_shiny?: boolean
@@ -1324,6 +1326,7 @@ export type Database = {
           created_at?: string
           disabled_abilities?: Json
           exp?: number
+          golpes_de_maquina?: string[]
           hp?: number
           id?: string
           is_shiny?: boolean
@@ -4002,6 +4005,7 @@ export type Database = {
           created_at: string
           disabled_abilities: Json
           exp: number
+          golpes_de_maquina: string[]
           hp: number
           id: string
           is_shiny: boolean
@@ -4037,6 +4041,7 @@ export type Database = {
           created_at?: string
           disabled_abilities?: Json
           exp?: number
+          golpes_de_maquina?: string[]
           hp: number
           id?: string
           is_shiny?: boolean
@@ -4072,6 +4077,7 @@ export type Database = {
           created_at?: string
           disabled_abilities?: Json
           exp?: number
+          golpes_de_maquina?: string[]
           hp?: number
           id?: string
           is_shiny?: boolean

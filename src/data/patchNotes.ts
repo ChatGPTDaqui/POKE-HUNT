@@ -12,6 +12,39 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // UM item so, e ele nao e "limpamos a ficha do golpe".
+  //
+  // O PP NAO ERA UM NUMERO A MAIS: ELE MENTIA POR ASSOCIACAO. Em todo jogo da
+  // franquia o PP e um RECURSO QUE ACABA — e o jogador que via "PP 5" na ficha
+  // tinha motivo de sobra pra economizar aquele golpe, ou pra nao equipa-lo.
+  // Aqui ele nunca esgotou, nem uma vez: nenhum golpe fica indisponivel por
+  // falta de PP. Ou seja, a ficha induzia uma decisao de jogo com base numa
+  // regra que nao existe. E isso e mudanca de comportamento percebido, nao
+  // cosmetica — que e o teste da regua.
+  //
+  // POR ISSO O TEXTO DIZ O QUE O NUMERO NUNCA FOI, e nao so que ele saiu. Quem
+  // evitou um golpe de 5 PP por meses precisa saber que nao precisava.
+  //
+  // A SEGUNDA FRASE ENSINA A REGRA QUE FICOU NO LUGAR, porque a Wiki explicava a
+  // recarga EM TERMOS de PP ("menos PP significa mais recarga") e esse caminho
+  // de aprendizado sumiu junto. Sem ela a nota tira uma informacao e nao
+  // devolve nenhuma.
+  //
+  // FICA DE FORA, e a lista e longa de proposito: o learnset de TM/HM que
+  // entrou no repo, a coluna nova de golpes de maquina, os tipos regenerados e
+  // o portao de copy que ganhou uma fonte. Nada disso o jogador ve, e o sistema
+  // de Maquinas em si e MEIA-FEATURE hoje — ele ganha entrada propria quando
+  // der pra cair, ensinar e usar. Anunciar encanamento de uma feature que ainda
+  // nao existe seria prometer o que nao esta no ar.
+  {
+    version: '7.51',
+    date: '2026-09-05',
+    title: 'O PP saiu da ficha do golpe — ele nunca foi o que parecia',
+    highlights: [
+      'A FICHA DE CADA GOLPE MOSTRAVA UM "PP", E ELE NUNCA ACABOU NESTE JOGO. Nos jogos da série o PP é um recurso que se esgota, então ver "PP 5" era motivo de sobra para economizar aquele golpe ou nem equipá-lo — mas aqui nenhum golpe fica indisponível por falta de PP, nem uma vez. O número saiu da ficha, do resumo do golpe e do glossário. Se você evitou um golpe forte por causa dele, pode usar à vontade.',
+      'NO LUGAR FICOU O QUE IMPORTA DE VERDADE: O TEMPO DE RECARGA. A regra é direta — golpe forte volta mais devagar, e a Velocidade do seu POKE encurta a espera de todos eles. O número que aparece já é o real, com a Velocidade daquele POKE aplicada, e nenhum golpe sai antes do ritmo mínimo do combate.',
+    ],
+  },
   // DOIS itens, e os dois sao sobre a MESMA coisa vista de dois angulos: o jogo
   // sabia de algo e nao contava pro jogador.
   //

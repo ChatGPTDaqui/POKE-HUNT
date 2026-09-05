@@ -18,6 +18,7 @@
     "edge:verificar": "node scripts/verify-edge-bundle.js",
     "edge:quem-puxa": "node scripts/quem-puxa-no-edge.mjs",
     "catalog:gerar": "node scripts/generate-catalog.js",
+    "maquinas:gerar": "node scripts/gerar-maquinas.js",
     "catalog:migrar": "node scripts/migrate-catalog-to-postgres.js",
     "catalog:verificar": "node scripts/verify-catalog-diff.js",
     "planilha:aplicar": "node scripts/sync-planilha.js",
