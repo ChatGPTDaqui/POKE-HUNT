@@ -12,6 +12,42 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // DOIS itens, e os dois sao sobre a MESMA coisa vista de dois angulos: o jogo
+  // sabia de algo e nao contava pro jogador.
+  //
+  // O ITEM 1 NAO E "CORRIGIMOS UM TEXTO". Ele ENSINA UMA MECANICA QUE NUNCA FOI
+  // DITA: os 5 segundos da contagem sao uma janela pra comprar um Revive na
+  // Loja. Isso sempre funcionou — o overlay foi confinado ao campo justamente
+  // pra o jogador conseguir mexer nos menus durante a contagem — e nunca esteve
+  // escrito em lugar nenhum. Quem via "Auto-Revive em... 5" com a mochila vazia
+  // esperava parado, e era o unico momento em que agir resolvia.
+  //
+  // Por isso o item lidera: o outro devolve uma informacao que estava
+  // escondida, este devolve uma AÇÃO que estava escondida.
+  //
+  // A CONDICAO ENTRA (regra da 7.42/7.43/7.49): so acontecia com a mochila sem
+  // nenhum Revive. Quem sempre teve estoque nunca viu nada.
+  //
+  // O ITEM 2 E DE CELULAR, e a regua manda anunciar porque e informacao que o
+  // jogador NAO TINHA COMO ALCANCAR — nao e enfeite novo. No computador aquelas
+  // tres legendas sempre existiram no hover; no telefone, nunca.
+  //
+  // O SELO DE EFETIVIDADE VEM NOMEADO no texto, e nao "tres explicacoes": ele e
+  // o que muda decisao. "2x" sozinho nao diz de quem contra quem, e e o numero
+  // que decide se vale entrar naquela hunt.
+  //
+  // FICA DE FORA: que a regra de deteccao virou modulo compartilhado, os dois
+  // portoes de teste novos, e o verbete reaproveitado do glossario. Encanamento,
+  // por melhor que seja.
+  {
+    version: '7.50',
+    date: '2026-09-04',
+    title: 'A contagem do Auto-Revive é uma janela para comprar — e agora ela diz isso',
+    highlights: [
+      'QUANDO SEU POKE DESMAIA, OS 5 SEGUNDOS DA CONTAGEM SÃO SEU PRAZO PARA COMPRAR UM REVIVE NA LOJA. Isso sempre funcionou — o aviso fica só sobre o campo justamente para você conseguir abrir os menus — mas o jogo nunca disse. Pior: sem nenhum Revive na mochila ele continuava anunciando "Auto-Revive em...", contava até zero e sumia sem fazer nada, e você tinha esperado parado no único momento em que dava para agir. Agora, sem Revive, ele avisa que falta o item e manda comprar antes do tempo acabar.',
+      'NO CELULAR, TRÊS EXPLICAÇÕES DA TELA DE HUNT NÃO ABRIAM DE JEITO NENHUM. Elas só apareciam parando o mouse em cima, o que não existe no toque. A mais importante é o selo colorido de efetividade (2x, ½x): sozinho ele não diz de quem contra quem, e é o número que decide se vale entrar naquela caçada. Agora ele, a etiqueta de Guardião/Lord e o bloco de sub-bioma abrem com um toque.',
+    ],
+  },
   // DOIS itens, e o primeiro e desproporcionalmente mais importante que o
   // segundo — o que e exatamente por que eles vao na mesma nota e nesta ordem.
   //
