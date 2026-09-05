@@ -43,7 +43,7 @@ const ROTULO_CATEGORIA: Record<string, string> = { physical: 'Fisico', special: 
  * dado que o motor de combate consome.
  *
  * POR QUE ISTO EXISTE (PH-71): até aqui a ficha mostrava tipo, categoria, dano
- * base, precisão, PP, recarga e área — e depois a descrição em prosa, escrita à
+ * base, precisão, recarga e área (o PP saiu na PH-512) — e depois a descrição em prosa, escrita à
  * mão, como ÚNICA informação sobre o que o golpe faz. Chance de status, estágios
  * de atributo, percentual de dreno, chance de flinch, estágio de crítico: nada
  * disso aparecia na tela, mesmo estando no dado. O jogador escolhia os 4 slots
@@ -174,7 +174,10 @@ export function AbilityTooltip({
                 Precisao {ability.accuracy ?? 100}%
               </span>
             )}
-            <span>PP {ability.pp}</span>
+            {/* PH-512: o PP saiu. Ver a nota em AbilityHud — ele nunca foi
+                recurso gasto aqui, so a variavel de onde a Recarga abaixo e
+                derivada, e mostrar os dois pedia que o jogador refizesse uma
+                conta que o motor ja fez. */}
             {/* PH-493: a recarga REAL, e nao mais `ability.cooldown` cru.
                 Aquele campo e a recarga nominal derivada do PP, antes de a
                 Velocidade dividir e antes do piso do turno — e era ele que

@@ -113,19 +113,20 @@ export const GLOSSARIO = {
     ],
   },
 
-  pp: {
-    titulo: 'PP',
-    corpo: [
-      'Aqui o PP não é gasto: ele define a RECARGA do golpe. Golpe de PP baixo é golpe forte, e por isso demora mais pra voltar.',
-      'Nenhum golpe fica indisponível por falta de PP neste jogo.',
-    ],
-    wiki: 'Combate',
-  },
+  // PH-512: O VERBETE `pp` FOI REMOVIDO, e o único consumidor dele — a ficha
+  // em AbilityHud — saiu junto. Ele existia para desfazer uma confusão que a
+  // própria tela criava ao mostrar "PP 5" sem dizer que aqui PP não se gasta.
+  // Tirada a ficha, o verbete virava explicação de um número que o jogador não
+  // vê em lugar nenhum. O conceito que sobrou é a Recarga, logo abaixo.
 
   recarga: {
     titulo: 'Recarga',
     corpo: [
-      'Tempo até o golpe poder ser usado de novo. Sai do PP do golpe e da Velocidade do POKE — POKE mais rápido recarrega mais rápido.',
+      // PH-512: a primeira frase parou de citar PP. Ela explicava a recarga
+      // por uma variável que o jogador não vê mais em tela nenhuma — o que é
+      // pior do que não explicar. O que ele precisa saber é a REGRA (golpe
+      // forte volta devagar) e a alavanca que ele controla (Velocidade).
+      'Tempo até o golpe poder ser usado de novo. Golpe forte volta mais devagar, e a Velocidade do POKE encurta a espera de todos eles.',
       // PH-493: A SEGUNDA FRASE E METADE DO CONSERTO. A ficha mostrava a recarga
       // nominal do catalogo, sem a Velocidade e sem este piso, e o jogador via
       // "1.4s" num golpe que saia de 3 em 3 segundos. O numero passou a ser o
