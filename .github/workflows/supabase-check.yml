@@ -30,8 +30,10 @@ jobs:
         # Sem isso, um PR de feature branch reto pra main (o mesmo erro que
         # ja aconteceu 2x nesta sessao) passa sem aviso nenhum.
         if: github.event_name == 'pull_request' && github.head_ref != 'dev'
+        env:
+          PR_HEAD: ${{ github.head_ref }}
         run: |
-          echo "::error::PR para main so e permitido a partir da branch dev (esta PR vem de '${{ github.head_ref }}'). Merge sua feature branch em dev primeiro, teste em jogo-dev, so depois abra PR dev->main."
+          echo "::error::PR para main so e permitido a partir da branch dev (esta PR vem de '$PR_HEAD'). Merge sua feature branch em dev primeiro, teste em jogo-dev, so depois abra PR dev->main."
           exit 1
 
       # VERSAO FIXA, e nao `latest` (PH-290).
@@ -250,21 +252,6 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          # Sem isto todo run baixava o registry inteiro de novo — nao havia
-          # UMA ocorrencia de `cache` nos workflows ate 03/09 (PH-453).
-          #
-          # Os DOIS lockfiles na chave, e nao so o da raiz: `build-check` roda
-          # `npm ci` duas vezes (raiz e `authority/`). Chave unica pros quatro
-          # workflows de proposito — assim o primeiro run a rodar aquece o cache
-          # de todos os outros, em vez de cada um manter o seu.
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            authority/package-lock.json
-
       - name: database.types.ts esta desatualizado?
         # PostgrestVersion reflete a versao do servidor detectada NA HORA da
         # chamada, nao e schema — e a Management API do Supabase ja
@@ -320,7 +307,6 @@ jobs:
         # formatador antes de comparar (o que preserva a deteccao de conteudo),
         # e nao afrouxar o diff.
         run: |
-          npm ci
           # PH-106: pelo wrapper, que re-linka se a credencial tiver sido
           # rotacionada por outra invocacao do CLI enquanto o `npm ci` rodava.
           scripts/ci/supabase-cli.sh supabase gen types typescript --linked > /tmp/database.types.ts

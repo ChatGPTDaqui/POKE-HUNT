@@ -40,7 +40,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22.22.2
           # Sem isto todo run baixava o registry inteiro de novo — nao havia
           # UMA ocorrencia de `cache` nos workflows ate 03/09 (PH-453).
           #
