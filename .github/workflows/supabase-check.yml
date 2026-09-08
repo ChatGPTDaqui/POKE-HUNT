@@ -45,8 +45,15 @@ jobs:
 
       - name: Conferir migrations remotas sem arquivo versionado
         run: |
-          scripts/ci/supabase-cli.sh supabase migration list --linked --output-format json > schema-remote.json
-          jq -e '.migrations | type == "array"' schema-remote.json > /dev/null
+          if ! scripts/ci/supabase-cli.sh supabase migration list --linked --output-format json > schema-remote.json; then
+            echo "::error::CLI falhou em todas as tentativas; falha de conexao/credencial, nao migration orfa."
+            exit 1
+          fi
+          if ! jq -e 'has("migrations") and (.migrations | type == "array")' schema-remote.json > /dev/null 2>&1; then
+            echo "::error::CLI respondeu sem '.migrations' como array; formato invalido, NAO e o gate de migration orfa."
+            head -c 2000 schema-remote.json
+            exit 1
+          fi
           FALHOU=0
           ARQUIVOS=$(git log --all --diff-filter=A --name-only --pretty=format: -- supabase/migrations/ | sort -u)
           for versao in $(jq -r '.migrations[] | select(.local == "") | .remote' schema-remote.json); do

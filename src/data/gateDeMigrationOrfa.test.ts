@@ -166,7 +166,7 @@ describe('a versao do CLI e FIXA nos tres workflows (PH-290)', () => {
     // Versoes diferentes entre o gate e o deploy significam que o gate aprovou
     // com um CLI e o deploy aplicou com outro — divergencia que so aparece em
     // producao.
-    const versoes = WORKFLOWS.map(([, fonte]) => fonte.match(/version:\s*(\d+\.\d+\.\d+)/)?.[1])
+    const versoes = WORKFLOWS.map(([, fonte]) => fonte.match(/^\s+version:\s*(\d+\.\d+\.\d+)/m)?.[1])
     expect(new Set(versoes).size, `versoes: ${versoes.join(', ')}`).toBe(1)
   })
 })
