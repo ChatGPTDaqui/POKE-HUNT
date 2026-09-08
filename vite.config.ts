@@ -1,3 +1,4 @@
+import { buildInfo } from './scripts/build-info.mts'
 import fs from 'node:fs'
 import path from 'node:path'
 import type { Plugin, Connect } from 'vite'
@@ -72,7 +73,7 @@ function serveGameAssets(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), serveGameAssets()],
+  plugins: [buildInfo(), react(), tailwindcss(), serveGameAssets()],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
