@@ -14,11 +14,22 @@ concurrency:
   group: supabase-deploy-dev
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      - name: Reutilizar apenas publicacao equivalente comprovada
+        id: equivalente
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await require("./scripts/ci/reutilizar-deploy.cjs")({ github, context, core })
 
       # VERSAO FIXA, e nao 'latest' (PH-290): 'latest' resolve por chamada a API
       # do GitHub, e ela tem rate limit — visto em 30/08, "Failed to resolve latest
@@ -29,6 +40,8 @@ jobs:
           version: 2.116.0
 
       - name: Aplicar migrations pendentes (mesmo arquivo cobre dev + public)
+        id: migrations
+        if: steps.equivalente.outputs.reutilizar != 'true'
         # Mesmo comando do deploy de main -- nao ha "db push so pra dev", o CLI
         # aplica toda migration pendente do repo inteiro. O gate de par
         # dev/public (supabase-check.yml) e quem garante que uma migration nova
@@ -47,8 +60,9 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - uses: actions/setup-node@v5
+        if: steps.equivalente.outputs.reutilizar != 'true'
         with:
-          node-version: 20
+          node-version: 22.22.2
           # Sem isto todo run baixava o registry inteiro de novo — nao havia
           # UMA ocorrencia de `cache` nos workflows ate 03/09 (PH-453).
           #
@@ -62,8 +76,11 @@ jobs:
             authority/package-lock.json
 
       - run: npm ci
+        if: steps.equivalente.outputs.reutilizar != 'true'
 
       - name: Publicar Edge Function jogo-dev (mesmo bundle de authority/)
+        id: edge
+        if: steps.equivalente.outputs.reutilizar != 'true'
         run: |
           npm run build:edge
           npx supabase functions deploy jogo-dev --project-ref "$SUPABASE_PROJECT_REF"
@@ -72,6 +89,7 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - name: Confirmar schema ativo pos-deploy (achado do pente fino, docs/15)
+        id: health
         # Sem isto, secret errado (JOGO_SCHEMA_DEV ausente/trocado) bota codigo
         # de staging rodando contra o schema de PRODUCAO silenciosamente --
         # mesma classe do incidente de 13/08. Usa a publishable key (nao e
@@ -92,62 +110,8 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
-  # ---------------------------------------------------------------------------
-  # PH-317: avisa AQUI que `database.types.ts` ficou velho, em vez de deixar a
-  # descoberta pra PR do proximo desavisado.
-  # ---------------------------------------------------------------------------
-  # O PADRAO QUE ISTO QUEBRA. Toda vez que uma migration chega na `dev`, o passo
-  # acima aplica no banco remoto — e a partir dali o gate `supabase-check`
-  # reprova TODA PR aberta, inclusive as que nao tocam em banco nenhum. Quatro
-  # vezes ate 31/08 (PH-288, PH-313, PH-316, PH-318), e o custo nunca caiu em
-  # quem fez a mudanca de schema: caiu em quem abriu a PR seguinte e encontrou
-  # um gate vermelho sobre algo que nao era dele.
-  #
-  # POR QUE ISTO NAO ABRE UMA PR SOZINHO, que era o desenho obvio. PR aberta com
-  # o `GITHUB_TOKEN` do proprio workflow NAO dispara outros workflows — e um
-  # checkout do GitHub. Os checks obrigatorios nunca seriam reportados e a PR
-  # ficaria `BLOCKED` pra sempre, com o resto verde. E exatamente o que acontece
-  # com uma PR `main` -> `dev` (visto em 31/08, PR #314). Abrir de verdade
-  # exigiria um PAT novo como secret, e isso e decisao do dono do projeto, nao
-  # deste arquivo.
-  #
-  # POR QUE ELE FALHA, e nao so avisa. O `CLAUDE.md` ja obriga a conferir o run
-  # do deploy depois de todo merge — entao este e o unico lugar onde o aviso
-  # chega em quem ACABOU de causar a defasagem, e chega antes de a proxima PR
-  # de outra pessoa ser reprovada. Um `::warning::` nesse mesmo lugar seria
-  # ignorado na terceira vez.
-  #
-  # O DEPLOY CONTINUA VERDE. Este e um job SEPARADO, dependente do `deploy`: a
-  # migration foi aplicada e a Edge foi publicada, e isso permanece visivelmente
-  # verdadeiro. O que fica vermelho e o chore que ficou faltando.
-  tipos:
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      # Mesma versao fixa do job de cima, pelo mesmo motivo (PH-290): 'latest'
-      # resolve por chamada a API do GitHub e ja caiu por rate limit.
-      - uses: supabase/setup-cli@v2
-        with:
-          version: 2.116.0
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          # Sem isto todo run baixava o registry inteiro de novo — nao havia
-          # UMA ocorrencia de `cache` nos workflows ate 03/09 (PH-453).
-          #
-          # Os DOIS lockfiles na chave, e nao so o da raiz: `build-check` roda
-          # `npm ci` duas vezes (raiz e `authority/`). Chave unica pros quatro
-          # workflows de proposito — assim o primeiro run a rodar aquece o cache
-          # de todos os outros, em vez de cada um manter o seu.
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            authority/package-lock.json
-
       - name: database.types.ts ficou velho com esta migration?
+        if: steps.equivalente.outputs.reutilizar != 'true'
         id: comparar
         # A comparacao e a MESMA de `supabase-check.yml`, inclusive a
         # normalizacao de `PostgrestVersion` — aquela linha reflete a versao do
@@ -158,10 +122,9 @@ jobs:
         # Pelo wrapper (PH-106): ele re-linka se a credencial tiver sido
         # rotacionada por outra invocacao do CLI enquanto o `npm ci` rodava.
         run: |
-          npm ci
           if ! scripts/ci/supabase-cli.sh supabase gen types typescript --linked > /tmp/database.types.ts; then
-            echo "::warning::Nao foi possivel gerar os tipos pra comparar (CLI falhou). Nao da pra dizer se estao velhos — rode 'npm run db:types' local se esta leva mexeu em schema."
-            exit 0
+            echo "::error::Publicacao executada, mas verificacao de tipos inconclusiva: CLI falhou."
+            exit 1
           fi
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' /tmp/database.types.ts > /tmp/gerado.norm.ts
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' src/lib/database.types.ts > /tmp/commitado.norm.ts
@@ -175,9 +138,9 @@ jobs:
           {
             echo "## \`database.types.ts\` ficou velho"
             echo
-            echo "O deploy **funcionou** — a migration foi aplicada e a Edge publicada. O que falta e o chore de tipos."
+            echo "As etapas de migration, Edge e saude **funcionaram** — a migration foi aplicada e a Edge publicada. O que falta e o chore de tipos."
             echo
-            echo "Sem ele, o gate \`supabase-check\` passa a reprovar **toda PR aberta**, inclusive as que nao tocam em banco nenhum."
+            echo "O monitor e a promocao permanecem reprovados ate reconciliar o contrato; PRs de interface nao herdam esta correcao."
             echo
             echo '```'
             echo "git switch -c chore/PH-<n>-db-types-de-<assunto> origin/dev"
@@ -207,3 +170,22 @@ jobs:
         run: |
           echo "::error::database.types.ts esta desatualizado depois desta migration. O deploy funcionou; o que falta e 'npm run db:types' numa PR de chore. Ver o resumo deste run."
           exit 1
+
+      - name: Registrar aplicacao, publicacao e tipos separadamente
+        if: always()
+        env:
+          MIGRATIONS: ${{ steps.migrations.outcome }}
+          EDGE: ${{ steps.edge.outcome }}
+          HEALTH: ${{ steps.health.outcome }}
+          TYPES: ${{ steps.comparar.outcome }}
+          STALE: ${{ steps.comparar.outputs.velho }}
+          REUSED: ${{ steps.equivalente.outputs.reutilizar }}
+          REUSED_RUN: ${{ steps.equivalente.outputs.run }}
+        run: node scripts/ci/schema-deploy-status.mjs
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: schema-deploy-status
+          path: schema-deploy-status.json
+          if-no-files-found: error

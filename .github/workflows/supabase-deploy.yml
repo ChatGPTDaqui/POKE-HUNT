@@ -29,6 +29,7 @@ jobs:
           version: 2.116.0
 
       - name: Aplicar migrations pendentes (public + dev, par por arquivo)
+        id: migrations
         # PH-106: o `link` mora DENTRO do wrapper — ver o comentario no topo de
         # scripts/ci/supabase-cli.sh. Aqui o custo de morrer por colisao de
         # credencial e o maior de todos: migration de PRODUCAO nao aplicada com
@@ -40,7 +41,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22.22.2
           # Sem isto todo run baixava o registry inteiro de novo — nao havia
           # UMA ocorrencia de `cache` nos workflows ate 03/09 (PH-453).
           #
@@ -56,213 +57,35 @@ jobs:
       - run: npm ci
 
       - name: Publicar Edge Function (motor + servidor de autoridade)
+        id: edge
         run: npm run edge:publicar
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
-      # PH-460 — a obrigacao pos-promocao deixa de depender de alguem lembrar.
-      #
-      # `check` e `build-check` NAO verificam que o app sobe: o primeiro olha
-      # migration e tipos, o segundo roda `tsc` e teste, e nenhum abre o jogo.
-      # Isso ja falhou DUAS vezes com deploy verde — PH-134 (cliente quebrado
-      # por env ausente) e PH-293 (cliente carregando a tela e nunca o jogo, por
-      # CORS). O `CLAUDE.md` obriga conferir na mao desde entao; aqui a maquina
-      # passa a fazer, na hora certa, sempre.
-      #
-      # AS DUAS BANCADAS, e nao so a fumaca. `fumaca-de-producao.mjs` confere
-      # login, `/estado` e CORS nos dois ambientes, e deu "TUDO OK" duas vezes em
-      # 02/09 com TODA hunt do jogo bloqueada — o 409 de HP mascarava o gate.
-      # Quem pega gate de hunt quebrado e `abrir-hunt-em-producao.mjs` (PH-451).
-      #
-      # DUAS TENTATIVAS. Um 429 de rate limit do auth transformaria a promocao
-      # em vermelho, e a regra do projeto manda REVERTER quando a promocao fica
-      # vermelha. Falso positivo aqui custa um revert desnecessario em producao,
-      # entao a segunda tentativa vale mais que a deteccao 15s mais cedo.
-      - name: O jogo CARREGA em producao?
+      - name: Verificar as duas bancadas
+        id: smokes
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           CONTA_TESTE_SENHA: ${{ secrets.CONTA_TESTE_SENHA }}
-        run: |
-          set -uo pipefail
+        run: node scripts/ci/verificar-publicacao.mjs smokes
 
-          # BRANCO CONTA COMO AUSENTE (PH-463). `-z` e falso pra uma string com
-          # so um `\n`, e `gh secret set NOME` sem `--body` le da entrada padrao:
-          # entrada vazia grava um segredo que EXISTE e nao e vazio. Sem esta
-          # limpeza, esse segredo passaria a guarda, as bancadas rodariam com
-          # credencial invalida, o job ficaria VERMELHO — e a regra do projeto
-          # manda reverter producao quando a promocao fica vermelha. Ou seja: um
-          # segredo mal colado dispararia um revert desnecessario.
-          U=$(printf '%s' "${VITE_SUPABASE_URL:-}" | tr -d '[:space:]')
-          A=$(printf '%s' "${VITE_SUPABASE_ANON_KEY:-}" | tr -d '[:space:]')
-          S=$(printf '%s' "${CONTA_TESTE_SENHA:-}" | tr -d '[:space:]')
+      - name: Conferir commit e bundle no Pages
+        if: always() && steps.edge.outcome == 'success'
+        run: node scripts/ci/verificar-publicacao.mjs client
 
-          if [ -z "$U" ] || [ -z "$A" ] || [ -z "$S" ]; then
-            echo "::warning::Faltam secrets — a verificacao de producao NAO rodou. Confira na mao."
-            {
-              echo "### A verificacao de producao NAO rodou"
-              echo ""
-              echo "Faltam secrets no repo. Enquanto isso, a obrigacao do \`CLAUDE.md\` continua sendo manual:"
-              echo ""
-              echo '```'
-              echo "node scripts/harness/fumaca-de-producao.mjs"
-              echo "node scripts/harness/abrir-hunt-em-producao.mjs"
-              echo '```'
-              echo ""
-              echo "Para ligar:"
-              echo ""
-              echo '```'
-              echo "gh secret set VITE_SUPABASE_URL      --repo ChatGPTDaqui/POKE-HUNT"
-              echo "gh secret set VITE_SUPABASE_ANON_KEY --repo ChatGPTDaqui/POKE-HUNT"
-              echo "gh secret set CONTA_TESTE_SENHA      --repo ChatGPTDaqui/POKE-HUNT"
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
+      - name: Consolidar resultado independente da cor do job
+        if: always()
+        env:
+          MIGRATIONS_OUTCOME: ${{ steps.migrations.outcome }}
+          EDGE_OUTCOME: ${{ steps.edge.outcome }}
+        run: node scripts/ci/verificar-publicacao.mjs resumo
 
-          # TRES resultados, e nao dois (PH-463). As bancadas separam
-          # "configuracao ruim" de "producao quebrada", e a diferenca decide
-          # entre deixar a promocao verde ou disparar um revert:
-          #
-          #   0  passou
-          #   2  INCONCLUSIVO — credencial recusada (400/401/403 no login).
-          #      E segredo errado, nao produto quebrado. 5xx e rede continuam
-          #      caindo no 1, porque ai o servidor E o problema.
-          #   1  producao reprovou de verdade
-          #
-          # Sem esta separacao, colar o segredo errado deixaria a promocao
-          # vermelha e a regra do `CLAUDE.md` mandaria reverter producao — por
-          # um erro de configuracao que nao quebrou nada.
-          conferir() {
-            echo "== $1 =="
-            node "$1"
-            local c=$?
-            [ "$c" = "0" ] && return 0
-            [ "$c" = "2" ] && return 2
-            echo "::warning::$1 reprovou na 1a tentativa; repetindo em 15s antes de reprovar a promocao."
-            sleep 15
-            node "$1"
-          }
-
-          RUIM=0
-          INCONCLUSIVO=0
-          for BANCADA in scripts/harness/fumaca-de-producao.mjs scripts/harness/abrir-hunt-em-producao.mjs; do
-            conferir "$BANCADA"
-            case $? in
-              0) ;;
-              2) INCONCLUSIVO=1 ;;
-              *) RUIM=1 ;;
-            esac
-          done
-
-          if [ "$RUIM" != "0" ]; then
-            {
-              echo "### PRODUCAO REPROVOU a verificacao pos-deploy"
-              echo ""
-              echo "A regra do \`CLAUDE.md\` e reverter primeiro e investigar depois."
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
-
-          if [ "$INCONCLUSIVO" != "0" ]; then
-            echo "::warning::Credencial recusada — a verificacao de producao NAO concluiu. Confira na mao."
-            {
-              echo "### A verificacao NAO concluiu: a credencial foi recusada"
-              echo ""
-              echo "O login da conta de teste voltou 400/401/403. Isso e **segredo errado, nao producao quebrada** — por isso a promocao segue verde."
-              echo ""
-              echo "Causa mais comum: \`gh secret set NOME\` rodado sem \`--body\` e sem colar nada, o que grava um segredo em branco ou truncado."
-              echo ""
-              echo "Enquanto isso a obrigacao do \`CLAUDE.md\` continua manual:"
-              echo ""
-              echo '```'
-              echo "node scripts/harness/fumaca-de-producao.mjs"
-              echo "node scripts/harness/abrir-hunt-em-producao.mjs"
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          echo "### Producao verificada: login, \`/estado\`, CORS e abertura de hunt" >> "$GITHUB_STEP_SUMMARY"
-
-      # O BURACO QUE ESTE PASSO FECHA, e ele foi visto acontecer em 03/09.
-      #
-      # As duas bancadas acima conferem login, `/estado`, CORS e abertura de
-      # hunt — tudo EDGE. Nenhuma delas olha qual bundle o Cloudflare Pages esta
-      # servindo, e o Pages e um pipeline SEPARADO deste workflow.
-      #
-      # Resultado observado na promocao da 7.42: o deploy fechou VERDE, as duas
-      # bancadas deram TUDO OK, e o cliente em producao ainda era o da 7.41. Deu
-      # certo por espera, nao por verificacao — se o build do Pages tivesse
-      # falhado calado, este job teria dito sucesso do mesmo jeito.
-      #
-      # POR QUE ELE NAO REPROVA O JOB. A regra do `CLAUDE.md` e "promocao
-      # vermelha, reverte producao primeiro". Pages atrasado NAO e producao
-      # quebrada: o banco e a Edge ja estao no ar e o jogo funciona: o que falta
-      # e o cliente novo. Reverter por isso seria trocar um atraso cosmetico por
-      # um rollback de verdade. Mesmo raciocinio do ramo INCONCLUSIVO acima.
-      - name: O CLIENTE publicado e o desta promocao?
-        run: |
-          set -uo pipefail
-
-          # A VERSAO da nota mais nova e o carimbo que prova qual build esta no
-          # ar: ela muda a cada promocao e vive no mesmo commit que o resto.
-          VERSAO=$(grep -m1 -oE "version: *'[^']+'" src/data/patchNotes.ts | grep -oE "[0-9]+\.[0-9]+")
-          if [ -z "$VERSAO" ]; then
-            echo "::warning::Nao consegui ler a versao da nota mais nova — verificacao do cliente pulada."
-            exit 0
-          fi
-          # Ponto no regex casa qualquer caractere; escapar deixa `7.42` sem
-          # casar com `7142`.
-          RE=$(printf '%s' "$VERSAO" | sed 's/\./\\./g')
-
-          # A ORIGEM e a mesma dos harnesses (`abrir-hunt-em-producao.mjs`).
-          ORIGEM="https://poke-hunt-euj.pages.dev"
-
-          # Ate 10 minutos. Em 03/09 o Pages levou alguns minutos depois de o
-          # deploy da Edge fechar; o teto existe pra o passo nao ficar preso.
-          # O BUNDLE VAI PRA ARQUIVO ANTES DO GREP, e isto e correcao de defeito
-          # medido, nao estilo: `curl ... | grep -q` faz o grep sair no primeiro
-          # casamento e fechar o pipe, o curl morre escrevendo
-          # ("curl: Failed writing body") e o `set -o pipefail` reprova a
-          # pipeline INTEIRA. Ou seja: o bundle continha a versao e a checagem
-          # dizia que nao. Falso negativo justamente no passo que existe pra nao
-          # mentir. Pego rodando o script — `bash -n` passa nele.
-          ACHOU=0
-          for _ in $(seq 1 20); do
-            curl -sS --max-time 20 "$ORIGEM/" -o indice.html || true
-            BUNDLE=$(grep -oE '/build/index-[A-Za-z0-9_-]+\.js' indice.html | head -1 || true)
-            if [ -n "$BUNDLE" ]; then
-              curl -sS --max-time 60 "$ORIGEM$BUNDLE" -o cliente.js || true
-              # `version:.7\.42` casa com aspas simples, duplas OU crase — o
-              # minificador ja usou as tres. Ancorar em `version:` e o que evita
-              # o falso positivo: `7.42` solto aparece em coordenada de SVG.
-              if grep -qE "version:.${RE}" cliente.js; then
-                ACHOU=1
-                break
-              fi
-            fi
-            sleep 30
-          done
-          rm -f indice.html cliente.js
-
-          if [ "$ACHOU" = "1" ]; then
-            echo "### Cliente publicado confere: a nota $VERSAO esta no bundle em producao" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          echo "::warning::O Pages ainda nao publicou o cliente desta promocao (nota $VERSAO). Edge e banco JA estao no ar."
-          {
-            echo "### O CLIENTE ainda nao e o desta promocao"
-            echo ""
-            echo "Depois de 10 minutos, o bundle em producao nao contem a nota \`$VERSAO\`."
-            echo ""
-            echo "**Isto nao e producao quebrada** — banco e Edge ja estao no ar e o jogo funciona. O que falta e o build do Cloudflare Pages, que e um pipeline separado deste workflow."
-            echo ""
-            echo "Conferir na mao (o bundle tem que conter a versao da nota mais nova):"
-            echo ""
-            echo '```'
-            echo "curl -s $ORIGEM/ | grep -oE '/build/index-[A-Za-z0-9_-]+\.js'"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Guardar status da publicacao
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: publicacao-status
+          path: publicacao-status.json
+          if-no-files-found: error

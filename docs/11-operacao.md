@@ -407,49 +407,45 @@ máquina. Histórico completo em [15-coordenacao-supabase.md](15-coordenacao-sup
 coluna, função, policy, índice, grant) vira arquivo em `supabase/migrations/`, sempre, sem
 exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
 
-### Passo a passo
+### Procedimento vigente
 
-1. Criar `supabase/migrations/<timestamp>_<nome_descritivo>.sql` — timestamp formato
-   `YYYYMMDDHHmmss`, maior que o mais recente já existente no diretório.
-2. **Este projeto tem 2 schemas espelhados: `public` (produção) e `dev` (clone de teste).** Se a
-   mudança afeta uma tabela/função/policy do jogo (não algo `public`-only por natureza, tipo grant
-   de sistema), criar **os dois arquivos**, um por schema, timestamps próximos — convenção já em
-   uso, ver `supabase/migrations/2026081*_..._public.sql` / `..._dev.sql`.
-3. Aplicar: `npx supabase db push` (precisa estar linkado uma vez por máquina —
-   `npx supabase link --project-ref uogmhqbyjgafjujbqdty`).
-4. Se mudou tabela/coluna/tipo: `npm run db:types` — regenera `src/lib/database.types.ts`.
-   Commitar junto da migration, no mesmo commit.
-5. `git add` migration(s) + `database.types.ts` → commit → push numa branch de feature.
-6. **PR mira `dev`, nunca `main` direto** (docs/15, Parte 3 — reforçado por CI desde
-   `483266f`: PR pra `main` que não vem de `dev` é reprovado automático). `build-check-dev.yml`
-   roda tsc+testes; `supabase-check.yml` roda o gate de migration/types, comparando contra
-   `dev` (não `main`) nesta etapa.
-7. Merge em `dev` → `supabase-deploy-dev.yml` aplica migration + publica `jogo-dev` +
-   confirma o schema ativo (`/saude`). Testar local: `.env.local` com `VITE_SERVIDOR_URL`
-   apontando pra `jogo-dev` (seção acima) — agora sim existe ciclo antes de produção.
-8. Validado em `jogo-dev` → PR `dev` → `main` (gate de par `dev`/`public` reaplica aqui,
-   comparando contra `main` de verdade — é o ponto real de promoção).
+Siga [PROCESSO.md](PROCESSO.md#banco-e-segurança) para preparar migrations e tipos e
+[integração e publicação](PROCESSO.md#integrar-e-publicar) para PR, deploy e verificação.
+A antiga sequência que mandava aplicar `db push` da feature antes do commit foi retirada
+em 08/09/2026 (PH-515): ela alterava o banco compartilhado antes da revisão. O CI de dev
+já aplica as migrations dos dois schemas; não existe isolamento de DDL por branch.
 
-   **"Validado em `jogo-dev`" é o SERVIDOR.** O cliente de staging tem que ser aberto à parte:
-   `https://dev.poke-hunt-euj.pages.dev`, tela subindo e console limpo. Ver a seção "Staging tem
-   DOIS lados" acima — esse front-end passou meses sem iniciar, com o deploy verde o tempo todo.
-9. Merge em `main` → `supabase-deploy.yml` aplica em produção. **Não rodar `db
-   push`/`edge:publicar` manual fora desse fluxo**, a menos que seja diagnóstico pontual (a seção
-   de Diagnóstico de 502 abaixo já é esse caso legítimo).
+### Preparar schema e tipos na mesma PR (PH-517)
 
-   **Esse mesmo run também VERIFICA produção** (PH-460): depois de publicar a Edge, ele roda
-   `fumaca-de-producao.mjs` e `abrir-hunt-em-producao.mjs` contra produção. Por isso **ler o
-   resumo do job, não só a cor** — verde tem três leituras:
+1. Atualizar a base dev e escrever migrations aditivas, compatíveis com o produto publicado.
+   Arquivos aplicados não são editados. Par `_public.sql`/`_dev.sql` usa o mesmo assunto e
+   timestamps distintos posteriores à base; um único arquivo pode cobrir ambos explicitamente.
+2. Abrir PR de rascunho. O check compara a lista remota com as migrations da base, captura
+   somente `public`/`dev` por `db dump`, confere novamente a lista e restaura no Postgres
+   descartável do runner. Nenhum save é copiado, nenhuma escrita de feature vai para o remoto.
+   A cópia da estrutura resolve a lacuna histórica do clone dev sem reescrever migrations antigas.
+3. A baseline deve gerar os tipos da base. Só então as migrations novas são executadas e os
+   tipos resultantes comparados com a PR. Falha de SQL reprova; não existe bypass por tamanho.
+4. Baixar o artefato `database.types.ts` do run; copiar o arquivo `database.types.regenerado.ts`
+   para `src/lib/database.types.ts`, revisar o diff, typecheck/testes afetados e push na mesma PR.
+   Tipos não precisam ser alterados quando a migration não muda o contrato gerado.
+5. Com os checks aprovados, sair de rascunho e integrar pelo procedimento. Conferir o artefato
+   `schema-deploy-status`: aplicação, Edge, saúde e tipos têm resultados separados. Drift ou
+   geração inconclusiva reprova o run sem afirmar que uma migration já aplicada foi desfeita.
 
-   | resumo do job | o que aconteceu | o que fazer |
-   |---|---|---|
-   | `Producao verificada: login, /estado, CORS e abertura de hunt` | as duas bancadas passaram | nada |
-   | `A verificacao de producao NAO rodou` | faltam os secrets `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `CONTA_TESTE_SENHA` | rodar as duas bancadas na mão |
-   | `A verificacao NAO concluiu: a credencial foi recusada` | secret existe mas está errado ou em branco | corrigir o secret e rodar as duas na mão |
+PR de interface não herda comparação com schema de outra tarefa. A detecção de migrations
+sem arquivo permanece no check; drift de tipos permanece no deploy, no monitor diário e no
+gate de promoção. Se a base remota ainda não foi publicada ou mudou durante a captura, a
+bancada reprova e deve ser repetida após estabilizar, sem aplicar a feature à força.
 
-   **Vermelho nesse passo é produção quebrada de verdade**, não configuração: credencial recusada
-   (400/401/403 no login) sai com código 2 e vira aviso, justamente para que um segredo mal colado
-   não dispare a regra de reverter (PH-463). O que reprova é 5xx, rede, ou resposta errada.
+Limites: baseline sem dados valida estrutura, execução de SQL e tipos, não prova backfill
+correto em todos os saves nem compatibilidade comportamental de RPC. A revisão e testes da
+migration devem cobrir esses casos com fixtures representativas. Remover coluna/RPC usada
+pelo produto exige implantação em fases; o schema public já muda no merge em dev.
+
+Implementação e reprodução: `scripts/ci/schema-plan.mjs` e `schema-sandbox.sh`, executados
+pelo `supabase-check.yml` com CLI fixado. O dump é temporário e não vira artefato público.
+Referência do [dump de estrutura e banco local](https://supabase.com/docs/reference/cli/supabase-db-dump).
 
 ### Se o gate (`supabase-check.yml`) falhar e não estiver claro por quê
 
@@ -460,7 +456,9 @@ exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
   version, name from supabase_migrations.schema_migrations where version = '<versao>'` (via `db
   query`) dá o nome; `information_schema.columns` + `pg_constraint` dão a definição real pra
   reconstruir o `alter table`/`create ...` com precisão, não achismo.
-- **"database.types.ts esta desatualizado"** → `npm run db:types`, commitar o resultado.
+- **Tipos da PR divergentes** → usar o artefato do banco descartável e corrigir a mesma PR.
+  **Drift após deploy/na promoção** → gerar do remoto com `npm run db:types`, revisar a causa
+  e corrigir por PR; nunca esconder coluna/enum divergente como diferença cosmética.
 - **"Migration nova mexe em dev sem mexer em public" (ou vice-versa)** → falta o arquivo par do
   passo 2 acima.
 
