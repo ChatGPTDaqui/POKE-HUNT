@@ -40,9 +40,14 @@ Não repetir checks já aprovados sem alteração ou nova evidência. Manter iso
 - Não aplicar `db push` da feature antes do commit/PR. O CI de dev aplica as migrations após merge.
   **Dev e public compartilham o projeto: esse push já afeta os dois schemas.** Mudanças precisam
   ser compatíveis com cliente e servidor atualmente publicados. Contrações exigem fase posterior.
-- Tipos devem acompanhar o schema; geração remota só descreve migrations já aplicadas.
-  Nunca aplicar antecipadamente para satisfazer o gate. Se o gate impedir preparar tipos da
-  migration pendente, resolver o fluxo de validação antes de integrar; não ignorar o diff.
+- Tipos acompanham a migration na mesma PR. O check de schema restaura apenas a estrutura
+  atual em banco descartável, confere a baseline com a base e aplica as migrations novas ali.
+  Se os tipos divergirem, baixar `database.types.regenerado.ts` do artefato `database.types.ts`,
+  revisar e commitar como `src/lib/database.types.ts` na mesma PR; repetir os checks.
+  Não armar auto-merge enquanto essa preparação não terminar. Ver `11-operacao.md`.
+- PR sem alteração de schema/tipos não compara seu contrato com um remoto em movimento.
+  Drift continua reprovando o deploy de dev, o monitor diário e a promoção para main.
+  Geração remota só descreve migrations já aplicadas, nunca justifica `db push` antecipado.
 - Exceções existentes: catálogo por pipeline versionado e idempotente; `db:wipe` é operação do
   usuário, com `--confirmar=APAGAR-TUDO`, nunca ação autônoma do agente.
 - Não expor `.env`, tokens ou dados de jogadores. Conferir projeto/schema antes de operar.
