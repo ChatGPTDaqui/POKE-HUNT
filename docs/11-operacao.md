@@ -407,49 +407,13 @@ máquina. Histórico completo em [15-coordenacao-supabase.md](15-coordenacao-sup
 coluna, função, policy, índice, grant) vira arquivo em `supabase/migrations/`, sempre, sem
 exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
 
-### Passo a passo
+### Procedimento vigente
 
-1. Criar `supabase/migrations/<timestamp>_<nome_descritivo>.sql` — timestamp formato
-   `YYYYMMDDHHmmss`, maior que o mais recente já existente no diretório.
-2. **Este projeto tem 2 schemas espelhados: `public` (produção) e `dev` (clone de teste).** Se a
-   mudança afeta uma tabela/função/policy do jogo (não algo `public`-only por natureza, tipo grant
-   de sistema), criar **os dois arquivos**, um por schema, timestamps próximos — convenção já em
-   uso, ver `supabase/migrations/2026081*_..._public.sql` / `..._dev.sql`.
-3. Aplicar: `npx supabase db push` (precisa estar linkado uma vez por máquina —
-   `npx supabase link --project-ref uogmhqbyjgafjujbqdty`).
-4. Se mudou tabela/coluna/tipo: `npm run db:types` — regenera `src/lib/database.types.ts`.
-   Commitar junto da migration, no mesmo commit.
-5. `git add` migration(s) + `database.types.ts` → commit → push numa branch de feature.
-6. **PR mira `dev`, nunca `main` direto** (docs/15, Parte 3 — reforçado por CI desde
-   `483266f`: PR pra `main` que não vem de `dev` é reprovado automático). `build-check-dev.yml`
-   roda tsc+testes; `supabase-check.yml` roda o gate de migration/types, comparando contra
-   `dev` (não `main`) nesta etapa.
-7. Merge em `dev` → `supabase-deploy-dev.yml` aplica migration + publica `jogo-dev` +
-   confirma o schema ativo (`/saude`). Testar local: `.env.local` com `VITE_SERVIDOR_URL`
-   apontando pra `jogo-dev` (seção acima) — agora sim existe ciclo antes de produção.
-8. Validado em `jogo-dev` → PR `dev` → `main` (gate de par `dev`/`public` reaplica aqui,
-   comparando contra `main` de verdade — é o ponto real de promoção).
-
-   **"Validado em `jogo-dev`" é o SERVIDOR.** O cliente de staging tem que ser aberto à parte:
-   `https://dev.poke-hunt-euj.pages.dev`, tela subindo e console limpo. Ver a seção "Staging tem
-   DOIS lados" acima — esse front-end passou meses sem iniciar, com o deploy verde o tempo todo.
-9. Merge em `main` → `supabase-deploy.yml` aplica em produção. **Não rodar `db
-   push`/`edge:publicar` manual fora desse fluxo**, a menos que seja diagnóstico pontual (a seção
-   de Diagnóstico de 502 abaixo já é esse caso legítimo).
-
-   **Esse mesmo run também VERIFICA produção** (PH-460): depois de publicar a Edge, ele roda
-   `fumaca-de-producao.mjs` e `abrir-hunt-em-producao.mjs` contra produção. Por isso **ler o
-   resumo do job, não só a cor** — verde tem três leituras:
-
-   | resumo do job | o que aconteceu | o que fazer |
-   |---|---|---|
-   | `Producao verificada: login, /estado, CORS e abertura de hunt` | as duas bancadas passaram | nada |
-   | `A verificacao de producao NAO rodou` | faltam os secrets `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `CONTA_TESTE_SENHA` | rodar as duas bancadas na mão |
-   | `A verificacao NAO concluiu: a credencial foi recusada` | secret existe mas está errado ou em branco | corrigir o secret e rodar as duas na mão |
-
-   **Vermelho nesse passo é produção quebrada de verdade**, não configuração: credencial recusada
-   (400/401/403 no login) sai com código 2 e vira aviso, justamente para que um segredo mal colado
-   não dispare a regra de reverter (PH-463). O que reprova é 5xx, rede, ou resposta errada.
+Siga [PROCESSO.md](PROCESSO.md#banco-e-segurança) para preparar migrations e tipos e
+[integração e publicação](PROCESSO.md#integrar-e-publicar) para PR, deploy e verificação.
+A antiga sequência que mandava aplicar `db push` da feature antes do commit foi retirada
+em 08/09/2026 (PH-515): ela alterava o banco compartilhado antes da revisão. O CI de dev
+já aplica as migrations dos dois schemas; não existe isolamento de DDL por branch.
 
 ### Se o gate (`supabase-check.yml`) falhar e não estiver claro por quê
 
