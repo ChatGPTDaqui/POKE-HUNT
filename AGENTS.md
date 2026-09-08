@@ -3,7 +3,7 @@
 React/TS, Canvas e Supabase; catálogo scripts/usum. Comandos: package.json.
 
 ## Roteamento
-Antes de cada tarefa nova/ferramentas, avalie silenciosamente pelo pedido:
+Antes de nova tarefa e de usar ferramentas, avalie silenciosamente pelo pedido:
 complexidade, contexto, arquivos/módulos, raciocínio, programação/arquitetura/debugging/
 pesquisa, risco e ganho de qualidade por consumo. Sem investigação prévia.
 Use o modelo disponível na interface/sessão menos custoso com qualidade suficiente.
@@ -35,6 +35,7 @@ ajuste no seletor, sem executar em outro modelo.
 Roteie contexto separadamente: leia só o necessário.
 
 ## Execução e contexto
+Execute só o pedido.
 Auditoria/plano: só leitura. Preserve alterações alheias. Antes de editar, leia
 docs/PROCESSO.md: Jira, checks e integração após a escolha, sem novos gates.
 docs/README.md roteia domínios; docs/operacao/ rege banco, publicação e verificação.
