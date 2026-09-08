@@ -70,6 +70,15 @@ Não repetir checks já aprovados sem alteração ou nova evidência. Manter iso
 Consultar estado agregado em intervalos razoáveis enquanto realiza trabalho independente;
 não manter loops de `gh pr checks`. Espera não substitui verificar o resultado final.
 
+`node scripts/ci/status-publicacao.mjs [SHA completo]` consulta o run e seu artefato
+`publicacao-status`. Sem SHA usa a main atual. O resultado discrimina migration, Edge,
+as duas bancadas e o cliente. `verified` exige todos; `configuration-inconclusive`
+exige corrigir credenciais e verificar; `functional-failure` exige tratar a regressão;
+`client-pending` exige acompanhar o Pages; `deployment-failure` exige investigar a etapa
+que falhou. Artefato ausente ou execução em andamento nunca significam verificado.
+O cliente precisa apresentar SHA, entrada no HTML e hash do bundle correspondentes,
+independentemente da versão das patch notes. A espera por propagação tem limite.
+
 ## Contexto desta máquina
 
 `CLAUDE.local.md` pode apontar para Obsidian, memórias e comandos locais. Ele complementa este
