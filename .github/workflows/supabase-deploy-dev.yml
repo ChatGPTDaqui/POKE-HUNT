@@ -40,6 +40,7 @@ jobs:
           version: 2.116.0
 
       - name: Aplicar migrations pendentes (mesmo arquivo cobre dev + public)
+        id: migrations
         if: steps.equivalente.outputs.reutilizar != 'true'
         # Mesmo comando do deploy de main -- nao ha "db push so pra dev", o CLI
         # aplica toda migration pendente do repo inteiro. O gate de par
@@ -78,6 +79,7 @@ jobs:
         if: steps.equivalente.outputs.reutilizar != 'true'
 
       - name: Publicar Edge Function jogo-dev (mesmo bundle de authority/)
+        id: edge
         if: steps.equivalente.outputs.reutilizar != 'true'
         run: |
           npm run build:edge
@@ -87,6 +89,7 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - name: Confirmar schema ativo pos-deploy (achado do pente fino, docs/15)
+        id: health
         # Sem isto, secret errado (JOGO_SCHEMA_DEV ausente/trocado) bota codigo
         # de staging rodando contra o schema de PRODUCAO silenciosamente --
         # mesma classe do incidente de 13/08. Usa a publishable key (nao e
@@ -120,8 +123,8 @@ jobs:
         # rotacionada por outra invocacao do CLI enquanto o `npm ci` rodava.
         run: |
           if ! scripts/ci/supabase-cli.sh supabase gen types typescript --linked > /tmp/database.types.ts; then
-            echo "::warning::Nao foi possivel gerar os tipos pra comparar (CLI falhou). Nao da pra dizer se estao velhos — rode 'npm run db:types' local se esta leva mexeu em schema."
-            exit 0
+            echo "::error::Publicacao executada, mas verificacao de tipos inconclusiva: CLI falhou."
+            exit 1
           fi
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' /tmp/database.types.ts > /tmp/gerado.norm.ts
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' src/lib/database.types.ts > /tmp/commitado.norm.ts
@@ -137,7 +140,7 @@ jobs:
             echo
             echo "As etapas de migration, Edge e saude **funcionaram** — a migration foi aplicada e a Edge publicada. O que falta e o chore de tipos."
             echo
-            echo "Sem ele, o gate \`supabase-check\` passa a reprovar **toda PR aberta**, inclusive as que nao tocam em banco nenhum."
+            echo "O monitor e a promocao permanecem reprovados ate reconciliar o contrato; PRs de interface nao herdam esta correcao."
             echo
             echo '```'
             echo "git switch -c chore/PH-<n>-db-types-de-<assunto> origin/dev"
@@ -167,3 +170,22 @@ jobs:
         run: |
           echo "::error::database.types.ts esta desatualizado depois desta migration. O deploy funcionou; o que falta e 'npm run db:types' numa PR de chore. Ver o resumo deste run."
           exit 1
+
+      - name: Registrar aplicacao, publicacao e tipos separadamente
+        if: always()
+        env:
+          MIGRATIONS: ${{ steps.migrations.outcome }}
+          EDGE: ${{ steps.edge.outcome }}
+          HEALTH: ${{ steps.health.outcome }}
+          TYPES: ${{ steps.comparar.outcome }}
+          STALE: ${{ steps.comparar.outputs.velho }}
+          REUSED: ${{ steps.equivalente.outputs.reutilizar }}
+          REUSED_RUN: ${{ steps.equivalente.outputs.run }}
+        run: node scripts/ci/schema-deploy-status.mjs
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: schema-deploy-status
+          path: schema-deploy-status.json
+          if-no-files-found: error

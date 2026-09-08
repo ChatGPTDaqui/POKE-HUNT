@@ -1,337 +1,97 @@
 name: Supabase check
 
-# Gate de PR/push. Pega os 2 incidentes que ja aconteceram por falta disso:
-# - migration criada e nunca aplicada (schema remoto diverge do que os
-#   arquivos em supabase/migrations/ esperam)
-# - front rodando contra schema desatualizado (database.types.ts nao
-#   regenerado depois de uma mudanca de coluna/tabela)
-#
-# Roda num runner do GitHub (tem Docker disponivel) — nao e o mesmo ambiente
-# que a maquina local, que evita Docker de proposito (ver docs/11-operacao.md).
-
 on:
   pull_request:
-    branches: [main]
-  push:
-    branches-ignore: [main]
+    branches: [dev, main]
+  schedule:
+    - cron: '20 9 * * *'
+
+# Só validações da mesma PR podem ser substituídas. Deploys têm grupos próprios.
+concurrency:
+  group: supabase-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      SCHEMA_BASE: ${{ github.base_ref == 'main' && 'origin/main' || 'origin/dev' }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0 # precisa do historico completo pro git diff contra a base mais abaixo
-
-      - name: PR pra main so pode vir de dev
-        # Reforco do fluxo feature->dev->main (docs/15, Parte 3): so vira gate
-        # de verdade combinado com branch protection marcando este check como
-        # obrigatorio (pendente — precisa de admin no repo, ver docs/15).
-        # Sem isso, um PR de feature branch reto pra main (o mesmo erro que
-        # ja aconteceu 2x nesta sessao) passa sem aviso nenhum.
-        if: github.event_name == 'pull_request' && github.head_ref != 'dev'
-        env:
-          PR_HEAD: ${{ github.head_ref }}
-        run: |
-          echo "::error::PR para main so e permitido a partir da branch dev (esta PR vem de '$PR_HEAD'). Merge sua feature branch em dev primeiro, teste em jogo-dev, so depois abra PR dev->main."
-          exit 1
-
-      # VERSAO FIXA, e nao `latest` (PH-290).
-      #
-      # ESTA DECISAO FOI TOMADA AO CONTRARIO PRIMEIRO, e durou 40 minutos. O
-      # raciocinio era que versao fixa nao congela o servico do outro lado e so
-      # adiaria o problema. Ele ignorava COMO o `latest` e resolvido:
-      #
-      #   ##[error]Failed to resolve latest Supabase CLI release: rate limit exceeded
-      #
-      # `latest` faz uma CHAMADA A API DO GITHUB a cada run, e ela tem rate
-      # limit. Visto em 30/08 na PR de promocao, depois de uma tarde de muitos
-      # runs — ou seja: o CI inteiro cai por um motivo que nao tem nada a ver com
-      # o codigo, e cai justo na hora de promover, que e quando ha mais runs.
-      #
-      # O segundo argumento continua valendo, e agora sem contrapeso: este gate
-      # le o FORMATO de saida do CLI (`.migrations[]`, `.local`, `.remote`), e
-      # com `latest` esse formato pode mudar debaixo dele sem ninguem tocar em
-      # nada.
-      #
-      # O custo de fixar e um PR de uma linha quando o `db push` pedir um CLI
-      # mais novo — e ai o erro dira exatamente isso, em vez de "rate limit".
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'schedule' && 'dev' || github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.22.2
       - uses: supabase/setup-cli@v2
         with:
           version: 2.116.0
 
-      # PH-106: nao ha mais passo "Link no projeto Supabase" aqui. O `link`
-      # provisiona o role `cli_login_postgres` ROTACIONANDO a senha a cada
-      # login, e este workflow dispara no MESMO segundo que
-      # `supabase-deploy-dev` em todo push em `dev` — as duas invocacoes se
-      # invalidavam e quem morria era sorteio (28P01). Agora o `link` mora
-      # dentro de scripts/ci/supabase-cli.sh, que re-linka e repete quando a
-      # credencial fica velha. Ver o cabecalho do script.
-
-      - name: Existe migration aplicada no remoto que nao existe local?
-        # NAO usa 'db diff' — ele reconstroi o banco do zero so com as
-        # migrations do repo (shadow database), e esse rebuild esta quebrado
-        # pra este projeto: o schema `dev` (~30 tabelas) foi clonado de
-        # `public` fora da trilha de migration muito antes de qualquer
-        # convencao de arquivo _dev existir, entao o replay historico falha
-        # ("schema dev does not exist") pra QUALQUER schema, nao so dev.
-        # Consertar isso e cirurgia de historico, fora de escopo aqui.
-        #
-        # 'migration list --linked' faz a pergunta certa sem precisar
-        # reconstruir nada: compara os arquivos locais contra o que o
-        # Supabase tem registrado como aplicado.
-        #
-        # ---------------------------------------------------------------
-        # PH-76: ORFA PENDENTE DE MERGE NAO E O MESMO QUE DDL NA MAO
-        # ---------------------------------------------------------------
-        # O passo 3 de docs/11-operacao.md manda aplicar `db push` DA BRANCH
-        # DE FEATURE, antes do PR. Enquanto essa PR nao mergear, o arquivo
-        # existe so nela — e pra todas as outras branches aquela migration
-        # aparece como orfa. Reprovar ai fazia seguir o fluxo documentado
-        # travar o CI de todo mundo: 26 PRs reprovadas de uma vez em 22/08,
-        # nenhuma delas mexendo em schema.
-        #
-        # A distincao e barata e objetiva: orfa legitima tem arquivo em
-        # ALGUMA branch do repositorio; DDL aplicada na mao (o incidente que
-        # o gate existe pra pegar, PH-32) nao tem em nenhuma.
-        #
-        # E nao aborta o job: a falha vai pro passo final, pros passos de par
-        # dev/public e de types RODAREM mesmo havendo orfa pendente. Antes
-        # eles ficavam inacessiveis atras deste, justo quando ha mudanca de
-        # schema em voo — que e quando mais importam.
+      - name: Promocao somente de dev
+        if: github.base_ref == 'main' && github.head_ref != 'dev'
         run: |
-          # 'migration list --linked' flanca a conexao ocasionalmente (visto
-          # 2x em 25/08: falha em ~30s sem imprimir nada, run seguinte no
-          # MESMO commit passa normal em minutos) -- o wrapper retenta, pra nao
-          # reprovar PR por instabilidade de rede em vez de por orfa de verdade.
-          #
-          # PH-106: o retry que morava AQUI nao re-linkava, entao so cobria o
-          # flake de rede. Contra a senha rotacionada por outra invocacao do CLI
-          # as 3 tentativas falhavam identicas, porque a credencial em disco
-          # continuava velha. scripts/ci/supabase-cli.sh re-linka a cada
-          # tentativa e cobre os dois casos.
-          LISTA="$(scripts/ci/supabase-cli.sh supabase migration list --linked --output-format json || true)"
-          if [ -z "$LISTA" ]; then
-            echo "::error::'supabase migration list --linked' falhou em todas as tentativas -- isto e falha de conexao/credencial do CLI, nao o gate de migration orfa. Ver logs do step."
+          echo '::error::Promocao para main deve vir de dev.'
+          exit 1
+
+      - name: Validar historico, ordem, pares e escopo
+        id: plan
+        run: node scripts/ci/schema-plan.mjs
+
+      - name: Conferir migrations remotas sem arquivo versionado
+        run: |
+          if ! scripts/ci/supabase-cli.sh supabase migration list --linked --output-format json > schema-remote.json; then
+            echo "::error::CLI falhou em todas as tentativas; falha de conexao/credencial, nao migration orfa."
             exit 1
           fi
-          # PH-290: a guarda de cima so cobria saida VAZIA. Em 30/08 o CLI saiu
-          # com 0 e imprimiu JSON valido SEM `.migrations`, e o `jq` da linha
-          # seguinte estourou com "Cannot iterate over null (null)" e exit 5. O
-          # que chegava ao log era erro de `jq` — quem fosse investigar
-          # procuraria bug de sintaxe no gate, e a causa era o CLI instavel (o
-          # rerun do MESMO commit passou, sem mudar nada).
-          #
-          # `-e` faz o `jq` sair !=0 quando o teste da falso, entao a decisao
-          # volta pra ca em vez de morrer dentro do pipe. A saida crua vai pro
-          # log limitada a 2000 bytes: o bastante pra reconhecer o formato, sem
-          # despejar a lista inteira num erro de conexao.
-          if ! echo "$LISTA" | jq -e 'has("migrations") and (.migrations | type == "array")' >/dev/null 2>&1; then
-            echo "::error::'migration list --linked' respondeu sem '.migrations' como array -- CLI instavel ou o formato de saida mudou. Isto NAO e o gate de migration orfa reprovando. Saida crua abaixo."
-            echo "$LISTA" | head -c 2000
+          if ! jq -e 'has("migrations") and (.migrations | type == "array")' schema-remote.json > /dev/null 2>&1; then
+            echo "::error::CLI respondeu sem '.migrations' como array; formato invalido, NAO e o gate de migration orfa."
+            head -c 2000 schema-remote.json
             exit 1
           fi
-          echo "$LISTA" | jq -c '.migrations[]'
-          ORFAS=$(echo "$LISTA" | jq -r '.migrations[] | select(.local == "") | .remote')
-          if [ -z "$ORFAS" ]; then
-            echo "Toda migration aplicada no remoto tem arquivo local correspondente."
-            exit 0
-          fi
-          # --tags pra alcancar tambem o que so existe em tag; --force porque
-          # refs podem ter sido reescritas por rebase em branch de feature.
-          git fetch --all --tags --force --quiet
-          ARQUIVOS_EM_QUALQUER_BRANCH=$(git log --all --diff-filter=A --name-only --pretty=format: -- supabase/migrations/ | sort -u)
           FALHOU=0
-          for versao in $ORFAS; do
-            if echo "$ARQUIVOS_EM_QUALQUER_BRANCH" | grep -q "^supabase/migrations/${versao}_"; then
-              echo "::warning::Migration ${versao} esta aplicada no remoto e pendente de merge (o arquivo existe em outra branch). Nao e bloqueio: e a janela normal do passo 3 do fluxo de schema."
+          ARQUIVOS=$(git log --all --diff-filter=A --name-only --pretty=format: -- supabase/migrations/ | sort -u)
+          for versao in $(jq -r '.migrations[] | select(.local == "") | .remote' schema-remote.json); do
+            if echo "$ARQUIVOS" | grep -q "^supabase/migrations/${versao}_"; then
+              echo "::warning::Migration $versao existe no historico de outra branch; reconciliar com a base."
             else
-              echo "::error::Migration ${versao} esta aplicada no banco remoto e NAO tem arquivo em nenhuma branch — isto e DDL aplicada na mao (db query, dashboard ou apply_migration sem commitar)."
-              echo "  Resolver: reconstruir o .sql com o MESMO timestamp e registrar com 'supabase migration repair --status applied ${versao}'."
-              echo "  NAO rode 'migration repair --status reverted' — o CLI as vezes sugere isso, e marcaria como revertida uma migration que esta de fato aplicada. O deploy seguinte tentaria recriar objeto que ja existe e quebraria."
+              echo "::error::Migration $versao aplicada sem arquivo em qualquer branch. Reconciliar sem marcar como revertida uma migration ainda aplicada."
               FALHOU=1
             fi
           done
-          echo "ORFA_APLICADA_NA_MAO=$FALHOU" >> "$GITHUB_ENV"
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          # PH-106: quem linka agora e o wrapper, entao ele precisa do ref aqui.
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          [ "$FALHOU" = 0 ]
 
-      - name: Migration nova mexe em dev sem mexer em public (ou vice-versa)?
-        # Convencao do projeto (ver supabase/migrations/2026081*): mudanca de
-        # schema em dev/public anda em par. Nada impede hoje commitar so um
-        # lado — silencioso ate os 2 ambientes divergirem de verdade.
-        # So olha migrations NOVAS neste push/PR (nao mexe no historico, que
-        # e de antes dessa convencao existir).
-        #
-        # Base do diff varia por trigger (achado do pente fino, docs/15 Parte 3):
-        # PR pra main compara contra main (exige par completo, e o ponto real
-        # de promocao pra producao). Push fora de main (feature branch ou dev)
-        # compara contra dev — um commit so-`_dev.sql` precisa passar livre
-        # ali, o par so e cobrado quando vira PR dev->main.
-        run: |
-          git fetch origin main dev --depth=50
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BASE=origin/main
-          else
-            BASE=origin/dev
-          fi
-          NOVAS=$(git diff --name-only --diff-filter=A "$BASE"...HEAD -- supabase/migrations/)
-          if [ -z "$NOVAS" ]; then
-            echo "Nenhuma migration nova neste push/PR."
-            exit 0
-          fi
-          TOCA_DEV=""
-          TOCA_PUBLIC=""
-          for f in $NOVAS; do
-            if grep -qE '\bdev\.[a-zA-Z_]' "$f"; then TOCA_DEV="$TOCA_DEV $f"; fi
-            if grep -qE '\bpublic\.[a-zA-Z_]' "$f"; then TOCA_PUBLIC="$TOCA_PUBLIC $f"; fi
-          done
-          if [ -n "$TOCA_DEV" ] && [ -z "$TOCA_PUBLIC" ]; then
-            echo "::error::Migration nova mexe em dev.* mas nenhuma mexe em public.* — falta o par:$TOCA_DEV"
-            exit 1
-          fi
-          if [ -n "$TOCA_PUBLIC" ] && [ -z "$TOCA_DEV" ]; then
-            echo "::error::Migration nova mexe em public.* mas nenhuma mexe em dev.* — falta o par:$TOCA_PUBLIC"
-            exit 1
-          fi
-          echo "Par dev/public ok (ou migration nao mexe em nenhum dos dois, ex: grant/extensao)."
+      - name: Preparar baseline comprovada para PR de schema ou mudanca do harness
+        if: github.base_ref != 'main' && (steps.plan.outputs.schema == 'true' || steps.plan.outputs.harness == 'true')
+        run: node scripts/ci/schema-plan.mjs baseline
 
-      - name: Migration nova tem carimbo ANTERIOR ao que ja esta na base?
-        # PH-247/PH-289: o `db push` recusa aplicar migration cujo carimbo caia
-        # ANTES da ultima ja registrada no remoto:
-        #
-        #   Found local migration files to be inserted before the last migration
-        #   on remote database.
-        #   Rerun the command with --include-all flag to apply these migrations:
-        #
-        # E ele nao para na PR que causou: a partir dali TODO deploy da `dev`
-        # reprova, ate alguem renomear o arquivo. Aconteceu em 30/08 — duas PRs
-        # abertas no mesmo dia, a de carimbo MAIOR (PH-277, `...010000`) mesclou
-        # primeiro e a de carimbo menor (PH-247, `...000000`) virou "fora de
-        # ordem" sem ninguem ter editado nada. O custo cai em quem nao fez.
-        #
-        # A base e a mesma do passo anterior: `origin/main` pra PR de promocao,
-        # `origin/dev` pro resto. Nao e o estado do REMOTO (que o CI nao le aqui),
-        # e sim o do branch de destino — que e o que vai ser aplicado a seguir, e
-        # a aproximacao suficiente pra pegar a colisao entre PRs concorrentes.
-        run: |
-          git fetch origin main dev --depth=50
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BASE=origin/main
-          else
-            BASE=origin/dev
-          fi
-          NOVAS=$(git diff --name-only --diff-filter=A "$BASE"...HEAD -- supabase/migrations/)
-          if [ -z "$NOVAS" ]; then
-            echo "Nenhuma migration nova neste push/PR."
-            exit 0
-          fi
-          MAIOR_NA_BASE=$(git ls-tree --name-only "$BASE" supabase/migrations/ \
-            | sed -E 's|.*/([0-9]{14})_.*|\1|' | grep -E '^[0-9]{14}$' | sort | tail -1)
-          if [ -z "$MAIOR_NA_BASE" ]; then
-            echo "Base sem migration — nada com que comparar."
-            exit 0
-          fi
-          echo "Ultimo carimbo em $BASE: $MAIOR_NA_BASE"
-          FALHOU=0
-          for f in $NOVAS; do
-            CARIMBO=$(basename "$f" | cut -c1-14)
-            if [ "$CARIMBO" \< "$MAIOR_NA_BASE" ]; then
-              echo "::error::$f tem carimbo $CARIMBO, ANTERIOR ao ultimo de $BASE ($MAIOR_NA_BASE)."
-              echo "  O 'db push' vai recusar com 'to be inserted before the last migration on remote database'"
-              echo "  e travar TODO deploy seguinte, nao so esta PR."
-              echo "  Resolver: renomeie o arquivo com um carimbo maior que $MAIOR_NA_BASE (o par _public/_dev anda junto)."
-              FALHOU=1
-            fi
-          done
-          [ "$FALHOU" = "0" ] || exit 1
-          echo "Toda migration nova tem carimbo posterior ao da base."
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      - name: Aplicar migrations e verificar tipos somente no banco descartavel
+        if: github.base_ref != 'main' && (steps.plan.outputs.schema == 'true' || steps.plan.outputs.harness == 'true')
+        run: bash scripts/ci/schema-sandbox.sh
 
-      - name: database.types.ts esta desatualizado?
-        # PostgrestVersion reflete a versao do servidor detectada NA HORA da
-        # chamada, nao e schema — e a Management API do Supabase ja
-        # demonstrou responder valores diferentes em chamadas quase
-        # simultaneas pro MESMO projeto (26/08: 14.17 e 14.15, segundos de
-        # diferenca, secrets confirmados corretos nos dois casos). Comparar
-        # essa linha byte a byte reprova o gate por flakiness de infra, nao
-        # por schema desatualizado de verdade. Normalizada em COPIAS
-        # temporarias antes do diff — o arquivo real commitado nunca e
-        # tocado, e qualquer outra diferenca (coluna, tabela, RPC) continua
-        # reprovando normal.
-        #
-        # ESTE PASSO REPROVOU TODA PR EM 2026-09-02, E O DIFF TINHA DUAS
-        # METADES MUITO DIFERENTES (PH-417). Vale registrar porque a primeira
-        # leitura do log levou a conclusao errada.
-        #
-        # Dezesseis hunks, e so uma metade era cosmetica:
-        #
-        #   6 hunks  `dev.missao_cadeia.tipo` e
-        #            `dev.species_evolution_options.stone_type` estavam
-        #            tipadas como `Database["dev"]["Enums"]["element_type"]` no
-        #            arquivo commitado, e o gerador emitia `["public"]`. O
-        #            gerador estava CERTO: as duas colunas sao declaradas
-        #            `public.element_type` nas migrations que as criaram
-        #            (20260831190001_missao_cadeia_dev.sql:10 e
-        #            20260831140001_todas_as_evolucoes_dev.sql:53, a primeira com
-        #            comentario explicando a escolha). Era staleness de verdade,
-        #            de quando o arquivo foi gerado por ultimo — nao formatacao.
-        #            As outras 18 referencias a `["dev"]["Enums"]["element_type"]`
-        #            no bloco `dev` estao certas e NAO mudaram: o schema `dev`
-        #            tem o enum proprio, e so essas duas colunas apontam pro de
-        #            `public`.
-        #   10 hunks o gerador passou a parentizar a restricao de generico dos
-        #            helpers do fim do arquivo
-        #            (`TableName extends (X extends {...} : never) = never`).
-        #            Cosmetico, e a metade que mudou de um dia pro outro.
-        #
-        # A LICAO DA SEGUNDA METADE: fixar o CLI nao congela a saida daqui. A
-        # versao esta presa em 2.116.0 nos tres workflows desde a PH-290, e
-        # mesmo assim o MESMO commit (`ad4fb6b0`) passou as 06:41 e reprovou as
-        # 11:56 do mesmo dia. `gen types typescript --linked` NAO gera local —
-        # pede o codegen a Management API, que e versionada do lado deles.
-        # Mesma familia da instabilidade que ja justifica a normalizacao da
-        # `PostgrestVersion` acima.
-        #
-        # A LICAO DA PRIMEIRA METADE E MAIS IMPORTANTE: o gate estava certo, e
-        # havia divergencia real escondida atras da cosmetica. Se ele tivesse
-        # sido relaxado pra "ignorar formatacao", as seis linhas de enum errado
-        # teriam passado junto. Por isso a normalizacao continua cirurgica —
-        # uma linha nomeada — e nao vira "ignora diferenca de forma".
-        #
-        # Se a cosmetica repetir, a saida e passar os DOIS lados por um
-        # formatador antes de comparar (o que preserva a deteccao de conteudo),
-        # e nao afrouxar o diff.
+      - name: Gate de promocao e monitor de drift
+        if: github.base_ref == 'main' || github.event_name == 'schedule'
         run: |
-          # PH-106: pelo wrapper, que re-linka se a credencial tiver sido
-          # rotacionada por outra invocacao do CLI enquanto o `npm ci` rodava.
-          scripts/ci/supabase-cli.sh supabase gen types typescript --linked > /tmp/database.types.ts
-          sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' /tmp/database.types.ts > /tmp/gerado.norm.ts
+          scripts/ci/supabase-cli.sh supabase gen types typescript --linked > database.types.regenerado.ts
+          sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' database.types.regenerado.ts > /tmp/gerado.norm.ts
           sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' src/lib/database.types.ts > /tmp/commitado.norm.ts
-          if ! diff -q /tmp/gerado.norm.ts /tmp/commitado.norm.ts > /dev/null; then
-            echo "::error::src/lib/database.types.ts esta desatualizado em relacao ao schema remoto."
-            echo "Rode 'npm run db:types' local e commite o resultado junto da migration."
-            diff /tmp/gerado.norm.ts /tmp/commitado.norm.ts || true
+          if ! diff -u /tmp/commitado.norm.ts /tmp/gerado.norm.ts; then
+            echo '::error::Drift entre schema remoto e tipos. A promocao permanece bloqueada; corrija na PR responsavel pelo schema.'
             exit 1
           fi
-          echo "database.types.ts em sincronia com o schema remoto (PostgrestVersion ignorada de proposito - ver comentario do step)."
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          # PH-106: quem linka agora e o wrapper, entao ele precisa do ref aqui.
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
-      - name: Resultado do gate
-        # Roda SEMPRE (inclusive se um passo anterior falhou) pra transformar a
-        # orfa aplicada na mao em reprovacao — o passo que a detecta nao aborta
-        # de proposito, pros passos de par dev/public e de types rodarem.
+      - name: Guardar tipos para corrigir a mesma PR
         if: always()
-        run: |
-          if [ "${ORFA_APLICADA_NA_MAO:-0}" = "1" ]; then
-            echo "::error::Reprovado: ha migration aplicada no banco remoto sem arquivo em nenhuma branch. Veja o passo 'Existe migration aplicada no remoto que nao existe local?'."
-            exit 1
-          fi
-          echo "Gate ok."
+        uses: actions/upload-artifact@v6
+        with:
+          name: database.types.ts
+          path: |
+            database.types.regenerado.ts
+            schema-baseline.types.ts
+            schema-base.types.ts
+          if-no-files-found: ignore
