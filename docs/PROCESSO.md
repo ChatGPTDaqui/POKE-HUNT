@@ -27,8 +27,7 @@ não etapas adicionais. Arquitetura e comandos operacionais: `README.md` e `11-o
 | CI/harness | Exercitar decisões de sucesso e falha com fixtures; conferir execução real no CI |
 
 `tsc -b` incremental auxilia a edição, não prova build limpo. O CI obrigatório executa
-typecheck completo e suíte em toda PR para dev/main. Até o CI incluir o bundle Vite,
-mudança no cliente também exige `build:verificar` local antes da PR.
+typecheck completo, bundle Vite e suíte em toda PR para dev/main.
 Não repetir checks já aprovados sem alteração ou nova evidência. Manter isolamento do Vitest.
 `npm run build` é o comando de publicar: inclui a cópia dos assets; `build:verificar` não publica.
 

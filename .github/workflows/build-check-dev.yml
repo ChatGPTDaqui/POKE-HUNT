@@ -1,30 +1,13 @@
 name: Build check (PR)
 
-# Gate de tsc+testes pra feature branches virando dev -- nao existia CI
-# nenhum de build/teste antes disso, so o gate especifico de Supabase
-# (supabase-check.yml). Espelha o que "npm run build" + "npm test" fariam
-# local, mas roda antes do merge real (docs/15, Parte 3, fluxo PR
-# feature->dev).
-#
-# PH-297: RODA NA PROMOCAO PRA MAIN TAMBEM, e isso e o que faltava.
-#
-# Ate aqui ele so disparava em PR pra `dev`. O unico gate da `main` era o
-# `check` do Supabase — migration orfa, par dev/public, `database.types.ts` —,
-# nada de build nem de teste. Ou seja: `tsc` quebrado entrava em PRODUCAO com os
-# checks verdes, e quem segurava a porta era a aprovacao humana.
-#
-# Com o fim do review manual (decisao do dono do projeto, 30/08) essa aprovacao
-# sai de cena. O CI passa a ser o unico revisor, e revisor que nao olha o build
-# nao e revisor. Este `on:` e o passo 1 dos quatro da PH-297: sem ele, marcar
-# `build-check` como obrigatorio na `main` travaria a promocao esperando um
-# check que nunca chegaria.
-#
-# O NOME DO JOB (`build-check`, logo abaixo) NAO MUDA: e ele o `context` que os
-# rulesets referenciam. Quem deixou de citar `dev` foi o `name:` do workflow, que
-# agora vale pros dois destinos.
+# Os nomes dos jobs sao usados pelas protecoes de dev/main.
 on:
   pull_request:
     branches: [dev, main]
+
+concurrency:
+  group: build-check-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   build-check:
@@ -42,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 22.22.2
           # Sem isto todo run baixava o registry inteiro de novo — nao havia
           # UMA ocorrencia de `cache` nos workflows ate 03/09 (PH-453).
           #
@@ -61,14 +44,11 @@ jobs:
       - name: Buildar #engine (authority/ nao resolve sem isto -- ver CLAUDE.md)
         run: npm run build:engine
 
-      - name: Typecheck raiz (motor, cliente)
-        run: npx tsc -b --force
+      - name: Build limpo do cliente (sem copiar assets)
+        run: npm run build:verificar
 
       - name: Typecheck authority (servico de autoridade)
         run: cd authority && npx tsc --noEmit
 
-      - name: Testes raiz
+      - name: Testes raiz e authority (descoberta unica)
         run: npm test
-
-      - name: Testes authority
-        run: cd authority && npx vitest run
