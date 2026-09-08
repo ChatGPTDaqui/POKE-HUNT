@@ -36,7 +36,8 @@ gerar() {
     -e PG_META_GENERATE_TYPES=typescript \
     -e PG_META_GENERATE_TYPES_INCLUDED_SCHEMAS=public,graphql_public,dev \
     -e PG_META_GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS=true \
-    -e "PG_META_POSTGREST_VERSION=$POSTGREST" ghcr.io/supabase/postgres-meta:v0.99.0
+    -e "PG_META_POSTGREST_VERSION=$POSTGREST" ghcr.io/supabase/postgres-meta:v0.99.0 \
+    | node -e 'let s="";process.stdin.setEncoding("utf8");process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(s.trimEnd()+"\n"))'
 }
 gerar > schema-baseline.types.ts
 
