@@ -1,200 +1,40 @@
-# 10 — Invariantes e testes
+# Documento reorganizado
 
-`npm test` (vitest). 42 arquivos — cobre cliente **e** servidor num comando só (o `test.exclude`
-do `vite.config.ts` só tira `.claude/**` e `authority/engine/**`, então os `authority/src/*.test.ts`
-entram). A tabela abaixo é um recorte dos que valem explicação, não a lista completa.
+Consulte [docs/operacao/verificacao.md](operacao/verificacao.md).
+Texto anterior, datado e sem autoridade operacional: [arquivo](arquivo/2026-09-08/docs/10-invariantes-e-testes.md).
 
-O critério para um invariante virar teste neste projeto é específico:
+<a id="10--invariantes-e-testes"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#10--invariantes-e-testes); [documentação atual](operacao/verificacao.md).
 
-> **Vale teste quando a falha é silenciosa.** Nada lança exceção, nada aparece no console — o
-> jogo só fica sutilmente errado, e o sintoma chega como "está estranho" semanas depois.
+<a id="determinismo"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#determinismo); [documentação atual](operacao/verificacao.md).
 
-Um bug que estoura já tem quem o denuncie. Os daqui, não.
+<a id="invariantes-de-estado"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#invariantes-de-estado); [documentação atual](operacao/verificacao.md).
 
-| Arquivo | Casos | Impede |
-|---|---|---|
-| `engine/determinismo.test.ts` | — | Um `Math.random()` novo em qualquer sistema |
-| `engine/invariantes.test.ts` | 4 | Estado corrompido depois de combate real |
-| `engine/farmOffline.test.ts` | 3 | `stoppedEarly` setado onde não devia (ou não setado) |
-| `engine/lootFlow.test.ts` | — | Ordem EXP → loot → captura invertida |
-| `engine/systems/economySystem.test.ts` | — | Piso de venda vazando para o ouro por abate |
-| `engine/systems/progressionSystem.test.ts` | 3 | Barra de EXP medindo curva diferente do level-up |
-| `engine/systems/animationSystem.test.ts` | — | POKE atacando virado para o lado errado |
-| `data/hunts.test.ts` | 25 | Espécie órfã, sala sem pool, faixa não batendo com o nome, hunt vazia |
-| `engine/salas.test.ts` | 9 | Sala não avançando na quota certa, transição não congelando o mundo |
-| `data/vfxTiras.test.ts` | — | Caminho de arte errado caindo no procedural em silêncio; arte não-direcional girando |
-| `data/moveVfx.test.ts` | 7 | Arte de golpe com caminho errado (cai na do tipo, sem sinal), id fora do catálogo, tira exportada e esquecida fora do cadastro |
-| `data/walkBlock.test.ts` | 7 | Hunt sem sala (Pesadelo, BOSS, Lance) ficando sem walk-block; pintura órfã; spawn em célula bloqueada |
-| `engine/avisoDeEntradaNaHunt.test.ts` | 4 | "Entrar" recusando em silêncio — indistinguível de UI quebrada |
-| `engine/cooldownVisivel.test.ts` | — | Contagem na tela dessincronizada do cooldown que o motor aplica |
-| `engine/systems/imobilizacao.test.ts` | — | POKE preso continuando a andar |
-| `stores/gateDoLance.test.ts` | — | Hunt liberada pelo Lance voltando a "Bloqueado" no reload |
-| `lib/erroDeRede.test.ts` | — | "Verifique sua internet" acusando o bloqueador do jogador |
-| `stores/deviceMode.test.ts` | 7 | Celular deitado (844x390) lido como desktop — HUD sobreposta em 390px de altura |
-| `components/hud/ActionDock.test.ts` | 3 | Destino na barra E na grade do "Mais": badge de pendência contado duas vezes |
-| `features/game/hooks/insetDoTeclado.test.ts` | 4 | HUD pulando a cada rolagem (barra de URL) ou teclado cobrindo o campo de digitação |
+<a id="mochila-sob-demanda-e-auto-venda"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#mochila-sob-demanda-e-auto-venda); [documentação atual](operacao/verificacao.md).
 
-## Determinismo
+<a id="fluxo-de-loot"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#fluxo-de-loot); [documentação atual](operacao/verificacao.md).
 
-`engine/determinismo.test.ts` é o mais importante em termos de o que ele protege.
+<a id="economia"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#economia); [documentação atual](operacao/verificacao.md).
 
-"O jogo é determinístico" quebra em silêncio: basta um `Math.random()` novo em qualquer
-sistema, e nada pareceria diferente.
+<a id="crédito-incremental-de-rpc-vs-escrita-absoluta-do-flush"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#crédito-incremental-de-rpc-vs-escrita-absoluta-do-flush); [documentação atual](operacao/verificacao.md).
 
-O teste roda **600 passos de simulação real duas vezes com a mesma semente** e compara mundo
-com mundo, campo por campo: posições, POKEs, IVs, ids, efeitos, `pendingHits`.
+<a id="hunts"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#hunts); [documentação atual](operacao/verificacao.md).
 
-**Com controle negativo:** semente diferente **precisa** divergir. Sem isso, o teste passaria
-por acidente se a comparação estivesse quebrada.
+<a id="onde-os-testes-não-alcançam-e-o-que-se-faz-no-lugar"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#onde-os-testes-não-alcançam-e-o-que-se-faz-no-lugar); [documentação atual](operacao/verificacao.md).
 
-Ele pegou o único ponto que ainda escapava — o `uid` — que leitura de código não tinha pego.
+<a id="armadilhas-de-método-já-pagas"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#armadilhas-de-método-já-pagas); [documentação atual](operacao/verificacao.md).
 
-## Invariantes de estado
+<a id="gate-de-dados"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#gate-de-dados); [documentação atual](operacao/verificacao.md).
 
-`engine/invariantes.test.ts`, 4 casos sobre 10 minutos de caçada real.
-
-Nenhum destes lança exceção quando quebra: HP negativo desenha barra vazia, item negativo faz
-`hasItem` mentir, uid repetido faz o upsert do servidor **sobrescrever um POKE com outro**.
-
-1. Ouro, itens, HP, IVs e atributos em faixa válida, e **sem uid repetido**
-2. Pokedex só com espécie real
-3. O POKE em campo aparecendo **uma vez só** no estado
-4. Inimigo morto sempre com HP ≤ 0
-
-Passaram sem alteração no motor — são rede de segurança, não correção.
-
-## Mochila sob demanda e auto-venda
-
-Três arquivos, todos trancando falha que **não lança nada** — só mente na tela ou apaga POKE.
-
-`data/remote/mochilaRemota.test.ts` (4 casos) — o corte de 1000 linhas do PostgREST. Duas
-contas reais já passam disso (1328 e 813 POKEs) e o corte vem como `200 OK` com lista curta.
-Cobre: paginar acima de 1000, uma request só quando cabe, mochila vazia, e **estourar** quando
-o total declarado pelo banco não bate com o que chegou. Devolver lista curta em silêncio seria
-indistinguível de "o jogador vendeu tudo" — e as telas que leem essa lista oferecem venda em
-lote.
-
-`data/remote/estadoParcial.test.ts` (10 casos) — reconciliação do estado parcial. O que ele
-impede: a Mochila mostrando "2 POKEs" pra quem tem mil (as capturas da janela tratadas como se
-fossem a mochila), a mesma captura aparecendo duas vezes (predição local + linha real, uids
-diferentes), e predição órfã ficando na tela pra sempre.
-
-`engine/systems/autoVenda.test.ts` (8 casos) — a regra que apaga POKE em troca de ouro.
-Trancado: **shiny nunca vendido** (nem com a raridade marcada), nada vendido com o bot
-desligado, nada vendido fora da lista de raridades, bola consumida igual nos dois caminhos, e
-POKE vendido **não** entrando na mochila nem em `summary.captures`.
-
-## Fluxo de loot
-
-`engine/lootFlow.test.ts`.
-
-`handleEnemyDefeated` faz EXP → `awardKillLoot` → `maybeAutoCatch`, e não há um segundo caminho
-de abate (`awardKillLoot` tem um call site só). Isso foi **auditado e já estava certo**.
-
-O que faltava era **garantia**: a ordem é o tipo de coisa que uma refatoração inverte sem
-parecer errada, e o sintoma ("capturar rende menos que matar") só aparece como diferença
-estatística de ouro por hora.
-
-O teste roda a simulação real com auto-captura ligada e exige que **nenhum abate tenha ouro
-0** e que **tenha havido captura** — senão passaria sem provar nada.
-
-## Economia
-
-`economySystem.test.ts` tranca a separação entre `pokemonBaseValue` e `pokemonSellValue`:
-
-- A venda do POKE mais fraco possível dá exatamente 1000
-- `awardKillLoot` do mesmo POKE fica abaixo de 100
-- O nível vale desde o primeiro ponto (o piso é soma, não `max`)
-
-Sem o teste, a próxima refatoração que "simplificar" as duas funções numa só passa
-despercebida.
-
-### Crédito incremental de RPC vs escrita absoluta do flush
-
-`authority/src/progresso.test.ts`, 3 casos. **13 RPCs** creditam por `gold = gold + X` enquanto
-`gravarEstado` grava o valor ABSOLUTO de um snapshot lido antes. O que impede a segunda de
-apagar a primeira é o CAS em `updated_at` mais o trigger que avança `updated_at` em todo
-UPDATE — ver [08](08-social-e-mercado.md#o-invariante-que-sustenta-tudo-aqui).
-
-1. Venda concorrente **não** é apagada: o CAS recusa a escrita velha e o retry soma as duas
-2. A recusa vem com **exatamente** `CONFLITO_ESCRITA_JOGADOR` — com outra mensagem,
-   `comRetryDeColisao` não a reconhece como colisão efêmera e joga fora a janela de caçada
-3. **Contrafactual:** a mesma sequência com o trigger neutralizado, mostrando o ouro sumindo
-   sem erro nenhum
-
-O caso 3 existe porque a proteção é invisível: nada no código de uma RPC diz que ela depende
-de um trigger. Quem tornar o trigger condicional um dia vê o caso 1 ficar vermelho e o caso 3
-explicando por quê.
-
-O que o teste **não** alcança: o trigger em si (é DB, e não há Postgres local aqui). Confira
-com o comando em [08](08-social-e-mercado.md#o-invariante-que-sustenta-tudo-aqui).
-
-## Hunts
-
-`data/hunts.test.ts`, 25 casos. Ver a lista completa em
-[06](06-mundo-hunts-e-spawn.md#invariantes-trancados-por-teste).
-
-O motivo dele existir: uma espécie sem hunt **continua no Bestiário e com sprite** — só nunca
-aparece. Foi assim que o Dratini sumiu do jogo por uma leva inteira sem ninguém notar.
-
-`engine/salas.test.ts`, 9 casos — a máquina de salas em si (quota de abates, sorteio da
-próxima sala, ciclo reiniciando em vez de "acabar a hunt", e a contagem regressiva de
-transição congelando `stepWorld` até zerar). Ver [06](06-mundo-hunts-e-spawn.md#a-hunt-vira-salas).
-
-## Onde os testes não alcançam, e o que se faz no lugar
-
-Verificação ao vivo, com método fixo:
-
-1. Conta descartável contra a Edge Function publicada (ou o servidor local, quando o corpo do
-   erro do PostgREST importa)
-2. Efeito conferido **no Postgres** com `service_role`, nunca só no status code
-3. Conta apagada no fim
-
-**A regra que isso impõe: todo caso afirma o EFEITO, não o status.** O caso que mais engana:
-um DELETE bloqueado pela RLS devolve **204**. A RLS não rejeita — ela não acha linha que case
-com a policy. Um teste de status code passaria com o banco inteiramente aberto.
-
-### Armadilhas de método já pagas
-
-- **Comparar uma semente entre dois modos de combate não vale.** O modo pessimista consome
-  menos sorteios, então a sequência desloca. A primeira versão do teste "provou" que o
-  pessimista rendia mais — artefato do deslocamento. Média sobre várias sementes, **40 no
-  mínimo para ouro** (a cauda do `sellMultiplier` chega a 600x).
-- **Conferir que o processo certo subiu.** Duas rodadas de medição foram feitas contra um
-  servidor local **antigo** ainda de pé na porta 8787 — o processo novo morreu com
-  `EADDRINUSE` e o resultado do velho foi lido como se fosse do código atual. Os números
-  bateram por sorte. `curl /saude` não basta.
-- **Um matcher que acusa 100% das URLs está errado, não alarmante.** Na varredura de listas de
-  bloqueio, três falsos positivos do próprio matcher "provaram" que as 6.420 URLs estavam
-  bloqueadas antes de o número real (zero) aparecer.
-- **Ler estado do jogo por `import()` no navegador instancia um SEGUNDO módulo.** O Vite serve
-  módulos editados com query de versão (`?t=...`); um `import()` sem query cria cópia nova, com
-  store e contadores de módulo próprios. Sintomas reais: `team` vazio num jogo com POKE em
-  campo, e ids de entidade colidindo com o do jogador, quebrando o filtro de engajamento e
-  parecendo regressão de performance de 7x. **Fontes de verdade ao testar:** o save, o texto
-  renderizado e os pixels do canvas. Para disparar ações, clicar na UI real.
-- **Recarregar a página faz parte de verificar uma mudança de componente.** Um fix usou uma
-  variável antes de declarar; o HMR do Vite aplicou só metade e derrubou a aba com
-  `ReferenceError`. `tsc -b` estava limpo, porque o código **final** está correto — o que
-  quebrou foi o estado intermediário do hot reload.
-
-## Gate de dados
-
-`npm run catalog:verificar` prova que os dois geradores emitem arquivos **byte a byte**
-idênticos. Sai 1 se divergir. Ver [02](02-dados-e-catalogo.md#a-prova-de-que-trocar-a-fonte-não-mudou-o-jogo).
-
-É o único gate do projeto que prova uma propriedade forte automaticamente. Os documentos desta
-pasta **não têm equivalente** — por isso a regra de citar símbolo em vez de repetir número
-(ver [README](README.md#a-regra-que-faz-esta-pasta-valer-alguma-coisa)).
-
-## Checklist antes de fechar uma mudança
-
-```bash
-npx tsc -b                 # cliente
-cd authority && npx tsc --noEmit   # servidor (após npm run build:engine)
-npx oxlint                 # src/ e authority/src/
-npm test                   # vitest
-npm run build              # inclui a cópia de arte
-```
-
-E, para mudança que toca autoridade, economia ou spawn: verificação ao vivo pelo método acima.
+<a id="checklist-antes-de-fechar-uma-mudança"></a>
+[Seção anterior](arquivo/2026-09-08/docs/10-invariantes-e-testes.md#checklist-antes-de-fechar-uma-mudança); [documentação atual](operacao/verificacao.md).
