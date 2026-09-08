@@ -1,0 +1,9 @@
+> Registro histórico de 08/09/2026. Não é procedimento vigente.
+> Datas, comandos e pendências descrevem a base antiga. [Original preservado no Git](https://github.com/ChatGPTDaqui/POKE-HUNT/blob/016f1240dcb09788c8c44eb52b1be8044e52f190/AGENTS.md).
+> Consulte AGENTS.md e docs/PROCESSO.md na raiz atual para executar tarefas.
+
+# Contexto para agentes
+
+Leia `docs/PROCESSO.md` (procedimento vigente) e `CLAUDE.md` (contexto técnico).
+Consulte `docs/README.md` para localizar documentação do assunto. Histórico e memórias
+complementam a investigação; regras antigas revogadas não acrescentam etapas ao processo.
