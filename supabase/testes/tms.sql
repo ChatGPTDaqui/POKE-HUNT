@@ -18,7 +18,8 @@ begin
   insert into auth.users(id,raw_user_meta_data) values(dono,'{"trainer_name":"TM Fixture A"}'),(comprador,'{"trainer_name":"TM Fixture B"}');
   foreach s in array array['public','dev'] loop
     execute format('insert into %I.players(user_id,trainer_name,gold) values($1,''TM Fixture A'',100000),($2,''TM Fixture B'',100000) on conflict(user_id) do update set gold=100000',s) using dono,comprador;
-    execute format('insert into %I.species(id,dex_number,name,type1,base_hp,base_atk_fis,base_atk_esp,base_def,base_def_esp,base_speed,catch_rate,base_exp,growth_curve) values(''charizard'',6,''Charizard'',''FIRE'',78,84,109,78,85,100,45,240,''MEDIUM_SLOW'')',s);
+    execute format('insert into %I.spawn_tiers(key,weight,sort_order) values(''raro'',5,4)',s);
+    execute format('insert into %I.species(id,dex_number,name,type1,base_hp,base_atk_fis,base_atk_esp,base_def,base_def_esp,base_speed,catch_rate,base_exp,growth_curve,spawn_tier) values(''charizard'',6,''Charizard'',''FIRE'',78,84,109,78,85,100,45,240,''MEDIUM_SLOW'',''raro'')',s);
     execute format('insert into %I.pokemon_instances(id,user_id,species_id,location,level,hp,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed) values($1,$2,''charizard'',''bag'',60,100,15,15,15,15,15,15,100,100,100,100,100,100)',s) using poke,dono;
   end loop;
   foreach s in array array['public','dev'] loop
