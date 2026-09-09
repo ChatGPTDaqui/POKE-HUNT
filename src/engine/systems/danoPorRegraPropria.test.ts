@@ -182,7 +182,7 @@ describe('golpes de dano por regra propria que estavam inertes', () => {
   // pode entrar em DANO_SEM_PODER_BASE. Se entrasse, viraria golpe de dano 0
   // escolhivel e o aviso de golpe inerte da ficha sumiria — pior que o bug
   // original, porque nada na tela explicaria o slot morto.
-  it('os 6 sem regra implementada continuam FORA de DANO_SEM_PODER_BASE', () => {
+  it('os golpes sem regra implementada continuam FORA de DANO_SEM_PODER_BASE', () => {
     for (const id of DANO_POR_REGRA_NAO_IMPLEMENTADA) {
       expect(ABILITIES_DATA[id], id).toBeDefined()
       expect(DANO_SEM_PODER_BASE.has(id), id).toBe(false)

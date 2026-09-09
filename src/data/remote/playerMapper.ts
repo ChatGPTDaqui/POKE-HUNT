@@ -104,7 +104,7 @@ export interface PlayerSnapshot {
 // compila. O cliente tipado do supabase-js infere o formato da linha a partir do
 // LITERAL passado pro `.select()`; qualquer coisa que chegue como `string`
 // generica vira `GenericStringError` e derruba todo `rowToPoke(data)` a jusante.
-export const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is_shiny,rarity,locked,nature,trait,original_trainer,status,status_turns,created_at,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed,active_abilities,disabled_abilities,unlocked_abilities'
+export const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is_shiny,rarity,locked,nature,trait,original_trainer,status,status_turns,created_at,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed,active_abilities,disabled_abilities,unlocked_abilities,golpes_de_maquina'
 
 /**
  * A linha como ela CHEGA depois da PH-184 — sem as colunas que pararam de vir.
@@ -115,22 +115,8 @@ export const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is
  * `pokeToRow` (escrita) continua montando a linha inteira — o corte e so de
  * LEITURA.
  */
-// `golpes_de_maquina` ENTRA NO OMIT, e sai dele depois (PH-512).
-//
-// A coluna existe no schema desde 20260905120000, entao `PokemonRow` a declara
-// como obrigatoria. Mas `COLUNAS_DE_POKE` ainda NAO a seleciona, e este tipo
-// existe justamente pra dizer "quais colunas vem de verdade na leitura" — sem o
-// omit ele passaria a prometer um campo que chega `undefined`, que e o oposto
-// do que o comentario acima promete.
-//
-// Ela so pode entrar no `select` depois de a migration alcancar PRODUCAO: pedir
-// ao PostgREST uma coluna que o schema `public` ainda nao tem faz a leitura
-// INTEIRA do POKE falhar — nenhum POKE carrega, e nao so o campo novo falta.
-// Hoje ela existe so no `dev`.
-//
-// Quando a coluna entrar em `COLUNAS_DE_POKE`, esta linha do omit sai junto, no
-// mesmo commit. As duas andam sempre juntas.
-export type LinhaLidaDePoke = Omit<PokemonRow, 'user_id' | 'updated_at' | 'golpes_de_maquina'>
+// A migration de golpes_de_maquina já foi promovida; leitura e tipo incluem a coluna.
+export type LinhaLidaDePoke = Omit<PokemonRow, 'user_id' | 'updated_at'>
 
 /**
  * Especies desconhecidas ja avisadas — o aviso e por ESPECIE, nao por POKE.
@@ -189,6 +175,11 @@ export function rowToPoke(row: LinhaLidaDePoke): PokeInstance {
     def: row.stat_def, defEsp: row.stat_def_esp, speed: row.stat_speed,
   }
   const species = SPECIES[row.species_id]
+  const golpesDeMaquina = [...new Set(row.golpes_de_maquina ?? [])]
+  const conhecidos = [...new Set([
+    ...(species ? golpesAprendidosAte(species, row.level) : golpesGravados(row.species_id, row.unlocked_abilities)),
+    ...golpesDeMaquina,
+  ])]
   // `nature` NULL vira uma das 5 NEUTRAS, escolhida pelo uuid da propria linha.
   //
   // POR QUE NAO `undefined`: os atributos ficariam certos de qualquer jeito
@@ -248,14 +239,12 @@ export function rowToPoke(row: LinhaLidaDePoke): PokeInstance {
     // O que mudou foi so o aviso: o caso passa a ser LOGADO (uma vez por
     // especie, nao por POKE), porque divergencia catalogo-banco e real e tem
     // issue propria — PH-247.
-    unlockedAbilities: species
-      ? golpesAprendidosAte(species, row.level)
-      : golpesGravados(row.species_id, row.unlocked_abilities),
+    unlockedAbilities: conhecidos,
+    golpesDeMaquina,
     // Coluna adicionada depois (migration 20260809150000): linha antiga volta
     // com o default `{}` do banco, entao nao ha migracao de dado a fazer.
     disabledAbilities: (row.disabled_abilities ?? {}) as Record<string, boolean>,
-    // LIDO da coluna, ao contrario de `unlockedAbilities` logo acima: este e o
-    // unico dos dois que nao e derivavel, e escolha do jogador.
+    // Seleção do jogador; os conhecidos unem nível e máquinas persistidas.
     //
     // `null` (POKE anterior a migration 20260814120100, ou nunca configurado)
     // vira o padrao — os 4 ultimos golpes aprendidos. Array VAZIO e mantido
@@ -276,7 +265,7 @@ export function rowToPoke(row: LinhaLidaDePoke): PokeInstance {
     activeAbilities: species
       ? sanearEscolhaDeGolpes(
         row.active_abilities ?? activeAbilitiesPadrao(species, row.level),
-        golpesAprendidosAte(species, row.level),
+        conhecidos,
         species,
         row.level,
       )
@@ -517,6 +506,7 @@ export function pokeToRow(userId: string, poke: PokeInstance, location: 'team' |
     stat_hp: poke.stats.hp, stat_atk_fis: poke.stats.atkFis, stat_atk_esp: poke.stats.atkEsp,
     stat_def: poke.stats.def, stat_def_esp: poke.stats.defEsp, stat_speed: poke.stats.speed,
     unlocked_abilities: poke.unlockedAbilities,
+    golpes_de_maquina: poke.golpesDeMaquina ?? [],
     // `?? null` pelo mesmo motivo de `original_trainer` acima. NULL aqui tem
     // significado proprio (nunca configurado) e nao pode virar '{}'.
     active_abilities: poke.activeAbilities ?? null,

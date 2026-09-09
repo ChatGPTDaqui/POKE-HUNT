@@ -81,7 +81,7 @@ export function ItensTab() {
 
   function acoesCompra(itemId: string): AcoesCompra | null {
     const item = getItem(itemId)
-    if (!item || item.kind === 'stone') return null
+    if (!item || !('buyPrice' in item)) return null
     const maxAffordable = Math.max(1, Math.floor(gold / item.buyPrice))
     const qty = Math.min(buyQty[item.id] ?? 1, maxAffordable)
     const key = `buy:${item.id}`

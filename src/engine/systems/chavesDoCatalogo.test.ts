@@ -17,7 +17,7 @@
 // estiver neste arquivo, ela nao esta protegida.
 import { describe, expect, it } from 'vitest'
 
-import { ABILITIES_DATA } from '@/data/generated/abilities.generated'
+import { ABILITIES as ABILITIES_DATA } from '@/data/abilities'
 import { GOLPES_DE_SOM } from '@/data/traitEffects'
 import {
   DYNAMIC_POWER_ABILITIES,

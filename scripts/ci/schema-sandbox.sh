@@ -53,6 +53,11 @@ while IFS= read -r migration; do
 done < schema-new.txt
 gerar > database.types.regenerado.ts
 
+# Fixtures de RPC executam somente na cópia descartável, com rollback integral.
+if grep -q 'catalogo_e_ensino_tm' schema-new.txt; then
+  sql < "$ROOT/supabase/testes/tms.sql"
+fi
+
 # Exercita SQL real que deve falhar; um comando inválido aceito reprova o próprio harness.
 if sql -c 'ALTER TABLE public.__ph_tabela_que_nao_existe ADD COLUMN erro integer;' > "$SANDBOX/invalid.log" 2>&1; then
   echo '::error::Sandbox aceitou SQL inválido'; exit 1

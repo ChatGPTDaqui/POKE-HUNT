@@ -185,6 +185,10 @@ export interface BaseEntity {
   // golpe de Screen numa hunt — evita inicializar mais um objeto por entidade
   // criada quando nenhuma delas nunca vai usar.
   escudos?: Escudos
+  substitutoHp?: number
+  atracaoRestante?: number
+  embargoRestante?: number
+  ultimoQuash?: string
   // Imunidade de TIPO temporaria concedida por um golpe (hoje so Magnet Rise,
   // self-target: tipo='GROUND'). Diferente de `revelado` (que so IGNORA uma
   // imunidade natural), este campo CRIA uma — ver
@@ -771,6 +775,8 @@ export interface EstadoDeLure {
 }
 
 export interface WorldState {
+  /** Trick Room inverte a ordem dos hits simultâneos por cinco turnos. */
+  trickRoomRestante?: number
   mapDef: MapDef | null
   player: PlayerEntity | null
   enemies: EnemyEntity[]

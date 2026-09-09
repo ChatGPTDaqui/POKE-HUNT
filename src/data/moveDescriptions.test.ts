@@ -8,7 +8,9 @@ import { describe, it, expect } from 'vitest'
 import {
   MOVE_DESCRIPTIONS, golpeTemEfeitoReal, GOLPES_COM_EFEITO_HARDCODED, GOLPES_DE_ESCUDO,
 } from './moveDescriptions'
-import { ABILITIES_DATA } from './generated/abilities.generated'
+import { ABILITIES_DATA as POR_NIVEL } from './generated/abilities.generated'
+import { GOLPES_TM } from './generated/golpesTm.generated'
+const ABILITIES_DATA = { ...POR_NIVEL, ...GOLPES_TM }
 import { TYPED_AOE_MOVES } from './typedAoeMoves'
 import { ABILITIES, BASIC_ATTACK, DANO_SEM_PODER_BASE, isDamagingAbility } from './abilities'
 
@@ -99,7 +101,6 @@ describe('golpeTemEfeitoReal — aviso de "sem efeito" so em golpe realmente ine
   it('golpes genuinamente inertes (sem status/statChanges/id conhecido) continuam sem efeito', () => {
     expect(golpeTemEfeitoReal({ id: 'splash' })).toBe(false)
     expect(golpeTemEfeitoReal({ id: 'transform' })).toBe(false)
-    expect(golpeTemEfeitoReal({ id: 'sleep_talk' })).toBe(false)
     expect(golpeTemEfeitoReal({ id: 'rage_powder' })).toBe(false) // no-op estrutural, documentado
     expect(golpeTemEfeitoReal({ id: 'quick_guard' })).toBe(false) // sem prioridade neste motor
     // Os quatro OHKO do catalogo sao DOIS casos diferentes, e a tela precisa

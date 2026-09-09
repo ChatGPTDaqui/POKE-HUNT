@@ -110,6 +110,14 @@ function TabelaDeClima() {
 export function MundoTab() {
   return (
     <div className="space-y-2">
+      <WikiCard title="TMs: aprender e negociar">
+        Cada abate de uma espécie compatível tem 0,1% de chance total de soltar uma TM.
+        O sorteio escolhe igualmente entre as TMs que aquela espécie aprende.
+        No Hospital, abra Itens na Mochila e escolha um POKE compatível: ensinar consome uma TM,
+        e o golpe fica permanente. Selecione o golpe na ficha do POKE; os aprendidos por TM têm marca azul.
+        A loja compra cada TM por 1.000 de ouro, mas não vende TMs. Negocie também no Mercado.
+        As adaptações dos efeitos ao combate contínuo são explicadas na ficha de cada golpe.
+      </WikiCard>
       <WikiCard title={`Os ${BIOMAS.length} biomas nascem todos abertos`}>
         O mundo são <b>{BIOMAS.length} biomas</b>, e nenhum deles é trancado atrás de outro. Você escolhe onde
         entrar desde o primeiro minuto — o que decide onde você <i>consegue</i> caçar é o nível do seu POKE,

@@ -54,7 +54,7 @@ import { estagioDoGolpe } from '@/data/estagioVfx'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
-import { rollChance, randRange } from '@/core/random'
+import { rollChance, randRange, clamp } from '@/core/random'
 import { ATTACK_ANIM_DURATION, triggerAttackAnim } from './animationSystem'
 // Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
 // turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
@@ -850,6 +850,11 @@ function heavySlamPower(attackerPoke: PokeInstance, defenderPoke: PokeInstance):
 }
 
 export const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, defenderEntity: WorldEntity) => number> = {
+  grass_knot: (_rng, _a, defenderPoke) => lowKickPower(defenderPoke),
+  fling: () => 30,
+  // Não há amizade no jogo: ambos usam o teto de poder, explicitado na Wiki.
+  return: () => 102,
+  frustration: () => 102,
   magnitude: (rng) => rollMagnitudePower(rng),
   reversal: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
   flail: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
@@ -1305,6 +1310,14 @@ function golpeDeApoioUtil(
   if (chaveDeEscudo) {
     return (entity.escudos?.[chaveDeEscudo] ?? 0) <= 0
   }
+  if (ability.id === 'aurora_veil') return (clima === 'granizo' || clima === 'neve')
+    && ((entity.escudos?.reflect ?? 0) <= 0 || (entity.escudos?.lightScreen ?? 0) <= 0)
+  if (ability.id === 'trick_room') return !(world.trickRoomRestante && world.trickRoomRestante > 0)
+  if (ability.id === 'substitute') return !(entity.substitutoHp! > 0) && entity.poke.hp > entity.poke.stats.hp / 4
+  if (ability.id === 'attract') return !(defenderEntity.atracaoRestante! > 0) && traitDoPoke(defenderEntity.poke) !== 'oblivious'
+  if (ability.id === 'embargo') return !(defenderEntity.embargoRestante! > 0)
+  if (ability.id === 'sleep_talk') return entity.poke.status?.tipo === 'sleep'
+  if (['roar', 'quash', 'nature_power', 'fling'].includes(ability.id)) return true
   // Magnet Rise: self-buff sem statChanges (nao ativa nenhum estagio) — so
   // vale enquanto a imunidade a GROUND nao esta ativa nele mesmo. Sem esta
   // checagem o golpe nunca entraria em `statusPronto` (nao tem `.status` nem
@@ -1547,6 +1560,7 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     const power = poderBruto
       * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo)
       * multiplicadorCondicional(ability, defenderEntity)
+      * (ability.id === 'facade' && ['burn', 'poison', 'paralysis'].includes(attackerPoke.status?.tipo ?? '') ? 2 : 1)
 
     // DAMAGE_BASE tem um +2 fixo na formula (Gen2 legitimo pra golpe de dano
     // real), mas golpe de status puro (power 0, sem dynamicPower/fixed) nao
@@ -1558,7 +1572,7 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     // "a burn now technically halves the damage a burned Pokemon does with
     // physical moves" — a diferenca importa porque a stat crua continua sendo
     // a exibida na ficha do POKE.
-    if (isPhysical) dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null)
+    if (isPhysical && ability.id !== 'facade') dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null)
 
     const isStab = Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)
     // ADAPTABILITY sobe o STAB de 1.5x pra 2x. Passa por `stabPorTrait` em vez
@@ -1712,7 +1726,7 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
   }
 
   return {
-    amount: effectivenessMultiplier === 0 ? 0 : Math.max(1, Math.round(dmg)),
+    amount: effectivenessMultiplier === 0 || dmg === 0 ? 0 : Math.max(1, Math.round(dmg)),
     effectiveness,
     effectivenessLabel,
     isCrit,
@@ -1967,6 +1981,11 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
     ? candidateIds.filter((id) => id === entity.forcedAbilityId)
     : candidateIds
 
+  if (entity.poke.status?.tipo === 'sleep') {
+    return candidatosFinais.includes('sleep_talk') && isAbilityReady(entity, 'sleep_talk')
+      && !(entity.silenciadoAte! > 0) ? getAbility('sleep_talk') : null
+  }
+
   // Taunt: enquanto silenciado, golpe de status nunca entra na escolha (nos
   // jogos, estar calado significa exatamente isso).
   const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0)
@@ -2153,6 +2172,7 @@ export function golpeErrou(
   rng: Rng, ability: Ability, atacante: WorldEntity, defensor: WorldEntity,
   clima: ClimaTipo | null = null,
 ): boolean {
+  if (ability.id === 'smart_strike') return false
   const { atacante: traitAtk, defensor: traitDef } = traitsDoConfronto(atacante, defensor)
 
   // NO GUARD, dos DOIS lados: nos jogos ela garante acerto tanto dos golpes
@@ -2228,6 +2248,14 @@ function anunciarErro(world: WorldState, atacante: WorldEntity): void {
 }
 
 function statusImpedeAcao(world: WorldState, entity: WorldEntity, silent: boolean): boolean {
+  if ((entity.atracaoRestante ?? 0) > 0 && nextFloat(world.rng) < 0.5) {
+    startGlobalCooldown(entity, MIN_ACTION_GAP)
+    return true
+  }
+  if (entity.poke.status?.tipo === 'sleep'
+    && golpesUtilizaveis(entity.poke, SPECIES[entity.poke.speciesId], entity.kind === 'enemy').includes('sleep_talk')
+    && !entity.poke.disabledAbilities?.sleep_talk && isAbilityReady(entity, 'sleep_talk')
+    && !(entity.silenciadoAte! > 0)) return false
   const r = tentarAgir(world.rng, entity, (poder) => danoDeConfusao(entity, poder))
   if (r.agir) return false
 
@@ -2421,6 +2449,8 @@ export const PROTECT_BYPASS_ABILITY_IDS = new Set([
 // usuario (Danca das Espadas, Recover, ...) tambem nao e "recebido" por quem
 // tem Protect ativo — ele nunca tocou no alvo pra comecar.
 function golpeAtingeOAlvo(ability: Ability): boolean {
+  if (ability.id === 'substitute') return false
+  if (ability.id === 'aurora_veil' || ability.id === 'trick_room') return false
   if (ability.statTarget === 'self') return false
   if (ability.healPercent) return false
   if (PROTECT_BYPASS_ABILITY_IDS.has(ability.id)) return false
@@ -2607,7 +2637,8 @@ function ordenarPorVelocidade(world: WorldState, hits: PendingHit[]): PendingHit
     velocidade.set(hit.attackerId, atacante ? velocidadeEfetiva(atacante, clima) : -Infinity)
   }
   return [...hits].sort((a, b) => {
-    const diff = velocidade.get(b.attackerId)! - velocidade.get(a.attackerId)!
+    const diff = (velocidade.get(b.attackerId)! - velocidade.get(a.attackerId)!)
+      * ((world.trickRoomRestante ?? 0) > 0 ? -1 : 1)
     return diff !== 0 ? diff : a.id.localeCompare(b.id)
   })
 }
@@ -2615,7 +2646,7 @@ function ordenarPorVelocidade(world: WorldState, hits: PendingHit[]): PendingHit
 function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string[], onPlayerFainted: () => void, silent: boolean): void {
   const attacker = findEntityById(world.player, world.enemies, hit.attackerId)
   if (!attacker) return
-  const { ability } = hit
+  let { ability } = hit
 
   // Bug relatado explicitamente: um POKE derrotado entre o enfileiramento
   // de um hit (pose de ataque comeca) e o hit realmente pousar
@@ -2629,6 +2660,18 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // `isAbilityReady` guarda pra so a PRIMEIRA resolucao armar; as seguintes ja
   // veem a habilidade em cooldown e pulam, sem precisar de estado novo.
   if (isAbilityReady(attacker, ability.id)) armarCooldown(attacker, ability, world)
+
+  // Adaptações sem inventário equipado nem terreno de batalha.
+  if (ability.id === 'fling') ability = { ...ability, power: 30 }
+  if (ability.id === 'nature_power') ability = getAbility('tri_attack')!
+  if (ability.id === 'sleep_talk') {
+    if (attacker.poke.status?.tipo !== 'sleep') return
+    const opcoes = golpesUtilizaveis(attacker.poke, SPECIES[attacker.poke.speciesId], attacker.kind === 'enemy')
+      .filter(id => !['sleep_talk', 'rest'].includes(id) && !attacker.poke.disabledAbilities?.[id])
+      .map(getAbility).filter((a): a is Ability => a != null && a.target !== 'aoe')
+    if (!opcoes.length) return
+    ability = opcoes[Math.floor(nextFloat(world.rng) * opcoes.length)]
+  }
 
   if (hit.isAoeVisual) {
     // O unico anel deste cast AOE, centrado no atacante — ver
@@ -2740,6 +2783,29 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // jogos. Todo o resto de `resolveHit` (habilidade que reage a hit, dreno,
   // status, estagio, flinch) continua rodando UMA vez, com o TOTAL da
   // sequencia. Golpe normal tem `acertos === 1` e passa por aqui igual a antes.
+  const protegidoPorSubstituto = (target.substitutoHp ?? 0) > 0 && golpeAtingeOAlvo(ability) && !ehGolpeDeSom(ability.id)
+  if (protegidoPorSubstituto && !isDamagingAbility(ability)) return
+  if (ability.id === 'substitute' && !(attacker.substitutoHp! > 0)) {
+    const custo = Math.max(1, Math.floor(attacker.poke.stats.hp / 4))
+    if (attacker.poke.hp > custo) {
+      attacker.poke.hp -= custo
+      attacker.substitutoHp = custo
+    }
+  }
+  if (ability.id === 'attract' && traitDoPoke(target.poke) !== 'oblivious') target.atracaoRestante = 5 * TURNO_SEGUNDOS
+  if (ability.id === 'embargo') target.embargoRestante = 5 * TURNO_SEGUNDOS
+  if (ability.id === 'quash') {
+    target.ultimoQuash = hit.id
+    target.globalCooldown = Math.max(target.globalCooldown, TURNO_SEGUNDOS)
+    for (const pendente of world.pendingHits) if (pendente.attackerId === target.id) pendente.timer += TURNO_SEGUNDOS
+  }
+  if (ability.id === 'roar') {
+    const dx = target.x - attacker.x, dy = target.y - attacker.y
+    const distancia = Math.hypot(dx, dy) || 1
+    target.x = clamp(target.x + (dx || (dy === 0 ? 1 : 0)) / distancia * 100, target.radius, (world.mapDef?.bounds.width ?? 1400) - target.radius)
+    target.y = clamp(target.y + dy / distancia * 100, target.radius, (world.mapDef?.bounds.height ?? 900) - target.radius)
+    target.globalCooldown = Math.max(target.globalCooldown, TURNO_SEGUNDOS)
+  }
   const acertos = quantidadeDeAcertos(world.rng, ability)
   // `danoFinal` daqui pra baixo e o total da sequencia. Os usos posteriores
   // dele sao todos `danoFinal > 0` ("este golpe causou dano?"), entao somar e o
@@ -2760,6 +2826,10 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // CHEIO — perde o efeito no primeiro hit que ja tirou HP, igual ao
     // Multiscale acima.
     let danoDoAcerto = result.amount
+    if ((target.substitutoHp ?? 0) > 0 && protegidoPorSubstituto) {
+      target.substitutoHp = Math.max(0, target.substitutoHp! - danoDoAcerto)
+      continue
+    }
     const enduraGolpe = target.enduraAtiva === true
     if (enduraGolpe) target.enduraAtiva = false
     const sturdyTrait = !enduraGolpe
@@ -2968,7 +3038,10 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // logo abaixo, se mostra o VFX de status e em cima de quem) — nao existia
   // antes desta leva porque nada fora deste `if` precisava saber.
   let statusRecebeuEm: WorldEntity | null = null
-  if (!isDead(target)) {
+  if (isDead(target) && ability.statTarget === 'self' && !isDead(attacker)) {
+    aplicarMudancasDeStat(world.rng, attacker, target, ability)
+  }
+  if (!isDead(target) && !protegidoPorSubstituto) {
     // SHIELD DUST (alvo) apaga o efeito SECUNDARIO do golpe; SERENE GRACE
     // (atacante) dobra a chance dele. As duas mexem no MESMO campo, entao a
     // forma mais honesta e montar a versao do golpe que de fato vai valer
@@ -3180,6 +3253,12 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     attacker.escudos ??= {}
     attacker.escudos[chaveDeEscudo] = ESCUDO_DURACAO_SEGUNDOS
   }
+  if (ability.id === 'aurora_veil' && (world.clima?.tipo === 'granizo' || world.clima?.tipo === 'neve')) {
+    attacker.escudos ??= {}
+    attacker.escudos.reflect = ESCUDO_DURACAO_SEGUNDOS
+    attacker.escudos.lightScreen = ESCUDO_DURACAO_SEGUNDOS
+  }
+  if (ability.id === 'trick_room') world.trickRoomRestante = (world.trickRoomRestante ?? 0) > 0 ? 0 : 5 * TURNO_SEGUNDOS
 
   // CURSE (variante Ghost): custa 50% do PROPRIO HP MAXIMO do atacante
   // (CURSE_SELF_MAX_HP_LOSS_PERCENT — variante de SELF_DESTRUCT_HP_LOSS_PERCENT
@@ -3469,6 +3548,15 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   }
 
   const isPlayerAttacker = attacker.kind === 'player'
+  // Volt Switch: recuo espacial no combate contínuo, sem trocar a equipe escolhida.
+  if (ability.id === 'volt_switch' && danoCausado > 0 && !isDead(attacker)) {
+    const dx = attacker.x - target.x
+    const dy = attacker.y - target.y
+    const distancia = Math.hypot(dx, dy) || 1
+    const bounds = world.mapDef?.bounds
+    attacker.x = clamp(attacker.x + (dx || (dy ? 0 : 1)) / distancia * 60, attacker.radius, (bounds?.width ?? 1400) - attacker.radius)
+    attacker.y = clamp(attacker.y + dy / distancia * 60, attacker.radius, (bounds?.height ?? 900) - attacker.radius)
+  }
   const isAoe = ability.target === 'aoe'
   // Golpe de status alvo-unico: SO mostra VFX quando algo de fato pegou
   // (`statusRecebeuEm`) — golpe que falhou (imunidade, ja tinha status,
@@ -3735,9 +3823,18 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   const landed = ordenarPorVelocidade(world, world.pendingHits.filter((hit) => hit.timer <= 0))
   world.pendingHits = world.pendingHits.filter((hit) => hit.timer > 0)
   for (const hit of landed) {
+    if (hit.timer > 0) { world.pendingHits.push(hit); continue }
     resolveHit(world, hit, defeatedEnemyIds, () => {
       playerJustFainted = true
     }, silent)
+    if (hit.ability.id === 'quash') {
+      const alvo = findEntityById(world.player, world.enemies, hit.targetId)
+      if (alvo?.ultimoQuash === hit.id) {
+        for (const proximo of landed.slice(landed.indexOf(hit) + 1)) {
+          if (proximo.attackerId === alvo.id) proximo.timer += TURNO_SEGUNDOS
+        }
+      }
+    }
   }
 
   // WISH: mesmo padrao de pendingHits acima (tick down, resolve quando
