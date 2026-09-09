@@ -83,6 +83,7 @@ const ITEM_ICON_IDS: Set<string> = new Set([
 // (see itemIconBorderColor below), same "tint by colorForType" language the
 // rest of the UI already uses for ability slots/type chips/aura outlines.
 export function itemIconUrl(itemId: string): string | null {
+  if (/^tm_\d{2,3}$/.test(itemId)) return 'assets/item-icons/tm.svg';
   if (itemId.startsWith('stone_')) return 'assets/item-icons/type_stone.png';
   if (!ITEM_ICON_IDS.has(itemId)) return null;
   return `assets/item-icons/${itemId}.png`;

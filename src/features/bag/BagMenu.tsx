@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils'
 import { AutoVendaPanel, ChipAutoVenda } from './AutoVendaPanel'
 import { useMochila } from './useMochila'
 import { EstadoDaMochila } from './EstadoDaMochila'
+import { EnsinarTm } from './EnsinarTm'
 
 type SortKey = 'rarity' | 'iv' | 'level'
 const SORT_LABELS: Record<SortKey, string> = { rarity: 'Raridade', iv: 'IV', level: 'Nivel' }
@@ -371,6 +372,7 @@ export function ItensTab() {
       )}
 
       <Paginacao estado={paginado} rotulo="itens" />
+      {itemEmFoco?.kind === 'tm' && <EnsinarTm key={itemEmFoco.id} itemId={itemEmFoco.id} />}
     </div>
   )
 }

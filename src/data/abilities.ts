@@ -27,6 +27,7 @@
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { ABILITIES_DATA } from './generated/abilities.generated'
+import { GOLPES_TM } from './generated/golpesTm.generated'
 import { TYPED_AOE_MOVES } from './typedAoeMoves'
 import { WILD_AGGRO_RADIUS } from './huntTypes'
 import type { AbilityCategory, ElementType, StatusCondition, StatChange } from './generated/types'
@@ -124,7 +125,7 @@ export const AOE_RADIUS = WILD_AGGRO_RADIUS
 // Merged in ahead of the spreadsheet moves — TYPED_AOE_MOVES's keys
 // (aoe50_fire, aoe50_water, ...) never collide with real spreadsheet move
 // keys, so a plain object spread is enough.
-const ALL_ABILITIES_SOURCE = { ...ABILITIES_DATA, ...TYPED_AOE_MOVES }
+const ALL_ABILITIES_SOURCE = { ...GOLPES_TM, ...ABILITIES_DATA, ...TYPED_AOE_MOVES }
 
 // Patch por cima do catalogo gerado (Ultra Sun): esses 7 golpes vinham como
 // stub vazio (so type/power/pp/accuracy, sem nenhum efeito real). Sand Attack/
@@ -290,6 +291,7 @@ export function getAbility(id: string): Ability | null {
 // em Magnitude, Seismic Toss, Counter e companhia — golpes que o proprio motor
 // escolhe como golpe de dano. Trancado em moveDescriptions.test.ts.
 export const DANO_SEM_PODER_BASE = new Set([
+  'grass_knot', 'return', 'frustration', 'fling',
   'magnitude', 'reversal', 'flail', 'present', 'hidden_power',
   'seismic_toss', 'night_shade', 'dragon_rage', 'super_fang', 'psywave',
   'counter', 'mirror_coat',
@@ -313,7 +315,7 @@ export const DANO_SEM_PODER_BASE = new Set([
 // inerte: o aviso de golpe inerte da ficha (moveDescriptions#golpeTemEfeitoReal)
 // sumiria e o jogador gastaria um dos 4 slots sem nada na tela avisando.
 //
-//   fling, natural_gift   dependem do ITEM que o POKE carrega; nao existe POKE
+//   natural_gift          depende do ITEM que o POKE carrega; nao existe POKE
 //                         segurando item neste jogo.
 //   beat_up               um acerto por membro da equipe; a luta aqui e sempre
 //                         1 contra N, sem equipe atacando junto.
@@ -327,7 +329,7 @@ export const DANO_SEM_PODER_BASE = new Set([
 // Mesmo espirito da nota de `quick_guard` no fim deste arquivo: golpe morto
 // documentado e diferente de golpe esquecido.
 export const DANO_POR_REGRA_NAO_IMPLEMENTADA = new Set([
-  'fling', 'natural_gift', 'beat_up', 'spit_up',
+  'natural_gift', 'beat_up', 'spit_up',
   'bide', 'trump_card',
 ])
 

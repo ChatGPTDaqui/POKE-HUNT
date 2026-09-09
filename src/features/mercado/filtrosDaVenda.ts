@@ -123,6 +123,7 @@ export function categoriasPresentes(ids: string[]): string[] {
 }
 
 export const NOME_DA_CATEGORIA: Record<string, string> = {
+  tm: 'TMs',
   ball: 'Bolas',
   potion: 'Poções',
   revive: 'Revives',

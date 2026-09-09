@@ -25,6 +25,7 @@ export interface InfoDeItem {
 
 export function infoDoItem(item: AnyItem): InfoDeItem {
   const efeitos: string[] = []
+  if (item.kind === 'tm') efeitos.push('Consumida ao ensinar a um POKE compatível no Hospital.', 'Obtida por drop de Pokémon que aprendem este golpe. Pode ser vendida ao NPC ou negociada no Mercado.')
 
   if (item.kind === 'potion' && item.healAmount != null) {
     efeitos.push(

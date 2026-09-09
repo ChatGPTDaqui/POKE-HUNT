@@ -8,13 +8,14 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { ITEMS_DATA } from './generated/items.generated'
 import { STONE_ITEMS, type StoneItem } from './stones'
+import { TM_ITEMS, type TmItem } from './maquinas'
 import type { ItemDataEntry } from './generated/types'
 
 export interface GeneratedItem extends ItemDataEntry {
   sellPrice: number
 }
 
-export type AnyItem = GeneratedItem | StoneItem
+export type AnyItem = GeneratedItem | StoneItem | TmItem
 
 const formulaEngine = createFormulaEngine(FORMULAS)
 const SELL_FRACTION = formulaEngine.eval('SELL_ITEM_FRACTION')
@@ -68,7 +69,7 @@ export const SHOP_STOCK: ShopStockEntry[] = Object.values(GENERATED_ITEMS)
 // Merged view used by every generic "look up an owned item" lookup
 // (getItem, the Mochila/Loja "vender" tabs, etc.) so Stones behave like any
 // other stackable item everywhere except the buy list above.
-export const ITEMS: Record<string, AnyItem> = { ...GENERATED_ITEMS, ...STONE_ITEMS }
+export const ITEMS: Record<string, AnyItem> = { ...GENERATED_ITEMS, ...STONE_ITEMS, ...TM_ITEMS }
 
 export function getItem(id: string): AnyItem | null {
   return ITEMS[id] || null
