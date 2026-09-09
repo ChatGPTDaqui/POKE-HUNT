@@ -11,15 +11,16 @@ declare
   conhecido boolean;
   recusou boolean;
 begin
-  -- Fixtures sem executar provisionamento de conta, que depende do catálogo completo.
-  perform set_config('session_replication_role','replica',true);
-  insert into auth.users(id) values(dono),(comprador);
+  -- Catálogo mínimo para o provisionamento normal das contas fictícias.
   foreach s in array array['public','dev'] loop
-    execute format('insert into %I.players(user_id,trainer_name,gold) values($1,''TM Fixture A'',100000),($2,''TM Fixture B'',100000)',s) using dono,comprador;
+    execute format('insert into %I.items(id,name,kind,buy_price) values(''poke_ball'',''Bola fixture'',''ball'',200),(''potion'',''Poção fixture'',''potion'',300),(''revive'',''Revive fixture'',''revive'',1500) on conflict do nothing',s);
+  end loop;
+  insert into auth.users(id,raw_user_meta_data) values(dono,'{"trainer_name":"TM Fixture A"}'),(comprador,'{"trainer_name":"TM Fixture B"}');
+  foreach s in array array['public','dev'] loop
+    execute format('insert into %I.players(user_id,trainer_name,gold) values($1,''TM Fixture A'',100000),($2,''TM Fixture B'',100000) on conflict(user_id) do update set gold=100000',s) using dono,comprador;
     execute format('insert into %I.species(id,dex_number,name,type1,base_hp,base_atk_fis,base_atk_esp,base_def,base_def_esp,base_speed,catch_rate,base_exp,growth_curve) values(''charizard'',6,''Charizard'',''FIRE'',78,84,109,78,85,100,45,240,''MEDIUM_SLOW'')',s);
     execute format('insert into %I.pokemon_instances(id,user_id,species_id,location,level,hp,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed) values($1,$2,''charizard'',''bag'',60,100,15,15,15,15,15,15,100,100,100,100,100,100)',s) using poke,dono;
   end loop;
-  perform set_config('session_replication_role','origin',true);
   foreach s in array array['public','dev'] loop
     execute format('select %I.creditar_drop_tm($1,''tm_26'',4,''fixture'')',s) using dono;
     execute format('select %I.creditar_drop_tm($1,''tm_26'',4,''fixture'')',s) using dono;
@@ -30,9 +31,12 @@ begin
     execute format('select %I.ensinar_tm(''tm_26'',$1)',s) using poke;
     execute format('select quantity from %I.player_items where user_id=$1 and item_id=''tm_26''',s) into qtd using dono;
     assert qtd=3, 'Ensino repetido consumiu outra TM';
-    execute format('update %I.pokemon_instances set golpes_de_maquina=''{}'' where id=$1',s) using poke;
+    execute format('update %I.pokemon_instances set golpes_de_maquina=''{}'',unlocked_abilities=''{}'' where id=$1',s) using poke;
     execute format('select ''earthquake''=any(golpes_de_maquina) from %I.pokemon_instances where id=$1',s) into conhecido using poke;
     assert conhecido, 'Flush apagou golpe permanente';
+    execute format('select %I.definir_golpes_ativos($1,array[''earthquake''])',s) using poke;
+    execute format('select ''earthquake''=any(active_abilities) from %I.pokemon_instances where id=$1',s) into conhecido using poke;
+    assert conhecido, 'Golpe ensinado não pôde ser equipado';
     recusou := false;
     begin execute format('select %I.comprar_item(''tm_26'',1)',s); exception when others then recusou := true; end;
     assert recusou, 'NPC vendeu TM';

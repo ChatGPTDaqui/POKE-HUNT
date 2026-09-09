@@ -29,10 +29,11 @@ create function ${schema}.preservar_golpes_de_maquina() returns trigger
 language plpgsql set search_path=${schema},pg_temp as $$
 begin
   new.golpes_de_maquina := array(select distinct g from unnest(old.golpes_de_maquina || coalesce(new.golpes_de_maquina,'{}')) g order by g);
+  new.unlocked_abilities := array(select distinct g from unnest(coalesce(new.unlocked_abilities,'{}') || new.golpes_de_maquina) g order by g);
   return new;
 end;
 $$;
-create trigger preservar_golpes_de_maquina before update of golpes_de_maquina on ${schema}.pokemon_instances
+create trigger preservar_golpes_de_maquina before update of golpes_de_maquina,unlocked_abilities on ${schema}.pokemon_instances
   for each row execute function ${schema}.preservar_golpes_de_maquina();
 `;
   for (const tm of fonte.tms) {

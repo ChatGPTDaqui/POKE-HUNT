@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  {
+    version: '7.52',
+    date: '2026-09-09',
+    title: 'TMs: encontre, ensine e negocie',
+    highlights: [
+      'TMs agora podem cair de POKEs que aprendem o golpe: a chance total é de 0,1% por abate elegível. Cada espécie sorteia entre suas TMs compatíveis.',
+      'No Hospital, escolha uma TM nos Itens da Mochila e ensine a um POKE compatível. Uma unidade é consumida; o golpe aprendido é permanente e recebe a marca azul TM na ficha, onde você pode equipá-lo.',
+      'Venda cada TM à loja por 1.000 de ouro ou negocie com outros jogadores no Mercado. A loja não oferece TMs para compra. Consulte a ficha dos golpes para conhecer as adaptações ao combate deste jogo.',
+    ],
+  },
   // UM item so, e ele nao e "limpamos a ficha do golpe".
   //
   // O PP NAO ERA UM NUMERO A MAIS: ELE MENTIA POR ASSOCIACAO. Em todo jogo da

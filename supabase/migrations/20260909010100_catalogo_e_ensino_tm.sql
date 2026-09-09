@@ -19,10 +19,11 @@ create function public.preservar_golpes_de_maquina() returns trigger
 language plpgsql set search_path=public,pg_temp as $$
 begin
   new.golpes_de_maquina := array(select distinct g from unnest(old.golpes_de_maquina || coalesce(new.golpes_de_maquina,'{}')) g order by g);
+  new.unlocked_abilities := array(select distinct g from unnest(coalesce(new.unlocked_abilities,'{}') || new.golpes_de_maquina) g order by g);
   return new;
 end;
 $$;
-create trigger preservar_golpes_de_maquina before update of golpes_de_maquina on public.pokemon_instances
+create trigger preservar_golpes_de_maquina before update of golpes_de_maquina,unlocked_abilities on public.pokemon_instances
   for each row execute function public.preservar_golpes_de_maquina();
 insert into public.items(id,name,kind,description,buy_price) values ('tm_01','TM01 — Work Up','tm','Ensina Work Up permanentemente. Consumida ao usar.',null) on conflict(id) do update set name=excluded.name, kind=excluded.kind, description=excluded.description, buy_price=null;
 insert into public.maquinas values ('tm_01','work_up',array['bulbasaur','ivysaur','venusaur','charmander','charmeleon','charizard','squirtle','wartortle','blastoise','pidgey','pidgeotto','pidgeot','rattata','raticate','spearow','fearow','clefairy','clefable','jigglypuff','wigglytuff','meowth','persian','mankey','primeape','poliwrath','machop','machoke','machamp','farfetch_d','doduo','dodrio','hitmonlee','hitmonchan','lickitung','chansey','kangaskhan','tauros','eevee','vaporeon','jolteon','flareon','snorlax','mew','chikorita','bayleef','meganium','cyndaquil','quilava','typhlosion','totodile','croconaw','feraligatr','sentret','furret','hoothoot','noctowl','cleffa','igglybuff','togepi','togetic','marill','azumarill','aipom','espeon','umbreon','girafarig','snubbull','granbull','heracross','teddiursa','ursaring','stantler','tyrogue','hitmontop','miltank','blissey','treecko','grovyle','sceptile','torchic','combusken','blaziken','mudkip','marshtomp','swampert','zigzagoon','linoone','taillow','swellow','breloom','slakoth','vigoroth','slaking','whismur','loudred','exploud','makuhita','hariyama','azurill','skitty','delcatty','meditite','medicham','spinda','zangoose','castform','kecleon']::text[]);
@@ -303,10 +304,11 @@ create function dev.preservar_golpes_de_maquina() returns trigger
 language plpgsql set search_path=dev,pg_temp as $$
 begin
   new.golpes_de_maquina := array(select distinct g from unnest(old.golpes_de_maquina || coalesce(new.golpes_de_maquina,'{}')) g order by g);
+  new.unlocked_abilities := array(select distinct g from unnest(coalesce(new.unlocked_abilities,'{}') || new.golpes_de_maquina) g order by g);
   return new;
 end;
 $$;
-create trigger preservar_golpes_de_maquina before update of golpes_de_maquina on dev.pokemon_instances
+create trigger preservar_golpes_de_maquina before update of golpes_de_maquina,unlocked_abilities on dev.pokemon_instances
   for each row execute function dev.preservar_golpes_de_maquina();
 insert into dev.items(id,name,kind,description,buy_price) values ('tm_01','TM01 — Work Up','tm','Ensina Work Up permanentemente. Consumida ao usar.',null) on conflict(id) do update set name=excluded.name, kind=excluded.kind, description=excluded.description, buy_price=null;
 insert into dev.maquinas values ('tm_01','work_up',array['bulbasaur','ivysaur','venusaur','charmander','charmeleon','charizard','squirtle','wartortle','blastoise','pidgey','pidgeotto','pidgeot','rattata','raticate','spearow','fearow','clefairy','clefable','jigglypuff','wigglytuff','meowth','persian','mankey','primeape','poliwrath','machop','machoke','machamp','farfetch_d','doduo','dodrio','hitmonlee','hitmonchan','lickitung','chansey','kangaskhan','tauros','eevee','vaporeon','jolteon','flareon','snorlax','mew','chikorita','bayleef','meganium','cyndaquil','quilava','typhlosion','totodile','croconaw','feraligatr','sentret','furret','hoothoot','noctowl','cleffa','igglybuff','togepi','togetic','marill','azumarill','aipom','espeon','umbreon','girafarig','snubbull','granbull','heracross','teddiursa','ursaring','stantler','tyrogue','hitmontop','miltank','blissey','treecko','grovyle','sceptile','torchic','combusken','blaziken','mudkip','marshtomp','swampert','zigzagoon','linoone','taillow','swellow','breloom','slakoth','vigoroth','slaking','whismur','loudred','exploud','makuhita','hariyama','azurill','skitty','delcatty','meditite','medicham','spinda','zangoose','castform','kecleon']::text[]);

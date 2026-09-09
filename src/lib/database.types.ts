@@ -151,6 +151,46 @@ export type Database = {
         }
         Relationships: []
       }
+      creditos_tm: {
+        Row: {
+          item_id: string
+          origem: string
+          user_id: string
+        }
+        Insert: {
+          item_id: string
+          origem: string
+          user_id: string
+        }
+        Update: {
+          item_id?: string
+          origem?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creditos_tm_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "maquinas"
+            referencedColumns: ["item_id"]
+          },
+          {
+            foreignKeyName: "creditos_tm_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "creditos_tm_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       encounter_slot_rates: {
         Row: {
           percent: number
@@ -621,6 +661,32 @@ export type Database = {
           unlock_cost?: number | null
         }
         Relationships: []
+      }
+      maquinas: {
+        Row: {
+          especies: string[]
+          golpe: string
+          item_id: string
+        }
+        Insert: {
+          especies: string[]
+          golpe: string
+          item_id: string
+        }
+        Update: {
+          especies?: string[]
+          golpe?: string
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maquinas_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       market_deliveries: {
         Row: {
@@ -2353,6 +2419,15 @@ export type Database = {
         }
       }
       conversas: { Args: never; Returns: Json }
+      creditar_drop_tm: {
+        Args: {
+          p_item_id: string
+          p_origem: string
+          p_qtd: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       criar_leilao: {
         Args: {
           p_currency: string
@@ -2431,6 +2506,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      ensinar_tm: {
+        Args: { p_item_id: string; p_poke_id: string }
+        Returns: Json
       }
       enviar_mensagem: {
         Args: {
@@ -2703,7 +2782,14 @@ export type Database = {
         | "DARK"
         | "STEEL"
         | "FAIRY"
-      item_kind: "ball" | "potion" | "revive" | "rod" | "stone" | "status_heal"
+      item_kind:
+        | "ball"
+        | "potion"
+        | "revive"
+        | "rod"
+        | "stone"
+        | "status_heal"
+        | "tm"
       map_continent: "johto" | "kanto"
       move_category: "physical" | "special"
       move_target: "single" | "aoe"
@@ -2901,6 +2987,46 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      creditos_tm: {
+        Row: {
+          item_id: string
+          origem: string
+          user_id: string
+        }
+        Insert: {
+          item_id: string
+          origem: string
+          user_id: string
+        }
+        Update: {
+          item_id?: string
+          origem?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creditos_tm_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "maquinas"
+            referencedColumns: ["item_id"]
+          },
+          {
+            foreignKeyName: "creditos_tm_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "creditos_tm_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       encounter_slot_rates: {
         Row: {
@@ -3372,6 +3498,32 @@ export type Database = {
           unlock_cost?: number | null
         }
         Relationships: []
+      }
+      maquinas: {
+        Row: {
+          especies: string[]
+          golpe: string
+          item_id: string
+        }
+        Insert: {
+          especies: string[]
+          golpe: string
+          item_id: string
+        }
+        Update: {
+          especies?: string[]
+          golpe?: string
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maquinas_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       market_deliveries: {
         Row: {
@@ -5104,6 +5256,15 @@ export type Database = {
         }
       }
       conversas: { Args: never; Returns: Json }
+      creditar_drop_tm: {
+        Args: {
+          p_item_id: string
+          p_origem: string
+          p_qtd: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       criar_leilao: {
         Args: {
           p_currency: string
@@ -5182,6 +5343,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      ensinar_tm: {
+        Args: { p_item_id: string; p_poke_id: string }
+        Returns: Json
       }
       enviar_mensagem: {
         Args: {
@@ -5454,7 +5619,14 @@ export type Database = {
         | "DARK"
         | "STEEL"
         | "FAIRY"
-      item_kind: "ball" | "potion" | "revive" | "rod" | "stone" | "status_heal"
+      item_kind:
+        | "ball"
+        | "potion"
+        | "revive"
+        | "rod"
+        | "stone"
+        | "status_heal"
+        | "tm"
       map_continent: "johto" | "kanto"
       move_category: "physical" | "special"
       move_target: "single" | "aoe"
@@ -5615,7 +5787,15 @@ export const Constants = {
         "STEEL",
         "FAIRY",
       ],
-      item_kind: ["ball", "potion", "revive", "rod", "stone", "status_heal"],
+      item_kind: [
+        "ball",
+        "potion",
+        "revive",
+        "rod",
+        "stone",
+        "status_heal",
+        "tm",
+      ],
       map_continent: ["johto", "kanto"],
       move_category: ["physical", "special"],
       move_target: ["single", "aoe"],
@@ -5650,7 +5830,15 @@ export const Constants = {
         "STEEL",
         "FAIRY",
       ],
-      item_kind: ["ball", "potion", "revive", "rod", "stone", "status_heal"],
+      item_kind: [
+        "ball",
+        "potion",
+        "revive",
+        "rod",
+        "stone",
+        "status_heal",
+        "tm",
+      ],
       map_continent: ["johto", "kanto"],
       move_category: ["physical", "special"],
       move_target: ["single", "aoe"],
