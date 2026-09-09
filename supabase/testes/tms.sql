@@ -13,7 +13,7 @@ declare
 begin
   -- Catálogo mínimo para o provisionamento normal das contas fictícias.
   foreach s in array array['public','dev'] loop
-    execute format('insert into %I.items(id,name,kind,buy_price) values(''poke_ball'',''Bola fixture'',''ball'',200),(''potion'',''Poção fixture'',''potion'',300),(''revive'',''Revive fixture'',''revive'',1500) on conflict do nothing',s);
+    execute format('insert into %I.items(id,name,kind,buy_price,heal_amount,revive_hp_percent) values(''poke_ball'',''Bola fixture'',''ball'',200,null,null),(''potion'',''Poção fixture'',''potion'',300,20,null),(''revive'',''Revive fixture'',''revive'',1500,null,0.5) on conflict do nothing',s);
   end loop;
   insert into auth.users(id,raw_user_meta_data) values(dono,'{"trainer_name":"TM Fixture A"}'),(comprador,'{"trainer_name":"TM Fixture B"}');
   foreach s in array array['public','dev'] loop
