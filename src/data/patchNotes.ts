@@ -18,7 +18,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
     title: 'TMs: encontre, ensine e negocie',
     highlights: [
       'TMs agora podem cair de POKEs que aprendem o golpe: a chance total é de 0,1% por abate elegível. Cada espécie sorteia entre suas TMs compatíveis.',
-      'No Hospital, escolha uma TM nos Itens da Mochila e ensine a um POKE compatível. Uma unidade é consumida; o golpe aprendido é permanente e recebe a marca azul TM na ficha, onde você pode equipá-lo.',
+      'No Hospital, a própria TM agora mostra tipo, categoria, dano, precisão, recarga e efeitos antes do uso. POKEs da equipe aparecem primeiro, separados dos que estão na mochila. Uma unidade é consumida; o golpe aprendido é permanente e recebe a marca azul TM na ficha, onde você pode equipá-lo.',
       'Venda cada TM à loja por 1.000 de ouro ou negocie com outros jogadores no Mercado. A loja não oferece TMs para compra. Consulte a ficha dos golpes para conhecer as adaptações ao combate deste jogo.',
     ],
   },

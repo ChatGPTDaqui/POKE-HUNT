@@ -16,6 +16,22 @@ beforeEach(() => {
   useGameStateStore.setState({ team: [poke], bagPokes: [], currentMapId: null, items: { tm_26: 2 }, lockedItems: {} })
 })
 describe('ensinar TM pela mochila', () => {
+  it('explica o golpe e separa a equipe antes da mochila', () => {
+    const reserva = createPokeInstance(createRng(513), 'geodude', 5)
+    reserva.uid = 'poke-reserva'
+    useGameStateStore.setState({ bagPokes: [reserva] })
+
+    const { container } = render(<EnsinarTm itemId="tm_26" />)
+
+    const detalhes = screen.getByRole('region', { name: 'Detalhes de Earthquake' })
+    expect(detalhes.textContent).toContain('Dano base100')
+    expect(detalhes.textContent).toContain('Precisão100%')
+    const grupos = [...container.querySelectorAll('optgroup')]
+    expect(grupos.map(grupo => grupo.label)).toEqual(['Equipe — recomendado', 'Mochila'])
+    expect(grupos[0].textContent).toContain('Charizard')
+    expect(grupos[1].textContent).toContain('Geodude')
+  })
+
   it('consome uma unidade e registra o golpe permanentemente', async () => {
     render(<EnsinarTm itemId="tm_26" />)
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'poke-teste' } })
