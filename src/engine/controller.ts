@@ -536,6 +536,10 @@ export const controller = {
     const item = getItem(itemId)
     const world = useWorldStore.getState()
     if (!item || !world.player) return
+    if ((world.player.embargoRestante ?? 0) > 0) {
+      useToastStore.getState().pushToast('Embargo impede usar itens neste POKE.', 'error', 'world')
+      return
+    }
 
     if (item.kind === 'potion' && item.healAmount != null) {
       if (world.player.fainted) {

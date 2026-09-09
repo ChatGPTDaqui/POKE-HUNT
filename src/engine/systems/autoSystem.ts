@@ -149,6 +149,7 @@ export function updateAutoHeal(world: WorldState, gameState: GameStateStore, dt:
   const player = world.player
   const events: AutoHealEvent[] = []
   if (!player) return events
+  if ((player.embargoRestante ?? 0) > 0) return events
 
   const timers = world.autoTimers
   timers.treinador = Math.max(0, timers.treinador - dt)

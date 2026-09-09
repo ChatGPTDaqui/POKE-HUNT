@@ -16,7 +16,7 @@
 //
 // POR QUE A CONTAGEM DE GOLPES AUSENTES E UMA GUARDA, E NAO ESTATISTICA
 // -----------------------------------------------------------------------------
-// 17 golpes de Maquina nao existem em `abilities.generated.ts`. Enquanto for
+// Dois golpes de HM ainda não existem no catálogo combinado. Enquanto for
 // assim, a Maquina que os ensina nao pode ser fabricada — ela ensinaria um id
 // que `getAbility` devolve `null`. A lista fica CONGELADA aqui: implementar um
 // desses golpes tem que ser um ato deliberado que mexe neste arquivo, e nao um
@@ -25,18 +25,15 @@ import { describe, it, expect } from 'vitest'
 import MAQUINAS from '../../scripts/usum/maquinas.json'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { ABILITIES_DATA } from './generated/abilities.generated'
+import { GOLPES_TM } from './generated/golpesTm.generated'
 
 /**
  * Os golpes de Maquina que o motor ainda NAO sabe executar.
  *
- * `surf` aparece nas duas listas (TM94 no Ultra Sun e HM3 na Gen III), entao
- * sao 17 golpes distintos e nao 18. Cada um destes bloqueia a Maquina que o
- * ensina ate alguem implementar o efeito.
+ * Só Cut e Rock Smash (HMs) permanecem ausentes; as 100 TMs têm efeito.
  */
 const GOLPES_QUE_O_MOTOR_NAO_TEM = [
-  'aurora_veil', 'brutal_swing', 'confide', 'cut', 'dazzling_gleam', 'facade',
-  'focus_blast', 'frustration', 'grass_knot', 'overheat', 'return', 'rock_smash',
-  'scald', 'smart_strike', 'surf', 'trick_room', 'volt_switch',
+  'cut', 'rock_smash',
 ].sort()
 
 describe('o dado das Maquinas casa com o catalogo do jogo (PH-512)', () => {
@@ -98,7 +95,7 @@ describe('o dado das Maquinas casa com o catalogo do jogo (PH-512)', () => {
 
   it('a lista de golpes que o motor nao tem esta congelada — implementar um e ato deliberado', () => {
     const todos = [...MAQUINAS.tms.map((t) => t.golpe), ...MAQUINAS.hms.map((h) => h.golpe)]
-    const ausentes = [...new Set(todos.filter((g) => !(g in ABILITIES_DATA)))].sort()
+    const ausentes = [...new Set(todos.filter((g) => !(g in ABILITIES_DATA) && !(g in GOLPES_TM)))].sort()
     expect(ausentes).toEqual(GOLPES_QUE_O_MOTOR_NAO_TEM)
   })
 

@@ -856,7 +856,22 @@ export async function gravarEstado(
     if (gravarPoke.length) await inserir(cfg, 'pokemon_instances', gravarPoke, { upsert: 'id' })
   }
 
-  const linhasItens = gameStateToItemRows(userId, estado)
+  const todosItens = gameStateToItemRows(userId, estado)
+  // TM só entra pela simulação como drop. Consumo/venda/negociação são RPCs.
+  // Somar o delta evita apagar ou sobrescrever uma compra concorrente (PH-513).
+  for (const item of todosItens.filter(l => l.item_id?.startsWith('tm_'))) {
+    const anterior = linhasNoLoad?.items.find(l => l.item_id === item.item_id)?.quantity ?? 0
+    const delta = Number(item.quantity) - anterior
+    if (delta > 0) {
+      if (!linhasNoLoad) throw new Error('Crédito de TM exige baseline do snapshot')
+      await chamarRpc(cfg, 'creditar_drop_tm', {
+        p_user_id: userId, p_item_id: item.item_id, p_qtd: delta,
+        p_origem: playerUpdatedAtEsperado,
+      })
+    }
+  }
+  const linhasItens = todosItens.filter(l => !l.item_id?.startsWith('tm_'))
+  const itensComunsNoLoad = linhasNoLoad?.items.filter(l => !l.item_id.startsWith('tm_'))
   // Mesmo diff de remocao que `pokemon_instances` acima. Sem ele, um item
   // consumido ate exatamente 0 (e nao travado) some de `estado.items` mas a
   // linha velha continua no banco — o upsert so toca as chaves presentes, nunca
@@ -864,14 +879,14 @@ export async function gravarEstado(
   // reload (evolucao especial de graca), e qualquer pocao/bola zerada
   // ressuscitava. `gameStateToItemRows` ja preserva itens travados com
   // quantidade 0, entao esses continuam na lista e nao sao removidos.
-  if (!tabelaIntacta(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id))) {
+  if (!tabelaIntacta(linhasItens, itensComunsNoLoad, (l) => String(l.item_id))) {
     const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
     const itensNoBanco = await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
-    const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id))
+    const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !id.startsWith('tm_') && !itemIdsAgora.has(id))
     for (const lote of porLotesDeId(removerItens)) {
       await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
     }
-    const itensMudados = linhasQueMudaram(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id))
+    const itensMudados = linhasQueMudaram(linhasItens, itensComunsNoLoad, (l) => String(l.item_id))
     if (itensMudados.length) await inserir(cfg, 'player_items', itensMudados, { upsert: 'user_id,item_id' })
   }
 

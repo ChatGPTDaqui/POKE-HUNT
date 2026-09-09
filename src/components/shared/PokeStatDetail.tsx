@@ -356,7 +356,9 @@ function FilaDeGolpes(
 export function MovesetTable({ poke, species }: { poke: PokeInstance; species: Species }) {
   // O learnset COMPLETO da especie, nao so `poke.unlockedAbilities`: a tabela
   // tambem serve como preview de "o que vem por ai".
-  const rows = species.abilities
+  const rows = [...species.abilities, ...(poke.golpesDeMaquina ?? [])
+    .filter(key => !species.abilities.some(a => a.key === key))
+    .map(key => ({ key, levelReq: 0 }))]
     .map((entry) => ({ entry, ability: getAbility(entry.key) }))
     .filter((r): r is { entry: typeof r.entry; ability: NonNullable<typeof r.ability> } => Boolean(r.ability))
     .sort((a, b) => a.entry.levelReq - b.entry.levelReq)
@@ -497,7 +499,8 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           </div>
         )}
         {rows.map(({ entry, ability }, index) => {
-          const learned = entry.levelReq <= poke.level
+          const porTm = poke.golpesDeMaquina?.includes(entry.key) ?? false
+          const learned = porTm || entry.levelReq <= poke.level
           const idxNaFila = ativos.indexOf(entry.key)
           return (
             <div
@@ -509,7 +512,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
                 learned ? 'bg-n900 text-foreground' : 'text-n500 opacity-45'
               }`}
             >
-              <span className="text-n400">{entry.levelReq}</span>
+              <span className={porTm ? 'text-sky-400' : 'text-n400'}>{porTm ? 'TM' : entry.levelReq}</span>
               <AbilityTooltip ability={ability} poke={poke}>
                 <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
                   {ability.name}

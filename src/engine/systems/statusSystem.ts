@@ -572,6 +572,10 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
  * PH-418 evitou dando prazo ao estagio.
  */
 export function limparEstadoVolatil(entity: WorldEntity): void {
+  entity.substitutoHp = 0
+  entity.atracaoRestante = 0
+  entity.embargoRestante = 0
+  entity.ultimoQuash = undefined
   entity.statusVolatil = null
   entity.revelado = undefined
   entity.escudos = undefined
@@ -682,6 +686,8 @@ export interface TickDeStatus {
  * pro resto do dano.
  */
 export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: ClimaTipo | null = null): TickDeStatus {
+  entity.atracaoRestante = Math.max(0, (entity.atracaoRestante ?? 0) - dt)
+  entity.embargoRestante = Math.max(0, (entity.embargoRestante ?? 0) - dt)
   if (entity.imunidadeDeStatus > 0) {
     entity.imunidadeDeStatus = Math.max(0, entity.imunidadeDeStatus - dt)
   }

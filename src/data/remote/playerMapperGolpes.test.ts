@@ -12,7 +12,7 @@
 // golpe", que so aparece com um POKE de dado antigo em maos.
 import { describe, expect, it } from 'vitest'
 
-import { rowToPoke, type PokemonRow } from './playerMapper'
+import { rowToPoke, pokeToRow, type PokemonRow } from './playerMapper'
 import { SPECIES } from '@/data/pokes'
 import { golpesAprendidosAte } from '@/data/activeAbilities'
 
@@ -49,6 +49,18 @@ function linha(activeAbilities: string[] | null): PokemonRow {
 }
 
 describe('rowToPoke: escolha de golpes', () => {
+  it('preserva o golpe de TM e sua seleção mesmo fora do learnset por nível', () => {
+    const row = linha(['earthquake'])
+    expect(golpesAprendidosAte(SPECIES[ESPECIE], NIVEL)).not.toContain('earthquake')
+    row.golpes_de_maquina = ['earthquake', 'earthquake']
+    const poke = rowToPoke(row)
+    expect(poke.golpesDeMaquina).toEqual(['earthquake'])
+    expect(poke.unlockedAbilities.filter(g => g === 'earthquake')).toHaveLength(1)
+    expect(poke.activeAbilities).toEqual(['earthquake'])
+    const persistido = { ...row, ...pokeToRow('u1', poke, 'team', 0) }
+    expect(rowToPoke(persistido).golpesDeMaquina).toEqual(['earthquake'])
+    expect(rowToPoke(persistido).activeAbilities).toEqual(['earthquake'])
+  })
   it('descarta a chave que o learnset atual nao tem mais', () => {
     const validos = golpesAprendidosAte(SPECIES[ESPECIE], NIVEL).slice(0, 2)
     const poke = rowToPoke(linha(['golpe_do_recordador_extinto', ...validos]))

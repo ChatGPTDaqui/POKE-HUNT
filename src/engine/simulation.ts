@@ -1554,6 +1554,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // Vale nos tres regimes que chamam `stepWorld` sem nenhum deles precisar
   // lembrar: ao vivo, catch-up silencioso e resim da autoridade.
   tickClimaDeGolpe(world, dt)
+  if (world.trickRoomRestante) world.trickRoomRestante = Math.max(0, world.trickRoomRestante - dt)
 
   // Contagem regressiva de intro da Champion Lance: movimento/combate/
   // respawn ficam congelados e nada nasceu ainda ate isso chegar a 0.

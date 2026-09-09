@@ -3,6 +3,7 @@ import type { Rng } from '@/core/rng'
 import { getItem } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { stoneItemId } from '@/data/stones'
+import { sortearTm } from '@/data/maquinas'
 import { rollChance } from '@/core/random'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
@@ -112,6 +113,11 @@ export function awardKillLoot(
     droppedItems.push(stoneId)
   }
 
+  const tm = sortearTm(enemy.poke.speciesId, rng.state)
+  if (tm) {
+    gameState.addItem(tm.id, 1)
+    droppedItems.push(tm.id)
+  }
   return { gold, droppedItems }
 }
 

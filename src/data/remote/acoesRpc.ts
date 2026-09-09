@@ -239,6 +239,10 @@ function rpc(nome: string, params: (acao: Acao) => Record<string, unknown>): Des
 }
 
 const DESPACHO: Record<string, Despacho> = {
+  ensinarTm: {
+    chamar: rpc('ensinar_tm', a => ({ p_item_id: a.itemId, p_poke_id: a.pokeUid })),
+    aoSucesso: async a => { await Promise.all([refetchItem(a.itemId as string), refetchPoke(a.pokeUid as string)]) },
+  },
   comprarItem: {
     chamar: rpc('comprar_item', (a) => ({ p_item_id: a.itemId, p_qtd: a.qtd })),
     aoSucesso: async (a) => { await Promise.all([refetchGold(), refetchItem(a.itemId as string)]) },

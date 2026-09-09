@@ -90,6 +90,8 @@ export interface PokeInstance {
    */
   trait?: string
   unlockedAbilities: string[]
+  /** Golpes permanentes ensinados por máquina; não dependem do learnset por nível. */
+  golpesDeMaquina?: string[]
   // Os no maximo 4 golpes que o POKE leva pra luta (data/activeAbilities.ts).
   // Diferente de `unlockedAbilities`, que e DERIVAVEL de especie+nivel, este e
   // escolha do jogador — e o unico dos dois que precisa ser gravado.

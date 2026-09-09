@@ -87,6 +87,25 @@ beforeEach(() => {
 })
 
 describe('gravarEstado() — diff de escrita', () => {
+  it('credita só TMs novas sem sobrescrever o inventário negociado', async () => {
+    const estado = estadoComItens()
+    estado.items.tm_26 = 2
+    const baseline = baselineDe(estado)
+    estado.items.tm_26 = 3
+    await gravarEstado(cfg, USER, estado, new Set(), tabelaPlayers.updated_at, baseline)
+    expect(db.chamarRpc).toHaveBeenCalledWith(cfg, 'creditar_drop_tm', {
+      p_user_id: USER, p_item_id: 'tm_26', p_qtd: 1, p_origem: '2026-01-01T00:00:00.000Z',
+    })
+    expect(db.inserir).not.toHaveBeenCalled()
+    expect(db.apagar).not.toHaveBeenCalled()
+  })
+  it('TM inalterada não causa gravação nem consulta do inventário', async () => {
+    const estado = estadoComItens()
+    estado.items.tm_26 = 2
+    await gravarEstado(cfg, USER, estado, new Set(), tabelaPlayers.updated_at, baselineDe(estado))
+    expect(db.chamarRpc).toHaveBeenCalledTimes(1)
+    expect(db.selecionarTudo).not.toHaveBeenCalled()
+  })
   it('janela sem nenhum evento: grava so a linha de players', async () => {
     const estado = estadoComItens()
 
