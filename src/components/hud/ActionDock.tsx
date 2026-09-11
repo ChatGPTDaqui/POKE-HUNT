@@ -28,7 +28,7 @@ import {
   Backpack, BookOpen, Books, Calculator, ChatsCircle, CheckSquare, DotsThreeOutline,
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
   Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
-  ArrowsLeftRight,
+  ArrowsLeftRight, Sword,
 } from '@phosphor-icons/react'
 import { useWorldStore } from '@/stores/worldStore'
 import { useRendererStore } from '@/stores/rendererStore'
@@ -77,6 +77,7 @@ const SECUNDARIOS: DestinoDeTela[] = [
   // carta em PH-81, e o envelope era a ultima peca dizendo o contrario.
   { screen: 'social', label: 'Social', Icon: ChatsCircle },
   { screen: 'troca', label: 'Troca', Icon: ArrowsLeftRight },
+  { screen: 'pvp', label: 'PvP', Icon: Sword },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
   { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
   { screen: 'tasks', label: 'Tasks', Icon: CheckSquare },

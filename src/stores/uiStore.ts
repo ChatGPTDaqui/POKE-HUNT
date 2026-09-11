@@ -44,7 +44,7 @@ export interface AnuncioParaConversa {
 export type ScreenName =
   | 'equipe' | 'mochila' | 'loja' | 'hunts' | 'pokedex'
   | 'wiki' | 'config' | 'social' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
-  | 'ranking' | 'tutoriais' | 'especialidades' | 'troca'
+  | 'ranking' | 'tutoriais' | 'especialidades' | 'troca' | 'pvp'
 
 // Reexportado do toastStore em vez de redeclarado: as duas listas ja
 // divergiram uma vez (a aba "Mundo" mudou de dono e esta copia continuaria

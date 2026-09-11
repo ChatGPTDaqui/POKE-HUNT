@@ -12,6 +12,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { stepWorld, LIVE_SIM_STEP_SECONDS } from './simulation'
 import { controller } from './controller'
 import { recordSimulatedSeconds } from './clockDrift'
+import { stepPvpVisual } from './systems/pvpSystem'
 
 // Mesma constante que o resim do servidor usa fora do regime offline
 // (authority/src/progresso.ts) — ver o raciocinio completo em
@@ -55,7 +56,8 @@ export function useGameLoop(active: boolean, onLiveTick?: () => void): void {
         const step = Math.min(STEP, delta)
         const gameState = useGameStateStore.getState()
         useWorldStore.getState().update((draft) => {
-          stepWorld(draft, step, gameState, { silent: false })
+          if (draft.pvp) stepPvpVisual(draft, step)
+          else stepWorld(draft, step, gameState, { silent: false })
         })
         delta -= step
         simulated += step

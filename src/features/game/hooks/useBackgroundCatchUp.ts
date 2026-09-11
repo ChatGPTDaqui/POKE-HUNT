@@ -48,6 +48,7 @@ export function useBackgroundCatchUp(): void {
 
       const world = useWorldStore.getState()
       if (!world.mapDef || !world.player) return // nada a adiantar no Hospital
+      if (world.pvp) return
 
       const cappedSeconds = segundosCatchUpEfetivos(gapSeconds)
       withSavesDeferred(() => {
@@ -81,7 +82,8 @@ export function useBackgroundCatchUp(): void {
         // Navegadores mobile matam uma pagina em segundo plano sem disparar
         // `beforeunload` — este (com o `pagehide`) e o unico ponto de save
         // confiavel nesses aparelhos.
-        syncActivePokeToGameState(useWorldStore.getState(), useGameStateStore.getState())
+        const world = useWorldStore.getState()
+        if (!world.pvp) syncActivePokeToGameState(world, useGameStateStore.getState())
         forceSave()
         // `forceSave` NAO grava nada sob autoridade do servidor (o cliente
         // perdeu a escrita na Fase D): sem este commit, ocultar a aba deixava o

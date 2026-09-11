@@ -1077,6 +1077,13 @@ export interface WorldState {
    * o movimento e exatamente o de sempre.
    */
   lure: EstadoDeLure | null
+  pvp: {
+    treinador: string
+    estado: 'lutando' | 'vitoria' | 'derrota'
+    sessaoId?: string
+    meuId?: string
+    rivalId?: string
+  } | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
   // `ProgressoDaSessao` que `sala`/`sequenceIndex` usam pra sobreviver ao

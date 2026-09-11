@@ -40,9 +40,10 @@ describe('destinos da barra e da grade', () => {
     //
     // Troca entrou na PH-314, logo depois do Social: as duas sao as telas
     // "com outro jogador do outro lado", e e do Social que o convite costuma
-    // sair.
+    // sair. PvP (PH-512) entrou logo apos, mesmo grupo de "duelo com outro
+    // jogador".
     expect(telas).toEqual(
-      ['social', 'troca', 'calc', 'ranking', 'wiki', 'tutoriais', 'config'],
+      ['social', 'troca', 'pvp', 'calc', 'ranking', 'wiki', 'tutoriais', 'config'],
     )
   })
 })
