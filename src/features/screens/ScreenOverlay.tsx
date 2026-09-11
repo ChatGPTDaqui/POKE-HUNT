@@ -28,6 +28,7 @@ import { RankingMenu } from '@/features/ranking/RankingMenu'
 import { TutoriaisMenu } from '@/features/tutorial/TutoriaisMenu'
 import { EspecialidadesMenu } from '@/features/especialidades/EspecialidadesMenu'
 import { TrocaMenu } from '@/features/troca/TrocaMenu'
+import { PvpMenu } from '@/features/pvp/PvpMenu'
 
 const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   equipe: TeamMenu,
@@ -46,6 +47,7 @@ const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   tutoriais: TutoriaisMenu,
   especialidades: EspecialidadesMenu,
   troca: TrocaMenu,
+  pvp: PvpMenu,
 }
 
 const TITLES: Record<ScreenName, string> = {
@@ -65,6 +67,7 @@ const TITLES: Record<ScreenName, string> = {
   tutoriais: 'Repetir Tutoriais',
   especialidades: 'Especialidades',
   troca: 'Troca',
+  pvp: 'PvP',
 }
 
 // Largura padrao por tela, em `em`. Nao e capricho: a aba Itens da Loja tem

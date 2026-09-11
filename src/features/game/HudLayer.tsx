@@ -42,6 +42,7 @@ import { ColunaDeAtalhos } from '@/components/hud/ColunaDeAtalhos'
 import { ChatLog } from '@/components/toasts/ChatLog'
 import { ChatMobile } from '@/components/toasts/ChatMobile'
 import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
+import { PvpOverlay } from '@/features/pvp/PvpOverlay'
 import { useDeviceMode, useUiStore } from '@/stores/uiStore'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { cn } from '@/lib/utils'
@@ -172,6 +173,7 @@ export function HudLayer() {
           topo, e nao filha: ela ancora na DIREITA e aquele container e uma
           coluna alinhada a esquerda. */}
       <ColunaDeAtalhos />
+      <PvpOverlay />
 
       {/* Taxas no canto inferior direito (PH-279): sairam do trilho, onde
           disputavam largura com a sala. Irma do rodape, e nao filha: ela ancora
