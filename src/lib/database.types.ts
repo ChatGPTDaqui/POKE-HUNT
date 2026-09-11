@@ -1447,6 +1447,215 @@ export type Database = {
           },
         ]
       }
+      pvp_historico: {
+        Row: {
+          anfitriao_id: string
+          convidado_id: string
+          encerrada_em: string
+          id: string
+          sessao_id: string
+          vencedor_id: string | null
+        }
+        Insert: {
+          anfitriao_id: string
+          convidado_id: string
+          encerrada_em?: string
+          id?: string
+          sessao_id: string
+          vencedor_id?: string | null
+        }
+        Update: {
+          anfitriao_id?: string
+          convidado_id?: string
+          encerrada_em?: string
+          id?: string
+          sessao_id?: string
+          vencedor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_historico_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      pvp_sessao: {
+        Row: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        Insert: {
+          anfitriao_id: string
+          anfitriao_poke?: Json | null
+          anfitriao_pokemon_id?: string | null
+          anfitriao_reporte?: string | null
+          convidado_id: string
+          convidado_poke?: Json | null
+          convidado_pokemon_id?: string | null
+          convidado_reporte?: string | null
+          criada_em?: string
+          encerrada_em?: string | null
+          encerrada_por?: string | null
+          estado?: string
+          expira_em?: string
+          id?: string
+          vencedor_id?: string | null
+        }
+        Update: {
+          anfitriao_id?: string
+          anfitriao_poke?: Json | null
+          anfitriao_pokemon_id?: string | null
+          anfitriao_reporte?: string | null
+          convidado_id?: string
+          convidado_poke?: Json | null
+          convidado_pokemon_id?: string | null
+          convidado_reporte?: string | null
+          criada_em?: string
+          encerrada_em?: string | null
+          encerrada_por?: string | null
+          estado?: string
+          expira_em?: string
+          id?: string
+          vencedor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_sessao_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_anfitriao_reporte_fkey"
+            columns: ["anfitriao_reporte"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_anfitriao_reporte_fkey"
+            columns: ["anfitriao_reporte"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_convidado_reporte_fkey"
+            columns: ["convidado_reporte"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_convidado_reporte_fkey"
+            columns: ["convidado_reporte"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_encerrada_por_fkey"
+            columns: ["encerrada_por"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_encerrada_por_fkey"
+            columns: ["encerrada_por"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       recompensa_concedida: {
         Row: {
           chave: string
@@ -2314,6 +2523,32 @@ export type Database = {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
       }
+      abrir_pvp: {
+        Args: { p_convidado_id: string; p_poke: Json; p_pokemon_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       abrir_troca: {
         Args: { p_convidado_id: string }
         Returns: {
@@ -2333,6 +2568,32 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      aceitar_pvp: {
+        Args: { p_poke: Json; p_pokemon_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2484,6 +2745,32 @@ export type Database = {
         }
       }
       encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
+      encerrar_pvp: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       encerrar_troca: {
         Args: { p_motivo?: string; p_sessao_id: string }
         Returns: {
@@ -2635,6 +2922,10 @@ export type Database = {
         }
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
+      pvp_validar_poke: {
+        Args: { p_eu: string; p_poke: Json; p_pokemon_id: string }
+        Returns: undefined
+      }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
@@ -2647,6 +2938,32 @@ export type Database = {
           p_rota: string
         }
         Returns: undefined
+      }
+      registrar_resultado_pvp: {
+        Args: { p_sessao_id: string; p_vencedor_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
       reivindicar_missao: {
@@ -4284,6 +4601,215 @@ export type Database = {
           },
         ]
       }
+      pvp_historico: {
+        Row: {
+          anfitriao_id: string
+          convidado_id: string
+          encerrada_em: string
+          id: string
+          sessao_id: string
+          vencedor_id: string | null
+        }
+        Insert: {
+          anfitriao_id: string
+          convidado_id: string
+          encerrada_em?: string
+          id?: string
+          sessao_id: string
+          vencedor_id?: string | null
+        }
+        Update: {
+          anfitriao_id?: string
+          convidado_id?: string
+          encerrada_em?: string
+          id?: string
+          sessao_id?: string
+          vencedor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_historico_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_historico_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      pvp_sessao: {
+        Row: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        Insert: {
+          anfitriao_id: string
+          anfitriao_poke?: Json | null
+          anfitriao_pokemon_id?: string | null
+          anfitriao_reporte?: string | null
+          convidado_id: string
+          convidado_poke?: Json | null
+          convidado_pokemon_id?: string | null
+          convidado_reporte?: string | null
+          criada_em?: string
+          encerrada_em?: string | null
+          encerrada_por?: string | null
+          estado?: string
+          expira_em?: string
+          id?: string
+          vencedor_id?: string | null
+        }
+        Update: {
+          anfitriao_id?: string
+          anfitriao_poke?: Json | null
+          anfitriao_pokemon_id?: string | null
+          anfitriao_reporte?: string | null
+          convidado_id?: string
+          convidado_poke?: Json | null
+          convidado_pokemon_id?: string | null
+          convidado_reporte?: string | null
+          criada_em?: string
+          encerrada_em?: string | null
+          encerrada_por?: string | null
+          estado?: string
+          expira_em?: string
+          id?: string
+          vencedor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_sessao_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_anfitriao_id_fkey"
+            columns: ["anfitriao_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_anfitriao_reporte_fkey"
+            columns: ["anfitriao_reporte"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_anfitriao_reporte_fkey"
+            columns: ["anfitriao_reporte"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_convidado_id_fkey"
+            columns: ["convidado_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_convidado_reporte_fkey"
+            columns: ["convidado_reporte"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_convidado_reporte_fkey"
+            columns: ["convidado_reporte"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_encerrada_por_fkey"
+            columns: ["encerrada_por"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_encerrada_por_fkey"
+            columns: ["encerrada_por"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_sessao_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       recompensa_concedida: {
         Row: {
           chave: string
@@ -5151,6 +5677,32 @@ export type Database = {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
       }
+      abrir_pvp: {
+        Args: { p_convidado_id: string; p_poke: Json; p_pokemon_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       abrir_troca: {
         Args: { p_convidado_id: string }
         Returns: {
@@ -5170,6 +5722,32 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "troca_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      aceitar_pvp: {
+        Args: { p_poke: Json; p_pokemon_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -5321,6 +5899,32 @@ export type Database = {
         }
       }
       encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
+      encerrar_pvp: {
+        Args: { p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       encerrar_troca: {
         Args: { p_motivo?: string; p_sessao_id: string }
         Returns: {
@@ -5472,6 +6076,10 @@ export type Database = {
         }
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
+      pvp_validar_poke: {
+        Args: { p_eu: string; p_poke: Json; p_pokemon_id: string }
+        Returns: undefined
+      }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
@@ -5484,6 +6092,32 @@ export type Database = {
           p_rota: string
         }
         Returns: undefined
+      }
+      registrar_resultado_pvp: {
+        Args: { p_sessao_id: string; p_vencedor_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
       reivindicar_missao: {
