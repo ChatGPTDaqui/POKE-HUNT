@@ -11,7 +11,8 @@ import { sincronizarAutoAoSair } from '@/data/remote/autoridade'
 export function useSyncOnUnload(): void {
   useEffect(() => {
     function onUnload() {
-      syncActivePokeToGameState(useWorldStore.getState(), useGameStateStore.getState())
+      const world = useWorldStore.getState()
+      if (!world.pvp) syncActivePokeToGameState(world, useGameStateStore.getState())
       forceSave()
       // Sob autoridade do servidor `forceSave()` acima e no-op (ver
       // gameStatePersistence.ts#setItem) — quem precisa sobreviver ao unload

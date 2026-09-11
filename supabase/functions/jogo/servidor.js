@@ -86634,6 +86634,7 @@ function emptyWorldState(seed = randomSeed()) {
 		},
 		pessimista: false,
 		lure: null,
+		pvp: null,
 		clima: null,
 		climaAmbiente: null,
 		especialidadeNiveis: null

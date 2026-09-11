@@ -5,7 +5,7 @@
 // outro jogador. Sem `VITE_SERVIDOR_URL` a tela diz isso em vez de mostrar uma
 // lista com um jogador so.
 import { useState } from 'react'
-import { Crown, Medal, UserPlus } from '@phosphor-icons/react'
+import { Crown, Medal, Sword, UserPlus } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import type { CriterioPoke, EntradaTreinador, EntradaPoke, EntradaHall } from '@/data/remote/servidor'
 import * as rankingRpc from '@/data/remote/rankingRpc'
@@ -15,8 +15,12 @@ import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
-import { SegmentedTabs, GameSelect, SectionLabel } from '@/components/game/controls'
+import { useGameStateStore } from '@/stores/gameStateStore'
+import { useUiStore } from '@/stores/uiStore'
+import { useWorldStore } from '@/stores/worldStore'
+import { SegmentedTabs, GameSelect, SectionLabel, GameButton } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
+import { criarMundoPvpVisual } from '@/features/pvp/pvpWorld'
 
 type Aba = 'treinadores' | 'pokemon' | 'hall'
 
@@ -163,6 +167,9 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
   // jogador abre exatamente o mesmo cartao, e por isso o campo "Treinador
   // original" dentro dele responde de quem ele e.
   const showProfile = usePokeProfileStore((s) => s.showProfile)
+  const meuTime = useGameStateStore((s) => s.team)
+  const activeIndex = useGameStateStore((s) => s.activeIndex)
+  const closeScreen = useUiStore((s) => s.closeScreen)
   const { data, isLoading, error } = useQuery({
     queryKey: ['ranking', 'pokemon', criterio],
     queryFn: () => rankingRpc.rankingPokemon(criterio),
@@ -171,42 +178,56 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
   const entradas: EntradaPoke[] = data?.entradas ?? []
 
   return (
-    <Estado carregando={isLoading} erro={error} vazio={entradas.length === 0}>
-      <div className="flex flex-col gap-[.3em]">
-        {entradas.map((e, i) => {
-          const species = SPECIES[e.poke.speciesId]
-          const url = faceIconUrl(e.poke.speciesId, e.poke.isShiny)
-          const raridade = rarityOf(e.poke)
-          // Uma especie desconhecida (renomeada/removida num sync depois do
-          // POKE ter sido criado) ainda aparece na lista, mas nao abre o
-          // perfil: o cartao inteiro e montado a partir de `species`.
-          const abrivel = Boolean(species)
-          return (
-            <Linha
-              key={e.poke.uid}
-              onClick={abrivel ? () => showProfile(e.poke, species) : undefined}
-            >
-              <Posicao n={i + 1} />
-              {url && (
-                <img
-                  src={url}
-                  alt=""
-                  className="h-[1.8em] w-[1.8em] shrink-0 rounded-[.25em] border-2 object-cover"
-                  style={{ borderColor: raridade.color }}
-                />
-              )}
-              <span className="min-w-0 flex-1 truncate">
-                {e.poke.isShiny && <span className="text-shiny">✨ </span>}
-                {species?.name ?? e.poke.speciesId}
-                <span className="text-n500"> · {e.treinadorOriginal ?? e.treinador}</span>
-              </span>
-              <span className="shrink-0 text-[.75em] text-n500">Lv {e.poke.level}</span>
-              <span className="shrink-0 font-mono text-[.9em] font-bold">{e.valor}</span>
-            </Linha>
-          )
-        })}
-      </div>
-    </Estado>
+    <>
+      <Estado carregando={isLoading} erro={error} vazio={entradas.length === 0}>
+        <div className="flex flex-col gap-[.3em]">
+          {entradas.map((e, i) => {
+            const species = SPECIES[e.poke.speciesId]
+            const url = faceIconUrl(e.poke.speciesId, e.poke.isShiny)
+            const raridade = rarityOf(e.poke)
+            const abrivel = Boolean(species)
+            return (
+              <Linha key={e.poke.uid}>
+                <Posicao n={i + 1} />
+                {url && (
+                  <img
+                    src={url}
+                    alt=""
+                    className="h-[1.8em] w-[1.8em] shrink-0 rounded-[.25em] border-2 object-cover"
+                    style={{ borderColor: raridade.color }}
+                  />
+                )}
+                <button
+                  type="button"
+                  disabled={!abrivel}
+                  onClick={() => { if (species) showProfile(e.poke, species) }}
+                  className="min-w-0 flex-1 cursor-pointer truncate bg-transparent p-0 text-left font-[inherit] text-[inherit] disabled:cursor-default"
+                >
+                  {e.poke.isShiny && <span className="text-shiny">✨ </span>}
+                  {species?.name ?? e.poke.speciesId}
+                  <span className="text-n500"> · {e.treinadorOriginal ?? e.treinador}</span>
+                </button>
+                <span className="shrink-0 text-[.75em] text-n500">Lv {e.poke.level}</span>
+                <span className="shrink-0 font-mono text-[.9em] font-bold">{e.valor}</span>
+                <GameButton
+                  variant="ghost"
+                  disabled={meuTime.length === 0}
+                  title={meuTime.length === 0 ? 'Monte uma equipe antes de duelar' : `Duelar contra ${species?.name ?? e.poke.speciesId}`}
+                  onClick={() => {
+                    const meuPoke = meuTime[activeIndex] ?? meuTime[0]
+                    if (!meuPoke) return
+                    useWorldStore.getState().setWorld(criarMundoPvpVisual(meuPoke, e.poke, e.treinador))
+                    closeScreen()
+                  }}
+                >
+                  <Sword /> PvP
+                </GameButton>
+              </Linha>
+            )
+          })}
+        </div>
+      </Estado>
+    </>
   )
 }
 
