@@ -14,16 +14,18 @@ Mudanças em banco: leia ../operacao/banco.md.
 players/pokemon_instances/player_items/player_pokedex/player_auto_catch_rules/
 player_missoes_reivindicadas/player_especialidades — várias dessas tabelas também têm RPC
 dedicada (comprar_item, evoluir_poke, reivindicar_missao, subir_nivel_especialidade, etc).
-Decisão (PH-520, 12/09/2026): a duplicação é intencional, não uma rota a remover. RPC cobre
-ação discreta que precisa de regra de negócio no servidor no instante do clique; o autosave
-periódico cobre estado de simulação contínua (HP, XP, ouro por ausência, abates) que não tem
-ação discreta correspondente — sem ele, nada persistiria o progresso entre ações. `players` é
-protegido por CAS otimista (updated_at); `player_missoes_reivindicadas` usa
-`ignoreDuplicates: true` porque reivindicar é flag "nunca desliga". `player_especialidades`
-faz upsert sem essa proteção: uma corrida entre `subir_nivel_especialidade` e um autosave com
-snapshot local anterior ao refetch pode reverter o nível em silêncio (janela estreita, sem
-CAS nem ignoreDuplicates). Achado, não corrigido — mexer no autosave é alto risco pra todo
-jogador; qualquer fix aqui exige revisão própria, não side-effect de auditoria.
+
+**Correção (12/09/2026) à análise anterior desta seção**: a auditoria do PH-520 tinha
+concluído que essa duplicação convive de propósito com as RPCs em produção, e apontado uma
+janela de corrida em `player_especialidades`. Isso está ERRADO pro ambiente real: `setItem`
+de `gameStatePersistence.ts` (`postgresStorage`) retorna cedo quando `servidorAtivo()` é
+`true` — "O interruptor VITE_SERVIDOR_URL" — e o bundle de produção confirma essa var setada
+(`functions/v1/jogo` presente no JS publicado). Logo `escrever()`/`savePlayerState` **nunca
+roda em produção**; é código só alcançável em dev/local sem `VITE_SERVIDOR_URL`. A RPC é a
+ÚNICA escritora dessas tabelas hoje — não há corrida nenhuma pra fechar. `authority/src`
+(Edge Function) confirma o mesmo pelo lado do servidor: só LÊ `player_especialidades` (nunca
+escreve) e nem lê `player_missoes_reivindicadas` (missão não entra no recálculo de combate).
+Ver PH-520/PH-521 pra reconciliação dos tickets.
 
 ## Consulta detalhada
 
