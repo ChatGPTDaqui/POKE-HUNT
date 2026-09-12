@@ -374,6 +374,16 @@ function reportarErro(erro: unknown, sempreAvisar = false): void {
 export async function pedirAcao(
   acao: { tipo: string } & Record<string, unknown>,
   fallback: () => boolean | void,
+  opcoes?: {
+    /**
+     * Erro que o proprio chamador sabe resolver sem susto pro jogador — ex:
+     * a acao era idempotente e o servidor recusou porque ela ja tinha sido
+     * aplicada antes (estado local atrasado). Devolver `true` pula o toast
+     * de erro generico; quem chama e responsavel por corrigir o estado local
+     * dentro do proprio predicado.
+     */
+    tratarErroLocalmente?: (erro: unknown) => boolean
+  },
 ): Promise<boolean> {
   if (!servidorAtivo()) {
     return fallback() !== false
@@ -383,7 +393,7 @@ export async function pedirAcao(
     if (resposta.mensagem) useToastStore.getState().pushToast(resposta.mensagem, 'success', 'world')
     return true
   } catch (erro) {
-    reportarErro(erro)
+    if (!opcoes?.tratarErroLocalmente?.(erro)) reportarErro(erro)
     return false
   }
 }
@@ -405,11 +415,12 @@ export async function pedirAcao(
 export async function pedirAcaoComLocal<T>(
   acao: { tipo: string } & Record<string, unknown>,
   fallback: () => T,
+  opcoes?: Parameters<typeof pedirAcao>[2],
 ): Promise<{ ok: boolean; local: T | null }> {
   let local: T | null = null
   const ok = await pedirAcao(acao, () => {
     local = fallback()
-  })
+  }, opcoes)
   return { ok, local }
 }
 

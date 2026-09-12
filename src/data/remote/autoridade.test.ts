@@ -16,10 +16,16 @@ vi.mock('./servidor', async () => {
   }
 })
 
+vi.mock('./acoesRpc', async () => {
+  const real = await vi.importActual<typeof import('./acoesRpc')>('./acoesRpc')
+  return { ...real, executarAcaoRpc: vi.fn() }
+})
+
 import { ErroServidor, servidor } from './servidor'
+import { executarAcaoRpc } from './acoesRpc'
 import {
   abrirSessaoDeHunt, liquidar, pararFlushPeriodico, registrarEncerramentoDeSessao,
-  INTERVALO_FLUSH_MS, INTERVALO_FLUSH_MAX_MS, commitAgora,
+  INTERVALO_FLUSH_MS, INTERVALO_FLUSH_MAX_MS, commitAgora, pedirAcao,
 } from './autoridade'
 import { LIMIAR_OFFLINE_SEGUNDOS } from '@/engine/simulation'
 import { useToastStore } from '@/stores/toastStore'
@@ -441,5 +447,66 @@ describe('pedido de sala com a quota fechada (PH-273)', () => {
     fecharQuota(1)
     await vi.advanceTimersByTimeAsync(0)
     expect(mock.flush).toHaveBeenCalledTimes(2)
+  })
+})
+
+// PH-tasks — "Missão já reivindicada" aparecia como erro vermelho pro jogador
+// mesmo quando a recompensa ja tinha sido dada antes (estado local atrasado:
+// multi-aba, flush demorado). O servidor recusar de novo esta certo — o toast
+// de erro generico e que confundia. `tratarErroLocalmente` deixa quem chama
+// resolver esse caso especifico sem o susto.
+describe('pedirAcao() — tratarErroLocalmente pula o toast generico', () => {
+  const mockExecutar = executarAcaoRpc as unknown as ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('erro tratado localmente: nao chama o toast de erro generico e devolve false', async () => {
+    mockExecutar.mockRejectedValue(new ErroServidor(409, 'Missao ja reivindicada.'))
+    const pushToastOriginal = useToastStore.getState().pushToast
+    const pushToast = vi.fn()
+    useToastStore.setState({ pushToast })
+
+    const tratou = vi.fn(() => true)
+    const ok = await pedirAcao({ tipo: 'reivindicarMissao' }, () => {}, { tratarErroLocalmente: tratou })
+
+    expect(ok).toBe(false)
+    expect(tratou).toHaveBeenCalledTimes(1)
+    expect(pushToast).not.toHaveBeenCalled()
+
+    useToastStore.setState({ pushToast: pushToastOriginal })
+  })
+
+  it('predicado devolve false: cai no toast de erro generico normal', async () => {
+    mockExecutar.mockRejectedValue(new ErroServidor(409, 'Abates insuficientes.'))
+    const pushToastOriginal = useToastStore.getState().pushToast
+    const pushToast = vi.fn()
+    useToastStore.setState({ pushToast })
+
+    const ok = await pedirAcao(
+      { tipo: 'reivindicarMissao' },
+      () => {},
+      { tratarErroLocalmente: () => false },
+    )
+
+    expect(ok).toBe(false)
+    expect(pushToast).toHaveBeenCalledTimes(1)
+
+    useToastStore.setState({ pushToast: pushToastOriginal })
+  })
+
+  it('sem opcoes (comportamento de todo outro chamador): erro sempre vai pro toast', async () => {
+    mockExecutar.mockRejectedValue(new ErroServidor(409, 'qualquer erro de negocio'))
+    const pushToastOriginal = useToastStore.getState().pushToast
+    const pushToast = vi.fn()
+    useToastStore.setState({ pushToast })
+
+    const ok = await pedirAcao({ tipo: 'x' }, () => {})
+
+    expect(ok).toBe(false)
+    expect(pushToast).toHaveBeenCalledTimes(1)
+
+    useToastStore.setState({ pushToast: pushToastOriginal })
   })
 })
