@@ -204,7 +204,9 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     // garantia de NAO REGREDIR: escrever direto (`s.biomaProgress[bioma] =
     // estagio`, como era aqui) deixaria revisitar um estagio antigo desligar
     // o seguinte — e o servidor e a autoridade, entao o buraco seria dele.
-    setBiomaProgress: (bioma, estagio) => { s.biomaProgress = comEstagioLimpo(s.biomaProgress, bioma, estagio) },
+    setBiomaProgress: (bioma, estagio, pesadelo = false) => {
+      s.biomaProgress = comEstagioLimpo(s.biomaProgress, bioma, estagio, pesadelo)
+    },
 
     // ----- acoes de UI: existem pro tipo fechar, nao sao usadas na simulacao -----
     setAutoToggle: (key, value) => { s.autoToggles[key] = value },

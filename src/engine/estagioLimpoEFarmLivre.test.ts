@@ -54,11 +54,24 @@ describe('estagioJaLimpo (a pergunta pura)', () => {
     expect(estagioJaLimpo(estagioId(BIOMA, 1), p)).toBe(false)
   })
 
-  it('hunt sem estagio (inicial, BOSS, Pesadelo) nunca conta como limpa', () => {
+  it('hunt sem estagio (inicial, BOSS) nunca conta como limpa', () => {
     const p = { ...progressoPorBiomaDefault(), mata: 10 }
-    for (const id of ['route_46', 'boss_lance', 'nightmare_mata_e1']) {
+    for (const id of ['route_46', 'boss_lance']) {
       expect(estagioJaLimpo(id, p), id).toBe(false)
     }
+  })
+
+  it('PH-522/523: o espelho do Pesadelo TAMBEM fica limpo, mas so pelo progresso PROPRIO dele', () => {
+    // Progresso do Mundo (mata: 10) nao conta pro Pesadelo — o bug que fazia
+    // `estagioJaLimpo` responder `false` pra SEMPRE em `nightmare_*` (parser
+    // estrito rejeitando o prefixo) tambem escondia o oposto: progresso do
+    // Mundo nunca vazava pro Pesadelo, porque a chave era outra.
+    const p = { ...progressoPorBiomaDefault(), mata: 10 }
+    expect(estagioJaLimpo('nightmare_mata_e1', p)).toBe(false)
+    const comPesadelo = { ...p, nightmare_mata: 1 }
+    expect(estagioJaLimpo('nightmare_mata_e1', comPesadelo)).toBe(true)
+    // E o Pesadelo limpo nao conta pro Mundo — isolamento nos dois sentidos.
+    expect(estagioJaLimpo(estagioId('marinho', 1), comPesadelo)).toBe(false)
   })
 })
 
@@ -133,6 +146,14 @@ describe('proximoEstagioLiberado', () => {
     const p = { ...progressoPorBiomaDefault(), mata: 10 }
     expect(proximoEstagioLiberado('route_46', p)).toBeNull()
     expect(proximoEstagioLiberado('boss_lance', p)).toBeNull()
+  })
+
+  it('PH-523: no espelho do Pesadelo, devolve o seguinte PREFIXADO, contra o progresso proprio', () => {
+    const p = { ...progressoPorBiomaDefault(), mata: 10, nightmare_mata: 3 }
+    expect(proximoEstagioLiberado(`nightmare_${estagioId(BIOMA, 3)}`, p))
+      .toBe(`nightmare_${estagioId(BIOMA, 4)}`)
+    // O 10 do Mundo nao libera o 4 do Pesadelo — tracks independentes.
+    expect(proximoEstagioLiberado(`nightmare_${estagioId(BIOMA, 4)}`, p)).toBeNull()
   })
 })
 

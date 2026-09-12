@@ -24,21 +24,35 @@ function progressoSimulado(nivel: number): ProgressoPorBioma {
   return Object.fromEntries(BIOMAS.map((b) => [b.chave, Math.min(nivel, ESTAGIOS_POR_BIOMA)]))
 }
 
+/** PH-523: prefixa `nightmare_<bioma>` pra simular progresso do Pesadelo, independente do Mundo. */
+function progressoDoPesadelo(nivel: number): ProgressoPorBioma {
+  const p = progressoSimulado(nivel)
+  return Object.fromEntries(
+    Object.entries(p).map(([chave, valor]) => [`nightmare_${chave}`, valor]),
+  )
+}
+
 function Bancada() {
   const [nivel, setNivel] = useState(3)
+  const [pesadelo, setPesadelo] = useState(false)
   const [bioma, setBioma] = useState<string | null>(
     new URLSearchParams(location.search).get('bioma'),
   )
   const [aberto, setAberto] = useState<string | null>(null)
-  const progresso = progressoSimulado(nivel)
+  const progresso = { ...progressoSimulado(nivel), ...progressoDoPesadelo(nivel) }
 
   // Os botoes da barra vivem no HTML (fora do React) pra a bancada abrir com
   // estilo mesmo se o bundle demorar; aqui so ligamos o clique.
-  document.querySelectorAll<HTMLButtonElement>('#barra button').forEach((b) => {
+  document.querySelectorAll<HTMLButtonElement>('#barra button[data-p]').forEach((b) => {
     const p = Number(b.dataset.p)
     b.dataset.on = p === nivel ? '1' : '0'
     b.onclick = () => setNivel(p)
   })
+  const btnPesadelo = document.getElementById('btn-pesadelo')
+  if (btnPesadelo) {
+    btnPesadelo.textContent = `Pesadelo: ${pesadelo ? 'on' : 'off'}`
+    btnPesadelo.onclick = () => setPesadelo((v) => !v)
+  }
   const onde = document.getElementById('onde')
   if (onde) onde.textContent = bioma ? `— trilha de ${bioma}` : '— os 12 biomas'
 
@@ -47,6 +61,7 @@ function Bancada() {
       <TrilhaDoBioma
         biomaChave={bioma}
         progresso={progresso}
+        pesadelo={pesadelo}
         mapaAtivoId={null}
         abertoId={aberto}
         entrandoId={null}
@@ -56,7 +71,7 @@ function Bancada() {
       />
     )
   }
-  return <MapaDeBiomas progresso={progresso} onEscolher={setBioma} />
+  return <MapaDeBiomas progresso={progresso} onEscolher={setBioma} pesadelo={pesadelo} />
 }
 
 createRoot(document.getElementById('palco')!).render(<Bancada />)

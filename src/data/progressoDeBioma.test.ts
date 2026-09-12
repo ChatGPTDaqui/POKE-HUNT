@@ -24,9 +24,13 @@ import {
 } from './progressoDeBioma'
 
 describe('a forma do progresso', () => {
-  it('nasce com os 12 biomas em zero', () => {
+  it('nasce com os 12 biomas do Mundo e os 12 do Pesadelo em zero', () => {
+    // PH-523: o Modo Pesadelo tem progresso PROPRIO, independente do Mundo —
+    // mesmo objeto, chave prefixada `nightmare_<bioma>` (sem coluna nova:
+    // `players.bioma_progress` ja e jsonb).
     const p = progressoPorBiomaDefault()
-    expect(Object.keys(p).sort()).toEqual(BIOMAS.map((b) => b.chave).sort())
+    const esperado = BIOMAS.flatMap((b) => [b.chave, `nightmare_${b.chave}`])
+    expect(Object.keys(p).sort()).toEqual(esperado.sort())
     expect(Object.values(p).every((v) => v === 0)).toBe(true)
   })
 
@@ -138,8 +142,13 @@ describe('traducao do save antigo', () => {
     // total de biomas, e ha 11 na faixa1 — as faixas nao vem em ordem
     // crescente no dado de verdade.
     const p = lerProgressoPorBioma({ faixa1: 11, faixa2: 12, faixa3: 12 })
-    expect(Object.keys(p).length).toBe(12)
-    expect(Object.values(p).every((v) => v === 9)).toBe(true)
+    // PH-523: 24 chaves — os 12 biomas do Mundo mais os 12 do Pesadelo
+    // (`nightmare_<bioma>`), progresso independente.
+    expect(Object.keys(p).length).toBe(24)
+    expect(BIOMAS.every((b) => p[b.chave] === 9)).toBe(true)
+    // A traducao de save legado e so do Mundo — o Pesadelo nao existia
+    // naquele formato de save, entao fica em zero.
+    expect(BIOMAS.every((b) => p[`nightmare_${b.chave}`] === 0)).toBe(true)
   })
 
   it('NUNCA concede o estagio 10 — ele e conteudo que nao existia', () => {

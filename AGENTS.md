@@ -8,9 +8,14 @@ complexidade, contexto, arquivos/módulos, raciocínio, programação/arquitetur
 pesquisa, risco e ganho de qualidade por consumo. Sem investigação prévia.
 Use o modelo disponível na interface/sessão menos custoso com qualidade suficiente.
 Consumo é estimativa, não quota/tarifa; não invente disponibilidade ou economia.
-Astra: alto consumo; só para arquitetura/refatoração global, debugging difícil,
-impactos entre módulos ou erro de consequência significativa; nunca por padrão em
-edições simples, documentação, consultas, repetição ou bugs localizados.
+Cogite os modelos realmente disponíveis no plano, não só dois por hábito: Haiku 4.5
+(baixíssimo consumo — typo, rename, formatação, consulta factual simples), Sonnet 5
+(consumo médio — trabalho padrão de feature/bug), Astra = Opus 5 (alto consumo; só
+para arquitetura/refatoração global, debugging difícil, impactos entre módulos ou
+erro de consequência significativa; nunca por padrão em edições simples, documentação,
+consultas, repetição ou bugs localizados) e Fable 5.1 quando o pedido for melhor
+servido por esse perfil. Confirme na interface quais desses estão disponíveis antes
+de ofertar opção — não ofereça modelo fora do plano do usuário.
 Responda somente neste formato, com motivos de uma frase e avaliações curtas:
 
 **ROTEAMENTO**
