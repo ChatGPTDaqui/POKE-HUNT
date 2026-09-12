@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.53',
+    date: '2026-09-12',
+    title: 'Modo Pesadelo ganha trilha própria',
+    highlights: [
+      'Modo Pesadelo agora tem a mesma trilha de 12 biomas e 10 estágios do Mundo, com progresso independente — não é mais uma lista solta de hunts.',
+      'PvP amistoso: o resultado da luta passa a exigir confirmação dos dois jogadores, e o POKE usado é validado pelo servidor.',
+      'A mensagem de missão já resgatada não aparece mais como erro.',
+      '"Avançar de estágio ao concluir" e "Recuar se perder" agora ficam fixos no canto do mapa, em vez de no fim da lista de POKEs.',
+    ],
+  },
+  {
     version: '7.52',
     date: '2026-09-09',
     title: 'TMs: encontre, ensine e negocie',
