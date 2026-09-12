@@ -81977,13 +81977,37 @@ function tickClimaDeGolpe(world, dt) {
 * Trocar o nome do tipo obriga o compilador a apontar cada lugar que precisava
 * ser relido. Foi a unica forma de tornar a mudanca de formato barulhenta.
 */
-/** Progresso de conta nova: os 12 biomas em zero, nenhum estagio limpo. */
-function progressoPorBiomaDefault() {
-	return Object.fromEntries(BIOMAS.map((b) => [b.chave, 0]));
+/**
+* A chave de armazenamento do bioma dentro de `ProgressoPorBioma`.
+*
+* PH-523: o Modo Pesadelo tem progresso PRÓPRIO, independente do Mundo —
+* limpar o Marinho estágio 5 no Mundo não libera o Pesadelo Marinho estágio 5.
+* Em vez de uma coluna nova (`players.bioma_progress` já é `jsonb`, aceita
+* qualquer chave), o Pesadelo mora no MESMO objeto sob uma chave prefixada
+* (`nightmare_marinho`) — zero migration, zero coluna nova, e
+* `lerProgressoPorBioma` já preserva qualquer chave presente em
+* `progressoPorBiomaDefault()`.
+*/
+function chaveDoProgresso(bioma, pesadelo) {
+	return pesadelo ? `${PREFIXO_DO_PESADELO}${bioma}` : bioma;
 }
-/** Maior estagio limpo do bioma. Bioma desconhecido ou ausente: 0. */
-function maiorEstagioLimpo(progresso, bioma) {
-	const bruto = progresso[bioma];
+/** Progresso de conta nova: os 12 biomas em zero, nenhum estágio limpo — no Mundo e no Pesadelo. */
+function progressoPorBiomaDefault() {
+	const base = {};
+	for (const b of BIOMAS) {
+		base[b.chave] = 0;
+		base[chaveDoProgresso(b.chave, true)] = 0;
+	}
+	return base;
+}
+/**
+* Maior estagio limpo do bioma. Bioma desconhecido ou ausente: 0.
+*
+* `pesadelo` (PH-523) le a trilha do Modo Pesadelo em vez da do Mundo — mesmo
+* bioma, progresso independente (ver `chaveDoProgresso`).
+*/
+function maiorEstagioLimpo(progresso, bioma, pesadelo = false) {
+	const bruto = progresso[chaveDoProgresso(bioma, pesadelo)];
 	if (typeof bruto !== "number" || !Number.isFinite(bruto)) return 0;
 	return Math.min(Math.max(Math.trunc(bruto), 0), 10);
 }
@@ -81995,12 +82019,12 @@ function maiorEstagioLimpo(progresso, bioma) {
 * Devolve um objeto novo — o estado do jogo e tratado como imutavel pelos
 * consumidores (store do Zustand, snapshot do flush).
 */
-function comEstagioLimpo(progresso, bioma, estagio) {
+function comEstagioLimpo(progresso, bioma, estagio, pesadelo = false) {
 	if (!estagioValido(estagio)) return progresso;
-	if (estagio <= maiorEstagioLimpo(progresso, bioma)) return progresso;
+	if (estagio <= maiorEstagioLimpo(progresso, bioma, pesadelo)) return progresso;
 	return {
 		...progresso,
-		[bioma]: estagio
+		[chaveDoProgresso(bioma, pesadelo)]: estagio
 	};
 }
 /**
@@ -82015,10 +82039,10 @@ function comEstagioLimpo(progresso, bioma, estagio) {
 * calculam a mesma regra separado, eles divergem, e o jogador ve uma hunt
 * aberta que o servidor recusa.
 */
-function estagioLiberado(progresso, bioma, estagio) {
+function estagioLiberado(progresso, bioma, estagio, pesadelo = false) {
 	if (!estagioValido(estagio)) return false;
 	if (estagio === 1) return true;
-	return maiorEstagioLimpo(progresso, bioma) >= estagio - 1;
+	return maiorEstagioLimpo(progresso, bioma, pesadelo) >= estagio - 1;
 }
 /**
 * Mensagem de bloqueio do estagio, ou `null` se ele esta liberado.
@@ -82028,8 +82052,8 @@ function estagioLiberado(progresso, bioma, estagio) {
 * recusar a sessao. Quando isso vivia em dois lugares (PH-227/229) a nota do
 * arquivo tinha que pedir que ninguem os deixasse divergir.
 */
-function bloqueioDoEstagio(progresso, bioma, estagio) {
-	if (estagioLiberado(progresso, bioma, estagio)) return null;
+function bloqueioDoEstagio(progresso, bioma, estagio, pesadelo = false) {
+	if (estagioLiberado(progresso, bioma, estagio, pesadelo)) return null;
 	return `Vença o Lord do estágio ${estagio - 1} para liberar este.`;
 }
 /**
@@ -85952,13 +85976,23 @@ function candidatas(mapId) {
 * ele) mantem o atalho de "um candidato so" valendo e deixa explicito que a
 * lista de candidatos DEPENDE do estagio.
 *
-* HUNT SEM ESTAGIO CONTINUA NO PESO ESTATICO. A inicial, as BOSS, o Campeao
-* Lance e o espelho do Pesadelo nao tem curva de profundidade — la `sub.peso` e
-* o peso certo, e nao um fallback.
+* HUNT SEM ESTAGIO CONTINUA NO PESO ESTATICO. So a inicial, as BOSS e o
+* Campeao Lance — nenhuma delas tem curva de profundidade, la `sub.peso` e o
+* peso certo, e nao um fallback.
+*
+* PH-523: O ESPELHO DO PESADELO GANHOU A MESMA CURVA. Ate aqui ele caia no
+* peso estatico igual a hunt inicial/BOSS/Lance — o comentario dizia "nao tem
+* curva de profundidade", mas isso deixava o Pesadelo com uma COMPOSICAO DE
+* SUB-BIOMA DIFERENTE do Mundo no mesmo estagio (medido: Industrial 10 do
+* Mundo sorteia Laboratorio 57%/Usina 31%/Fabrica 11%; o espelho, antes desta
+* correcao, sorteava Obra 40%/Fabrica 24%/Usina 24%/Laboratorio 12% — um
+* QUARTO sub-bioma que o Mundo nem alcanca ali). O pedido e "copia exata do
+* Mundo, so com dificuldade maior" — a composicao tem que bater, e so o nivel
+* (`shiftLevel`, nightmareMaps.ts) muda.
 */
 function pesoDeSorteioDaSala(mapId) {
 	const opcoes = candidatas(mapId);
-	const doMapa = parseEstagioId(mapId);
+	const doMapa = parseEstagioIdOuEspelho(mapId);
 	const bioma = doMapa ? BIOMA_POR_CHAVE[doMapa.bioma] : null;
 	if (!doMapa || !bioma) return {
 		opcoes,
@@ -86235,11 +86269,20 @@ function protetorDaSala(sala, mapId) {
 	if (!bioma || !BIOMA_POR_CHAVE[bioma]) return null;
 	return sala.indice >= quantidadeDeSalas(mapId) - 1 ? "lord" : "guardian";
 }
-/** O jogador ja fechou o estagio desta hunt alguma vez? */
+/**
+* O jogador ja fechou o estagio desta hunt alguma vez?
+*
+* PH-522/523: usa o parser PERMISSIVO (`parseEstagioIdOuEspelho`), e nao o
+* estrito — o espelho do Pesadelo (`nightmare_marinho_e7`) TEM progresso
+* proprio (`maiorEstagioLimpo(..., pesadelo: true)`, ver
+* `progressoDeBioma.ts`), e com o parser estrito esta funcao respondia
+* `false` pra SEMPRE nele. Consequencia real: Guardian/Lord nunca virava
+* dispensavel numa repeticao do Pesadelo, mesmo depois de ja limpo.
+*/
 function estagioJaLimpo(mapId, progresso) {
-	const doMapa = parseEstagioId(mapId);
+	const doMapa = parseEstagioIdOuEspelho(mapId);
 	if (!doMapa) return false;
-	return maiorEstagioLimpo(progresso, doMapa.bioma) >= doMapa.estagio;
+	return maiorEstagioLimpo(progresso, doMapa.bioma, doMapa.pesadelo) >= doMapa.estagio;
 }
 /**
 * Esta sala ainda DEVE um protetor?
@@ -86550,11 +86593,12 @@ function aplicarTransicaoDeSala(world, mapId) {
 * recusa com 403 — o jogador veria a hunt parar sozinha, sem explicacao.
 */
 function proximoEstagioLiberado(mapId, progresso) {
-	const doMapa = parseEstagioId(mapId);
+	const doMapa = parseEstagioIdOuEspelho(mapId);
 	if (!doMapa) return null;
 	const proximo = doMapa.estagio + 1;
-	if (!estagioLiberado(progresso, doMapa.bioma, proximo)) return null;
-	return estagioId(doMapa.bioma, proximo);
+	if (!estagioLiberado(progresso, doMapa.bioma, proximo, doMapa.pesadelo)) return null;
+	const id = estagioId(doMapa.bioma, proximo);
+	return doMapa.pesadelo ? `${PREFIXO_DO_PESADELO}${id}` : id;
 }
 /**
 * O mapId do estagio ANTERIOR a este, se ele existir. `null` no estagio 1 e em
@@ -86572,11 +86616,12 @@ function proximoEstagioLiberado(mapId, progresso) {
 * delas tem estagio anterior, e nas duas ultimas morrer ja e definitivo.
 */
 function estagioAnterior(mapId) {
-	const doMapa = parseEstagioId(mapId);
+	const doMapa = parseEstagioIdOuEspelho(mapId);
 	if (!doMapa) return null;
 	const anterior = doMapa.estagio - 1;
 	if (anterior < 1) return null;
-	return estagioId(doMapa.bioma, anterior);
+	const id = estagioId(doMapa.bioma, anterior);
+	return doMapa.pesadelo ? `${PREFIXO_DO_PESADELO}${id}` : id;
 }
 //#endregion
 //#region src/engine/systems/pokedexSystem.ts
@@ -87150,9 +87195,9 @@ function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
 function avancarBiomaProgressSeForOProximo(world, gameState) {
 	const bioma = SUB_BIOMA_POR_CHAVE[world.sala?.chave ?? ""]?.bioma.chave;
 	if (!bioma) return;
-	const doMapa = parseEstagioId(world.mapDef?.id ?? "");
+	const doMapa = parseEstagioIdOuEspelho(world.mapDef?.id ?? "");
 	if (!doMapa || doMapa.bioma !== bioma) return;
-	gameState.setBiomaProgress(bioma, doMapa.estagio);
+	gameState.setBiomaProgress(bioma, doMapa.estagio, doMapa.pesadelo);
 }
 function spawnEnemyAt(world, mapDef, ctx, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
@@ -88253,8 +88298,8 @@ function criarEstadoDoJogador(dados) {
 			setEspecialidadeNivel: (tipo, trilha, nivel) => {
 				s.especialidades[tipo][trilha] = nivel;
 			},
-			setBiomaProgress: (bioma, estagio) => {
-				s.biomaProgress = comEstagioLimpo(s.biomaProgress, bioma, estagio);
+			setBiomaProgress: (bioma, estagio, pesadelo = false) => {
+				s.biomaProgress = comEstagioLimpo(s.biomaProgress, bioma, estagio, pesadelo);
 			},
 			setAutoToggle: (key, value) => {
 				s.autoToggles[key] = value;
@@ -89165,11 +89210,18 @@ async function sairDaHunt(cfg, userId, sessaoId) {
 * MESMA funcao que o menu chama (`HuntMenu.tsx#bloqueioDeBiomaClient`) — antes
 * os dois lados reimplementavam a regra e repetiam a string a mao, com um
 * comentario em cada arquivo pedindo que ninguem os deixasse divergir.
+*
+* PH-523: o espelho do Pesadelo (`parseEstagioIdOuEspelho`) agora passa por
+* este MESMO gate — sequencial, estagio N pede N-1 limpo —, so que contra o
+* progresso PROPRIO dele (`pesadelo: true`, ver `progressoDeBioma.ts`). Antes
+* o parser estrito devolvia `null` pra `nightmare_*` e o comentario dizia
+* "cada uma tem o gate proprio dela" — mas nenhum gate proprio existia, e as
+* 120 hunts do Pesadelo entravam sem checagem nenhuma de sequencia.
 */
 function bloqueioDeBiomaPendente(mapId, progresso) {
-	const doMapa = parseEstagioId(mapId);
+	const doMapa = parseEstagioIdOuEspelho(mapId);
 	if (!doMapa) return null;
-	return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio);
+	return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio, doMapa.pesadelo);
 }
 /**
 * Quanto tempo depois de fechada uma sessao ainda vale como "a hunt que o

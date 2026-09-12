@@ -25,7 +25,8 @@
 //     de `data/biomas.ts`. Foi exatamente essa confusao que fez a curva de
 //     profundidade ficar dois meses na tela sem valer no jogo (PH-476).
 import { SUB_BIOMA_POR_CHAVE, type BiomaDef } from '@/data/biomas'
-import { estagioId, niveisDoEstagio, quantidadeDeSalas } from '@/data/estagios'
+import { estagioId, niveisDoEstagio, quantidadeDeSalas, PREFIXO_DO_PESADELO } from '@/data/estagios'
+import { MAPS } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { SPECIES, type Species } from '@/data/pokes'
 import {
@@ -105,9 +106,17 @@ function protetoresNaSala(
   return doProtetor.pool
 }
 
+/** Id de mapa do estagio, do Mundo ou (PH-523) do espelho do Modo Pesadelo. */
+function mapIdDoEstagio(bioma: string, estagio: number, pesadelo: boolean): string {
+  const id = estagioId(bioma, estagio)
+  return pesadelo ? `${PREFIXO_DO_PESADELO}${id}` : id
+}
+
 /** Os sub-biomas que ESTE estagio sorteia, com a chance de cada um. */
-export function subBiomasDoEstagio(bioma: BiomaDef, estagio: number): SubBiomaDoEstagio[] {
-  const distribuicao = distribuicaoDeSala(estagioId(bioma.chave, estagio))
+export function subBiomasDoEstagio(
+  bioma: BiomaDef, estagio: number, pesadelo = false,
+): SubBiomaDoEstagio[] {
+  const distribuicao = distribuicaoDeSala(mapIdDoEstagio(bioma.chave, estagio, pesadelo))
   return Object.entries(distribuicao)
     .map(([chave, p]) => ({
       chave,
@@ -129,12 +138,17 @@ export function subBiomasDoEstagio(bioma: BiomaDef, estagio: number): SubBiomaDo
  * cada indice. Ver a armadilha (2) no cabecalho.
  */
 export function elencoDoEstagio(
-  bioma: BiomaDef, estagio: number, chave: string | null = null,
+  bioma: BiomaDef, estagio: number, chave: string | null = null, pesadelo = false,
 ): EspecieDoEstagio[] {
-  const mapId = estagioId(bioma.chave, estagio)
+  const mapId = mapIdDoEstagio(bioma.chave, estagio, pesadelo)
   const salas = quantidadeDeSalas(mapId)
-  const faixa = niveisDoEstagio(estagio)
-  const daTela = subBiomasDoEstagio(bioma, estagio)
+  // PH-523: a faixa do Pesadelo e DESLOCADA (+100, piso 150 —
+  // `nightmareMaps.ts#shiftLevel`), e `MAPS[mapId].levelRange` ja e a faixa
+  // certa dos dois modos. `niveisDoEstagio` sozinha so serve pro Mundo — usa-la
+  // aqui pro Pesadelo faria a janela de nivel nao bater com os encontros
+  // (todos deslocados), e `contextoDeSpawn` devolveria pool vazio ou errado.
+  const faixa = MAPS[mapId]?.levelRange ?? niveisDoEstagio(estagio)
+  const daTela = subBiomasDoEstagio(bioma, estagio, pesadelo)
   const recorte = chave == null ? daTela : daTela.filter((s) => s.chave === chave)
   if (recorte.length === 0) return []
   // Renormaliza: com um sub-bioma so, ele vale 100% do recorte.

@@ -17,7 +17,7 @@
 // vai pro banco, precisa sobreviver a save antigo e nao pode mudar sem
 // migration. Misturar os dois faria a regua parecer versionada.
 import { BIOMAS, BIOMA_POR_CHAVE, ESTAGIOS_PARA_O_LANCE } from './biomas'
-import { ESTAGIOS_POR_BIOMA, estagioValido, parseEstagioId } from './estagios'
+import { ESTAGIOS_POR_BIOMA, estagioValido, parseEstagioId, PREFIXO_DO_PESADELO } from './estagios'
 
 /**
  * Maior estagio JA LIMPO de cada bioma, de 0 (nenhum) a 10 (bioma fechado).
@@ -38,14 +38,41 @@ export type ProgressoPorBioma = Record<string, number>
  * ser relido. Foi a unica forma de tornar a mudanca de formato barulhenta.
  */
 
-/** Progresso de conta nova: os 12 biomas em zero, nenhum estagio limpo. */
-export function progressoPorBiomaDefault(): ProgressoPorBioma {
-  return Object.fromEntries(BIOMAS.map((b) => [b.chave, 0]))
+/**
+ * A chave de armazenamento do bioma dentro de `ProgressoPorBioma`.
+ *
+ * PH-523: o Modo Pesadelo tem progresso PRÓPRIO, independente do Mundo —
+ * limpar o Marinho estágio 5 no Mundo não libera o Pesadelo Marinho estágio 5.
+ * Em vez de uma coluna nova (`players.bioma_progress` já é `jsonb`, aceita
+ * qualquer chave), o Pesadelo mora no MESMO objeto sob uma chave prefixada
+ * (`nightmare_marinho`) — zero migration, zero coluna nova, e
+ * `lerProgressoPorBioma` já preserva qualquer chave presente em
+ * `progressoPorBiomaDefault()`.
+ */
+function chaveDoProgresso(bioma: string, pesadelo: boolean): string {
+  return pesadelo ? `${PREFIXO_DO_PESADELO}${bioma}` : bioma
 }
 
-/** Maior estagio limpo do bioma. Bioma desconhecido ou ausente: 0. */
-export function maiorEstagioLimpo(progresso: ProgressoPorBioma, bioma: string): number {
-  const bruto = progresso[bioma]
+/** Progresso de conta nova: os 12 biomas em zero, nenhum estágio limpo — no Mundo e no Pesadelo. */
+export function progressoPorBiomaDefault(): ProgressoPorBioma {
+  const base: ProgressoPorBioma = {}
+  for (const b of BIOMAS) {
+    base[b.chave] = 0
+    base[chaveDoProgresso(b.chave, true)] = 0
+  }
+  return base
+}
+
+/**
+ * Maior estagio limpo do bioma. Bioma desconhecido ou ausente: 0.
+ *
+ * `pesadelo` (PH-523) le a trilha do Modo Pesadelo em vez da do Mundo — mesmo
+ * bioma, progresso independente (ver `chaveDoProgresso`).
+ */
+export function maiorEstagioLimpo(
+  progresso: ProgressoPorBioma, bioma: string, pesadelo = false,
+): number {
+  const bruto = progresso[chaveDoProgresso(bioma, pesadelo)]
   if (typeof bruto !== 'number' || !Number.isFinite(bruto)) return 0
   return Math.min(Math.max(Math.trunc(bruto), 0), ESTAGIOS_POR_BIOMA)
 }
@@ -59,12 +86,12 @@ export function maiorEstagioLimpo(progresso: ProgressoPorBioma, bioma: string): 
  * consumidores (store do Zustand, snapshot do flush).
  */
 export function comEstagioLimpo(
-  progresso: ProgressoPorBioma, bioma: string, estagio: number,
+  progresso: ProgressoPorBioma, bioma: string, estagio: number, pesadelo = false,
 ): ProgressoPorBioma {
   if (!estagioValido(estagio)) return progresso
-  const atual = maiorEstagioLimpo(progresso, bioma)
+  const atual = maiorEstagioLimpo(progresso, bioma, pesadelo)
   if (estagio <= atual) return progresso
-  return { ...progresso, [bioma]: estagio }
+  return { ...progresso, [chaveDoProgresso(bioma, pesadelo)]: estagio }
 }
 
 /**
@@ -80,11 +107,11 @@ export function comEstagioLimpo(
  * aberta que o servidor recusa.
  */
 export function estagioLiberado(
-  progresso: ProgressoPorBioma, bioma: string, estagio: number,
+  progresso: ProgressoPorBioma, bioma: string, estagio: number, pesadelo = false,
 ): boolean {
   if (!estagioValido(estagio)) return false
   if (estagio === 1) return true
-  return maiorEstagioLimpo(progresso, bioma) >= estagio - 1
+  return maiorEstagioLimpo(progresso, bioma, pesadelo) >= estagio - 1
 }
 
 /**
@@ -96,9 +123,9 @@ export function estagioLiberado(
  * arquivo tinha que pedir que ninguem os deixasse divergir.
  */
 export function bloqueioDoEstagio(
-  progresso: ProgressoPorBioma, bioma: string, estagio: number,
+  progresso: ProgressoPorBioma, bioma: string, estagio: number, pesadelo = false,
 ): string | null {
-  if (estagioLiberado(progresso, bioma, estagio)) return null
+  if (estagioLiberado(progresso, bioma, estagio, pesadelo)) return null
   return `Vença o Lord do estágio ${estagio - 1} para liberar este.`
 }
 

@@ -35,7 +35,7 @@ import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
 import { SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
-import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import { parseEstagioIdOuEspelho, quantidadeDeSalas } from '@/data/estagios'
 import type { ProgressoPorBioma } from '@/data/progressoDeBioma'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
@@ -718,9 +718,11 @@ function avancarBiomaProgressSeForOProximo(world: WorldState, gameState: GameSta
   // O estagio sai do mapId, e nao do `continent`: o `continent` e o grupo de
   // gate (a ponte de faixa da PH-426) e nao diz QUAL dos tres estagios daquele
   // grupo o jogador limpou.
-  const doMapa = parseEstagioId(world.mapDef?.id ?? '')
+  // PH-523: parser PERMISSIVO — o espelho do Pesadelo tambem fecha estagio
+  // (na trilha PROPRIA dele, `pesadelo: true`), e nao so o Mundo.
+  const doMapa = parseEstagioIdOuEspelho(world.mapDef?.id ?? '')
   if (!doMapa || doMapa.bioma !== bioma) return
-  gameState.setBiomaProgress(bioma, doMapa.estagio)
+  gameState.setBiomaProgress(bioma, doMapa.estagio, doMapa.pesadelo)
 }
 
 function spawnEnemyAt(

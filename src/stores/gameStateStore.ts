@@ -100,7 +100,9 @@ export interface GameStateActions {
   // PH-226/236: diferente de missao/especialidade (so menu), esta E chamada
   // pela simulacao — vencer o Lord avanca o indice dentro de
   // handleEnemyDefeated (simulation.ts), nao so por acao de tela.
-  setBiomaProgress: (bioma: string, estagio: number) => void
+  // PH-523: `pesadelo` grava na trilha do Modo Pesadelo (progresso proprio,
+  // independente do Mundo) em vez da trilha normal — ver `comEstagioLimpo`.
+  setBiomaProgress: (bioma: string, estagio: number, pesadelo?: boolean) => void
 
   // Acoes do painel Auto + AbilityHUD (Fase 6). No vanilla essas telas
   // mutavam o objeto direto (`gameState.autoToggles.autoPot = !...`,
@@ -533,11 +535,11 @@ export const useGameStateStore = create<GameStateStore>()(
         }))
       },
 
-      setBiomaProgress: (bioma, estagio) => {
+      setBiomaProgress: (bioma, estagio, pesadelo = false) => {
         // NUNCA REGRIDE: limpar de novo um estagio antigo (a caçada direcionada
         // da PH-428) nao pode desligar o estagio seguinte. A regra mora em
         // `comEstagioLimpo` pra o servidor aplicar a mesma.
-        set((state) => ({ biomaProgress: comEstagioLimpo(state.biomaProgress, bioma, estagio) }))
+        set((state) => ({ biomaProgress: comEstagioLimpo(state.biomaProgress, bioma, estagio, pesadelo) }))
       },
 
       setAutoToggle: (key, value) => {

@@ -14,7 +14,7 @@ import {
   GRUPOS_INICIAIS, SUB_BIOMA_POR_CHAVE, grupoLiberado,
   type SubBiomaDef,
 } from '@/data/biomas'
-import { parseEstagioId, quantidadeDeSalas } from '@/data/estagios'
+import { parseEstagioId, parseEstagioIdOuEspelho, quantidadeDeSalas } from '@/data/estagios'
 import { bloqueioDoEstagio, bloqueioDoLance, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { MapaDeBiomas, TrilhaDoBioma } from './TrilhaDeEstagios'
@@ -59,10 +59,13 @@ const fmt = new Intl.NumberFormat('pt-BR')
 function bloqueioDeBiomaClient(mapId: string, progresso: ProgressoPorBioma): string | null {
   // PH-432: o Campeao Lance tem gate proprio — progresso 5 nos 12 biomas.
   if (mapId === LANCE_MAP_ID) return bloqueioDoLance(progresso)
-  const doMapa = parseEstagioId(mapId)
-  // Hunt sem estagio (inicial, BOSS, Lance, Pesadelo) nao passa por este gate.
+  // PH-523: parser PERMISSIVO — o espelho do Modo Pesadelo passa pelo MESMO
+  // gate sequencial do Mundo, so que contra o progresso PROPRIO dele
+  // (`doMapa.pesadelo`, ver `progressoDeBioma.ts`).
+  const doMapa = parseEstagioIdOuEspelho(mapId)
+  // Hunt sem estagio (inicial, BOSS, Lance) nao passa por este gate.
   if (!doMapa) return null
-  return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio)
+  return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio, doMapa.pesadelo)
 }
 
 async function acionarHunt(
@@ -379,18 +382,19 @@ export function HuntMenu() {
   const activePoke = team[activeIndex] ?? null
   const activeSpecies = activePoke ? (SPECIES[activePoke.speciesId] ?? null) : null
 
-  // A LISTA DE CARDS SO MOSTRA O QUE NAO E ESTAGIO DE BIOMA (PH-431).
+  // A LISTA DE CARDS SO MOSTRA O QUE NAO E ESTAGIO DE BIOMA (PH-431/523).
   //
   // As 120 hunts de bioma sairam daqui e viraram a navegacao de dois niveis
-  // (`MapaDeBiomas` -> `TrilhaDoBioma`). O que sobra na lista e o que nao tem
-  // trilha: a hunt inicial, as 11 BOSS, o Campeao Lance e o espelho do Modo
-  // Pesadelo. Sao poucas, curadas a mao e sem progressao entre si — cartao e a
-  // forma certa pra elas, e continuar listando as 120 junto seria devolver a
-  // tela de 121 linhas que esta issue existe pra desfazer.
+  // (`MapaDeBiomas` -> `TrilhaDoBioma`) — e o mesmo vale agora pro espelho do
+  // Modo Pesadelo (PH-523: era jogado aqui inteiro, 120 cartoes soltos em
+  // "Hunts especiais" em vez da mesma trilha por bioma do Mundo). O parser
+  // PERMISSIVO (`parseEstagioIdOuEspelho`) tira os dois. O que sobra na lista
+  // e o que de fato nao tem trilha: a hunt inicial, as 11 BOSS e o Campeao
+  // Lance.
   const visibleMaps = useMemo(() => {
     const term = search.trim().toLowerCase()
     return Object.values(MAPS)
-      .filter((m) => parseEstagioId(m.id) == null)
+      .filter((m) => parseEstagioIdOuEspelho(m.id) == null)
       .filter((m) => (m.continent ?? GRUPOS_INICIAIS[0]) === continent)
       .filter((m) => huntHasType(m, typeFilter))
       .filter((m) => huntMatches(m, term))
@@ -448,6 +452,7 @@ export function HuntMenu() {
         <TrilhaDoBioma
           biomaChave={biomaAberto}
           progresso={biomaProgress}
+          pesadelo={continent === 'nightmare'}
           mapaAtivoId={mapaAtivoId}
           abertoId={expandedMapId}
           entrandoId={acao.pendingKey?.startsWith('map:') ? acao.pendingKey.slice(4) : null}
@@ -686,7 +691,11 @@ export function HuntMenu() {
           porque e onde o jogador vai 99% das vezes: o que sobra na lista sao
           as hunts de fim de jogo. */}
       <SectionLabel>Biomas</SectionLabel>
-      <MapaDeBiomas progresso={biomaProgress} onEscolher={setBiomaAberto} />
+      <MapaDeBiomas
+        progresso={biomaProgress}
+        onEscolher={setBiomaAberto}
+        pesadelo={continent === 'nightmare'}
+      />
 
       {huntsEspeciais.length > 0 && <SectionLabel>Hunts especiais</SectionLabel>}
       {huntsEspeciais.length === 0 && !huntInicial && (

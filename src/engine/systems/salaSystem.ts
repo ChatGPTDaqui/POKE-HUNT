@@ -36,7 +36,8 @@ import {
   type SubBiomaDef,
 } from '@/data/biomas'
 import {
-  estagioId, parseEstagioId, parseEstagioIdOuEspelho, pesosDoEstagio, quantidadeDeSalas,
+  estagioId, parseEstagioIdOuEspelho, pesosDoEstagio, quantidadeDeSalas,
+  PREFIXO_DO_PESADELO,
 } from '@/data/estagios'
 import { estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma } from '@/data/progressoDeBioma'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
@@ -155,13 +156,23 @@ function candidatas(mapId: string): SubBiomaDef[] {
  * ele) mantem o atalho de "um candidato so" valendo e deixa explicito que a
  * lista de candidatos DEPENDE do estagio.
  *
- * HUNT SEM ESTAGIO CONTINUA NO PESO ESTATICO. A inicial, as BOSS, o Campeao
- * Lance e o espelho do Pesadelo nao tem curva de profundidade — la `sub.peso` e
- * o peso certo, e nao um fallback.
+ * HUNT SEM ESTAGIO CONTINUA NO PESO ESTATICO. So a inicial, as BOSS e o
+ * Campeao Lance — nenhuma delas tem curva de profundidade, la `sub.peso` e o
+ * peso certo, e nao um fallback.
+ *
+ * PH-523: O ESPELHO DO PESADELO GANHOU A MESMA CURVA. Ate aqui ele caia no
+ * peso estatico igual a hunt inicial/BOSS/Lance — o comentario dizia "nao tem
+ * curva de profundidade", mas isso deixava o Pesadelo com uma COMPOSICAO DE
+ * SUB-BIOMA DIFERENTE do Mundo no mesmo estagio (medido: Industrial 10 do
+ * Mundo sorteia Laboratorio 57%/Usina 31%/Fabrica 11%; o espelho, antes desta
+ * correcao, sorteava Obra 40%/Fabrica 24%/Usina 24%/Laboratorio 12% — um
+ * QUARTO sub-bioma que o Mundo nem alcanca ali). O pedido e "copia exata do
+ * Mundo, so com dificuldade maior" — a composicao tem que bater, e so o nivel
+ * (`shiftLevel`, nightmareMaps.ts) muda.
  */
 function pesoDeSorteioDaSala(mapId: string): { opcoes: SubBiomaDef[]; peso: (s: SubBiomaDef) => number } {
   const opcoes = candidatas(mapId)
-  const doMapa = parseEstagioId(mapId)
+  const doMapa = parseEstagioIdOuEspelho(mapId)
   const bioma = doMapa ? BIOMA_POR_CHAVE[doMapa.bioma] : null
   if (!doMapa || !bioma) return { opcoes, peso: (s) => s.peso }
 
@@ -601,11 +612,20 @@ export function protetorDaSala(sala: SalaAtiva | null, mapId: string): TipoDePro
   return sala.indice >= quantidadeDeSalas(mapId) - 1 ? 'lord' : 'guardian'
 }
 
-/** O jogador ja fechou o estagio desta hunt alguma vez? */
+/**
+ * O jogador ja fechou o estagio desta hunt alguma vez?
+ *
+ * PH-522/523: usa o parser PERMISSIVO (`parseEstagioIdOuEspelho`), e nao o
+ * estrito — o espelho do Pesadelo (`nightmare_marinho_e7`) TEM progresso
+ * proprio (`maiorEstagioLimpo(..., pesadelo: true)`, ver
+ * `progressoDeBioma.ts`), e com o parser estrito esta funcao respondia
+ * `false` pra SEMPRE nele. Consequencia real: Guardian/Lord nunca virava
+ * dispensavel numa repeticao do Pesadelo, mesmo depois de ja limpo.
+ */
 export function estagioJaLimpo(mapId: string, progresso: ProgressoPorBioma): boolean {
-  const doMapa = parseEstagioId(mapId)
+  const doMapa = parseEstagioIdOuEspelho(mapId)
   if (!doMapa) return false
-  return maiorEstagioLimpo(progresso, doMapa.bioma) >= doMapa.estagio
+  return maiorEstagioLimpo(progresso, doMapa.bioma, doMapa.pesadelo) >= doMapa.estagio
 }
 
 export function nomeDaSala(sala: SalaAtiva | null): string | null {
@@ -1320,11 +1340,12 @@ export { quantidadeDeSalas }
 export function proximoEstagioLiberado(
   mapId: string, progresso: ProgressoPorBioma,
 ): string | null {
-  const doMapa = parseEstagioId(mapId)
+  const doMapa = parseEstagioIdOuEspelho(mapId)
   if (!doMapa) return null
   const proximo = doMapa.estagio + 1
-  if (!estagioLiberado(progresso, doMapa.bioma, proximo)) return null
-  return estagioId(doMapa.bioma, proximo)
+  if (!estagioLiberado(progresso, doMapa.bioma, proximo, doMapa.pesadelo)) return null
+  const id = estagioId(doMapa.bioma, proximo)
+  return doMapa.pesadelo ? `${PREFIXO_DO_PESADELO}${id}` : id
 }
 
 /**
@@ -1343,9 +1364,10 @@ export function proximoEstagioLiberado(
  * delas tem estagio anterior, e nas duas ultimas morrer ja e definitivo.
  */
 export function estagioAnterior(mapId: string): string | null {
-  const doMapa = parseEstagioId(mapId)
+  const doMapa = parseEstagioIdOuEspelho(mapId)
   if (!doMapa) return null
   const anterior = doMapa.estagio - 1
   if (anterior < 1) return null
-  return estagioId(doMapa.bioma, anterior)
+  const id = estagioId(doMapa.bioma, anterior)
+  return doMapa.pesadelo ? `${PREFIXO_DO_PESADELO}${id}` : id
 }
