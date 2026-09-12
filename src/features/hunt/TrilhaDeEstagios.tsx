@@ -663,16 +663,6 @@ function PainelDoEstagio({
   // componente e remontado por `key={mapId}` na trilha, entao trocar de estagio
   // volta pro estagio inteiro sozinho — sem `useEffect` de sincronizacao.
   const [recorte, setRecorte] = useState<string | null>(null)
-  // PH-490: o "avançar ao concluir" passou a morar aqui. Selecionado do store
-  // pelo campo, e não o objeto `autoToggles` inteiro — assinar o objeto faria
-  // este painel re-renderizar a cada mudança de auto-catch e auto-pot, e ele
-  // recalcula o elenco do estágio.
-  const avancarDeEstagio = useGameStateStore((s) => s.autoToggles.avancarDeEstagio)
-  // PH-493: o par simetrico. Selecionado campo a campo pelo mesmo motivo do de
-  // cima — assinar o objeto `autoToggles` inteiro faria este painel
-  // re-renderizar (e recalcular o elenco do estágio) a cada auto-catch.
-  const recuarSePerder = useGameStateStore((s) => s.autoToggles.recuarSePerder)
-  const setAutoToggle = useGameStateStore((s) => s.setAutoToggle)
   const subBiomas = useMemo(
     () => subBiomasDoEstagio(bioma, estagio, pesadelo), [bioma, estagio, pesadelo],
   )
@@ -775,39 +765,41 @@ function PainelDoEstagio({
           />
         ))}
       </div>
+    </div>
+  )
+}
 
-      {/* O QUE ACONTECE QUANDO ESTE ESTÁGIO ACABAR (PH-490).
-          Este toggle morava no painel de Automações, a dois menus daqui — e a
-          decisão que ele governa ("repito este estágio ou vou pro seguinte?") é
-          tomada olhando esta trilha, escolhendo este estágio pela espécie que
-          se caça nele. Ele fecha o painel porque é a última pergunta: primeiro
-          o que tem aqui dentro, depois o que fazer ao terminar.
-
-          Continua GLOBAL, e não por estágio: é o mesmo `autoToggles` que o
-          servidor lê na simulação. Quem manda a mudança pro servidor é o
-          `useSincronizarAuto` montado em `JogoCarregado` — antes da PH-490 o
-          efeito vivia dentro do painel de Automações, e um toggle mudado daqui
-          com aquele painel fechado nunca teria chegado lá. */}
+/**
+ * Os dois toggles de fim de estágio (PH-490/493), agora sobre o MAPA (pedido
+ * do dono: "mover para o topo direito da imagem de background dos biomas").
+ *
+ * MORAVAM NO FIM DO PAINEL, embaixo do elenco — a pergunta "o que fazer ao
+ * terminar o estágio?" so fazia sentido depois de ler o que tem aqui dentro.
+ * O novo lugar prioriza visibilidade constante: o painel troca de conteúdo a
+ * cada estágio selecionado (a chave `key={mapId}` do `PainelDoEstagio` o
+ * remonta), e o jogador rolando a lista de POKEs perdia os dois toggles de
+ * vista. Sobre o mapa eles ficam fixos e visíveis o tempo todo, no MESMO
+ * canto em qualquer estágio.
+ *
+ * GLOBAL, e não por estágio — mesmo `autoToggles` que o servidor lê na
+ * simulação (`useSincronizarAuto` em `JogoCarregado`).
+ */
+function ControlesDeFimDeEstagio() {
+  const avancarDeEstagio = useGameStateStore((s) => s.autoToggles.avancarDeEstagio)
+  const recuarSePerder = useGameStateStore((s) => s.autoToggles.recuarSePerder)
+  const setAutoToggle = useGameStateStore((s) => s.setAutoToggle)
+  return (
+    // Fundo PROPRIO (bg-n900/90 + borda), e nao so o dos cartoes: `BlocoAuto`
+    // desligado nao tem fundo nenhum (so borda), e sobre uma arte de cena com
+    // area clara o texto ficaria ilegivel. Mesmo tratamento da bolha de dica
+    // do no (`DicaDoEstagio`) — e o mesmo problema de legibilidade sobre foto.
+    <div className="absolute right-[.5em] top-[.5em] z-[4] flex w-[9.5em] flex-col gap-[.3em] rounded-[.6em] border border-n700 bg-n900/90 p-[.35em] text-[.72em] shadow-lg">
       <BlocoAuto
         titulo="Avançar de estágio ao concluir"
         dica="Ao limpar a última sala do estágio, entra no estágio seguinte em vez de repetir o mesmo. Se não houver próximo — ou se ele ainda estiver bloqueado — o estágio atual repete."
         ligado={avancarDeEstagio}
         aoLigar={(v) => setAutoToggle('avancarDeEstagio', v)}
       />
-
-      {/* O PAR DO DE CIMA, PELO OUTRO LADO (PH-493). Pedido do dono do projeto,
-          e ele nomeou o lugar: "ficará ao lado do botão 'Avançar ao concluir'".
-
-          Os dois respondem a mesma pergunta — quando é hora de trocar de
-          estágio? —, um pelo sucesso e outro pelo fracasso, e é por isso que
-          ficam colados. Num idle o jogador não está olhando: sem este, ele volta
-          depois de uma hora e encontra um POKE que morreu, reviveu e morreu de
-          novo o tempo todo, com a mochila de Revive vazia e zero progresso.
-
-          Três derrotas em 15 segundos, e os dois números estão em
-          `simulation.ts#DERROTAS_PARA_RECUAR`/`JANELA_DE_RECUO_SEGUNDOS` — a
-          dica os cita por extenso porque o jogador não tem outro lugar onde
-          lê-los. */}
       <BlocoAuto
         titulo="Recuar se perder"
         dica="Se o seu POKE for derrotado 3 vezes em 15 segundos, volta para o estágio anterior em vez de continuar apanhando. No estágio 1 não há para onde voltar — ali ele não faz nada."
@@ -994,6 +986,7 @@ export function TrilhaDoBioma({
         style={{ background: bioma.bg.primary }}
       >
         <FundoDoBioma biomaChave={bioma.chave} />
+        <ControlesDeFimDeEstagio />
         <LinhaDoCaminho pontos={pontos} limpo={limpo} cor={cor} />
         {pontos.map(([x, y], i) => {
           const estagio = i + 1
