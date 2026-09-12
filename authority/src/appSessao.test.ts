@@ -55,13 +55,22 @@ describe('bloqueioDeBiomaPendente (PH-430)', () => {
     expect(bloqueioDeBiomaPendente('aguas_interiores_e8', progresso)).not.toBeNull()
   })
 
-  it('hunt sem estagio (inicial, BOSS, Lance, Pesadelo) nunca e barrada por esta regra', () => {
-    // Cada uma tem o gate proprio; este aqui so fala de estagio de bioma. O
-    // Pesadelo entra na lista porque o mapId dele PARECE um estagio
-    // (`nightmare_marinho_e7`) e so nao passa porque o parse valida o bioma.
-    for (const mapId of ['route_46', 'boss_lance', 'boss_articuno', 'nightmare_marinho_e7']) {
+  it('hunt sem estagio (inicial, BOSS, Lance) nunca e barrada por esta regra', () => {
+    // Cada uma tem o gate proprio; este aqui so fala de estagio de bioma.
+    for (const mapId of ['route_46', 'boss_lance', 'boss_articuno']) {
       expect(bloqueioDeBiomaPendente(mapId, progressoPorBiomaDefault()), mapId).toBeNull()
     }
+  })
+
+  it('PH-523: o espelho do Pesadelo passa pelo MESMO gate sequencial, contra o progresso PROPRIO dele', () => {
+    // Conta nova: estagio 1 do Pesadelo liberado, estagio 7 preso (pede o Lord
+    // do 6) — igual ao Mundo, so que o progresso do Mundo nao interfere aqui.
+    const progresso = { ...progressoPorBiomaDefault(), marinho: 9 }
+    expect(bloqueioDeBiomaPendente('nightmare_marinho_e1', progresso)).toBeNull()
+    expect(bloqueioDeBiomaPendente('nightmare_marinho_e7', progresso)).not.toBeNull()
+    // Limpar o Pesadelo libera o proprio Pesadelo, e nao o Mundo.
+    const comPesadelo = { ...progresso, nightmare_marinho: 6 }
+    expect(bloqueioDeBiomaPendente('nightmare_marinho_e7', comPesadelo)).toBeNull()
   })
 
   it('estagio fora da regua (0, 11) e recusado em vez de liberado por engano', () => {

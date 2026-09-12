@@ -69,7 +69,8 @@ export { bloqueioDoLance, biomasFaltandoParaOLance } from '@/data/progressoDeBio
 export type { ProgressoPorBioma } from '@/data/progressoDeBioma'
 export {
   ESTAGIOS, ESTAGIOS_POR_BIOMA, ESTAGIO_POR_ID, SALAS_POR_ESTAGIO, SALAS_POR_BIOMA,
-  TETO_DO_MODO_NORMAL, estagioId, parseEstagioId, estagioValido, niveisDoEstagio,
+  TETO_DO_MODO_NORMAL, estagioId, parseEstagioId, parseEstagioIdOuEspelho,
+  PREFIXO_DO_PESADELO, estagioValido, niveisDoEstagio,
   zonaMaximaDoEstagio, salasDoEstagio, pesosDoEstagio,
 } from '@/data/estagios'
 export type { EstagioDef, EstagioDoMapId } from '@/data/estagios'

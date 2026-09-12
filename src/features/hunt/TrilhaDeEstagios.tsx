@@ -20,8 +20,8 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { BIOMAS, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, type BiomaDef } from '@/data/biomas'
 import {
-  ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, parseEstagioId, pesosDoEstagio,
-  quantidadeDeSalas,
+  ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, parseEstagioIdOuEspelho, pesosDoEstagio,
+  quantidadeDeSalas, PREFIXO_DO_PESADELO,
 } from '@/data/estagios'
 import {
   bloqueioDoEstagio, estagioLiberado, maiorEstagioLimpo, type ProgressoPorBioma,
@@ -59,11 +59,11 @@ export type EstadoDoEstagio = 'limpo' | 'atual' | 'liberado' | 'bloqueado'
  * dez. `atual` e o primeiro nao-limpo que esta liberado.
  */
 export function estadoDoEstagio(
-  progresso: ProgressoPorBioma, bioma: string, estagio: number,
+  progresso: ProgressoPorBioma, bioma: string, estagio: number, pesadelo = false,
 ): EstadoDoEstagio {
-  const limpo = maiorEstagioLimpo(progresso, bioma)
+  const limpo = maiorEstagioLimpo(progresso, bioma, pesadelo)
   if (estagio <= limpo) return 'limpo'
-  if (!estagioLiberado(progresso, bioma, estagio)) return 'bloqueado'
+  if (!estagioLiberado(progresso, bioma, estagio, pesadelo)) return 'bloqueado'
   return estagio === limpo + 1 ? 'atual' : 'liberado'
 }
 
@@ -154,15 +154,17 @@ function IconeDoBioma({ bioma, cor }: { bioma: BiomaDef; cor: string }) {
 }
 
 function CartaoDeBioma({
-  bioma, progresso, onEscolher,
+  bioma, progresso, onEscolher, pesadelo = false,
 }: {
   bioma: BiomaDef
   progresso: ProgressoPorBioma
   onEscolher: () => void
+  pesadelo?: boolean
 }) {
-  const limpo = maiorEstagioLimpo(progresso, bioma.chave)
+  const limpo = maiorEstagioLimpo(progresso, bioma.chave, pesadelo)
   const cor = colorForType(bioma.tipo)
-  const recomendado = bioma.chave === BIOMA_RECOMENDADO && limpo === 0
+  // PH-523: "COMECE AQUI" e orientacao de novato — so faz sentido no Mundo.
+  const recomendado = !pesadelo && bioma.chave === BIOMA_RECOMENDADO && limpo === 0
 
   return (
     <button
@@ -215,10 +217,12 @@ function CartaoDeBioma({
 }
 
 export function MapaDeBiomas({
-  progresso, onEscolher,
+  progresso, onEscolher, pesadelo = false,
 }: {
   progresso: ProgressoPorBioma
   onEscolher: (chave: string) => void
+  /** PH-523: os 12 biomas, mas lendo/gravando na trilha do Modo Pesadelo. */
+  pesadelo?: boolean
 }) {
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(11em,1fr))] gap-[.5em]">
@@ -227,6 +231,7 @@ export function MapaDeBiomas({
           key={bioma.chave}
           bioma={bioma}
           progresso={progresso}
+          pesadelo={pesadelo}
           onEscolher={() => onEscolher(bioma.chave)}
         />
       ))}
@@ -634,7 +639,7 @@ function LinhaDoCaminho({
 const DO_ESTAGIO = '__estagio__'
 
 function PainelDoEstagio({
-  bioma, estagio, estado, progresso, ehAtiva, entrando, pokeEmCampo, onEntrar,
+  bioma, estagio, estado, progresso, ehAtiva, entrando, pokeEmCampo, onEntrar, pesadelo = false,
 }: {
   bioma: BiomaDef
   estagio: number
@@ -645,9 +650,15 @@ function PainelDoEstagio({
   /** O POKE em campo, pra a coluna de efetividade. `null` a esconde. */
   pokeEmCampo: Species | null
   onEntrar: () => void
+  /** PH-523: estagio do Modo Pesadelo — mesmo bioma/estagio, mapId prefixado. */
+  pesadelo?: boolean
 }) {
-  const mapId = estagioId(bioma.chave, estagio)
-  const [lo, hi] = niveisDoEstagio(estagio)
+  const id = estagioId(bioma.chave, estagio)
+  const mapId = pesadelo ? `${PREFIXO_DO_PESADELO}${id}` : id
+  // PH-523: a faixa exibida e a REAL do mapa (`MAPS[mapId].levelRange`), que no
+  // Pesadelo esta deslocada (+100, piso 150) — `niveisDoEstagio` sozinha so vale
+  // pro Mundo e mostraria "Lv 1-10" numa hunt que na verdade e Lv 150-159.
+  const [lo, hi] = MAPS[mapId]?.levelRange ?? niveisDoEstagio(estagio)
   // Qual sub-bioma o jogador esta olhando; `null` = o estagio inteiro. O
   // componente e remontado por `key={mapId}` na trilha, entao trocar de estagio
   // volta pro estagio inteiro sozinho — sem `useEffect` de sincronizacao.
@@ -662,14 +673,18 @@ function PainelDoEstagio({
   // re-renderizar (e recalcular o elenco do estágio) a cada auto-catch.
   const recuarSePerder = useGameStateStore((s) => s.autoToggles.recuarSePerder)
   const setAutoToggle = useGameStateStore((s) => s.setAutoToggle)
-  const subBiomas = useMemo(() => subBiomasDoEstagio(bioma, estagio), [bioma, estagio])
+  const subBiomas = useMemo(
+    () => subBiomasDoEstagio(bioma, estagio, pesadelo), [bioma, estagio, pesadelo],
+  )
   // A conta e pesada o bastante pra memoizar: ela roda `contextoDeSpawn` uma vez
   // por (sub-bioma x indice de sala) — ate 4 x 8 = 32 chamadas, cada uma com o
   // recorte de janela de nivel e a apara de teto. O cache de `contextoDeSpawn`
   // absorve a repeticao entre renders, este `useMemo` absorve a de dentro do
   // mesmo render.
-  const elenco = useMemo(() => elencoDoEstagio(bioma, estagio, recorte), [bioma, estagio, recorte])
-  const bloqueio = bloqueioDoEstagio(progresso, bioma.chave, estagio)
+  const elenco = useMemo(
+    () => elencoDoEstagio(bioma, estagio, recorte, pesadelo), [bioma, estagio, recorte, pesadelo],
+  )
+  const bloqueio = bloqueioDoEstagio(progresso, bioma.chave, estagio, pesadelo)
   const bloqueado = estado === 'bloqueado'
 
   return (
@@ -885,7 +900,7 @@ function BotaoDeEntrar({
 // ---------------------------------------------------------------------------
 export function TrilhaDoBioma({
   biomaChave, progresso, mapaAtivoId, abertoId, entrandoId, pokeEmCampo,
-  onAbrir, onEntrar, onVoltar,
+  onAbrir, onEntrar, onVoltar, pesadelo = false,
 }: {
   biomaChave: string
   progresso: ProgressoPorBioma
@@ -904,6 +919,8 @@ export function TrilhaDoBioma({
   onAbrir: (mapId: string | null) => void
   onEntrar: (mapId: string) => void
   onVoltar: () => void
+  /** PH-523: a trilha do Modo Pesadelo — mesmos 10 nos, mapId prefixado, progresso proprio. */
+  pesadelo?: boolean
 }) {
   // O HOOK VEM ANTES DA GUARDA, e a ordem nao e estilo.
   //
@@ -940,15 +957,16 @@ export function TrilhaDoBioma({
   const bioma = BIOMA_POR_CHAVE[biomaChave]
   if (!bioma) return null
 
-  const limpo = maiorEstagioLimpo(progresso, bioma.chave)
+  const limpo = maiorEstagioLimpo(progresso, bioma.chave, pesadelo)
   const cor = colorForType(bioma.tipo)
+  const prefixo = pesadelo ? PREFIXO_DO_PESADELO : ''
   const pontos = caminhoDoBioma(bioma.chave)
 
   // O painel abre no estagio ATUAL quando o jogador entra no bioma, e nao
   // vazio: chegar num mapa e ter que adivinhar qual dos dez clicar e o mesmo
   // problema que o pulso do no resolve — so que sem resposta nenhuma.
-  const doAberto = abertoId != null ? parseEstagioId(abertoId) : null
-  const selecionado = doAberto?.bioma === bioma.chave
+  const doAberto = abertoId != null ? parseEstagioIdOuEspelho(abertoId) : null
+  const selecionado = doAberto?.bioma === bioma.chave && doAberto.pesadelo === pesadelo
     ? doAberto.estagio
     : Math.min(limpo + 1, ESTAGIOS_POR_BIOMA)
 
@@ -979,12 +997,12 @@ export function TrilhaDoBioma({
         <LinhaDoCaminho pontos={pontos} limpo={limpo} cor={cor} />
         {pontos.map(([x, y], i) => {
           const estagio = i + 1
-          const mapId = estagioId(bioma.chave, estagio)
+          const mapId = `${prefixo}${estagioId(bioma.chave, estagio)}`
           return (
             <NoNoMapa
               key={mapId}
               estagio={estagio}
-              estado={estadoDoEstagio(progresso, bioma.chave, estagio)}
+              estado={estadoDoEstagio(progresso, bioma.chave, estagio, pesadelo)}
               cor={cor}
               x={x}
               y={y}
@@ -1008,14 +1026,14 @@ export function TrilhaDoBioma({
             dele. */}
         {destacado != null && destacado !== selecionado && (() => {
           const [x, y] = pontos[destacado - 1]
-          const mapId = estagioId(bioma.chave, destacado)
+          const mapId = `${prefixo}${estagioId(bioma.chave, destacado)}`
           return (
             <DicaDoEstagio
               estagio={destacado}
-              estado={estadoDoEstagio(progresso, bioma.chave, destacado)}
+              estado={estadoDoEstagio(progresso, bioma.chave, destacado, pesadelo)}
               x={x}
               y={y}
-              niveis={niveisDoEstagio(destacado)}
+              niveis={MAPS[mapId]?.levelRange ?? niveisDoEstagio(destacado)}
               salas={quantidadeDeSalas(mapId)}
               composicao={composicaoDoEstagio(bioma, destacado)}
               ehAtiva={mapaAtivoId === mapId}
@@ -1030,15 +1048,16 @@ export function TrilhaDoBioma({
         // estagio 7 com a aba "Praia" aberta manteria "Praia" selecionada — num
         // estagio onde a Praia pode ter peso zero, o que deixaria a lista vazia
         // sem nada explicando.
-        key={estagioId(bioma.chave, selecionado)}
+        key={`${prefixo}${estagioId(bioma.chave, selecionado)}`}
         bioma={bioma}
         estagio={selecionado}
-        estado={estadoDoEstagio(progresso, bioma.chave, selecionado)}
+        estado={estadoDoEstagio(progresso, bioma.chave, selecionado, pesadelo)}
         progresso={progresso}
-        ehAtiva={mapaAtivoId === estagioId(bioma.chave, selecionado)}
-        entrando={entrandoId === estagioId(bioma.chave, selecionado)}
+        pesadelo={pesadelo}
+        ehAtiva={mapaAtivoId === `${prefixo}${estagioId(bioma.chave, selecionado)}`}
+        entrando={entrandoId === `${prefixo}${estagioId(bioma.chave, selecionado)}`}
         pokeEmCampo={pokeEmCampo}
-        onEntrar={() => onEntrar(estagioId(bioma.chave, selecionado))}
+        onEntrar={() => onEntrar(`${prefixo}${estagioId(bioma.chave, selecionado)}`)}
       />
     </div>
   )

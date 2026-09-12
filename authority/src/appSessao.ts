@@ -11,7 +11,7 @@ import {
 } from './progresso.js'
 import {
   MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
-  parseEstagioId, bloqueioDoEstagio, bloqueioDoLance, LANCE_MAP_ID, grupoLiberado,
+  parseEstagioIdOuEspelho, bloqueioDoEstagio, bloqueioDoLance, LANCE_MAP_ID, grupoLiberado,
   type ProgressoPorBioma, type SalaAtiva,
 } from '#engine'
 
@@ -249,15 +249,22 @@ async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promis
  * MESMA funcao que o menu chama (`HuntMenu.tsx#bloqueioDeBiomaClient`) — antes
  * os dois lados reimplementavam a regra e repetiam a string a mao, com um
  * comentario em cada arquivo pedindo que ninguem os deixasse divergir.
+ *
+ * PH-523: o espelho do Pesadelo (`parseEstagioIdOuEspelho`) agora passa por
+ * este MESMO gate — sequencial, estagio N pede N-1 limpo —, so que contra o
+ * progresso PROPRIO dele (`pesadelo: true`, ver `progressoDeBioma.ts`). Antes
+ * o parser estrito devolvia `null` pra `nightmare_*` e o comentario dizia
+ * "cada uma tem o gate proprio dela" — mas nenhum gate proprio existia, e as
+ * 120 hunts do Pesadelo entravam sem checagem nenhuma de sequencia.
  */
 export function bloqueioDeBiomaPendente(
   mapId: string, progresso: ProgressoPorBioma,
 ): string | null {
-  const doMapa = parseEstagioId(mapId)
-  // Hunt sem estagio — a inicial, as BOSS, a do Lance, o espelho do Pesadelo —
-  // nunca e barrada por esta regra. Cada uma tem o gate proprio dela.
+  const doMapa = parseEstagioIdOuEspelho(mapId)
+  // Hunt sem estagio — a inicial, as BOSS, a do Lance — nao e barrada por
+  // esta regra.
   if (!doMapa) return null
-  return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio)
+  return bloqueioDoEstagio(progresso, doMapa.bioma, doMapa.estagio, doMapa.pesadelo)
 }
 
 /**

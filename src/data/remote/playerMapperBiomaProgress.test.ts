@@ -51,8 +51,8 @@ describe('bioma_progress — round-trip e traducao pelo mapper (PH-224/429)', ()
     const snap = snapshotComPlayer({ bioma_progress: null })
     const estado = snapshotToGameState(snap, defaultGameStateData())
     expect(estado.biomaProgress).toEqual(progressoPorBiomaDefault())
-    // 12 chaves, uma por bioma, todas em zero.
-    expect(Object.keys(estado.biomaProgress).length).toBe(12)
+    // 24 chaves (PH-523): 12 do Mundo + 12 do Pesadelo, todas em zero.
+    expect(Object.keys(estado.biomaProgress).length).toBe(24)
   })
 
   it('grava e le de volta o mesmo progresso, no formato novo', () => {
