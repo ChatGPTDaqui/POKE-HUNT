@@ -10,6 +10,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { useToastStore } from '@/stores/toastStore'
 import { pedirAcaoComLocal } from '@/data/remote/autoridade'
+import { ErroServidor } from '@/data/remote/servidor'
 import { reivindicarMissao } from '@/engine/systems/missaoSystem'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { Sheet } from '@/components/game/Sheet'
@@ -158,6 +159,19 @@ function MissaoCard({ tipo, missao, bloqueada }: { tipo: ElementType; missao: Mi
       const { ok, local } = await pedirAcaoComLocal(
         { tipo: 'reivindicarMissao', missaoTipo: tipo, speciesId: missao.speciesId },
         () => reivindicarMissao(useGameStateStore.getState(), tipo, missao.speciesId),
+        {
+          // O servidor recusa com essa mensagem exata quando o estado local
+          // ficou pra tras (multi-aba, flush atrasado) e o jogador ja tinha
+          // essa recompensa — nao e um erro de verdade, e o cliente perguntando
+          // de novo por algo que ja aconteceu. Susto (toast vermelho) so
+          // confundiria: aqui so alinha o estado local, sem cobrar de novo.
+          tratarErroLocalmente: (erro) => {
+            if (!(erro instanceof ErroServidor) || erro.message !== 'Missao ja reivindicada.') return false
+            useGameStateStore.getState().setMissaoReivindicada(key)
+            toast(`Missão de ${species?.name ?? missao.speciesId} já estava reivindicada.`)
+            return true
+          },
+        },
       )
       if (!ok) return
       if (!local) return
@@ -165,7 +179,8 @@ function MissaoCard({ tipo, missao, bloqueada }: { tipo: ElementType; missao: Mi
       else toast(
         local.reason === 'abates_insuficientes' ? 'Abates insuficientes.'
           : local.reason === 'missao_anterior_pendente' ? 'Complete a missão anterior primeiro.'
-            : 'Não foi possível reivindicar.',
+            : local.reason === 'ja_reivindicada' ? 'Você já reivindicou essa missão.'
+              : 'Não foi possível reivindicar.',
         'error',
       )
     })
