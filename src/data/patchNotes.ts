@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.54',
+    date: '2026-09-13',
+    title: 'PvP: ranqueado com temporada, time dedicado e duelo animado',
+    highlights: [
+      'Nova aba Ranked no menu PvP: fila por MMR, divisões de Bronze a Mestre com PDL visível, e limite de 5 partidas ranqueadas por dia (reseta à meia-noite).',
+      'Nova aba Build: monte um time de até 6 POKEs dedicado ao PvP, separado da sua equipe de aventura. O ranqueado exige o time completo, todos no nível 80 ou mais, com os 4 golpes escolhidos.',
+      'O duelo amistoso agora usa o time inteiro: quem convida entra com o time de PvP salvo, e quem aceita escolhe entre a equipe atual ou esse time salvo.',
+      'O resultado de qualquer duelo (ranqueado ou amistoso) é decidido pelo servidor e reproduzido golpe a golpe na tela, com os POKEs reagindo a cada acerto — não é mais só um texto de vitória ou derrota.',
+    ],
+  },
+  {
     version: '7.53',
     date: '2026-09-12',
     title: 'Modo Pesadelo ganha trilha própria',
