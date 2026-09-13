@@ -101,19 +101,42 @@ if (!URL_BASE || !ANON || !SENHA) {
 }
 
 /**
- * O painel. `espera` e o que APROVA a bancada.
+ * O painel fixo. `espera` e o que APROVA a bancada.
  *
  * Os ids sao de tres biomas diferentes de proposito: um gate quebrado por
  * bioma (um sub-bioma sem pool, um id que o gerador nao emitiu) nao aparece
  * checando um so.
+ *
+ * `nightmare_route_46` NAO esta aqui — ver `entradaDoPesadelo` abaixo. A
+ * conta de teste e livre pra jogar e pode legitimamente ja ter derrotado o
+ * Lance, o que desbloqueia o Modo Pesadelo de verdade; cravar 403 pra sempre
+ * reprovava a bancada por avanco real, nao por gate quebrado (achado ao
+ * promover PH-527, 2026-09-13).
  */
 const PAINEL = [
   { mapId: 'route_46', espera: 200, porque: 'a primeira cacada do jogo, sem gate nenhum' },
   { mapId: 'campo_aberto_e1', espera: 200, porque: 'estagio 1 sempre liberado' },
   { mapId: 'sombrio_e1', espera: 200, porque: 'estagio 1 de outro bioma — nao e um caso isolado' },
-  { mapId: 'nightmare_route_46', espera: 403, porque: 'Modo Pesadelo e premio do Lance; 200 aqui = gate afrouxou' },
   { mapId: 'boss_lance', espera: 403, porque: 'portao da PH-432 (estagio 5 nos 12 biomas)' },
 ]
+
+/**
+ * O invariante real do Pesadelo nao e "a conta nunca desbloqueou" — e "a
+ * resposta do gate bate com o que `unlockedContinents` diz que a conta tem".
+ * `grupos` vem do MESMO `/estado` que a bancada ja consulta antes de pedir
+ * qualquer hunt, entao isto nao e uma segunda fonte de verdade: e a fonte que
+ * ja existia, so usada pra prever o gate em vez de ser so impressa no log.
+ */
+function entradaDoPesadelo(grupos) {
+  const desbloqueado = Array.isArray(grupos) && grupos.includes('nightmare')
+  return {
+    mapId: 'nightmare_route_46',
+    espera: desbloqueado ? 200 : 403,
+    porque: desbloqueado
+      ? 'conta ja derrotou o Lance (unlockedContinents inclui nightmare) — 403 aqui seria o gate travando quem tem direito'
+      : 'Modo Pesadelo e premio do Lance; 200 aqui = gate afrouxou',
+  }
+}
 
 async function entrar() {
   const r = await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
@@ -256,8 +279,13 @@ async function conferir() {
     console.log(`  aquecimento: falhou em ${((Date.now() - t0Aquece) / 1000).toFixed(1)}s (descartado) — ${e.message}\n`)
   }
 
+  // Entra ANTES do boss_lance de proposito: o painel segue indo do mais
+  // aberto pro mais trancado, e o mapId do Pesadelo continua vindo logo apos
+  // os biomas do Mundo no log, onde ja estava antes desta mudanca.
+  const painelDaExecucao = [...PAINEL.slice(0, 3), entradaDoPesadelo(grupos), ...PAINEL.slice(3)]
+
   let reprovou = false
-  for (const { mapId, espera, porque } of PAINEL) {
+  for (const { mapId, espera, porque } of painelDaExecucao) {
     const { r, corpo, tentativas, msPrimeira } = await pedirHunt(mapId, equipe[0].uid)
     if (tentativas > 1) {
       // A RETENTATIVA APARECE NO LOG, SEMPRE. Engolir em silencio trocaria um
