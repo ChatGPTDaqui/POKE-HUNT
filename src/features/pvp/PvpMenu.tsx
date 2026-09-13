@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { Clock, Sword, X } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
-import { Carregando, GameButton, GameInput, SectionLabel } from '@/components/game/controls'
+import { Carregando, ComingSoon, GameButton, GameInput, SectionLabel, SegmentedTabs } from '@/components/game/controls'
 import * as rankingRpc from '@/data/remote/rankingRpc'
 import { useAuthStore } from '@/stores/authStore'
 import { usePvp } from './usePvp'
+import { PvpBuildTab } from './PvpBuildTab'
+
+type AbaPvp = 'lobby' | 'build' | 'ranked' | 'torneios'
 
 function useNick(userId: string | null): string {
   const { data } = useQuery({
@@ -26,18 +29,56 @@ function formatarData(iso: string): string {
 }
 
 export function PvpMenu() {
+  const [aba, setAba] = useState<AbaPvp>('lobby')
   const pvp = usePvp()
   const [nick, setNick] = useState('')
   const meuId = useAuthStore((s) => s.user?.id ?? null)
   const nickDoOutro = useNick(pvp.outroId)
 
-  if (pvp.carregando) return <Carregando texto="Procurando convites PvP..." />
+  const abas = (
+    <SegmentedTabs
+      value={aba}
+      onChange={setAba}
+      options={[
+        { value: 'lobby', label: 'Lobby' },
+        { value: 'build', label: 'Build' },
+        { value: 'ranked', label: 'Ranked' },
+        { value: 'torneios', label: 'Torneios' },
+      ]}
+      className="mb-[.65em]"
+    />
+  )
+
+  if (aba === 'build') return <div className="flex flex-col gap-[.75em]">{abas}<PvpBuildTab /></div>
+  if (aba === 'ranked') {
+    return (
+      <div className="flex flex-col gap-[.75em]">
+        {abas}
+        <ComingSoon icon={<Sword />} title="Ranqueado em breve">
+          Fila por MMR, temporada e divisões. Monte seu time na aba Build enquanto isso.
+        </ComingSoon>
+      </div>
+    )
+  }
+  if (aba === 'torneios') {
+    return (
+      <div className="flex flex-col gap-[.75em]">
+        {abas}
+        <ComingSoon icon={<Sword />} title="Torneios em breve">
+          Torneio semanal e batalha em dupla ainda estão a caminho.
+        </ComingSoon>
+      </div>
+    )
+  }
+
+  if (pvp.carregando) return <div className="flex flex-col gap-[.75em]">{abas}<Carregando texto="Procurando convites PvP..." /></div>
 
   const souConvidado = pvp.papel === 'convidado'
   const podeEnviar = nick.trim().length >= 2 && !pvp.sessao
 
   return (
     <div className="flex flex-col gap-[.75em]">
+      {abas}
       <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em]">
         <div className="mb-[.45em] flex items-center gap-[.35em]">
           <Sword className="text-[1.1em] text-n300" />
