@@ -1,4 +1,6 @@
 import { colorForType } from './typeColors'
+import { TM_ITEMS } from './maquinas'
+import { getAbility } from './abilities'
 import type { ElementType } from './generated/types'
 
 // Real sprite art. The original 32 species' assets/sprites/*.png (+ shiny at
@@ -90,7 +92,13 @@ export function itemIconUrl(itemId: string): string | null {
 }
 
 export function itemIconBorderColor(itemId: string): string | null {
-  if (!itemId.startsWith('stone_')) return null;
-  const type = itemId.slice('stone_'.length).toUpperCase();
-  return colorForType(type as ElementType);
+  if (itemId.startsWith('stone_')) {
+    const type = itemId.slice('stone_'.length).toUpperCase();
+    return colorForType(type as ElementType);
+  }
+  // Mesmo disco de icone pra toda TM (nao ha arte por golpe) — a cor da borda
+  // e o que diferencia uma da outra pelo tipo do golpe que ela ensina.
+  const tm = TM_ITEMS[itemId];
+  if (tm) return colorForType(getAbility(tm.golpe)?.type);
+  return null;
 }

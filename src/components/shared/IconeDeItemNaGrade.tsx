@@ -41,9 +41,9 @@ export function IconeDeItemNaGrade({
   tamanho?: string
 }) {
   const url = itemIconUrl(itemId)
-  // Stones compartilham UM icone base; a distincao entre os 17 tipos vem da COR
-  // DA BORDA (nao existem 17 sprites no pack de origem) — e e por isso que a
-  // borda nao e enfeite aqui.
+  // Stones e TMs compartilham UM icone base cada; a distincao entre tipos vem
+  // da COR DA BORDA (nao existem sprites por tipo/golpe no pack de origem) —
+  // e e por isso que a borda nao e enfeite aqui.
   const borda = itemIconBorderColor(itemId)
   const estilo = tamanho ? { height: tamanho, width: tamanho } : undefined
 
