@@ -1104,6 +1104,12 @@ export interface WorldState {
     origem?: 'pvp' | 'duelo'
     mapId?: string
     bossTeam?: import('@/data/pokes').PokeInstance[]
+    // Identifica ESTE duelo especifico — `PvpOverlay` e HUD global, nunca
+    // desmonta entre duelos, entao o guard "ja creditei" (useRef) precisa
+    // comparar contra isto em vez de um boolean simples, senao o segundo
+    // duelo da sessao herda `creditado.current === true` do primeiro e a
+    // recompensa nunca e aplicada de novo.
+    duelId?: string
   } | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do

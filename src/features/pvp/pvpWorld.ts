@@ -160,6 +160,6 @@ export function criarMundoDuelo(
   const base = criarMundoPvpReplay(eventos, 'anfitriao', resultadoFinal, nomeDoBoss)
   return {
     ...base,
-    pvp: { ...base.pvp!, origem: 'duelo', mapId, bossTeam },
+    pvp: { ...base.pvp!, origem: 'duelo', mapId, bossTeam, duelId: `${mapId}-${Date.now()}` },
   }
 }
