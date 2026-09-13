@@ -6,6 +6,7 @@ import * as rankingRpc from '@/data/remote/rankingRpc'
 import { useAuthStore } from '@/stores/authStore'
 import { usePvp } from './usePvp'
 import { PvpBuildTab } from './PvpBuildTab'
+import { PvpRankedTab } from './PvpRankedTab'
 
 type AbaPvp = 'lobby' | 'build' | 'ranked' | 'torneios'
 
@@ -50,16 +51,7 @@ export function PvpMenu() {
   )
 
   if (aba === 'build') return <div className="flex flex-col gap-[.75em]">{abas}<PvpBuildTab /></div>
-  if (aba === 'ranked') {
-    return (
-      <div className="flex flex-col gap-[.75em]">
-        {abas}
-        <ComingSoon icon={<Sword />} title="Ranqueado em breve">
-          Fila por MMR, temporada e divisões. Monte seu time na aba Build enquanto isso.
-        </ComingSoon>
-      </div>
-    )
-  }
+  if (aba === 'ranked') return <div className="flex flex-col gap-[.75em]">{abas}<PvpRankedTab /></div>
   if (aba === 'torneios') {
     return (
       <div className="flex flex-col gap-[.75em]">
