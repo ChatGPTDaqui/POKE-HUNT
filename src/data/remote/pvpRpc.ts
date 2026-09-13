@@ -146,3 +146,74 @@ export function assinarMeuPvp(userId: string, aoMudar: () => void): () => void {
     .subscribe()
   return () => { void supabase.removeChannel(canal) }
 }
+
+// --- time e rank do PvP ranqueado (PH-529/PH-530) --------------------------
+
+export interface TimePvp {
+  pokemonIds: string[]
+  atualizadoEm: string
+}
+
+export interface RankPvp {
+  mmr: number
+  partidas: number
+  pdl: number
+  divisao: string
+  vitorias: number
+  derrotas: number
+  partidasHoje: number
+  resetEm: string
+}
+
+export async function meuTimePvp(): Promise<TimePvp | null> {
+  const { data, error } = await db.from('pvp_time').select('*').maybeSingle()
+  falhou(error)
+  return data ? { pokemonIds: data.pokemon_ids ?? [], atualizadoEm: data.atualizado_em } : null
+}
+
+export async function salvarTimePvp(pokemonIds: string[]): Promise<TimePvp> {
+  const { data, error } = await db.rpc('salvar_time_pvp', { p_pokemon_ids: pokemonIds })
+  falhou(error)
+  return { pokemonIds: data.pokemon_ids ?? [], atualizadoEm: data.atualizado_em }
+}
+
+export async function meuRankPvp(): Promise<RankPvp> {
+  const { data, error } = await db.rpc('meu_rank_pvp', {})
+  falhou(error)
+  return {
+    mmr: data.mmr,
+    partidas: data.partidas,
+    pdl: data.pdl,
+    divisao: data.divisao,
+    vitorias: data.vitorias,
+    derrotas: data.derrotas,
+    partidasHoje: data.partidas_hoje,
+    resetEm: data.reset_em,
+  }
+}
+
+export async function entrarFilaRanqueada(): Promise<RankPvp> {
+  const { data, error } = await db.rpc('entrar_fila_ranqueada', {})
+  falhou(error)
+  return {
+    mmr: data.mmr,
+    partidas: data.partidas,
+    pdl: data.pdl,
+    divisao: data.divisao,
+    vitorias: data.vitorias,
+    derrotas: data.derrotas,
+    partidasHoje: data.partidas_hoje,
+    resetEm: data.reset_em,
+  }
+}
+
+export async function sairDaFilaRanqueada(): Promise<void> {
+  const { error } = await db.rpc('sair_da_fila_ranqueada', {})
+  falhou(error)
+}
+
+export async function tentarPearearRanqueado(): Promise<SessaoPvp | null> {
+  const { data, error } = await db.rpc('tentar_parear_ranqueado', {})
+  falhou(error)
+  return data ? daLinha(data as LinhaPvp) : null
+}
