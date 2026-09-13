@@ -12,10 +12,13 @@ import type { PvpEventoRemoto, LadoPvpRemoto } from '@/data/remote/servidor'
 // Dano abaixo disto nao justifica o flinch — golpe fraco nao "machuca
 // visivelmente" (limiar pedido: 30% do HP maximo do defensor).
 const LIMIAR_HURT = 0.3
-// Pausa entre um evento e o proximo, alem da duracao da propria pose de
-// ataque (ATTACK_ANIM_DURATION) — sem isto os golpes emendam sem dar tempo
-// de ler "quem atacou quem".
-const PAUSA_ENTRE_EVENTOS = 0.35
+// Duracao de UM turno inteiro (pedido explicito: ~3s), contada a partir do
+// instante em que o golpe e aplicado. PRECISA ser maior que
+// ATTACK_ANIM_DURATION (0.5s, animationSystem.ts) + HURT_ANIM_DURATION
+// (0.4s) — do contrario o proximo evento troca a pose antes da atual
+// terminar de tocar e a sprite de ataque nunca aparece completa (bug
+// PH-534: com 0.35s o replay ficava um borrao ilegivel).
+const PAUSA_ENTRE_EVENTOS = 3
 // Nivel arbitrario so pra ter um `PokeInstance` com stats coerentes — o
 // replay nunca mostra numero de stat nenhum, so precisa de `poke.hp`/
 // `poke.stats.hp` pra Faint/Hurt funcionarem via `isDead`.
@@ -25,6 +28,9 @@ export interface EstadoReplayPvp {
   eventos: PvpEventoRemoto[]
   indice: number
   esperando: number
+  // Ultimo evento aplicado — PvpOverlay le isto pra mostrar "X usou Y!"
+  // (PH-534: o nome do golpe ja vinha do servidor mas nunca era exibido).
+  ultimoEvento?: PvpEventoRemoto
 }
 
 function pokeVisual(speciesId: string, isShiny: boolean) {
@@ -77,6 +83,7 @@ export function stepPvpReplay(world: WorldState, dt: number): void {
     triggerHurtAnim(defensor)
   }
 
+  replay.ultimoEvento = evento
   replay.indice += 1
   replay.esperando = PAUSA_ENTRE_EVENTOS
 }

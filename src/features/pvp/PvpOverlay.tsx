@@ -44,6 +44,10 @@ export function PvpOverlay() {
   if (!pvp) return null
 
   const emAndamento = pvp.estado === 'lutando' || pvp.estado === 'replay'
+  // PH-534: o nome do golpe ja vinha do servidor mas nunca era exibido —
+  // so existe durante o replay (duelo AO VIVO/`criarMundoPvpVisual` nao tem
+  // `pvp.replay`, so o resultado ja decidido tem).
+  const ultimoEvento = pvp.replay?.ultimoEvento
 
   const encerrar = () => {
     const { team, activeIndex } = useGameStateStore.getState()
@@ -61,6 +65,11 @@ export function PvpOverlay() {
         <div className="mt-[.25em] text-[.78em] text-n400">
           Você {Math.max(0, playerHp)} HP · Rival {Math.max(0, rivalHp)}/{rivalMaxHp} HP
         </div>
+        {emAndamento && ultimoEvento && (
+          <div className="mt-[.2em] text-[.78em] text-n300">
+            {ultimoEvento.atacante} usou {ultimoEvento.golpe}!
+          </div>
+        )}
         {!emAndamento && (
           <GameButton className="mt-[.45em]" variant="primary" onClick={encerrar}>
             <ArrowUDownLeft /> Voltar
