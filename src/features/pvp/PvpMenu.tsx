@@ -131,23 +131,6 @@ export function PvpMenu() {
         )}
       </div>
 
-      {pvp.resultado && (
-        <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em] text-center">
-          <SectionLabel>RESULTADO</SectionLabel>
-          <div className="mt-[.3em] text-[1.05em] font-medium">
-            {pvp.resultado.jaResolvido
-              ? 'Esse duelo já tinha sido resolvido.'
-              : pvp.resultado.vencedorId == null
-                ? 'Empate'
-                : pvp.resultado.vencedorId === meuId ? 'Você venceu!' : 'Você perdeu.'}
-          </div>
-          {pvp.resultado.turnos != null && (
-            <div className="text-[.8em] text-n400">Duelo em {pvp.resultado.turnos} turnos.</div>
-          )}
-          <GameButton className="mt-[.4em]" variant="primary" onClick={pvp.limparResultado}>Fechar</GameButton>
-        </div>
-      )}
-
       <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em]">
         <SectionLabel>HISTÓRICO PVP</SectionLabel>
         <div className="mt-[.45em] flex max-h-[15em] flex-col gap-[.3em] overflow-y-auto">
