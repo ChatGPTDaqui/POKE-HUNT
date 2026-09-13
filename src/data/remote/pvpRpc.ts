@@ -7,12 +7,14 @@ const db = supabase as unknown as {
 }
 
 export type EstadoPvp = 'convidada' | 'aberta' | 'concluida' | 'cancelada' | 'expirada'
+export type ModoPvp = 'amistoso' | 'ranqueado'
 
 export interface SessaoPvp {
   id: string
   anfitriaoId: string
   convidadoId: string
   estado: EstadoPvp
+  modo: ModoPvp
   criadaEm: string
   expiraEm: string
   encerradaPor: string | null
@@ -36,6 +38,7 @@ interface LinhaPvp {
   anfitriao_id: string
   convidado_id: string
   estado: EstadoPvp
+  modo?: ModoPvp
   criada_em: string
   expira_em: string
   encerrada_por: string | null
@@ -55,6 +58,7 @@ function daLinha(l: LinhaPvp): SessaoPvp {
     anfitriaoId: l.anfitriao_id,
     convidadoId: l.convidado_id,
     estado: l.estado,
+    modo: l.modo ?? 'amistoso',
     criadaEm: l.criada_em,
     expiraEm: l.expira_em,
     encerradaPor: l.encerrada_por,
@@ -91,6 +95,21 @@ export async function aceitarPvp(sessaoId: string, meuPoke: PokeInstance): Promi
     p_pokemon_id: meuPoke.uid,
     p_poke: meuPoke,
   })
+  falhou(error)
+  return daLinha(data as LinhaPvp)
+}
+
+// Amistoso com time completo (PH-531): anfitriao convida com o proprio time
+// de PvP salvo (aba Build); convidado aceita com o array explicito que
+// escolheu no client (time atual de aventura ou o salvo de PvP).
+export async function abrirPvpTime(convidadoId: string): Promise<SessaoPvp> {
+  const { data, error } = await db.rpc('abrir_pvp_time', { p_convidado_id: convidadoId })
+  falhou(error)
+  return daLinha(data as LinhaPvp)
+}
+
+export async function aceitarPvpTime(sessaoId: string, pokemonIds: string[]): Promise<SessaoPvp> {
+  const { data, error } = await db.rpc('aceitar_pvp_time', { p_sessao_id: sessaoId, p_pokemon_ids: pokemonIds })
   falhou(error)
   return daLinha(data as LinhaPvp)
 }

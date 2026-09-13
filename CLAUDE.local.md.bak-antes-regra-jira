@@ -1,0 +1,364 @@
+# CLAUDE.local.md — regras pessoais desta máquina
+
+Arquivo pessoal e gitignored. Não copiar para outro dev, não migrar para `CLAUDE.md`
+(que é versionado e regra de time).
+
+## Toda tarefa e toda correção passa pelo Jira
+
+**Antes de tocar em qualquer arquivo versionado**, a tarefa nova ou a correção de erro tem
+issue no Jira, projeto `PH` em `oreisviana.atlassian.net`. **Somente o projeto `PH`** — nunca
+criar issue em outro projeto deste site, mesmo que o assunto pareça encaixar melhor lá.
+
+A única coisa que não abre issue é mudança em arquivo **gitignored** (`.env.local`,
+`CLAUDE.local.md`, `.claude/*`), porque é config de máquina e não entra em commit; nesse caso
+avisar o usuário que mudou e seguir.
+
+### Faixa trivial — uma issue por DIA, não por item
+
+**Mudou em 2026-09-03.** A regra anterior era "sem exceção por tamanho: typo em doc, comentário,
+ajuste de uma linha — todos abrem issue".
+
+Agora, o que couber INTEIRO na lista abaixo entra numa issue única do dia,
+**"Manutenção trivial — <data>"**, em vez de abrir uma issue própria:
+
+- typo, acento ou reescrita de frase em documentação ou comentário;
+- string de UI sem mudança de comportamento;
+- rename mecânico sem mudança de lógica;
+- mudança de menos de 20 linhas **sem lógica nova** (formatação, import, ordem de campo).
+
+**Não cabe na faixa, e abre issue própria como antes:** qualquer coisa que toque motor,
+authority, migration, workflow de CI, regra de negócio, ou que mude comportamento visível pro
+jogador — por menor que seja o diff. Na dúvida, é issue própria: a faixa é um atalho, e atalho em
+dúvida vira rastro perdido.
+
+O resto do ciclo continua igual: branch com a key da issue do dia no nome, PR aberta, os dois
+checks. **O que muda é só a granularidade do rastro no board.**
+
+**A TROCA, explícita, porque ela é o custo real desta regra.** O rastro no board passa a ser por
+DIA e não por ITEM. Procurar depois "quando aquele texto da tela mudou?" deixa de dar uma issue
+com o motivo e passa a dar um dia com N mudanças juntas — e o `git log` vira a única fonte fina.
+Se esse rastro por item importa mais do que o tempo economizado, **esta é a regra a desfazer**, e
+desfazê-la é apagar esta seção: nenhuma outra parte do processo depende dela.
+
+Antes de criar, procurar issue existente com `text ~` no JQL (não só por título) — o board tem
+backlog de QA e duplicata polui o rastro.
+
+Formato da issue:
+
+- **Título** com o impacto primeiro, sem prefixo de tipo ou key: "Captura falha quando time está
+  cheio", não "[BUG] captura".
+- **Description** com o sintoma **e** o critério de aceite explícito. Sem critério de aceite a
+  issue não serve como rastro de QA.
+- Tipo `Bug` para comportamento quebrado, `Task` para trabalho novo.
+
+## Se a tarefa é para executar agora
+
+1. `git fetch origin dev` e criar a branch **de `origin/dev`**, nunca da `main`, nunca do HEAD
+   atual: `git switch -c <tipo>/PH-<n>-<slug> origin/dev`. Tipos: `feat` `fix` `chore` `docs`
+   `refactor` `test` `perf` `ci` `style`.
+2. A key `PH-<n>` **no nome da branch** é obrigatória — é o que liga o commit ao board e o que o
+   guardrail local verifica.
+3. Mudança de schema Supabase continua seguindo o fluxo de 9 passos de
+   `docs/11-operacao.md#fluxo-de-mudança-de-schema`, incluindo o par `_public.sql` + `_dev.sql`.
+4. Antes de subir, a verificação local é **o mínimo que pega erro real**, não a suíte inteira:
+
+   - `npx tsc -b` **sempre** (é o erro mais comum, e desde a PH-458 custa ~1s a quente).
+   - O teste **do que se mexeu** (`npx vitest run <caminho ou padrão>`).
+   - `npx vitest run` inteiro **só** quando a mudança tocar motor (`src/engine/`), authority,
+     store, ou outro código compartilhado que a suíte inteira importa.
+
+   **Mudou em 2026-09-03.** A regra anterior mandava rodar `tsc -b` **e** a suíte cheia
+   "independente do que o CI cubra". Medido nas 20 sessões anteriores: 560 min de suíte cheia +
+   165 min de `tsc` locais, repetindo exatamente o que `build-check` roda em toda PR — 13% do
+   tempo ativo gasto duas vezes no mesmo trabalho. O portão local não some, ele para de duplicar:
+   `check` e `build-check` são obrigatórios nas **duas** branches, e com o
+   auto-merge do passo 7 uma PR vermelha não entra. Nada quebrado passa por não ter rodado a suíte
+   aqui — só volta mais tarde, pelo CI.
+
+   **Incerteza honesta:** os 17 runs de `build-check` anteriores a esta mudança tiveram zero
+   falhas, e esse dado não distingue "o portão local funcionava" de "nada estava falhando". Se o CI
+   começar a ficar vermelho com frequência, reverter é reescrever este parágrafo.
+
+   Papercut do vitest: `npx vitest run --silent <caminho>` **aborta** com
+   `TypeError: Unexpected value "--silent=<caminho>"` — a flag engole o argumento seguinte. Formas
+   que funcionam: `npx vitest run --silent=true <caminho>` ou `npx vitest run <caminho> --silent`.
+
+5. Commit em conventional commits, mensagem em português, sem crédito nem coautoria.
+6. `git push -u origin <branch>`.
+7. Abrir a PR e **armar o auto-merge**:
+
+   ```
+   gh pr create --base dev --reviewer OtaviorRV --title "[PH-<n>] <resumo>"
+   gh pr merge --auto --squash <n>
+   ```
+
+   Corpo do PR: link da issue, o que mudou, o critério de aceite copiado da issue, e o resultado
+   real de `tsc`/`vitest`. PR mira `dev`, nunca `main`.
+
+   **Só armar o auto-merge quando não vier mais commit nesta branch** — ele dispara no primeiro
+   verde, e commit que chegar depois disso fica órfão fora da `dev`. PR que ainda vai receber
+   ajuste, ou que subiu `--draft`, fica sem `--auto` até o último push.
+
+   **Não ficar em `gh pr checks` esperando o CI.** Foram 215 chamadas e 259 min de espera medidos —
+   o segundo maior consumidor de relógio do projeto, atrás só do vitest. Depois de armar, uma única
+   conferida com `gh pr view <n> --json state,mergeStateStatus,mergedAt` e seguir: se não entrou
+   ainda, o certo a dizer é que o auto-merge está **armado**, não que a PR está pendente de alguém.
+
+   **Se a `dev` andar enquanto a PR espera, ela trava em `BEHIND` e o auto-merge
+   NÃO desatrava sozinho.** As duas branches têm `strict_required_status_checks_policy`,
+   que exige a branch atualizada; o auto-merge respeita a regra mas não faz a
+   atualização por conta própria. Medido em 03/09: PR com os dois checks verdes e
+   auto-merge armado parada em `BEHIND` por 40 min. Conserto de uma linha:
+
+   ```
+   gh pr update-branch <n>
+   ```
+
+   Vale a pena conferir isso quando várias PRs sobem na mesma leva — a primeira
+   entra, e as seguintes nascem atrás dela.
+
+8. Transicionar a issue no Jira para o estado de revisão.
+9. ~~**Nunca fazer merge da própria PR.**~~ **Revogado em 2026-08-30** — ver "O REVIEW MANUAL
+   ACABOU", abaixo. Merge da própria PR liberado nas duas branches, com os checks verdes. O que
+   continua: a PR é sempre aberta, e a revisão escrita vai como comentário nela.
+
+Comandos prontos: `/ph <descrição>` faz o ciclo inteiro; `/pr` fecha uma tarefa já em andamento.
+
+## Banco só muda por migration — schema E dado
+
+Decidida em **2026-08-26**. O `CLAUDE.md` já exige migration para **schema**; esta regra estende a
+mesma exigência para **dado**.
+
+**Toda alteração no banco remoto entra por arquivo de migration versionado em
+`supabase/migrations/`.** Vale para os dois lados:
+
+- **Schema (DDL):** tabela, coluna, índice, constraint, tipo, RPC/função, trigger, policy de RLS,
+  grant. Já era regra de time; continua valendo igual, com o par `_public.sql` + `_dev.sql`.
+- **Dado (DML):** `insert`, `update`, `delete`, `upsert` que altere linha no remoto — seed, correção
+  de linha torta, backfill de coluna nova, ajuste de balanceamento que vive em tabela, remoção de
+  registro obsoleto.
+
+**Proibido, sem exceção:** `supabase db query`, o editor SQL do dashboard, `apply_migration` do MCP
+sem commitar o arquivo, **`execute_sql` do MCP para ESCREVER** (`insert`/`update`/`delete`/`upsert`
+ou qualquer DDL), script `.mjs`/`.js` de uma vez só, ou REST com `SERVICE_ROLE_KEY` na mão. Se a
+mudança precisa existir amanhã no banco, ela precisa existir hoje como arquivo no git.
+
+**`execute_sql` para LER é liberado** — `select`, `with`, `explain`. Decidido em **2026-08-30**
+(PH-309). Até então a tool inteira estava em `permissions.ask` do `.claude/settings.json`, e o texto
+aqui dizia "proibido sem exceção"; na prática ela era usada só para leitura (medido: 66 chamadas em
+15 sessões, 62 `select` + 4 `with`, **zero escrita**) e cada uma abria um prompt de autorização. Um
+gate que dispara 66 vezes por sessão em falso positivo não protege: ele treina quem opera a aprovar
+sem ler, e a escrita real passaria igual às 66 leituras anteriores. A regra escrita e a config
+divergiam; agora as duas dizem a mesma coisa — **ler pode, escrever não**.
+
+**O que segura a escrita agora:** esta regra (comportamental), `apply_migration` ainda em
+`permissions.ask`, e a PR obrigatória. O que NÃO segura: o CI. `supabase-check.yml` compara
+migrations aplicadas, então pega DDL fora de migration mas **não pega DML** — um `update players
+set ...` via `execute_sql` passaria sem prompt e sem check. Fechar isso de verdade exige um hook
+`PreToolUse` que inspecione o argumento `query` (permissão de MCP não filtra por argumento). Risco
+aceito conscientemente, não esquecido.
+
+**Por quê:** sem o arquivo, a mudança existe só no banco. Ela não aparece em code review, não é
+reproduzível em outro ambiente, e o gate `supabase-check.yml` reprova a próxima PR de qualquer um
+por "migration aplicada no remoto sem arquivo local" — o custo cai em quem não fez a mudança. Isso
+já aconteceu duas vezes no dia em que o gate foi criado.
+
+**As duas únicas exceções, nomeadas:**
+
+1. `npm run catalog:migrar` (`scripts/migrate-catalog-to-postgres.js`) — popula as 8 tabelas de
+   catálogo a partir da planilha mestra, por upsert idempotente. A FONTE é versionada e o script é
+   versionado, então a mudança é reproduzível e revisável; é pipeline, não escrita ad-hoc.
+2. `npm run db:wipe` — reset de saves. Não muda schema nem introduz dado novo, só zera o que
+   jogador gerou. Continua exigindo `--confirmar=APAGAR-TUDO` e continua sendo comando que o
+   usuário roda, não a IA.
+
+Qualquer OUTRA escrita de dado no remoto vira migration. Na dúvida sobre um caso novo, ele é
+migration — não se acrescenta exceção a esta lista sem o usuário decidir.
+
+**Migration de dado tem regra própria:** precisa ser idempotente (`on conflict do nothing/update`,
+`where not exists`, `delete` com filtro explícito) e precisa dizer no comentário do arquivo o que
+faz e por quê. Migration de dado que roda duas vezes e duplica linha é bug, não migration.
+
+## Trabalho só está salvo depois de `commit` + `push`
+
+Decidida em **2026-08-26**, depois de perder o protótipo da PH-189.
+
+**Salvar contexto e `/clear` NÃO salvam arquivo.** Eles mexem só na conversa — no que a IA
+lembra. Nenhum dos dois toca no disco, nenhum dos dois versiona nada. Arquivo fora de commit
+continua fora de commit depois de qualquer coisa feita no chat.
+
+**Arquivo não rastreado não deixa rastro.** Não entra em reflog, não vira objeto no `.git`, não
+aparece em stash. Quando some, não existe forense: não dá pra saber quando nem por quê. Foi o que
+aconteceu com `src/harness-placa.ts` e `harness-batalha.html`, a bancada que produziu as medições
+da PH-189 — os números sobreviveram porque foram escritos na issue, o código não sobreviveu porque
+nunca entrou no git.
+
+**Protótipo, bancada de medição e harness de investigação VÃO pro git.** Não é código descartável:
+é a prova de que a solução medida funciona, e é o que o próximo a pegar a issue precisa pra
+reproduzir o número em vez de refazer a investigação. Lugar: `scripts/harness/`. Não vai pro bundle
+de produção, então não custa nada. Este repo já versiona 242MB de entrada de script (PH-163) por
+exatamente esse motivo — guardar os dois lados da derivação.
+
+Se o protótipo é sujo demais pra ficar em `src/`, isso é argumento pra movê-lo, não pra deixá-lo
+fora do controle de versão.
+
+**Este diretório de trabalho é compartilhado por várias sessões ao mesmo tempo.** Medido em
+26/08: três sessões trocaram de branch no MESMO diretório em 50 minutos (`PH-197` → `PH-198` →
+`PH-199`), e existem worktrees paralelos em `Documents/POKE-HUNT-PH-*` e `.claude/worktrees/`.
+Consequências práticas:
+
+- Antes de trocar de branch ou encerrar, **commitar e empurrar**. Branch só local morre com o
+  diretório.
+- Não rodar `git clean` neste diretório sem olhar o que ele vai levar — pode ser trabalho vivo de
+  outra sessão.
+- Achar a branch trocada debaixo do pé é normal aqui, não é sinal de problema. Conferir
+  `git status -sb` antes de assumir em que branch se está.
+
+## O REVIEW MANUAL ACABOU — decretado em 2026-08-30, sem prazo
+
+Substitui a suspensão temporária de 22/08 (prorrogada em 25/08), que expirava hoje. **Não expira e
+não volta**: palavras do dono do projeto, "está decretado o fim do review e aprovação manual da
+minha parte nesse projeto".
+
+**O que isso significa na prática:**
+
+- O passo **9** ("nunca fazer merge da própria PR") está **revogado**, nas duas branches.
+- `dev` e `main` estão as duas com `required_approving_review_count: 0`.
+- O Otávio não espera aprovação de ninguém pra passar nada, em nenhuma branch.
+- Tudo o mais continua igual: **PR aberta normalmente**, issue no Jira antes, key na branch,
+  guardrail ligado. O que saiu foi a espera por um humano, não o fluxo.
+
+**O CI virou o único revisor, e por isso ele apertou junto (PH-297).** Não é opcional:
+
+- `check` (supabase) **e** `build-check` (tsc + testes) obrigatórios nas **duas** branches.
+- `build-check` passou a rodar também em PR para `main` — até 30/08 ele só disparava em PR para
+  `dev`, e a promoção para produção nunca rodou `tsc` nem teste nenhum. A aprovação humana era o
+  que sobrava de gate ali; tirá-la sem fechar isso deixaria produção sem revisor nenhum.
+- `bypass_actors` vazio na **`main`**. Ninguém empurra direto ali, nem quem tem admin.
+- **Na `dev` ele NÃO está vazio** — conferido na API em 03/09, há um ator
+  (`OtaviorRV`, `bypass_mode: pull_request`), que pode mergear PR sem os checks
+  satisfeitos. Este arquivo afirmou "nas duas" desde 30/08 e estava errado.
+  Também divergem: `require_extra_approval_for_unattributed_changes` é `true` na
+  `dev` e `false` na `main`. Ao mexer em proteção, conferir as duas de verdade:
+  `gh api repos/ChatGPTDaqui/POKE-HUNT/rulesets/21101230` (dev) e `.../21100682` (main).
+
+**Dois lugares protegem a `main`, e os dois precisam concordar.** Achado ao aplicar isto: além do
+ruleset, existe uma **branch protection clássica** (`/branches/main/protection`). Ela continuava
+exigindo 1 aprovação depois de o ruleset já estar em 0, e o GitHub reporta `REVIEW_REQUIRED` se
+**qualquer um** dos dois exigir. Ao mexer em proteção, conferir os dois:
+
+```
+gh api repos/ChatGPTDaqui/POKE-HUNT/rulesets/21100682     # ruleset main-protection
+gh api repos/ChatGPTDaqui/POKE-HUNT/branches/main/protection   # protecao classica
+```
+
+**`require_extra_approval_for_unattributed_changes` está `false` na `main`.** Ela exigia aprovação
+humana quando a PR carregava commit de autoria não vinculada a uma conta do GitHub — e a `dev`
+acumula commits assim. Com ela ligada o decreto não se cumpria. O que se perde: commit forjado com
+o e-mail de outra pessoa entra sem revisão humana. O que segura no lugar: PR obrigatória,
+`bypass_actors` vazio, e os dois checks.
+
+**A dívida de revisão não sumiu — ela virou permanente, e agora é dele.** As PRs que entraram sem
+revisão desde 22/08 (#109 em diante) continuam sem revisão, e as novas entram do mesmo jeito. A
+compensação que eu mantenho: **revisão escrita de cada PR como comentário**, que é a única trilha
+de "alguém olhou isto" que sobrou.
+
+**A PROMOÇÃO TAMBÉM CAIU, no mesmo dia (PH-298).** A primeira versão desta seção separava as duas
+coisas — aprovar a PR e disparar a promoção — e dizia que a segunda continuava exigindo o "vai"
+dele. Ele pediu as duas: *"muda no CLAUDE.md pra promover sozinho também"*. Feito.
+
+| | Quem decide | Estado |
+|---|---|---|
+| **Aprovar** uma PR (review) | ninguém — o CI | acabou em 30/08 (PH-297) |
+| **Disparar** a promoção pra produção | quem estiver tocando | acabou em 30/08 (PH-298) |
+
+**E ISSO CRIA UMA OBRIGAÇÃO NOVA, que está no `CLAUDE.md` e não é opcional.** O CI não verifica
+que o app sobe: `check` olha migration e tipos, `build-check` roda `tsc` e testes, e nenhum abre o
+jogo. Já falhou duas vezes com deploy verde (PH-134 e PH-293). Depois de todo merge em `main`:
+conferir o run do deploy, **abrir o jogo em produção e ver se ele carrega** (não se a tela sobe),
+levar os patch notes junto, e reverter primeiro se quebrar.
+
+## Guardrail local
+
+`.claude/hooks/guardrail-jira.mjs`, registrado como hook `PreToolUse` de `Bash` em
+`.claude/settings.local.json`. Bloqueia commit em `main`/`dev`, commit ou push em branch sem key
+`PH-<n>`, push/merge mirando `main`/`dev`, e criação de branch fora de `origin/dev` ou com nome
+fora do padrão. Só age dentro do repo `POKE-HUNT`.
+
+Escape hatch: o literal `#guardrail-off` no comando desliga a checagem daquela chamada. Usar
+**somente** quando o usuário pedir explicitamente.
+
+O que o guardrail **não** faz: não sabe se a key existe de verdade no Jira. Uma key inventada
+(`PH-999`) passa por ele. Fechar esse furo exige chamar a API do Jira com token — hoje o acesso
+é MCP OAuth interativo, que não roda em hook.
+
+## O FARM OFFLINE NÃO EXISTE — quarentena, sem prazo
+
+Decretado em **2026-08-30**, depois de eu trazer o assunto três vezes numa sessão só.
+
+**O farm offline está PAUSADO e em QUARENTENA. Trate-o como se ele não existisse.** Não é "existe
+mas está desligado": para efeito de qualquer raciocínio, projeto, diagnóstico, relatório, comentário
+de código, issue, PR ou patch note, **ele não existe**.
+
+Isso quer dizer, sem exceção:
+
+- **Não citar** como causa, explicação, atenuante ou "contexto útil" de nada. "Isso acontece porque
+  o farm offline está pausado" é uma resposta proibida — se um jogador está perdendo progresso, o
+  problema é esse, e o resto é implementação.
+- **Não investigar, não medir, não testar, não otimizar** nada que dependa dele.
+- **Não tocar** em `FARM_OFFLINE_PAUSADO`, no regime `offline` do flush, no modo pessimista nem no
+  piso de 50% — nem para "melhorar", nem para "aproveitar que estou aqui".
+- **Não propor** mudanças nele, nem oferecer issue sobre ele.
+- **Não usá-lo como desculpa** para um caso não resolvido. Se um caso não tem solução hoje, o nome
+  dele é o sintoma do jogador ("sessão viva tratada como ausência"), não o nome do subsistema.
+
+Ele volta um dia, **quando for pedido explicitamente**. Até lá, silêncio.
+
+**PERGUNTA SUA SOBRE O ASSUNTO NÃO LEVANTA A QUARENTENA** — reforçado em **2026-09-01**, depois
+de eu quebrar a regra. Perguntado "a PH-377 tem alguma coisa a ver com o farm offline?", eu fui
+ler o hook de boot e o `progresso.ts` da authority, medi onde a mecânica está viva, escrevi o
+diagnóstico no chat e ainda ofereci trabalhar nela. A resposta certa cabia em uma linha: **"sim,
+essa parte está em quarentena; a outra parte é X"** — e ponto.
+
+A distinção que eu errei: **"ele volta quando for pedido explicitamente"** significa você mandar
+voltar a trabalhar nele. Não é uma pergunta de sim-ou-não, não é você citar o nome, não é você
+perguntar se algo tem relação. Nesses casos: confirmar ou negar a relação em uma frase, dizer que
+está fora por quarentena, e não abrir o código, não medir, não diagnosticar, não propor.
+
+Corolário para a fila: se uma issue do `PH` tiver critério de aceite que manda mexer nele (a
+PH-377 tinha, criada por mim mesmo), **o critério sai da issue** em vez de ser cumprido.
+
+## Achado fora do escopo da branch atual
+
+Achado de auditoria ou QA não vira commit na hora: relatar, checar se já existe issue no `PH`,
+oferecer abrir uma, e parar. A fila do Jira é a ordem de trabalho.
+
+## Patch notes não pode atrasar — varredura diária + gate na promoção
+
+Decidida em **2026-08-27**. O changelog (`src/data/patchNotes.ts`) já ficou pra trás duas vezes
+(7.13/PH-166 retroativa, 7.14/PH-231 com 13 itens de uma vez), sempre porque promoção `dev`→`main`
+saiu sem ninguém atualizar a nota.
+
+**Duas camadas:**
+
+1. **Varredura diária** — scheduled task `patch-notes-diario` (`~/.claude/scheduled-tasks/`), roda
+   todo dia ~20:40 local. Ela: compara o que está na `main` contra a última entrada de
+   `patchNotes.ts`; separa o que é player-facing do que é interno/CI/meia-feature; se sobrar
+   coisa **já promovida pra `main`** e sem nota, abre issue no `PH` e uma PR de rascunho pra `dev`
+   com a entrada nova (revisor OtaviorRV, **nunca mergeia**). Se não sobrar nada, no-op.
+
+2. **Gate na promoção** — toda PR `dev`→`main` confere o intervalo desde a última nota e leva a
+   entrada de patch notes junto (ou uma logo atrás). É a lição escrita na própria 7.13: conferir
+   contra o **intervalo**, não contra a issue que motivou.
+
+**Régua do que ENTRA na nota** (mesma das 7.11–7.14):
+- Só o que o jogador **vê ou sente**: tela nova, efeito visual, texto de UI, mudança de
+  comportamento de jogo, bug visível corrigido.
+- Só o que **já está na `main`** (promovido). Coisa só na `dev` não é produção — não anuncia.
+- **Meia-feature não entra.** Sistema grande que chegou pela metade (ex.: boss/andares só no
+  bioma piloto, sem visual) espera a versão completa e ganha entrada própria.
+- **Fica de fora, sempre:** perf interno, egress, CI, refactor, migration sem efeito visível,
+  harness, encanamento (camada de VFX é enabler — quem entra é o efeito que ela permite).
+- Linguagem de jogador, não de dev. Frase-chave em maiúscula, mesmo tom das entradas anteriores.
+- Versão = lista de inteiros por ponto (`7.14`, não decimal). Uma entrada por promoção, não por
+  dia — dia sem mudança player-facing não gera entrada.

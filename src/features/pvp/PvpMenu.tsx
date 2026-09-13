@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Clock, Sword, X } from '@phosphor-icons/react'
+import { Clock, Sword } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import { Carregando, ComingSoon, GameButton, GameInput, SectionLabel, SegmentedTabs } from '@/components/game/controls'
 import * as rankingRpc from '@/data/remote/rankingRpc'
 import { useAuthStore } from '@/stores/authStore'
 import { usePvp } from './usePvp'
 import { PvpBuildTab } from './PvpBuildTab'
+import { PvpRankedTab } from './PvpRankedTab'
 
 type AbaPvp = 'lobby' | 'build' | 'ranked' | 'torneios'
 
@@ -50,16 +51,7 @@ export function PvpMenu() {
   )
 
   if (aba === 'build') return <div className="flex flex-col gap-[.75em]">{abas}<PvpBuildTab /></div>
-  if (aba === 'ranked') {
-    return (
-      <div className="flex flex-col gap-[.75em]">
-        {abas}
-        <ComingSoon icon={<Sword />} title="Ranqueado em breve">
-          Fila por MMR, temporada e divisões. Monte seu time na aba Build enquanto isso.
-        </ComingSoon>
-      </div>
-    )
-  }
+  if (aba === 'ranked') return <div className="flex flex-col gap-[.75em]">{abas}<PvpRankedTab /></div>
   if (aba === 'torneios') {
     return (
       <div className="flex flex-col gap-[.75em]">
@@ -115,31 +107,46 @@ export function PvpMenu() {
             <span className="flex items-center gap-[.25em] text-[.78em] text-n500">
               <Clock /> aguardando aceite
             </span>
-            <div className="flex gap-[.4em]">
-              {souConvidado ? (
-                <GameButton variant="primary" block carregando={pvp.ocupado} onClick={() => { void pvp.aceitar() }}>
-                  Aceitar
-                </GameButton>
-              ) : null}
-              <GameButton variant="danger" block carregando={pvp.ocupado} onClick={() => { void pvp.recusarOuCancelar() }}>
-                {souConvidado ? 'Recusar' : 'Cancelar'}
-              </GameButton>
-            </div>
+            {souConvidado ? (
+              <div className="flex flex-col gap-[.3em]">
+                <span className="text-[.78em] text-n500">Duelo automático — escolha qual time leva pra luta:</span>
+                <div className="flex gap-[.4em]">
+                  <GameButton variant="primary" block carregando={pvp.ocupado} onClick={() => { void pvp.aceitar(false) }}>
+                    Time atual
+                  </GameButton>
+                  <GameButton variant="primary" block carregando={pvp.ocupado} onClick={() => { void pvp.aceitar(true) }}>
+                    Time de PvP salvo
+                  </GameButton>
+                </div>
+              </div>
+            ) : null}
+            <GameButton variant="danger" block carregando={pvp.ocupado} onClick={() => { void pvp.recusarOuCancelar() }}>
+              {souConvidado ? 'Recusar' : 'Cancelar'}
+            </GameButton>
           </div>
         ) : (
-          <div className="flex flex-col gap-[.45em]">
-            <span className="text-[.9em]">Duelo aceito contra <strong>{nickDoOutro}</strong>.</span>
-            <div className="flex gap-[.4em]">
-              <GameButton variant="primary" block onClick={() => pvp.entrarNaArena(nickDoOutro)}>
-                Entrar no mapa PvP
-              </GameButton>
-              <GameButton variant="danger" block carregando={pvp.ocupado} onClick={() => { void pvp.recusarOuCancelar() }}>
-                <X /> Cancelar
-              </GameButton>
-            </div>
+          <div className="flex flex-col items-center gap-[.4em] py-[.5em]">
+            <Carregando texto={`Resolvendo o duelo contra ${nickDoOutro}...`} />
           </div>
         )}
       </div>
+
+      {pvp.resultado && (
+        <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em] text-center">
+          <SectionLabel>RESULTADO</SectionLabel>
+          <div className="mt-[.3em] text-[1.05em] font-medium">
+            {pvp.resultado.jaResolvido
+              ? 'Esse duelo já tinha sido resolvido.'
+              : pvp.resultado.vencedorId == null
+                ? 'Empate'
+                : pvp.resultado.vencedorId === meuId ? 'Você venceu!' : 'Você perdeu.'}
+          </div>
+          {pvp.resultado.turnos != null && (
+            <div className="text-[.8em] text-n400">Duelo em {pvp.resultado.turnos} turnos.</div>
+          )}
+          <GameButton className="mt-[.4em]" variant="primary" onClick={pvp.limparResultado}>Fechar</GameButton>
+        </div>
+      )}
 
       <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em]">
         <SectionLabel>HISTÓRICO PVP</SectionLabel>

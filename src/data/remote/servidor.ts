@@ -237,6 +237,25 @@ export interface RespostaFlush extends RespostaComEstado {
  * PH-178. Mesmo formato de `RespostaFlush` (o servidor simula o intervalo
  * normal antes de tentar o avanco) mais o resultado do proprio avanco.
  */
+export interface PvpEventoRemoto {
+  atacante: string
+  defensor: string
+  golpe: string
+  dano: number
+  hpRestante: number
+  efetividade: number
+  nocaute: boolean
+}
+
+export interface RespostaResolverPvp {
+  jaResolvido?: boolean
+  vencedorId?: string | null
+  eventos?: PvpEventoRemoto[]
+  turnos?: number
+  pdlDeltaAnfitriao?: number
+  pdlDeltaConvidado?: number
+}
+
 export interface RespostaAvancoDeSala extends RespostaFlush {
   /**
    * `false` quando a sala ja nao estava mais travada em 30/30 ao fim da
@@ -618,6 +637,14 @@ export const servidor = {
   // do que ele pediu.
   avancarSalaManual: () => pedir<RespostaAvancoDeSala>('/sessao/avancar-sala', {
     method: 'POST', timeoutMs: TIMEOUT_FLUSH_MS, body: CORPO_PARCIAL,
+  }),
+
+  // Resolucao 100% server-side do PvP (PH-529): o servidor roda o duelo e
+  // calcula Elo/PDL, o client so pede e mostra o resultado — nunca reporta o
+  // proprio vencedor. Idempotente (`jaResolvido: true` se outro participante
+  // já disparou primeiro).
+  resolverPvp: (sessaoId: string) => pedir<RespostaResolverPvp>('/pvp/resolver', {
+    method: 'POST', body: JSON.stringify({ sessaoId }),
   }),
 }
 
