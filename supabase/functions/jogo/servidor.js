@@ -40844,7 +40844,7 @@ function pvpRowToPoke(row) {
 }
 //#endregion
 //#region authority/src/appPvp.ts
-function json$1(dado, status = 200) {
+function json$2(dado, status = 200) {
 	return new Response(JSON.stringify(dado), {
 		status,
 		headers: { "content-type": "application/json; charset=utf-8" }
@@ -40861,7 +40861,7 @@ function resultadoDoAnfitriao(r) {
 	if (r.vencedor === "oponente") return "derrota";
 	return "empate";
 }
-function eventosParaCliente(eventos) {
+function eventosParaCliente$1(eventos) {
 	const lado = (l) => l === "jogador" ? "anfitriao" : "convidado";
 	return eventos.map((e) => ({
 		...e,
@@ -40875,7 +40875,7 @@ async function resolverPvp(cfg, jogadorId, req) {
 	const [sessao] = await selecionar(cfg, `pvp_sessao?id=eq.${sessaoId}&select=*`);
 	if (!sessao) throw new ErroHttp(404, "PvP nao encontrado.");
 	if (sessao.anfitriao_id !== jogadorId && sessao.convidado_id !== jogadorId) throw new ErroHttp(403, "Este PvP nao e seu.");
-	if (sessao.estado !== "aberta") return json$1({ jaResolvido: true });
+	if (sessao.estado !== "aberta") return json$2({ jaResolvido: true });
 	const timeAnfitriao = montarTime("anfitriao", sessao.anfitriao_time);
 	const timeConvidado = montarTime("convidado", sessao.convidado_time);
 	if (timeAnfitriao.time.length === 0 || timeConvidado.time.length === 0) throw new ErroHttp(409, "Um dos times deste PvP esta vazio ou invalido.");
@@ -40896,9 +40896,9 @@ async function resolverPvp(cfg, jogadorId, req) {
 			p_pdl_delta_anfitriao: null,
 			p_pdl_delta_convidado: null
 		});
-		return json$1({
+		return json$2({
 			vencedorId,
-			eventos: eventosParaCliente(resultado.eventos),
+			eventos: eventosParaCliente$1(resultado.eventos),
 			turnos: resultado.turnos
 		});
 	}
@@ -40920,14 +40920,903 @@ async function resolverPvp(cfg, jogadorId, req) {
 		p_pdl_delta_anfitriao: calculo.anfitriao.pdlDelta,
 		p_pdl_delta_convidado: calculo.convidado.pdlDelta
 	});
-	return json$1({
+	return json$2({
 		vencedorId,
-		eventos: eventosParaCliente(resultado.eventos),
+		eventos: eventosParaCliente$1(resultado.eventos),
 		turnos: resultado.turnos,
 		pdlDeltaAnfitriao: calculo.anfitriao.pdlDelta,
 		pdlDeltaConvidado: calculo.convidado.pdlDelta
 	});
 }
+//#endregion
+//#region src/data/biomas.ts
+/**
+* O grupo de gate das hunts que nascem abertas.
+*
+* ERAM AS DUAS PRIMEIRAS FAIXAS ATE A PH-432, e o encolhimento aqui e o fim da
+* ponte que a PH-426 tinha montado. O raciocinio: `continent` existe pra dizer
+* "este conteudo esta liberado?", e nas hunts de bioma essa pergunta passou a
+* ser respondida pelo ESTAGIO (PH-430 — o estagio 1 sempre aberto, o N pede o
+* N-1). Manter as faixas aqui era uma segunda trava que dizia a mesma coisa com
+* granularidade pior: ela barrava o estagio 7 inteiro atras do Campeao Lance
+* quando o gate de estagio ja o barra atras do estagio 6.
+*
+* O que `continent` ainda decide de verdade e UMA coisa: o Modo Pesadelo (e as
+* 11 hunts BOSS dentro dele) esta aberto? Isso continua sendo o premio do
+* Lance.
+*/
+var GRUPOS_INICIAIS = ["biomas"];
+/**
+* O que derrotar o Campeao Lance libera.
+*
+* Encolheu de `['faixa3', 'nightmare']` pra so o Pesadelo na PH-432: a faixa3
+* deixou de existir como grupo, e o que era "a faixa III" agora sao os estagios
+* 7 a 10, liberados um a um pelo proprio progresso do bioma.
+*/
+var GRUPOS_DO_LANCE = ["nightmare"];
+var GRUPOS_LEGADOS = /* @__PURE__ */ new Set([
+	"johto",
+	"kanto",
+	"faixa1",
+	"faixa2",
+	"faixa3"
+]);
+/**
+* O grupo de gate da hunt esta liberado pra este jogador?
+*
+* PH-447: GRUPO INICIAL E LIBERADO POR DEFINICAO, E NAO POR ESTAR NA LISTA DA
+* LINHA. Ate aqui as duas pontas perguntavam
+* `unlockedContinents.includes(grupo)` direto, e isso amarrou "o mundo esta
+* aberto?" ao CONTEUDO de `players.unlocked_continents` — uma coluna escrita
+* por saves antigos, com nome de grupo que o codigo ja renomeou duas vezes.
+*
+* O ESTRAGO REAL, medido em producao em 02/09: a PH-434 trocou
+* `GRUPOS_INICIAIS` de `['faixa1','faixa2']` pra `['biomas']`, nenhuma
+* migration reescreveu a coluna, e as 8 linhas do banco continuaram com
+* `faixa1`/`faixa2`. Resultado: `includes('biomas')` falso pra todo mundo, e
+* TODA hunt do jogo — a Rota 46 inicial e os 120 estagios de bioma — respondeu
+* "Derrote o Campeao Lance antes de acessar Mundo". O jogo inteiro trancado,
+* com deploy verde e 2977 testes passando.
+*
+* Por que a checagem por definicao e a resposta certa, e nao so a migration: o
+* grupo inicial NUNCA pode estar fechado. Ele e o que nasce aberto — e a
+* pergunta "o jogador desbloqueou o que nasce aberto?" nao tem resposta util,
+* so tem resposta errada. O que `continent` decide de verdade e uma coisa so
+* (o Modo Pesadelo, premio do Lance), e essa continua vindo da lista.
+*
+* Fica ao lado de `GRUPOS_INICIAIS` porque as duas pontas chamam a MESMA
+* funcao — o gate da autoridade (`appSessao.ts`) e o menu (`HuntMenu.tsx`).
+* Mesmo motivo de `bloqueioDoEstagio` morar em `progressoDeBioma.ts`: regra
+* calculada em dois lugares diverge, e o jogador ve hunt aberta que o servidor
+* recusa.
+*/
+function grupoLiberado(grupo, liberados) {
+	if (GRUPOS_INICIAIS.includes(grupo)) return true;
+	return liberados.includes(grupo);
+}
+/**
+* Traduz `unlocked_continents` de um save pro vocabulario de hoje.
+*
+* A FONTE UNICA DA TRADUCAO (PH-447). Ela existia SO no `merge` do `persist`
+* (`stores/gameStateStore.ts`), e o caminho remoto — `remote/playerMapper.ts`,
+* que e o que vale sob autoridade — repassava a coluna crua. Os dois caminhos
+* de carga discordavam sobre o que o jogador tem liberado, e o remoto era o
+* errado.
+*
+* Pior: `stores/gateDoLance.test.ts` COPIAVA esta formula em vez de importa-la
+* ("a mesma traducao que o merge aplica"), entao o teste provava a copia e
+* ninguem cobria o caminho remoto. E o modo de falha que
+* `docs/` chama de "concordar na formula nao basta".
+*
+* As tres regras, na ordem:
+*
+*  - `GRUPOS_INICIAIS` entram SEMPRE, mesmo em save que nao os tinha (e o caso
+*    de todo save escrito antes da PH-434);
+*  - `'kanto'` era o que o Lance liberava, entao vira o que ele libera hoje;
+*  - o resto de `GRUPOS_LEGADOS` (`'johto'`, `faixa1..3`) e DESCARTADO. Ver a
+*    nota de `GRUPOS_LEGADOS` acima pro porque `'nightmare'` nao esta la.
+*/
+function traduzirGruposLiberados(gravados) {
+	return [.../* @__PURE__ */ new Set([...GRUPOS_INICIAIS, ...(gravados ?? []).flatMap((c) => c === "kanto" ? GRUPOS_DO_LANCE : GRUPOS_LEGADOS.has(c) ? [] : [c])])];
+}
+var LOOT = {
+	basico: [{
+		itemId: "potion",
+		chance: .15
+	}, {
+		itemId: "poke_ball",
+		chance: .1
+	}],
+	civilizado: [
+		{
+			itemId: "potion",
+			chance: .18
+		},
+		{
+			itemId: "poke_ball",
+			chance: .14
+		},
+		{
+			itemId: "great_ball",
+			chance: .05
+		}
+	],
+	remoto: [
+		{
+			itemId: "super_potion",
+			chance: .1
+		},
+		{
+			itemId: "great_ball",
+			chance: .08
+		},
+		{
+			itemId: "revive",
+			chance: .03
+		}
+	],
+	profundo: [
+		{
+			itemId: "hyper_potion",
+			chance: .06
+		},
+		{
+			itemId: "ultra_ball",
+			chance: .05
+		},
+		{
+			itemId: "max_revive",
+			chance: .015
+		}
+	]
+};
+var ARTE = {
+	dojo: "assets/hunt-backgrounds/dojo.jpg",
+	planicie: "assets/hunt-backgrounds/plains.jpg",
+	campina: "assets/hunt-backgrounds/meadow.jpg",
+	vilarejo: "assets/hunt-backgrounds/town.jpg",
+	vilarejoNoturno: "assets/hunt-backgrounds/town-night.jpg",
+	metropole: "assets/hunt-backgrounds/metropolis.jpg",
+	cortico: "assets/hunt-backgrounds/slum.jpg",
+	florestaPadrao: "assets/hunt-backgrounds/forest.jpg",
+	matoAlto: "assets/hunt-backgrounds/tall-grass.jpg",
+	selva: "assets/hunt-backgrounds/jungle.jpg",
+	ilha: "assets/hunt-backgrounds/island.jpg",
+	marAberto: "assets/hunt-backgrounds/sea.jpg",
+	praia: "assets/hunt-backgrounds/beach.jpg",
+	lago: "assets/hunt-backgrounds/lake.jpg",
+	pantano: "assets/hunt-backgrounds/swamp.jpg",
+	ermos: "assets/hunt-backgrounds/badlands.jpg",
+	deserto: "assets/hunt-backgrounds/desert.jpg",
+	terraDevastada: "assets/hunt-backgrounds/wasteland.jpg",
+	montanha: "assets/hunt-backgrounds/mountain.jpg",
+	cavernaVulcanica: "assets/hunt-backgrounds/cave-volcanic.jpg",
+	cavernaDeGelo: "assets/hunt-backgrounds/ice-cave.jpg",
+	montanhaDeGelo: "assets/hunt-backgrounds/ice-mountain.jpg",
+	vulcao: "assets/hunt-backgrounds/volcano.jpg",
+	obra: "assets/hunt-backgrounds/construction-site.jpg",
+	industrial: "assets/hunt-backgrounds/industrial.jpg",
+	ruinas: "assets/hunt-backgrounds/ruins.jpg",
+	temploMistico: "assets/hunt-backgrounds/temple.jpg",
+	grutaFeerica: "assets/hunt-backgrounds/fairy-cave.jpg",
+	florestaQueimada: "assets/hunt-backgrounds/burnt-forest.jpg",
+	abismo: "assets/hunt-backgrounds/abyss.jpg"
+};
+var BIOMAS = [
+	{
+		chave: "campo_aberto",
+		nome: "Campo Aberto",
+		tipo: "NORMAL",
+		bg: {
+			primary: "#3f5a34",
+			secondary: "#4a6a3d",
+			image: ARTE.campina
+		},
+		subBiomas: [
+			{
+				chave: "plains",
+				nome: "Planície",
+				peso: 10,
+				loot: "basico",
+				bg: {
+					primary: "#3f5a34",
+					secondary: "#4a6a3d",
+					image: ARTE.planicie
+				}
+			},
+			{
+				chave: "grass",
+				nome: "Relvado",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "meadow",
+				nome: "Campina",
+				peso: 6,
+				loot: "basico"
+			},
+			{
+				chave: "town",
+				nome: "Vilarejo",
+				peso: 6,
+				loot: "civilizado",
+				bg: {
+					primary: "#3f5a34",
+					secondary: "#4a6a3d",
+					image: ARTE.vilarejo
+				}
+			}
+		]
+	},
+	{
+		chave: "mata",
+		nome: "Mata",
+		tipo: "GRASS",
+		bg: {
+			primary: "#284b3c",
+			secondary: "#2e5544",
+			image: ARTE.florestaPadrao
+		},
+		subBiomas: [
+			{
+				chave: "forest",
+				nome: "Floresta",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "tall-grass",
+				nome: "Mato Alto",
+				peso: 10,
+				loot: "basico",
+				bg: {
+					primary: "#284b3c",
+					secondary: "#2e5544",
+					image: ARTE.matoAlto
+				}
+			},
+			{
+				chave: "jungle",
+				nome: "Selva",
+				peso: 6,
+				loot: "remoto",
+				bg: {
+					primary: "#284b3c",
+					secondary: "#2e5544",
+					image: ARTE.selva
+				}
+			}
+		]
+	},
+	{
+		chave: "marinho",
+		nome: "Marinho",
+		tipo: "WATER",
+		bg: {
+			primary: "#1f3d52",
+			secondary: "#27506b",
+			image: ARTE.ilha
+		},
+		subBiomas: [
+			{
+				chave: "sea",
+				nome: "Mar Aberto",
+				peso: 10,
+				loot: "basico",
+				bg: {
+					primary: "#1f3d52",
+					secondary: "#27506b",
+					image: ARTE.marAberto
+				}
+			},
+			{
+				chave: "beach",
+				nome: "Praia",
+				peso: 6,
+				loot: "civilizado",
+				bg: {
+					primary: "#1f3d52",
+					secondary: "#27506b",
+					image: ARTE.praia
+				}
+			},
+			{
+				chave: "seabed",
+				nome: "Leito Oceanico",
+				peso: 3,
+				loot: "profundo"
+			}
+		]
+	},
+	{
+		chave: "aguas_interiores",
+		nome: "Águas Interiores",
+		tipo: "WATER",
+		bg: {
+			primary: "#24463f",
+			secondary: "#2c5850",
+			image: ARTE.lago
+		},
+		subBiomas: [{
+			chave: "lake",
+			nome: "Lago",
+			peso: 10,
+			loot: "basico"
+		}, {
+			chave: "swamp",
+			nome: "Pantano",
+			peso: 6,
+			loot: "remoto",
+			bg: {
+				primary: "#24463f",
+				secondary: "#2c5850",
+				image: ARTE.pantano
+			}
+		}]
+	},
+	{
+		chave: "aridos",
+		nome: "Aridos",
+		tipo: "GROUND",
+		bg: {
+			primary: "#5c4a30",
+			secondary: "#6d5838",
+			image: ARTE.ermos
+		},
+		subBiomas: [
+			{
+				chave: "badlands",
+				nome: "Ermos",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "desert",
+				nome: "Deserto",
+				peso: 6,
+				loot: "remoto",
+				bg: {
+					primary: "#5c4a30",
+					secondary: "#6d5838",
+					image: ARTE.deserto
+				}
+			},
+			{
+				chave: "wasteland",
+				nome: "Terra Devastada",
+				peso: 3,
+				loot: "profundo",
+				bg: {
+					primary: "#5c4a30",
+					secondary: "#6d5838",
+					image: ARTE.terraDevastada
+				}
+			}
+		]
+	},
+	{
+		chave: "subterraneo",
+		nome: "Subterraneo",
+		tipo: "ROCK",
+		bg: {
+			primary: "#3a3340",
+			secondary: "#463d4d",
+			image: ARTE.montanha
+		},
+		subBiomas: [{
+			chave: "cave",
+			nome: "Caverna",
+			peso: 10,
+			loot: "basico",
+			bg: {
+				primary: "#3a3340",
+				secondary: "#463d4d",
+				image: ARTE.cavernaVulcanica
+			}
+		}, {
+			chave: "mountain",
+			nome: "Montanha",
+			peso: 6,
+			loot: "remoto"
+		}]
+	},
+	{
+		chave: "gelido",
+		nome: "Gelido",
+		tipo: "ICE",
+		bg: {
+			primary: "#33505e",
+			secondary: "#3d6070",
+			image: ARTE.montanhaDeGelo
+		},
+		subBiomas: [{
+			chave: "ice-cave",
+			nome: "Caverna de Gelo",
+			peso: 10,
+			loot: "remoto",
+			bg: {
+				primary: "#33505e",
+				secondary: "#3d6070",
+				image: ARTE.cavernaDeGelo
+			}
+		}, {
+			chave: "snowy-forest",
+			nome: "Floresta Nevada",
+			peso: 6,
+			loot: "basico"
+		}]
+	},
+	{
+		chave: "igneo",
+		nome: "Igneo",
+		tipo: "FIRE",
+		bg: {
+			primary: "#5a2a1e",
+			secondary: "#6d3626",
+			image: ARTE.vulcao
+		},
+		subBiomas: [{
+			chave: "volcano",
+			nome: "Vulcao",
+			peso: 10,
+			loot: "remoto"
+		}]
+	},
+	{
+		chave: "urbano",
+		nome: "Urbano",
+		tipo: "FIGHTING",
+		bg: {
+			primary: "#3d3a35",
+			secondary: "#4a4640",
+			image: ARTE.vilarejoNoturno
+		},
+		subBiomas: [
+			{
+				chave: "metropolis",
+				nome: "Metropole",
+				peso: 10,
+				loot: "civilizado",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.metropole
+				}
+			},
+			{
+				chave: "slum",
+				nome: "Cortico",
+				peso: 6,
+				loot: "civilizado",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.cortico
+				}
+			},
+			{
+				chave: "dojo",
+				nome: "Dojo",
+				peso: 6,
+				loot: "basico",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.dojo
+				}
+			}
+		]
+	},
+	{
+		chave: "industrial",
+		nome: "Industrial",
+		tipo: "ELECTRIC",
+		bg: {
+			primary: "#3b3f4a",
+			secondary: "#474c59",
+			image: ARTE.industrial
+		},
+		subBiomas: [
+			{
+				chave: "construction-site",
+				nome: "Obra",
+				peso: 10,
+				loot: "civilizado",
+				bg: {
+					primary: "#3b3f4a",
+					secondary: "#474c59",
+					image: ARTE.obra
+				}
+			},
+			{
+				chave: "factory",
+				nome: "Fabrica",
+				peso: 6,
+				loot: "civilizado"
+			},
+			{
+				chave: "power-plant",
+				nome: "Usina",
+				peso: 6,
+				loot: "remoto"
+			},
+			{
+				chave: "laboratory",
+				nome: "Laboratório",
+				peso: 3,
+				loot: "profundo"
+			}
+		]
+	},
+	{
+		chave: "sagrado",
+		nome: "Sagrado",
+		tipo: "PSYCHIC",
+		bg: {
+			primary: "#4a3a55",
+			secondary: "#584565",
+			image: ARTE.temploMistico
+		},
+		subBiomas: [
+			{
+				chave: "ruins",
+				nome: "Ruinas",
+				peso: 10,
+				loot: "remoto",
+				bg: {
+					primary: "#4a3a55",
+					secondary: "#584565",
+					image: ARTE.ruinas
+				}
+			},
+			{
+				chave: "temple",
+				nome: "Templo",
+				peso: 6,
+				loot: "remoto"
+			},
+			{
+				chave: "fairy-cave",
+				nome: "Gruta Feerica",
+				peso: 3,
+				loot: "profundo",
+				bg: {
+					primary: "#4a3a55",
+					secondary: "#584565",
+					image: ARTE.grutaFeerica
+				}
+			}
+		]
+	},
+	{
+		chave: "sombrio",
+		nome: "Sombrio",
+		tipo: "GHOST",
+		bg: {
+			primary: "#2b2733",
+			secondary: "#35303f",
+			image: ARTE.florestaQueimada
+		},
+		subBiomas: [
+			{
+				chave: "graveyard",
+				nome: "Cemiterio",
+				peso: 10,
+				loot: "remoto"
+			},
+			{
+				chave: "abyss",
+				nome: "Abismo",
+				peso: 6,
+				loot: "profundo",
+				bg: {
+					primary: "#2b2733",
+					secondary: "#35303f",
+					image: ARTE.abismo
+				}
+			},
+			{
+				chave: "space",
+				nome: "Espaço",
+				peso: 3,
+				loot: "profundo",
+				bg: {
+					primary: "#2b2733",
+					secondary: "#35303f",
+					image: ARTE.abismo
+				}
+			}
+		]
+	}
+];
+var GEOMETRIA = {
+	bounds: {
+		width: 1400,
+		height: 900
+	},
+	playerSpawn: {
+		x: 700,
+		y: 450
+	},
+	maxEnemies: 6,
+	respawnDelay: 6,
+	spawnPoints: [
+		{
+			x: 500,
+			y: 320
+		},
+		{
+			x: 900,
+			y: 320
+		},
+		{
+			x: 500,
+			y: 580
+		},
+		{
+			x: 900,
+			y: 580
+		},
+		{
+			x: 700,
+			y: 250
+		},
+		{
+			x: 700,
+			y: 650
+		}
+	]
+};
+var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
+var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
+	sub,
+	bioma
+}])));
+//#endregion
+//#region src/data/nightmareMaps.ts
+var TYPE_BACKGROUND_IMAGE = {
+	FIRE: "assets/hunt-backgrounds/volcano.jpg",
+	WATER: "assets/hunt-backgrounds/sea.jpg",
+	GRASS: "assets/hunt-backgrounds/forest.jpg",
+	ROCK: "assets/hunt-backgrounds/mountain.jpg",
+	FIGHTING: "assets/hunt-backgrounds/dojo.jpg",
+	ELECTRIC: "assets/hunt-backgrounds/industrial.jpg",
+	DRAGON: "assets/hunt-backgrounds/dragon.jpg",
+	BUG: "assets/hunt-backgrounds/jungle.jpg",
+	NORMAL: "assets/hunt-backgrounds/plains.jpg",
+	POISON: "assets/hunt-backgrounds/swamp.jpg",
+	FLYING: "assets/hunt-backgrounds/mountain.jpg",
+	GROUND: "assets/hunt-backgrounds/desert.jpg",
+	ICE: "assets/hunt-backgrounds/ice-mountain.jpg",
+	STEEL: "assets/hunt-backgrounds/construction-site.jpg",
+	PSYCHIC: "assets/hunt-backgrounds/temple.jpg",
+	GHOST: "assets/hunt-backgrounds/abyss.jpg",
+	DARK: "assets/hunt-backgrounds/burnt-forest.jpg",
+	FAIRY: "assets/hunt-backgrounds/fairy-cave.jpg"
+};
+function bossBackgroundImage(species) {
+	return TYPE_BACKGROUND_IMAGE[species.type] || (species.type2 ? TYPE_BACKGROUND_IMAGE[species.type2] : void 0) || null;
+}
+var shiftLevel = (level) => Math.max(level + 100, 150);
+/**
+* `sourcePorSala` e o cadastro de salas das hunts espelhadas
+* (huntSpawnOverrides.ts#POOL_POR_SALA). Ele entra aqui porque o espelho e quem
+* conhece a convencao do prefixo `nightmare_` — e porque sem ele o Modo Pesadelo
+* era a UNICA familia de hunt de bioma sem sistema de salas.
+*
+* O QUE ISSO CONSERTA. O espelho copiava mapa e encontros e paravam ai: as 36
+* hunts do Pesadelo nasciam fora de `POOL_POR_SALA`, entao `temSalas()` dizia
+* `false` e elas rodavam como hunt de BOSS — um mapa unico, sem sub-bioma, sem
+* chip de sala, sem aviso de nova area, sem janela de nivel por sala e com o
+* pool inteiro da hunt spawnando de uma vez. As irmas normais (as mesmas 36, um
+* `nightmare_` de diferenca no id) rodavam com as 10 salas. Nada disso dava
+* erro: era so uma feature que nao existia em metade do conteudo de bioma.
+*/
+function buildNightmareMirror(sourceMaps, sourceEncounters, sourcePorSala = {}) {
+	const maps = {};
+	const encounters = {};
+	const porSala = {};
+	for (const map of Object.values(sourceMaps)) {
+		const newId = `nightmare_${map.id}`;
+		const enemyPool = [];
+		for (const encId of map.enemyPool) {
+			const enc = sourceEncounters[encId];
+			if (!enc) continue;
+			const newEncId = `nightmare_${encId}`;
+			encounters[newEncId] = {
+				...enc,
+				id: newEncId,
+				minLevel: shiftLevel(enc.minLevel),
+				maxLevel: shiftLevel(enc.maxLevel),
+				...enc.levelWeights ? { levelWeights: enc.levelWeights.map((lw) => ({
+					...lw,
+					level: shiftLevel(lw.level)
+				})) } : {}
+			};
+			enemyPool.push(newEncId);
+		}
+		maps[newId] = {
+			...map,
+			id: newId,
+			name: `${map.name} (Pesadelo)`,
+			continent: "nightmare",
+			levelRange: [shiftLevel(map.levelRange[0]), shiftLevel(map.levelRange[1])],
+			unlockCost: null,
+			maxEnemies: GEOMETRIA.maxEnemies,
+			enemyPool
+		};
+		const salasDaOrigem = sourcePorSala[map.id];
+		if (salasDaOrigem) {
+			const salas = {};
+			for (const [chave, ids] of Object.entries(salasDaOrigem)) salas[chave] = ids.map((id) => `nightmare_${id}`).filter((id) => encounters[id] != null);
+			porSala[newId] = salas;
+		}
+	}
+	return {
+		maps,
+		encounters,
+		porSala
+	};
+}
+function buildBossHunts() {
+	const maps = {};
+	const encounters = {};
+	for (const speciesId of LEGENDARY_SPECIES_IDS) {
+		const species = SPECIES[speciesId];
+		if (!species) continue;
+		const mapId = `boss_${speciesId}`;
+		const encId = `${mapId}_encounter`;
+		encounters[encId] = {
+			id: encId,
+			speciesId,
+			minLevel: 300,
+			maxLevel: 300,
+			aggroRadius: 175,
+			wanderRadius: 60,
+			weight: 1
+		};
+		maps[mapId] = {
+			id: mapId,
+			name: `BOSS ${species.name}`,
+			description: `Covil do lendário ${species.name} (nível 300) — aparece uma única vez, sem respawn.`,
+			levelRange: [300, 300],
+			unlockCost: null,
+			continent: "nightmare",
+			bounds: {
+				width: 1400,
+				height: 900
+			},
+			playerSpawn: {
+				x: 700,
+				y: 450
+			},
+			bg: {
+				primary: "#3e2f23",
+				secondary: "#4a3829",
+				image: bossBackgroundImage(species)
+			},
+			maxEnemies: 1,
+			noRespawn: true,
+			encarada: true,
+			respawnDelay: 6,
+			spawnPoints: [{
+				x: 700,
+				y: 450
+			}],
+			enemyPool: [encId],
+			itemDrops: []
+		};
+	}
+	return {
+		maps,
+		encounters
+	};
+}
+var LANCE_MAP_ID = "boss_lance";
+var LANCE_RARITY$1 = "legendary";
+var LANCE_IVS$1 = {
+	hp: 23,
+	atkFis: 23,
+	atkEsp: 23,
+	def: 23,
+	defEsp: 23,
+	speed: 23
+};
+var LANCE_TEAM$1 = [
+	{
+		speciesId: "gyarados",
+		level: 60
+	},
+	{
+		speciesId: "dragonite",
+		level: 55
+	},
+	{
+		speciesId: "charizard",
+		level: 60
+	},
+	{
+		speciesId: "dragonite",
+		level: 56
+	},
+	{
+		speciesId: "aerodactyl",
+		level: 60
+	},
+	{
+		speciesId: "dragonite",
+		level: 65
+	}
+];
+function buildLanceHunt() {
+	const encounters = {};
+	const enemyPool = LANCE_TEAM$1.map((entry, i) => {
+		const encId = `${LANCE_MAP_ID}_${i}`;
+		encounters[encId] = {
+			id: encId,
+			speciesId: entry.speciesId,
+			minLevel: entry.level,
+			maxLevel: entry.level,
+			aggroRadius: 175,
+			wanderRadius: 60,
+			weight: 1,
+			rarity: LANCE_RARITY$1,
+			ivs: LANCE_IVS$1
+		};
+		return encId;
+	});
+	return {
+		map: {
+			id: LANCE_MAP_ID,
+			name: "BOSS Campeão Lance",
+			description: "Batalha contra o Campeão Lance — 6 POKEs Lendários em sequência (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o próximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.",
+			levelRange: [55, 65],
+			unlockCost: null,
+			continent: GRUPOS_INICIAIS[0],
+			bounds: {
+				width: 1400,
+				height: 900
+			},
+			playerSpawn: {
+				x: 700,
+				y: 450
+			},
+			bg: {
+				primary: "#3e2f23",
+				secondary: "#4a3829",
+				image: TYPE_BACKGROUND_IMAGE.DRAGON ?? null
+			},
+			maxEnemies: 1,
+			noRespawn: true,
+			noCatch: true,
+			autoSwitchTeamOnFaint: true,
+			sequence: enemyPool,
+			unlocksContinentOnClear: GRUPOS_DO_LANCE,
+			startCountdown: 5,
+			keepCorpses: true,
+			encarada: true,
+			respawnDelay: 2,
+			spawnPoints: [{
+				x: 700,
+				y: 450
+			}],
+			enemyPool,
+			itemDrops: []
+		},
+		encounters
+	};
+}
+var bosses = buildBossHunts();
+var lance = buildLanceHunt();
+var BOSS_MAPS_DATA = {
+	...bosses.maps,
+	[LANCE_MAP_ID]: lance.map
+};
+var BOSS_ENCOUNTERS_DATA = {
+	...bosses.encounters,
+	...lance.encounters
+};
 //#endregion
 //#region src/data/generated/subBiomaCollision.generated.ts
 var COLISAO_POR_ARTE = {
@@ -43747,651 +44636,6 @@ var COLISAO_POR_ARTE = {
 		}
 	}
 };
-//#endregion
-//#region src/data/biomas.ts
-/**
-* O grupo de gate das hunts que nascem abertas.
-*
-* ERAM AS DUAS PRIMEIRAS FAIXAS ATE A PH-432, e o encolhimento aqui e o fim da
-* ponte que a PH-426 tinha montado. O raciocinio: `continent` existe pra dizer
-* "este conteudo esta liberado?", e nas hunts de bioma essa pergunta passou a
-* ser respondida pelo ESTAGIO (PH-430 — o estagio 1 sempre aberto, o N pede o
-* N-1). Manter as faixas aqui era uma segunda trava que dizia a mesma coisa com
-* granularidade pior: ela barrava o estagio 7 inteiro atras do Campeao Lance
-* quando o gate de estagio ja o barra atras do estagio 6.
-*
-* O que `continent` ainda decide de verdade e UMA coisa: o Modo Pesadelo (e as
-* 11 hunts BOSS dentro dele) esta aberto? Isso continua sendo o premio do
-* Lance.
-*/
-var GRUPOS_INICIAIS = ["biomas"];
-/**
-* O que derrotar o Campeao Lance libera.
-*
-* Encolheu de `['faixa3', 'nightmare']` pra so o Pesadelo na PH-432: a faixa3
-* deixou de existir como grupo, e o que era "a faixa III" agora sao os estagios
-* 7 a 10, liberados um a um pelo proprio progresso do bioma.
-*/
-var GRUPOS_DO_LANCE = ["nightmare"];
-var GRUPOS_LEGADOS = /* @__PURE__ */ new Set([
-	"johto",
-	"kanto",
-	"faixa1",
-	"faixa2",
-	"faixa3"
-]);
-/**
-* O grupo de gate da hunt esta liberado pra este jogador?
-*
-* PH-447: GRUPO INICIAL E LIBERADO POR DEFINICAO, E NAO POR ESTAR NA LISTA DA
-* LINHA. Ate aqui as duas pontas perguntavam
-* `unlockedContinents.includes(grupo)` direto, e isso amarrou "o mundo esta
-* aberto?" ao CONTEUDO de `players.unlocked_continents` — uma coluna escrita
-* por saves antigos, com nome de grupo que o codigo ja renomeou duas vezes.
-*
-* O ESTRAGO REAL, medido em producao em 02/09: a PH-434 trocou
-* `GRUPOS_INICIAIS` de `['faixa1','faixa2']` pra `['biomas']`, nenhuma
-* migration reescreveu a coluna, e as 8 linhas do banco continuaram com
-* `faixa1`/`faixa2`. Resultado: `includes('biomas')` falso pra todo mundo, e
-* TODA hunt do jogo — a Rota 46 inicial e os 120 estagios de bioma — respondeu
-* "Derrote o Campeao Lance antes de acessar Mundo". O jogo inteiro trancado,
-* com deploy verde e 2977 testes passando.
-*
-* Por que a checagem por definicao e a resposta certa, e nao so a migration: o
-* grupo inicial NUNCA pode estar fechado. Ele e o que nasce aberto — e a
-* pergunta "o jogador desbloqueou o que nasce aberto?" nao tem resposta util,
-* so tem resposta errada. O que `continent` decide de verdade e uma coisa so
-* (o Modo Pesadelo, premio do Lance), e essa continua vindo da lista.
-*
-* Fica ao lado de `GRUPOS_INICIAIS` porque as duas pontas chamam a MESMA
-* funcao — o gate da autoridade (`appSessao.ts`) e o menu (`HuntMenu.tsx`).
-* Mesmo motivo de `bloqueioDoEstagio` morar em `progressoDeBioma.ts`: regra
-* calculada em dois lugares diverge, e o jogador ve hunt aberta que o servidor
-* recusa.
-*/
-function grupoLiberado(grupo, liberados) {
-	if (GRUPOS_INICIAIS.includes(grupo)) return true;
-	return liberados.includes(grupo);
-}
-/**
-* Traduz `unlocked_continents` de um save pro vocabulario de hoje.
-*
-* A FONTE UNICA DA TRADUCAO (PH-447). Ela existia SO no `merge` do `persist`
-* (`stores/gameStateStore.ts`), e o caminho remoto — `remote/playerMapper.ts`,
-* que e o que vale sob autoridade — repassava a coluna crua. Os dois caminhos
-* de carga discordavam sobre o que o jogador tem liberado, e o remoto era o
-* errado.
-*
-* Pior: `stores/gateDoLance.test.ts` COPIAVA esta formula em vez de importa-la
-* ("a mesma traducao que o merge aplica"), entao o teste provava a copia e
-* ninguem cobria o caminho remoto. E o modo de falha que
-* `docs/` chama de "concordar na formula nao basta".
-*
-* As tres regras, na ordem:
-*
-*  - `GRUPOS_INICIAIS` entram SEMPRE, mesmo em save que nao os tinha (e o caso
-*    de todo save escrito antes da PH-434);
-*  - `'kanto'` era o que o Lance liberava, entao vira o que ele libera hoje;
-*  - o resto de `GRUPOS_LEGADOS` (`'johto'`, `faixa1..3`) e DESCARTADO. Ver a
-*    nota de `GRUPOS_LEGADOS` acima pro porque `'nightmare'` nao esta la.
-*/
-function traduzirGruposLiberados(gravados) {
-	return [.../* @__PURE__ */ new Set([...GRUPOS_INICIAIS, ...(gravados ?? []).flatMap((c) => c === "kanto" ? GRUPOS_DO_LANCE : GRUPOS_LEGADOS.has(c) ? [] : [c])])];
-}
-var LOOT = {
-	basico: [{
-		itemId: "potion",
-		chance: .15
-	}, {
-		itemId: "poke_ball",
-		chance: .1
-	}],
-	civilizado: [
-		{
-			itemId: "potion",
-			chance: .18
-		},
-		{
-			itemId: "poke_ball",
-			chance: .14
-		},
-		{
-			itemId: "great_ball",
-			chance: .05
-		}
-	],
-	remoto: [
-		{
-			itemId: "super_potion",
-			chance: .1
-		},
-		{
-			itemId: "great_ball",
-			chance: .08
-		},
-		{
-			itemId: "revive",
-			chance: .03
-		}
-	],
-	profundo: [
-		{
-			itemId: "hyper_potion",
-			chance: .06
-		},
-		{
-			itemId: "ultra_ball",
-			chance: .05
-		},
-		{
-			itemId: "max_revive",
-			chance: .015
-		}
-	]
-};
-var ARTE = {
-	dojo: "assets/hunt-backgrounds/dojo.jpg",
-	planicie: "assets/hunt-backgrounds/plains.jpg",
-	campina: "assets/hunt-backgrounds/meadow.jpg",
-	vilarejo: "assets/hunt-backgrounds/town.jpg",
-	vilarejoNoturno: "assets/hunt-backgrounds/town-night.jpg",
-	metropole: "assets/hunt-backgrounds/metropolis.jpg",
-	cortico: "assets/hunt-backgrounds/slum.jpg",
-	florestaPadrao: "assets/hunt-backgrounds/forest.jpg",
-	matoAlto: "assets/hunt-backgrounds/tall-grass.jpg",
-	selva: "assets/hunt-backgrounds/jungle.jpg",
-	ilha: "assets/hunt-backgrounds/island.jpg",
-	marAberto: "assets/hunt-backgrounds/sea.jpg",
-	praia: "assets/hunt-backgrounds/beach.jpg",
-	lago: "assets/hunt-backgrounds/lake.jpg",
-	pantano: "assets/hunt-backgrounds/swamp.jpg",
-	ermos: "assets/hunt-backgrounds/badlands.jpg",
-	deserto: "assets/hunt-backgrounds/desert.jpg",
-	terraDevastada: "assets/hunt-backgrounds/wasteland.jpg",
-	montanha: "assets/hunt-backgrounds/mountain.jpg",
-	cavernaVulcanica: "assets/hunt-backgrounds/cave-volcanic.jpg",
-	cavernaDeGelo: "assets/hunt-backgrounds/ice-cave.jpg",
-	montanhaDeGelo: "assets/hunt-backgrounds/ice-mountain.jpg",
-	vulcao: "assets/hunt-backgrounds/volcano.jpg",
-	obra: "assets/hunt-backgrounds/construction-site.jpg",
-	industrial: "assets/hunt-backgrounds/industrial.jpg",
-	ruinas: "assets/hunt-backgrounds/ruins.jpg",
-	temploMistico: "assets/hunt-backgrounds/temple.jpg",
-	grutaFeerica: "assets/hunt-backgrounds/fairy-cave.jpg",
-	florestaQueimada: "assets/hunt-backgrounds/burnt-forest.jpg",
-	abismo: "assets/hunt-backgrounds/abyss.jpg"
-};
-var BIOMAS = [
-	{
-		chave: "campo_aberto",
-		nome: "Campo Aberto",
-		tipo: "NORMAL",
-		bg: {
-			primary: "#3f5a34",
-			secondary: "#4a6a3d",
-			image: ARTE.campina
-		},
-		subBiomas: [
-			{
-				chave: "plains",
-				nome: "Planície",
-				peso: 10,
-				loot: "basico",
-				bg: {
-					primary: "#3f5a34",
-					secondary: "#4a6a3d",
-					image: ARTE.planicie
-				}
-			},
-			{
-				chave: "grass",
-				nome: "Relvado",
-				peso: 10,
-				loot: "basico"
-			},
-			{
-				chave: "meadow",
-				nome: "Campina",
-				peso: 6,
-				loot: "basico"
-			},
-			{
-				chave: "town",
-				nome: "Vilarejo",
-				peso: 6,
-				loot: "civilizado",
-				bg: {
-					primary: "#3f5a34",
-					secondary: "#4a6a3d",
-					image: ARTE.vilarejo
-				}
-			}
-		]
-	},
-	{
-		chave: "mata",
-		nome: "Mata",
-		tipo: "GRASS",
-		bg: {
-			primary: "#284b3c",
-			secondary: "#2e5544",
-			image: ARTE.florestaPadrao
-		},
-		subBiomas: [
-			{
-				chave: "forest",
-				nome: "Floresta",
-				peso: 10,
-				loot: "basico"
-			},
-			{
-				chave: "tall-grass",
-				nome: "Mato Alto",
-				peso: 10,
-				loot: "basico",
-				bg: {
-					primary: "#284b3c",
-					secondary: "#2e5544",
-					image: ARTE.matoAlto
-				}
-			},
-			{
-				chave: "jungle",
-				nome: "Selva",
-				peso: 6,
-				loot: "remoto",
-				bg: {
-					primary: "#284b3c",
-					secondary: "#2e5544",
-					image: ARTE.selva
-				}
-			}
-		]
-	},
-	{
-		chave: "marinho",
-		nome: "Marinho",
-		tipo: "WATER",
-		bg: {
-			primary: "#1f3d52",
-			secondary: "#27506b",
-			image: ARTE.ilha
-		},
-		subBiomas: [
-			{
-				chave: "sea",
-				nome: "Mar Aberto",
-				peso: 10,
-				loot: "basico",
-				bg: {
-					primary: "#1f3d52",
-					secondary: "#27506b",
-					image: ARTE.marAberto
-				}
-			},
-			{
-				chave: "beach",
-				nome: "Praia",
-				peso: 6,
-				loot: "civilizado",
-				bg: {
-					primary: "#1f3d52",
-					secondary: "#27506b",
-					image: ARTE.praia
-				}
-			},
-			{
-				chave: "seabed",
-				nome: "Leito Oceanico",
-				peso: 3,
-				loot: "profundo"
-			}
-		]
-	},
-	{
-		chave: "aguas_interiores",
-		nome: "Águas Interiores",
-		tipo: "WATER",
-		bg: {
-			primary: "#24463f",
-			secondary: "#2c5850",
-			image: ARTE.lago
-		},
-		subBiomas: [{
-			chave: "lake",
-			nome: "Lago",
-			peso: 10,
-			loot: "basico"
-		}, {
-			chave: "swamp",
-			nome: "Pantano",
-			peso: 6,
-			loot: "remoto",
-			bg: {
-				primary: "#24463f",
-				secondary: "#2c5850",
-				image: ARTE.pantano
-			}
-		}]
-	},
-	{
-		chave: "aridos",
-		nome: "Aridos",
-		tipo: "GROUND",
-		bg: {
-			primary: "#5c4a30",
-			secondary: "#6d5838",
-			image: ARTE.ermos
-		},
-		subBiomas: [
-			{
-				chave: "badlands",
-				nome: "Ermos",
-				peso: 10,
-				loot: "basico"
-			},
-			{
-				chave: "desert",
-				nome: "Deserto",
-				peso: 6,
-				loot: "remoto",
-				bg: {
-					primary: "#5c4a30",
-					secondary: "#6d5838",
-					image: ARTE.deserto
-				}
-			},
-			{
-				chave: "wasteland",
-				nome: "Terra Devastada",
-				peso: 3,
-				loot: "profundo",
-				bg: {
-					primary: "#5c4a30",
-					secondary: "#6d5838",
-					image: ARTE.terraDevastada
-				}
-			}
-		]
-	},
-	{
-		chave: "subterraneo",
-		nome: "Subterraneo",
-		tipo: "ROCK",
-		bg: {
-			primary: "#3a3340",
-			secondary: "#463d4d",
-			image: ARTE.montanha
-		},
-		subBiomas: [{
-			chave: "cave",
-			nome: "Caverna",
-			peso: 10,
-			loot: "basico",
-			bg: {
-				primary: "#3a3340",
-				secondary: "#463d4d",
-				image: ARTE.cavernaVulcanica
-			}
-		}, {
-			chave: "mountain",
-			nome: "Montanha",
-			peso: 6,
-			loot: "remoto"
-		}]
-	},
-	{
-		chave: "gelido",
-		nome: "Gelido",
-		tipo: "ICE",
-		bg: {
-			primary: "#33505e",
-			secondary: "#3d6070",
-			image: ARTE.montanhaDeGelo
-		},
-		subBiomas: [{
-			chave: "ice-cave",
-			nome: "Caverna de Gelo",
-			peso: 10,
-			loot: "remoto",
-			bg: {
-				primary: "#33505e",
-				secondary: "#3d6070",
-				image: ARTE.cavernaDeGelo
-			}
-		}, {
-			chave: "snowy-forest",
-			nome: "Floresta Nevada",
-			peso: 6,
-			loot: "basico"
-		}]
-	},
-	{
-		chave: "igneo",
-		nome: "Igneo",
-		tipo: "FIRE",
-		bg: {
-			primary: "#5a2a1e",
-			secondary: "#6d3626",
-			image: ARTE.vulcao
-		},
-		subBiomas: [{
-			chave: "volcano",
-			nome: "Vulcao",
-			peso: 10,
-			loot: "remoto"
-		}]
-	},
-	{
-		chave: "urbano",
-		nome: "Urbano",
-		tipo: "FIGHTING",
-		bg: {
-			primary: "#3d3a35",
-			secondary: "#4a4640",
-			image: ARTE.vilarejoNoturno
-		},
-		subBiomas: [
-			{
-				chave: "metropolis",
-				nome: "Metropole",
-				peso: 10,
-				loot: "civilizado",
-				bg: {
-					primary: "#3d3a35",
-					secondary: "#4a4640",
-					image: ARTE.metropole
-				}
-			},
-			{
-				chave: "slum",
-				nome: "Cortico",
-				peso: 6,
-				loot: "civilizado",
-				bg: {
-					primary: "#3d3a35",
-					secondary: "#4a4640",
-					image: ARTE.cortico
-				}
-			},
-			{
-				chave: "dojo",
-				nome: "Dojo",
-				peso: 6,
-				loot: "basico",
-				bg: {
-					primary: "#3d3a35",
-					secondary: "#4a4640",
-					image: ARTE.dojo
-				}
-			}
-		]
-	},
-	{
-		chave: "industrial",
-		nome: "Industrial",
-		tipo: "ELECTRIC",
-		bg: {
-			primary: "#3b3f4a",
-			secondary: "#474c59",
-			image: ARTE.industrial
-		},
-		subBiomas: [
-			{
-				chave: "construction-site",
-				nome: "Obra",
-				peso: 10,
-				loot: "civilizado",
-				bg: {
-					primary: "#3b3f4a",
-					secondary: "#474c59",
-					image: ARTE.obra
-				}
-			},
-			{
-				chave: "factory",
-				nome: "Fabrica",
-				peso: 6,
-				loot: "civilizado"
-			},
-			{
-				chave: "power-plant",
-				nome: "Usina",
-				peso: 6,
-				loot: "remoto"
-			},
-			{
-				chave: "laboratory",
-				nome: "Laboratório",
-				peso: 3,
-				loot: "profundo"
-			}
-		]
-	},
-	{
-		chave: "sagrado",
-		nome: "Sagrado",
-		tipo: "PSYCHIC",
-		bg: {
-			primary: "#4a3a55",
-			secondary: "#584565",
-			image: ARTE.temploMistico
-		},
-		subBiomas: [
-			{
-				chave: "ruins",
-				nome: "Ruinas",
-				peso: 10,
-				loot: "remoto",
-				bg: {
-					primary: "#4a3a55",
-					secondary: "#584565",
-					image: ARTE.ruinas
-				}
-			},
-			{
-				chave: "temple",
-				nome: "Templo",
-				peso: 6,
-				loot: "remoto"
-			},
-			{
-				chave: "fairy-cave",
-				nome: "Gruta Feerica",
-				peso: 3,
-				loot: "profundo",
-				bg: {
-					primary: "#4a3a55",
-					secondary: "#584565",
-					image: ARTE.grutaFeerica
-				}
-			}
-		]
-	},
-	{
-		chave: "sombrio",
-		nome: "Sombrio",
-		tipo: "GHOST",
-		bg: {
-			primary: "#2b2733",
-			secondary: "#35303f",
-			image: ARTE.florestaQueimada
-		},
-		subBiomas: [
-			{
-				chave: "graveyard",
-				nome: "Cemiterio",
-				peso: 10,
-				loot: "remoto"
-			},
-			{
-				chave: "abyss",
-				nome: "Abismo",
-				peso: 6,
-				loot: "profundo",
-				bg: {
-					primary: "#2b2733",
-					secondary: "#35303f",
-					image: ARTE.abismo
-				}
-			},
-			{
-				chave: "space",
-				nome: "Espaço",
-				peso: 3,
-				loot: "profundo",
-				bg: {
-					primary: "#2b2733",
-					secondary: "#35303f",
-					image: ARTE.abismo
-				}
-			}
-		]
-	}
-];
-var GEOMETRIA = {
-	bounds: {
-		width: 1400,
-		height: 900
-	},
-	playerSpawn: {
-		x: 700,
-		y: 450
-	},
-	maxEnemies: 6,
-	respawnDelay: 6,
-	spawnPoints: [
-		{
-			x: 500,
-			y: 320
-		},
-		{
-			x: 900,
-			y: 320
-		},
-		{
-			x: 500,
-			y: 580
-		},
-		{
-			x: 900,
-			y: 580
-		},
-		{
-			x: 700,
-			y: 250
-		},
-		{
-			x: 700,
-			y: 650
-		}
-	]
-};
-var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
-var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
-	sub,
-	bioma
-}])));
 //#endregion
 //#region src/data/generated/elencoPorEstagio.generated.ts
 /**
@@ -51053,250 +51297,6 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"zapdos": 1,
 	"zigzagoon": 20,
 	"zubat": 20
-};
-//#endregion
-//#region src/data/nightmareMaps.ts
-var TYPE_BACKGROUND_IMAGE = {
-	FIRE: "assets/hunt-backgrounds/volcano.jpg",
-	WATER: "assets/hunt-backgrounds/sea.jpg",
-	GRASS: "assets/hunt-backgrounds/forest.jpg",
-	ROCK: "assets/hunt-backgrounds/mountain.jpg",
-	FIGHTING: "assets/hunt-backgrounds/dojo.jpg",
-	ELECTRIC: "assets/hunt-backgrounds/industrial.jpg",
-	DRAGON: "assets/hunt-backgrounds/dragon.jpg",
-	BUG: "assets/hunt-backgrounds/jungle.jpg",
-	NORMAL: "assets/hunt-backgrounds/plains.jpg",
-	POISON: "assets/hunt-backgrounds/swamp.jpg",
-	FLYING: "assets/hunt-backgrounds/mountain.jpg",
-	GROUND: "assets/hunt-backgrounds/desert.jpg",
-	ICE: "assets/hunt-backgrounds/ice-mountain.jpg",
-	STEEL: "assets/hunt-backgrounds/construction-site.jpg",
-	PSYCHIC: "assets/hunt-backgrounds/temple.jpg",
-	GHOST: "assets/hunt-backgrounds/abyss.jpg",
-	DARK: "assets/hunt-backgrounds/burnt-forest.jpg",
-	FAIRY: "assets/hunt-backgrounds/fairy-cave.jpg"
-};
-function bossBackgroundImage(species) {
-	return TYPE_BACKGROUND_IMAGE[species.type] || (species.type2 ? TYPE_BACKGROUND_IMAGE[species.type2] : void 0) || null;
-}
-var shiftLevel = (level) => Math.max(level + 100, 150);
-/**
-* `sourcePorSala` e o cadastro de salas das hunts espelhadas
-* (huntSpawnOverrides.ts#POOL_POR_SALA). Ele entra aqui porque o espelho e quem
-* conhece a convencao do prefixo `nightmare_` — e porque sem ele o Modo Pesadelo
-* era a UNICA familia de hunt de bioma sem sistema de salas.
-*
-* O QUE ISSO CONSERTA. O espelho copiava mapa e encontros e paravam ai: as 36
-* hunts do Pesadelo nasciam fora de `POOL_POR_SALA`, entao `temSalas()` dizia
-* `false` e elas rodavam como hunt de BOSS — um mapa unico, sem sub-bioma, sem
-* chip de sala, sem aviso de nova area, sem janela de nivel por sala e com o
-* pool inteiro da hunt spawnando de uma vez. As irmas normais (as mesmas 36, um
-* `nightmare_` de diferenca no id) rodavam com as 10 salas. Nada disso dava
-* erro: era so uma feature que nao existia em metade do conteudo de bioma.
-*/
-function buildNightmareMirror(sourceMaps, sourceEncounters, sourcePorSala = {}) {
-	const maps = {};
-	const encounters = {};
-	const porSala = {};
-	for (const map of Object.values(sourceMaps)) {
-		const newId = `nightmare_${map.id}`;
-		const enemyPool = [];
-		for (const encId of map.enemyPool) {
-			const enc = sourceEncounters[encId];
-			if (!enc) continue;
-			const newEncId = `nightmare_${encId}`;
-			encounters[newEncId] = {
-				...enc,
-				id: newEncId,
-				minLevel: shiftLevel(enc.minLevel),
-				maxLevel: shiftLevel(enc.maxLevel),
-				...enc.levelWeights ? { levelWeights: enc.levelWeights.map((lw) => ({
-					...lw,
-					level: shiftLevel(lw.level)
-				})) } : {}
-			};
-			enemyPool.push(newEncId);
-		}
-		maps[newId] = {
-			...map,
-			id: newId,
-			name: `${map.name} (Pesadelo)`,
-			continent: "nightmare",
-			levelRange: [shiftLevel(map.levelRange[0]), shiftLevel(map.levelRange[1])],
-			unlockCost: null,
-			maxEnemies: GEOMETRIA.maxEnemies,
-			enemyPool
-		};
-		const salasDaOrigem = sourcePorSala[map.id];
-		if (salasDaOrigem) {
-			const salas = {};
-			for (const [chave, ids] of Object.entries(salasDaOrigem)) salas[chave] = ids.map((id) => `nightmare_${id}`).filter((id) => encounters[id] != null);
-			porSala[newId] = salas;
-		}
-	}
-	return {
-		maps,
-		encounters,
-		porSala
-	};
-}
-function buildBossHunts() {
-	const maps = {};
-	const encounters = {};
-	for (const speciesId of LEGENDARY_SPECIES_IDS) {
-		const species = SPECIES[speciesId];
-		if (!species) continue;
-		const mapId = `boss_${speciesId}`;
-		const encId = `${mapId}_encounter`;
-		encounters[encId] = {
-			id: encId,
-			speciesId,
-			minLevel: 300,
-			maxLevel: 300,
-			aggroRadius: 175,
-			wanderRadius: 60,
-			weight: 1
-		};
-		maps[mapId] = {
-			id: mapId,
-			name: `BOSS ${species.name}`,
-			description: `Covil do lendário ${species.name} (nível 300) — aparece uma única vez, sem respawn.`,
-			levelRange: [300, 300],
-			unlockCost: null,
-			continent: "nightmare",
-			bounds: {
-				width: 1400,
-				height: 900
-			},
-			playerSpawn: {
-				x: 700,
-				y: 450
-			},
-			bg: {
-				primary: "#3e2f23",
-				secondary: "#4a3829",
-				image: bossBackgroundImage(species)
-			},
-			maxEnemies: 1,
-			noRespawn: true,
-			encarada: true,
-			respawnDelay: 6,
-			spawnPoints: [{
-				x: 700,
-				y: 450
-			}],
-			enemyPool: [encId],
-			itemDrops: []
-		};
-	}
-	return {
-		maps,
-		encounters
-	};
-}
-var LANCE_MAP_ID = "boss_lance";
-var LANCE_RARITY = "legendary";
-var LANCE_IVS = {
-	hp: 23,
-	atkFis: 23,
-	atkEsp: 23,
-	def: 23,
-	defEsp: 23,
-	speed: 23
-};
-var LANCE_TEAM = [
-	{
-		speciesId: "gyarados",
-		level: 60
-	},
-	{
-		speciesId: "dragonite",
-		level: 55
-	},
-	{
-		speciesId: "charizard",
-		level: 60
-	},
-	{
-		speciesId: "dragonite",
-		level: 56
-	},
-	{
-		speciesId: "aerodactyl",
-		level: 60
-	},
-	{
-		speciesId: "dragonite",
-		level: 65
-	}
-];
-function buildLanceHunt() {
-	const encounters = {};
-	const enemyPool = LANCE_TEAM.map((entry, i) => {
-		const encId = `${LANCE_MAP_ID}_${i}`;
-		encounters[encId] = {
-			id: encId,
-			speciesId: entry.speciesId,
-			minLevel: entry.level,
-			maxLevel: entry.level,
-			aggroRadius: 175,
-			wanderRadius: 60,
-			weight: 1,
-			rarity: LANCE_RARITY,
-			ivs: LANCE_IVS
-		};
-		return encId;
-	});
-	return {
-		map: {
-			id: LANCE_MAP_ID,
-			name: "BOSS Campeão Lance",
-			description: "Batalha contra o Campeão Lance — 6 POKEs Lendários em sequência (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o próximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.",
-			levelRange: [55, 65],
-			unlockCost: null,
-			continent: GRUPOS_INICIAIS[0],
-			bounds: {
-				width: 1400,
-				height: 900
-			},
-			playerSpawn: {
-				x: 700,
-				y: 450
-			},
-			bg: {
-				primary: "#3e2f23",
-				secondary: "#4a3829",
-				image: TYPE_BACKGROUND_IMAGE.DRAGON ?? null
-			},
-			maxEnemies: 1,
-			noRespawn: true,
-			noCatch: true,
-			autoSwitchTeamOnFaint: true,
-			sequence: enemyPool,
-			unlocksContinentOnClear: GRUPOS_DO_LANCE,
-			startCountdown: 5,
-			keepCorpses: true,
-			encarada: true,
-			respawnDelay: 2,
-			spawnPoints: [{
-				x: 700,
-				y: 450
-			}],
-			enemyPool,
-			itemDrops: []
-		},
-		encounters
-	};
-}
-var bosses = buildBossHunts();
-var lance = buildLanceHunt();
-var BOSS_MAPS_DATA = {
-	...bosses.maps,
-	[LANCE_MAP_ID]: lance.map
-};
-var BOSS_ENCOUNTERS_DATA = {
-	...bosses.encounters,
-	...lance.encounters
 };
 //#endregion
 //#region src/data/trainingDummy.ts
@@ -91257,6 +91257,95 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	};
 }
 //#endregion
+//#region authority/src/appDuelo.ts
+var LANCE_RARITY = "legendary";
+var LANCE_IVS = {
+	hp: 23,
+	atkFis: 23,
+	atkEsp: 23,
+	def: 23,
+	defEsp: 23,
+	speed: 23
+};
+var LANCE_TEAM = [
+	{
+		speciesId: "gyarados",
+		level: 60
+	},
+	{
+		speciesId: "dragonite",
+		level: 55
+	},
+	{
+		speciesId: "charizard",
+		level: 60
+	},
+	{
+		speciesId: "dragonite",
+		level: 56
+	},
+	{
+		speciesId: "aerodactyl",
+		level: 60
+	},
+	{
+		speciesId: "dragonite",
+		level: 65
+	}
+];
+var BOSS_LEVEL = 300;
+function json$1(dado, status = 200) {
+	return new Response(JSON.stringify(dado), {
+		status,
+		headers: { "content-type": "application/json; charset=utf-8" }
+	});
+}
+function montarTimeDoBoss(mapId) {
+	const rng = createRng(randomSeed());
+	if (mapId === "boss_lance") return LANCE_TEAM.map((entry) => createPokeInstance(rng, entry.speciesId, entry.level, {
+		rarity: LANCE_RARITY,
+		ivs: LANCE_IVS
+	}));
+	return [createPokeInstance(rng, mapId.slice(5), BOSS_LEVEL)];
+}
+function eventosParaCliente(eventos) {
+	const lado = (l) => l === "jogador" ? "anfitriao" : "convidado";
+	return eventos.map((e) => ({
+		...e,
+		atacanteLado: lado(e.atacanteLado),
+		defensorLado: lado(e.defensorLado)
+	}));
+}
+async function resolverDuelo(cfg, jogadorId, req) {
+	const mapId = (await req.json().catch(() => null))?.mapId;
+	if (!mapId) throw new ErroHttp(400, "mapId e obrigatorio");
+	if (!BOSS_MAPS_DATA[mapId]) throw new ErroHttp(400, "este mapa nao e um duelo de boss");
+	if (!MAPS[mapId]) throw new ErroHttp(400, "hunt desconhecida");
+	const estado = await carregarEstado(cfg, jogadorId, { comBag: false });
+	const grupo = MAPS[mapId].continent;
+	if (!grupoLiberado(grupo, estado.unlockedContinents)) throw new ErroHttp(403, "Derrote o Campeao Lance para acessar esta area.");
+	if (mapId === "boss_lance") {
+		const doLance = bloqueioDoLance(estado.biomaProgress);
+		if (doLance) throw new ErroHttp(403, doLance);
+	}
+	const timeDoJogador = estado.team.filter((p) => p.hp > 0);
+	if (timeDoJogador.length === 0) throw new ErroHttp(409, "Toda a sua equipe esta desmaiada. Cure na Enfermeira antes de duelar.");
+	const timeDoBoss = montarTimeDoBoss(mapId);
+	const resultado = simularPvp({
+		nome: "jogador",
+		time: timeDoJogador
+	}, {
+		nome: "boss",
+		time: timeDoBoss
+	});
+	return json$1({
+		vencedor: resultado.vencedor === "jogador" ? "jogador" : resultado.vencedor === "oponente" ? "boss" : "empate",
+		eventos: eventosParaCliente(resultado.eventos),
+		turnos: resultado.turnos,
+		timeDoBoss
+	});
+}
+//#endregion
 //#region authority/src/appSessao.ts
 function json(dado, status = 200) {
 	return new Response(JSON.stringify(dado), {
@@ -91326,6 +91415,7 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/sessao/avancar-sala" && req.method === "POST") return avancarSala(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/pvp/resolver" && req.method === "POST") return resolverPvp(cfg, jogador.id, req);
+	if (url.pathname === "/duelo/resolver" && req.method === "POST") return resolverDuelo(cfg, jogador.id, req);
 	if (url.pathname === "/estado" && req.method === "GET") {
 		const parcial = url.searchParams.get("parcial") === "1";
 		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas, linhasNoLoad }) => {

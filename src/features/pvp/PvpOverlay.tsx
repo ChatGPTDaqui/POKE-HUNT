@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react'
 import { ArrowUDownLeft } from '@phosphor-icons/react'
 import { GameButton, GameCard, SectionLabel } from '@/components/game/controls'
 import { buildHospitalWorld } from '@/engine/simulation'
+import { creditarVitoriaDeDuelo } from '@/features/duelo/duelo'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { useWorldStore } from '@/stores/worldStore'
@@ -23,6 +25,21 @@ export function PvpOverlay() {
   const playerHp = useWorldStore((s) => s.player?.poke.hp ?? 0)
   const rivalHp = useWorldStore((s) => s.enemies[0]?.poke.hp ?? 0)
   const rivalMaxHp = useWorldStore((s) => s.enemies[0]?.poke.stats.hp ?? 1)
+  // Guarda o `duelId` do ULTIMO duelo ja creditado, nao um boolean — este
+  // componente e HUD global, nunca desmonta entre duelos, entao um boolean
+  // fixo travaria em `true` apos o primeiro duelo da sessao e nunca mais
+  // creditaria os seguintes.
+  const creditadoDuelId = useRef<string | null>(null)
+
+  // Modo duelo (Lance/lendário, PH-533): ao vencer, credita XP/ouro/
+  // captura/Pokédex — UMA vez por duelo, mesmo se o componente re-renderizar
+  // varias vezes com o mesmo resultado.
+  useEffect(() => {
+    if (pvp?.origem !== 'duelo' || pvp.estado !== 'vitoria' || !pvp.duelId) return
+    if (creditadoDuelId.current === pvp.duelId) return
+    creditadoDuelId.current = pvp.duelId
+    void creditarVitoriaDeDuelo(useWorldStore.getState())
+  }, [pvp])
 
   if (!pvp) return null
 
