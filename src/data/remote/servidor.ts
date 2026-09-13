@@ -265,6 +265,13 @@ export interface RespostaResolverPvp {
   pdlDeltaConvidado?: number
 }
 
+export interface RespostaResolverDuelo {
+  vencedor: 'jogador' | 'boss' | 'empate'
+  eventos: PvpEventoRemoto[]
+  turnos: number
+  timeDoBoss: PokeInstance[]
+}
+
 export interface RespostaAvancoDeSala extends RespostaFlush {
   /**
    * `false` quando a sala ja nao estava mais travada em 30/30 ao fim da
@@ -654,6 +661,12 @@ export const servidor = {
   // já disparou primeiro).
   resolverPvp: (sessaoId: string) => pedir<RespostaResolverPvp>('/pvp/resolver', {
     method: 'POST', body: JSON.stringify({ sessaoId }),
+  }),
+
+  // PH-533: "modo duelo" — Campeao Lance/lendario, mesmo padrao do PvP
+  // (server resolve tudo de uma vez, cliente so reproduz e credita).
+  resolverDuelo: (mapId: string) => pedir<RespostaResolverDuelo>('/duelo/resolver', {
+    method: 'POST', body: JSON.stringify({ mapId }),
   }),
 }
 
