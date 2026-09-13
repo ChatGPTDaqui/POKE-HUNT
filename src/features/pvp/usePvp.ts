@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as pvpRpc from '@/data/remote/pvpRpc'
 import type { HistoricoPvp, SessaoPvp } from '@/data/remote/pvpRpc'
+import { servidor } from '@/data/remote/servidor'
+import type { RespostaResolverPvp } from '@/data/remote/servidor'
 import { useAuthStore } from '@/stores/authStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
-import { useUiStore } from '@/stores/uiStore'
-import { useWorldStore } from '@/stores/worldStore'
-import { criarMundoPvpVisual } from './pvpWorld'
 
 type PapelPvp = 'anfitriao' | 'convidado'
 
@@ -17,16 +16,13 @@ export interface EstadoDoPvp {
   papel: PapelPvp | null
   outroId: string | null
   ocupado: boolean
+  resultado: RespostaResolverPvp | null
+  resolvendo: boolean
   convidarPorNick: (nick: string) => Promise<void>
-  aceitar: () => Promise<void>
+  aceitar: (usarTimeSalvo: boolean) => Promise<void>
   recusarOuCancelar: () => Promise<void>
-  entrarNaArena: (nomeDoRival?: string) => void
+  limparResultado: () => void
   recarregar: () => Promise<void>
-}
-
-function meuPokeAtivo() {
-  const { team, activeIndex } = useGameStateStore.getState()
-  return team[activeIndex] ?? team[0] ?? null
 }
 
 function avisarErro(e: unknown): void {
@@ -43,6 +39,9 @@ export function usePvp(): EstadoDoPvp {
   const [historico, setHistorico] = useState<HistoricoPvp[]>([])
   const [carregando, setCarregando] = useState(true)
   const [ocupado, setOcupado] = useState(false)
+  const [resolvendo, setResolvendo] = useState(false)
+  const [resultado, setResultado] = useState<RespostaResolverPvp | null>(null)
+  const resolvidoRef = useRef<string | null>(null)
 
   const recarregar = useCallback(async () => {
     try {
@@ -65,6 +64,22 @@ export function usePvp(): EstadoDoPvp {
     if (!meuId) return
     return pvpRpc.assinarMeuPvp(meuId, () => { void recarregar() })
   }, [meuId, recarregar])
+
+  // Duelo aceito (estado 'aberta') resolve sozinho — sem batalha ao vivo, o
+  // servidor decide o resultado assim que os dois times estao prontos.
+  // Idempotente do lado do servidor (`aplicar_resultado_pvp` so age em
+  // sessao 'aberta'), entao nao ha problema em anfitriao E convidado
+  // dispararem a mesma chamada quase ao mesmo tempo.
+  useEffect(() => {
+    if (!sessao || sessao.estado !== 'aberta') return
+    if (resolvidoRef.current === sessao.id) return
+    resolvidoRef.current = sessao.id
+    setResolvendo(true)
+    void servidor.resolverPvp(sessao.id)
+      .then((res) => { setResultado(res); setSessao(null) })
+      .catch((e) => avisarErro(e))
+      .finally(() => { setResolvendo(false); void recarregar() })
+  }, [sessao, recarregar])
 
   const agir = useCallback(async (acao: () => Promise<SessaoPvp>) => {
     if (ocupado) return
@@ -91,12 +106,10 @@ export function usePvp(): EstadoDoPvp {
     if (ocupado) return
     setOcupado(true)
     try {
-      const poke = meuPokeAtivo()
-      if (!poke) throw new Error('Escolha um POKE na equipe antes de convidar.')
       const alvo = await pvpRpc.buscarTreinadorPorNick(nick)
       if (!alvo) throw new Error('Treinador não encontrado.')
       if (alvo.userId === meuId) throw new Error('Você não pode se convidar para PvP.')
-      const nova = await pvpRpc.abrirPvp(alvo.userId, poke)
+      const nova = await pvpRpc.abrirPvpTime(alvo.userId)
       setSessao(nova)
       await recarregar()
     } catch (e) {
@@ -106,38 +119,26 @@ export function usePvp(): EstadoDoPvp {
     }
   }, [meuId, ocupado, recarregar])
 
-  const aceitar = useCallback(async () => {
-    const poke = meuPokeAtivo()
-    if (!poke) throw new Error('Escolha um POKE na equipe antes de aceitar.')
+  // `usarTimeSalvo`: true pega o time de PvP salvo (aba Build), false usa o
+  // time atual de aventura — so o client sabe qual e o atual (gameStateStore),
+  // por isso o array de ids vai explicito, nao "escolha no servidor".
+  const aceitar = useCallback(async (usarTimeSalvo: boolean) => {
     if (!sessao) return
-    await agir(() => pvpRpc.aceitarPvp(sessao.id, poke))
+    await agir(async () => {
+      const ids = usarTimeSalvo
+        ? (await pvpRpc.meuTimePvp())?.pokemonIds ?? []
+        : useGameStateStore.getState().team.map((p) => p.uid)
+      if (ids.length === 0) {
+        throw new Error(usarTimeSalvo ? 'Seu time de PvP está vazio — monte um na aba Build.' : 'Sua equipe de aventura está vazia.')
+      }
+      return pvpRpc.aceitarPvpTime(sessao.id, ids)
+    })
   }, [agir, sessao])
 
   const recusarOuCancelar = useCallback(async () => {
     if (!sessao) return
     await agir(() => pvpRpc.encerrarPvp(sessao.id))
   }, [agir, sessao])
-
-  const entrarNaArena = useCallback((nomeDoRival = 'rival') => {
-    if (!sessao || !meuId || !papel) return
-    const meuPoke = papel === 'anfitriao' ? sessao.anfitriaoPoke : sessao.convidadoPoke
-    const rival = papel === 'anfitriao' ? sessao.convidadoPoke : sessao.anfitriaoPoke
-    if (!meuPoke || !rival) {
-      useToastStore.getState().pushToast('O outro treinador ainda não carregou o POKE do duelo.', 'error', 'world')
-      return
-    }
-    useWorldStore.getState().setWorld({
-      ...criarMundoPvpVisual(meuPoke, rival, nomeDoRival),
-      pvp: {
-        treinador: nomeDoRival,
-        estado: 'lutando',
-        sessaoId: sessao.id,
-        meuId,
-        rivalId: outroId ?? undefined,
-      },
-    })
-    useUiStore.getState().closeScreen()
-  }, [meuId, outroId, papel, sessao])
 
   return {
     carregando,
@@ -146,10 +147,12 @@ export function usePvp(): EstadoDoPvp {
     papel,
     outroId,
     ocupado,
+    resultado,
+    resolvendo,
     convidarPorNick,
     aceitar,
     recusarOuCancelar,
-    entrarNaArena,
+    limparResultado: () => setResultado(null),
     recarregar,
   }
 }

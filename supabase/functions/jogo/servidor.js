@@ -40859,13 +40859,32 @@ async function resolverPvp(cfg, jogadorId, req) {
 	if (!sessao) throw new ErroHttp(404, "PvP nao encontrado.");
 	if (sessao.anfitriao_id !== jogadorId && sessao.convidado_id !== jogadorId) throw new ErroHttp(403, "Este PvP nao e seu.");
 	if (sessao.estado !== "aberta") return json$1({ jaResolvido: true });
-	if (sessao.modo !== "ranqueado") throw new ErroHttp(400, "Resolucao automatica ainda so cobre o ranqueado.");
 	const timeAnfitriao = montarTime("anfitriao", sessao.anfitriao_time);
 	const timeConvidado = montarTime("convidado", sessao.convidado_time);
 	if (timeAnfitriao.time.length === 0 || timeConvidado.time.length === 0) throw new ErroHttp(409, "Um dos times deste PvP esta vazio ou invalido.");
 	const resultado = simularPvp(timeAnfitriao, timeConvidado);
 	const resultadoAnfitriao = resultadoDoAnfitriao(resultado);
 	const vencedorId = resultadoAnfitriao === "vitoria" ? sessao.anfitriao_id : resultadoAnfitriao === "derrota" ? sessao.convidado_id : null;
+	if (sessao.modo !== "ranqueado") {
+		await chamarRpc(cfg, "aplicar_resultado_pvp", {
+			p_sessao_id: sessaoId,
+			p_vencedor_id: vencedorId,
+			p_eventos: resultado.eventos,
+			p_mmr_anfitriao: null,
+			p_pdl_anfitriao: null,
+			p_divisao_anfitriao: null,
+			p_mmr_convidado: null,
+			p_pdl_convidado: null,
+			p_divisao_convidado: null,
+			p_pdl_delta_anfitriao: null,
+			p_pdl_delta_convidado: null
+		});
+		return json$1({
+			vencedorId,
+			eventos: resultado.eventos,
+			turnos: resultado.turnos
+		});
+	}
 	const ranks = await selecionar(cfg, `pvp_rank?user_id=in.(${sessao.anfitriao_id},${sessao.convidado_id})&select=user_id,mmr,partidas,pdl,divisao`);
 	const rankAnfitriao = ranks.find((r) => r.user_id === sessao.anfitriao_id);
 	const rankConvidado = ranks.find((r) => r.user_id === sessao.convidado_id);

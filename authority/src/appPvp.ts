@@ -57,10 +57,6 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
     // Idempotente: outro participante ja disparou a resolucao primeiro.
     return json({ jaResolvido: true })
   }
-  if (sessao.modo !== 'ranqueado') {
-    throw new ErroHttp(400, 'Resolucao automatica ainda so cobre o ranqueado.')
-  }
-
   const timeAnfitriao = montarTime('anfitriao', sessao.anfitriao_time)
   const timeConvidado = montarTime('convidado', sessao.convidado_time)
   if (timeAnfitriao.time.length === 0 || timeConvidado.time.length === 0) {
@@ -72,6 +68,24 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
   const vencedorId = resultadoAnfitriao === 'vitoria'
     ? sessao.anfitriao_id
     : resultadoAnfitriao === 'derrota' ? sessao.convidado_id : null
+
+  // Amistoso nao mexe em MMR/PDL — so o ranqueado tem stakes de temporada.
+  if (sessao.modo !== 'ranqueado') {
+    await chamarRpc(cfg, 'aplicar_resultado_pvp', {
+      p_sessao_id: sessaoId,
+      p_vencedor_id: vencedorId,
+      p_eventos: resultado.eventos,
+      p_mmr_anfitriao: null,
+      p_pdl_anfitriao: null,
+      p_divisao_anfitriao: null,
+      p_mmr_convidado: null,
+      p_pdl_convidado: null,
+      p_divisao_convidado: null,
+      p_pdl_delta_anfitriao: null,
+      p_pdl_delta_convidado: null,
+    })
+    return json({ vencedorId, eventos: resultado.eventos, turnos: resultado.turnos })
+  }
 
   const ranks = await selecionar<LinhaRankPvp>(
     cfg,
