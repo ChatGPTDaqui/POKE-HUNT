@@ -9,6 +9,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        // Acento de marca "Vidro Noturno" (--color-ember). Reservado pra UMA
+        // acao primaria por tela (Entrar/Capturar/Batalhar) — nao trocar o
+        // "default" inteiro por isto, senao todo botao comum vira CTA e o
+        // acento para de significar "a acao que importa aqui".
+        brand: "bg-ember text-n900 hover:bg-ember/85",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:

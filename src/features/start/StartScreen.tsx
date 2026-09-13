@@ -99,7 +99,7 @@ function PassoNome({ nomeAtual, aoConfirmar }: { nomeAtual: string; aoConfirmar:
           {erro}
         </p>
       )}
-      <Button type="submit" disabled={enviando}>
+      <Button type="submit" variant="brand" disabled={enviando}>
         {enviando ? 'Aguarde...' : 'Confirmar e escolher meu POKE'}
       </Button>
     </form>

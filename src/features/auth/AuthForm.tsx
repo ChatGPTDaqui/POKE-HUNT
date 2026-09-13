@@ -101,7 +101,7 @@ export function AuthForm({
     <div className="flex min-h-svh items-center justify-center bg-background p-6">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-5 rounded-lg border bg-card p-6">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold">{titulo}</h1>
+          <h1 className="font-heading text-xl font-semibold">{titulo}</h1>
           <p className="text-sm text-muted-foreground">{descricao}</p>
         </div>
 
@@ -160,7 +160,7 @@ export function AuthForm({
           </p>
         )}
 
-        <Button type="submit" className="w-full" disabled={enviando}>
+        <Button type="submit" variant="brand" className="w-full" disabled={enviando}>
           {enviando ? 'Aguarde...' : rotuloAcao}
         </Button>
 
