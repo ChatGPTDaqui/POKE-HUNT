@@ -15,6 +15,8 @@ export interface PvpCombatente {
   time: PokeInstance[]
 }
 
+export type LadoPvp = 'jogador' | 'oponente'
+
 export interface PvpEvento {
   atacante: string
   defensor: string
@@ -23,6 +25,17 @@ export interface PvpEvento {
   hpRestante: number
   efetividade: number
   nocaute: boolean
+  // Campos pro replay animado (PH-532) — evita o client ter que adivinhar
+  // qual time/instancia agiu a partir só do nome de exibição da espécie
+  // (que não é único: mesma espécie pode estar nos dois times, ou repetida
+  // dentro do mesmo time).
+  atacanteLado: LadoPvp
+  atacanteSpeciesId: string
+  atacanteShiny: boolean
+  defensorLado: LadoPvp
+  defensorSpeciesId: string
+  defensorShiny: boolean
+  hpMaximoDefensor: number
 }
 
 export interface PvpResultado {
@@ -97,12 +110,13 @@ function escolherGolpe(atacante: Lutador, defensor: Lutador): Ability {
   return ordenados[0]?.ability ?? BASIC_ATTACK
 }
 
-function aplicarAtaque(atacante: Lutador, defensor: Lutador): PvpEvento {
+function aplicarAtaque(atacante: Lutador, ladoAtacante: LadoPvp, defensor: Lutador, ladoDefensor: LadoPvp): PvpEvento {
   const ability = escolherGolpe(atacante, defensor)
   const efetividade = isDamagingAbility(ability)
     ? getEffectiveness(ability.type as ElementType, defensor.species.type, defensor.species.type2)
     : 1
   const dano = Math.min(defensor.poke.hp, danoDoGolpe(atacante, defensor, ability))
+  const hpMaximoDefensor = defensor.poke.stats.hp
   defensor.poke.hp = Math.max(0, defensor.poke.hp - dano)
   return {
     atacante: nomeDoPoke(atacante),
@@ -112,6 +126,13 @@ function aplicarAtaque(atacante: Lutador, defensor: Lutador): PvpEvento {
     hpRestante: defensor.poke.hp,
     efetividade,
     nocaute: defensor.poke.hp <= 0,
+    atacanteLado: ladoAtacante,
+    atacanteSpeciesId: atacante.species.id,
+    atacanteShiny: atacante.poke.isShiny,
+    defensorLado: ladoDefensor,
+    defensorSpeciesId: defensor.species.id,
+    defensorShiny: defensor.poke.isShiny,
+    hpMaximoDefensor,
   }
 }
 
@@ -129,19 +150,20 @@ export function simularPvp(jogador: PvpCombatente, oponente: PvpCombatente): Pvp
     turnos += 1
     const ativoJogador = vivos(timeJogador)[0]
     const ativoOponente = vivos(timeOponente)[0]
-    const ordem = ativoJogador.poke.stats.speed >= ativoOponente.poke.stats.speed
-      ? [ativoJogador, ativoOponente]
-      : [ativoOponente, ativoJogador]
-    const alvo = new Map<Lutador, Lutador>([
-      [ativoJogador, ativoOponente],
-      [ativoOponente, ativoJogador],
+    const ordem: [Lutador, LadoPvp][] = ativoJogador.poke.stats.speed >= ativoOponente.poke.stats.speed
+      ? [[ativoJogador, 'jogador'], [ativoOponente, 'oponente']]
+      : [[ativoOponente, 'oponente'], [ativoJogador, 'jogador']]
+    const alvo = new Map<Lutador, [Lutador, LadoPvp]>([
+      [ativoJogador, [ativoOponente, 'oponente']],
+      [ativoOponente, [ativoJogador, 'jogador']],
     ])
 
-    for (const atacante of ordem) {
+    for (const [atacante, ladoAtacante] of ordem) {
       if (atacante.poke.hp <= 0) continue
-      const defensor = alvo.get(atacante)
-      if (!defensor || defensor.poke.hp <= 0) continue
-      eventos.push(aplicarAtaque(atacante, defensor))
+      const par = alvo.get(atacante)
+      if (!par || par[0].poke.hp <= 0) continue
+      const [defensor, ladoDefensor] = par
+      eventos.push(aplicarAtaque(atacante, ladoAtacante, defensor, ladoDefensor))
     }
   }
 

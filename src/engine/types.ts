@@ -110,6 +110,12 @@ export interface BaseEntity {
   // tocando.
   vfxCuraHp?: number
   vfxCuraStatus?: number
+  // PH-532: flinch de levar dano (pose `Hurt`), disparado em ONE-SHOT pelo
+  // replay do PvP quando um golpe tira >= 30% do HP maximo — mesmo padrao de
+  // `attackAnimTimer`/`vfxCuraHp` (descontado em tickAttackAnimTimers, nunca
+  // em loop). Ausente/0 = nao esta tocando; nenhum combate PvE dispara isto
+  // hoje, so o replay.
+  hurtAnimTimer?: number
 
   /**
    * PH-397: este POKE esta girando na encarada do duelo NESTE tick.
@@ -1079,10 +1085,16 @@ export interface WorldState {
   lure: EstadoDeLure | null
   pvp: {
     treinador: string
-    estado: 'lutando' | 'vitoria' | 'derrota'
+    estado: 'lutando' | 'vitoria' | 'derrota' | 'empate' | 'replay'
     sessaoId?: string
     meuId?: string
     rivalId?: string
+    // PH-532: replay do resultado ja decidido pelo servidor — `estado`
+    // comeca em 'replay' e vira `resultadoFinal` sozinho quando os eventos
+    // acabam (ver engine/systems/pvpReplaySystem.ts).
+    meuLado?: import('@/data/remote/servidor').LadoPvpRemoto
+    replay?: import('./systems/pvpReplaySystem').EstadoReplayPvp
+    resultadoFinal?: 'vitoria' | 'derrota' | 'empate'
   } | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
