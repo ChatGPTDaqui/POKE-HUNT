@@ -1447,12 +1447,48 @@ export type Database = {
           },
         ]
       }
+      pvp_fila: {
+        Row: {
+          entrou_em: string
+          mmr: number
+          user_id: string
+        }
+        Insert: {
+          entrou_em?: string
+          mmr: number
+          user_id: string
+        }
+        Update: {
+          entrou_em?: string
+          mmr?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_fila_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_fila_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pvp_historico: {
         Row: {
           anfitriao_id: string
           convidado_id: string
           encerrada_em: string
           id: string
+          modo: string
+          pdl_delta_anfitriao: number | null
+          pdl_delta_convidado: number | null
           sessao_id: string
           vencedor_id: string | null
         }
@@ -1461,6 +1497,9 @@ export type Database = {
           convidado_id: string
           encerrada_em?: string
           id?: string
+          modo?: string
+          pdl_delta_anfitriao?: number | null
+          pdl_delta_convidado?: number | null
           sessao_id: string
           vencedor_id?: string | null
         }
@@ -1469,6 +1508,9 @@ export type Database = {
           convidado_id?: string
           encerrada_em?: string
           id?: string
+          modo?: string
+          pdl_delta_anfitriao?: number | null
+          pdl_delta_convidado?: number | null
           sessao_id?: string
           vencedor_id?: string | null
         }
@@ -1517,22 +1559,76 @@ export type Database = {
           },
         ]
       }
+      pvp_rank: {
+        Row: {
+          derrotas: number
+          divisao: string
+          mmr: number
+          partidas: number
+          partidas_hoje: number
+          pdl: number
+          reset_em: string
+          user_id: string
+          vitorias: number
+        }
+        Insert: {
+          derrotas?: number
+          divisao?: string
+          mmr?: number
+          partidas?: number
+          partidas_hoje?: number
+          pdl?: number
+          reset_em?: string
+          user_id: string
+          vitorias?: number
+        }
+        Update: {
+          derrotas?: number
+          divisao?: string
+          mmr?: number
+          partidas?: number
+          partidas_hoje?: number
+          pdl?: number
+          reset_em?: string
+          user_id?: string
+          vitorias?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_rank_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_rank_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pvp_sessao: {
         Row: {
           anfitriao_id: string
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         Insert: {
@@ -1540,16 +1636,19 @@ export type Database = {
           anfitriao_poke?: Json | null
           anfitriao_pokemon_id?: string | null
           anfitriao_reporte?: string | null
+          anfitriao_time?: Json | null
           convidado_id: string
           convidado_poke?: Json | null
           convidado_pokemon_id?: string | null
           convidado_reporte?: string | null
+          convidado_time?: Json | null
           criada_em?: string
           encerrada_em?: string | null
           encerrada_por?: string | null
           estado?: string
           expira_em?: string
           id?: string
+          modo?: string
           vencedor_id?: string | null
         }
         Update: {
@@ -1557,16 +1656,19 @@ export type Database = {
           anfitriao_poke?: Json | null
           anfitriao_pokemon_id?: string | null
           anfitriao_reporte?: string | null
+          anfitriao_time?: Json | null
           convidado_id?: string
           convidado_poke?: Json | null
           convidado_pokemon_id?: string | null
           convidado_reporte?: string | null
+          convidado_time?: Json | null
           criada_em?: string
           encerrada_em?: string | null
           encerrada_por?: string | null
           estado?: string
           expira_em?: string
           id?: string
+          modo?: string
           vencedor_id?: string | null
         }
         Relationships: [
@@ -1651,6 +1753,39 @@ export type Database = {
             foreignKeyName: "pvp_sessao_vencedor_id_fkey"
             columns: ["vencedor_id"]
             isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      pvp_time: {
+        Row: {
+          atualizado_em: string
+          pokemon_ids: string[]
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          pokemon_ids?: string[]
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          pokemon_ids?: string[]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_time_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_time_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "treinadores_publico"
             referencedColumns: ["user_id"]
           },
@@ -2530,16 +2665,19 @@ export type Database = {
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         SetofOptions: {
@@ -2579,16 +2717,19 @@ export type Database = {
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         SetofOptions: {
@@ -2636,6 +2777,47 @@ export type Database = {
           p_price: number
         }
         Returns: Json
+      }
+      aplicar_resultado_pvp: {
+        Args: {
+          p_divisao_anfitriao: string
+          p_divisao_convidado: string
+          p_eventos: Json
+          p_mmr_anfitriao: number
+          p_mmr_convidado: number
+          p_pdl_anfitriao: number
+          p_pdl_convidado: number
+          p_pdl_delta_anfitriao: number
+          p_pdl_delta_convidado: number
+          p_sessao_id: string
+          p_vencedor_id: string
+        }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          anfitriao_time: Json | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          convidado_time: Json | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          modo: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
@@ -2752,16 +2934,19 @@ export type Database = {
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         SetofOptions: {
@@ -2797,6 +2982,26 @@ export type Database = {
       ensinar_tm: {
         Args: { p_item_id: string; p_poke_id: string }
         Returns: Json
+      }
+      entrar_fila_ranqueada: {
+        Args: never
+        Returns: {
+          derrotas: number
+          divisao: string
+          mmr: number
+          partidas: number
+          partidas_hoje: number
+          pdl: number
+          reset_em: string
+          user_id: string
+          vitorias: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_rank"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       enviar_mensagem: {
         Args: {
@@ -2867,6 +3072,26 @@ export type Database = {
       marcar_conversa_lida: { Args: { p_contato_id: string }; Returns: Json }
       marcar_correio_lido: { Args: { p_mensagem_id: string }; Returns: Json }
       meu_perfil: { Args: never; Returns: Json }
+      meu_rank_pvp: {
+        Args: never
+        Returns: {
+          derrotas: number
+          divisao: string
+          mmr: number
+          partidas: number
+          partidas_hoje: number
+          pdl: number
+          reset_em: string
+          user_id: string
+          vitorias: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_rank"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
@@ -2922,6 +3147,29 @@ export type Database = {
         }
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
+      pvp_garantir_rank: {
+        Args: { p_user: string }
+        Returns: {
+          derrotas: number
+          divisao: string
+          mmr: number
+          partidas: number
+          partidas_hoje: number
+          pdl: number
+          reset_em: string
+          user_id: string
+          vitorias: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_rank"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pvp_proximo_reset: { Args: { p_ref?: string }; Returns: string }
+      pvp_snapshot_time: { Args: { p_user: string }; Returns: Json }
+      pvp_time_pronto_ranqueado: { Args: { p_user: string }; Returns: boolean }
       pvp_validar_poke: {
         Args: { p_eu: string; p_poke: Json; p_pokemon_id: string }
         Returns: undefined
@@ -2946,16 +3194,19 @@ export type Database = {
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         SetofOptions: {
@@ -2984,6 +3235,21 @@ export type Database = {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
         Returns: Json
       }
+      sair_da_fila_ranqueada: { Args: never; Returns: undefined }
+      salvar_time_pvp: {
+        Args: { p_pokemon_ids: string[] }
+        Returns: {
+          atualizado_em: string
+          pokemon_ids: string[]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_time"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       subir_nivel_especialidade: {
         Args: { p_tipo: string; p_trilha: string }
         Returns: Json
@@ -2994,6 +3260,35 @@ export type Database = {
       }
       taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
+      tentar_parear_ranqueado: {
+        Args: never
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          anfitriao_time: Json | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          convidado_time: Json | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          modo: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
       tirar_item_da_mesa: {
         Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
@@ -4601,12 +4896,48 @@ export type Database = {
           },
         ]
       }
+      pvp_fila: {
+        Row: {
+          entrou_em: string
+          mmr: number
+          user_id: string
+        }
+        Insert: {
+          entrou_em?: string
+          mmr: number
+          user_id: string
+        }
+        Update: {
+          entrou_em?: string
+          mmr?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_fila_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_fila_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pvp_historico: {
         Row: {
           anfitriao_id: string
           convidado_id: string
           encerrada_em: string
           id: string
+          modo: string
+          pdl_delta_anfitriao: number | null
+          pdl_delta_convidado: number | null
           sessao_id: string
           vencedor_id: string | null
         }
@@ -4615,6 +4946,9 @@ export type Database = {
           convidado_id: string
           encerrada_em?: string
           id?: string
+          modo?: string
+          pdl_delta_anfitriao?: number | null
+          pdl_delta_convidado?: number | null
           sessao_id: string
           vencedor_id?: string | null
         }
@@ -4623,6 +4957,9 @@ export type Database = {
           convidado_id?: string
           encerrada_em?: string
           id?: string
+          modo?: string
+          pdl_delta_anfitriao?: number | null
+          pdl_delta_convidado?: number | null
           sessao_id?: string
           vencedor_id?: string | null
         }
@@ -4671,22 +5008,76 @@ export type Database = {
           },
         ]
       }
+      pvp_rank: {
+        Row: {
+          derrotas: number
+          divisao: string
+          mmr: number
+          partidas: number
+          partidas_hoje: number
+          pdl: number
+          reset_em: string
+          user_id: string
+          vitorias: number
+        }
+        Insert: {
+          derrotas?: number
+          divisao?: string
+          mmr?: number
+          partidas?: number
+          partidas_hoje?: number
+          pdl?: number
+          reset_em?: string
+          user_id: string
+          vitorias?: number
+        }
+        Update: {
+          derrotas?: number
+          divisao?: string
+          mmr?: number
+          partidas?: number
+          partidas_hoje?: number
+          pdl?: number
+          reset_em?: string
+          user_id?: string
+          vitorias?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_rank_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_rank_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pvp_sessao: {
         Row: {
           anfitriao_id: string
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         Insert: {
@@ -4694,16 +5085,19 @@ export type Database = {
           anfitriao_poke?: Json | null
           anfitriao_pokemon_id?: string | null
           anfitriao_reporte?: string | null
+          anfitriao_time?: Json | null
           convidado_id: string
           convidado_poke?: Json | null
           convidado_pokemon_id?: string | null
           convidado_reporte?: string | null
+          convidado_time?: Json | null
           criada_em?: string
           encerrada_em?: string | null
           encerrada_por?: string | null
           estado?: string
           expira_em?: string
           id?: string
+          modo?: string
           vencedor_id?: string | null
         }
         Update: {
@@ -4711,16 +5105,19 @@ export type Database = {
           anfitriao_poke?: Json | null
           anfitriao_pokemon_id?: string | null
           anfitriao_reporte?: string | null
+          anfitriao_time?: Json | null
           convidado_id?: string
           convidado_poke?: Json | null
           convidado_pokemon_id?: string | null
           convidado_reporte?: string | null
+          convidado_time?: Json | null
           criada_em?: string
           encerrada_em?: string | null
           encerrada_por?: string | null
           estado?: string
           expira_em?: string
           id?: string
+          modo?: string
           vencedor_id?: string | null
         }
         Relationships: [
@@ -4805,6 +5202,39 @@ export type Database = {
             foreignKeyName: "pvp_sessao_vencedor_id_fkey"
             columns: ["vencedor_id"]
             isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      pvp_time: {
+        Row: {
+          atualizado_em: string
+          pokemon_ids: string[]
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          pokemon_ids?: string[]
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          pokemon_ids?: string[]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_time_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_time_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "treinadores_publico"
             referencedColumns: ["user_id"]
           },
@@ -5684,16 +6114,19 @@ export type Database = {
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         SetofOptions: {
@@ -5733,16 +6166,19 @@ export type Database = {
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         SetofOptions: {
@@ -5790,6 +6226,47 @@ export type Database = {
           p_price: number
         }
         Returns: Json
+      }
+      aplicar_resultado_pvp: {
+        Args: {
+          p_divisao_anfitriao: string
+          p_divisao_convidado: string
+          p_eventos: Json
+          p_mmr_anfitriao: number
+          p_mmr_convidado: number
+          p_pdl_anfitriao: number
+          p_pdl_convidado: number
+          p_pdl_delta_anfitriao: number
+          p_pdl_delta_convidado: number
+          p_sessao_id: string
+          p_vencedor_id: string
+        }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          anfitriao_time: Json | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          convidado_time: Json | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          modo: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
@@ -5906,16 +6383,19 @@ export type Database = {
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         SetofOptions: {
@@ -5951,6 +6431,26 @@ export type Database = {
       ensinar_tm: {
         Args: { p_item_id: string; p_poke_id: string }
         Returns: Json
+      }
+      entrar_fila_ranqueada: {
+        Args: never
+        Returns: {
+          derrotas: number
+          divisao: string
+          mmr: number
+          partidas: number
+          partidas_hoje: number
+          pdl: number
+          reset_em: string
+          user_id: string
+          vitorias: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_rank"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       enviar_mensagem: {
         Args: {
@@ -6021,6 +6521,26 @@ export type Database = {
       marcar_conversa_lida: { Args: { p_contato_id: string }; Returns: Json }
       marcar_correio_lido: { Args: { p_mensagem_id: string }; Returns: Json }
       meu_perfil: { Args: never; Returns: Json }
+      meu_rank_pvp: {
+        Args: never
+        Returns: {
+          derrotas: number
+          divisao: string
+          mmr: number
+          partidas: number
+          partidas_hoje: number
+          pdl: number
+          reset_em: string
+          user_id: string
+          vitorias: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_rank"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
@@ -6076,6 +6596,29 @@ export type Database = {
         }
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
+      pvp_garantir_rank: {
+        Args: { p_user: string }
+        Returns: {
+          derrotas: number
+          divisao: string
+          mmr: number
+          partidas: number
+          partidas_hoje: number
+          pdl: number
+          reset_em: string
+          user_id: string
+          vitorias: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_rank"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pvp_proximo_reset: { Args: { p_ref?: string }; Returns: string }
+      pvp_snapshot_time: { Args: { p_user: string }; Returns: Json }
+      pvp_time_pronto_ranqueado: { Args: { p_user: string }; Returns: boolean }
       pvp_validar_poke: {
         Args: { p_eu: string; p_poke: Json; p_pokemon_id: string }
         Returns: undefined
@@ -6100,16 +6643,19 @@ export type Database = {
           anfitriao_poke: Json | null
           anfitriao_pokemon_id: string | null
           anfitriao_reporte: string | null
+          anfitriao_time: Json | null
           convidado_id: string
           convidado_poke: Json | null
           convidado_pokemon_id: string | null
           convidado_reporte: string | null
+          convidado_time: Json | null
           criada_em: string
           encerrada_em: string | null
           encerrada_por: string | null
           estado: string
           expira_em: string
           id: string
+          modo: string
           vencedor_id: string | null
         }
         SetofOptions: {
@@ -6138,6 +6684,21 @@ export type Database = {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
         Returns: Json
       }
+      sair_da_fila_ranqueada: { Args: never; Returns: undefined }
+      salvar_time_pvp: {
+        Args: { p_pokemon_ids: string[] }
+        Returns: {
+          atualizado_em: string
+          pokemon_ids: string[]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_time"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       subir_nivel_especialidade: {
         Args: { p_tipo: string; p_trilha: string }
         Returns: Json
@@ -6148,6 +6709,35 @@ export type Database = {
       }
       taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
+      tentar_parear_ranqueado: {
+        Args: never
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          anfitriao_time: Json | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          convidado_time: Json | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          modo: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
       tirar_item_da_mesa: {
         Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }

@@ -5,6 +5,7 @@
 // passam mais por aqui — ver as ~20 funcoes ja criadas.
 import { autenticar } from './auth.js'
 import { ErroHttp, selecionar, inserir, atualizar, chamarRpc, type Config } from './db.js'
+import { resolverPvp } from './appPvp.js'
 import {
   aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
   FLUSH_OCUPADO, type LinhaSessao, type LinhaSalaProtetor,
@@ -107,6 +108,9 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
   }
   if (url.pathname === '/sessao/avancar-sala' && req.method === 'POST') {
     return avancarSala(cfg, jogador.id, await aceitaEstadoParcial(req))
+  }
+  if (url.pathname === '/pvp/resolver' && req.method === 'POST') {
+    return resolverPvp(cfg, jogador.id, req)
   }
   if (url.pathname === '/estado' && req.method === 'GET') {
     // Le E LIQUIDA as entregas pendentes do Mercado (uso interno, ver
