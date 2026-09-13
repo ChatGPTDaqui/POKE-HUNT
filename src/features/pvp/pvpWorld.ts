@@ -144,3 +144,22 @@ export function criarMundoPvpReplay(
     },
   }
 }
+
+// PH-533: "modo duelo" (Lance/lendario) — mesmo mundo de replay do PvP,
+// so marcado com `origem: 'duelo'` + `mapId`/`bossTeam` pra quem assiste o
+// replay (PvpOverlay) saber que precisa creditar recompensa ao final (ver
+// src/features/duelo/duelo.ts), em vez de so mostrar o resultado como o
+// PvP faz.
+export function criarMundoDuelo(
+  eventos: PvpEventoRemoto[],
+  resultadoFinal: 'vitoria' | 'derrota' | 'empate',
+  mapId: string,
+  bossTeam: PokeInstance[],
+  nomeDoBoss: string,
+): WorldState {
+  const base = criarMundoPvpReplay(eventos, 'anfitriao', resultadoFinal, nomeDoBoss)
+  return {
+    ...base,
+    pvp: { ...base.pvp!, origem: 'duelo', mapId, bossTeam },
+  }
+}

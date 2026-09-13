@@ -1095,6 +1095,15 @@ export interface WorldState {
     meuLado?: import('@/data/remote/servidor').LadoPvpRemoto
     replay?: import('./systems/pvpReplaySystem').EstadoReplayPvp
     resultadoFinal?: 'vitoria' | 'derrota' | 'empate'
+    // PH-533: "modo duelo" (Lance/lendario) reaproveita o mesmo replay do
+    // PvP, mas precisa aplicar recompensa (XP/ouro/captura/pokedex) ao
+    // final — so quando `origem === 'duelo'`. `bossTeam` vem do servidor
+    // (`/duelo/resolver`) na mesma ordem que o duelo derrubou; `mapId` diz
+    // qual `HuntMapDef` real usar pra recompensa (noCatch/itemDrops/etc),
+    // ja que o `mapDef` do mundo de replay e so a arena de renderizacao.
+    origem?: 'pvp' | 'duelo'
+    mapId?: string
+    bossTeam?: import('@/data/pokes').PokeInstance[]
   } | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
