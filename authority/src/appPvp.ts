@@ -43,6 +43,15 @@ function resultadoDoAnfitriao(r: PvpResultado): Resultado {
   return 'empate'
 }
 
+// simularPvp(timeAnfitriao, timeConvidado) rotula os lados 'jogador'/
+// 'oponente' (vocabulario generico do motor); o client conhece anfitriao/
+// convidado (mesmo vocabulario de pvp_sessao) — traduz aqui, uma vez, em vez
+// de arrastar os dois nomes ate a UI.
+function eventosParaCliente(eventos: PvpResultado['eventos']) {
+  const lado = (l: 'jogador' | 'oponente'): 'anfitriao' | 'convidado' => (l === 'jogador' ? 'anfitriao' : 'convidado')
+  return eventos.map((e) => ({ ...e, atacanteLado: lado(e.atacanteLado), defensorLado: lado(e.defensorLado) }))
+}
+
 export async function resolverPvp(cfg: Config, jogadorId: string, req: Request): Promise<Response> {
   const corpo = (await req.json().catch(() => null)) as { sessaoId?: string } | null
   const sessaoId = corpo?.sessaoId
@@ -84,7 +93,7 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
       p_pdl_delta_anfitriao: null,
       p_pdl_delta_convidado: null,
     })
-    return json({ vencedorId, eventos: resultado.eventos, turnos: resultado.turnos })
+    return json({ vencedorId, eventos: eventosParaCliente(resultado.eventos), turnos: resultado.turnos })
   }
 
   const ranks = await selecionar<LinhaRankPvp>(
@@ -120,7 +129,7 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
 
   return json({
     vencedorId,
-    eventos: resultado.eventos,
+    eventos: eventosParaCliente(resultado.eventos),
     turnos: resultado.turnos,
     pdlDeltaAnfitriao: calculo.anfitriao.pdlDelta,
     pdlDeltaConvidado: calculo.convidado.pdlDelta,

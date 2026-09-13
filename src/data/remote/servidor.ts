@@ -237,6 +237,8 @@ export interface RespostaFlush extends RespostaComEstado {
  * PH-178. Mesmo formato de `RespostaFlush` (o servidor simula o intervalo
  * normal antes de tentar o avanco) mais o resultado do proprio avanco.
  */
+export type LadoPvpRemoto = 'anfitriao' | 'convidado'
+
 export interface PvpEventoRemoto {
   atacante: string
   defensor: string
@@ -245,6 +247,13 @@ export interface PvpEventoRemoto {
   hpRestante: number
   efetividade: number
   nocaute: boolean
+  atacanteLado: LadoPvpRemoto
+  atacanteSpeciesId: string
+  atacanteShiny: boolean
+  defensorLado: LadoPvpRemoto
+  defensorSpeciesId: string
+  defensorShiny: boolean
+  hpMaximoDefensor: number
 }
 
 export interface RespostaResolverPvp {
