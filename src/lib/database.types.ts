@@ -2687,6 +2687,35 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      abrir_pvp_time: {
+        Args: { p_convidado_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          anfitriao_time: Json | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          convidado_time: Json | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          modo: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       abrir_troca: {
         Args: { p_convidado_id: string }
         Returns: {
@@ -2712,6 +2741,35 @@ export type Database = {
       }
       aceitar_pvp: {
         Args: { p_poke: Json; p_pokemon_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          anfitriao_time: Json | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          convidado_time: Json | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          modo: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      aceitar_pvp_time: {
+        Args: { p_pokemon_ids: string[]; p_sessao_id: string }
         Returns: {
           anfitriao_id: string
           anfitriao_poke: Json | null
@@ -3168,6 +3226,10 @@ export type Database = {
         }
       }
       pvp_proximo_reset: { Args: { p_ref?: string }; Returns: string }
+      pvp_snapshot_pokemon: {
+        Args: { p_pokemon_ids: string[]; p_user: string }
+        Returns: Json
+      }
       pvp_snapshot_time: { Args: { p_user: string }; Returns: Json }
       pvp_time_pronto_ranqueado: { Args: { p_user: string }; Returns: boolean }
       pvp_validar_poke: {
@@ -6136,6 +6198,35 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      abrir_pvp_time: {
+        Args: { p_convidado_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          anfitriao_time: Json | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          convidado_time: Json | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          modo: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       abrir_troca: {
         Args: { p_convidado_id: string }
         Returns: {
@@ -6161,6 +6252,35 @@ export type Database = {
       }
       aceitar_pvp: {
         Args: { p_poke: Json; p_pokemon_id: string; p_sessao_id: string }
+        Returns: {
+          anfitriao_id: string
+          anfitriao_poke: Json | null
+          anfitriao_pokemon_id: string | null
+          anfitriao_reporte: string | null
+          anfitriao_time: Json | null
+          convidado_id: string
+          convidado_poke: Json | null
+          convidado_pokemon_id: string | null
+          convidado_reporte: string | null
+          convidado_time: Json | null
+          criada_em: string
+          encerrada_em: string | null
+          encerrada_por: string | null
+          estado: string
+          expira_em: string
+          id: string
+          modo: string
+          vencedor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_sessao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      aceitar_pvp_time: {
+        Args: { p_pokemon_ids: string[]; p_sessao_id: string }
         Returns: {
           anfitriao_id: string
           anfitriao_poke: Json | null
@@ -6617,6 +6737,10 @@ export type Database = {
         }
       }
       pvp_proximo_reset: { Args: { p_ref?: string }; Returns: string }
+      pvp_snapshot_pokemon: {
+        Args: { p_pokemon_ids: string[]; p_user: string }
+        Returns: Json
+      }
       pvp_snapshot_time: { Args: { p_user: string }; Returns: Json }
       pvp_time_pronto_ranqueado: { Args: { p_user: string }; Returns: boolean }
       pvp_validar_poke: {
