@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/fredoka";
+@import "@fontsource-variable/manrope";
 /* Par monospace da Geist. Existe porque `font-mono` era usado nos tres
    elementos mais chamativos do DOM (splash "LVL UP !", contagem do Campeao
    Lance, contagem do Auto-Revive) sem `--font-mono` definido em lugar nenhum —
@@ -14,8 +15,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    /* Heading e sans agora sao familias distintas (identidade "Vidro
+       Noturno") — Fredoka so pra titulo/logo, Manrope pro resto da UI.
+       @fontsource-variable/geist (nao-mono) foi removido do import acima:
+       nada referenciava 'Geist Variable' fora deste arquivo. */
+    --font-heading: 'Fredoka Variable', sans-serif;
+    --font-sans: 'Manrope Variable', sans-serif;
     --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
 
     /* --- escada neutra do tema "black" -------------------------------------
@@ -23,8 +28,8 @@
        o design distingue coisas que o shadcn junta: borda de JANELA
        (neutral-700) e borda de CARD (neutral-800) sao dois valores, e ambos
        viram `--border` se so os tokens do shadcn forem usados. */
-    --color-n900: #141519;
-    --color-n800: #232428;
+    --color-n900: #0E1016;
+    --color-n800: #161A22;
     --color-n700: #303136;
     --color-n600: #4a4b52;
     /* n500 SUBIU de #717580 pra #80848e (PH-382), e o motivo e contraste
@@ -64,17 +69,25 @@
        existir UM lugar quando a cor mudar. As paletas de tipo elemental e de
        raridade continuam em src/data/typeColors.ts e src/data/rarity.ts: sao
        dado do jogo indexado por chave, nao cor de chrome. */
-    --color-gold: #fbbf24;
-    --color-diamond: #4fc3f7;
-    --color-hp: #10b981;
-    --color-hp-low: #ef4444;
-    --color-exp: #38bdf8;
-    --color-shiny: #b366ff;
+    --color-gold: #F0B429;
+    /* Empurrado de #4fc3f7 (azul-ceu, h~199) pro teal abaixo (h~172): nao era
+       diamond x shiny que colidia (h~199 x h~259, ja bem separados) e sim
+       diamond x --color-exp depois do reskin (#5EA8FF, h~212 — so 13 graus de
+       diamond). Teal mantem "gema" sem se confundir com a barra de EXP. */
+    --color-diamond: #2DD4BF;
+    --color-hp: #3FCB80;
+    --color-hp-low: #FF6650;
+    --color-exp: #5EA8FF;
+    --color-shiny: #B18CFF;
     --color-ok: #34d399;
     --color-warn: #fb923c;
-    --color-bad: #ef4444;
+    --color-bad: #FF6650;
     --color-cat-physical: #9aa0a6;
     --color-cat-special: #60a5fa;
+    /* Acento de marca "Vidro Noturno" — unico uso previsto: botao de acao
+       primaria (Capturar/Batalhar) e logotipo. Nao usar em badge/estado, ja
+       tem token proprio pra isso. Ver plano de identidade visual. */
+    --color-ember: #FF7A50;
 
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
