@@ -1,27 +1,32 @@
-import { useEffect, useRef } from 'react'
 import { ArrowUDownLeft } from '@phosphor-icons/react'
 import { GameButton, GameCard, SectionLabel } from '@/components/game/controls'
 import { buildHospitalWorld } from '@/engine/simulation'
-import * as pvpRpc from '@/data/remote/pvpRpc'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { useWorldStore } from '@/stores/worldStore'
+
+// `lutando`: duelo AO VIVO (ex: praticar contra o poke exibido no Ranking,
+// ver RankingMenu.tsx — `criarMundoPvpVisual`, sem sessao nenhuma no banco).
+// `replay`: resultado do PvP com sessao (amistoso ou ranqueado) ja decidido
+// pelo servidor ANTES desta tela abrir (ver usePvp.ts/usePvpRanked.ts) —
+// aqui so reproduz os eventos, nunca reporta nada de volta.
+const TITULO_POR_ESTADO: Record<string, (treinador: string) => string> = {
+  lutando: (t) => `Duelo contra ${t}`,
+  replay: (t) => `Duelo contra ${t}`,
+  vitoria: () => 'Você venceu',
+  derrota: (t) => `${t} venceu`,
+  empate: () => 'Empate',
+}
 
 export function PvpOverlay() {
   const pvp = useWorldStore((s) => s.pvp)
   const playerHp = useWorldStore((s) => s.player?.poke.hp ?? 0)
   const rivalHp = useWorldStore((s) => s.enemies[0]?.poke.hp ?? 0)
   const rivalMaxHp = useWorldStore((s) => s.enemies[0]?.poke.stats.hp ?? 1)
-  const registrados = useRef(new Set<string>())
-
-  useEffect(() => {
-    if (!pvp?.sessaoId || pvp.estado === 'lutando' || registrados.current.has(pvp.sessaoId)) return
-    registrados.current.add(pvp.sessaoId)
-    const vencedorId = pvp.estado === 'vitoria' ? pvp.meuId ?? null : pvp.rivalId ?? null
-    void pvpRpc.registrarResultadoPvp(pvp.sessaoId, vencedorId)
-  }, [pvp])
 
   if (!pvp) return null
+
+  const emAndamento = pvp.estado === 'lutando' || pvp.estado === 'replay'
 
   const encerrar = () => {
     const { team, activeIndex } = useGameStateStore.getState()
@@ -34,12 +39,12 @@ export function PvpOverlay() {
       <GameCard className="p-[.65em] text-center">
         <SectionLabel>ARENA PVP</SectionLabel>
         <div className="mt-[.15em] font-medium">
-          {pvp.estado === 'lutando' ? `Duelo contra ${pvp.treinador}` : pvp.estado === 'vitoria' ? 'Você venceu' : `${pvp.treinador} venceu`}
+          {(TITULO_POR_ESTADO[pvp.estado] ?? TITULO_POR_ESTADO.lutando)(pvp.treinador)}
         </div>
         <div className="mt-[.25em] text-[.78em] text-n400">
           Você {Math.max(0, playerHp)} HP · Rival {Math.max(0, rivalHp)}/{rivalMaxHp} HP
         </div>
-        {pvp.estado !== 'lutando' && (
+        {!emAndamento && (
           <GameButton className="mt-[.45em]" variant="primary" onClick={encerrar}>
             <ArrowUDownLeft /> Voltar
           </GameButton>

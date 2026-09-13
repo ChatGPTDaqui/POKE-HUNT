@@ -5,8 +5,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import * as pvpRpc from '@/data/remote/pvpRpc'
 import { servidor, servidorAtivo } from '@/data/remote/servidor'
-import type { RespostaResolverPvp } from '@/data/remote/servidor'
+import { useAuthStore } from '@/stores/authStore'
 import { useToastStore } from '@/stores/toastStore'
+import { useUiStore } from '@/stores/uiStore'
+import { useWorldStore } from '@/stores/worldStore'
+import { criarMundoPvpReplay } from './pvpWorld'
 
 const INTERVALO_POLL_MS = 3000
 
@@ -14,18 +17,16 @@ export interface EstadoRankeado {
   rank: pvpRpc.RankPvp | null
   carregando: boolean
   procurando: boolean
-  resultado: RespostaResolverPvp | null
   entrarNaFila: () => Promise<void>
   cancelar: () => Promise<void>
-  limparResultado: () => void
   servidorConfigurado: boolean
 }
 
 export function usePvpRanked(): EstadoRankeado {
+  const meuId = useAuthStore((s) => s.user?.id ?? null)
   const [rank, setRank] = useState<pvpRpc.RankPvp | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [procurando, setProcurando] = useState(false)
-  const [resultado, setResultado] = useState<RespostaResolverPvp | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const vivo = useRef(true)
 
@@ -64,7 +65,14 @@ export function usePvpRanked(): EstadoRankeado {
           pararPolling()
           setProcurando(false)
           const res = await servidor.resolverPvp(sessao.id)
-          if (vivo.current) setResultado(res)
+          if (meuId && res.eventos && res.eventos.length > 0) {
+            const meuLado = sessao.anfitriaoId === meuId ? 'anfitriao' : 'convidado'
+            const resultadoFinal = res.vencedorId == null
+              ? 'empate'
+              : res.vencedorId === meuId ? 'vitoria' : 'derrota'
+            useWorldStore.getState().setWorld(criarMundoPvpReplay(res.eventos, meuLado, resultadoFinal, 'oponente ranqueado'))
+            useUiStore.getState().closeScreen()
+          }
           await recarregarRank()
         } catch (e) {
           pararPolling()
@@ -97,10 +105,8 @@ export function usePvpRanked(): EstadoRankeado {
     rank,
     carregando,
     procurando,
-    resultado,
     entrarNaFila,
     cancelar,
-    limparResultado: () => setResultado(null),
     servidorConfigurado: servidorAtivo(),
   }
 }

@@ -40660,10 +40660,11 @@ function escolherGolpe(atacante, defensor) {
 		dano: danoDoGolpe(atacante, defensor, ability)
 	})).filter((c) => c.dano > 0).sort((a, b) => b.dano - a.dano || b.ability.power - a.ability.power || a.ability.name.localeCompare(b.ability.name))[0]?.ability ?? BASIC_ATTACK;
 }
-function aplicarAtaque(atacante, defensor) {
+function aplicarAtaque(atacante, ladoAtacante, defensor, ladoDefensor) {
 	const ability = escolherGolpe(atacante, defensor);
 	const efetividade = isDamagingAbility(ability) ? getEffectiveness(ability.type, defensor.species.type, defensor.species.type2) : 1;
 	const dano = Math.min(defensor.poke.hp, danoDoGolpe(atacante, defensor, ability));
+	const hpMaximoDefensor = defensor.poke.stats.hp;
 	defensor.poke.hp = Math.max(0, defensor.poke.hp - dano);
 	return {
 		atacante: nomeDoPoke(atacante),
@@ -40672,7 +40673,14 @@ function aplicarAtaque(atacante, defensor) {
 		dano,
 		hpRestante: defensor.poke.hp,
 		efetividade,
-		nocaute: defensor.poke.hp <= 0
+		nocaute: defensor.poke.hp <= 0,
+		atacanteLado: ladoAtacante,
+		atacanteSpeciesId: atacante.species.id,
+		atacanteShiny: atacante.poke.isShiny,
+		defensorLado: ladoDefensor,
+		defensorSpeciesId: defensor.species.id,
+		defensorShiny: defensor.poke.isShiny,
+		hpMaximoDefensor
 	};
 }
 function vivos(time) {
@@ -40687,13 +40695,14 @@ function simularPvp(jogador, oponente) {
 		turnos += 1;
 		const ativoJogador = vivos(timeJogador)[0];
 		const ativoOponente = vivos(timeOponente)[0];
-		const ordem = ativoJogador.poke.stats.speed >= ativoOponente.poke.stats.speed ? [ativoJogador, ativoOponente] : [ativoOponente, ativoJogador];
-		const alvo = /* @__PURE__ */ new Map([[ativoJogador, ativoOponente], [ativoOponente, ativoJogador]]);
-		for (const atacante of ordem) {
+		const ordem = ativoJogador.poke.stats.speed >= ativoOponente.poke.stats.speed ? [[ativoJogador, "jogador"], [ativoOponente, "oponente"]] : [[ativoOponente, "oponente"], [ativoJogador, "jogador"]];
+		const alvo = /* @__PURE__ */ new Map([[ativoJogador, [ativoOponente, "oponente"]], [ativoOponente, [ativoJogador, "jogador"]]]);
+		for (const [atacante, ladoAtacante] of ordem) {
 			if (atacante.poke.hp <= 0) continue;
-			const defensor = alvo.get(atacante);
-			if (!defensor || defensor.poke.hp <= 0) continue;
-			eventos.push(aplicarAtaque(atacante, defensor));
+			const par = alvo.get(atacante);
+			if (!par || par[0].poke.hp <= 0) continue;
+			const [defensor, ladoDefensor] = par;
+			eventos.push(aplicarAtaque(atacante, ladoAtacante, defensor, ladoDefensor));
 		}
 	}
 	const jogadorRestantes = vivos(timeJogador).length;
@@ -40852,6 +40861,14 @@ function resultadoDoAnfitriao(r) {
 	if (r.vencedor === "oponente") return "derrota";
 	return "empate";
 }
+function eventosParaCliente(eventos) {
+	const lado = (l) => l === "jogador" ? "anfitriao" : "convidado";
+	return eventos.map((e) => ({
+		...e,
+		atacanteLado: lado(e.atacanteLado),
+		defensorLado: lado(e.defensorLado)
+	}));
+}
 async function resolverPvp(cfg, jogadorId, req) {
 	const sessaoId = (await req.json().catch(() => null))?.sessaoId;
 	if (!sessaoId) throw new ErroHttp(400, "sessaoId e obrigatorio");
@@ -40881,7 +40898,7 @@ async function resolverPvp(cfg, jogadorId, req) {
 		});
 		return json$1({
 			vencedorId,
-			eventos: resultado.eventos,
+			eventos: eventosParaCliente(resultado.eventos),
 			turnos: resultado.turnos
 		});
 	}
@@ -40905,7 +40922,7 @@ async function resolverPvp(cfg, jogadorId, req) {
 	});
 	return json$1({
 		vencedorId,
-		eventos: resultado.eventos,
+		eventos: eventosParaCliente(resultado.eventos),
 		turnos: resultado.turnos,
 		pdlDeltaAnfitriao: calculo.anfitriao.pdlDelta,
 		pdlDeltaConvidado: calculo.convidado.pdlDelta
@@ -55528,6 +55545,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"squirtle": {
@@ -55602,6 +55624,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"bulbasaur": {
@@ -55668,6 +55695,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"geodude": {
@@ -55738,6 +55770,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				20
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"spearow": {
@@ -55802,6 +55839,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"rattata": {
@@ -55871,6 +55913,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"pidgey": {
@@ -55943,6 +55990,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 16,
 			"durations": [35, 30]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"sentret": {
@@ -56017,6 +56069,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"hoppip": {
@@ -56101,6 +56158,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"zubat": {
@@ -56173,6 +56235,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"dunsparce": {
@@ -56239,6 +56306,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"caterpie": {
@@ -56301,6 +56373,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"weedle": {
@@ -56362,6 +56439,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"charmeleon": {
@@ -56435,6 +56517,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"wartortle": {
@@ -56493,6 +56580,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"ivysaur": {
@@ -56548,6 +56640,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"graveler": {
@@ -56619,6 +56716,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"fearow": {
@@ -56689,6 +56791,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"raticate": {
@@ -56756,6 +56863,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [35, 30]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"pidgeotto": {
@@ -56816,6 +56928,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"furret": {
@@ -56882,6 +56999,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"skiploom": {
@@ -56948,6 +57070,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"golbat": {
@@ -57016,6 +57143,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"metapod": {
@@ -57084,6 +57216,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"kakuna": {
@@ -57130,6 +57267,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"charizard": {
@@ -57200,6 +57342,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"blastoise": {
@@ -57259,6 +57406,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [2, 8]
 		}
 	},
 	"venusaur": {
@@ -57314,6 +57466,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"pidgeot": {
@@ -57374,6 +57531,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"jumpluff": {
@@ -57446,6 +57608,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"butterfree": {
@@ -57519,6 +57686,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [35, 30]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"beedrill": {
@@ -57589,6 +57761,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"bellsprout": {
@@ -57644,6 +57821,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"unown": {
@@ -57698,6 +57880,11 @@ var BATTLE_SPRITE_ANIMS = {
 				35,
 				4
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"growlithe": {
@@ -57758,6 +57945,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"sandshrew": {
@@ -57811,6 +58003,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"onix": {
@@ -57870,6 +58067,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 64,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [2, 8]
 		}
 	},
 	"paras": {
@@ -57934,6 +58136,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [2, 8]
 		}
 	},
 	"ekans": {
@@ -58003,6 +58210,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"slowpoke": {
@@ -58064,6 +58276,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 16,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"snubbull": {
@@ -58130,6 +58347,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"abra": {
@@ -58208,6 +58430,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"jigglypuff": {
@@ -58281,6 +58508,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [35, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"ditto": {
@@ -58320,6 +58552,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 16,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"nidoran_f": {
@@ -58386,6 +58623,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"nidoran_m": {
@@ -58451,6 +58693,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"sunkern": {
@@ -58525,6 +58772,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"yanma": {
@@ -58608,6 +58860,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"machop": {
@@ -58677,6 +58934,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"koffing": {
@@ -58757,6 +59019,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"weezing": {
@@ -58835,6 +59102,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"magnemite": {
@@ -58900,6 +59172,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				8
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"tauros": {
@@ -58947,6 +59224,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"miltank": {
@@ -59008,6 +59290,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"arbok": {
@@ -59067,6 +59354,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"farfetch_d": {
@@ -59110,6 +59402,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"natu": {
@@ -59163,6 +59460,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"smeargle": {
@@ -59229,6 +59531,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"swinub": {
@@ -59292,6 +59599,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"jynx": {
@@ -59353,6 +59665,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"krabby": {
@@ -59409,6 +59726,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 16,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"seel": {
@@ -59467,6 +59789,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"tangela": {
@@ -59524,6 +59851,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"lickitung": {
@@ -59584,6 +59916,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"weepinbell": {
@@ -59652,6 +59989,11 @@ var BATTLE_SPRITE_ANIMS = {
 				10,
 				12
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"ursaring": {
@@ -59724,6 +60066,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"gligar": {
@@ -59807,6 +60154,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"donphan": {
@@ -59867,6 +60219,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"skarmory": {
@@ -59936,6 +60293,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"machoke": {
@@ -59979,6 +60341,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"larvitar": {
@@ -60057,6 +60424,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"pupitar": {
@@ -60129,6 +60501,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"magmar": {
@@ -60190,6 +60567,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"parasect": {
@@ -60253,6 +60635,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"ponyta": {
@@ -60334,6 +60721,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"rapidash": {
@@ -60405,6 +60797,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"doduo": {
@@ -60448,6 +60845,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"dodrio": {
@@ -60493,6 +60895,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"sandslash": {
@@ -60546,6 +60953,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"slowbro": {
@@ -60603,6 +61015,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"granbull": {
@@ -60659,6 +61076,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"kadabra": {
@@ -60726,6 +61148,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"nidorina": {
@@ -60788,6 +61215,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"nidorino": {
@@ -60854,6 +61286,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"magneton": {
@@ -60921,6 +61358,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"xatu": {
@@ -60977,6 +61419,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"piloswine": {
@@ -61042,6 +61489,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"kingler": {
@@ -61098,6 +61550,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"dewgong": {
@@ -61165,6 +61622,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"tyranitar": {
@@ -61227,6 +61689,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"pichu": {
@@ -61284,6 +61751,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"cleffa": {
@@ -61341,6 +61813,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"igglybuff": {
@@ -61395,6 +61872,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"togepi": {
@@ -61440,6 +61922,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"pikachu": {
@@ -61512,6 +61999,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"hoothoot": {
@@ -61572,6 +62064,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"spinarak": {
@@ -61633,6 +62130,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"ledyba": {
@@ -61713,6 +62215,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"pineco": {
@@ -61776,6 +62283,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"oddish": {
@@ -61840,6 +62352,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"poliwag": {
@@ -61907,6 +62424,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [2, 8]
 		}
 	},
 	"diglett": {
@@ -61960,6 +62482,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [2, 8]
 		}
 	},
 	"voltorb": {
@@ -62034,6 +62561,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"meowth": {
@@ -62105,6 +62637,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"gastly": {
@@ -62184,6 +62721,11 @@ var BATTLE_SPRITE_ANIMS = {
 				6,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"drowzee": {
@@ -62244,6 +62786,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [35, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"magikarp": {
@@ -62311,6 +62858,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"goldeen": {
@@ -62394,6 +62946,11 @@ var BATTLE_SPRITE_ANIMS = {
 				10,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"horsea": {
@@ -62461,6 +63018,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"tentacool": {
@@ -62520,6 +63082,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"exeggcute": {
@@ -62582,6 +63149,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"mareep": {
@@ -62654,6 +63226,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"cyndaquil": {
@@ -62718,6 +63295,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"chikorita": {
@@ -62790,6 +63372,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"totodile": {
@@ -62866,6 +63453,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"mankey": {
@@ -62930,6 +63522,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"cubone": {
@@ -63001,6 +63598,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"chinchou": {
@@ -63074,6 +63676,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				8
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"shellder": {
@@ -63145,6 +63752,11 @@ var BATTLE_SPRITE_ANIMS = {
 				10,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"staryu": {
@@ -63203,6 +63815,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"grimer": {
@@ -63266,6 +63883,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"venonat": {
@@ -63327,6 +63949,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"psyduck": {
@@ -63386,6 +64013,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [35, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"wooper": {
@@ -63454,6 +64086,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [2, 8]
 		}
 	},
 	"slugma": {
@@ -63516,6 +64153,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [2, 8]
 		}
 	},
 	"houndour": {
@@ -63597,6 +64239,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"teddiursa": {
@@ -63658,6 +64305,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"phanpy": {
@@ -63729,6 +64381,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"remoraid": {
@@ -63800,6 +64457,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"tyrogue": {
@@ -63864,6 +64526,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"elekid": {
@@ -63923,6 +64590,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"magby": {
@@ -63995,6 +64667,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"smoochum": {
@@ -64066,6 +64743,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"marill": {
@@ -64131,6 +64813,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"sudowoodo": {
@@ -64185,6 +64872,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 16,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"murkrow": {
@@ -64258,6 +64950,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"aipom": {
@@ -64326,6 +65023,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"qwilfish": {
@@ -64399,6 +65101,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"corsola": {
@@ -64458,6 +65165,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"sneasel": {
@@ -64531,6 +65243,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"girafarig": {
@@ -64604,6 +65321,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"stantler": {
@@ -64677,6 +65399,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"misdreavus": {
@@ -64764,6 +65491,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"delibird": {
@@ -64834,6 +65566,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"sunflora": {
@@ -64907,6 +65644,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"wobbuffet": {
@@ -64971,6 +65713,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"mantine": {
@@ -65051,6 +65798,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 80,
+			"frameHeight": 96,
+			"durations": [2, 8]
 		}
 	},
 	"rhyhorn": {
@@ -65109,6 +65861,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"hitmonlee": {
@@ -65163,6 +65920,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"hitmonchan": {
@@ -65222,6 +65984,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"kangaskhan": {
@@ -65288,6 +66055,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"lapras": {
@@ -65349,6 +66121,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 96,
+			"durations": [2, 8]
 		}
 	},
 	"porygon": {
@@ -65418,6 +66195,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"eevee": {
@@ -65483,6 +66265,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"scyther": {
@@ -65542,6 +66329,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"pinsir": {
@@ -65602,6 +66394,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"dratini": {
@@ -65665,6 +66462,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"omanyte": {
@@ -65722,6 +66524,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"kabuto": {
@@ -65791,6 +66598,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [2, 8]
 		}
 	},
 	"aerodactyl": {
@@ -65856,6 +66668,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"snorlax": {
@@ -65919,6 +66736,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"heracross": {
@@ -65980,6 +66802,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"alakazam": {
@@ -66045,6 +66872,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"gengar": {
@@ -66120,6 +66952,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"machamp": {
@@ -66185,6 +67022,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"victreebel": {
@@ -66253,6 +67095,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"arcanine": {
@@ -66309,6 +67156,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"nidoking": {
@@ -66368,6 +67220,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"nidoqueen": {
@@ -66432,6 +67289,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"steelix": {
@@ -66493,6 +67355,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 48,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 112,
+			"durations": [2, 8]
 		}
 	},
 	"gyarados": {
@@ -66561,6 +67428,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 72,
+			"frameHeight": 120,
+			"durations": [2, 8]
 		}
 	},
 	"articuno": {
@@ -66629,6 +67501,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 56,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 120,
+			"durations": [2, 8]
 		}
 	},
 	"zapdos": {
@@ -66692,6 +67569,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 56,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 80,
+			"frameHeight": 104,
+			"durations": [2, 8]
 		}
 	},
 	"moltres": {
@@ -66757,6 +67639,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 48,
 			"frameHeight": 64,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 80,
+			"frameHeight": 120,
+			"durations": [2, 8]
 		}
 	},
 	"raikou": {
@@ -66827,6 +67714,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"entei": {
@@ -66899,6 +67791,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"suicune": {
@@ -66969,6 +67866,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"lugia": {
@@ -67019,6 +67921,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 56,
 			"frameHeight": 80,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 88,
+			"frameHeight": 112,
+			"durations": [2, 8]
 		}
 	},
 	"ho_oh": {
@@ -67088,6 +67995,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 56,
 			"frameHeight": 56,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 96,
+			"frameHeight": 128,
+			"durations": [2, 8]
 		}
 	},
 	"celebi": {
@@ -67173,6 +68085,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"mewtwo": {
@@ -67251,6 +68168,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"mew": {
@@ -67331,6 +68253,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"noctowl": {
@@ -67408,6 +68335,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"ariados": {
@@ -67476,6 +68408,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"ledian": {
@@ -67546,6 +68483,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"forretress": {
@@ -67627,6 +68569,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"gloom": {
@@ -67687,6 +68634,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"poliwhirl": {
@@ -67751,6 +68703,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"dugtrio": {
@@ -67804,6 +68761,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [2, 8]
 		}
 	},
 	"electrode": {
@@ -67866,6 +68828,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"persian": {
@@ -67921,6 +68888,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 16,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"haunter": {
@@ -67995,6 +68967,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				20
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"hypno": {
@@ -68062,6 +69039,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [35, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"seaking": {
@@ -68141,6 +69123,11 @@ var BATTLE_SPRITE_ANIMS = {
 				10,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"seadra": {
@@ -68213,6 +69200,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"tentacruel": {
@@ -68278,6 +69270,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"flaaffy": {
@@ -68351,6 +69348,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"quilava": {
@@ -68421,6 +69423,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"bayleef": {
@@ -68482,6 +69489,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"croconaw": {
@@ -68537,6 +69549,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"primeape": {
@@ -68600,6 +69617,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"marowak": {
@@ -68655,6 +69677,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"lanturn": {
@@ -68738,6 +69765,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"muk": {
@@ -68800,6 +69832,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"venomoth": {
@@ -68888,6 +69925,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				8
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"golduck": {
@@ -68947,6 +69989,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [35, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"quagsire": {
@@ -69010,6 +70057,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"magcargo": {
@@ -69067,6 +70119,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"houndoom": {
@@ -69138,6 +70195,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"octillery": {
@@ -69191,6 +70253,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"electabuzz": {
@@ -69251,6 +70318,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"azumarill": {
@@ -69312,6 +70384,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"rhydon": {
@@ -69370,6 +70447,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"dragonair": {
@@ -69438,6 +70520,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"omastar": {
@@ -69495,6 +70582,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"kabutops": {
@@ -69557,6 +70649,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"ampharos": {
@@ -69621,6 +70718,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"typhlosion": {
@@ -69690,6 +70792,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"meganium": {
@@ -69751,6 +70858,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"feraligatr": {
@@ -69813,6 +70925,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"dragonite": {
@@ -69877,6 +70994,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"kingdra": {
@@ -69953,6 +71075,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"politoed": {
@@ -70020,6 +71147,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"golem": {
@@ -70077,6 +71209,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"porygon2": {
@@ -70146,6 +71283,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"scizor": {
@@ -70209,6 +71351,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"vileplume": {
@@ -70276,6 +71423,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [35, 30]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"bellossom": {
@@ -70335,6 +71487,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"exeggutor": {
@@ -70396,6 +71553,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"poliwrath": {
@@ -70459,6 +71621,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"slowking": {
@@ -70525,6 +71692,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"cloyster": {
@@ -70599,6 +71771,11 @@ var BATTLE_SPRITE_ANIMS = {
 				15,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"starmie": {
@@ -70664,6 +71841,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"wigglytuff": {
@@ -70726,6 +71908,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [35, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"vaporeon": {
@@ -70782,6 +71969,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"jolteon": {
@@ -70846,6 +72038,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"flareon": {
@@ -70913,6 +72110,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"espeon": {
@@ -70974,6 +72176,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"umbreon": {
@@ -71054,6 +72261,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"raichu": {
@@ -71126,6 +72338,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"crobat": {
@@ -71193,6 +72410,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"hitmontop": {
@@ -71258,6 +72480,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"clefairy": {
@@ -71307,6 +72534,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"togetic": {
@@ -71362,6 +72594,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"clefable": {
@@ -71411,6 +72648,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"treecko": {
@@ -71479,6 +72721,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"grovyle": {
@@ -71544,6 +72791,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"sceptile": {
@@ -71599,6 +72851,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"torchic": {
@@ -71672,6 +72929,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"combusken": {
@@ -71733,6 +72995,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"blaziken": {
@@ -71788,6 +73055,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"mudkip": {
@@ -71863,6 +73135,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"marshtomp": {
@@ -71923,6 +73200,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 16,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"swampert": {
@@ -71996,6 +73278,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"poochyena": {
@@ -72070,6 +73357,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"mightyena": {
@@ -72144,6 +73436,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"zigzagoon": {
@@ -72209,6 +73506,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"linoone": {
@@ -72281,6 +73583,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"wurmple": {
@@ -72346,6 +73653,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"silcoon": {
@@ -72403,6 +73715,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"beautifly": {
@@ -72475,6 +73792,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"cascoon": {
@@ -72532,6 +73854,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"dustox": {
@@ -72603,6 +73930,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"lotad": {
@@ -72662,6 +73994,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 16,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"lombre": {
@@ -72727,6 +74064,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"ludicolo": {
@@ -72782,6 +74124,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"seedot": {
@@ -72841,6 +74188,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"nuzleaf": {
@@ -72921,6 +74273,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"shiftry": {
@@ -72992,6 +74349,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"taillow": {
@@ -73055,6 +74417,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 16,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"swellow": {
@@ -73126,6 +74493,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"wingull": {
@@ -73205,6 +74577,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"pelipper": {
@@ -73262,6 +74639,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"ralts": {
@@ -73326,6 +74708,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"kirlia": {
@@ -73409,6 +74796,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"gardevoir": {
@@ -73468,6 +74860,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"surskit": {
@@ -73533,6 +74930,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"masquerain": {
@@ -73598,6 +75000,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"shroomish": {
@@ -73661,6 +75068,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"breloom": {
@@ -73739,6 +75151,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"slakoth": {
@@ -73793,6 +75210,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"vigoroth": {
@@ -73855,6 +75277,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"slaking": {
@@ -73918,6 +75345,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"nincada": {
@@ -73979,6 +75411,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"ninjask": {
@@ -74046,6 +75483,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"shedinja": {
@@ -74133,6 +75575,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"whismur": {
@@ -74198,6 +75645,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"loudred": {
@@ -74262,6 +75714,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"exploud": {
@@ -74323,6 +75780,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"makuhita": {
@@ -74406,6 +75868,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"hariyama": {
@@ -74475,6 +75942,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"azurill": {
@@ -74537,6 +76009,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"nosepass": {
@@ -74601,6 +76078,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"skitty": {
@@ -74674,6 +76156,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"delcatty": {
@@ -74751,6 +76238,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"sableye": {
@@ -74805,6 +76297,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"mawile": {
@@ -74878,6 +76375,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"aron": {
@@ -74948,6 +76450,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"lairon": {
@@ -75008,6 +76515,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"aggron": {
@@ -75070,6 +76582,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"meditite": {
@@ -75136,6 +76653,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"medicham": {
@@ -75203,6 +76725,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"electrike": {
@@ -75283,6 +76810,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"manectric": {
@@ -75353,6 +76885,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"plusle": {
@@ -75429,6 +76966,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"minun": {
@@ -75505,6 +77047,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"volbeat": {
@@ -75572,6 +77119,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"illumise": {
@@ -75631,6 +77183,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"roselia": {
@@ -75705,6 +77262,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"gulpin": {
@@ -75764,6 +77326,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"swalot": {
@@ -75823,6 +77390,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"carvanha": {
@@ -75891,6 +77463,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"sharpedo": {
@@ -75963,6 +77540,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				26
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"wailmer": {
@@ -76036,6 +77618,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"wailord": {
@@ -76115,6 +77702,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 80,
+			"frameHeight": 128,
+			"durations": [2, 8]
 		}
 	},
 	"numel": {
@@ -76175,6 +77767,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"camerupt": {
@@ -76235,6 +77832,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"torkoal": {
@@ -76296,6 +77898,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"spoink": {
@@ -76370,6 +77977,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 48,
 			"durations": [40, 30]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"grumpig": {
@@ -76430,6 +78042,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"spinda": {
@@ -76512,6 +78129,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"trapinch": {
@@ -76587,6 +78209,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"vibrava": {
@@ -76659,6 +78286,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"flygon": {
@@ -76732,6 +78364,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"cacnea": {
@@ -76792,6 +78429,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"cacturne": {
@@ -76858,6 +78500,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"swablu": {
@@ -76935,6 +78582,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"altaria": {
@@ -77015,6 +78667,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"zangoose": {
@@ -77089,6 +78746,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"seviper": {
@@ -77149,6 +78811,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"lunatone": {
@@ -77222,6 +78889,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"solrock": {
@@ -77296,6 +78968,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"barboach": {
@@ -77367,6 +79044,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"whiscash": {
@@ -77445,6 +79127,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				12
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"corphish": {
@@ -77510,6 +79197,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"crawdaunt": {
@@ -77570,6 +79262,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"baltoy": {
@@ -77654,6 +79351,11 @@ var BATTLE_SPRITE_ANIMS = {
 				8,
 				8
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"claydol": {
@@ -77720,6 +79422,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"lileep": {
@@ -77780,6 +79487,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"cradily": {
@@ -77854,6 +79566,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"anorith": {
@@ -77927,6 +79644,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"armaldo": {
@@ -77997,6 +79719,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"feebas": {
@@ -78068,6 +79795,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"milotic": {
@@ -78131,6 +79863,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 48,
 			"frameHeight": 72,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 88,
+			"frameHeight": 104,
+			"durations": [2, 8]
 		}
 	},
 	"castform": {
@@ -78197,6 +79934,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [35, 30]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"kecleon": {
@@ -78267,6 +80009,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"shuppet": {
@@ -78347,6 +80094,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"banette": {
@@ -78411,6 +80163,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"duskull": {
@@ -78486,6 +80243,11 @@ var BATTLE_SPRITE_ANIMS = {
 				16,
 				8
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"dusclops": {
@@ -78545,6 +80307,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"tropius": {
@@ -78613,6 +80380,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"chimecho": {
@@ -78690,6 +80462,11 @@ var BATTLE_SPRITE_ANIMS = {
 				10,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"absol": {
@@ -78755,6 +80532,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"wynaut": {
@@ -78822,6 +80604,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"snorunt": {
@@ -78892,6 +80679,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"glalie": {
@@ -78960,6 +80752,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 48,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"spheal": {
@@ -79024,6 +80821,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"sealeo": {
@@ -79085,6 +80887,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 40,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"walrein": {
@@ -79152,6 +80959,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"clamperl": {
@@ -79215,6 +81027,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	},
 	"huntail": {
@@ -79279,6 +81096,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 24,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"gorebyss": {
@@ -79351,6 +81173,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"relicanth": {
@@ -79423,6 +81250,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"luvdisc": {
@@ -79502,6 +81334,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"bagon": {
@@ -79572,6 +81409,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"shelgon": {
@@ -79633,6 +81475,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"salamence": {
@@ -79717,6 +81564,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"beldum": {
@@ -79791,6 +81643,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"metang": {
@@ -79867,6 +81724,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"metagross": {
@@ -79922,6 +81784,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 48,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 40,
+			"durations": [2, 8]
 		}
 	},
 	"regirock": {
@@ -79983,6 +81850,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [2, 8]
 		}
 	},
 	"regice": {
@@ -80043,6 +81915,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"registeel": {
@@ -80096,6 +81973,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 32,
 			"frameHeight": 40,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 72,
+			"durations": [2, 8]
 		}
 	},
 	"latias": {
@@ -80179,6 +82061,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"latios": {
@@ -80250,6 +82137,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 48,
 			"frameHeight": 32,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 56,
+			"frameHeight": 96,
+			"durations": [2, 8]
 		}
 	},
 	"kyogre": {
@@ -80329,6 +82221,11 @@ var BATTLE_SPRITE_ANIMS = {
 				12,
 				16
 			]
+		},
+		"Hurt": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [2, 8]
 		}
 	},
 	"groudon": {
@@ -80400,6 +82297,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 56,
 			"frameHeight": 56,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [2, 8]
 		}
 	},
 	"rayquaza": {
@@ -80477,6 +82379,11 @@ var BATTLE_SPRITE_ANIMS = {
 				10,
 				30
 			]
+		},
+		"Hurt": {
+			"frameWidth": 80,
+			"frameHeight": 136,
+			"durations": [2, 8]
 		}
 	},
 	"jirachi": {
@@ -80565,6 +82472,11 @@ var BATTLE_SPRITE_ANIMS = {
 				4,
 				10
 			]
+		},
+		"Hurt": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [2, 8]
 		}
 	},
 	"deoxys": {
@@ -80634,6 +82546,11 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameWidth": 24,
 			"frameHeight": 56,
 			"durations": [30, 35]
+		},
+		"Hurt": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [2, 8]
 		}
 	}
 };
@@ -80656,7 +82573,8 @@ var ANIM_FALLBACKS = {
 		"Walk"
 	],
 	Idle: ["Walk"],
-	Sleep: ["Idle", "Walk"]
+	Sleep: ["Idle", "Walk"],
+	Hurt: ["Idle", "Walk"]
 };
 function resolveBattleAnim(speciesId, animName, isShiny = false) {
 	const species = BATTLE_SPRITE_ANIMS[speciesId];
@@ -80681,6 +82599,7 @@ function desiredAnimName(entity) {
 	if (isDead(entity)) return "Faint";
 	if (entity.poke.status?.tipo === "sleep") return "Sleep";
 	if (entity.attackAnimTimer > 0) return entity.attackAnim;
+	if ((entity.hurtAnimTimer ?? 0) > 0) return "Hurt";
 	if (imobilizadoPorStatus(entity)) return "Idle";
 	if (entity.encarando) return "Walk";
 	if (entity.state === "chase") return "Walk";
@@ -80692,6 +82611,11 @@ function tickAttackAnimTimers(world, dt) {
 	for (const entity of entities) {
 		if (!entity) continue;
 		if (entity.attackAnimTimer > 0) entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt);
+		if (entity.hurtAnimTimer) {
+			const resta = entity.hurtAnimTimer - dt;
+			if (resta > 0) entity.hurtAnimTimer = resta;
+			else delete entity.hurtAnimTimer;
+		}
 		if (entity.vfxCuraHp) {
 			const resta = entity.vfxCuraHp - dt;
 			if (resta > 0) entity.vfxCuraHp = resta;

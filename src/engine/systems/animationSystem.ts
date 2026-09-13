@@ -33,6 +33,11 @@ export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
   // Sleep -> Idle -> Walk (conferido: 0 das 226 especies sem Sleep).
   if (entity.poke.status?.tipo === 'sleep') return 'Sleep'
   if (entity.attackAnimTimer > 0) return entity.attackAnim as AnimName
+  // PH-532: flinch de levar dano, so o replay do PvP dispara isto (ver
+  // triggerHurtAnim). Abaixo do proprio ataque de proposito — se por algum
+  // motivo as duas coisas coincidirem na mesma entidade, "estou atacando"
+  // ganha de "acabei de apanhar".
+  if ((entity.hurtAnimTimer ?? 0) > 0) return 'Hurt'
   // Imobilizado por status (hoje congelamento — o sono ja saiu acima, com
   // animacao propria): o estado continua 'chase'/'wander' pra o combate
   // seguir funcionando (movementSystem.ts explica por que), entao sem esta
@@ -69,6 +74,11 @@ export function tickAttackAnimTimers(world: WorldState, dt: number): void {
     if (!entity) continue
     if (entity.attackAnimTimer > 0) {
       entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt)
+    }
+    if (entity.hurtAnimTimer) {
+      const resta = entity.hurtAnimTimer - dt
+      if (resta > 0) entity.hurtAnimTimer = resta
+      else delete entity.hurtAnimTimer
     }
     // Faiscas de cura (HP e status). Descontadas aqui e nao em `updateAnimations`
     // pelo mesmo motivo do `attackAnimTimer`: esta funcao roda tambem no modo
@@ -161,4 +171,18 @@ export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boo
   entity.attackAnim = kind
   entity.attackAnimTimer = ATTACK_ANIM_DURATION
   if (target) faceToward(entity, target)
+}
+
+// PH-532: quanto tempo o flinch de "Hurt" fica na tela no replay do PvP. Os
+// frames da pose (~10 ticks no acervo PMD, ver scripts/importar-hurt-anim.mjs)
+// duram bem menos que isto — o valor aqui e o mesmo tipo de flourish fixo que
+// `ATTACK_ANIM_DURATION` ja e pra Shoot/Charge, so pra a pose ficar visivel
+// mesmo numa animacao curta.
+export const HURT_ANIM_DURATION = 0.4
+
+// So o replay do PvP chama isto (pvpReplaySystem.ts) — nenhum combate PvE
+// dispara flinch hoje. Mesmo padrao de `triggerAttackAnim`: so arma o timer,
+// `desiredAnimName`/`updateAnimations` cuidam do resto.
+export function triggerHurtAnim(entity: PlayerEntity | EnemyEntity, duration = HURT_ANIM_DURATION): void {
+  entity.hurtAnimTimer = duration
 }

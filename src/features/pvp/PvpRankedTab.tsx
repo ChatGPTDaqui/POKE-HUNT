@@ -1,5 +1,5 @@
 import { Sword, Trophy } from '@phosphor-icons/react'
-import { Carregando, ComingSoon, GameButton, GameCard, SectionLabel } from '@/components/game/controls'
+import { Carregando, ComingSoon, GameButton, SectionLabel } from '@/components/game/controls'
 import { usePvpRanked } from './usePvpRanked'
 
 const NOME_DIVISAO: Record<string, string> = {
@@ -24,27 +24,6 @@ export function PvpRankedTab() {
   }
 
   if (pvp.carregando) return <Carregando texto="Carregando seu rank..." />
-
-  if (pvp.resultado) {
-    const venci = pvp.resultado.vencedorId != null
-    return (
-      <GameCard className="flex flex-col items-center gap-[.5em] p-[1em] text-center">
-        <Trophy className="text-[2em] text-primary" />
-        <div className="text-[1.1em] font-medium">
-          {pvp.resultado.jaResolvido
-            ? 'Esse duelo já tinha sido resolvido.'
-            : venci ? 'Vitória!' : 'Derrota'}
-        </div>
-        {pvp.resultado.pdlDeltaAnfitriao != null && (
-          <div className="text-[.85em] text-n400">
-            {pvp.resultado.turnos != null && <>Duelo em {pvp.resultado.turnos} turnos. </>}
-            PDL: {pvp.resultado.pdlDeltaAnfitriao >= 0 ? '+' : ''}{pvp.resultado.pdlDeltaAnfitriao}
-          </div>
-        )}
-        <GameButton variant="primary" onClick={pvp.limparResultado}>Fechar</GameButton>
-      </GameCard>
-    )
-  }
 
   const rank = pvp.rank
   return (

@@ -1,11 +1,21 @@
 import { updateAnimations, tickAttackAnimTimers } from './animationSystem'
 import { updateCombat } from './combatSystem'
 import { updateMovement } from './movementSystem'
+import { stepPvpReplay } from './pvpReplaySystem'
 import { isDead } from '../entity'
 import type { WorldState } from '../types'
 
 export function stepPvpVisual(world: WorldState, dt: number): void {
   if (!world.pvp) return
+
+  // PH-532: resultado ja decidido pelo servidor, so tocando os eventos —
+  // nao passa por movementSystem/combatSystem (que decidiriam de novo).
+  if (world.pvp.estado === 'replay') {
+    tickAttackAnimTimers(world, dt)
+    stepPvpReplay(world, dt)
+    updateAnimations(world, dt)
+    return
+  }
 
   if (world.countdownRemaining != null) {
     world.countdownRemaining -= dt

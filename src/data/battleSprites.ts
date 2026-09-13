@@ -24,6 +24,10 @@ const ANIM_FALLBACKS: Partial<Record<AnimName, AnimName[]>> = {
   Faint: ['Sleep', 'Idle', 'Walk'],
   Idle: ['Walk'],
   Sleep: ['Idle', 'Walk'],
+  // Cobertura de 380/380 no import de PH-532 (scripts/importar-hurt-anim.mjs),
+  // mas a linha existe pra especie nova que entrar no elenco sem passar por
+  // ali — mesma regra que `Faint` (58/245 quando isto foi escrito) documenta.
+  Hurt: ['Idle', 'Walk'],
 }
 
 export interface ResolvedBattleAnim extends BattleSpriteAnimMeta {
