@@ -53,6 +53,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     pessimista: false,
     lure: null,
     pvp: null,
+    rodadaDuelo: null,
     clima: null,
     climaAmbiente: null,
     especialidadeNiveis: null,
