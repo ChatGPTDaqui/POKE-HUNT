@@ -67,7 +67,9 @@ describe('PvP via motor compartilhado — anfitriao (A) vs convidado (B)', () =>
 
     const eventos = eventosParaCliente(resultado.eventos)
     expect(eventos.length).toBeGreaterThan(0)
-    expect(eventos[0].atacanteLado).toBe('anfitriao')
+    // Nao "o primeiro evento e do anfitriao": Rattata Nv5 tem Quick Attack
+    // (prioridade) e abre a luta em ~40% das sementes.
+    expect(eventos.some((e) => e.atacanteLado === 'anfitriao')).toBe(true)
     expect(eventos.every((e) => e.atacanteLado === 'anfitriao' || e.defensorLado === 'convidado' || e.atacanteLado === 'convidado')).toBe(true)
   })
 
@@ -83,5 +85,21 @@ describe('PvP via motor compartilhado — anfitriao (A) vs convidado (B)', () =>
       (e) => e.atacanteSpeciesId === 'gyarados' || e.defensorSpeciesId === 'gyarados',
     )
     expect(gyaradosParticipou).toBe(true)
+  })
+
+  // PH-539: o convidado e `world.enemies[0]`, e o motor escolhia golpe de
+  // inimigo pelo kit de selvagem — o time montado na Build era ignorado.
+  it('convidado luta com os golpes que escolheu, nao com o kit de selvagem', () => {
+    const anfitriao = montarTime([linha({ id: 'anf-1', species_id: 'snorlax', stat_hp: 5000, stat_def: 400, stat_def_esp: 400, stat_atk_fis: 10, stat_atk_esp: 10, stat_speed: 1 })])
+    const convidado = montarTime([linha({
+      id: 'conv-1', species_id: 'ludicolo', stat_speed: 300,
+      golpes_de_maquina: ['scald', 'ice_beam', 'energy_ball', 'focus_blast'],
+      active_abilities: ['scald', 'ice_beam', 'energy_ball', 'focus_blast'],
+    })])
+
+    const resultado = rodarConfronto(anfitriao, convidado, { ladoBGolpesProprios: true })
+    const golpesDoConvidado = new Set(resultado.eventos.filter((e) => e.atacanteLado !== 'player').map((e) => e.golpe))
+    expect(golpesDoConvidado.size).toBeGreaterThan(0)
+    for (const g of golpesDoConvidado) expect(['Scald', 'Ice Beam', 'Energy Ball', 'Focus Blast']).toContain(g)
   })
 })

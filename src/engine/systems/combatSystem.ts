@@ -1056,6 +1056,12 @@ export function golpeAnuladoPorImunidade(
   ).imune
 }
 
+// Inimigo de campo luta com o kit de selvagem por nivel; inimigo marcado
+// `golpesProprios` (convidado do PvP, PH-539) luta com o que escolheu.
+function usaKitDeSelvagem(entity: WorldEntity): boolean {
+  return entity.kind === 'enemy' && !entity.golpesProprios
+}
+
 /**
  * PH-301: existe ALGUM golpe no arsenal deste atacante que causa dano neste
  * alvo? Usado em dois lugares que nao se enxergam: a escolha de golpe (pra so
@@ -1065,7 +1071,7 @@ export function golpeAnuladoPorImunidade(
 export function podeDanificar(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity): boolean {
   const especie = SPECIES[attackerEntity.poke.speciesId]
   if (!especie) return true
-  const golpes = golpesUtilizaveis(attackerEntity.poke, especie, attackerEntity.kind === 'enemy')
+  const golpes = golpesUtilizaveis(attackerEntity.poke, especie, usaKitDeSelvagem(attackerEntity))
     .map((id) => getAbility(id))
     .filter((a): a is Ability => a != null)
     // O Ataque Basico assume o tipo primario do atacante (`basicAttackFor`),
@@ -1957,7 +1963,7 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
   // No maximo 4 golpes (+ o AOE de nivel 50 pro POKE do jogador). Selvagem usa
   // os 4 ultimos que a especie aprenderia naquele nivel, sem AOE — ver
   // data/activeAbilities.ts.
-  const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === 'enemy')
+  const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, usaKitDeSelvagem(entity))
     .filter((id) => !disabled[id])
     // Disable: golpe especifico temporariamente fora dos candidatos enquanto
     // o timer nao zera -- mesmo ponto de filtro do "desligado pelo jogador"
@@ -2255,7 +2261,7 @@ function statusImpedeAcao(world: WorldState, entity: WorldEntity, silent: boolea
     return true
   }
   if (entity.poke.status?.tipo === 'sleep'
-    && golpesUtilizaveis(entity.poke, SPECIES[entity.poke.speciesId], entity.kind === 'enemy').includes('sleep_talk')
+    && golpesUtilizaveis(entity.poke, SPECIES[entity.poke.speciesId], usaKitDeSelvagem(entity)).includes('sleep_talk')
     && !entity.poke.disabledAbilities?.sleep_talk && isAbilityReady(entity, 'sleep_talk')
     && !(entity.silenciadoAte! > 0)) return false
   const r = tentarAgir(world.rng, entity, (poder) => danoDeConfusao(entity, poder))
@@ -2733,7 +2739,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (ability.id === 'nature_power') ability = getAbility('tri_attack')!
   if (ability.id === 'sleep_talk') {
     if (attacker.poke.status?.tipo !== 'sleep') return
-    const opcoes = golpesUtilizaveis(attacker.poke, SPECIES[attacker.poke.speciesId], attacker.kind === 'enemy')
+    const opcoes = golpesUtilizaveis(attacker.poke, SPECIES[attacker.poke.speciesId], usaKitDeSelvagem(attacker))
       .filter(id => !['sleep_talk', 'rest'].includes(id) && !attacker.poke.disabledAbilities?.[id])
       .map(getAbility).filter((a): a is Ability => a != null && a.target !== 'aoe')
     if (!opcoes.length) return
