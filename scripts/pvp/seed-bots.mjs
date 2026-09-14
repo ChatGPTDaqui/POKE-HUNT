@@ -5,6 +5,7 @@
 //   node scripts/pvp/seed-bots.mjs                      # schema do .env (padrao dev)
 //   node scripts/pvp/seed-bots.mjs --schema=public --confirmar-public
 //   node scripts/pvp/seed-bots.mjs --refazer            # apaga e recria os times
+//   node scripts/pvp/seed-bots.mjs --refazer --so=wallace
 //
 // Idempotente por schema: bot com 6 POKEs e time salvo e pulado. A conta de
 // auth e compartilhada entre dev e public (o trigger cria `players` nos dois),
@@ -31,7 +32,12 @@ const RARIDADE = 'legendary'
 
 // Times pela aparicao mais reconhecivel de cada treinador, restritos ao
 // catalogo do jogo (Gen 1-3). Repeticao de especie dentro do time e canonica
-// (Lance).
+// (Lance). Entrada pode ser `{ especie, tms }` quando o learnset de nivel nao
+// da 4 golpes decentes (evolucao por pedra, ex. Ludicolo): os `tms` entram em
+// `golpes_de_maquina` e viram os golpes ativos, como se ensinados por TM.
+const TMS = {
+  ludicolo: ['scald', 'energy_ball', 'ice_beam', 'focus_blast'],
+}
 const BOTS = [
   { slug: 'red', nome: 'Red', time: ['pikachu', 'venusaur', 'charizard', 'blastoise', 'snorlax', 'lapras'] },
   { slug: 'blue', nome: 'Blue', time: ['pidgeot', 'alakazam', 'rhydon', 'exeggutor', 'gyarados', 'charizard'] },
@@ -47,6 +53,7 @@ const BOTS = [
 
 const args = process.argv.slice(2)
 const refazer = args.includes('--refazer')
+const so = args.find((a) => a.startsWith('--so='))?.slice(5)
 
 function lerEnv() {
   const arquivo = join(RAIZ, '.env')
@@ -140,8 +147,13 @@ for (const bot of BOTS) {
 }
 
 const usuarios = await listarUsuarios()
+const alvos = so ? BOTS.filter((b) => b.slug === so) : BOTS
+if (!alvos.length) {
+  console.error(`--so=${so} nao bate com nenhum bot`)
+  process.exit(1)
+}
 
-for (const bot of BOTS) {
+for (const bot of alvos) {
   console.log(`\n${bot.nome}`)
   const userId = await garantirConta(bot, usuarios)
 
@@ -164,6 +176,12 @@ for (const bot of BOTS) {
     const pokes = bot.time.map((especieId) => {
       const poke = createPokeInstance(rng, especieId, NIVEL, { ivs: { ...IV_FULL }, rarity: RARIDADE })
       poke.originalTrainer = bot.nome
+      const tms = TMS[especieId]
+      if (tms) {
+        poke.golpesDeMaquina = [...tms]
+        poke.unlockedAbilities = [...new Set([...poke.unlockedAbilities, ...tms])]
+        poke.activeAbilities = [...tms]
+      }
       return poke
     })
     const linhas = gameStateToPokemonRows(userId, { team: pokes, bagPokes: [] })
@@ -189,4 +207,4 @@ for (const bot of BOTS) {
   })
 }
 
-console.log(`\n${BOTS.length} bots prontos em ${schema}.`)
+console.log(`\n${alvos.length} bot(s) pronto(s) em ${schema}.`)

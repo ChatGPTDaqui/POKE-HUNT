@@ -29,13 +29,17 @@ export interface LinhaTimePvp {
   stat_def_esp: number
   stat_speed: number
   active_abilities: string[] | null
+  golpes_de_maquina?: string[] | null
 }
 
 export function pvpRowToPoke(row: LinhaTimePvp): PokeInstance | null {
   const species = SPECIES[row.species_id]
   if (!species) return null
 
-  const conhecidos = golpesAprendidosAte(species, row.level)
+  // Golpe de TM conta como conhecido, igual `rowToPoke` do cliente — sem
+  // isso `sanearEscolhaDeGolpes` descartava a escolha do jogador em silencio.
+  const golpesDeMaquina = [...new Set(row.golpes_de_maquina ?? [])]
+  const conhecidos = [...new Set([...golpesAprendidosAte(species, row.level), ...golpesDeMaquina])]
   const stats = {
     hp: row.stat_hp, atkFis: row.stat_atk_fis, atkEsp: row.stat_atk_esp,
     def: row.stat_def, defEsp: row.stat_def_esp, speed: row.stat_speed,
@@ -53,7 +57,7 @@ export function pvpRowToPoke(row: LinhaTimePvp): PokeInstance | null {
     nature: undefined,
     stats,
     unlockedAbilities: conhecidos,
-    golpesDeMaquina: [],
+    golpesDeMaquina,
     disabledAbilities: {},
     activeAbilities: sanearEscolhaDeGolpes(
       row.active_abilities ?? activeAbilitiesPadrao(species, row.level),
