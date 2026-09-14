@@ -16,7 +16,9 @@ import { GameButton } from '@/components/game/controls'
 import { CampoOverlay } from './CampoOverlay'
 
 export function DefeatModal() {
-  const caido = useWorldStore((s) => Boolean(s.mapDef && s.player?.fainted))
+  // Na arena (PH-540) quem cai e trocado pelo proximo do time; o fim e o
+  // ArenaOverlay que anuncia.
+  const caido = useWorldStore((s) => Boolean(s.mapDef && !s.arena && s.player?.fainted))
   const huntBoss = useWorldStore((s) => Boolean(s.mapDef?.noRespawn))
   // Mesma condicao que o motor usa pra parar a simulacao (offlineSimSystem) e
   // que o autoSystem usa pra reanimar. Duplicar o criterio a mao seria a forma

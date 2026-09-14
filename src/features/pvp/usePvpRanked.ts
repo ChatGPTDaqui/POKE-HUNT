@@ -1,15 +1,15 @@
 // Fila ranqueada (PH-531): entra, faz polling do pareamento (sem cron — a
 // funcao Postgres `tentar_parear_ranqueado` tenta casar a cada chamada) e,
-// ao casar, dispara a resolucao server-side (`/pvp/resolver`) e mostra o
-// resultado. Nunca reporta o proprio vencedor — o servidor decide tudo.
+// ao casar, dispara a resolucao server-side (`/pvp/resolver`) e entra na
+// ARENA (PH-540) com a semente devolvida — a luta na tela e a mesma que o
+// servidor resolveu. Nunca reporta o proprio vencedor.
 import { useCallback, useEffect, useRef, useState } from 'react'
 import * as pvpRpc from '@/data/remote/pvpRpc'
 import { servidor, servidorAtivo } from '@/data/remote/servidor'
 import { useAuthStore } from '@/stores/authStore'
 import { useToastStore } from '@/stores/toastStore'
-import { useUiStore } from '@/stores/uiStore'
-import { useWorldStore } from '@/stores/worldStore'
-import { criarMundoPvpReplay } from './pvpWorld'
+import { entrarNaArena } from '@/features/arena/arena'
+import { arenaDaSessao } from './arenaDaSessao'
 
 const INTERVALO_POLL_MS = 3000
 
@@ -65,15 +65,9 @@ export function usePvpRanked(): EstadoRankeado {
           pararPolling()
           setProcurando(false)
           const res = await servidor.resolverPvp(sessao.id)
-          if (meuId && res.eventos && res.eventos.length > 0) {
-            const meuLado = sessao.anfitriaoId === meuId ? 'anfitriao' : 'convidado'
-            const oponenteId = meuLado === 'anfitriao' ? sessao.convidadoId : sessao.anfitriaoId
-            const nome = await pvpRpc.nomeDoTreinador(oponenteId).catch(() => null)
-            const resultadoFinal = res.vencedorId == null
-              ? 'empate'
-              : res.vencedorId === meuId ? 'vitoria' : 'derrota'
-            useWorldStore.getState().setWorld(criarMundoPvpReplay(res.eventos, meuLado, resultadoFinal, nome ?? 'oponente ranqueado'))
-            useUiStore.getState().closeScreen()
+          if (meuId) {
+            const entrada = await arenaDaSessao(sessao, meuId, res, 'oponente ranqueado')
+            if (entrada) entrarNaArena({ ...entrada, aoSair: () => { void recarregarRank() } })
           }
           await recarregarRank()
         } catch (e) {

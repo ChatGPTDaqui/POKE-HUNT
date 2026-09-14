@@ -5,9 +5,8 @@ import { servidor } from '@/data/remote/servidor'
 import { useAuthStore } from '@/stores/authStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
-import { useUiStore } from '@/stores/uiStore'
-import { useWorldStore } from '@/stores/worldStore'
-import { criarMundoPvpReplay } from './pvpWorld'
+import { entrarNaArena } from '@/features/arena/arena'
+import { arenaDaSessao } from './arenaDaSessao'
 
 type PapelPvp = 'anfitriao' | 'convidado'
 
@@ -64,29 +63,22 @@ export function usePvp(): EstadoDoPvp {
     return pvpRpc.assinarMeuPvp(meuId, () => { void recarregar() })
   }, [meuId, recarregar])
 
-  // Duelo aceito (estado 'aberta') resolve sozinho — sem batalha ao vivo, o
-  // servidor decide o resultado assim que os dois times estao prontos.
-  // Idempotente do lado do servidor (`aplicar_resultado_pvp` so age em
-  // sessao 'aberta'), entao nao ha problema em anfitriao E convidado
-  // dispararem a mesma chamada quase ao mesmo tempo. Ao voltar, monta o
-  // mundo de REPLAY (PH-532) com os eventos — a mesma tela que mostrava o
-  // duelo ao vivo (`PvpOverlay`) agora so reproduz o que ja aconteceu.
+  // Duelo aceito (estado 'aberta') resolve sozinho no servidor assim que os
+  // dois times estao prontos. Idempotente do lado do servidor
+  // (`aplicar_resultado_pvp` so age em sessao 'aberta'), entao nao ha
+  // problema em anfitriao E convidado dispararem a mesma chamada quase ao
+  // mesmo tempo. Ao voltar, entra na ARENA (PH-540) com a semente — a luta
+  // ao vivo no motor do modo livre.
   useEffect(() => {
     if (!sessao || sessao.estado !== 'aberta' || !meuId) return
     if (resolvidoRef.current === sessao.id) return
     resolvidoRef.current = sessao.id
-    const meuLado = sessao.anfitriaoId === meuId ? 'anfitriao' : 'convidado'
-    const nomeDoRival = sessao.anfitriaoId === meuId ? 'oponente' : 'anfitriao'
     setResolvendo(true)
     void servidor.resolverPvp(sessao.id)
-      .then((res) => {
+      .then(async (res) => {
         setSessao(null)
-        if (!res.eventos || res.eventos.length === 0) return
-        const resultadoFinal = res.vencedorId == null
-          ? 'empate'
-          : res.vencedorId === meuId ? 'vitoria' : 'derrota'
-        useWorldStore.getState().setWorld(criarMundoPvpReplay(res.eventos, meuLado, resultadoFinal, nomeDoRival))
-        useUiStore.getState().closeScreen()
+        const entrada = await arenaDaSessao(sessao, meuId, res, 'oponente')
+        if (entrada) entrarNaArena(entrada)
       })
       .catch((e) => avisarErro(e))
       .finally(() => { setResolvendo(false); void recarregar() })

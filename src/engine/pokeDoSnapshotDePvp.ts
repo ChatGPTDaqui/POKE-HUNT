@@ -1,18 +1,12 @@
 // Linha crua de `pvp_time`/`pvp_sessao.anfitriao_time` (snapshot jsonb de
 // `pokemon_instances`, ver `pvp_snapshot_time` na migration) -> `PokeInstance`
-// que `pvpSimulator` entende.
+// que a arena luta.
 //
-// DELIBERADAMENTE NAO reaproveita `rowToPoke` de `src/data/remote/
-// playerMapper.ts`: aquele arquivo importa `@/stores/gameStateStore` (Zustand)
-// e `@/data/missaoChave`/`progressoDeBioma` — cadeia nunca testada dentro do
-// bundle de autoridade (`vite.edge.config.ts`), que ate hoje so importa
-// `@/data/*` puro via `#engine`. Reimplementar so o pedaço que o PvP usa e
-// mais barato que arriscar puxar um import runtime que quebra em Deno.
-//
-// Usa o `stat_*` GRAVADO (cache), nao recalculado — mesma confianca que o
-// fluxo amistoso ja dá ao `anfitriao_poke`/`convidado_poke` jsonb (validados
-// contra a linha real por `pvp_validar_poke`, nunca recomputados a partir de
-// IV/natureza). Consistente, não uma escolha nova.
+// MORA NO MOTOR (PH-540) porque servidor E cliente precisam montar o MESMO
+// POKE a partir do mesmo snapshot — stats gravados, golpes saneados igual —
+// senao a luta reproduzida no cliente diverge da resolvida no servidor.
+// Deliberadamente nao reaproveita `rowToPoke` (playerMapper.ts): aquele
+// recalcula atributos e importa store do cliente.
 import { activeAbilitiesPadrao, golpesAprendidosAte, sanearEscolhaDeGolpes } from '@/data/activeAbilities'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 

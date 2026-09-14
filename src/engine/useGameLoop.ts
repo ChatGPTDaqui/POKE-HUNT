@@ -12,7 +12,6 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { stepWorld, LIVE_SIM_STEP_SECONDS } from './simulation'
 import { controller } from './controller'
 import { recordSimulatedSeconds } from './clockDrift'
-import { stepPvpVisual } from './systems/pvpSystem'
 
 // Mesma constante que o resim do servidor usa fora do regime offline
 // (authority/src/progresso.ts) — ver o raciocinio completo em
@@ -28,6 +27,11 @@ const MAX_DELTA = 1.0 // clampa gaps grandes (ex: laptop hibernou) pra nao resol
 // tempo real se passou desde o ultimo tick real).
 export function useGameLoop(active: boolean, onLiveTick?: () => void): void {
   const lastUpdateTimeRef = useRef(0)
+  // PH-540: na arena o passo e SEMPRE `STEP` inteiro, e o resto do intervalo
+  // fica guardado pro proximo tick — e o que faz a luta ao vivo bater com a
+  // resolucao do servidor (passo fixo). Na hunt o resto e simulado como
+  // fracao, como sempre.
+  const restoDaArenaRef = useRef(0)
   // Ref em vez de dependencia direta do efeito: uma arrow function inline
   // passada pelo chamador (Fase 5, bem provavel) mudaria de identidade a
   // cada render — sem isso, o efeito reiniciaria (limpa+recria o
@@ -52,12 +56,19 @@ export function useGameLoop(active: boolean, onLiveTick?: () => void): void {
       if (delta > MAX_DELTA) delta = MAX_DELTA
 
       let simulated = 0
+      const naArena = useWorldStore.getState().arena != null
+      if (naArena) {
+        delta += restoDaArenaRef.current
+        restoDaArenaRef.current = delta % STEP
+        delta -= restoDaArenaRef.current
+      } else {
+        restoDaArenaRef.current = 0
+      }
       while (delta > 0) {
         const step = Math.min(STEP, delta)
         const gameState = useGameStateStore.getState()
         useWorldStore.getState().update((draft) => {
-          if (draft.pvp) stepPvpVisual(draft, step)
-          else stepWorld(draft, step, gameState, { silent: false })
+          stepWorld(draft, step, gameState, { silent: false })
         })
         delta -= step
         simulated += step

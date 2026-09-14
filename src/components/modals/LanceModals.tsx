@@ -10,7 +10,7 @@ import { CampoOverlay } from './CampoOverlay'
 // controller.ts#buildMapWorld/stepWorld): nada nasceu ainda e o combate esta
 // congelado enquanto isso corre.
 export function LanceCountdownModal() {
-  const remaining = useWorldStore((s) => s.countdownRemaining)
+  const remaining = useWorldStore((s) => (s.mapDef?.id === LANCE_MAP_ID ? s.countdownRemaining : null))
   if (remaining == null || remaining <= 0) return null
 
   return (
