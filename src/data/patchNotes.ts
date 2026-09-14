@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.55',
+    date: '2026-09-14',
+    title: 'Ranked: treinadores bot quando não há oponente',
+    highlights: [
+      'Na fila ranqueada, se ninguém da sua faixa aparecer em 15 segundos, você enfrenta um treinador bot: Red, Blue, Giovanni, Lance, Agatha, Blaine, Steven Stone, Wallace, Maxie ou Ash, sorteado a cada partida, com o time da franquia no nível 80.',
+      'Partida contra bot não mexe no seu MMR, PDL ou divisão e não conta no limite de 5 partidas por dia — serve pra testar o time. O replay mostra o nome do treinador que você enfrentou.',
+      'Bots não aparecem nos rankings de treinadores nem de POKEs.',
+    ],
+  },
+  {
     version: '7.54',
     date: '2026-09-13',
     title: 'PvP: ranqueado com temporada, time dedicado e duelo animado',
