@@ -121,6 +121,19 @@ await rest(`/pvp_sessao?estado=in.(convidada,aberta)&or=(anfitriao_id.eq.${meuId
 })
 await rest(`/pvp_fila?user_id=eq.${meuId}`, { method: 'DELETE', headers: { Prefer: 'return=minimal' } })
 
+// Convite amistoso VENCIDO pendente (o caso real que barrou "Procurar
+// oponente" com "Voce ja esta em um duelo PvP"): a fila tem que expirar e
+// seguir, nao recusar.
+await rest('/pvp_sessao', {
+  method: 'POST',
+  body: JSON.stringify({
+    anfitriao_id: meuId, convidado_id: bots[0].user_id, estado: 'convidada', modo: 'amistoso',
+    criada_em: new Date(Date.now() - 20 * 60_000).toISOString(),
+    expira_em: new Date(Date.now() - 5 * 60_000).toISOString(),
+  }),
+  headers: { Prefer: 'return=minimal' },
+})
+
 // --- 2. fila e pareamento como o jogador ------------------------------------
 const login = await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
   method: 'POST',
@@ -136,8 +149,14 @@ const jogador = cabecalhosRest(ANON, schema, { Authorization: `Bearer ${login.ac
 // Base de comparacao e o rank que `entrar_fila_ranqueada` devolve, nao uma
 // leitura anterior: a linha de `pvp_rank` so nasce nessa chamada
 // (`pvp_garantir_rank`), e conta nova nao tem nada antes.
-const rankEntrada = await rest('/rpc/entrar_fila_ranqueada', { method: 'POST', body: '{}' }, jogador)
-ok(typeof rankEntrada?.mmr === 'number', `entrou na fila (mmr ${rankEntrada?.mmr})`)
+let rankEntrada = null
+try {
+  rankEntrada = await rest('/rpc/entrar_fila_ranqueada', { method: 'POST', body: '{}' }, jogador)
+} catch (e) {
+  ok(false, `entrar na fila com convite vencido pendente: ${e.message}`)
+  process.exit(1)
+}
+ok(typeof rankEntrada?.mmr === 'number', `entrou na fila com convite vencido pendente (mmr ${rankEntrada?.mmr})`)
 const campos = ['mmr', 'pdl', 'divisao', 'partidas', 'vitorias', 'derrotas']
 const rankAntes = Object.fromEntries(campos.map((c) => [c, rankEntrada[c]]))
 const partidasHojeAntes = rankEntrada.partidas_hoje
