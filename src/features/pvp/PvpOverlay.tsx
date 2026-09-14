@@ -48,6 +48,13 @@ export function PvpOverlay() {
   // so existe durante o replay (duelo AO VIVO/`criarMundoPvpVisual` nao tem
   // `pvp.replay`, so o resultado ja decidido tem).
   const ultimoEvento = pvp.replay?.ultimoEvento
+  // PH-535 Fase 3: balao "Vai, X!" so na fase de arremesso (pedido do
+  // usuario e so sobre o momento de ENTRADA) — tem prioridade sobre o
+  // golpe do evento anterior, senao os dois textos brigariam pelo mesmo
+  // espaco enquanto o POKE novo ainda nao entrou. Fase 'recolhendo' fica
+  // muda de proposito (so a animacao de desmaio, sem fala).
+  const troca = pvp.replay?.troca
+  const balaoDeTroca = troca?.fase === 'arremessando' ? `Vai, ${troca.nomeNovo}!` : null
 
   const encerrar = () => {
     const { team, activeIndex } = useGameStateStore.getState()
@@ -65,7 +72,10 @@ export function PvpOverlay() {
         <div className="mt-[.25em] text-[.78em] text-n400">
           Você {Math.max(0, playerHp)} HP · Rival {Math.max(0, rivalHp)}/{rivalMaxHp} HP
         </div>
-        {emAndamento && ultimoEvento && (
+        {emAndamento && balaoDeTroca && (
+          <div className="mt-[.2em] text-[.78em] text-n300">{balaoDeTroca}</div>
+        )}
+        {emAndamento && !balaoDeTroca && ultimoEvento && (
           <div className="mt-[.2em] text-[.78em] text-n300">
             {ultimoEvento.atacante} usou {ultimoEvento.golpe}!
           </div>

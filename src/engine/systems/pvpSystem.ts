@@ -3,6 +3,7 @@ import { updateCombat } from './combatSystem'
 import { updateMovement } from './movementSystem'
 import { stepPvpReplay } from './pvpReplaySystem'
 import { isDead } from '../entity'
+import { effectDone, tickEffect } from '../effect'
 import type { WorldState } from '../types'
 
 export function stepPvpVisual(world: WorldState, dt: number): void {
@@ -13,6 +14,12 @@ export function stepPvpVisual(world: WorldState, dt: number): void {
   if (world.pvp.estado === 'replay') {
     tickAttackAnimTimers(world, dt)
     stepPvpReplay(world, dt)
+    // PH-535 Fase 3: a coreografia de troca cria um `captureAnim`
+    // (world.effects) pro arremesso de bola — sem tickar/filtrar aqui ele
+    // fica congelado no quadro 0 pra sempre (`combatSystem.ts#updateCombat`
+    // e quem faz isso pro modo livre, e o replay nunca passa por ele).
+    for (const effect of world.effects) tickEffect(effect, dt)
+    world.effects = world.effects.filter((e) => !effectDone(e))
     updateAnimations(world, dt)
     return
   }

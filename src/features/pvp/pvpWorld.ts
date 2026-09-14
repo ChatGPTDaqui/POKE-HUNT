@@ -140,7 +140,7 @@ export function criarMundoPvpReplay(
       estado: 'replay',
       meuLado,
       resultadoFinal,
-      replay: { eventos, indice: 0, esperando: 0.6 },
+      replay: { eventos, indice: 0, esperando: 0.6, troca: null },
     },
   }
 }
