@@ -1,20 +1,26 @@
-// Resolucao SERVER-SIDE do PvP ranqueado — nunca o client reportando o
-// proprio veredito (esse e o modelo antigo de `registrar_resultado_pvp`,
-// aceitavel pro amistoso sem stakes, inaceitavel com MMR em jogo).
+// Resolucao SERVER-SIDE do PvP — nunca o client reportando o proprio
+// veredito (esse e o modelo antigo de `registrar_resultado_pvp`, aceitavel
+// pro duelo social sem stakes, inaceitavel com MMR em jogo).
 //
-// PH-535 Fase 2: trocou `pvpSimulator.ts` (dano reimplementado do zero, sem
-// stage/status/trait/escudo) pelo MESMO motor real headless que o Modo
-// Duelo usa (`confrontoHeadless.ts` — `combatSystem.ts#updateCombat`,
-// compartilhado com `appDuelo.ts`). Habilidade de entrada (Intimidate etc.)
-// passa a ter efeito mecanico de verdade tambem no PvP contra jogador.
+// PH-540: o duelo e a ARENA do motor (engine/arena.ts) — a mesma funcao que
+// o cliente roda ao vivo, aqui headless, com a semente derivada do id da
+// sessao. O cliente reproduz a luta com a mesma semente e os mesmos
+// snapshots; o veredito que vale e o daqui.
+//
+// LADO A = ANFITRIAO. A arena e assimetrica (jogador x inimigo do motor),
+// entao a reproducao exata so acontece no cliente que monta o anfitriao como
+// `meuTime` — o proprio anfitriao, e todo caso contra bot. O convidado humano
+// monta espelhado (ele como `meuTime`) e ve uma luta equivalente, nao a
+// mesma; se ela discordar do veredito, a tela mostra o oficial (ver
+// features/arena/arena.ts#vereditoParaTela).
 //
 // Resultado e persistido atomicamente via a RPC `aplicar_resultado_pvp`
 // (service_role).
 import type { PokeInstance } from '@/data/pokes'
-import { eventosParaCliente, rodarConfronto, type ResultadoConfronto } from './confrontoHeadless.js'
+import { LIVE_SIM_STEP_SECONDS, rodarArena, sementeDaSessao } from '#engine'
 import { ErroHttp, chamarRpc, selecionar, type Config } from './db.js'
 import { calcularResultadoRanqueado, type EntradaJogador, type Resultado } from './pvpElo.js'
-import { pvpRowToPoke, type LinhaTimePvp } from './pvpRow.js'
+import { pvpRowToPoke, type LinhaTimePvp } from '#engine'
 
 interface LinhaSessaoPvp {
   id: string
@@ -22,6 +28,7 @@ interface LinhaSessaoPvp {
   convidado_id: string
   estado: string
   modo: 'amistoso' | 'ranqueado' | 'ranqueado_bot'
+  vencedor_id: string | null
   anfitriao_time: LinhaTimePvp[] | null
   convidado_time: LinhaTimePvp[] | null
 }
@@ -38,17 +45,9 @@ function json(dado: unknown, status = 200): Response {
   return new Response(JSON.stringify(dado), { status, headers: { 'content-type': 'application/json; charset=utf-8' } })
 }
 
-// Exportado so pra teste direto (appPvp.test.ts) — sem precisar montar o
-// Request/Config/mocks de RPC inteiros pra provar que a linha crua do
-// banco vira um time que o motor aceita.
+// Exportado so pra teste direto (appPvp.test.ts).
 export function montarTime(linhas: LinhaTimePvp[] | null): PokeInstance[] {
   return (linhas ?? []).map(pvpRowToPoke).filter((p): p is PokeInstance => p != null)
-}
-
-function resultadoDoAnfitriao(r: ResultadoConfronto): Resultado {
-  if (r.vencedor === 'A') return 'vitoria'
-  if (r.vencedor === 'B') return 'derrota'
-  return 'empate'
 }
 
 export async function resolverPvp(cfg: Config, jogadorId: string, req: Request): Promise<Response> {
@@ -61,9 +60,11 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
   if (sessao.anfitriao_id !== jogadorId && sessao.convidado_id !== jogadorId) {
     throw new ErroHttp(403, 'Este PvP nao e seu.')
   }
+  const semente = sementeDaSessao(sessao.id)
   if (sessao.estado !== 'aberta') {
-    // Idempotente: outro participante ja disparou a resolucao primeiro.
-    return json({ jaResolvido: true })
+    // Idempotente: o outro participante ja disparou a resolucao primeiro —
+    // este ainda precisa do veredito pra reproduzir a luta do lado dele.
+    return json({ jaResolvido: true, vencedorId: sessao.vencedor_id, semente })
   }
   const timeAnfitriao = montarTime(sessao.anfitriao_time)
   const timeConvidado = montarTime(sessao.convidado_time)
@@ -71,13 +72,8 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
     throw new ErroHttp(409, 'Um dos times deste PvP esta vazio ou invalido.')
   }
 
-  // Lado A do motor = anfitriao, lado B = convidado (ver
-  // confrontoHeadless.ts#eventosParaCliente) — os dois times ja chegam com
-  // HP cheio/sem status (pvpRowToPoke sempre grava `hp: stat_hp` e
-  // `status: null`, nao um snapshot de batalha em andamento).
-  const resultado = rodarConfronto(timeAnfitriao, timeConvidado, { ladoBGolpesProprios: true })
-  const eventosTraduzidos = eventosParaCliente(resultado.eventos)
-  const resultadoAnfitriao = resultadoDoAnfitriao(resultado)
+  const { resultado } = rodarArena({ semente, meuTime: timeAnfitriao, rivalTime: timeConvidado, nomeDoRival: '' }, LIVE_SIM_STEP_SECONDS)
+  const resultadoAnfitriao: Resultado = resultado === 'vitoria' ? 'vitoria' : resultado === 'derrota' ? 'derrota' : 'empate'
   const vencedorId = resultadoAnfitriao === 'vitoria'
     ? sessao.anfitriao_id
     : resultadoAnfitriao === 'derrota' ? sessao.convidado_id : null
@@ -88,7 +84,7 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
     await chamarRpc(cfg, 'aplicar_resultado_pvp', {
       p_sessao_id: sessaoId,
       p_vencedor_id: vencedorId,
-      p_eventos: eventosTraduzidos,
+      p_eventos: null,
       p_mmr_anfitriao: null,
       p_pdl_anfitriao: null,
       p_divisao_anfitriao: null,
@@ -98,7 +94,7 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
       p_pdl_delta_anfitriao: null,
       p_pdl_delta_convidado: null,
     })
-    return json({ vencedorId, eventos: eventosTraduzidos, turnos: resultado.eventos.length })
+    return json({ vencedorId, semente })
   }
 
   const ranks = await selecionar<LinhaRankPvp>(
@@ -121,7 +117,7 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
   await chamarRpc(cfg, 'aplicar_resultado_pvp', {
     p_sessao_id: sessaoId,
     p_vencedor_id: vencedorId,
-    p_eventos: eventosTraduzidos,
+    p_eventos: null,
     p_mmr_anfitriao: calculo.anfitriao.mmr,
     p_pdl_anfitriao: calculo.anfitriao.pdl,
     p_divisao_anfitriao: calculo.anfitriao.divisao,
@@ -134,8 +130,7 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
 
   return json({
     vencedorId,
-    eventos: eventosTraduzidos,
-    turnos: resultado.eventos.length,
+    semente,
     pdlDeltaAnfitriao: calculo.anfitriao.pdlDelta,
     pdlDeltaConvidado: calculo.convidado.pdlDelta,
   })

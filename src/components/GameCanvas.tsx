@@ -188,7 +188,7 @@ export function GameCanvas() {
 
     const syncInterval = setInterval(() => {
       const world = useWorldStore.getState()
-      if (!world.pvp) syncActivePokeToGameState(world, useGameStateStore.getState())
+      if (!world.arena) syncActivePokeToGameState(world, useGameStateStore.getState())
     }, SYNC_INTERVAL_MS)
 
     return () => {

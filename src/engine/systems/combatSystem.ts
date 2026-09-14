@@ -71,7 +71,7 @@ import {
   distanceTo,
 } from '../entity'
 import type {
-  Clima, ClimaTipo, EnemyEntity, Escudos, EventoDuelo, LadoDuelo, PendingHit, PlayerEntity, WorldEntity, WorldState,
+  Clima, ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEntity, WorldState,
 } from '../types'
 
 // Quanto tempo depois do golpe disparar a resolucao pousa: arte do golpe,
@@ -2321,71 +2321,10 @@ function truantImpedeAcao(world: WorldState, entity: WorldEntity, silent: boolea
   return true
 }
 
-// ---------------------------------------------------------------------------
-// PH-535: GATE DE TURNO DO MODO DUELO
-// ---------------------------------------------------------------------------
-//
-// So existe `world.rodadaDuelo` quando o mundo E um duelo (Lance, lendario,
-// PvP contra jogador) — hunt normal nunca seta este campo, e as tres funcoes
-// abaixo viram no-op (`podeAgirNoDuelo` sempre `true`, `avancarRodadaDuelo`
-// sempre no-op). Nenhum comportamento de modo livre muda.
-function ladoDoDuelo(entity: WorldEntity): LadoDuelo {
-  return entity.kind === 'player' ? 'player' : 'enemy'
-}
-
-function podeAgirNoDuelo(world: WorldState, entity: WorldEntity): boolean {
-  return !world.rodadaDuelo || world.rodadaDuelo.fila[0] === ladoDoDuelo(entity)
-}
-
-// Chamado sempre que o lado da vez TERMINA a tentativa de agir — golpe
-// resolvido, errou, ou barrado por status/Truant. So tira da fila se ainda
-// for a vez dele (guard contra dupla-chamada nao fazer nada de errado).
-function avancarRodadaDuelo(world: WorldState, entity: WorldEntity): void {
-  const rodada = world.rodadaDuelo
-  if (!rodada) return
-  const lado = ladoDoDuelo(entity)
-  if (rodada.fila[0] === lado) rodada.fila.shift()
-}
-
-// Narracao pro replay (PH-532/535) — o dano de verdade ja saiu de
-// `resolveHit` com a pipeline real inteira (trait, Soak, Foresight etc);
-// `efetividade` aqui e so pra decidir o TEXTO/flinch do replay, recalculada
-// de forma simplificada (ignora imunidade temporaria de golpe e "revelado")
-// porque uma diferenca aqui e cosmetica, nunca de regra.
-function registrarEventoDeDuelo(
-  world: WorldState, atacante: WorldEntity, defensor: WorldEntity, ability: Ability, hpAntes: number, vivoAntes: boolean,
-): void {
-  const rodada = world.rodadaDuelo
-  if (!rodada) return
-  const especieAtacante = SPECIES[atacante.poke.speciesId]
-  const especieDefensor = SPECIES[defensor.poke.speciesId]
-  const [tipoDefensor1, tipoDefensor2] = tiposEfetivosParaEfetividade(defensor, especieDefensor)
-  const evento: EventoDuelo = {
-    atacante: especieAtacante.name,
-    defensor: especieDefensor.name,
-    golpe: ability.name,
-    dano: Math.max(0, hpAntes - defensor.poke.hp),
-    hpRestante: defensor.poke.hp,
-    efetividade: isDamagingAbility(ability)
-      ? getEffectiveness(ability.type as ElementType, tipoDefensor1, tipoDefensor2)
-      : 1,
-    nocaute: vivoAntes && isDead(defensor),
-    atacanteLado: ladoDoDuelo(atacante),
-    atacanteSpeciesId: atacante.poke.speciesId,
-    atacanteShiny: Boolean(atacante.poke.isShiny),
-    defensorLado: ladoDoDuelo(defensor),
-    defensorSpeciesId: defensor.poke.speciesId,
-    defensorShiny: Boolean(defensor.poke.isShiny),
-    hpMaximoDefensor: getMaxHp(defensor),
-  }
-  rodada.eventos.push(evento)
-}
-
 function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEnemies: EnemyEntity[], silent: boolean): void {
-  if (!podeAgirNoDuelo(world, player)) return
   if (!canAct(player)) return
-  if (statusImpedeAcao(world, player, silent)) { avancarRodadaDuelo(world, player); return }
-  if (truantImpedeAcao(world, player, silent)) { avancarRodadaDuelo(world, player); return }
+  if (statusImpedeAcao(world, player, silent)) return
+  if (truantImpedeAcao(world, player, silent)) return
 
   const primaryTarget = engagedEnemies[0]
   const allEnemies = nearbyAliveEnemies(world)
@@ -2416,7 +2355,6 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget, world.clima?.tipo ?? null)) {
     armarCooldown(player, ability, world) // erro nao tem pouso pra esperar
     if (!silent) anunciarErro(world, player)
-    avancarRodadaDuelo(world, player)
     return
   }
 
@@ -2426,7 +2364,6 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
 
   if (targets.length === 0) {
     armarCooldown(player, ability, world) // AOE sem ninguem no raio -- e um erro na pratica
-    avancarRodadaDuelo(world, player)
     return
   }
 
@@ -2452,10 +2389,9 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   // mais que o ATK quase zerado). "Seguro pra qualquer time" so fica
   // verdadeiro travando o ataque aqui, nao ajustando atributo.
   if (world.mapDef?.passiveEnemies) return
-  if (!podeAgirNoDuelo(world, enemy)) return
   if (!canAct(enemy)) return
-  if (statusImpedeAcao(world, enemy, silent)) { avancarRodadaDuelo(world, enemy); return }
-  if (truantImpedeAcao(world, enemy, silent)) { avancarRodadaDuelo(world, enemy); return }
+  if (statusImpedeAcao(world, enemy, silent)) return
+  if (truantImpedeAcao(world, enemy, silent)) return
 
   const ability = pickAbility(world, enemy, player, () => 1) // inimigos so miram no jogador unico
   if (!ability) return
@@ -2477,7 +2413,6 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player, world.clima?.tipo ?? null)) {
     armarCooldown(enemy, ability, world) // erro nao tem pouso pra esperar
     if (!silent) anunciarErro(world, enemy)
-    avancarRodadaDuelo(world, enemy)
     return
   }
 
@@ -3897,20 +3832,9 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   world.pendingHits = world.pendingHits.filter((hit) => hit.timer > 0)
   for (const hit of landed) {
     if (hit.timer > 0) { world.pendingHits.push(hit); continue }
-    // PH-535: capturado ANTES de `resolveHit` — e o unico jeito de saber
-    // quanto dano ele de fato aplicou (a funcao nao devolve nada) sem
-    // reescrever o pipeline inteiro so pra narrar o Modo Duelo.
-    const atacanteDoHit = world.rodadaDuelo ? findEntityById(world.player, world.enemies, hit.attackerId) : null
-    const alvoDoHit = world.rodadaDuelo ? findEntityById(world.player, world.enemies, hit.targetId) : null
-    const hpAntesDoHit = alvoDoHit?.poke.hp ?? 0
-    const alvoVivoAntes = alvoDoHit ? !isDead(alvoDoHit) : false
     resolveHit(world, hit, defeatedEnemyIds, () => {
       playerJustFainted = true
     }, silent)
-    if (atacanteDoHit && alvoDoHit) {
-      registrarEventoDeDuelo(world, atacanteDoHit, alvoDoHit, hit.ability, hpAntesDoHit, alvoVivoAntes)
-      avancarRodadaDuelo(world, atacanteDoHit)
-    }
     if (hit.ability.id === 'quash') {
       const alvo = findEntityById(world.player, world.enemies, hit.targetId)
       if (alvo?.ultimoQuash === hit.id) {
@@ -3994,17 +3918,6 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
         enemy.entradaProcessada = true
         resolveEntryHook(world, enemy, player, silent)
       }
-    }
-
-    // PH-535: NOVO ROUND do Modo Duelo — fila vazia (comeco da luta, ou os
-    // dois lados ja agiram na rodada anterior) reavalia por Velocidade
-    // EFETIVA (pos hook de entrada, pos qualquer estagio ja aplicado), com o
-    // ativo atual dos dois lados. E assim que uma queda de Velocidade no
-    // meio da luta muda quem abre o round seguinte.
-    if (world.rodadaDuelo && world.rodadaDuelo.fila.length === 0) {
-      const clima = world.clima?.tipo ?? null
-      const jogadorPrimeiro = velocidadeEfetiva(player, clima) >= velocidadeEfetiva(primaryTarget, clima)
-      world.rodadaDuelo.fila = jogadorPrimeiro ? ['player', 'enemy'] : ['enemy', 'player']
     }
 
     // PH-264: reunindo, o jogador NAO golpeia — a mecanica que o painel de Lure

@@ -16,11 +16,10 @@ import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { useUiStore } from '@/stores/uiStore'
-import { useWorldStore } from '@/stores/worldStore'
 import { SegmentedTabs, GameSelect, SectionLabel, GameButton } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
-import { criarMundoPvpVisual } from '@/features/pvp/pvpWorld'
+import { entrarNaArena } from '@/features/arena/arena'
+import { randomSeed } from '@/core/rng'
 
 type Aba = 'treinadores' | 'pokemon' | 'hall'
 
@@ -169,7 +168,6 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const meuTime = useGameStateStore((s) => s.team)
   const activeIndex = useGameStateStore((s) => s.activeIndex)
-  const closeScreen = useUiStore((s) => s.closeScreen)
   const { data, isLoading, error } = useQuery({
     queryKey: ['ranking', 'pokemon', criterio],
     queryFn: () => rankingRpc.rankingPokemon(criterio),
@@ -216,8 +214,8 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
                   onClick={() => {
                     const meuPoke = meuTime[activeIndex] ?? meuTime[0]
                     if (!meuPoke) return
-                    useWorldStore.getState().setWorld(criarMundoPvpVisual(meuPoke, e.poke, e.treinador))
-                    closeScreen()
+                    // Duelo local, sem stakes: arena com semente sorteada, sem veredito de servidor.
+                    entrarNaArena({ semente: randomSeed(), meuTime: [meuPoke], rivalTime: [e.poke], nomeDoRival: e.treinador, veredito: null })
                   }}
                 >
                   <Sword /> PvP

@@ -12,7 +12,7 @@ export function useSyncOnUnload(): void {
   useEffect(() => {
     function onUnload() {
       const world = useWorldStore.getState()
-      if (!world.pvp) syncActivePokeToGameState(world, useGameStateStore.getState())
+      if (!world.arena) syncActivePokeToGameState(world, useGameStateStore.getState())
       forceSave()
       // Sob autoridade do servidor `forceSave()` acima e no-op (ver
       // gameStatePersistence.ts#setItem) — quem precisa sobreviver ao unload
