@@ -67,10 +67,12 @@ export function usePvpRanked(): EstadoRankeado {
           const res = await servidor.resolverPvp(sessao.id)
           if (meuId && res.eventos && res.eventos.length > 0) {
             const meuLado = sessao.anfitriaoId === meuId ? 'anfitriao' : 'convidado'
+            const oponenteId = meuLado === 'anfitriao' ? sessao.convidadoId : sessao.anfitriaoId
+            const nome = await pvpRpc.nomeDoTreinador(oponenteId).catch(() => null)
             const resultadoFinal = res.vencedorId == null
               ? 'empate'
               : res.vencedorId === meuId ? 'vitoria' : 'derrota'
-            useWorldStore.getState().setWorld(criarMundoPvpReplay(res.eventos, meuLado, resultadoFinal, 'oponente ranqueado'))
+            useWorldStore.getState().setWorld(criarMundoPvpReplay(res.eventos, meuLado, resultadoFinal, nome ?? 'oponente ranqueado'))
             useUiStore.getState().closeScreen()
           }
           await recarregarRank()

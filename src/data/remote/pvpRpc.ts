@@ -7,7 +7,9 @@ const db = supabase as unknown as {
 }
 
 export type EstadoPvp = 'convidada' | 'aberta' | 'concluida' | 'cancelada' | 'expirada'
-export type ModoPvp = 'amistoso' | 'ranqueado'
+// `ranqueado_bot` (PH-539): pareado com bot por falta de humano na fila; sem
+// MMR/PDL e sem consumir o limite diario.
+export type ModoPvp = 'amistoso' | 'ranqueado' | 'ranqueado_bot'
 
 export interface SessaoPvp {
   id: string
@@ -77,6 +79,15 @@ export async function buscarTreinadorPorNick(nick: string): Promise<{ userId: st
     .maybeSingle()
   falhou(error)
   return data ? { userId: data.user_id, nome: data.trainer_name } : null
+}
+
+export async function nomeDoTreinador(userId: string): Promise<string | null> {
+  const { data, error } = await db.from('treinadores_publico')
+    .select('trainer_name')
+    .eq('user_id', userId)
+    .maybeSingle()
+  falhou(error)
+  return data?.trainer_name ?? null
 }
 
 export async function abrirPvp(convidadoId: string, meuPoke: PokeInstance): Promise<SessaoPvp> {
