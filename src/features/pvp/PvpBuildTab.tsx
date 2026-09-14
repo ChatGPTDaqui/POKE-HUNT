@@ -17,8 +17,13 @@ import * as pvpRpc from '@/data/remote/pvpRpc'
 
 export const NIVEL_MINIMO_PVP = 80
 const SLOTS = 6
+// PH-539 — TEMPORARIO: gate do ranqueado relaxado no servidor (migration
+// 20260914210000) pra testar contra os bots; qualquer POKE conta como pronto.
+// Voltar pra false junto com a reversao da migration.
+const GATE_RANQUEADO_RELAXADO = true
 
 function pokeProntoPraRanqueado(poke: PokeInstance): boolean {
+  if (GATE_RANQUEADO_RELAXADO) return true
   return poke.level >= NIVEL_MINIMO_PVP && (poke.activeAbilities?.length ?? 0) >= MAX_ACTIVE_ABILITIES
 }
 
@@ -102,8 +107,9 @@ export function PvpBuildTab() {
           </span>
         </div>
         <p className="mb-[.55em] text-[.78em] text-n500">
-          Time separado do time de aventura. Ranqueado exige os 6 slots preenchidos,
-          nível {NIVEL_MINIMO_PVP}+ e os 4 golpes escolhidos em cada POKE (Equipe → Golpes).
+          {GATE_RANQUEADO_RELAXADO
+            ? 'Time separado do time de aventura. Durante os testes, basta 1 POKE no time pra entrar no ranqueado (os bots estão no nível 80).'
+            : `Time separado do time de aventura. Ranqueado exige os 6 slots preenchidos, nível ${NIVEL_MINIMO_PVP}+ e os 4 golpes escolhidos em cada POKE (Equipe → Golpes).`}
         </p>
 
         <div className="grid grid-cols-2 gap-[.5em] sm:grid-cols-3">
