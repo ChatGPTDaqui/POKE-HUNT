@@ -49,7 +49,7 @@ export function PvpRankedTab() {
       <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em] text-center">
         {pvp.procurando ? (
           <div className="flex flex-col items-center gap-[.45em]">
-            <span className="text-[.9em] text-n300">Procurando oponente da sua faixa de MMR...</span>
+            <span className="text-[.9em] text-n300">Procurando oponente da sua faixa de MMR... Sem ninguém em 15s, um treinador bot entra no lugar (sem MMR).</span>
             <GameButton variant="danger" onClick={() => { void pvp.cancelar() }}>Cancelar</GameButton>
           </div>
         ) : (

@@ -1447,6 +1447,36 @@ export type Database = {
           },
         ]
       }
+      pvp_bots: {
+        Row: {
+          criado_em: string
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string
+          user_id: string
+        }
+        Update: {
+          criado_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_bots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_bots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pvp_fila: {
         Row: {
           entrou_em: string
@@ -2521,18 +2551,21 @@ export type Database = {
       }
       treinadores_publico: {
         Row: {
+          eh_bot: boolean | null
           trainer_exp: number | null
           trainer_level: number | null
           trainer_name: string | null
           user_id: string | null
         }
         Insert: {
+          eh_bot?: never
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
           user_id?: string | null
         }
         Update: {
+          eh_bot?: never
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
@@ -4958,6 +4991,36 @@ export type Database = {
           },
         ]
       }
+      pvp_bots: {
+        Row: {
+          criado_em: string
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string
+          user_id: string
+        }
+        Update: {
+          criado_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_bots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_bots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pvp_fila: {
         Row: {
           entrou_em: string
@@ -6032,18 +6095,21 @@ export type Database = {
       }
       treinadores_publico: {
         Row: {
+          eh_bot: boolean | null
           trainer_exp: number | null
           trainer_level: number | null
           trainer_name: string | null
           user_id: string | null
         }
         Insert: {
+          eh_bot?: never
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
           user_id?: string | null
         }
         Update: {
+          eh_bot?: never
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
