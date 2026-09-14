@@ -28,6 +28,7 @@ const COLUNA_POR_CRITERIO: Record<CriterioPoke, string> = {
 export async function rankingTreinadores(limite = 50): Promise<{ entradas: EntradaTreinador[] }> {
   const { data, error } = await db.from('treinadores_publico')
     .select('user_id, trainer_name, trainer_level, trainer_exp')
+    .eq('eh_bot', false)
     .order('trainer_level', { ascending: false }).order('trainer_exp', { ascending: false }).limit(limite)
   if (error) throw new Error(error.message)
   const entradas: EntradaTreinador[] = (data ?? []).map((r: any) => ({

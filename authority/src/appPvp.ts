@@ -21,7 +21,7 @@ interface LinhaSessaoPvp {
   anfitriao_id: string
   convidado_id: string
   estado: string
-  modo: 'amistoso' | 'ranqueado'
+  modo: 'amistoso' | 'ranqueado' | 'ranqueado_bot'
   anfitriao_time: LinhaTimePvp[] | null
   convidado_time: LinhaTimePvp[] | null
 }
@@ -82,7 +82,8 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
     ? sessao.anfitriao_id
     : resultadoAnfitriao === 'derrota' ? sessao.convidado_id : null
 
-  // Amistoso nao mexe em MMR/PDL — so o ranqueado tem stakes de temporada.
+  // Amistoso e partida contra bot (PH-539) nao mexem em MMR/PDL — so o
+  // ranqueado tem stakes de temporada.
   if (sessao.modo !== 'ranqueado') {
     await chamarRpc(cfg, 'aplicar_resultado_pvp', {
       p_sessao_id: sessaoId,

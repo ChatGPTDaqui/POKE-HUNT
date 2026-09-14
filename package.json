@@ -44,6 +44,7 @@
     "conta:criar": "node scripts/conta-de-teste.js --criar",
     "conta:limpar": "node scripts/conta-de-teste.js --limpar",
     "conta:poderes": "node scripts/conta-teste-poderes.mjs --aplicar",
+    "pvp:bots": "node scripts/pvp/seed-bots.mjs",
     "edge:jwks": "node scripts/edge-jwks.mjs",
     "edge:publicar": "npm run build:edge && node scripts/publicar-edge.mjs",
     "usum:baixar": "node scripts/fetch-usum-catalog.js",
