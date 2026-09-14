@@ -70,7 +70,15 @@ export async function creditarVitoriaDeDuelo(world: WorldState): Promise<void> {
 
   for (const poke of bossTeam) {
     const enemy = createEnemyEntity(world.counters, {
-      poke, x: world.player.x, y: world.player.y, encounterId: mapId,
+      // `mapId` cru NUNCA foi um id de encontro registrado (bug real,
+      // achado testando PH-535 em staging): lendario registra
+      // `${mapId}_encounter`, Lance registra `${mapId}_0`..`${mapId}_5`
+      // (um por membro do time, `nightmareMaps.ts`). `createEnemyEntity`
+      // so usa isto pra `aggroRadius` (irrelevante aqui — a entidade
+      // nunca anda), entao qualquer encontro JA REGISTRADO do proprio
+      // mapa serve, mesmo truque usado no resolvedor headless
+      // (`authority/src/appDuelo.ts`).
+      poke, x: world.player.x, y: world.player.y, encounterId: mapDef.enemyPool[0],
     })
     // `mapDef` real (nao a arena de renderizacao do replay) pra
     // noCatch/itemDrops/noRewards baterem com a hunt de verdade.
