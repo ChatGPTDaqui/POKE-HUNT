@@ -79,7 +79,16 @@ export interface ResultadoConfronto {
  * Sem `stepWorld`/`buildMapWorld`: um confronto nao tem movimento, spawn
  * ou sala — so os dois ativos, parados, batendo.
  */
-export function rodarConfronto(timeAInicial: PokeInstance[], timeBInicial: PokeInstance[]): ResultadoConfronto {
+export interface OpcoesConfronto {
+  /**
+   * Lado B luta com os golpes escolhidos dos proprios POKEs (PvP: o convidado e
+   * um jogador com time da Build). Sem isto o motor trata `world.enemies[0]`
+   * como inimigo de campo e escolhe pelo kit de selvagem por nivel.
+   */
+  ladoBGolpesProprios?: boolean
+}
+
+export function rodarConfronto(timeAInicial: PokeInstance[], timeBInicial: PokeInstance[], opcoes: OpcoesConfronto = {}): ResultadoConfronto {
   const timeA: TimeDoConfronto = { pokes: timeAInicial, indiceAtivo: 0 }
   const timeB: TimeDoConfronto = { pokes: timeBInicial, indiceAtivo: 0 }
   const pokeA = primeiroVivo(timeA)
@@ -98,6 +107,7 @@ export function rodarConfronto(timeAInicial: PokeInstance[], timeBInicial: PokeI
   const enemy = createEnemyEntity(world.counters, { poke: pokeB, x: 40, y: 0, encounterId: ENCONTRO_QUALQUER })
   enemy.state = 'engaged'
   enemy.targetId = player.id
+  if (opcoes.ladoBGolpesProprios) enemy.golpesProprios = true
   world.player = player
   world.enemies = [enemy]
 

@@ -75,7 +75,7 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
   // confrontoHeadless.ts#eventosParaCliente) — os dois times ja chegam com
   // HP cheio/sem status (pvpRowToPoke sempre grava `hp: stat_hp` e
   // `status: null`, nao um snapshot de batalha em andamento).
-  const resultado = rodarConfronto(timeAnfitriao, timeConvidado)
+  const resultado = rodarConfronto(timeAnfitriao, timeConvidado, { ladoBGolpesProprios: true })
   const eventosTraduzidos = eventosParaCliente(resultado.eventos)
   const resultadoAnfitriao = resultadoDoAnfitriao(resultado)
   const vencedorId = resultadoAnfitriao === 'vitoria'

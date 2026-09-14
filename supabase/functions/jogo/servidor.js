@@ -84798,6 +84798,9 @@ function golpeAnuladoPorImunidade(rng, attackerEntity, defenderEntity, ability) 
 	if (efetividadeConsiderandoRevelado(getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies) === 0) return true;
 	return resolverImunidadeDeTipo(deriveRng(rng.state, "anulado-por-imunidade"), ability.type, defenderEntity, false, traitsDoConfronto(attackerEntity, defenderEntity).defensor).imune;
 }
+function usaKitDeSelvagem(entity) {
+	return entity.kind === "enemy" && !entity.golpesProprios;
+}
 /**
 * PH-301: existe ALGUM golpe no arsenal deste atacante que causa dano neste
 * alvo? Usado em dois lugares que nao se enxergam: a escolha de golpe (pra so
@@ -84807,7 +84810,7 @@ function golpeAnuladoPorImunidade(rng, attackerEntity, defenderEntity, ability) 
 function podeDanificar(rng, attackerEntity, defenderEntity) {
 	const especie = SPECIES[attackerEntity.poke.speciesId];
 	if (!especie) return true;
-	const comDano = golpesUtilizaveis(attackerEntity.poke, especie, attackerEntity.kind === "enemy").map((id) => getAbility(id)).filter((a) => a != null).map((a) => a.id === BASIC_ATTACK.id ? basicAttackFor(especie) : a).filter((a) => isDamagingAbility(a));
+	const comDano = golpesUtilizaveis(attackerEntity.poke, especie, usaKitDeSelvagem(attackerEntity)).map((id) => getAbility(id)).filter((a) => a != null).map((a) => a.id === BASIC_ATTACK.id ? basicAttackFor(especie) : a).filter((a) => isDamagingAbility(a));
 	if (comDano.length === 0) return true;
 	return comDano.some((a) => !golpeAnuladoPorImunidade(rng, attackerEntity, defenderEntity, a));
 }
@@ -85186,7 +85189,7 @@ function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 	const clima = world.clima?.tipo ?? null;
 	const attackerSpecies = SPECIES[entity.poke.speciesId];
 	const disabled = entity.poke.disabledAbilities || {};
-	const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === "enemy").filter((id) => !disabled[id]).filter((id) => !(entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0 && id === entity.disabledAbilityId)).filter((id) => !(entity.tormentedUntil && entity.tormentedUntil > 0 && id === entity.lastUsedAbilityId)).filter((id) => id !== "curse" || attackerSpecies.type === "GHOST" || attackerSpecies.type2 === "GHOST");
+	const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, usaKitDeSelvagem(entity)).filter((id) => !disabled[id]).filter((id) => !(entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0 && id === entity.disabledAbilityId)).filter((id) => !(entity.tormentedUntil && entity.tormentedUntil > 0 && id === entity.lastUsedAbilityId)).filter((id) => id !== "curse" || attackerSpecies.type === "GHOST" || attackerSpecies.type2 === "GHOST");
 	const candidatosFinais = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId) ? candidateIds.filter((id) => id === entity.forcedAbilityId) : candidateIds;
 	if (entity.poke.status?.tipo === "sleep") return candidatosFinais.includes("sleep_talk") && isAbilityReady(entity, "sleep_talk") && !(entity.silenciadoAte > 0) ? getAbility("sleep_talk") : null;
 	const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0);
@@ -85352,7 +85355,7 @@ function statusImpedeAcao(world, entity, silent) {
 		startGlobalCooldown(entity, MIN_ACTION_GAP);
 		return true;
 	}
-	if (entity.poke.status?.tipo === "sleep" && golpesUtilizaveis(entity.poke, SPECIES[entity.poke.speciesId], entity.kind === "enemy").includes("sleep_talk") && !entity.poke.disabledAbilities?.sleep_talk && isAbilityReady(entity, "sleep_talk") && !(entity.silenciadoAte > 0)) return false;
+	if (entity.poke.status?.tipo === "sleep" && golpesUtilizaveis(entity.poke, SPECIES[entity.poke.speciesId], usaKitDeSelvagem(entity)).includes("sleep_talk") && !entity.poke.disabledAbilities?.sleep_talk && isAbilityReady(entity, "sleep_talk") && !(entity.silenciadoAte > 0)) return false;
 	const r = tentarAgir(world.rng, entity, (poder) => danoDeConfusao(entity, poder));
 	if (r.agir) return false;
 	startGlobalCooldown(entity, MIN_ACTION_GAP);
@@ -85726,7 +85729,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	if (ability.id === "nature_power") ability = getAbility("tri_attack");
 	if (ability.id === "sleep_talk") {
 		if (attacker.poke.status?.tipo !== "sleep") return;
-		const opcoes = golpesUtilizaveis(attacker.poke, SPECIES[attacker.poke.speciesId], attacker.kind === "enemy").filter((id) => !["sleep_talk", "rest"].includes(id) && !attacker.poke.disabledAbilities?.[id]).map(getAbility).filter((a) => a != null && a.target !== "aoe");
+		const opcoes = golpesUtilizaveis(attacker.poke, SPECIES[attacker.poke.speciesId], usaKitDeSelvagem(attacker)).filter((id) => !["sleep_talk", "rest"].includes(id) && !attacker.poke.disabledAbilities?.[id]).map(getAbility).filter((a) => a != null && a.target !== "aoe");
 		if (!opcoes.length) return;
 		ability = opcoes[Math.floor(nextFloat(world.rng) * opcoes.length)];
 	}
@@ -86529,17 +86532,7 @@ function trocarAtivo(entity, novoPoke, world) {
 	apagarTodosOsEstagios(entity);
 	world.rodadaDuelo.fila = [];
 }
-/**
-* Roda um confronto INTEIRO de time-contra-time, headless. Lado A vira
-* `world.player`, lado B vira `world.enemies[0]` — vocabulario do MOTOR,
-* sem relacao com quem e "o jogador de verdade": em PvP os dois lados sao
-* jogadores reais (A=anfitriao, B=convidado); em Modo Duelo A e sempre o
-* jogador e B e sempre o boss/Lance.
-*
-* Sem `stepWorld`/`buildMapWorld`: um confronto nao tem movimento, spawn
-* ou sala — so os dois ativos, parados, batendo.
-*/
-function rodarConfronto(timeAInicial, timeBInicial) {
+function rodarConfronto(timeAInicial, timeBInicial, opcoes = {}) {
 	const timeA = {
 		pokes: timeAInicial,
 		indiceAtivo: 0
@@ -86573,6 +86566,7 @@ function rodarConfronto(timeAInicial, timeBInicial) {
 	});
 	enemy.state = "engaged";
 	enemy.targetId = player.id;
+	if (opcoes.ladoBGolpesProprios) enemy.golpesProprios = true;
 	world.player = player;
 	world.enemies = [enemy];
 	for (let tick = 0; tick < MAX_TICKS_CONFRONTO; tick++) {
@@ -86698,7 +86692,8 @@ function calcularResultadoRanqueado(anfitriao, convidado, resultadoAnfitriao) {
 function pvpRowToPoke(row) {
 	const species = SPECIES[row.species_id];
 	if (!species) return null;
-	const conhecidos = golpesAprendidosAte(species, row.level);
+	const golpesDeMaquina = [...new Set(row.golpes_de_maquina ?? [])];
+	const conhecidos = [.../* @__PURE__ */ new Set([...golpesAprendidosAte(species, row.level), ...golpesDeMaquina])];
 	const stats = {
 		hp: row.stat_hp,
 		atkFis: row.stat_atk_fis,
@@ -86726,7 +86721,7 @@ function pvpRowToPoke(row) {
 		nature: void 0,
 		stats,
 		unlockedAbilities: conhecidos,
-		golpesDeMaquina: [],
+		golpesDeMaquina,
 		disabledAbilities: {},
 		activeAbilities: sanearEscolhaDeGolpes(row.active_abilities ?? activeAbilitiesPadrao(species, row.level), conhecidos, species, row.level),
 		status: null,
@@ -86760,7 +86755,7 @@ async function resolverPvp(cfg, jogadorId, req) {
 	const timeAnfitriao = montarTime(sessao.anfitriao_time);
 	const timeConvidado = montarTime(sessao.convidado_time);
 	if (timeAnfitriao.length === 0 || timeConvidado.length === 0) throw new ErroHttp(409, "Um dos times deste PvP esta vazio ou invalido.");
-	const resultado = rodarConfronto(timeAnfitriao, timeConvidado);
+	const resultado = rodarConfronto(timeAnfitriao, timeConvidado, { ladoBGolpesProprios: true });
 	const eventosTraduzidos = eventosParaCliente(resultado.eventos);
 	const resultadoAnfitriao = resultadoDoAnfitriao(resultado);
 	const vencedorId = resultadoAnfitriao === "vitoria" ? sessao.anfitriao_id : resultadoAnfitriao === "derrota" ? sessao.convidado_id : null;

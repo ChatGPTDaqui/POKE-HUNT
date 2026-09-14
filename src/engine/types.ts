@@ -380,6 +380,13 @@ export interface EnemyEntity extends BaseEntity {
    * `WorldState.protetorPendente`, nao aqui.
    */
   isProtetor?: boolean
+  /**
+   * PH-539: luta com os 4 golpes escolhidos do proprio POKE (`activeAbilities`),
+   * como o lado do jogador, em vez do kit de selvagem por nivel. Ligado no
+   * convidado do PvP: e um jogador real com time montado na Build, nao um
+   * inimigo de campo.
+   */
+  golpesProprios?: boolean
 }
 
 /**

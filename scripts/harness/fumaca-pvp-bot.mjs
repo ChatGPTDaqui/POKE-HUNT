@@ -133,9 +133,13 @@ if (!login.access_token) {
 }
 const jogador = cabecalhosRest(ANON, schema, { Authorization: `Bearer ${login.access_token}` })
 
-const [rankAntes] = await rest(`/pvp_rank?user_id=eq.${meuId}&select=mmr,pdl,divisao,partidas,vitorias,derrotas,partidas_hoje`)
+// Base de comparacao e o rank que `entrar_fila_ranqueada` devolve, nao uma
+// leitura anterior: a linha de `pvp_rank` so nasce nessa chamada
+// (`pvp_garantir_rank`), e conta nova nao tem nada antes.
 const rankEntrada = await rest('/rpc/entrar_fila_ranqueada', { method: 'POST', body: '{}' }, jogador)
 ok(typeof rankEntrada?.mmr === 'number', `entrou na fila (mmr ${rankEntrada?.mmr})`)
+const campos = ['mmr', 'pdl', 'divisao', 'partidas', 'vitorias', 'derrotas']
+const rankAntes = Object.fromEntries(campos.map((c) => [c, rankEntrada[c]]))
 const partidasHojeAntes = rankEntrada.partidas_hoje
 
 console.log('\nPareando (bot so entra depois de 15s)...')
@@ -174,10 +178,20 @@ ok(resposta.ok, `edge /pvp/resolver HTTP ${resposta.status}`)
 ok(Array.isArray(corpo.eventos) && corpo.eventos.length > 0, `${corpo.eventos?.length ?? 0} eventos no replay`)
 ok(corpo.vencedorId === null || corpo.vencedorId === meuId || corpo.vencedorId === sessao.convidado_id, `vencedor: ${corpo.vencedorId === meuId ? 'jogador' : corpo.vencedorId === null ? 'empate' : nomeDoBot?.trainer_name}`)
 ok(corpo.pdlDeltaAnfitriao === undefined, 'sem delta de PDL na resposta')
+// Golpes por especie, dos dois lados: e aqui que se ve se um golpe de TM
+// (ou qualquer escolha fora do learnset) sobreviveu ao snapshot do servidor.
+const golpesPorLado = new Map()
+for (const e of corpo.eventos ?? []) {
+  const chave = `${e.atacanteLado === 'anfitriao' ? 'eu ' : 'bot'} ${e.atacanteSpeciesId}`
+  if (!golpesPorLado.has(chave)) golpesPorLado.set(chave, new Set())
+  golpesPorLado.get(chave).add(e.golpe)
+}
+for (const [chave, golpes] of golpesPorLado) console.log(`         ${chave.padEnd(16)} ${[...golpes].join(', ')}`)
 
 // --- 4. rank intacto e historico gravado -------------------------------------
 const [rankDepois] = await rest(`/pvp_rank?user_id=eq.${meuId}&select=mmr,pdl,divisao,partidas,vitorias,derrotas,partidas_hoje`)
-ok(JSON.stringify({ ...rankAntes, partidas_hoje: 0 }) === JSON.stringify({ ...rankDepois, partidas_hoje: 0 }), 'mmr/pdl/divisao/partidas/vitorias/derrotas inalterados')
+const rankDepoisComparavel = Object.fromEntries(campos.map((c) => [c, rankDepois?.[c]]))
+ok(JSON.stringify(rankAntes) === JSON.stringify(rankDepoisComparavel), `mmr/pdl/divisao/partidas/vitorias/derrotas inalterados (${JSON.stringify(rankDepoisComparavel)})`)
 ok(rankDepois.partidas_hoje === partidasHojeAntes, `partidas_hoje nao consumiu (${rankDepois.partidas_hoje})`)
 const [hist] = await rest(`/pvp_historico?sessao_id=eq.${sessao.id}&select=modo,vencedor_id,pdl_delta_anfitriao`)
 ok(hist?.modo === 'ranqueado_bot', `historico modo = ${hist?.modo}`)
