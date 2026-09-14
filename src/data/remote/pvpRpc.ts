@@ -245,5 +245,7 @@ export async function sairDaFilaRanqueada(): Promise<void> {
 export async function tentarPearearRanqueado(): Promise<SessaoPvp | null> {
   const { data, error } = await db.rpc('tentar_parear_ranqueado', {})
   falhou(error)
-  return data ? daLinha(data as LinhaPvp) : null
+  // Sem par a funcao devolve NULL de tipo composto, e o PostgREST serializa
+  // isso como um objeto com todas as colunas nulas — nao como `null`.
+  return data && (data as LinhaPvp).id ? daLinha(data as LinhaPvp) : null
 }
