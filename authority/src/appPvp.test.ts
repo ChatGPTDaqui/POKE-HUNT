@@ -35,6 +35,26 @@ describe('montarTime (PH-535/536)', () => {
   it('null vira time vazio', () => {
     expect(montarTime(null)).toEqual([])
   })
+
+  // PH-539: golpe de TM escolhido pelo jogador era descartado no PvP porque o
+  // snapshot so contava o learnset de nivel.
+  it('golpe de TM em golpes_de_maquina sobrevive como golpe ativo', () => {
+    const [poke] = montarTime([linha({
+      species_id: 'ludicolo',
+      golpes_de_maquina: ['scald', 'ice_beam'],
+      active_abilities: ['scald', 'ice_beam', 'mega_drain', 'nature_power'],
+    })])
+    expect(poke.activeAbilities).toEqual(['scald', 'ice_beam', 'mega_drain', 'nature_power'])
+    expect(poke.unlockedAbilities).toContain('scald')
+  })
+
+  it('golpe de TM que a linha nao tem continua caindo', () => {
+    const [poke] = montarTime([linha({
+      species_id: 'ludicolo',
+      active_abilities: ['scald', 'mega_drain'],
+    })])
+    expect(poke.activeAbilities).not.toContain('scald')
+  })
 })
 
 describe('PvP via motor compartilhado — anfitriao (A) vs convidado (B)', () => {

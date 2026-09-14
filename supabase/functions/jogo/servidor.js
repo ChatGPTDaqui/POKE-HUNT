@@ -86698,7 +86698,8 @@ function calcularResultadoRanqueado(anfitriao, convidado, resultadoAnfitriao) {
 function pvpRowToPoke(row) {
 	const species = SPECIES[row.species_id];
 	if (!species) return null;
-	const conhecidos = golpesAprendidosAte(species, row.level);
+	const golpesDeMaquina = [...new Set(row.golpes_de_maquina ?? [])];
+	const conhecidos = [.../* @__PURE__ */ new Set([...golpesAprendidosAte(species, row.level), ...golpesDeMaquina])];
 	const stats = {
 		hp: row.stat_hp,
 		atkFis: row.stat_atk_fis,
@@ -86726,7 +86727,7 @@ function pvpRowToPoke(row) {
 		nature: void 0,
 		stats,
 		unlockedAbilities: conhecidos,
-		golpesDeMaquina: [],
+		golpesDeMaquina,
 		disabledAbilities: {},
 		activeAbilities: sanearEscolhaDeGolpes(row.active_abilities ?? activeAbilitiesPadrao(species, row.level), conhecidos, species, row.level),
 		status: null,
