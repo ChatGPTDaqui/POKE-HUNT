@@ -32,6 +32,7 @@ import type { Rng } from '@/core/rng'
 import { captureAnimFrameDuration, captureAnimFrameCount } from '@/data/captureAnim'
 import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
+import { stepArena } from './arena'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
 import { SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
@@ -1535,6 +1536,13 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // botao de volta, e uma linha aqui, e nao uma reescrita do avanco de sala.
   const manualAdvance = false
   if (!world.player) return []
+
+  // PH-540: arena e o mesmo motor sem economia — nada abaixo (recompensa,
+  // sala, respawn, auto-pocao, lure) vale nela.
+  if (world.arena) {
+    stepArena(world, dt, { silent })
+    return []
+  }
 
   if (!world.mapDef) {
     // Hospital: sem movimento/combate, mas o battle sprite continua animando.

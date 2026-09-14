@@ -49218,6 +49218,7 @@ function emptyWorldState(seed = randomSeed()) {
 		},
 		pessimista: false,
 		lure: null,
+		arena: null,
 		pvp: null,
 		rodadaDuelo: null,
 		clima: null,
@@ -87631,6 +87632,100 @@ function captureAnimFrameDuration() {
 function captureAnimFrameCount(success) {
 	return success ? 60 : 44;
 }
+function entidadeDoRival(world, arena, poke) {
+	const enemy = createEnemyEntity(world.counters, {
+		poke,
+		x: arena.rivalSpawn.x,
+		y: arena.rivalSpawn.y,
+		encounterId: arena.encounterId
+	});
+	enemy.aggroRadius = 999;
+	enemy.leashRadius = 999;
+	enemy.spawnPoint = { ...arena.rivalSpawn };
+	enemy.facing = {
+		x: -1,
+		y: 0
+	};
+	enemy.golpesProprios = true;
+	return enemy;
+}
+function temAlguemDePe(time, aPartirDe) {
+	for (let i = aPartirDe; i < time.length; i++) if (time[i].hp > 0) return i;
+	return -1;
+}
+/**
+* Um passo da arena. Mesmo contrato de `stepWorld`: `silent` cala toast e
+* VFX, nunca muda o resultado.
+*/
+function stepArena(world, dt, opts = {}) {
+	const arena = world.arena;
+	const player = world.player;
+	if (!arena || !player || !world.mapDef) return;
+	const silent = opts.silent ?? false;
+	if (arena.resultado !== "lutando") {
+		if (!silent) updateAnimations(world, dt);
+		return;
+	}
+	arena.ticks++;
+	tickClimaDeGolpe(world, dt);
+	if (world.trickRoomRestante) world.trickRoomRestante = Math.max(0, world.trickRoomRestante - dt);
+	if (world.countdownRemaining != null) {
+		world.countdownRemaining -= dt;
+		if (world.countdownRemaining <= 0) world.countdownRemaining = null;
+		if (!silent) updateAnimations(world, dt);
+		return;
+	}
+	updateMovement(world, dt);
+	updateCombat(world, dt, { silent });
+	tickAttackAnimTimers(world, dt);
+	if (!silent) updateAnimations(world, dt);
+	for (const enemy of world.enemies) {
+		if (!isDead(enemy)) continue;
+		if (enemy.deathRemovalTimer == null) enemy.deathRemovalTimer = silent ? 0 : 4;
+		else if (enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
+	}
+	if (isDead(player)) {
+		const proximo = temAlguemDePe(arena.meuTime, arena.indiceMeu + 1);
+		if (proximo !== -1) {
+			arena.trocaMeu = (arena.trocaMeu ?? 2) - dt;
+			if (arena.trocaMeu <= 0) {
+				arena.trocaMeu = null;
+				arena.indiceMeu = proximo;
+				player.poke = arena.meuTime[proximo];
+				player.cooldowns = {};
+				player.globalCooldown = 0;
+				player.flashTimer = 0;
+				player.fainted = false;
+				player.deathHandled = false;
+				player.entradaProcessada = false;
+				player.state = "idle";
+				player.targetId = null;
+				apagarTodosOsEstagios(player);
+			}
+		}
+	} else arena.trocaMeu = null;
+	if (!world.enemies.some((e) => !isDead(e))) {
+		const proximo = temAlguemDePe(arena.rivalTime, arena.indiceRival + 1);
+		if (proximo !== -1) {
+			arena.trocaRival = (arena.trocaRival ?? 2) - dt;
+			if (arena.trocaRival <= 0) {
+				arena.trocaRival = null;
+				arena.indiceRival = proximo;
+				world.enemies.push(entidadeDoRival(world, arena, arena.rivalTime[proximo]));
+			}
+		}
+	} else arena.trocaRival = null;
+	const meuLadoAcabou = isDead(player) && temAlguemDePe(arena.meuTime, arena.indiceMeu + 1) === -1;
+	const rivalAcabou = !world.enemies.some((e) => !isDead(e)) && temAlguemDePe(arena.rivalTime, arena.indiceRival + 1) === -1;
+	if (meuLadoAcabou && rivalAcabou) arena.resultado = "empate";
+	else if (rivalAcabou) arena.resultado = "vitoria";
+	else if (meuLadoAcabou) arena.resultado = "derrota";
+	else if (arena.ticks >= 108e3) arena.resultado = "empate";
+	if (arena.resultado !== "lutando") {
+		player.state = arena.resultado === "derrota" ? "dead" : "idle";
+		player.targetId = null;
+	}
+}
 //#endregion
 //#region src/data/statLabels.ts
 var STAT_LABEL = {
@@ -89853,6 +89948,10 @@ function stepWorld(world, dt, gameState, opts = {}) {
 	const silent = opts.silent ?? false;
 	const manualAdvance = false;
 	if (!world.player) return [];
+	if (world.arena) {
+		stepArena(world, dt, { silent });
+		return [];
+	}
 	if (!world.mapDef) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
