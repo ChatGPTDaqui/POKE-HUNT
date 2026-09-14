@@ -1122,6 +1122,12 @@ export interface WorldState {
    * o movimento e exatamente o de sempre.
    */
   lure: EstadoDeLure | null
+  /**
+   * PH-540: arena de duelo (PvP/Modo Duelo) rodando no motor do modo livre.
+   * Presente = `stepWorld` delega pra `stepArena` e nada e creditado. Ver
+   * engine/arena.ts.
+   */
+  arena: import('./arena').EstadoDaArena | null
   pvp: {
     treinador: string
     estado: 'lutando' | 'vitoria' | 'derrota' | 'empate' | 'replay'

@@ -12,6 +12,10 @@
 export { buildMapWorld, buildHospitalWorld, stepWorld, handleEnemyDefeated } from './simulation'
 export { OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, OFFLINE_FARM_MAX_HOURS, LIMIAR_OFFLINE_SEGUNDOS } from './simulation'
 export type { SequenciaDeSorteio } from './simulation'
+// PH-540: arena de duelo (PvP/Modo Duelo) — o servidor resolve headless com a
+// mesma funcao que o cliente roda ao vivo.
+export { criarMundoArena, rodarArena, stepArena, ARENA_MAP_ID } from './arena'
+export type { EstadoDaArena, OpcoesDaArena, ResultadoDaArena } from './arena'
 
 export { simulateWorldSeconds, createEmptySummary } from './systems/offlineSimSystem'
 export type { OfflineSimSummary, KillResult } from './systems/offlineSimSystem'
