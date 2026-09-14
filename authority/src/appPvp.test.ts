@@ -1,13 +1,10 @@
-// PH-535 Fase 2: PvP ranqueado/amistoso passa a usar o MESMO motor real
-// headless do Modo Duelo (`confrontoHeadless.ts`), em vez de
-// `pvpSimulator.ts`. Prova que uma LINHA CRUA de `pvp_time`/
-// `pvp_sessao.*_time` vira um time que o motor real aceita e resolve
-// corretamente, e que a traducao de eventos usa o vocabulario certo
-// (anfitriao/convidado) pros dois lados.
+// Prova que uma LINHA CRUA de `pvp_time`/`pvp_sessao.*_time` vira um time
+// que o motor aceita, e que a arena (PH-540) resolve o PvP de forma
+// deterministica pela semente da sessao.
 import { describe, expect, it } from 'vitest'
-import { eventosParaCliente, rodarConfronto } from './confrontoHeadless.js'
+import { LIVE_SIM_STEP_SECONDS, rodarArena, sementeDaSessao } from '#engine'
 import { montarTime } from './appPvp.js'
-import type { LinhaTimePvp } from './pvpRow.js'
+import type { LinhaTimePvp } from '#engine'
 
 function linha(overrides: Partial<LinhaTimePvp> = {}): LinhaTimePvp {
   return {
@@ -57,49 +54,33 @@ describe('montarTime (PH-535/536)', () => {
   })
 })
 
-describe('PvP via motor compartilhado — anfitriao (A) vs convidado (B)', () => {
-  it('anfitriao muito mais forte vence, eventos traduzidos pro vocabulario do client', () => {
+describe('PvP via arena (PH-540) — anfitriao (meu lado) vs convidado (rival)', () => {
+  it('anfitriao muito mais forte vence; mesma semente da o mesmo veredito', () => {
     const anfitriao = montarTime([linha({ id: 'anf-1', stat_atk_fis: 500, stat_atk_esp: 500 })])
     const convidado = montarTime([linha({ id: 'conv-1', species_id: 'rattata', level: 5, stat_hp: 1, stat_def: 1, stat_def_esp: 1, stat_speed: 1 })])
-
-    const resultado = rodarConfronto(anfitriao, convidado)
-    expect(resultado.vencedor).toBe('A')
-
-    const eventos = eventosParaCliente(resultado.eventos)
-    expect(eventos.length).toBeGreaterThan(0)
-    // Nao "o primeiro evento e do anfitriao": Rattata Nv5 tem Quick Attack
-    // (prioridade) e abre a luta em ~40% das sementes.
-    expect(eventos.some((e) => e.atacanteLado === 'anfitriao')).toBe(true)
-    expect(eventos.every((e) => e.atacanteLado === 'anfitriao' || e.defensorLado === 'convidado' || e.atacanteLado === 'convidado')).toBe(true)
+    const semente = sementeDaSessao('00000000-0000-4000-8000-000000000001')
+    const a = rodarArena({ semente, meuTime: anfitriao, rivalTime: convidado, nomeDoRival: '' }, LIVE_SIM_STEP_SECONDS)
+    const b = rodarArena({ semente, meuTime: montarTime([linha({ id: 'anf-1', stat_atk_fis: 500, stat_atk_esp: 500 })]), rivalTime: montarTime([linha({ id: 'conv-1', species_id: 'rattata', level: 5, stat_hp: 1, stat_def: 1, stat_def_esp: 1, stat_speed: 1 })]), nomeDoRival: '' }, LIVE_SIM_STEP_SECONDS)
+    expect(a.resultado).toBe('vitoria')
+    expect(b.resultado).toBe(a.resultado)
+    expect(b.ticks).toBe(a.ticks)
   })
 
-  it('convidado com time completo (6) troca normalmente ao perder o ativo', () => {
-    const anfitriao = montarTime([linha({ id: 'anf-1', stat_atk_fis: 60, stat_atk_esp: 60 })]) // forte, nao esmagador
+  it('convidado com time completo troca ao perder o ativo e luta com o kit que escolheu', () => {
+    const anfitriao = montarTime([linha({ id: 'anf-1', species_id: 'snorlax', stat_hp: 5000, stat_def: 400, stat_def_esp: 400, stat_atk_fis: 10, stat_atk_esp: 10, stat_speed: 1 })])
     const convidado = montarTime([
       linha({ id: 'c1', species_id: 'rattata', level: 5, stat_hp: 1, stat_def: 1, stat_def_esp: 1, stat_speed: 1 }),
-      linha({ id: 'c2', species_id: 'gyarados', stat_hp: 300, stat_def: 200, stat_def_esp: 200 }),
+      linha({ id: 'c2', species_id: 'ludicolo', stat_speed: 300, golpes_de_maquina: ['scald', 'ice_beam', 'energy_ball', 'focus_blast'], active_abilities: ['scald', 'ice_beam', 'energy_ball', 'focus_blast'] }),
     ])
-
-    const resultado = rodarConfronto(anfitriao, convidado)
-    const gyaradosParticipou = resultado.eventos.some(
-      (e) => e.atacanteSpeciesId === 'gyarados' || e.defensorSpeciesId === 'gyarados',
-    )
-    expect(gyaradosParticipou).toBe(true)
+    const { world } = rodarArena({ semente: 3, meuTime: anfitriao, rivalTime: convidado, nomeDoRival: '' }, LIVE_SIM_STEP_SECONDS)
+    expect(world.arena!.indiceRival).toBe(1)
+    const ludicolo = world.enemies.find((e) => e.poke.speciesId === 'ludicolo')!
+    expect(ludicolo.golpesProprios).toBe(true)
+    expect(ludicolo.poke.activeAbilities).toEqual(['scald', 'ice_beam', 'energy_ball', 'focus_blast'])
   })
 
-  // PH-539: o convidado e `world.enemies[0]`, e o motor escolhia golpe de
-  // inimigo pelo kit de selvagem — o time montado na Build era ignorado.
-  it('convidado luta com os golpes que escolheu, nao com o kit de selvagem', () => {
-    const anfitriao = montarTime([linha({ id: 'anf-1', species_id: 'snorlax', stat_hp: 5000, stat_def: 400, stat_def_esp: 400, stat_atk_fis: 10, stat_atk_esp: 10, stat_speed: 1 })])
-    const convidado = montarTime([linha({
-      id: 'conv-1', species_id: 'ludicolo', stat_speed: 300,
-      golpes_de_maquina: ['scald', 'ice_beam', 'energy_ball', 'focus_blast'],
-      active_abilities: ['scald', 'ice_beam', 'energy_ball', 'focus_blast'],
-    })])
-
-    const resultado = rodarConfronto(anfitriao, convidado, { ladoBGolpesProprios: true })
-    const golpesDoConvidado = new Set(resultado.eventos.filter((e) => e.atacanteLado !== 'player').map((e) => e.golpe))
-    expect(golpesDoConvidado.size).toBeGreaterThan(0)
-    for (const g of golpesDoConvidado) expect(['Scald', 'Ice Beam', 'Energy Ball', 'Focus Blast']).toContain(g)
+  it('sementeDaSessao e estavel e distingue sessoes', () => {
+    expect(sementeDaSessao('a')).toBe(sementeDaSessao('a'))
+    expect(sementeDaSessao('a')).not.toBe(sementeDaSessao('b'))
   })
 })

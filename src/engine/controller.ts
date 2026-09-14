@@ -23,7 +23,6 @@ import type { Point } from './types'
 import { apagarTodosOsEstagios, limparEfeitosAoDesmaiar } from './systems/statusSystem'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
-import { ehMapaDeDuelo, entrarEmDuelo } from '@/features/duelo/duelo'
 
 /**
  * Aviso de "seu POKE ja passou do teto desta hunt" (PH-208), ou `null` quando
@@ -162,13 +161,6 @@ export const controller = {
     avisar: boolean,
     retomando: boolean,
   ): Promise<boolean> {
-    // PH-533: "modo duelo" — Lance/lendario nao passam mais pelo pipeline
-    // de sessao/flush do "modo livre". So ativa com autoridade de verdade
-    // (sem ela nao ha como resolver server-side); sem servidor configurado
-    // cai no fluxo antigo, pra dev local sem Edge continuar funcionando.
-    if (servidorAtivo() && ehMapaDeDuelo(mapId)) {
-      return await entrarEmDuelo(mapId)
-    }
     const gameState = useGameStateStore.getState()
     const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid, {
       avisarErro: avisar, retomando,

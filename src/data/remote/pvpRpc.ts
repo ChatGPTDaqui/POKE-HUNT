@@ -1,5 +1,6 @@
 import { schema, supabase } from '@/lib/supabase'
 import type { PokeInstance } from '@/data/pokes'
+import { pvpRowToPoke, type LinhaTimePvp } from '@/engine/pokeDoSnapshotDePvp'
 
 const db = supabase as unknown as {
   from: (tabela: string) => any
@@ -24,6 +25,9 @@ export interface SessaoPvp {
   vencedorId: string | null
   anfitriaoPoke: PokeInstance | null
   convidadoPoke: PokeInstance | null
+  /** Snapshots dos times (PH-529) como POKEs pela regra do servidor — e o que a arena luta. */
+  anfitriaoTime: PokeInstance[]
+  convidadoTime: PokeInstance[]
 }
 
 export interface HistoricoPvp {
@@ -48,6 +52,14 @@ interface LinhaPvp {
   vencedor_id: string | null
   anfitriao_poke: PokeInstance | null
   convidado_poke: PokeInstance | null
+  anfitriao_time?: LinhaTimePvp[] | null
+  convidado_time?: LinhaTimePvp[] | null
+}
+
+// Mesmo mapeador do servidor (PH-540): o POKE que a arena luta aqui e
+// byte a byte o que o servidor resolveu.
+function timeDoSnapshot(linhas: LinhaTimePvp[] | null | undefined): PokeInstance[] {
+  return (linhas ?? []).map(pvpRowToPoke).filter((p): p is PokeInstance => p != null)
 }
 
 function falhou(error: { message: string } | null): void {
@@ -68,6 +80,8 @@ function daLinha(l: LinhaPvp): SessaoPvp {
     vencedorId: l.vencedor_id,
     anfitriaoPoke: l.anfitriao_poke,
     convidadoPoke: l.convidado_poke,
+    anfitriaoTime: timeDoSnapshot(l.anfitriao_time),
+    convidadoTime: timeDoSnapshot(l.convidado_time),
   }
 }
 

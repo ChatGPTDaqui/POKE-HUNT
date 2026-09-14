@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.56',
+    date: '2026-09-14',
+    title: 'PvP luta de verdade na arena',
+    highlights: [
+      'Duelo ranqueado, amistoso e contra bot agora acontece no mesmo combate do modo livre: seus POKEs e os do rival se aproximam, atacam com a arte e os golpes de sempre, com HUD e barras de HP normais. O replay com narrador foi removido.',
+      'Quando um POKE cai, o próximo do time entra em campo — dos dois lados. O resultado é decidido pelo servidor com a mesma luta que você vê na tela.',
+      'Campeão Lance e os lendários voltam a ser lutas no mapa, como eram antes.',
+      'Ranking → PvP contra um POKE do top vira um duelo local na arena, sem contar pra nada.',
+    ],
+  },
+  {
     version: '7.55',
     date: '2026-09-14',
     title: 'Ranked: treinadores bot quando não há oponente',

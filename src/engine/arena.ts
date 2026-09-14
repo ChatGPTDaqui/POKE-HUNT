@@ -47,6 +47,18 @@ export interface EstadoDaArena {
 }
 
 export const ARENA_MAP_ID = 'arena'
+
+/**
+ * Semente do duelo a partir do id da sessao de PvP: servidor e os DOIS
+ * clientes chegam ao mesmo numero sem coluna nova nem troca de mensagem
+ * extra (o segundo a chamar `/pvp/resolver` so recebe `jaResolvido`).
+ * FNV-1a 32 bits sobre o uuid, mesmo passo de `deriveRng`.
+ */
+export function sementeDaSessao(sessaoId: string): number {
+  let h = 0x811c9dc5 | 0
+  for (let i = 0; i < sessaoId.length; i++) h = Math.imul(h ^ sessaoId.charCodeAt(i), 0x01000193) | 0
+  return h
+}
 const AFASTAMENTO_INICIAL = 90
 const CONTAGEM_INICIAL = 3
 // Teto de seguranca (30 min simulados a 60 Hz) pra dois times que nao se

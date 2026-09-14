@@ -11,7 +11,8 @@
 //   2. `entrar_fila_ranqueada` aceita; `tentar_parear_ranqueado` devolve null
 //      antes dos 15s e uma sessao `ranqueado_bot` depois, com convidado em
 //      `pvp_bots`;
-//   3. a Edge `/pvp/resolver` devolve eventos e vencedor;
+//   3. a Edge `/pvp/resolver` devolve vencedor e semente, e a arena rodada
+//      aqui com a mesma semente (motor headless) chega ao mesmo veredito;
 //   4. `pvp_rank` da conta fica identico ao de antes e `pvp_historico` grava
 //      `modo = 'ranqueado_bot'`.
 //
@@ -194,18 +195,24 @@ const resposta = await fetch(`${URL_BASE}/functions/v1/${FUNCAO}/pvp/resolver`, 
 })
 const corpo = await resposta.json().catch(() => ({}))
 ok(resposta.ok, `edge /pvp/resolver HTTP ${resposta.status}`)
-ok(Array.isArray(corpo.eventos) && corpo.eventos.length > 0, `${corpo.eventos?.length ?? 0} eventos no replay`)
 ok(corpo.vencedorId === null || corpo.vencedorId === meuId || corpo.vencedorId === sessao.convidado_id, `vencedor: ${corpo.vencedorId === meuId ? 'jogador' : corpo.vencedorId === null ? 'empate' : nomeDoBot?.trainer_name}`)
+ok(Number.isInteger(corpo.semente), `semente devolvida (${corpo.semente})`)
 ok(corpo.pdlDeltaAnfitriao === undefined, 'sem delta de PDL na resposta')
-// Golpes por especie, dos dois lados: e aqui que se ve se um golpe de TM
-// (ou qualquer escolha fora do learnset) sobreviveu ao snapshot do servidor.
-const golpesPorLado = new Map()
-for (const e of corpo.eventos ?? []) {
-  const chave = `${e.atacanteLado === 'anfitriao' ? 'eu ' : 'bot'} ${e.atacanteSpeciesId}`
-  if (!golpesPorLado.has(chave)) golpesPorLado.set(chave, new Set())
-  golpesPorLado.get(chave).add(e.golpe)
+
+// --- 3b. determinismo: a MESMA arena aqui (Node) tem que dar o mesmo veredito
+// que a Edge (Deno). E o contrato do PH-540 — o cliente reproduz a luta.
+{
+  const motor = await carregarMotor()
+  ok(motor.sementeDaSessao(sessao.id) === corpo.semente, 'semente local bate com a do servidor')
+  const meuTime = (sessao.anfitriao_time ?? []).map(motor.pvpRowToPoke).filter(Boolean)
+  const rivalTime = (sessao.convidado_time ?? []).map(motor.pvpRowToPoke).filter(Boolean)
+  const local = motor.rodarArena({ semente: corpo.semente, meuTime, rivalTime, nomeDoRival: '' }, motor.LIVE_SIM_STEP_SECONDS)
+  const vereditoLocal = local.resultado === 'vitoria' ? meuId : local.resultado === 'derrota' ? sessao.convidado_id : null
+  ok(vereditoLocal === corpo.vencedorId, `reproducao local (${local.resultado}, ${local.ticks} ticks) bate com o veredito do servidor`)
+  const golpes = new Map()
+  for (const p of [...meuTime, ...rivalTime]) golpes.set(p.speciesId, p.activeAbilities.join(', '))
+  for (const [especie, lista] of golpes) console.log(`         ${especie.padEnd(12)} ${lista}`)
 }
-for (const [chave, golpes] of golpesPorLado) console.log(`         ${chave.padEnd(16)} ${[...golpes].join(', ')}`)
 
 // --- 4. rank intacto e historico gravado -------------------------------------
 const [rankDepois] = await rest(`/pvp_rank?user_id=eq.${meuId}&select=mmr,pdl,divisao,partidas,vitorias,derrotas,partidas_hoje`)
