@@ -780,6 +780,38 @@ export interface EstadoDeLure {
   esperandoRetardatario: boolean
 }
 
+// PH-535: qual ENTIDADE da arena de duelo — sempre exatamente duas, o
+// `world.player` e o `world.enemies[0]` (motor real, um slot ativo por
+// lado, igual qualquer hunt normal). Nao confundir com `LadoPvpRemoto`
+// ('anfitriao'/'convidado') em `data/remote/servidor.ts` — aquele e o
+// vocabulario do FIO (quem e o dono da sessao); este e local ao motor.
+export type LadoDuelo = 'player' | 'enemy'
+
+/**
+ * UM evento golpe-a-golpe do Modo Duelo, gerado pelo motor real
+ * (`combatSystem.ts`) rodando headless no servidor — mesma forma que o
+ * cliente ja sabe reproduzir desde a PH-532 (golpe, dano, efetividade,
+ * nocaute, especie/shiny dos dois lados pro replay saber quem trocou).
+ * Consumido por `pvpReplaySystem.ts` via `data/remote/servidor.ts#PvpEventoRemoto`
+ * (mesma forma, nomes de lado convertidos na borda do servidor).
+ */
+export interface EventoDuelo {
+  atacante: string
+  defensor: string
+  golpe: string
+  dano: number
+  hpRestante: number
+  efetividade: number
+  nocaute: boolean
+  atacanteLado: LadoDuelo
+  atacanteSpeciesId: string
+  atacanteShiny: boolean
+  defensorLado: LadoDuelo
+  defensorSpeciesId: string
+  defensorShiny: boolean
+  hpMaximoDefensor: number
+}
+
 export interface WorldState {
   /** Trick Room inverte a ordem dos hits simultâneos por cinco turnos. */
   trickRoomRestante?: number
@@ -1110,6 +1142,26 @@ export interface WorldState {
     // duelo da sessao herda `creditado.current === true` do primeiro e a
     // recompensa nunca e aplicada de novo.
     duelId?: string
+  } | null
+  // PH-535: gate de turno do Modo Duelo — TODA hunt roda `updateCombat`
+  // (combatSystem.ts) com os dois lados agindo de forma independente, cada
+  // um no proprio cooldown; isto e o UNICO campo que muda esse
+  // comportamento, e so quando existe. `undefined`/`null` = hunt normal,
+  // zero mudanca. Nao confundir com `pvp` acima (que e client-only, pro
+  // REPLAY visual) — este e o motor de verdade, usado tanto no servidor
+  // (resolucao headless) quanto, futuramente, em qualquer duelo ao vivo.
+  //
+  // `fila` tem no maximo 2 entradas por rodada (['player','enemy'] ou
+  // ['enemy','player'], conforme Velocidade efetiva) — `executePlayerAction`/
+  // `executeEnemyAction` so agem quando `fila[0]` e o proprio lado, e o
+  // proprio `updateCombat` tira da fila quando a acao termina (golpe
+  // resolvido, errou, ou barrado por status/Truant). Fila vazia = fim de
+  // rodada, `updateCombat` recalcula uma nova pela Velocidade atual dos
+  // dois ativos — e assim que uma queda de Velocidade no meio da luta muda
+  // quem ataca primeiro no round seguinte, como pedido.
+  rodadaDuelo?: {
+    fila: LadoDuelo[]
+    eventos: EventoDuelo[]
   } | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
