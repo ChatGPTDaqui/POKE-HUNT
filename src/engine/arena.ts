@@ -43,6 +43,8 @@ export interface EstadoDaArena {
   trocaRival: number | null
   ticks: number
   encounterId: string
+  /** Bola amarela: onde eu nasco e por onde meu substituto entra (PH-545). */
+  meuSpawn: { x: number; y: number }
   rivalSpawn: { x: number; y: number }
 }
 
@@ -120,6 +122,7 @@ export function criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival }: Op
     trocaRival: null,
     ticks: 0,
     encounterId: mapDef.enemyPool[0],
+    meuSpawn,
     rivalSpawn,
   }
   const player = createPlayerEntity(world.counters, { poke: arena.meuTime[0], x: meuSpawn.x, y: meuSpawn.y })
@@ -189,8 +192,10 @@ export function stepArena(world: WorldState, dt: number, opts: { silent?: boolea
     else if (enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt
   }
 
-  // Troca do meu lado: o proximo de pe entra depois da espera, no lugar do
-  // caido (mesma entidade — HUD e camera seguem `world.player`).
+  // Troca do meu lado: o proximo de pe entra depois da espera, pela BOLA
+  // AMARELA (PH-545, mesma regra de `trocarPorDesmaio` na hunt do Lance e da
+  // bola verde do rival), na mesma entidade — HUD e camera seguem
+  // `world.player`.
   if (isDead(player)) {
     const proximo = temAlguemDePe(arena.meuTime, arena.indiceMeu + 1)
     if (proximo !== -1) {
@@ -207,6 +212,12 @@ export function stepArena(world: WorldState, dt: number, opts: { silent?: boolea
         player.entradaProcessada = false
         player.state = 'idle'
         player.targetId = null
+        player.x = arena.meuSpawn.x
+        player.y = arena.meuSpawn.y
+        player.pathWaypoints = null
+        player.pathIndex = 0
+        player.pathTargetX = null
+        player.pathTargetY = null
         apagarTodosOsEstagios(player)
       }
     }

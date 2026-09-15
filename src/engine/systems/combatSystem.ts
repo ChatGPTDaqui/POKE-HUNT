@@ -2322,14 +2322,16 @@ function truantImpedeAcao(world: WorldState, entity: WorldEntity, silent: boolea
   return true
 }
 
-function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEnemies: EnemyEntity[], silent: boolean): void {
+// `golpeEscolhido` (PH-545): o round do duelo ja escolheu o golpe na abertura
+// (a prioridade dele definiu a ordem); aqui so se usa. Ausente = escolhe agora.
+function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEnemies: EnemyEntity[], silent: boolean, golpeEscolhido: Ability | null = null): void {
   if (!canAct(player)) return
   if (statusImpedeAcao(world, player, silent)) return
   if (truantImpedeAcao(world, player, silent)) return
 
   const primaryTarget = engagedEnemies[0]
   const allEnemies = nearbyAliveEnemies(world)
-  const ability = pickAbility(world, player, primaryTarget, (a) =>
+  const ability = golpeEscolhido ?? pickAbility(world, player, primaryTarget, (a) =>
     allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length,
   )
   if (!ability) return
@@ -2381,7 +2383,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   if (ability.target === 'aoe') queueAoeVisual(world, player, ability)
 }
 
-function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity, silent: boolean): void {
+function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity, silent: boolean, golpeEscolhido: Ability | null = null): void {
   // Boneco de treino (data/trainingDummy.ts, `HuntMapDef.passiveEnemies`):
   // NUNCA revida. Apanha a distancia inteira (IVs de ataque no minimo,
   // ver TREINO_IVS) nao bastava — medido AO VIVO nesta leva, um Wobbuffet
@@ -2394,7 +2396,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   if (statusImpedeAcao(world, enemy, silent)) return
   if (truantImpedeAcao(world, enemy, silent)) return
 
-  const ability = pickAbility(world, enemy, player, () => 1) // inimigos so miram no jogador unico
+  const ability = golpeEscolhido ?? pickAbility(world, enemy, player, () => 1) // inimigos so miram no jogador unico
   if (!ability) return
 
   // Mesma logica de executePlayerAction acima -- registrado na escolha, nao
@@ -3935,9 +3937,16 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     if (world.mapDef?.encarada) {
       // PH-544: combate duelo age em rounds — um por vez, 3 s entre eles,
       // ordem por Velocidade recalculada a cada round. Ver rodadaDeDuelo.ts.
-      executarRodadaDeDuelo(world, player, engagedEnemies, (e) => velocidadeEfetiva(e, world.clima?.tipo ?? null), {
-        jogador: () => { if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent) },
-        inimigo: (enemy) => { if (!isDead(enemy) && !player.fainted) executeEnemyAction(world, enemy, player, silent) },
+      const clima = world.clima?.tipo ?? null
+      const rival = engagedEnemies[0]
+      executarRodadaDeDuelo(world, player, engagedEnemies, {
+        velocidade: (e) => velocidadeEfetiva(e, clima),
+        escolher: (e) => e.kind === 'enemy'
+          ? pickAbility(world, e, player, () => 1)
+          : pickAbility(world, e, rival, (a) => nearbyAliveEnemies(world).filter((x) => Math.hypot(x.x - e.x, x.y - e.y) <= (a.radius ?? 0)).length),
+      }, {
+        jogador: (golpe) => { if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent, golpe) },
+        inimigo: (enemy, golpe) => { if (!isDead(enemy) && !player.fainted) executeEnemyAction(world, enemy, player, silent, golpe) },
       })
     } else {
       if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent)

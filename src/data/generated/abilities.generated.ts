@@ -257,6 +257,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 10,
     "target": "single",
+    "priority": 4,
     "accuracy": 100
   },
   "water_pulse": {
@@ -509,6 +510,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 40,
     "pp": 30,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "mind_reader": {
@@ -713,6 +715,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 5,
     "target": "single",
+    "priority": 4,
     "accuracy": 100
   },
   "pluck": {
@@ -839,6 +842,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 10,
     "target": "single",
+    "priority": 4,
     "accuracy": 100
   },
   "safeguard": {
@@ -941,6 +945,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 20,
     "target": "single",
+    "priority": -6,
     "accuracy": 100
   },
   "quick_attack": {
@@ -951,6 +956,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 40,
     "pp": 30,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "spark": {
@@ -1146,6 +1152,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 20,
     "target": "single",
+    "priority": -5,
     "accuracy": 100
   },
   "ice_fang": {
@@ -1179,6 +1186,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 20,
     "target": "single",
+    "priority": -6,
     "accuracy": 100
   },
   "dragon_rush": {
@@ -1789,6 +1797,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 20,
     "target": "single",
+    "priority": 5,
     "accuracy": 100
   },
   "wish": {
@@ -2176,6 +2185,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 80,
     "pp": 5,
     "target": "single",
+    "priority": 2,
     "accuracy": 100
   },
   "fly": {
@@ -2298,6 +2308,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 20,
     "target": "single",
+    "priority": -6,
     "accuracy": 100
   },
   "knock_off": {
@@ -2328,6 +2339,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 10,
     "target": "single",
+    "priority": 4,
     "accuracy": 100
   },
   "psycho_boost": {
@@ -2522,6 +2534,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 70,
     "pp": 5,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "super_fang": {
@@ -3007,6 +3020,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 20,
     "target": "single",
+    "priority": 2,
     "accuracy": 100
   },
   "cotton_spore": {
@@ -3085,6 +3099,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 15,
     "target": "single",
+    "priority": 3,
     "accuracy": 100
   },
   "screech": {
@@ -3152,6 +3167,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 10,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "harden": {
@@ -3201,6 +3217,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "pp": 10,
     "target": "single",
     "flinchChance": 100,
+    "priority": 3,
     "accuracy": 100
   },
   "razor_wind": {
@@ -3255,6 +3272,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 30,
     "pp": 10,
     "target": "single",
+    "priority": 2,
     "accuracy": 100
   },
   "counter": {
@@ -3265,6 +3283,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 20,
     "target": "single",
+    "priority": -5,
     "accuracy": 100
   },
   "mach_punch": {
@@ -3275,6 +3294,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 40,
     "pp": 30,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "force_palm": {
@@ -3412,6 +3432,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 10,
     "target": "single",
+    "priority": 4,
     "accuracy": 100
   },
   "string_shot": {
@@ -3627,6 +3648,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 40,
     "pp": 30,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "double_team": {
@@ -3706,6 +3728,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 60,
     "pp": 10,
     "target": "single",
+    "priority": -4,
     "accuracy": 100
   },
   "vital_throw": {
@@ -3716,6 +3739,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 70,
     "pp": 10,
     "target": "single",
+    "priority": -1,
     "accuracy": 100
   },
   "brick_break": {
@@ -3798,6 +3822,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 40,
     "pp": 30,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "fury_swipes": {
@@ -4051,6 +4076,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 40,
     "pp": 20,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "mud_slap": {
@@ -4318,6 +4344,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 60,
     "pp": 10,
     "target": "single",
+    "priority": -6,
     "accuracy": 90
   },
   "acid_spray": {
@@ -4582,6 +4609,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 15,
     "target": "single",
+    "priority": 3,
     "accuracy": 100
   },
   "sing": {
@@ -4611,6 +4639,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "priority": 1,
     "accuracy": 100
   },
   "acid_armor": {
@@ -4649,6 +4678,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 25,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "trump_card": {
@@ -4679,6 +4709,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 10,
     "target": "single",
+    "priority": 3,
     "accuracy": 100
   },
   "rock_slide": {
@@ -4752,6 +4783,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 60,
     "pp": 10,
     "target": "single",
+    "priority": -6,
     "accuracy": 90
   },
   "coil": {
@@ -5038,6 +5070,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 15,
     "target": "single",
+    "priority": 4,
     "accuracy": 100
   },
   "sleep_talk": {
@@ -5078,6 +5111,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 20,
     "target": "single",
+    "priority": 2,
     "accuracy": 100
   },
   "echoed_voice": {
@@ -5209,6 +5243,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 150,
     "pp": 20,
     "target": "single",
+    "priority": -3,
     "accuracy": 100
   },
   "howl": {
@@ -5988,6 +6023,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 40,
     "pp": 30,
     "target": "single",
+    "priority": 1,
     "accuracy": 100
   },
   "ice_punch": {
@@ -6052,6 +6088,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 60,
     "pp": 10,
     "target": "single",
+    "priority": -4,
     "accuracy": 100
   },
   "present": {
@@ -6180,6 +6217,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 15,
     "target": "single",
+    "priority": 2,
     "accuracy": 100
   },
   "trick": {
