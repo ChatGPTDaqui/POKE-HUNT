@@ -107,7 +107,13 @@ describe('o cartao da hunt e o sorteio de sala', () => {
   // TOLERANCIA DE 1,5 PONTO com 200 mil sorteios e semente fixa: o erro de
   // amostragem de uma fatia de 35% em 200 mil e ~0,2 ponto, entao ha folga de
   // 7x. A guarda reprova por regressao, nao por ruido.
-  it('bate com a frequencia de um sorteio real nos estagios que o bug mordia', () => {
+  //
+  // TIMEOUT PROPRIO (PH-547): sao 1 milhao de sorteios com `contextoDeSpawn`
+  // em cada um — ~4 s sozinho, 16-20 s com a suite inteira dividindo dois
+  // workers. Os 5 s padrao reprovavam o caso por carga, nao por regressao, e
+  // era o unico vermelho de uma suite de 3.285. Encolher a amostra reduziria
+  // a folga que o paragrafo acima justifica; o prazo e que acompanha o trabalho.
+  it('bate com a frequencia de um sorteio real nos estagios que o bug mordia', { timeout: 90_000 }, () => {
     const AMOSTRA = 200_000
     const TOLERANCIA = 1.5
     const erros: string[] = []

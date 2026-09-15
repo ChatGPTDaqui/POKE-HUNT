@@ -15,7 +15,7 @@
 // O item recebido NAO aparece aqui de proposito: ele vai por `market_deliveries`
 // e e reivindicado no proximo `/estado`. Somar no estado local tambem daria duas
 // fontes pro mesmo credito.
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 let chamadas: { nome: string; params: Record<string, unknown> | undefined }[]
 let invalidacoes: number
@@ -50,6 +50,16 @@ vi.mock('@/stores/mochilaStore', () => ({
   mochilaCarregada: () => true,
   useMochilaStore: { getState: () => ({ invalidar: () => { invalidacoes += 1 } }) },
 }))
+
+// PH-408: o primeiro caso estourava o timeout de 5 s. Cada caso importa
+// `./trocaRpc` de novo (o `vi.resetModules` abaixo e de proposito: mocks
+// limpos por caso), e a PRIMEIRA importacao paga a transformacao a frio do
+// grafo inteiro (supabase, stores, tipos) — medido em ~2,9 s na maquina de
+// dev, mais que isso no CI carregado. As seguintes saem do cache (~150 ms).
+// Pagar esse custo aqui, fora do relogio de qualquer caso, e o que sobra.
+beforeAll(async () => {
+  await import('./trocaRpc')
+})
 
 beforeEach(() => {
   chamadas = []
