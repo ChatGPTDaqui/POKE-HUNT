@@ -82,7 +82,7 @@ describe('placar do duelo (PH-549)', () => {
     expect(el).not.toBeNull()
     expect(el.textContent).toContain('Lance')
     expect(el.textContent).toContain('Gyarados')
-    expect(el.querySelector('img[src="assets/treinadores/lance.png"]')).not.toBeNull()
+    expect(el.querySelector('img[src="assets/treinadores/rosto/lance.png"]')).not.toBeNull()
     expect(screen.getByLabelText('6 de 6 de pé')).toBeTruthy()
   })
 
