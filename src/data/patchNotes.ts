@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-550 (rostos e mais retratos) e PH-551 (extras do placar). Fica de fora
+  // o MMR/divisao do rival, que nao entrou (RLS de pvp_rank so do dono).
+  {
+    version: '7.58',
+    date: '2026-09-15',
+    title: 'Fotos de perfil: rostos nítidos e 26 personagens a mais',
+    highlights: [
+      'A foto de perfil agora mostra o ROSTO do treinador, legível mesmo pequeno no ranking e no chat. E a galeria cresceu: Misty, Brock, Jessie, James, recrutas da Equipe Rocket, Archer, Ariana, Prof. Carvalho, Leaf, Ethan, Lyra, Silver, May, Dawn, Serena, N, Cynthia, Sabrina, Erika, Koga, Bruno, Lorelei, Whitney, Morty e Clair — 36 no total.',
+      'Placar do duelo: cada treinador mostra quantos POKEs do outro lado já derrubou (KO), o golpe escolhido aparece na cor do tipo, quem abre o round leva a marca 1º e o lado que está agindo fica destacado.',
+    ],
+  },
   // PH-548 (foto), PH-549 (placar), PH-546 (Lance) e PH-513 (Mercado) — as
   // quatro mudam o que o jogador ve ou sofre. Ficam de fora: PH-547/408
   // (timeouts de teste), PH-519 (lockfile), PH-505/506 (docs e decisao),
