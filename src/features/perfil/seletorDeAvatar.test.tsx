@@ -61,7 +61,7 @@ describe('seletor de foto de perfil (PH-548)', () => {
     // Tres componentes, dois ids distintos, UMA consulta.
     await vi.waitFor(() => expect(rpc.avataresDe).toHaveBeenCalledTimes(1))
     expect(rpc.avataresDe.mock.calls[0][0].sort()).toEqual(['u-a', 'u-b'])
-    await vi.waitFor(() => expect(container.querySelectorAll('img[src="assets/treinadores/blue.png"]').length).toBe(2))
+    await vi.waitFor(() => expect(container.querySelectorAll('img[src="assets/treinadores/rosto/blue.png"]').length).toBe(2))
     // Sem foto: icone generico, e NAO um novo pedido.
     expect(container.querySelectorAll('img').length).toBe(2)
     expect(rpc.avataresDe).toHaveBeenCalledTimes(1)
