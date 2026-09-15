@@ -12,6 +12,21 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-548 (foto), PH-549 (placar), PH-546 (Lance) e PH-513 (Mercado) — as
+  // quatro mudam o que o jogador ve ou sofre. Ficam de fora: PH-547/408
+  // (timeouts de teste), PH-519 (lockfile), PH-505/506 (docs e decisao),
+  // PH-461/467 (protecao de branch e template de PR) — nada disso chega a tela.
+  {
+    version: '7.57',
+    date: '2026-09-15',
+    title: 'Foto de perfil e placar do duelo',
+    highlights: [
+      'Escolha sua foto de perfil no Perfil do Treinador: os retratos de Red, Blue, Giovanni, Lance, Agatha, Blaine, Steven Stone, Wallace, Maxie e Ash. A foto aparece onde seu nome aparece — ranking, mercado, amigos, chat, correio e convites de PvP. Os treinadores bot já vêm com o retrato deles.',
+      'Todo duelo (PvP, Campeão Lance e covis de lendário) ganhou um placar no alto da tela: foto e nome dos dois treinadores, o POKE em campo de cada lado com a face que muda conforme HP e status, barra de HP, nível, as bolas do time (quem já caiu) e o golpe escolhido no round.',
+      'Campeão Lance: quando seu POKE caía, aparecia "Você foi derrotado" e a caçada encerrava com o resto do time vivo. Agora o próximo do time entra, até um dos lados ficar sem POKE.',
+      'Mercado: item comprado por uma ordem que casou enquanto você caçava não some mais no salvamento seguinte.',
+    ],
+  },
   {
     version: '7.56',
     date: '2026-09-14',
