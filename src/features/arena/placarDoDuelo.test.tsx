@@ -99,3 +99,41 @@ describe('placar do duelo (PH-549)', () => {
     expect(placar()).toBeNull()
   })
 })
+
+// PH-551: KOs, quem age primeiro e a vez — tudo derivado do que o motor ja tem.
+describe('placar do duelo — KOs e ordem do round (PH-551)', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+    useAvatarStore.getState().reiniciar()
+    useArenaStore.setState({ veredito: null, nomeDoRival: 'Rival', rivalId: null, aoSair: null })
+  })
+  afterEach(() => {
+    cleanup()
+    useWorldStore.getState().resetWorld()
+  })
+
+  it('KO de cada lado = bolas caidas do outro; o 1º e quem abre a ordem do round', () => {
+    const world = criarMundoArena({
+      semente: 1,
+      meuTime: [poke('m1', 'pikachu'), poke('m2', 'eevee')],
+      rivalTime: [poke('r1', 'gengar'), poke('r2', 'snorlax'), poke('r3', 'lapras')],
+      nomeDoRival: 'Rival',
+    })
+    // Dois do rival ja cairam; um meu tambem.
+    world.arena!.rivalTime[0].hp = 0
+    world.arena!.rivalTime[1].hp = 0
+    world.arena!.meuTime[1].hp = 0
+    const inimigo = world.enemies[0]
+    world.rodadaDeDuelo = { numero: 3, ordem: [inimigo.id, world.player!.id], indice: 1, espera: 0, golpes: {} }
+    useWorldStore.getState().setWorld(world)
+    render(<PlacarDoDuelo />)
+    expect(screen.getByLabelText('2 KO')).toBeTruthy()
+    expect(screen.getByLabelText('1 KO')).toBeTruthy()
+    // O rival abriu o round; a vez (indice 1) e minha.
+    const lados = screen.getByTestId('placar-do-duelo').querySelectorAll('[data-na-vez]')
+    expect(lados.length).toBe(1)
+    expect(lados[0].textContent).toContain('Pikachu')
+    const marca = screen.getByTitle('Age primeiro neste round')
+    expect(marca.closest('[data-na-vez], .flex.min-w-0.flex-1.items-center')!.textContent).toContain('Gengar')
+  })
+})
