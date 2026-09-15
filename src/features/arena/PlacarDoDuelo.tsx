@@ -31,6 +31,8 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useAuthStore } from '@/stores/authStore'
 import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { cn } from '@/lib/utils'
+import { colorForType } from '@/data/typeColors'
+import type { Ability } from '@/data/abilities'
 import { useArenaStore } from './arena'
 
 const NOME_DO_LANCE = 'Lance'
@@ -42,7 +44,12 @@ interface LadoDoPlacar {
   face: ReturnType<typeof escolherFace>
   /** Bolas do time: `true` = ainda de pe. `[]` quando nao ha time (selvagem). */
   bolas: boolean[]
-  golpe: string | null
+  golpe: Ability | null
+  /** PH-551: POKEs do outro lado que este lado derrubou. */
+  kos: number
+  /** PH-551: este lado age primeiro no round / esta na vez agora. */
+  primeiro: boolean
+  naVez: boolean
 }
 
 /** O inimigo "em campo" do duelo: o vivo; se so ha corpos (Lance), o ultimo caido. */
@@ -73,6 +80,8 @@ export function PlacarDoDuelo() {
   const enemies = useWorldStore((s) => s.enemies)
   const arena = useWorldStore((s) => s.arena)
   const golpes = useWorldStore((s) => s.rodadaDeDuelo?.golpes ?? null)
+  const ordem = useWorldStore((s) => s.rodadaDeDuelo?.ordem ?? null)
+  const indiceDaVez = useWorldStore((s) => s.rodadaDeDuelo?.indice ?? null)
   const team = useGameStateStore((s) => s.team)
   const meuNome = useGameStateStore((s) => s.trainer.name)
   const meuId = useAuthStore((s) => s.user?.id ?? null)
@@ -85,13 +94,23 @@ export function PlacarDoDuelo() {
 
   if (!emDuelo || !player) return null
 
+  // NA ARENA, O HP DO POKE EM CAMPO VEM DA ENTIDADE, nao do array do time. O
+  // worldStore e immer: o motor muta `player.poke.hp` pelo caminho da entidade e
+  // a copia em `arena.meuTime[i]` fica com o valor de antes (mesmo objeto de
+  // origem, dois caminhos no draft). O motor nao depende disso (so olha o time
+  // A PARTIR do proximo indice), o placar sim — sem isto o KO nunca contava.
   const meuTime = arena ? arena.meuTime : team
+  const bolasDoTime = (time: PokeInstance[], indice: number, emCampo: PokeInstance | null) =>
+    time.map((p, i) => (i === indice && emCampo ? emCampo.hp > 0 : i < indice ? false : p.hp > 0))
   const eu: LadoDoPlacar = {
     treinador: { nome: meuNome, userId: meuId },
     poke: meuPoke,
     face: minhaFace,
-    bolas: meuTime.map((p) => p.hp > 0),
-    golpe: golpes?.[player.id]?.name ?? null,
+    bolas: arena ? bolasDoTime(arena.meuTime, arena.indiceMeu, meuPoke) : meuTime.map((p) => p.hp > 0),
+    golpe: golpes?.[player.id] ?? null,
+    kos: 0,
+    primeiro: ordem?.[0] === player.id,
+    naVez: ordem != null && indiceDaVez != null && ordem[indiceDaVez] === player.id,
   }
 
   const estadoDoInimigo = faceDoInimigo(inimigo)
@@ -99,7 +118,7 @@ export function PlacarDoDuelo() {
   let bolasRival: boolean[] = []
   if (arena) {
     treinadorRival = { nome: nomeDoRival, userId: rivalId }
-    bolasRival = arena.rivalTime.map((p) => p.hp > 0)
+    bolasRival = bolasDoTime(arena.rivalTime, arena.indiceRival, inimigo?.poke ?? null)
   } else if (mapId === LANCE_MAP_ID && sequencia) {
     treinadorRival = { nome: NOME_DO_LANCE, avatar: 'lance' }
     // Os ja derrotados sao os indices antes do atual; o atual cai quando morre.
@@ -111,8 +130,14 @@ export function PlacarDoDuelo() {
     poke: inimigo?.poke ?? null,
     face: estadoDoInimigo ? escolherFace(estadoDoInimigo) : 'normal',
     bolas: bolasRival,
-    golpe: inimigo ? golpes?.[inimigo.id]?.name ?? null : null,
+    golpe: inimigo ? golpes?.[inimigo.id] ?? null : null,
+    kos: 0,
+    primeiro: inimigo != null && ordem?.[0] === inimigo.id,
+    naVez: inimigo != null && ordem != null && indiceDaVez != null && ordem[indiceDaVez] === inimigo.id,
   }
+  // KOs: o que eu derrubei do outro lado sao as bolas caidas dele, e vice-versa.
+  eu.kos = rival.bolas.filter((viva) => !viva).length
+  rival.kos = eu.bolas.filter((viva) => !viva).length
 
   return (
     <div
@@ -135,11 +160,23 @@ function Lado({ lado, espelhado }: { lado: LadoDoPlacar; espelhado: boolean }) {
   const hpPct = poke && poke.stats.hp > 0 ? Math.max(0, Math.min(100, (poke.hp / poke.stats.hp) * 100)) : 0
   const hpBaixo = hpPct < 30
   return (
-    <div className={cn('flex min-w-0 flex-1 items-center gap-[.4em]', espelhado && 'flex-row-reverse text-right')}>
+    <div
+      data-na-vez={lado.naVez || undefined}
+      className={cn(
+        'flex min-w-0 flex-1 items-center gap-[.4em] rounded-[.5em] px-[.2em] transition-colors',
+        espelhado && 'flex-row-reverse text-right',
+        lado.naVez && 'bg-n800/70',
+      )}
+    >
       {treinador ? (
         <div className={cn('flex min-w-0 shrink-0 items-center gap-[.3em]', espelhado && 'flex-row-reverse')}>
           <AvatarDoTreinador userId={treinador.userId ?? null} avatar={treinador.avatar} tamanho={2.2} nome={treinador.nome} />
-          <span className="max-w-[6em] truncate text-[.78em] font-semibold leading-none">{treinador.nome}</span>
+          <span className="flex min-w-0 flex-col gap-[.15em]">
+            <span className="max-w-[6em] truncate text-[.78em] font-semibold leading-none">{treinador.nome}</span>
+            {lado.bolas.length > 0 && (
+              <span className="text-[.6em] leading-none text-n400" aria-label={`${lado.kos} KO`}>KO {lado.kos}</span>
+            )}
+          </span>
         </div>
       ) : (
         <span className="shrink-0 text-[.7em] text-n500">Selvagem</span>
@@ -168,7 +205,14 @@ function Lado({ lado, espelhado }: { lado: LadoDoPlacar; espelhado: boolean }) {
                   ))}
                 </span>
               )}
-              {lado.golpe && <span className="truncate">{lado.golpe}</span>}
+              {lado.golpe && (
+                <span className="truncate font-medium" style={{ color: colorForType(lado.golpe.type) }}>
+                  {lado.golpe.name}
+                </span>
+              )}
+              {lado.primeiro && (
+                <span className="shrink-0 rounded-full bg-n700 px-[.4em] text-[.9em] text-n200" title="Age primeiro neste round">1º</span>
+              )}
             </div>
           </div>
         </div>
