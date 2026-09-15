@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { Clock, Sword } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import { Carregando, ComingSoon, GameButton, GameInput, SectionLabel, SegmentedTabs } from '@/components/game/controls'
@@ -99,10 +100,14 @@ export function PvpMenu() {
           </div>
         ) : pvp.sessao.estado === 'convidada' ? (
           <div className="flex flex-col gap-[.45em]">
-            <span className="text-[.9em]">
-              {souConvidado
-                ? <><strong>{nickDoOutro}</strong> te chamou para um duelo.</>
-                : <>Convite enviado para <strong>{nickDoOutro}</strong>.</>}
+            <span className="flex items-center gap-[.4em] text-[.9em]">
+              {/* PH-548: a foto de quem esta do outro lado do convite. */}
+              <AvatarDoTreinador userId={pvp.outroId} tamanho={1.8} />
+              <span>
+                {souConvidado
+                  ? <><strong>{nickDoOutro}</strong> te chamou para um duelo.</>
+                  : <>Convite enviado para <strong>{nickDoOutro}</strong>.</>}
+              </span>
             </span>
             <span className="flex items-center gap-[.25em] text-[.78em] text-n500">
               <Clock /> aguardando aceite

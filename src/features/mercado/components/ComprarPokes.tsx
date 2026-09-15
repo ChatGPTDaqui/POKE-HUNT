@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { useQuery } from '@tanstack/react-query'
 import { BookmarkSimple, ChatCircleDots, Coin, Diamond, Gavel } from '@phosphor-icons/react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
@@ -372,6 +373,8 @@ export function ComprarPokes() {
                     "Conversar" que o servidor recusa com "Voce nao pode mandar
                     mensagem pra si mesmo" — erro depois do clique, para uma
                     situação que dava pra não oferecer. */}
+                {/* PH-548: a foto do vendedor ao lado do nome, em linha. */}
+                <AvatarDoTreinador userId={a.seller_id} tamanho={1.4} className="mr-[.25em] align-middle" />
                 {a.seller_id === meuId ? (
                   <span className="text-n400">{a.vendedor} (você)</span>
                 ) : (

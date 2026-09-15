@@ -9,7 +9,7 @@
 // recurso futuro (mesma decisao ja tomada em Tasks/Social/Mercado).
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { User, Coins, Diamond, Trophy, Sword, Clock, BookOpen, Sparkle, TShirt, Star, SignOut } from '@phosphor-icons/react'
+import { Coins, Diamond, Trophy, Sword, Clock, BookOpen, Sparkle, TShirt, Star, SignOut } from '@phosphor-icons/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -23,6 +23,9 @@ import { carregarCapturasRecentes } from '@/data/remote/mochilaRemota'
 import { Painel } from '@/components/game/Painel'
 import { Carregando, GameButton, GameCard, Meter, SectionLabel, SegmentedTabs } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
+import { useAvatarStore } from '@/stores/avatarStore'
+import { SeletorDeAvatar } from './SeletorDeAvatar'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
 const CAPTURAS_NO_LOG = 12
@@ -50,6 +53,10 @@ export function PerfilTreinador() {
   const signOut = useAuthStore((s) => s.signOut)
   const askConfirm = useConfirmDialogStore((s) => s.confirm)
   const [aba, setAba] = useState<Aba>('resumo')
+  // PH-548: a foto e social (vem de treinadores_publico), nao do GameState.
+  const meuId = useAuthStore((s) => s.user?.id ?? null)
+  const meuAvatar = useAvatarStore((s) => (meuId ? s.porUsuario[meuId] ?? null : null))
+  const [escolhendoFoto, setEscolhendoFoto] = useState(false)
 
   const trainer = useGameStateStore((s) => s.trainer)
   const wallet = useGameStateStore((s) => s.wallet)
@@ -103,9 +110,16 @@ export function PerfilTreinador() {
       title="Perfil do Treinador"
       header={
         <div className="flex items-center gap-[.6em] border-b border-n800 px-[.65em] pb-[.6em]">
-          <div className="flex h-[4.6em] w-[4.6em] shrink-0 items-center justify-center rounded-[.7em] border border-n700 bg-n900">
-            <User className="text-[2.2em] text-n300" />
-          </div>
+          {/* PH-548: o retrato abre o seletor de foto. */}
+          <button
+            type="button"
+            aria-label="Trocar foto de perfil"
+            aria-expanded={escolhendoFoto}
+            onClick={() => setEscolhendoFoto((v) => !v)}
+            className="flex h-[4.6em] w-[4.6em] shrink-0 items-center justify-center rounded-[.7em] border border-n700 bg-n900 hover:border-n500"
+          >
+            <AvatarDoTreinador userId={meuId} tamanho={4.2} />
+          </button>
           <div className="flex min-w-0 flex-1 flex-col gap-[.25em]">
             <div className="truncate text-[1.15em] font-semibold">{trainer.name}</div>
             <div className="flex items-center gap-[.5em] text-[.8em] text-n300">
@@ -124,7 +138,14 @@ export function PerfilTreinador() {
           </div>
         </div>
       }
-      subheader={<div className="px-[.65em] py-[.5em]"><SegmentedTabs value={aba} onChange={setAba} options={ABAS} /></div>}
+      subheader={(
+        <div className="flex flex-col gap-[.5em] px-[.65em] py-[.5em]">
+          {escolhendoFoto && meuId && (
+            <SeletorDeAvatar userId={meuId} atual={meuAvatar} aoFechar={() => setEscolhendoFoto(false)} />
+          )}
+          <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
+        </div>
+      )}
     >
       {aba === 'resumo' && (
         <div className="flex flex-col gap-[.5em]">

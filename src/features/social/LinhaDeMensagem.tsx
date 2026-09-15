@@ -10,6 +10,7 @@
 // definido no corpo de outro e recriado a cada render, o que remonta a subarvore
 // inteira e joga fora foco e estado interno. Mesmo motivo de PH-31.
 import { Check, Gift, Trash, X } from '@phosphor-icons/react'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { GameButton, GameCard } from '@/components/game/controls'
 import { getItem } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
@@ -102,6 +103,7 @@ export function LinhaDeMensagem({
         )}
 
         <div className="text-[.75em] text-n500">
+          {m.de_id && <AvatarDoTreinador userId={m.de_id} tamanho={1.2} className="mr-[.25em] align-[-.25em]" />}
           {`de ${m.de_nome}`}
           {' · '}
           {new Date(m.created_at).toLocaleString('pt-BR')}
