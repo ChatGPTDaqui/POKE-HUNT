@@ -12,6 +12,7 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
 import type { PokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld, type ProgressoDaSessao } from './simulation'
+import { simulateWorldSeconds } from './systems/offlineSimSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 
@@ -196,5 +197,78 @@ describe('Campeao Lance — sequencia', () => {
     expect(idsVistos).toEqual(['r1', 'r2', 'r3'])
     expect(world.player!.fainted).toBe(true)
     expect(gameState.team.every((p) => p.hp <= 0)).toBe(true)
+  })
+})
+
+// PH-546: o caminho do SERVIDOR e `simulateWorldSeconds`, nao `stepWorld` a
+// seco — e era la que a troca por desmaio nunca acontecia. O laco parava com
+// `stoppedEarly` no primeiro tick com o POKE no chao (hunt BOSS = "sem jeito de
+// reanimar"), antes dos `ESPERA_DE_TROCA_SEGUNDOS` que a troca precisa; a
+// sessao era encerrada por "desmaio" com o resto do time vivo, e o jogador via
+// "Voce foi derrotado" seguido da cura do Hospital — o "revive" que nao existe.
+describe('Campeao Lance — troca por desmaio no caminho do servidor (PH-546)', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  function simular(seconds: number) {
+    const gameState = useGameStateStore.getState()
+    const world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], { seed: 0,
+      rng: createRng(1),
+      counters: { entity: 1, effect: 1, pendingHit: 1 },
+    })
+    const resumo = simulateWorldSeconds({
+      world, gameState, seconds, stepSeconds: 0.1,
+      stepFn: (w, dt, opts) => stepWorld(w, dt, gameState, opts),
+    })
+    return { world, gameState, resumo }
+  }
+
+  it('nao encerra por desmaio enquanto houver substituto no time', () => {
+    const gs = useGameStateStore.getState()
+    gs.addPokeToTeam(pokeFragil('r1'))
+    gs.addPokeToTeam(pokeFragil('r2'))
+    gs.setActiveIndex(0)
+
+    // Janela curta: r1 cai dentro dela, r2 ainda nao. O que importa e o laco
+    // NAO parar no primeiro desmaio e r2 estar em campo no fim.
+    const { world, resumo } = simular(12)
+
+    expect(resumo.mortesDoJogador).toBeGreaterThanOrEqual(1)
+    expect(resumo.stoppedEarly).toBe(false)
+    expect(resumo.simulatedSeconds).toBeCloseTo(12, 5)
+    expect(world.player!.poke.uid).toBe('r2')
+    expect(world.player!.fainted).toBe(false)
+    // Le a store de novo: `gameState` e o snapshot de antes da rotacao.
+    expect(useGameStateStore.getState().team.map((p) => p.uid)).toEqual(['r2', 'r1'])
+  })
+
+  it('encerra por desmaio so quando o time INTEIRO caiu', () => {
+    const gs = useGameStateStore.getState()
+    gs.addPokeToTeam(pokeFragil('r1'))
+    gs.addPokeToTeam(pokeFragil('r2'))
+    gs.addPokeToTeam(pokeFragil('r3'))
+    gs.setActiveIndex(0)
+
+    const { world, gameState, resumo } = simular(300)
+
+    expect(resumo.stoppedEarly).toBe(true)
+    expect(resumo.mortesDoJogador).toBe(3)
+    expect(resumo.simulatedSeconds).toBeLessThan(300)
+    expect(world.player!.fainted).toBe(true)
+    expect(gameState.team.every((p) => p.hp <= 0)).toBe(true)
+  })
+
+  it('a luta fecha pelo lado do Lance quando o substituto e forte', () => {
+    const gs = useGameStateStore.getState()
+    gs.addPokeToTeam(pokeFragil('abre-sessao'))
+    gs.addPokeToTeam({ ...pokeAbsurdo(), uid: 'assume-depois' })
+    gs.setActiveIndex(0)
+
+    const { world, resumo } = simular(600)
+
+    expect(resumo.stoppedEarly).toBe(false)
+    expect(world.player!.poke.uid).toBe('assume-depois')
+    expect(world.sequenceCleared).toBe(true)
   })
 })

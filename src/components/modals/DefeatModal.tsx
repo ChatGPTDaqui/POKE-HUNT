@@ -10,6 +10,7 @@
 // mapa que nao credita nada, sem nenhuma indicacao de que precisava curar — foi
 // a versao "com o jogo aberto" do mesmo bug que matava o farm offline.
 import { controller } from '@/engine/controller'
+import { podeLevantarDoDesmaio } from '@/engine/systems/autoSystem'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { GameButton } from '@/components/game/controls'
@@ -19,13 +20,16 @@ export function DefeatModal() {
   // Na arena (PH-540) quem cai e trocado pelo proximo do time; o fim e o
   // ArenaOverlay que anuncia.
   const caido = useWorldStore((s) => Boolean(s.mapDef && !s.arena && s.player?.fainted))
-  const huntBoss = useWorldStore((s) => Boolean(s.mapDef?.noRespawn))
-  // Mesma condicao que o motor usa pra parar a simulacao (offlineSimSystem) e
-  // que o autoSystem usa pra reanimar. Duplicar o criterio a mao seria a forma
-  // classica de o aviso aparecer na hora errada.
-  const podeLevantar = useGameStateStore(
-    (s) => !huntBoss && s.autoToggles.autoRevive && (s.items.revive ?? 0) >= 1,
-  )
+  const mapDef = useWorldStore((s) => s.mapDef)
+  const huntBoss = Boolean(mapDef?.noRespawn)
+  // O MESMO predicado que o servidor usa pra parar a simulacao
+  // (offlineSimSystem), e nao uma copia a mao — a copia que vivia aqui
+  // (`!huntBoss && autoRevive && items.revive >= 1`) era a forma classica de o
+  // aviso aparecer na hora errada, e apareceu: no Lance ela ignorava o
+  // substituto do time e dizia "Voce foi derrotado" 2 s antes do proximo POKE
+  // entrar (PH-546). Tambem ignorava o Max Revive, como a PH-508 ja tinha
+  // corrigido no motor.
+  const podeLevantar = useGameStateStore((s) => podeLevantarDoDesmaio(s, mapDef))
   if (!caido || podeLevantar) return null
 
   return (

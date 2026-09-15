@@ -48,7 +48,7 @@ import { aplicarStatus, apagarTodosOsEstagios, limparEfeitosAoDesmaiar } from '.
 import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { climaAmbienteDaSala, climaDeAmbiente, tickClimaDeGolpe } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
-import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
+import { updateAutoHeal, maybeAutoCatch, temSubstitutoDeEquipe } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
 import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/farmRates'
@@ -834,15 +834,14 @@ function entradaDoInimigo(mapDef: MapDef, sala: { chave: string } | null): Point
  */
 function trocarPorDesmaio(world: WorldState, gameState: GameStateStore, dt: number, silent: boolean): void {
   const player = world.player
-  if (!world.mapDef?.autoSwitchTeamOnFaint || !player || !isDead(player)) {
+  // Mesmo predicado que o servidor usa pra NAO encerrar a sessao por desmaio
+  // (autoSystem#podeLevantarDoDesmaio, PH-546): se este bloco troca, aquele
+  // espera; se divergirem, o servidor encerra uma luta que o cliente continua.
+  if (!world.mapDef || !player || !isDead(player) || !temSubstitutoDeEquipe(world.mapDef, gameState.team)) {
     world.trocaEmCampo = null
     return
   }
   const proximo = gameState.team.findIndex((p) => p.hp > 0)
-  if (proximo === -1) {
-    world.trocaEmCampo = null
-    return
-  }
 
   world.trocaEmCampo = (world.trocaEmCampo ?? ESPERA_DE_TROCA_SEGUNDOS) - dt
   if (world.trocaEmCampo > 0) return
