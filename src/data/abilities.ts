@@ -64,6 +64,12 @@ export interface Ability {
   statChance?: number
   statTarget?: 'self'
   flinchChance?: number
+  /**
+   * PH-545: faixa de prioridade dos jogos (Quick Attack +1, Protect +4,
+   * Roar -6). Ausente = 0. So o combate duelo le: decide a ordem do round
+   * antes da Velocidade (systems/rodadaDeDuelo.ts).
+   */
+  priority?: number
   critStages?: number
   drainPercent?: number
   healPercent?: number

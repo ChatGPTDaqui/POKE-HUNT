@@ -23,7 +23,16 @@
 // disparar — a pose Hurt de quem levou nunca disputa com a pose de ataque
 // dele mesmo.
 //
-// EMPATE de Velocidade sorteia por `world.rng`, que e a sequencia reconferida
+// PRIORIDADE (PH-545, v2). Como nos jogos, a faixa de prioridade do golpe
+// vem ANTES da Velocidade: Quick Attack (+1) de um Snorlax sai antes do
+// Thunderbolt (0) de um Jolteon. Pra saber a prioridade e preciso saber o
+// golpe, entao cada lado ESCOLHE o golpe na abertura do round (`escolher`,
+// que e o `pickAbility` real) e o executor usa esse golpe na vez, sem
+// escolher de novo — escolher duas vezes avancaria a fila de golpes do
+// jogador (`filaGolpeIndex`) duas vezes por round. Trick Room inverte so a
+// comparacao de Velocidade, nunca a de prioridade (tambem como nos jogos).
+//
+// EMPATE de Velocidade (dentro da mesma prioridade) sorteia por `world.rng`, que e a sequencia reconferida
 // pelo servidor: os dois lados chegam ao mesmo vencedor do empate. Consome um
 // sorteio so no empate, e so no duelo — o combate livre nao passa por aqui.
 //
@@ -36,7 +45,7 @@
 // so faz o proximo comecar do zero na janela seguinte, com a ordem recalculada
 // — que e o que um round novo faria de qualquer jeito.
 import { nextFloat } from '@/core/rng'
-import { TURNO_SEGUNDOS } from '@/data/abilities'
+import { TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
 import { isDead } from '../entity'
 import type { EnemyEntity, PlayerEntity, RodadaDeDuelo, WorldEntity, WorldState } from '../types'
 
@@ -44,8 +53,15 @@ import type { EnemyEntity, PlayerEntity, RodadaDeDuelo, WorldEntity, WorldState 
 export const INTERVALO_DO_TURNO = TURNO_SEGUNDOS
 
 export interface ExecutoresDeAcao {
-  jogador: () => void
-  inimigo: (enemy: EnemyEntity) => void
+  /** Age com o golpe escolhido na abertura (`null` = escolhe na hora). */
+  jogador: (golpe: Ability | null) => void
+  inimigo: (enemy: EnemyEntity, golpe: Ability | null) => void
+}
+
+export interface RegrasDoRound {
+  velocidade: (entity: WorldEntity) => number
+  /** O `pickAbility` real: golpe que a entidade usaria agora, ou `null`. */
+  escolher: (entity: WorldEntity) => Ability | null
 }
 
 /**
@@ -73,7 +89,7 @@ export function executarRodadaDeDuelo(
   world: WorldState,
   player: PlayerEntity,
   engajados: EnemyEntity[],
-  velocidade: (entity: WorldEntity) => number,
+  regras: RegrasDoRound,
   executores: ExecutoresDeAcao,
 ): void {
   const rival = engajados[0]
@@ -90,7 +106,7 @@ export function executarRodadaDeDuelo(
     && rodada.ordem.includes(player.id)
     && rodada.ordem.includes(rival.id)
   if (!rodadaValida) {
-    rodada = abrirRound(world, player, rival, velocidade, (rodada?.numero ?? 0) + 1, rodada?.espera ?? 0)
+    rodada = abrirRound(world, player, rival, regras, (rodada?.numero ?? 0) + 1, rodada?.espera ?? 0)
     world.rodadaDeDuelo = rodada
   }
   if (!rodada || rodada.espera > 0) return
@@ -100,15 +116,16 @@ export function executarRodadaDeDuelo(
     // a agir ja passou (chegamos aqui com `espera` zerada), entao o primeiro
     // do round novo age neste mesmo tick — o intervalo entre rounds e o
     // mesmo intervalo entre turnos, nao um a mais.
-    rodada = abrirRound(world, player, rival, velocidade, rodada.numero + 1, 0)
+    rodada = abrirRound(world, player, rival, regras, rodada.numero + 1, 0)
     world.rodadaDeDuelo = rodada
   }
 
   const vezDe = rodada.ordem[rodada.indice]
   const quem: WorldEntity = vezDe === player.id ? player : rival
   const cooldownAntes = quem.globalCooldown
-  if (quem === player) executores.jogador()
-  else executores.inimigo(rival)
+  const golpe = rodada.golpes[quem.id] ?? null
+  if (quem === player) executores.jogador(golpe)
+  else executores.inimigo(rival, golpe)
 
   // Agiu (ou perdeu a vez): o executor armou o cooldown global. Passa a vez
   // e arma o relogio. Se nao agiu (cooldown ainda contando de antes, ou sem
@@ -123,17 +140,28 @@ function abrirRound(
   world: WorldState,
   player: PlayerEntity,
   rival: EnemyEntity,
-  velocidade: (entity: WorldEntity) => number,
+  regras: RegrasDoRound,
   numero: number,
   espera: number,
 ): RodadaDeDuelo {
-  const vJogador = velocidade(player)
-  const vRival = velocidade(rival)
+  // Golpes escolhidos AGORA, nesta ordem fixa (jogador, rival) pra o consumo
+  // de RNG de `pickAbility` ser o mesmo nos dois lados do contrato.
+  const golpeDoJogador = regras.escolher(player)
+  const golpeDoRival = regras.escolher(rival)
+  const pJogador = golpeDoJogador?.priority ?? 0
+  const pRival = golpeDoRival?.priority ?? 0
   let jogadorPrimeiro: boolean
-  if (vJogador === vRival) jogadorPrimeiro = nextFloat(world.rng) < 0.5
-  else jogadorPrimeiro = vJogador > vRival
-  // Trick Room: o mais lento vai primeiro, como nos jogos.
-  if ((world.trickRoomRestante ?? 0) > 0) jogadorPrimeiro = !jogadorPrimeiro
+  if (pJogador !== pRival) {
+    jogadorPrimeiro = pJogador > pRival
+  } else {
+    const vJogador = regras.velocidade(player)
+    const vRival = regras.velocidade(rival)
+    if (vJogador === vRival) jogadorPrimeiro = nextFloat(world.rng) < 0.5
+    else jogadorPrimeiro = vJogador > vRival
+    // Trick Room: o mais lento vai primeiro — so dentro da mesma faixa de
+    // prioridade, como nos jogos.
+    if ((world.trickRoomRestante ?? 0) > 0) jogadorPrimeiro = !jogadorPrimeiro
+  }
   const ordem = jogadorPrimeiro ? [player.id, rival.id] : [rival.id, player.id]
-  return { numero, ordem, indice: 0, espera }
+  return { numero, ordem, indice: 0, espera, golpes: { [player.id]: golpeDoJogador, [rival.id]: golpeDoRival } }
 }

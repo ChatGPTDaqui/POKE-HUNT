@@ -469,6 +469,14 @@ export interface RodadaDeDuelo {
   indice: number
   /** Segundos ate o proximo poder agir. */
   espera: number
+  /**
+   * PH-545: golpe escolhido por cada lado NA ABERTURA do round (id da
+   * entidade -> golpe). A prioridade dele decidiu a ordem, e e ele que o
+   * executor usa na vez — escolher de novo avancaria `filaGolpeIndex` duas
+   * vezes. `null` = nao tinha golpe na abertura (dormindo sem Sleep Talk);
+   * o executor escolhe na hora, como no combate livre.
+   */
+  golpes: Record<string, Ability | null>
 }
 
 /**

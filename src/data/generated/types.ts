@@ -182,6 +182,8 @@ export interface AbilityDataEntry {
   // 'self' = vai em quem usou (Swords Dance sobe o proprio Ataque).
   statTarget?: 'self'
   flinchChance?: number
+  // PH-545: faixa de prioridade (Quick Attack 1, Protect 4, Roar -6). Ausente = 0.
+  priority?: number
   // Estagios de critico ACIMA do normal, nao porcentagem (Slash tem 1).
   critStages?: number
   // % do dano causado que volta como cura (positivo) ou recuo (negativo).

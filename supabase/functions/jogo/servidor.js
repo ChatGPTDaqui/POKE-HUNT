@@ -33611,6 +33611,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 10,
 		"target": "single",
+		"priority": 4,
 		"accuracy": 100
 	},
 	"water_pulse": {
@@ -33858,6 +33859,7 @@ var ABILITIES_DATA = {
 		"power": 40,
 		"pp": 30,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"mind_reader": {
@@ -34060,6 +34062,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 5,
 		"target": "single",
+		"priority": 4,
 		"accuracy": 100
 	},
 	"pluck": {
@@ -34181,6 +34184,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 10,
 		"target": "single",
+		"priority": 4,
 		"accuracy": 100
 	},
 	"safeguard": {
@@ -34281,6 +34285,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 20,
 		"target": "single",
+		"priority": -6,
 		"accuracy": 100
 	},
 	"quick_attack": {
@@ -34291,6 +34296,7 @@ var ABILITIES_DATA = {
 		"power": 40,
 		"pp": 30,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"spark": {
@@ -34475,6 +34481,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 20,
 		"target": "single",
+		"priority": -5,
 		"accuracy": 100
 	},
 	"ice_fang": {
@@ -34508,6 +34515,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 20,
 		"target": "single",
+		"priority": -6,
 		"accuracy": 100
 	},
 	"dragon_rush": {
@@ -35093,6 +35101,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 20,
 		"target": "single",
+		"priority": 5,
 		"accuracy": 100
 	},
 	"wish": {
@@ -35461,6 +35470,7 @@ var ABILITIES_DATA = {
 		"power": 80,
 		"pp": 5,
 		"target": "single",
+		"priority": 2,
 		"accuracy": 100
 	},
 	"fly": {
@@ -35580,6 +35590,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 20,
 		"target": "single",
+		"priority": -6,
 		"accuracy": 100
 	},
 	"knock_off": {
@@ -35610,6 +35621,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 10,
 		"target": "single",
+		"priority": 4,
 		"accuracy": 100
 	},
 	"psycho_boost": {
@@ -35798,6 +35810,7 @@ var ABILITIES_DATA = {
 		"power": 70,
 		"pp": 5,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"super_fang": {
@@ -36271,6 +36284,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 20,
 		"target": "single",
+		"priority": 2,
 		"accuracy": 100
 	},
 	"cotton_spore": {
@@ -36345,6 +36359,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 15,
 		"target": "single",
+		"priority": 3,
 		"accuracy": 100
 	},
 	"screech": {
@@ -36410,6 +36425,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 10,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"harden": {
@@ -36457,6 +36473,7 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"flinchChance": 100,
+		"priority": 3,
 		"accuracy": 100
 	},
 	"razor_wind": {
@@ -36511,6 +36528,7 @@ var ABILITIES_DATA = {
 		"power": 30,
 		"pp": 10,
 		"target": "single",
+		"priority": 2,
 		"accuracy": 100
 	},
 	"counter": {
@@ -36521,6 +36539,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 20,
 		"target": "single",
+		"priority": -5,
 		"accuracy": 100
 	},
 	"mach_punch": {
@@ -36531,6 +36550,7 @@ var ABILITIES_DATA = {
 		"power": 40,
 		"pp": 30,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"force_palm": {
@@ -36668,6 +36688,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 10,
 		"target": "single",
+		"priority": 4,
 		"accuracy": 100
 	},
 	"string_shot": {
@@ -36877,6 +36898,7 @@ var ABILITIES_DATA = {
 		"power": 40,
 		"pp": 30,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"double_team": {
@@ -36954,6 +36976,7 @@ var ABILITIES_DATA = {
 		"power": 60,
 		"pp": 10,
 		"target": "single",
+		"priority": -4,
 		"accuracy": 100
 	},
 	"vital_throw": {
@@ -36964,6 +36987,7 @@ var ABILITIES_DATA = {
 		"power": 70,
 		"pp": 10,
 		"target": "single",
+		"priority": -1,
 		"accuracy": 100
 	},
 	"brick_break": {
@@ -37046,6 +37070,7 @@ var ABILITIES_DATA = {
 		"power": 40,
 		"pp": 30,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"fury_swipes": {
@@ -37292,6 +37317,7 @@ var ABILITIES_DATA = {
 		"power": 40,
 		"pp": 20,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"mud_slap": {
@@ -37547,6 +37573,7 @@ var ABILITIES_DATA = {
 		"power": 60,
 		"pp": 10,
 		"target": "single",
+		"priority": -6,
 		"accuracy": 90
 	},
 	"acid_spray": {
@@ -37807,6 +37834,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 15,
 		"target": "single",
+		"priority": 3,
 		"accuracy": 100
 	},
 	"sing": {
@@ -37834,6 +37862,7 @@ var ABILITIES_DATA = {
 			"estagios": -1
 		}],
 		"statChance": 100,
+		"priority": 1,
 		"accuracy": 100
 	},
 	"acid_armor": {
@@ -37870,6 +37899,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 25,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"trump_card": {
@@ -37900,6 +37930,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 10,
 		"target": "single",
+		"priority": 3,
 		"accuracy": 100
 	},
 	"rock_slide": {
@@ -37973,6 +38004,7 @@ var ABILITIES_DATA = {
 		"power": 60,
 		"pp": 10,
 		"target": "single",
+		"priority": -6,
 		"accuracy": 90
 	},
 	"coil": {
@@ -38247,6 +38279,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 15,
 		"target": "single",
+		"priority": 4,
 		"accuracy": 100
 	},
 	"sleep_talk": {
@@ -38287,6 +38320,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 20,
 		"target": "single",
+		"priority": 2,
 		"accuracy": 100
 	},
 	"echoed_voice": {
@@ -38416,6 +38450,7 @@ var ABILITIES_DATA = {
 		"power": 150,
 		"pp": 20,
 		"target": "single",
+		"priority": -3,
 		"accuracy": 100
 	},
 	"howl": {
@@ -39172,6 +39207,7 @@ var ABILITIES_DATA = {
 		"power": 40,
 		"pp": 30,
 		"target": "single",
+		"priority": 1,
 		"accuracy": 100
 	},
 	"ice_punch": {
@@ -39236,6 +39272,7 @@ var ABILITIES_DATA = {
 		"power": 60,
 		"pp": 10,
 		"target": "single",
+		"priority": -4,
 		"accuracy": 100
 	},
 	"present": {
@@ -39360,6 +39397,7 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 15,
 		"target": "single",
+		"priority": 2,
 		"accuracy": 100
 	},
 	"trick": {
@@ -91628,7 +91666,7 @@ function tickRodadaDeDuelo(world, dt) {
 * quando o relogio zerou. Substitui, no combate duelo, o trecho de
 * `updateCombat` em que jogador e todos os engajados agem no mesmo tick.
 */
-function executarRodadaDeDuelo(world, player, engajados, velocidade, executores) {
+function executarRodadaDeDuelo(world, player, engajados, regras, executores) {
 	const rival = engajados[0];
 	if (!rival || isDead(player) || isDead(rival)) {
 		if (world.rodadaDeDuelo) world.rodadaDeDuelo = null;
@@ -91636,35 +91674,47 @@ function executarRodadaDeDuelo(world, player, engajados, velocidade, executores)
 	}
 	let rodada = world.rodadaDeDuelo;
 	if (!(rodada != null && rodada.ordem.length === 2 && rodada.ordem.includes(player.id) && rodada.ordem.includes(rival.id))) {
-		rodada = abrirRound(world, player, rival, velocidade, (rodada?.numero ?? 0) + 1, rodada?.espera ?? 0);
+		rodada = abrirRound(world, player, rival, regras, (rodada?.numero ?? 0) + 1, rodada?.espera ?? 0);
 		world.rodadaDeDuelo = rodada;
 	}
 	if (!rodada || rodada.espera > 0) return;
 	if (rodada.indice >= rodada.ordem.length) {
-		rodada = abrirRound(world, player, rival, velocidade, rodada.numero + 1, 0);
+		rodada = abrirRound(world, player, rival, regras, rodada.numero + 1, 0);
 		world.rodadaDeDuelo = rodada;
 	}
 	const quem = rodada.ordem[rodada.indice] === player.id ? player : rival;
 	const cooldownAntes = quem.globalCooldown;
-	if (quem === player) executores.jogador();
-	else executores.inimigo(rival);
+	const golpe = rodada.golpes[quem.id] ?? null;
+	if (quem === player) executores.jogador(golpe);
+	else executores.inimigo(rival, golpe);
 	if (quem.globalCooldown > 0 && quem.globalCooldown !== cooldownAntes) {
 		rodada.indice++;
 		rodada.espera = INTERVALO_DO_TURNO;
 	}
 }
-function abrirRound(world, player, rival, velocidade, numero, espera) {
-	const vJogador = velocidade(player);
-	const vRival = velocidade(rival);
+function abrirRound(world, player, rival, regras, numero, espera) {
+	const golpeDoJogador = regras.escolher(player);
+	const golpeDoRival = regras.escolher(rival);
+	const pJogador = golpeDoJogador?.priority ?? 0;
+	const pRival = golpeDoRival?.priority ?? 0;
 	let jogadorPrimeiro;
-	if (vJogador === vRival) jogadorPrimeiro = nextFloat(world.rng) < .5;
-	else jogadorPrimeiro = vJogador > vRival;
-	if ((world.trickRoomRestante ?? 0) > 0) jogadorPrimeiro = !jogadorPrimeiro;
+	if (pJogador !== pRival) jogadorPrimeiro = pJogador > pRival;
+	else {
+		const vJogador = regras.velocidade(player);
+		const vRival = regras.velocidade(rival);
+		if (vJogador === vRival) jogadorPrimeiro = nextFloat(world.rng) < .5;
+		else jogadorPrimeiro = vJogador > vRival;
+		if ((world.trickRoomRestante ?? 0) > 0) jogadorPrimeiro = !jogadorPrimeiro;
+	}
 	return {
 		numero,
 		ordem: jogadorPrimeiro ? [player.id, rival.id] : [rival.id, player.id],
 		indice: 0,
-		espera
+		espera,
+		golpes: {
+			[player.id]: golpeDoJogador,
+			[rival.id]: golpeDoRival
+		}
 	};
 }
 //#endregion
@@ -92898,13 +92948,13 @@ function truantImpedeAcao(world, entity, silent) {
 	}));
 	return true;
 }
-function executePlayerAction(world, player, engagedEnemies, silent) {
+function executePlayerAction(world, player, engagedEnemies, silent, golpeEscolhido = null) {
 	if (!canAct(player)) return;
 	if (statusImpedeAcao(world, player, silent)) return;
 	if (truantImpedeAcao(world, player, silent)) return;
 	const primaryTarget = engagedEnemies[0];
 	const allEnemies = nearbyAliveEnemies(world);
-	const ability = pickAbility(world, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
+	const ability = golpeEscolhido ?? pickAbility(world, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(player, ability);
@@ -92926,12 +92976,12 @@ function executePlayerAction(world, player, engagedEnemies, silent) {
 	for (const target of targets) queueHit(world, player, target, ability);
 	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
 }
-function executeEnemyAction(world, enemy, player, silent) {
+function executeEnemyAction(world, enemy, player, silent, golpeEscolhido = null) {
 	if (world.mapDef?.passiveEnemies) return;
 	if (!canAct(enemy)) return;
 	if (statusImpedeAcao(world, enemy, silent)) return;
 	if (truantImpedeAcao(world, enemy, silent)) return;
-	const ability = pickAbility(world, enemy, player, () => 1);
+	const ability = golpeEscolhido ?? pickAbility(world, enemy, player, () => 1);
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(enemy, ability);
@@ -93908,15 +93958,21 @@ function updateCombat(world, dt, opts = {}) {
 			enemy.entradaProcessada = true;
 			resolveEntryHook(world, enemy, player, silent);
 		}
-		if (world.mapDef?.encarada) executarRodadaDeDuelo(world, player, engagedEnemies, (e) => velocidadeEfetiva(e, world.clima?.tipo ?? null), {
-			jogador: () => {
-				if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent);
-			},
-			inimigo: (enemy) => {
-				if (!isDead(enemy) && !player.fainted) executeEnemyAction(world, enemy, player, silent);
-			}
-		});
-		else {
+		if (world.mapDef?.encarada) {
+			const clima = world.clima?.tipo ?? null;
+			const rival = engagedEnemies[0];
+			executarRodadaDeDuelo(world, player, engagedEnemies, {
+				velocidade: (e) => velocidadeEfetiva(e, clima),
+				escolher: (e) => e.kind === "enemy" ? pickAbility(world, e, player, () => 1) : pickAbility(world, e, rival, (a) => nearbyAliveEnemies(world).filter((x) => Math.hypot(x.x - e.x, x.y - e.y) <= (a.radius ?? 0)).length)
+			}, {
+				jogador: (golpe) => {
+					if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent, golpe);
+				},
+				inimigo: (enemy, golpe) => {
+					if (!isDead(enemy) && !player.fainted) executeEnemyAction(world, enemy, player, silent, golpe);
+				}
+			});
+		} else {
 			if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent);
 			for (const enemy of engagedEnemies) {
 				if (isDead(enemy) || player.fainted) continue;
@@ -94034,6 +94090,7 @@ function criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival }) {
 		trocaRival: null,
 		ticks: 0,
 		encounterId: mapDef.enemyPool[0],
+		meuSpawn,
 		rivalSpawn
 	};
 	const player = createPlayerEntity(world.counters, {
@@ -94124,6 +94181,12 @@ function stepArena(world, dt, opts = {}) {
 				player.entradaProcessada = false;
 				player.state = "idle";
 				player.targetId = null;
+				player.x = arena.meuSpawn.x;
+				player.y = arena.meuSpawn.y;
+				player.pathWaypoints = null;
+				player.pathIndex = 0;
+				player.pathTargetX = null;
+				player.pathTargetY = null;
 				apagarTodosOsEstagios(player);
 			}
 		}

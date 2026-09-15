@@ -108,6 +108,7 @@ function abaGolpes(catalogo) {
     'Mudancas de Stat': g.mudancasDeStat,
     'Chance de Stat': g.chanceDeStat,
     'Chance de Flinch': g.chanceDeFlinch,
+    'Prioridade': g.prioridade || 0,
     'Estagios de Critico': g.estagiosDeCritico,
     'Dreno %': g.drenoPercentual,
     'Cura %': g.curaPercentual,
