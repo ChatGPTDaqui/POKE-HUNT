@@ -8,8 +8,11 @@
 // produziu o bug.
 import { describe, expect, it } from 'vitest'
 
-import { triggerAttackAnim, directionRowFromFacing, desiredAnimName } from './animationSystem'
-import type { EnemyEntity, PlayerEntity } from '../types'
+import {
+  triggerAttackAnim, directionRowFromFacing, desiredAnimName,
+  registrarDanoParaHurt, tickAttackAnimTimers, HURT_ANIM_DURATION,
+} from './animationSystem'
+import type { EnemyEntity, PlayerEntity, WorldState } from '../types'
 
 function atacante(): PlayerEntity {
   return { x: 100, y: 100, facing: { x: 0, y: 1 }, attackAnim: 'Shoot', attackAnimTimer: 0 } as PlayerEntity
@@ -74,5 +77,55 @@ describe('animacao parada durante a pausa do wander', () => {
 
   it('morto sempre Faint, mesmo com wanderTarget setado', () => {
     expect(desiredAnimName(inimigo({ hp: 0, wanderTarget: { x: 1, y: 1 } }))).toBe('Faint')
+  })
+})
+
+// PH-542: flinch de levar dano so no combate DUELO e so em acerto pesado.
+describe('pose Hurt no duelo (PH-542)', () => {
+  function alvo(hp = 100): PlayerEntity {
+    return {
+      state: 'engaged', facing: { x: 1, y: 0 }, attackAnim: null, attackAnimTimer: 0, fainted: false,
+      poke: { hp, stats: { hp: 100 }, status: null },
+    } as unknown as PlayerEntity
+  }
+  const duelo = { mapDef: { encarada: true } } as unknown as WorldState
+  const livre = { mapDef: { encarada: false } } as unknown as WorldState
+
+  it('acerto de 20%+ do HP maximo no duelo arma a pose', () => {
+    const e = alvo()
+    registrarDanoParaHurt(duelo, e, 20)
+    expect(e.hurtAnimTimer).toBe(HURT_ANIM_DURATION)
+    expect(desiredAnimName(e)).toBe('Hurt')
+  })
+
+  it('acerto abaixo de 20% nao arma; combate livre nunca arma', () => {
+    const fraco = alvo()
+    registrarDanoParaHurt(duelo, fraco, 19)
+    expect(fraco.hurtAnimTimer).toBeUndefined()
+    const mundo = alvo()
+    registrarDanoParaHurt(livre, mundo, 100)
+    expect(mundo.hurtAnimTimer).toBeUndefined()
+    expect(desiredAnimName(mundo)).toBe('Idle')
+  })
+
+  it('a pose de ataque propria vence o Hurt, e o timer desce em tickAttackAnimTimers', () => {
+    const e = alvo()
+    registrarDanoParaHurt(duelo, e, 50)
+    triggerAttackAnim(e, false)
+    expect(desiredAnimName(e)).toBe('Shoot')
+    e.attackAnimTimer = 0
+    const world = { player: e, enemies: [] } as unknown as WorldState
+    tickAttackAnimTimers(world, HURT_ANIM_DURATION / 2)
+    expect(desiredAnimName(e)).toBe('Hurt')
+    tickAttackAnimTimers(world, HURT_ANIM_DURATION)
+    expect(e.hurtAnimTimer).toBeUndefined()
+    expect(desiredAnimName(e)).toBe('Idle')
+  })
+
+  it('morto nao flincha: a pose de desmaio vence', () => {
+    const e = alvo(0)
+    registrarDanoParaHurt(duelo, e, 50)
+    expect(e.hurtAnimTimer).toBeUndefined()
+    expect(desiredAnimName(e)).toBe('Faint')
   })
 })

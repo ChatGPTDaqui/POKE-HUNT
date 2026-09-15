@@ -110,6 +110,15 @@ export interface BaseEntity {
   // tocando.
   vfxCuraHp?: number
   vfxCuraStatus?: number
+  /**
+   * PH-542: segundos que faltam pra pose `Hurt` (flinch de levar dano)
+   * terminar. So o COMBATE DUELO (`mapDef.encarada`: Lance, lendarios, arena
+   * PvP) arma isto, e so quando um unico acerto tira 20%+ do HP maximo —
+   * o combate livre nunca mostra a pose. Mesma regra dos timers de cura:
+   * descontado em animationSystem#tickAttackAnimTimers (silent inclusive),
+   * pra servidor e cliente carregarem o mesmo estado. Ausente = nao toca.
+   */
+  hurtAnimTimer?: number
 
   /**
    * PH-397: este POKE esta girando na encarada do duelo NESTE tick.

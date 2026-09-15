@@ -55,7 +55,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange, clamp } from '@/core/random'
-import { ATTACK_ANIM_DURATION, triggerAttackAnim } from './animationSystem'
+import { ATTACK_ANIM_DURATION, registrarDanoParaHurt, triggerAttackAnim } from './animationSystem'
 // Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
 // turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
 // dura 30 abates, entao 5 turnos de clima passavam antes de qualquer coisa
@@ -2861,6 +2861,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
     if (danoDoAcerto > 0) {
       takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke))
+      registrarDanoParaHurt(world, target, danoDoAcerto)
       if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoDoAcerto })
       if (aguentou && !silent) anunciarAguentou(world, target)
     }

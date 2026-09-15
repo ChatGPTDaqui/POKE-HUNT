@@ -81617,10 +81617,12 @@ function limparEfeitosAoDesmaiar(entity) {
 //#endregion
 //#region src/engine/systems/animationSystem.ts
 var ATTACK_ANIM_DURATION = .5;
+var HURT_ANIM_DURATION = .45;
 function desiredAnimName(entity) {
 	if (isDead(entity)) return "Faint";
 	if (entity.poke.status?.tipo === "sleep") return "Sleep";
 	if (entity.attackAnimTimer > 0) return entity.attackAnim;
+	if ((entity.hurtAnimTimer ?? 0) > 0) return "Hurt";
 	if (imobilizadoPorStatus(entity)) return "Idle";
 	if (entity.encarando) return "Walk";
 	if (entity.state === "chase") return "Walk";
@@ -81632,6 +81634,11 @@ function tickAttackAnimTimers(world, dt) {
 	for (const entity of entities) {
 		if (!entity) continue;
 		if (entity.attackAnimTimer > 0) entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt);
+		if (entity.hurtAnimTimer) {
+			const resta = entity.hurtAnimTimer - dt;
+			if (resta > 0) entity.hurtAnimTimer = resta;
+			else delete entity.hurtAnimTimer;
+		}
 		if (entity.vfxCuraHp) {
 			const resta = entity.vfxCuraHp - dt;
 			if (resta > 0) entity.vfxCuraHp = resta;
@@ -81682,6 +81689,18 @@ function triggerAttackAnim(entity, isAoe, target) {
 	entity.attackAnim = isAoe ? "Charge" : "Shoot";
 	entity.attackAnimTimer = ATTACK_ANIM_DURATION;
 	if (target) faceToward(entity, target);
+}
+/**
+* PH-542: arma a pose Hurt em quem levou o acerto — so no combate duelo
+* (`mapDef.encarada`) e so quando UM acerto tira 20%+ do HP maximo. Multi-hit
+* conta por acerto (cada um passa por aqui). Morto nao flincha: a pose de
+* desmaio vence em `desiredAnimName`, e o timer ficaria armado a toa.
+*/
+function registrarDanoParaHurt(world, alvo, dano) {
+	if (!world.mapDef?.encarada) return;
+	if (dano < alvo.poke.stats.hp * .2) return;
+	if (isDead(alvo)) return;
+	alvo.hurtAnimTimer = HURT_ANIM_DURATION;
 }
 //#endregion
 //#region src/data/generated/subBiomas.generated.ts
@@ -86550,6 +86569,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		danoFinal += danoDoAcerto;
 		if (danoDoAcerto > 0) {
 			takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke));
+			registrarDanoParaHurt(world, target, danoDoAcerto);
 			if (!silent) spawnDamageNumber(world, target, {
 				...result,
 				amount: danoDoAcerto

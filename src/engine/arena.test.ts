@@ -114,4 +114,18 @@ describe('arena: palco pintado do Lance (PH-541)', () => {
     }
     expect(maiorSalto).toBeLessThan(15)
   })
+
+  // PH-542: a arena e combate duelo, entao golpes pesados armam a pose Hurt
+  // em quem levou — prova que o gancho de resolveHit dispara na luta real.
+  it('golpe de 20%+ do HP arma a pose Hurt em quem levou', () => {
+    const world = criarMundoArena({ semente: 3, meuTime: time(1, TIME_A), rivalTime: time(2, TIME_B), nomeDoRival: 'Rival' })
+    let flinches = 0
+    while (world.arena!.resultado === 'lutando') {
+      stepArena(world, LIVE_SIM_STEP_SECONDS, { silent: true })
+      for (const e of [world.player!, ...world.enemies]) {
+        if ((e.hurtAnimTimer ?? 0) > 0) { flinches++; e.hurtAnimTimer = undefined }
+      }
+    }
+    expect(flinches).toBeGreaterThan(0)
+  })
 })
