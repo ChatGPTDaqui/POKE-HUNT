@@ -5,11 +5,13 @@
 // game ticks (1 tick = 1/60s, matching our own fixed-step loop).
 // Not every species has every animation — see ANIM_FALLBACKS in battleSprites.js.
 
-// `Hurt` (PH-532): flinch de levar dano, 380/380 especies no acervo (ver
+// `Hurt` (PH-532/PH-542): flinch de levar dano, 380/380 especies (ver
 // docs/arquivo/2026-09-08/docs/18-animacoes-do-pmd-disponiveis.md) — importado
-// por scripts/importar-hurt-anim.mjs, disparado em ONE-SHOT (nunca em loop) no
-// replay do PvP quando um golpe tira >= 30% do HP maximo do defensor.
-export type AnimName = 'Idle' | 'Walk' | 'Shoot' | 'Charge' | 'Sleep' | 'Faint' | 'Hurt'
+// por scripts/importar-anim-pmd.mjs; toca no combate duelo quando um golpe
+// tira >= 20% do HP maximo de quem levou.
+// `Attack` (PH-543): pose de golpe do combate duelo, 380/380 pelo mesmo
+// script; o combate livre segue com Shoot/Charge.
+export type AnimName = 'Idle' | 'Walk' | 'Shoot' | 'Charge' | 'Sleep' | 'Faint' | 'Hurt' | 'Attack'
 
 export interface BattleSpriteAnimMeta {
   frameWidth: number
@@ -81,6 +83,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -167,6 +186,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "bulbasaur": {
@@ -243,6 +278,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -322,6 +374,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        3,
+        3,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2
+      ]
     }
   },
   "spearow": {
@@ -396,6 +468,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -476,6 +568,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -559,6 +667,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -644,6 +772,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        6,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -737,6 +882,30 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
     }
   },
   "zubat": {
@@ -820,6 +989,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        3,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "dunsparce": {
@@ -900,6 +1086,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "caterpie": {
@@ -973,6 +1176,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "weedle": {
@@ -1044,6 +1264,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -1129,6 +1366,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "wartortle": {
@@ -1198,6 +1455,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "ivysaur": {
@@ -1263,6 +1537,21 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -1346,6 +1635,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "fearow": {
@@ -1427,6 +1732,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "raticate": {
@@ -1505,6 +1831,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "pidgeotto": {
@@ -1575,6 +1920,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -1653,6 +2018,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "skiploom": {
@@ -1729,6 +2111,30 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
       ]
     }
   },
@@ -1809,6 +2215,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        3,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "metapod": {
@@ -1888,6 +2311,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "kakuna": {
@@ -1944,6 +2383,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -2026,6 +2485,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "blastoise": {
@@ -2096,6 +2575,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        4
+      ]
     }
   },
   "venusaur": {
@@ -2161,6 +2659,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -2232,6 +2747,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -2312,6 +2847,30 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
       ]
     }
   },
@@ -2397,6 +2956,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "beedrill": {
@@ -2475,6 +3054,30 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     }
   },
   "bellsprout": {
@@ -2544,6 +3147,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "unown": {
@@ -2605,6 +3224,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -2677,6 +3312,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "sandshrew": {
@@ -2740,6 +3394,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -2810,6 +3481,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 128,
+      "frameHeight": 152,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -2885,6 +3573,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        3,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -2969,6 +3676,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        4,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "slowpoke": {
@@ -3040,6 +3764,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -3117,6 +3857,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -3207,6 +3963,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        4,
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "jigglypuff": {
@@ -3291,6 +4064,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "ditto": {
@@ -3343,6 +4135,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -3421,6 +4229,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "nidoran_m": {
@@ -3496,6 +4320,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -3584,6 +4424,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -3679,6 +4536,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "machop": {
@@ -3758,6 +4631,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -3847,6 +4736,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "weezing": {
@@ -3933,6 +4843,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2
+      ]
     }
   },
   "magnemite": {
@@ -4006,6 +4934,31 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "tauros": {
@@ -4063,6 +5016,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        1,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -4135,6 +5106,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        3,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -4209,6 +5201,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        4,
+        6,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "farfetch_d": {
@@ -4262,6 +5270,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -4326,6 +5350,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -4407,6 +5447,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "swinub": {
@@ -4481,6 +5537,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "jynx": {
@@ -4553,6 +5625,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "krabby": {
@@ -4622,6 +5710,28 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        1,
+        2,
+        3,
+        2,
+        1,
+        3,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        1
       ]
     }
   },
@@ -4695,6 +5805,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "tangela": {
@@ -4762,6 +5890,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -4833,6 +5978,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -4909,6 +6070,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -4992,6 +6169,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -5087,6 +6280,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "donphan": {
@@ -5157,6 +6367,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -5238,6 +6464,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "machoke": {
@@ -5291,6 +6536,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        3,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -5381,6 +6646,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "pupitar": {
@@ -5461,6 +6742,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "magmar": {
@@ -5532,6 +6830,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -5606,6 +6920,31 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -5699,6 +7038,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "rapidash": {
@@ -5781,6 +7136,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "doduo": {
@@ -5834,6 +7205,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        1,
+        2,
+        4,
+        3,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -5890,6 +7281,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        1,
+        2,
+        4,
+        3,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -5954,6 +7365,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -6026,6 +7454,30 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        6,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1
+      ]
     }
   },
   "granbull": {
@@ -6095,6 +7547,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -6174,6 +7642,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "nidorina": {
@@ -6246,6 +7730,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -6324,6 +7824,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "magneton": {
@@ -6399,6 +7916,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "xatu": {
@@ -6468,6 +8001,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -6545,6 +8095,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "kingler": {
@@ -6614,6 +8180,28 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        1,
+        2,
+        3,
+        2,
+        1,
+        3,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        1
       ]
     }
   },
@@ -6693,6 +8281,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "tyranitar": {
@@ -6766,6 +8370,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "pichu": {
@@ -6833,6 +8454,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -6905,6 +8542,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "igglybuff": {
@@ -6973,6 +8626,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "togepi": {
@@ -7028,6 +8698,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -7112,6 +8798,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "hoothoot": {
@@ -7182,6 +8884,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -7254,6 +8972,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        2,
+        6,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -7346,6 +9082,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
+      ]
     }
   },
   "pineco": {
@@ -7419,6 +9175,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -7494,6 +9266,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -7573,6 +9366,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "diglett": {
@@ -7639,6 +9449,21 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -7725,6 +9550,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "meowth": {
@@ -7806,6 +9651,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -7894,6 +9755,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        3
+      ]
     }
   },
   "drowzee": {
@@ -7964,6 +9844,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -8042,6 +9940,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -8134,6 +10053,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "horsea": {
@@ -8209,6 +10144,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "tentacool": {
@@ -8278,6 +10229,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -8351,6 +10322,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -8435,6 +10422,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "cyndaquil": {
@@ -8512,6 +10515,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -8595,6 +10614,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -8683,6 +10718,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "mankey": {
@@ -8757,6 +10808,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        4,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -8840,6 +10912,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "chinchou": {
@@ -8921,6 +11009,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "shellder": {
@@ -9000,6 +11105,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "staryu": {
@@ -9068,6 +11189,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -9142,6 +11284,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -9218,6 +11379,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        1,
+        1,
+        2,
+        3,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "psyduck": {
@@ -9287,6 +11468,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -9370,6 +11568,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "slugma": {
@@ -9442,6 +11656,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -9535,6 +11765,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "teddiursa": {
@@ -9606,6 +11852,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -9689,6 +11951,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        3,
+        3,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "remoraid": {
@@ -9768,6 +12049,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "tyrogue": {
@@ -9843,6 +12140,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "elekid": {
@@ -9912,6 +12225,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -9996,6 +12325,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "smoochum": {
@@ -10078,6 +12423,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "marill": {
@@ -10157,6 +12518,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "sudowoodo": {
@@ -10223,6 +12601,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -10308,6 +12703,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "aipom": {
@@ -10390,6 +12801,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "qwilfish": {
@@ -10471,6 +12898,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "corsola": {
@@ -10540,6 +12985,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -10625,6 +13086,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "girafarig": {
@@ -10709,6 +13186,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "stantler": {
@@ -10792,6 +13290,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -10888,6 +13403,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "delibird": {
@@ -10968,6 +13499,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -11053,6 +13600,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "wobbuffet": {
@@ -11127,6 +13690,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -11216,6 +13795,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "rhyhorn": {
@@ -11285,6 +13885,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "hitmonlee": {
@@ -11352,6 +13968,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -11422,6 +14054,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -11500,6 +14151,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 96,
+      "durations": [
+        1,
+        2,
+        3,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "lapras": {
@@ -11571,6 +14241,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -11648,6 +14336,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -11728,6 +14432,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        4,
+        4
+      ]
     }
   },
   "scyther": {
@@ -11797,6 +14518,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -11868,6 +14605,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -11943,6 +14696,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "omanyte": {
@@ -12013,6 +14782,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -12094,6 +14879,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "aerodactyl": {
@@ -12170,6 +14972,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "snorlax": {
@@ -12244,6 +15065,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        8,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "heracross": {
@@ -12315,6 +15152,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2
       ]
     }
   },
@@ -12391,6 +15248,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -12478,6 +15351,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        4,
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "machamp": {
@@ -12553,6 +15443,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -12633,6 +15542,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "arcanine": {
@@ -12701,6 +15626,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -12774,6 +15718,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -12850,6 +15813,21 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "steelix": {
@@ -12921,6 +15899,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 120,
+      "frameHeight": 152,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -12997,6 +15992,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 104,
+      "frameHeight": 136,
+      "durations": [
+        4,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -13077,6 +16088,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 120,
+      "durations": [
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "zapdos": {
@@ -13150,6 +16177,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -13226,6 +16270,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 104,
+      "frameHeight": 136,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -13307,6 +16371,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -13391,6 +16474,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        3,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "suicune": {
@@ -13472,6 +16572,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "lugia": {
@@ -13538,6 +16655,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 104,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -13618,6 +16751,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 120,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -13712,6 +16866,28 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "mewtwo": {
@@ -13801,6 +16977,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        3,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "mew": {
@@ -13888,6 +17081,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        1,
+        3,
+        1,
+        3,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -13977,6 +17190,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "ariados": {
@@ -14055,6 +17284,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        1,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        3,
+        4
       ]
     }
   },
@@ -14136,6 +17382,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
       ]
     }
   },
@@ -14226,6 +17492,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "gloom": {
@@ -14296,6 +17580,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -14372,6 +17677,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "dugtrio": {
@@ -14438,6 +17759,21 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -14512,6 +17848,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "persian": {
@@ -14579,6 +17934,28 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        1,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -14662,6 +18039,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        6,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "hypno": {
@@ -14739,6 +18134,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -14827,6 +18238,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "seadra": {
@@ -14907,6 +18334,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "tentacruel": {
@@ -14982,6 +18425,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -15067,6 +18530,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "quilava": {
@@ -15148,6 +18627,28 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     }
   },
   "bayleef": {
@@ -15220,6 +18721,21 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "croconaw": {
@@ -15288,6 +18804,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -15363,6 +18896,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
     }
   },
   "marowak": {
@@ -15428,6 +18981,21 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -15520,6 +19088,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "muk": {
@@ -15592,6 +19176,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -15689,6 +19291,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "golduck": {
@@ -15758,6 +19380,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -15833,6 +19474,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "magcargo": {
@@ -15903,6 +19560,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -15986,6 +19659,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "octillery": {
@@ -16052,6 +19741,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -16123,6 +19828,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -16196,6 +19917,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "rhydon": {
@@ -16267,6 +20005,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -16347,6 +20101,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "omastar": {
@@ -16417,6 +20187,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -16490,6 +20276,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -16565,6 +20368,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -16646,6 +20467,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "meganium": {
@@ -16717,6 +20558,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -16790,6 +20650,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -16865,6 +20743,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -16950,6 +20847,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "politoed": {
@@ -17028,6 +20941,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 104,
+      "durations": [
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "golem": {
@@ -17098,6 +21029,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -17176,6 +21128,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "scizor": {
@@ -17249,6 +21217,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -17328,6 +21312,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "bellossom": {
@@ -17397,6 +21402,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -17469,6 +21490,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -17543,6 +21581,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -17620,6 +21674,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -17703,6 +21773,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "starmie": {
@@ -17779,6 +21868,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "wigglytuff": {
@@ -17852,6 +21962,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "vaporeon": {
@@ -17921,6 +22047,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -18000,6 +22142,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "flareon": {
@@ -18078,6 +22236,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "espeon": {
@@ -18149,6 +22324,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -18241,6 +22433,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "raichu": {
@@ -18324,6 +22532,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "crobat": {
@@ -18402,6 +22626,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     }
   },
   "hitmontop": {
@@ -18478,6 +22722,29 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "clefairy": {
@@ -18537,6 +22804,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -18604,6 +22887,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "clefable": {
@@ -18663,6 +22962,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -18743,6 +23058,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "grovyle": {
@@ -18822,6 +23153,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2
+      ]
     }
   },
   "sceptile": {
@@ -18890,6 +23238,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -18975,6 +23339,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "combusken": {
@@ -19047,6 +23428,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "blaziken": {
@@ -19115,6 +23512,21 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -19202,6 +23614,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "marshtomp": {
@@ -19272,6 +23700,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -19356,6 +23800,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -19442,6 +23905,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "mightyena": {
@@ -19527,6 +24007,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "zigzagoon": {
@@ -19602,6 +24099,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -19686,6 +24201,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "wurmple": {
@@ -19762,6 +24294,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "silcoon": {
@@ -19829,6 +24378,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
       ]
     }
   },
@@ -19913,6 +24483,28 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "cascoon": {
@@ -19980,6 +24572,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -20063,6 +24673,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "lotad": {
@@ -20132,6 +24762,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -20209,6 +24855,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "ludicolo": {
@@ -20277,6 +24940,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -20350,6 +25029,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -20442,6 +25137,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "shiftry": {
@@ -20524,6 +25236,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "taillow": {
@@ -20597,6 +25325,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -20679,6 +25427,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -20770,6 +25538,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        4,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "pelipper": {
@@ -20840,6 +25628,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        3,
+        3,
+        3,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -20918,6 +25724,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -21013,6 +25835,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        3,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "gardevoir": {
@@ -21082,6 +25923,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -21159,6 +26016,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        1,
+        2,
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "masquerain": {
@@ -21235,6 +26110,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "shroomish": {
@@ -21308,6 +26201,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -21398,6 +26307,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "slakoth": {
@@ -21465,6 +26390,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3,
+        2
       ]
     }
   },
@@ -21538,6 +26479,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -21613,6 +26570,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "nincada": {
@@ -21684,6 +26657,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -21759,6 +26749,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -21855,6 +26861,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "whismur": {
@@ -21931,6 +26953,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "loudred": {
@@ -22006,6 +27044,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "exploud": {
@@ -22077,6 +27131,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -22172,6 +27242,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "hariyama": {
@@ -22252,6 +27341,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "azurill": {
@@ -22324,6 +27432,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -22399,6 +27524,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -22483,6 +27624,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        4,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
       ]
     }
   },
@@ -22572,6 +27730,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "sableye": {
@@ -22639,6 +27813,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -22724,6 +27914,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "aron": {
@@ -22805,6 +28011,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "lairon": {
@@ -22875,6 +28097,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -22948,6 +28186,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -23026,6 +28280,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "medicham": {
@@ -23103,6 +28373,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -23195,6 +28482,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "manectric": {
@@ -23275,6 +28581,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -23363,6 +28688,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "minun": {
@@ -23450,6 +28792,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "volbeat": {
@@ -23528,6 +28887,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "illumise": {
@@ -23600,6 +28980,27 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -23686,6 +29087,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "gulpin": {
@@ -23759,6 +29177,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "swalot": {
@@ -23831,6 +29269,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -23907,6 +29361,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -23988,6 +29458,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "wailmer": {
@@ -24068,6 +29554,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -24156,6 +29659,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "numel": {
@@ -24226,6 +29746,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -24298,6 +29835,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "torkoal": {
@@ -24369,6 +29922,30 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -24455,6 +30032,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
     }
   },
   "grumpig": {
@@ -24525,6 +30121,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        2,
+        6,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -24619,6 +30232,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "trapinch": {
@@ -24705,6 +30335,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "vibrava": {
@@ -24788,6 +30434,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "flygon": {
@@ -24869,6 +30532,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "cacnea": {
@@ -24939,6 +30619,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -25016,6 +30712,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -25104,6 +30816,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -25196,6 +30924,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "zangoose": {
@@ -25281,6 +31025,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "seviper": {
@@ -25351,6 +31111,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        8,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -25432,6 +31208,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -25515,6 +31309,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "barboach": {
@@ -25593,6 +31405,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -25680,6 +31508,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "corphish": {
@@ -25759,6 +31603,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "crawdaunt": {
@@ -25829,6 +31689,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -25922,6 +31798,29 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "claydol": {
@@ -25999,6 +31898,29 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "lileep": {
@@ -26069,6 +31991,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        8,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
       ]
     }
   },
@@ -26155,6 +32095,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        8,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "anorith": {
@@ -26235,6 +32193,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -26317,6 +32291,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "feebas": {
@@ -26396,6 +32386,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "milotic": {
@@ -26469,6 +32479,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -26546,6 +32572,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -26627,6 +32669,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -26716,6 +32774,25 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "banette": {
@@ -26790,6 +32867,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -26874,6 +32967,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "dusclops": {
@@ -26943,6 +33052,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -27022,6 +33147,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -27108,6 +33249,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "absol": {
@@ -27187,6 +33344,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "wynaut": {
@@ -27264,6 +33437,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -27346,6 +33536,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "glalie": {
@@ -27425,6 +33631,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "spheal": {
@@ -27500,6 +33722,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "sealeo": {
@@ -27571,6 +33809,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -27650,6 +33904,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "clamperl": {
@@ -27723,6 +33993,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -27798,6 +34084,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -27879,6 +34182,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "relicanth": {
@@ -27958,6 +34277,24 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        4,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -28046,6 +34383,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "bagon": {
@@ -28127,6 +34481,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "shelgon": {
@@ -28198,6 +34568,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -28294,6 +34680,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        4,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "beldum": {
@@ -28375,6 +34777,29 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        4,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -28460,6 +34885,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "metagross": {
@@ -28528,6 +34973,26 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 96,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -28601,6 +35066,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "regice": {
@@ -28672,6 +35153,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "registeel": {
@@ -28738,6 +35235,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -28833,6 +35346,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "latios": {
@@ -28914,6 +35444,23 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -29002,6 +35549,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "groudon": {
@@ -29083,6 +35646,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 88,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -29168,6 +35747,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 176,
+      "frameHeight": 144,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   },
@@ -29265,6 +35860,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         8
       ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        4,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
     }
   },
   "deoxys": {
@@ -29344,6 +35955,22 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
       "durations": [
         2,
         8
+      ]
+    },
+    "Attack": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        6,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
       ]
     }
   }

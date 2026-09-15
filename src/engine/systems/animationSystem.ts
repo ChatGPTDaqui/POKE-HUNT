@@ -173,8 +173,13 @@ export function faceToward(entity: PlayerEntity | EnemyEntity, target: Point): v
 // `target` entra aqui, e nao numa chamada separada de faceToward no
 // CombatSystem, pra nao existir caminho novo de ataque que dispare a pose sem
 // virar o POKE — foi exatamente esse esquecimento que produziu o bug.
-export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boolean, target?: Point): void {
-  const kind: AttackAnimKind = isAoe ? 'Charge' : 'Shoot'
+//
+// `duelo` (PH-543): no combate duelo (`mapDef.encarada`) a pose e sempre
+// `Attack`, alvo unico ou area — o acervo PMD nao separa por alcance, e o
+// pedido foi "a sprite attack" pra todo golpe do duelo. O combate livre
+// continua com Shoot/Charge.
+export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boolean, target?: Point, duelo = false): void {
+  const kind: AttackAnimKind = duelo ? 'Attack' : isAoe ? 'Charge' : 'Shoot'
   entity.attackAnim = kind
   entity.attackAnimTimer = ATTACK_ANIM_DURATION
   if (target) faceToward(entity, target)
