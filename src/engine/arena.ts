@@ -14,7 +14,7 @@
 // ids; ver movementSystem/encaradaSystem), e `silent` so cala toast/VFX —
 // `arena.test.ts` prova que silencioso e ao vivo terminam identicos.
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
-import { getMap, spawnInimigoParaSala, spawnPointParaSala } from '@/data/maps'
+import { mapDefParaSala, spawnInimigoParaSala, spawnPointParaSala } from '@/data/maps'
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import type { PokeInstance } from '@/data/pokes'
 import type { MapDef } from '@/data/maps'
@@ -69,7 +69,13 @@ export function cloneParaArena(poke: PokeInstance): PokeInstance {
 }
 
 export function mapaDaArena(nomeDoRival: string): MapDef {
-  const base = getMap(LANCE_MAP_ID)
+  // PH-541: `mapDefParaSala`, e nao `getMap` cru — a hunt do Lance passa por
+  // ela (simulation.ts#buildMapWorld) e ganha `bounds` e `collisionGrid` da
+  // ARTE pintada (dragon.jpg, 2100x2020). Com o catalogo cru (1400x900, sem
+  // grade) as bolas pintadas (y=1330) caiam fora do mundo: `mapWalkRadius`
+  // puxava os corpos pro centro no primeiro tick — o "teleporte" — e sem
+  // grade eles atravessavam parede.
+  const base = mapDefParaSala(LANCE_MAP_ID, null)
   if (!base) throw new Error('Arena indisponivel: mapa base ausente.')
   return {
     ...base,

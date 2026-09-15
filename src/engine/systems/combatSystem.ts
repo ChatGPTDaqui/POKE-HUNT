@@ -55,7 +55,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange, clamp } from '@/core/random'
-import { ATTACK_ANIM_DURATION, triggerAttackAnim } from './animationSystem'
+import { ATTACK_ANIM_DURATION, registrarDanoParaHurt, triggerAttackAnim } from './animationSystem'
 // Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
 // turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
 // dura 30 abates, entao 5 turnos de clima passavam antes de qualquer coisa
@@ -63,6 +63,7 @@ import { ATTACK_ANIM_DURATION, triggerAttackAnim } from './animationSystem'
 // `climaAmbiente.ts` desde a PH-329, junto do tick que o gasta.
 import { CLIMA_DE_GOLPE_TURNOS } from './climaAmbiente'
 import { reunindoParaLure } from './lureSystem'
+import { executarRodadaDeDuelo, tickRodadaDeDuelo } from './rodadaDeDuelo'
 import { ehAlvoPrioritario } from './movementSystem'
 import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
@@ -2343,7 +2344,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   // PH-176: cooldown NAO arma aqui mais — so no erro/AOE-sem-alvo abaixo, ou
   // em `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`).
   startGlobalCooldown(player, MIN_ACTION_GAP)
-  triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
+  triggerAttackAnim(player, ability.target === 'aoe', primaryTarget, world.mapDef?.encarada === true)
   announceAbility(world, player, ability)
 
   // Lock-On/Mind Reader (Fase 12): garantia de acerto e "uma vez, contra
@@ -2405,7 +2406,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   // `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`). Inimigo
   // sempre mira o jogador unico, entao nao existe caso "AOE sem alvo".
   startGlobalCooldown(enemy, MIN_ACTION_GAP)
-  triggerAttackAnim(enemy, ability.target === 'aoe', player)
+  triggerAttackAnim(enemy, ability.target === 'aoe', player, world.mapDef?.encarada === true)
   announceAbility(world, enemy, ability)
 
   const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id
@@ -2861,6 +2862,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
     if (danoDoAcerto > 0) {
       takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke))
+      registrarDanoParaHurt(world, target, danoDoAcerto)
       if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoDoAcerto })
       if (aguentou && !silent) anunciarAguentou(world, target)
     }
@@ -3764,6 +3766,7 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
 
   tickCooldowns(player, dt)
   for (const enemy of enemies) tickCooldowns(enemy, dt)
+  tickRodadaDeDuelo(world, dt)
 
   // PH-329: o prazo do clima NAO e gasto aqui. Ele saiu pra
   // `climaAmbiente.ts#tickClimaDeGolpe`, chamado de `stepWorld`, porque este
@@ -3929,11 +3932,20 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     // Quem termina a reuniao e o proprio lure, e ele tem quatro saidas — conta
     // fechada, sem candidato pra puxar, shiny em campo e o teto de tempo —,
     // entao isto nao pode virar um POKE que nunca ataca.
-    if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent)
+    if (world.mapDef?.encarada) {
+      // PH-544: combate duelo age em rounds — um por vez, 3 s entre eles,
+      // ordem por Velocidade recalculada a cada round. Ver rodadaDeDuelo.ts.
+      executarRodadaDeDuelo(world, player, engagedEnemies, (e) => velocidadeEfetiva(e, world.clima?.tipo ?? null), {
+        jogador: () => { if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent) },
+        inimigo: (enemy) => { if (!isDead(enemy) && !player.fainted) executeEnemyAction(world, enemy, player, silent) },
+      })
+    } else {
+      if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent)
 
-    for (const enemy of engagedEnemies) {
-      if (isDead(enemy) || player.fainted) continue
-      executeEnemyAction(world, enemy, player, silent)
+      for (const enemy of engagedEnemies) {
+        if (isDead(enemy) || player.fainted) continue
+        executeEnemyAction(world, enemy, player, silent)
+      }
     }
   } else {
     // FIM DE BATALHA. Sem nenhum inimigo engajado, a luta acabou — e nos jogos

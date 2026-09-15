@@ -28,6 +28,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     reviveCountdown: null,
     trocaEmCampo: null,
     encarada: null,
+    rodadaDeDuelo: null,
     respawnTimer: null,
     sequenceIndex: 0,
     sequenceCleared: false,

@@ -25,7 +25,8 @@ import type { StatusAtivo, EstagiosDeStat, EstagiosFonte, StatDeEstagio } from '
 import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
-export type AttackAnimKind = 'Shoot' | 'Charge'
+// 'Attack' (PH-543) e a pose do COMBATE DUELO; Shoot/Charge sao as do livre.
+export type AttackAnimKind = 'Shoot' | 'Charge' | 'Attack'
 
 // Escudos ("Screens"): Reflect/Light Screen/Safeguard/Mist/Lucky Chant/Wide
 // Guard. Cada valor e segundos restantes (mesmo padrao de `imunidadeDeStatus`
@@ -110,6 +111,15 @@ export interface BaseEntity {
   // tocando.
   vfxCuraHp?: number
   vfxCuraStatus?: number
+  /**
+   * PH-542: segundos que faltam pra pose `Hurt` (flinch de levar dano)
+   * terminar. So o COMBATE DUELO (`mapDef.encarada`: Lance, lendarios, arena
+   * PvP) arma isto, e so quando um unico acerto tira 20%+ do HP maximo —
+   * o combate livre nunca mostra a pose. Mesma regra dos timers de cura:
+   * descontado em animationSystem#tickAttackAnimTimers (silent inclusive),
+   * pra servidor e cliente carregarem o mesmo estado. Ausente = nao toca.
+   */
+  hurtAnimTimer?: number
 
   /**
    * PH-397: este POKE esta girando na encarada do duelo NESTE tick.
@@ -447,6 +457,18 @@ export interface ProtetorDaAutoridade {
    * com HP cheio na janela seguinte (PH-472).
    */
   resolvido: boolean
+}
+
+/** PH-544: um round do combate duelo. Ver systems/rodadaDeDuelo.ts. */
+export interface RodadaDeDuelo {
+  /** Conta a partir de 1; so diagnostico. */
+  numero: number
+  /** Ids das duas entidades na ordem em que agem neste round. */
+  ordem: string[]
+  /** Posicao em `ordem` de quem esta na vez. `ordem.length` == round fechado. */
+  indice: number
+  /** Segundos ate o proximo poder agir. */
+  espera: number
 }
 
 /**
@@ -818,6 +840,14 @@ export interface WorldState {
    * apontar, e nada que justifique um campo novo no payload do servidor.
    */
   encarada: EstadoDaEncarada | null
+  /**
+   * PH-544: round em curso do combate duelo (quem age, quem espera, quanto
+   * falta), ou `null` fora do duelo / entre rounds sem par de pe.
+   * EFEMERO como `encarada`: um flush no meio so faz o proximo round abrir do
+   * zero, com a ordem recalculada — que e o que ele faria de qualquer jeito.
+   * Ver systems/rodadaDeDuelo.ts.
+   */
+  rodadaDeDuelo: RodadaDeDuelo | null
   sequenceIndex: number
   sequenceCleared: boolean
   countdownRemaining: number | null

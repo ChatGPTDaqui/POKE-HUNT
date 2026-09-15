@@ -11,6 +11,13 @@ import { imobilizadoPorStatus } from './statusSystem'
 // dano/efeitos/derrota so acontecem quando a pose termina de tocar.
 export const ATTACK_ANIM_DURATION = 0.5
 
+// PH-542: quanto tempo a pose Hurt fica na tela no combate duelo. As artes
+// PMD de Hurt tem 2 quadros de ~10 ticks (0.33 s); um pouco mais pra o olho
+// registrar o flinch antes de voltar ao Idle/Walk.
+export const HURT_ANIM_DURATION = 0.45
+// Fracao do HP MAXIMO que um unico acerto precisa tirar pra tocar a pose.
+export const HURT_ANIM_FRACAO_DO_HP = 0.2
+
 // 8 direcoes de bussola na ordem padrao do sheet PMD: Down, DownRight,
 // Right, UpRight, Up, UpLeft, Left, DownLeft (sentido horario a partir do sul).
 const SECTOR_TO_ROW = [2, 1, 0, 7, 6, 5, 4, 3]
@@ -33,6 +40,11 @@ export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
   // Sleep -> Idle -> Walk (conferido: 0 das 226 especies sem Sleep).
   if (entity.poke.status?.tipo === 'sleep') return 'Sleep'
   if (entity.attackAnimTimer > 0) return entity.attackAnim as AnimName
+  // PH-542: flinch de levar dano, so armado no combate duelo. Abaixo da pose
+  // de ataque de proposito: quem esta disparando nao e interrompido — no
+  // duelo por turnos o golpe pousa em quem NAO esta na vez, entao na pratica
+  // as duas nunca disputam.
+  if ((entity.hurtAnimTimer ?? 0) > 0) return 'Hurt'
   // Imobilizado por status (hoje congelamento — o sono ja saiu acima, com
   // animacao propria): o estado continua 'chase'/'wander' pra o combate
   // seguir funcionando (movementSystem.ts explica por que), entao sem esta
@@ -69,6 +81,11 @@ export function tickAttackAnimTimers(world: WorldState, dt: number): void {
     if (!entity) continue
     if (entity.attackAnimTimer > 0) {
       entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt)
+    }
+    if (entity.hurtAnimTimer) {
+      const resta = entity.hurtAnimTimer - dt
+      if (resta > 0) entity.hurtAnimTimer = resta
+      else delete entity.hurtAnimTimer
     }
     // Faiscas de cura (HP e status). Descontadas aqui e nao em `updateAnimations`
     // pelo mesmo motivo do `attackAnimTimer`: esta funcao roda tambem no modo
@@ -156,10 +173,28 @@ export function faceToward(entity: PlayerEntity | EnemyEntity, target: Point): v
 // `target` entra aqui, e nao numa chamada separada de faceToward no
 // CombatSystem, pra nao existir caminho novo de ataque que dispare a pose sem
 // virar o POKE — foi exatamente esse esquecimento que produziu o bug.
-export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boolean, target?: Point): void {
-  const kind: AttackAnimKind = isAoe ? 'Charge' : 'Shoot'
+//
+// `duelo` (PH-543): no combate duelo (`mapDef.encarada`) a pose e sempre
+// `Attack`, alvo unico ou area — o acervo PMD nao separa por alcance, e o
+// pedido foi "a sprite attack" pra todo golpe do duelo. O combate livre
+// continua com Shoot/Charge.
+export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boolean, target?: Point, duelo = false): void {
+  const kind: AttackAnimKind = duelo ? 'Attack' : isAoe ? 'Charge' : 'Shoot'
   entity.attackAnim = kind
   entity.attackAnimTimer = ATTACK_ANIM_DURATION
   if (target) faceToward(entity, target)
 }
 
+
+/**
+ * PH-542: arma a pose Hurt em quem levou o acerto — so no combate duelo
+ * (`mapDef.encarada`) e so quando UM acerto tira 20%+ do HP maximo. Multi-hit
+ * conta por acerto (cada um passa por aqui). Morto nao flincha: a pose de
+ * desmaio vence em `desiredAnimName`, e o timer ficaria armado a toa.
+ */
+export function registrarDanoParaHurt(world: Pick<WorldState, 'mapDef'>, alvo: PlayerEntity | EnemyEntity, dano: number): void {
+  if (!world.mapDef?.encarada) return
+  if (dano < alvo.poke.stats.hp * HURT_ANIM_FRACAO_DO_HP) return
+  if (isDead(alvo)) return
+  alvo.hurtAnimTimer = HURT_ANIM_DURATION
+}

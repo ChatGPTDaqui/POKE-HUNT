@@ -1,14 +1,17 @@
-// PH-532: acrescenta a animacao `Hurt` (flinch de levar dano, ver
-// docs/arquivo/2026-09-08/docs/18-animacoes-do-pmd-disponiveis.md — cobertura
-// 100% no acervo PMD, 2 quadros/10 ticks) as especies que JA TEM pasta em
-// assets/battle-sprites/<id>/ (as outras 6 poses ja foram importadas antes).
+// Acrescenta UMA animacao do acervo PMD (`--anim=<Nome>`, ver
+// docs/arquivo/2026-09-08/docs/18-animacoes-do-pmd-disponiveis.md) as especies
+// que JA TEM pasta em assets/battle-sprites/<id>/. Nasceu como
+// importar-hurt-anim.mjs (PH-532, `Hurt`: 380/380, 2 quadros/10 ticks) e foi
+// generalizado na PH-543 pra `Attack` (962/981 no acervo) — a mecanica e a
+// mesma pra qualquer pose do AnimData.xml.
 //
 // Diferente de scripts/import-kanto-sprites.js (legado, escreve em js/data/*
 // que nao existe mais depois da migracao pra src/ + TS): este script SO
 // adiciona uma animacao nova a especies que ja tem pasta, e escreve direto em
-// src/data/battleSpriteAnims.ts.
+// src/data/battleSpriteAnims.ts. Lembrar de acrescentar o nome em
+// `AnimName` e um degrau em `ANIM_FALLBACKS` (src/data/battleSprites.ts).
 //
-// Run: node scripts/importar-hurt-anim.mjs [--acervo=<checkout do SpriteCollab>]
+// Run: node scripts/importar-anim-pmd.mjs --anim=Attack [--acervo=<checkout do SpriteCollab>] [--forcar]
 import { existsSync, mkdirSync, copyFileSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -17,6 +20,11 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const ACERVO = (() => {
   const arg = process.argv.find((a) => a.startsWith('--acervo='))
   return arg ? arg.slice('--acervo='.length) : join(ROOT, 'assets', 'SpriteCollab-master (1)', 'SpriteCollab-master')
+})()
+const ANIM = (() => {
+  const arg = process.argv.find((a) => a.startsWith('--anim='))
+  if (!arg) throw new Error('uso: --anim=<Nome da animacao no AnimData.xml> (ex.: Hurt, Attack)')
+  return arg.slice('--anim='.length)
 })()
 const SPRITE_ROOT = join(ACERVO, 'sprite')
 const BATTLE_SPRITES_DIR = join(ROOT, 'assets', 'battle-sprites')
@@ -85,9 +93,9 @@ function main() {
   const forcar = process.argv.includes('--forcar')
   const especiesComPasta = readdirSync(BATTLE_SPRITES_DIR).filter((id) =>
     existsSync(join(BATTLE_SPRITES_DIR, id, 'Idle-Anim.png'))
-    && (forcar || !existsSync(join(BATTLE_SPRITES_DIR, id, 'Hurt-Anim.png'))),
+    && (forcar || !existsSync(join(BATTLE_SPRITES_DIR, id, `${ANIM}-Anim.png`))),
   )
-  console.log(`${especiesComPasta.length} especies sem Hurt-Anim ainda.`)
+  console.log(`${especiesComPasta.length} especies sem ${ANIM}-Anim ainda.`)
 
   const novasEntradas = {}
   const importadas = []
@@ -104,14 +112,14 @@ function main() {
     if (!existsSync(animXmlPath)) { puladas.push(`${id} (sem AnimData.xml em sprite/${d4})`); continue }
 
     const nodeByName = parseAnimData(animXmlPath)
-    const resolved = resolveAnim('Hurt', nodeByName, spriteDir)
-    if (!resolved) { puladas.push(`${id} (acervo nao tem Hurt pra esta especie)`); continue }
+    const resolved = resolveAnim(ANIM, nodeByName, spriteDir)
+    if (!resolved) { puladas.push(`${id} (acervo nao tem ${ANIM} pra esta especie)`); continue }
 
-    const destNormal = join(BATTLE_SPRITES_DIR, id, 'Hurt-Anim.png')
+    const destNormal = join(BATTLE_SPRITES_DIR, id, `${ANIM}-Anim.png`)
     copyFile(resolved.file, destNormal)
 
-    const shinyFile = join(shinySpriteDir, 'Hurt-Anim.png')
-    const destShiny = join(BATTLE_SPRITES_DIR, id, 'Hurt-Shiny-Anim.png')
+    const shinyFile = join(shinySpriteDir, `${ANIM}-Anim.png`)
+    const destShiny = join(BATTLE_SPRITES_DIR, id, `${ANIM}-Shiny-Anim.png`)
     copyFile(existsSync(shinyFile) ? shinyFile : resolved.file, destShiny)
 
     novasEntradas[id] = {
@@ -128,7 +136,7 @@ function main() {
     if (!m) throw new Error('nao encontrei BATTLE_SPRITE_ANIMS em battleSpriteAnims.ts')
     const existente = JSON.parse(m[1])
     for (const [id, anim] of Object.entries(novasEntradas)) {
-      existente[id] = { ...existente[id], Hurt: anim }
+      existente[id] = { ...existente[id], [ANIM]: anim }
     }
     const header = conteudo.slice(0, m.index)
     // SEM ; no final: scripts/geometriaDosSprites.test.mjs le este arquivo com
