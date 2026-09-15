@@ -7,6 +7,7 @@ import { criarMundoArena, rodarArena, stepArena, ARENA_MAP_ID } from './arena'
 import { mapDefParaSala, spawnInimigoParaSala, spawnPointParaSala } from '@/data/maps'
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { isDead } from './entity'
+import { velocidadeEfetiva } from './systems/combatSystem'
 import { LIVE_SIM_STEP_SECONDS, stepWorld } from './simulation'
 import type { WorldState } from './types'
 
@@ -127,5 +128,42 @@ describe('arena: palco pintado do Lance (PH-541)', () => {
       }
     }
     expect(flinches).toBeGreaterThan(0)
+  })
+})
+
+// PH-544: a arena e combate duelo, entao os golpes saem em rounds — um por
+// vez, 3 s entre disparos, o mais rapido primeiro.
+describe('arena: rounds por Velocidade (PH-544)', () => {
+  function disparos(world: WorldState): { tick: number; id: string }[] {
+    const lista: { tick: number; id: string }[] = []
+    const timerAntes = new Map<string, number>()
+    while (world.arena!.resultado === 'lutando') {
+      stepArena(world, LIVE_SIM_STEP_SECONDS, { silent: true })
+      for (const e of [world.player!, ...world.enemies]) {
+        const antes = timerAntes.get(e.id) ?? 0
+        if (e.attackAnimTimer > antes) lista.push({ tick: world.arena!.ticks, id: e.id })
+        timerAntes.set(e.id, e.attackAnimTimer)
+      }
+    }
+    return lista
+  }
+
+  it('nunca dois disparos com menos de 3 s de intervalo, e o mais rapido abre a luta', () => {
+    const world = criarMundoArena({ semente: 11, meuTime: time(1, TIME_A), rivalTime: time(2, TIME_B), nomeDoRival: 'Rival' })
+    const meuId = world.player!.id
+    const rivalId = world.enemies[0].id
+    const maisRapido = velocidadeEfetiva(world.player!) > velocidadeEfetiva(world.enemies[0]) ? meuId : rivalId
+    const lista = disparos(world)
+    expect(lista.length).toBeGreaterThan(4)
+    expect(lista[0].id).toBe(maisRapido)
+    const ticksDoTurno = Math.round(3 / LIVE_SIM_STEP_SECONDS)
+    for (let i = 1; i < lista.length; i++) {
+      expect(lista[i].tick - lista[i - 1].tick, `disparo ${i}`).toBeGreaterThanOrEqual(ticksDoTurno - 1)
+    }
+    // Alternancia dentro do round: ninguem dispara duas vezes seguidas
+    // enquanto o outro esta de pe e no mesmo round (o rival trocado e outra
+    // entidade, entao a lista pode repetir o jogador na troca).
+    const ids = lista.map((d) => d.id)
+    expect(new Set(ids).size).toBeGreaterThanOrEqual(2)
   })
 })

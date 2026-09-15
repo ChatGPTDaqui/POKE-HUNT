@@ -91608,6 +91608,66 @@ function atualizarLure(world, gameState, dt) {
 	};
 }
 //#endregion
+//#region src/engine/systems/rodadaDeDuelo.ts
+/** Intervalo entre a acao de um lado e a do outro, e entre rounds. */
+var INTERVALO_DO_TURNO = TURNO_SEGUNDOS;
+/**
+* Desconta o relogio do turno. Roda TODO tick de combate (silent inclusive),
+* antes de qualquer decisao de acao, pra o intervalo valer tambem enquanto
+* ninguem esta engajado — senao um par que se separa e volta a se encarar
+* dispararia na hora.
+*/
+function tickRodadaDeDuelo(world, dt) {
+	const rodada = world.rodadaDeDuelo;
+	if (!rodada) return;
+	if (rodada.espera > 0) rodada.espera = Math.max(0, rodada.espera - dt);
+	if (rodada.espera < 1e-6) rodada.espera = 0;
+}
+/**
+* Um tick da decisao de acao no duelo: no maximo UMA entidade age, e so
+* quando o relogio zerou. Substitui, no combate duelo, o trecho de
+* `updateCombat` em que jogador e todos os engajados agem no mesmo tick.
+*/
+function executarRodadaDeDuelo(world, player, engajados, velocidade, executores) {
+	const rival = engajados[0];
+	if (!rival || isDead(player) || isDead(rival)) {
+		if (world.rodadaDeDuelo) world.rodadaDeDuelo = null;
+		return;
+	}
+	let rodada = world.rodadaDeDuelo;
+	if (!(rodada != null && rodada.ordem.length === 2 && rodada.ordem.includes(player.id) && rodada.ordem.includes(rival.id))) {
+		rodada = abrirRound(world, player, rival, velocidade, (rodada?.numero ?? 0) + 1, rodada?.espera ?? 0);
+		world.rodadaDeDuelo = rodada;
+	}
+	if (!rodada || rodada.espera > 0) return;
+	if (rodada.indice >= rodada.ordem.length) {
+		rodada = abrirRound(world, player, rival, velocidade, rodada.numero + 1, 0);
+		world.rodadaDeDuelo = rodada;
+	}
+	const quem = rodada.ordem[rodada.indice] === player.id ? player : rival;
+	const cooldownAntes = quem.globalCooldown;
+	if (quem === player) executores.jogador();
+	else executores.inimigo(rival);
+	if (quem.globalCooldown > 0 && quem.globalCooldown !== cooldownAntes) {
+		rodada.indice++;
+		rodada.espera = INTERVALO_DO_TURNO;
+	}
+}
+function abrirRound(world, player, rival, velocidade, numero, espera) {
+	const vJogador = velocidade(player);
+	const vRival = velocidade(rival);
+	let jogadorPrimeiro;
+	if (vJogador === vRival) jogadorPrimeiro = nextFloat(world.rng) < .5;
+	else jogadorPrimeiro = vJogador > vRival;
+	if ((world.trickRoomRestante ?? 0) > 0) jogadorPrimeiro = !jogadorPrimeiro;
+	return {
+		numero,
+		ordem: jogadorPrimeiro ? [player.id, rival.id] : [rival.id, player.id],
+		indice: 0,
+		espera
+	};
+}
+//#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
 	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection, statusStat, seguir = null, apontarPara = null } = params;
@@ -93756,6 +93816,7 @@ function updateCombat(world, dt, opts = {}) {
 	let playerJustFainted = false;
 	tickCooldowns(player, dt);
 	for (const enemy of enemies) tickCooldowns(enemy, dt);
+	tickRodadaDeDuelo(world, dt);
 	for (const entity of [player, ...enemies]) {
 		if (isDead(entity)) continue;
 		const { dano, expirados, drenoParaOrigem, pereceu } = tickStatus(world.rng, entity, dt, world.clima?.tipo ?? null);
@@ -93847,10 +93908,20 @@ function updateCombat(world, dt, opts = {}) {
 			enemy.entradaProcessada = true;
 			resolveEntryHook(world, enemy, player, silent);
 		}
-		if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent);
-		for (const enemy of engagedEnemies) {
-			if (isDead(enemy) || player.fainted) continue;
-			executeEnemyAction(world, enemy, player, silent);
+		if (world.mapDef?.encarada) executarRodadaDeDuelo(world, player, engagedEnemies, (e) => velocidadeEfetiva(e, world.clima?.tipo ?? null), {
+			jogador: () => {
+				if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent);
+			},
+			inimigo: (enemy) => {
+				if (!isDead(enemy) && !player.fainted) executeEnemyAction(world, enemy, player, silent);
+			}
+		});
+		else {
+			if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent);
+			for (const enemy of engagedEnemies) {
+				if (isDead(enemy) || player.fainted) continue;
+				executeEnemyAction(world, enemy, player, silent);
+			}
 		}
 	} else limparEstadoVolatil(player);
 	return {
@@ -93872,6 +93943,7 @@ function emptyWorldState(seed = randomSeed()) {
 		reviveCountdown: null,
 		trocaEmCampo: null,
 		encarada: null,
+		rodadaDeDuelo: null,
 		respawnTimer: null,
 		sequenceIndex: 0,
 		sequenceCleared: false,

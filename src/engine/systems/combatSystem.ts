@@ -63,6 +63,7 @@ import { ATTACK_ANIM_DURATION, registrarDanoParaHurt, triggerAttackAnim } from '
 // `climaAmbiente.ts` desde a PH-329, junto do tick que o gasta.
 import { CLIMA_DE_GOLPE_TURNOS } from './climaAmbiente'
 import { reunindoParaLure } from './lureSystem'
+import { executarRodadaDeDuelo, tickRodadaDeDuelo } from './rodadaDeDuelo'
 import { ehAlvoPrioritario } from './movementSystem'
 import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
@@ -3765,6 +3766,7 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
 
   tickCooldowns(player, dt)
   for (const enemy of enemies) tickCooldowns(enemy, dt)
+  tickRodadaDeDuelo(world, dt)
 
   // PH-329: o prazo do clima NAO e gasto aqui. Ele saiu pra
   // `climaAmbiente.ts#tickClimaDeGolpe`, chamado de `stepWorld`, porque este
@@ -3930,11 +3932,20 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     // Quem termina a reuniao e o proprio lure, e ele tem quatro saidas — conta
     // fechada, sem candidato pra puxar, shiny em campo e o teto de tempo —,
     // entao isto nao pode virar um POKE que nunca ataca.
-    if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent)
+    if (world.mapDef?.encarada) {
+      // PH-544: combate duelo age em rounds — um por vez, 3 s entre eles,
+      // ordem por Velocidade recalculada a cada round. Ver rodadaDeDuelo.ts.
+      executarRodadaDeDuelo(world, player, engagedEnemies, (e) => velocidadeEfetiva(e, world.clima?.tipo ?? null), {
+        jogador: () => { if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent) },
+        inimigo: (enemy) => { if (!isDead(enemy) && !player.fainted) executeEnemyAction(world, enemy, player, silent) },
+      })
+    } else {
+      if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent)
 
-    for (const enemy of engagedEnemies) {
-      if (isDead(enemy) || player.fainted) continue
-      executeEnemyAction(world, enemy, player, silent)
+      for (const enemy of engagedEnemies) {
+        if (isDead(enemy) || player.fainted) continue
+        executeEnemyAction(world, enemy, player, silent)
+      }
     }
   } else {
     // FIM DE BATALHA. Sem nenhum inimigo engajado, a luta acabou — e nos jogos

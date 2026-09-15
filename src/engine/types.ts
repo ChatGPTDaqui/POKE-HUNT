@@ -459,6 +459,18 @@ export interface ProtetorDaAutoridade {
   resolvido: boolean
 }
 
+/** PH-544: um round do combate duelo. Ver systems/rodadaDeDuelo.ts. */
+export interface RodadaDeDuelo {
+  /** Conta a partir de 1; so diagnostico. */
+  numero: number
+  /** Ids das duas entidades na ordem em que agem neste round. */
+  ordem: string[]
+  /** Posicao em `ordem` de quem esta na vez. `ordem.length` == round fechado. */
+  indice: number
+  /** Segundos ate o proximo poder agir. */
+  espera: number
+}
+
 /**
  * PH-397: a coreografia de encarada de UM par em duelo.
  *
@@ -828,6 +840,14 @@ export interface WorldState {
    * apontar, e nada que justifique um campo novo no payload do servidor.
    */
   encarada: EstadoDaEncarada | null
+  /**
+   * PH-544: round em curso do combate duelo (quem age, quem espera, quanto
+   * falta), ou `null` fora do duelo / entre rounds sem par de pe.
+   * EFEMERO como `encarada`: um flush no meio so faz o proximo round abrir do
+   * zero, com a ordem recalculada — que e o que ele faria de qualquer jeito.
+   * Ver systems/rodadaDeDuelo.ts.
+   */
+  rodadaDeDuelo: RodadaDeDuelo | null
   sequenceIndex: number
   sequenceCleared: boolean
   countdownRemaining: number | null
