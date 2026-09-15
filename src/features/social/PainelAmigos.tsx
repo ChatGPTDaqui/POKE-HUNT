@@ -5,6 +5,7 @@
 // sao destrutivas e bloquear ainda desfaz a amizade junto, o que nao e obvio
 // pelo rotulo do botao.
 import { ChatCircle, Envelope, Prohibit, UserMinus } from '@phosphor-icons/react'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { GameButton, GameCard, SectionLabel } from '@/components/game/controls'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { SPECIES } from '@/data/pokes'
@@ -68,6 +69,8 @@ export function PainelAmigos({
                   title={a.online ? 'Online' : 'Offline'}
                   className={cn('h-[.55em] w-[.55em] shrink-0 rounded-full', a.online ? 'bg-ok' : 'bg-n600')}
                 />
+                {/* PH-548: foto do amigo antes do POKE ativo. */}
+                <AvatarDoTreinador userId={a.userId} tamanho={2} />
 
                 {especie && a.pokeAtivo && (
                   <PokeSwatch species={especie} isShiny={a.pokeAtivo.shiny} size={2} />

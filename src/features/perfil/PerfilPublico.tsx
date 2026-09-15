@@ -31,6 +31,7 @@ import { perfilPublico } from '@/data/remote/rankingRpc'
 import { useUiStore } from '@/stores/uiStore'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 
 function formatarDuracao(segundos: number): string {
   if (segundos < 60) return `${Math.floor(segundos)}s`
@@ -75,7 +76,8 @@ export function PerfilPublico() {
       header={
         <div className="flex items-center gap-[.6em] border-b border-n800 px-[.65em] pb-[.6em]">
           <div className="flex h-[3.8em] w-[3.8em] shrink-0 items-center justify-center rounded-[.7em] border border-n700 bg-n900">
-            <User className="text-[1.8em] text-n300" />
+            {/* PH-548: a foto do outro jogador, pelo mesmo cache do ranking. */}
+            <AvatarDoTreinador userId={alvo?.userId ?? null} tamanho={3.4} />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-[.25em]">
             {/* O nome vem do anúncio, então o título aparece antes da RPC

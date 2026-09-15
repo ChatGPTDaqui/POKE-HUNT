@@ -33,6 +33,7 @@
 // (`pointer-events:none`) e o fechar-ao-tocar-fora e um listener de documento.
 // Um backdrop que capturasse o toque faria trocar de tela exigir dois toques.
 import { useRef } from 'react'
+import { PlacarDoDuelo } from '@/features/arena/PlacarDoDuelo'
 import { StatusRail } from '@/components/hud/StatusRail'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
@@ -142,6 +143,9 @@ export function HudLayer() {
                 No compacto ele continua aqui: o trilho de 390px nao tem largura
                 pra ele (ver a nota no topo de SalaChip.tsx). */}
             {!salaNoTrilho(mode) && <SalaChip />}
+            {/* PH-549: o placar do combate duelo (arena, Lance, covis) mora na
+                mesma fileira contextual — some sozinho fora do duelo. */}
+            <PlacarDoDuelo />
             {/* O CLIMA SAIU DAQUI (PH-285). Ele agora esta no trilho nas TRES
                 larguras: com o nome escrito na faixa central, e so como simbolo
                 no compacto, onde o vao tem 73px (ver `StatusRail`).

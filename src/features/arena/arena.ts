@@ -15,30 +15,33 @@ interface EstadoDaArenaNoCliente {
   /** Veredito oficial (servidor). `null` = duelo local sem stakes. */
   veredito: VereditoDaArena | null
   nomeDoRival: string
+  /** PH-548: quem e o rival, pra foto no placar; `null` = sem conta (duelo local/treino). */
+  rivalId: string | null
   aoSair: (() => void) | null
 }
 
-export const useArenaStore = create<EstadoDaArenaNoCliente>(() => ({ veredito: null, nomeDoRival: '', aoSair: null }))
+export const useArenaStore = create<EstadoDaArenaNoCliente>(() => ({ veredito: null, nomeDoRival: '', rivalId: null, aoSair: null }))
 
 export interface EntradaNaArena {
   semente: number
   meuTime: PokeInstance[]
   rivalTime: PokeInstance[]
   nomeDoRival: string
+  rivalId?: string | null
   veredito: VereditoDaArena | null
   aoSair?: () => void
 }
 
-export function entrarNaArena({ semente, meuTime, rivalTime, nomeDoRival, veredito, aoSair }: EntradaNaArena): void {
+export function entrarNaArena({ semente, meuTime, rivalTime, nomeDoRival, rivalId, veredito, aoSair }: EntradaNaArena): void {
   const world = criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival })
-  useArenaStore.setState({ veredito, nomeDoRival, aoSair: aoSair ?? null })
+  useArenaStore.setState({ veredito, nomeDoRival, rivalId: rivalId ?? null, aoSair: aoSair ?? null })
   useWorldStore.getState().setWorld(world)
   useUiStore.getState().closeScreen()
 }
 
 export function sairDaArena(): void {
   const { aoSair } = useArenaStore.getState()
-  useArenaStore.setState({ veredito: null, nomeDoRival: '', aoSair: null })
+  useArenaStore.setState({ veredito: null, nomeDoRival: '', rivalId: null, aoSair: null })
   controller.returnToHospital({ x: 0, y: 0 })
   aoSair?.()
 }

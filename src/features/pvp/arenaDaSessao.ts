@@ -23,5 +23,5 @@ export async function arenaDaSessao(
     ? 'empate'
     : res.vencedorId === meuId ? 'vitoria' : 'derrota'
 
-  return { semente: res.semente, meuTime, rivalTime, nomeDoRival, veredito }
+  return { semente: res.semente, meuTime, rivalTime, nomeDoRival, rivalId: oponenteId, veredito }
 }

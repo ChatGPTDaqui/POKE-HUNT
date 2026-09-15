@@ -5,6 +5,7 @@
 // outro jogador. Sem `VITE_SERVIDOR_URL` a tela diz isso em vez de mostrar uma
 // lista com um jogador so.
 import { useState } from 'react'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { Crown, Medal, Sword, UserPlus } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import type { CriterioPoke, EntradaTreinador, EntradaPoke, EntradaHall } from '@/data/remote/servidor'
@@ -145,6 +146,7 @@ function AbaTreinadores() {
           <Linha key={e.userId}>
             <Posicao n={i + 1} />
             <Crown className={cn('shrink-0 text-[1.1em]', i === 0 ? 'text-gold' : 'text-n600')} />
+            <AvatarDoTreinador userId={e.userId} tamanho={1.6} />
             <span className="min-w-0 flex-1 truncate">{e.nome}</span>
             <span className="shrink-0 text-[.85em] text-n300">Lv {e.nivel}</span>
             <span className="shrink-0 font-mono text-[.75em] text-n500">{e.exp.toLocaleString('pt-BR')} XP</span>
@@ -215,7 +217,7 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
                     const meuPoke = meuTime[activeIndex] ?? meuTime[0]
                     if (!meuPoke) return
                     // Duelo local, sem stakes: arena com semente sorteada, sem veredito de servidor.
-                    entrarNaArena({ semente: randomSeed(), meuTime: [meuPoke], rivalTime: [e.poke], nomeDoRival: e.treinador, veredito: null })
+                    entrarNaArena({ semente: randomSeed(), meuTime: [meuPoke], rivalTime: [e.poke], nomeDoRival: e.treinador, rivalId: e.userId, veredito: null })
                   }}
                 >
                   <Sword /> PvP
@@ -246,6 +248,7 @@ function AbaHall() {
             <Linha key={e.userId}>
               <Posicao n={i + 1} />
               <Medal className={cn('shrink-0 text-[1.1em]', i === 0 ? 'text-gold' : 'text-n600')} />
+              <AvatarDoTreinador userId={e.userId} tamanho={1.6} />
               <span className="min-w-0 flex-1 truncate">{e.nome}</span>
               <span className="shrink-0 text-[.75em] text-n500">
                 {new Date(e.conquistadoEm).toLocaleDateString('pt-BR')}
