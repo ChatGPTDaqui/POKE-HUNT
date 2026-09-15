@@ -1254,6 +1254,7 @@ export type Database = {
           auto_sell_config: Json
           auto_status_config: Json
           auto_toggles: Json
+          avatar: string | null
           bioma_progress: Json
           created_at: string
           current_map_id: string | null
@@ -1276,6 +1277,7 @@ export type Database = {
           auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
+          avatar?: string | null
           bioma_progress?: Json
           created_at?: string
           current_map_id?: string | null
@@ -1298,6 +1300,7 @@ export type Database = {
           auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
+          avatar?: string | null
           bioma_progress?: Json
           created_at?: string
           current_map_id?: string | null
@@ -2551,6 +2554,7 @@ export type Database = {
       }
       treinadores_publico: {
         Row: {
+          avatar: string | null
           eh_bot: boolean | null
           trainer_exp: number | null
           trainer_level: number | null
@@ -2558,6 +2562,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          avatar?: string | null
           eh_bot?: never
           trainer_exp?: number | null
           trainer_level?: number | null
@@ -2565,6 +2570,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          avatar?: string | null
           eh_bot?: never
           trainer_exp?: number | null
           trainer_level?: number | null
@@ -2987,6 +2993,7 @@ export type Database = {
         Returns: Json
       }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
+      definir_avatar: { Args: { p_avatar: string }; Returns: Json }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
         Returns: Json
@@ -4798,6 +4805,7 @@ export type Database = {
           auto_sell_config: Json
           auto_status_config: Json
           auto_toggles: Json
+          avatar: string | null
           bioma_progress: Json
           created_at: string
           current_map_id: string | null
@@ -4820,6 +4828,7 @@ export type Database = {
           auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
+          avatar?: string | null
           bioma_progress?: Json
           created_at?: string
           current_map_id?: string | null
@@ -4842,6 +4851,7 @@ export type Database = {
           auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
+          avatar?: string | null
           bioma_progress?: Json
           created_at?: string
           current_map_id?: string | null
@@ -6095,6 +6105,7 @@ export type Database = {
       }
       treinadores_publico: {
         Row: {
+          avatar: string | null
           eh_bot: boolean | null
           trainer_exp: number | null
           trainer_level: number | null
@@ -6102,6 +6113,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          avatar?: string | null
           eh_bot?: never
           trainer_exp?: number | null
           trainer_level?: number | null
@@ -6109,6 +6121,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          avatar?: string | null
           eh_bot?: never
           trainer_exp?: number | null
           trainer_level?: number | null
@@ -6531,6 +6544,7 @@ export type Database = {
         Returns: Json
       }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
+      definir_avatar: { Args: { p_avatar: string }; Returns: Json }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
         Returns: Json
