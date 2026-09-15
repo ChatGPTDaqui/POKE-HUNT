@@ -7,6 +7,8 @@ Boss global é outro sistema, fora deste repositório. Migrations e patch notes 
 mantêm os nomes antigos. Quantidades vêm dos símbolos vigentes, não do registro antigo.
 Preserve entradas de colisão/água e as saídas geradas; derivação precisa continuar reproduzível.
 Estado de sala/protetor tem autoridade no servidor; não corrigir só sua representação visual.
+Estágios 8, 9 e 10 de cada bioma são o fim do bioma: mesmo elenco, só o nível do inimigo
+sobe (PH-506, decisão do dono em 15/09/2026). Não é bug nem fila de conteúdo; ver decisões.
 
 ## Consulta detalhada
 
