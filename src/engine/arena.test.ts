@@ -106,11 +106,13 @@ describe('arena: palco pintado do Lance (PH-541)', () => {
     const world = criarMundoArena({ semente: 3, meuTime: time(1, TIME_A), rivalTime: time(2, TIME_B), nomeDoRival: 'Rival' })
     let maiorSalto = 0
     while (world.arena!.resultado === 'lutando') {
-      const antes = [world.player!, ...world.enemies].map((e) => ({ id: e.id, x: e.x, y: e.y }))
+      const antes = [world.player!, ...world.enemies].map((e) => ({ id: e.id, poke: e.poke, x: e.x, y: e.y }))
       stepArena(world, LIVE_SIM_STEP_SECONDS, { silent: true })
-      for (const { id, x, y } of antes) {
+      for (const { id, poke, x, y } of antes) {
         const e = world.player!.id === id ? world.player! : world.enemies.find((k) => k.id === id)
-        if (e) maiorSalto = Math.max(maiorSalto, Math.hypot(e.x - x, e.y - y))
+        // Troca de POKE do meu lado e entrada pela bola amarela (PH-545),
+        // deslocamento intencional — nao e teleporte.
+        if (e && e.poke === poke) maiorSalto = Math.max(maiorSalto, Math.hypot(e.x - x, e.y - y))
       }
     }
     expect(maiorSalto).toBeLessThan(15)
@@ -165,5 +167,15 @@ describe('arena: rounds por Velocidade (PH-544)', () => {
     // entidade, entao a lista pode repetir o jogador na troca).
     const ids = lista.map((d) => d.id)
     expect(new Set(ids).size).toBeGreaterThanOrEqual(2)
+  })
+
+  // PH-545: meu substituto entra pela bola amarela, nao onde o anterior caiu.
+  it('substituto do jogador nasce na bola amarela', () => {
+    const world = criarMundoArena({ semente: 5, meuTime: time(1, ['eevee', 'dragonite']), rivalTime: time(2, ['metagross']), nomeDoRival: 'Rival' })
+    const amarela = spawnPointParaSala(LANCE_MAP_ID, null)!
+    const primeiro = world.arena!.meuTime[0]
+    while (world.arena!.resultado === 'lutando' && world.player!.poke === primeiro) stepArena(world, LIVE_SIM_STEP_SECONDS, { silent: true })
+    expect(world.player!.poke).not.toBe(primeiro)
+    expect({ x: world.player!.x, y: world.player!.y }).toEqual(amarela)
   })
 })

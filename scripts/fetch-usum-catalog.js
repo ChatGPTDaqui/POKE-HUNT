@@ -232,6 +232,9 @@ function efeitosDoGolpe(m) {
     mudancasDeStat,
     chanceDeStat,
     chanceDeFlinch: meta.flinch_chance || 0,
+    // PH-545: faixa de prioridade (Quick Attack +1, Protect +4, Roar -6...).
+    // Decide quem age primeiro no round do combate duelo, antes da Velocidade.
+    prioridade: m.priority || 0,
     // `crit_rate` e o numero de ESTAGIOS de critico acima do normal (Slash e
     // Razor Leaf tem 1), nao uma porcentagem.
     estagiosDeCritico: meta.crit_rate || 0,

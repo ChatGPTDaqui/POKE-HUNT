@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest'
 import { createRng } from '@/core/rng'
 import { executarRodadaDeDuelo, tickRodadaDeDuelo, INTERVALO_DO_TURNO } from './rodadaDeDuelo'
+import type { Ability } from '@/data/abilities'
 import type { EnemyEntity, PlayerEntity, WorldEntity, WorldState } from '../types'
 
 function entidade(id: string, hp = 100): WorldEntity {
@@ -16,17 +17,21 @@ function mundo(): WorldState {
 /** Executor que "age": arma o cooldown global como os reais fazem. */
 function executores(log: string[]) {
   return {
-    jogador: (p: WorldEntity) => () => { if (p.globalCooldown > 0) return; p.globalCooldown = INTERVALO_DO_TURNO; log.push(p.id) },
-    inimigo: () => (e: EnemyEntity) => { if (e.globalCooldown > 0) return; e.globalCooldown = INTERVALO_DO_TURNO; log.push(e.id) },
+    jogador: (p: WorldEntity) => (golpe: Ability | null) => { if (p.globalCooldown > 0) return; p.globalCooldown = INTERVALO_DO_TURNO; log.push(golpe ? `${p.id}:${golpe.id}` : p.id) },
+    inimigo: () => (e: EnemyEntity, golpe: Ability | null) => { if (e.globalCooldown > 0) return; e.globalCooldown = INTERVALO_DO_TURNO; log.push(golpe ? `${e.id}:${golpe.id}` : e.id) },
   }
 }
 
-function roda(world: WorldState, player: PlayerEntity, rival: EnemyEntity, vel: Record<string, number>, log: string[], ticks: number, dt = 1 / 60) {
+/** Golpes por entidade; ausente = sem golpe escolhido (age sem prioridade). */
+type Golpes = Record<string, Ability | null>
+const golpe = (id: string, priority?: number): Ability => ({ id, ...(priority != null ? { priority } : {}) } as Ability)
+
+function roda(world: WorldState, player: PlayerEntity, rival: EnemyEntity, vel: Record<string, number>, log: string[], ticks: number, golpes: Golpes = {}, dt = 1 / 60) {
   const ex = executores(log)
   for (let i = 0; i < ticks; i++) {
     for (const e of [player, rival]) { e.globalCooldown = Math.max(0, e.globalCooldown - dt); if (e.globalCooldown < 1e-6) e.globalCooldown = 0 }
     tickRodadaDeDuelo(world, dt)
-    executarRodadaDeDuelo(world, player, [rival], (e) => vel[e.id], { jogador: ex.jogador(player), inimigo: ex.inimigo() })
+    executarRodadaDeDuelo(world, player, [rival], { velocidade: (e) => vel[e.id], escolher: (e) => golpes[e.id] ?? null }, { jogador: ex.jogador(player), inimigo: ex.inimigo() })
   }
 }
 
@@ -113,5 +118,49 @@ describe('rodada de duelo (PH-544)', () => {
     expect(world.rodadaDeDuelo!.indice).toBe(0)
     roda(world, p, r, { p: 50, r: 120 }, log, 31)
     expect(log).toEqual(['r'])
+  })
+
+  // PH-545 (v2): prioridade do golpe vem antes da Velocidade.
+  it('golpe com prioridade abre o round mesmo sendo o mais lento', () => {
+    const world = mundo()
+    const p = entidade('p') as PlayerEntity
+    const r = entidade('r') as EnemyEntity
+    const log: string[] = []
+    roda(world, p, r, { p: 30, r: 130 }, log, 181, { p: golpe('quick_attack', 1), r: golpe('thunderbolt', 0) })
+    expect(log).toEqual(['p:quick_attack', 'r:thunderbolt'])
+  })
+
+  it('mesma prioridade cai na Velocidade; Trick Room nao inverte prioridade', () => {
+    const world = mundo()
+    world.trickRoomRestante = 30
+    const p = entidade('p') as PlayerEntity
+    const r = entidade('r') as EnemyEntity
+    const log: string[] = []
+    // p lento com prioridade 0, r rapido com prioridade 1: prioridade decide, Trick Room nao mexe.
+    roda(world, p, r, { p: 30, r: 130 }, log, 1, { p: golpe('tackle', 0), r: golpe('quick_attack', 1) })
+    expect(log).toEqual(['r:quick_attack'])
+    // Empate de prioridade sob Trick Room: o lento (p) vai primeiro.
+    const w2 = mundo(); w2.trickRoomRestante = 30
+    const p2 = entidade('p') as PlayerEntity
+    const r2 = entidade('r') as EnemyEntity
+    const log2: string[] = []
+    roda(w2, p2, r2, { p: 30, r: 130 }, log2, 1, { p: golpe('tackle', 0), r: golpe('tackle', 0) })
+    expect(log2).toEqual(['p:tackle'])
+  })
+
+  it('o golpe escolhido na abertura e o que chega ao executor, uma vez por round', () => {
+    const world = mundo()
+    const p = entidade('p') as PlayerEntity
+    const r = entidade('r') as EnemyEntity
+    const log: string[] = []
+    let escolhas = 0
+    const ex = executores(log)
+    for (let i = 0; i < 181; i++) {
+      for (const e of [p, r]) { e.globalCooldown = Math.max(0, e.globalCooldown - 1 / 60); if (e.globalCooldown < 1e-6) e.globalCooldown = 0 }
+      tickRodadaDeDuelo(world, 1 / 60)
+      executarRodadaDeDuelo(world, p, [r], { velocidade: () => 100, escolher: () => { escolhas++; return golpe('tackle') } }, { jogador: ex.jogador(p), inimigo: ex.inimigo() })
+    }
+    expect(log).toHaveLength(2)
+    expect(escolhas).toBe(2) // um por lado, so na abertura
   })
 })

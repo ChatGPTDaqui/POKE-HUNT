@@ -708,6 +708,7 @@ function syncSpeciesAndMoves(workbook, hunts) {
               ...(golpeRow['Alvo do Efeito'] === 'self' ? { statTarget: 'self' } : {}),
             } : {}),
             ...(golpeRow['Chance de Flinch'] ? { flinchChance: golpeRow['Chance de Flinch'] } : {}),
+            ...(golpeRow['Prioridade'] ? { priority: golpeRow['Prioridade'] } : {}),
             ...(golpeRow['Estagios de Critico'] ? { critStages: golpeRow['Estagios de Critico'] } : {}),
             ...(golpeRow['Dreno %'] ? { drainPercent: golpeRow['Dreno %'] } : {}),
             ...(golpeRow['Cura %'] ? { healPercent: golpeRow['Cura %'] } : {}),
