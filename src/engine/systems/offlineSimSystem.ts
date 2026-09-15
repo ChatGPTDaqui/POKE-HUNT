@@ -16,7 +16,7 @@ import type { PokeInstance } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from '../types'
-import { podeAutoReanimar } from './autoSystem'
+import { podeLevantarDoDesmaio } from './autoSystem'
 
 export interface KillResult {
   /** Loot do abate MAIS o que a auto-venda rendeu neste evento, se rendeu. */
@@ -112,7 +112,7 @@ export interface OfflineSimSummary {
   pokeLevelAfter: number
   trainerLevelBefore: number
   trainerLevelAfter: number
-  stoppedEarly: boolean // desmaiou sem jeito de auto-reanimar (sem toggle, ou sem `revive` sobrando)
+  stoppedEarly: boolean // desmaiou sem jeito de levantar (sem auto-revive nem substituto do time — ver autoSystem#podeLevantarDoDesmaio)
   truncated: boolean // acabou o orcamento de tempo real antes de cobrir o gap inteiro
   stepSeconds: number // o passo realmente usado (pode ser mais grosso que o pedido — ver DEFAULT_MAX_STEPS)
   /**
@@ -183,7 +183,6 @@ export function simulateWorldSeconds({
   if (!Number.isFinite(seconds) || seconds <= 0 || !world.player) return summary
 
   const itemsBefore = { ...gameState.items }
-  const isBossHunt = Boolean(world.mapDef && world.mapDef.noRespawn)
   summary.pokeLevelBefore = world.player.poke.level
   summary.trainerLevelBefore = gameState.trainer.level
   const stepCap = Math.max(1, maxSteps)
@@ -247,7 +246,14 @@ export function simulateWorldSeconds({
       // (que precisa ser espelhada aqui: sem isso o laco rodava as 6 horas com
       // um cadaver em campo, sem `stoppedEarly` e sem abate, e o relatorio nao
       // tinha como explicar o zero), o toggle, e o inventario.
-      if (!podeAutoReanimar(gameState, isBossHunt)) {
+      //
+      // PH-546: e o SUBSTITUTO DO TIME e o outro jeito de levantar. No Lance
+      // (`autoSwitchTeamOnFaint`) o proximo POKE vivo entra sozinho depois de
+      // `ESPERA_DE_TROCA_SEGUNDOS` — e este `break` acontecia no primeiro tick
+      // com o POKE no chao, antes da troca ter chance. O servidor encerrava a
+      // sessao por "desmaio" com o resto do time inteiro e vivo.
+      // `podeLevantarDoDesmaio` junta os dois caminhos.
+      if (!podeLevantarDoDesmaio(gameState, world.mapDef)) {
         summary.stoppedEarly = true
         break
       }
