@@ -14,7 +14,7 @@
 // ids; ver movementSystem/encaradaSystem), e `silent` so cala toast/VFX —
 // `arena.test.ts` prova que silencioso e ao vivo terminam identicos.
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
-import { getMap } from '@/data/maps'
+import { getMap, spawnInimigoParaSala, spawnPointParaSala } from '@/data/maps'
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import type { PokeInstance } from '@/data/pokes'
 import type { MapDef } from '@/data/maps'
@@ -59,7 +59,6 @@ export function sementeDaSessao(sessaoId: string): number {
   for (let i = 0; i < sessaoId.length; i++) h = Math.imul(h ^ sessaoId.charCodeAt(i), 0x01000193) | 0
   return h
 }
-const AFASTAMENTO_INICIAL = 90
 const CONTAGEM_INICIAL = 3
 // Teto de seguranca (30 min simulados a 60 Hz) pra dois times que nao se
 // arranham nunca travarem o servidor; empata.
@@ -100,8 +99,10 @@ export function criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival }: Op
   if (meuTime.length === 0 || rivalTime.length === 0) throw new Error('Arena precisa de POKE dos dois lados.')
   const mapDef = mapaDaArena(nomeDoRival)
   const world = emptyWorldState(semente)
-  const meuSpawn = { x: mapDef.playerSpawn.x - AFASTAMENTO_INICIAL, y: mapDef.playerSpawn.y }
-  const rivalSpawn = { x: mapDef.playerSpawn.x + AFASTAMENTO_INICIAL, y: mapDef.playerSpawn.y }
+  // Mesmo palco e mesmas bolas da luta do Lance: eu na amarela, o rival na
+  // verde (pontos pintados na arte, ver data/maps.ts). A arena nao tem sala.
+  const meuSpawn = spawnPointParaSala(LANCE_MAP_ID, null) ?? mapDef.playerSpawn
+  const rivalSpawn = spawnInimigoParaSala(LANCE_MAP_ID, null) ?? mapDef.spawnPoints[0] ?? mapDef.playerSpawn
   const arena: EstadoDaArena = {
     meuTime: meuTime.map(cloneParaArena),
     rivalTime: rivalTime.map(cloneParaArena),
