@@ -18,15 +18,17 @@
 // generico ocupando ~46px permanentes da faixa mais disputada da tela, sem
 // largura pro nome nem pro nivel. Ali ele desce pra gaveta de detalhes, onde
 // cabe COM nome e nivel escritos — e a carteira fica no trilho (PH-279).
-import { User } from '@phosphor-icons/react'
 import { trainerExpProgress } from '@/engine/systems/progressionSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
 import { Carteira } from '@/components/hud/Carteira'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
+import { useAuthStore } from '@/stores/authStore'
 
 export function CardDoTreinador() {
   const trainer = useGameStateStore((s) => s.trainer)
   const setPerfilOpen = useUiStore((s) => s.setPerfilOpen)
+  const meuId = useAuthStore((s) => s.user?.id ?? null)
   const progress = trainerExpProgress(trainer)
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
 
@@ -41,9 +43,8 @@ export function CardDoTreinador() {
         + 'rounded-[.7em] border border-n700 p-[.25em] pr-[.35em]'
       }
     >
-      <span className="flex h-[2em] w-[2em] items-center justify-center rounded-[.5em] text-[1.1em] text-n300">
-        <User weight="fill" />
-      </span>
+      {/* PH-548: a foto escolhida no perfil; sem foto, o icone de sempre. */}
+      <AvatarDoTreinador userId={meuId} tamanho={2} />
       <span className="flex flex-col items-start gap-[.2em] pr-[.2em]">
         <span className="max-w-[7em] truncate text-[.78em] leading-none">{trainer.name}</span>
         <span className="text-[.7em] leading-none text-n400">Lv {trainer.level}</span>

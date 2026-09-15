@@ -13,6 +13,7 @@
 // respondem a dois breakpoints diferentes — em <1180 ela estreita pra nao
 // encostar no menu central, e em <780 ela sobe pra cima do menu inferior.
 import { useEffect, useRef, type CSSProperties } from 'react'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { Minus, PaperPlaneRight, Plus } from '@phosphor-icons/react'
 import { useToastStore, type ToastType } from '@/stores/toastStore'
 import { useChatStore } from '@/stores/chatStore'
@@ -142,6 +143,8 @@ export function AbaMundo() {
                   pendurar um icone em cada mensagem encheria o log de ruido. O
                   sublinhado ao passar o mouse e a unica pista que cabe sem
                   mudar o layout. */}
+              {/* PH-548: a foto e pequena e em linha pra nao virar ruido no log. */}
+              <AvatarDoTreinador userId={m.user_id} tamanho={1.1} className="mr-[.25em] align-[-.2em]" />
               <NomeNoChat nick={m.trainer_name} />
               <span className="text-n300">{m.body}</span>
               {m.anexos?.length > 0 && (
