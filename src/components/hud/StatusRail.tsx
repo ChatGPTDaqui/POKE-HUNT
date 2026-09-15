@@ -12,7 +12,9 @@
 // taxas) mora atras de um toque, na gaveta de detalhes — nao porque importe
 // menos, mas porque ele NAO muda entre um olhar e outro.
 import { useState } from 'react'
-import { CaretDown, ChartLineUp, User } from '@phosphor-icons/react'
+import { CaretDown, ChartLineUp } from '@phosphor-icons/react'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
+import { useAuthStore } from '@/stores/authStore'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { spriteUrl } from '@/data/sprites'
 import { faceEmocaoUrl } from '@/data/faceEmotions'
@@ -401,6 +403,7 @@ function FaixaCentral() {
 // `Shinys` aparece.
 
 function GavetaDetalhes({ comTreinador }: { comTreinador: boolean }) {
+  const meuId = useAuthStore((s) => s.user?.id ?? null)
   const stats = useTaxas()
   const abrirAnalyzer = useUiStore((s) => s.setAnalyzerOpen)
   const setPerfilOpen = useUiStore((s) => s.setPerfilOpen)
@@ -423,7 +426,8 @@ function GavetaDetalhes({ comTreinador }: { comTreinador: boolean }) {
           className="justify-between"
           onClick={() => setPerfilOpen(true)}
         >
-          <span className="flex items-center gap-[.4em]"><User weight="fill" /> {trainer.name}</span>
+          {/* PH-548: a foto de perfil tambem na gaveta (largura estreita). */}
+          <span className="flex items-center gap-[.4em]"><AvatarDoTreinador userId={meuId} tamanho={1.4} /> {trainer.name}</span>
           <span className="text-n400">Lv {trainer.level}</span>
         </GameButton>
       )}
