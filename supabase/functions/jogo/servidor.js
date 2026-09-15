@@ -87267,7 +87267,6 @@ function sementeDaSessao(sessaoId) {
 	for (let i = 0; i < sessaoId.length; i++) h = Math.imul(h ^ sessaoId.charCodeAt(i), 16777619) | 0;
 	return h;
 }
-var AFASTAMENTO_INICIAL = 90;
 var CONTAGEM_INICIAL = 3;
 function cloneParaArena(poke) {
 	return {
@@ -87299,14 +87298,8 @@ function criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival }) {
 	if (meuTime.length === 0 || rivalTime.length === 0) throw new Error("Arena precisa de POKE dos dois lados.");
 	const mapDef = mapaDaArena(nomeDoRival);
 	const world = emptyWorldState(semente);
-	const meuSpawn = {
-		x: mapDef.playerSpawn.x - AFASTAMENTO_INICIAL,
-		y: mapDef.playerSpawn.y
-	};
-	const rivalSpawn = {
-		x: mapDef.playerSpawn.x + AFASTAMENTO_INICIAL,
-		y: mapDef.playerSpawn.y
-	};
+	const meuSpawn = spawnPointParaSala("boss_lance", null) ?? mapDef.playerSpawn;
+	const rivalSpawn = spawnInimigoParaSala("boss_lance", null) ?? mapDef.spawnPoints[0] ?? mapDef.playerSpawn;
 	const arena = {
 		meuTime: meuTime.map(cloneParaArena),
 		rivalTime: rivalTime.map(cloneParaArena),
