@@ -24,10 +24,13 @@ const ANIM_FALLBACKS: Partial<Record<AnimName, AnimName[]>> = {
   Faint: ['Sleep', 'Idle', 'Walk'],
   Idle: ['Walk'],
   Sleep: ['Idle', 'Walk'],
-  // Cobertura de 380/380 no import de PH-532 (scripts/importar-hurt-anim.mjs),
+  // Cobertura de 380/380 no import de PH-532 (scripts/importar-anim-pmd.mjs),
   // mas a linha existe pra especie nova que entrar no elenco sem passar por
   // ali — mesma regra que `Faint` (58/245 quando isto foi escrito) documenta.
   Hurt: ['Idle', 'Walk'],
+  // PH-543: pose de golpe do duelo. 380/380 hoje; especie sem ela cai na
+  // pose de ataque do combate livre, que e o que tocava antes.
+  Attack: ['Shoot', 'Charge', 'Idle', 'Walk'],
 }
 
 export interface ResolvedBattleAnim extends BattleSpriteAnimMeta {

@@ -25,7 +25,8 @@ import type { StatusAtivo, EstagiosDeStat, EstagiosFonte, StatDeEstagio } from '
 import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
-export type AttackAnimKind = 'Shoot' | 'Charge'
+// 'Attack' (PH-543) e a pose do COMBATE DUELO; Shoot/Charge sao as do livre.
+export type AttackAnimKind = 'Shoot' | 'Charge' | 'Attack'
 
 // Escudos ("Screens"): Reflect/Light Screen/Safeguard/Mist/Lucky Chant/Wide
 // Guard. Cada valor e segundos restantes (mesmo padrao de `imunidadeDeStatus`

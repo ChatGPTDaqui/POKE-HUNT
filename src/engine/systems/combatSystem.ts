@@ -2343,7 +2343,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   // PH-176: cooldown NAO arma aqui mais — so no erro/AOE-sem-alvo abaixo, ou
   // em `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`).
   startGlobalCooldown(player, MIN_ACTION_GAP)
-  triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
+  triggerAttackAnim(player, ability.target === 'aoe', primaryTarget, world.mapDef?.encarada === true)
   announceAbility(world, player, ability)
 
   // Lock-On/Mind Reader (Fase 12): garantia de acerto e "uma vez, contra
@@ -2405,7 +2405,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   // `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`). Inimigo
   // sempre mira o jogador unico, entao nao existe caso "AOE sem alvo".
   startGlobalCooldown(enemy, MIN_ACTION_GAP)
-  triggerAttackAnim(enemy, ability.target === 'aoe', player)
+  triggerAttackAnim(enemy, ability.target === 'aoe', player, world.mapDef?.encarada === true)
   announceAbility(world, enemy, ability)
 
   const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id

@@ -129,3 +129,16 @@ describe('pose Hurt no duelo (PH-542)', () => {
     expect(desiredAnimName(e)).toBe('Faint')
   })
 })
+
+// PH-543: a pose de golpe depende do TIPO de combate, nao do alcance.
+describe('pose de golpe por tipo de combate (PH-543)', () => {
+  it('combate livre: Shoot pra alvo unico, Charge pra area', () => {
+    const a = atacante(); triggerAttackAnim(a, false); expect(a.attackAnim).toBe('Shoot')
+    const b = atacante(); triggerAttackAnim(b, true); expect(b.attackAnim).toBe('Charge')
+  })
+  it('combate duelo: Attack sempre, alvo unico ou area', () => {
+    const a = atacante(); triggerAttackAnim(a, false, undefined, true); expect(a.attackAnim).toBe('Attack')
+    const b = atacante(); triggerAttackAnim(b, true, undefined, true); expect(b.attackAnim).toBe('Attack')
+    expect(desiredAnimName({ ...b, attackAnimTimer: 0.2, poke: { status: null, hp: 1 } } as unknown as PlayerEntity)).toBe('Attack')
+  })
+})
