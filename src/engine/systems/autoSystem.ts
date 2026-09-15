@@ -140,6 +140,46 @@ export function podeAutoReanimar(
   return melhorRevive(gameState) !== null
 }
 
+/**
+ * Ha alguem vivo no banco pra entrar no lugar do POKE caido — a troca por
+ * desmaio de `simulation.ts#trocarPorDesmaio`, que so existe nos mapas com
+ * `autoSwitchTeamOnFaint` (Campeao Lance).
+ *
+ * Recebe o `mapDef` minimo em vez do mundo pelo mesmo motivo de
+ * `podeAutoReanimar` receber `isBossHunt`: quem chama ja o tem, e o predicado
+ * nao precisa conhecer a forma do `WorldState`.
+ */
+export function temSubstitutoDeEquipe(
+  mapDef: { autoSwitchTeamOnFaint?: boolean } | null | undefined,
+  team: readonly { hp: number }[],
+): boolean {
+  if (!mapDef?.autoSwitchTeamOnFaint) return false
+  return team.some((p) => p.hp > 0)
+}
+
+/**
+ * O POKE em campo caiu: a cacada ainda tem como continuar sozinha?
+ *
+ * Sim por DOIS caminhos, e nao um: o Auto-Revive (`podeAutoReanimar`) OU um
+ * substituto do time (`temSubstitutoDeEquipe`). E a pergunta que decide se a
+ * simulacao do servidor para por "desmaio" (`offlineSimSystem`) e se o cliente
+ * mostra "Voce foi derrotado" (`DefeatModal`).
+ *
+ * PH-546: so o primeiro caminho era considerado. No Lance — hunt BOSS, onde
+ * reanimar e proibido — a resposta era sempre "nao", e o servidor encerrava a
+ * sessao no primeiro tick com o POKE no chao, ANTES dos
+ * `ESPERA_DE_TROCA_SEGUNDOS` que a troca por desmaio precisa pra acontecer. O
+ * jogador via "Voce foi derrotado", era mandado ao Hospital com o resto do
+ * time vivo, e a luta contra o Lance nunca passava do primeiro POKE caido.
+ */
+export function podeLevantarDoDesmaio(
+  gameState: GameStateStore,
+  mapDef: { noRespawn?: boolean; autoSwitchTeamOnFaint?: boolean } | null | undefined,
+): boolean {
+  const isBossHunt = Boolean(mapDef?.noRespawn)
+  return podeAutoReanimar(gameState, isBossHunt) || temSubstitutoDeEquipe(mapDef, gameState.team)
+}
+
 // Cuida de autoPot e autoRevive. Chamado uma vez por tick fixo.
 // `world.autoTimers` throttla uso repetido de item.
 // Hunts BOSS (world.mapDef.noRespawn) desligam os dois toggles

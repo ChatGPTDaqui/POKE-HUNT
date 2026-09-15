@@ -94537,6 +94537,37 @@ function podeAutoReanimar(gameState, isBossHunt) {
 	if (!gameState.autoToggles.autoRevive) return false;
 	return melhorRevive(gameState) !== null;
 }
+/**
+* Ha alguem vivo no banco pra entrar no lugar do POKE caido — a troca por
+* desmaio de `simulation.ts#trocarPorDesmaio`, que so existe nos mapas com
+* `autoSwitchTeamOnFaint` (Campeao Lance).
+*
+* Recebe o `mapDef` minimo em vez do mundo pelo mesmo motivo de
+* `podeAutoReanimar` receber `isBossHunt`: quem chama ja o tem, e o predicado
+* nao precisa conhecer a forma do `WorldState`.
+*/
+function temSubstitutoDeEquipe(mapDef, team) {
+	if (!mapDef?.autoSwitchTeamOnFaint) return false;
+	return team.some((p) => p.hp > 0);
+}
+/**
+* O POKE em campo caiu: a cacada ainda tem como continuar sozinha?
+*
+* Sim por DOIS caminhos, e nao um: o Auto-Revive (`podeAutoReanimar`) OU um
+* substituto do time (`temSubstitutoDeEquipe`). E a pergunta que decide se a
+* simulacao do servidor para por "desmaio" (`offlineSimSystem`) e se o cliente
+* mostra "Voce foi derrotado" (`DefeatModal`).
+*
+* PH-546: so o primeiro caminho era considerado. No Lance — hunt BOSS, onde
+* reanimar e proibido — a resposta era sempre "nao", e o servidor encerrava a
+* sessao no primeiro tick com o POKE no chao, ANTES dos
+* `ESPERA_DE_TROCA_SEGUNDOS` que a troca por desmaio precisa pra acontecer. O
+* jogador via "Voce foi derrotado", era mandado ao Hospital com o resto do
+* time vivo, e a luta contra o Lance nunca passava do primeiro POKE caido.
+*/
+function podeLevantarDoDesmaio(gameState, mapDef) {
+	return podeAutoReanimar(gameState, Boolean(mapDef?.noRespawn)) || temSubstitutoDeEquipe(mapDef, gameState.team);
+}
 function updateAutoHeal(world, gameState, dt) {
 	const player = world.player;
 	const events = [];
@@ -96133,15 +96164,11 @@ function entradaDoInimigo(mapDef, sala) {
 */
 function trocarPorDesmaio(world, gameState, dt, silent) {
 	const player = world.player;
-	if (!world.mapDef?.autoSwitchTeamOnFaint || !player || !isDead(player)) {
+	if (!world.mapDef || !player || !isDead(player) || !temSubstitutoDeEquipe(world.mapDef, gameState.team)) {
 		world.trocaEmCampo = null;
 		return;
 	}
 	const proximo = gameState.team.findIndex((p) => p.hp > 0);
-	if (proximo === -1) {
-		world.trocaEmCampo = null;
-		return;
-	}
 	world.trocaEmCampo = (world.trocaEmCampo ?? 2) - dt;
 	if (world.trocaEmCampo > 0) return;
 	world.trocaEmCampo = null;
@@ -96683,7 +96710,6 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 	summary.requestedSeconds = seconds;
 	if (!Number.isFinite(seconds) || seconds <= 0 || !world.player) return summary;
 	const itemsBefore = { ...gameState.items };
-	const isBossHunt = Boolean(world.mapDef && world.mapDef.noRespawn);
 	summary.pokeLevelBefore = world.player.poke.level;
 	summary.trainerLevelBefore = gameState.trainer.level;
 	let step = Math.max(Math.max(.01, stepSeconds), seconds / Math.max(1, maxSteps));
@@ -96722,7 +96748,7 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 			}
 		}
 		if (world.player.fainted) {
-			if (!podeAutoReanimar(gameState, isBossHunt)) {
+			if (!podeLevantarDoDesmaio(gameState, world.mapDef)) {
 				summary.stoppedEarly = true;
 				break;
 			}
