@@ -38,7 +38,8 @@ export function SeletorDeAvatar({ userId, atual, aoFechar }: Props) {
   return (
     <div className="flex flex-col gap-[.4em] rounded-[.7em] border border-n700 bg-n900 p-[.6em]" data-testid="seletor-de-avatar">
       <SectionLabel>Foto de perfil</SectionLabel>
-      <div className="grid grid-cols-6 gap-[.4em]">
+      {/* PH-550: 36 retratos — rola dentro do painel em vez de empurrar as abas. */}
+      <div className="grid max-h-[13em] grid-cols-6 gap-[.35em] overflow-y-auto pr-[.2em] sm:grid-cols-9">
         <button
           type="button"
           disabled={gravando}
