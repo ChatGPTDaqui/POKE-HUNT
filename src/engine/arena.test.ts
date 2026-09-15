@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance, type PokeInstance } from '@/data/pokes'
 import { criarMundoArena, rodarArena, stepArena, ARENA_MAP_ID } from './arena'
+import { mapDefParaSala, spawnInimigoParaSala, spawnPointParaSala } from '@/data/maps'
+import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { isDead } from './entity'
 import { LIVE_SIM_STEP_SECONDS, stepWorld } from './simulation'
 import type { WorldState } from './types'
@@ -76,5 +78,40 @@ describe('arena (PH-540)', () => {
     expect(world.arena!.resultado).toBe('vitoria')
     expect(tocouNoEstado).toBe(0)
     expect(world.mapDef!.id).toBe(ARENA_MAP_ID)
+  })
+})
+
+// PH-541: o mundo da arena e o palco PINTADO do Lance. Com o catalogo cru
+// (1400x900, sem grade) as bolas ficavam fora do mundo e o primeiro tick
+// puxava os corpos pro centro — o "teleporte" que o dono viu contra os bots.
+describe('arena: palco pintado do Lance (PH-541)', () => {
+  it('herda bounds e grade da arte, e cada lado nasce na sua bola', () => {
+    const world = criarMundoArena({ semente: 3, meuTime: time(1, TIME_A), rivalTime: time(2, TIME_B), nomeDoRival: 'Rival' })
+    const lance = mapDefParaSala(LANCE_MAP_ID, null)!
+    expect(world.mapDef!.bounds).toEqual(lance.bounds)
+    expect(world.mapDef!.collisionGrid).toBe(lance.collisionGrid)
+    expect(world.mapDef!.colisaoDefineLimite).toBe(true)
+
+    const amarela = spawnPointParaSala(LANCE_MAP_ID, null)!
+    const verde = spawnInimigoParaSala(LANCE_MAP_ID, null)!
+    expect({ x: world.player!.x, y: world.player!.y }).toEqual(amarela)
+    expect({ x: world.enemies[0].x, y: world.enemies[0].y }).toEqual(verde)
+    expect(amarela.y).toBeGreaterThan(900) // a bola so existe no mundo da arte
+  })
+
+  it('ninguem teleporta: nenhum corpo anda mais que um passo por tick na luta inteira', () => {
+    // Com o catalogo cru o salto era de ~460 px no tick em que a encarada
+    // engaja (a coleira puxava o par pro centro de um mapa que nao existe).
+    const world = criarMundoArena({ semente: 3, meuTime: time(1, TIME_A), rivalTime: time(2, TIME_B), nomeDoRival: 'Rival' })
+    let maiorSalto = 0
+    while (world.arena!.resultado === 'lutando') {
+      const antes = [world.player!, ...world.enemies].map((e) => ({ id: e.id, x: e.x, y: e.y }))
+      stepArena(world, LIVE_SIM_STEP_SECONDS, { silent: true })
+      for (const { id, x, y } of antes) {
+        const e = world.player!.id === id ? world.player! : world.enemies.find((k) => k.id === id)
+        if (e) maiorSalto = Math.max(maiorSalto, Math.hypot(e.x - x, e.y - y))
+      }
+    }
+    expect(maiorSalto).toBeLessThan(15)
   })
 })

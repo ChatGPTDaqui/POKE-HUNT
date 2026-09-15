@@ -87276,7 +87276,7 @@ function cloneParaArena(poke) {
 	};
 }
 function mapaDaArena(nomeDoRival) {
-	const base = getMap(LANCE_MAP_ID);
+	const base = mapDefParaSala(LANCE_MAP_ID, null);
 	if (!base) throw new Error("Arena indisponivel: mapa base ausente.");
 	return {
 		...base,
