@@ -2,11 +2,15 @@
 //
 // A regra de qual estado da qual face e pura e mora em data/faceEmotions.ts.
 // Aqui fica so o que precisa do React: ler o mundo com selector estreito, achar
-// o level-up (que e um EVENTO, e o estado do mundo so guarda o resultado) e
-// segurar a face por um tempo minimo pra ela nao piscar.
+// o level-up (que e um EVENTO, e o estado do mundo so guarda o resultado — ver
+// `useFestejando` abaixo), somar o duelo vencido (que e ESTADO puro do motor,
+// `engine/systems/vitoriaDoDuelo.ts#duelVencido`, sem janela propria: dura
+// enquanto o jogador nao sair) e segurar a face por um tempo minimo pra ela
+// nao piscar.
 import { useEffect, useRef, useState } from 'react'
 import type { PokeInstance } from '@/data/pokes'
 import { escolherFace, faceUrlsDaEspecie, FACE_NEUTRA, type FaceEscolhida } from '@/data/faceEmotions'
+import { duelVencido } from '@/engine/systems/vitoriaDoDuelo'
 import { primeImage } from '@/render/sprites'
 import { useWorldStore } from '@/stores/worldStore'
 
@@ -35,8 +39,12 @@ export function useFaceDoPoke(poke: PokeInstance | null): FaceEscolhida {
   const fainted = useWorldStore((s) => s.player?.fainted ?? false)
   const emCombate = useWorldStore((s) => s.player?.state === 'chase' || s.player?.state === 'engaged')
   const statusVolatil = useWorldStore((s) => s.player?.statusVolatil ?? null)
+  // Duelo vencido sem mais ninguem pra lutar (Lance zerado, covil resolvido,
+  // arena vencida): a mesma comemoracao do level-up, ver vitoriaDoDuelo.ts.
+  const duelo = useWorldStore(duelVencido)
 
-  const festejando = useFestejando(poke?.uid ?? null, poke?.level ?? 0)
+  const festejandoPorNivel = useFestejando(poke?.uid ?? null, poke?.level ?? 0)
+  const festejando = festejandoPorNivel || (doJogador && duelo)
   useFacesQuentes(poke?.speciesId ?? null, poke?.isShiny ?? false)
 
   const face = poke == null

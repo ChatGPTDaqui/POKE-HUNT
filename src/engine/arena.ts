@@ -21,6 +21,7 @@ import type { MapDef } from '@/data/maps'
 import { createEnemyEntity, createPlayerEntity, isDead } from './entity'
 import { DEATH_ANIM_GRACE_PERIOD } from './simulation'
 import { apresentarEntrada, tickAberturaDoDuelo } from './systems/aberturaDoDuelo'
+import { tickVitoriaDoDuelo } from './systems/vitoriaDoDuelo'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { tickClimaDeGolpe } from './systems/climaAmbiente'
 import { tickEffects, updateCombat } from './systems/combatSystem'
@@ -177,6 +178,9 @@ export function stepArena(world: WorldState, dt: number, opts: { silent?: boolea
   const silent = opts.silent ?? false
 
   if (arena.resultado !== 'lutando') {
+    // PH: comemoracao ao vencer (vitoriaDoDuelo.ts) — a arena ja congela tudo
+    // aqui, so falta a pose. Silent tambem: e estado, nao efeito visual.
+    tickVitoriaDoDuelo(world)
     if (!silent) updateAnimations(world, dt)
     return
   }

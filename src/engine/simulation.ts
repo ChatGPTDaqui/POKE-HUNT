@@ -45,6 +45,7 @@ import { updateMovement } from './systems/movementSystem'
 import { atualizarLure } from './systems/lureSystem'
 import { updateCombat, podeDanificar, tickEffects } from './systems/combatSystem'
 import { apresentarEntrada, tickAberturaDoDuelo } from './systems/aberturaDoDuelo'
+import { tickVitoriaDoDuelo } from './systems/vitoriaDoDuelo'
 import { aplicarStatus, apagarTodosOsEstagios, limparEfeitosAoDesmaiar } from './systems/statusSystem'
 import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { climaAmbienteDaSala, climaDeAmbiente, tickClimaDeGolpe } from './systems/climaAmbiente'
@@ -1714,6 +1715,9 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // instante em que a conta fecha (o POKE daria um passo a mais pro candidato
   // antes de virar pra lutar).
   atualizarLure(world, gameState, dt)
+  // Comemoracao de duelo vencido (Lance/covil): arma antes do movimento, que
+  // le o mesmo `duelVencido` pra parar de vagar (ver vitoriaDoDuelo.ts).
+  tickVitoriaDoDuelo(world)
   updateMovement(world, dt)
   const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent })
   // attackAnimTimer precisa decrementar todo tick independente de `silent`
