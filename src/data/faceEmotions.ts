@@ -47,19 +47,23 @@ export interface EstadoDaFace {
   statusVolatil: StatusAtivo | null
   /** O POKE esta perseguindo ou batendo em alguem agora. */
   emCombate: boolean
-  /** Subiu de nivel nos ultimos instantes (janela decidida por quem chama). */
+  /** Subiu de nivel ha pouco OU venceu o duelo agora — janela decidida por quem chama. */
   festejando: boolean
 }
 
 /**
  * A ordem e uma escala de urgencia, e ela e o desenho todo:
  *
- *   KO > acabou de subir de nivel > HP critico > status > HP baixo > lutando > neutro
+ *   KO > festejando (nivel ou duelo vencido) > HP critico > status > HP baixo > lutando > neutro
  *
- * `festejando` vem acima de HP critico de proposito — o level-up dura ~2s e e o
- * unico momento comemorativo do loop; um POKE que sobe de nivel ferido merece a
- * comemoracao e volta a cara de dor logo depois. KO vem antes de tudo porque com
- * o POKE desmaiado nada mais que a face poderia dizer importa.
+ * `festejando` vem acima de HP critico de proposito. Sao dois eventos, com
+ * durações diferentes: o level-up dura ~2s (useFaceDoPoke.ts#useFestejando); o
+ * duelo vencido (Lance zerado, covil resolvido, arena vencida — ver
+ * engine/systems/vitoriaDoDuelo.ts) continua enquanto o jogador nao sair da
+ * hunt. Um POKE que sobe de nivel ferido, ou que venceu machucado, merece a
+ * comemoracao mesmo assim — a cara de dor so volta quando o motivo some. KO
+ * vem antes de tudo porque com o POKE desmaiado nada mais que a face poderia
+ * dizer importa.
  *
  * Status ganha de HP baixo, e perde de HP critico: 60% de vida com veneno e uma
  * noticia sobre o veneno; 20% de vida e uma noticia sobre a vida.

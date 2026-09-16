@@ -108,6 +108,19 @@ export function HudLayer() {
           <div ref={trilhoRef}>
             <StatusRail />
           </div>
+          {/* Placar do combate duelo (arena, Lance, covis) — PH-549 o colocava
+              na fileira de chips (sala/clima), la embaixo das reservas. Com uma
+              equipe cheia a fileira de reservas empurra o card pra baixo o
+              bastante pra ele acabar no meio da tela, longe do cabecalho que
+              ele descreve. Mora AQUI agora, entre o cabecalho e as reservas —
+              proprio slot, nao a mesma fileira dos chips, pra nao herdar o
+              `justify-center` pensado pra chips pequenos.
+              So existe (e so entao ganha margem) quando ha duelo — `PlacarDoDuelo`
+              devolve `null` fora dele, e a div fica vazia de verdade, mesmo
+              padrao `:not(:empty)` que a fileira de chips ja usa abaixo. */}
+          <div className="flex w-full justify-center [&:not(:empty)]:my-[.4em]">
+            <PlacarDoDuelo />
+          </div>
           {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
               ancora propria na borda esquerda. A ancora foi tentada uma vez
               (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em
@@ -120,7 +133,12 @@ export function HudLayer() {
               campo — o slot 1 e o campo, e a numeracao dela comeca em 2 (ver
               ReservasRail). A linha de sala/clima ficava no meio dos dois e
               cortava essa leitura: no PC as reservas apareciam como um bloco
-              solto abaixo de um chip, sem relacao visivel com o POKE. */}
+              solto abaixo de um chip, sem relacao visivel com o POKE.
+
+              O slot do placar de duelo, logo acima, e a UNICA excecao de
+              proposito: fora de duelo ele nao renderiza nada (fica vazio),
+              entao esta regra continua valendo sempre que ela importa — hunt
+              normal com reservas. */}
           <ReservasRail />
           {/* SO O CHIP DE SALA MORA AQUI (PH-285), e so no compacto. O clima
               subiu pro trilho junto com ele; o `flex-wrap` continua porque a
@@ -143,9 +161,6 @@ export function HudLayer() {
                 No compacto ele continua aqui: o trilho de 390px nao tem largura
                 pra ele (ver a nota no topo de SalaChip.tsx). */}
             {!salaNoTrilho(mode) && <SalaChip />}
-            {/* PH-549: o placar do combate duelo (arena, Lance, covis) mora na
-                mesma fileira contextual — some sozinho fora do duelo. */}
-            <PlacarDoDuelo />
             {/* O CLIMA SAIU DAQUI (PH-285). Ele agora esta no trilho nas TRES
                 larguras: com o nome escrito na faixa central, e so como simbolo
                 no compacto, onde o vao tem 73px (ver `StatusRail`).
