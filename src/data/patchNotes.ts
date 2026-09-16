@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-553 (duelo vencido comemora; placar sobe pra logo abaixo do cabeçalho).
+  {
+    version: '7.60',
+    date: '2026-09-16',
+    title: 'Duelo vencido: seu POKE comemora, e o placar sobe pro topo',
+    highlights: [
+      'Ao vencer um duelo (Campeão Lance, covil de lendário), seu POKE não fica mais andando sem rumo pelo mapa vazio — ele para e repete a pose de comemoração, a mesma do level-up, até você sair. A foto de perfil no cabeçalho também mostra a cara feliz enquanto isso.',
+      'O placar do duelo (PvP, Lance, covis) agora aparece logo abaixo do seu cabeçalho, em vez de ficar preso atrás da fila de reservas com a equipe cheia.',
+    ],
+  },
   // PH-552 (abertura do duelo). A contagem regressiva de intro saiu junto.
   {
     version: '7.59',
