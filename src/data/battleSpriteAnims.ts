@@ -11,7 +11,7 @@
 // tira >= 20% do HP maximo de quem levou.
 // `Attack` (PH-543): pose de golpe do combate duelo, 380/380 pelo mesmo
 // script; o combate livre segue com Shoot/Charge.
-export type AnimName = 'Idle' | 'Walk' | 'Shoot' | 'Charge' | 'Sleep' | 'Faint' | 'Hurt' | 'Attack'
+export type AnimName = 'Idle' | 'Walk' | 'Shoot' | 'Charge' | 'Sleep' | 'Faint' | 'Hurt' | 'Attack' | 'Pose' | 'Hop' | 'Swing'
 
 export interface BattleSpriteAnimMeta {
   frameWidth: number
@@ -100,6 +100,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -202,6 +242,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "bulbasaur": {
@@ -295,6 +375,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -394,6 +516,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "spearow": {
@@ -488,6 +641,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -584,6 +768,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -688,6 +903,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "sentret": {
@@ -789,6 +1044,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -906,6 +1201,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         1
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "zubat": {
@@ -1006,6 +1332,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "dunsparce": {
@@ -1103,6 +1460,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "caterpie": {
@@ -1193,6 +1592,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "weedle": {
@@ -1281,6 +1711,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -1386,6 +1847,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "wartortle": {
@@ -1472,6 +1973,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "ivysaur": {
@@ -1552,6 +2084,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -1650,6 +2213,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -1753,6 +2347,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "raticate": {
@@ -1850,6 +2475,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "pidgeotto": {
@@ -1940,6 +2596,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -2034,6 +2721,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -2136,6 +2854,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         1
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "golbat": {
@@ -2232,6 +2981,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "metapod": {
@@ -2327,6 +3107,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "kakuna": {
@@ -2403,6 +3214,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -2505,6 +3347,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "blastoise": {
@@ -2594,6 +3467,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "venusaur": {
@@ -2676,6 +3580,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -2767,6 +3702,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -2869,6 +3835,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         1,
+        1,
+        1
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
         1,
         1
       ]
@@ -2976,6 +3973,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "beedrill": {
@@ -3078,6 +4106,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         1
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "bellsprout": {
@@ -3163,6 +4222,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "unown": {
@@ -3240,6 +4330,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -3331,6 +4452,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "sandshrew": {
@@ -3411,6 +4563,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -3498,6 +4690,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 88,
+      "frameHeight": 160,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -3592,6 +4815,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -3693,6 +4947,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "slowpoke": {
@@ -3780,6 +5076,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -3873,6 +5200,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -3980,6 +5338,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "jigglypuff": {
@@ -4083,6 +5481,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "ditto": {
@@ -4151,6 +5589,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -4245,6 +5714,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "nidoran_m": {
@@ -4336,6 +5836,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -4441,6 +5972,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -4552,6 +6114,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "machop": {
@@ -4647,6 +6240,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -4757,6 +6390,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "weezing": {
@@ -4861,6 +6525,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "magnemite": {
@@ -4959,6 +6654,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "tauros": {
@@ -5034,6 +6760,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -5128,6 +6885,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "arbok": {
@@ -5217,6 +7005,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "farfetch_d": {
@@ -5286,6 +7105,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -5366,6 +7216,51 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        12,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -5463,6 +7358,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "swinub": {
@@ -5553,6 +7488,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "jynx": {
@@ -5640,6 +7606,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -5733,6 +7730,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         1
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "seel": {
@@ -5823,6 +7851,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "tangela": {
@@ -5907,6 +7966,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -5994,6 +8084,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -6086,6 +8207,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -6185,6 +8337,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -6297,6 +8480,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "donphan": {
@@ -6383,6 +8606,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -6483,6 +8737,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "machoke": {
@@ -6556,6 +8841,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -6662,6 +8978,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "pupitar": {
@@ -6759,6 +9115,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "magmar": {
@@ -6846,6 +9233,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -6945,6 +9363,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -7054,6 +9503,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "rapidash": {
@@ -7152,6 +9641,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "doduo": {
@@ -7225,6 +9745,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -7301,6 +9852,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -7382,6 +9964,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -7478,6 +10100,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         1
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "granbull": {
@@ -7563,6 +10216,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -7658,6 +10342,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "nidorina": {
@@ -7746,6 +10461,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -7841,6 +10587,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "magneton": {
@@ -7932,6 +10709,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "xatu": {
@@ -8018,6 +10826,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -8111,6 +10950,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "kingler": {
@@ -8201,6 +11071,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4,
         2,
+        1
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
         1
       ]
     }
@@ -8297,6 +11198,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "tyranitar": {
@@ -8387,6 +11319,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "pichu": {
@@ -8470,6 +11433,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -8558,6 +11563,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "igglybuff": {
@@ -8643,6 +11679,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "togepi": {
@@ -8714,6 +11781,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -8814,6 +11912,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "hoothoot": {
@@ -8900,6 +12038,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -8990,6 +12159,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -9102,6 +12302,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "pineco": {
@@ -9191,6 +12433,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -9288,6 +12561,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "poliwag": {
@@ -9383,6 +12687,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "diglett": {
@@ -9464,6 +12799,44 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        8,
+        3,
+        3,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 24,
+      "durations": [
+        2,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -9570,6 +12943,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "meowth": {
@@ -9667,6 +13082,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -9774,6 +13229,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         3
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "drowzee": {
@@ -9862,6 +13348,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -9961,6 +13478,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -10069,6 +13617,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "horsea": {
@@ -10160,6 +13739,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "tentacool": {
@@ -10250,6 +13860,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "exeggcute": {
@@ -10338,6 +13979,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -10438,6 +14110,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "cyndaquil": {
@@ -10531,6 +14245,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -10630,6 +14384,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -10734,6 +14528,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "mankey": {
@@ -10829,6 +14663,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -10928,6 +14793,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "chinchou": {
@@ -11026,6 +14931,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "shellder": {
@@ -11121,6 +15057,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "staryu": {
@@ -11210,6 +15177,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -11303,6 +15301,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -11399,6 +15428,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "psyduck": {
@@ -11485,6 +15554,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -11584,6 +15693,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "slugma": {
@@ -11672,6 +15823,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -11781,6 +15963,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "teddiursa": {
@@ -11868,6 +16092,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -11970,6 +16225,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "remoraid": {
@@ -12065,6 +16362,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "tyrogue": {
@@ -12156,6 +16484,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "elekid": {
@@ -12241,6 +16600,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -12341,6 +16731,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "smoochum": {
@@ -12439,6 +16869,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "marill": {
@@ -12535,6 +17007,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "sudowoodo": {
@@ -12618,6 +17130,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -12719,6 +17262,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "aipom": {
@@ -12816,6 +17401,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -12916,6 +17541,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "corsola": {
@@ -13001,6 +17657,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -13101,6 +17788,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -13207,6 +17934,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "stantler": {
@@ -13307,6 +18076,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -13419,6 +18219,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "delibird": {
@@ -13515,6 +18357,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -13616,6 +18498,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "wobbuffet": {
@@ -13706,6 +18630,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -13816,6 +18771,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 64,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 112,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "rhyhorn": {
@@ -13901,6 +18887,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "hitmonlee": {
@@ -13984,6 +19001,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -14073,6 +19121,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -14170,6 +19249,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "lapras": {
@@ -14259,6 +19369,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 56,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -14352,6 +19493,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -14449,6 +19621,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         4,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "scyther": {
@@ -14534,6 +19748,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -14621,6 +19866,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -14712,6 +19988,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "omanyte": {
@@ -14793,6 +20100,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         1,
         1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
         2,
         2,
         2,
@@ -14896,6 +20234,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "aerodactyl": {
@@ -14991,6 +20369,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "snorlax": {
@@ -15080,6 +20489,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -15173,6 +20613,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "alakazam": {
@@ -15264,6 +20735,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -15368,6 +20870,47 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "machamp": {
@@ -15462,6 +21005,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -15558,6 +21132,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "arcanine": {
@@ -15645,6 +21250,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -15738,6 +21374,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "nidoqueen": {
@@ -15828,6 +21495,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "steelix": {
@@ -15916,6 +21614,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 88,
+      "frameHeight": 152,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 120,
+      "frameHeight": 128,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -16008,6 +21737,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 96,
+      "frameHeight": 168,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 136,
+      "frameHeight": 128,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -16104,6 +21864,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 88,
+      "frameHeight": 144,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "zapdos": {
@@ -16194,6 +21985,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 56,
+      "frameHeight": 136,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -16290,6 +22112,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 80,
+      "frameHeight": 152,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -16391,6 +22244,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 56,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "entei": {
@@ -16491,6 +22375,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "suicune": {
@@ -16589,6 +22504,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "lugia": {
@@ -16671,6 +22617,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 80,
+      "frameHeight": 136,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 120,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -16772,6 +22749,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 72,
+      "frameHeight": 152,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 96,
+      "frameHeight": 120,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -16888,6 +22896,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "mewtwo": {
@@ -16993,6 +23041,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -17102,6 +23190,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "noctowl": {
@@ -17206,6 +23334,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "ariados": {
@@ -17301,6 +23460,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         3,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -17402,6 +23592,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         1,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -17510,6 +23731,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "gloom": {
@@ -17602,6 +23854,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "poliwhirl": {
@@ -17693,6 +23976,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "dugtrio": {
@@ -17774,6 +24088,44 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        3,
+        3,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        10,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -17867,6 +24219,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "persian": {
@@ -17956,6 +24339,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -18057,6 +24471,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "hypno": {
@@ -18150,6 +24595,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -18254,6 +24730,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "seadra": {
@@ -18350,6 +24857,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "tentacruel": {
@@ -18445,6 +24983,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -18545,6 +25114,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -18649,6 +25258,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "bayleef": {
@@ -18736,6 +25385,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "croconaw": {
@@ -18821,6 +25501,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -18916,6 +25627,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "marowak": {
@@ -18996,6 +25738,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -19104,6 +25877,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "muk": {
@@ -19194,6 +26007,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 96,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -19311,6 +26155,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "golduck": {
@@ -19399,6 +26274,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -19490,6 +26396,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "magcargo": {
@@ -19576,6 +26513,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -19675,6 +26643,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "octillery": {
@@ -19757,6 +26756,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -19844,6 +26874,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -19934,6 +26995,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "rhydon": {
@@ -20021,6 +27113,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -20117,6 +27240,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "omastar": {
@@ -20203,6 +27357,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -20293,6 +27478,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -20386,6 +27602,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -20487,6 +27734,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "meganium": {
@@ -20578,6 +27865,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "feraligatr": {
@@ -20668,6 +27986,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -20762,6 +28111,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -20863,6 +28243,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "politoed": {
@@ -20959,6 +28370,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "golem": {
@@ -21050,6 +28492,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -21144,6 +28617,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "scizor": {
@@ -21233,6 +28737,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -21333,6 +28868,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "bellossom": {
@@ -21418,6 +28984,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -21508,6 +29105,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "poliwrath": {
@@ -21597,6 +29225,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -21690,6 +29349,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -21792,6 +29482,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "starmie": {
@@ -21889,6 +29610,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "wigglytuff": {
@@ -21978,6 +29730,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "vaporeon": {
@@ -22063,6 +29846,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 56,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 104,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -22157,6 +29971,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -22253,6 +30109,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "espeon": {
@@ -22341,6 +30239,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -22449,6 +30378,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "raichu": {
@@ -22548,6 +30519,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "crobat": {
@@ -22645,6 +30656,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -22745,6 +30787,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         1
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "clefairy": {
@@ -22820,6 +30893,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -22903,6 +31007,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "clefable": {
@@ -22978,6 +31122,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -23073,6 +31248,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -23170,6 +31385,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         4,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "sceptile": {
@@ -23254,6 +31509,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -23356,6 +31642,51 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "combusken": {
@@ -23444,6 +31775,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "blaziken": {
@@ -23527,6 +31889,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -23630,6 +32023,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "marshtomp": {
@@ -23716,6 +32151,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -23820,6 +32286,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "poochyena": {
@@ -23921,6 +32427,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -24024,6 +32572,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "zigzagoon": {
@@ -24117,6 +32707,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -24218,6 +32839,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "wurmple": {
@@ -24311,6 +32963,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "silcoon": {
@@ -24399,6 +33082,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         1,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -24505,6 +33219,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "cascoon": {
@@ -24590,6 +33335,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -24693,6 +33469,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "lotad": {
@@ -24778,6 +33585,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -24872,6 +33710,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "ludicolo": {
@@ -24956,6 +33825,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -25045,6 +33945,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -25154,6 +34085,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "shiftry": {
@@ -25252,6 +34223,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "taillow": {
@@ -25345,6 +34347,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -25447,6 +34480,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -25558,6 +34622,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "pelipper": {
@@ -25646,6 +34741,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -25740,6 +34866,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -25854,6 +35020,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "gardevoir": {
@@ -25939,6 +35145,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -26034,6 +35271,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "masquerain": {
@@ -26128,6 +35396,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "shroomish": {
@@ -26217,6 +35516,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -26323,6 +35653,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "slakoth": {
@@ -26406,6 +35776,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         3,
         3,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -26495,6 +35896,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -26586,6 +36018,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "nincada": {
@@ -26674,6 +36137,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -26765,6 +36259,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -26877,6 +36402,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "whismur": {
@@ -26969,6 +36525,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "loudred": {
@@ -27060,6 +36647,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "exploud": {
@@ -27147,6 +36774,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -27261,6 +36919,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "hariyama": {
@@ -27360,6 +37058,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "azurill": {
@@ -27449,6 +37178,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -27540,6 +37300,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -27641,6 +37432,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         4
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -27746,6 +37577,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "sableye": {
@@ -27829,6 +37702,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -27930,6 +37834,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 80,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "aron": {
@@ -28027,6 +37962,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "lairon": {
@@ -28113,6 +38090,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -28202,6 +38210,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -28295,6 +38334,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -28390,6 +38460,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -28501,6 +38602,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "manectric": {
@@ -28600,6 +38743,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -28705,6 +38879,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "minun": {
@@ -28809,6 +39025,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "volbeat": {
@@ -28908,6 +39166,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "illumise": {
@@ -29001,6 +39290,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -29104,6 +39424,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "gulpin": {
@@ -29197,6 +39557,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "swalot": {
@@ -29285,6 +39676,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -29377,6 +39799,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -29473,6 +39926,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -29571,6 +40055,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -29676,6 +40191,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 72,
+      "frameHeight": 144,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 96,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "numel": {
@@ -29764,6 +40310,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "camerupt": {
@@ -29850,6 +40427,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -29946,6 +40554,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -30051,6 +40690,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         4
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "grumpig": {
@@ -30138,6 +40808,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -30249,6 +40950,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "trapinch": {
@@ -30351,6 +41092,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "vibrava": {
@@ -30451,6 +41234,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "flygon": {
@@ -30549,6 +41363,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "cacnea": {
@@ -30635,6 +41480,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -30728,6 +41604,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -30832,6 +41739,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -30940,6 +41889,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "zangoose": {
@@ -31041,6 +42032,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "seviper": {
@@ -31127,6 +42160,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 56,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -31226,6 +42290,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -31327,6 +42422,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "barboach": {
@@ -31421,6 +42547,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -31524,6 +42681,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "corphish": {
@@ -31619,6 +42807,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "crawdaunt": {
@@ -31705,6 +42935,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -31821,6 +43082,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "claydol": {
@@ -31921,6 +43213,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "lileep": {
@@ -32007,6 +43330,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         1,
         1,
         1,
+        1,
+        1
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
         1,
         1
       ]
@@ -32113,6 +43467,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "anorith": {
@@ -32210,6 +43604,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "armaldo": {
@@ -32306,6 +43731,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -32406,6 +43862,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "milotic": {
@@ -32495,6 +43982,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 64,
+      "frameHeight": 136,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 120,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -32588,6 +44106,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -32685,6 +44234,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -32793,6 +44382,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "banette": {
@@ -32883,6 +44514,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -32983,6 +44645,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "dusclops": {
@@ -33068,6 +44770,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -33163,6 +44896,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -33265,6 +45029,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "absol": {
@@ -33360,6 +45166,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 56,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "wynaut": {
@@ -33454,6 +45302,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -33552,6 +45431,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 64,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "glalie": {
@@ -33647,6 +45566,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "spheal": {
@@ -33738,6 +45688,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "sealeo": {
@@ -33825,6 +45806,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -33920,6 +45932,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "clamperl": {
@@ -34009,6 +46052,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -34101,6 +46175,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -34197,6 +46302,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -34295,6 +46431,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -34400,6 +46567,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 24,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "bagon": {
@@ -34497,6 +46695,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "shelgon": {
@@ -34584,6 +46822,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -34696,6 +46965,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 56,
+      "frameHeight": 72,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 56,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 104,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "beldum": {
@@ -34801,6 +47112,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "metang": {
@@ -34905,6 +47247,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "metagross": {
@@ -34994,6 +47367,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "regirock": {
@@ -35082,6 +47486,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 72,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "regice": {
@@ -35169,6 +47604,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "registeel": {
@@ -35251,6 +47717,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -35363,6 +47860,48 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        1,
+        3,
+        2,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "latios": {
@@ -35461,6 +48000,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 64,
+      "frameHeight": 128,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 112,
+      "frameHeight": 112,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -35565,6 +48135,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Hop": {
+      "frameWidth": 64,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "groudon": {
@@ -35662,6 +48263,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 64,
+      "frameHeight": 136,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 88,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -35763,6 +48395,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 88,
+      "frameHeight": 184,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 112,
+      "frameHeight": 144,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   },
@@ -35876,6 +48539,46 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2
       ]
+    },
+    "Pose": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        12,
+        5,
+        8
+      ]
+    },
+    "Hop": {
+      "frameWidth": 40,
+      "frameHeight": 88,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
+      ]
     }
   },
   "deoxys": {
@@ -35971,6 +48674,37 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
         2,
         2,
         2
+      ]
+    },
+    "Hop": {
+      "frameWidth": 48,
+      "frameHeight": 104,
+      "durations": [
+        2,
+        1,
+        2,
+        3,
+        4,
+        4,
+        3,
+        2,
+        1,
+        2
+      ]
+    },
+    "Swing": {
+      "frameWidth": 80,
+      "frameHeight": 96,
+      "durations": [
+        2,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        1,
+        1
       ]
     }
   }

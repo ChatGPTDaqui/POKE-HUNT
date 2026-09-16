@@ -265,7 +265,8 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
     // coisas: a faixa de nivel seguinte e o Modo Pesadelo (com as 11 hunts
     // BOSS dentro dele).
     unlocksContinentOnClear: GRUPOS_DO_LANCE,
-    startCountdown: 5, // explicit user request — 5..0 countdown before Lance's first POKE spawns (main.js#buildMapWorld/stepWorld)
+    // PH-552: a contagem de 5 s saiu — a abertura do duelo (bola, pose,
+    // habilidade de entrada) e o que antecede o primeiro golpe.
     keepCorpses: true, // explicit user request — defeated POKEs here stay on the field as "bodies" instead of despawning after DEATH_ANIM_GRACE_PERIOD
     // PH-397: a arena de duelo do jogo. O par se encara e gira entre um golpe e
     // o outro; os cadaveres que `keepCorpses` deixa em campo nao participam

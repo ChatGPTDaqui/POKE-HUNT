@@ -23,6 +23,7 @@ import { getMap, MAPS } from '@/data/maps'
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { buildMapWorld, stepWorld, type ProgressoDaSessao } from './simulation'
+import { pularAbertura } from './testes/aberturaDeTeste'
 
 const ARENA_DO_LANCE = COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.jpg']
 
@@ -50,11 +51,12 @@ function mundoDoLance(progresso?: ProgressoDaSessao) {
   }, progresso)
 }
 
-/** Passa a contagem regressiva de intro (5s) e para no primeiro POKE em campo. */
+/**
+ * Passa a abertura do duelo (PH-552: bola, pose e habilidade de quem esta em
+ * campo — a contagem de 5 s saiu) e para com os dois lados prontos pra lutar.
+ */
 function passarIntro(world: ReturnType<typeof mundoDoLance>, gameState = useGameStateStore.getState()) {
-  for (let i = 0; i < 80 && world.countdownRemaining != null; i++) {
-    stepWorld(world, 0.1, gameState, { silent: true })
-  }
+  pularAbertura(world, gameState)
 }
 
 describe('arena de duelo: por onde cada lado entra', () => {

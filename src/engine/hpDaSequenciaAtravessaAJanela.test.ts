@@ -101,21 +101,28 @@ describe('PH-307: HP da sequencia atravessa a janela do servidor', () => {
     expect(gameState.isContinentUnlocked('nightmare')).toBe(true)
   })
 
-  // O `0` tem um caminho perigoso: numa sessao NOVA, a contagem de entrada do
-  // Lance (5s) segura o spawn, entao uma janela que feche antes dela grava `0`
-  // sem ninguem ter caido. Se esse `0` pulasse o spawn na reconstrucao, o
+  // O `0` tem um caminho perigoso: ate a PH-552 a contagem de entrada do Lance
+  // (5s) segurava o spawn, entao uma janela que fechasse antes dela gravava
+  // `0` sem ninguem ter caido. Se esse `0` pulasse o spawn na reconstrucao, o
   // PRIMEIRO POKE do Lance seria pulado — o jogador ganharia de graca o
-  // Gyarados. Nao acontece: com indice 0 e sequencia nao iniciada o mundo nao
-  // esta "retomando", entao a contagem rearma e e ELA quem spawna o indice 0.
-  // Preso aqui porque a analise e sutil demais pra ficar so no comentario.
-  it('janela que fecha durante a contagem de entrada nao pula o primeiro do Lance', () => {
+  // Gyarados. Hoje o Gyarados esta em campo desde o primeiro tick (dentro da
+  // bola, durante a abertura), entao a janela grava o HP dele; mas um `0` no
+  // indice 0 ainda pode vir de uma sessao gravada pela versao anterior, e
+  // continua lido como "sem informacao": e o spawn de `buildMapWorld` quem
+  // poe o indice 0 em campo. Preso aqui porque a analise e sutil demais pra
+  // ficar so no comentario.
+  it('janela que fecha durante a abertura nao pula o primeiro do Lance', () => {
     const gameState = useGameStateStore.getState()
     let world = mundo()
-    // 1 segundo — bem menos que a contagem de entrada.
+    // 1 segundo — bem menos que a abertura (8 s).
     for (let t = 0; t < 10; t++) stepWorld(world, 0.1, gameState, { silent: true })
-    expect(hpDaSequencia(world)).toBe(0)
+    expect(world.aberturaDoDuelo).not.toBeNull()
+    const hpGravado = hpDaSequencia(world)
+    expect(hpGravado).toBeGreaterThan(0)
 
-    world = mundo({ sequenceIndex: world.sequenceIndex, sequenceCleared: false, sequenceHp: 0 })
+    world = mundo({ sequenceIndex: world.sequenceIndex, sequenceCleared: false, sequenceHp: hpGravado })
+    // Retomada: a abertura nao toca de novo.
+    expect(world.aberturaDoDuelo).toBeNull()
     for (let t = 0; t < 100; t++) stepWorld(world, 0.1, gameState, { silent: true })
 
     expect(world.sequenceIndex).toBe(0)
@@ -124,6 +131,14 @@ describe('PH-307: HP da sequencia atravessa a janela do servidor', () => {
     // O primeiro da ordem real do Lance. O id do ENCONTRO nao e o da especie
     // (os encontros do Lance sao gerados), entao a comparacao e pela especie.
     expect(emCampo!.poke.speciesId).toBe('gyarados')
+  })
+
+  it('`0` gravado no indice 0 (versao anterior) tambem nao pula o Gyarados', () => {
+    const gameState = useGameStateStore.getState()
+    const world = mundo({ sequenceIndex: 0, sequenceCleared: false, sequenceHp: 0 })
+    for (let t = 0; t < 100; t++) stepWorld(world, 0.1, gameState, { silent: true })
+    expect(world.sequenceIndex).toBe(0)
+    expect(world.enemies.find((e) => e.poke.hp > 0)?.poke.speciesId).toBe('gyarados')
   })
 
   it('o dano de uma janela continua valendo na seguinte, ate o membro cair', () => {

@@ -20,12 +20,13 @@ import type { PokeInstance } from '@/data/pokes'
 import type { MapDef } from '@/data/maps'
 import { createEnemyEntity, createPlayerEntity, isDead } from './entity'
 import { DEATH_ANIM_GRACE_PERIOD } from './simulation'
+import { apresentarEntrada, tickAberturaDoDuelo } from './systems/aberturaDoDuelo'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { tickClimaDeGolpe } from './systems/climaAmbiente'
-import { updateCombat } from './systems/combatSystem'
+import { tickEffects, updateCombat } from './systems/combatSystem'
 import { updateMovement } from './systems/movementSystem'
 import { apagarTodosOsEstagios } from './systems/statusSystem'
-import type { EnemyEntity, WorldState } from './types'
+import type { EnemyEntity, WorldEntity, WorldState } from './types'
 import { emptyWorldState } from './worldState'
 
 export type ResultadoDaArena = 'lutando' | 'vitoria' | 'derrota' | 'empate'
@@ -61,7 +62,6 @@ export function sementeDaSessao(sessaoId: string): number {
   for (let i = 0; i < sessaoId.length; i++) h = Math.imul(h ^ sessaoId.charCodeAt(i), 0x01000193) | 0
   return h
 }
-const CONTAGEM_INICIAL = 3
 // Teto de seguranca (30 min simulados a 60 Hz) pra dois times que nao se
 // arranham nunca travarem o servidor; empata.
 export const ARENA_TICKS_MAXIMO = 30 * 60 * 60
@@ -89,7 +89,9 @@ export function mapaDaArena(nomeDoRival: string): MapDef {
     autoSwitchTeamOnFaint: false,
     sequence: undefined,
     unlocksContinentOnClear: undefined,
-    startCountdown: CONTAGEM_INICIAL,
+    // PH-552: sem contagem — a abertura (bola, pose, habilidade) e o que
+    // antecede o primeiro golpe. O titulo "Duelo contra X" e so do cliente.
+    startCountdown: undefined,
     keepCorpses: true,
     encarada: true,
     enemyPool: [base.enemyPool[0]],
@@ -101,9 +103,15 @@ export interface OpcoesDaArena {
   meuTime: PokeInstance[]
   rivalTime: PokeInstance[]
   nomeDoRival: string
+  /**
+   * PH-552: eu sou o dono da casa (apresento primeiro)? So no amistoso, e so
+   * pro anfitriao. Ranqueado e bot: a casa e o rival. Vem da sessao — o
+   * servidor e os dois clientes passam o mesmo valor. Padrao `false`.
+   */
+  casaEhOJogador?: boolean
 }
 
-export function criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival }: OpcoesDaArena): WorldState {
+export function criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival, casaEhOJogador = false }: OpcoesDaArena): WorldState {
   if (meuTime.length === 0 || rivalTime.length === 0) throw new Error('Arena precisa de POKE dos dois lados.')
   const mapDef = mapaDaArena(nomeDoRival)
   const world = emptyWorldState(semente)
@@ -128,15 +136,19 @@ export function criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival }: Op
   const player = createPlayerEntity(world.counters, { poke: arena.meuTime[0], x: meuSpawn.x, y: meuSpawn.y })
   player.facing = { x: 1, y: 0 }
   const enemy = entidadeDoRival(world, arena, arena.rivalTime[0])
-  return {
+  const mundo: WorldState = {
     ...world,
     mapDef,
     player,
     enemies: [enemy],
     respawnTimer: null,
     countdownRemaining: mapDef.startCountdown ?? null,
+    casaEhOJogador,
     arena,
   }
+  // PH-552: os dois se apresentam antes do primeiro golpe, casa primeiro.
+  apresentarEntrada(mundo, [player, enemy])
+  return mundo
 }
 
 function entidadeDoRival(world: Pick<WorldState, 'counters'>, arena: EstadoDaArena, poke: PokeInstance): EnemyEntity {
@@ -180,6 +192,15 @@ export function stepArena(world: WorldState, dt: number, opts: { silent?: boolea
     return
   }
 
+  // PH-552: abertura (bola, pose, habilidade de entrada) — a cada entrada de
+  // POKE, dos dois lados. Nada anda nem bate ate acabar; so poses e efeitos.
+  if (tickAberturaDoDuelo(world, dt, silent)) {
+    tickEffects(world, dt)
+    tickAttackAnimTimers(world, dt)
+    if (!silent) updateAnimations(world, dt)
+    return
+  }
+
   updateMovement(world, dt)
   updateCombat(world, dt, { silent })
   tickAttackAnimTimers(world, dt)
@@ -196,6 +217,10 @@ export function stepArena(world: WorldState, dt: number, opts: { silent?: boolea
   // AMARELA (PH-545, mesma regra de `trocarPorDesmaio` na hunt do Lance e da
   // bola verde do rival), na mesma entidade — HUD e camera seguem
   // `world.player`.
+  //
+  // PH-552: quem entra se apresenta. As entradas do tick sao juntadas numa
+  // chamada so, pra os dois lados caindo juntos apresentarem casa primeiro.
+  const entraram: WorldEntity[] = []
   if (isDead(player)) {
     const proximo = temAlguemDePe(arena.meuTime, arena.indiceMeu + 1)
     if (proximo !== -1) {
@@ -219,6 +244,7 @@ export function stepArena(world: WorldState, dt: number, opts: { silent?: boolea
         player.pathTargetX = null
         player.pathTargetY = null
         apagarTodosOsEstagios(player)
+        entraram.push(player)
       }
     }
   } else {
@@ -235,12 +261,15 @@ export function stepArena(world: WorldState, dt: number, opts: { silent?: boolea
       if (arena.trocaRival <= 0) {
         arena.trocaRival = null
         arena.indiceRival = proximo
-        world.enemies.push(entidadeDoRival(world, arena, arena.rivalTime[proximo]))
+        const substituto = entidadeDoRival(world, arena, arena.rivalTime[proximo])
+        world.enemies.push(substituto)
+        entraram.push(substituto)
       }
     }
   } else {
     arena.trocaRival = null
   }
+  if (entraram.length > 0) apresentarEntrada(world, entraram)
 
   // Relido DEPOIS das trocas: quem acabou de entrar conta como vivo.
   const meuLadoAcabou = isDead(player) && temAlguemDePe(arena.meuTime, arena.indiceMeu + 1) === -1

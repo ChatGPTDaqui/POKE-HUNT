@@ -23,5 +23,10 @@ export async function arenaDaSessao(
     ? 'empate'
     : res.vencedorId === meuId ? 'vitoria' : 'derrota'
 
-  return { semente: res.semente, meuTime, rivalTime, nomeDoRival, rivalId: oponenteId, veredito }
+  // PH-552: mesma regra do servidor (authority/src/appPvp.ts): no amistoso a
+  // casa e o anfitriao; no ranqueado e contra bot, o convidado. O convidado
+  // monta espelhado, entao pra ele o valor inverte.
+  const casaEhOAnfitriao = sessao.modo === 'amistoso'
+  const casaEhOJogador = souAnfitriao ? casaEhOAnfitriao : !casaEhOAnfitriao
+  return { semente: res.semente, meuTime, rivalTime, nomeDoRival, rivalId: oponenteId, veredito, casaEhOJogador }
 }

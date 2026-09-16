@@ -18,6 +18,7 @@ import {
   drawMarcaDoAlvo, drawMarcaDoJogador, planejarTextoDeCombate,
 } from './sprites'
 import { desenharAmbiente } from './ambiente'
+import { drawBalaoDaAbertura } from './balaoDaAbertura'
 import { desenharClimaFundo, desenharClimaFrente, familiaDoClima } from './climaVisual'
 import { CENA_HOSPITAL, ZOOM_DA_CENA, escalaDoPoke } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
@@ -312,7 +313,10 @@ export class Renderer {
     // estado (`player.targetId`, publicado por `combatSystem#updateCombat`) e o
     // canvas nao usava. So vale com o jogador em pe: sem POKE em campo nao ha
     // "meu" nem alvo, e uma mira sobrando em cima de um mob leria como ordem.
-    const jogadorVivo = world.player && !world.player.fainted ? world.player : null
+    // PH-552: dentro da bola (`nascendo`) o POKE existe no motor mas nao no
+    // campo — nem corpo, nem marca de chao, nem barra. A bola se abrindo e o
+    // balao ficam no lugar dele.
+    const jogadorVivo = world.player && !world.player.fainted && !world.player.nascendo ? world.player : null
     const idDoAlvo = jogadorVivo?.targetId ?? null
     // Antes dos corpos: as DUAS sao marca de CHAO, e passar por cima de quem
     // anda nelas leria como efeito de golpe.
@@ -333,6 +337,7 @@ export class Renderer {
     // texto.
     const tipoDeProtetorAtual = protetorDaSala(world.sala, world.mapDef?.id ?? '')
     for (const enemy of world.enemies) {
+      if (enemy.nascendo) continue
       drawEntity(ctx, enemy)
       if (enemy.poke.hp > 0) {
         drawHpBar(ctx, enemy, enemy.id === idDoAlvo)
@@ -363,6 +368,8 @@ export class Renderer {
     for (const effect of world.effects) {
       drawEffect(ctx, effect, world, desviosDeTexto)
     }
+    // "Vai X!!" (PH-552) por cima da bola que esta se abrindo.
+    drawBalaoDaAbertura(ctx, world)
 
     // Clima na FRENTE de tudo (PH-141): a passagem rasante, o filtro de cor, a
     // vinheta e o relampago. Depois dos efeitos de golpe de proposito — o

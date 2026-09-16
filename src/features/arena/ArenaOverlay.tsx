@@ -1,6 +1,11 @@
-// Os dois unicos avisos da arena (PH-540): a contagem antes do primeiro
-// golpe e o resultado no fim. Todo o resto — HUD, barras, arte — e o da hunt.
+// Os dois unicos avisos da arena (PH-540): o titulo do duelo e o resultado no
+// fim. Todo o resto — HUD, barras, arte — e o da hunt.
+//
+// PH-552: a contagem de 3 s saiu — a abertura (bola, pose, habilidade) e o
+// que antecede o primeiro golpe, e ela acontece no campo. Sobrou "Duelo
+// contra X" por 1 s, so no cliente, sem cobrir a bola sendo jogada.
 import { CampoOverlay } from '@/components/modals/CampoOverlay'
+import { TituloDoDuelo } from '@/components/modals/TituloDoDuelo'
 import { GameButton } from '@/components/game/controls'
 import { useWorldStore } from '@/stores/worldStore'
 import { sairDaArena, useArenaStore, vereditoParaTela } from './arena'
@@ -10,23 +15,13 @@ const COR = { vitoria: 'text-amber-300', derrota: 'text-destructive', empate: 't
 
 export function ArenaOverlay() {
   const naArena = useWorldStore((s) => s.arena != null)
-  const contagem = useWorldStore((s) => (s.arena ? s.countdownRemaining : null))
   const resultadoLocal = useWorldStore((s) => s.arena?.resultado ?? 'lutando')
   const veredito = useArenaStore((s) => s.veredito)
   const nomeDoRival = useArenaStore((s) => s.nomeDoRival)
   if (!naArena) return null
 
-  if (contagem != null && contagem > 0) {
-    return (
-      <CampoOverlay>
-        <div className="text-lg font-semibold">Duelo contra {nomeDoRival}</div>
-        <div className="font-mono text-6xl font-black text-amber-300">{Math.ceil(contagem)}</div>
-      </CampoOverlay>
-    )
-  }
-
   const final = vereditoParaTela(resultadoLocal, veredito)
-  if (!final) return null
+  if (!final) return <TituloDoDuelo titulo={`Duelo contra ${nomeDoRival}`} />
 
   return (
     <CampoOverlay interativo>

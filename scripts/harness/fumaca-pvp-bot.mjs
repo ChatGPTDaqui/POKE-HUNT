@@ -206,7 +206,7 @@ ok(corpo.pdlDeltaAnfitriao === undefined, 'sem delta de PDL na resposta')
   ok(motor.sementeDaSessao(sessao.id) === corpo.semente, 'semente local bate com a do servidor')
   const meuTime = (sessao.anfitriao_time ?? []).map(motor.pvpRowToPoke).filter(Boolean)
   const rivalTime = (sessao.convidado_time ?? []).map(motor.pvpRowToPoke).filter(Boolean)
-  const local = motor.rodarArena({ semente: corpo.semente, meuTime, rivalTime, nomeDoRival: '' }, motor.LIVE_SIM_STEP_SECONDS)
+  const local = motor.rodarArena({ semente: corpo.semente, meuTime, rivalTime, nomeDoRival: '', casaEhOJogador: sessao.modo === 'amistoso' }, motor.LIVE_SIM_STEP_SECONDS)
   const vereditoLocal = local.resultado === 'vitoria' ? meuId : local.resultado === 'derrota' ? sessao.convidado_id : null
   ok(vereditoLocal === corpo.vencedorId, `reproducao local (${local.resultado}, ${local.ticks} ticks) bate com o veredito do servidor`)
   const golpes = new Map()

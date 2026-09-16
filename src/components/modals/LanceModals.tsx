@@ -4,21 +4,15 @@ import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
 import { GameButton } from '@/components/game/controls'
-import { CampoOverlay } from './CampoOverlay'
+import { TituloDoDuelo } from './TituloDoDuelo'
 
-// Contagem regressiva de intro (world.countdownRemaining, ver
-// controller.ts#buildMapWorld/stepWorld): nada nasceu ainda e o combate esta
-// congelado enquanto isso corre.
+// PH-552: a contagem regressiva de intro (5 s, `world.countdownRemaining`)
+// saiu do duelo — a abertura (bola, pose, habilidade) e o que antecede o
+// primeiro golpe. Sobrou o titulo por 1 s, so no cliente.
 export function LanceCountdownModal() {
-  const remaining = useWorldStore((s) => (s.mapDef?.id === LANCE_MAP_ID ? s.countdownRemaining : null))
-  if (remaining == null || remaining <= 0) return null
-
-  return (
-    <CampoOverlay>
-      <div className="text-lg font-semibold">O Campeão Lance se aproxima...</div>
-      <div className="font-mono text-6xl font-black text-amber-300">{Math.ceil(remaining)}</div>
-    </CampoOverlay>
-  )
+  const noLance = useWorldStore((s) => s.mapDef?.id === LANCE_MAP_ID)
+  if (!noLance) return null
+  return <TituloDoDuelo titulo="Duelo contra o Campeão Lance" />
 }
 
 // Atalho de vitoria: aparece SO depois de vencer o Lance, enquanto o jogador

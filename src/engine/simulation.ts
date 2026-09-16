@@ -43,7 +43,8 @@ import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './ent
 import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
 import { atualizarLure } from './systems/lureSystem'
-import { updateCombat, podeDanificar } from './systems/combatSystem'
+import { updateCombat, podeDanificar, tickEffects } from './systems/combatSystem'
+import { apresentarEntrada, tickAberturaDoDuelo } from './systems/aberturaDoDuelo'
 import { aplicarStatus, apagarTodosOsEstagios, limparEfeitosAoDesmaiar } from './systems/statusSystem'
 import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { climaAmbienteDaSala, climaDeAmbiente, tickClimaDeGolpe } from './systems/climaAmbiente'
@@ -902,6 +903,8 @@ function trocarPorDesmaio(world: WorldState, gameState: GameStateStore, dt: numb
     player.pathTargetX = null
     player.pathTargetY = null
   }
+  // PH-552: no duelo, quem entra se apresenta (bola, pose, habilidade).
+  apresentarEntrada(world, [player])
   if (!silent) {
     toastStore.getState().pushToast(
       `${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`,
@@ -1074,8 +1077,17 @@ export function buildMapWorld(
   const sequenceCleared = progresso?.sequenceCleared ?? false
   // A contagem regressiva de intro do Lance so vale na PRIMEIRA janela. Numa
   // retomada ela seria 5 segundos de combate congelado por flush.
-  const retomando = sequenceIndex > 0 || sequenceCleared
-  const countdownRemaining = retomando ? null : (mapDef.startCountdown || null)
+  //
+  // PH-552: `sequenceHp > 0` tambem e retomada — a luta com o PRIMEIRO
+  // membro pode atravessar uma janela, e sem isto a apresentacao de abertura
+  // tocaria de novo a cada reconstrucao do mundo no servidor. `0` no indice 0
+  // NAO conta: e o marcador que uma janela fechada antes de alguem nascer
+  // deixava (ver hpDaSequenciaAtravessaAJanela.test.ts) — tratado como "sem
+  // informacao" logo abaixo, senao o Gyarados seria pulado.
+  const retomando = sequenceIndex > 0 || sequenceCleared || (progresso?.sequenceHp ?? 0) > 0
+  // No combate duelo (`encarada`) nao ha contagem: a apresentacao de abertura
+  // (PH-552) e o que antecede a luta, e ela precisa dos POKEs em campo.
+  const countdownRemaining = retomando || mapDef.encarada ? null : (mapDef.startCountdown || null)
 
   // PH-140: com autoridade o clima vem PRONTO no progresso; sem ela, e derivado
   // de `(seed, sala)`. `'clima' in progresso` e nao `progresso.clima != null`
@@ -1155,7 +1167,7 @@ export function buildMapWorld(
       // ainda nao avancou" — o campo nasce VAZIO e o proximo tick avanca a
       // sequencia (ou a fecha, se era o ultimo). Sem esse caso, um membro
       // derrotado na borda da janela ressuscitava inteiro aqui.
-      if (progresso?.sequenceHp !== 0) {
+      if (progresso?.sequenceHp !== 0 || !retomando) {
         const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala))
         // `> 0` e uma luta em andamento; `null`/ausente e sessao sem
         // informacao, e ai vale o HP cheio que `spawnSequenceEnemy` ja deu.
@@ -1175,7 +1187,7 @@ export function buildMapWorld(
     }
   }
 
-  return {
+  const world: WorldState = {
     ...base,
     mapDef, player, enemies, effects: [], pendingHits: [], pendingWishes: [],
     autoTimers: { treinador: 0 },
@@ -1201,6 +1213,13 @@ export function buildMapWorld(
     climaAmbiente: climaDaConstrucao,
     especialidadeNiveis: especialidadeNiveis ?? null,
   }
+  // PH-552: abertura do duelo — os dois lados se apresentam antes do primeiro
+  // golpe. So na primeira janela: numa retomada os dois ja estao em campo.
+  // Covil de lendario nao tem marcador de retomada no progresso, entao la o
+  // servidor repete a abertura a cada reconstrucao (8 s de janela parada);
+  // o cliente, que constroi o mundo uma vez por visita, nao.
+  if (mapDef.encarada && !retomando && enemies.length > 0) apresentarEntrada(world, [player, ...enemies])
+  return world
 }
 
 // ---------- Resolucao de combate (EXP, loot, captura) ----------
@@ -1588,6 +1607,15 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     return []
   }
 
+  // PH-552: abertura do duelo (bola, pose, habilidade de entrada) — movimento e
+  // combate congelados ate a apresentacao acabar; so poses e efeitos correm.
+  if (tickAberturaDoDuelo(world, dt, silent)) {
+    tickEffects(world, dt)
+    tickAttackAnimTimers(world, dt)
+    if (!silent) updateAnimations(world, dt)
+    return []
+  }
+
   // Quota fechada numa janela ANTERIOR (a contagem regressiva e efemera e nao
   // atravessa a reconstrucao de mundo do servidor): arma a transicao agora, sem
   // esperar um abate novo. Ver o livelock em
@@ -1858,6 +1886,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
       world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay
+      // PH-552: o proximo da sequencia se apresenta antes de lutar.
+      apresentarEntrada(world, [enemy])
     }
   }
 
