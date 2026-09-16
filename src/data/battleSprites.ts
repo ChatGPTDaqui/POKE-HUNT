@@ -31,6 +31,12 @@ const ANIM_FALLBACKS: Partial<Record<AnimName, AnimName[]>> = {
   // PH-543: pose de golpe do duelo. 380/380 hoje; especie sem ela cai na
   // pose de ataque do combate livre, que e o que tocava antes.
   Attack: ['Shoot', 'Charge', 'Idle', 'Walk'],
+  // PH-552: abertura do duelo. `Pose` (ameaca) so existe pra 97/380 no
+  // acervo; a ordem Pose -> Hop -> Shoot e decisao do dono (sem `Double`).
+  // `Hop` e `Swing` vieram 380/380 do mesmo import.
+  Pose: ['Hop', 'Shoot', 'Charge', 'Idle', 'Walk'],
+  Hop: ['Shoot', 'Charge', 'Idle', 'Walk'],
+  Swing: ['Attack', 'Shoot', 'Charge', 'Idle', 'Walk'],
 }
 
 export interface ResolvedBattleAnim extends BattleSpriteAnimMeta {

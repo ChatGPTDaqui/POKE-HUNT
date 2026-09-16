@@ -21,6 +21,8 @@ import type { ElementType } from '@/data/generated/types'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
 import type { Ability } from '@/data/abilities'
 import type { ResolvedBattleAnim } from '@/data/battleSprites'
+import type { AnimName } from '@/data/battleSpriteAnims'
+import type { AberturaDoDuelo } from './systems/aberturaDoDuelo'
 import type { StatusAtivo, EstagiosDeStat, EstagiosFonte, StatDeEstagio } from '@/data/statusEffects'
 import type { Rng } from '@/core/rng'
 
@@ -134,6 +136,18 @@ export interface BaseEntity {
    * combate.
    */
   encarando?: boolean
+  /**
+   * PH-552: pose forcada pela abertura do duelo (`Pose` na ameaca, `Swing` na
+   * habilidade de entrada). Vence tudo em `desiredAnimName` menos o desmaio.
+   * So `systems/aberturaDoDuelo.ts` escreve e apaga; ausente = sem pose forcada.
+   */
+  animOverride?: AnimName
+  /**
+   * PH-552: ainda dentro da bola — a etapa `bola` da abertura esta correndo.
+   * O motor ja tem a entidade (posicao, HP), o cliente nao a desenha ate a
+   * etapa acabar. Ausente = em campo.
+   */
+  nascendo?: boolean
 
   // --- Status ---------------------------------------------------------------
   // O status NAO-VOLATIL (veneno, queimadura, paralisia, sono, congelamento)
@@ -274,6 +288,10 @@ export interface BaseEntity {
   // hook dispara de novo, como uma troca de POKE nos jogos reais. Uma
   // entidade NOVA ja nasce com isto undefined, entao nunca precisa de reset
   // manual na criacao.
+  //
+  // NO DUELO (`mapDef.encarada`, PH-552) quem dispara o hook e a etapa de
+  // habilidade da abertura (systems/aberturaDoDuelo.ts), que marca isto no
+  // fim; `updateCombat` nao dispara no engajar la.
   entradaProcessada?: boolean
 
   // --- Fase 12: golpes sem-dano e Traits passivas ----------------------------
@@ -856,6 +874,20 @@ export interface WorldState {
    * Ver systems/rodadaDeDuelo.ts.
    */
   rodadaDeDuelo: RodadaDeDuelo | null
+  /**
+   * PH-552: apresentacao em curso do combate duelo (bola, pose de ameaca,
+   * habilidade de entrada — a cada entrada de POKE), ou `null` fora dela.
+   * Enquanto existir, movimento e combate ficam congelados. EFEMERO como
+   * `rodadaDeDuelo`. Ver systems/aberturaDoDuelo.ts.
+   */
+  aberturaDoDuelo: AberturaDoDuelo | null
+  /**
+   * PH-552: no duelo, o JOGADOR e o dono da casa (apresenta primeiro)? Falso
+   * no Lance, nos covis e na arena ranqueada/bot (a casa e o rival); no
+   * amistoso e o anfitriao. Vem da sessao — servidor e os dois clientes
+   * recebem o mesmo valor, sem sorteio.
+   */
+  casaEhOJogador: boolean
   sequenceIndex: number
   sequenceCleared: boolean
   countdownRemaining: number | null
