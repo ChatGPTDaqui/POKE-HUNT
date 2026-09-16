@@ -9,6 +9,7 @@ import { isDead, distanceTo } from '../entity'
 import { imobilizadoPorStatus } from './statusSystem'
 import { canOccupy, clampToMapCircle, empurrarCorpo } from './corpoNoMapa'
 import { aplicarEncarada } from './encaradaSystem'
+import { duelVencido } from './vitoriaDoDuelo'
 import type { EnemyEntity, PlayerEntity, Point, WorldState } from '../types'
 
 const WANDER_MARGIN = 40
@@ -502,6 +503,12 @@ export function updateMovement(world: WorldState, dt: number): void {
         if (!imobilizadoPorStatus(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef)
         player.wanderTarget = null
       }
+    } else if (duelVencido(world)) {
+      // Duelo vencido (Lance zerado, covil resolvido) e ninguem mais vem pra
+      // lutar: para no lugar pra comemorar (ver vitoriaDoDuelo.ts#tickVitoriaDoDuelo,
+      // que arma a pose) em vez de vagar pelo mapa vazio ate o jogador sair.
+      player.state = 'idle'
+      player.wanderTarget = null
     } else {
       player.state = 'wander'
       if (imobilizadoPorStatus(player)) player.wanderTarget = null

@@ -103636,6 +103636,40 @@ function moverPara(corpo, tx, ty, teto, mapDef, mapCx, mapCy, mapRadius) {
 	const fator = Math.min(1, teto / dist);
 	empurrarCorpo(corpo, dx * fator, dy * fator, mapDef, mapCx, mapCy, mapRadius);
 }
+/**
+* O jogador venceu um duelo (`mapDef.encarada`) e nao ha mais ninguem vindo
+* pra lutar? PURA: le o mundo, nao escreve nada.
+*
+* - Arena PvP: `arena.resultado === 'vitoria'` e o proprio estado ja existe.
+* - Campeao Lance: `sequenceCleared` — os 6 POKEs da sequencia cairam.
+* - Covil de lendario (BOSS): sem sequencia, sem respawn (`noRespawn`) e
+*   ninguem vivo do lado inimigo. O gap ENTRE membros da sequencia do Lance
+*   (proximo ainda nao nasceu) tambem bate "sem inimigo vivo" e `noRespawn`,
+*   e e por isso que este ramo exige `!mapDef.sequence` — sem a guarda, o
+*   POKE "comemoraria" nos poucos ticks de espera entre um Dragonite e o
+*   proximo, no meio do proprio duelo.
+*/
+function duelVencido(world) {
+	const { mapDef, player } = world;
+	if (!mapDef?.encarada || !player || isDead(player)) return false;
+	if (world.arena) return world.arena.resultado === "vitoria";
+	if (world.sequenceCleared) return true;
+	if (mapDef.noRespawn && !mapDef.sequence) return !world.enemies.some((e) => !isDead(e));
+	return false;
+}
+/**
+* Arma/desarma `player.animOverride` pra pose de vitoria. So mexe no valor
+* que ELA mesma armou (`POSE_DE_VITORIA`) — a abertura do duelo tem o campo
+* pra si durante a apresentacao, e os dois nunca coexistem (a abertura acaba
+* antes de haver "duelo vencido" pra medir). Chamar todo tick e barato e
+* idempotente.
+*/
+function tickVitoriaDoDuelo(world) {
+	const player = world.player;
+	if (!player) return;
+	if (duelVencido(world)) player.animOverride = "Hop";
+	else if (player.animOverride === "Hop") delete player.animOverride;
+}
 //#endregion
 //#region src/engine/systems/movementSystem.ts
 var WANDER_MARGIN = 40;
@@ -103971,6 +104005,9 @@ function updateMovement(world, dt) {
 				if (!imobilizadoPorStatus(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef);
 				player.wanderTarget = null;
 			}
+		} else if (duelVencido(world)) {
+			player.state = "idle";
+			player.wanderTarget = null;
 		} else {
 			player.state = "wander";
 			if (imobilizadoPorStatus(player)) player.wanderTarget = null;
@@ -107063,6 +107100,7 @@ function stepArena(world, dt, opts = {}) {
 	if (!arena || !player || !world.mapDef) return;
 	const silent = opts.silent ?? false;
 	if (arena.resultado !== "lutando") {
+		tickVitoriaDoDuelo(world);
 		if (!silent) updateAnimations(world, dt);
 		return;
 	}
@@ -109469,6 +109507,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		return [];
 	}
 	atualizarLure(world, gameState, dt);
+	tickVitoriaDoDuelo(world);
 	updateMovement(world, dt);
 	const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent });
 	tickAttackAnimTimers(world, dt);
