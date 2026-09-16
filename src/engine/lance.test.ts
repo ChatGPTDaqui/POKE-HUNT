@@ -103,14 +103,18 @@ describe('Campeao Lance — sequencia', () => {
     }, progresso)
 
     const especiesVistas: string[] = []
-    let ultimoId: string | null = null
+    // Pelo INDICE da sequencia, nao pelo id da entidade: a reconstrucao recria
+    // o membro em campo com outro id (e, sem `sequenceHp` aqui, com HP cheio),
+    // e desde a PH-552 a apresentacao de cada entrada faz uma janela de 30 s
+    // cair no meio de um membro com frequencia.
+    let ultimoIndice = -1
     for (let janela = 0; janela < 40 && !world.sequenceCleared; janela++) {
       // ~30s por janela, passo de 0.1s = 300 ticks — o mesmo passo do flush real.
       for (let i = 0; i < 300 && !world.sequenceCleared; i++) {
         stepWorld(world, 0.1, gameState, { silent: true })
         const vivo = world.enemies.find((e) => e.poke.hp > 0)
-        if (vivo && vivo.id !== ultimoId) {
-          ultimoId = vivo.id
+        if (vivo && world.sequenceIndex !== ultimoIndice) {
+          ultimoIndice = world.sequenceIndex
           especiesVistas.push(vivo.poke.speciesId)
         }
       }
@@ -231,12 +235,14 @@ describe('Campeao Lance — troca por desmaio no caminho do servidor (PH-546)', 
     gs.setActiveIndex(0)
 
     // Janela curta: r1 cai dentro dela, r2 ainda nao. O que importa e o laco
-    // NAO parar no primeiro desmaio e r2 estar em campo no fim.
-    const { world, resumo } = simular(12)
+    // NAO parar no primeiro desmaio e r2 estar em campo no fim. 20 s porque a
+    // abertura do duelo (PH-552) gasta 8 s antes do primeiro golpe e r2 ainda
+    // se apresenta (4 s) depois de entrar.
+    const { world, resumo } = simular(20)
 
     expect(resumo.mortesDoJogador).toBeGreaterThanOrEqual(1)
     expect(resumo.stoppedEarly).toBe(false)
-    expect(resumo.simulatedSeconds).toBeCloseTo(12, 5)
+    expect(resumo.simulatedSeconds).toBeCloseTo(20, 5)
     expect(world.player!.poke.uid).toBe('r2')
     expect(world.player!.fainted).toBe(false)
     // Le a store de novo: `gameState` e o snapshot de antes da rotacao.

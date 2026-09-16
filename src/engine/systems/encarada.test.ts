@@ -24,6 +24,7 @@ import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { MAPS } from '@/data/maps'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { buildMapWorld, stepWorld } from '../simulation'
+import { pularAbertura } from '../testes/aberturaDeTeste'
 import { engageRangeFor } from './combatSystem'
 import { desiredAnimName } from './animationSystem'
 import { aplicarEncarada, DISTANCIA_DA_ENCARADA, sortearPerna } from './encaradaSystem'
@@ -52,11 +53,14 @@ function mundoDoLance(): WorldState {
   const gs = useGameStateStore.getState()
   gs.addPokeToTeam(poke('duelista'))
   gs.setActiveIndex(0)
-  return buildMapWorld(LANCE_MAP_ID, useGameStateStore.getState().team[0], {
+  const world = buildMapWorld(LANCE_MAP_ID, useGameStateStore.getState().team[0], {
     seed: 0,
     rng: createRng(7),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
+  // PH-552: a encarada so comeca depois da apresentacao dos dois.
+  pularAbertura(world, useGameStateStore.getState())
+  return world
 }
 
 /**

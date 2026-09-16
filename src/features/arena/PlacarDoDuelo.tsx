@@ -50,6 +50,8 @@ interface LadoDoPlacar {
   /** PH-551: este lado age primeiro no round / esta na vez agora. */
   primeiro: boolean
   naVez: boolean
+  /** PH-552: este lado esta na apresentacao de entrada agora. */
+  apresentando: boolean
 }
 
 /** O inimigo "em campo" do duelo: o vivo; se so ha corpos (Lance), o ultimo caido. */
@@ -82,6 +84,8 @@ export function PlacarDoDuelo() {
   const golpes = useWorldStore((s) => s.rodadaDeDuelo?.golpes ?? null)
   const ordem = useWorldStore((s) => s.rodadaDeDuelo?.ordem ?? null)
   const indiceDaVez = useWorldStore((s) => s.rodadaDeDuelo?.indice ?? null)
+  // PH-552: quem esta se apresentando (bola/pose/habilidade), por lado.
+  const apresentando = useWorldStore((s) => s.aberturaDoDuelo?.fila[s.aberturaDoDuelo.indice]?.entidadeId ?? null)
   const team = useGameStateStore((s) => s.team)
   const meuNome = useGameStateStore((s) => s.trainer.name)
   const meuId = useAuthStore((s) => s.user?.id ?? null)
@@ -111,6 +115,7 @@ export function PlacarDoDuelo() {
     kos: 0,
     primeiro: ordem?.[0] === player.id,
     naVez: ordem != null && indiceDaVez != null && ordem[indiceDaVez] === player.id,
+    apresentando: apresentando === player.id,
   }
 
   const estadoDoInimigo = faceDoInimigo(inimigo)
@@ -134,6 +139,7 @@ export function PlacarDoDuelo() {
     kos: 0,
     primeiro: inimigo != null && ordem?.[0] === inimigo.id,
     naVez: inimigo != null && ordem != null && indiceDaVez != null && ordem[indiceDaVez] === inimigo.id,
+    apresentando: inimigo != null && apresentando === inimigo.id,
   }
   // KOs: o que eu derrubei do outro lado sao as bolas caidas dele, e vice-versa.
   eu.kos = rival.bolas.filter((viva) => !viva).length
@@ -162,6 +168,7 @@ function Lado({ lado, espelhado }: { lado: LadoDoPlacar; espelhado: boolean }) {
   return (
     <div
       data-na-vez={lado.naVez || undefined}
+      data-apresentando={lado.apresentando || undefined}
       className={cn(
         'flex min-w-0 flex-1 items-center gap-[.4em] rounded-[.5em] px-[.2em] transition-colors',
         espelhado && 'flex-row-reverse text-right',
@@ -212,6 +219,9 @@ function Lado({ lado, espelhado }: { lado: LadoDoPlacar; espelhado: boolean }) {
               )}
               {lado.primeiro && (
                 <span className="shrink-0 rounded-full bg-n700 px-[.4em] text-[.9em] text-n200" title="Age primeiro neste round">1º</span>
+              )}
+              {lado.apresentando && (
+                <span className="shrink-0 italic text-amber-200/90">apresentando…</span>
               )}
             </div>
           </div>

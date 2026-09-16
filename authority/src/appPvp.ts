@@ -72,7 +72,11 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
     throw new ErroHttp(409, 'Um dos times deste PvP esta vazio ou invalido.')
   }
 
-  const { resultado } = rodarArena({ semente, meuTime: timeAnfitriao, rivalTime: timeConvidado, nomeDoRival: '' }, LIVE_SIM_STEP_SECONDS)
+  // PH-552: quem apresenta primeiro. So no amistoso o anfitriao (quem
+  // convidou) e a casa; no ranqueado e contra bot a casa e o convidado —
+  // `meuTime` aqui e sempre o anfitriao, entao o valor segue esse lado.
+  const casaEhOJogador = sessao.modo === 'amistoso'
+  const { resultado } = rodarArena({ semente, meuTime: timeAnfitriao, rivalTime: timeConvidado, nomeDoRival: '', casaEhOJogador }, LIVE_SIM_STEP_SECONDS)
   const resultadoAnfitriao: Resultado = resultado === 'vitoria' ? 'vitoria' : resultado === 'derrota' ? 'derrota' : 'empate'
   const vencedorId = resultadoAnfitriao === 'vitoria'
     ? sessao.anfitriao_id

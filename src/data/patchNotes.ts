@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-552 (abertura do duelo). A contagem regressiva de intro saiu junto.
+  {
+    version: '7.59',
+    date: '2026-09-16',
+    title: 'Abertura do duelo: "Vai X!!", pose e habilidade antes da luta',
+    highlights: [
+      'Todo duelo (PvP, Campeão Lance e covis de lendário) agora começa como nos jogos: cada treinador joga a bola, o POKE sai dela, faz a pose de ameaça e a habilidade de entrada (Intimidate, Download, clima) resolve — só então a luta começa. O dono da casa apresenta primeiro (o rival no ranqueado, contra bot, no Lance e no covil; quem convidou no amistoso).',
+      'Toda substituição também apresenta quem entra: bola, pose e habilidade, sem repetir para quem já estava em campo. O placar mostra "apresentando…" enquanto isso acontece.',
+      'A contagem regressiva antes do Lance e da arena saiu — no lugar dela fica só o título "Duelo contra X" por um instante, sem cobrir o campo.',
+    ],
+  },
   // PH-550 (rostos e mais retratos) e PH-551 (extras do placar). Fica de fora
   // o MMR/divisao do rival, que nao entrou (RLS de pvp_rank so do dono).
   {

@@ -3639,6 +3639,17 @@ const TRAIT_CLIMA: Partial<Record<TraitId, ClimaTipo>> = {
   drought: 'sol',
 }
 
+/**
+ * PH-552: a Trait reage a "acabou de entrar em campo"? E o que decide se a
+ * abertura do duelo gasta uma etapa de habilidade com este POKE — a mesma
+ * lista que `resolveEntryHook` trata.
+ */
+export function traitTemHookDeEntrada(poke: PokeInstance): boolean {
+  const trait = traitDoPoke(poke)
+  if (!trait) return false
+  return TRAIT_CLIMA[trait] != null || trait === 'intimidate' || trait === TRAIT_TRACE || trait === 'download'
+}
+
 // Clima ligado por TRAIT (Drizzle/Sand Stream/Snow Warning/Drought) e
 // INDEFINIDO nos jogos reais — dura ate outra Trait ou golpe de clima
 // substituir, sem contagem de turnos. Era `Infinity` aqui por isso, e a PH-140
@@ -3660,7 +3671,7 @@ const CLIMA_DE_TRAIT_TURNOS = CLIMA_DE_GOLPE_TURNOS
  * simetricamente: uma vez pro jogador contra o alvo principal, e uma vez por
  * cada inimigo que acabou de engajar contra o jogador.
  */
-function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldEntity, silent: boolean): void {
+export function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldEntity, silent: boolean): void {
   const trait = traitDoPoke(self.poke)
   if (!trait) return
 
@@ -3705,6 +3716,35 @@ function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldE
     const mudanca = aplicarEstagioUnico(self, stat, 1, fonteDeTrait(self, 'download'))
     if (mudanca && !silent) anunciarEstagios(world, self, [mudanca])
   }
+}
+
+/**
+ * Envelhece os efeitos visuais, segue o dono, solta a raia de quem terminou e
+ * descarta os concluidos. Parte de `updateCombat`; exposta porque a abertura
+ * do duelo (PH-552) congela o combate e ainda precisa da bola tocando.
+ */
+export function tickEffects(world: WorldState, dt: number): void {
+  const { player, enemies } = world
+  for (const effect of world.effects) {
+    tickEffect(effect, dt)
+    // Depois do movimento deste frame ja ter rodado, senao a arte andaria um
+    // frame atras do POKE.
+    if (effect.seguirId) seguirDono(effect, findEntityById(player, enemies, effect.seguirId))
+    // DEPOIS do `seguirDono`, e nao antes: o reapontamento le a posicao ja
+    // transladada do efeito. Invertido, o angulo sairia calculado contra a
+    // posicao do frame anterior — um frame de erro a cada frame, que num golpe
+    // rapido e o bastante pra o rastro tremer.
+    if (effect.apontarParaId) {
+      reapontarParaAtacante(effect, findEntityById(player, enemies, effect.apontarParaId))
+    }
+  }
+  for (const effect of world.effects) {
+    if (effectDone(effect) && effect.ownerId) {
+      const owner = findEntityById(player, enemies, effect.ownerId)
+      if (owner) releaseEffectLane(owner, effect.id)
+    }
+  }
+  world.effects = world.effects.filter((e) => !effectDone(e))
 }
 
 export interface CombatResult {
@@ -3811,26 +3851,7 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     })
   }
 
-  for (const effect of world.effects) {
-    tickEffect(effect, dt)
-    // Depois do movimento deste frame ja ter rodado, senao a arte andaria um
-    // frame atras do POKE.
-    if (effect.seguirId) seguirDono(effect, findEntityById(player, enemies, effect.seguirId))
-    // DEPOIS do `seguirDono`, e nao antes: o reapontamento le a posicao ja
-    // transladada do efeito. Invertido, o angulo sairia calculado contra a
-    // posicao do frame anterior — um frame de erro a cada frame, que num golpe
-    // rapido e o bastante pra o rastro tremer.
-    if (effect.apontarParaId) {
-      reapontarParaAtacante(effect, findEntityById(player, enemies, effect.apontarParaId))
-    }
-  }
-  for (const effect of world.effects) {
-    if (effectDone(effect) && effect.ownerId) {
-      const owner = findEntityById(player, enemies, effect.ownerId)
-      if (owner) releaseEffectLane(owner, effect.id)
-    }
-  }
-  world.effects = world.effects.filter((e) => !effectDone(e))
+  tickEffects(world, dt)
 
   for (const hit of world.pendingHits) hit.timer -= dt
   const landed = ordenarPorVelocidade(world, world.pendingHits.filter((hit) => hit.timer <= 0))
@@ -3914,14 +3935,23 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     // HOOK DE ENTRADA EM COMBATE — dispara so no primeiro frame de cada lado
     // engajado (ver resolveEntryHook), simetrico: o jogador contra o alvo
     // principal, e cada inimigo recem-engajado contra o jogador.
-    if (!player.entradaProcessada) {
-      player.entradaProcessada = true
-      resolveEntryHook(world, player, primaryTarget, silent)
-    }
-    for (const enemy of engagedEnemies) {
-      if (!enemy.entradaProcessada) {
-        enemy.entradaProcessada = true
-        resolveEntryHook(world, enemy, player, silent)
+    //
+    // NAO NO DUELO (PH-552): la o hook e uma etapa da abertura
+    // (systems/aberturaDoDuelo.ts), disparada no fim da apresentacao de quem
+    // entrou. Disparar aqui tambem faria o Intimidate sair duas vezes — e o
+    // "fim de batalha" entre um rival e o proximo (`limparEstadoVolatil`
+    // abaixo) rearma `entradaProcessada` de quem FICOU em campo, que nao se
+    // apresenta de novo.
+    if (!world.mapDef?.encarada) {
+      if (!player.entradaProcessada) {
+        player.entradaProcessada = true
+        resolveEntryHook(world, player, primaryTarget, silent)
+      }
+      for (const enemy of engagedEnemies) {
+        if (!enemy.entradaProcessada) {
+          enemy.entradaProcessada = true
+          resolveEntryHook(world, enemy, player, silent)
+        }
       }
     }
 

@@ -30,6 +30,10 @@ export function directionRowFromFacing(facing: Point): number {
 
 export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
   if (isDead(entity)) return 'Faint'
+  // PH-552: pose da abertura do duelo (ameaca/habilidade de entrada). Acima
+  // do sono de proposito: quem acabou de sair da bola esta se apresentando, e
+  // a apresentacao e o que o jogador esta olhando.
+  if (entity.animOverride) return entity.animOverride
   // Sono vence ate a pose de ataque: e o unico status com animacao propria em
   // todas as 226 especies com arte, e "dormindo" e a informacao que muda o que
   // o jogador entende da cena. Um POKE que adormece no meio da propria pose de

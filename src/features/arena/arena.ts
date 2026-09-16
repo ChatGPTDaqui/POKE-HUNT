@@ -30,10 +30,12 @@ export interface EntradaNaArena {
   rivalId?: string | null
   veredito: VereditoDaArena | null
   aoSair?: () => void
+  /** PH-552: eu apresento primeiro? Padrao `false` (a casa e o rival). */
+  casaEhOJogador?: boolean
 }
 
-export function entrarNaArena({ semente, meuTime, rivalTime, nomeDoRival, rivalId, veredito, aoSair }: EntradaNaArena): void {
-  const world = criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival })
+export function entrarNaArena({ semente, meuTime, rivalTime, nomeDoRival, rivalId, veredito, aoSair, casaEhOJogador }: EntradaNaArena): void {
+  const world = criarMundoArena({ semente, meuTime, rivalTime, nomeDoRival, casaEhOJogador })
   useArenaStore.setState({ veredito, nomeDoRival, rivalId: rivalId ?? null, aoSair: aoSair ?? null })
   useWorldStore.getState().setWorld(world)
   useUiStore.getState().closeScreen()
