@@ -38,9 +38,10 @@ function Identidade({ item, owned }: { item: GeneratedItem; owned: number }) {
         </span>
       </ItemTooltip>
       <div className="min-w-0 flex-1">
-        <div className="truncate font-medium">{item.name}</div>
-        <div className="truncate text-[.78em] text-n500">
-          tem {fmt.format(owned)} · <span className="text-gold">{fmt.format(item.buyPrice)}</span>
+        <div className="break-words font-medium">{item.name}</div>
+        <div className="text-[.78em] text-n400">
+          <span className="block text-gold">{fmt.format(item.buyPrice)} ouro</span>
+          Na mochila: {fmt.format(owned)}
         </div>
       </div>
     </>
@@ -125,15 +126,16 @@ export function ItemCompraCard({ onAbrir, ...props }: AcoesCompra & { onAbrir: (
       <GameCard
         onClick={onAbrir}
         title={`Comprar ${item.name}`}
-        className="flex min-h-[44px] items-center gap-[.35em] p-[.3em]"
+        className="shop-product flex min-h-[44px] flex-wrap items-center gap-[.35em] p-[.45em]"
       >
         <Identidade item={item} owned={owned} />
+        <GameButton className="w-full" aria-label={`Comprar ${item.name}`} onClick={(e) => { e.stopPropagation(); onAbrir() }}>Comprar</GameButton>
       </GameCard>
     )
   }
 
   return (
-    <GameCard className="flex flex-col gap-[.35em] p-[.45em]">
+    <GameCard className="shop-product flex flex-col gap-[.55em] p-[.65em]">
       <div className="flex items-center gap-[.45em]">
         <Identidade item={item} owned={owned} />
       </div>
