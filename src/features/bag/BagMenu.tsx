@@ -6,7 +6,9 @@
 // estavel entre renders, entao da pra filtrar o array de verdade — esse
 // workaround nao precisa ser portado.
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
+import { ArrowDown, ArrowUp, Backpack, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
+import { MenuHeading, MenuScene, SelectionHint } from '@/components/game/MenuScene'
+import { TypeChip } from '@/components/shared/TypeChip'
 import { pedirAcao } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent, type PokeInstance } from '@/data/pokes'
 import { ITEMS } from '@/data/items'
@@ -122,9 +124,10 @@ function PokemonsTab() {
           largura inteira por ser um `<label>` com 44px de alvo), o cabeçalho de
           filtros comia 180px dos ~470px uteis do celular. Como CHIP ele cabe ao
           lado dos outros tres controles e o estado continua obvio. */}
-      <div className="flex items-center gap-[.4em]">
+      <div className="inventory-toolbar">
         <GameInput
           placeholder="Buscar POKE..."
+          aria-label="Buscar POKE na mochila"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="min-w-[6em] flex-1"
@@ -154,7 +157,7 @@ function PokemonsTab() {
       {visible.length === 0 ? (
         <p className="text-n500">Nenhum POKE encontrado.</p>
       ) : (
-        <>
+        <div className="inventory-workspace">
           {/* Grade, e nao uma linha por POKE (PH-118). Trancado e shiny
               aparecem no proprio slot: numa grade o texto sai, e sem a marca o
               jogador so descobriria a trava ao tentar usar o POKE. */}
@@ -187,7 +190,7 @@ function PokemonsTab() {
             })}
           />
 
-          {pokeEmFoco && (
+          {pokeEmFoco ? (
             <GameCard
               title="Clique para ver o perfil · Shift+clique para linkar no chat"
               onClick={(e) => {
@@ -195,15 +198,15 @@ function PokemonsTab() {
                 if (tratouComoLink(e, () => linkarPoke(pokeEmFoco, species))) return
                 showProfile(pokeEmFoco, species)
               }}
-              className="flex items-center gap-[.5em] p-[.4em]"
+              className="inventory-detail"
             >
               <PokeSwatch
                 species={SPECIES[pokeEmFoco.speciesId]}
                 isShiny={pokeEmFoco.isShiny}
                 poke={pokeEmFoco}
-                size={2.6}
+                size={3.8}
               />
-              <div className="min-w-0 flex-1">
+              <div className="detail-identity">
                 <div className="flex flex-wrap items-center gap-[.4em]">
                   <PokeNameTag poke={pokeEmFoco} species={SPECIES[pokeEmFoco.speciesId]} />
                   <span className="text-n400">Lv{pokeEmFoco.level}</span>
@@ -211,7 +214,12 @@ function PokemonsTab() {
                 <div className="text-[.75em] text-n500">
                   HP {Math.floor(pokeEmFoco.hp)}/{pokeEmFoco.stats.hp} · IV {averageIvPercent(pokeEmFoco.ivs).toFixed(0)}%
                 </div>
+                <div className="mt-[.4em] flex flex-wrap gap-[.25em]">
+                  {[SPECIES[pokeEmFoco.speciesId].type, SPECIES[pokeEmFoco.speciesId].type2].map((type) => type && <TypeChip key={type} type={type} />)}
+                </div>
               </div>
+              <div className="detail-actions">
+              <GameButton onClick={(e) => { e.stopPropagation(); showProfile(pokeEmFoco, SPECIES[pokeEmFoco.speciesId]) }}>Ver perfil</GameButton>
               <LockButton
                 locked={Boolean(pokeEmFoco.locked)}
                 carregando={acao.isPending(`lock:${pokeEmFoco.uid}`)}
@@ -224,6 +232,7 @@ function PokemonsTab() {
               />
               {canMove ? (
                 <GameButton
+                  variant="primary"
                   carregando={acao.isPending(`team:${pokeEmFoco.uid}`)}
                   disabled={acao.pendingKey != null}
                   title="Mover para a equipe"
@@ -240,9 +249,10 @@ function PokemonsTab() {
               ) : (
                 <span className="text-[.78em] text-n500">Equipe cheia</span>
               )}
+              </div>
             </GameCard>
-          )}
-        </>
+          ) : <SelectionHint>Selecione um Pokémon para ver seus atributos e colocar na equipe.</SelectionHint>}
+        </div>
       )}
 
       <Paginacao estado={paginado} rotulo="POKEs" />
@@ -271,6 +281,8 @@ export function ItensTab() {
   // descricao e acoes moram na ficha, e nao dentro dele.
   const [foco, setFoco] = useState<string | null>(null)
 
+  const [busca, setBusca] = useState('')
+
   // Memo pra `usePaginacao` nao recortar um array novo a cada render (o objeto
   // `items` muda de identidade em todo flush do servidor).
   //
@@ -291,7 +303,8 @@ export function ItensTab() {
   )
   // A lista de itens tambem pagina: com as 17 Stones + bolas/pocoes/revives ela
   // ja passa de 30 linhas, cada uma com icone proprio.
-  const paginado = usePaginacao(ids)
+  const filtrados = useMemo(() => ids.filter((id) => ITEMS[id].name.toLocaleLowerCase().includes(busca.trim().toLocaleLowerCase())), [ids, busca])
+  const paginado = usePaginacao(filtrados)
 
   if (ids.length === 0) return <p className="text-n500">Nenhum item.</p>
 
@@ -304,6 +317,12 @@ export function ItensTab() {
 
   return (
     <div className="flex flex-col gap-[.3em]">
+      <label className="inventory-toolbar">
+        <span className="text-[.8em] text-n400">Buscar item</span>
+        <GameInput aria-label="Buscar item" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nome do item…" className="flex-1" />
+        <span className="text-[.75em] text-n400">{filtrados.length} {filtrados.length === 1 ? 'tipo' : 'tipos'}</span>
+      </label>
+      <div className="inventory-workspace">
       {/* Grade, e nao uma linha por item (PH-118). O contador do slot e o
           "x30" que estava no texto da linha, e ele fica visivel em TODOS os
           itens de uma vez em vez de so no selecionado. */}
@@ -329,26 +348,27 @@ export function ItensTab() {
         })}
       />
 
-      {itemEmFoco && (
+      {itemEmFoco ? (
         <GameCard
           title="Shift+clique para linkar no chat"
           onClick={(e) => { tratouComoLink(e, () => linkarItem(itemEmFoco, items[itemEmFoco.id])) }
           }
-          className={cn('flex items-center gap-[.5em] p-[.4em]', lockedItems[itemEmFoco.id] && 'border-gold/40')}
+          className={cn('inventory-detail', lockedItems[itemEmFoco.id] && 'border-gold/40')}
         >
           <ItemTooltip item={itemEmFoco}>
             <span className="cursor-help">
-              <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="2.6em" />
+              <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="3.8em" />
             </span>
           </ItemTooltip>
           <ItemTooltip item={itemEmFoco}>
-            <div className="min-w-0 flex-1 cursor-help">
+            <div className="detail-identity cursor-help">
               <div className="font-medium">
                 {itemEmFoco.name} <span className="text-n400">x{items[itemEmFoco.id]}</span>
               </div>
               <div className="text-[.75em] text-n500">{itemEmFoco.description}</div>
             </div>
           </ItemTooltip>
+          <div className="detail-actions">
           <LockButton
             locked={Boolean(lockedItems[itemEmFoco.id])}
             carregando={acao.isPending(`lock:${itemEmFoco.id}`)}
@@ -366,11 +386,14 @@ export function ItensTab() {
               era consumida por nada nesse caso, e so tirar o desperdicio
               deixaria a UI oferecendo um botao que sempre da erro. */}
           {podeUsar && (
-            <GameButton onClick={(e) => { e.stopPropagation(); controller.useItem(itemEmFoco.id) }}>Usar</GameButton>
+            <GameButton variant="primary" onClick={(e) => { e.stopPropagation(); controller.useItem(itemEmFoco.id) }}>Usar</GameButton>
           )}
+          </div>
         </GameCard>
-      )}
+      ) : <SelectionHint>Selecione um item para ver seu efeito e as ações disponíveis.</SelectionHint>}
+      </div>
 
+      {filtrados.length === 0 && <p className="text-[.85em] text-n400">Nenhum item encontrado.</p>}
       <Paginacao estado={paginado} rotulo="itens" />
       {itemEmFoco?.kind === 'tm' && <EnsinarTm key={itemEmFoco.id} itemId={itemEmFoco.id} />}
     </div>
@@ -381,7 +404,7 @@ export function BagMenu() {
   const [tab, setTab] = useState<'pokemons' | 'itens'>('pokemons')
   const [autoVendaAberta, setAutoVendaAberta] = useState(false)
   return (
-    <div className="flex flex-col gap-[.4em]">
+    <MenuScene>
       <StickyHeader>
         {/* Abas e gatilho da auto-venda na MESMA fileira. As duas abas usavam
             190px dos 374 uteis e o resto era vidro vazio, enquanto a auto-venda
@@ -406,7 +429,8 @@ export function BagMenu() {
         </div>
         {tab === 'pokemons' && autoVendaAberta && <AutoVendaPanel />}
       </StickyHeader>
+      <MenuHeading icon={<Backpack weight="duotone" />} title="Sua coleção" description="Pokémon e recursos para a próxima aventura." />
       {tab === 'pokemons' ? <PokemonsTab /> : <ItensTab />}
-    </div>
+    </MenuScene>
   )
 }

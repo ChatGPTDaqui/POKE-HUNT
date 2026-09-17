@@ -76,6 +76,9 @@ const TITLES: Record<ScreenName, string> = {
 // item 2 da auditoria). Bestiario tem grade + painel de detalhe lado a lado.
 const DEFAULT_WIDTH = 36
 const WIDTHS: Partial<Record<ScreenName, number>> = {
+  mochila: 48,
+  equipe: 42,
+  pvp: 48,
   loja: 52,
   bestiario: 56,
   calc: 46,

@@ -1,0 +1,85 @@
+/* PH-554: apresentação restrita aos quatro menus; sem mudar o Canvas ou o restante da HUD. */
+.trainer-menu {
+  --menu-accent: var(--color-exp);
+  --menu-edge: color-mix(in srgb, var(--menu-accent) 28%, var(--color-n700));
+  display: flex;
+  flex-direction: column;
+  gap: .7em;
+  min-width: 0;
+}
+.trainer-menu[data-tone='shop'] { --menu-accent: var(--color-gold); }
+.trainer-menu[data-tone='team'] { --menu-accent: var(--color-hp); }
+.trainer-menu[data-tone='arena'] { --menu-accent: var(--color-ember); }
+.trainer-heading {
+  display: flex;
+  align-items: center;
+  gap: .75em;
+  padding: .8em;
+  border: 1px solid var(--menu-edge);
+  border-radius: .85em;
+  background: radial-gradient(ellipse at top left, color-mix(in srgb, var(--menu-accent) 13%, transparent), transparent 75%), var(--color-n900);
+  box-shadow: inset 0 1px 0 #ffffff0a;
+}
+.trainer-emblem {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.4em;
+  height: 2.4em;
+  color: var(--menu-accent);
+  border: 1px solid var(--menu-edge);
+  border-radius: .7em;
+  background: color-mix(in srgb, var(--menu-accent) 8%, var(--color-n900));
+  font-size: 1.2em;
+}
+.trainer-heading-aside { font-size: .8em; color: var(--color-n300); font-variant-numeric: tabular-nums; }
+.inventory-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(14em, .7fr); gap: .75em; align-items: start; }
+.trainer-menu[data-layout='compacto'] .inventory-workspace { grid-template-columns: minmax(0, 1fr); }
+.inventory-detail {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .65em;
+  min-width: 0; padding: .85em;
+  border: 1px solid var(--menu-edge); border-radius: .8em;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--menu-accent) 9%, var(--color-n900)), var(--color-n900));
+}
+.inventory-detail > .detail-identity { flex: 1 1 9em; min-width: 0; }
+.inventory-detail .detail-actions { display: flex; flex-wrap: wrap; width: 100%; gap: .4em; border-top: 1px solid var(--color-n700); padding-top: .65em; }
+.selection-hint { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5em; min-height: 10em; padding: 1em; text-align: center; color: var(--color-n400); font-size: .85em; border: 1px dashed var(--color-n700); border-radius: .8em; }
+.trainer-menu[data-layout='compacto'] .selection-hint { min-height: 0; flex-direction: row; padding: .4em; }
+.inventory-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .4em; padding: .5em; border: 1px solid var(--color-n700); border-radius: .65em; background: var(--color-n900); }
+.inventory-grid { scrollbar-gutter: stable; align-content: start; }
+.trainer-menu .inventory-grid { background: #080b12; border-color: var(--color-n700); padding: .45em; }
+.trainer-menu .inventory-slot { background: linear-gradient(145deg, #202633, #11151e); box-shadow: inset 0 1px 0 #ffffff0a; }
+.trainer-menu .inventory-slot[aria-checked='true'] { border-color: var(--menu-accent); background: color-mix(in srgb, var(--menu-accent) 17%, var(--color-n900)); box-shadow: inset 0 0 0 1px var(--menu-accent); }
+.inventory-slot:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.trainer-menu .inventory-slot:not(:disabled):hover { border-color: var(--menu-accent); }
+.trainer-menu .inventory-slot img { image-rendering: pixelated; }
+.shop-counter { min-width: 0; padding: .55em; border: 1px solid var(--color-n700); border-radius: .8em; background: linear-gradient(180deg, #211d151f, #0e1016); }
+.shop-product { border-color: var(--color-n700); background: linear-gradient(135deg, #252218, var(--color-n900) 65%); }
+.team-roster { display: flex; flex-direction: column; gap: .6em; }
+.team-member { border-color: var(--color-n700); border-left: .25em solid var(--color-n700); background: linear-gradient(110deg, #1a2330, var(--color-n900) 65%); }
+.team-member.is-active { border-left-color: var(--color-hp); background: linear-gradient(110deg, #19352d, var(--color-n900) 65%); }
+.team-position { align-self: flex-start; font-family: var(--font-mono); font-size: .75em; color: var(--color-n400); }
+.arena-surface { padding: .8em; border: 1px solid var(--color-n700); border-radius: .8em; background: linear-gradient(125deg, #2b211c, var(--color-n900) 70%); }
+.formation-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6em; }
+.trainer-menu[data-layout='compacto'] .formation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.formation-slot { min-width: 0; min-height: 9em; display: flex; flex-direction: column; gap: .45em; padding: .65em; border: 1px solid var(--color-n700); border-radius: .75em; background: radial-gradient(ellipse at top, #3c302c55, transparent), var(--color-n900); }
+.formation-slot.is-selected { border-color: var(--menu-accent); }
+.formation-empty { align-items: center; justify-content: center; border-style: dashed; color: var(--color-n400); cursor: pointer; }
+.formation-empty:focus-visible { outline: 2px solid var(--menu-accent); outline-offset: 2px; }
+.formation-empty:disabled { cursor: default; opacity: .55; }
+.trainer-menu[data-layout='compacto'] .jogo-botão { min-height: 44px; }
+.trainer-menu[data-layout='compacto'] .inventory-grid { max-height: 10em !important; }
+.formation-picker { margin-top: .7em; padding: .65em; border: 1px solid var(--menu-edge); border-radius: .8em; background: var(--color-n900); }
+.candidate-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15em), 1fr)); gap: .4em; max-height: 17em; overflow-y: auto; margin-top: .6em; }
+.candidate { display: flex; align-items: center; gap: .6em; min-width: 0; min-height: 44px; padding: .5em; border: 1px solid var(--color-n700); border-radius: .6em; text-align: left; cursor: pointer; }
+.candidate:hover, .candidate:focus-visible { border-color: var(--menu-accent); background: #ffffff08; outline: 2px solid transparent; }
+.candidate:disabled { opacity: .5; cursor: wait; }
+.trainer-menu[data-layout='deitado'] .trainer-heading { padding: .4em .7em; }
+.trainer-menu[data-layout='deitado'] .trainer-emblem { width: 1.8em; height: 1.8em; }
+.trainer-menu[data-layout='compacto'] .trainer-heading { gap: .5em; padding: .65em; }
+.trainer-menu[data-layout='compacto'] .trainer-heading-aside { max-width: 7em; text-align: right; }
+@media (prefers-reduced-motion: no-preference) {
+  .trainer-heading { animation: trainer-arrive 180ms ease-out both; }
+  .inventory-slot, .candidate { transition: border-color 140ms ease, background-color 140ms ease; }
+}
+@keyframes trainer-arrive { from { opacity: 0; transform: translateY(.2em); } to { opacity: 1; transform: none; } }

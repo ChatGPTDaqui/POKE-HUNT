@@ -28,15 +28,15 @@ export function PvpRankedTab() {
   const rank = pvp.rank
   return (
     <div className="flex flex-col gap-[.75em]">
-      <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em]">
+      <div className="arena-surface">
         <div className="mb-[.45em] flex items-center gap-[.35em]">
-          <Trophy className="text-[1.1em] text-primary" />
+          <Trophy weight="duotone" className="text-[2em] text-gold" />
           <SectionLabel>SUA TEMPORADA</SectionLabel>
         </div>
         {rank && (
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-[1.05em] font-medium">{NOME_DIVISAO[rank.divisao] ?? rank.divisao}</div>
+              <div className="font-heading text-[1.5em]">{NOME_DIVISAO[rank.divisao] ?? rank.divisao}</div>
               <div className="text-[.8em] text-n400">{rank.pdl} PDL · {rank.vitorias}V {rank.derrotas}D</div>
             </div>
             <div className={`text-[.85em] ${rank.partidasHoje >= 5 ? 'text-bad' : 'text-n400'}`}>
@@ -46,7 +46,7 @@ export function PvpRankedTab() {
         )}
       </div>
 
-      <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em] text-center">
+      <div className="arena-surface text-center">
         {pvp.procurando ? (
           <div className="flex flex-col items-center gap-[.45em]">
             <span className="text-[.9em] text-n300">Procurando oponente da sua faixa de MMR... Sem ninguém em 15s, um treinador bot entra no lugar (sem MMR).</span>

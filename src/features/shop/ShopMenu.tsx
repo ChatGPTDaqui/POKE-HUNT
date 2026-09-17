@@ -6,7 +6,8 @@
 // `pedirAcaoComLocal` (o toast reporta o resultado REAL, nao um literal fixo —
 // ver a nota naquele helper).
 import { useState } from 'react'
-import { Coin, Diamond } from '@phosphor-icons/react'
+import { Coin, Diamond, Storefront } from '@phosphor-icons/react'
+import { MenuHeading, MenuScene } from '@/components/game/MenuScene'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { SegmentedTabs, StickyHeader } from '@/components/game/controls'
@@ -21,7 +22,7 @@ export function ShopMenu() {
   const { compacto } = useDeviceMode()
 
   return (
-    <div className="flex flex-col gap-[.55em]">
+    <MenuScene tone="shop">
       <StickyHeader className="flex-row flex-wrap items-center">
         {/* Uma fileira so, e os mesmos dois destinos em todo regime. Ela chegou
             a ter tres opcoes no celular ("Comprar | Vender | POKEs") porque
@@ -48,7 +49,8 @@ export function ShopMenu() {
           </span>
         )}
       </StickyHeader>
+      <MenuHeading icon={<Storefront weight="duotone" />} title="Suprimentos de aventura" description="Prepare a mochila. A próxima captura começa aqui." />
       {tab === 'itens' ? <ItensTab /> : <PokemonsTab />}
-    </div>
+    </MenuScene>
   )
 }

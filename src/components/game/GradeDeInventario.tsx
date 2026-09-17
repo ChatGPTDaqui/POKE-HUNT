@@ -136,7 +136,7 @@ export function GradeDeInventario({
       // contagem.
       role={multiplo ? 'group' : 'radiogroup'}
       aria-label={rotuloDoGrupo}
-      className={cn('overflow-y-auto rounded-[.5em] border border-n800 bg-n900/60 p-[.3em]', className)}
+      className={cn('inventory-grid overflow-y-auto rounded-[.5em] border border-n800 bg-n900/60 p-[.3em]', className)}
       style={{
         maxHeight: `${alturaMaxEm}em`,
         display: 'grid',
@@ -159,7 +159,7 @@ export function GradeDeInventario({
             disabled={slot.desabilitado}
             onClick={(evento) => onSelecionar(slot.id, evento)}
             className={cn(
-              'relative flex items-center justify-center rounded-[.4em] border-2 p-[.15em] transition-colors',
+              'inventory-slot relative flex items-center justify-center rounded-[.4em] border-2 p-[.15em] transition-colors',
               slot.desabilitado ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
               ativo
                 ? 'border-primary bg-primary/15'
