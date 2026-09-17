@@ -136,7 +136,7 @@ export function ItensTab() {
           `min-w-0` nas duas colunas: sem isso um nome longo estica a coluna e o
           grid de 1fr 1fr vira duas colunas de larguras diferentes. */}
       <div className="grid grid-cols-2 items-start gap-[.4em]">
-        <div className="flex min-w-0 flex-col gap-[.3em]">
+        <div className="shop-counter flex min-w-0 flex-col gap-[.4em]">
           {/* `min-h` igual nas duas colunas: o botao "Tudo" da venda e mais alto
               que um rotulo de texto, e sem o piso a primeira linha de uma coluna
               comecava abaixo da outra. */}
@@ -156,7 +156,7 @@ export function ItensTab() {
           })}
         </div>
 
-        <div className="flex min-w-0 flex-col gap-[.3em]">
+        <div className="shop-counter flex min-w-0 flex-col gap-[.4em]">
           <div className="flex min-h-[2em] items-center justify-between gap-[.3em]">
             <SectionLabel className="truncate">VENDER</SectionLabel>
             <GameButton

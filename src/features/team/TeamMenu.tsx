@@ -15,6 +15,9 @@ import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { GameButton, GameCard, Meter } from '@/components/game/controls'
 import { useDeviceMode } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
+import { UsersThree } from '@phosphor-icons/react'
+import { MenuHeading, MenuScene } from '@/components/game/MenuScene'
+import { TypeChip } from '@/components/shared/TypeChip'
 
 // PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
 // enquanto duram. O guard de verdade esta em controller.setActiveTeamIndex; aqui
@@ -42,7 +45,9 @@ export function TeamMenu() {
   const especieEscolhendo = pokeEscolhendo ? SPECIES[pokeEscolhendo.speciesId] : null
 
   return (
-    <div className="flex flex-col gap-[.3em]">
+    <MenuScene tone="team">
+      <MenuHeading icon={<UsersThree weight="duotone" />} title="Equipe de aventura" description="Seu parceiro em campo e os próximos a entrar em ação." />
+      <div className="team-roster">
       {pokeEscolhendo && especieEscolhendo && (
         <EscolhaDeEvolucao
           poke={pokeEscolhendo}
@@ -78,10 +83,11 @@ export function TeamMenu() {
             // numa coluna a direita: "Colocar em campo" e "Retirar da equipe"
             // empilhados custavam 45% da largura do card e empurravam nome, HP
             // e barra pra uma coluna de 8em.
-            className={cn('flex gap-[.5em] p-[.4em]', compacto ? 'flex-col' : 'items-center')}
+            className={cn('team-member flex gap-[.65em] p-[.7em]', isActive && 'is-active', compacto ? 'flex-col' : 'items-center')}
           >
             <div className={cn('flex min-w-0 gap-[.55em]', compacto ? 'items-center' : 'flex-1 items-center')}>
-            <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={3.2} />
+            <span className="team-position">{String(index + 1).padStart(2, '0')}</span>
+            <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={3.6} />
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-[.4em]">
@@ -109,6 +115,7 @@ export function TeamMenu() {
                   </GameButton>
                 )}
               </div>
+              <div className="mt-[.35em] flex flex-wrap gap-[.25em]">{[species.type, species.type2].map((type) => type && <TypeChip key={type} type={type} />)}</div>
               <div className="mt-[.2em] text-[.78em] text-n400">
                 HP {Math.floor(poke.hp)}/{poke.stats.hp} · EXP {Math.max(0, Math.floor(progress.into))}/{progress.needed}
               </div>
@@ -174,6 +181,7 @@ export function TeamMenu() {
           </GameCard>
         )
       })}
-    </div>
+      </div>
+    </MenuScene>
   )
 }

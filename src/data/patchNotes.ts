@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  {
+    version: '7.61',
+    date: '2026-09-17',
+    title: 'Mochila, loja e equipes com visual de aventura',
+    highlights: [
+      'Mochila com detalhes ao lado da coleção no computador, busca de itens e ações mais claras. No celular, os detalhes ficam abaixo da grade.',
+      'Loja com preços e quantidades mais legíveis, botão de compra no celular e balcões separados. A equipe ganhou retratos maiores, tipos e destaque para o POKE ativo.',
+      'A equipe PvP agora mostra seis posições fixas, tipos, golpes e prontidão. Escolha substitutos pela busca; as alterações só aparecem como salvas após a confirmação do servidor.',
+    ],
+  },
   // PH-553 (duelo vencido comemora; placar sobe pra logo abaixo do cabeçalho).
   {
     version: '7.60',

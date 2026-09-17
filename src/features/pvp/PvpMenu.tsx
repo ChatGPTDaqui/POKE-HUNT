@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { MenuHeading, MenuScene } from '@/components/game/MenuScene'
 import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { Clock, Sword } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
@@ -31,6 +32,15 @@ function formatarData(iso: string): string {
 }
 
 export function PvpMenu() {
+  return (
+    <MenuScene tone="arena">
+      <MenuHeading icon={<Sword weight="duotone" />} title="Arena de treinadores" description="Monte sua formação. Desafie outro treinador. Conquiste seu lugar." />
+      <PvpConteudo />
+    </MenuScene>
+  )
+}
+
+function PvpConteudo() {
   const [aba, setAba] = useState<AbaPvp>('lobby')
   const pvp = usePvp()
   const [nick, setNick] = useState('')
@@ -43,7 +53,7 @@ export function PvpMenu() {
       onChange={setAba}
       options={[
         { value: 'lobby', label: 'Lobby' },
-        { value: 'build', label: 'Build' },
+        { value: 'build', label: 'Equipe PvP' },
         { value: 'ranked', label: 'Ranked' },
         { value: 'torneios', label: 'Torneios' },
       ]}
@@ -72,7 +82,7 @@ export function PvpMenu() {
   return (
     <div className="flex flex-col gap-[.75em]">
       {abas}
-      <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em]">
+      <div className="arena-surface">
         <div className="mb-[.45em] flex items-center gap-[.35em]">
           <Sword className="text-[1.1em] text-n300" />
           <SectionLabel>CONVITE</SectionLabel>
@@ -83,6 +93,7 @@ export function PvpMenu() {
             <GameInput
               className="flex-1"
               placeholder="Nick do treinador"
+              aria-label="Nick do treinador"
               value={nick}
               onChange={(e) => setNick(e.target.value)}
               onKeyDown={(e) => {
@@ -136,7 +147,7 @@ export function PvpMenu() {
         )}
       </div>
 
-      <div className="rounded-[.7em] border border-n800 bg-n900 p-[.65em]">
+      <div className="arena-surface">
         <SectionLabel>HISTÓRICO PVP</SectionLabel>
         <div className="mt-[.45em] flex max-h-[15em] flex-col gap-[.3em] overflow-y-auto">
           {pvp.historico.length === 0 ? (
