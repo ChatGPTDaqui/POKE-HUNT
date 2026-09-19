@@ -60,17 +60,23 @@ function bossBackgroundImage(species: SpeciesDataEntry): string | null {
 // afirmava "11 hunts BOSS" e "os 11 lendarios" muito depois de a Geracao III
 // ter subido esse numero pra 21. Numero digitado a mao em copy nao tem quem o
 // corrija — `LEGENDARY_SPECIES_IDS.length` tem.
-export const LEVEL_OFFSET = 100
+// Offset FIXO por estagio (nao mais so por nivel bruto), decidido em 19/09
+// pra alinhar cada um dos 10 estagios do Pesadelo a uma regua propria de
+// Lv150-250 (antes: +100 flat com piso 150, que colapsava os estagios 1-5
+// TODOS no mesmo Lv150 sem faixa nenhuma — bug real, achado ao medir
+// `niveisDoEstagio` de 1-50 contra o piso).
+//
+// +149 e o unico offset constante que crava o PISO em Lv150 exato (Lv1 normal
+// + 149) — requisito explicito do dono do projeto, mais importante que os
+// numeros do meio baterem redondo. Efeito colateral: cada estagio sai 1
+// abaixo do arredondado "de 10 em 10" (estagio1 vira 150-159 em vez de
+// 150-160, estagio10 vira 240-249 em vez de 241-250). Offset variavel por
+// estagio bateria os redondos mas quebraria a garantia de que o espelho
+// preserva a ORDEM relativa de nivel entre especies dentro do mesmo estagio
+// — nao vale a troca por estetica de numero.
+export const LEVEL_OFFSET = 149
 export const BOSS_LEVEL = 300
-// Floor applied on top of the +100 offset (explicit user request: "os
-// pokemons do modo pesadelo mais fracos agora possuem o lvl 150") — the
-// weakest base hunt (Route 46 Inicial, ~Lv1-2) would only reach ~101-102
-// with a flat +100, so every mirrored level is clamped up to this floor
-// instead. Kanto's mirrored zones already clear 150 on their own (their base
-// levels got their own +50 bump, see sync-planilha.js#KANTO_BANDS), so the
-// floor only ever kicks in for the low Johto zones.
-export const NIGHTMARE_MIN_LEVEL = 150
-const shiftLevel = (level: number) => Math.max(level + LEVEL_OFFSET, NIGHTMARE_MIN_LEVEL)
+const shiftLevel = (level: number) => level + LEVEL_OFFSET
 
 // Recebe as hunts normais em vez de ler `MAPS_DATA` direto: o espelho tem
 // que ser tirado do resultado FINAL (depois do recorte por regiao e das
