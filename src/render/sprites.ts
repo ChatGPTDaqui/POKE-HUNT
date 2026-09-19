@@ -925,10 +925,13 @@ export function drawNameLevelTag(
 }
 
 const IMPACT_BASE_SIZE = 44
-// Opacidade de TODA sprite/efeito de ataque: 90% solida, 10% transparente.
-// Vale pro desenho procedural e pra arte real (drawQuadroDeTira) — os dois
-// multiplicam o proprio fade por ela.
-const SOLID_OPACITY = 0.9
+// Opacidade de TODA sprite/efeito de ataque: 20% solida, 80% transparente
+// (PH-560, pedido explicito do dono do projeto — "nenhuma sprite de ataque
+// deve sobressair o corpo dos POKEs"). Vale pro desenho procedural e pra arte
+// real (drawQuadroDeTira) — os dois multiplicam o proprio fade por ela, entao
+// o teto de opacidade e o mesmo no pico do efeito em qualquer um dos dois
+// caminhos. Era 0.9 antes desta issue.
+const SOLID_OPACITY = 0.2
 const HOLD_PORTION = 0.6
 
 function drawShapeParticle(ctx: CanvasRenderingContext2D, shape: ImpactShape, size: number): void {

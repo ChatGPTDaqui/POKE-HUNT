@@ -1758,6 +1758,13 @@ const EFFECTIVENESS_COLORS: Record<Effectiveness, string> = {
   immune: '#000000',
 }
 
+// Pedido explicito do dono do projeto (PH-560): o numero de dano ficava so
+// 0,9s na tela, tempo curto demais pra ler no meio de um combate com varios
+// POKEs. Sobe pra 2,8s — so o dano, nao os outros textos flutuantes
+// (`abilityName`: mudanca de stat, "Truant!", "Perish Song!"), que nao foram
+// pedidos e continuam com a duracao antiga.
+const DURACAO_DO_NUMERO_DE_DANO_S = 2.8
+
 // Texto de combate flutuante acima do alvo. Hits com rotulo de efetividade
 // (ex: "Super efetivo!") desenham 2 linhas empilhadas, entao reservam 2
 // slots de raia em vez de 1.
@@ -1767,7 +1774,7 @@ function spawnDamageNumber(world: WorldState, target: WorldEntity, result: Damag
     x: target.x, y: target.y,
     targetX: target.x, targetY: target.y - target.radius - 40,
     color: EFFECTIVENESS_COLORS[result.effectiveness],
-    duration: 0.9,
+    duration: DURACAO_DO_NUMERO_DE_DANO_S,
     value: result.amount,
     effectiveness: result.effectiveness !== 'normal' ? result.effectiveness : undefined,
     effectivenessLabel: result.effectivenessLabel,

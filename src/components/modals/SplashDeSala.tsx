@@ -39,8 +39,15 @@ import { useWorldStore } from '@/stores/worldStore'
 export const DURACAO_DO_SPLASH_DE_SALA_MS = 4000
 
 const CSS = `
+/* PH-560: pedido explicito do dono do projeto — efeito de zoom IN na entrada
+   (nao a escala quase imperceptivel de .96->1 que ja existia). O cartao entra
+   grande (1.4x) e encolhe ate o tamanho final: e a leitura usual de "zoom in"
+   num banner de UI (o oposto do zoom-out de scale(0)->1 que pareceria so
+   'aparecer'). Fica so na ENTRADA (0-12%) — sair com o mesmo zoom competiria
+   com o combate no resto da duracao, que e exatamente o que a nota 3 do
+   cabecalho do componente pede pra evitar. */
 @keyframes splash-sala-entra {
-  0%   { opacity: 0; transform: translateY(-10px) scale(.96) }
+  0%   { opacity: 0; transform: translateY(-10px) scale(1.4) }
   12%  { opacity: 1; transform: translateY(0) scale(1) }
   82%  { opacity: 1; transform: translateY(0) scale(1) }
   100% { opacity: 0; transform: translateY(-8px) scale(.99) }

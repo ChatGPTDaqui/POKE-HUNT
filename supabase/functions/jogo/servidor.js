@@ -105444,6 +105444,7 @@ var EFFECTIVENESS_COLORS = {
 	weak: "#8b98a8",
 	immune: "#000000"
 };
+var DURACAO_DO_NUMERO_DE_DANO_S = 2.8;
 function spawnDamageNumber(world, target, result) {
 	world.effects.push(createWorldEffect(world.counters, {
 		type: "damageNumber",
@@ -105452,7 +105453,7 @@ function spawnDamageNumber(world, target, result) {
 		targetX: target.x,
 		targetY: target.y - target.radius - 40,
 		color: EFFECTIVENESS_COLORS[result.effectiveness],
-		duration: .9,
+		duration: DURACAO_DO_NUMERO_DE_DANO_S,
 		value: result.amount,
 		effectiveness: result.effectiveness !== "normal" ? result.effectiveness : void 0,
 		effectivenessLabel: result.effectivenessLabel,
