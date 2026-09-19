@@ -11,21 +11,6 @@ export function MenuScene({ children, tone = 'collection' }: {
   return <div className="trainer-menu" data-tone={tone} data-layout={mode}>{children}</div>
 }
 
-export function MenuHeading({ icon, title, description, aside }: {
-  icon: ReactNode; title: string; description: string; aside?: ReactNode
-}) {
-  return (
-    <header className="trainer-heading">
-      <span className="trainer-emblem" aria-hidden>{icon}</span>
-      <div className="min-w-0 flex-1">
-        <h2 className="font-heading text-[1.25em] leading-tight">{title}</h2>
-        <p className="mt-[.2em] text-[.78em] text-n400">{description}</p>
-      </div>
-      {aside && <div className="trainer-heading-aside">{aside}</div>}
-    </header>
-  )
-}
-
 export function SelectionHint({ children }: { children: ReactNode }) {
   return <div className="selection-hint"><span aria-hidden className="text-[2em]">◇</span><p>{children}</p></div>
 }

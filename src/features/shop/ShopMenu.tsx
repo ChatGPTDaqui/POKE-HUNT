@@ -6,8 +6,8 @@
 // `pedirAcaoComLocal` (o toast reporta o resultado REAL, nao um literal fixo —
 // ver a nota naquele helper).
 import { useState } from 'react'
-import { Coin, Diamond, Storefront } from '@phosphor-icons/react'
-import { MenuHeading, MenuScene } from '@/components/game/MenuScene'
+import { Coin, Diamond } from '@phosphor-icons/react'
+import { MenuScene } from '@/components/game/MenuScene'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { SegmentedTabs, StickyHeader } from '@/components/game/controls'
@@ -49,7 +49,6 @@ export function ShopMenu() {
           </span>
         )}
       </StickyHeader>
-      <MenuHeading icon={<Storefront weight="duotone" />} title="Suprimentos de aventura" description="Prepare a mochila. A próxima captura começa aqui." />
       {tab === 'itens' ? <ItensTab /> : <PokemonsTab />}
     </MenuScene>
   )

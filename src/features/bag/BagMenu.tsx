@@ -6,8 +6,8 @@
 // estavel entre renders, entao da pra filtrar o array de verdade — esse
 // workaround nao precisa ser portado.
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, Backpack, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
-import { MenuHeading, MenuScene, SelectionHint } from '@/components/game/MenuScene'
+import { ArrowDown, ArrowUp, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
+import { MenuScene, SelectionHint } from '@/components/game/MenuScene'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { pedirAcao } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent, type PokeInstance } from '@/data/pokes'
@@ -599,7 +599,6 @@ export function BagMenu() {
         </div>
         {tab === 'pokemons' && autoVendaAberta && <AutoVendaPanel />}
       </StickyHeader>
-      <MenuHeading icon={<Backpack weight="duotone" />} title="Sua coleção" description="Pokémon e recursos para a próxima aventura." />
       {tab === 'pokemons' ? <PokemonsTab /> : tab === 'itens' ? <ItensTab /> : <TmsTab />}
     </MenuScene>
   )
