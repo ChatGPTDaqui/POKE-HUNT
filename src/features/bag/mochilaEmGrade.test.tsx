@@ -109,15 +109,21 @@ describe('Mochila em grade (PH-118)', () => {
     expect(todosOsIds.length).toBeGreaterThan(LOTE_INCREMENTAL)
     useGameStateStore.setState({ items: Object.fromEntries(todosOsIds.map((id) => [id, 1])), lockedItems: {} })
 
-    render(<ItensTab />)
-    expect(screen.getAllByRole('radio')).toHaveLength(LOTE_INCREMENTAL)
+    // jsdom nao calcula layout de verdade: ver a nota igual em tmsTab.test.tsx.
+    const scrollHeightSpy = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(1000)
+    const clientHeightSpy = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(200)
+    try {
+      render(<ItensTab />)
+      expect(screen.getAllByRole('radio')).toHaveLength(LOTE_INCREMENTAL)
 
-    const grade = screen.getByRole('radiogroup', { name: 'Itens da mochila' })
-    Object.defineProperty(grade, 'scrollHeight', { configurable: true, value: 1000 })
-    Object.defineProperty(grade, 'clientHeight', { configurable: true, value: 200 })
-    Object.defineProperty(grade, 'scrollTop', { configurable: true, value: 950 })
-    fireEvent.scroll(grade)
+      const grade = screen.getByRole('radiogroup', { name: 'Itens da mochila' })
+      Object.defineProperty(grade, 'scrollTop', { configurable: true, value: 950 })
+      fireEvent.scroll(grade)
 
-    expect(screen.getAllByRole('radio')).toHaveLength(Math.min(LOTE_INCREMENTAL * 2, todosOsIds.length))
+      expect(screen.getAllByRole('radio')).toHaveLength(Math.min(LOTE_INCREMENTAL * 2, todosOsIds.length))
+    } finally {
+      scrollHeightSpy.mockRestore()
+      clientHeightSpy.mockRestore()
+    }
   })
 })
