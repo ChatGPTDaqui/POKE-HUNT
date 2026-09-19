@@ -28,7 +28,7 @@
 // Tambem nao e arrastavel. Reordenar inventario e outro assunto (o trilho de
 // reservas ja tem o seu), e misturar arrasto com selecao no mesmo toque e como
 // se ganha o bug de "toquei pra escolher e ele reordenou".
-import { type MouseEvent, type ReactNode } from 'react'
+import { type MouseEvent, type UIEvent, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 export interface SlotDeInventario {
@@ -95,7 +95,7 @@ function contadorCurto(n: number): string {
 
 export function GradeDeInventario({
   slots, selecionado, onSelecionar, alturaMaxEm = 13, className, rotuloDoGrupo,
-  modo = 'unico', selecionados,
+  modo = 'unico', selecionados, onScroll,
 }: {
   slots: SlotDeInventario[]
   /** Slot marcado no modo 'unico'. Ignorado no modo 'multiplo'. */
@@ -123,6 +123,12 @@ export function GradeDeInventario({
   modo?: 'unico' | 'multiplo'
   /** Slots marcados no modo 'multiplo'. */
   selecionados?: ReadonlySet<string>
+  /**
+   * Repassado pro scroll do container (PH-557): quem usa rolagem incremental em
+   * vez de paginacao por seta escuta aqui pra saber quando esta perto do fim.
+   * Ausente = comportamento identico ao de antes.
+   */
+  onScroll?: (evento: UIEvent<HTMLDivElement>) => void
 }) {
   const multiplo = modo === 'multiplo'
   return (
@@ -137,6 +143,7 @@ export function GradeDeInventario({
       role={multiplo ? 'group' : 'radiogroup'}
       aria-label={rotuloDoGrupo}
       className={cn('inventory-grid overflow-y-auto rounded-[.5em] border border-n800 bg-n900/60 p-[.3em]', className)}
+      onScroll={onScroll}
       style={{
         maxHeight: `${alturaMaxEm}em`,
         display: 'grid',
