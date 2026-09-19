@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MenuHeading, MenuScene } from '@/components/game/MenuScene'
+import { MenuScene } from '@/components/game/MenuScene'
 import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { Clock, Sword } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
@@ -34,7 +34,6 @@ function formatarData(iso: string): string {
 export function PvpMenu() {
   return (
     <MenuScene tone="arena">
-      <MenuHeading icon={<Sword weight="duotone" />} title="Arena de treinadores" description="Monte sua formação. Desafie outro treinador. Conquiste seu lugar." />
       <PvpConteudo />
     </MenuScene>
   )
