@@ -76,17 +76,50 @@ describe('Aba TMs da mochila (PH-556)', () => {
     expect(todasAsTms.length).toBeGreaterThan(LOTE_INCREMENTAL)
     useGameStateStore.setState({ items: Object.fromEntries(todasAsTms.map((id) => [id, 1])) })
 
-    render(<TmsTab />)
-    expect(screen.getAllByRole('radio')).toHaveLength(LOTE_INCREMENTAL)
+    // jsdom nao calcula layout de verdade (scrollHeight/clientHeight sao
+    // sempre 0), e o preenchimento automatico da PH-559 le essas duas medidas
+    // ANTES do teste conseguir pegar o node pra forjar — sem isto ele ve
+    // "0 <= 0" (caixa "cheia") e revela tudo de uma vez, e a asercao do lote
+    // inicial falharia mesmo com o comportamento real correto. Simula "caixa
+    // com espaco pra 200px, conteudo de 1000px" no PROTOTIPO, valendo pra
+    // todo elemento ate restaurar.
+    const scrollHeightSpy = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(1000)
+    const clientHeightSpy = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(200)
+    try {
+      render(<TmsTab />)
+      expect(screen.getAllByRole('radio')).toHaveLength(LOTE_INCREMENTAL)
 
-    const grade = screen.getByRole('radiogroup', { name: 'TMs da mochila' })
-    // jsdom nao calcula layout de verdade: forja as tres medidas que o
-    // handler confere pra simular "o jogador rolou ate quase o fim".
-    Object.defineProperty(grade, 'scrollHeight', { configurable: true, value: 1000 })
-    Object.defineProperty(grade, 'clientHeight', { configurable: true, value: 200 })
-    Object.defineProperty(grade, 'scrollTop', { configurable: true, value: 950 })
-    fireEvent.scroll(grade)
+      const grade = screen.getByRole('radiogroup', { name: 'TMs da mochila' })
+      Object.defineProperty(grade, 'scrollTop', { configurable: true, value: 950 })
+      fireEvent.scroll(grade)
 
-    expect(screen.getAllByRole('radio')).toHaveLength(Math.min(LOTE_INCREMENTAL * 2, todasAsTms.length))
+      expect(screen.getAllByRole('radio')).toHaveLength(Math.min(LOTE_INCREMENTAL * 2, todasAsTms.length))
+    } finally {
+      scrollHeightSpy.mockRestore()
+      clientHeightSpy.mockRestore()
+    }
+  })
+
+  it('BUG REAL (PH-559): se o lote nao encher a caixa, completa sozinho sem esperar rolagem', () => {
+    // O caso que travava: caixa com espaco de sobra (scrollHeight <=
+    // clientHeight) mesmo com o lote inteiro desenhado — sem overflow nenhum,
+    // nao ha `onScroll` que dispare, e sem o preenchimento automatico o resto
+    // ficava preso pra sempre atras de "role para ver mais" com nada pra rolar.
+    const todasAsTms = Object.keys(TM_ITEMS)
+    expect(todasAsTms.length).toBeGreaterThan(LOTE_INCREMENTAL)
+    useGameStateStore.setState({ items: Object.fromEntries(todasAsTms.map((id) => [id, 1])) })
+
+    // Caixa "grande demais pro conteudo": clientHeight MAIOR que scrollHeight,
+    // o oposto do teste anterior — simula a grade nunca ficando rolavel.
+    const scrollHeightSpy = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(200)
+    const clientHeightSpy = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(1000)
+    try {
+      render(<TmsTab />)
+      // Sem fireEvent.scroll nenhum: se o bug voltar, isto trava em LOTE_INCREMENTAL.
+      expect(screen.getAllByRole('radio')).toHaveLength(todasAsTms.length)
+    } finally {
+      scrollHeightSpy.mockRestore()
+      clientHeightSpy.mockRestore()
+    }
   })
 })
