@@ -11,6 +11,7 @@
 import { useCallback, useEffect, type CSSProperties, type ReactNode } from 'react'
 import { X } from '@phosphor-icons/react'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
+import { useWindowResize } from '@/hooks/useWindowResize'
 import { useFecharComEsc } from '@/hooks/useFecharComEsc'
 import type { WindowKey } from '@/stores/uiStore'
 import { GameIconButton } from './controls'
@@ -52,6 +53,7 @@ export function GameWindow({
   onClose, title, header, subheader, footer, children, className, bodyClassName,
 }: GameWindowProps) {
   const { pos, onPointerDown } = useWindowDrag(winKey)
+  const { onPointerDownBorda } = useWindowResize(winKey)
 
   // A largura padrao e escrita UMA vez, por ref, e nunca entra no `style`
   // reativo. Se entrasse, todo re-render que mudasse a posicao (ou seja, cada
@@ -155,6 +157,36 @@ export function GameWindow({
           className,
         )}
       >
+        {/* PH-562: as quatro faixas de borda, pedido explicito do dono do
+            projeto ("atualmente so existe nas extremidades diagonais"). O
+            `resize: both` nativo do CSS (acima) continua dono do canto
+            inferior direito — por isso a faixa de baixo e a da direita param
+            16px antes do canto, pra nao brigar com o grip nativo do
+            navegador ali. Vem ANTES do header/corpo no DOM de proposito: as
+            duas sao `position:absolute` sem z-index, entao empatam por ordem
+            de insercao — o botao de Fechar (tambem absolute, mas inserido
+            DEPOIS, dentro do header) fica por cima das faixas na faixa de
+            cima, e continua clicavel mesmo onde as areas se tocam. */}
+        <div
+          aria-hidden
+          onPointerDown={onPointerDownBorda('top')}
+          className="absolute top-0 right-[10px] left-[10px] h-[7px] cursor-ns-resize touch-none"
+        />
+        <div
+          aria-hidden
+          onPointerDown={onPointerDownBorda('bottom')}
+          className="absolute right-[16px] bottom-0 left-[10px] h-[7px] cursor-ns-resize touch-none"
+        />
+        <div
+          aria-hidden
+          onPointerDown={onPointerDownBorda('left')}
+          className="absolute top-[10px] bottom-[10px] left-0 w-[7px] cursor-ew-resize touch-none"
+        />
+        <div
+          aria-hidden
+          onPointerDown={onPointerDownBorda('right')}
+          className="absolute top-[10px] bottom-[16px] right-0 w-[7px] cursor-ew-resize touch-none"
+        />
         {header ? (
           // Com cabecalho custom o botao de fechar flutua por cima dele: o
           // conteudo (a arte do POKE, por exemplo) ocupa a largura toda, e

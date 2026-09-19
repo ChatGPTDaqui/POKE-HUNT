@@ -506,7 +506,7 @@ export function TmsTab() {
           alturaMaxEm={20}
           selecionado={foco}
           ref={revelacao.containerRef}
-            onScroll={revelacao.aoRolar}
+          onScroll={revelacao.aoRolar}
           onSelecionar={(id, evento) => {
             if (tratouComoLink(evento, () => linkarItem(ITEMS[id], items[id]))) return
             setFoco(id)
@@ -530,41 +530,49 @@ export function TmsTab() {
         />
 
         {itemEmFoco ? (
-          <GameCard
-            title="Shift+clique para linkar no chat"
-            onClick={(e) => { tratouComoLink(e, () => linkarItem(itemEmFoco, items[itemEmFoco.id])) }}
-            className={cn('inventory-detail', lockedItems[itemEmFoco.id] && 'border-gold/40')}
-          >
-            <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="3.8em" />
-            <div className="detail-identity">
-              <div className="font-medium">
-                {itemEmFoco.name} <span className="text-n400">x{items[itemEmFoco.id]}</span>
-              </div>
-              {abilityEmFoco && (
-                <div className="mt-[.2em] flex flex-wrap items-center gap-[.3em]">
-                  <TypeChip type={abilityEmFoco.type} full />
+          // PH-562: a ficha e o EnsinarTm (detalhe completo + ensinar) vivem
+          // JUNTOS na coluna da direita — antes o EnsinarTm renderizava full
+          // width ABAIXO do workspace inteiro, deixando esta coluna curta (so
+          // icone+nome+cadeado) com uma sobra vazia embaixo dela ate o
+          // EnsinarTm comecar la embaixo. Achado com screenshot real pelo dono
+          // do projeto.
+          <div className="flex flex-col gap-[.5em]">
+            <GameCard
+              title="Shift+clique para linkar no chat"
+              onClick={(e) => { tratouComoLink(e, () => linkarItem(itemEmFoco, items[itemEmFoco.id])) }}
+              className={cn('inventory-detail', lockedItems[itemEmFoco.id] && 'border-gold/40')}
+            >
+              <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="3.8em" />
+              <div className="detail-identity">
+                <div className="font-medium">
+                  {itemEmFoco.name} <span className="text-n400">x{items[itemEmFoco.id]}</span>
                 </div>
-              )}
-            </div>
-            <div className="detail-actions">
-              <LockButton
-                locked={Boolean(lockedItems[itemEmFoco.id])}
-                carregando={acao.isPending(`lock:${itemEmFoco.id}`)}
-                onToggle={() => {
-                  void acao.run(`lock:${itemEmFoco.id}`, () =>
-                    pedirAcao({ tipo: 'alternarTravaItem', itemId: itemEmFoco.id }, () => toggleItemLock(itemEmFoco.id)),
-                  )
-                }}
-              />
-            </div>
-          </GameCard>
+                {abilityEmFoco && (
+                  <div className="mt-[.2em] flex flex-wrap items-center gap-[.3em]">
+                    <TypeChip type={abilityEmFoco.type} full />
+                  </div>
+                )}
+              </div>
+              <div className="detail-actions">
+                <LockButton
+                  locked={Boolean(lockedItems[itemEmFoco.id])}
+                  carregando={acao.isPending(`lock:${itemEmFoco.id}`)}
+                  onToggle={() => {
+                    void acao.run(`lock:${itemEmFoco.id}`, () =>
+                      pedirAcao({ tipo: 'alternarTravaItem', itemId: itemEmFoco.id }, () => toggleItemLock(itemEmFoco.id)),
+                    )
+                  }}
+                />
+              </div>
+            </GameCard>
+            <EnsinarTm key={itemEmFoco.id} itemId={itemEmFoco.id} />
+          </div>
         ) : <SelectionHint>Selecione uma TM para ver o golpe e ensiná-lo.</SelectionHint>}
       </div>
 
       {filtrados.length === 0
         ? <p className="text-[.85em] text-n400">Nenhuma TM encontrada.</p>
         : <RevelacaoIncremental estado={revelacao} rotulo="TMs" />}
-      {itemEmFoco && <EnsinarTm key={itemEmFoco.id} itemId={itemEmFoco.id} />}
     </div>
   )
 }
