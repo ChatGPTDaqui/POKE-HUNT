@@ -15,8 +15,7 @@ import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { GameButton, GameCard, Meter } from '@/components/game/controls'
 import { useDeviceMode } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
-import { UsersThree } from '@phosphor-icons/react'
-import { MenuHeading, MenuScene } from '@/components/game/MenuScene'
+import { MenuScene } from '@/components/game/MenuScene'
 import { TypeChip } from '@/components/shared/TypeChip'
 
 // PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
@@ -46,7 +45,6 @@ export function TeamMenu() {
 
   return (
     <MenuScene tone="team">
-      <MenuHeading icon={<UsersThree weight="duotone" />} title="Equipe de aventura" description="Seu parceiro em campo e os próximos a entrar em ação." />
       <div className="team-roster">
       {pokeEscolhendo && especieEscolhendo && (
         <EscolhaDeEvolucao
