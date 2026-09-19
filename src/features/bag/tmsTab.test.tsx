@@ -7,7 +7,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { TM_ITEMS } from '@/data/maquinas'
 import { getAbility } from '@/data/abilities'
-import { TmsTab, LOTE_DE_TMS } from './BagMenu'
+import { LOTE_INCREMENTAL } from '@/components/game/Paginacao'
+import { TmsTab } from './BagMenu'
 
 vi.mock('./useMochila', () => ({ useMochila: () => ({ carregada: true, erro: null }) }))
 vi.mock('@/data/remote/autoridade', () => ({ pedirAcao: async (_acao: unknown, fallback: () => unknown) => fallback() }))
@@ -72,11 +73,11 @@ describe('Aba TMs da mochila (PH-556)', () => {
     // Precisa de mais TM que o lote inicial pra ter o que revelar — usa o
     // catalogo real inteiro (ele ja tem dezenas de entradas).
     const todasAsTms = Object.keys(TM_ITEMS)
-    expect(todasAsTms.length).toBeGreaterThan(LOTE_DE_TMS)
+    expect(todasAsTms.length).toBeGreaterThan(LOTE_INCREMENTAL)
     useGameStateStore.setState({ items: Object.fromEntries(todasAsTms.map((id) => [id, 1])) })
 
     render(<TmsTab />)
-    expect(screen.getAllByRole('radio')).toHaveLength(LOTE_DE_TMS)
+    expect(screen.getAllByRole('radio')).toHaveLength(LOTE_INCREMENTAL)
 
     const grade = screen.getByRole('radiogroup', { name: 'TMs da mochila' })
     // jsdom nao calcula layout de verdade: forja as tres medidas que o
@@ -86,6 +87,6 @@ describe('Aba TMs da mochila (PH-556)', () => {
     Object.defineProperty(grade, 'scrollTop', { configurable: true, value: 950 })
     fireEvent.scroll(grade)
 
-    expect(screen.getAllByRole('radio')).toHaveLength(Math.min(LOTE_DE_TMS * 2, todasAsTms.length))
+    expect(screen.getAllByRole('radio')).toHaveLength(Math.min(LOTE_INCREMENTAL * 2, todasAsTms.length))
   })
 })
