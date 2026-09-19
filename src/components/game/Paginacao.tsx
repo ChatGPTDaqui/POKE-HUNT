@@ -18,7 +18,7 @@
 //
 // A paginacao e aplicada DEPOIS de filtrar/ordenar, entao a busca continua vendo
 // a colecao inteira (o filtro nao enxerga so a pagina atual — seria o bug obvio).
-import { useEffect, useMemo, useState, type UIEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from 'react'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { GameButton } from './controls'
 
@@ -104,6 +104,12 @@ export interface Incremental<T> {
   mostrados: T[]
   /** Handler pro `onScroll` do container rolavel (ex.: `GradeDeInventario`). */
   aoRolar: (evento: UIEvent<HTMLDivElement>) => void
+  /**
+   * `ref` do container rolavel — passa direto pro `ref` do `GradeDeInventario`
+   * (que a encaminha pro `<div>` de verdade). Sem isto o hook nao tem como medir
+   * se o lote atual ENCHEU a caixa; ver o BUG REAL no corpo do hook.
+   */
+  containerRef: (node: HTMLDivElement | null) => void
   /** Quantos itens ainda nao foram revelados. */
   restantes: number
 }
@@ -117,11 +123,53 @@ export interface Incremental<T> {
  * identidade) quanto "os dados de origem mudaram" (flush do servidor). Quem
  * chama precisa passar um array ja memoizado (`useMemo`) com as dependencias
  * certas, ou o reset dispara a cada render.
+ *
+ * BUG REAL (PH-559), achado pelo dono do projeto com a mao na mochila: se o
+ * LOTE_INCREMENTAL cabe inteiro dentro de `alturaMaxEm` sem estourar — comum
+ * com colunas largas, ex. 24 itens em 8 colunas sao so 3 linhas, contra as ~5
+ * que cabem em 20em —, o container nunca fica rolavel. Sem overflow nao ha
+ * `onScroll` nenhum pra disparar, e o resto da lista trava pra sempre: "role
+ * para ver mais" sem NADA que role. O efeito abaixo fecha esse buraco —
+ * completa sozinho, lote atras de lote, ate a caixa realmente ficar cheia (ou
+ * acabarem os itens) — ANTES de depender do gesto de rolagem do jogador.
  */
 export function useRevelacaoIncremental<T>(itens: T[], lote = LOTE_INCREMENTAL): Incremental<T> {
   const [visivel, setVisivel] = useState(lote)
+  const elRef = useRef<HTMLDivElement | null>(null)
+  const containerRef = useCallback((node: HTMLDivElement | null) => { elRef.current = node }, [])
 
   useEffect(() => { setVisivel(lote) }, [itens, lote])
+
+  // Sem array de dependencias: precisa reler o DOM depois de CADA render (o
+  // proprio `setVisivel` daqui inclusive), pra saber se o lote que acabou de
+  // entrar ja produziu overflow. Converge sozinho — a condicao `visivel <
+  // itens.length` para de bater assim que mostrar tudo, mesmo que a caixa
+  // nunca preencha (lista curta: fim de lista de verdade, nao bug).
+  useEffect(() => {
+    const el = elRef.current
+    if (el && visivel < itens.length && el.scrollHeight <= el.clientHeight) {
+      setVisivel((v) => Math.min(v + lote, itens.length))
+    }
+  })
+
+  // Cobre o caso de a JANELA crescer (redimensionar, girar o celular): a
+  // caixa que estava cheia pode deixar de estar, e sem isto o preenchimento
+  // automatico so rodaria de novo no proximo filtro/ordenacao. Recriado a
+  // cada mudanca de `itens`/`lote` (e nao so uma vez): senao o closure do
+  // callback ficaria preso nos valores do primeiro render pra sempre, e um
+  // filtro que reduzisse a lista deixaria a guarda `visivel < itens.length`
+  // comparando contra um `itens.length` velho.
+  useEffect(() => {
+    const el = elRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(() => {
+      if (visivel < itens.length && el.scrollHeight <= el.clientHeight) {
+        setVisivel((v) => Math.min(v + lote, itens.length))
+      }
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [itens, lote, visivel])
 
   function aoRolar(evento: UIEvent<HTMLDivElement>) {
     const el = evento.currentTarget
@@ -131,7 +179,7 @@ export function useRevelacaoIncremental<T>(itens: T[], lote = LOTE_INCREMENTAL):
   }
 
   const mostrados = useMemo(() => itens.slice(0, Math.min(visivel, itens.length)), [itens, visivel])
-  return { mostrados, aoRolar, restantes: itens.length - mostrados.length }
+  return { mostrados, aoRolar, containerRef, restantes: itens.length - mostrados.length }
 }
 
 /**

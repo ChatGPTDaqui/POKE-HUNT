@@ -28,7 +28,7 @@
 // Tambem nao e arrastavel. Reordenar inventario e outro assunto (o trilho de
 // reservas ja tem o seu), e misturar arrasto com selecao no mesmo toque e como
 // se ganha o bug de "toquei pra escolher e ele reordenou".
-import { type MouseEvent, type UIEvent, type ReactNode } from 'react'
+import { forwardRef, type MouseEvent, type UIEvent, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 export interface SlotDeInventario {
@@ -93,10 +93,13 @@ function contadorCurto(n: number): string {
   return String(n)
 }
 
-export function GradeDeInventario({
-  slots, selecionado, onSelecionar, alturaMaxEm = 13, className, rotuloDoGrupo,
-  modo = 'unico', selecionados, onScroll,
-}: {
+/**
+ * Encaminhada pro container rolavel (PH-559): a revelacao incremental precisa
+ * medir `scrollHeight`/`clientHeight` de verdade pra saber se o lote atual ja
+ * ENCHEU a caixa — sem isso, ela nao tem como saber se falta espaco pra rolar
+ * ou se so falta CONTEUDO.
+ */
+export const GradeDeInventario = forwardRef<HTMLDivElement, {
   slots: SlotDeInventario[]
   /** Slot marcado no modo 'unico'. Ignorado no modo 'multiplo'. */
   selecionado: string | null
@@ -129,10 +132,14 @@ export function GradeDeInventario({
    * Ausente = comportamento identico ao de antes.
    */
   onScroll?: (evento: UIEvent<HTMLDivElement>) => void
-}) {
+}>(function GradeDeInventario({
+  slots, selecionado, onSelecionar, alturaMaxEm = 13, className, rotuloDoGrupo,
+  modo = 'unico', selecionados, onScroll,
+}, ref) {
   const multiplo = modo === 'multiplo'
   return (
     <div
+      ref={ref}
       // `radiogroup` e nao `listbox`: escolha unica entre opcoes visiveis e
       // exatamente a semantica de radio. O `<select>` que estava aqui antes era
       // listbox por acidente de elemento, nao por intencao.
@@ -195,4 +202,4 @@ export function GradeDeInventario({
       })}
     </div>
   )
-}
+})

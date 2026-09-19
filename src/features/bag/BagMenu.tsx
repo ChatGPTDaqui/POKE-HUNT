@@ -170,6 +170,7 @@ export function PokemonsTab() {
             rotuloDoGrupo="POKEs da mochila"
             alturaMaxEm={20}
             selecionado={foco}
+            ref={revelacao.containerRef}
             onScroll={revelacao.aoRolar}
             onSelecionar={(uid, evento) => {
               const poke = visible.find((p) => p.uid === uid)
@@ -336,6 +337,7 @@ export function ItensTab() {
         rotuloDoGrupo="Itens da mochila"
         alturaMaxEm={20}
         selecionado={foco}
+        ref={revelacao.containerRef}
         onScroll={revelacao.aoRolar}
         onSelecionar={(id, evento) => {
           // Shift+clique continua linkando no chat, como fazia na linha.
@@ -503,7 +505,8 @@ export function TmsTab() {
           rotuloDoGrupo="TMs da mochila"
           alturaMaxEm={20}
           selecionado={foco}
-          onScroll={revelacao.aoRolar}
+          ref={revelacao.containerRef}
+            onScroll={revelacao.aoRolar}
           onSelecionar={(id, evento) => {
             if (tratouComoLink(evento, () => linkarItem(ITEMS[id], items[id]))) return
             setFoco(id)
