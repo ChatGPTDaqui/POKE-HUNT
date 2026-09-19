@@ -12,6 +12,9 @@ import { TypeChip } from '@/components/shared/TypeChip'
 import { pedirAcao } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent, type PokeInstance } from '@/data/pokes'
 import { ITEMS } from '@/data/items'
+import { TM_ITEMS } from '@/data/maquinas'
+import { getAbility, type Ability } from '@/data/abilities'
+import type { ElementType } from '@/data/generated/types'
 import { rarityRank } from '@/data/rarity'
 import { controller } from '@/engine/controller'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
@@ -400,8 +403,163 @@ export function ItensTab() {
   )
 }
 
+// Catalogo derivado uma vez (como `TMS_DROPAVEIS` em maquinas.ts): o golpe de
+// cada TM nao muda em runtime, entao resolver `getAbility` por TM a cada
+// render da aba seria trabalho refeito atoa.
+const ABILITY_POR_TM: Record<string, Ability | null> = Object.fromEntries(
+  Object.values(TM_ITEMS).map((tm) => [tm.id, getAbility(tm.golpe)]),
+)
+
+const TODOS_OS_TIPOS = 'todos' as const
+
+// Aba dedicada as TMs (PH-556): a lista generica de Itens ja misturava TM com
+// pocao e bola, sem jeito de ver dano/categoria/AoE sem abrir uma por uma. Ela
+// SO lista o que esta na mochila (igual as outras duas abas) — nao e um
+// catalogo do jogo inteiro, que exigiria uma fonte de dado nova e destacar
+// posse. Reaproveita `EnsinarTm` pro detalhe+ensino: a logica de compatibilidade
+// por especie e o fluxo de consumo da TM ja vivem la, e duplicar aqui divergiria
+// cedo ou tarde.
+// Exportada pra tmsTab.test.tsx, mesmo motivo de `ItensTab`.
+export function TmsTab() {
+  const items = useGameStateStore((s) => s.items)
+  const lockedItems = useGameStateStore((s) => s.lockedItems)
+  const toggleItemLock = useGameStateStore((s) => s.toggleItemLock)
+  const acao = useAcaoPendente()
+  const [foco, setFoco] = useState<string | null>(null)
+  const [busca, setBusca] = useState('')
+  const [tipoFiltro, setTipoFiltro] = useState<ElementType | typeof TODOS_OS_TIPOS>(TODOS_OS_TIPOS)
+  const [sortDesc, setSortDesc] = useState(true)
+
+  const idsTm = useMemo(
+    () => Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id]?.kind === 'tm'),
+    [items],
+  )
+
+  const tiposComTm = useMemo(() => {
+    const presentes = new Set<ElementType>()
+    for (const id of idsTm) {
+      const tipo = ABILITY_POR_TM[id]?.type
+      if (tipo) presentes.add(tipo)
+    }
+    return [...presentes].sort()
+  }, [idsTm])
+
+  const filtrados = useMemo(() => {
+    const termo = busca.trim().toLocaleLowerCase()
+    return idsTm
+      .filter((id) => {
+        const ability = ABILITY_POR_TM[id]
+        if (tipoFiltro !== TODOS_OS_TIPOS && ability?.type !== tipoFiltro) return false
+        return !termo || ITEMS[id].name.toLocaleLowerCase().includes(termo)
+          || (ability?.name.toLocaleLowerCase().includes(termo) ?? false)
+      })
+      .sort((a, b) => {
+        const diff = (ABILITY_POR_TM[a]?.power ?? 0) - (ABILITY_POR_TM[b]?.power ?? 0)
+        return sortDesc ? -diff : diff
+      })
+  }, [idsTm, busca, tipoFiltro, sortDesc])
+  const paginado = usePaginacao(filtrados)
+
+  if (idsTm.length === 0) return <p className="text-n500">Nenhuma TM na mochila.</p>
+
+  const itemEmFoco = foco != null && idsTm.includes(foco) ? TM_ITEMS[foco] : null
+  const abilityEmFoco = itemEmFoco ? ABILITY_POR_TM[itemEmFoco.id] : null
+
+  return (
+    <div className="flex flex-col gap-[.3em]">
+      <div className="inventory-toolbar">
+        <GameInput
+          placeholder="Buscar TM ou golpe..."
+          aria-label="Buscar TM"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          className="min-w-[6em] flex-1"
+        />
+        <GameSelect
+          aria-label="Filtrar por tipo de golpe"
+          value={tipoFiltro}
+          onChange={(e) => setTipoFiltro(e.target.value as ElementType | typeof TODOS_OS_TIPOS)}
+        >
+          <option value={TODOS_OS_TIPOS}>Todos os tipos</option>
+          {tiposComTm.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
+        </GameSelect>
+        <GameButton
+          onClick={() => setSortDesc((d) => !d)}
+          aria-label={sortDesc ? 'Maior poder primeiro' : 'Menor poder primeiro'}
+          title={sortDesc ? 'Maior poder primeiro' : 'Menor poder primeiro'}
+        >
+          {sortDesc ? <ArrowDown /> : <ArrowUp />}
+        </GameButton>
+      </div>
+
+      <div className="inventory-workspace">
+        <GradeDeInventario
+          rotuloDoGrupo="TMs da mochila"
+          alturaMaxEm={14}
+          selecionado={foco}
+          onSelecionar={(id, evento) => {
+            if (tratouComoLink(evento, () => linkarItem(ITEMS[id], items[id]))) return
+            setFoco(id)
+          }}
+          slots={paginado.pagina.map((id) => {
+            const travado = Boolean(lockedItems[id])
+            const ability = ABILITY_POR_TM[id]
+            return {
+              id,
+              rotulo: [
+                `${TM_ITEMS[id].name} (x${items[id]})`,
+                ability ? `${ability.type} · Poder ${ability.power > 0 ? ability.power : '—'}` : null,
+                travado ? 'trancado' : null,
+              ].filter(Boolean).join(' · '),
+              contador: items[id],
+              aro: travado ? 'border-gold/50' : undefined,
+              marca: travado ? <LockSimple weight="fill" className="text-gold" /> : undefined,
+              conteudo: <IconeDeItemNaGrade itemId={id} nome={TM_ITEMS[id].name} />,
+            }
+          })}
+        />
+
+        {itemEmFoco ? (
+          <GameCard
+            title="Shift+clique para linkar no chat"
+            onClick={(e) => { tratouComoLink(e, () => linkarItem(itemEmFoco, items[itemEmFoco.id])) }}
+            className={cn('inventory-detail', lockedItems[itemEmFoco.id] && 'border-gold/40')}
+          >
+            <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="3.8em" />
+            <div className="detail-identity">
+              <div className="font-medium">
+                {itemEmFoco.name} <span className="text-n400">x{items[itemEmFoco.id]}</span>
+              </div>
+              {abilityEmFoco && (
+                <div className="mt-[.2em] flex flex-wrap items-center gap-[.3em]">
+                  <TypeChip type={abilityEmFoco.type} full />
+                </div>
+              )}
+            </div>
+            <div className="detail-actions">
+              <LockButton
+                locked={Boolean(lockedItems[itemEmFoco.id])}
+                carregando={acao.isPending(`lock:${itemEmFoco.id}`)}
+                onToggle={() => {
+                  void acao.run(`lock:${itemEmFoco.id}`, () =>
+                    pedirAcao({ tipo: 'alternarTravaItem', itemId: itemEmFoco.id }, () => toggleItemLock(itemEmFoco.id)),
+                  )
+                }}
+              />
+            </div>
+          </GameCard>
+        ) : <SelectionHint>Selecione uma TM para ver o golpe e ensiná-lo.</SelectionHint>}
+      </div>
+
+      {filtrados.length === 0 && <p className="text-[.85em] text-n400">Nenhuma TM encontrada.</p>}
+      <Paginacao estado={paginado} rotulo="TMs" />
+      {itemEmFoco && <EnsinarTm key={itemEmFoco.id} itemId={itemEmFoco.id} />}
+    </div>
+  )
+}
+
 export function BagMenu() {
-  const [tab, setTab] = useState<'pokemons' | 'itens'>('pokemons')
+  const [tab, setTab] = useState<'pokemons' | 'itens' | 'tms'>('pokemons')
   const [autoVendaAberta, setAutoVendaAberta] = useState(false)
   return (
     <MenuScene>
@@ -416,6 +574,7 @@ export function BagMenu() {
             options={[
               { value: 'pokemons', label: 'Pokemons' },
               { value: 'itens', label: 'Itens' },
+              { value: 'tms', label: 'TMs' },
             ]}
           />
           {tab === 'pokemons' && (
@@ -430,7 +589,7 @@ export function BagMenu() {
         {tab === 'pokemons' && autoVendaAberta && <AutoVendaPanel />}
       </StickyHeader>
       <MenuHeading icon={<Backpack weight="duotone" />} title="Sua coleção" description="Pokémon e recursos para a próxima aventura." />
-      {tab === 'pokemons' ? <PokemonsTab /> : <ItensTab />}
+      {tab === 'pokemons' ? <PokemonsTab /> : tab === 'itens' ? <ItensTab /> : <TmsTab />}
     </MenuScene>
   )
 }
