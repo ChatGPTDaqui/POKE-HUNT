@@ -18,7 +18,7 @@
 //
 // A paginacao e aplicada DEPOIS de filtrar/ordenar, entao a busca continua vendo
 // a colecao inteira (o filtro nao enxerga so a pagina atual — seria o bug obvio).
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type UIEvent } from 'react'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { GameButton } from './controls'
 
@@ -75,5 +75,77 @@ export function Paginacao({ estado, rotulo }: { estado: Paginado<unknown>; rotul
         </GameButton>
       </div>
     </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Revelacao incremental por rolagem (PH-558)
+// ---------------------------------------------------------------------------
+// Alternativa ao par acima pras 3 grades da Mochila (Pokemons/Itens/TMs,
+// origem na aba TMs — PH-557). NAO MUDA NADA sobre o que e buscado do
+// Supabase: a colecao inteira (POKEs/itens da mochila) ja chega do servidor
+// numa unica leitura, em `useMochila`, e fica inteira em memoria no cliente —
+// isso e verdade tanto com `usePaginacao` quanto com este hook. A paginacao
+// SEMPRE foi so sobre quantos NODES o navegador desenha de uma vez (ver o
+// cabecalho do arquivo), nunca sobre economizar leitura de banco; nenhuma das
+// duas formas muda o numero de linhas lidas do Postgres.
+//
+// A troca e so de UX: com `TAMANHO_PAGINA` fixo e a grade em `auto-fill`
+// (numero de colunas variavel pela largura), a ultima linha de uma pagina
+// raramente enche, sobrando celulas vazias que leem como "acabou aqui" mesmo
+// havendo mais itens numa pagina seguinte (achado real com screenshot, ver
+// PH-557). Revelar mais ao chegar perto do fim do scroll evita esse
+// descompasso — a ultima linha parcial passa a significar so "o que carregou
+// ate agora", que e a leitura correta de qualquer feed com scroll.
+export const LOTE_INCREMENTAL = 24
+
+export interface Incremental<T> {
+  /** Fatia de `itens` a desenhar agora. */
+  mostrados: T[]
+  /** Handler pro `onScroll` do container rolavel (ex.: `GradeDeInventario`). */
+  aoRolar: (evento: UIEvent<HTMLDivElement>) => void
+  /** Quantos itens ainda nao foram revelados. */
+  restantes: number
+}
+
+/**
+ * Revela `itens` em lotes conforme o container rola perto do fim, em vez de
+ * cortar em paginas navegadas por seta.
+ *
+ * Reseta pro lote inicial sempre que a IDENTIDADE de `itens` muda — o que
+ * cobre tanto "o filtro mudou" (o array filtrado/ordenado e recalculado, nova
+ * identidade) quanto "os dados de origem mudaram" (flush do servidor). Quem
+ * chama precisa passar um array ja memoizado (`useMemo`) com as dependencias
+ * certas, ou o reset dispara a cada render.
+ */
+export function useRevelacaoIncremental<T>(itens: T[], lote = LOTE_INCREMENTAL): Incremental<T> {
+  const [visivel, setVisivel] = useState(lote)
+
+  useEffect(() => { setVisivel(lote) }, [itens, lote])
+
+  function aoRolar(evento: UIEvent<HTMLDivElement>) {
+    const el = evento.currentTarget
+    if (visivel < itens.length && el.scrollTop + el.clientHeight >= el.scrollHeight - 96) {
+      setVisivel((v) => Math.min(v + lote, itens.length))
+    }
+  }
+
+  const mostrados = useMemo(() => itens.slice(0, Math.min(visivel, itens.length)), [itens, visivel])
+  return { mostrados, aoRolar, restantes: itens.length - mostrados.length }
+}
+
+/**
+ * Rodape da revelacao incremental — equivalente ao `<Paginacao>` acima, mas
+ * sem controles: nao ha pagina pra navegar, so um aviso enquanto falta
+ * revelar. Nao renderiza nada quando ja mostrou tudo (mesma convencao do
+ * `<Paginacao>`: sem sobra visual quando nao ha mais nada a fazer).
+ */
+export function RevelacaoIncremental({ estado, rotulo }: { estado: Incremental<unknown>; rotulo: string }) {
+  const total = estado.mostrados.length + estado.restantes
+  if (total === 0) return null
+  return (
+    <p className="text-[.75em] text-n500">
+      {estado.mostrados.length} de {total} {rotulo}{estado.restantes > 0 ? ' · role para ver mais' : ''}
+    </p>
   )
 }
