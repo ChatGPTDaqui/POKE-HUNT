@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-556 (aba TMs dedicada na mochila).
+  {
+    version: '7.63',
+    date: '2026-09-19',
+    title: 'Mochila: aba própria para as TMs',
+    highlights: [
+      'As TMs saem da lista geral de itens e ganham aba própria na mochila, com dano, categoria (físico/especial/status), precisão, recarga e se o golpe atinge vários inimigos por perto — sem precisar abrir uma por uma.',
+      'Filtro por tipo do golpe e ordenação por poder (maior ou menor primeiro), direto no topo da aba.',
+    ],
+  },
   // PH-555 (offset de nivel do Pesadelo colapsava estagios 1-5 em Lv150 fixo).
   {
     version: '7.62',
