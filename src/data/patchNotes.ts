@@ -12,6 +12,15 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-555 (offset de nivel do Pesadelo colapsava estagios 1-5 em Lv150 fixo).
+  {
+    version: '7.62',
+    date: '2026-09-19',
+    title: 'Modo Pesadelo: nível corrigido em todos os 10 estágios',
+    highlights: [
+      'Os estágios 1 a 5 de cada bioma no Modo Pesadelo caíam todos no mesmo Lv 150 fixo, sem faixa de nível nenhuma entre eles. Agora cada estágio tem sua própria janela de 10 níveis, subindo de Lv 150 (estágio 1) até Lv 249 (estágio 10).',
+    ],
+  },
   {
     version: '7.61',
     date: '2026-09-17',

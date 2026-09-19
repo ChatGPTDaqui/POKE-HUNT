@@ -50432,7 +50432,7 @@ var TYPE_BACKGROUND_IMAGE = {
 function bossBackgroundImage(species) {
 	return TYPE_BACKGROUND_IMAGE[species.type] || (species.type2 ? TYPE_BACKGROUND_IMAGE[species.type2] : void 0) || null;
 }
-var shiftLevel = (level) => Math.max(level + 100, 150);
+var shiftLevel = (level) => level + 149;
 /**
 * `sourcePorSala` e o cadastro de salas das hunts espelhadas
 * (huntSpawnOverrides.ts#POOL_POR_SALA). Ele entra aqui porque o espelho e quem

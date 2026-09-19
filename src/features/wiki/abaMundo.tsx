@@ -35,7 +35,7 @@ import {
   ESTAGIOS_POR_BIOMA, NIVEIS_POR_ESTAGIO, TETO_DO_MODO_NORMAL,
   SALAS_POR_ESTAGIO, SALAS_POR_BIOMA, niveisDoEstagio,
 } from '@/data/estagios'
-import { BOSS_LEVEL, LEVEL_OFFSET, NIGHTMARE_MIN_LEVEL } from '@/data/nightmareMaps'
+import { BOSS_LEVEL, LEVEL_OFFSET } from '@/data/nightmareMaps'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { APARENCIA } from '@/components/hud/ClimaChip'
 import { colorForType } from '@/data/typeColors'
@@ -236,9 +236,8 @@ export function MundoTab() {
 
       <WikiCard title="Modo Pesadelo — o espelho de nível alto">
         Toda caçada normal tem um espelho no <b>Modo Pesadelo</b>, disponível desde o começo e sem custo. Os
-        níveis são os da hunt original <b>+{LEVEL_OFFSET}</b>, com piso de <b>Lv {NIGHTMARE_MIN_LEVEL}</b> —
-        então até o espelho da Rota 46 chega a {NIGHTMARE_MIN_LEVEL}. É onde o modo normal continua depois do
-        Lv {TETO_DO_MODO_NORMAL}.
+        níveis são os da hunt original <b>+{LEVEL_OFFSET}</b> — cada um dos 10 estágios de bioma ganha sua
+        própria faixa de Lv 150 a 250. É onde o modo normal continua depois do Lv {TETO_DO_MODO_NORMAL}.
         <br />
         <br />
         O Pesadelo também é a única casa das <b>hunts BOSS</b>: os <b>{LEGENDARY_SPECIES_IDS.length} POKEs
