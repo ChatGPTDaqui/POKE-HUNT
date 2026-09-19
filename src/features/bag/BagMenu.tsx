@@ -5,7 +5,7 @@
 // `refresh()` dele reconstruia o painel inteiro). Em React o input e um node
 // estavel entre renders, entao da pra filtrar o array de verdade — esse
 // workaround nao precisa ser portado.
-import { useEffect, useMemo, useState, type UIEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, Backpack, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
 import { MenuHeading, MenuScene, SelectionHint } from '@/components/game/MenuScene'
 import { TypeChip } from '@/components/shared/TypeChip'
@@ -31,7 +31,7 @@ import {
 } from '@/components/game/controls'
 import { GradeDeInventario } from '@/components/game/GradeDeInventario'
 import { IconeDeItemNaGrade } from '@/components/shared/IconeDeItemNaGrade'
-import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
+import { RevelacaoIncremental, useRevelacaoIncremental } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
 import { AutoVendaPanel, ChipAutoVenda } from './AutoVendaPanel'
 import { useMochila } from './useMochila'
@@ -65,7 +65,9 @@ function LockButton({ locked, onToggle, carregando }: { locked: boolean; onToggl
   )
 }
 
-function PokemonsTab() {
+// Exportada pra teste de rolagem incremental (PH-558), mesmo motivo de
+// `ItensTab`/`TmsTab`.
+export function PokemonsTab() {
   // A mochila nao vem mais no carregamento da pagina — chega quando uma tela
   // que a usa abre. Ver `useMochila`/`mochilaStore`.
   const { carregada } = useMochila()
@@ -108,9 +110,9 @@ function PokemonsTab() {
       })
   }, [bagPokes, search, sortKey, sortDesc, shinyOnly])
 
-  // Pagina DEPOIS de filtrar/ordenar: a busca continua varrendo a mochila
+  // Revela DEPOIS de filtrar/ordenar: a busca continua varrendo a mochila
   // inteira, so a renderizacao e limitada — ver a nota em Paginacao.tsx.
-  const paginado = usePaginacao(visible)
+  const revelacao = useRevelacaoIncremental(visible)
 
   if (!carregada) return <EstadoDaMochila />
   if (bagPokes.length === 0) return <p className="text-n500">Nenhum POKE na mochila.</p>
@@ -166,15 +168,16 @@ function PokemonsTab() {
               jogador so descobriria a trava ao tentar usar o POKE. */}
           <GradeDeInventario
             rotuloDoGrupo="POKEs da mochila"
-            alturaMaxEm={14}
+            alturaMaxEm={20}
             selecionado={foco}
+            onScroll={revelacao.aoRolar}
             onSelecionar={(uid, evento) => {
               const poke = visible.find((p) => p.uid === uid)
               // Shift+clique continua linkando no chat, como fazia na linha.
               if (poke && tratouComoLink(evento, () => linkarPoke(poke, SPECIES[poke.speciesId]))) return
               setFoco(uid)
             }}
-            slots={paginado.pagina.map((poke) => {
+            slots={revelacao.mostrados.map((poke) => {
               const species = SPECIES[poke.speciesId]
               return {
                 id: poke.uid,
@@ -258,7 +261,7 @@ function PokemonsTab() {
         </div>
       )}
 
-      <Paginacao estado={paginado} rotulo="POKEs" />
+      <RevelacaoIncremental estado={revelacao} rotulo="POKEs" />
     </div>
   )
 }
@@ -307,7 +310,7 @@ export function ItensTab() {
   // A lista de itens tambem pagina: com as 17 Stones + bolas/pocoes/revives ela
   // ja passa de 30 linhas, cada uma com icone proprio.
   const filtrados = useMemo(() => ids.filter((id) => ITEMS[id].name.toLocaleLowerCase().includes(busca.trim().toLocaleLowerCase())), [ids, busca])
-  const paginado = usePaginacao(filtrados)
+  const revelacao = useRevelacaoIncremental(filtrados)
 
   if (ids.length === 0) return <p className="text-n500">Nenhum item.</p>
 
@@ -331,14 +334,15 @@ export function ItensTab() {
           itens de uma vez em vez de so no selecionado. */}
       <GradeDeInventario
         rotuloDoGrupo="Itens da mochila"
-        alturaMaxEm={14}
+        alturaMaxEm={20}
         selecionado={foco}
+        onScroll={revelacao.aoRolar}
         onSelecionar={(id, evento) => {
           // Shift+clique continua linkando no chat, como fazia na linha.
           if (tratouComoLink(evento, () => linkarItem(ITEMS[id], items[id]))) return
           setFoco(id)
         }}
-        slots={paginado.pagina.map((itemId) => {
+        slots={revelacao.mostrados.map((itemId) => {
           const travado = Boolean(lockedItems[itemId])
           return {
             id: itemId,
@@ -396,8 +400,9 @@ export function ItensTab() {
       ) : <SelectionHint>Selecione um item para ver seu efeito e as ações disponíveis.</SelectionHint>}
       </div>
 
-      {filtrados.length === 0 && <p className="text-[.85em] text-n400">Nenhum item encontrado.</p>}
-      <Paginacao estado={paginado} rotulo="itens" />
+      {filtrados.length === 0
+        ? <p className="text-[.85em] text-n400">Nenhum item encontrado.</p>
+        : <RevelacaoIncremental estado={revelacao} rotulo="itens" />}
       {itemEmFoco?.kind === 'tm' && <EnsinarTm key={itemEmFoco.id} itemId={itemEmFoco.id} />}
     </div>
   )
@@ -411,12 +416,6 @@ const ABILITY_POR_TM: Record<string, Ability | null> = Object.fromEntries(
 )
 
 const TODOS_OS_TIPOS = 'todos' as const
-
-// PH-557: quantas TMs a grade mostra de saida, e quantas soma por vez ao
-// chegar perto do fim da rolagem. Numeros redondos, sem relacao com o antigo
-// `TAMANHO_PAGINA=30` de Paginacao.tsx — este e so o passo do carregamento
-// incremental, nao mais um corte de "pagina" que o jogador precisa navegar.
-export const LOTE_DE_TMS = 24
 
 // Aba dedicada as TMs (PH-556): a lista generica de Itens ja misturava TM com
 // pocao e bola, sem jeito de ver dano/categoria/AoE sem abrir uma por uma. Ela
@@ -435,10 +434,6 @@ export function TmsTab() {
   const [busca, setBusca] = useState('')
   const [tipoFiltro, setTipoFiltro] = useState<ElementType | typeof TODOS_OS_TIPOS>(TODOS_OS_TIPOS)
   const [sortDesc, setSortDesc] = useState(true)
-  // Quantas TMs a rolagem ja revelou, das filtradas/ordenadas. Reseta pro lote
-  // inicial sempre que o filtro muda — senao trocar de tipo no meio da rolagem
-  // deixaria a contagem de um filtro vazando pro outro.
-  const [visivel, setVisivel] = useState(LOTE_DE_TMS)
 
   const idsTm = useMemo(
     () => Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id]?.kind === 'tm'),
@@ -468,23 +463,8 @@ export function TmsTab() {
         return sortDesc ? -diff : diff
       })
   }, [idsTm, busca, tipoFiltro, sortDesc])
-
-  useEffect(() => { setVisivel(LOTE_DE_TMS) }, [busca, tipoFiltro, sortDesc])
-
-  const mostradas = filtrados.slice(0, visivel)
-  // PH-557: rolagem incremental em vez de seta de pagina — a paginacao por
-  // seta cortava a grade num numero fixo (30) que raramente batia com um
-  // multiplo exato de colunas responsivas, sobrando celulas vazias na ultima
-  // linha que pareciam "acabou aqui" mesmo com mais TM na pagina seguinte.
-  // Rolar e revelar mais e a mesma UX de qualquer feed: a ultima linha parcial
-  // e so "o que carregou ate agora", nao um limite artificial.
-  function aoRolarAGrade(evento: UIEvent<HTMLDivElement>) {
-    const el = evento.currentTarget
-    const permaneceu = filtrados.length - visivel
-    if (permaneceu > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 96) {
-      setVisivel((v) => Math.min(v + LOTE_DE_TMS, filtrados.length))
-    }
-  }
+  const revelacao = useRevelacaoIncremental(filtrados)
+  const mostradas = revelacao.mostrados
 
   if (idsTm.length === 0) return <p className="text-n500">Nenhuma TM na mochila.</p>
 
@@ -523,7 +503,7 @@ export function TmsTab() {
           rotuloDoGrupo="TMs da mochila"
           alturaMaxEm={20}
           selecionado={foco}
-          onScroll={aoRolarAGrade}
+          onScroll={revelacao.aoRolar}
           onSelecionar={(id, evento) => {
             if (tratouComoLink(evento, () => linkarItem(ITEMS[id], items[id]))) return
             setFoco(id)
@@ -578,13 +558,9 @@ export function TmsTab() {
         ) : <SelectionHint>Selecione uma TM para ver o golpe e ensiná-lo.</SelectionHint>}
       </div>
 
-      {filtrados.length === 0 ? (
-        <p className="text-[.85em] text-n400">Nenhuma TM encontrada.</p>
-      ) : (
-        <p className="text-[.75em] text-n500">
-          {mostradas.length} de {filtrados.length} TMs{mostradas.length < filtrados.length ? ' · role para ver mais' : ''}
-        </p>
-      )}
+      {filtrados.length === 0
+        ? <p className="text-[.85em] text-n400">Nenhuma TM encontrada.</p>
+        : <RevelacaoIncremental estado={revelacao} rotulo="TMs" />}
       {itemEmFoco && <EnsinarTm key={itemEmFoco.id} itemId={itemEmFoco.id} />}
     </div>
   )

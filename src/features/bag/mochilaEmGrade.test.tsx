@@ -20,6 +20,7 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { ITEMS } from '@/data/items'
+import { LOTE_INCREMENTAL } from '@/components/game/Paginacao'
 import { ItensTab } from './BagMenu'
 
 // A ficha tem cadeado e "Usar", e os dois falam com o servidor. O que este
@@ -99,5 +100,24 @@ describe('Mochila em grade (PH-118)', () => {
     act(() => { useGameStateStore.setState({ items: { [POCAO]: 4 } }) })
     expect(screen.queryByText(ITEMS[BALL].description)).toBeNull()
     expect(screen.queryByRole('radio', { name: `${ITEMS[BALL].name} (x30)` })).toBeNull()
+  })
+
+  it('rolagem incremental (PH-558): comeca com um lote e revela mais ao chegar perto do fim', () => {
+    // O catalogo real de itens (Stones + TM + genericos) ja passa do lote —
+    // nao precisa forjar dado.
+    const todosOsIds = Object.keys(ITEMS)
+    expect(todosOsIds.length).toBeGreaterThan(LOTE_INCREMENTAL)
+    useGameStateStore.setState({ items: Object.fromEntries(todosOsIds.map((id) => [id, 1])), lockedItems: {} })
+
+    render(<ItensTab />)
+    expect(screen.getAllByRole('radio')).toHaveLength(LOTE_INCREMENTAL)
+
+    const grade = screen.getByRole('radiogroup', { name: 'Itens da mochila' })
+    Object.defineProperty(grade, 'scrollHeight', { configurable: true, value: 1000 })
+    Object.defineProperty(grade, 'clientHeight', { configurable: true, value: 200 })
+    Object.defineProperty(grade, 'scrollTop', { configurable: true, value: 950 })
+    fireEvent.scroll(grade)
+
+    expect(screen.getAllByRole('radio')).toHaveLength(Math.min(LOTE_INCREMENTAL * 2, todosOsIds.length))
   })
 })
