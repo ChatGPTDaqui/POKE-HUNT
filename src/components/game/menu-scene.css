@@ -10,13 +10,19 @@
 .trainer-menu[data-tone='shop'] { --menu-accent: var(--color-gold); }
 .trainer-menu[data-tone='team'] { --menu-accent: var(--color-hp); }
 .trainer-menu[data-tone='arena'] { --menu-accent: var(--color-ember); }
+/* PH-560: padding/emblema encolhidos (era padding .8em, emblema 2.4em) —
+   pedido explicito do dono do projeto ("metade da janela é conteúdo inútil e
+   vazio", com screenshot apontando ESTA faixa). O padrao 'compacto'/'deitado'
+   logo abaixo ja provava que a versao pequena funciona; agora ela e a DEFAULT,
+   e os dois modos especiais so precisam de um empurrao a mais, nao de partir
+   do tamanho grande. */
 .trainer-heading {
   display: flex;
   align-items: center;
-  gap: .75em;
-  padding: .8em;
+  gap: .55em;
+  padding: .5em .65em;
   border: 1px solid var(--menu-edge);
-  border-radius: .85em;
+  border-radius: .7em;
   background: radial-gradient(ellipse at top left, color-mix(in srgb, var(--menu-accent) 13%, transparent), transparent 75%), var(--color-n900);
   box-shadow: inset 0 1px 0 #ffffff0a;
 }
@@ -24,13 +30,13 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 2.4em;
-  height: 2.4em;
+  width: 1.9em;
+  height: 1.9em;
   color: var(--menu-accent);
   border: 1px solid var(--menu-edge);
-  border-radius: .7em;
+  border-radius: .6em;
   background: color-mix(in srgb, var(--menu-accent) 8%, var(--color-n900));
-  font-size: 1.2em;
+  font-size: 1em;
 }
 .trainer-heading-aside { font-size: .8em; color: var(--color-n300); font-variant-numeric: tabular-nums; }
 .inventory-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(14em, .7fr); gap: .75em; align-items: start; }
@@ -74,9 +80,9 @@
 .candidate { display: flex; align-items: center; gap: .6em; min-width: 0; min-height: 44px; padding: .5em; border: 1px solid var(--color-n700); border-radius: .6em; text-align: left; cursor: pointer; }
 .candidate:hover, .candidate:focus-visible { border-color: var(--menu-accent); background: #ffffff08; outline: 2px solid transparent; }
 .candidate:disabled { opacity: .5; cursor: wait; }
-.trainer-menu[data-layout='deitado'] .trainer-heading { padding: .4em .7em; }
-.trainer-menu[data-layout='deitado'] .trainer-emblem { width: 1.8em; height: 1.8em; }
-.trainer-menu[data-layout='compacto'] .trainer-heading { gap: .5em; padding: .65em; }
+.trainer-menu[data-layout='deitado'] .trainer-heading { padding: .3em .6em; }
+.trainer-menu[data-layout='deitado'] .trainer-emblem { width: 1.5em; height: 1.5em; }
+.trainer-menu[data-layout='compacto'] .trainer-heading { gap: .45em; padding: .4em .55em; }
 .trainer-menu[data-layout='compacto'] .trainer-heading-aside { max-width: 7em; text-align: right; }
 @media (prefers-reduced-motion: no-preference) {
   .trainer-heading { animation: trainer-arrive 180ms ease-out both; }

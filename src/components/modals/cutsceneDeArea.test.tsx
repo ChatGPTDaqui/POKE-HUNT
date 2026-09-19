@@ -31,6 +31,7 @@ import { SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
 import { MAPS, backgroundParaSala } from '@/data/maps'
 import { useWorldStore } from '@/stores/worldStore'
 import { useCutsceneStore } from '@/stores/cutsceneStore'
+import { useUiStore } from '@/stores/uiStore'
 import { TETO_DE_CARREGAMENTO_MS } from '@/data/tetoDeCarregamento'
 import { PRELOAD_TIMEOUT_MS } from '@/data/preload'
 import { CutsceneDeArea } from './CutsceneDeArea'
@@ -43,6 +44,7 @@ afterEach(() => {
   cleanup()
   useCutsceneStore.setState({ cena: null } as never, false)
   useWorldStore.setState({ mapDef: null, salaPendente: null, salaCountdownRemaining: null } as never, false)
+  useUiStore.setState({ currentScreen: null }, false)
 })
 
 describe('a cena em si', () => {
@@ -54,6 +56,17 @@ describe('a cena em si', () => {
     expect(screen.getByText('Praia')).toBeTruthy()
     expect(screen.getByText('Lv 21-30')).toBeTruthy()
     expect(document.querySelector('img')).toBeNull()
+  })
+
+  it('PH-560: nao desenha nada com uma janela de menu aberta (Mochila, Loja, ...)', () => {
+    // Pedido repetido do dono do projeto: a cutscene nao pode sobrepor janela
+    // aberta. `useFaixaDoCampo` so sabe a GEOMETRIA da faixa, nao se ha uma
+    // GameWindow flutuando ali — o gate e o `useJanelaSobreOCampo`
+    // (`currentScreen` cobre Mochila/Loja/Equipe/Pokedex).
+    useUiStore.setState({ currentScreen: 'mochila' }, false)
+    render(<CutsceneDeArea arte={null} corDeFundo="#123456" titulo="Praia" subtitulo="Lv 21-30" />)
+    expect(screen.queryByText('Praia')).toBeNull()
+    expect(document.querySelector('[role="status"]')).toBeNull()
   })
 
   it('a arte entra como <img> com `onLoad`, e nao como background-image', () => {

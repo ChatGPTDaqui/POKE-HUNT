@@ -170,7 +170,11 @@ export function GameWindow({
         ) : (
           <div
             onPointerDown={onPointerDown}
-            className="win-drag-handle flex shrink-0 items-center justify-between gap-[.5em] border-b border-n800 py-[.55em] pr-[.55em] pl-[.7em]"
+            // PH-560: padding vertical apertado (era py-[.55em]) — pedido do
+            // dono do projeto pra sobrar mais tela pro conteudo em vez de
+            // moldura. A barra de titulo continua com alvo de toque valido: o
+            // botao de fechar dentro dela (GameIconButton) tem 44px proprios.
+            className="win-drag-handle flex shrink-0 items-center justify-between gap-[.5em] border-b border-n800 py-[.4em] pr-[.45em] pl-[.6em]"
           >
             <span className="truncate font-medium">{title}</span>
             <GameIconButton variant="ghost" onClick={onClose} aria-label="Fechar">
@@ -181,9 +185,9 @@ export function GameWindow({
 
         {subheader && <div className="shrink-0">{subheader}</div>}
 
-        <div className={cn('min-h-0 flex-1 overflow-auto p-[.7em] text-[.85em]', bodyClassName)}>{children}</div>
+        <div className={cn('min-h-0 flex-1 overflow-auto p-[.5em] text-[.85em]', bodyClassName)}>{children}</div>
 
-        {footer && <div className="shrink-0 border-t border-n800 px-[.7em] py-[.6em]">{footer}</div>}
+        {footer && <div className="shrink-0 border-t border-n800 px-[.5em] py-[.45em]">{footer}</div>}
       </div>
     </>
   )

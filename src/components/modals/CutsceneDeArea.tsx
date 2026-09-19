@@ -40,6 +40,7 @@
 import { useState } from 'react'
 
 import { useFaixaDoCampo } from '@/hooks/useFaixaDoCampo'
+import { useJanelaSobreOCampo } from '@/stores/janelaSobreOCampo'
 import { cn } from '@/lib/utils'
 
 /**
@@ -155,6 +156,17 @@ export function CutsceneDeArea({
   const [arteChegou, setArteChegou] = useState<boolean | null>(arte ? null : false)
   const revelar = arteChegou !== null
   const faixa = useFaixaDoCampo()
+  // PH-560: pedido repetido do dono do projeto — a cutscene nao pode sobrepor
+  // janela de menu aberta (Mochila, Loja, ...). `useFaixaDoCampo` so calcula a
+  // GEOMETRIA da faixa do campo; ela nao sabia se havia uma GameWindow flutuando
+  // por cima daquela mesma area (zIndex bem menor que o z-[58] da cutscene, mas
+  // a cutscene desenhava mesmo assim). Mesmo gate que o SplashDeSala ja usa
+  // (`useJanelaSobreOCampo`) — nao afeta o carregamento de verdade, que roda
+  // independente da cena estar visivel (ver a nota "ELA NAO E MAIS TELA CHEIA"
+  // acima): so pausa a ANIMACAO enquanto o jogador esta olhando pro menu, nao
+  // pro campo.
+  const janelaAberta = useJanelaSobreOCampo()
+  if (janelaAberta) return null
 
   return (
     // A faixa do campo (PH-482), e z-[58]: acima do `CampoOverlay` (55) e do
