@@ -103,9 +103,18 @@ if (pronto === true) {
   })
   const linhas = motor.gameStateToPokemonRows(meuId, { team: [], bagPokes: pokes })
   await rest('/pokemon_instances', { method: 'POST', body: JSON.stringify(linhas), headers: { Prefer: 'return=minimal' } })
+  const ids = pokes.map((p) => p.uid)
   await rest('/pvp_time?on_conflict=user_id', {
     method: 'POST',
-    body: JSON.stringify({ user_id: meuId, pokemon_ids: pokes.map((p) => p.uid), atualizado_em: new Date().toISOString() }),
+    body: JSON.stringify({ user_id: meuId, pokemon_ids: ids, atualizado_em: new Date().toISOString() }),
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+  })
+  // PH-563: o snapshot le o preset ativo; `pvp_time` e so espelho.
+  await rest('/pvp_preset?on_conflict=user_id,tipo,posicao', {
+    method: 'POST',
+    body: JSON.stringify(['ataque', 'defesa'].map((tipo) => ({
+      user_id: meuId, tipo, posicao: 1, slots: ids.map((pokemon_id) => ({ pokemon_id, golpes: [] })), ativo: true,
+    }))),
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
   })
   const agora = await rest(`/rpc/pvp_time_pronto_ranqueado`, { method: 'POST', body: JSON.stringify({ p_user: meuId }) })
@@ -147,6 +156,34 @@ if (!login.access_token) {
 }
 const jogador = cabecalhosRest(ANON, schema, { Authorization: `Bearer ${login.access_token}` })
 
+// --- 2a. preset com golpes por slot (PH-563) --------------------------------
+// O snapshot da sessao tem que carregar `golpes_escolhidos` do preset ativo, e
+// o POKE montado pelo motor tem que lutar com ESSE kit, nao com `active_abilities`.
+const presets = await rest('/rpc/meus_presets_pvp', { method: 'POST', body: '{}' }, jogador)
+ok(Array.isArray(presets) && presets.length === 6, `meus_presets_pvp devolve 6 presets (${presets?.length})`)
+const ataqueAtivo = presets.find((p) => p.tipo === 'ataque' && p.ativo)
+ok(ataqueAtivo != null && ataqueAtivo.slots.length === 6, `preset de ataque ativo com 6 slots (${ataqueAtivo?.slots?.length})`)
+const [primeiro] = await rest(`/pokemon_instances?id=eq.${ataqueAtivo.slots[0].pokemon_id}&select=id,species_id,active_abilities,unlocked_abilities`)
+const ativosDoPoke = primeiro.active_abilities ?? []
+const escolhaDoPreset = ativosDoPoke.length >= 2 ? [...ativosDoPoke].reverse() : (primeiro.unlocked_abilities ?? []).slice(0, 2)
+ok(escolhaDoPreset.length >= 1 && JSON.stringify(escolhaDoPreset) !== JSON.stringify(ativosDoPoke), `kit do preset difere do kit do POKE (${escolhaDoPreset.join(', ')})`)
+const slotsComGolpe = ataqueAtivo.slots.map((s, i) => ({ pokemon_id: s.pokemon_id, golpes: i === 0 ? escolhaDoPreset : [] }))
+const presetSalvo = await rest('/rpc/salvar_preset_pvp', {
+  method: 'POST',
+  body: JSON.stringify({ p_tipo: 'ataque', p_posicao: ataqueAtivo.posicao, p_nome: 'Fumaca', p_slots: slotsComGolpe }),
+}, jogador)
+ok(JSON.stringify(presetSalvo?.slots?.[0]?.golpes) === JSON.stringify(escolhaDoPreset), 'salvar_preset_pvp gravou os golpes do slot 1')
+let recusou = false
+try {
+  await rest('/rpc/salvar_preset_pvp', {
+    method: 'POST',
+    body: JSON.stringify({ p_tipo: 'ataque', p_posicao: ataqueAtivo.posicao, p_nome: 'Fumaca', p_slots: [{ pokemon_id: primeiro.id, golpes: ['golpe_que_nao_existe'] }] }),
+  }, jogador)
+} catch { recusou = true }
+ok(recusou, 'salvar_preset_pvp recusa golpe que o POKE nao conhece')
+const [espelho] = await rest(`/pvp_time?user_id=eq.${meuId}&select=pokemon_ids`)
+ok(JSON.stringify(espelho?.pokemon_ids) === JSON.stringify(slotsComGolpe.map((s) => s.pokemon_id)), 'pvp_time espelha o preset de ataque ativo')
+
 // Base de comparacao e o rank que `entrar_fila_ranqueada` devolve, nao uma
 // leitura anterior: a linha de `pvp_rank` so nasce nessa chamada
 // (`pvp_garantir_rank`), e conta nova nao tem nada antes.
@@ -184,6 +221,7 @@ ok(sessao.modo === 'ranqueado_bot', `modo = ${sessao.modo}`)
 ok(sessao.anfitriao_id === meuId, 'jogador e o anfitriao')
 ok(idsDeBot.has(sessao.convidado_id), 'convidado esta em pvp_bots')
 ok(Array.isArray(sessao.convidado_time) && sessao.convidado_time.length === 6, 'time do bot no snapshot tem 6')
+ok(JSON.stringify(sessao.anfitriao_time?.[0]?.golpes_escolhidos) === JSON.stringify(escolhaDoPreset), 'snapshot do anfitriao carrega golpes_escolhidos do preset')
 const [nomeDoBot] = await rest(`/treinadores_publico?user_id=eq.${sessao.convidado_id}&select=trainer_name,eh_bot`, {}, jogador)
 ok(nomeDoBot?.eh_bot === true, `treinadores_publico marca ${nomeDoBot?.trainer_name} como bot`)
 
@@ -209,6 +247,7 @@ ok(corpo.pdlDeltaAnfitriao === undefined, 'sem delta de PDL na resposta')
   const local = motor.rodarArena({ semente: corpo.semente, meuTime, rivalTime, nomeDoRival: '', casaEhOJogador: sessao.modo === 'amistoso' }, motor.LIVE_SIM_STEP_SECONDS)
   const vereditoLocal = local.resultado === 'vitoria' ? meuId : local.resultado === 'derrota' ? sessao.convidado_id : null
   ok(vereditoLocal === corpo.vencedorId, `reproducao local (${local.resultado}, ${local.ticks} ticks) bate com o veredito do servidor`)
+  ok(JSON.stringify(meuTime[0]?.activeAbilities) === JSON.stringify(escolhaDoPreset), `POKE do slot 1 luta com o kit do preset (${meuTime[0]?.activeAbilities.join(', ')})`)
   const golpes = new Map()
   for (const p of [...meuTime, ...rivalTime]) golpes.set(p.speciesId, p.activeAbilities.join(', '))
   for (const [especie, lista] of golpes) console.log(`         ${especie.padEnd(12)} ${lista}`)
