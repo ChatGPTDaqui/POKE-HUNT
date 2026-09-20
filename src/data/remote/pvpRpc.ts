@@ -191,9 +191,12 @@ export async function historicoPvp(limite = 20): Promise<HistoricoPvp[]> {
   }))
 }
 
-export function assinarMeuPvp(userId: string, aoMudar: () => void): () => void {
+// `sufixo` separa assinantes: `supabase.channel(nome)` devolve o MESMO canal
+// pra nome repetido, e adicionar callback num canal ja inscrito estoura
+// ("cannot add postgres_changes callbacks ... after subscribe()").
+export function assinarMeuPvp(userId: string, aoMudar: () => void, sufixo = ''): () => void {
   const canal = supabase
-    .channel(`pvp-${userId}`)
+    .channel(`pvp-${userId}${sufixo}`)
     .on('postgres_changes', { event: '*', schema, table: 'pvp_sessao' }, () => aoMudar())
     .on('postgres_changes', { event: '*', schema, table: 'pvp_historico' }, () => aoMudar())
     .subscribe()

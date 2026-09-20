@@ -59,7 +59,7 @@ export function usePvpRanked(): EstadoRankeado {
 
   useEffect(() => {
     if (!meuId) return
-    return pvpRpc.assinarMeuPvp(meuId, () => { void recarregar() })
+    return pvpRpc.assinarMeuPvp(meuId, () => { void recarregar() }, '-ranked')
   }, [meuId, recarregar])
 
   const atacar = useCallback(async () => {
