@@ -1803,39 +1803,6 @@ export type Database = {
           },
         ]
       }
-      pvp_time: {
-        Row: {
-          atualizado_em: string
-          pokemon_ids: string[]
-          user_id: string
-        }
-        Insert: {
-          atualizado_em?: string
-          pokemon_ids?: string[]
-          user_id: string
-        }
-        Update: {
-          atualizado_em?: string
-          pokemon_ids?: string[]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pvp_time_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "players"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pvp_time_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "treinadores_publico"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       recompensa_concedida: {
         Row: {
           chave: string
@@ -3302,7 +3269,6 @@ export type Database = {
         }
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
-      pvp_espelhar_time: { Args: { p_user: string }; Returns: undefined }
       pvp_garantir_presets: { Args: { p_user: string }; Returns: undefined }
       pvp_garantir_rank: {
         Args: { p_user: string }
@@ -3338,7 +3304,6 @@ export type Database = {
         Returns: Json
       }
       pvp_snapshot_time: { Args: { p_user: string }; Returns: Json }
-      pvp_time_pronto_ranqueado: { Args: { p_user: string }; Returns: boolean }
       pvp_validar_poke: {
         Args: { p_eu: string; p_poke: Json; p_pokemon_id: string }
         Returns: undefined
@@ -3423,20 +3388,6 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "pvp_preset"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      salvar_time_pvp: {
-        Args: { p_pokemon_ids: string[] }
-        Returns: {
-          atualizado_em: string
-          pokemon_ids: string[]
-          user_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "pvp_time"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -5414,39 +5365,6 @@ export type Database = {
           },
         ]
       }
-      pvp_time: {
-        Row: {
-          atualizado_em: string
-          pokemon_ids: string[]
-          user_id: string
-        }
-        Insert: {
-          atualizado_em?: string
-          pokemon_ids?: string[]
-          user_id: string
-        }
-        Update: {
-          atualizado_em?: string
-          pokemon_ids?: string[]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pvp_time_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "players"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pvp_time_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "treinadores_publico"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       recompensa_concedida: {
         Row: {
           chave: string
@@ -6913,7 +6831,6 @@ export type Database = {
         }
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
-      pvp_espelhar_time: { Args: { p_user: string }; Returns: undefined }
       pvp_garantir_presets: { Args: { p_user: string }; Returns: undefined }
       pvp_garantir_rank: {
         Args: { p_user: string }
@@ -6949,7 +6866,6 @@ export type Database = {
         Returns: Json
       }
       pvp_snapshot_time: { Args: { p_user: string }; Returns: Json }
-      pvp_time_pronto_ranqueado: { Args: { p_user: string }; Returns: boolean }
       pvp_validar_poke: {
         Args: { p_eu: string; p_poke: Json; p_pokemon_id: string }
         Returns: undefined
@@ -7034,20 +6950,6 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "pvp_preset"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      salvar_time_pvp: {
-        Args: { p_pokemon_ids: string[] }
-        Returns: {
-          atualizado_em: string
-          pokemon_ids: string[]
-          user_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "pvp_time"
           isOneToOne: true
           isSetofReturn: false
         }
