@@ -1,6 +1,6 @@
 // Semeia os bots do PvP ranqueado (PH-539): dez treinadores iconicos com
 // conta real (auth.users + players via trigger), seis POKEs nivel 80 com
-// raridade legendary e IV 31, time salvo em `pvp_time` e marca em `pvp_bots`.
+// raridade legendary e IV 31, presets de ataque/defesa em `pvp_preset` e marca em `pvp_bots`.
 //
 //   node scripts/pvp/seed-bots.mjs                      # schema do .env (padrao dev)
 //   node scripts/pvp/seed-bots.mjs --schema=public --confirmar-public
@@ -164,8 +164,8 @@ for (const bot of alvos) {
   })
 
   const existentes = await rest(`/pokemon_instances?user_id=eq.${userId}&select=id`)
-  const [time] = await rest(`/pvp_time?user_id=eq.${userId}&select=pokemon_ids`)
-  const pronto = existentes.length === 6 && time && (time.pokemon_ids || []).length === 6
+  const [defesa] = await rest(`/pvp_preset?user_id=eq.${userId}&tipo=eq.defesa&ativo=is.true&select=slots`)
+  const pronto = existentes.length === 6 && defesa && (defesa.slots || []).length === 6
   if (pronto && !refazer) {
     console.log('  ja semeado, pulando (use --refazer pra recriar)')
   } else {
@@ -190,12 +190,7 @@ for (const bot of alvos) {
 
     const ids = pokes.map((p) => p.uid)
     const agora = new Date().toISOString()
-    await rest('/pvp_time?on_conflict=user_id', {
-      method: 'POST',
-      body: JSON.stringify({ user_id: userId, pokemon_ids: ids, atualizado_em: agora }),
-      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-    })
-    // PH-563: o snapshot da arena le o preset ativo, nao mais `pvp_time`.
+    // O snapshot da arena le o preset ativo (PH-563).
     const slots = ids.map((pokemon_id) => ({ pokemon_id, golpes: [] }))
     await rest('/pvp_preset?on_conflict=user_id,tipo,posicao', {
       method: 'POST',

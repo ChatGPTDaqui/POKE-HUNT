@@ -1,4 +1,4 @@
-// Linha crua de `pvp_time`/`pvp_sessao.anfitriao_time` (snapshot jsonb de
+// Linha crua de `pvp_sessao.anfitriao_time`/`convidado_time` (snapshot jsonb de
 // `pokemon_instances`, ver `pvp_snapshot_time` na migration) -> `PokeInstance`
 // que a arena luta.
 //
