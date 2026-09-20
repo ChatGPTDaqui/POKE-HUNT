@@ -189,9 +189,19 @@ for (const bot of alvos) {
     await rest('/pokemon_instances', { method: 'POST', body: JSON.stringify(linhas), headers: { Prefer: 'return=minimal' } })
 
     const ids = pokes.map((p) => p.uid)
+    const agora = new Date().toISOString()
     await rest('/pvp_time?on_conflict=user_id', {
       method: 'POST',
-      body: JSON.stringify({ user_id: userId, pokemon_ids: ids, atualizado_em: new Date().toISOString() }),
+      body: JSON.stringify({ user_id: userId, pokemon_ids: ids, atualizado_em: agora }),
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    })
+    // PH-563: o snapshot da arena le o preset ativo, nao mais `pvp_time`.
+    const slots = ids.map((pokemon_id) => ({ pokemon_id, golpes: [] }))
+    await rest('/pvp_preset?on_conflict=user_id,tipo,posicao', {
+      method: 'POST',
+      body: JSON.stringify(['ataque', 'defesa'].map((tipo) => ({
+        user_id: userId, tipo, posicao: 1, nome: '', slots, ativo: true, atualizado_em: agora,
+      }))),
       headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
     })
     for (const p of pokes) {

@@ -45,6 +45,36 @@ describe('montarTime (PH-535/536)', () => {
     expect(poke.unlockedAbilities).toContain('scald')
   })
 
+  // PH-563: o slot do preset pode ter kit proprio, diferente do kit do modo livre.
+  it('golpes_escolhidos do preset vencem active_abilities', () => {
+    const [poke] = montarTime([linha({
+      species_id: 'ludicolo',
+      golpes_de_maquina: ['scald', 'ice_beam'],
+      active_abilities: ['mega_drain', 'nature_power'],
+      golpes_escolhidos: ['ice_beam', 'scald'],
+    })])
+    expect(poke.activeAbilities).toEqual(['ice_beam', 'scald'])
+  })
+
+  it('golpes_escolhidos vazio cai em active_abilities', () => {
+    const [poke] = montarTime([linha({
+      species_id: 'ludicolo',
+      active_abilities: ['mega_drain', 'nature_power'],
+      golpes_escolhidos: [],
+    })])
+    expect(poke.activeAbilities).toEqual(['mega_drain', 'nature_power'])
+  })
+
+  it('golpe escolhido que o POKE nao conhece e saneado, nao passa', () => {
+    const [poke] = montarTime([linha({
+      species_id: 'ludicolo',
+      active_abilities: ['mega_drain'],
+      golpes_escolhidos: ['scald', 'mega_drain'],
+    })])
+    expect(poke.activeAbilities).not.toContain('scald')
+    expect(poke.activeAbilities).toContain('mega_drain')
+  })
+
   it('golpe de TM que a linha nao tem continua caindo', () => {
     const [poke] = montarTime([linha({
       species_id: 'ludicolo',

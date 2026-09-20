@@ -1592,6 +1592,51 @@ export type Database = {
           },
         ]
       }
+      pvp_preset: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          nome: string
+          posicao: number
+          slots: Json
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          nome?: string
+          posicao: number
+          slots?: Json
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          nome?: string
+          posicao?: number
+          slots?: Json
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_preset_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_preset_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pvp_rank: {
         Row: {
           derrotas: number
@@ -2916,6 +2961,24 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      ativar_preset_pvp: {
+        Args: { p_posicao: number; p_tipo: string }
+        Returns: {
+          ativo: boolean
+          atualizado_em: string
+          nome: string
+          posicao: number
+          slots: Json
+          tipo: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_preset"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
       cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
@@ -3190,6 +3253,24 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      meus_presets_pvp: {
+        Args: never
+        Returns: {
+          ativo: boolean
+          atualizado_em: string
+          nome: string
+          posicao: number
+          slots: Json
+          tipo: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "pvp_preset"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
@@ -3245,6 +3326,8 @@ export type Database = {
         }
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
+      pvp_espelhar_time: { Args: { p_user: string }; Returns: undefined }
+      pvp_garantir_presets: { Args: { p_user: string }; Returns: undefined }
       pvp_garantir_rank: {
         Args: { p_user: string }
         Returns: {
@@ -3268,6 +3351,10 @@ export type Database = {
       pvp_proximo_reset: { Args: { p_ref?: string }; Returns: string }
       pvp_snapshot_pokemon: {
         Args: { p_pokemon_ids: string[]; p_user: string }
+        Returns: Json
+      }
+      pvp_snapshot_preset: {
+        Args: { p_tipo: string; p_user: string }
         Returns: Json
       }
       pvp_snapshot_time: { Args: { p_user: string }; Returns: Json }
@@ -3338,6 +3425,29 @@ export type Database = {
         Returns: Json
       }
       sair_da_fila_ranqueada: { Args: never; Returns: undefined }
+      salvar_preset_pvp: {
+        Args: {
+          p_nome: string
+          p_posicao: number
+          p_slots: Json
+          p_tipo: string
+        }
+        Returns: {
+          ativo: boolean
+          atualizado_em: string
+          nome: string
+          posicao: number
+          slots: Json
+          tipo: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_preset"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       salvar_time_pvp: {
         Args: { p_pokemon_ids: string[] }
         Returns: {
@@ -5143,6 +5253,51 @@ export type Database = {
           },
         ]
       }
+      pvp_preset: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          nome: string
+          posicao: number
+          slots: Json
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          nome?: string
+          posicao: number
+          slots?: Json
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          nome?: string
+          posicao?: number
+          slots?: Json
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvp_preset_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pvp_preset_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pvp_rank: {
         Row: {
           derrotas: number
@@ -6467,6 +6622,24 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      ativar_preset_pvp: {
+        Args: { p_posicao: number; p_tipo: string }
+        Returns: {
+          ativo: boolean
+          atualizado_em: string
+          nome: string
+          posicao: number
+          slots: Json
+          tipo: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_preset"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
       cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
@@ -6741,6 +6914,24 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      meus_presets_pvp: {
+        Args: never
+        Returns: {
+          ativo: boolean
+          atualizado_em: string
+          nome: string
+          posicao: number
+          slots: Json
+          tipo: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "pvp_preset"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
@@ -6796,6 +6987,8 @@ export type Database = {
         }
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
+      pvp_espelhar_time: { Args: { p_user: string }; Returns: undefined }
+      pvp_garantir_presets: { Args: { p_user: string }; Returns: undefined }
       pvp_garantir_rank: {
         Args: { p_user: string }
         Returns: {
@@ -6819,6 +7012,10 @@ export type Database = {
       pvp_proximo_reset: { Args: { p_ref?: string }; Returns: string }
       pvp_snapshot_pokemon: {
         Args: { p_pokemon_ids: string[]; p_user: string }
+        Returns: Json
+      }
+      pvp_snapshot_preset: {
+        Args: { p_tipo: string; p_user: string }
         Returns: Json
       }
       pvp_snapshot_time: { Args: { p_user: string }; Returns: Json }
@@ -6889,6 +7086,29 @@ export type Database = {
         Returns: Json
       }
       sair_da_fila_ranqueada: { Args: never; Returns: undefined }
+      salvar_preset_pvp: {
+        Args: {
+          p_nome: string
+          p_posicao: number
+          p_slots: Json
+          p_tipo: string
+        }
+        Returns: {
+          ativo: boolean
+          atualizado_em: string
+          nome: string
+          posicao: number
+          slots: Json
+          tipo: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pvp_preset"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       salvar_time_pvp: {
         Args: { p_pokemon_ids: string[] }
         Returns: {
