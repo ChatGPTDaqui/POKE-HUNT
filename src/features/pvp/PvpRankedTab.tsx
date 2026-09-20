@@ -3,6 +3,7 @@ import { Shield, Sword, Trophy } from '@phosphor-icons/react'
 import { Carregando, ComingSoon, GameButton, SectionLabel } from '@/components/game/controls'
 import { SPECIES } from '@/data/pokes'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { useMochilaStore } from '@/stores/mochilaStore'
 import * as pvpRpc from '@/data/remote/pvpRpc'
 import { usePvpRanked } from './usePvpRanked'
 
@@ -25,7 +26,10 @@ export function PvpRankedTab() {
   const pvp = usePvpRanked()
   const team = useGameStateStore((s) => s.team)
   const bagPokes = useGameStateStore((s) => s.bagPokes)
+  const carregarMochila = useMochilaStore((s) => s.carregar)
+  const mochilaCarregada = useMochilaStore((s) => s.carregada)
   const [nomes, setNomes] = useState<Record<string, string>>({})
+  useEffect(() => { if (!mochilaCarregada) void carregarMochila() }, [mochilaCarregada, carregarMochila])
 
   const idsDosAtacantes = pvp.defesasRecentes.map((h) => h.anfitriaoId).filter((id) => !(id in nomes))
   useEffect(() => {
@@ -90,7 +94,9 @@ export function PvpRankedTab() {
           <Shield weight="duotone" className="text-[1.6em] text-n300" />
           <SectionLabel>SUA DEFESA</SectionLabel>
         </div>
-        {defesaValida.length === 0 ? (
+        {!mochilaCarregada ? (
+          <p className="text-[.82em] text-n500">Carregando sua defesa…</p>
+        ) : defesaValida.length === 0 ? (
           <p role="note" className="text-[.82em] text-bad">Sua defesa está vazia: você não aparece como alvo até montar e ativar um time de defesa na aba Equipe PvP.</p>
         ) : (
           <p className="text-[.82em] text-n300">
