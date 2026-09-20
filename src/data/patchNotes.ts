@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-563/564 (presets de PvP com golpes por slot; UI de ataque/defesa e drag).
+  {
+    version: '7.64',
+    date: '2026-09-20',
+    title: 'Equipe PvP: três times de ataque, três de defesa e golpes por POKE',
+    highlights: [
+      'A aba Equipe PvP agora guarda até 3 times de ataque e 3 de defesa, com nome próprio. Um de cada fica marcado como ATIVO: o de ataque é o que entra no ranqueado; o de defesa é o que vai proteger você quando o ranqueado assíncrono chegar.',
+      'Arraste os POKEs pelo punho no canto do cartão (ou use o teclado) para reordenar a formação.',
+      'Cada slot pode ter o próprio kit de até 4 golpes, inclusive os aprendidos por TM, sem mexer nos golpes que o POKE usa na aventura. Sem escolha, o slot usa os golpes ativos do POKE.',
+    ],
+  },
   // PH-556 (aba TMs dedicada na mochila).
   {
     version: '7.63',
