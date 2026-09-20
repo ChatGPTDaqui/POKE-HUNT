@@ -25,6 +25,9 @@ independentemente da versão das patch notes. A espera por propagação tem limi
    e scripts/harness/abrir-hunt-em-producao.mjs. Credencial ausente/recusada é inconclusivo:
    corrigir e verificar. Regressão funcional confirmada exige reversão antes de investigação longa.
 5. Cliente Pages é publicação separada: conferir com o build promovido. Resultado real na issue.
+   `client-pending` que persiste: `node scripts/ci/pages-producao.mjs` lista os deployments de
+   produção do Cloudflare (o check "Cloudflare Pages" no commit pode ser o da branch de sync,
+   mesmo sha); `--retry` refaz o último se falhou (ex.: `clone_repo/failure`, infra deles).
 
 ## Ambientes e ferramentas
 
