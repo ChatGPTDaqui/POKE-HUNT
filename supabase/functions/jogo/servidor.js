@@ -110075,14 +110075,15 @@ function aplicarPdl(divisaoAtual, pdlAtual, delta) {
 		pdl
 	};
 }
-function calcularResultadoRanqueado(anfitriao, convidado, resultadoAnfitriao) {
+var FATOR_DEFENSOR = .5;
+function calcularResultadoRanqueado(anfitriao, convidado, resultadoAnfitriao, fatorConvidado = 1) {
 	const resultadoConvidado = resultadoAnfitriao === "vitoria" ? "derrota" : resultadoAnfitriao === "derrota" ? "vitoria" : "empate";
 	const espAnfitriao = esperado(anfitriao.mmr, convidado.mmr);
 	const espConvidado = 1 - espAnfitriao;
 	const mmrAnfitriao = Math.max(MMR_MINIMO, Math.round(anfitriao.mmr + kFactor(anfitriao.partidas) * (scoreDe(resultadoAnfitriao) - espAnfitriao)));
-	const mmrConvidado = Math.max(MMR_MINIMO, Math.round(convidado.mmr + kFactor(convidado.partidas) * (scoreDe(resultadoConvidado) - espConvidado)));
+	const mmrConvidado = Math.max(MMR_MINIMO, Math.round(convidado.mmr + fatorConvidado * kFactor(convidado.partidas) * (scoreDe(resultadoConvidado) - espConvidado)));
 	const deltaAnfitriao = pdlDeltaBruto(resultadoAnfitriao, espAnfitriao);
-	const deltaConvidado = pdlDeltaBruto(resultadoConvidado, espConvidado);
+	const deltaConvidado = Math.trunc(pdlDeltaBruto(resultadoConvidado, espConvidado) * fatorConvidado);
 	const rankAnfitriao = aplicarPdl(anfitriao.divisao, anfitriao.pdl, deltaAnfitriao);
 	const rankConvidado = aplicarPdl(convidado.divisao, convidado.pdl, deltaConvidado);
 	return {
@@ -110158,7 +110159,7 @@ async function resolverPvp(cfg, jogadorId, req) {
 	const rankAnfitriao = ranks.find((r) => r.user_id === sessao.anfitriao_id);
 	const rankConvidado = ranks.find((r) => r.user_id === sessao.convidado_id);
 	if (!rankAnfitriao || !rankConvidado) throw new ErroHttp(500, "Rank ranqueado ausente para um dos participantes.");
-	const calculo = calcularResultadoRanqueado(rankAnfitriao, rankConvidado, resultadoAnfitriao);
+	const calculo = calcularResultadoRanqueado(rankAnfitriao, rankConvidado, resultadoAnfitriao, FATOR_DEFENSOR);
 	await chamarRpc(cfg, "aplicar_resultado_pvp", {
 		p_sessao_id: sessaoId,
 		p_vencedor_id: vencedorId,

@@ -8,8 +8,8 @@ const db = supabase as unknown as {
 }
 
 export type EstadoPvp = 'convidada' | 'aberta' | 'concluida' | 'cancelada' | 'expirada'
-// `ranqueado_bot` (PH-539): pareado com bot por falta de humano na fila; sem
-// MMR/PDL e sem consumir o limite diario.
+// `ranqueado_bot` (PH-539/565): pareado com bot por falta de defensor humano
+// na faixa de MMR; sem MMR/PDL, mas consome o limite diario.
 export type ModoPvp = 'amistoso' | 'ranqueado' | 'ranqueado_bot'
 
 export interface SessaoPvp {
@@ -37,6 +37,9 @@ export interface HistoricoPvp {
   convidadoId: string
   vencedorId: string | null
   encerradaEm: string
+  modo: ModoPvp
+  pdlDeltaAnfitriao: number | null
+  pdlDeltaConvidado: number | null
 }
 
 interface LinhaPvp {
@@ -154,11 +157,14 @@ export async function registrarResultadoPvp(sessaoId: string, vencedorId: string
   return daLinha(data as LinhaPvp)
 }
 
-export async function meuPvpVivo(): Promise<SessaoPvp | null> {
+// PH-565: sessao ranqueada em que sou o CONVIDADO e a defesa salva sendo
+// atacada — nao e um duelo meu pra entrar; o atacante resolve sozinho.
+export async function meuPvpVivo(meuId: string): Promise<SessaoPvp | null> {
   const { data, error } = await db.from('pvp_sessao')
     .select('*')
     .in('estado', ['convidada', 'aberta'])
     .gt('expira_em', new Date().toISOString())
+    .or(`anfitriao_id.eq.${meuId},modo.eq.amistoso`)
     .order('criada_em', { ascending: false })
     .limit(1)
   falhou(error)
@@ -179,6 +185,9 @@ export async function historicoPvp(limite = 20): Promise<HistoricoPvp[]> {
     convidadoId: l.convidado_id,
     vencedorId: l.vencedor_id,
     encerradaEm: l.encerrada_em,
+    modo: (l.modo ?? 'amistoso') as ModoPvp,
+    pdlDeltaAnfitriao: l.pdl_delta_anfitriao ?? null,
+    pdlDeltaConvidado: l.pdl_delta_convidado ?? null,
   }))
 }
 
@@ -193,11 +202,6 @@ export function assinarMeuPvp(userId: string, aoMudar: () => void): () => void {
 
 // --- time e rank do PvP ranqueado (PH-529/PH-530) --------------------------
 
-export interface TimePvp {
-  pokemonIds: string[]
-  atualizadoEm: string
-}
-
 export interface RankPvp {
   mmr: number
   partidas: number
@@ -207,18 +211,6 @@ export interface RankPvp {
   derrotas: number
   partidasHoje: number
   resetEm: string
-}
-
-export async function meuTimePvp(): Promise<TimePvp | null> {
-  const { data, error } = await db.from('pvp_time').select('*').maybeSingle()
-  falhou(error)
-  return data ? { pokemonIds: data.pokemon_ids ?? [], atualizadoEm: data.atualizado_em } : null
-}
-
-export async function salvarTimePvp(pokemonIds: string[]): Promise<TimePvp> {
-  const { data, error } = await db.rpc('salvar_time_pvp', { p_pokemon_ids: pokemonIds })
-  falhou(error)
-  return { pokemonIds: data.pokemon_ids ?? [], atualizadoEm: data.atualizado_em }
 }
 
 // --- presets de time (PH-563): 3 de ataque + 3 de defesa, 1 ativo por tipo ---
@@ -298,30 +290,10 @@ export async function meuRankPvp(): Promise<RankPvp> {
   }
 }
 
-export async function entrarFilaRanqueada(): Promise<RankPvp> {
-  const { data, error } = await db.rpc('entrar_fila_ranqueada', {})
+// PH-565: ranqueado assincrono — pareia na hora com a defesa salva de um
+// jogador de MMR proximo (ou bot) e devolve a sessao ja 'aberta'.
+export async function atacarRanqueado(): Promise<SessaoPvp> {
+  const { data, error } = await db.rpc('atacar_ranqueado', {})
   falhou(error)
-  return {
-    mmr: data.mmr,
-    partidas: data.partidas,
-    pdl: data.pdl,
-    divisao: data.divisao,
-    vitorias: data.vitorias,
-    derrotas: data.derrotas,
-    partidasHoje: data.partidas_hoje,
-    resetEm: data.reset_em,
-  }
-}
-
-export async function sairDaFilaRanqueada(): Promise<void> {
-  const { error } = await db.rpc('sair_da_fila_ranqueada', {})
-  falhou(error)
-}
-
-export async function tentarPearearRanqueado(): Promise<SessaoPvp | null> {
-  const { data, error } = await db.rpc('tentar_parear_ranqueado', {})
-  falhou(error)
-  // Sem par a funcao devolve NULL de tipo composto, e o PostgREST serializa
-  // isso como um objeto com todas as colunas nulas — nao como `null`.
-  return data && (data as LinhaPvp).id ? daLinha(data as LinhaPvp) : null
+  return daLinha(data as LinhaPvp)
 }

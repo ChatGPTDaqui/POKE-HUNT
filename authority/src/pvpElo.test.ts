@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calcularResultadoRanqueado, ESCADA_DIVISOES, type EntradaJogador } from './pvpElo.js'
+import { FATOR_DEFENSOR, calcularResultadoRanqueado, ESCADA_DIVISOES, type EntradaJogador } from './pvpElo.js'
 
 function jogador(overrides: Partial<EntradaJogador> = {}): EntradaJogador {
   return { mmr: 1000, partidas: 20, pdl: 50, divisao: 'ouro_2', ...overrides }
@@ -11,6 +11,19 @@ describe('calcularResultadoRanqueado', () => {
     expect(r.anfitriao.mmr).toBeGreaterThan(1000)
     expect(r.convidado.mmr).toBeLessThan(1000)
     expect(r.anfitriao.mmr - 1000).toBe(1000 - r.convidado.mmr)
+  })
+
+  // PH-565: defensor atacado offline ganha/perde metade.
+  it('fator do defensor: convidado ganha/perde metade do MMR e do PDL, anfitriao inteiro', () => {
+    const cheio = calcularResultadoRanqueado(jogador(), jogador(), 'vitoria')
+    const meio = calcularResultadoRanqueado(jogador(), jogador(), 'vitoria', FATOR_DEFENSOR)
+    expect(meio.anfitriao).toEqual(cheio.anfitriao)
+    expect(1000 - meio.convidado.mmr).toBe((1000 - cheio.convidado.mmr) / 2)
+    expect(meio.convidado.pdlDelta).toBe(Math.trunc(cheio.convidado.pdlDelta / 2))
+    expect(meio.convidado.pdlDelta).toBeLessThan(0)
+    const defesaVenceu = calcularResultadoRanqueado(jogador(), jogador(), 'derrota', FATOR_DEFENSOR)
+    expect(defesaVenceu.convidado.pdlDelta).toBe(Math.trunc(calcularResultadoRanqueado(jogador(), jogador(), 'derrota').convidado.pdlDelta / 2))
+    expect(defesaVenceu.convidado.pdlDelta).toBeGreaterThan(0)
   })
 
   it('empate nao muda PDL nem MMR de ninguem com mmr igual', () => {
