@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-565 (ranqueado assincrono: ataque contra defesa salva, cooldown, defensor pela metade).
+  {
+    version: '7.65',
+    date: '2026-09-20',
+    title: 'Ranqueado sem esperar ninguém: ataque a defesa de outro treinador',
+    highlights: [
+      'A fila do ranqueado acabou. "Atacar" pareia na hora com a defesa salva de um treinador da sua faixa de MMR, esteja ele online ou não — a luta é automática, e você assiste no mesmo motor de sempre.',
+      'Seu time de DEFESA ativo (aba Equipe PvP) é o que luta por você quando alguém te ataca. Sem defesa ativa você não aparece como alvo. Quem é atacado ganha ou perde só metade do PDL; quem ataca leva o valor cheio.',
+      'Você só enfrenta o mesmo treinador de novo depois de 5 outras partidas. Sem ninguém na sua faixa, um treinador bot entra (sem PDL, mas conta no limite diário). A aba Ranked mostra sua defesa e os últimos ataques que ela sofreu; o Histórico marca "Defendeu" e "Defesa caiu".',
+    ],
+  },
   // PH-563/564 (presets de PvP com golpes por slot; UI de ataque/defesa e drag).
   {
     version: '7.64',

@@ -1,8 +1,7 @@
-// Fila ranqueada (PH-531): entra, faz polling do pareamento (sem cron — a
-// funcao Postgres `tentar_parear_ranqueado` tenta casar a cada chamada) e,
-// ao casar, dispara a resolucao server-side (`/pvp/resolver`) e entra na
-// ARENA (PH-540) com a semente devolvida — a luta na tela e a mesma que o
-// servidor resolveu. Nunca reporta o proprio vencedor.
+// Ranqueado assincrono (PH-565): "Atacar" pareia NA HORA com a defesa salva
+// de um jogador de MMR proximo (online ou nao) — ou com um bot —, dispara a
+// resolucao server-side (`/pvp/resolver`) e entra na ARENA (PH-540) com a
+// semente devolvida. Sem fila, sem polling. Nunca reporta o proprio vencedor.
 import { useCallback, useEffect, useRef, useState } from 'react'
 import * as pvpRpc from '@/data/remote/pvpRpc'
 import { servidor, servidorAtivo } from '@/data/remote/servidor'
@@ -11,98 +10,83 @@ import { useToastStore } from '@/stores/toastStore'
 import { entrarNaArena } from '@/features/arena/arena'
 import { arenaDaSessao } from './arenaDaSessao'
 
-const INTERVALO_POLL_MS = 3000
-
 export interface EstadoRankeado {
   rank: pvpRpc.RankPvp | null
+  defesa: pvpRpc.PresetPvp | null
+  defesasRecentes: pvpRpc.HistoricoPvp[]
   carregando: boolean
-  procurando: boolean
-  entrarNaFila: () => Promise<void>
-  cancelar: () => Promise<void>
+  atacando: boolean
+  atacar: () => Promise<void>
   servidorConfigurado: boolean
 }
+
+const DEFESAS_NO_CARTAO = 5
 
 export function usePvpRanked(): EstadoRankeado {
   const meuId = useAuthStore((s) => s.user?.id ?? null)
   const [rank, setRank] = useState<pvpRpc.RankPvp | null>(null)
+  const [defesa, setDefesa] = useState<pvpRpc.PresetPvp | null>(null)
+  const [defesasRecentes, setDefesasRecentes] = useState<pvpRpc.HistoricoPvp[]>([])
   const [carregando, setCarregando] = useState(true)
-  const [procurando, setProcurando] = useState(false)
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [atacando, setAtacando] = useState(false)
   const vivo = useRef(true)
 
-  const recarregarRank = useCallback(async () => {
+  const recarregar = useCallback(async () => {
     try {
-      setRank(await pvpRpc.meuRankPvp())
+      const [r, presets, hist] = await Promise.all([
+        pvpRpc.meuRankPvp(),
+        pvpRpc.meusPresetsPvp(),
+        pvpRpc.historicoPvp(50),
+      ])
+      if (!vivo.current) return
+      setRank(r)
+      setDefesa(presets.find((p) => p.tipo === 'defesa' && p.ativo) ?? null)
+      setDefesasRecentes(hist
+        .filter((h) => h.modo === 'ranqueado' && h.convidadoId === meuId)
+        .slice(0, DEFESAS_NO_CARTAO))
     } catch (e) {
       useToastStore.getState().pushToast(
         e instanceof Error ? e.message : 'Não foi possível carregar seu rank.', 'error', 'world',
       )
     }
-  }, [])
+  }, [meuId])
 
   useEffect(() => {
     vivo.current = true
-    void recarregarRank().finally(() => { if (vivo.current) setCarregando(false) })
+    void recarregar().finally(() => { if (vivo.current) setCarregando(false) })
     return () => { vivo.current = false }
-  }, [recarregarRank])
+  }, [recarregar])
 
-  const pararPolling = useCallback(() => {
-    if (pollRef.current) clearInterval(pollRef.current)
-    pollRef.current = null
-  }, [])
+  useEffect(() => {
+    if (!meuId) return
+    return pvpRpc.assinarMeuPvp(meuId, () => { void recarregar() }, '-ranked')
+  }, [meuId, recarregar])
 
-  useEffect(() => () => pararPolling(), [pararPolling])
-
-  const entrarNaFila = useCallback(async () => {
+  const atacar = useCallback(async () => {
+    if (atacando || !meuId) return
+    setAtacando(true)
     try {
-      const rankAtualizado = await pvpRpc.entrarFilaRanqueada()
-      setRank(rankAtualizado)
-      setProcurando(true)
-      pollRef.current = setInterval(async () => {
-        try {
-          const sessao = await pvpRpc.tentarPearearRanqueado()
-          if (!sessao) return
-          pararPolling()
-          setProcurando(false)
-          const res = await servidor.resolverPvp(sessao.id)
-          if (meuId) {
-            const entrada = await arenaDaSessao(sessao, meuId, res, 'oponente ranqueado')
-            if (entrada) entrarNaArena({ ...entrada, aoSair: () => { void recarregarRank() } })
-          }
-          await recarregarRank()
-        } catch (e) {
-          pararPolling()
-          setProcurando(false)
-          useToastStore.getState().pushToast(
-            e instanceof Error ? e.message : 'Erro ao parear PvP ranqueado.', 'error', 'world',
-          )
-        }
-      }, INTERVALO_POLL_MS)
+      const sessao = await pvpRpc.atacarRanqueado()
+      const res = await servidor.resolverPvp(sessao.id)
+      const entrada = await arenaDaSessao(sessao, meuId, res, 'oponente ranqueado')
+      if (entrada) entrarNaArena({ ...entrada, aoSair: () => { void recarregar() } })
+      await recarregar()
     } catch (e) {
       useToastStore.getState().pushToast(
-        e instanceof Error ? e.message : 'Não foi possível entrar na fila ranqueada.', 'error', 'world',
+        e instanceof Error ? e.message : 'Não foi possível atacar agora.', 'error', 'world',
       )
+    } finally {
+      if (vivo.current) setAtacando(false)
     }
-  }, [pararPolling, recarregarRank])
-
-  const cancelar = useCallback(async () => {
-    pararPolling()
-    setProcurando(false)
-    try {
-      await pvpRpc.sairDaFilaRanqueada()
-    } catch (e) {
-      useToastStore.getState().pushToast(
-        e instanceof Error ? e.message : 'Não foi possível sair da fila.', 'error', 'world',
-      )
-    }
-  }, [pararPolling])
+  }, [atacando, meuId, recarregar])
 
   return {
     rank,
+    defesa,
+    defesasRecentes,
     carregando,
-    procurando,
-    entrarNaFila,
-    cancelar,
+    atacando,
+    atacar,
     servidorConfigurado: servidorAtivo(),
   }
 }
