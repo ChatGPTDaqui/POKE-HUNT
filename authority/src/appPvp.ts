@@ -19,7 +19,7 @@
 import type { PokeInstance } from '@/data/pokes'
 import { LIVE_SIM_STEP_SECONDS, rodarArena, sementeDaSessao } from '#engine'
 import { ErroHttp, chamarRpc, selecionar, type Config } from './db.js'
-import { calcularResultadoRanqueado, type EntradaJogador, type Resultado } from './pvpElo.js'
+import { FATOR_DEFENSOR, calcularResultadoRanqueado, type EntradaJogador, type Resultado } from './pvpElo.js'
 import { pvpRowToPoke, type LinhaTimePvp } from '#engine'
 
 interface LinhaSessaoPvp {
@@ -116,7 +116,8 @@ export async function resolverPvp(cfg: Config, jogadorId: string, req: Request):
 
   const entradaAnfitriao: EntradaJogador = rankAnfitriao
   const entradaConvidado: EntradaJogador = rankConvidado
-  const calculo = calcularResultadoRanqueado(entradaAnfitriao, entradaConvidado, resultadoAnfitriao)
+  // PH-565: ranqueado e sempre atacante (anfitriao) x defesa salva (convidado).
+  const calculo = calcularResultadoRanqueado(entradaAnfitriao, entradaConvidado, resultadoAnfitriao, FATOR_DEFENSOR)
 
   await chamarRpc(cfg, 'aplicar_resultado_pvp', {
     p_sessao_id: sessaoId,

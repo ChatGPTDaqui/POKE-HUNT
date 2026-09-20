@@ -44,7 +44,7 @@ export function usePvp(): EstadoDoPvp {
   const recarregar = useCallback(async () => {
     try {
       const [viva, hist] = await Promise.all([
-        pvpRpc.meuPvpVivo(),
+        meuId ? pvpRpc.meuPvpVivo(meuId) : Promise.resolve(null),
         pvpRpc.historicoPvp(),
       ])
       setSessao(viva)
@@ -54,7 +54,7 @@ export function usePvp(): EstadoDoPvp {
     } finally {
       setCarregando(false)
     }
-  }, [])
+  }, [meuId])
 
   useEffect(() => { void recarregar() }, [recarregar])
 
@@ -122,17 +122,17 @@ export function usePvp(): EstadoDoPvp {
     }
   }, [meuId, ocupado, recarregar])
 
-  // `usarTimeSalvo`: true pega o time de PvP salvo (aba Build), false usa o
-  // time atual de aventura — so o client sabe qual e o atual (gameStateStore),
-  // por isso o array de ids vai explicito, nao "escolha no servidor".
+  // `usarTimeSalvo`: true pega o preset de ATAQUE ativo (aba Equipe PvP),
+  // false usa o time atual de aventura — so o client sabe qual e o atual
+  // (gameStateStore), por isso o array de ids vai explicito.
   const aceitar = useCallback(async (usarTimeSalvo: boolean) => {
     if (!sessao) return
     await agir(async () => {
       const ids = usarTimeSalvo
-        ? (await pvpRpc.meuTimePvp())?.pokemonIds ?? []
+        ? ((await pvpRpc.meusPresetsPvp()).find((p) => p.tipo === 'ataque' && p.ativo)?.slots ?? []).map((s) => s.pokemonId)
         : useGameStateStore.getState().team.map((p) => p.uid)
       if (ids.length === 0) {
-        throw new Error(usarTimeSalvo ? 'Seu time de PvP está vazio — monte um na aba Build.' : 'Sua equipe de aventura está vazia.')
+        throw new Error(usarTimeSalvo ? 'Seu time de ataque está vazio — monte um na aba Equipe PvP.' : 'Sua equipe de aventura está vazia.')
       }
       return pvpRpc.aceitarPvpTime(sessao.id, ids)
     })

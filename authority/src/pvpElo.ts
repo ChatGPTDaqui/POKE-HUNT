@@ -86,10 +86,15 @@ function aplicarPdl(divisaoAtual: string, pdlAtual: number, delta: number): { di
   return { divisao: ESCADA_DIVISOES[indice], pdl }
 }
 
+// PH-565: no ranqueado assincrono o convidado e o DEFENSOR — nao escolheu
+// lutar, entao ganha/perde metade (decisao do dono, 19/09/2026).
+export const FATOR_DEFENSOR = 0.5
+
 export function calcularResultadoRanqueado(
   anfitriao: EntradaJogador,
   convidado: EntradaJogador,
   resultadoAnfitriao: Resultado,
+  fatorConvidado = 1,
 ): { anfitriao: SaidaJogador; convidado: SaidaJogador } {
   const resultadoConvidado: Resultado = resultadoAnfitriao === 'vitoria'
     ? 'derrota'
@@ -104,11 +109,13 @@ export function calcularResultadoRanqueado(
   )
   const mmrConvidado = Math.max(
     MMR_MINIMO,
-    Math.round(convidado.mmr + kFactor(convidado.partidas) * (scoreDe(resultadoConvidado) - espConvidado)),
+    Math.round(convidado.mmr + fatorConvidado * kFactor(convidado.partidas) * (scoreDe(resultadoConvidado) - espConvidado)),
   )
 
   const deltaAnfitriao = pdlDeltaBruto(resultadoAnfitriao, espAnfitriao)
-  const deltaConvidado = pdlDeltaBruto(resultadoConvidado, espConvidado)
+  // `trunc`, nao `round`: metade de -15 fica -7, nunca -8 (arredondar
+  // pra longe do zero puniria o defensor a mais pelo sinal).
+  const deltaConvidado = Math.trunc(pdlDeltaBruto(resultadoConvidado, espConvidado) * fatorConvidado)
   const rankAnfitriao = aplicarPdl(anfitriao.divisao, anfitriao.pdl, deltaAnfitriao)
   const rankConvidado = aplicarPdl(convidado.divisao, convidado.pdl, deltaConvidado)
 

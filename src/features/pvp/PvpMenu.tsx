@@ -154,13 +154,17 @@ function PvpConteudo() {
           ) : pvp.historico.map((h) => {
             const euVenci = h.vencedorId != null && h.vencedorId === meuId
             const empate = h.vencedorId == null
+            // PH-565: no ranqueado o convidado e a DEFESA salva sendo atacada.
+            const defendi = h.modo === 'ranqueado' && h.convidadoId === meuId
+            const delta = h.anfitriaoId === meuId ? h.pdlDeltaAnfitriao : h.pdlDeltaConvidado
             return (
               <div key={h.id} className="flex items-center gap-[.45em] rounded-[.45em] border border-n800 px-[.45em] py-[.35em]">
                 <span className={euVenci ? 'text-green-400' : empate ? 'text-n400' : 'text-bad'}>
-                  {empate ? 'Encerrado' : euVenci ? 'Vitória' : 'Derrota'}
+                  {empate ? 'Encerrado' : defendi ? (euVenci ? 'Defendeu' : 'Defesa caiu') : euVenci ? 'Vitória' : 'Derrota'}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-[.82em] text-n400">
-                  sessão {h.sessaoId.slice(0, 8)}
+                  {h.modo === 'ranqueado' ? (defendi ? 'ataque sofrido' : 'ranqueado') : h.modo === 'ranqueado_bot' ? 'treino contra bot' : 'amistoso'}
+                  {delta != null && delta !== 0 && <span className={delta > 0 ? ' text-green-400' : ' text-bad'}> {delta > 0 ? '+' : ''}{delta} PDL</span>}
                 </span>
                 <span className="shrink-0 text-[.75em] text-n500">{formatarData(h.encerradaEm)}</span>
               </div>
