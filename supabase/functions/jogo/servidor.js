@@ -109620,6 +109620,7 @@ function pvpRowToPoke(row) {
 		defEsp: row.stat_def_esp,
 		speed: row.stat_speed
 	};
+	const escolha = (row.golpes_escolhidos?.length ? row.golpes_escolhidos : null) ?? row.active_abilities ?? activeAbilitiesPadrao(species, row.level);
 	return {
 		uid: row.id,
 		speciesId: row.species_id,
@@ -109641,7 +109642,7 @@ function pvpRowToPoke(row) {
 		unlockedAbilities: conhecidos,
 		golpesDeMaquina,
 		disabledAbilities: {},
-		activeAbilities: sanearEscolhaDeGolpes(row.active_abilities ?? activeAbilitiesPadrao(species, row.level), conhecidos, species, row.level),
+		activeAbilities: sanearEscolhaDeGolpes(escolha, conhecidos, species, row.level),
 		status: null,
 		locked: false,
 		capturedAt: (/* @__PURE__ */ new Date(0)).toISOString()

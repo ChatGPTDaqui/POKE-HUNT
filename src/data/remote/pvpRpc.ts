@@ -221,6 +221,68 @@ export async function salvarTimePvp(pokemonIds: string[]): Promise<TimePvp> {
   return { pokemonIds: data.pokemon_ids ?? [], atualizadoEm: data.atualizado_em }
 }
 
+// --- presets de time (PH-563): 3 de ataque + 3 de defesa, 1 ativo por tipo ---
+
+export type TipoPresetPvp = 'ataque' | 'defesa'
+
+export interface SlotPresetPvp {
+  pokemonId: string
+  /** Vazio = usa os golpes ativos do POKE. */
+  golpes: string[]
+}
+
+export interface PresetPvp {
+  tipo: TipoPresetPvp
+  posicao: number
+  nome: string
+  slots: SlotPresetPvp[]
+  ativo: boolean
+  atualizadoEm: string
+}
+
+interface LinhaPreset {
+  tipo: TipoPresetPvp
+  posicao: number
+  nome: string
+  slots: { pokemon_id: string; golpes?: string[] | null }[] | null
+  ativo: boolean
+  atualizado_em: string
+}
+
+function presetDaLinha(l: LinhaPreset): PresetPvp {
+  return {
+    tipo: l.tipo,
+    posicao: l.posicao,
+    nome: l.nome ?? '',
+    slots: (l.slots ?? []).map((s) => ({ pokemonId: s.pokemon_id, golpes: s.golpes ?? [] })),
+    ativo: l.ativo,
+    atualizadoEm: l.atualizado_em,
+  }
+}
+
+export async function meusPresetsPvp(): Promise<PresetPvp[]> {
+  const { data, error } = await db.rpc('meus_presets_pvp', {})
+  falhou(error)
+  return ((data ?? []) as LinhaPreset[]).map(presetDaLinha)
+}
+
+export async function salvarPresetPvp(preset: Pick<PresetPvp, 'tipo' | 'posicao' | 'nome' | 'slots'>): Promise<PresetPvp> {
+  const { data, error } = await db.rpc('salvar_preset_pvp', {
+    p_tipo: preset.tipo,
+    p_posicao: preset.posicao,
+    p_nome: preset.nome,
+    p_slots: preset.slots.map((s) => ({ pokemon_id: s.pokemonId, golpes: s.golpes })),
+  })
+  falhou(error)
+  return presetDaLinha(data as LinhaPreset)
+}
+
+export async function ativarPresetPvp(tipo: TipoPresetPvp, posicao: number): Promise<PresetPvp> {
+  const { data, error } = await db.rpc('ativar_preset_pvp', { p_tipo: tipo, p_posicao: posicao })
+  falhou(error)
+  return presetDaLinha(data as LinhaPreset)
+}
+
 export async function meuRankPvp(): Promise<RankPvp> {
   const { data, error } = await db.rpc('meu_rank_pvp', {})
   falhou(error)
