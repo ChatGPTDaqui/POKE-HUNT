@@ -16,7 +16,7 @@ const todas = [
 function gravador(): { ctx: CanvasRenderingContext2D; log: string[] } {
   const log: string[] = []
   const ctx = new Proxy({} as Record<string, unknown>, {
-    get: (_a, k) => (...args: unknown[]) => { log.push(`${String(k)}(${args.map(v => typeof v === 'number' ? v.toFixed(3) : String(v)).join(',')})`) },
+    get: (_a, k) => (...args: unknown[]) => { log.push(`${String(k)}(${args.map(v => typeof v === 'number' ? v.toFixed(3) : String(v)).join(',')})`); return { addColorStop: (o: number, c: string) => log.push(`stop(${o},${c})`) } },
     set: (_a, k, v) => { log.push(`${String(k)}=${String(v)}`); return true },
   }) as unknown as CanvasRenderingContext2D
   return { ctx, log }

@@ -18,10 +18,10 @@
 //   T1 Thunder Shock   estalo curto: 3 piscadas de um arco fino ate o alvo.
 //   T2 Shock Wave      esfera de plasma que salta pelos vertices de um zigue-zague.
 //   T3 Thunderbolt     o do v2: raio do ceu + arco horizontal + crepitar.
-//   T4 Thunder         lider em degraus desce, descarga grossa estroba 3x, raios rasteiros.
+//   T4 Thunder         o ceu fecha, 3 lideres convergem, clarao + coluna de luz, estouro.
 //   A1 Charge          arvore de raio rasteira crescendo do centro pra fora.
 //   A2 Discharge       quem lanca vira o no: raios do corpo pra pontos da area.
-//   A3 Thunder Storm   tempestade: raios do ceu em staccato, cada um avisado no chao.
+//   A3 Thunder Storm   o ceu fecha na area, raios em staccato avisados no chao, e a coluna final no centro.
 //
 // Sem estado entre quadros: cada forma de raio vem de um rng LOCAL semeado por
 // (semente sorteada no inicio, degrau do tempo). Mesmo `ms`, mesmo raio.
@@ -260,61 +260,169 @@ function thunderbolt(c: ContextoVfx): void {
 }
 
 // ---------------------------------------------------------------------------
-// T4 — THUNDER: lider em degraus, descarga que estroba, raios rasteiros
+// T4 — THUNDER: o ceu fecha, tres lideres convergem, a coluna cai
 // ---------------------------------------------------------------------------
+//
+// O que faz ele IMPONENTE (e nao um Thunderbolt maior): o golpe muda a cena.
+//   1. carga      junta energia numa esfera acima da cabeca e a DISPARA pro
+//                 ceu — o trovao vem de la, nao do corpo.
+//   2. ceu fecha  a area escurece em volta do alvo (dither do pixelizador) e
+//                 tres lideres finos descem aos trancos de tres pontos do ceu.
+//   3. descarga   clarao que lava a cena, depois a COLUNA: pilar largo de luz
+//                 com borda de raio, estrobando 3x, 6 galhos grossos.
+//   4. estouro    12 raios radiais que explodem do alvo, raios rasteiros que
+//                 correm pelo chao ate 60 unidades, estrela e riscos grandes.
+//   5. rescaldo   o alvo crepitando forte e faiscas pulando ate o fim.
 
-const TROVAO_LIDER = 120
-const TROVAO_CAI = 400
+const TROVAO_DISPARO = 300
+const TROVAO_LIDER = 380
+const TROVAO_CAI = 620
 /** As 3 descargas: acesa / apagada / acesa / apagada / acesa, cada vez mais fina. */
-const TROVAO_DESCARGAS = [[0, 70, 8], [100, 150, 6], [180, 250, 4.5]] as const
+const TROVAO_DESCARGAS = [[0, 90, 1], [120, 180, 0.75], [215, 300, 0.55]] as const
+const TROVAO_CEU = 175
+
+/** Escurece em volta de `p` com queda radial: o dither do pixelizador vira sombra pontilhada, sem borda de retangulo. */
+function sombraDoCeu(ctx: CanvasRenderingContext2D, p: Ponto, r: number, forca: number, pele: Pele): void {
+  if (forca <= 0.02) return
+  const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r)
+  g.addColorStop(0, pele.contorno); g.addColorStop(1, pele.contorno + '00')
+  ctx.globalAlpha = forca; ctx.fillStyle = g
+  ctx.fillRect(p.x - r, p.y - r, 2 * r, 2 * r)
+  ctx.globalAlpha = 1
+}
+
+/** Clarao: disco claro com queda radial, a luz do raio lavando a cena. */
+function clarao(ctx: CanvasRenderingContext2D, p: Ponto, r: number, forca: number, pele: Pele): void {
+  if (forca <= 0.02) return
+  const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r)
+  g.addColorStop(0, pele.nucleo); g.addColorStop(0.45, pele.meio); g.addColorStop(1, pele.meio + '00')
+  ctx.globalAlpha = forca; ctx.fillStyle = g
+  ctx.fillRect(p.x - r, p.y - r, 2 * r, 2 * r)
+  ctx.globalAlpha = 1
+}
+
+/**
+ * Coluna de luz do ceu ate `base`: poligono largo cujas DUAS bordas sao raios
+ * (re-sorteadas a cada degrau), em 4 camadas. Nao e um retangulo brilhante: e
+ * um raio grosso demais pra ser linha.
+ */
+function coluna(ctx: CanvasRenderingContext2D, topo: Ponto, base: Ponto, largura: number, semente: number, passo: number, pele: Pele): void {
+  const r = rngDoPasso(semente, passo)
+  const esq = pontosDeRaio(topo, base, largura * 0.7, 4, r)
+  const dir = pontosDeRaio(topo, base, largura * 0.7, 4, r)
+  const n = esq.length
+  // Afina no topo (vem de longe) e abre na base (onde bate).
+  const meia = (k: number, i: number) => (largura * k * (0.35 + 0.65 * (i / (n - 1)))) / 2
+  for (const [cor, k] of [[pele.contorno, 1.25], [pele.base, 1], [pele.meio, 0.7], [pele.nucleo, 0.36]] as const) {
+    ctx.beginPath()
+    for (let i = 0; i < n; i++) ctx.lineTo(esq[i].x - meia(k, i), esq[i].y)
+    for (let i = n - 1; i >= 0; i--) ctx.lineTo(dir[i].x + meia(k, i), dir[i].y)
+    ctx.closePath(); ctx.fillStyle = cor; ctx.fill()
+  }
+}
 
 function thunder(c: ContextoVfx): void {
   const { ctx, ms, alvo, pele, rng } = c
   const b = bochecha(c)
-  const semCarga = rng(), semLider = rng(), semDescarga = rng(), semChao = rng(), semCrepita = rng()
-  const semFaiscas = sortear(rng, 18 * 3)
+  const semCarga = rng(), semEsfera = rng(), semSubida = rng(), semCeu = rng()
+  const semLideres = sortear(rng, 3)
+  const semColuna = rng(), semGalhos = rng(), semEstouro = rng(), semChao = rng(), semCrepita = rng()
+  const semSuga = sortear(rng, 14 * 3)
+  const semFaiscas = sortear(rng, 26 * 3)
   const semEstrela = sortear(rng, 9)
-  const semRiscos = sortear(rng, 30)
-  const topo = { x: alvo.x - 8, y: alvo.y - 170 }
-
-  // Antecipacao: quem lanca carrega com arcos subindo do corpo pro ceu.
-  if (ms < TROVAO_CAI) {
-    crepitar(ctx, ms, b, 0, TROVAO_CAI, 3, 16, 1.2, semCarga, pele, 40)
-    if (ms > 60 && passoDe(ms, 60, 60) % 2 === 0) raio(ctx, b, { x: b.x + 4, y: b.y - 60 }, 1.6, 6, 4, 0, 0, semCarga, passoDe(ms, 60, 60), pele)
-  }
-  // Lider escalonado: um raio FINO que desce do ceu aos trancos, em 5 degraus,
-  // e para no ar logo acima do alvo. A forma fica fixa (o caminho ja aberto).
-  if (ms >= TROVAO_LIDER && ms < TROVAO_CAI) {
-    const caminho = pontosDeRaio(topo, alvo, 20, 5, rngDoPasso(semLider, 0))
-    const degrau = Math.min(5, Math.floor((ms - TROVAO_LIDER) / 50) + 1)
-    tracarRaio(ctx, caminho.slice(0, Math.ceil((caminho.length * degrau) / 6)), 1.2, pele)
-  }
+  const semRiscos = sortear(rng, 16 * 3)
+  const cabeca = { x: c.origem.x, y: c.origem.y - 16 }
+  const topo = { x: alvo.x - 6, y: alvo.y - TROVAO_CEU }
   const e = ms - TROVAO_CAI
-  queimado(ctx, ms, { x: alvo.x, y: alvo.y + 4 }, TROVAO_CAI, 700, 13, pele)
-  // Descarga de retorno: grossa, 4 galhos, pelo MESMO caminho do lider.
+
+  // 2. O ceu fecha: a sombra cresce durante os lideres e some depois da descarga.
+  const sombra = ms < TROVAO_LIDER - 60 ? 0
+    : ms < TROVAO_CAI ? 0.55 * saida((ms - (TROVAO_LIDER - 60)) / (TROVAO_CAI - TROVAO_LIDER + 60))
+      : 0.55 * (1 - limitar((e - 300) / 350))
+  sombraDoCeu(ctx, { x: alvo.x, y: alvo.y - 30 }, 120, sombra, pele)
+  queimado(ctx, ms, { x: alvo.x, y: alvo.y + 4 }, TROVAO_CAI, 800, 14, pele)
+
+  // 1. Carga: faiscas SUGADAS pra esfera acima da cabeca, que incha e crepita.
+  if (ms < TROVAO_DISPARO) {
+    const passo = passoDe(ms, 0, 40)
+    for (let i = 0; i < 14; i++) {
+      const t = (ms - semSuga[i * 3 + 2] * 200) / 110
+      if (t < 0 || t >= 1) continue
+      // Salta pra dentro em 4 degraus secos (nunca desliza).
+      const d = 26 * (1 - Math.floor(t * 4) / 4)
+      const a = semSuga[i * 3] * TAU
+      const p = { x: cabeca.x + Math.cos(a) * d, y: cabeca.y + Math.sin(a) * d * 0.8 }
+      tracarRaio(ctx, pontosDeRaio(p, { x: p.x - Math.cos(a) * 6, y: p.y - Math.sin(a) * 5 }, 2, 2, rngDoPasso(semSuga[i * 3 + 1], passo)), 1, pele)
+    }
+    crepitar(ctx, ms, b, 0, TROVAO_DISPARO, 2, 12, 1.1, semCarga, pele, 40)
+    esfera(ctx, cabeca, 1.5 + 4.5 * saida(ms / TROVAO_DISPARO), semEsfera, passo, pele)
+  }
+  // O disparo pro ceu: raio grosso da cabeca pra cima.
+  if (ms >= TROVAO_DISPARO && ms < TROVAO_DISPARO + 90) {
+    const f = (ms - TROVAO_DISPARO) / 90
+    raio(ctx, cabeca, { x: cabeca.x + 6, y: cabeca.y - 170 }, 5 * (1 - f * 0.6), 12, 5, 2, 14, semSubida, passoDe(ms, TROVAO_DISPARO), pele)
+    clarao(ctx, cabeca, 26, 0.6 * (1 - f), pele)
+  }
+  // O ceu roncando: arcos curtos piscando no alto, acima do alvo.
+  crepitar(ctx, ms, { x: alvo.x, y: alvo.y - 140 }, TROVAO_DISPARO + 40, TROVAO_CAI, 3, 26, 1.3, semCeu, pele, 45)
+
+  // Tres lideres finos descendo aos trancos de tres pontos do ceu, convergindo
+  // no alvo. Forma fixa: e o caminho que se abre, degrau por degrau.
+  if (ms >= TROVAO_LIDER && ms < TROVAO_CAI) {
+    for (let i = 0; i < 3; i++) {
+      const de = { x: alvo.x + (i - 1) * 34, y: alvo.y - TROVAO_CEU + Math.abs(i - 1) * 12 }
+      const caminho = pontosDeRaio(de, alvo, 16, 5, rngDoPasso(semLideres[i], 0))
+      const degrau = Math.min(6, Math.floor((ms - TROVAO_LIDER - i * 30) / 38) + 1)
+      if (degrau > 0) tracarRaio(ctx, caminho.slice(0, Math.ceil((caminho.length * degrau) / 7)), 1.3, pele)
+    }
+  }
+
+  // 3. Descarga: clarao e coluna estrobando.
+  if (e >= 0 && e < 50) clarao(ctx, alvo, 110, 0.85 * (1 - e / 50), pele)
   const d = TROVAO_DESCARGAS.find(([a, z]) => e >= a && e < z)
   if (d) {
-    raio(ctx, topo, alvo, d[2], 20, 5, 4, 22, semDescarga, passoDe(e, 0), pele)
+    const passo = passoDe(e, 0)
+    coluna(ctx, topo, { x: alvo.x, y: alvo.y + 4 }, 20 * d[2], semColuna, passo, pele)
+    const r = rngDoPasso(semGalhos, passo)
+    for (let g = 0; g < 6; g++) {
+      const y = topo.y + (alvo.y - topo.y) * em(r(), 0.1, 0.8)
+      const lado = g % 2 ? 1 : -1
+      const de = { x: alvo.x + lado * 5, y }
+      tracarRaio(ctx, pontosDeRaio(de, { x: de.x + lado * em(r(), 18, 34), y: y + em(r(), -6, 18) }, 7, 3, r), 2.4 * d[2], pele)
+    }
   }
-  // Raios rasteiros: a descarga se espalha no chao em 5 galhos que CORREM pra
-  // fora, cada degrau mais longe.
-  if (e >= 60 && e < 360) {
-    const passo = passoDe(e, 60, 50)
-    if (passo % 3 !== 2) {
-      const r = rngDoPasso(semChao, passo)
-      const chao = { x: alvo.x, y: alvo.y + 12 }
-      const alcance = 18 + 30 * saida((e - 60) / 300)
-      for (let k = 0; k < 5; k++) {
-        const a = (k / 5) * TAU + r() * 0.8
-        tracarRaio(ctx, pontosDeRaio(chao, { x: chao.x + Math.cos(a) * alcance, y: chao.y + Math.sin(a) * alcance * 0.4 }, 6, 3, r), 1.5, pele)
+  // 4. Estouro: 12 raios radiais que crescem do alvo em degraus.
+  if (e >= 0 && e < 200) {
+    const passo = passoDe(e, 0, 45)
+    if (passo !== 2) {
+      const r = rngDoPasso(semEstouro, passo)
+      const alcance = 16 + 26 * saida(e / 200)
+      for (let k = 0; k < 12; k++) {
+        const a = (k / 12) * TAU + r() * 0.4
+        tracarRaio(ctx, pontosDeRaio(alvo, { x: alvo.x + Math.cos(a) * alcance, y: alvo.y + Math.sin(a) * alcance * 0.8 }, 5, 3, r), 2 * (1 - e / 260), pele)
       }
     }
   }
-  if (e >= 0 && e < 280) estrelaDeImpacto(ctx, alvo, 22, e / 280, pele, fila(semEstrela))
-  if (e >= 0 && e < 400) riscos(ctx, alvo, 10, 34, e / 400, pele.nucleo, fila(semRiscos))
-  crepitar(ctx, ms, alvo, TROVAO_CAI + 250, TROVAO_CAI + 900, 3, 16, 1.2, semCrepita, pele)
-  faiscas(ctx, ms, alvo, TROVAO_CAI + 40, 800, 18, 30, 3, semFaiscas, pele)
+  // Raios rasteiros correndo pelo chao ate 60 unidades.
+  if (e >= 40 && e < 460) {
+    const passo = passoDe(e, 40, 50)
+    if (passo % 3 !== 2) {
+      const r = rngDoPasso(semChao, passo)
+      const chao = { x: alvo.x, y: alvo.y + 12 }
+      const alcance = 20 + 40 * saida((e - 40) / 420)
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * TAU + r() * 0.6
+        tracarRaio(ctx, pontosDeRaio(chao, { x: chao.x + Math.cos(a) * alcance, y: chao.y + Math.sin(a) * alcance * 0.4 }, 7, 4, r), 1.7, pele)
+      }
+    }
+  }
+  if (e >= 0 && e < 320) estrelaDeImpacto(ctx, alvo, 30, e / 320, pele, fila(semEstrela))
+  if (e >= 0 && e < 450) riscos(ctx, alvo, 16, 50, e / 450, pele.nucleo, fila(semRiscos))
+  // 5. Rescaldo.
+  crepitar(ctx, ms, alvo, TROVAO_CAI + 200, TROVAO_CAI + 1000, 3, 18, 1.3, semCrepita, pele)
+  faiscas(ctx, ms, alvo, TROVAO_CAI + 30, 900, 26, 40, 3.2, semFaiscas, pele)
 }
+
 
 // ---------------------------------------------------------------------------
 // AREA — escala k: o raio real e 175
@@ -402,6 +510,8 @@ const TEMPESTADE_RAIOS = 9
 /** Quando cada raio cai — os `impactos` do tier. Ritmo irregular de proposito: tempestade nao tem metronomo. */
 export const TEMPESTADE_QUEDAS = [240, 330, 380, 500, 560, 610, 740, 800, 900] as const
 const AVISO = 110
+/** O golpe final no centro, depois da ultima queda. */
+const TEMPESTADE_FINAL = 1060
 
 function thunderStorm(c: ContextoVfx): void {
   const { ctx, ms, alvo: centro, raio: R, pele, rng } = c
@@ -411,6 +521,13 @@ function thunderStorm(c: ContextoVfx): void {
   const semFaiscas = Array.from({ length: TEMPESTADE_RAIOS }, () => sortear(rng, 6 * 3))
   const semCarga = rng()
   const semEstrelas = sortear(rng, TEMPESTADE_RAIOS * 9)
+  const semFinal = rng(), semEstouro = rng()
+  const semEstrelaFinal = sortear(rng, 9)
+  const semRiscos = sortear(rng, 16 * 3)
+  // O ceu fecha sobre a area inteira enquanto a tempestade dura.
+  const ef = ms - TEMPESTADE_FINAL
+  const sombra = 0.5 * saida(limitar(ms / 200)) * (1 - limitar((ef - 200) / 300))
+  sombraDoCeu(ctx, { x: centro.x, y: centro.y + 4 }, R * 1.15, sombra, pele)
   // Quem lanca aponta pro ceu: arco que sobe do corpo durante a tempestade.
   if (ms < 900 && passoDe(ms, 0, 60) % 2 === 0) raio(ctx, centro, { x: centro.x, y: centro.y - 50 * k }, 1.8, 8, 4, 1, 10, semCarga, passoDe(ms, 0, 60), pele)
   for (let i = 0; i < TEMPESTADE_RAIOS; i++) {
@@ -422,12 +539,32 @@ function thunderStorm(c: ContextoVfx): void {
     crepitar(ctx, ms, peito, cai - AVISO, cai, 2, 8 * k * 0.6, 1, semRaios[i], pele, 30)
     const e = ms - cai
     queimado(ctx, ms, peito, cai, 380, 5 * k, pele)
+    if (e >= 0 && e < 40) clarao(ctx, peito, 22 * k * 0.6, 0.45 * (1 - e / 40), pele)
     if (e >= 0 && e < 120 && passoDe(e, 0) !== 1) {
       raio(ctx, { x: chao.x + em(semPontos[i * 2 + 1], -12, 12), y: chao.y - 150 * k }, peito, 4.2 * (1 - e / 200), 16 * k, 5, 2, 12 * k, semRaios[i], passoDe(e, 0), pele)
     }
     if (e >= 0 && e < 160) estrelaDeImpacto(ctx, peito, 10 * k * 0.7, e / 160, pele, fila(semEstrelas.slice(i * 9, i * 9 + 9)))
     faiscas(ctx, ms, peito, cai + 20, 420, 6, 14 * k * 0.7, 2.6, semFaiscas[i], pele)
   }
+  // Final: a coluna do Thunder cai em quem lancou — o olho da tempestade —
+  // com clarao sobre a area toda e o estouro radial correndo pelo chao.
+  if (ef >= 0 && ef < 60) clarao(ctx, centro, R * 0.9, 0.8 * (1 - ef / 60), pele)
+  const d = TROVAO_DESCARGAS.find(([a, z]) => ef >= a && ef < z)
+  if (d) coluna(ctx, { x: centro.x - 8, y: centro.y - 170 * k }, { x: centro.x, y: centro.y + 6 }, 26 * d[2] * Math.min(k, 1.6), semFinal, passoDe(ef, 0), pele)
+  if (ef >= 30 && ef < 500) {
+    const passo = passoDe(ef, 30, 50)
+    if (passo % 3 !== 2) {
+      const r = rngDoPasso(semEstouro, passo)
+      const chao = { x: centro.x, y: centro.y + 12 }
+      const alcance = R * (0.2 + 0.7 * saida((ef - 30) / 470))
+      for (let j = 0; j < 10; j++) {
+        const a = (j / 10) * TAU + r() * 0.5
+        tracarRaio(ctx, pontosDeRaio(chao, noChao(centro, a, alcance), alcance * 0.12, 5, r), 2, pele)
+      }
+    }
+  }
+  if (ef >= 0 && ef < 320) estrelaDeImpacto(ctx, centro, 26, ef / 320, pele, fila(semEstrelaFinal))
+  if (ef >= 0 && ef < 450) riscos(ctx, centro, 16, 60, ef / 450, pele.nucleo, fila(semRiscos))
 }
 
 // ---------------------------------------------------------------------------
@@ -447,11 +584,11 @@ export const ELETRICO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
   2: { desenhar: shockWave, duracao: { 2: 1000 }, alcance: 34, impactos: { 2: [WAVE_CHEGA] } },
   // O raio do ceu nasce 140 acima do alvo: alcance cobre a queda inteira.
   3: { desenhar: thunderbolt, duracao: { 3: 1100 }, alcance: 150, impactos: { 3: [BOLT_CAI + 15] } },
-  4: { desenhar: thunder, duracao: { 4: 1400 }, alcance: 180, impactos: { 4: [TROVAO_CAI] } },
+  4: { desenhar: thunder, duracao: { 4: 1800 }, alcance: 200, impactos: { 4: [TROVAO_CAI] } },
 }
 
 export const ELETRICO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
   1: { desenhar: charge, duracao: { 1: 800 }, alcance: 30, impactos: { 1: [120] } },
   2: { desenhar: discharge, duracao: { 2: 1000 }, alcance: 60, impactos: { 2: DISCHARGE_IMPACTOS } },
-  3: { desenhar: thunderStorm, duracao: { 3: 1400 }, alcance: 200, impactos: { 3: TEMPESTADE_QUEDAS } },
+  3: { desenhar: thunderStorm, duracao: { 3: 1800 }, alcance: 200, impactos: { 3: [...TEMPESTADE_QUEDAS, TEMPESTADE_FINAL] } },
 }
