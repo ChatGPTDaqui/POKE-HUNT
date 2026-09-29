@@ -266,8 +266,7 @@ function thunderbolt(c: ContextoVfx): void {
 // O que faz ele IMPONENTE (e nao um Thunderbolt maior): o golpe muda a cena.
 //   1. carga      junta energia numa esfera acima da cabeca e a DISPARA pro
 //                 ceu — o trovao vem de la, nao do corpo.
-//   2. ceu fecha  a area escurece em volta do alvo (dither do pixelizador) e
-//                 tres lideres finos descem aos trancos de tres pontos do ceu.
+//   2. ceu ronca  arcos piscando no alto e tres lideres finos descem aos trancos de tres pontos do ceu.
 //   3. descarga   clarao que lava a cena, depois a COLUNA: pilar largo de luz
 //                 com borda de raio, estrobando 3x, 6 galhos grossos.
 //   4. estouro    12 raios radiais que explodem do alvo, raios rasteiros que
@@ -281,24 +280,16 @@ const TROVAO_CAI = 620
 const TROVAO_DESCARGAS = [[0, 90, 1], [120, 180, 0.75], [215, 300, 0.55]] as const
 const TROVAO_CEU = 175
 
-/** Escurece em volta de `p` com queda radial: o dither do pixelizador vira sombra pontilhada, sem borda de retangulo. */
-function sombraDoCeu(ctx: CanvasRenderingContext2D, p: Ponto, r: number, forca: number, pele: Pele): void {
-  if (forca <= 0.02) return
-  const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r)
-  g.addColorStop(0, pele.contorno); g.addColorStop(1, pele.contorno + '00')
-  ctx.globalAlpha = forca; ctx.fillStyle = g
-  ctx.fillRect(p.x - r, p.y - r, 2 * r, 2 * r)
-  ctx.globalAlpha = 1
-}
-
-/** Clarao: disco claro com queda radial, a luz do raio lavando a cena. */
+/**
+ * Clarao: disco CHAPADO que estoura e encolhe em 2 camadas (meio por fora,
+ * nucleo por dentro). Sem gradiente nem alfa de proposito: no pixelizador,
+ * alfa vira pontilhado, e o dono rejeitou o pontilhado (29/09).
+ */
 function clarao(ctx: CanvasRenderingContext2D, p: Ponto, r: number, forca: number, pele: Pele): void {
-  if (forca <= 0.02) return
-  const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r)
-  g.addColorStop(0, pele.nucleo); g.addColorStop(0.45, pele.meio); g.addColorStop(1, pele.meio + '00')
-  ctx.globalAlpha = forca; ctx.fillStyle = g
-  ctx.fillRect(p.x - r, p.y - r, 2 * r, 2 * r)
-  ctx.globalAlpha = 1
+  const raio = r * 0.55 * forca
+  if (raio < 1) return
+  ctx.fillStyle = pele.meio; ctx.beginPath(); ctx.ellipse(p.x, p.y, raio, raio * 0.75, 0, 0, TAU); ctx.fill()
+  ctx.fillStyle = pele.nucleo; ctx.beginPath(); ctx.ellipse(p.x, p.y, raio * 0.6, raio * 0.45, 0, 0, TAU); ctx.fill()
 }
 
 /**
@@ -335,11 +326,6 @@ function thunder(c: ContextoVfx): void {
   const topo = { x: alvo.x - 6, y: alvo.y - TROVAO_CEU }
   const e = ms - TROVAO_CAI
 
-  // 2. O ceu fecha: a sombra cresce durante os lideres e some depois da descarga.
-  const sombra = ms < TROVAO_LIDER - 60 ? 0
-    : ms < TROVAO_CAI ? 0.55 * saida((ms - (TROVAO_LIDER - 60)) / (TROVAO_CAI - TROVAO_LIDER + 60))
-      : 0.55 * (1 - limitar((e - 300) / 350))
-  sombraDoCeu(ctx, { x: alvo.x, y: alvo.y - 30 }, 120, sombra, pele)
   queimado(ctx, ms, { x: alvo.x, y: alvo.y + 4 }, TROVAO_CAI, 800, 14, pele)
 
   // 1. Carga: faiscas SUGADAS pra esfera acima da cabeca, que incha e crepita.
@@ -432,6 +418,34 @@ const escalaDaArea = (r: number) => Math.max(1, r / 70)
 /** Ponto no chao da area: elipse achatada da camera 3/4. */
 const noChao = (centro: Ponto, a: number, d: number): Ponto => ({ x: centro.x + Math.cos(a) * d, y: centro.y + 12 + Math.sin(a) * d * 0.45 })
 
+/**
+ * CERCA DE RAIO: a borda real da area (elipse do chao, raio R) desenhada por
+ * `n` trechos de raio ligando pontos da borda. E o que mostra o ALCANCE do
+ * golpe de area (pedido do dono, 29/09). Fecha em volta do centro nos
+ * primeiros 25% da janela, pisca em degraus e cada trecho troca de forma.
+ */
+function cercaDeRaio(
+  ctx: CanvasRenderingContext2D, ms: number, centro: Ponto, R: number, t0: number, t1: number,
+  n: number, semente: number, pele: Pele, largura: number,
+): void {
+  if (ms < t0 || ms >= t1) return
+  const f = (ms - t0) / (t1 - t0)
+  const passo = passoDe(ms, t0, 45)
+  if (f > 0.25 && passo % 4 === 3) return
+  const fecha = saida(limitar(f / 0.25))
+  const w = largura * (f < 0.8 ? 1 : 1 - (f - 0.8) / 0.2)
+  const r = rngDoPasso(semente, passo)
+  const giro = rngDoPasso(semente, -1)() * TAU
+  for (let i = 0; i < n; i++) {
+    const a0 = giro + (i / n) * TAU, a1 = giro + ((i + 1) / n) * TAU
+    // Fecha dos dois lados a partir da frente (baixo), como corrente se alastrando.
+    const meio = (i + 0.5) / n
+    if (Math.min(meio, 1 - meio) * 2 > fecha) { r(); continue }
+    const d = R * (0.97 + r() * 0.06)
+    tracarRaio(ctx, pontosDeRaio(noChao(centro, a0, d), noChao(centro, a1, d), R * 0.05, 3, r), w, pele)
+  }
+}
+
 // A1 — CHARGE: arvore de raio rasteira (figura de Lichtenberg) crescendo pra fora
 const CHARGE_TRONCOS = 7
 const CHARGE_CRESCE = 280
@@ -441,7 +455,10 @@ function charge(c: ContextoVfx): void {
   const semTroncos = sortear(rng, CHARGE_TRONCOS * 2)
   const semForma = rng(), semCarga = rng()
   const semFaiscas = sortear(rng, 10 * 3)
+  const semCerca = rng()
   crepitar(ctx, ms, centro, 0, 160, 3, 12 * escalaDaArea(R), 1.2, semCarga, pele, 40)
+  // A cerca acende quando as pontas dos troncos chegam na borda.
+  cercaDeRaio(ctx, ms, centro, R, 60 + CHARGE_CRESCE * 0.7, 700, 14, semCerca, pele, 1.8)
   if (ms < 60 || ms >= 620) return
   // Cada tronco e um caminho fixo (a arvore nao muda de forma, so cresce e
   // pisca); os galhos nascem quando a ponta passa por eles.
@@ -451,7 +468,7 @@ function charge(c: ContextoVfx): void {
   const largura = 1.8 * (ms < 460 ? 1 : 1 - (ms - 460) / 160)
   for (let i = 0; i < CHARGE_TRONCOS; i++) {
     const a = (i / CHARGE_TRONCOS) * TAU + semTroncos[i * 2] * 0.7
-    const fim = noChao(centro, a, R * em(semTroncos[i * 2 + 1], 0.75, 0.98))
+    const fim = noChao(centro, a, R * em(semTroncos[i * 2 + 1], 0.95, 1))
     const r = rngDoPasso(semForma, i)
     const pts = pontosDeRaio({ x: centro.x, y: centro.y + 12 }, fim, R * 0.12, 5, r)
     const n = Math.max(2, Math.ceil(pts.length * cresce))
@@ -480,6 +497,8 @@ function discharge(c: ContextoVfx): void {
   const semCorpo = rng()
   const semFaiscas = Array.from({ length: DISCHARGE_PULSOS }, () => sortear(rng, 5 * 3))
   const semEstrela = sortear(rng, 9)
+  const semCerca = rng()
+  cercaDeRaio(ctx, ms, centro, R, DISCHARGE_INICIO, DISCHARGE_INICIO + DISCHARGE_PULSOS * DISCHARGE_PULSO + 200, 16, semCerca, pele, 2)
   // Carga: o corpo acende e crepita forte antes de soltar.
   crepitar(ctx, ms, centro, 0, DISCHARGE_INICIO + DISCHARGE_PULSOS * DISCHARGE_PULSO, 3, 10 * k, 1.3, semCorpo, pele, 40)
   if (ms < DISCHARGE_INICIO) {
@@ -494,7 +513,9 @@ function discharge(c: ContextoVfx): void {
     const t0 = DISCHARGE_INICIO + p * DISCHARGE_PULSO
     const e = ms - t0
     const r = rngDoPasso(semPulsos[p], 0)
-    const pontos = Array.from({ length: 5 }, () => noChao(centro, r() * TAU, R * em(Math.sqrt(r()), 0.35, 0.95)))
+    // Raios distribuidos em volta (5 setores, girando a cada pulso) e batendo
+    // perto da borda: juntos desenham o circulo do alcance.
+    const pontos = Array.from({ length: 5 }, (_, i) => noChao(centro, ((i + p * 0.5 + r() * 0.5) / 5) * TAU, R * em(r(), 0.85, 1)))
     if (e >= 0 && e < 70) {
       const w = (p % 2 ? 2 : 2.8) * k * 0.7
       for (let i = 0; i < pontos.length; i++) raio(ctx, centro, pontos[i], w, R * 0.1, 5, i === 0 ? 1 : 0, 14 * k, semPulsos[p] + i * 0.1, passoDe(e, 0, 35), pele)
@@ -524,14 +545,15 @@ function thunderStorm(c: ContextoVfx): void {
   const semFinal = rng(), semEstouro = rng()
   const semEstrelaFinal = sortear(rng, 9)
   const semRiscos = sortear(rng, 16 * 3)
-  // O ceu fecha sobre a area inteira enquanto a tempestade dura.
   const ef = ms - TEMPESTADE_FINAL
-  const sombra = 0.5 * saida(limitar(ms / 200)) * (1 - limitar((ef - 200) / 300))
-  sombraDoCeu(ctx, { x: centro.x, y: centro.y + 4 }, R * 1.15, sombra, pele)
+  const semCerca = rng()
+  cercaDeRaio(ctx, ms, centro, R, 150, 1150, 16, semCerca, pele, 2.2)
   // Quem lanca aponta pro ceu: arco que sobe do corpo durante a tempestade.
   if (ms < 900 && passoDe(ms, 0, 60) % 2 === 0) raio(ctx, centro, { x: centro.x, y: centro.y - 50 * k }, 1.8, 8, 4, 1, 10, semCarga, passoDe(ms, 0, 60), pele)
   for (let i = 0; i < TEMPESTADE_RAIOS; i++) {
-    const a = semPontos[i * 2] * TAU, d = i === 0 ? 0 : R * (0.25 + 0.7 * Math.sqrt(semPontos[i * 2 + 1]))
+    // Oito quedas em volta, em setores iguais, perto da borda: o circulo
+    // aparece pelas quedas. A primeira cai no centro.
+    const a = ((i + semPontos[i * 2] * 0.6) / (TEMPESTADE_RAIOS - 1)) * TAU, d = i === 0 ? 0 : R * em(semPontos[i * 2 + 1], 0.7, 0.92)
     const chao = noChao(centro, a, d)
     const peito = { x: chao.x, y: chao.y - 12 }
     const cai = TEMPESTADE_QUEDAS[i]
