@@ -53374,7 +53374,7 @@ function findEntityById(player, enemies, id) {
 //#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
-	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection, statusStat, seguir = null, apontarPara = null } = params;
+	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection, statusStat, seguir = null, apontarPara = null } = params;
 	const id = `effect-${counters.effect++}`;
 	const lane = owner ? claimEffectLane(owner, id, laneSize) : 0;
 	return {
@@ -53400,6 +53400,8 @@ function createWorldEffect(counters, params) {
 		elementType,
 		abilityId,
 		anguloDeAtaque,
+		origemX,
+		origemY,
 		ballItemId,
 		success,
 		statusDirection,
@@ -105445,7 +105447,7 @@ var EFFECTIVENESS_COLORS = {
 	immune: "#000000"
 };
 var DURACAO_DO_NUMERO_DE_DANO_S = 2.8;
-function spawnDamageNumber(world, target, result) {
+function spawnDamageNumber(world, target, result, abilityId) {
 	world.effects.push(createWorldEffect(world.counters, {
 		type: "damageNumber",
 		x: target.x,
@@ -105459,7 +105461,8 @@ function spawnDamageNumber(world, target, result) {
 		effectivenessLabel: result.effectivenessLabel,
 		isCrit: result.isCrit || void 0,
 		owner: target,
-		laneSize: result.effectivenessLabel ? 2 : 1
+		laneSize: result.effectivenessLabel ? 2 : 1,
+		abilityId
 	}));
 }
 function basicAttackFor(attackerSpecies) {
@@ -106012,6 +106015,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			y: attacker.y,
 			targetX: attacker.x,
 			targetY: attacker.y - attacker.radius * .6,
+			origemX: attacker.x,
+			origemY: attacker.y - attacker.radius * .6,
 			color: colorForType(ability.type),
 			isAoe: true,
 			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
@@ -106106,7 +106111,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			if (!silent) spawnDamageNumber(world, target, {
 				...result,
 				amount: danoDoAcerto
-			});
+			}, ability.id);
 			if (aguentou && !silent) anunciarAguentou(world, target);
 		}
 	}
@@ -106538,6 +106543,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			targetX: local.x,
 			targetY: local.y - local.radius * .6,
 			anguloDeAtaque: mesmoLugar ? void 0 : Math.atan2(local.y - attacker.y, local.x - attacker.x),
+			origemX: attacker.x,
+			origemY: attacker.y - attacker.radius * .6,
 			color: colorForType(ability.type),
 			isAoe: false,
 			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
