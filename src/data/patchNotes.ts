@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // VFX anime pixel: golpes de fogo com efeito procedural por tier de poder.
+  {
+    version: '7.66',
+    date: '2026-09-29',
+    title: 'Golpes de fogo com efeitos novos',
+    highlights: [
+      'Os golpes de fogo ganharam efeitos novos, desenhados no estilo do jogo. Cada golpe tem o seu: Ember cospe três brasas, Flame Burst estoura numa flor de chamas, Flamethrower é um jato contínuo e Fire Blast explode no clássico 大 de fogo.',
+      'Quanto mais forte o golpe, mais elaborado o efeito — e um acerto crítico sobe um nível. Golpes em área (Incinerate, Heat Wave, Eruption e a Explosão Elemental de fogo) incendeiam o chão ao redor de quem lança.',
+      'O número de dano agora aparece quando o fogo chega no alvo, em vez de sair antes da chama.',
+    ],
+  },
   // PH-565 (ranqueado assincrono: ataque contra defesa salva, cooldown, defensor pela metade).
   {
     version: '7.65',
