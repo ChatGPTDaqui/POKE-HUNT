@@ -1,4 +1,4 @@
-// Laboratorio de VFX de golpe (lab-vfx.html) — so `vite dev`, nunca no build.
+// Laboratorio de VFX de golpe (lab-vfx.html) — `vite dev` e staging, nunca producao.
 //
 // E a cena do lab v2 aprovado pelo dono (28/09), agora usando os MODULOS REAIS:
 // coreografia do registro de tipo, pele, pixelizador. Mostra o golpe INTEIRO —
