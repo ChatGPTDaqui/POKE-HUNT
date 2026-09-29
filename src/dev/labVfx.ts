@@ -13,6 +13,7 @@ import type { ElementType } from '@/data/generated/types'
 import { vfxDoGolpe } from '@/data/moveVfx'
 import { tiraDeAreaDoElemento, tiraDoElemento, type TiraDeVfx } from '@/data/vfxTiras'
 import { hashTexto, rngSemeado } from '@/render/vfx/aleatorio'
+import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
 import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -23,12 +24,16 @@ import type { EntradaDeCoreografia, Tier } from '@/render/vfx/tipos'
 // Catalogo do lab: tipo -> 7 golpes-vitrine
 // ---------------------------------------------------------------------------
 
-interface GolpeDoLab { id: string; area: boolean; tier: Tier; entrada: EntradaDeCoreografia; atacante: string }
+interface GolpeDoLab { id: string; tipo: ElementType; area: boolean; tier: Tier; entrada: EntradaDeCoreografia; atacante: string }
 
 const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   FIRE: [
-    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
-    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
+  ],
+  ELECTRIC: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_ELETRICO.single[t], tipo: 'ELECTRIC' as const, area: false, tier: t, entrada: ELETRICO_SINGLE[t], atacante: 'pikachu' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_ELETRICO.area[t], tipo: 'ELECTRIC' as const, area: true, tier: t, entrada: ELETRICO_AREA[t], atacante: 'pikachu' })),
   ],
 }
 
@@ -238,7 +243,7 @@ class Cena {
     if (ms > duracao) return
     const { origem, alvo } = this.pontos()
     const raio = g.area ? AOE_RADIUS : 0
-    const pele = PELES[getAbility(g.id)?.type ?? 'NORMAL']
+    const pele = PELES[g.tipo]
     const pintar = (ctx: CanvasRenderingContext2D) => g.entrada.desenhar({
       ctx, ms, duracao, origem, alvo, raio, tier: g.tier, pele,
       angulo: g.area ? 0 : Math.atan2(alvo.y - origem.y, alvo.x - origem.x),
@@ -252,7 +257,7 @@ class Cena {
   /** Aproximacao do `drawQuadroDeTira` atual: a tira do golpe, ou a do tipo, a 10 fps. */
   desenharTira(c: CanvasRenderingContext2D, ms: number): void {
     const g = this.golpe
-    const tipo = getAbility(g.id)?.type ?? 'NORMAL'
+    const tipo = g.tipo
     const arte = vfxDoGolpe(g.id)
     const tira: TiraDeVfx | null = g.area ? (arte?.aoe ?? tiraDeAreaDoElemento(tipo)) : (arte?.single ?? tiraDoElemento(tipo))
     if (!tira) return
