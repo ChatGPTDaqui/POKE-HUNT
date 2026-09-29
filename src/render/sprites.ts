@@ -14,6 +14,7 @@ import { directionRowFromFacing } from '@/engine/systems/animationSystem'
 import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
+import { atrasoDoNumeroDeDano, desenharVfxDeGolpe } from './vfx/desenharVfx'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
 import { footOffsetFraction } from '@/data/spriteFootOffsets'
@@ -1266,6 +1267,11 @@ function encostoNoAlvo(effect: WorldEffect, tira: TiraDeVfx): [number, number] {
 function drawImpactBurst(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, permitirTiraDeTipo = true,
 ): void {
+  // VFX procedural (render/vfx) antes de TODA tira: tipo migrado desenha anime
+  // e nunca cai na arte PNG, nem na por golpe. Tipo nao migrado devolve false e
+  // segue exatamente o caminho de antes.
+  if (desenharVfxDeGolpe(ctx, effect)) return
+
   // Arte POR GOLPE antes da arte por tipo (data/moveVfx.ts): Bullet Punch e
   // STEEL, e sem esta consulta ele desenharia o mesmo aco de Metal Claw.
   const arteDoGolpe = vfxDoGolpe(effect.abilityId)
@@ -1344,6 +1350,9 @@ function drawImpactBurst(
 function drawAoeRing(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, permitirTiraDeTipo = true,
 ): void {
+  // Mesma precedencia do impacto alvo-unico: ver drawImpactBurst.
+  if (desenharVfxDeGolpe(ctx, effect)) return
+
   // `worldSize` e o DIAMETRO real da area de efeito (ability.radius * 2), entao
   // a arte sai exatamente do tamanho do que o golpe atinge — a mesma regra que
   // o anel procedural ja seguia.
@@ -2081,7 +2090,16 @@ export function drawEffect(
   desvios?: ReadonlyMap<string, number>,
 ): void {
   const desvio = desvios?.get(effect.id) ?? 0
-  if (effect.type === 'damageNumber') return drawDamageNumber(ctx, effect, world, desvio)
+  if (effect.type === 'damageNumber') {
+    // Golpe com coreografia nova (render/vfx) tem VIAGEM: o dano ja aconteceu no
+    // motor, mas o fogo so chega no alvo 170-620 ms depois. O numero espera o
+    // impacto visual — e o tempo dele na tela encolhe junto, pra o fade de
+    // saida continuar inteiro. Golpe sem coreografia: atraso 0, nada muda.
+    const atraso = atrasoDoNumeroDeDano(effect.abilityId, effect.isCrit) / 1000
+    if (atraso <= 0) return drawDamageNumber(ctx, effect, world, desvio)
+    if (effect.age - effect.delay < atraso) return
+    return drawDamageNumber(ctx, { ...effect, delay: effect.delay + atraso, duration: effect.duration - atraso }, world, desvio)
+  }
   if (effect.type === 'abilityName') return drawAbilityName(ctx, effect, world, desvio)
   if (effect.type === 'abilityEffect') return drawAbilityEffect(ctx, effect, world)
   if (effect.type === 'captureAnim') return drawCaptureAnim(ctx, effect)
