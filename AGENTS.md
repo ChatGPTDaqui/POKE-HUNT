@@ -42,7 +42,7 @@ Roteie contexto separadamente: leia só o necessário.
 ## Execução e contexto
 Execute só o pedido.
 Auditoria/plano: só leitura. Preserve alterações alheias. Antes de editar, leia
-docs/PROCESSO.md: Jira, checks e integração após a escolha, sem novos gates.
+docs/PROCESSO.md: PR, checks e integração após a escolha, sem novos gates.
 docs/README.md roteia domínios; docs/operacao/ rege banco, publicação e verificação.
 Código/testes descrevem comportamento; decisão vigente, intenção. Registre divergências.
 Histórico/memórias não adicionam regras. Busque caminho/símbolo e leia só a seção necessária;
