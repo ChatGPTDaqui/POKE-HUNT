@@ -13,6 +13,7 @@ import type { ElementType } from '@/data/generated/types'
 import { vfxDoGolpe } from '@/data/moveVfx'
 import { tiraDeAreaDoElemento, tiraDoElemento, type TiraDeVfx } from '@/data/vfxTiras'
 import { hashTexto, rngSemeado } from '@/render/vfx/aleatorio'
+import { AGUA_AREA, AGUA_SINGLE, VITRINE_DA_AGUA } from '@/render/vfx/coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
 import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
@@ -34,6 +35,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   ELECTRIC: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_ELETRICO.single[t], tipo: 'ELECTRIC' as const, area: false, tier: t, entrada: ELETRICO_SINGLE[t], atacante: 'pikachu' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_ELETRICO.area[t], tipo: 'ELECTRIC' as const, area: true, tier: t, entrada: ELETRICO_AREA[t], atacante: 'pikachu' })),
+  ],
+  WATER: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_AGUA.single[t], tipo: 'WATER' as const, area: false, tier: t, entrada: AGUA_SINGLE[t], atacante: 'squirtle' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_AGUA.area[t], tipo: 'WATER' as const, area: true, tier: t, entrada: AGUA_AREA[t], atacante: 'squirtle' })),
   ],
 }
 
