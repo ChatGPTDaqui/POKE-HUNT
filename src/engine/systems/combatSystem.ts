@@ -1768,7 +1768,7 @@ const DURACAO_DO_NUMERO_DE_DANO_S = 2.8
 // Texto de combate flutuante acima do alvo. Hits com rotulo de efetividade
 // (ex: "Super efetivo!") desenham 2 linhas empilhadas, entao reservam 2
 // slots de raia em vez de 1.
-function spawnDamageNumber(world: WorldState, target: WorldEntity, result: DamageResult): void {
+function spawnDamageNumber(world: WorldState, target: WorldEntity, result: DamageResult, abilityId?: string): void {
   world.effects.push(createWorldEffect(world.counters, {
     type: 'damageNumber',
     x: target.x, y: target.y,
@@ -1785,6 +1785,9 @@ function spawnDamageNumber(world: WorldState, target: WorldEntity, result: Damag
     isCrit: result.isCrit || undefined,
     owner: target,
     laneSize: result.effectivenessLabel ? 2 : 1,
+    // So desenho: o render atrasa o numero ate o impacto da coreografia do
+    // golpe (render/vfx). A simulacao nunca le.
+    abilityId,
   }))
 }
 
@@ -2701,6 +2704,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         type: 'abilityEffect',
         x: attacker.x, y: attacker.y,
         targetX: attacker.x, targetY: attacker.y - attacker.radius * 0.6,
+        origemX: attacker.x, origemY: attacker.y - attacker.radius * 0.6,
         color: colorForType(ability.type),
         isAoe: true,
         duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
@@ -2872,7 +2876,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     if (danoDoAcerto > 0) {
       takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke))
       registrarDanoParaHurt(world, target, danoDoAcerto)
-      if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoDoAcerto })
+      if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoDoAcerto }, ability.id)
       if (aguentou && !silent) anunciarAguentou(world, target)
     }
   }
@@ -3592,6 +3596,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       x: local.x, y: local.y,
       targetX: local.x, targetY: local.y - local.radius * 0.6,
       anguloDeAtaque: mesmoLugar ? undefined : Math.atan2(local.y - attacker.y, local.x - attacker.x),
+      // Mesma altura de "peito" do alvo logo acima, pra o jato sair e chegar
+      // no mesmo plano. So o VFX procedural le (render/vfx).
+      origemX: attacker.x, origemY: attacker.y - attacker.radius * 0.6,
       color: colorForType(ability.type),
       isAoe: false,
       duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,

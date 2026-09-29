@@ -25,6 +25,7 @@ import type { WorldEntity, WorldState } from '@/engine/types'
 import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { arteParaSala, backgroundParaSala } from '@/data/maps'
 import type { MapDef } from '@/data/maps'
+import { iniciarQuadroDeVfx } from './vfx/orcamento'
 
 // Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
 // salaSystem.ts) mas ate 2026-08-15 o FUNDO ficava parado no do bioma inteiro
@@ -278,6 +279,9 @@ export class Renderer {
   renderMap(mapDef: MapDef, world: WorldState): void {
     const ctx = this.ctx
     this.clear()
+    // Teto de particulas do VFX de golpe e POR QUADRO, somado entre todos os
+    // efeitos: renova aqui, uma vez, antes de qualquer efeito pedir.
+    iniciarQuadroDeVfx()
 
     const camera = this._computeCamera(mapDef, world.player)
     ctx.save()

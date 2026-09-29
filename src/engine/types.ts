@@ -606,6 +606,13 @@ export interface WorldEffect {
   // dos 0,35s de vida do impacto, e a arte apontaria pra outro lugar no meio
   // da animacao.
   anguloDeAtaque?: number
+  // Posicao do ATACANTE no instante do golpe. So o VFX procedural usa
+  // (render/vfx): coreografia de projetil precisa saber de onde o jato sai, e o
+  // angulo sozinho nao diz a distancia. Congelada pelo mesmo motivo do angulo, e
+  // de proposito NAO transladada por `seguirId` — quem anda junto e a arte no
+  // alvo, nao o ponto de partida. A simulacao nunca le.
+  origemX?: number
+  origemY?: number
   // Presente so em `abilityEffect` de golpe de STATUS — troca o burst de
   // impacto normal pela arte de buff/debuff (data/estagioVfx.ts).
   statusDirection?: 'aumenta' | 'diminui'

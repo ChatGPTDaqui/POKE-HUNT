@@ -21,6 +21,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { VFX_POR_GOLPE } from '@/data/moveVfx'
 import { FPS_DA_ARTE_DE_EFEITO, PISO_DE_PROLONGAMENTO } from '@/data/vfxTiras'
+import { isolarRegistros } from './vfx/registroDeTeste'
 
 const LARGURA_DA_TIRA = 1200
 
@@ -87,6 +88,12 @@ function sequencia(golpe: string, tipo: string, quadros: number, passos: number)
 }
 
 describe('modo de cauda da arte de golpe', () => {
+  // Este arquivo testa o caminho da TIRA PNG. Desde a migracao do FIRE pro VFX
+  // procedural (render/vfx), `fire_spin` nao passa mais por ele no jogo — com
+  // o registro vazio, volta a exercitar a tira, que segue valendo pros tipos
+  // ainda nao migrados.
+  isolarRegistros()
+
   beforeEach(() => { sxObservados = [] })
 
   it('bite usa boomerang, e a arte dele nao e direcional', () => {
