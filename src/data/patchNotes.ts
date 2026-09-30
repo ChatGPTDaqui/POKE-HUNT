@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // VFX anime pixel: voador ligado.
+  {
+    version: '7.69',
+    date: '2026-09-30',
+    title: 'Golpes voadores com efeitos novos',
+    highlights: [
+      'Os golpes voadores agora mostram o vento de verdade: Gust vira um redemoinho, Air Slash solta lâminas de ar girando e Drill Peck fura o alvo com uma broca de vento.',
+      'Sky Attack mergulha do céu como uma ave de luz, e penas se espalham no impacto.',
+      'Golpes voadores em área espalham lâminas, ventania e penas pela área inteira.',
+    ],
+  },
   // VFX anime pixel: grama, normal e lutador ligados; area preenche o interior.
   {
     version: '7.68',
