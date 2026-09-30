@@ -19,7 +19,8 @@
 //   T4 Hydro Pump    gotas SUGADAS formam a esfera; jato de pressao enorme com
 //                    espuma na boca; o alvo some numa coroa gigante e a agua
 //                    chove em volta.
-//   A1 Bubble        bolhas tremulando se espalham ate a borda e estouram nela.
+//   A1 Bubble        bolhas tremulando se espalham pela area e estouram nela toda
+//                    (metade na borda, marcando o limite).
 //   A2 Surf          onda em anel que corre do centro ate a borda e quebra nela.
 //   A3 Water Spout   tromba d'agua sobe do corpo, desaba em chuva sobre a area e
 //                    geiseres explodem em volta da borda.
@@ -30,6 +31,8 @@ import { estrelaDeImpacto, limitar, massaEmCamadas, riscos, saida, type Bolha } 
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
 
 const TAU = Math.PI * 2
+/** Angulo entre pontos consecutivos da espiral de Vogel (~137,5°). */
+const ANGULO_DOURADO = Math.PI * (3 - Math.sqrt(5))
 /** Gravidade em unidades/ms² — gota de 0,12 u/ms pra cima volta ao chao em ~240 ms. */
 const G = 0.001
 
@@ -365,11 +368,16 @@ function bubble(c: ContextoVfx): void {
   const bolhas: { x: number; y: number; r: number; w: number }[] = []
   const gotas: Bolha[] = []
   for (let i = 0; i < BOLHAS; i++) {
-    // Setores iguais: juntas elas desenham o circulo.
-    const a = ((i + sem[i * 4] * 0.7) / BOLHAS) * TAU
-    const sai = sem[i * 4 + 1] * 120, dur = em(sem[i * 4 + 2], 380, 460)
+    // Metade vai ate a borda em setores iguais (desenha o limite); a outra
+    // metade estoura espalhada pelo INTERIOR numa espiral de Vogel — o golpe
+    // pega todo mundo dentro, nao so quem esta na borda (dono, 30/09).
+    const naBorda = i % 2 === 0, j = i >> 1, meio = BOLHAS >> 1
+    const a = naBorda ? ((j + sem[i * 4] * 0.7) / meio) * TAU : j * ANGULO_DOURADO + sem[i * 4] * 0.4
+    const d = naBorda ? em(sem[i * 4 + 3], 0.9, 1) : 0.85 * Math.sqrt((j + 0.5) / meio)
+    // As de dentro chegam antes: o estouro corre do centro pra borda.
+    const sai = sem[i * 4 + 1] * 120, dur = em(sem[i * 4 + 2], 380, 460) * (0.45 + 0.55 * d)
     const t = (ms - sai) / dur
-    const fim = noChao(centro, a, R * em(sem[i * 4 + 3], 0.9, 1))
+    const fim = noChao(centro, a, R * d)
     if (t >= 0 && t < 1) {
       // Bolha nao anda reta: vai boiando, subindo e descendo.
       const u = saida(t)

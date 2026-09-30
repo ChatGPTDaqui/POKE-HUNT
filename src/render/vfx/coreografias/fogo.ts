@@ -18,7 +18,8 @@
 //   T4 Fire Blast     carga que suga linguas, bola pesada e o 大 de 5 bracos.
 //   A1 Incinerate     linguas rasteiras disparando do centro pra fora.
 //   A2 Heat Wave      o chao pega fogo de dentro pra fora, foco por foco.
-//   A3 Eruption       coluna vulcanica + bolas-cometa que caem e acendem a area.
+//   A3 Eruption       coluna vulcanica + bolas-cometa que caem pela area inteira,
+//                     do centro pra borda, e acendem onde pousam.
 //
 // Nenhuma coreografia desenha anel no chao em volta do alvo de single (vetado
 // pelo dono). Em AREA e o contrario: a borda pega fogo pra mostrar o alcance
@@ -425,6 +426,8 @@ function heatWave(c: ContextoVfx): void {
 
 // A3 — ERUPTION: coluna vulcanica + bolas-cometa que caem e acendem a area
 const ERUPCAO_BOLAS = 10
+/** Angulo entre pontos consecutivos da espiral de Vogel (~137,5°). */
+const ANGULO_DOURADO = Math.PI * (3 - Math.sqrt(5))
 const ERUPCAO_SUBIDA = 260
 /** Quando cada bola cai — usado como `impactos` do tier. */
 export const ERUPCAO_POUSOS = Array.from({ length: ERUPCAO_BOLAS }, (_, i) => 500 + i * 60)
@@ -449,8 +452,11 @@ function eruption(c: ContextoVfx): void {
   })
   const brasas: Viva[] = []
   for (let i = 0; i < ERUPCAO_BOLAS; i++) {
-    // Bolas em setores iguais, perto da borda: juntas desenham o circulo.
-    const a = ((i + semAlvos[i * 2] * 0.6) / ERUPCAO_BOLAS) * TAU, d = raio * (0.6 + 0.3 * semAlvos[i * 2 + 1])
+    // Espiral de Vogel: as bolas cobrem a area INTEIRA por igual e, na ordem em
+    // que caem, andam do centro pra borda — quem esta dentro tambem toma (dono,
+    // 30/09: antes caiam so perto da borda e o centro ficava vazio).
+    const a = i * ANGULO_DOURADO + (semAlvos[i * 2] - 0.5) * 0.5
+    const d = raio * 0.9 * Math.sqrt((i + 0.5 + (semAlvos[i * 2 + 1] - 0.5) * 0.6) / ERUPCAO_BOLAS)
     const pouso = noChao(centro, a, d)
     const sai = ERUPCAO_SUBIDA + i * 60, cai = ERUPCAO_POUSOS[i]
     const trajeto = linha(topo, pouso, 24 * k)
