@@ -22,7 +22,7 @@
 //   T4 Leaf Storm     folhas giram em volta de quem lanca, correm em helice ate
 //                     o alvo e viram um REDEMOINHO alto; a ventania atravessa a
 //                     cena e no fim chove folha em volta.
-//   A1 Razor Leaf     navalhas giram chapadas do centro ate a borda e cravam nela.
+//   A1 Razor Leaf     navalhas giram chapadas e cravam na area inteira (e na borda).
 //   A2 Petal Blizzard espiral de folhas que abre ate a borda, roda nela e se solta.
 //   A3 Frenzy Plant   raiz grossa sobe do corpo e raizes explodem do chao em
 //                     volta da borda inteira, chicoteando.
@@ -450,8 +450,14 @@ const escalaDaArea = (r: number) => Math.max(1, r / 70)
 /** Ponto no chao da area: elipse achatada da camera 3/4. */
 const noChao = (centro: Ponto, a: number, d: number): Ponto => ({ x: centro.x + Math.cos(a) * d, y: centro.y + 12 + Math.sin(a) * d * 0.45 })
 
-// A1 — RAZOR LEAF: navalhas giram chapadas ate a borda e cravam nela
-const NAVALHAS = 22
+// A1 — RAZOR LEAF: navalhas giram chapadas e cravam no chao da area inteira:
+// 16 na borda (o limite) e 12 espalhadas por dentro numa espiral de Vogel —
+// o golpe pega todo mundo dentro, nao so quem esta na borda (dono, 30/09).
+const NAVALHAS_NA_BORDA = 16
+const NAVALHAS_DENTRO = 12
+const NAVALHAS = NAVALHAS_NA_BORDA + NAVALHAS_DENTRO
+/** Angulo entre pontos consecutivos da espiral de Vogel (~137,5°). */
+const ANGULO_DOURADO = Math.PI * (3 - Math.sqrt(5))
 const RAZOR_SAI = 60
 const RAZOR_VOO = 300
 const RAZOR_CRAVADA = 160
@@ -463,10 +469,14 @@ function razorLeaf(c: ContextoVfx): void {
   const semCai = sortear(rng, NAVALHAS * 4)
   const folhas: Folha[] = []
   for (let i = 0; i < NAVALHAS; i++) {
-    const a = ((i + sem[i * 2] * 0.6) / NAVALHAS) * TAU
+    const naBorda = i < NAVALHAS_NA_BORDA, j = naBorda ? i : i - NAVALHAS_NA_BORDA
+    const a = naBorda ? ((j + sem[i * 2] * 0.6) / NAVALHAS_NA_BORDA) * TAU : j * ANGULO_DOURADO + sem[i * 2] * 0.4
+    const d = naBorda ? 0.97 : 0.85 * Math.sqrt((j + 0.5) / NAVALHAS_DENTRO)
+    // Voo proporcional a distancia: as de dentro cravam antes, a borda fecha por ultimo.
+    const voo = RAZOR_VOO * (0.45 + 0.55 * d)
     const sai = RAZOR_SAI + sem[i * 2 + 1] * 60
-    const t = (ms - sai) / RAZOR_VOO
-    const fim = noChao(centro, a, R * 0.97)
+    const t = (ms - sai) / voo
+    const fim = noChao(centro, a, R * d)
     const tam = 2.8 * k
     if (t >= 0 && t < 1) {
       // Gira CHAPADA e rapida, como shuriken — nao vira o verso.
@@ -474,8 +484,8 @@ function razorLeaf(c: ContextoVfx): void {
       const x = centro.x + (fim.x - centro.x) * u, y = centro.y + (fim.y - 6 - centro.y) * u - Math.sin(Math.PI * t) * 8
       folhas.push({ x, y, tam, ang: ms * 0.045 + i, vira: 1 })
     } else if (t >= 1) {
-      // Cravada na borda, de ponta, tremendo; depois solta e plana.
-      const cravada = ms - (sai + RAZOR_VOO)
+      // Cravada no chao, de ponta, tremendo; depois solta e plana.
+      const cravada = ms - (sai + voo)
       if (cravada < RAZOR_CRAVADA) folhas.push({ x: fim.x, y: fim.y - 6, tam, ang: a + Math.PI + Math.sin(cravada * 0.2) * 0.12, vira: 0.55 })
       else {
         const f = folhaPlanando({ x: fim.x, y: fim.y - 6 }, semCai, i, (cravada - RAZOR_CRAVADA) / 420, 14, tam * 0.8)
