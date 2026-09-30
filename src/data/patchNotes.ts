@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // VFX anime pixel: eletrico e agua ligados; area mostra o alcance inteiro.
+  {
+    version: '7.67',
+    date: '2026-09-30',
+    title: 'Golpes elétricos e de água com efeitos novos',
+    highlights: [
+      'Os golpes elétricos ganharam efeitos novos: Thunder Shock estala num arco curto, Thunderbolt cai do céu e crepita no alvo, e Thunder escurece o céu antes de cair numa coluna de luz.',
+      'Os golpes de água também: a água agora tem peso — Water Gun esguicha em arco, Hydro Pump é um jato de pressão que ensopa o alvo e Surf corre em onda até a borda da área.',
+      'Golpes em área (inclusive os de fogo) agora mostram o círculo inteiro do alcance. Antes, a metade de trás do círculo era cortada.',
+    ],
+  },
   // VFX anime pixel: golpes de fogo com efeito procedural por tier de poder.
   {
     version: '7.66',

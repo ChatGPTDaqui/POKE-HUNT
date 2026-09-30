@@ -140,9 +140,7 @@ function tangente(a: Ponto, k: Ponto, b: Ponto, u: number): number {
 /** Corpo de um cipo: a linha central amostrada e o raio em cada ponto. */
 interface Tubo { pts: Ponto[]; raios: number[] }
 
-const PONTOS_DO_TUBO = 18
-/** Faixas de espessura: o tubo afina em degraus, um `stroke` por faixa. */
-const FAIXAS_DO_TUBO = 6
+const PONTOS_DO_TUBO = 10
 
 /**
  * Cipo de `a` ate `b` curvado por `k`. `ate` 0..1 e quanto ja cresceu: so
@@ -170,26 +168,30 @@ function cipo(a: Ponto, k: Ponto, b: Ponto, esp: number, ate: number, folhasEm: 
 }
 
 /**
- * Pinta os tubos como traco redondo afinando em faixas: contorno de todos,
- * depois a base de todos, depois o miolo claro — as camadas fundem os tubos
- * que se cruzam, como a massa do fogo. Custa ~poucas dezenas de `stroke`; a
- * cadeia de circulos que havia antes passava de 1.900 arcos no Frenzy Plant.
+ * Pinta os tubos como poligono preenchido (os dois lados da linha central,
+ * afinando continuo): contorno de todos, depois a base de todos, depois o miolo
+ * claro — as camadas fundem os tubos que se cruzam, como a massa do fogo. Um
+ * `fill` por camada. Medido no buffer de software do pixelizador: cadeia de
+ * circulos 2,7 ms, traco redondo 1,7 ms, poligono 0,7 ms (25 raizes).
  */
 function pintarTubos(ctx: CanvasRenderingContext2D, tubos: readonly Tubo[], pele: Pele): void {
   if (!tubos.length) return
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round'
-  const por = PONTOS_DO_TUBO / FAIXAS_DO_TUBO
-  for (const [cor, k, extra] of [[pele.contorno, 2, 2.4], [pele.base, 2, 0], [pele.meio, 1.1, 0]] as const) {
-    ctx.strokeStyle = cor
-    for (const t of tubos) {
-      for (let f = 0; f < FAIXAS_DO_TUBO; f++) {
-        const i0 = f * por, i1 = (f + 1) * por
-        ctx.lineWidth = t.raios[Math.round((i0 + i1) / 2)] * k + extra
-        ctx.beginPath(); ctx.moveTo(t.pts[i0].x, t.pts[i0].y)
-        for (let i = i0 + 1; i <= i1; i++) ctx.lineTo(t.pts[i].x, t.pts[i].y)
-        ctx.stroke()
+  for (const [cor, k, extra] of [[pele.contorno, 1, 1.2], [pele.base, 1, 0], [pele.meio, 0.55, 0]] as const) {
+    ctx.fillStyle = cor; ctx.beginPath()
+    for (const { pts, raios } of tubos) {
+      const n = pts.length - 1
+      const lado = (j: number, s: number): [number, number] => {
+        const q = pts[Math.min(n, j + 1)], o = pts[Math.max(0, j - 1)]
+        const dx = q.x - o.x, dy = q.y - o.y, d = Math.hypot(dx, dy) || 1
+        const r = raios[j] * k + extra
+        return [pts[j].x - (dy / d) * r * s, pts[j].y + (dx / d) * r * s]
       }
+      ctx.moveTo(...lado(0, 1))
+      for (let j = 1; j <= n; j++) ctx.lineTo(...lado(j, 1))
+      for (let j = n; j >= 0; j--) ctx.lineTo(...lado(j, -1))
+      ctx.closePath()
     }
+    ctx.fill()
   }
 }
 
@@ -500,55 +502,71 @@ function razorLeaf(c: ContextoVfx): void {
 // A2 — PETAL BLIZZARD: tres bracos de espiral girando abrem ate a borda, um
 // anel de folhas roda nela e no fim tudo se solta planando. E o AoE mais comum
 // da grama (aoe50_grass cai aqui): manter barato.
-const BLIZZARD_BRACOS = 3
-const BLIZZARD_POR_BRACO = 12
-const BLIZZARD_ANEL = 14
-const BLIZZARD_SAI = 100
-const BLIZZARD_ABRE = 520
-const BLIZZARD_SOLTA = 850
+interface Redemoinho { bracos: number; porBraco: number; anel: number; sai: number; abre: number; solta: number; tam: number }
 
-function petalBlizzard(c: ContextoVfx): void {
-  const { ctx, ms, alvo: centro, raio: R, pele, rng } = c
-  const k = Math.min(escalaDaArea(R), 1.8)
-  const n = BLIZZARD_BRACOS * BLIZZARD_POR_BRACO + BLIZZARD_ANEL
-  const sem = sortear(rng, n * 4)
-  const folhas: Folha[] = []
+const BLIZZARD: Redemoinho = { bracos: 3, porBraco: 12, anel: 14, sai: 100, abre: 520, solta: 850, tam: 2.2 }
+
+const folhasDoRedemoinho = (r: Redemoinho) => r.bracos * r.porBraco + r.anel
+
+/**
+ * Redemoinho de folhas no chao da area: bracos de espiral girando que abrem do
+ * centro ate a borda, um anel rodando na borda e, em `solta`, tudo planando.
+ * `sem` traz 4 numeros por folha (`folhasDoRedemoinho`).
+ */
+function redemoinho(ms: number, centro: Ponto, R: number, k: number, r: Redemoinho, sem: readonly number[], folhas: Folha[]): void {
+  const n = folhasDoRedemoinho(r), nosBracos = r.bracos * r.porBraco
   const giro = ms * 0.007
   for (let i = 0; i < n; i++) {
-    const noAnel = i >= BLIZZARD_BRACOS * BLIZZARD_POR_BRACO
+    const noAnel = i >= nosBracos
     let a: number, ate: number, sai: number
     if (noAnel) {
       // Anel: entra quando os bracos chegam na borda e roda nela — mostra o alcance.
-      const j = i - BLIZZARD_BRACOS * BLIZZARD_POR_BRACO
-      a = (j / BLIZZARD_ANEL) * TAU + giro * 1.3
+      a = ((i - nosBracos) / r.anel) * TAU + giro * 1.3
       ate = 0.97
-      sai = BLIZZARD_SAI + BLIZZARD_ABRE * 0.6 + sem[i * 4 + 1] * 60
+      sai = r.sai + r.abre * 0.6 + sem[i * 4 + 1] * 60
     } else {
       // Braco de espiral: quanto mais longe do centro, mais torcido pra tras.
-      const braco = i % BLIZZARD_BRACOS, f = (Math.floor(i / BLIZZARD_BRACOS) + 0.3 + sem[i * 4] * 0.4) / BLIZZARD_POR_BRACO
-      a = (braco / BLIZZARD_BRACOS) * TAU - f * 2.6 + giro
+      const braco = i % r.bracos, f = (Math.floor(i / r.bracos) + 0.3 + sem[i * 4] * 0.4) / r.porBraco
+      a = (braco / r.bracos) * TAU - f * 2.6 + giro
       ate = 0.12 + f * 0.85
-      sai = BLIZZARD_SAI + sem[i * 4 + 1] * 60
+      sai = r.sai + sem[i * 4 + 1] * 60
     }
-    const t = limitar((ms - sai) / (noAnel ? 250 : BLIZZARD_ABRE))
+    const t = limitar((ms - sai) / (noAnel ? 250 : r.abre))
     if (t <= 0) continue
     const p = noChao(centro, a, R * ate * (noAnel ? 0.75 + 0.25 * saida(t) : saida(t)))
-    const solta = (ms - BLIZZARD_SOLTA - sem[i * 4 + 2] * 150) / 400
-    const tam = 2.2 * k * (0.6 + 0.4 * saida(t))
+    const solta = (ms - r.solta - sem[i * 4 + 2] * 150) / 400
+    const tam = r.tam * k * (0.6 + 0.4 * saida(t))
     if (solta < 0) folhas.push({ x: p.x, y: p.y - 8 - Math.sin(ms * 0.01 + i) * 3, tam, ang: a + Math.PI / 2, vira: Math.cos(ms * 0.02 + i) })
     else {
       const f = folhaPlanando({ x: p.x, y: p.y - 8 }, sem, i, solta, 18, tam)
       if (f) folhas.push(f)
     }
   }
+}
+
+function petalBlizzard(c: ContextoVfx): void {
+  const { ctx, ms, alvo: centro, raio: R, pele, rng } = c
+  const k = Math.min(escalaDaArea(R), 1.8)
+  const sem = sortear(rng, folhasDoRedemoinho(BLIZZARD) * 4)
+  const folhas: Folha[] = []
+  redemoinho(ms, centro, R, k, BLIZZARD, sem, folhas)
   folhas.sort((p, q) => p.y - q.y)
   pintarFolhas(ctx, folhas, pele)
 }
 
-// A3 — FRENZY PLANT: raiz grossa sobe e raizes explodem na borda inteira
+// A3 — FRENZY PLANT: o redemoinho do Petal Blizzard, maior (4 bracos, anel
+// mais cheio), varre a AREA INTEIRA; por onde a frente dele passa, raizes
+// rompem o chao em aneis, do centro ate a borda. O golpe pega todo mundo
+// dentro (dono, 30/09: planta so na borda dava a impressao de que so quem
+// estava na borda tomava dano; e pediu pra unir a ideia do A2 com a do A3).
 const FRENZY_TRONCO = 400
-/** 12 raizes em volta da borda, brotando em sequencia pelos dois lados. */
-export const FRENZY_RAIZES = [450, 480, 480, 510, 510, 540, 540, 570, 570, 600, 600, 630] as const
+const FRENZY_REDEMOINHO: Redemoinho = { bracos: 4, porBraco: 12, anel: 18, sai: 100, abre: 700, solta: 1000, tam: 2.7 }
+/** Quando a frente do redemoinho (saida(t) = d) passa pela fracao `d` do raio. */
+const passaEm = (d: number) => FRENZY_REDEMOINHO.sai + FRENZY_REDEMOINHO.abre * (1 - Math.cbrt(1 - d)) + 30
+/** Aneis de raizes: fracao do raio e quantas; rompem logo atras da frente do redemoinho. */
+const FRENZY_ANEIS = [{ d: 0.4, n: 4 }, { d: 0.7, n: 7 }, { d: 0.95, n: 12 }].map(a => ({ ...a, rompe: passaEm(a.d) }))
+export const FRENZY_ONDAS = FRENZY_ANEIS.map(a => a.rompe)
+const FRENZY_RAIZES = FRENZY_ANEIS.flatMap((anel, i) => Array.from({ length: anel.n }, (_, j) => ({ anel: i, a: ((j + (i % 2) * 0.5) / anel.n) * TAU, d: anel.d, rompe: anel.rompe })))
 const FRENZY_CRESCE = 180
 const FRENZY_RECOLHE = 1150
 
@@ -556,7 +574,7 @@ function frenzyPlant(c: ContextoVfx): void {
   const { ctx, ms, alvo: centro, raio: R, pele, rng } = c
   const k = Math.min(escalaDaArea(R), 1.6)
   const semRaiz = sortear(rng, FRENZY_RAIZES.length * 2)
-  const semFolhas = FRENZY_RAIZES.map(() => sortear(rng, 4 * 4))
+  const semRedemoinho = sortear(rng, folhasDoRedemoinho(FRENZY_REDEMOINHO) * 4)
   const semEstrela = sortear(rng, 9)
   const tubos: Tubo[] = [], folhas: Folha[] = []
   const recolhe = limitar((ms - FRENZY_RECOLHE) / 250)
@@ -569,31 +587,34 @@ function frenzyPlant(c: ContextoVfx): void {
     for (const lado of [-1, 1]) {
       const base = { x: chao.x + lado * 15 * k, y: chao.y - 6 }
       const ponta = { x: topo.x - lado * 6 * k + Math.sin(ms * 0.004 + lado) * 3, y: topo.y }
-      cipo(base, { x: base.x + lado * 16 * k, y: chao.y - 40 * k }, ponta, 4.2 * k, cresce, [0.4, 0.65, 0.88], 2.6 * k, tubos, folhas)
+      cipo(base, { x: base.x + lado * 16 * k, y: chao.y - 40 * k }, ponta, 4.2 * k * (1 - recolhe * 0.8), cresce, [0.4, 0.65, 0.88], 2.6 * k, tubos, folhas)
     }
   }
-  // Raizes da borda: brotam do chao pra fora e pra cima, chicoteando.
-  FRENZY_RAIZES.forEach((quando, i) => {
-    const lado = i % 2 ? 1 : -1, passo = Math.ceil(i / 2)
-    const a = Math.PI / 2 + lado * (passo / FRENZY_RAIZES.length) * TAU + (semRaiz[i * 2] - 0.5) * 0.2
-    const base = noChao(centro, a, R * 0.95)
+  // Raizes: cada anel rompe o chao numa onda que corre do centro pra borda,
+  // cada raiz inclinada pra fora (a forca vem de quem lanca) e chicoteando.
+  FRENZY_RAIZES.forEach((r, i) => {
+    const a = r.a + (semRaiz[i * 2] - 0.5) * 0.25
+    const base = noChao(centro, a, R * r.d)
+    // Dentro do anel a onda tambem anda: a frente de cada raiz sai em sequencia.
+    const quando = r.rompe + (Math.abs(Math.sin(a / 2)) * 40)
     const cresce = saida(limitar((ms - quando) / FRENZY_CRESCE)) * (1 - recolhe)
     if (cresce > 0) {
-      const alto = em(semRaiz[i * 2 + 1], 34, 46) * k
-      const fora = Math.cos(a) * 14 * k
-      const chicote = Math.sin((ms - quando) * 0.012 + i) * 6 * k
+      // Baixas por dentro (o redemoinho tem que aparecer por cima); a borda, mais alta, marca o limite.
+      const alto = em(semRaiz[i * 2 + 1], 32, 44) * k * (r.anel === 2 ? 0.8 : 0.5)
+      const fora = Math.cos(a) * 12 * k
+      const chicote = Math.sin((ms - quando) * 0.012 + i) * 5 * k
       const ponta = { x: base.x + fora + chicote, y: base.y - alto }
-      cipo(base, { x: base.x - fora * 0.6, y: base.y - alto * 0.55 }, ponta, 3.2 * k, cresce, [0.45, 0.7], 2 * k, tubos, folhas)
-    }
-    // Quando a raiz rompe o chao, folhas voam da ponta e planam.
-    for (let j = 0; j < 4; j++) {
-      const f = folhaPlanando({ x: base.x, y: base.y - 30 * k }, semFolhas[i], j, (ms - quando - 120) / 560, 20, 1.6 * k)
-      if (f) folhas.push(f)
+      cipo(base, { x: base.x - fora * 0.6, y: base.y - alto * 0.55 }, ponta, 3 * k * (1 - recolhe * 0.8), cresce, [0.5, 0.75], 2 * k, tubos, folhas)
     }
   })
-  pintarTubos(ctx, tubos, pele)
+  // Fundo primeiro: raiz da frente (y maior) cobre a de tras.
+  const ordem = tubos.map((t, i) => [t.pts[0].y, i] as const).sort((p, q) => p[0] - q[0]).map(([, i]) => tubos[i])
+  pintarTubos(ctx, ordem, pele)
+  // O redemoinho por cima das raizes: as folhas passam na frente delas.
+  redemoinho(ms, centro, R, k, FRENZY_REDEMOINHO, semRedemoinho, folhas)
+  folhas.sort((p, q) => p.y - q.y)
   pintarFolhas(ctx, folhas, pele)
-  const e = ms - FRENZY_RAIZES[0]
+  const e = ms - FRENZY_ONDAS[0]
   if (e >= 0 && e < 240) estrelaDeImpacto(ctx, topo, 14, e / 240, pele, fila(semEstrela))
 }
 
@@ -614,7 +635,7 @@ export const GRAMA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
 
 export const GRAMA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
   1: { desenhar: razorLeaf, duracao: { 1: 1000 }, alcance: 30, impactos: { 1: [RAZOR_SAI + RAZOR_VOO] } },
-  2: { desenhar: petalBlizzard, duracao: { 2: 1450 }, alcance: 30, impactos: { 2: [BLIZZARD_SAI + 250] } },
+  2: { desenhar: petalBlizzard, duracao: { 2: 1450 }, alcance: 30, impactos: { 2: [BLIZZARD.sai + 250] } },
   // As raizes da borda de tras (y ~ -67) sobem ate ~74 acima dela.
-  3: { desenhar: frenzyPlant, duracao: { 3: 1500 }, alcance: 145, impactos: { 3: [...FRENZY_RAIZES] } },
+  3: { desenhar: frenzyPlant, duracao: { 3: 1600 }, alcance: 145, impactos: { 3: FRENZY_ONDAS } },
 }
