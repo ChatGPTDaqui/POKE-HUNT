@@ -181,10 +181,11 @@ describe('golpe de status nunca empresta arte de ataque (PH-480)', () => {
   it('golpe de DANO continua usando a tira do tipo — a guarda e so do status', async () => {
     // O contra-caso, e ele e obrigatorio: cortar a tira de tipo pra todo mundo
     // apagaria a arte de impacto do jogo inteiro, e o teste acima passaria
-    // igual.
-    const doTipo = tiraDoElemento('NORMAL' as never)
+    // igual. Precisa de um tipo que AINDA cai na tira: NORMAL virou VFX
+    // procedural (30/09) e nao pede tira nenhuma no golpe de dano.
+    const doTipo = tiraDoElemento('PSYCHIC' as never)
     const { drawEffect } = await spritesNovo()
-    const dano = { ...efeitoDeStatus('tackle', 'NORMAL'), statusDirection: undefined, statusStat: undefined }
+    const dano = { ...efeitoDeStatus('confusion', 'PSYCHIC'), statusDirection: undefined, statusStat: undefined }
     drawEffect(ctxFalso(), dano as never, mundoVazio)
     expect(pedidas).toContain(doTipo!.url)
   })

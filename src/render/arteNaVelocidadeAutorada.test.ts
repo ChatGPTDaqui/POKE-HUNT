@@ -16,6 +16,7 @@
 // canvas nao da pra testar isto de fora — `faseDaTira` nao e exportada, e
 // exporta-la so pro teste esconderia justamente a parte que erra (o recorte).
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { isolarRegistros } from './vfx/registroDeTeste'
 
 import { TIRA_POR_ELEMENTO, FPS_DA_ARTE_DE_EFEITO } from '@/data/vfxTiras'
 
@@ -95,6 +96,11 @@ function quadroEm(idade: number, duracao = 3.0, tipo = TIPO, quadros = QUADROS):
 }
 
 describe('arte de golpe na velocidade autorada', () => {
+  // Mede a TIRA PNG: com o registro vazio, o tipo usado aqui volta a cair nela
+  // mesmo depois de migrado pro VFX procedural (a tira segue valendo pros
+  // tipos ainda nao migrados).
+  isolarRegistros()
+
   beforeEach(() => { quadrosDesenhados = [] })
 
   it('a velocidade autorada e 10 fps, e a tira de referencia tem quadros pra medir', () => {

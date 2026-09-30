@@ -1,6 +1,6 @@
-// FIGHTING no lab (30/09): ainda NAO inscrito no registro — so entra no jogo
-// depois da aprovacao visual do dono. Aqui tranca o que vale desde ja.
+// FIGHTING ligado no jogo (30/09, aprovado pelo dono no lab do staging).
 import { describe, expect, it } from 'vitest'
+import { ABILITIES, isDamagingAbility } from '@/data/abilities'
 import { resolverVfx } from '../resolverVfx'
 import { rngSemeado } from '../aleatorio'
 import { PELES } from '../paletas'
@@ -29,9 +29,15 @@ function quadro(e: EntradaDeCoreografia, tier: Tier, area: boolean, ms: number):
   return log
 }
 
-describe('FIGHTING no lab', () => {
-  it('ainda cai na tira no jogo (sem aprovacao do dono)', () => {
-    expect(resolverVfx({ abilityId: 'sky_uppercut', area: false })).toBeNull()
+describe('FIGHTING migrado', () => {
+  it('todo golpe de dano de lutador resolve pra coreografia nova', () => {
+    const golpes = Object.values(ABILITIES).filter(g => g.type === 'FIGHTING' && isDamagingAbility(g))
+    expect(golpes.length).toBeGreaterThan(5) // anti-teste-vacuo
+    for (const g of golpes) {
+      const r = resolverVfx({ abilityId: g.id, area: g.target === 'aoe' })
+      expect(r, g.id).not.toBeNull()
+      expect(r!.tipo).toBe('FIGHTING')
+    }
   })
 
   it.each(todas)('%s: impactos dentro da duracao', (_n, tier, e) => {
