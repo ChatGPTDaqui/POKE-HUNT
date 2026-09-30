@@ -12,6 +12,18 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // VFX anime pixel: grama, normal e lutador ligados; area preenche o interior.
+  {
+    version: '7.68',
+    date: '2026-09-30',
+    title: 'Golpes de grama, normais e de luta com efeitos novos',
+    highlights: [
+      'Os golpes de grama agora soltam folhas de verdade, que planam e viram no ar: Vine Whip estala dois cipós, Magical Leaf abre um leque de folhas teleguiadas e Leaf Storm vira um redemoinho em volta do alvo.',
+      'Os golpes normais viraram pancada de verdade, com faísca de impacto e linhas de velocidade; Giga Impact termina num quadro de impacto de anime.',
+      'Os golpes de luta ganharam chutes, arcos de choque atravessando o alvo e uma aura de energia; Focus Punch concentra antes do soco.',
+      'Golpes em área agora mostram que pegam todo mundo dentro, não só a borda: Eruption, Bubble, Razor Leaf e Petal Blizzard espalham o efeito pela área inteira.',
+    ],
+  },
   // VFX anime pixel: eletrico e agua ligados; area mostra o alcance inteiro.
   {
     version: '7.67',
