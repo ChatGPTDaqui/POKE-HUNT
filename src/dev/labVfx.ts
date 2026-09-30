@@ -19,6 +19,7 @@ import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografi
 import { GRAMA_AREA, GRAMA_SINGLE, VITRINE_DA_GRAMA } from '@/render/vfx/coreografias/grama'
 import { LUTADOR_AREA, LUTADOR_SINGLE, VITRINE_DO_LUTADOR } from '@/render/vfx/coreografias/lutador'
 import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/coreografias/normal'
+import { VENENO_AREA, VENENO_SINGLE, VITRINE_DO_VENENO } from '@/render/vfx/coreografias/veneno'
 import { VITRINE_DO_VOADOR, VOADOR_AREA, VOADOR_SINGLE } from '@/render/vfx/coreografias/voador'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -60,6 +61,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   FLYING: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_VOADOR.single[t], tipo: 'FLYING' as const, area: false, tier: t, entrada: VOADOR_SINGLE[t], atacante: 'pidgey' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_VOADOR.area[t], tipo: 'FLYING' as const, area: true, tier: t, entrada: VOADOR_AREA[t], atacante: 'pidgey' })),
+  ],
+  POISON: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_VENENO.single[t], tipo: 'POISON' as const, area: false, tier: t, entrada: VENENO_SINGLE[t], atacante: 'ekans' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_VENENO.area[t], tipo: 'POISON' as const, area: true, tier: t, entrada: VENENO_AREA[t], atacante: 'ekans' })),
   ],
 }
 
