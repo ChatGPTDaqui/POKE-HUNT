@@ -1,15 +1,15 @@
-// GRASS ligado no jogo (30/09, aprovado pelo dono no lab do staging).
+// NORMAL ligado no jogo (30/09, aprovado pelo dono no lab do staging).
 import { describe, expect, it } from 'vitest'
 import { ABILITIES, isDamagingAbility } from '@/data/abilities'
 import { resolverVfx } from '../resolverVfx'
 import { rngSemeado } from '../aleatorio'
 import { PELES } from '../paletas'
 import type { EntradaDeCoreografia, Tier } from '../tipos'
-import { GRAMA_AREA, GRAMA_SINGLE } from './grama'
+import { NORMAL_AREA, NORMAL_SINGLE } from './normal'
 
 const todas = [
-  ...Object.entries(GRAMA_SINGLE).map(([t, e]) => [`single T${t}`, Number(t) as Tier, e, false] as const),
-  ...Object.entries(GRAMA_AREA).map(([t, e]) => [`area T${t}`, Number(t) as Tier, e, true] as const),
+  ...Object.entries(NORMAL_SINGLE).map(([t, e]) => [`single T${t}`, Number(t) as Tier, e, false] as const),
+  ...Object.entries(NORMAL_AREA).map(([t, e]) => [`area T${t}`, Number(t) as Tier, e, true] as const),
 ]
 
 /** Contexto 2D que grava as chamadas de desenho, pra comparar quadros. */
@@ -25,18 +25,18 @@ function gravador(): { ctx: CanvasRenderingContext2D; log: string[] } {
 function quadro(e: EntradaDeCoreografia, tier: Tier, area: boolean, ms: number): string[] {
   const { ctx, log } = gravador()
   const origem = { x: 0, y: 0 }, alvo = area ? origem : { x: 46, y: 10 }
-  e.desenhar({ ctx, ms, duracao: e.duracao[tier]!, origem, alvo, angulo: 0.2, raio: area ? 175 : 0, tier, pele: PELES.GRASS, rng: rngSemeado(42), pedir: n => n })
+  e.desenhar({ ctx, ms, duracao: e.duracao[tier]!, origem, alvo, angulo: 0.2, raio: area ? 175 : 0, tier, pele: PELES.NORMAL, rng: rngSemeado(42), pedir: n => n })
   return log
 }
 
-describe('GRASS migrado', () => {
-  it('todo golpe de dano de grama resolve pra coreografia nova', () => {
-    const golpes = Object.values(ABILITIES).filter(g => g.type === 'GRASS' && isDamagingAbility(g))
+describe('NORMAL migrado', () => {
+  it('todo golpe de dano normal resolve pra coreografia nova', () => {
+    const golpes = Object.values(ABILITIES).filter(g => g.type === 'NORMAL' && isDamagingAbility(g))
     expect(golpes.length).toBeGreaterThan(5) // anti-teste-vacuo
     for (const g of golpes) {
       const r = resolverVfx({ abilityId: g.id, area: g.target === 'aoe' })
       expect(r, g.id).not.toBeNull()
-      expect(r!.tipo).toBe('GRASS')
+      expect(r!.tipo).toBe('NORMAL')
     }
   })
 
