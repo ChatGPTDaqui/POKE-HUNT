@@ -16,6 +16,7 @@ import { hashTexto, rngSemeado } from '@/render/vfx/aleatorio'
 import { AGUA_AREA, AGUA_SINGLE, VITRINE_DA_AGUA } from '@/render/vfx/coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
 import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
+import { GRAMA_AREA, GRAMA_SINGLE, VITRINE_DA_GRAMA } from '@/render/vfx/coreografias/grama'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
 import { desenharPixelizado } from '@/render/vfx/pixelizador'
@@ -39,6 +40,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   WATER: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_AGUA.single[t], tipo: 'WATER' as const, area: false, tier: t, entrada: AGUA_SINGLE[t], atacante: 'squirtle' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_AGUA.area[t], tipo: 'WATER' as const, area: true, tier: t, entrada: AGUA_AREA[t], atacante: 'squirtle' })),
+  ],
+  GRASS: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_GRAMA.single[t], tipo: 'GRASS' as const, area: false, tier: t, entrada: GRAMA_SINGLE[t], atacante: 'bulbasaur' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_GRAMA.area[t], tipo: 'GRASS' as const, area: true, tier: t, entrada: GRAMA_AREA[t], atacante: 'bulbasaur' })),
   ],
 }
 
