@@ -19,8 +19,8 @@ describe('FIRE migrado', () => {
   })
 
   it('golpe de outro tipo continua na tira', () => {
-    expect(resolverVfx({ abilityId: 'thunderbolt', area: false })).toBeNull()
-    expect(atrasoDoNumeroDeDano('thunderbolt')).toBe(0)
+    expect(resolverVfx({ abilityId: 'psychic', area: false })).toBeNull()
+    expect(atrasoDoNumeroDeDano('psychic')).toBe(0)
   })
 
   it.each([
