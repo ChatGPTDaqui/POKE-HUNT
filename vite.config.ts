@@ -71,6 +71,13 @@ function serveGameAssets(): Plugin {
   }
 }
 
+// O lab de VFX (lab-vfx.html) entra no build SO no staging: o Cloudflare Pages
+// define CF_PAGES_BRANCH com a branch que esta publicando, e a branch `dev` e a
+// que vira dev.poke-hunt-euj.pages.dev. Lista de permissao, e nao "tudo menos
+// main": build local, CI, preview de PR e producao ficam so com o jogo. O dono
+// revisa os golpes no celular em /lab-vfx sem depender de sessao com `vite dev`.
+const LAB_NO_BUILD = process.env.CF_PAGES_BRANCH === 'dev'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [buildInfo(), react(), tailwindcss(), serveGameAssets()],
@@ -141,5 +148,8 @@ export default defineConfig({
     // `dist/build/` — assim `/assets/*` fica exclusivamente da arte, servida
     // pelo plugin acima (ou pelo servidor estatico em producao).
     assetsDir: 'build',
+    rollupOptions: LAB_NO_BUILD
+      ? { input: { main: path.resolve(import.meta.dirname, 'index.html'), labVfx: path.resolve(import.meta.dirname, 'lab-vfx.html') } }
+      : undefined,
   },
 })

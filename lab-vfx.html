@@ -6,8 +6,9 @@
   <title>Lab VFX</title>
   <!--
     Laboratorio de DESENVOLVIMENTO do VFX de golpe (spec 2026-09-28).
-    So o `vite dev` serve esta pagina: o build de producao so empacota o que
-    esta em rollupOptions.input (index.html), entao ela nunca chega ao jogador.
+    Servida pelo `vite dev` e pelo build do STAGING (CF_PAGES_BRANCH=dev, ver
+    vite.config.ts). O build de producao nao a empacota, entao ela nunca chega
+    ao jogador.
   -->
   <style>
     body { margin: 0; background: #0f1117; color: #e8eaf0; font: 13px/1.4 system-ui, sans-serif; padding: 16px }

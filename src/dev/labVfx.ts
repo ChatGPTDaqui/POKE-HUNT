@@ -1,4 +1,4 @@
-// Laboratorio de VFX de golpe (lab-vfx.html) — so `vite dev`, nunca no build.
+// Laboratorio de VFX de golpe (lab-vfx.html) — `vite dev` e staging, nunca producao.
 //
 // E a cena do lab v2 aprovado pelo dono (28/09), agora usando os MODULOS REAIS:
 // coreografia do registro de tipo, pele, pixelizador. Mostra o golpe INTEIRO —
@@ -13,7 +13,10 @@ import type { ElementType } from '@/data/generated/types'
 import { vfxDoGolpe } from '@/data/moveVfx'
 import { tiraDeAreaDoElemento, tiraDoElemento, type TiraDeVfx } from '@/data/vfxTiras'
 import { hashTexto, rngSemeado } from '@/render/vfx/aleatorio'
+import { AGUA_AREA, AGUA_SINGLE, VITRINE_DA_AGUA } from '@/render/vfx/coreografias/agua'
+import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
 import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
+import { GRAMA_AREA, GRAMA_SINGLE, VITRINE_DA_GRAMA } from '@/render/vfx/coreografias/grama'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
 import { desenharPixelizado } from '@/render/vfx/pixelizador'
@@ -23,12 +26,24 @@ import type { EntradaDeCoreografia, Tier } from '@/render/vfx/tipos'
 // Catalogo do lab: tipo -> 7 golpes-vitrine
 // ---------------------------------------------------------------------------
 
-interface GolpeDoLab { id: string; area: boolean; tier: Tier; entrada: EntradaDeCoreografia; atacante: string }
+interface GolpeDoLab { id: string; tipo: ElementType; area: boolean; tier: Tier; entrada: EntradaDeCoreografia; atacante: string }
 
 const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   FIRE: [
-    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
-    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
+  ],
+  ELECTRIC: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_ELETRICO.single[t], tipo: 'ELECTRIC' as const, area: false, tier: t, entrada: ELETRICO_SINGLE[t], atacante: 'pikachu' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_ELETRICO.area[t], tipo: 'ELECTRIC' as const, area: true, tier: t, entrada: ELETRICO_AREA[t], atacante: 'pikachu' })),
+  ],
+  WATER: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_AGUA.single[t], tipo: 'WATER' as const, area: false, tier: t, entrada: AGUA_SINGLE[t], atacante: 'squirtle' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_AGUA.area[t], tipo: 'WATER' as const, area: true, tier: t, entrada: AGUA_AREA[t], atacante: 'squirtle' })),
+  ],
+  GRASS: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_GRAMA.single[t], tipo: 'GRASS' as const, area: false, tier: t, entrada: GRAMA_SINGLE[t], atacante: 'bulbasaur' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_GRAMA.area[t], tipo: 'GRASS' as const, area: true, tier: t, entrada: GRAMA_AREA[t], atacante: 'bulbasaur' })),
   ],
 }
 
@@ -238,7 +253,7 @@ class Cena {
     if (ms > duracao) return
     const { origem, alvo } = this.pontos()
     const raio = g.area ? AOE_RADIUS : 0
-    const pele = PELES[getAbility(g.id)?.type ?? 'NORMAL']
+    const pele = PELES[g.tipo]
     const pintar = (ctx: CanvasRenderingContext2D) => g.entrada.desenhar({
       ctx, ms, duracao, origem, alvo, raio, tier: g.tier, pele,
       angulo: g.area ? 0 : Math.atan2(alvo.y - origem.y, alvo.x - origem.x),
@@ -252,7 +267,7 @@ class Cena {
   /** Aproximacao do `drawQuadroDeTira` atual: a tira do golpe, ou a do tipo, a 10 fps. */
   desenharTira(c: CanvasRenderingContext2D, ms: number): void {
     const g = this.golpe
-    const tipo = getAbility(g.id)?.type ?? 'NORMAL'
+    const tipo = g.tipo
     const arte = vfxDoGolpe(g.id)
     const tira: TiraDeVfx | null = g.area ? (arte?.aoe ?? tiraDeAreaDoElemento(tipo)) : (arte?.single ?? tiraDoElemento(tipo))
     if (!tira) return

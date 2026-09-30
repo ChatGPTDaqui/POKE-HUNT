@@ -34,9 +34,11 @@ export function retanguloDoEfeito(origem: Ponto, alvo: Ponto, alcance: number, r
     // um circulo. Tratar como circulo fazia o pixelizador varrer um quadrado de
     // 690x690 quase vazio no Eruption — 3 ms so de getImageData. Aqui a altura
     // e o que o efeito sobe acima do peito (`alcance`) + o chao ate a borda da
-    // elipse.
+    // elipse. O topo tambem cobre a borda DE TRAS da elipse (acima do peito
+    // quando o raio e grande): sem isso a metade de tras do alcance era cortada.
     const x0 = alvo.x - raio - FOLGA_DA_AREA, x1 = alvo.x + raio + FOLGA_DA_AREA
-    const y0 = alvo.y - alcance, y1 = alvo.y + 12 + raio * 0.45 + FOLGA_DA_AREA
+    const y0 = Math.min(alvo.y - alcance, alvo.y + 12 - raio * 0.45 - FOLGA_DA_AREA)
+    const y1 = alvo.y + 12 + raio * 0.45 + FOLGA_DA_AREA
     return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }
   }
   const folga = alcance

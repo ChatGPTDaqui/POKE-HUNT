@@ -20,7 +20,9 @@
 //   A2 Heat Wave      o chao pega fogo de dentro pra fora, foco por foco.
 //   A3 Eruption       coluna vulcanica + bolas-cometa que caem e acendem a area.
 //
-// Nenhuma coreografia desenha anel no chao em volta do alvo (vetado pelo dono).
+// Nenhuma coreografia desenha anel no chao em volta do alvo de single (vetado
+// pelo dono). Em AREA e o contrario: a borda pega fogo pra mostrar o alcance
+// (pedido do dono, 29/09) — ver `cercaDeFogo`.
 import { pintarFogo } from '../campoDeFogo'
 import { estrelaDeImpacto, entrada, limitar, riscos, saida } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
@@ -350,17 +352,47 @@ const escalaDaArea = (raio: number) => Math.max(1, raio / 70)
 /** Ponto no chao da area: elipse achatada da camera 3/4. */
 const noChao = (centro: Ponto, a: number, d: number): Ponto => ({ x: centro.x + Math.cos(a) * d, y: centro.y + 12 + Math.sin(a) * d * 0.45 })
 
+/**
+ * CERCA DE FOGO: a borda real da area (elipse do chao, raio R) pegando fogo
+ * em `n` focos igualmente espacados. A frente acende pelo lado de baixo
+ * (o mais perto da camera) e corre pelos dois lados ate fechar em cima — e o
+ * que mostra o ALCANCE do golpe de area (pedido do dono, 29/09). Cada foco e o
+ * incendio do v2, mais baixo e curto pra borda ler como linha, nao como mancha.
+ */
+function cercaDeFogo(
+  ms: number, centro: Ponto, R: number, t0: number, fecha: number, dura: number,
+  n: number, sem: readonly number[], k: number, chamas: Viva[], brasas: Viva[],
+): void {
+  for (let i = 0; i < n; i++) {
+    const u = i / n
+    const a = Math.PI / 2 + u * TAU
+    // Distancia da frente ao foco pela borda (0 embaixo, 1 em cima).
+    const lado = Math.min(u, 1 - u) * 2
+    const acende = t0 + lado * fecha
+    const f = incendio(ms, noChao(centro, a, R * 0.97), acende, acende + dura, sem.slice(i * POR_FOCO_DA_CERCA, (i + 1) * POR_FOCO_DA_CERCA), k)
+    chamas.push(...f.chamas); brasas.push(...f.brasas)
+  }
+}
+/** 12 chamas por foco = 4 levas do incendio (3 linguas a cada 55 ms). */
+const POR_FOCO_DA_CERCA = 12 * POR_CHAMA
+
 // A1 — INCINERATE: linguas rasteiras disparando do centro pra fora
 function incinerate(c: ContextoVfx): void {
   const { ctx, ms, alvo: centro, raio, pele, rng } = c
   const k = escalaDaArea(raio)
   const sem = sortear(rng, 40 * POR_CHAMA)
   const chao = { x: centro.x, y: centro.y + 12 }
+  const semCerca = sortear(rng, 16 * POR_FOCO_DA_CERCA)
   const chamas = emitir(ms, 0, 300, 30, 4, sem, POR_CHAMA, s => {
     const a = TAU * s[0], v = em(s[1], 0.3, 0.45) * k
     return { x: chao.x, y: chao.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.45, arrasto: 0.955, vida: em(s[2], 380, 480), r: em(s[3], 3.2, 4.4) * k * 0.8 }
   })
+  // As linguas rasteiras batem na borda e ela pega fogo.
+  const brasas: Viva[] = []
+  cercaDeFogo(ms, centro, raio, 180, 160, 260, 16, semCerca, k * 0.55, chamas, brasas)
+  chamas.sort((p, q) => p.y - q.y)
   pintarChamas(ctx, chamas, pele, ms)
+  pintarBrasas(ctx, brasas, pele)
 }
 
 // A2 — HEAT WAVE: o chao pega fogo de dentro pra fora, foco por foco
@@ -373,6 +405,7 @@ function heatWave(c: ContextoVfx): void {
   const semFocos = sortear(rng, HEAT_FOCOS * 2)
   const semFogo = Array.from({ length: HEAT_FOCOS }, () => sortear(rng, 10 * POR_CHAMA))
   const semFumaca = sortear(rng, 8 * POR_CHAMA)
+  const semCerca = sortear(rng, 20 * POR_FOCO_DA_CERCA)
   // Cada foco pega fogo quando a frente invisivel chega nele: a area se
   // revela pelo fogo pegando, sem anel nenhum. O foco e o incendio do v2.
   const chamas: Viva[] = [], brasas: Viva[] = []
@@ -382,6 +415,8 @@ function heatWave(c: ContextoVfx): void {
     const f = incendio(ms, noChao(centro, a, d), acende, acende + 330, semFogo[i], k * 0.85)
     chamas.push(...f.chamas); brasas.push(...f.brasas)
   }
+  // A frente chega na borda e a borda inteira pega fogo: o alcance.
+  cercaDeFogo(ms, centro, raio, HEAT_ESPALHA * 0.8, 200, 520, 20, semCerca, k * 0.6, chamas, brasas)
   chamas.sort((p, q) => p.y - q.y)
   pintarFumaca(ctx, fumacaDoFim(ms, centro, 600, 1000, semFumaca, k), pele)
   pintarChamas(ctx, chamas, pele, ms)
@@ -402,6 +437,7 @@ function eruption(c: ContextoVfx): void {
   const semBolas = Array.from({ length: ERUPCAO_BOLAS }, () => sortear(rng, 16 * POR_CHAMA))
   const semFogo = Array.from({ length: ERUPCAO_BOLAS }, () => sortear(rng, 9 * POR_CHAMA))
   const semFumaca = sortear(rng, 12 * POR_CHAMA)
+  const semCerca = sortear(rng, 20 * POR_FOCO_DA_CERCA)
   const chao = { x: centro.x, y: centro.y + 12 }
   const topo = { x: centro.x, y: centro.y - 44 * k }
 
@@ -413,7 +449,8 @@ function eruption(c: ContextoVfx): void {
   })
   const brasas: Viva[] = []
   for (let i = 0; i < ERUPCAO_BOLAS; i++) {
-    const a = semAlvos[i * 2] * TAU, d = raio * (0.3 + 0.65 * Math.sqrt(semAlvos[i * 2 + 1]))
+    // Bolas em setores iguais, perto da borda: juntas desenham o circulo.
+    const a = ((i + semAlvos[i * 2] * 0.6) / ERUPCAO_BOLAS) * TAU, d = raio * (0.6 + 0.3 * semAlvos[i * 2 + 1])
     const pouso = noChao(centro, a, d)
     const sai = ERUPCAO_SUBIDA + i * 60, cai = ERUPCAO_POUSOS[i]
     const trajeto = linha(topo, pouso, 24 * k)
@@ -421,6 +458,7 @@ function eruption(c: ContextoVfx): void {
     const f = incendio(ms, { x: pouso.x, y: pouso.y - 6 }, cai, cai + 280, semFogo[i], k * 0.8)
     chamas.push(...f.chamas); brasas.push(...f.brasas)
   }
+  cercaDeFogo(ms, centro, raio, ERUPCAO_POUSOS[0], 300, 600, 20, semCerca, k * 0.6, chamas, brasas)
   chamas.sort((p, q) => p.y - q.y)
   pintarFumaca(ctx, fumacaDoFim(ms, topo, 420, 1000, semFumaca, k * 1.3), pele)
   pintarChamas(ctx, chamas, pele, ms)
