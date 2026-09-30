@@ -25,6 +25,17 @@ export interface Brasa { x: number; y: number; r: number; f: number; ang: number
 
 /** Limiares de calor das 4 faixas: contorno, base, meio, nucleo. */
 const LIMIARES = [0.14, 0.4, 0.72, 1.05] as const
+
+/**
+ * Estilo QUENTE (piloto 2, referencias do dono 30/09): o miolo passa do
+ * amarelo pro BRANCO onde o calor empilha — as referencias tem todas um nucleo
+ * branco grande. O contorno escuro FICA: testado sem ele (borda vermelha +
+ * halo pontilhado), o fogo virou ruido em cima da grama; as referencias tem
+ * fundo escuro, o jogo nao.
+ */
+export interface EstiloDoFogo { quente?: boolean }
+/** Calor a partir do qual o estilo quente pinta branco. */
+const LIMIAR_BRANCO = 1.5
 /** Cauda da gota: quanto ela se estica pra tras do movimento, em raios (o 2,1 do v2). */
 const CAUDA = 2.1
 
@@ -56,6 +67,10 @@ let tela: HTMLCanvasElement | null = null
 let calor = new Float32Array(0)
 let imagem: ImageData | null = null
 
+const rgb = (h: string) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]
+
+const BRANCO_QUENTE = rgb('#ffffff')
+
 /** RGB das 4 faixas, calculado uma vez por pele (o hex nao muda). */
 const coresCache = new WeakMap<Pele, number[][]>()
 function coresDaPele(pele: Pele): number[][] {
@@ -73,14 +88,14 @@ function coresDaPele(pele: Pele): number[][] {
  * Pinta `chamas` como fogo em `ctx` (transform de MUNDO ja aplicado). `ms`
  * faz o ruido rolar; sem ele a borda ficaria parada.
  */
-export function pintarFogo(ctx: CanvasRenderingContext2D, chamas: readonly Brasa[], pele: Pele, ms: number): void {
+export function pintarFogo(ctx: CanvasRenderingContext2D, chamas: readonly Brasa[], pele: Pele, ms: number, estilo: EstiloDoFogo = {}): void {
   if (!chamas.length || typeof document === 'undefined') return
   const vivas: Quente[] = []
   for (const p of chamas) {
     const r = raioNaIdade(p)
     if (r > 0.3) vivas.push({ p, r, t: temperatura(p.f) })
   }
-  for (const ilha of ilhas(vivas)) pintarIlha(ctx, ilha, pele, ms)
+  for (const ilha of ilhas(vivas)) pintarIlha(ctx, ilha, pele, ms, estilo)
 }
 
 interface Quente { p: Brasa; r: number; t: number }
@@ -139,7 +154,7 @@ function caixaDaGota({ p, r }: Quente): [number, number, number, number] {
   return [x0, y0, x1, y1]
 }
 
-function pintarIlha(ctx: CanvasRenderingContext2D, vivas: readonly Quente[], pele: Pele, ms: number): void {
+function pintarIlha(ctx: CanvasRenderingContext2D, vivas: readonly Quente[], pele: Pele, ms: number, estilo: EstiloDoFogo): void {
   // Retangulo que contem todas as gotas da ilha (cabeca + cauda).
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
   for (const v of vivas) {
@@ -199,8 +214,9 @@ function pintarIlha(ctx: CanvasRenderingContext2D, vivas: readonly Quente[], pel
       let f = -1
       for (let k = LIMIARES.length - 1; k >= 0; k--) if (v > LIMIARES[k]) { f = k; break }
       if (f < 0) continue
+      const cor = estilo.quente && v > LIMIAR_BRANCO ? BRANCO_QUENTE : cores[f]
       const i = (yy * passo + xx) * 4
-      d[i] = cores[f][0]; d[i + 1] = cores[f][1]; d[i + 2] = cores[f][2]; d[i + 3] = 255
+      d[i] = cor[0]; d[i + 1] = cor[1]; d[i + 2] = cor[2]; d[i + 3] = 255
     }
   }
   tc.putImageData(imagem, 0, 0, 0, 0, w, h)
