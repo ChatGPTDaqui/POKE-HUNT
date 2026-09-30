@@ -15,7 +15,7 @@ import { tiraDeAreaDoElemento, tiraDoElemento, type TiraDeVfx } from '@/data/vfx
 import { hashTexto, rngSemeado } from '@/render/vfx/aleatorio'
 import { AGUA_AREA, AGUA_SINGLE, VITRINE_DA_AGUA } from '@/render/vfx/coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
-import { FLAMETHROWER_PILOTO, FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
+import { FOGO_AREA, FOGO_NOVO_AREA, FOGO_NOVO_SINGLE, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
 import { GRAMA_AREA, GRAMA_SINGLE, VITRINE_DA_GRAMA } from '@/render/vfx/coreografias/grama'
 import { LUTADOR_AREA, LUTADOR_SINGLE, VITRINE_DO_LUTADOR } from '@/render/vfx/coreografias/lutador'
 import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/coreografias/normal'
@@ -37,10 +37,10 @@ interface GolpeDoLab {
 }
 
 const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
+  // Fogo novo (referencias do dono): a esquerda o atual, a direita o novo.
   FIRE: [
-    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
-    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
-    { id: 'flamethrower', tipo: 'FIRE', area: false, tier: 3, entrada: FLAMETHROWER_PILOTO, antes: FOGO_SINGLE[3], atacante: 'charmander' },
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_NOVO_SINGLE[t], antes: FOGO_SINGLE[t], atacante: 'charmander' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_NOVO_AREA[t], antes: FOGO_AREA[t], atacante: 'charmander' })),
   ],
   ELECTRIC: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_ELETRICO.single[t], tipo: 'ELECTRIC' as const, area: false, tier: t, entrada: ELETRICO_SINGLE[t], atacante: 'pikachu' })),
@@ -330,7 +330,7 @@ function montarBotoes(): void {
   barra.innerHTML = ''
   ;(TIPOS_DO_LAB[tipoAtual] ?? []).forEach((g, i) => {
     const b = document.createElement('button')
-    b.textContent = `${g.area ? 'Área' : 'Single'} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}${g.antes ? ' (piloto)' : ''}`
+    b.textContent = `${g.area ? 'Área' : 'Single'} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
     b.className = i === golpeAtual ? 'on' : ''
     b.onclick = () => { golpeAtual = i; montarBotoes(); reiniciar() }
     barra.append(b)
@@ -344,7 +344,7 @@ function reiniciar(): void {
   opt.zoom = g.area ? Math.min(escolhido, 1.2) : escolhido
   for (const c of cenas) { c.medir(); c.montar(g) }
   $('titulo-tira').textContent = g.antes ? 'Atual: coreografia em produção' : 'Atual: tira PNG'
-  $('titulo-anime').textContent = g.antes ? 'Piloto: método novo (pixel na grade)' : 'Proposta: coreografia anime pixel'
+  $('titulo-anime').textContent = g.antes ? 'Novo: linguagem das referências' : 'Proposta: coreografia anime pixel'
 }
 
 const tipoSel = $<HTMLSelectElement>('tipo')
@@ -366,6 +366,14 @@ new MutationObserver(() => {
     const [tipo, i] = d.labGolpe.split(':')
     delete d.labGolpe
     tipoAtual = tipo as ElementType; tipoSel.value = tipo; golpeAtual = Number(i); montarBotoes(); reiniciar()
+  }
+  // Desenha na hora: com a aba em segundo plano o requestAnimationFrame para.
+  // Duas vezes: a primeira abre o turno, a segunda chega no ms pedido.
+  if (opt.congelado !== null) for (const c of cenas) {
+    c.passo(0); c.passo(0)
+    // O flash da silhueta anda no relogio real, que parado nao anda: limpa.
+    for (const a of c.alvos) a.cor = null
+    c.desenhar()
   }
 }).observe(document.body, { attributes: true })
 
