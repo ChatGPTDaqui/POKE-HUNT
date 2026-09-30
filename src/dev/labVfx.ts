@@ -17,6 +17,7 @@ import { AGUA_AREA, AGUA_SINGLE, VITRINE_DA_AGUA } from '@/render/vfx/coreografi
 import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
 import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
 import { GRAMA_AREA, GRAMA_SINGLE, VITRINE_DA_GRAMA } from '@/render/vfx/coreografias/grama'
+import { LUTADOR_AREA, LUTADOR_SINGLE, VITRINE_DO_LUTADOR } from '@/render/vfx/coreografias/lutador'
 import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/coreografias/normal'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -49,6 +50,11 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   NORMAL: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_NORMAL.single[t], tipo: 'NORMAL' as const, area: false, tier: t, entrada: NORMAL_SINGLE[t], atacante: 'eevee' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_NORMAL.area[t], tipo: 'NORMAL' as const, area: true, tier: t, entrada: NORMAL_AREA[t], atacante: 'eevee' })),
+  ],
+  // Sem A1: nenhum golpe de lutador cai nele (ver coreografias/lutador.ts).
+  FIGHTING: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_LUTADOR.single[t], tipo: 'FIGHTING' as const, area: false, tier: t, entrada: LUTADOR_SINGLE[t], atacante: 'machop' })),
+    ...([2, 3] as const).map(t => ({ id: VITRINE_DO_LUTADOR.area[t], tipo: 'FIGHTING' as const, area: true, tier: t, entrada: LUTADOR_AREA[t]!, atacante: 'machop' })),
   ],
 }
 
