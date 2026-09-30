@@ -11,6 +11,7 @@
 //   GRASS     30/09/2026 — aprovado pelo dono no lab do staging.
 //   NORMAL    30/09/2026 — aprovado pelo dono no lab do staging.
 //   FIGHTING  30/09/2026 — aprovado pelo dono; sem A1 (nenhum golpe de lutador cai nele).
+//   FLYING    30/09/2026 — aprovado pelo dono no lab do staging.
 import type { ElementType } from '@/data/generated/types'
 import { AGUA_AREA, AGUA_SINGLE } from './coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE } from './coreografias/eletrico'
@@ -18,6 +19,7 @@ import { FOGO_AREA, FOGO_SINGLE } from './coreografias/fogo'
 import { GRAMA_AREA, GRAMA_SINGLE } from './coreografias/grama'
 import { LUTADOR_AREA, LUTADOR_SINGLE } from './coreografias/lutador'
 import { NORMAL_AREA, NORMAL_SINGLE } from './coreografias/normal'
+import { VOADOR_AREA, VOADOR_SINGLE } from './coreografias/voador'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
@@ -29,6 +31,7 @@ export const REGISTRO_SINGLE: Partial<Record<ElementType, PorTier>> = {
   GRASS: GRAMA_SINGLE,
   NORMAL: NORMAL_SINGLE,
   FIGHTING: LUTADOR_SINGLE,
+  FLYING: VOADOR_SINGLE,
 }
 
 export const REGISTRO_DE_AREA: Partial<Record<ElementType, PorTier>> = {
@@ -38,6 +41,7 @@ export const REGISTRO_DE_AREA: Partial<Record<ElementType, PorTier>> = {
   GRASS: GRAMA_AREA,
   NORMAL: NORMAL_AREA,
   FIGHTING: LUTADOR_AREA,
+  FLYING: VOADOR_AREA,
 }
 
 export const REGISTRO_DE_MOTIVO: Partial<Record<Motivo, EntradaDeCoreografia>> = {}
