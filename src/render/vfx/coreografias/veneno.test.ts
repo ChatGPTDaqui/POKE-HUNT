@@ -1,6 +1,7 @@
-// POISON no lab (30/09): ainda NAO inscrito no registro — so entra no jogo
-// depois da aprovacao visual do dono. Aqui tranca o que vale desde ja.
+// POISON ligado no jogo (01/10, com o acabamento de impacto; o dono pediu o
+// plano inteiro ate producao).
 import { describe, expect, it } from 'vitest'
+import { ABILITIES, isDamagingAbility } from '@/data/abilities'
 import { resolverVfx } from '../resolverVfx'
 import { rngSemeado } from '../aleatorio'
 import { PELES } from '../paletas'
@@ -29,9 +30,15 @@ function quadro(e: EntradaDeCoreografia, tier: Tier, area: boolean, ms: number):
   return log
 }
 
-describe('POISON no lab', () => {
-  it('ainda cai na tira no jogo (sem aprovacao do dono)', () => {
-    expect(resolverVfx({ abilityId: 'sludge_bomb', area: false })).toBeNull()
+describe('POISON migrado', () => {
+  it('todo golpe de dano venenoso resolve pra coreografia nova', () => {
+    const golpes = Object.values(ABILITIES).filter(g => g.type === 'POISON' && isDamagingAbility(g))
+    expect(golpes.length).toBeGreaterThan(5) // anti-teste-vacuo
+    for (const g of golpes) {
+      const r = resolverVfx({ abilityId: g.id, area: g.target === 'aoe' })
+      expect(r, g.id).not.toBeNull()
+      expect(r!.tipo).toBe('POISON')
+    }
   })
 
   it.each(todas)('%s: impactos dentro da duracao', (_n, tier, e) => {

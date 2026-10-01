@@ -25,6 +25,7 @@
 // AREA preenche o interior e a borda marca o limite (dono, 29/09 e 30/09).
 import { estrelaDeImpacto, limitar, massaEmCamadas, riscos, saida, type Bolha } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
+import { comImpacto } from '../acabamento'
 
 const TAU = Math.PI * 2
 /** Angulo entre pontos consecutivos da espiral de Vogel (~137,5°). */
@@ -506,15 +507,15 @@ export const VITRINE_DO_VENENO = {
   area: { 1: 'acid', 2: 'sludge_wave', 3: 'aoe50_poison' },
 } as const
 
-export const VENENO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
+export const VENENO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: poisonSting, duracao: { 1: 900 }, alcance: 30, impactos: { 1: [FERRAO_VOO] } },
   2: { desenhar: sludge, duracao: { 2: 1100 }, alcance: 44, impactos: { 2: [SLUDGE_CHEGA] } },
   3: { desenhar: sludgeBomb, duracao: { 3: 1500 }, alcance: 46, impactos: { 3: [BOMBA_ESTOURA] } },
   4: { desenhar: gunkShot, duracao: { 4: 1800 }, alcance: 90, impactos: { 4: [GUNK_CHEGA] } },
-}
+}, false)
 
-export const VENENO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
+export const VENENO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: acid, duracao: { 1: 1300 }, alcance: 70, impactos: { 1: [300] } },
   2: { desenhar: sludgeWave, duracao: { 2: 1500 }, alcance: 30, impactos: { 2: [ONDA_SAI + 250] } },
   3: { desenhar: pantano, duracao: { 3: 1800 }, alcance: 60, impactos: { 3: [...PANTANO_GEISERES] } },
-}
+}, true)

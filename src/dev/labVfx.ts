@@ -21,6 +21,7 @@ import { LUTADOR_AREA, LUTADOR_SINGLE, VITRINE_DO_LUTADOR } from '@/render/vfx/c
 import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/coreografias/normal'
 import { VENENO_AREA, VENENO_SINGLE, VITRINE_DO_VENENO } from '@/render/vfx/coreografias/veneno'
 import { VITRINE_DO_VOADOR, VOADOR_AREA, VOADOR_SINGLE } from '@/render/vfx/coreografias/voador'
+import { semAcabamento } from '@/render/vfx/acabamento'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
 import { desenharPixelizado } from '@/render/vfx/pixelizador'
@@ -70,6 +71,16 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_VENENO.single[t], tipo: 'POISON' as const, area: false, tier: t, entrada: VENENO_SINGLE[t], atacante: 'ekans' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_VENENO.area[t], tipo: 'POISON' as const, area: true, tier: t, entrada: VENENO_AREA[t], atacante: 'ekans' })),
   ],
+}
+
+// Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
+// golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
+for (const [tipo, golpes] of Object.entries(TIPOS_DO_LAB)) {
+  if (tipo === 'FIRE') continue
+  for (const g of golpes!) {
+    const e = g.entrada
+    g.antes ??= { ...e, desenhar: c => semAcabamento(() => e.desenhar(c)) }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -342,8 +353,8 @@ function reiniciar(): void {
   // Area com o raio real (175) nao cabe no zoom de perto: abre a camera.
   opt.zoom = g.area ? Math.min(escolhido, 1.2) : escolhido
   for (const c of cenas) { c.medir(); c.montar(g) }
-  $('titulo-tira').textContent = g.antes ? 'Atual: coreografia em produção' : 'Atual: tira PNG'
-  $('titulo-anime').textContent = g.antes ? 'Novo: linguagem das referências' : 'Proposta: coreografia anime pixel'
+  $('titulo-tira').textContent = g.antes ? 'Atual: sem acabamento de impacto' : 'Atual: tira PNG'
+  $('titulo-anime').textContent = g.antes ? 'Novo: com acabamento de impacto' : 'Proposta: coreografia anime pixel'
 }
 
 const tipoSel = $<HTMLSelectElement>('tipo')

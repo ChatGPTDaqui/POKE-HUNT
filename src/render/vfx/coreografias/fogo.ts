@@ -27,6 +27,7 @@
 // pelo dono). Em AREA e o contrario: a borda pega fogo pra mostrar o alcance
 // (pedido do dono, 29/09) — ver `cercaDeFogo`.
 import { pintarFogo } from '../campoDeFogo'
+import { afinado, fagulhasEmTraco, POR_FAGULHA, POR_RAIO, raiosDeImpacto } from '../acabamento'
 import { estrelaDeImpacto, entrada, limitar, riscos, saida } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
 
@@ -507,60 +508,6 @@ function eruption(c: ContextoVfx): void {
 
 /** Area empilha calor de muitos focos: branco so no miolo do miolo. */
 const LIMIAR_BRANCO_DA_AREA = 2
-
-/** Triangulo afinado de `a` (largo) ate `b` (ponta): risco, raio, fagulha. */
-function afinado(ctx: CanvasRenderingContext2D, ax: number, ay: number, bx: number, by: number, larg: number): void {
-  const d = Math.hypot(bx - ax, by - ay)
-  if (d < 0.5) return
-  const nx = (-(by - ay) / d) * larg / 2, ny = ((bx - ax) / d) * larg / 2
-  ctx.moveTo(ax + nx, ay + ny); ctx.lineTo(bx, by); ctx.lineTo(ax - nx, ay - ny); ctx.closePath()
-}
-
-/** Numeros por raio e por fagulha — quem sorteia usa `n * POR_RAIO` etc. */
-const POR_RAIO = 2
-const POR_FAGULHA = 2
-
-/**
- * Raios do impacto: tracos afinados que espirram de `p` num leque em volta de
- * `dir` (`abre` rad pra cada lado; PI = circulo inteiro). A ponta sai rapido e
- * a cauda alcanca a ponta — o raio "passa" e some. `t` 0..1 em ~170 ms.
- */
-function raiosDeImpacto(
-  ctx: CanvasRenderingContext2D, p: Ponto, dir: number, abre: number, t: number,
-  sem: readonly number[], pele: Pele, k = 1,
-): void {
-  if (t < 0 || t > 1) return
-  const n = sem.length / POR_RAIO
-  for (const [cor, larg] of [[pele.base, 3.2], [pele.nucleo, 1.6]] as const) {
-    ctx.fillStyle = cor
-    ctx.beginPath()
-    for (let i = 0; i < n; i++) {
-      const a = dir + em(sem[i * 2], -abre, abre)
-      const comp = em(sem[i * 2 + 1], 10, 20) * k
-      const cab = comp * saida(limitar(t * 2.2)), cauda = comp * entrada(t)
-      afinado(ctx, p.x + Math.cos(a) * cauda, p.y + Math.sin(a) * cauda, p.x + Math.cos(a) * cab, p.y + Math.sin(a) * cab, larg * Math.min(k, 1.5))
-    }
-    ctx.fill()
-  }
-}
-
-/** Fagulhas em traco: saem de `p` no leque, perdem velocidade e CAEM. `t` 0..1 em ~380 ms. */
-function fagulhasEmTraco(
-  ctx: CanvasRenderingContext2D, p: Ponto, dir: number, abre: number, t: number,
-  sem: readonly number[], pele: Pele, k = 1,
-): void {
-  if (t < 0 || t > 1) return
-  const n = sem.length / POR_FAGULHA
-  ctx.fillStyle = t < 0.5 ? pele.nucleo : pele.meio
-  ctx.beginPath()
-  for (let i = 0; i < n; i++) {
-    const a = dir + em(sem[i * 2], -abre, abre), d = em(sem[i * 2 + 1], 22, 36) * k * saida(t)
-    const x = p.x + Math.cos(a) * d, y = p.y + Math.sin(a) * d + 10 * k * t * t
-    const tr = 3 * (1 - t) + 0.8
-    afinado(ctx, x, y, x - Math.cos(a) * tr, y - Math.sin(a) * tr + 1.5 * t, 1.2)
-  }
-  ctx.fill()
-}
 
 /**
  * Riscos de velocidade ao lado de uma trajetoria de `de` na direcao `dir`: um
