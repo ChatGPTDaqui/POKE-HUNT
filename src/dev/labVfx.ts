@@ -30,6 +30,7 @@ import { SOMBRIO_AREA, SOMBRIO_SINGLE, VITRINE_DO_SOMBRIO } from '@/render/vfx/c
 import { ACO_AREA, ACO_SINGLE, VITRINE_DO_ACO } from '@/render/vfx/coreografias/aco'
 import { GELO_AREA, GELO_SINGLE, VITRINE_DO_GELO } from '@/render/vfx/coreografias/gelo'
 import { FANTASMA_AREA, FANTASMA_SINGLE, VITRINE_DO_FANTASMA } from '@/render/vfx/coreografias/fantasma'
+import { DRAGAO_AREA, DRAGAO_SINGLE, VITRINE_DO_DRAGAO } from '@/render/vfx/coreografias/dragao'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -115,6 +116,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   GHOST: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FANTASMA.single[t], tipo: 'GHOST' as const, area: false, tier: t, entrada: FANTASMA_SINGLE[t], atacante: 'gengar' })),
     ...([2, 3] as const).map(t => ({ id: VITRINE_DO_FANTASMA.area[t], tipo: 'GHOST' as const, area: true, tier: t, entrada: FANTASMA_AREA[t]!, atacante: 'gengar' })),
+  ],
+  DRAGON: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_DRAGAO.single[t], tipo: 'DRAGON' as const, area: false, tier: t, entrada: DRAGAO_SINGLE[t], atacante: 'dratini' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_DRAGAO.area[t], tipo: 'DRAGON' as const, area: true, tier: t, entrada: DRAGAO_AREA[t], atacante: 'dratini' })),
   ],
 }
 
