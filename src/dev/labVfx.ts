@@ -19,6 +19,7 @@ import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografi
 import { GRAMA_AREA, GRAMA_SINGLE, VITRINE_DA_GRAMA } from '@/render/vfx/coreografias/grama'
 import { LUTADOR_AREA, LUTADOR_SINGLE, VITRINE_DO_LUTADOR } from '@/render/vfx/coreografias/lutador'
 import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/coreografias/normal'
+import { TERRA_AREA, TERRA_SINGLE, VITRINE_DA_TERRA } from '@/render/vfx/coreografias/terra'
 import { VENENO_AREA, VENENO_SINGLE, VITRINE_DO_VENENO } from '@/render/vfx/coreografias/veneno'
 import { VITRINE_DO_VOADOR, VOADOR_AREA, VOADOR_SINGLE } from '@/render/vfx/coreografias/voador'
 import { semAcabamento } from '@/render/vfx/acabamento'
@@ -70,6 +71,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   POISON: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_VENENO.single[t], tipo: 'POISON' as const, area: false, tier: t, entrada: VENENO_SINGLE[t], atacante: 'ekans' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_VENENO.area[t], tipo: 'POISON' as const, area: true, tier: t, entrada: VENENO_AREA[t], atacante: 'ekans' })),
+  ],
+  GROUND: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_TERRA.single[t], tipo: 'GROUND' as const, area: false, tier: t, entrada: TERRA_SINGLE[t], atacante: 'sandshrew' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_TERRA.area[t], tipo: 'GROUND' as const, area: true, tier: t, entrada: TERRA_AREA[t], atacante: 'sandshrew' })),
   ],
 }
 
