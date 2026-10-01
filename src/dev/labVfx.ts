@@ -22,6 +22,7 @@ import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/core
 import { TERRA_AREA, TERRA_SINGLE, VITRINE_DA_TERRA } from '@/render/vfx/coreografias/terra'
 import { VENENO_AREA, VENENO_SINGLE, VITRINE_DO_VENENO } from '@/render/vfx/coreografias/veneno'
 import { VITRINE_DO_VOADOR, VOADOR_AREA, VOADOR_SINGLE } from '@/render/vfx/coreografias/voador'
+import { INSETO_AREA, INSETO_SINGLE, VITRINE_DO_INSETO } from '@/render/vfx/coreografias/inseto'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -75,6 +76,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   GROUND: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_TERRA.single[t], tipo: 'GROUND' as const, area: false, tier: t, entrada: TERRA_SINGLE[t], atacante: 'sandshrew' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_TERRA.area[t], tipo: 'GROUND' as const, area: true, tier: t, entrada: TERRA_AREA[t], atacante: 'sandshrew' })),
+  ],
+  BUG: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_INSETO.single[t], tipo: 'BUG' as const, area: false, tier: t, entrada: INSETO_SINGLE[t], atacante: 'scyther' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_INSETO.area[t], tipo: 'BUG' as const, area: true, tier: t, entrada: INSETO_AREA[t], atacante: 'scyther' })),
   ],
 }
 
