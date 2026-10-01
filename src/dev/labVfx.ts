@@ -23,6 +23,7 @@ import { TERRA_AREA, TERRA_SINGLE, VITRINE_DA_TERRA } from '@/render/vfx/coreogr
 import { VENENO_AREA, VENENO_SINGLE, VITRINE_DO_VENENO } from '@/render/vfx/coreografias/veneno'
 import { VITRINE_DO_VOADOR, VOADOR_AREA, VOADOR_SINGLE } from '@/render/vfx/coreografias/voador'
 import { PSIQUICO_AREA, PSIQUICO_SINGLE, VITRINE_DO_PSIQUICO } from '@/render/vfx/coreografias/psiquico'
+import { INSETO_AREA, INSETO_SINGLE, VITRINE_DO_INSETO } from '@/render/vfx/coreografias/inseto'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -80,6 +81,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   PSYCHIC: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_PSIQUICO.single[t], tipo: 'PSYCHIC' as const, area: false, tier: t, entrada: PSIQUICO_SINGLE[t], atacante: 'espeon' })),
     ...([2, 3] as const).map(t => ({ id: VITRINE_DO_PSIQUICO.area[t], tipo: 'PSYCHIC' as const, area: true, tier: t, entrada: PSIQUICO_AREA[t]!, atacante: 'espeon' })),
+  ],
+  BUG: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_INSETO.single[t], tipo: 'BUG' as const, area: false, tier: t, entrada: INSETO_SINGLE[t], atacante: 'scyther' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_INSETO.area[t], tipo: 'BUG' as const, area: true, tier: t, entrada: INSETO_AREA[t], atacante: 'scyther' })),
   ],
 }
 
