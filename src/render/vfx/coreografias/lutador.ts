@@ -29,6 +29,7 @@
 //                      area inteira.
 import { crescente, estrelaDeImpacto, limitar, riscos, saida } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
+import { comImpacto } from '../acabamento'
 
 const TAU = Math.PI * 2
 /** Angulo entre pontos consecutivos da espiral de Vogel (~137,5°). */
@@ -373,14 +374,14 @@ export const VITRINE_DO_LUTADOR = {
   area: { 2: 'aoe50_fighting', 3: 'aoe50_fighting' },
 } as const
 
-export const LUTADOR_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
+export const LUTADOR_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: doubleKick, duracao: { 1: 700 }, alcance: 28, impactos: { 1: CHUTES.map(k => k.bate) } },
   2: { desenhar: forcePalm, duracao: { 2: 900 }, alcance: 44, impactos: { 2: [PALMA_BATE] } },
   3: { desenhar: skyUppercut, duracao: { 3: 1100 }, alcance: 56, impactos: { 3: [GANCHO_BATE] } },
   4: { desenhar: focusPunch, duracao: { 4: 1600 }, alcance: 100, impactos: { 4: [FOCO_BATE, FOCO_ECO] } },
-}
+}, false)
 
-export const LUTADOR_AREA: Partial<Record<1 | 2 | 3, EntradaDeCoreografia>> = {
+export const LUTADOR_AREA: Partial<Record<1 | 2 | 3, EntradaDeCoreografia>> = comImpacto({
   2: { desenhar: socoNoChao, duracao: { 2: 1100 }, alcance: 30, impactos: { 2: [chegaEm(SOCO_CHAO, SOCO_CORRE, 0.3)] } },
   3: { desenhar: tresPisoes, duracao: { 3: 1700 }, alcance: 60, impactos: { 3: [...PISOES] } },
-}
+}, true)

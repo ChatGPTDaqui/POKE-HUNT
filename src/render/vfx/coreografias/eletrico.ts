@@ -28,6 +28,7 @@
 import { rngSemeado } from '../aleatorio'
 import { estrelaDeImpacto, limitar, pontosDeRaio, riscos, saida, tracarRaio } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
+import { comImpacto } from '../acabamento'
 
 const TAU = Math.PI * 2
 
@@ -601,16 +602,16 @@ export const VITRINE_DO_ELETRICO = {
   area: { 1: 'charge', 2: 'discharge', 3: 'thunder_storm' },
 } as const
 
-export const ELETRICO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
+export const ELETRICO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: thunderShock, duracao: { 1: 700 }, alcance: 26, impactos: { 1: [SHOCK_ACESO[0][0]] } },
   2: { desenhar: shockWave, duracao: { 2: 1000 }, alcance: 34, impactos: { 2: [WAVE_CHEGA] } },
   // O raio do ceu nasce 140 acima do alvo: alcance cobre a queda inteira.
   3: { desenhar: thunderbolt, duracao: { 3: 1100 }, alcance: 150, impactos: { 3: [BOLT_CAI + 15] } },
   4: { desenhar: thunder, duracao: { 4: 1800 }, alcance: 200, impactos: { 4: [TROVAO_CAI] } },
-}
+}, false)
 
-export const ELETRICO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
+export const ELETRICO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: charge, duracao: { 1: 800 }, alcance: 30, impactos: { 1: [120] } },
   2: { desenhar: discharge, duracao: { 2: 1000 }, alcance: 60, impactos: { 2: DISCHARGE_IMPACTOS } },
   3: { desenhar: thunderStorm, duracao: { 3: 1800 }, alcance: 200, impactos: { 3: [...TEMPESTADE_QUEDAS, TEMPESTADE_FINAL] } },
-}
+}, true)

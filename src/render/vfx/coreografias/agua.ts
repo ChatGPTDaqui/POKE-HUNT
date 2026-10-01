@@ -29,6 +29,7 @@
 // sempre aparece — bolhas estourando, onda quebrando, geiseres.
 import { estrelaDeImpacto, limitar, massaEmCamadas, riscos, saida, type Bolha } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
+import { comImpacto } from '../acabamento'
 
 const TAU = Math.PI * 2
 /** Angulo entre pontos consecutivos da espiral de Vogel (~137,5°). */
@@ -474,15 +475,15 @@ export const VITRINE_DA_AGUA = {
   area: { 1: 'bubble', 2: 'surf', 3: 'water_spout' },
 } as const
 
-export const AGUA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
+export const AGUA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: waterGun, duracao: { 1: 900 }, alcance: 30, impactos: { 1: GUN_SAIDAS.map(s => s + GUN_VOO) } },
   2: { desenhar: waterPulse, duracao: { 2: 1000 }, alcance: 34, impactos: { 2: [PULSE_CHEGA] } },
   3: { desenhar: scald, duracao: { 3: 1100 }, alcance: 40, impactos: { 3: [SCALD_CHEGA] } },
   4: { desenhar: hydroPump, duracao: { 4: 1600 }, alcance: 80, impactos: { 4: [PUMP_CHEGA] } },
-}
+}, false)
 
-export const AGUA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
+export const AGUA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: bubble, duracao: { 1: 900 }, alcance: 30, impactos: { 1: [400] } },
   2: { desenhar: surf, duracao: { 2: 1200 }, alcance: 40, impactos: { 2: [SURF_SAI + 200] } },
   3: { desenhar: waterSpout, duracao: { 3: 1500 }, alcance: 190, impactos: { 3: [SPOUT_SOBE + 300, ...SPOUT_GEISERES] } },
-}
+}, true)
