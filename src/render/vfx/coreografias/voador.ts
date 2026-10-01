@@ -26,6 +26,7 @@
 import { PARTICULAS, type Sementes } from '../particulas'
 import { estrelaDeImpacto, limitar, riscos, saida } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
+import { comImpacto } from '../acabamento'
 
 const TAU = Math.PI * 2
 /** Angulo entre pontos consecutivos da espiral de Vogel (~137,5°). */
@@ -563,15 +564,15 @@ export const VITRINE_DO_VOADOR = {
   area: { 1: 'air_cutter', 2: 'aoe50_flying', 3: 'aoe50_flying' },
 } as const
 
-export const VOADOR_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
+export const VOADOR_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: gust, duracao: { 1: 1100 }, alcance: 30, impactos: { 1: [GUST_ESTOURA] } },
   2: { desenhar: airSlash, duracao: { 2: 1000 }, alcance: 34, impactos: { 2: SLASH_SAIDAS.map(s => s + SLASH_VOO) } },
   3: { desenhar: drillPeck, duracao: { 3: 1200 }, alcance: 40, impactos: { 3: [BROCA_CHEGA, BROCA_FURA] } },
   4: { desenhar: skyAttack, duracao: { 4: 1700 }, alcance: 130, impactos: { 4: [SKY_BATE] } },
-}
+}, false)
 
-export const VOADOR_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
+export const VOADOR_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: airCutter, duracao: { 1: 1000 }, alcance: 40, impactos: { 1: [CUTTER_VOO * 0.6] } },
   2: { desenhar: ventania, duracao: { 2: 1300 }, alcance: 60, impactos: { 2: [300] } },
   3: { desenhar: furacao, duracao: { 3: 1600 }, alcance: 180, impactos: { 3: [120, 600] } },
-}
+}, true)

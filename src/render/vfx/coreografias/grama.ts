@@ -32,6 +32,7 @@
 import { PARTICULAS, type Sementes } from '../particulas'
 import { crescente, estrelaDeImpacto, limitar, riscos, saida } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
+import { comImpacto } from '../acabamento'
 
 const TAU = Math.PI * 2
 
@@ -626,16 +627,16 @@ export const VITRINE_DA_GRAMA = {
   area: { 1: 'razor_leaf', 2: 'petal_blizzard', 3: 'frenzy_plant' },
 } as const
 
-export const GRAMA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
+export const GRAMA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: vineWhip, duracao: { 1: 1000 }, alcance: 34, impactos: { 1: WHIP.map(w => w.estala) } },
   2: { desenhar: magicalLeaf, duracao: { 2: 1100 }, alcance: 40, impactos: { 2: [MAGIC_CHEGA] } },
   3: { desenhar: leafBlade, duracao: { 3: 1100 }, alcance: 40, impactos: { 3: [...BLADE_CORTES] } },
   4: { desenhar: leafStorm, duracao: { 4: 1800 }, alcance: 95, impactos: { 4: [STORM_CHEGA, ...STORM_RAJADAS] } },
-}
+}, false)
 
-export const GRAMA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
+export const GRAMA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: razorLeaf, duracao: { 1: 1000 }, alcance: 30, impactos: { 1: [RAZOR_SAI + RAZOR_VOO] } },
   2: { desenhar: petalBlizzard, duracao: { 2: 1450 }, alcance: 30, impactos: { 2: [BLIZZARD.sai + 250] } },
   // As raizes da borda de tras (y ~ -67) sobem ate ~74 acima dela.
   3: { desenhar: frenzyPlant, duracao: { 3: 1600 }, alcance: 145, impactos: { 3: FRENZY_ONDAS } },
-}
+}, true)

@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // VFX anime pixel: acabamento de impacto nos tipos e veneno ligado.
+  {
+    version: '7.71',
+    date: '2026-10-01',
+    title: 'Impactos mais fortes e golpes venenosos com efeitos novos',
+    highlights: [
+      'Golpes elétricos, de água, grama, normais, lutadores e voadores ganharam um estouro no impacto, cada um do seu jeito: faísca em zigue-zague, respingo, folhas, raios de pancada.',
+      'Os golpes venenosos agora mostram gosma de verdade: Sludge Bomb explode em respingos, Gunk Shot solta uma nuvem tóxica e Sludge Wave cobre a área inteira.',
+    ],
+  },
   // VFX anime pixel: fogo redesenhado com as referencias do dono.
   {
     version: '7.70',
