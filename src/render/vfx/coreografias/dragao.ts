@@ -196,8 +196,8 @@ function outrage(c: ContextoVfx): void {
   const esc: Escama[] = []
   FURIA.forEach((t0, i) => esc.push(...estouroDeEscamas(alvo, (ms - t0) / 520, semEsc[i], 1 + i * 0.25)))
   escamas(ctx, esc, pele)
-  const ultimo = FURIA[2]
-  if (ms >= ultimo && ms < ultimo + 260) estrelaDeImpacto(ctx, alvo, 22, (ms - ultimo) / 260, pele, fila(semEstrela))
+  const derradeiro = FURIA[2]
+  if (ms >= derradeiro && ms < derradeiro + 260) estrelaDeImpacto(ctx, alvo, 22, (ms - derradeiro) / 260, pele, fila(semEstrela))
 }
 
 // ---------------------------------------------------------------------------
