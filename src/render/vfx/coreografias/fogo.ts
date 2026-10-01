@@ -11,10 +11,12 @@
 //   textura     a do campo de calor (campoDeFogo.ts): as particulas somam calor,
 //               um ruido rolando pra cima rasga a borda, e o calor e fatiado nas
 //               4 cores. Substituiu a gota recortada do v2.
+//   referencias  (dono, 01/10) nucleo branco, riscos de velocidade, impacto em
+//               raios + fagulhas, rescaldo que esfria — ver "PECAS DAS REFERENCIAS".
 //
 //   T1 Ember          tres pelotas-cometa cuspidas; cada uma acende o alvo.
 //   T2 Flame Burst    bola que estoura num anel de linguas pra fora + incendio.
-//   T3 Flamethrower   o jato do v2 (mesma construcao).
+//   T3 Flamethrower   jato que chega no impacto, espirra em raios no alvo.
 //   T4 Fire Blast     carga que suga linguas, bola pesada e o 大 de 5 bracos.
 //   A1 Incinerate     linguas rasteiras disparando do centro pra fora.
 //   A2 Heat Wave      o chao pega fogo de dentro pra fora, foco por foco.
@@ -98,8 +100,8 @@ const em = (u: number, a: number, b: number) => a + u * (b - a)
  * campo de calor com ruido (campoDeFogo.ts). A construcao do golpe nao muda —
  * so a pele do fogo (decisao do dono, 28/09).
  */
-function pintarChamas(ctx: CanvasRenderingContext2D, chamas: readonly Viva[], pele: Pele, ms: number, quente = false, limiarBranco?: number): void {
-  pintarFogo(ctx, chamas, pele, ms, { quente, limiarBranco })
+function pintarChamas(ctx: CanvasRenderingContext2D, chamas: readonly Viva[], pele: Pele, ms: number, limiarBranco?: number): void {
+  pintarFogo(ctx, chamas, pele, ms, { quente: true, limiarBranco })
 }
 
 /** Fumaca do v2: bolotas em 3 tons, a luz deslocada pra cima-esquerda. */
@@ -199,13 +201,12 @@ function carga(ctx: CanvasRenderingContext2D, p: Ponto, k: number, raio: number,
 const EMBER_SAIDAS = [0, 90, 180] as const
 const EMBER_VOO = 170
 
-function ember(c: ContextoVfx, novo = false): void {
+function ember(c: ContextoVfx): void {
   const { ctx, ms, alvo, pele, rng } = c
   const b = boca(c)
   const semBolas = EMBER_SAIDAS.map(() => sortear(rng, 12 * POR_CHAMA))
   const semFogo = EMBER_SAIDAS.map(() => sortear(rng, 6 * POR_CHAMA))
   const desvios = EMBER_SAIDAS.map(() => sortear(rng, 2))
-  // Sorteios do fogo novo DEPOIS dos antigos: a versao antiga nao muda.
   const semRaios = EMBER_SAIDAS.map(() => sortear(rng, 5 * POR_RAIO))
   const semFagulhas = EMBER_SAIDAS.map(() => sortear(rng, 6 * POR_FAGULHA))
   const chamas: Viva[] = [], brasas: Viva[] = []
@@ -218,15 +219,13 @@ function ember(c: ContextoVfx, novo = false): void {
     chamas.push(...bolaDeFogo(ms, sai, sai + EMBER_VOO, t => trajeto((t - sai) / EMBER_VOO), 2.6, semBolas[i]))
     const f = incendio(ms, fim, sai + EMBER_VOO, sai + EMBER_VOO + 150, semFogo[i], 0.7)
     chamas.push(...f.chamas); brasas.push(...f.brasas)
-    if (novo) {
-      const dir = Math.atan2(fim.y - b.y, fim.x - b.x), bate = sai + EMBER_VOO
-      acertos.push(() => {
-        raiosDeImpacto(ctx, fim, dir, 1.2, (ms - bate) / 150, semRaios[i], pele, 0.55)
-        fagulhasEmTraco(ctx, fim, dir, 1.4, (ms - bate) / 320, semFagulhas[i], pele, 0.5)
-      })
-    }
+    const dir = Math.atan2(fim.y - b.y, fim.x - b.x), bate = sai + EMBER_VOO
+    acertos.push(() => {
+      raiosDeImpacto(ctx, fim, dir, 1.2, (ms - bate) / 150, semRaios[i], pele, 0.55)
+      fagulhasEmTraco(ctx, fim, dir, 1.4, (ms - bate) / 320, semFagulhas[i], pele, 0.5)
+    })
   })
-  pintarChamas(ctx, chamas, pele, ms, novo)
+  pintarChamas(ctx, chamas, pele, ms)
   for (const a of acertos) a()
   pintarBrasas(ctx, brasas, pele)
 }
@@ -237,7 +236,7 @@ function ember(c: ContextoVfx, novo = false): void {
 
 const BURST_CHEGA = 260
 
-function flameBurst(c: ContextoVfx, novo = false): void {
+function flameBurst(c: ContextoVfx): void {
   const { ctx, ms, alvo, pele, rng } = c
   const b = boca(c)
   const semBola = sortear(rng, 14 * POR_CHAMA)
@@ -262,58 +261,23 @@ function flameBurst(c: ContextoVfx, novo = false): void {
   const f = incendio(ms, alvo, BURST_CHEGA + 60, BURST_CHEGA + 360, semFogo)
   chamas.push(...f.chamas)
   const fumaca = fumacaDoFim(ms, alvo, BURST_CHEGA + 380, BURST_CHEGA + 620, semFumaca)
-  if (novo) pintarFumacaComBrasa(ctx, fumaca, pele)
-  else pintarFumaca(ctx, fumaca, pele)
-  pintarChamas(ctx, chamas, pele, ms, novo)
-  if (novo) {
-    const dist = Math.hypot(alvo.x - b.x, alvo.y - b.y), dir = Math.atan2(alvo.y - b.y, alvo.x - b.x)
-    riscosDeVelocidade(ctx, ms, b, dir, dist, (dist / (BURST_CHEGA - 90)) * 1.8, 90, BURST_CHEGA - 60, 30, semRiscos, pele, 0.8)
-    // Estouro em FLOR: raios e fagulhas pro circulo inteiro.
-    raiosDeImpacto(ctx, alvo, 0, Math.PI, (ms - BURST_CHEGA) / 170, semRaios, pele, 0.9)
-    fagulhasEmTraco(ctx, alvo, 0, Math.PI, (ms - BURST_CHEGA) / 380, semFagulhas, pele, 0.9)
-    brasasSubindo(ctx, ms, { x: alvo.x, y: alvo.y + 12 }, BURST_CHEGA + 400, semBrasas, pele)
-  }
+  pintarFumacaComBrasa(ctx, fumaca, pele)
+  pintarChamas(ctx, chamas, pele, ms)
+  const dist = Math.hypot(alvo.x - b.x, alvo.y - b.y), dir = Math.atan2(alvo.y - b.y, alvo.x - b.x)
+  riscosDeVelocidade(ctx, ms, b, dir, dist, (dist / (BURST_CHEGA - 90)) * 1.8, 90, BURST_CHEGA - 60, 30, semRiscos, pele, 0.8)
+  // Estouro em FLOR: raios e fagulhas pro circulo inteiro.
+  raiosDeImpacto(ctx, alvo, 0, Math.PI, (ms - BURST_CHEGA) / 170, semRaios, pele, 0.9)
+  fagulhasEmTraco(ctx, alvo, 0, Math.PI, (ms - BURST_CHEGA) / 380, semFagulhas, pele, 0.9)
+  brasasSubindo(ctx, ms, { x: alvo.x, y: alvo.y + 12 }, BURST_CHEGA + 400, semBrasas, pele)
   pintarBrasas(ctx, f.brasas, pele)
   if (ms >= BURST_CHEGA && ms < BURST_CHEGA + 200) estrelaDeImpacto(ctx, alvo, 13, (ms - BURST_CHEGA) / 200, pele, fila(semEstrela))
 }
 
 // ---------------------------------------------------------------------------
-// T3 — FLAMETHROWER (o do v2, identico)
+// T3 — FLAMETHROWER (o piloto 2 aprovado; ver "PECAS DAS REFERENCIAS")
 // ---------------------------------------------------------------------------
 
 const JATO_INICIO = 160
-const JATO_FIM = 620
-const JATO_VEL = 0.2 // unidades/ms
-
-/** Quando o jato alcanca o alvo — o impacto do Flamethrower depende da distancia. */
-export function chegadaDoJato(origem: Ponto, alvo: Ponto): number {
-  return JATO_INICIO + Math.hypot(alvo.x - origem.x, alvo.y - origem.y) / JATO_VEL
-}
-
-function flamethrower(c: ContextoVfx): void {
-  const { ctx, ms, alvo, pele, rng } = c
-  const b = boca(c)
-  const semJato = sortear(rng, 26 * POR_CHAMA)
-  const semFogo = sortear(rng, 30 * POR_CHAMA)
-  const semFumaca = sortear(rng, 8 * POR_CHAMA)
-  const semEstrela = sortear(rng, 9)
-  const dist = Math.hypot(alvo.x - b.x, alvo.y - b.y)
-  const base = Math.atan2(alvo.y - b.y, alvo.x - b.x)
-  const chegada = JATO_INICIO + dist / JATO_VEL
-
-  if (ms < 170) carga(ctx, b, ms / 170, 3.5, pele)
-  // Jato: uma lingua a cada 18 ms, velocidade 0,2, vida = tempo ate o alvo.
-  const chamas = emitir(ms, JATO_INICIO, JATO_FIM, 18, 1, semJato, POR_CHAMA, s => {
-    const a = base + em(s[0], -0.12, 0.12)
-    return { x: b.x, y: b.y, vx: Math.cos(a) * JATO_VEL, vy: Math.sin(a) * JATO_VEL, vida: (dist / JATO_VEL) * 1.05, r: em(s[1], 3.2, 4.4) }
-  })
-  const f = incendio(ms, alvo, chegada, 760, semFogo)
-  chamas.push(...f.chamas)
-  pintarFumaca(ctx, fumacaDoFim(ms, alvo, 700, 1100, semFumaca), pele)
-  pintarChamas(ctx, chamas, pele, ms)
-  pintarBrasas(ctx, f.brasas, pele)
-  if (ms >= chegada && ms < chegada + 200) estrelaDeImpacto(ctx, alvo, 15, (ms - chegada) / 200, pele, fila(semEstrela))
-}
 
 // ---------------------------------------------------------------------------
 // T4 — FIRE BLAST
@@ -324,7 +288,7 @@ const BLAST_CHEGA = 620
 /** Os 5 bracos do 大 (cima, esquerda, direita, baixo-esq, baixo-dir). */
 const BRACOS = [CIMA, Math.PI, 0, Math.PI * 0.72, Math.PI * 0.28] as const
 
-function fireBlast(c: ContextoVfx, novo = false): void {
+function fireBlast(c: ContextoVfx): void {
   const { ctx, ms, alvo, pele, rng } = c
   const b = boca(c)
   const semSuga = sortear(rng, 20 * POR_CHAMA)
@@ -362,16 +326,13 @@ function fireBlast(c: ContextoVfx, novo = false): void {
   const f = incendio(ms, alvo, BLAST_CHEGA + 80, BLAST_CHEGA + 560, semFogo, 1.25)
   chamas.push(...f.chamas)
   const fumaca = fumacaDoFim(ms, alvo, BLAST_CHEGA + 420, BLAST_CHEGA + 780, semFumaca, 1.6)
-  if (novo) pintarFumacaComBrasa(ctx, fumaca, pele)
-  else pintarFumaca(ctx, fumaca, pele)
-  pintarChamas(ctx, chamas, pele, ms, novo)
-  if (novo) {
-    const dist = Math.hypot(alvo.x - b.x, alvo.y - b.y), dir = Math.atan2(alvo.y - b.y, alvo.x - b.x)
-    riscosDeVelocidade(ctx, ms, b, dir, dist, (dist / (BLAST_CHEGA - BLAST_CARGA)) * 2, BLAST_CARGA, BLAST_CHEGA - 60, 24, semVelocidade, pele, 1.3)
-    raiosDeImpacto(ctx, alvo, 0, Math.PI, (ms - BLAST_CHEGA) / 200, semRaios, pele, 1.5)
-    fagulhasEmTraco(ctx, alvo, 0, Math.PI, (ms - BLAST_CHEGA) / 450, semFagulhas, pele, 1.4)
-    brasasSubindo(ctx, ms, { x: alvo.x, y: alvo.y + 12 }, BLAST_CHEGA + 450, semBrasas, pele, 1.3)
-  }
+  pintarFumacaComBrasa(ctx, fumaca, pele)
+  pintarChamas(ctx, chamas, pele, ms)
+  const dist = Math.hypot(alvo.x - b.x, alvo.y - b.y), dir = Math.atan2(alvo.y - b.y, alvo.x - b.x)
+  riscosDeVelocidade(ctx, ms, b, dir, dist, (dist / (BLAST_CHEGA - BLAST_CARGA)) * 2, BLAST_CARGA, BLAST_CHEGA - 60, 24, semVelocidade, pele, 1.3)
+  raiosDeImpacto(ctx, alvo, 0, Math.PI, (ms - BLAST_CHEGA) / 200, semRaios, pele, 1.5)
+  fagulhasEmTraco(ctx, alvo, 0, Math.PI, (ms - BLAST_CHEGA) / 450, semFagulhas, pele, 1.4)
+  brasasSubindo(ctx, ms, { x: alvo.x, y: alvo.y + 12 }, BLAST_CHEGA + 450, semBrasas, pele, 1.3)
   pintarBrasas(ctx, f.brasas, pele)
   const e = ms - BLAST_CHEGA
   if (e >= 0 && e < 260) estrelaDeImpacto(ctx, alvo, 22, e / 260, pele, fila(semEstrela))
@@ -417,7 +378,7 @@ function cercaDeFogo(
 const POR_FOCO_DA_CERCA = 12 * POR_CHAMA
 
 // A1 — INCINERATE: linguas rasteiras disparando do centro pra fora
-function incinerate(c: ContextoVfx, novo = false): void {
+function incinerate(c: ContextoVfx): void {
   const { ctx, ms, alvo: centro, raio, pele, rng } = c
   const k = escalaDaArea(raio)
   const sem = sortear(rng, 40 * POR_CHAMA)
@@ -433,12 +394,10 @@ function incinerate(c: ContextoVfx, novo = false): void {
   const brasas: Viva[] = []
   cercaDeFogo(ms, centro, raio, 180, 160, 260, 16, semCerca, k * 0.55, chamas, brasas)
   chamas.sort((p, q) => p.y - q.y)
-  pintarChamas(ctx, chamas, pele, ms, novo, LIMIAR_BRANCO_DA_AREA)
-  if (novo) {
-    // A ignicao: raios e fagulhas do centro pra fora, no instante do disparo.
-    raiosDeImpacto(ctx, chao, 0, Math.PI, ms / 200, semRaios, pele, k * 0.9)
-    fagulhasEmTraco(ctx, chao, 0, Math.PI, ms / 420, semFagulhas, pele, k * 0.8)
-  }
+  pintarChamas(ctx, chamas, pele, ms, LIMIAR_BRANCO_DA_AREA)
+  // A ignicao: raios e fagulhas do centro pra fora, no instante do disparo.
+  raiosDeImpacto(ctx, chao, 0, Math.PI, ms / 200, semRaios, pele, k * 0.9)
+  fagulhasEmTraco(ctx, chao, 0, Math.PI, ms / 420, semFagulhas, pele, k * 0.8)
   pintarBrasas(ctx, brasas, pele)
 }
 
@@ -446,7 +405,7 @@ function incinerate(c: ContextoVfx, novo = false): void {
 const HEAT_FOCOS = 22
 const HEAT_ESPALHA = 520
 
-function heatWave(c: ContextoVfx, novo = false): void {
+function heatWave(c: ContextoVfx): void {
   const { ctx, ms, alvo: centro, raio, pele, rng } = c
   const k = escalaDaArea(raio)
   const semFocos = sortear(rng, HEAT_FOCOS * 2)
@@ -466,9 +425,8 @@ function heatWave(c: ContextoVfx, novo = false): void {
   cercaDeFogo(ms, centro, raio, HEAT_ESPALHA * 0.8, 200, 520, 20, semCerca, k * 0.6, chamas, brasas)
   chamas.sort((p, q) => p.y - q.y)
   const fumaca = fumacaDoFim(ms, centro, 600, 1000, semFumaca, k)
-  if (novo) pintarFumacaComBrasa(ctx, fumaca, pele)
-  else pintarFumaca(ctx, fumaca, pele)
-  pintarChamas(ctx, chamas, pele, ms, novo, LIMIAR_BRANCO_DA_AREA)
+  pintarFumacaComBrasa(ctx, fumaca, pele)
+  pintarChamas(ctx, chamas, pele, ms, LIMIAR_BRANCO_DA_AREA)
   pintarBrasas(ctx, brasas, pele)
 }
 
@@ -480,7 +438,7 @@ const ERUPCAO_SUBIDA = 260
 /** Quando cada bola cai — usado como `impactos` do tier. */
 export const ERUPCAO_POUSOS = Array.from({ length: ERUPCAO_BOLAS }, (_, i) => 500 + i * 60)
 
-function eruption(c: ContextoVfx, novo = false): void {
+function eruption(c: ContextoVfx): void {
   const { ctx, ms, alvo: centro, raio, pele, rng } = c
   const k = escalaDaArea(raio)
   const semColuna = sortear(rng, 40 * POR_CHAMA)
@@ -518,25 +476,22 @@ function eruption(c: ContextoVfx, novo = false): void {
   cercaDeFogo(ms, centro, raio, ERUPCAO_POUSOS[0], 300, 600, 20, semCerca, k * 0.6, chamas, brasas)
   chamas.sort((p, q) => p.y - q.y)
   const fumaca = fumacaDoFim(ms, topo, 420, 1000, semFumaca, k * 1.3)
-  if (novo) pintarFumacaComBrasa(ctx, fumaca, pele)
-  else pintarFumaca(ctx, fumaca, pele)
-  pintarChamas(ctx, chamas, pele, ms, novo, LIMIAR_BRANCO_DA_AREA)
-  if (novo) {
-    // Cada bola que pousa espirra fagulhas pra cima.
-    pousos.forEach((p, i) => fagulhasEmTraco(ctx, p, CIMA, 1.3, (ms - ERUPCAO_POUSOS[i]) / 360, semFagulhas[i], pele, k * 0.45))
-  }
+  pintarFumacaComBrasa(ctx, fumaca, pele)
+  pintarChamas(ctx, chamas, pele, ms, LIMIAR_BRANCO_DA_AREA)
+  // Cada bola que pousa espirra fagulhas pra cima.
+  pousos.forEach((p, i) => fagulhasEmTraco(ctx, p, CIMA, 1.3, (ms - ERUPCAO_POUSOS[i]) / 360, semFagulhas[i], pele, k * 0.45))
   pintarBrasas(ctx, brasas, pele)
 }
 
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// FOGO NOVO — linguagem das referencias do dono (piloto 2 aprovado, 30/09)
+// PECAS DAS REFERENCIAS — linguagem do fogo aprovada pelo dono (01/10/2026)
 // ---------------------------------------------------------------------------
 //
 // O piloto 1 (pixel decidido na grade, formas duras) foi reprovado; o piloto 2
-// do Flamethrower partiu do ANTIGO e somou o que as referencias tem. Aprovado,
-// vira a linguagem do tipo inteiro. As pecas:
+// do Flamethrower partiu do v2 e somou o que as referencias tem; aprovado, virou
+// a linguagem do tipo inteiro. As pecas:
 //   - fogo QUENTE: nucleo branco onde o calor empilha (campoDeFogo);
 //   - RISCOS de velocidade correndo junto do que voa, mais rapidos que ele;
 //   - IMPACTO em raios afinados + fagulhas em traco que caem;
@@ -546,8 +501,9 @@ function eruption(c: ContextoVfx, novo = false): void {
 // nesta escala, virava rabisco) e marca queimada no chao (a camada de VFX e
 // desenhada por cima das entidades, a marca cobria as pernas do alvo).
 //
-// Enquanto o dono avalia no lab, cada golpe tem as duas versoes: `novo` liga
-// as pecas acima. Aprovado, o `novo` vira o unico caminho.
+// Valem pra outros tipos com a forma DELES (raio de agua nao e raio de fogo):
+// o que se leva e a estrutura — impacto em raios + fagulhas, riscos no que
+// voa, rescaldo que esfria.
 
 /** Area empilha calor de muitos focos: branco so no miolo do miolo. */
 const LIMIAR_BRANCO_DA_AREA = 2
@@ -654,12 +610,12 @@ function brasasSubindo(ctx: CanvasRenderingContext2D, ms: number, pe: Ponto, t0:
   }
 }
 
-// T3 NOVO — FLAMETHROWER (o piloto 2 aprovado). O jato CHEGA no instante do
-// impacto (velocidade pela distancia): no antigo a reacao vinha antes do fogo.
-const NOVO_JATO_CHEGA = 250
-const NOVO_JATO_FIM = 640
+// T3 — FLAMETHROWER. O jato CHEGA no instante do impacto (velocidade pela
+// distancia): no do v2 a reacao do alvo vinha antes do fogo chegar.
+const JATO_CHEGA = 250
+const JATO_FIM = 640
 
-function flamethrowerNovo(c: ContextoVfx): void {
+function flamethrower(c: ContextoVfx): void {
   const { ctx, ms, alvo, pele, rng } = c
   const b = boca(c)
   const semJato = sortear(rng, 56 * POR_CHAMA)
@@ -673,25 +629,25 @@ function flamethrowerNovo(c: ContextoVfx): void {
 
   const dist = Math.hypot(alvo.x - b.x, alvo.y - b.y)
   const base = Math.atan2(alvo.y - b.y, alvo.x - b.x)
-  const vel = Math.max(0.2, dist / (NOVO_JATO_CHEGA - JATO_INICIO))
+  const vel = Math.max(0.2, dist / (JATO_CHEGA - JATO_INICIO))
 
   if (ms < 170) carga(ctx, b, ms / 170, 3.5, pele)
   // A cada 9 ms: o jato e mais rapido que o antigo, e a 16 ms virava contas soltas.
-  const chamas = emitir(ms, JATO_INICIO, NOVO_JATO_FIM, 9, 1, semJato, POR_CHAMA, s => {
+  const chamas = emitir(ms, JATO_INICIO, JATO_FIM, 9, 1, semJato, POR_CHAMA, s => {
     const a = base + em(s[0], -0.1, 0.1)
     return { x: b.x, y: b.y, vx: Math.cos(a) * vel, vy: Math.sin(a) * vel, vida: (dist / vel) * 1.05, r: em(s[1], 3.4, 4.8) }
   })
-  const f = incendio(ms, alvo, NOVO_JATO_CHEGA, 820, semFogo)
+  const f = incendio(ms, alvo, JATO_CHEGA, 820, semFogo)
   chamas.push(...f.chamas)
   pintarFumacaComBrasa(ctx, fumacaDoFim(ms, alvo, 760, 1150, semFumaca), pele)
-  pintarChamas(ctx, chamas, pele, ms, true)
-  riscosDeVelocidade(ctx, ms, b, base, dist, vel * 1.8, JATO_INICIO, NOVO_JATO_FIM, 40, semRiscos, pele)
+  pintarChamas(ctx, chamas, pele, ms)
+  riscosDeVelocidade(ctx, ms, b, base, dist, vel * 1.8, JATO_INICIO, JATO_FIM, 40, semRiscos, pele)
   // Leque pra frente e pra cima: o fogo passa do alvo.
-  raiosDeImpacto(ctx, alvo, base - 0.2, 1.3, (ms - NOVO_JATO_CHEGA) / 170, semRaios, pele)
-  fagulhasEmTraco(ctx, alvo, base - 0.2, 1.5, (ms - NOVO_JATO_CHEGA) / 380, semFagulhas, pele)
+  raiosDeImpacto(ctx, alvo, base - 0.2, 1.3, (ms - JATO_CHEGA) / 170, semRaios, pele)
+  fagulhasEmTraco(ctx, alvo, base - 0.2, 1.5, (ms - JATO_CHEGA) / 380, semFagulhas, pele)
   pintarBrasas(ctx, f.brasas, pele)
   brasasSubindo(ctx, ms, { x: alvo.x, y: alvo.y + 12 }, 800, semBrasas, pele)
-  if (ms >= NOVO_JATO_CHEGA && ms < NOVO_JATO_CHEGA + 200) estrelaDeImpacto(ctx, alvo, 15, (ms - NOVO_JATO_CHEGA) / 200, pele, fila(semEstrela))
+  if (ms >= JATO_CHEGA && ms < JATO_CHEGA + 200) estrelaDeImpacto(ctx, alvo, 15, (ms - JATO_CHEGA) / 200, pele, fila(semEstrela))
 }
 
 /** Nome do golpe-vitrine de cada tier — o que o lab mostra e o que a coreografia imita. */
@@ -703,9 +659,7 @@ export const VITRINE_DO_FOGO = {
 export const FOGO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
   1: { desenhar: ember, duracao: { 1: 900 }, alcance: 26, impactos: { 1: EMBER_SAIDAS.map(s => s + EMBER_VOO) } },
   2: { desenhar: flameBurst, duracao: { 2: 1150 }, alcance: 34, impactos: { 2: [BURST_CHEGA] } },
-  // Impacto do jato depende da distancia; 250 ms e a chegada na distancia
-  // tipica de combate (~18 unidades da boca ao peito).
-  3: { desenhar: flamethrower, duracao: { 3: 1150 }, alcance: 34, impactos: { 3: [250] } },
+  3: { desenhar: flamethrower, duracao: { 3: 1450 }, alcance: 40, impactos: { 3: [JATO_CHEGA] } },
   4: { desenhar: fireBlast, duracao: { 4: 1500 }, alcance: 50, impactos: { 4: [BLAST_CHEGA] } },
 }
 
@@ -715,16 +669,3 @@ export const FOGO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
   3: { desenhar: eruption, duracao: { 3: 1800 }, alcance: 200, impactos: { 3: ERUPCAO_POUSOS } },
 }
 
-/** Fogo novo (ver "FOGO NOVO"): so no lab ate o dono aprovar o tipo inteiro. */
-export const FOGO_NOVO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
-  1: { ...FOGO_SINGLE[1], desenhar: c => ember(c, true) },
-  2: { ...FOGO_SINGLE[2], desenhar: c => flameBurst(c, true) },
-  3: { desenhar: flamethrowerNovo, duracao: { 3: 1450 }, alcance: 40, impactos: { 3: [NOVO_JATO_CHEGA] } },
-  4: { ...FOGO_SINGLE[4], desenhar: c => fireBlast(c, true) },
-}
-
-export const FOGO_NOVO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
-  1: { ...FOGO_AREA[1], desenhar: c => incinerate(c, true) },
-  2: { ...FOGO_AREA[2], desenhar: c => heatWave(c, true) },
-  3: { ...FOGO_AREA[3], desenhar: c => eruption(c, true) },
-}
