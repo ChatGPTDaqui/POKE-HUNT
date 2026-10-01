@@ -14,6 +14,7 @@
 //   FLYING    30/09/2026 — aprovado pelo dono no lab do staging.
 //   POISON    01/10/2026 — com o acabamento de impacto (acabamento.ts), no plano
 //             que o dono mandou levar ate producao.
+//   GROUND    01/10/2026 — aprovado pelo dono no lab do staging.
 import type { ElementType } from '@/data/generated/types'
 import { AGUA_AREA, AGUA_SINGLE } from './coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE } from './coreografias/eletrico'
@@ -21,6 +22,7 @@ import { FOGO_AREA, FOGO_SINGLE } from './coreografias/fogo'
 import { GRAMA_AREA, GRAMA_SINGLE } from './coreografias/grama'
 import { LUTADOR_AREA, LUTADOR_SINGLE } from './coreografias/lutador'
 import { NORMAL_AREA, NORMAL_SINGLE } from './coreografias/normal'
+import { TERRA_AREA, TERRA_SINGLE } from './coreografias/terra'
 import { VENENO_AREA, VENENO_SINGLE } from './coreografias/veneno'
 import { VOADOR_AREA, VOADOR_SINGLE } from './coreografias/voador'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
@@ -36,6 +38,7 @@ export const REGISTRO_SINGLE: Partial<Record<ElementType, PorTier>> = {
   FIGHTING: LUTADOR_SINGLE,
   FLYING: VOADOR_SINGLE,
   POISON: VENENO_SINGLE,
+  GROUND: TERRA_SINGLE,
 }
 
 export const REGISTRO_DE_AREA: Partial<Record<ElementType, PorTier>> = {
@@ -47,6 +50,7 @@ export const REGISTRO_DE_AREA: Partial<Record<ElementType, PorTier>> = {
   FIGHTING: LUTADOR_AREA,
   FLYING: VOADOR_AREA,
   POISON: VENENO_AREA,
+  GROUND: TERRA_AREA,
 }
 
 export const REGISTRO_DE_MOTIVO: Partial<Record<Motivo, EntradaDeCoreografia>> = {}
