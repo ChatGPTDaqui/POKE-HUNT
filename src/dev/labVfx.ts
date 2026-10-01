@@ -25,6 +25,7 @@ import { VITRINE_DO_VOADOR, VOADOR_AREA, VOADOR_SINGLE } from '@/render/vfx/core
 import { PSIQUICO_AREA, PSIQUICO_SINGLE, VITRINE_DO_PSIQUICO } from '@/render/vfx/coreografias/psiquico'
 import { INSETO_AREA, INSETO_SINGLE, VITRINE_DO_INSETO } from '@/render/vfx/coreografias/inseto'
 import { ROCHA_AREA, ROCHA_SINGLE, VITRINE_DA_ROCHA } from '@/render/vfx/coreografias/rocha'
+import { FADA_AREA, FADA_SINGLE, VITRINE_DA_FADA } from '@/render/vfx/coreografias/fada'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -90,6 +91,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   ROCK: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_ROCHA.single[t], tipo: 'ROCK' as const, area: false, tier: t, entrada: ROCHA_SINGLE[t], atacante: 'geodude' })),
     ...([2, 3] as const).map(t => ({ id: VITRINE_DA_ROCHA.area[t], tipo: 'ROCK' as const, area: true, tier: t, entrada: ROCHA_AREA[t]!, atacante: 'geodude' })),
+  ],
+  FAIRY: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_FADA.single[t], tipo: 'FAIRY' as const, area: false, tier: t, entrada: FADA_SINGLE[t], atacante: 'clefairy' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_FADA.area[t], tipo: 'FAIRY' as const, area: true, tier: t, entrada: FADA_AREA[t], atacante: 'clefairy' })),
   ],
 }
 
