@@ -15,7 +15,7 @@ import { tiraDeAreaDoElemento, tiraDoElemento, type TiraDeVfx } from '@/data/vfx
 import { hashTexto, rngSemeado } from '@/render/vfx/aleatorio'
 import { AGUA_AREA, AGUA_SINGLE, VITRINE_DA_AGUA } from '@/render/vfx/coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
-import { FOGO_AREA, FOGO_NOVO_AREA, FOGO_NOVO_SINGLE, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
+import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
 import { GRAMA_AREA, GRAMA_SINGLE, VITRINE_DA_GRAMA } from '@/render/vfx/coreografias/grama'
 import { LUTADOR_AREA, LUTADOR_SINGLE, VITRINE_DO_LUTADOR } from '@/render/vfx/coreografias/lutador'
 import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/coreografias/normal'
@@ -37,10 +37,9 @@ interface GolpeDoLab {
 }
 
 const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
-  // Fogo novo (referencias do dono): a esquerda o atual, a direita o novo.
   FIRE: [
-    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_NOVO_SINGLE[t], antes: FOGO_SINGLE[t], atacante: 'charmander' })),
-    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_NOVO_AREA[t], antes: FOGO_AREA[t], atacante: 'charmander' })),
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
   ],
   ELECTRIC: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_ELETRICO.single[t], tipo: 'ELECTRIC' as const, area: false, tier: t, entrada: ELETRICO_SINGLE[t], atacante: 'pikachu' })),

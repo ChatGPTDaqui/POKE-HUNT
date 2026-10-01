@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // VFX anime pixel: fogo redesenhado com as referencias do dono.
+  {
+    version: '7.70',
+    date: '2026-10-01',
+    title: 'Golpes de fogo mais quentes',
+    highlights: [
+      'Os golpes de fogo ganharam núcleo branco-quente, raios e fagulhas no impacto e brasas que esfriam dentro da fumaça.',
+      'Flamethrower agora atinge o alvo no mesmo instante em que ele reage, e espirra fogo ao bater.',
+      'Ember, Flame Burst e Fire Blast deixam um rastro de velocidade no ar; Eruption solta fagulhas em cada bola que cai.',
+    ],
+  },
   // VFX anime pixel: voador ligado.
   {
     version: '7.69',
