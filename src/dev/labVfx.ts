@@ -15,10 +15,11 @@ import { tiraDeAreaDoElemento, tiraDoElemento, type TiraDeVfx } from '@/data/vfx
 import { hashTexto, rngSemeado } from '@/render/vfx/aleatorio'
 import { AGUA_AREA, AGUA_SINGLE, VITRINE_DA_AGUA } from '@/render/vfx/coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
-import { FOGO_AREA, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
+import { FOGO_AREA, FOGO_NOVO_AREA, FOGO_NOVO_SINGLE, FOGO_SINGLE, VITRINE_DO_FOGO } from '@/render/vfx/coreografias/fogo'
 import { GRAMA_AREA, GRAMA_SINGLE, VITRINE_DA_GRAMA } from '@/render/vfx/coreografias/grama'
 import { LUTADOR_AREA, LUTADOR_SINGLE, VITRINE_DO_LUTADOR } from '@/render/vfx/coreografias/lutador'
 import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/coreografias/normal'
+import { VENENO_AREA, VENENO_SINGLE, VITRINE_DO_VENENO } from '@/render/vfx/coreografias/veneno'
 import { VITRINE_DO_VOADOR, VOADOR_AREA, VOADOR_SINGLE } from '@/render/vfx/coreografias/voador'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -29,12 +30,17 @@ import type { EntradaDeCoreografia, Tier } from '@/render/vfx/tipos'
 // Catalogo do lab: tipo -> 7 golpes-vitrine
 // ---------------------------------------------------------------------------
 
-interface GolpeDoLab { id: string; tipo: ElementType; area: boolean; tier: Tier; entrada: EntradaDeCoreografia; atacante: string }
+interface GolpeDoLab {
+  id: string; tipo: ElementType; area: boolean; tier: Tier; entrada: EntradaDeCoreografia; atacante: string
+  /** Piloto de metodo novo: a esquerda mostra ESTA coreografia (a atual) no lugar da tira. */
+  antes?: EntradaDeCoreografia
+}
 
 const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
+  // Fogo novo (referencias do dono): a esquerda o atual, a direita o novo.
   FIRE: [
-    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
-    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_NOVO_SINGLE[t], antes: FOGO_SINGLE[t], atacante: 'charmander' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_NOVO_AREA[t], antes: FOGO_AREA[t], atacante: 'charmander' })),
   ],
   ELECTRIC: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_ELETRICO.single[t], tipo: 'ELECTRIC' as const, area: false, tier: t, entrada: ELETRICO_SINGLE[t], atacante: 'pikachu' })),
@@ -61,6 +67,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_VOADOR.single[t], tipo: 'FLYING' as const, area: false, tier: t, entrada: VOADOR_SINGLE[t], atacante: 'pidgey' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_VOADOR.area[t], tipo: 'FLYING' as const, area: true, tier: t, entrada: VOADOR_AREA[t], atacante: 'pidgey' })),
   ],
+  POISON: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_VENENO.single[t], tipo: 'POISON' as const, area: false, tier: t, entrada: VENENO_SINGLE[t], atacante: 'ekans' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_VENENO.area[t], tipo: 'POISON' as const, area: true, tier: t, entrada: VENENO_AREA[t], atacante: 'ekans' })),
+  ],
 }
 
 // ---------------------------------------------------------------------------
@@ -74,7 +84,7 @@ const TURNO = 1700
 const PEITO = 12
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
-const opt = { velocidade: 1, zoom: 2.5, pixel: true }
+const opt: { velocidade: number; zoom: number; pixel: boolean; congelado: number | null } = { velocidade: 1, zoom: 2.5, pixel: true, congelado: null }
 
 const imagens = new Map<string, HTMLImageElement>()
 function imagem(url: string): HTMLImageElement {
@@ -199,13 +209,16 @@ class Cena {
 
   passo(dtReal: number): void {
     this.real += dtReal
-    this.t += this.real < this.paradoAte ? 0 : dtReal * opt.velocidade
+    // Storyboard: o quadro exato de `congelado` ms, sem andar o relogio.
+    if (opt.congelado !== null) this.t = this.turnoT0 + opt.congelado
+    else this.t += this.real < this.paradoAte ? 0 : dtReal * opt.velocidade
     if (this.t >= this.proximoTurno) {
       this.turnoT0 = this.t; this.proximoTurno = this.t + TURNO; this.turnoId++; this.impactosFeitos = 0
       this.atk.tocar('Attack', this.t)
     }
     const ms = this.t - this.turnoT0
-    const impactos = this.modo === 'anime' ? (this.golpe.entrada.impactos?.[this.golpe.tier] ?? []) : [200]
+    const entrada = this.modo === 'anime' ? this.golpe.entrada : this.golpe.antes
+    const impactos = entrada ? (entrada.impactos?.[this.golpe.tier] ?? []) : [200]
     while (this.impactosFeitos < impactos.length && ms >= impactos[this.impactosFeitos]) {
       this.reagir(this.impactosFeitos === 0)
       this.impactosFeitos++
@@ -218,7 +231,7 @@ class Cena {
   /** A reacao do alvo: o que faz o golpe "doer" — Hurt, silhueta, hit-stop, numero. */
   reagir(primeiro: boolean): void {
     const tier = this.golpe.tier
-    const forte = this.modo === 'anime' && tier >= 3
+    const forte = (this.modo === 'anime' || !!this.golpe.antes) && tier >= 3
     for (const a of this.alvos) {
       a.tocar('Hurt', this.t)
       if (forte) {
@@ -244,7 +257,8 @@ class Cena {
     for (const e of todos) e.desenhar(c, this.figurantes.includes(e) ? this.real : this.t)
 
     const ms = this.t - this.turnoT0
-    if (this.modo === 'anime') this.desenharAnime(c, ms)
+    if (this.modo === 'anime') this.desenharAnime(c, ms, this.golpe.entrada)
+    else if (this.golpe.antes) this.desenharAnime(c, ms, this.golpe.antes)
     else this.desenharTira(c, ms)
 
     c.font = 'bold 9px system-ui'; c.textAlign = 'center'; c.lineJoin = 'round'
@@ -263,20 +277,20 @@ class Cena {
     return { origem, alvo }
   }
 
-  desenharAnime(c: CanvasRenderingContext2D, ms: number): void {
+  desenharAnime(c: CanvasRenderingContext2D, ms: number, entrada: EntradaDeCoreografia): void {
     const g = this.golpe
-    const duracao = g.entrada.duracao[g.tier] ?? 1000
+    const duracao = entrada.duracao[g.tier] ?? 1000
     if (ms > duracao) return
     const { origem, alvo } = this.pontos()
     const raio = g.area ? AOE_RADIUS : 0
     const pele = PELES[g.tipo]
-    const pintar = (ctx: CanvasRenderingContext2D) => g.entrada.desenhar({
+    const pintar = (ctx: CanvasRenderingContext2D) => entrada.desenhar({
       ctx, ms, duracao, origem, alvo, raio, tier: g.tier, pele,
       angulo: g.area ? 0 : Math.atan2(alvo.y - origem.y, alvo.x - origem.x),
       rng: rngSemeado(hashTexto(`lab-${this.turnoId}`)),
       pedir: n => n,
     })
-    if (opt.pixel) desenharPixelizado(c, retanguloDoEfeito(origem, alvo, g.entrada.alcance, raio), paletaDaPele(pele), pintar)
+    if (opt.pixel) desenharPixelizado(c, retanguloDoEfeito(origem, alvo, entrada.alcance, raio), paletaDaPele(pele), pintar)
     else pintar(c)
   }
 
@@ -329,6 +343,8 @@ function reiniciar(): void {
   // Area com o raio real (175) nao cabe no zoom de perto: abre a camera.
   opt.zoom = g.area ? Math.min(escolhido, 1.2) : escolhido
   for (const c of cenas) { c.medir(); c.montar(g) }
+  $('titulo-tira').textContent = g.antes ? 'Atual: coreografia em produção' : 'Atual: tira PNG'
+  $('titulo-anime').textContent = g.antes ? 'Novo: linguagem das referências' : 'Proposta: coreografia anime pixel'
 }
 
 const tipoSel = $<HTMLSelectElement>('tipo')
@@ -340,6 +356,26 @@ $<HTMLSelectElement>('render').onchange = e => { opt.pixel = (e.target as HTMLSe
 
 montarBotoes()
 reiniciar()
+
+// Gancho do storyboard, por atributo (funciona de fora do mundo da pagina):
+// <body data-lab-congelar="ms|vazio" data-lab-golpe="TIPO:indice">.
+new MutationObserver(() => {
+  const d = document.body.dataset
+  opt.congelado = d.labCongelar ? Number(d.labCongelar) : null
+  if (d.labGolpe) {
+    const [tipo, i] = d.labGolpe.split(':')
+    delete d.labGolpe
+    tipoAtual = tipo as ElementType; tipoSel.value = tipo; golpeAtual = Number(i); montarBotoes(); reiniciar()
+  }
+  // Desenha na hora: com a aba em segundo plano o requestAnimationFrame para.
+  // Duas vezes: a primeira abre o turno, a segunda chega no ms pedido.
+  if (opt.congelado !== null) for (const c of cenas) {
+    c.passo(0); c.passo(0)
+    // O flash da silhueta anda no relogio real, que parado nao anda: limpa.
+    for (const a of c.alvos) a.cor = null
+    c.desenhar()
+  }
+}).observe(document.body, { attributes: true })
 
 let antes = performance.now()
 function quadro(agora: number): void {
