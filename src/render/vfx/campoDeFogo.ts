@@ -33,7 +33,11 @@ const LIMIARES = [0.14, 0.4, 0.72, 1.05] as const
  * halo pontilhado), o fogo virou ruido em cima da grama; as referencias tem
  * fundo escuro, o jogo nao.
  */
-export interface EstiloDoFogo { quente?: boolean }
+export interface EstiloDoFogo {
+  quente?: boolean
+  /** Calor minimo do branco. Area empilha muito mais calor: sem subir o limiar, os focos viravam manchas brancas chapadas. */
+  limiarBranco?: number
+}
 /** Calor a partir do qual o estilo quente pinta branco. */
 const LIMIAR_BRANCO = 1.5
 /** Cauda da gota: quanto ela se estica pra tras do movimento, em raios (o 2,1 do v2). */
@@ -214,7 +218,7 @@ function pintarIlha(ctx: CanvasRenderingContext2D, vivas: readonly Quente[], pel
       let f = -1
       for (let k = LIMIARES.length - 1; k >= 0; k--) if (v > LIMIARES[k]) { f = k; break }
       if (f < 0) continue
-      const cor = estilo.quente && v > LIMIAR_BRANCO ? BRANCO_QUENTE : cores[f]
+      const cor = estilo.quente && v > (estilo.limiarBranco ?? LIMIAR_BRANCO) ? BRANCO_QUENTE : cores[f]
       const i = (yy * passo + xx) * 4
       d[i] = cor[0]; d[i + 1] = cor[1]; d[i + 2] = cor[2]; d[i + 3] = 255
     }
