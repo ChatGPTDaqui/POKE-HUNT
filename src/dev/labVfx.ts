@@ -29,6 +29,7 @@ import { FADA_AREA, FADA_SINGLE, VITRINE_DA_FADA } from '@/render/vfx/coreografi
 import { SOMBRIO_AREA, SOMBRIO_SINGLE, VITRINE_DO_SOMBRIO } from '@/render/vfx/coreografias/sombrio'
 import { ACO_AREA, ACO_SINGLE, VITRINE_DO_ACO } from '@/render/vfx/coreografias/aco'
 import { GELO_AREA, GELO_SINGLE, VITRINE_DO_GELO } from '@/render/vfx/coreografias/gelo'
+import { FANTASMA_AREA, FANTASMA_SINGLE, VITRINE_DO_FANTASMA } from '@/render/vfx/coreografias/fantasma'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -110,6 +111,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   ICE: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_GELO.single[t], tipo: 'ICE' as const, area: false, tier: t, entrada: GELO_SINGLE[t], atacante: 'jynx' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_GELO.area[t], tipo: 'ICE' as const, area: true, tier: t, entrada: GELO_AREA[t], atacante: 'jynx' })),
+  ],
+  GHOST: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FANTASMA.single[t], tipo: 'GHOST' as const, area: false, tier: t, entrada: FANTASMA_SINGLE[t], atacante: 'gengar' })),
+    ...([2, 3] as const).map(t => ({ id: VITRINE_DO_FANTASMA.area[t], tipo: 'GHOST' as const, area: true, tier: t, entrada: FANTASMA_AREA[t]!, atacante: 'gengar' })),
   ],
 }
 
