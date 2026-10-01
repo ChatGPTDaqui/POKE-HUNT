@@ -28,6 +28,7 @@ import { ROCHA_AREA, ROCHA_SINGLE, VITRINE_DA_ROCHA } from '@/render/vfx/coreogr
 import { FADA_AREA, FADA_SINGLE, VITRINE_DA_FADA } from '@/render/vfx/coreografias/fada'
 import { SOMBRIO_AREA, SOMBRIO_SINGLE, VITRINE_DO_SOMBRIO } from '@/render/vfx/coreografias/sombrio'
 import { ACO_AREA, ACO_SINGLE, VITRINE_DO_ACO } from '@/render/vfx/coreografias/aco'
+import { GELO_AREA, GELO_SINGLE, VITRINE_DO_GELO } from '@/render/vfx/coreografias/gelo'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -105,6 +106,10 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   STEEL: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_ACO.single[t], tipo: 'STEEL' as const, area: false, tier: t, entrada: ACO_SINGLE[t], atacante: 'magnemite' })),
     ...([2, 3] as const).map(t => ({ id: VITRINE_DO_ACO.area[t], tipo: 'STEEL' as const, area: true, tier: t, entrada: ACO_AREA[t]!, atacante: 'magnemite' })),
+  ],
+  ICE: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_GELO.single[t], tipo: 'ICE' as const, area: false, tier: t, entrada: GELO_SINGLE[t], atacante: 'jynx' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_GELO.area[t], tipo: 'ICE' as const, area: true, tier: t, entrada: GELO_AREA[t], atacante: 'jynx' })),
   ],
 }
 
