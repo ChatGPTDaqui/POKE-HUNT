@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // VFX anime pixel: terra ligada.
+  {
+    version: '7.72',
+    date: '2026-10-01',
+    title: 'Golpes de terra com efeitos novos',
+    highlights: [
+      'Os golpes de terra agora têm peso: Earth Power racha o chão e explode num gêiser de terra, e torrões caem em volta.',
+      'Mud-Slap e Mud Shot arremessam lama que espirra e escorre no alvo.',
+      'Earthquake e Bulldoze mandam ondas de poeira pela área inteira, levantando torrões em quem estiver dentro.',
+    ],
+  },
   // VFX anime pixel: acabamento de impacto nos tipos e veneno ligado.
   {
     version: '7.71',
