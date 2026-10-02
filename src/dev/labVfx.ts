@@ -22,6 +22,15 @@ import { NORMAL_AREA, NORMAL_SINGLE, VITRINE_DO_NORMAL } from '@/render/vfx/core
 import { TERRA_AREA, TERRA_SINGLE, VITRINE_DA_TERRA } from '@/render/vfx/coreografias/terra'
 import { VENENO_AREA, VENENO_SINGLE, VITRINE_DO_VENENO } from '@/render/vfx/coreografias/veneno'
 import { VITRINE_DO_VOADOR, VOADOR_AREA, VOADOR_SINGLE } from '@/render/vfx/coreografias/voador'
+import { PSIQUICO_AREA, PSIQUICO_SINGLE, VITRINE_DO_PSIQUICO } from '@/render/vfx/coreografias/psiquico'
+import { INSETO_AREA, INSETO_SINGLE, VITRINE_DO_INSETO } from '@/render/vfx/coreografias/inseto'
+import { ROCHA_AREA, ROCHA_SINGLE, VITRINE_DA_ROCHA } from '@/render/vfx/coreografias/rocha'
+import { FADA_AREA, FADA_SINGLE, VITRINE_DA_FADA } from '@/render/vfx/coreografias/fada'
+import { SOMBRIO_AREA, SOMBRIO_SINGLE, VITRINE_DO_SOMBRIO } from '@/render/vfx/coreografias/sombrio'
+import { ACO_AREA, ACO_SINGLE, VITRINE_DO_ACO } from '@/render/vfx/coreografias/aco'
+import { GELO_AREA, GELO_SINGLE, VITRINE_DO_GELO } from '@/render/vfx/coreografias/gelo'
+import { FANTASMA_AREA, FANTASMA_SINGLE, VITRINE_DO_FANTASMA } from '@/render/vfx/coreografias/fantasma'
+import { DRAGAO_AREA, DRAGAO_SINGLE, VITRINE_DO_DRAGAO } from '@/render/vfx/coreografias/dragao'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
@@ -75,6 +84,42 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   GROUND: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_TERRA.single[t], tipo: 'GROUND' as const, area: false, tier: t, entrada: TERRA_SINGLE[t], atacante: 'sandshrew' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_TERRA.area[t], tipo: 'GROUND' as const, area: true, tier: t, entrada: TERRA_AREA[t], atacante: 'sandshrew' })),
+  ],
+  PSYCHIC: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_PSIQUICO.single[t], tipo: 'PSYCHIC' as const, area: false, tier: t, entrada: PSIQUICO_SINGLE[t], atacante: 'espeon' })),
+    ...([2, 3] as const).map(t => ({ id: VITRINE_DO_PSIQUICO.area[t], tipo: 'PSYCHIC' as const, area: true, tier: t, entrada: PSIQUICO_AREA[t]!, atacante: 'espeon' })),
+  ],
+  BUG: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_INSETO.single[t], tipo: 'BUG' as const, area: false, tier: t, entrada: INSETO_SINGLE[t], atacante: 'scyther' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_INSETO.area[t], tipo: 'BUG' as const, area: true, tier: t, entrada: INSETO_AREA[t], atacante: 'scyther' })),
+  ],
+  ROCK: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_ROCHA.single[t], tipo: 'ROCK' as const, area: false, tier: t, entrada: ROCHA_SINGLE[t], atacante: 'geodude' })),
+    ...([2, 3] as const).map(t => ({ id: VITRINE_DA_ROCHA.area[t], tipo: 'ROCK' as const, area: true, tier: t, entrada: ROCHA_AREA[t]!, atacante: 'geodude' })),
+  ],
+  FAIRY: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DA_FADA.single[t], tipo: 'FAIRY' as const, area: false, tier: t, entrada: FADA_SINGLE[t], atacante: 'clefairy' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DA_FADA.area[t], tipo: 'FAIRY' as const, area: true, tier: t, entrada: FADA_AREA[t], atacante: 'clefairy' })),
+  ],
+  DARK: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_SOMBRIO.single[t], tipo: 'DARK' as const, area: false, tier: t, entrada: SOMBRIO_SINGLE[t], atacante: 'umbreon' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_SOMBRIO.area[t], tipo: 'DARK' as const, area: true, tier: t, entrada: SOMBRIO_AREA[t], atacante: 'umbreon' })),
+  ],
+  STEEL: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_ACO.single[t], tipo: 'STEEL' as const, area: false, tier: t, entrada: ACO_SINGLE[t], atacante: 'magnemite' })),
+    ...([2, 3] as const).map(t => ({ id: VITRINE_DO_ACO.area[t], tipo: 'STEEL' as const, area: true, tier: t, entrada: ACO_AREA[t]!, atacante: 'magnemite' })),
+  ],
+  ICE: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_GELO.single[t], tipo: 'ICE' as const, area: false, tier: t, entrada: GELO_SINGLE[t], atacante: 'jynx' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_GELO.area[t], tipo: 'ICE' as const, area: true, tier: t, entrada: GELO_AREA[t], atacante: 'jynx' })),
+  ],
+  GHOST: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FANTASMA.single[t], tipo: 'GHOST' as const, area: false, tier: t, entrada: FANTASMA_SINGLE[t], atacante: 'gengar' })),
+    ...([2, 3] as const).map(t => ({ id: VITRINE_DO_FANTASMA.area[t], tipo: 'GHOST' as const, area: true, tier: t, entrada: FANTASMA_AREA[t]!, atacante: 'gengar' })),
+  ],
+  DRAGON: [
+    ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_DRAGAO.single[t], tipo: 'DRAGON' as const, area: false, tier: t, entrada: DRAGAO_SINGLE[t], atacante: 'dratini' })),
+    ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_DRAGAO.area[t], tipo: 'DRAGON' as const, area: true, tier: t, entrada: DRAGAO_AREA[t], atacante: 'dratini' })),
   ],
 }
 
