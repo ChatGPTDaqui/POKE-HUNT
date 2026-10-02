@@ -1813,7 +1813,14 @@ function ancoraDoTexto(effect: WorldEffect, world: WorldState): { x: number; y: 
   if (effect.type === 'damageNumber') {
     return { x: ancora.x, y: ancora.y - SUBIDA_DO_NUMERO * effectProgress(effect) }
   }
-  return { x: ancora.x, y: ancora.y + ABILITY_NAME_Y_OFFSET }
+  // Nome do golpe: centrado EMBAIXO DOS PES de quem usou (02/10). Sem dono ele
+  // fica no ponto do impacto, como sempre.
+  const owner = resolveEffectOwner(effect, world)
+  if (!owner) return ancora
+  return {
+    x: owner.x,
+    y: owner.y + groundOffset(owner) + NOME_ABAIXO_DOS_PES + effect.lane * RAIA_DO_NOME,
+  }
 }
 
 /**
@@ -1986,38 +1993,27 @@ function drawDamageNumber(
 }
 
 /**
- * Onde o nome do golpe fica: LOGO ABAIXO DA BARRA DE VIDA do POKE que atacou
- * (PH-275), e nao no alto da coluna de texto junto com os numeros de dano.
+ * Onde o nome do golpe fica: EMBAIXO DOS PES do POKE que usou, centrado nele
+ * (pedido do dono, 02/10, "pra organizar melhor a visualizacao do combate").
  *
- * A geometria da placa, de cima pra baixo (`y` cresce pra baixo, e `topo` e
- * `entity.y - visualTopOffset(entity)`, o alto do corpo):
+ * Antes (PH-275/283) ele ficava colado embaixo da barra de vida, no meio da
+ * placa de cima — que ja tem nome, Lv e barra, e e por onde sobem os numeros
+ * de dano. Em cima ficou so o que identifica o POKE e o que ele SOFRE; o que
+ * ele FEZ desceu pro chao, onde nao disputa com nada.
  *
- *   topo - 26   nome da especie      (drawNameLevelTag)
- *   topo - 15   Lv                   (drawNameLevelTag)
- *   topo - 13   barra de vida, 5px de altura, terminando em `topo - 8`
- *   topo +  2   NOME DO GOLPE        <- aqui, encostado na barra
- *   topo        cabeca do sprite
+ * A geometria, com `pe = entity.y + groundOffset(entity)` (o chao da sombra):
  *
- * O deslocamento parte de `EFFECT_BASE_GAP` porque a ancora da coluna de efeitos
- * comeca justamente `EFFECT_BASE_GAP` ACIMA do topo do corpo: somar isso traz o
- * texto de volta pro corpo.
+ *   pe           sombra
+ *   pe +  3      topo da placa do nome
+ *   pe + 13      baseline do nome    <- NOME_ABAIXO_DOS_PES
  *
- * COLADO NA BARRA, e nao 3px abaixo dela (PH-283, a pedido do usuario, depois de
- * ver na tela). Com a folga, o nome flutuava entre a barra e o POKE e nao lia
- * como parte da placa. A placa de fundo (`PLACA_DO_GOLPE`) da a folga visual que
- * o vao dava, sem o texto se soltar da barra: o topo dela encosta em `topo - 8`,
- * que e exatamente onde a barra termina.
- *
- * O `lane` continua embutido na ancora e continua subtraindo — entao um SEGUNDO
- * golpe do mesmo POKE, ainda em cena, cai na raia de cima em vez de escrever por
- * cima do primeiro. Era pedido explicito da issue: dois golpes seguidos nao
- * podem deixar dois textos empilhados no mesmo lugar.
- *
- * Por que perto do corpo e nao no alto: o nome do golpe responde "o que ESTE
- * POKE acabou de fazer", e no alto ele disputava leitura com os numeros de dano,
- * que sao de quem RECEBEU. Duas perguntas diferentes no mesmo lugar.
+ * O `lane` continua separando dois textos do mesmo POKE, agora pra BAIXO: o
+ * segundo golpe (ou "Ataque ↓" logo depois do golpe) cai na linha de baixo em
+ * vez de escrever por cima do primeiro.
  */
-const ABILITY_NAME_Y_OFFSET = EFFECT_BASE_GAP + 2
+const NOME_ABAIXO_DOS_PES = 13
+/** Altura de uma linha de nome com a placa (8px de fonte + 2px de folga em cima e embaixo). */
+const RAIA_DO_NOME = 12
 
 /**
  * Fundo da placa do nome do golpe (PH-283).
@@ -2044,14 +2040,14 @@ function drawAbilityName(
 
   ctx.save()
   ctx.globalAlpha = Math.max(0, alpha)
-  ctx.textAlign = 'left'
+  ctx.textAlign = 'center'
   ctx.font = FONTE.nomeDeGolpe
 
   const largura = ctx.measureText(effect.text ?? '').width
   const altura = alturaDaFonte(FONTE.nomeDeGolpe)
   roundedRectPath(
     ctx,
-    x - PLACA_DO_GOLPE_FOLGA_X,
+    x - largura / 2 - PLACA_DO_GOLPE_FOLGA_X,
     y - altura - PLACA_DO_GOLPE_FOLGA_Y,
     largura + PLACA_DO_GOLPE_FOLGA_X * 2,
     altura + PLACA_DO_GOLPE_FOLGA_Y * 2,

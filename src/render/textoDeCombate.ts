@@ -119,13 +119,14 @@ export function caixaDoNumeroDeDano(m: Medidor, effect: WorldEffect, ancoraX: nu
   return { x: ancoraX - FOLGA, y: topo - FOLGA, w: largura + FOLGA * 2, h: ancoraY + 3 - topo + FOLGA * 2 }
 }
 
-/** A caixa do nome do golpe. Uma linha so, ancorada pela baseline. */
+/** A caixa do nome do golpe. Uma linha so, CENTRADA em `ancoraX` e ancorada pela baseline. */
 export function caixaDoNomeDeGolpe(m: Medidor, effect: WorldEffect, ancoraX: number, ancoraY: number): Caixa {
   const altura = alturaDaFonte(FONTE.nomeDeGolpe)
+  const largura = m.larguraDe(effect.text ?? '', FONTE.nomeDeGolpe)
   return {
-    x: ancoraX - FOLGA,
+    x: ancoraX - largura / 2 - FOLGA,
     y: ancoraY - altura - FOLGA,
-    w: m.larguraDe(effect.text ?? '', FONTE.nomeDeGolpe) + FOLGA * 2,
+    w: largura + FOLGA * 2,
     h: altura + 3 + FOLGA * 2,
   }
 }
