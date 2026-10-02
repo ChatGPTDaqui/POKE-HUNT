@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Nome do golpe saiu de baixo da barra de HP e foi pros pes de quem usou.
+  {
+    version: '7.74',
+    date: '2026-10-02',
+    title: 'Nome do golpe nos pés',
+    highlights: [
+      'O nome do golpe agora aparece embaixo dos pés de quem usou, e não mais embaixo da barra de vida.',
+      'Mudanças de atributo e de condição, como "Ataque −33%", também aparecem nos pés.',
+    ],
+  },
   // VFX anime pixel: os 9 tipos restantes ligados — todos os 18 migrados.
   {
     version: '7.73',
