@@ -15,6 +15,9 @@
 //   POISON    01/10/2026 — com o acabamento de impacto (acabamento.ts), no plano
 //             que o dono mandou levar ate producao.
 //   GROUND    01/10/2026 — aprovado pelo dono no lab do staging.
+//   PSYCHIC, BUG, ROCK, FAIRY, DARK, STEEL, ICE, GHOST, DRAGON — 01/10/2026,
+//             aprovados pelo dono no lab do staging, de uma vez. Com eles os
+//             18 tipos estao migrados: nenhum golpe de dano cai mais na tira.
 import type { ElementType } from '@/data/generated/types'
 import { AGUA_AREA, AGUA_SINGLE } from './coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE } from './coreografias/eletrico'
@@ -25,6 +28,15 @@ import { NORMAL_AREA, NORMAL_SINGLE } from './coreografias/normal'
 import { TERRA_AREA, TERRA_SINGLE } from './coreografias/terra'
 import { VENENO_AREA, VENENO_SINGLE } from './coreografias/veneno'
 import { VOADOR_AREA, VOADOR_SINGLE } from './coreografias/voador'
+import { PSIQUICO_AREA, PSIQUICO_SINGLE } from './coreografias/psiquico'
+import { INSETO_AREA, INSETO_SINGLE } from './coreografias/inseto'
+import { ROCHA_AREA, ROCHA_SINGLE } from './coreografias/rocha'
+import { FADA_AREA, FADA_SINGLE } from './coreografias/fada'
+import { SOMBRIO_AREA, SOMBRIO_SINGLE } from './coreografias/sombrio'
+import { ACO_AREA, ACO_SINGLE } from './coreografias/aco'
+import { GELO_AREA, GELO_SINGLE } from './coreografias/gelo'
+import { FANTASMA_AREA, FANTASMA_SINGLE } from './coreografias/fantasma'
+import { DRAGAO_AREA, DRAGAO_SINGLE } from './coreografias/dragao'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
@@ -39,6 +51,15 @@ export const REGISTRO_SINGLE: Partial<Record<ElementType, PorTier>> = {
   FLYING: VOADOR_SINGLE,
   POISON: VENENO_SINGLE,
   GROUND: TERRA_SINGLE,
+  PSYCHIC: PSIQUICO_SINGLE,
+  BUG: INSETO_SINGLE,
+  ROCK: ROCHA_SINGLE,
+  FAIRY: FADA_SINGLE,
+  DARK: SOMBRIO_SINGLE,
+  STEEL: ACO_SINGLE,
+  ICE: GELO_SINGLE,
+  GHOST: FANTASMA_SINGLE,
+  DRAGON: DRAGAO_SINGLE,
 }
 
 export const REGISTRO_DE_AREA: Partial<Record<ElementType, PorTier>> = {
@@ -51,6 +72,15 @@ export const REGISTRO_DE_AREA: Partial<Record<ElementType, PorTier>> = {
   FLYING: VOADOR_AREA,
   POISON: VENENO_AREA,
   GROUND: TERRA_AREA,
+  PSYCHIC: PSIQUICO_AREA,
+  BUG: INSETO_AREA,
+  ROCK: ROCHA_AREA,
+  FAIRY: FADA_AREA,
+  DARK: SOMBRIO_AREA,
+  STEEL: ACO_AREA,
+  ICE: GELO_AREA,
+  GHOST: FANTASMA_AREA,
+  DRAGON: DRAGAO_AREA,
 }
 
 export const REGISTRO_DE_MOTIVO: Partial<Record<Motivo, EntradaDeCoreografia>> = {}

@@ -1,6 +1,6 @@
-// STEEL no lab (01/10): ainda NAO inscrito no registro — so entra no jogo
-// depois da aprovacao visual do dono. Aqui tranca o que vale desde ja.
+// STEEL ligado no jogo (01/10, aprovado pelo dono no lab do staging).
 import { describe, expect, it } from 'vitest'
+import { ABILITIES, isDamagingAbility } from '@/data/abilities'
 import { resolverVfx } from '../resolverVfx'
 import { rngSemeado } from '../aleatorio'
 import { PELES } from '../paletas'
@@ -29,9 +29,15 @@ function quadro(e: EntradaDeCoreografia, tier: Tier, area: boolean, ms: number):
   return log
 }
 
-describe('STEEL no lab', () => {
-  it('ainda cai na tira no jogo (sem aprovacao do dono)', () => {
-    expect(resolverVfx({ abilityId: 'flash_cannon', area: false })).toBeNull()
+describe('STEEL migrado', () => {
+  it('todo golpe de dano de aco resolve pra coreografia nova', () => {
+    const golpes = Object.values(ABILITIES).filter(g => g.type === 'STEEL' && isDamagingAbility(g))
+    expect(golpes.length).toBeGreaterThan(3) // anti-teste-vacuo
+    for (const g of golpes) {
+      const r = resolverVfx({ abilityId: g.id, area: g.target === 'aoe' })
+      expect(r, g.id).not.toBeNull()
+      expect(r!.tipo).toBe('STEEL')
+    }
   })
 
   it.each(todas)('%s: impactos dentro da duracao', (_n, tier, e) => {

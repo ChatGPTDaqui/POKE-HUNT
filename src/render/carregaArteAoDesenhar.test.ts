@@ -68,7 +68,14 @@ const mundoVazio = { player: null, enemies: [] } as never
 async function spritesNovo() {
   vi.resetModules()
   pedidas = []
-  return import('./sprites')
+  const sprites = await import('./sprites')
+  // Desde 01/10 o STEEL (o tipo do Bullet Punch) e VFX procedural e nao pede
+  // tira nenhuma. O caminho que este arquivo tranca continua existindo pra
+  // golpe sem coreografia, entao cada caso tira o STEEL do registro da
+  // instancia nova que o resetModules acabou de criar.
+  const registro = await import('@/render/vfx/registro')
+  delete registro.REGISTRO_SINGLE.STEEL
+  return sprites
 }
 
 // AQUECIMENTO, e nao um import ocioso (PH-129). `sprites.ts` puxa um grafo
