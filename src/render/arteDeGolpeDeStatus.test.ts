@@ -181,10 +181,14 @@ describe('golpe de status nunca empresta arte de ataque (PH-480)', () => {
   it('golpe de DANO continua usando a tira do tipo — a guarda e so do status', async () => {
     // O contra-caso, e ele e obrigatorio: cortar a tira de tipo pra todo mundo
     // apagaria a arte de impacto do jogo inteiro, e o teste acima passaria
-    // igual. Precisa de um tipo que AINDA cai na tira: NORMAL virou VFX
-    // procedural (30/09) e nao pede tira nenhuma no golpe de dano.
+    // igual. Desde 01/10 os 18 tipos sao VFX procedural e nenhum golpe de dano
+    // cai mais na tira — entao o caso tira o PSYCHIC do registro da instancia
+    // que o `sprites` novo usa (o resetModules cria uma nova a cada caso) e
+    // mede o caminho de tira, que continua existindo pra tipo sem coreografia.
     const doTipo = tiraDoElemento('PSYCHIC' as never)
     const { drawEffect } = await spritesNovo()
+    const registro = await import('@/render/vfx/registro')
+    delete registro.REGISTRO_SINGLE.PSYCHIC
     const dano = { ...efeitoDeStatus('confusion', 'PSYCHIC'), statusDirection: undefined, statusStat: undefined }
     drawEffect(ctxFalso(), dano as never, mundoVazio)
     expect(pedidas).toContain(doTipo!.url)

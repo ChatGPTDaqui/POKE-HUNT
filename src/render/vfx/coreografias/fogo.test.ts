@@ -18,9 +18,10 @@ describe('FIRE migrado', () => {
     }
   })
 
-  it('golpe de outro tipo continua na tira', () => {
-    expect(resolverVfx({ abilityId: 'psychic', area: false })).toBeNull()
-    expect(atrasoDoNumeroDeDano('psychic')).toBe(0)
+  it('golpe de outro tipo nao vira fogo', () => {
+    // Ate 01/10 este caso dizia "continua na tira"; agora os 18 tipos sao
+    // procedurais, e o que importa e o FIRE nao capturar o golpe dos outros.
+    expect(resolverVfx({ abilityId: 'psychic', area: false })?.tipo).toBe('PSYCHIC')
   })
 
   it.each([

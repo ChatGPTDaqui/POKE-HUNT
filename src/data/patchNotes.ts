@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // VFX anime pixel: os 9 tipos restantes ligados — todos os 18 migrados.
+  {
+    version: '7.73',
+    date: '2026-10-01',
+    title: 'Todos os tipos com efeitos novos',
+    highlights: [
+      'Golpes psíquicos, de inseto, de rocha, de fada, sombrios, de aço, de gelo, fantasmas e de dragão agora têm efeitos próprios.',
+      'Psybeam corre em anéis, Bite fecha uma mandíbula, Ice Beam congela o alvo numa crosta que quebra e Shadow Ball explode em espíritos.',
+      'Golpes em área desses tipos atingem a área inteira: Blizzard cobre tudo de neve, Rock Slide derruba pedras e Twister levanta escamas.',
+    ],
+  },
   // VFX anime pixel: terra ligada.
   {
     version: '7.72',
