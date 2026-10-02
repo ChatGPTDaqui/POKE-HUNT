@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<!-- Base "/" pelo mesmo motivo da encarada-no-duelo.html: as URLs de arte sao
+     relativas e cairiam em /scripts/harness/assets/... (404 silencioso). -->
+<base href="/" />
+<title>Nome do golpe nos pés</title>
+<!--
+  NOME DO GOLPE EMBAIXO DOS PES (02/10), DESENHADO PELO PROPRIO JOGO
+
+  O teste `src/render/nomeDoGolpeNosPes.test.ts` prova a geometria (caixa logo
+  abaixo do pe, centrada, segunda raia desce). O que ele nao responde: fica
+  legivel contra o chao, briga com o VFX do alvo, colide com o vizinho na hunt
+  cheia? Isso so o olho julga.
+
+  Esquerda: duelo (arena do Lance, encarada). Direita: hunt (?mapa=, padrao
+  route_46). O botao "congelar no proximo nome" para os dois paineis no primeiro
+  quadro em que aparecer um `abilityName` — o nome dura pouco e passar por ele
+  rodando e o jeito mais facil de nao ver nada.
+
+  COMO RODAR
+     npm run dev
+     abrir http://localhost:5173/scripts/harness/nome-do-golpe-nos-pes.html
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14171a; color: #dfe4ea; font: 12px/1.5 ui-monospace, monospace; }
+  h1 { font-size: 14px; margin: 12px; font-weight: 600; }
+  .barra { margin: 0 12px 12px; display: flex; gap: 8px; }
+  .par { display: flex; gap: 12px; padding: 0 12px 16px; flex-wrap: wrap; }
+  .painel { display: flex; flex-direction: column; gap: 4px; }
+  canvas { background: #000; border: 1px solid #2a2f36; display: block; }
+  button { font: inherit; background: #2a2f36; color: #dfe4ea; border: 1px solid #3a4149; padding: 4px 10px; cursor: pointer; }
+  #log { margin: 0 12px; white-space: pre; color: #9aa4ae; }
+</style>
+</head>
+<body>
+<h1>Nome do golpe embaixo dos pés</h1>
+<div class="barra">
+  <button id="pausa">pausar</button>
+  <button id="congelar">congelar no próximo nome</button>
+</div>
+<div class="par">
+  <div class="painel"><span>duelo (Lance)</span><canvas id="duelo" width="520" height="420"></canvas></div>
+  <div class="painel"><span id="rotuloHunt">hunt</span><canvas id="hunt" width="520" height="420"></canvas></div>
+</div>
+<p id="log"></p>
+
+<script type="module">
+import { createRng } from '/src/core/rng.ts'
+import { createPokeInstance } from '/src/data/pokes.ts'
+import { LANCE_MAP_ID } from '/src/data/nightmareMaps.ts'
+import { buildMapWorld, stepWorld } from '/src/engine/simulation.ts'
+import { useGameStateStore } from '/src/stores/gameStateStore.ts'
+import { Renderer } from '/src/render/renderer.ts'
+
+const params = new URLSearchParams(location.search)
+const ESPECIE = params.get('especie') || 'charizard'
+const MAPA = params.get('mapa') || 'route_46'
+const PASSO = 1 / 60
+document.getElementById('rotuloHunt').textContent = `hunt (${MAPA})`
+
+// Imortal: a bancada quer ver golpes, nao a tela de derrota.
+function jogador() {
+  const poke = createPokeInstance(createRng(11), ESPECIE, 100)
+  // Ataque 1: luta curta demais some com o alvo antes do nome aparecer.
+  poke.stats = { ...poke.stats, hp: 99999, atkFis: 1, atkEsp: 1, def: 9999, defEsp: 9999 }
+  poke.hp = 99999
+  return poke
+}
+
+function montar(mapId) {
+  const gs = useGameStateStore.getState()
+  gs.resetToDefaults()
+  gs.addPokeToTeam(jogador())
+  gs.setActiveIndex(0)
+  return buildMapWorld(mapId, useGameStateStore.getState().team[0], {
+    seed: 0, rng: createRng(7), counters: { entity: 1, effect: 1, pendingHit: 1 },
+  })
+}
+
+const mundos = [
+  { world: montar(LANCE_MAP_ID), renderer: new Renderer(document.getElementById('duelo')) },
+  { world: montar(MAPA), renderer: new Renderer(document.getElementById('hunt')) },
+]
+window.__mundos = mundos
+
+let rodando = true
+let congelarNoNome = false
+const bPausa = document.getElementById('pausa')
+const log = document.getElementById('log')
+function setRodando(v) { rodando = v; bPausa.textContent = v ? 'pausar' : 'continuar' }
+bPausa.onclick = () => setRodando(!rodando)
+document.getElementById('congelar').onclick = () => { congelarNoNome = true; setRodando(true) }
+
+const nomes = (w) => w.effects.filter((e) => e.type === 'abilityName')
+// So congela em nome que ainda nao foi visto: senao o mesmo nome que causou a
+// ultima parada para de novo no quadro seguinte.
+const vistos = new Set()
+
+function tique() {
+  for (const m of mundos) {
+    if (m.world.player) m.world.player.poke.hp = m.world.player.poke.stats.hp
+    stepWorld(m.world, PASSO, useGameStateStore.getState())
+    if (m.world.mapDef) m.renderer.renderMap(m.world.mapDef, m.world)
+  }
+  const vivos = mundos.map((m) => nomes(m.world).map((e) => `${e.text}@lane${e.lane}`).join(', ') || '—')
+  log.textContent = `duelo: ${vivos[0]}\nhunt:  ${vivos[1]}`
+  const novo = mundos.flatMap((m) => nomes(m.world)).find((e) => e.age > 0.25 && !vistos.has(e.id))
+  if (novo) vistos.add(novo.id)
+  return novo
+}
+
+// Avanco sincrono (aba em segundo plano pausa o rAF): roda ate o proximo nome
+// novo, ou ate `max` quadros.
+window.__proximoNome = (max = 3600) => {
+  for (let i = 0; i < max; i++) { const n = tique(); if (n) return n.text }
+  return null
+}
+
+function quadro() {
+  if (rodando) {
+    const novo = tique()
+    if (congelarNoNome && novo) { congelarNoNome = false; setRodando(false) }
+  }
+  requestAnimationFrame(quadro)
+}
+quadro()
+</script>
+</body>
+</html>
