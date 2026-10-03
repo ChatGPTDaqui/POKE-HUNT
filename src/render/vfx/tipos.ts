@@ -90,6 +90,14 @@ export interface EntradaDeCoreografia {
    */
   alcance: number
   /**
+   * Single, opcional: folga POR LADO em vez do `alcance` igual pros quatro. Pro
+   * golpe que cai do ceu (Thunder): 200 pra cima, mas ~60 pros lados e pra
+   * baixo. Com o `alcance` dos quatro lados o pixelizador varria ~3x os pixels
+   * do raio, todo quadro (02/10). Medir a extensao real antes de apertar: o que
+   * passar da folga sai CORTADO na borda do retangulo.
+   */
+  margem?: { cima: number; baixo: number; lados: number }
+  /**
    * Instantes (ms) em que o golpe BATE, por tier. E o gancho da reacao do alvo
    * — Hurt, flash de silhueta, hit-stop, numero de dano — que acontece FORA da
    * coreografia (ela so desenha o efeito). O lab ja usa; o jogo passa a usar

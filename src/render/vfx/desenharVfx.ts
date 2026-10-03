@@ -14,7 +14,7 @@ import { orcamentoDoQuadro, type Orcamento } from './orcamento'
 import { PELES, paletaDaPele } from './paletas'
 import { desenharPixelizado, type Retangulo } from './pixelizador'
 import { resolverVfx, type VfxResolvido } from './resolverVfx'
-import type { Ponto } from './tipos'
+import type { EntradaDeCoreografia, Ponto } from './tipos'
 
 /** Duracao quando a coreografia nao declarou o tier pedido: a do maior tier declarado abaixo dele. */
 export function duracaoDoTier(r: VfxResolvido): number {
@@ -28,7 +28,9 @@ export function duracaoDoTier(r: VfxResolvido): number {
 /** Folga lateral da area alem do raio: chamas e brasas passam um pouco da borda. */
 const FOLGA_DA_AREA = 20
 
-export function retanguloDoEfeito(origem: Ponto, alvo: Ponto, alcance: number, raio: number): Retangulo {
+export function retanguloDoEfeito(
+  origem: Ponto, alvo: Ponto, alcance: number, raio: number, margem?: EntradaDeCoreografia['margem'],
+): Retangulo {
   if (raio > 0) {
     // AREA: o chao da camera 3/4 e uma ELIPSE achatada (0,45 na altura), nao
     // um circulo. Tratar como circulo fazia o pixelizador varrer um quadrado de
@@ -41,9 +43,9 @@ export function retanguloDoEfeito(origem: Ponto, alvo: Ponto, alcance: number, r
     const y1 = alvo.y + 12 + raio * 0.45 + FOLGA_DA_AREA
     return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }
   }
-  const folga = alcance
-  const x0 = Math.min(origem.x, alvo.x) - folga, y0 = Math.min(origem.y, alvo.y) - folga
-  const x1 = Math.max(origem.x, alvo.x) + folga, y1 = Math.max(origem.y, alvo.y) + folga
+  const { cima, baixo, lados } = margem ?? { cima: alcance, baixo: alcance, lados: alcance }
+  const x0 = Math.min(origem.x, alvo.x) - lados, y0 = Math.min(origem.y, alvo.y) - cima
+  const x1 = Math.max(origem.x, alvo.x) + lados, y1 = Math.max(origem.y, alvo.y) + baixo
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }
 }
 
@@ -73,9 +75,10 @@ export function desenharVfxDeGolpe(
   })
   if (!r) return false
 
-  const ms = (effect.age - effect.delay) * 1000
+  const msReal = (effect.age - effect.delay) * 1000
   const duracao = duracaoDoTier(r)
-  if (ms < 0 || ms > duracao) return true
+  if (msReal < 0 || msReal > duracao) return true
+  const ms = passoDaCoreografia(msReal, effect.id)
 
   const alvo = { x: effect.targetX ?? effect.x, y: effect.targetY ?? effect.y }
   const origem = effect.origemX !== undefined && effect.origemY !== undefined
@@ -86,16 +89,47 @@ export function desenharVfxDeGolpe(
   const orcamento = opcoes.orcamento ?? orcamentoDoQuadro()
   const pixelizar = opcoes.pixelizar ?? desenharPixelizado
 
-  pixelizar(ctx, retanguloDoEfeito(origem, alvo, r.entrada.alcance, raio), paletaDaPele(pele), c => {
+  const angulo = effect.anguloDeAtaque ?? 0
+  // O quadro guardado vale ate o PROXIMO PASSO da coreografia. Posicao e
+  // angulo ficam de fora de proposito: o efeito acompanha quem se move
+  // (`seguirId`) e o angulo segue o alvo todo quadro — com eles na versao,
+  // nenhum quadro era reaproveitado (medido: 27%). No passo seguinte o desenho
+  // pega posicao e angulo de agora; no meio, o bitmap e carimbado no retangulo
+  // de agora (o pixelizador repinta se o TAMANHO dele mudar).
+  const versao = `${ms}|${raio}|${r.tier}`
+
+  pixelizar(ctx, retanguloDoEfeito(origem, alvo, r.entrada.alcance, raio, r.entrada.margem), paletaDaPele(pele), c => {
     r.entrada.desenhar({
-      ctx: c, ms, duracao, origem, alvo,
-      angulo: effect.anguloDeAtaque ?? 0,
+      ctx: c, ms, duracao, origem, alvo, angulo,
       raio, tier: r.tier, pele,
       // Semente nova a cada quadro, mesma sequencia: e isso que torna a
       // coreografia funcao pura de `ms` (ver aleatorio.ts).
       rng: rngSemeado(hashTexto(effect.id)),
       pedir: orcamento.pedir,
     })
-  })
+  }, { id: effect.id, versao })
   return true
+}
+
+/**
+ * Quadros por segundo da COREOGRAFIA, independente do monitor (02/10).
+ *
+ * Antes o efeito era repintado e repixelizado a cada quadro de tela — 60 Hz,
+ * ou 144 num monitor rapido — e os golpes de area grandes (Heat Wave, Petal
+ * Blizzard, Surf) custavam 2 a 6 ms CADA quadro. A 30 passos por segundo o
+ * pixelizador reaproveita o bitmap no quadro do meio (`desenharPixelizado` com
+ * guarda), e o custo cai pela metade a 60 Hz. E a cadencia comum de efeito em
+ * pixel art; o sprite PMD anda a menos que isso.
+ */
+export const CADENCIA_DO_VFX = 30
+const PASSO_MS = 1000 / CADENCIA_DO_VFX
+
+/**
+ * `ms` arredondado pro passo da coreografia. Metade dos efeitos anda com o
+ * passo deslocado de meio passo (pela paridade do id): dois golpes na tela nao
+ * repintam no MESMO quadro, e o custo se espalha em vez de empilhar.
+ */
+export function passoDaCoreografia(ms: number, id: string): number {
+  const fase = (hashTexto(id) & 1) * (PASSO_MS / 2)
+  return Math.max(0, Math.floor((ms - fase) / PASSO_MS) * PASSO_MS + fase)
 }
