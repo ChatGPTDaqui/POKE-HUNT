@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.79',
+    date: '2026-10-03',
+    title: 'Jornada do Treinador',
+    highlights: [
+      'As Hunts agora mostram sete marcos: do primeiro Lord à vitória sobre Lance, conclusão do Mundo e domínio do Pesadelo, reconhecendo seu progresso atual.',
+      'O topo do jogo indica um próximo objetivo. Abra a jornada para encontrar o bioma e estágio sugeridos, sem iniciar a caçada automaticamente.',
+      'A jornada reúne metas de missões, pesquisa no Bestiário e especialidades, com as recompensas e benefícios que já existem no jogo.',
+      'A Wiki agora explica corretamente que vencer Lance libera o Pesadelo, com progresso separado do Mundo.',
+    ],
+  },
+  {
     version: '7.78',
     date: '2026-10-03',
     title: 'Seu próximo golpe',

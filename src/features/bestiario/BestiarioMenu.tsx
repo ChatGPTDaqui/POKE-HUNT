@@ -21,7 +21,8 @@ import { TypeChip } from '@/components/shared/TypeChip'
 import { GameCheck, GameInput, GameSelect, Meter, SectionLabel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
-const STAGE_THRESHOLDS = [500, 2500, 10_000, 50_000]
+import { MARCOS_BESTIARIO } from '@/data/jornada'
+const STAGE_THRESHOLDS = MARCOS_BESTIARIO
 const fmt = new Intl.NumberFormat('pt-BR')
 
 interface Progresso {
