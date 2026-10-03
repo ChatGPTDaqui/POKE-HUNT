@@ -366,9 +366,9 @@ export const VITRINE_DO_SOMBRIO = {
 
 export const SOMBRIO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: pursuit, duracao: { 1: 800 }, alcance: 30, impactos: { 1: [PURSUIT_BATE] } },
-  2: { desenhar: bite, duracao: { 2: 900 }, alcance: 30, impactos: { 2: [BITE_FECHA] } },
-  3: { desenhar: darkPulse, duracao: { 3: 1100 }, alcance: 40, impactos: { 3: [PULSE_CHEGA] } },
-  4: { desenhar: crunch, duracao: { 4: 1400 }, alcance: 44, impactos: { 4: [CRUNCH_1, CRUNCH_2] } },
+  2: { desenhar: bite, duracao: { 2: 900 }, alcance: 30, margem: { cima: 30, baixo: 39, lados: 30 }, impactos: { 2: [BITE_FECHA] } },
+  3: { desenhar: darkPulse, duracao: { 3: 1100 }, alcance: 40, margem: { cima: 40, baixo: 49, lados: 40 }, impactos: { 3: [PULSE_CHEGA] } },
+  4: { desenhar: crunch, duracao: { 4: 1400 }, alcance: 44, margem: { cima: 44, baixo: 55, lados: 44 }, impactos: { 4: [CRUNCH_1, CRUNCH_2] } },
 }, false)
 
 export const SOMBRIO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({

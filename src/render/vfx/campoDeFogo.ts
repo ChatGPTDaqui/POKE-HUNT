@@ -58,13 +58,43 @@ function hash2(x: number, y: number): number {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296
 }
 
-function ruido(x: number, y: number): number {
-  const xi = Math.floor(x), yi = Math.floor(y)
-  const fx = x - xi, fy = y - yi
-  const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy)
-  const a = hash2(xi, yi), b = hash2(xi + 1, yi), c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1)
-  return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy
+/**
+ * Ruido de valor (2 oitavas no chamador) de UMA LINHA (y fixo), guardando os
+ * 4 hashes da celula enquanto x nao sai dela — a celula tem 1/0,28 = 3,6 px, e
+ * pixel vizinho repetia os mesmos hashes. Mesma conta, na mesma ordem, da
+ * funcao `ruido(x, y)` que existia antes: valor identico (03/10, Heat Wave).
+ */
+class RuidoDaLinha {
+  private yi = 0
+  private uy = 0
+  private xi = NaN
+  private a = 0
+  private b = 0
+  private c = 0
+  private d = 0
+
+  linha(y: number): void {
+    this.yi = Math.floor(y)
+    const fy = y - this.yi
+    this.uy = fy * fy * (3 - 2 * fy)
+    this.xi = NaN
+  }
+
+  em(x: number): number {
+    const xi = Math.floor(x)
+    if (xi !== this.xi) {
+      this.xi = xi
+      const yi = this.yi
+      this.a = hash2(xi, yi); this.b = hash2(xi + 1, yi); this.c = hash2(xi, yi + 1); this.d = hash2(xi + 1, yi + 1)
+    }
+    const fx = x - xi
+    const ux = fx * fx * (3 - 2 * fx), uy = this.uy
+    const { a, b, c, d } = this
+    return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy
+  }
 }
+const oitava1 = new RuidoDaLinha()
+const oitava2 = new RuidoDaLinha()
 
 /** Raio da gota no instante — a MESMA curva do v2 (cresce 0,55x -> 1,85x, some nos ultimos 40%). */
 export function raioNaIdade(p: Brasa): number {
@@ -181,15 +211,32 @@ function pintarIlha(ctx: CanvasRenderingContext2D, vivas: readonly Quente[], pel
 
   // 1. Cada gota soma calor no proprio retangulo. Forma de gota do v2:
   //    cabeca redonda na frente, cauda esticada pra tras do movimento.
+  //
+  //    Cada linha so varre o trecho que a gota PODE tocar (03/10, Heat Wave): a
+  //    gota inteira cabe na elipse (ao/CAUDA)^2 + perp^2 < r^2 — a cabeca e um
+  //    circulo de raio r, mais estreito que ela na frente. A intersecao da
+  //    elipse girada com a linha e uma quadratica em dx; com 1 px de folga pro
+  //    arredondamento, o que fica de fora tem d2 >= 1 com certeza. O teste
+  //    por pixel abaixo e o MESMO, entao o desenho sai identico.
+  const invC2 = 1 / (CAUDA * CAUDA)
   for (const v of vivas) {
     const { p, r, t } = v
     const cs = Math.cos(p.ang), sn = Math.sin(p.ang)
     const [cx0, cy0, cx1, cy1] = caixaDaGota(v)
     const ax = Math.max(0, Math.floor(cx0 - x0)), bx = Math.min(w - 1, Math.ceil(cx1 - x0))
     const ay = Math.max(0, Math.floor(cy0 - y0)), by = Math.min(h - 1, Math.ceil(cy1 - y0))
+    const qa = cs * cs * invC2 + sn * sn
     for (let yy = ay; yy <= by; yy++) {
       const dy = yy + y0 + 0.5 - p.y
-      for (let xx = ax; xx <= bx; xx++) {
+      const qb = 2 * cs * sn * dy * (invC2 - 1)
+      const qc = sn * sn * dy * dy * invC2 + cs * cs * dy * dy - r * r
+      const disc = qb * qb - 4 * qa * qc
+      if (disc < 0) continue
+      const raiz = Math.sqrt(disc)
+      const base = p.x - x0 - 0.5
+      const lx = Math.max(ax, Math.floor((-qb - raiz) / (2 * qa) + base) - 1)
+      const rx = Math.min(bx, Math.ceil((-qb + raiz) / (2 * qa) + base) + 1)
+      for (let xx = lx; xx <= rx; xx++) {
         const dx = xx + x0 + 0.5 - p.x
         let ao = dx * cs + dy * sn // ao longo do movimento
         const perp = -dx * sn + dy * cs
@@ -218,6 +265,10 @@ function pintarIlha(ctx: CanvasRenderingContext2D, vivas: readonly Quente[], pel
   const rolar = ms * 0.03
   const branco = estilo.quente ? (estilo.limiarBranco ?? LIMIAR_BRANCO) : Infinity
   for (let yy = 0; yy < h; yy++) {
+    // Coordenada de MUNDO no ruido: a textura nao "anda" junto com o retangulo.
+    const wy = yy + y0
+    oitava1.linha((wy + rolar) * 0.28)
+    oitava2.linha((wy + rolar * 1.6) * 0.6)
     for (let xx = 0; xx < w; xx++) {
       const q = calor[yy * w + xx]
       // O ruido so EMPURRA PRA BAIXO, no maximo `RASGO`: `v` fica sempre entre
@@ -233,9 +284,8 @@ function pintarIlha(ctx: CanvasRenderingContext2D, vivas: readonly Quente[], pel
       if (fTeto === fPiso && (alto - RASGO > branco) === (alto > branco)) {
         v = alto
       } else {
-        // Coordenada de MUNDO no ruido: a textura nao "anda" junto com o retangulo.
-        const wx = xx + x0, wy = yy + y0
-        const n = ruido(wx * 0.28, (wy + rolar) * 0.28) * 0.65 + ruido(wx * 0.6, (wy + rolar * 1.6) * 0.6) * 0.35
+        const wx = xx + x0
+        const n = oitava1.em(wx * 0.28) * 0.65 + oitava2.em(wx * 0.6) * 0.35
         v = alto - n * RASGO
       }
       const f = faixa(v)

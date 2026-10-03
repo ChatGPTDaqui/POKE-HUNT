@@ -133,6 +133,9 @@ window.__assinaturas = (so) => {
         pctx.clearRect(0, 0, prova.width, prova.height)
         iniciarQuadroDeVfx()
         const e = efeito(rep, i / 60)
+        // Id por geometria: o pixelizador guarda o bitmap POR EFEITO, e a
+        // segunda geometria no mesmo passo reaproveitaria o da primeira.
+        e.id += `-g${GEOMETRIAS.indexOf(g)}`
         if (!rep.area) { e.origemX = g.origemX; e.origemY = g.origemY }
         else e.worldSize = g.worldSize
         desenharVfxDeGolpe(pctx, e)
@@ -141,6 +144,59 @@ window.__assinaturas = (so) => {
     }
     saida[rep.chave] = hashes.join(',')
   }
+  return saida
+}
+
+// CORTES (03/10): quanto cada coreografia desenha ALEM do retangulo do
+// pixelizador — o que passa sai cortado na borda, no jogo e no lab. Desenha
+// sem pixelizador num canvas grande (alfa >= 8, o menor que o Bayer acende),
+// em varias geometrias e sementes, e compara a caixa do desenho com
+// `retanguloDoEfeito`. Devolve so quem corta, em px por lado.
+window.__cortes = async () => {
+  const { retanguloDoEfeito } = await import('/src/render/vfx/desenharVfx.ts')
+  const { PELES } = await import('/src/render/vfx/paletas.ts')
+  const { rngSemeado, hashTexto } = await import('/src/render/vfx/aleatorio.ts')
+  const W = 1000
+  const c = document.createElement('canvas'); c.width = W; c.height = W
+  const cx = c.getContext('2d', { willReadFrequently: true })
+  const alvo = { x: 500, y: 560 }
+  const origens = [{ x: 420, y: 540 }, { x: 590, y: 580 }, { x: 470, y: 470 }, { x: 520, y: 640 }]
+  const saida = {}
+  // Sem pausas entre passos: com a aba em segundo plano o navegador segura
+  // setTimeout e a medicao nao andava. Roda de uma vez (alguns minutos).
+  window.__progressoCortes = 0
+  for (const rep of representantes()) {
+    window.__progressoCortes++
+    const dur = duracaoDoTier(rep.r)
+    const pior = { cima: 0, baixo: 0, esq: 0, dir: 0 }
+    const geos = rep.area ? [175, 110].map((raio) => ({ origem: alvo, raio })) : origens.map((origem) => ({ origem, raio: 0 }))
+    for (const g of geos) {
+      const ret = retanguloDoEfeito(g.origem, alvo, rep.r.entrada.alcance, g.raio, rep.r.entrada.margem)
+      for (const sem of ['a', 'b']) {
+        for (let ms = 0; ms <= dur; ms += 50) {
+          cx.reset()
+          rep.r.entrada.desenhar({
+            ctx: cx, ms, duracao: dur, origem: g.origem, alvo,
+            angulo: Math.atan2(alvo.y - g.origem.y, alvo.x - g.origem.x) || 0,
+            raio: g.raio, tier: rep.r.tier, pele: PELES[rep.r.tipo], rng: rngSemeado(hashTexto(sem)), pedir: (n) => n,
+          })
+          const d = new Uint32Array(cx.getImageData(0, 0, W, W).data.buffer)
+          let x0 = W, y0 = W, x1 = -1, y1 = -1
+          for (let y = 0; y < W; y++) {
+            const b = y * W
+            for (let x = 0; x < W; x++) if ((d[b + x] >>> 24) >= 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y }
+          }
+          if (x1 < 0) continue
+          pior.cima = Math.max(pior.cima, Math.ceil(ret.y - y0))
+          pior.baixo = Math.max(pior.baixo, Math.ceil(y1 + 1 - (ret.y + ret.h)))
+          pior.esq = Math.max(pior.esq, Math.ceil(ret.x - x0))
+          pior.dir = Math.max(pior.dir, Math.ceil(x1 + 1 - (ret.x + ret.w)))
+        }
+      }
+    }
+    if (pior.cima > 0 || pior.baixo > 0 || pior.esq > 0 || pior.dir > 0) saida[rep.chave] = pior
+  }
+  window.__resultadoCortes = saida
   return saida
 }
 

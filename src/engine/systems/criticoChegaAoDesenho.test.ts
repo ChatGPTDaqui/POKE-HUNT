@@ -96,3 +96,31 @@ describe('o critico chega ao efeito de dano (PH-131)', () => {
     expect(numeros.every((e) => !e.isCrit)).toBe(true)
   })
 })
+
+// 03/10: a PONTE tambem tem que chegar ao efeito do GOLPE, nao so ao numero. O
+// spec de VFX (D7) diz que critico sobe um tier visual, e o numero de dano ja
+// esperava o impacto do tier de cima (`atrasoDoNumeroDeDano`) — mas o
+// `abilityEffect` nascia sem `isCrit`, entao o desenho nunca subia e o numero
+// saia atrasado em relacao ao que estava na tela.
+describe('o critico chega ao efeito do golpe (03/10)', () => {
+  const efeitosDoGolpe = (world: ReturnType<typeof cenario>['world']) =>
+    world.effects.filter((e) => e.type === 'abilityEffect')
+
+  it('hit critico marca `isCrit` no efeito do golpe', () => {
+    const mundo = cenario(GOLPE)
+    mundo.player.proximoGolpeCriticoGarantido = true
+    umUso(mundo.world)
+    const golpes = efeitosDoGolpe(mundo.world)
+    expect(golpes.length, 'nenhum efeito de golpe saiu — o cenario nao bateu').toBeGreaterThan(0)
+    expect(golpes.some((e) => e.isCrit === true)).toBe(true)
+  })
+
+  it('hit sem critico nao marca o efeito do golpe', () => {
+    const mundo = cenario(GOLPE)
+    mundo.world.pessimista = true
+    umUso(mundo.world)
+    const golpes = efeitosDoGolpe(mundo.world)
+    expect(golpes.length).toBeGreaterThan(0)
+    expect(golpes.every((e) => !e.isCrit)).toBe(true)
+  })
+})

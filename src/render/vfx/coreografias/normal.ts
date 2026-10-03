@@ -512,11 +512,11 @@ export const NORMAL_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImp
   1: { desenhar: pound, duracao: { 1: 600 }, alcance: 24, impactos: { 1: [...POUND_TAPAS] } },
   2: { desenhar: headbutt, duracao: { 2: 800 }, alcance: 30, impactos: { 2: [HEAD_BATE] } },
   3: { desenhar: bodySlam, duracao: { 3: 1000 }, alcance: 64, impactos: { 3: [SLAM_CAI] } },
-  4: { desenhar: gigaImpact, duracao: { 4: 1400 }, alcance: 110, impactos: { 4: [GIGA_BATE, GIGA_ESTOURO] } },
+  4: { desenhar: gigaImpact, duracao: { 4: 1400 }, alcance: 110, margem: { cima: 110, baixo: 110, lados: 120 }, impactos: { 4: [GIGA_BATE, GIGA_ESTOURO] } },
 }, false)
 
 export const NORMAL_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
-  1: { desenhar: swift, duracao: { 1: 1100 }, alcance: 90, impactos: { 1: [SWIFT_SAI + SWIFT_VOO * 0.6] } },
+  1: { desenhar: swift, duracao: { 1: 1100 }, alcance: 135, margem: { cima: 65, baixo: 20, lados: 20 }, impactos: { 1: [SWIFT_SAI + SWIFT_VOO * 0.6] } },
   2: { desenhar: hyperVoice, duracao: { 2: 1200 }, alcance: 30, impactos: { 2: [VOZ_ONDAS[0] + 150] } },
   3: { desenhar: explosion, duracao: { 3: 1500 }, alcance: 80, impactos: { 3: [EXPLO_NUCLEO] } },
 }, true)

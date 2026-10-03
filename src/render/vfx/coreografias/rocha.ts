@@ -375,14 +375,14 @@ export const VITRINE_DA_ROCHA = {
 } as const
 
 export const ROCHA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
-  1: { desenhar: rockThrow, duracao: { 1: 1000 }, alcance: 34, impactos: { 1: THROW_SAIDAS.map(s => s + THROW_VOO) } },
-  2: { desenhar: rockTomb, duracao: { 2: 1500 }, alcance: 50, impactos: { 2: [TOMB_CAI[0] + TOMB_QUEDA] } },
-  3: { desenhar: powerGem, duracao: { 3: 1100 }, alcance: 34, impactos: { 3: [GEM_CHEGA] } },
-  4: { desenhar: stoneEdge, duracao: { 4: 1600 }, alcance: 60, impactos: { 4: [EDGE_CENTRO] } },
+  1: { desenhar: rockThrow, duracao: { 1: 1000 }, alcance: 34, margem: { cima: 34, baixo: 34, lados: 55 }, impactos: { 1: THROW_SAIDAS.map(s => s + THROW_VOO) } },
+  2: { desenhar: rockTomb, duracao: { 2: 1500 }, alcance: 50, margem: { cima: 50, baixo: 50, lados: 78 }, impactos: { 2: [TOMB_CAI[0] + TOMB_QUEDA] } },
+  3: { desenhar: powerGem, duracao: { 3: 1100 }, alcance: 34, margem: { cima: 34, baixo: 48, lados: 34 }, impactos: { 3: [GEM_CHEGA] } },
+  4: { desenhar: stoneEdge, duracao: { 4: 1600 }, alcance: 60, margem: { cima: 60, baixo: 60, lados: 99 }, impactos: { 4: [EDGE_CENTRO] } },
 }, false)
 
 /** Sem A1: nenhum golpe de rocha em area cai nele (ver cabecalho). */
 export const ROCHA_AREA: Partial<Record<1 | 2 | 3, EntradaDeCoreografia>> = comImpacto({
-  2: { desenhar: rockSlide, duracao: { 2: 1500 }, alcance: 80, impactos: { 2: [SLIDE_INICIO + SLIDE_QUEDA + 60] } },
-  3: { desenhar: avalanche, duracao: { 3: 1800 }, alcance: 100, impactos: { 3: [360, 900] } },
+  2: { desenhar: rockSlide, duracao: { 2: 1500 }, alcance: 195, margem: { cima: 135, baixo: 20, lados: 95 }, impactos: { 2: [SLIDE_INICIO + SLIDE_QUEDA + 60] } },
+  3: { desenhar: avalanche, duracao: { 3: 1800 }, alcance: 207, margem: { cima: 127, baixo: 20, lados: 97 }, impactos: { 3: [360, 900] } },
 }, true)

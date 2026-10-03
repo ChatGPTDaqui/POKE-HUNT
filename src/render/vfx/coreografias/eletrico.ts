@@ -616,5 +616,5 @@ export const ELETRICO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comI
 export const ELETRICO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: charge, duracao: { 1: 800 }, alcance: 30, impactos: { 1: [120] } },
   2: { desenhar: discharge, duracao: { 2: 1000 }, alcance: 60, impactos: { 2: DISCHARGE_IMPACTOS } },
-  3: { desenhar: thunderStorm, duracao: { 3: 1800 }, alcance: 200, impactos: { 3: [...TEMPESTADE_QUEDAS, TEMPESTADE_FINAL] } },
+  3: { desenhar: thunderStorm, duracao: { 3: 1800 }, alcance: 436, margem: { cima: 256, baixo: 20, lados: 36 }, impactos: { 3: [...TEMPESTADE_QUEDAS, TEMPESTADE_FINAL] } },
 }, true)

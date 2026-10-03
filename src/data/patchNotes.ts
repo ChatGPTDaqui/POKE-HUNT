@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Correcoes dos efeitos de golpe: cortes, critico e Heat Wave.
+  {
+    version: '7.77',
+    date: '2026-10-03',
+    title: 'Efeitos de golpe inteiros',
+    highlights: [
+      'Corrigido: vários efeitos de golpe saíam cortados na borda, como os raios do Thunder Storm, as pedras do Rock Slide e o jato do Hydro Pump. Agora aparecem inteiros.',
+      'Golpe crítico de alvo único agora mostra o efeito mais forte, e o número de dano aparece junto com o impacto.',
+      'Golpes de fogo em área, como o Heat Wave, ficaram mais leves.',
+    ],
+  },
   // O POKE fica parado um instante depois do golpe, igual pra todo golpe.
   {
     version: '7.76',
