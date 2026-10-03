@@ -6,6 +6,7 @@ import { maiorEstagioLimpo } from '@/data/progressoDeBioma'
 import { cadeiaDoTipo, chaveDaMissao, MISSAO_TYPES } from '@/data/missoes'
 import { ESPECIALIDADE_TYPES, ESPECIALIDADE_NIVEL_MAX } from '@/data/especialidades'
 import { SPECIES } from '@/data/pokes'
+import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { GameButton, Meter } from '@/components/game/controls'
 
 export function useJornada() {
@@ -48,6 +49,7 @@ export function JornadaDoTreinador({ onBioma, onLance }: {
     return [{ ...m, tipo, total: (k?.normal ?? 0) + (k?.shiny ?? 0) }]
   }).sort((a, b) => Math.min(1, b.total / b.alvo) - Math.min(1, a.total / a.alvo))[0]
   const pesquisa = Object.keys(SPECIES).flatMap(id => {
+    if (LEGENDARY_SPECIES_IDS.includes(id)) return []
     const k = kills[id]
     const total = (k?.normal ?? 0) + (k?.shiny ?? 0)
     const alvo = MARCOS_BESTIARIO.find(a => total < a)

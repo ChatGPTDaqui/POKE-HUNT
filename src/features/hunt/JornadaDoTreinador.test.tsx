@@ -13,6 +13,13 @@ beforeEach(() => {
   useUiStore.setState({ currentScreen: null })
 })
 describe('jornada na interface', () => {
+  it('não sugere lendários do conteúdo paralelo como meta de pesquisa', () => {
+    useGameStateStore.setState({ pokedexKills: { mewtwo: { normal: 499, shiny: 0 }, rattata: { normal: 12, shiny: 0 } } })
+    render(<JornadaDoTreinador onBioma={vi.fn()} onLance={vi.fn()} />)
+    const bestiario = screen.getByRole('heading', { name: 'Bestiário · pesquisa de espécies' }).parentElement!
+    expect(bestiario.textContent).toContain('Rattata: 12/500')
+    expect(bestiario.textContent).not.toContain('Mewtwo')
+  })
   it('abre objetivo e mantém as ações das trilhas navegáveis', () => {
     render(<ProximoObjetivo />)
     fireEvent.click(screen.getByRole('button', { name: 'Abrir jornada e próximo objetivo' }))
