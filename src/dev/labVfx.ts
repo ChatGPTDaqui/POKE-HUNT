@@ -33,7 +33,7 @@ import { FANTASMA_AREA, FANTASMA_SINGLE, VITRINE_DO_FANTASMA } from '@/render/vf
 import { DRAGAO_AREA, DRAGAO_SINGLE, VITRINE_DO_DRAGAO } from '@/render/vfx/coreografias/dragao'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
-import { BEAMS_POR_GOLPE } from '@/render/vfx/coreografias/beams'
+import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { tierDoPoder } from '@/data/tierDoVfx'
 import { REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
@@ -144,7 +144,7 @@ const ATACANTES_DE_BEAM: Record<string, string> = { ice_beam: 'lapras', aurora_b
 for (const [id, entrada] of Object.entries(BEAMS_POR_GOLPE)) {
   const g = getAbility(id)!, tier = tierDoPoder(g.power, false)
   ;(TIPOS_DO_LAB[g.type] ??= []).push({ id, tipo: g.type, area: false, tier, entrada,
-    atacante: ATACANTES_DE_BEAM[id], antes: REGISTRO_SINGLE[g.type]?.[tier], beam: true })
+    atacante: ATACANTES_DE_BEAM[id], antes: BEAMS_COM_IMPACTO_ANTERIOR[id], beam: true })
 }
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
@@ -447,8 +447,8 @@ function reiniciar(): void {
   $('titulo-tira').textContent = g.soco ? 'Anterior: coreografia por tipo' : g.antes ? 'Atual: sem acabamento de impacto' : 'Atual: tira PNG'
   $('titulo-anime').textContent = g.soco ? 'Novo: punho de energia' : g.antes ? 'Novo: com acabamento de impacto' : 'Proposta: coreografia anime pixel'
   if (g.beam) {
-    $('titulo-tira').textContent = 'Anterior: coreografia por tipo'
-    $('titulo-anime').textContent = 'Novo: Beam com assinatura própria'
+    $('titulo-tira').textContent = 'Anterior: impacto da 7.81'
+    $('titulo-anime').textContent = 'Novo: colisão sustentada do Beam'
   }
   if (g.id === 'bullet_punch') {
     $('titulo-tira').textContent = 'Bullet Punch: sprite original'

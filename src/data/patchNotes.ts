@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.82',
+    date: '2026-10-03',
+    title: 'Beams: impacto com mais presença',
+    highlights: [
+      'Os oito Beams agora mantêm uma colisão visual enquanto atingem o oponente, com pressão de energia e detalhes próprios de cada golpe.',
+      'Explosão âmbar no Hyper Beam, luz solar, cristais, facetas prismáticas, arcos mentais, faíscas e bolhas estourando tornam o contato mais marcante.',
+    ],
+  },
+  {
     version: '7.81',
     date: '2026-10-03',
     title: 'Beams com assinatura própria',
