@@ -119,6 +119,18 @@ window.__proximoNome = (max = 3600) => {
   return null
 }
 
+// Avanca ate um efeito de golpe estar no meio da coreografia (conferir o VFX).
+window.__proximoEfeito = (max = 3600) => {
+  for (let i = 0; i < max; i++) {
+    tique()
+    for (const m of mundos) {
+      const e = m.world.effects.find((x) => x.type === 'abilityEffect' && x.age - x.delay > 0.3 && x.age - x.delay < 0.36)
+      if (e) return e.abilityId
+    }
+  }
+  return null
+}
+
 function quadro() {
   if (rodando) {
     const novo = tique()
