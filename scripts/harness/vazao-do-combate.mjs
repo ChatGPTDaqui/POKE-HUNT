@@ -186,8 +186,11 @@ function medirUmaSemente(regime, semente) {
   // desce disso mede 0,00 item/min e nao responde nada sobre sobrevivencia —
   // sem esta coluna, esse 0,00 se confunde com "a cura nao funciona".
   let pisoDeHp = 1
+  // ABATES contados pelo retorno do passo (02/10): ouro/min sozinho mistura
+  // "matou mais" com "o que matou valia mais", e a cauda do ouro e pesada.
+  let abates = 0
   for (let t = 0; t * PASSO < SEGUNDOS; t++) {
-    stepWorld(world, PASSO, gameState, { silent: true })
+    abates += stepWorld(world, PASSO, gameState, { silent: true }).length
     passos++
     for (const ph of world.pendingHits ?? []) golpesVistos.add(ph.id)
     if (world.player && (world.player.state === 'engaged' || world.player.attackAnimTimer > 0)) passosEngajado++
@@ -204,7 +207,7 @@ function medirUmaSemente(regime, semente) {
   // anteriores. `salas * ABATES_POR_SALA` seria uma aproximacao; o numero fiel e
   // o ouro e o XP, que sao acumulados por abate e e o que o jogador sente.
   return {
-    ...contadores, salas, mortes, pisoDeHp,
+    ...contadores, salas, mortes, pisoDeHp, abates,
     golpes: golpesVistos.size,
     fracaoEngajado: passos ? passosEngajado / passos : 0,
   }
@@ -212,18 +215,19 @@ function medirUmaSemente(regime, semente) {
 
 const linhas = []
 for (const regime of REGIMES) {
-  const soma = { ouro: 0, xp: 0, itens: 0, revives: 0, salas: 0, golpes: 0, engajado: 0, mortes: 0, pisoDeHp: 0 };
+  const soma = { ouro: 0, xp: 0, itens: 0, revives: 0, salas: 0, golpes: 0, engajado: 0, mortes: 0, pisoDeHp: 0, abates: 0 };
   for (let s = 1; s <= SEMENTES; s++) {
     const r = medirUmaSemente(regime, s * 7919)
     soma.ouro += r.ouro; soma.xp += r.xp; soma.itens += r.itens; soma.salas += r.salas
     soma.golpes += r.golpes; soma.engajado += r.fracaoEngajado; soma.mortes += r.mortes
-    soma.pisoDeHp += r.pisoDeHp; soma.revives += r.revives
+    soma.pisoDeHp += r.pisoDeHp; soma.revives += r.revives; soma.abates += r.abates
   }
   const minutos = (SEGUNDOS / 60) * SEMENTES
   linhas.push({
     regime: regime.nome,
     ouroPorMin: soma.ouro / minutos,
     xpPorMin: soma.xp / minutos,
+    abatesPorMin: soma.abates / minutos,
     salasPorMin: soma.salas / minutos,
     golpesPorMin: soma.golpes / minutos,
     engajadoPct: (soma.engajado / SEMENTES) * 100,
@@ -239,7 +243,7 @@ saida.push('');
 saida.push(`TURNO_SEGUNDOS medido = ${TURNO_SEGUNDOS}`);
 saida.push(`hunt=${HUNT} (regime pode trocar)  ${SEGUNDOS}s x ${SEMENTES} sementes = ${(SEGUNDOS / 60) * SEMENTES} minutos por regime`);
 saida.push('');
-saida.push('regime                        ouro/min   golpes/min  % engajado   curas/min  mortes/min   piso HP');
+saida.push('regime                        ouro/min   golpes/min  % engajado   curas/min  mortes/min   piso HP  abates/min    xp/min');
 saida.push('-'.repeat(104));
 for (const l of linhas) {
   saida.push(
@@ -249,7 +253,9 @@ for (const l of linhas) {
     + (l.engajadoPct.toFixed(1) + '%').padStart(12)
     + l.curasPorMin.toFixed(2).padStart(12)
     + l.mortesPorMin.toFixed(3).padStart(12)
-    + (l.pisoDeHpPct.toFixed(1) + '%').padStart(10),
+    + (l.pisoDeHpPct.toFixed(1) + '%').padStart(10)
+    + l.abatesPorMin.toFixed(2).padStart(12)
+    + l.xpPorMin.toFixed(0).padStart(10),
   );
 }
 saida.push('');

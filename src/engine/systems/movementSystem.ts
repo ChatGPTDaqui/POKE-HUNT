@@ -433,6 +433,11 @@ function wanderFreely(rng: Rng, entity: Wanderer, dt: number, cx: number, cy: nu
   entity.wanderTarget = { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist }
 }
 
+/** Parado NESTE tick: status que imobiliza, ou o proprio golpe ainda na tela. */
+function naoAnda(entity: PlayerEntity | EnemyEntity): boolean {
+  return imobilizadoPorStatus(entity) || (entity.travaDoGolpe ?? 0) > 0
+}
+
 /**
  * Sono e paralisia travam o POKE onde ele esta (data/statusEffects.ts#imobiliza).
  *
@@ -454,6 +459,13 @@ function wanderFreely(rng: Rng, entity: Wanderer, dt: number, cx: number, cy: nu
  * selvagem e 175px e o spawn nasce entre 250 e 550px
  * (simulation.ts#SPAWN_CONE_MIN_DISTANCE), entao a hunt travaria ate alguem
  * curar. Ver data/statusEffects.ts#STATUS_QUE_IMOBILIZAM.
+ *
+ * O GOLPE NA TELA tambem para o POKE (02/10): `travaDoGolpe` entra por
+ * `naoAnda`, o MESMO caminho do sono, e nao pelo da pose (`attackAnimTimer`,
+ * que forca 'engaged'). So o deslocamento e pulado; o estado continua saindo
+ * da distancia real. Forcar 'engaged' por ate 2 s seria bug: `updateCombat`
+ * escolhe quem luta so por `state === 'engaged'`, entao um inimigo travado
+ * seguiria batendo (e apanhando) de longe enquanto o jogador vai embora.
  */
 export function updateMovement(world: WorldState, dt: number): void {
   const { player, enemies, mapDef } = world
@@ -483,7 +495,7 @@ export function updateMovement(world: WorldState, dt: number): void {
     const lure = world.lure
     player.state = lure.destino ? 'chase' : 'idle'
     player.wanderTarget = null
-    if (lure.destino && !imobilizadoPorStatus(player)) {
+    if (lure.destino && !naoAnda(player)) {
       moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef)
     }
   } else {
@@ -500,7 +512,7 @@ export function updateMovement(world: WorldState, dt: number): void {
         player.state = 'engaged'
       } else {
         player.state = 'chase'
-        if (!imobilizadoPorStatus(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef)
+        if (!naoAnda(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef)
         player.wanderTarget = null
       }
     } else if (duelVencido(world)) {
@@ -511,7 +523,7 @@ export function updateMovement(world: WorldState, dt: number): void {
       player.wanderTarget = null
     } else {
       player.state = 'wander'
-      if (imobilizadoPorStatus(player)) player.wanderTarget = null
+      if (naoAnda(player)) player.wanderTarget = null
       else wanderFreely(world.rng, player, dt, mapCx, mapCy, mapRadius, mapDef)
     }
   }
@@ -528,7 +540,7 @@ export function updateMovement(world: WorldState, dt: number): void {
       continue
     }
 
-    const enemyImobilizado = imobilizadoPorStatus(enemy)
+    const enemyImobilizado = naoAnda(enemy)
 
     if (player.fainted) {
       enemy.state = 'wander'

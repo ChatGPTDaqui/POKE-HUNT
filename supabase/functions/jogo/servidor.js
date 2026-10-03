@@ -54997,6 +54997,254 @@ function estagioDoGolpe(statChanges) {
 	};
 }
 //#endregion
+//#region src/data/duracaoDoVfx.ts
+/**
+* Faixas fixas de poder (D2/D3), iguais pra todo tipo: poder 90 e "forte" em
+* qualquer elemento. Poder entre faixas cai na de BAIXO — o limite e `<`.
+*
+* Os numeros sairam dos quartis reais do catalogo em 2026-09-28 (50/65/90).
+*/
+var LIMITES_SINGLE = [
+	55,
+	80,
+	100
+];
+var LIMITES_AREA = [65, 100];
+/**
+* Golpe de DANO sem poder base (Magnitude, Seismic Toss... — ver
+* `DANO_SEM_PODER_BASE`) cai aqui: o dano existe, so nao tem numero pra
+* comparar. T2 e o meio honesto: nem o estalo do golpe fraco nem o espetaculo
+* do forte.
+*/
+var TIER_SEM_PODER = 2;
+function tierDoPoder(power, area) {
+	if (power <= 0) return TIER_SEM_PODER;
+	const limites = area ? LIMITES_AREA : LIMITES_SINGLE;
+	let tier = 1;
+	for (const limite of limites) if (power >= limite) tier++;
+	return tier;
+}
+/**
+* Duracao (ms) ja resolvida por tier — com o mesmo recuo de
+* `render/vfx/desenharVfx.ts#duracaoDoTier` (tier sem duracao propria usa a do
+* maior tier abaixo dele). Tier AUSENTE = o desenho nao tem coreografia nele.
+* Motivo fica de fora enquanto `REGISTRO_DE_MOTIVO` estiver vazio; o teste
+* avisa se ele ganhar entradas.
+*/
+var DURACAO_DO_VFX = {
+	single: {
+		FIRE: {
+			1: 900,
+			2: 1150,
+			3: 1450,
+			4: 1500
+		},
+		ELECTRIC: {
+			1: 700,
+			2: 1e3,
+			3: 1100,
+			4: 1800
+		},
+		WATER: {
+			1: 900,
+			2: 1e3,
+			3: 1100,
+			4: 1600
+		},
+		GRASS: {
+			1: 1e3,
+			2: 1100,
+			3: 1100,
+			4: 1800
+		},
+		NORMAL: {
+			1: 600,
+			2: 800,
+			3: 1e3,
+			4: 1400
+		},
+		FIGHTING: {
+			1: 700,
+			2: 900,
+			3: 1100,
+			4: 1600
+		},
+		FLYING: {
+			1: 1100,
+			2: 1e3,
+			3: 1200,
+			4: 1700
+		},
+		POISON: {
+			1: 900,
+			2: 1100,
+			3: 1500,
+			4: 1800
+		},
+		GROUND: {
+			1: 900,
+			2: 1100,
+			3: 1400,
+			4: 1600
+		},
+		PSYCHIC: {
+			1: 1200,
+			2: 1100,
+			3: 1400,
+			4: 1800
+		},
+		BUG: {
+			1: 1e3,
+			2: 900,
+			3: 1e3,
+			4: 1300
+		},
+		ROCK: {
+			1: 1e3,
+			2: 1500,
+			3: 1100,
+			4: 1600
+		},
+		FAIRY: {
+			1: 1e3,
+			2: 1e3,
+			3: 1700,
+			4: 1300
+		},
+		DARK: {
+			1: 800,
+			2: 900,
+			3: 1100,
+			4: 1400
+		},
+		STEEL: {
+			1: 800,
+			2: 1100,
+			3: 1e3,
+			4: 1300
+		},
+		ICE: {
+			1: 1100,
+			2: 1200,
+			3: 1700,
+			4: 1500
+		},
+		GHOST: {
+			1: 1200,
+			2: 800,
+			3: 1200,
+			4: 1400
+		},
+		DRAGON: {
+			1: 900,
+			2: 1200,
+			3: 1e3,
+			4: 1400
+		}
+	},
+	area: {
+		FIRE: {
+			1: 800,
+			2: 1500,
+			3: 1800
+		},
+		ELECTRIC: {
+			1: 800,
+			2: 1e3,
+			3: 1800
+		},
+		WATER: {
+			1: 900,
+			2: 1200,
+			3: 1500
+		},
+		GRASS: {
+			1: 1e3,
+			2: 1450,
+			3: 1600
+		},
+		NORMAL: {
+			1: 1100,
+			2: 1200,
+			3: 1500
+		},
+		FIGHTING: {
+			2: 1100,
+			3: 1700
+		},
+		FLYING: {
+			1: 1e3,
+			2: 1300,
+			3: 1600
+		},
+		POISON: {
+			1: 1300,
+			2: 1500,
+			3: 1800
+		},
+		GROUND: {
+			1: 900,
+			2: 1300,
+			3: 1800
+		},
+		PSYCHIC: {
+			2: 1300,
+			3: 1800
+		},
+		BUG: {
+			1: 1100,
+			2: 1500,
+			3: 1700
+		},
+		ROCK: {
+			2: 1500,
+			3: 1800
+		},
+		FAIRY: {
+			1: 1100,
+			2: 1500,
+			3: 1700
+		},
+		DARK: {
+			1: 1100,
+			2: 1500,
+			3: 1700
+		},
+		STEEL: {
+			2: 1500,
+			3: 1700
+		},
+		ICE: {
+			1: 1300,
+			2: 1500,
+			3: 1800
+		},
+		GHOST: {
+			2: 1600,
+			3: 2100
+		},
+		DRAGON: {
+			1: 1300,
+			2: 1400,
+			3: 1800
+		}
+	}
+};
+/**
+* Quanto (ms) o VFX procedural do golpe fica na tela depois de pousar; 0 quando
+* o golpe nao tem coreografia (status, desconhecido, tier sem desenho).
+*
+* Sem `critico`: o efeito de golpe NAO recebe `isCrit` do motor (so o numero de
+* dano recebe), entao o tier desenhado e sempre o do poder. Ver a nota em
+* render/vfx/duracaoDoVfx.test.ts.
+*/
+function duracaoVisualDoGolpe(abilityId, area) {
+	const golpe = getAbility(abilityId);
+	if (!golpe || !isDamagingAbility(golpe)) return 0;
+	const tier = tierDoPoder(golpe.power, area);
+	return DURACAO_DO_VFX[area ? "area" : "single"][golpe.type]?.[tier] ?? 0;
+}
+//#endregion
 //#region src/data/battleSpriteAnims.ts
 var BATTLE_SPRITE_ANIMS = {
 	"charmander": {
@@ -101503,6 +101751,11 @@ function tickAttackAnimTimers(world, dt) {
 	for (const entity of entities) {
 		if (!entity) continue;
 		if (entity.attackAnimTimer > 0) entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt);
+		if (entity.travaDoGolpe) {
+			const resta = entity.travaDoGolpe - dt;
+			if (resta > 0) entity.travaDoGolpe = resta;
+			else delete entity.travaDoGolpe;
+		}
 		if (entity.hurtAnimTimer) {
 			const resta = entity.hurtAnimTimer - dt;
 			if (resta > 0) entity.hurtAnimTimer = resta;
@@ -103962,6 +104215,10 @@ function wanderFreely(rng, entity, dt, cx, cy, radius, mapDef) {
 		y: cy + Math.sin(angle) * dist
 	};
 }
+/** Parado NESTE tick: status que imobiliza, ou o proprio golpe ainda na tela. */
+function naoAnda(entity) {
+	return imobilizadoPorStatus(entity) || (entity.travaDoGolpe ?? 0) > 0;
+}
 /**
 * Sono e paralisia travam o POKE onde ele esta (data/statusEffects.ts#imobiliza).
 *
@@ -103983,6 +104240,13 @@ function wanderFreely(rng, entity, dt, cx, cy, radius, mapDef) {
 * selvagem e 175px e o spawn nasce entre 250 e 550px
 * (simulation.ts#SPAWN_CONE_MIN_DISTANCE), entao a hunt travaria ate alguem
 * curar. Ver data/statusEffects.ts#STATUS_QUE_IMOBILIZAM.
+*
+* O GOLPE NA TELA tambem para o POKE (02/10): `travaDoGolpe` entra por
+* `naoAnda`, o MESMO caminho do sono, e nao pelo da pose (`attackAnimTimer`,
+* que forca 'engaged'). So o deslocamento e pulado; o estado continua saindo
+* da distancia real. Forcar 'engaged' por ate 2 s seria bug: `updateCombat`
+* escolhe quem luta so por `state === 'engaged'`, entao um inimigo travado
+* seguiria batendo (e apanhando) de longe enquanto o jogador vai embora.
 */
 function updateMovement(world, dt) {
 	const { player, enemies, mapDef } = world;
@@ -103996,7 +104260,7 @@ function updateMovement(world, dt) {
 		const lure = world.lure;
 		player.state = lure.destino ? "chase" : "idle";
 		player.wanderTarget = null;
-		if (lure.destino && !imobilizadoPorStatus(player)) moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef);
+		if (lure.destino && !naoAnda(player)) moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef);
 	} else {
 		const targetEnemy = findNearestAlivePrioritario(player, enemies) || findNearestAliveEnemy(player, enemies);
 		if (targetEnemy) {
@@ -104004,7 +104268,7 @@ function updateMovement(world, dt) {
 			if (distanceTo(player, targetEnemy) <= engageRange) player.state = "engaged";
 			else {
 				player.state = "chase";
-				if (!imobilizadoPorStatus(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef);
+				if (!naoAnda(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef);
 				player.wanderTarget = null;
 			}
 		} else if (duelVencido(world)) {
@@ -104012,7 +104276,7 @@ function updateMovement(world, dt) {
 			player.wanderTarget = null;
 		} else {
 			player.state = "wander";
-			if (imobilizadoPorStatus(player)) player.wanderTarget = null;
+			if (naoAnda(player)) player.wanderTarget = null;
 			else wanderFreely(world.rng, player, dt, mapCx, mapCy, mapRadius, mapDef);
 		}
 	}
@@ -104025,7 +104289,7 @@ function updateMovement(world, dt) {
 			enemy.state = "engaged";
 			continue;
 		}
-		const enemyImobilizado = imobilizadoPorStatus(enemy);
+		const enemyImobilizado = naoAnda(enemy);
 		if (player.fainted) {
 			enemy.state = "wander";
 			enemy.targetId = null;
@@ -105991,6 +106255,16 @@ function ordenarPorVelocidade(world, hits) {
 		return diff !== 0 ? diff : a.id.localeCompare(b.id);
 	});
 }
+/**
+* O POKE so volta a andar quando o efeito do proprio golpe acabar (02/10). A
+* pose (`attackAnimTimer`) ja segurou ate o golpe pousar; daqui em diante
+* segura a duracao da coreografia, que nasce agora. Nunca encurta uma trava
+* maior que ja esteja correndo. Ver movementSystem.ts#naoAnda.
+*/
+function travarAteOGolpeAcabar(attacker, ability, area) {
+	const segundos = duracaoVisualDoGolpe(ability.id, area) / 1e3;
+	if (segundos > (attacker.travaDoGolpe ?? 0)) attacker.travaDoGolpe = segundos;
+}
 function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const attacker = findEntityById(world.player, world.enemies, hit.attackerId);
 	if (!attacker) return;
@@ -106009,6 +106283,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		ability = opcoes[Math.floor(nextFloat(world.rng) * opcoes.length)];
 	}
 	if (hit.isAoeVisual) {
+		travarAteOGolpeAcabar(attacker, ability, true);
 		if (!silent) world.effects.push(createWorldEffect(world.counters, {
 			type: "abilityEffect",
 			x: attacker.x,
@@ -106533,7 +106808,9 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		attacker.x = clamp$1(attacker.x + (dx || (dy ? 0 : 1)) / distancia * 60, attacker.radius, (bounds?.width ?? 1400) - attacker.radius);
 		attacker.y = clamp$1(attacker.y + dy / distancia * 60, attacker.radius, (bounds?.height ?? 900) - attacker.radius);
 	}
-	if (!(ability.target === "aoe") && !silent && (ability.power > 0 || statusRecebeuEm)) {
+	const isAoe = ability.target === "aoe";
+	if (!isAoe && ability.power > 0) travarAteOGolpeAcabar(attacker, ability, false);
+	if (!isAoe && !silent && (ability.power > 0 || statusRecebeuEm)) {
 		const local = !isDamagingAbility(ability) && statusRecebeuEm ? statusRecebeuEm : target;
 		const mesmoLugar = local.x === attacker.x && local.y === attacker.y;
 		world.effects.push(createWorldEffect(world.counters, {
