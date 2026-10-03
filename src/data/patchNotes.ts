@@ -12,6 +12,12 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  {
+    version: '7.78',
+    date: '2026-10-03',
+    title: 'Seu próximo golpe',
+    highlights: ['Passe o ponteiro ou toque no nível do POKE, no topo da caçada ou na ficha, para ver qual golpe ele aprenderá e em qual nível.'],
+  },
   // Correcoes dos efeitos de golpe: cortes, critico e Heat Wave.
   {
     version: '7.77',
