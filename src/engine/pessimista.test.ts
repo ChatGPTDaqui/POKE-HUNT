@@ -36,7 +36,15 @@ const JANELA = 1800
 // acima, e a margem ja fina de 12 sementes virou negativa por ruido puro
 // (pessimista.kills 352.83 vs otimista.kills 351.5). Com 40 sementes a
 // ordem correta volta (353.05 vs 353.35, confirmado empiricamente).
-const SEMENTES = Array.from({ length: 40 }, (_, i) => i * 137 + 3)
+//
+// 40 -> 160 em 02/10, pela trava "o POKE so anda depois que o golpe acaba".
+// A trava dura a coreografia do golpe que DEU o abate, entao critico (que muda
+// quem da o abate e quando) passou a mexer no tempo parado: a razao
+// pessimista/otimista por conjunto de 40 sementes foi de +-0,7% pra +-2%, e o
+// conjunto deste arquivo caiu em 1,0177. Medido em seis conjuntos de 40, a
+// MEDIA nao subiu (1,000 sem a trava, 0,997 com) — a invariante vale, so o
+// ruido cresceu. A margem de 1% ficou; o que mudou foi o tamanho da amostra.
+const SEMENTES = Array.from({ length: 160 }, (_, i) => i * 137 + 3)
 
 function simular(pessimista: boolean, semente: number) {
   const gameState = useGameStateStore.getState()

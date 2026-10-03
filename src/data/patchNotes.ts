@@ -12,6 +12,15 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // O POKE so volta a andar depois que o efeito do proprio golpe termina.
+  {
+    version: '7.76',
+    date: '2026-10-02',
+    title: 'Golpe até o fim',
+    highlights: [
+      'Depois de usar um golpe, o POKE espera o efeito terminar antes de voltar a andar. O golpe não fica mais para trás quando o inimigo cai.',
+    ],
+  },
   // Queda de desempenho com os efeitos novos de golpe.
   {
     version: '7.75',

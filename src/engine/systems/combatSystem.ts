@@ -50,6 +50,7 @@ import { colorForType } from '@/data/typeColors'
 import { bonusDeAtaque, reducaoDeDefesa } from '@/data/especialidades'
 import { ehDirecional } from '@/data/moveVfx'
 import { estagioDoGolpe } from '@/data/estagioVfx'
+import { duracaoVisualDoGolpe } from '@/data/duracaoDoVfx'
 
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
@@ -2664,6 +2665,17 @@ function ordenarPorVelocidade(world: WorldState, hits: PendingHit[]): PendingHit
   })
 }
 
+/**
+ * O POKE so volta a andar quando o efeito do proprio golpe acabar (02/10). A
+ * pose (`attackAnimTimer`) ja segurou ate o golpe pousar; daqui em diante
+ * segura a duracao da coreografia, que nasce agora. Nunca encurta uma trava
+ * maior que ja esteja correndo. Ver movementSystem.ts#naoAnda.
+ */
+function travarAteOGolpeAcabar(attacker: PlayerEntity | EnemyEntity, ability: Ability, area: boolean): void {
+  const segundos = duracaoVisualDoGolpe(ability.id, area) / 1000
+  if (segundos > (attacker.travaDoGolpe ?? 0)) attacker.travaDoGolpe = segundos
+}
+
 function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string[], onPlayerFainted: () => void, silent: boolean): void {
   const attacker = findEntityById(world.player, world.enemies, hit.attackerId)
   if (!attacker) return
@@ -2695,6 +2707,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   }
 
   if (hit.isAoeVisual) {
+    // Trava FORA do `silent`: o servidor re-simula o movimento e tem que parar
+    // o POKE igual ao cliente, mesmo sem efeito nenhum nascendo aqui.
+    travarAteOGolpeAcabar(attacker, ability, true)
     // O unico anel deste cast AOE, centrado no atacante — ver
     // queueAoeVisual. Hits individuais por-alvo abaixo pulam desenhar o
     // proprio. Pulado em silent (PH-11): farm offline/flush headless roda
@@ -3581,6 +3596,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     attacker.y = clamp(attacker.y + dy / distancia * 60, attacker.radius, (bounds?.height ?? 900) - attacker.radius)
   }
   const isAoe = ability.target === 'aoe'
+  // Mesmo gatilho do efeito abaixo (golpe de dano), fora do `silent`. Golpe de
+  // status nao tem coreografia e `duracaoVisualDoGolpe` devolve 0.
+  if (!isAoe && ability.power > 0) travarAteOGolpeAcabar(attacker, ability, false)
   // Golpe de status alvo-unico: SO mostra VFX quando algo de fato pegou
   // (`statusRecebeuEm`) — golpe que falhou (imunidade, ja tinha status,
   // janela de reaplicacao) nao fica com um circulo colorido em cima de nada

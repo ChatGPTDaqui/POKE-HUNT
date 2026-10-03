@@ -82,6 +82,14 @@ export interface BaseEntity {
   animElapsed: number
   attackAnim: AttackAnimKind | null
   attackAnimTimer: number
+  /**
+   * Segundos que o POKE ainda fica PARADO depois que o proprio golpe pousou,
+   * pra o efeito do golpe terminar onde ele esta (02/10). Somado a
+   * `attackAnimTimer` (a pose), e o tempo inteiro de "usar o golpe". Le de
+   * data/duracaoDoVfx.ts, nunca do efeito: em modo silent o efeito nem nasce, e
+   * o servidor tem que travar igual ao cliente. Ausente = 0.
+   */
+  travaDoGolpe?: number
   effectLanes: EffectLaneClaim[]
   pathWaypoints: Point[] | null
   pathIndex: number
