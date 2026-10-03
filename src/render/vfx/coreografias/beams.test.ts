@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ABILITIES, getAbility } from '@/data/abilities'
-import { BEAMS_POR_GOLPE, PERFIS_DE_BEAM } from './beams'
+import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR, PERFIS_DE_BEAM } from './beams'
 import { resolverVfx } from '../resolverVfx'
 import { atrasoDoNumeroDeDano, desenharVfxDeGolpe, retanguloDoEfeito } from '../desenharVfx'
 import { rngSemeado } from '../aleatorio'
@@ -8,7 +8,7 @@ import { paletaDaPele } from '../paletas'
 import type { ContextoVfx, Tier } from '../tipos'
 import type { WorldEffect } from '@/engine/types'
 
-function quadro(id: string, ms: number, tier: Tier = 3, distancia = 110, angulo = .2, orcamento = 100) {
+function quadro(id: string, ms: number, tier: Tier = 3, distancia = 110, angulo = .2, orcamento = 100, anterior = false) {
   const log: string[] = [], cores = new Set<string>()
   let m = [1,0,0,1,0,0], largura = 0
   const pilha: { m: number[]; largura: number }[] = []
@@ -34,7 +34,7 @@ function quadro(id: string, ms: number, tier: Tier = 3, distancia = 110, angulo 
     get: (_o,k) => (...args: number[]) => { log.push(`${String(k)}:${args.join(',')}`); metodos[String(k)]?.(...args) },
     set: (_o,k,v) => { log.push(`${String(k)}=${v}`); if (k==='lineWidth') largura=v; if (k==='fillStyle'||k==='strokeStyle') cores.add(v); return true },
   }) as CanvasRenderingContext2D
-  const e = BEAMS_POR_GOLPE[id]
+  const e = (anterior ? BEAMS_COM_IMPACTO_ANTERIOR : BEAMS_POR_GOLPE)[id]
   const rng = rngSemeado(42)
   let sorteios = 0
   const origem = Object.freeze({ x: 0, y: 0 }), alvo = Object.freeze({ x: Math.cos(angulo)*distancia, y: Math.sin(angulo)*distancia })
@@ -46,6 +46,15 @@ function quadro(id: string, ms: number, tier: Tier = 3, distancia = 110, angulo 
 }
 
 describe('Beams com assinatura própria', () => {
+  it.each(Object.keys(BEAMS_POR_GOLPE))('%s preserva o feixe antes do contato e sustenta colisão sem orçamento', id => {
+    const p = PERFIS_DE_BEAM[id]
+    for (const ms of [p.carga, p.contato - 1]) {
+      expect(quadro(id,ms).log).toEqual(quadro(id,ms,3,110,.2,100,true).log)
+    }
+    const ms = p.contato + Math.min(200,p.sustentar)
+    expect(quadro(id,ms,3,110,.2,0).log).not.toEqual(quadro(id,ms,3,110,.2,0,true).log)
+    expect(quadro(id,p.contato+p.sustentar+130).log).toEqual(quadro(id,p.contato+p.sustentar+130,3,110,.2,100,true).log)
+  })
   it('cobre exatamente os oito Beams do catálogo atual, incluindo Psybeam', () => {
     const ids = Object.values(ABILITIES).filter(g => /beam/i.test(g.name)).map(g => g.id).sort()
     expect(ids).toHaveLength(8)

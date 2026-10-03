@@ -2,9 +2,9 @@ import { PELES } from '../paletas'
 import { rngSemeado } from '../aleatorio'
 import { limitar, saida, estrelaDeImpacto } from '../primitivas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele } from '../tipos'
+import { desenharImpactoBeam, type AssinaturaBeam } from './impactoBeam'
 
-type Assinatura = 'gelo' | 'aurora' | 'mental' | 'sinal' | 'eletrico' | 'bolhas' | 'solar' | 'hiper'
-interface Perfil { assinatura: Assinatura; carga: number; contato: number; sustentar: number; duracao: number; largura: number; pele: Pele }
+interface Perfil { assinatura: AssinaturaBeam; carga: number; contato: number; sustentar: number; duracao: number; largura: number; pele: Pele }
 const PRISMA = ['#f786c7', '#67e8e4', '#ffe99b', '#a49aff'] as const
 const SOLAR: Pele = { ...PELES.GRASS, contorno: '#24321b', base: '#4dba58', meio: '#e0eb69', nucleo: '#ffffdf', estrela: '#f5ed8b', acento: ['#a7f0a0'] }
 const HIPER: Pele = { ...PELES.NORMAL, contorno: '#542730', base: '#e97836', meio: '#ffd277', nucleo: '#fff8d6', estrela: '#ffd277', acento: ['#a94635'] }
@@ -144,14 +144,17 @@ function desenharFeixe(c: ContextoVfx, p: Perfil, a: number, b: number, distanci
   }
 }
 
-function finalizar(c: ContextoVfx, p: Perfil, distancia: number): void {
+function finalizar(c: ContextoVfx, p: Perfil, distancia: number, impactoNovo: boolean): void {
   const { ctx, pele, ms, tier } = c
   if (ms < p.contato) return
   const t = limitar((ms - p.contato) / (p.duracao - p.contato))
   const r = (p.assinatura === 'hiper' ? 23 : p.assinatura === 'solar' ? 19 : 12) * (1 + (tier-1)*.04)
   // Estrela tem stream separado: encerrar o flash não muda a trajetória dos resíduos.
   const sementeDaEstrela = Math.floor(c.rng() * 0xffffffff)
-  if (ms < p.contato + 180) estrelaDeImpacto(ctx, { x: distancia, y: 0 }, r, (ms-p.contato)/180, pele, rngSemeado(sementeDaEstrela))
+  if (impactoNovo) desenharImpactoBeam(c,p,distancia,sementeDaEstrela)
+  if (ms < p.contato + (impactoNovo ? 90 : 180)) {
+    estrelaDeImpacto(ctx, { x: distancia, y: 0 }, r * (impactoNovo ? .48 : 1), (ms-p.contato)/(impactoNovo ? 90 : 180), pele, rngSemeado(sementeDaEstrela))
+  }
   // Resíduos têm direção/material próprios, sem sugerir status ou acertos extras.
   const n = c.pedir(6 + tier * 2)
   for (let i = 0; i < n; i++) {
@@ -172,7 +175,7 @@ function finalizar(c: ContextoVfx, p: Perfil, distancia: number): void {
   }
 }
 
-function coreografia(c: ContextoVfx, p: Perfil): void {
+function coreografia(c: ContextoVfx, p: Perfil, impactoNovo: boolean): void {
   if (c.ms < 0 || c.ms >= c.duracao) return
   const { ctx, origem, alvo, ms } = c
   const distancia = Math.hypot(alvo.x-origem.x, alvo.y-origem.y)
@@ -186,14 +189,19 @@ function coreografia(c: ContextoVfx, p: Perfil): void {
     const colapso = limitar((ms-fim)/130), cauda = boca + (distancia-boca) * saida(colapso)
     if (ponta > cauda) desenharFeixe(c,p,cauda,ponta,distancia,(.75+.25*limitar((ms-p.carga)/60))*(1-colapso))
   }
-  finalizar(c,p,distancia)
+  finalizar(c,p,distancia,impactoNovo)
   ctx.restore()
 }
 
 export const BEAMS_POR_GOLPE: Record<string, EntradaDeCoreografia> = Object.fromEntries(
   Object.entries(PERFIS_DE_BEAM).map(([id,p]) => [id, {
-    desenhar: (c: ContextoVfx) => coreografia(c,p), pele: p.pele,
+    desenhar: (c: ContextoVfx) => coreografia(c,p,true), pele: p.pele,
     alcance: 52, duracao: { 1:p.duracao, 2:p.duracao, 3:p.duracao, 4:p.duracao },
     impactos: { 1:[p.contato], 2:[p.contato], 3:[p.contato], 4:[p.contato] },
   }]),
+)
+
+/** Comparativo de QA: mesmo feixe, mas com o contato anterior da 7.81. */
+export const BEAMS_COM_IMPACTO_ANTERIOR: Record<string, EntradaDeCoreografia> = Object.fromEntries(
+  Object.entries(PERFIS_DE_BEAM).map(([id,p]) => [id, { ...BEAMS_POR_GOLPE[id], desenhar: (c: ContextoVfx) => coreografia(c,p,false) }]),
 )
