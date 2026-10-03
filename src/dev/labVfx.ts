@@ -11,7 +11,7 @@ import { AOE_RADIUS, getAbility } from '@/data/abilities'
 import { BATTLE_SPRITE_ANIMS, type AnimName } from '@/data/battleSpriteAnims'
 import type { ElementType } from '@/data/generated/types'
 import { vfxDoGolpe } from '@/data/moveVfx'
-import { tiraDeAreaDoElemento, tiraDoElemento, type TiraDeVfx } from '@/data/vfxTiras'
+import { orientacaoDaTira, tiraDeAreaDoElemento, tiraDoElemento, type TiraDeVfx } from '@/data/vfxTiras'
 import { hashTexto, rngSemeado } from '@/render/vfx/aleatorio'
 import { AGUA_AREA, AGUA_SINGLE, VITRINE_DA_AGUA } from '@/render/vfx/coreografias/agua'
 import { ELETRICO_AREA, ELETRICO_SINGLE, VITRINE_DO_ELETRICO } from '@/render/vfx/coreografias/eletrico'
@@ -32,6 +32,9 @@ import { GELO_AREA, GELO_SINGLE, VITRINE_DO_GELO } from '@/render/vfx/coreografi
 import { FANTASMA_AREA, FANTASMA_SINGLE, VITRINE_DO_FANTASMA } from '@/render/vfx/coreografias/fantasma'
 import { DRAGAO_AREA, DRAGAO_SINGLE, VITRINE_DO_DRAGAO } from '@/render/vfx/coreografias/dragao'
 import { semAcabamento } from '@/render/vfx/acabamento'
+import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
+import { tierDoPoder } from '@/data/tierDoVfx'
+import { REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
 import { desenharPixelizado } from '@/render/vfx/pixelizador'
@@ -45,6 +48,7 @@ interface GolpeDoLab {
   id: string; tipo: ElementType; area: boolean; tier: Tier; entrada: EntradaDeCoreografia; atacante: string
   /** Piloto de metodo novo: a esquerda mostra ESTA coreografia (a atual) no lugar da tira. */
   antes?: EntradaDeCoreografia
+  soco?: boolean
 }
 
 const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
@@ -123,11 +127,20 @@ const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
   ],
 }
 
+// Os socos ficam no tipo do catálogo, comparados com a coreografia anterior.
+for (const [id, entrada] of Object.entries(SOCOS_POR_GOLPE)) {
+  const g = getAbility(id)!
+  const tier = tierDoPoder(g.power, false)
+  ;(TIPOS_DO_LAB[g.type] ??= []).push({ id, tipo: g.type, area: false, tier, entrada,
+    atacante: 'hitmonchan', antes: REGISTRO_SINGLE[g.type]?.[tier], soco: true })
+}
+
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
 for (const [tipo, golpes] of Object.entries(TIPOS_DO_LAB)) {
   if (tipo === 'FIRE') continue
   for (const g of golpes!) {
+    if (g.id === 'bullet_punch') continue
     const e = g.entrada
     g.antes ??= { ...e, desenhar: c => semAcabamento(() => e.desenhar(c)) }
   }
@@ -277,7 +290,7 @@ class Cena {
       this.atk.tocar('Attack', this.t)
     }
     const ms = this.t - this.turnoT0
-    const entrada = this.modo === 'anime' ? this.golpe.entrada : this.golpe.antes
+    const entrada = this.golpe.id === 'bullet_punch' ? undefined : this.modo === 'anime' ? this.golpe.entrada : this.golpe.antes
     const impactos = entrada ? (entrada.impactos?.[this.golpe.tier] ?? []) : [200]
     while (this.impactosFeitos < impactos.length && ms >= impactos[this.impactosFeitos]) {
       this.reagir(this.impactosFeitos === 0)
@@ -317,7 +330,8 @@ class Cena {
     for (const e of todos) e.desenhar(c, this.figurantes.includes(e) ? this.real : this.t)
 
     const ms = this.t - this.turnoT0
-    if (this.modo === 'anime') this.desenharAnime(c, ms, this.golpe.entrada)
+    if (this.golpe.id === 'bullet_punch') this.desenharTira(c, ms)
+    else if (this.modo === 'anime') this.desenharAnime(c, ms, this.golpe.entrada)
     else if (this.golpe.antes) this.desenharAnime(c, ms, this.golpe.antes)
     else this.desenharTira(c, ms)
 
@@ -346,6 +360,7 @@ class Cena {
     const pele = PELES[g.tipo]
     const pintar = (ctx: CanvasRenderingContext2D) => entrada.desenhar({
       ctx, ms, duracao, origem, alvo, raio, tier: g.tier, pele,
+      acertos: Number($<HTMLSelectElement>('acertos').value),
       angulo: g.area ? 0 : Math.atan2(alvo.y - origem.y, alvo.x - origem.x),
       rng: rngSemeado(hashTexto(`lab-${this.turnoId}`)),
       pedir: n => n,
@@ -370,6 +385,17 @@ class Cena {
     const h = (tam * fh) / fw
     const { origem, alvo } = this.pontos()
     const dir = tira.direcional
+    if (g.id === 'bullet_punch') {
+      const o = orientacaoDaTira(tira, Math.atan2(alvo.y - origem.y, alvo.x - origem.x))
+      const w = fw * o.recorteX
+      c.save(); c.translate(alvo.x, alvo.y); c.rotate(o.giroParaOAlvo)
+      if (o.espelharY) c.scale(1, -1)
+      c.rotate(o.giroDaBase)
+      c.drawImage(img, Math.min(q, tira.quadros - 1) * fw + fw - w, 0, w, fh,
+        -tam * o.ancoraX + tam * (1 - o.recorteX), -h / 2, tam * o.recorteX, h)
+      c.restore()
+      return
+    }
     const ang = dir ? Math.atan2(alvo.y - origem.y, alvo.x - origem.x) - (dir.anguloBaseGraus * Math.PI) / 180 : 0
     c.save(); c.translate(alvo.x, alvo.y); c.rotate(ang)
     c.drawImage(img, Math.min(q, tira.quadros - 1) * fw, 0, fw, fh, -tam * (dir?.ancoraX ?? 0.5), -h / 2, tam, h)
@@ -390,7 +416,7 @@ function montarBotoes(): void {
   barra.innerHTML = ''
   ;(TIPOS_DO_LAB[tipoAtual] ?? []).forEach((g, i) => {
     const b = document.createElement('button')
-    b.textContent = `${g.area ? 'Área' : 'Single'} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
+    b.textContent = `${g.soco ? 'Soco' : g.area ? 'Área' : 'Single'} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
     b.className = i === golpeAtual ? 'on' : ''
     b.onclick = () => { golpeAtual = i; montarBotoes(); reiniciar() }
     barra.append(b)
@@ -403,13 +429,30 @@ function reiniciar(): void {
   // Area com o raio real (175) nao cabe no zoom de perto: abre a camera.
   opt.zoom = g.area ? Math.min(escolhido, 1.2) : escolhido
   for (const c of cenas) { c.medir(); c.montar(g) }
-  $('titulo-tira').textContent = g.antes ? 'Atual: sem acabamento de impacto' : 'Atual: tira PNG'
-  $('titulo-anime').textContent = g.antes ? 'Novo: com acabamento de impacto' : 'Proposta: coreografia anime pixel'
+  $('titulo-tira').textContent = g.soco ? 'Anterior: coreografia por tipo' : g.antes ? 'Atual: sem acabamento de impacto' : 'Atual: tira PNG'
+  $('titulo-anime').textContent = g.soco ? 'Novo: punho de energia' : g.antes ? 'Novo: com acabamento de impacto' : 'Proposta: coreografia anime pixel'
+  if (g.id === 'bullet_punch') {
+    $('titulo-tira').textContent = 'Bullet Punch: sprite original'
+    $('titulo-anime').textContent = 'Bullet Punch: sprite original preservada'
+  }
 }
 
 const tipoSel = $<HTMLSelectElement>('tipo')
 for (const t of Object.keys(TIPOS_DO_LAB)) tipoSel.add(new Option(t, t))
 tipoSel.onchange = () => { tipoAtual = tipoSel.value as ElementType; golpeAtual = 0; montarBotoes(); reiniciar() }
+$<HTMLSelectElement>('acertos').onchange = () => { reiniciar(); quadroCongelado() }
+$<HTMLSelectElement>('quadro').onchange = e => {
+  const valor = (e.target as HTMLSelectElement).value
+  opt.congelado = valor === '' ? null : Number(valor)
+  reiniciar(); quadroCongelado()
+}
+function quadroCongelado(): void {
+  if (opt.congelado !== null) for (const c of cenas) {
+    c.passo(0); c.passo(0)
+    for (const a of c.alvos) a.cor = null
+    c.desenhar()
+  }
+}
 $<HTMLSelectElement>('velocidade').onchange = e => { opt.velocidade = Number((e.target as HTMLSelectElement).value) }
 $<HTMLSelectElement>('zoom').onchange = () => reiniciar()
 $<HTMLSelectElement>('render').onchange = e => { opt.pixel = (e.target as HTMLSelectElement).value === 'pixel' }

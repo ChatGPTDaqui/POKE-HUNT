@@ -29,6 +29,7 @@ export interface CreateWorldEffectParams {
   worldSize?: number
   elementType?: WorldEffect['elementType']
   abilityId?: string
+  acertosVisuais?: number
   // Direcao atacante -> alvo, so pra arte marcada `direcional` (data/moveVfx.ts).
   anguloDeAtaque?: number
   /** Ver types.ts#WorldEffect.origemX — so desenho. */
@@ -62,7 +63,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
   const {
     type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25, delay = 0,
     value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1,
-    worldSize, elementType, abilityId, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection,
+    worldSize, elementType, abilityId, acertosVisuais, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection,
     statusStat,
     seguir = null, apontarPara = null,
   } = params
@@ -80,7 +81,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     effectiveness,
     effectivenessLabel: effectivenessLabel ?? undefined,
     isCrit,
-    text, unit, isAoe, worldSize, elementType, abilityId, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection,
+    text, unit, isAoe, worldSize, elementType, abilityId, acertosVisuais, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection,
     statusStat,
     laneSize,
     ownerId: owner ? owner.id : null,
