@@ -92,7 +92,7 @@ export function desenharVfxDeGolpe(
     ? { x: effect.origemX, y: effect.origemY }
     : alvo
   const raio = r.area ? (effect.worldSize ?? 0) / 2 : 0
-  const pele = PELES[r.tipo]
+  const pele = r.entrada.pele ?? PELES[r.tipo]
   const orcamento = opcoes.orcamento ?? orcamentoDoQuadro()
   const pixelizar = opcoes.pixelizar ?? desenharPixelizado
 

@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.81',
+    date: '2026-10-03',
+    title: 'Beams com assinatura própria',
+    highlights: [
+      'Oito golpes Beam ganharam animações próprias em pixel art, com preparação, avanço do feixe e dissipação.',
+      'Hyper Beam dispara energia dourada, Solar Beam concentra luz, Ice Beam projeta cristais e Aurora Beam desenha fitas prismáticas.',
+      'Psybeam tem hélices e anéis ópticos, Signal Beam entrelaça duas cores, Charge Beam descarrega arcos elétricos e Bubble Beam lança uma corrente de bolhas.',
+    ],
+  },
+  {
     version: '7.80',
     date: '2026-10-03',
     title: 'Socos com personalidade',

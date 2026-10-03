@@ -33,6 +33,7 @@ import { FANTASMA_AREA, FANTASMA_SINGLE, VITRINE_DO_FANTASMA } from '@/render/vf
 import { DRAGAO_AREA, DRAGAO_SINGLE, VITRINE_DO_DRAGAO } from '@/render/vfx/coreografias/dragao'
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
+import { BEAMS_POR_GOLPE } from '@/render/vfx/coreografias/beams'
 import { tierDoPoder } from '@/data/tierDoVfx'
 import { REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
@@ -49,6 +50,7 @@ interface GolpeDoLab {
   /** Piloto de metodo novo: a esquerda mostra ESTA coreografia (a atual) no lugar da tira. */
   antes?: EntradaDeCoreografia
   soco?: boolean
+  beam?: boolean
 }
 
 const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
@@ -133,6 +135,16 @@ for (const [id, entrada] of Object.entries(SOCOS_POR_GOLPE)) {
   const tier = tierDoPoder(g.power, false)
   ;(TIPOS_DO_LAB[g.type] ??= []).push({ id, tipo: g.type, area: false, tier, entrada,
     atacante: 'hitmonchan', antes: REGISTRO_SINGLE[g.type]?.[tier], soco: true })
+}
+
+// Beams preservam o comparativo anterior e usam espaço para ler a viagem.
+const ATACANTES_DE_BEAM: Record<string, string> = { ice_beam: 'lapras', aurora_beam: 'dewgong',
+  psybeam: 'espeon', signal_beam: 'venomoth', charge_beam: 'magnemite',
+  bubble_beam: 'squirtle', solar_beam: 'bulbasaur', hyper_beam: 'gyarados' }
+for (const [id, entrada] of Object.entries(BEAMS_POR_GOLPE)) {
+  const g = getAbility(id)!, tier = tierDoPoder(g.power, false)
+  ;(TIPOS_DO_LAB[g.type] ??= []).push({ id, tipo: g.type, area: false, tier, entrada,
+    atacante: ATACANTES_DE_BEAM[id], antes: REGISTRO_SINGLE[g.type]?.[tier], beam: true })
 }
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
@@ -256,7 +268,9 @@ class Cena {
   medir(): void {
     const r = this.raiz.getBoundingClientRect(), d = devicePixelRatio || 1
     this.canvas.width = Math.round(r.width * d); this.canvas.height = Math.round(r.height * d)
-    this.Z = opt.zoom * d
+    // Beam longo precisa caber com os sprites nas telas estreitas do lab.
+    const zoom = this.golpe?.beam ? Math.min(opt.zoom, r.width / (Number($<HTMLSelectElement>('distancia').value) + 100)) : opt.zoom
+    this.Z = zoom * d
     this.vw = this.canvas.width / this.Z; this.vh = this.canvas.height / this.Z
     this.cam = { x: SPAWN.x - this.vw / 2, y: SPAWN.y - this.vh / 2 }
   }
@@ -274,8 +288,9 @@ class Cena {
       ]
       this.figurantes = []
     } else {
-      this.atk = new Ent(golpe.atacante, SPAWN.x - 24, SPAWN.y - 4, linhaDaDirecao(46, 10))
-      this.alvos = [new Ent('doduo', SPAWN.x + 22, SPAWN.y + 6, linhaDaDirecao(-46, -10))]
+      const metade = golpe.beam ? Number($<HTMLSelectElement>('distancia').value) / 2 : 23
+      this.atk = new Ent(golpe.atacante, SPAWN.x - metade - 1, SPAWN.y - 4, linhaDaDirecao(2 * metade, 10))
+      this.alvos = [new Ent('doduo', SPAWN.x + metade - 1, SPAWN.y + 6, linhaDaDirecao(-2 * metade, -10))]
       this.figurantes = [new Ent('doduo', SPAWN.x - 90, SPAWN.y - 50, 0), new Ent('pidgey', SPAWN.x + 95, SPAWN.y - 35, 7)]
     }
   }
@@ -357,7 +372,7 @@ class Cena {
     if (ms > duracao) return
     const { origem, alvo } = this.pontos()
     const raio = g.area ? AOE_RADIUS : 0
-    const pele = PELES[g.tipo]
+    const pele = entrada.pele ?? PELES[g.tipo]
     const pintar = (ctx: CanvasRenderingContext2D) => entrada.desenhar({
       ctx, ms, duracao, origem, alvo, raio, tier: g.tier, pele,
       acertos: Number($<HTMLSelectElement>('acertos').value),
@@ -416,7 +431,7 @@ function montarBotoes(): void {
   barra.innerHTML = ''
   ;(TIPOS_DO_LAB[tipoAtual] ?? []).forEach((g, i) => {
     const b = document.createElement('button')
-    b.textContent = `${g.soco ? 'Soco' : g.area ? 'Área' : 'Single'} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
+    b.textContent = `${g.beam ? 'Beam' : g.soco ? 'Soco' : g.area ? 'Área' : 'Single'} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
     b.className = i === golpeAtual ? 'on' : ''
     b.onclick = () => { golpeAtual = i; montarBotoes(); reiniciar() }
     barra.append(b)
@@ -428,9 +443,13 @@ function reiniciar(): void {
   const escolhido = Number($<HTMLSelectElement>('zoom').value)
   // Area com o raio real (175) nao cabe no zoom de perto: abre a camera.
   opt.zoom = g.area ? Math.min(escolhido, 1.2) : escolhido
-  for (const c of cenas) { c.medir(); c.montar(g) }
+  for (const c of cenas) { c.montar(g); c.medir() }
   $('titulo-tira').textContent = g.soco ? 'Anterior: coreografia por tipo' : g.antes ? 'Atual: sem acabamento de impacto' : 'Atual: tira PNG'
   $('titulo-anime').textContent = g.soco ? 'Novo: punho de energia' : g.antes ? 'Novo: com acabamento de impacto' : 'Proposta: coreografia anime pixel'
+  if (g.beam) {
+    $('titulo-tira').textContent = 'Anterior: coreografia por tipo'
+    $('titulo-anime').textContent = 'Novo: Beam com assinatura própria'
+  }
   if (g.id === 'bullet_punch') {
     $('titulo-tira').textContent = 'Bullet Punch: sprite original'
     $('titulo-anime').textContent = 'Bullet Punch: sprite original preservada'
@@ -441,6 +460,7 @@ const tipoSel = $<HTMLSelectElement>('tipo')
 for (const t of Object.keys(TIPOS_DO_LAB)) tipoSel.add(new Option(t, t))
 tipoSel.onchange = () => { tipoAtual = tipoSel.value as ElementType; golpeAtual = 0; montarBotoes(); reiniciar() }
 $<HTMLSelectElement>('acertos').onchange = () => { reiniciar(); quadroCongelado() }
+$<HTMLSelectElement>('distancia').onchange = () => { reiniciar(); quadroCongelado() }
 $<HTMLSelectElement>('quadro').onchange = e => {
   const valor = (e.target as HTMLSelectElement).value
   opt.congelado = valor === '' ? null : Number(valor)
