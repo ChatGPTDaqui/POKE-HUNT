@@ -38,9 +38,13 @@ export function retanguloDoEfeito(
     // e o que o efeito sobe acima do peito (`alcance`) + o chao ate a borda da
     // elipse. O topo tambem cobre a borda DE TRAS da elipse (acima do peito
     // quando o raio e grande): sem isso a metade de tras do alcance era cortada.
-    const x0 = alvo.x - raio - FOLGA_DA_AREA, x1 = alvo.x + raio + FOLGA_DA_AREA
-    const y0 = Math.min(alvo.y - alcance, alvo.y + 12 - raio * 0.45 - FOLGA_DA_AREA)
-    const y1 = alvo.y + 12 + raio * 0.45 + FOLGA_DA_AREA
+    //
+    // `margem` em area e a folga ALEM da elipse por lado (padrao FOLGA_DA_AREA
+    // nos tres) — pra coreografia que passa da borda e saia cortada (03/10).
+    const { cima, baixo, lados } = margem ?? { cima: FOLGA_DA_AREA, baixo: FOLGA_DA_AREA, lados: FOLGA_DA_AREA }
+    const x0 = alvo.x - raio - lados, x1 = alvo.x + raio + lados
+    const y0 = Math.min(alvo.y - alcance, alvo.y + 12 - raio * 0.45 - cima)
+    const y1 = alvo.y + 12 + raio * 0.45 + baixo
     return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }
   }
   const { cima, baixo, lados } = margem ?? { cima: alcance, baixo: alcance, lados: alcance }

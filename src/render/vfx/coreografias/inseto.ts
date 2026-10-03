@@ -344,14 +344,14 @@ export const VITRINE_DO_INSETO = {
 } as const
 
 export const INSETO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
-  1: { desenhar: pinMissile, duracao: { 1: 1000 }, alcance: 30, impactos: { 1: PIN_SAIDAS.map(s => s + PIN_VOO) } },
+  1: { desenhar: pinMissile, duracao: { 1: 1000 }, alcance: 30, margem: { cima: 30, baixo: 45, lados: 30 }, impactos: { 1: PIN_SAIDAS.map(s => s + PIN_VOO) } },
   2: { desenhar: signalBeam, duracao: { 2: 900 }, alcance: 34, impactos: { 2: [SIGNAL_CHEGA] } },
-  3: { desenhar: xScissor, duracao: { 3: 1000 }, alcance: 30, impactos: { 3: [X_CORTE] } },
-  4: { desenhar: megahorn, duracao: { 4: 1300 }, alcance: 44, impactos: { 4: [HORN_CRAVA] } },
+  3: { desenhar: xScissor, duracao: { 3: 1000 }, alcance: 30, margem: { cima: 30, baixo: 43, lados: 40 }, impactos: { 3: [X_CORTE] } },
+  4: { desenhar: megahorn, duracao: { 4: 1300 }, alcance: 44, margem: { cima: 44, baixo: 64, lados: 44 }, impactos: { 4: [HORN_CRAVA] } },
 }, false)
 
 export const INSETO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: struggleBug, duracao: { 1: 1100 }, alcance: 30, impactos: { 1: [STRUGGLE_ONDAS[0] + 200] } },
-  2: { desenhar: enxame, duracao: { 2: 1500 }, alcance: 40, impactos: { 2: [ENXAME_SAI + 450] } },
+  2: { desenhar: enxame, duracao: { 2: 1500 }, alcance: 49, margem: { cima: 29, baixo: 20, lados: 20 }, impactos: { 2: [ENXAME_SAI + 450] } },
   3: { desenhar: bugBuzz, duracao: { 3: 1700 }, alcance: 40, impactos: { 3: BUZZ_ONDAS.map(t => t + 200) } },
 }, true)

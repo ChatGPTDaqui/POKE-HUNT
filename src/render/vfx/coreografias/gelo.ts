@@ -363,12 +363,12 @@ export const GELO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpac
   1: { desenhar: iceShard, duracao: { 1: 1100 }, alcance: 30, impactos: { 1: SHARD_SAIDAS.map(s => s + SHARD_VOO) } },
   2: { desenhar: auroraBeam, duracao: { 2: 1200 }, alcance: 34, impactos: { 2: [AURORA_CHEGA] } },
   3: { desenhar: iceBeam, duracao: { 3: 1700 }, alcance: 40, impactos: { 3: [BEAM_CHEGA] } },
-  4: { desenhar: icicleCrash, duracao: { 4: 1500 }, alcance: 90, impactos: { 4: [PINGENTES[0] + PINGENTE_QUEDA, PINGENTES[2] + PINGENTE_QUEDA] } },
+  4: { desenhar: icicleCrash, duracao: { 4: 1500 }, alcance: 90, margem: { cima: 132, baixo: 90, lados: 90 }, impactos: { 4: [PINGENTES[0] + PINGENTE_QUEDA, PINGENTES[2] + PINGENTE_QUEDA] } },
 }, false)
 
 export const GELO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
-  1: { desenhar: icyWind, duracao: { 1: 1300 }, alcance: 30, impactos: { 1: [300] } },
+  1: { desenhar: icyWind, duracao: { 1: 1300 }, alcance: 30, margem: { cima: 20, baixo: 20, lados: 110 }, impactos: { 1: [300] } },
   2: { desenhar: cristaisDoChao, duracao: { 2: 1500 }, alcance: 50, impactos: { 2: [300] } },
-  3: { desenhar: blizzard, duracao: { 3: 1800 }, alcance: 80, impactos: { 3: [500, 1000] } },
+  3: { desenhar: blizzard, duracao: { 3: 1800 }, alcance: 90, margem: { cima: 30, baixo: 42, lados: 79 }, impactos: { 3: [500, 1000] } },
 }, true)
 

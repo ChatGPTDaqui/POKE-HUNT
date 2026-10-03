@@ -631,7 +631,7 @@ export const GRAMA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpa
   1: { desenhar: vineWhip, duracao: { 1: 1000 }, alcance: 34, impactos: { 1: WHIP.map(w => w.estala) } },
   2: { desenhar: magicalLeaf, duracao: { 2: 1100 }, alcance: 40, impactos: { 2: [MAGIC_CHEGA] } },
   3: { desenhar: leafBlade, duracao: { 3: 1100 }, alcance: 40, impactos: { 3: [...BLADE_CORTES] } },
-  4: { desenhar: leafStorm, duracao: { 4: 1800 }, alcance: 95, impactos: { 4: [STORM_CHEGA, ...STORM_RAJADAS] } },
+  4: { desenhar: leafStorm, duracao: { 4: 1800 }, alcance: 95, margem: { cima: 95, baixo: 95, lados: 113 }, impactos: { 4: [STORM_CHEGA, ...STORM_RAJADAS] } },
 }, false)
 
 export const GRAMA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({

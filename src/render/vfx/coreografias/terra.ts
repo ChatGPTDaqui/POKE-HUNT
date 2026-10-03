@@ -563,12 +563,12 @@ export const VITRINE_DA_TERRA = {
 export const TERRA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: mudSlap, duracao: { 1: 900 }, alcance: 30, impactos: { 1: SLAP_SAIDAS.map(s => s + SLAP_VOO) } },
   2: { desenhar: mudShot, duracao: { 2: 1100 }, alcance: 34, impactos: { 2: [SHOT_SAI + SHOT_VOO] } },
-  3: { desenhar: earthPower, duracao: { 3: 1400 }, alcance: 70, impactos: { 3: [POWER_EXPLODE] } },
-  4: { desenhar: fissure, duracao: { 4: 1600 }, alcance: 60, impactos: { 4: [FENDA_ROMPE] } },
+  3: { desenhar: earthPower, duracao: { 3: 1400 }, alcance: 70, margem: { cima: 70, baixo: 70, lados: 90 }, impactos: { 3: [POWER_EXPLODE] } },
+  4: { desenhar: fissure, duracao: { 4: 1600 }, alcance: 60, margem: { cima: 60, baixo: 60, lados: 125 }, impactos: { 4: [FENDA_ROMPE] } },
 }, false)
 
 export const TERRA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: bulldoze, duracao: { 1: 900 }, alcance: 30, impactos: { 1: [BULL_PISA + 150] } },
-  2: { desenhar: sismo, duracao: { 2: 1300 }, alcance: 80, impactos: { 2: [SISMO_RACHA + 200] } },
-  3: { desenhar: earthquake, duracao: { 3: 1800 }, alcance: 100, impactos: { 3: QUAKE_ONDAS.map(t => t + 150) } },
+  2: { desenhar: sismo, duracao: { 2: 1300 }, alcance: 80, margem: { cima: 20, baixo: 20, lados: 38 }, impactos: { 2: [SISMO_RACHA + 200] } },
+  3: { desenhar: earthquake, duracao: { 3: 1800 }, alcance: 100, margem: { cima: 20, baixo: 20, lados: 31 }, impactos: { 3: QUAKE_ONDAS.map(t => t + 150) } },
 }, true)
