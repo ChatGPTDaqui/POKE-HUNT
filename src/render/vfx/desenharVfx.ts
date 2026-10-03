@@ -108,6 +108,7 @@ export function desenharVfxDeGolpe(
   pixelizar(ctx, retanguloDoEfeito(origem, alvo, r.entrada.alcance, raio, r.entrada.margem), paletaDaPele(pele), c => {
     r.entrada.desenhar({
       ctx: c, ms, duracao, origem, alvo, angulo,
+      acertos: effect.acertosVisuais,
       raio, tier: r.tier, pele,
       // Semente nova a cada quadro, mesma sequencia: e isso que torna a
       // coreografia funcao pura de `ms` (ver aleatorio.ts).

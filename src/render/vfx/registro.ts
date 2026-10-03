@@ -38,6 +38,7 @@ import { GELO_AREA, GELO_SINGLE } from './coreografias/gelo'
 import { FANTASMA_AREA, FANTASMA_SINGLE } from './coreografias/fantasma'
 import { DRAGAO_AREA, DRAGAO_SINGLE } from './coreografias/dragao'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
+import { SOCOS_POR_GOLPE } from './coreografias/socos'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
 
@@ -84,3 +85,4 @@ export const REGISTRO_DE_AREA: Partial<Record<ElementType, PorTier>> = {
 }
 
 export const REGISTRO_DE_MOTIVO: Partial<Record<Motivo, EntradaDeCoreografia>> = {}
+export const REGISTRO_POR_GOLPE: Record<string, EntradaDeCoreografia> = { ...SOCOS_POR_GOLPE }

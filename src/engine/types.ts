@@ -605,6 +605,8 @@ export interface WorldEffect {
   // Existe porque `elementType` nao distingue Bullet Punch de Metal Claw, e os
   // dois desenhariam o mesmo efeito de aco.
   abilityId?: string
+  /** Contatos efetivamente resolvidos; somente o VFX lê, nunca o cálculo de dano. */
+  acertosVisuais?: number
   // Angulo (radianos) do ATACANTE para o ALVO, no momento em que o golpe
   // concretizou. So o desenho usa, e so pra arte marcada `direcional` em
   // data/moveVfx.ts: burst radial (todo o lote por tipo elemental) ignora.

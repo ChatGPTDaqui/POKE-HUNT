@@ -60,6 +60,8 @@ export interface Ponto { x: number; y: number }
  * dessincronizar se o jogo pular quadros.
  */
 export interface ContextoVfx {
+  /** Contatos já resolvidos pelo motor (só para desenhar golpes múltiplos). */
+  acertos?: number
   ctx: CanvasRenderingContext2D
   /** ms desde o inicio do efeito. */
   ms: number
