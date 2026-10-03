@@ -235,9 +235,9 @@ export function MundoTab() {
       </WikiCard>
 
       <WikiCard title="Modo Pesadelo — o espelho de nível alto">
-        Toda caçada normal tem um espelho no <b>Modo Pesadelo</b>, disponível desde o começo e sem custo. Os
+        Toda caçada normal tem um espelho no <b>Modo Pesadelo</b>, liberado ao vencer o Campeão Lance e sem custo. Os
         níveis são os da hunt original <b>+{LEVEL_OFFSET}</b> — cada um dos 10 estágios de bioma ganha sua
-        própria faixa de Lv 150 a 250. É onde o modo normal continua depois do Lv {TETO_DO_MODO_NORMAL}.
+        própria faixa de Lv {PRIMEIRO_ESTAGIO[0] + LEVEL_OFFSET} a {TETO_DO_MODO_NORMAL + LEVEL_OFFSET}. Seu progresso é independente do Mundo.
         <br />
         <br />
         O Pesadelo também é a única casa das <b>hunts BOSS</b>: os <b>{LEGENDARY_SPECIES_IDS.length} POKEs

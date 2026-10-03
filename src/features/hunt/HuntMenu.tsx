@@ -4,6 +4,7 @@
 // auditoria): a MESMA lista aparecia em duas superficies, e a versao expandida
 // no card e a que da pra ler com calma e rolar.
 import { useMemo, useState } from 'react'
+import { JornadaDoTreinador } from './JornadaDoTreinador'
 import { pedirAcao } from '@/data/remote/autoridade'
 // `MAPS` guarda HuntMapDef (a definicao crua). `MapDef` e a forma RESOLVIDA que
 // getMap() devolve (collisionGrid ja aplicado/anulado, respawnDelay ja
@@ -675,6 +676,11 @@ export function HuntMenu() {
           </div>
         )}
       </StickyHeader>
+
+      <JornadaDoTreinador
+        onBioma={(chave, pesadelo) => { setContinent(pesadelo ? 'nightmare' : 'biomas'); setSearch(''); setTypeFilter('all'); setBiomaAberto(chave); setExpandedMapId(null) }}
+        onLance={() => { const lance = MAPS[LANCE_MAP_ID]; if (lance) { focusHunt(lance); setExpandedMapId(lance.id) } }}
+      />
 
       {/* PH-448: A ROTA 46 VEM ANTES DOS BIOMAS.
           Ela e a PRIMEIRA cacada do jogo (Lv 1 a 2, so tipo Normal) e estava
