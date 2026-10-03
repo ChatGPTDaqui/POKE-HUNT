@@ -32,6 +32,7 @@ import { StatusBadge } from './StatusBadge'
 import { TypeChip } from './TypeChip'
 import { AbilityTooltip } from './AbilityTooltip'
 import { Palavra } from './Explicacao'
+import { ProximoGolpe } from './ProximoGolpe'
 import { Meter } from '@/components/game/controls'
 import type { AbilityCategory } from '@/data/generated/types'
 
@@ -74,7 +75,7 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
       <div className="flex min-w-0 flex-1 flex-col gap-[.35em]">
         <div className="flex flex-wrap items-center gap-[.4em]">
           <PokeNameTag poke={poke} species={species} />
-          <span className="text-n400">Lv{poke.level}</span>
+          <ProximoGolpe poke={poke} species={species}><span className="text-n400">Lv{poke.level}</span></ProximoGolpe>
         </div>
         {/* Um gatilho pros DOIS chips, nao um por chip: a fraqueza de verdade
             sai da combinacao dos dois tipos (o 4x so existe assim), entao duas

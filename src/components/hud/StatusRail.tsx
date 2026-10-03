@@ -34,6 +34,7 @@ import { Carteira } from '@/components/hud/Carteira'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { useFaceDoPoke } from '@/hooks/useFaceDoPoke'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { ProximoGolpe } from '@/components/shared/ProximoGolpe'
 import { GameButton } from '@/components/game/controls'
 import { SalaChip } from '@/components/hud/SalaChip'
 import { ClimaChip } from '@/components/hud/ClimaChip'
@@ -261,7 +262,7 @@ function VitaisPoke() {
         <span className={cn('truncate font-medium', poke.isShiny && 'text-shiny')}>
           {poke.isShiny && '✨'}{species.name}
         </span>
-        <span className="shrink-0 text-[.85em] text-n400">Lv {poke.level}</span>
+        <ProximoGolpe poke={poke} species={species}><span className="shrink-0 text-[.85em] text-n400">Lv {poke.level}</span></ProximoGolpe>
         {fainted && <span className="shrink-0 text-[.85em] font-medium text-bad">KO</span>}
         <StatusBadge status={poke.status} />
         <StatusBadge status={statusVolatil} />
