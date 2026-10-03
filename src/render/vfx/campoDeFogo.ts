@@ -26,6 +26,15 @@ export interface Brasa { x: number; y: number; r: number; f: number; ang: number
 /** Limiares de calor das 4 faixas: contorno, base, meio, nucleo. */
 const LIMIARES = [0.14, 0.4, 0.72, 1.05] as const
 
+/** Quanto o ruido pode tirar do calor, no maximo (o ruido vai de 0 a 1). */
+const RASGO = 0.38
+
+/** Faixa do calor `v` (0..3), ou -1 abaixo do contorno. */
+function faixa(v: number): number {
+  for (let k = LIMIARES.length - 1; k >= 0; k--) if (v > LIMIARES[k]) return k
+  return -1
+}
+
 /**
  * Estilo QUENTE (piloto 2, referencias do dono 30/09): o miolo passa do
  * amarelo pro BRANCO onde o calor empilha — as referencias tem todas um nucleo
@@ -207,18 +216,31 @@ function pintarIlha(ctx: CanvasRenderingContext2D, vivas: readonly Quente[], pel
   for (let yy = 0; yy < h; yy++) d.fill(0, yy * passo * 4, (yy * passo + w) * 4)
   const cores = coresDaPele(pele)
   const rolar = ms * 0.03
+  const branco = estilo.quente ? (estilo.limiarBranco ?? LIMIAR_BRANCO) : Infinity
   for (let yy = 0; yy < h; yy++) {
     for (let xx = 0; xx < w; xx++) {
       const q = calor[yy * w + xx]
-      if (q <= 0.02) continue
-      // Coordenada de MUNDO no ruido: a textura nao "anda" junto com o retangulo.
-      const wx = xx + x0, wy = yy + y0
-      const n = ruido(wx * 0.28, (wy + rolar) * 0.28) * 0.65 + ruido(wx * 0.6, (wy + rolar * 1.6) * 0.6) * 0.35
-      const v = q * 1.15 - n * 0.38
-      let f = -1
-      for (let k = LIMIARES.length - 1; k >= 0; k--) if (v > LIMIARES[k]) { f = k; break }
+      // O ruido so EMPURRA PRA BAIXO, no maximo `RASGO`: `v` fica sempre entre
+      // `alto - RASGO` e `alto`. Sem cor nem no teto, o pixel nao acende —
+      // pula sem calcular ruido. E quando piso e teto caem na MESMA faixa (e do
+      // mesmo lado do branco), a cor ja esta decidida e o ruido nao muda nada.
+      // Os dois atalhos sao exatos: o desenho sai identico pixel a pixel, so
+      // sem pagar 8 hashes onde eles nao decidem nada (02/10, Heat Wave).
+      const alto = q * 1.15
+      if (alto <= LIMIARES[0]) continue
+      let v: number
+      const fTeto = faixa(alto), fPiso = faixa(alto - RASGO)
+      if (fTeto === fPiso && (alto - RASGO > branco) === (alto > branco)) {
+        v = alto
+      } else {
+        // Coordenada de MUNDO no ruido: a textura nao "anda" junto com o retangulo.
+        const wx = xx + x0, wy = yy + y0
+        const n = ruido(wx * 0.28, (wy + rolar) * 0.28) * 0.65 + ruido(wx * 0.6, (wy + rolar * 1.6) * 0.6) * 0.35
+        v = alto - n * RASGO
+      }
+      const f = faixa(v)
       if (f < 0) continue
-      const cor = estilo.quente && v > (estilo.limiarBranco ?? LIMIAR_BRANCO) ? BRANCO_QUENTE : cores[f]
+      const cor = v > branco ? BRANCO_QUENTE : cores[f]
       const i = (yy * passo + xx) * 4
       d[i] = cor[0]; d[i + 1] = cor[1]; d[i + 2] = cor[2]; d[i + 3] = 255
     }

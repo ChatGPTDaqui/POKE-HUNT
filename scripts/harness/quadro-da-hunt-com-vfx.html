@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<base href="/" />
+<title>Quadro da hunt com VFX</title>
+<!--
+  QUANTO O QUADRO DA HUNT CUSTA COM OS VFX NOVOS (02/10)
+
+  `custo-dos-vfx.html` mede cada coreografia sozinha. O que o jogador sente e o
+  QUADRO inteiro, com varios golpes ao mesmo tempo. Esta pagina roda o motor de
+  verdade num mapa cheio e cronometra `renderer.renderMap` quadro a quadro, em
+  duas passadas com a MESMA semente:
+
+    vfx novo    o registro como esta no jogo
+    tira        o registro esvaziado (todo golpe cai na tira PNG antiga)
+
+  Imprime media, p95 e pior quadro, e quantos efeitos de golpe estavam vivos.
+
+  O QUE ELA MEDIU (02/10, campo_aberto_e1, 40 s, Charizard com Heat Wave)
+
+                      media    p95    pior    reaproveitados
+    antes             1,44     3,6    14,5         —
+    depois            1,19     2,0     9,0        50%
+    tira (antiga)     1,33     3,1   5-11          —
+
+  "Depois" = pixelizador com tabela tipada, campo de fogo sem ruido onde ele
+  nao decide nada, retangulo do Thunder so pra cima, e a coreografia a 30
+  passos por segundo com o bitmap guardado entre um passo e outro. O pior
+  quadro que sobra e o auge do Heat Wave (campo de fogo com ~270 gotas) no
+  quadro em que ele repinta.
+
+  COMO RODAR
+     npm run dev
+     abrir http://localhost:5173/scripts/harness/quadro-da-hunt-com-vfx.html?mapa=route_46
+     window.__medir({ segundos: 30 }) pelo console
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14171a; color: #dfe4ea; font: 12px/1.5 ui-monospace, monospace; padding: 12px; }
+  canvas { background: #000; display: block; }
+  #log { white-space: pre; }
+</style>
+</head>
+<body>
+<p id="log">chame window.__medir()</p>
+<canvas id="tela" width="960" height="540"></canvas>
+<script type="module">
+import { createRng } from '/src/core/rng.ts'
+import { createPokeInstance } from '/src/data/pokes.ts'
+import { buildMapWorld, stepWorld } from '/src/engine/simulation.ts'
+import { useGameStateStore } from '/src/stores/gameStateStore.ts'
+import { Renderer } from '/src/render/renderer.ts'
+import * as registro from '/src/render/vfx/registro.ts'
+import { estatisticasDoPixelizador as est } from '/src/render/vfx/pixelizador.ts'
+
+const params = new URLSearchParams(location.search)
+const MAPA = params.get('mapa') || 'route_46'
+const ESPECIE = params.get('especie') || 'charizard'
+const PASSO = 1 / 60
+const renderer = new Renderer(document.getElementById('tela'))
+
+const COPIA = {
+  single: { ...registro.REGISTRO_SINGLE },
+  area: { ...registro.REGISTRO_DE_AREA },
+  motivo: { ...registro.REGISTRO_DE_MOTIVO },
+}
+function ligarVfx(ligado) {
+  for (const [alvo, origem] of [[registro.REGISTRO_SINGLE, COPIA.single], [registro.REGISTRO_DE_AREA, COPIA.area], [registro.REGISTRO_DE_MOTIVO, COPIA.motivo]]) {
+    for (const k of Object.keys(alvo)) delete alvo[k]
+    if (ligado) Object.assign(alvo, origem)
+  }
+}
+
+function montar() {
+  const gs = useGameStateStore.getState()
+  gs.resetToDefaults()
+  const poke = createPokeInstance(createRng(11), ESPECIE, 100)
+  // Imortal e de ataque baixo: luta longa, muitos golpes na tela ao mesmo tempo.
+  poke.stats = { ...poke.stats, hp: 99999, atkFis: 1, atkEsp: 1, def: 9999, defEsp: 9999 }
+  poke.hp = 99999
+  gs.addPokeToTeam(poke)
+  gs.setActiveIndex(0)
+  return buildMapWorld(MAPA, useGameStateStore.getState().team[0], {
+    seed: 0, rng: createRng(7), counters: { entity: 1, effect: 1, pendingHit: 1 },
+  })
+}
+
+function passada(ligado, quadros) {
+  ligarVfx(ligado)
+  const world = montar()
+  const tempos = []
+  const picos = []
+  est.repintados = 0; est.reaproveitados = 0
+  let efeitos = 0, picoDeEfeitos = 0
+  const ctx = document.getElementById('tela').getContext('2d')
+  for (let i = 0; i < quadros; i++) {
+    if (world.player) world.player.poke.hp = world.player.poke.stats.hp
+    stepWorld(world, PASSO, useGameStateStore.getState())
+    const t0 = performance.now()
+    renderer.renderMap(world.mapDef, world)
+    ctx.getImageData(0, 0, 1, 1) // forca a GPU a terminar o quadro
+    const dt = performance.now() - t0
+    tempos.push(dt)
+    const vivos = world.effects.filter((e) => e.type === 'abilityEffect')
+    const n = vivos.length
+    // Quadro lento: guarda QUEM estava na tela e em que ms da coreografia.
+    if (dt > 8 && !window.__efeitoLento) window.__efeitoLento = structuredClone(vivos)
+    if (dt > 8) picos.push({ ms: +dt.toFixed(1), efeitos: vivos.map((e) => `${e.abilityId}${e.isCrit ? '!' : ''}@${Math.round((e.age - e.delay) * 1000)}`) })
+    efeitos += n; if (n > picoDeEfeitos) picoDeEfeitos = n
+  }
+  tempos.sort((a, b) => a - b)
+  const media = tempos.reduce((a, b) => a + b, 0) / tempos.length
+  return {
+    media: +media.toFixed(2), p95: +tempos[Math.floor(tempos.length * 0.95)].toFixed(2),
+    pior: +tempos[tempos.length - 1].toFixed(2), efeitosMedio: +(efeitos / quadros).toFixed(1), picoDeEfeitos,
+    picos: picos.slice(0, 12),
+    repintados: est.repintados, reaproveitados: est.reaproveitados,
+  }
+}
+
+window.__medir = ({ segundos = 30 } = {}) => {
+  const quadros = segundos * 60
+  passada(true, 120) // aquece
+  const novo = passada(true, quadros)
+  const tira = passada(false, quadros)
+  ligarVfx(true)
+  const r = { mapa: MAPA, segundos, novo, tira }
+  document.getElementById('log').textContent = JSON.stringify(r, null, 2)
+  return r
+}
+</script>
+</body>
+</html>

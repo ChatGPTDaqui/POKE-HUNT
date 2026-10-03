@@ -350,7 +350,7 @@ class Cena {
       rng: rngSemeado(hashTexto(`lab-${this.turnoId}`)),
       pedir: n => n,
     })
-    if (opt.pixel) desenharPixelizado(c, retanguloDoEfeito(origem, alvo, entrada.alcance, raio), paletaDaPele(pele), pintar)
+    if (opt.pixel) desenharPixelizado(c, retanguloDoEfeito(origem, alvo, entrada.alcance, raio, entrada.margem), paletaDaPele(pele), pintar)
     else pintar(c)
   }
 

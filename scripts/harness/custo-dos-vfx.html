@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<base href="/" />
+<title>Custo dos VFX</title>
+<!--
+  QUANTO CADA COREOGRAFIA CUSTA POR QUADRO, E ONDE O TEMPO VAI (02/10)
+
+  Queixa do dono: o jogo cai de desempenho quando os golpes novos saem na tela.
+  Esta pagina desenha cada coreografia (uma por tipo x tier x single/area) do
+  primeiro ao ultimo quadro, num canvas de tela do tamanho do jogo, e separa o
+  custo em:
+
+    pintar      so a coreografia, direto no canvas (sem pixelizador)
+    completo    o caminho real do jogo (desenharVfxDeGolpe + pixelizador)
+
+  A diferenca entre os dois e o preco do pixelizador (getImageData + laco por
+  pixel + putImageData + drawImage). Cada lote termina lendo 1 pixel do canvas
+  de tela, que forca a GPU a terminar o que foi enfileirado — sem isso o
+  drawImage pareceria gratis e a conta iria pro quadro seguinte.
+
+  COMO RODAR
+     npm run dev
+     abrir http://localhost:5173/scripts/harness/custo-dos-vfx.html
+     (ou chamar window.__medir() pelo console; devolve as linhas da tabela)
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14171a; color: #dfe4ea; font: 12px/1.5 ui-monospace, monospace; padding: 12px; }
+  table { border-collapse: collapse; }
+  td, th { padding: 2px 8px; text-align: right; border-bottom: 1px solid #2a2f36; }
+  td:first-child, th:first-child { text-align: left; }
+  canvas { display: none; }
+</style>
+</head>
+<body>
+<p id="estado">medindo…</p>
+<table id="tabela"></table>
+<canvas id="tela" width="1280" height="720"></canvas>
+<script type="module">
+import { ABILITIES, isDamagingAbility } from '/src/data/abilities.ts'
+import { resolverVfx } from '/src/render/vfx/resolverVfx.ts'
+import { desenharVfxDeGolpe, duracaoDoTier } from '/src/render/vfx/desenharVfx.ts'
+import { iniciarQuadroDeVfx } from '/src/render/vfx/orcamento.ts'
+
+const params = new URLSearchParams(location.search)
+const tela = document.getElementById('tela')
+const ctx = tela.getContext('2d')
+ctx.setTransform(1.5, 0, 0, 1.5, 0, 0) // zoom da camera do jogo
+
+// Uma coreografia por chave (tipo, area, tier, motivo): o primeiro golpe que
+// resolve pra ela representa todos.
+function representantes() {
+  const vistos = new Map()
+  for (const g of Object.values(ABILITIES)) {
+    if (!isDamagingAbility(g)) continue
+    for (const critico of [false, true]) {
+      const area = g.target === 'aoe'
+      const r = resolverVfx({ abilityId: g.id, area, critico })
+      if (!r) continue
+      const chave = `${r.motivo ?? r.tipo} ${area ? 'A' : 'T'}${r.tier}`
+      if (!vistos.has(chave)) vistos.set(chave, { chave, golpe: g.id, area, critico, r })
+    }
+  }
+  return [...vistos.values()].sort((a, b) => a.chave.localeCompare(b.chave))
+}
+
+function efeito(rep, age) {
+  return {
+    id: 'bench-' + rep.chave, type: 'abilityEffect', x: 400, y: 300, targetX: 400, targetY: 300,
+    origemX: rep.area ? 400 : 330, origemY: rep.area ? 300 : 290,
+    radius: 14, color: '#fff', duration: 9, delay: 0, age,
+    abilityId: rep.golpe, isAoe: rep.area, isCrit: rep.critico, worldSize: rep.area ? 160 : undefined,
+    anguloDeAtaque: 0, laneSize: 1, ownerId: null, lane: 0,
+  }
+}
+
+const soPintar = (_destino, _ret, _paleta, pintar) => { pintar(ctx); return true }
+
+function medirUm(rep, pixelizar) {
+  const dur = duracaoDoTier(rep.r)
+  const quadros = Math.ceil(dur / (1000 / 60))
+  let total = 0, pior = 0
+  for (let i = 0; i < quadros; i++) {
+    iniciarQuadroDeVfx()
+    const t0 = performance.now()
+    desenharVfxDeGolpe(ctx, efeito(rep, i / 60), pixelizar ? {} : { pixelizar: soPintar })
+    ctx.getImageData(0, 0, 1, 1)
+    const dt = performance.now() - t0
+    total += dt; if (dt > pior) pior = dt
+  }
+  return { media: total / quadros, pior, quadros }
+}
+
+window.__medir = () => {
+  const linhas = []
+  for (const rep of representantes()) {
+    medirUm(rep, true) // aquece cache de paleta e JIT
+    const p = medirUm(rep, false), c = medirUm(rep, true)
+    linhas.push({ chave: rep.chave, golpe: rep.golpe, pintar: p.media, completo: c.media, pior: c.pior })
+  }
+  linhas.sort((a, b) => b.completo - a.completo)
+  return linhas
+}
+
+// ASSINATURA de cada coreografia: hash dos pixels de tela de 1 a cada 4
+// quadros, em duas geometrias (alvo a direita e acima-esquerda; area com 350 de
+// diametro, o Heat Wave real). Serve pra provar que uma OTIMIZACAO nao mudou
+// nenhum pixel: gere antes, gere depois, compare. Rng semeado pelo id do
+// efeito, entao o desenho e deterministico.
+const prova = document.createElement('canvas')
+prova.width = 800; prova.height = 600
+const pctx = prova.getContext('2d', { willReadFrequently: true })
+function hashDaTela() {
+  const d = new Uint32Array(pctx.getImageData(0, 0, prova.width, prova.height).data.buffer)
+  let h = 2166136261
+  for (let i = 0; i < d.length; i++) h = Math.imul(h ^ d[i], 16777619)
+  return (h >>> 0).toString(36)
+}
+const GEOMETRIAS = [
+  { origemX: 330, origemY: 290, worldSize: 350 },
+  { origemX: 470, origemY: 360, worldSize: 220 },
+]
+window.__assinaturas = (so) => {
+  const saida = {}
+  for (const rep of representantes()) {
+    if (so && !so.includes(rep.chave)) continue
+    const dur = duracaoDoTier(rep.r)
+    const hashes = []
+    for (const g of GEOMETRIAS) {
+      for (let i = 0; i * (1000 / 60) <= dur; i += 4) {
+        pctx.clearRect(0, 0, prova.width, prova.height)
+        iniciarQuadroDeVfx()
+        const e = efeito(rep, i / 60)
+        if (!rep.area) { e.origemX = g.origemX; e.origemY = g.origemY }
+        else e.worldSize = g.worldSize
+        desenharVfxDeGolpe(pctx, e)
+        hashes.push(hashDaTela())
+      }
+    }
+    saida[rep.chave] = hashes.join(',')
+  }
+  return saida
+}
+
+window.__tabela = () => {
+  const linhas = window.__medir()
+  const f = (n) => n.toFixed(2)
+  document.getElementById('tabela').innerHTML =
+    '<tr><th>coreografia</th><th>golpe</th><th>pintar ms</th><th>completo ms</th><th>pixelizador ms</th><th>pior quadro ms</th></tr>' +
+    linhas.map((l) => `<tr><td>${l.chave}</td><td>${l.golpe}</td><td>${f(l.pintar)}</td><td>${f(l.completo)}</td><td>${f(l.completo - l.pintar)}</td><td>${f(l.pior)}</td></tr>`).join('')
+  document.getElementById('estado').textContent = `${linhas.length} coreografias, média por quadro`
+  window.__linhas = linhas
+  return linhas
+}
+if (!params.has('manual')) window.__tabela()
+</script>
+</body>
+</html>

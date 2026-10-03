@@ -605,9 +605,12 @@ export const VITRINE_DO_ELETRICO = {
 export const ELETRICO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: thunderShock, duracao: { 1: 700 }, alcance: 26, impactos: { 1: [SHOCK_ACESO[0][0]] } },
   2: { desenhar: shockWave, duracao: { 2: 1000 }, alcance: 34, impactos: { 2: [WAVE_CHEGA] } },
-  // O raio do ceu nasce 140 acima do alvo: alcance cobre a queda inteira.
-  3: { desenhar: thunderbolt, duracao: { 3: 1100 }, alcance: 150, impactos: { 3: [BOLT_CAI + 15] } },
-  4: { desenhar: thunder, duracao: { 4: 1800 }, alcance: 200, impactos: { 4: [TROVAO_CAI] } },
+  // O raio do ceu nasce 140 acima do alvo: alcance cobre a queda inteira. So
+  // PRA CIMA, porem — pros lados e pra baixo o desenho medido (02/10, com o
+  // acabamento) vai a 36/46 no Thunderbolt e 61/57 no Thunder; a margem fica
+  // ~14 acima disso.
+  3: { desenhar: thunderbolt, duracao: { 3: 1100 }, alcance: 150, margem: { cima: 150, baixo: 60, lados: 50 }, impactos: { 3: [BOLT_CAI + 15] } },
+  4: { desenhar: thunder, duracao: { 4: 1800 }, alcance: 200, margem: { cima: 200, baixo: 72, lados: 76 }, impactos: { 4: [TROVAO_CAI] } },
 }, false)
 
 export const ELETRICO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
