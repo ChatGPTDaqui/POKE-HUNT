@@ -84,3 +84,21 @@ describe('versao do quadro guardado', () => {
     expect(versoes[0]).not.toBe(versoes[1])
   })
 })
+
+describe('retanguloDoEfeito: margem em area (03/10)', () => {
+  const alvo = { x: 100, y: 200 }, R = 100
+
+  it('sem margem a folga alem da elipse e 20 nos tres lados', () => {
+    const r = retanguloDoEfeito(alvo, alvo, 10, R)
+    expect(r.x).toBe(alvo.x - R - 20)
+    expect(r.y + r.h).toBe(alvo.y + 12 + R * 0.45 + 20)
+  })
+
+  it('com margem cada lado usa a sua (coreografia que passava da borda saia cortada)', () => {
+    const r = retanguloDoEfeito(alvo, alvo, 10, R, { cima: 50, baixo: 30, lados: 70 })
+    expect(r.x).toBe(alvo.x - R - 70)
+    expect(r.w).toBe(2 * (R + 70))
+    expect(r.y).toBe(alvo.y + 12 - R * 0.45 - 50)
+    expect(r.y + r.h).toBe(alvo.y + 12 + R * 0.45 + 30)
+  })
+})
