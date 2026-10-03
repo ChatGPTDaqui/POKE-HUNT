@@ -7,7 +7,7 @@
 import { getAbility, isDamagingAbility } from '@/data/abilities'
 import { motivoDoGolpe, tetoDoTier, tierDoPoder } from '@/data/tierDoVfx'
 import type { ElementType } from '@/data/generated/types'
-import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE } from './registro'
+import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE } from './registro'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 
 // Faixas de poder, teto e motivo moraram aqui ate 02/10; foram pra
@@ -33,6 +33,8 @@ export function resolverVfx(pedido: PedidoDeVfx): VfxResolvido | null {
   if (!pedido.abilityId) return null
   const golpe = getAbility(pedido.abilityId)
   if (!golpe || !isDamagingAbility(golpe)) return null
+  // Exceção aprovada: manter a sprite original, sem editar a arte/configuração.
+  if (golpe.id === 'bullet_punch' && !pedido.area) return null
   const tipo = pedido.elementType ?? golpe.type
   const area = pedido.area
 
@@ -43,6 +45,8 @@ export function resolverVfx(pedido: PedidoDeVfx): VfxResolvido | null {
   // Motivo manda (D5) — mas so em golpe alvo-unico: area de "soco" nao existe
   // no catalogo, e um Earthquake nao tem forma de punho.
   const motivo = area ? null : motivoDoGolpe(golpe.id)
+  const porGolpe = area ? undefined : REGISTRO_POR_GOLPE[golpe.id]
+  if (porGolpe) return { entrada: porGolpe, tipo, tier, area, motivo }
   if (motivo) {
     const entrada = REGISTRO_DE_MOTIVO[motivo]
     if (entrada) return { entrada, tipo, tier, area, motivo }

@@ -53374,7 +53374,7 @@ function findEntityById(player, enemies, id) {
 //#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
-	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection, statusStat, seguir = null, apontarPara = null } = params;
+	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, acertosVisuais, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection, statusStat, seguir = null, apontarPara = null } = params;
 	const id = `effect-${counters.effect++}`;
 	const lane = owner ? claimEffectLane(owner, id, laneSize) : 0;
 	return {
@@ -53399,6 +53399,7 @@ function createWorldEffect(counters, params) {
 		worldSize,
 		elementType,
 		abilityId,
+		acertosVisuais,
 		anguloDeAtaque,
 		origemX,
 		origemY,
@@ -106125,9 +106126,11 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	let danoFinal = 0;
 	let danoCausado = 0;
 	let houveCritico = false;
+	let acertosVisuais = 0;
 	for (let acerto = 0; acerto < acertos; acerto++) {
 		if (acerto > 0 && isDead(target)) break;
 		const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null, world.especialidadeNiveis);
+		acertosVisuais++;
 		if (result.isCrit) houveCritico = true;
 		let danoDoAcerto = result.amount;
 		if ((target.substitutoHp ?? 0) > 0 && protegidoPorSubstituto) {
@@ -106586,6 +106589,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			color: colorForType(ability.type),
 			isAoe: false,
 			isCrit: houveCritico || void 0,
+			acertosVisuais: acertos > 1 ? acertosVisuais : void 0,
 			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
 			elementType: ability.type,
 			abilityId: ability.id,

@@ -1088,6 +1088,20 @@ describe('golpe de multiplos acertos', () => {
     expect(umUsoDoGolpe(world)).toHaveLength(2)
   })
 
+  it('Comet Punch informa ao VFX somente os contatos reais', () => {
+    const { world } = cenarioMultiAcerto('comet_punch')
+    const danos = umUsoDoGolpe(world)
+    expect(danos.length).toBeGreaterThanOrEqual(2)
+    expect(world.effects.find(e => e.type === 'abilityEffect' && e.abilityId === 'comet_punch')?.acertosVisuais).toBe(danos.length)
+  })
+
+  it('Comet Punch que dá KO no primeiro contato não inventa mais socos', () => {
+    const { world, enemy } = cenarioMultiAcerto('comet_punch')
+    enemy.poke.hp = 1
+    expect(umUsoDoGolpe(world)).toHaveLength(1)
+    expect(world.effects.find(e => e.type === 'abilityEffect' && e.abilityId === 'comet_punch')?.acertosVisuais).toBe(1)
+  })
+
   it('golpe normal continua com um acerto so', () => {
     const { world } = cenarioMultiAcerto('scratch')
     expect(umUsoDoGolpe(world)).toHaveLength(1)

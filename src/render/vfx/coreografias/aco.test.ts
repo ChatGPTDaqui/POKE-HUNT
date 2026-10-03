@@ -31,7 +31,7 @@ function quadro(e: EntradaDeCoreografia, tier: Tier, area: boolean, ms: number):
 
 describe('STEEL migrado', () => {
   it('todo golpe de dano de aco resolve pra coreografia nova', () => {
-    const golpes = Object.values(ABILITIES).filter(g => g.type === 'STEEL' && isDamagingAbility(g))
+    const golpes = Object.values(ABILITIES).filter(g => g.type === 'STEEL' && isDamagingAbility(g) && g.id !== 'bullet_punch')
     expect(golpes.length).toBeGreaterThan(3) // anti-teste-vacuo
     for (const g of golpes) {
       const r = resolverVfx({ abilityId: g.id, area: g.target === 'aoe' })

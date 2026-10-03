@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.80',
+    date: '2026-10-03',
+    title: 'Socos com personalidade',
+    highlights: [
+      'Golpes Punch agora mostram punhos de energia em pixel art: socos rápidos, pesados, sequências e variações de fogo, gelo, eletricidade e sombras.',
+      'Comet Punch mostra a quantidade de acertos realmente aplicada, inclusive quando o primeiro soco já derrota o alvo.',
+      'Bullet Punch volta a usar sua sprite original, preservando a arte.',
+    ],
+  },
+  {
     version: '7.79',
     date: '2026-10-03',
     title: 'Jornada do Treinador',

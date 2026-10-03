@@ -2859,11 +2859,13 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   let danoFinal = 0
   let danoCausado = 0
   let houveCritico = false
+  let acertosVisuais = 0
   for (let acerto = 0; acerto < acertos; acerto++) {
     // Alvo caiu no acerto anterior: a sequencia para. Nos jogos e igual — os
     // acertos restantes de um Fury Swipes nao saem depois do KO.
     if (acerto > 0 && isDead(target)) break
     const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null, world.especialidadeNiveis)
+    acertosVisuais++
     if (result.isCrit) houveCritico = true
 
     // ENDURE / STURDY (Fase 12): sobrevive com 1 HP num golpe que mataria.
@@ -3632,6 +3634,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // efeito nascia sem isso: o desenho nunca subia de tier, mas o numero de
       // dano (`atrasoDoNumeroDeDano`) esperava o impacto do tier de cima.
       isCrit: houveCritico || undefined,
+      acertosVisuais: acertos > 1 ? acertosVisuais : undefined,
       duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
       elementType: ability.type,
       abilityId: ability.id,
