@@ -44,4 +44,8 @@ describe('FIRE migrado', () => {
     expect(atrasoDoNumeroDeDano('flamethrower', true)).toBe(620)
     expect(atrasoDoNumeroDeDano(undefined)).toBe(0)
   })
+
+  it('em area o critico nao muda a espera: o efeito e um so pro cast e nao sobe de tier', () => {
+    expect(atrasoDoNumeroDeDano('heat_wave', true)).toBe(atrasoDoNumeroDeDano('heat_wave', false))
+  })
 })

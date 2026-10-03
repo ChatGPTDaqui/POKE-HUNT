@@ -57,7 +57,10 @@ export function retanguloDoEfeito(
 export function atrasoDoNumeroDeDano(abilityId: string | undefined, critico?: boolean): number {
   if (!abilityId) return 0
   const area = getAbility(abilityId)?.target === 'aoe'
-  const r = resolverVfx({ abilityId, area, critico })
+  // Em area o efeito e UM so pro cast inteiro (o anel nasce antes dos acertos
+  // por alvo) e nao sobe de tier no critico — o numero de um alvo critico nao
+  // pode esperar um impacto que nao vai ser desenhado.
+  const r = resolverVfx({ abilityId, area, critico: critico && !area })
   return r?.entrada.impactos?.[r.tier]?.[0] ?? 0
 }
 
