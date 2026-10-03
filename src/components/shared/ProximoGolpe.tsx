@@ -8,7 +8,8 @@ import { Explicacao } from './Explicacao'
 export function proximoAprendizado(poke: PokeInstance, species: Species) {
   const futuros = [...nivelDeAprendizado(species)]
     .filter(([key, level]) => level > poke.level
-      && !poke.unlockedAbilities.includes(key) && getAbility(key))
+      && !poke.unlockedAbilities.includes(key)
+      && !poke.golpesDeMaquina?.includes(key) && getAbility(key))
     .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]))
   const nivel = futuros[0]?.[1]
   if (nivel === undefined) return null
@@ -23,7 +24,7 @@ export function ProximoGolpe({ poke, species, children }: {
     <Explicacao
       tabIndex={0}
       rotulo={`Próximo golpe de ${species.name}`}
-      className="cursor-help touch-manipulation underline decoration-dotted underline-offset-[.2em] focus-visible:outline focus-visible:outline-2"
+      className="inline-flex shrink-0 cursor-help touch-manipulation underline decoration-dotted underline-offset-[.2em] focus-visible:outline focus-visible:outline-2"
       conteudo={(
         <div className="flex flex-col gap-[.3em] text-left">
           <b>Próximo aprendizado</b>

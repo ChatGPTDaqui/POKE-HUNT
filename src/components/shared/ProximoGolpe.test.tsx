@@ -21,6 +21,7 @@ describe('próximo aprendizado', () => {
   })
   it('não anuncia golpe já aprendido e termina sem inventar outro', () => {
     expect(proximoAprendizado({ ...poke, unlockedAbilities: ['ember', 'growl'] }, species)?.nivel).toBe(20)
+    expect(proximoAprendizado({ ...poke, golpesDeMaquina: ['ember', 'growl'] }, species)?.nivel).toBe(20)
     expect(proximoAprendizado({ ...poke, level: 100 }, species)).toBeNull()
   })
   it('abre ao toque e atualiza a previsão com o nível', async () => {
