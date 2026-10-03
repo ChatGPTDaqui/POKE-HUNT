@@ -133,6 +133,9 @@ window.__assinaturas = (so) => {
         pctx.clearRect(0, 0, prova.width, prova.height)
         iniciarQuadroDeVfx()
         const e = efeito(rep, i / 60)
+        // Id por geometria: o pixelizador guarda o bitmap POR EFEITO, e a
+        // segunda geometria no mesmo passo reaproveitaria o da primeira.
+        e.id += `-g${GEOMETRIAS.indexOf(g)}`
         if (!rep.area) { e.origemX = g.origemX; e.origemY = g.origemY }
         else e.worldSize = g.worldSize
         desenharVfxDeGolpe(pctx, e)
