@@ -324,13 +324,13 @@ export const VITRINE_DO_ACO = {
 
 export const ACO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: bulletPunch, duracao: { 1: 800 }, alcance: 30, impactos: { 1: BULLET_SAIDAS.map(s => s + BULLET_VOO) } },
-  2: { desenhar: magnetBomb, duracao: { 2: 1100 }, alcance: 36, impactos: { 2: [BOMBA_CHEGA] } },
-  3: { desenhar: flashCannon, duracao: { 3: 1000 }, alcance: 34, impactos: { 3: [CANHAO_CARGA + 60] } },
-  4: { desenhar: ironTail, duracao: { 4: 1300 }, alcance: 50, impactos: { 4: [CAUDA_BATE] } },
+  2: { desenhar: magnetBomb, duracao: { 2: 1100 }, alcance: 36, margem: { cima: 36, baixo: 44, lados: 36 }, impactos: { 2: [BOMBA_CHEGA] } },
+  3: { desenhar: flashCannon, duracao: { 3: 1000 }, alcance: 34, margem: { cima: 34, baixo: 50, lados: 34 }, impactos: { 3: [CANHAO_CARGA + 60] } },
+  4: { desenhar: ironTail, duracao: { 4: 1300 }, alcance: 50, margem: { cima: 50, baixo: 64, lados: 50 }, impactos: { 4: [CAUDA_BATE] } },
 }, false)
 
 /** Sem A1: nenhum golpe de aco em area cai nele (ver cabecalho). */
 export const ACO_AREA: Partial<Record<1 | 2 | 3, EntradaDeCoreografia>> = comImpacto({
-  2: { desenhar: cacosDoChao, duracao: { 2: 1500 }, alcance: 50, impactos: { 2: [300] } },
-  3: { desenhar: chuvaDeLancas, duracao: { 3: 1700 }, alcance: 110, impactos: { 3: [400, 900] } },
+  2: { desenhar: cacosDoChao, duracao: { 2: 1500 }, alcance: 66, margem: { cima: 36, baixo: 20, lados: 20 }, impactos: { 2: [300] } },
+  3: { desenhar: chuvaDeLancas, duracao: { 3: 1700 }, alcance: 267, margem: { cima: 177, baixo: 20, lados: 20 }, impactos: { 3: [400, 900] } },
 }, true)

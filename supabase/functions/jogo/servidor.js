@@ -106585,6 +106585,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			origemY: attacker.y - attacker.radius * .6,
 			color: colorForType(ability.type),
 			isAoe: false,
+			isCrit: houveCritico || void 0,
 			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
 			elementType: ability.type,
 			abilityId: ability.id,

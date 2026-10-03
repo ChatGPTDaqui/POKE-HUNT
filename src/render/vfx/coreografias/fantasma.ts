@@ -330,13 +330,13 @@ export const VITRINE_DO_FANTASMA = {
 
 export const FANTASMA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: lick, duracao: { 1: 1200 }, alcance: 40, impactos: { 1: [LICK_LAMBE] } },
-  2: { desenhar: shadowPunch, duracao: { 2: 800 }, alcance: 34, impactos: { 2: [PUNCH_BATE] } },
+  2: { desenhar: shadowPunch, duracao: { 2: 800 }, alcance: 34, margem: { cima: 34, baixo: 34, lados: 44 }, impactos: { 2: [PUNCH_BATE] } },
   3: { desenhar: shadowBall, duracao: { 3: 1200 }, alcance: 40, impactos: { 3: [BALL_CHEGA] } },
   4: { desenhar: phantomForce, duracao: { 4: 1400 }, alcance: 50, impactos: { 4: [PHANTOM_BOTE] } },
 }, false)
 
 /** Sem A1: nenhum golpe fantasma em area cai nele (ver cabecalho). */
 export const FANTASMA_AREA: Partial<Record<1 | 2 | 3, EntradaDeCoreografia>> = comImpacto({
-  2: { desenhar: assombracao, duracao: { 2: 1600 }, alcance: 60, impactos: { 2: [300] } },
-  3: { desenhar: rodaDeFogoFatuo, duracao: { 3: 2100 }, alcance: 60, impactos: { 3: [1000, 1300] } },
+  2: { desenhar: assombracao, duracao: { 2: 1600 }, alcance: 85, margem: { cima: 45, baixo: 20, lados: 20 }, impactos: { 2: [300] } },
+  3: { desenhar: rodaDeFogoFatuo, duracao: { 3: 2100 }, alcance: 88, margem: { cima: 48, baixo: 20, lados: 20 }, impactos: { 3: [1000, 1300] } },
 }, true)

@@ -3628,6 +3628,10 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       origemX: attacker.x, origemY: attacker.y - attacker.radius * 0.6,
       color: colorForType(ability.type),
       isAoe: false,
+      // Critico sobe um tier visual (decisao D7 do spec de VFX). Ate 03/10 o
+      // efeito nascia sem isso: o desenho nunca subia de tier, mas o numero de
+      // dano (`atrasoDoNumeroDeDano`) esperava o impacto do tier de cima.
+      isCrit: houveCritico || undefined,
       duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
       elementType: ability.type,
       abilityId: ability.id,

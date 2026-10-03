@@ -307,12 +307,12 @@ export const VITRINE_DO_DRAGAO = {
 export const DRAGAO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: dualChop, duracao: { 1: 900 }, alcance: 30, impactos: { 1: [CHOP_1, CHOP_2] } },
   2: { desenhar: dragonBreath, duracao: { 2: 1200 }, alcance: 36, impactos: { 2: [BAFO_SAI + 160] } },
-  3: { desenhar: dragonPulse, duracao: { 3: 1000 }, alcance: 40, impactos: { 3: [PULSO_CHEGA] } },
-  4: { desenhar: outrage, duracao: { 4: 1400 }, alcance: 50, impactos: { 4: [...FURIA] } },
+  3: { desenhar: dragonPulse, duracao: { 3: 1000 }, alcance: 40, margem: { cima: 40, baixo: 49, lados: 40 }, impactos: { 3: [PULSO_CHEGA] } },
+  4: { desenhar: outrage, duracao: { 4: 1400 }, alcance: 50, margem: { cima: 50, baixo: 62, lados: 50 }, impactos: { 4: [...FURIA] } },
 }, false)
 
 export const DRAGAO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
-  1: { desenhar: twister, duracao: { 1: 1300 }, alcance: 60, impactos: { 1: [300] } },
+  1: { desenhar: twister, duracao: { 1: 1300 }, alcance: 81, margem: { cima: 41, baixo: 20, lados: 20 }, impactos: { 1: [300] } },
   2: { desenhar: rugido, duracao: { 2: 1400 }, alcance: 40, impactos: { 2: [RUGIDO[0] + 200] } },
-  3: { desenhar: meteoros, duracao: { 3: 1800 }, alcance: 110, impactos: { 3: [500, 1000] } },
+  3: { desenhar: meteoros, duracao: { 3: 1800 }, alcance: 235, margem: { cima: 145, baixo: 20, lados: 20 }, impactos: { 3: [500, 1000] } },
 }, true)

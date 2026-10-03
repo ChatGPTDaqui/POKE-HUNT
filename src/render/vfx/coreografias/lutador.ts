@@ -382,6 +382,6 @@ export const LUTADOR_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comIm
 }, false)
 
 export const LUTADOR_AREA: Partial<Record<1 | 2 | 3, EntradaDeCoreografia>> = comImpacto({
-  2: { desenhar: socoNoChao, duracao: { 2: 1100 }, alcance: 30, impactos: { 2: [chegaEm(SOCO_CHAO, SOCO_CORRE, 0.3)] } },
-  3: { desenhar: tresPisoes, duracao: { 3: 1700 }, alcance: 60, impactos: { 3: [...PISOES] } },
+  2: { desenhar: socoNoChao, duracao: { 2: 1100 }, alcance: 47, margem: { cima: 37, baixo: 20, lados: 20 }, impactos: { 2: [chegaEm(SOCO_CHAO, SOCO_CORRE, 0.3)] } },
+  3: { desenhar: tresPisoes, duracao: { 3: 1700 }, alcance: 100, margem: { cima: 60, baixo: 20, lados: 20 }, impactos: { 3: [...PISOES] } },
 }, true)

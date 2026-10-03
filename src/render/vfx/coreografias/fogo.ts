@@ -605,14 +605,14 @@ export const VITRINE_DO_FOGO = {
 
 export const FOGO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = {
   1: { desenhar: ember, duracao: { 1: 900 }, alcance: 26, impactos: { 1: EMBER_SAIDAS.map(s => s + EMBER_VOO) } },
-  2: { desenhar: flameBurst, duracao: { 2: 1150 }, alcance: 34, impactos: { 2: [BURST_CHEGA] } },
+  2: { desenhar: flameBurst, duracao: { 2: 1150 }, alcance: 34, margem: { cima: 44, baixo: 34, lados: 34 }, impactos: { 2: [BURST_CHEGA] } },
   3: { desenhar: flamethrower, duracao: { 3: 1450 }, alcance: 40, impactos: { 3: [JATO_CHEGA] } },
-  4: { desenhar: fireBlast, duracao: { 4: 1500 }, alcance: 50, impactos: { 4: [BLAST_CHEGA] } },
+  4: { desenhar: fireBlast, duracao: { 4: 1500 }, alcance: 50, margem: { cima: 59, baixo: 64, lados: 63 }, impactos: { 4: [BLAST_CHEGA] } },
 }
 
 export const FOGO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = {
-  1: { desenhar: incinerate, duracao: { 1: 800 }, alcance: 40, impactos: { 1: [200] } },
-  2: { desenhar: heatWave, duracao: { 2: 1500 }, alcance: 90, impactos: { 2: [350] } },
-  3: { desenhar: eruption, duracao: { 3: 1800 }, alcance: 200, impactos: { 3: ERUPCAO_POUSOS } },
+  1: { desenhar: incinerate, duracao: { 1: 800 }, alcance: 60, margem: { cima: 40, baixo: 45, lados: 87 }, impactos: { 1: [200] } },
+  2: { desenhar: heatWave, duracao: { 2: 1500 }, alcance: 132, margem: { cima: 62, baixo: 20, lados: 20 }, impactos: { 2: [350] } },
+  3: { desenhar: eruption, duracao: { 3: 1800 }, alcance: 264, margem: { cima: 84, baixo: 20, lados: 20 }, impactos: { 3: ERUPCAO_POUSOS } },
 }
 

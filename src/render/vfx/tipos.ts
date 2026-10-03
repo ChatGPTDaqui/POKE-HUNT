@@ -92,7 +92,9 @@ export interface EntradaDeCoreografia {
    */
   alcance: number
   /**
-   * Single, opcional: folga POR LADO em vez do `alcance` igual pros quatro. Pro
+   * Opcional: folga POR LADO. Single: no lugar do `alcance` igual pros quatro.
+   * Area: alem da elipse do chao (padrao 20 nos tres; o topo continua cobrindo
+   * o `alcance`). Pro
    * golpe que cai do ceu (Thunder): 200 pra cima, mas ~60 pros lados e pra
    * baixo. Com o `alcance` dos quatro lados o pixelizador varria ~3x os pixels
    * do raio, todo quadro (02/10). Medir a extensao real antes de apertar: o que

@@ -515,7 +515,7 @@ export const VENENO_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImp
 }, false)
 
 export const VENENO_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
-  1: { desenhar: acid, duracao: { 1: 1300 }, alcance: 70, impactos: { 1: [300] } },
+  1: { desenhar: acid, duracao: { 1: 1300 }, alcance: 117, margem: { cima: 67, baixo: 20, lados: 20 }, impactos: { 1: [300] } },
   2: { desenhar: sludgeWave, duracao: { 2: 1500 }, alcance: 30, impactos: { 2: [ONDA_SAI + 250] } },
-  3: { desenhar: pantano, duracao: { 3: 1800 }, alcance: 60, impactos: { 3: [...PANTANO_GEISERES] } },
+  3: { desenhar: pantano, duracao: { 3: 1800 }, alcance: 79, margem: { cima: 39, baixo: 20, lados: 20 }, impactos: { 3: [...PANTANO_GEISERES] } },
 }, true)

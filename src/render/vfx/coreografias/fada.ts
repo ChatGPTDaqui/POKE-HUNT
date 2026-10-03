@@ -353,11 +353,11 @@ export const FADA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpac
   1: { desenhar: fairyWind, duracao: { 1: 1000 }, alcance: 30, impactos: { 1: [VENTO_CHEGA] } },
   2: { desenhar: drainingKiss, duracao: { 2: 1000 }, alcance: 34, impactos: { 2: [BEIJO_CHEGA] } },
   3: { desenhar: moonblast, duracao: { 3: 1700 }, alcance: 50, impactos: { 3: [LUA_BATE] } },
-  4: { desenhar: playRough, duracao: { 4: 1300 }, alcance: 44, impactos: { 4: [BRIGA_INICIO + 120, BRIGA_INICIO + 500] } },
+  4: { desenhar: playRough, duracao: { 4: 1300 }, alcance: 44, margem: { cima: 44, baixo: 60, lados: 44 }, impactos: { 4: [BRIGA_INICIO + 120, BRIGA_INICIO + 500] } },
 }, false)
 
 export const FADA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: disarmingVoice, duracao: { 1: 1100 }, alcance: 30, impactos: { 1: [VOZ_ONDAS[0] + 200] } },
-  2: { desenhar: chuvaDeEstrelas, duracao: { 2: 1500 }, alcance: 80, impactos: { 2: [CHUVA_INICIO + 260] } },
+  2: { desenhar: chuvaDeEstrelas, duracao: { 2: 1500 }, alcance: 175, margem: { cima: 115, baixo: 20, lados: 20 }, impactos: { 2: [CHUVA_INICIO + 260] } },
   3: { desenhar: luar, duracao: { 3: 1700 }, alcance: 110, impactos: { 3: [LUAR_FEIXES, LUAR_FEIXES + 500] } },
 }, true)

@@ -477,13 +477,13 @@ export const VITRINE_DA_AGUA = {
 
 export const AGUA_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: waterGun, duracao: { 1: 900 }, alcance: 30, impactos: { 1: GUN_SAIDAS.map(s => s + GUN_VOO) } },
-  2: { desenhar: waterPulse, duracao: { 2: 1000 }, alcance: 34, impactos: { 2: [PULSE_CHEGA] } },
+  2: { desenhar: waterPulse, duracao: { 2: 1000 }, alcance: 34, margem: { cima: 34, baixo: 76, lados: 49 }, impactos: { 2: [PULSE_CHEGA] } },
   3: { desenhar: scald, duracao: { 3: 1100 }, alcance: 40, impactos: { 3: [SCALD_CHEGA] } },
-  4: { desenhar: hydroPump, duracao: { 4: 1600 }, alcance: 80, impactos: { 4: [PUMP_CHEGA] } },
+  4: { desenhar: hydroPump, duracao: { 4: 1600 }, alcance: 80, margem: { cima: 111, baixo: 80, lados: 151 }, impactos: { 4: [PUMP_CHEGA] } },
 }, false)
 
 export const AGUA_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
-  1: { desenhar: bubble, duracao: { 1: 900 }, alcance: 30, impactos: { 1: [400] } },
-  2: { desenhar: surf, duracao: { 2: 1200 }, alcance: 40, impactos: { 2: [SURF_SAI + 200] } },
-  3: { desenhar: waterSpout, duracao: { 3: 1500 }, alcance: 190, impactos: { 3: [SPOUT_SOBE + 300, ...SPOUT_GEISERES] } },
+  1: { desenhar: bubble, duracao: { 1: 900 }, alcance: 41, margem: { cima: 31, baixo: 20, lados: 39 }, impactos: { 1: [400] } },
+  2: { desenhar: surf, duracao: { 2: 1200 }, alcance: 55, margem: { cima: 35, baixo: 20, lados: 77 }, impactos: { 2: [SURF_SAI + 200] } },
+  3: { desenhar: waterSpout, duracao: { 3: 1500 }, alcance: 210, margem: { cima: 40, baixo: 20, lados: 72 }, impactos: { 3: [SPOUT_SOBE + 300, ...SPOUT_GEISERES] } },
 }, true)

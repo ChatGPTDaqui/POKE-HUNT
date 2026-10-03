@@ -567,12 +567,12 @@ export const VITRINE_DO_VOADOR = {
 export const VOADOR_SINGLE: Record<1 | 2 | 3 | 4, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: gust, duracao: { 1: 1100 }, alcance: 30, impactos: { 1: [GUST_ESTOURA] } },
   2: { desenhar: airSlash, duracao: { 2: 1000 }, alcance: 34, impactos: { 2: SLASH_SAIDAS.map(s => s + SLASH_VOO) } },
-  3: { desenhar: drillPeck, duracao: { 3: 1200 }, alcance: 40, impactos: { 3: [BROCA_CHEGA, BROCA_FURA] } },
-  4: { desenhar: skyAttack, duracao: { 4: 1700 }, alcance: 130, impactos: { 4: [SKY_BATE] } },
+  3: { desenhar: drillPeck, duracao: { 3: 1200 }, alcance: 40, margem: { cima: 40, baixo: 49, lados: 40 }, impactos: { 3: [BROCA_CHEGA, BROCA_FURA] } },
+  4: { desenhar: skyAttack, duracao: { 4: 1700 }, alcance: 130, margem: { cima: 152, baixo: 130, lados: 130 }, impactos: { 4: [SKY_BATE] } },
 }, false)
 
 export const VOADOR_AREA: Record<1 | 2 | 3, EntradaDeCoreografia> = comImpacto({
   1: { desenhar: airCutter, duracao: { 1: 1000 }, alcance: 40, impactos: { 1: [CUTTER_VOO * 0.6] } },
-  2: { desenhar: ventania, duracao: { 2: 1300 }, alcance: 60, impactos: { 2: [300] } },
+  2: { desenhar: ventania, duracao: { 2: 1300 }, alcance: 84, margem: { cima: 44, baixo: 20, lados: 20 }, impactos: { 2: [300] } },
   3: { desenhar: furacao, duracao: { 3: 1600 }, alcance: 180, impactos: { 3: [120, 600] } },
 }, true)
