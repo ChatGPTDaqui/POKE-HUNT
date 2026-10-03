@@ -85,6 +85,8 @@ export type Coreografia = (c: ContextoVfx) => void
 
 export interface EntradaDeCoreografia {
   desenhar: Coreografia
+  /** Paleta própria da assinatura do golpe; não altera seu tipo no combate. */
+  pele?: Pele
   /** Duracao por tier em ms. */
   duracao: Partial<Record<Tier, number>>
   /**
