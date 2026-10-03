@@ -37,14 +37,14 @@ const JANELA = 1800
 // (pessimista.kills 352.83 vs otimista.kills 351.5). Com 40 sementes a
 // ordem correta volta (353.05 vs 353.35, confirmado empiricamente).
 //
-// 40 -> 160 em 02/10, pela trava "o POKE so anda depois que o golpe acaba".
-// A trava dura a coreografia do golpe que DEU o abate, entao critico (que muda
-// quem da o abate e quando) passou a mexer no tempo parado: a razao
-// pessimista/otimista por conjunto de 40 sementes foi de +-0,7% pra +-2%, e o
-// conjunto deste arquivo caiu em 1,0177. Medido em seis conjuntos de 40, a
-// MEDIA nao subiu (1,000 sem a trava, 0,997 com) — a invariante vale, so o
-// ruido cresceu. A margem de 1% ficou; o que mudou foi o tamanho da amostra.
-const SEMENTES = Array.from({ length: 160 }, (_, i) => i * 137 + 3)
+// MEDIDO EM 03/10, com a trava "o POKE fica parado 0,7 s depois do golpe": a
+// razao pessimista/otimista de abates em seis conjuntos de 40 sementes foi
+// 1,0034 / 1,0247 / 0,9979 / 0,9965 / 1,0112 / 1,0173 (sem a trava: +-0,7%). Com
+// 160 sementes deu 0,9996 — a invariante vale, mas o ruido por conjunto de 40
+// passou da margem de 1%. Se este teste cair depois de uma mudanca que mexe em
+// TEMPO de combate, medir com mais sementes antes de concluir regressao (160
+// custa ~2 min numa maquina carregada, por isso nao ficou aqui).
+const SEMENTES = Array.from({ length: 40 }, (_, i) => i * 137 + 3)
 
 function simular(pessimista: boolean, semente: number) {
   const gameState = useGameStateStore.getState()
