@@ -5,13 +5,7 @@
 // so numeros congelados no momento do golpe. E isso que garante que ligar ou
 // desligar o VFX nao muda dano, ordem de eventos nem relogio de combate
 // (PvP/ranked dependem disso). Trancado em `soVisual.test.ts`.
-//
-// UMA excecao, de proposito (02/10): a DURACAO de cada coreografia trava o
-// movimento de quem usou o golpe ate ele acabar. O motor le essa duracao de
-// data/duracaoDoVfx.ts (copia guardada por render/vfx/duracaoDoVfx.test.ts),
-// nunca daqui — entao mudar a duracao de uma coreografia muda a SIMULACAO, e
-// pede atualizar aquela tabela e regerar o bundle da Edge.
-import type { MotivoDoVfx, TierDoVfx } from '@/data/duracaoDoVfx'
+import type { MotivoDoVfx, TierDoVfx } from '@/data/tierDoVfx'
 
 /**
  * Nivel de elaboracao do efeito. Single usa 1..4, area usa 1..3.
@@ -20,7 +14,7 @@ import type { MotivoDoVfx, TierDoVfx } from '@/data/duracaoDoVfx'
  * tamanho — a tabela esta no spec. Golpe forte le como forte porque tem coisa
  * que o fraco nao tem, e nao porque o mesmo desenho ficou maior.
  */
-// Tier e motivo moram em data/duracaoDoVfx.ts (o motor tambem le).
+// Tier e motivo moram em data/tierDoVfx.ts.
 export type Tier = TierDoVfx
 
 /** Forma fisica reconhecida pelo id do golpe. Manda na coreografia; o tipo so pinta. */

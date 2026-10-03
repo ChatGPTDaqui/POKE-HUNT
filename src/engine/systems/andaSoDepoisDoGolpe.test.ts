@@ -1,9 +1,10 @@
-// O POKE SO ANDA DEPOIS QUE O GOLPE TERMINA (02/10).
+// O POKE FICA PARADO UM TEMPO FIXO DEPOIS DO GOLPE (02/10, fixo desde 03/10).
 //
 // Pedido do dono: "o poke para rapidamente e ja comeca a andar de novo caso ele
 // tenha derrotado o inimigo, isso faz com que a skill fique para tras". A trava
 // era so a pose (0,5 s); o efeito nasce quando o golpe pousa e dura mais 0,6 a
-// 2,1 s. Agora o POKE fica parado a pose E o efeito.
+// 2,1 s. Agora o POKE fica parado a pose E mais `TRAVA_DEPOIS_DO_GOLPE` (0,7 s),
+// igual pra todo golpe — o dono preferiu um tempo padrao a um por coreografia.
 //
 // O cenario e o caso exato da queixa: o golpe DERROTA o alvo, e ha outro
 // inimigo longe pra onde o POKE quer andar. Mede, no motor inteiro
@@ -16,11 +17,11 @@ import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
 import { BASIC_ATTACK } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
-import { duracaoVisualDoGolpe } from '@/data/duracaoDoVfx'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld, stepWorld } from '../simulation'
 import { ATTACK_ANIM_DURATION } from './animationSystem'
+import { TRAVA_DEPOIS_DO_GOLPE } from './combatSystem'
 
 const PASSO = 1 / 60
 const GOLPE = 'ember'
@@ -83,22 +84,22 @@ function ateAndar(silent: boolean): number {
   return Infinity
 }
 
-describe('o POKE so anda depois que o efeito do golpe acaba (02/10)', () => {
-  const efeito = duracaoVisualDoGolpe(GOLPE, false) / 1000
+describe('o POKE fica parado depois do golpe (02/10)', () => {
+  const efeito = TRAVA_DEPOIS_DO_GOLPE
 
-  it('o golpe do cenario tem coreografia (anti-teste-vacuo)', () => {
-    expect(efeito).toBeGreaterThan(0.5)
+  it('a trava existe (anti-teste-vacuo)', () => {
+    expect(efeito).toBeGreaterThan(0.3)
   })
 
   it.each([
     { modo: 'cliente', silent: false },
     { modo: 'servidor (silent, sem efeito nenhum)', silent: true },
-  ])('$modo: fica parado a pose E o efeito, e anda logo depois', ({ silent }) => {
+  ])('$modo: fica parado a pose E a trava, e anda logo depois', ({ silent }) => {
     const andou = ateAndar(silent)
     // Antes: andava logo depois da pose (~0,5 s), com o efeito no meio.
-    expect(andou, 'andou com o efeito ainda na tela').toBeGreaterThanOrEqual(ATTACK_ANIM_DURATION + efeito - 2 * PASSO)
+    expect(andou, 'andou antes da trava acabar').toBeGreaterThanOrEqual(ATTACK_ANIM_DURATION + efeito - 2 * PASSO)
     // E nao fica preso alem disso.
-    expect(andou, 'ficou parado alem do fim do efeito').toBeLessThan(ATTACK_ANIM_DURATION + efeito + 0.25)
+    expect(andou, 'ficou parado alem da trava').toBeLessThan(ATTACK_ANIM_DURATION + efeito + 0.25)
   })
 
   it('cliente e servidor travam o MESMO tempo', () => {

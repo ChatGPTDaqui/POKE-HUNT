@@ -5,14 +5,13 @@
 // status, golpe desconhecido. E esse `null` que deixa a migracao ser TIPO A
 // TIPO sem o jogo nunca ficar sem efeito (decisao D4 do spec).
 import { getAbility, isDamagingAbility } from '@/data/abilities'
-import { motivoDoGolpe, tetoDoTier, tierDoPoder } from '@/data/duracaoDoVfx'
+import { motivoDoGolpe, tetoDoTier, tierDoPoder } from '@/data/tierDoVfx'
 import type { ElementType } from '@/data/generated/types'
 import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE } from './registro'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 
 // Faixas de poder, teto e motivo moraram aqui ate 02/10; foram pra
-// data/duracaoDoVfx.ts pra o MOTOR ler o mesmo tier (trava do POKE ate o golpe
-// acabar) sem importar render. Reexportados pra quem ja importava daqui.
+// data/tierDoVfx.ts (02/10). Reexportados pra quem ja importava daqui.
 export { motivoDoGolpe, tetoDoTier, tierDoPoder }
 
 export interface VfxResolvido {
