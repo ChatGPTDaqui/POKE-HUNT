@@ -12,6 +12,25 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // O POKE fica parado um instante depois do golpe, igual pra todo golpe.
+  {
+    version: '7.76',
+    date: '2026-10-03',
+    title: 'Golpe até o fim',
+    highlights: [
+      'Depois de usar um golpe, o POKE fica parado um instante antes de voltar a andar. O golpe não fica mais para trás quando o inimigo cai.',
+    ],
+  },
+  // Queda de desempenho com os efeitos novos de golpe.
+  {
+    version: '7.75',
+    date: '2026-10-02',
+    title: 'Efeitos de golpe mais leves',
+    highlights: [
+      'Os efeitos de golpe pesam bem menos: golpes em área grandes, como Heat Wave e Surf, não derrubam mais o desempenho da caçada.',
+      'Corrigido: golpes de inseto, sombrios e de dragão às vezes saíam com o traço diferente, dependendo do golpe que aparecia junto.',
+    ],
+  },
   // Nome do golpe saiu de baixo da barra de HP e foi pros pes de quem usou.
   {
     version: '7.74',

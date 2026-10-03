@@ -57,3 +57,25 @@ describe('pixelizarDados', () => {
     }
   })
 })
+
+describe('encaixe de cor nao depende da ordem (02/10)', () => {
+  // Antes o cache guardava o encaixe da PRIMEIRA cor que caia em cada celula
+  // de 5 bits, e duas cores da mesma celula podiam ter vizinhas diferentes: o
+  // mesmo pixel saia de um jeito ou de outro conforme o que tinha sido
+  // pixelizado antes. Agora a celula encaixa pelo centro, sempre.
+  const P = ['#000000', '#101010']
+  // 0x07 e 0x01 caem na mesma celula (>> 3 = 0); 0x07 esta mais perto de #101010.
+  const encaixe = (ordem: number[]) => ordem.map(v => {
+    const d = uniforme(1, 1, [v, v, v, 255])
+    pixelizarDados(d, 1, 1, P)
+    return d[0]
+  })
+
+  it('mesma celula, mesma cor, em qualquer ordem', () => {
+    const [a1, b1] = encaixe([7, 1])
+    const [b2, a2] = encaixe([1, 7])
+    expect(a1).toBe(b1)
+    expect(a1).toBe(a2)
+    expect(b1).toBe(b2)
+  })
+})

@@ -86,6 +86,12 @@ export function tickAttackAnimTimers(world: WorldState, dt: number): void {
     if (entity.attackAnimTimer > 0) {
       entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt)
     }
+    // Mesmo motivo: movementSystem le, e a trava tem que descer no servidor.
+    if (entity.travaDoGolpe) {
+      const resta = entity.travaDoGolpe - dt
+      if (resta > 0) entity.travaDoGolpe = resta
+      else delete entity.travaDoGolpe
+    }
     if (entity.hurtAnimTimer) {
       const resta = entity.hurtAnimTimer - dt
       if (resta > 0) entity.hurtAnimTimer = resta

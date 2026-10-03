@@ -2664,6 +2664,27 @@ function ordenarPorVelocidade(world: WorldState, hits: PendingHit[]): PendingHit
   })
 }
 
+/**
+ * Quanto o POKE fica PARADO depois que o proprio golpe de dano pousa (03/10),
+ * pro golpe nao ficar pra tras quando o alvo cai. A pose (`attackAnimTimer`)
+ * ja segurou ate o pouso; isto segura mais um tanto, IGUAL pra todo golpe — a
+ * pedido do dono, em vez de variar com a coreografia de cada um.
+ *
+ * Por que 0,7 s: o ultimo impacto das coreografias cai em ate 370 ms na
+ * mediana, 520 ms em 75% e 700 ms em 90% dos golpes de alvo unico, e o jato do
+ * Flamethrower para de sair da boca em 640 ms. Fumaca e brasas que ainda
+ * esfriam no alvo depois disso podem ficar pra tras.
+ *
+ * A primeira versao (02/10) travava a duracao INTEIRA de cada coreografia
+ * (0,6 a 2,1 s) e custava de 4% a 11% dos abates por minuto.
+ */
+export const TRAVA_DEPOIS_DO_GOLPE = 0.7
+
+/** Arma a trava sem nunca encurtar uma maior que ja esteja correndo. Ver movementSystem.ts#naoAnda. */
+function travarDepoisDoGolpe(attacker: PlayerEntity | EnemyEntity): void {
+  if (TRAVA_DEPOIS_DO_GOLPE > (attacker.travaDoGolpe ?? 0)) attacker.travaDoGolpe = TRAVA_DEPOIS_DO_GOLPE
+}
+
 function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string[], onPlayerFainted: () => void, silent: boolean): void {
   const attacker = findEntityById(world.player, world.enemies, hit.attackerId)
   if (!attacker) return
@@ -2695,6 +2716,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   }
 
   if (hit.isAoeVisual) {
+    // Trava FORA do `silent`: o servidor re-simula o movimento e tem que parar
+    // o POKE igual ao cliente, mesmo sem efeito nenhum nascendo aqui.
+    if (isDamagingAbility(ability)) travarDepoisDoGolpe(attacker)
     // O unico anel deste cast AOE, centrado no atacante — ver
     // queueAoeVisual. Hits individuais por-alvo abaixo pulam desenhar o
     // proprio. Pulado em silent (PH-11): farm offline/flush headless roda
@@ -3581,6 +3605,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     attacker.y = clamp(attacker.y + dy / distancia * 60, attacker.radius, (bounds?.height ?? 900) - attacker.radius)
   }
   const isAoe = ability.target === 'aoe'
+  // Mesmo gatilho do efeito de dano abaixo, fora do `silent`. Golpe de status
+  // (Danca das Espadas, Rosnado) nao trava: nao tem coreografia que fique pra tras.
+  if (!isAoe && ability.power > 0) travarDepoisDoGolpe(attacker)
   // Golpe de status alvo-unico: SO mostra VFX quando algo de fato pegou
   // (`statusRecebeuEm`) — golpe que falhou (imunidade, ja tinha status,
   // janela de reaplicacao) nao fica com um circulo colorido em cima de nada

@@ -101503,6 +101503,11 @@ function tickAttackAnimTimers(world, dt) {
 	for (const entity of entities) {
 		if (!entity) continue;
 		if (entity.attackAnimTimer > 0) entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt);
+		if (entity.travaDoGolpe) {
+			const resta = entity.travaDoGolpe - dt;
+			if (resta > 0) entity.travaDoGolpe = resta;
+			else delete entity.travaDoGolpe;
+		}
 		if (entity.hurtAnimTimer) {
 			const resta = entity.hurtAnimTimer - dt;
 			if (resta > 0) entity.hurtAnimTimer = resta;
@@ -103962,6 +103967,10 @@ function wanderFreely(rng, entity, dt, cx, cy, radius, mapDef) {
 		y: cy + Math.sin(angle) * dist
 	};
 }
+/** Parado NESTE tick: status que imobiliza, ou o proprio golpe ainda na tela. */
+function naoAnda(entity) {
+	return imobilizadoPorStatus(entity) || (entity.travaDoGolpe ?? 0) > 0;
+}
 /**
 * Sono e paralisia travam o POKE onde ele esta (data/statusEffects.ts#imobiliza).
 *
@@ -103983,6 +103992,13 @@ function wanderFreely(rng, entity, dt, cx, cy, radius, mapDef) {
 * selvagem e 175px e o spawn nasce entre 250 e 550px
 * (simulation.ts#SPAWN_CONE_MIN_DISTANCE), entao a hunt travaria ate alguem
 * curar. Ver data/statusEffects.ts#STATUS_QUE_IMOBILIZAM.
+*
+* O GOLPE NA TELA tambem para o POKE (02/10): `travaDoGolpe` entra por
+* `naoAnda`, o MESMO caminho do sono, e nao pelo da pose (`attackAnimTimer`,
+* que forca 'engaged'). So o deslocamento e pulado; o estado continua saindo
+* da distancia real. Forcar 'engaged' por ate 2 s seria bug: `updateCombat`
+* escolhe quem luta so por `state === 'engaged'`, entao um inimigo travado
+* seguiria batendo (e apanhando) de longe enquanto o jogador vai embora.
 */
 function updateMovement(world, dt) {
 	const { player, enemies, mapDef } = world;
@@ -103996,7 +104012,7 @@ function updateMovement(world, dt) {
 		const lure = world.lure;
 		player.state = lure.destino ? "chase" : "idle";
 		player.wanderTarget = null;
-		if (lure.destino && !imobilizadoPorStatus(player)) moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef);
+		if (lure.destino && !naoAnda(player)) moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef);
 	} else {
 		const targetEnemy = findNearestAlivePrioritario(player, enemies) || findNearestAliveEnemy(player, enemies);
 		if (targetEnemy) {
@@ -104004,7 +104020,7 @@ function updateMovement(world, dt) {
 			if (distanceTo(player, targetEnemy) <= engageRange) player.state = "engaged";
 			else {
 				player.state = "chase";
-				if (!imobilizadoPorStatus(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef);
+				if (!naoAnda(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef);
 				player.wanderTarget = null;
 			}
 		} else if (duelVencido(world)) {
@@ -104012,7 +104028,7 @@ function updateMovement(world, dt) {
 			player.wanderTarget = null;
 		} else {
 			player.state = "wander";
-			if (imobilizadoPorStatus(player)) player.wanderTarget = null;
+			if (naoAnda(player)) player.wanderTarget = null;
 			else wanderFreely(world.rng, player, dt, mapCx, mapCy, mapRadius, mapDef);
 		}
 	}
@@ -104025,7 +104041,7 @@ function updateMovement(world, dt) {
 			enemy.state = "engaged";
 			continue;
 		}
-		const enemyImobilizado = imobilizadoPorStatus(enemy);
+		const enemyImobilizado = naoAnda(enemy);
 		if (player.fainted) {
 			enemy.state = "wander";
 			enemy.targetId = null;
@@ -105991,6 +106007,25 @@ function ordenarPorVelocidade(world, hits) {
 		return diff !== 0 ? diff : a.id.localeCompare(b.id);
 	});
 }
+/**
+* Quanto o POKE fica PARADO depois que o proprio golpe de dano pousa (03/10),
+* pro golpe nao ficar pra tras quando o alvo cai. A pose (`attackAnimTimer`)
+* ja segurou ate o pouso; isto segura mais um tanto, IGUAL pra todo golpe — a
+* pedido do dono, em vez de variar com a coreografia de cada um.
+*
+* Por que 0,7 s: o ultimo impacto das coreografias cai em ate 370 ms na
+* mediana, 520 ms em 75% e 700 ms em 90% dos golpes de alvo unico, e o jato do
+* Flamethrower para de sair da boca em 640 ms. Fumaca e brasas que ainda
+* esfriam no alvo depois disso podem ficar pra tras.
+*
+* A primeira versao (02/10) travava a duracao INTEIRA de cada coreografia
+* (0,6 a 2,1 s) e custava de 4% a 11% dos abates por minuto.
+*/
+var TRAVA_DEPOIS_DO_GOLPE = .7;
+/** Arma a trava sem nunca encurtar uma maior que ja esteja correndo. Ver movementSystem.ts#naoAnda. */
+function travarDepoisDoGolpe(attacker) {
+	if (.7 > (attacker.travaDoGolpe ?? 0)) attacker.travaDoGolpe = TRAVA_DEPOIS_DO_GOLPE;
+}
 function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const attacker = findEntityById(world.player, world.enemies, hit.attackerId);
 	if (!attacker) return;
@@ -106009,6 +106044,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		ability = opcoes[Math.floor(nextFloat(world.rng) * opcoes.length)];
 	}
 	if (hit.isAoeVisual) {
+		if (isDamagingAbility(ability)) travarDepoisDoGolpe(attacker);
 		if (!silent) world.effects.push(createWorldEffect(world.counters, {
 			type: "abilityEffect",
 			x: attacker.x,
@@ -106533,7 +106569,9 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		attacker.x = clamp$1(attacker.x + (dx || (dy ? 0 : 1)) / distancia * 60, attacker.radius, (bounds?.width ?? 1400) - attacker.radius);
 		attacker.y = clamp$1(attacker.y + dy / distancia * 60, attacker.radius, (bounds?.height ?? 900) - attacker.radius);
 	}
-	if (!(ability.target === "aoe") && !silent && (ability.power > 0 || statusRecebeuEm)) {
+	const isAoe = ability.target === "aoe";
+	if (!isAoe && ability.power > 0) travarDepoisDoGolpe(attacker);
+	if (!isAoe && !silent && (ability.power > 0 || statusRecebeuEm)) {
 		const local = !isDamagingAbility(ability) && statusRecebeuEm ? statusRecebeuEm : target;
 		const mesmoLugar = local.x === attacker.x && local.y === attacker.y;
 		world.effects.push(createWorldEffect(world.counters, {

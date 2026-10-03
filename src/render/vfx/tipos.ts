@@ -5,6 +5,7 @@
 // so numeros congelados no momento do golpe. E isso que garante que ligar ou
 // desligar o VFX nao muda dano, ordem de eventos nem relogio de combate
 // (PvP/ranked dependem disso). Trancado em `soVisual.test.ts`.
+import type { MotivoDoVfx, TierDoVfx } from '@/data/tierDoVfx'
 
 /**
  * Nivel de elaboracao do efeito. Single usa 1..4, area usa 1..3.
@@ -13,10 +14,11 @@
  * tamanho — a tabela esta no spec. Golpe forte le como forte porque tem coisa
  * que o fraco nao tem, e nao porque o mesmo desenho ficou maior.
  */
-export type Tier = 1 | 2 | 3 | 4
+// Tier e motivo moram em data/tierDoVfx.ts.
+export type Tier = TierDoVfx
 
 /** Forma fisica reconhecida pelo id do golpe. Manda na coreografia; o tipo so pinta. */
-export type Motivo = 'soco' | 'chute' | 'mordida' | 'garra' | 'chifre' | 'bicada' | 'corte' | 'investida'
+export type Motivo = MotivoDoVfx
 
 /** Primitiva de particula que "e" o tipo — o que sobra no ar depois do impacto. */
 export type ParticulaDoTipo =
@@ -89,6 +91,14 @@ export interface EntradaDeCoreografia {
    * sai do raio; ver `retanguloDoEfeito`).
    */
   alcance: number
+  /**
+   * Single, opcional: folga POR LADO em vez do `alcance` igual pros quatro. Pro
+   * golpe que cai do ceu (Thunder): 200 pra cima, mas ~60 pros lados e pra
+   * baixo. Com o `alcance` dos quatro lados o pixelizador varria ~3x os pixels
+   * do raio, todo quadro (02/10). Medir a extensao real antes de apertar: o que
+   * passar da folga sai CORTADO na borda do retangulo.
+   */
+  margem?: { cima: number; baixo: number; lados: number }
   /**
    * Instantes (ms) em que o golpe BATE, por tier. E o gancho da reacao do alvo
    * — Hurt, flash de silhueta, hit-stop, numero de dano — que acontece FORA da
