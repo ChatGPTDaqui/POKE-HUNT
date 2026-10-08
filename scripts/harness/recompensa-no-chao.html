@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<base href="/" />
+<title>Recompensa no chão</title>
+<!--
+  OURO E XP CAINDO NO CHAO (08/10), DESENHADO PELO PROPRIO JOGO
+
+  Hunt real + a camada de VFX de cima (onde o voo ate a carteira e pintado) +
+  uma "carteira" de mentira no topo, publicada como a ancora que o voo procura.
+  `window.__ateAbate()` avanca ate o proximo abate; `window.__avancar(seg)`
+  avanca o tempo pra fotografar cada fase (queda, chao, voo).
+
+  COMO RODAR
+     npm run dev
+     abrir http://localhost:5173/scripts/harness/recompensa-no-chao.html
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14171a; color: #dfe4ea; font: 12px/1.5 ui-monospace, monospace; }
+  #palco { position: relative; width: 640px; height: 420px; margin: 12px; }
+  #palco canvas { position: absolute; left: 0; top: 0; width: 640px; height: 420px; }
+  #carteira { position: absolute; right: 10px; top: 8px; padding: 2px 8px; background: #000a; border: 1px solid #fbbf24; color: #fbbf24; z-index: 2; }
+  #log { margin: 0 12px; white-space: pre; }
+</style>
+</head>
+<body>
+<div id="palco">
+  <canvas id="jogo" width="640" height="420"></canvas>
+  <canvas id="vfx" width="640" height="420"></canvas>
+  <div id="carteira">ouro</div>
+</div>
+<p id="log"></p>
+<script type="module">
+import { createRng } from '/src/core/rng.ts'
+import { createPokeInstance } from '/src/data/pokes.ts'
+import { buildMapWorld, stepWorld } from '/src/engine/simulation.ts'
+import { useGameStateStore } from '/src/stores/gameStateStore.ts'
+import { Renderer } from '/src/render/renderer.ts'
+import { registrarCanvasDeVfx, registrarPintor, definirAncora, desenharVfx } from '/src/render/camadaVfx.ts'
+import { ANCORA } from '/src/hooks/useAncoraDeVfx.ts'
+import { converterRecompensasNovas, pintorDeRecompensa, contarVoos } from '/src/render/vooDeRecompensa.ts'
+
+const params = new URLSearchParams(location.search)
+const MAPA = params.get('mapa') || 'route_46'
+const PASSO = 1 / 60
+const renderer = new Renderer(document.getElementById('jogo'))
+registrarCanvasDeVfx(document.getElementById('vfx'))
+registrarPintor(pintorDeRecompensa)
+definirAncora(ANCORA.carteira, document.getElementById('carteira').getBoundingClientRect())
+
+const gs = useGameStateStore.getState()
+gs.resetToDefaults()
+const poke = createPokeInstance(createRng(11), params.get('especie') || 'charizard', 60)
+poke.stats = { ...poke.stats, hp: 99999 }
+poke.hp = 99999
+gs.addPokeToTeam(poke)
+gs.setActiveIndex(0)
+const world = buildMapWorld(MAPA, useGameStateStore.getState().team[0], {
+  seed: 0, rng: createRng(7), counters: { entity: 1, effect: 1, pendingHit: 1 },
+})
+window.__mundo = world
+
+let abates = 0
+function tique() {
+  if (world.player) world.player.poke.hp = world.player.poke.stats.hp
+  abates += stepWorld(world, PASSO, useGameStateStore.getState()).length
+  renderer.renderMap(world.mapDef, world)
+  converterRecompensasNovas(world.effects, (p) => renderer.mundoParaTela(world.mapDef, world.player, p))
+  desenharVfx(PASSO)
+  document.getElementById('log').textContent = `abates ${abates} · voos vivos ${contarVoos()}`
+}
+window.__ateAbate = (max = 3600) => {
+  const antes = abates
+  for (let i = 0; i < max && abates === antes; i++) tique()
+  return abates
+}
+window.__avancar = (seg) => { for (let i = 0; i < Math.round(seg * 60); i++) tique() }
+
+let rodando = !params.has('parado')
+function quadro() { if (rodando) tique(); requestAnimationFrame(quadro) }
+window.__pausar = (v) => { rodando = !v }
+quadro()
+</script>
+</body>
+</html>

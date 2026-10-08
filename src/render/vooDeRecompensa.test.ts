@@ -14,8 +14,8 @@
 //  - SATURACAO da contagem de moedas: acima de uma duzia o olho nao conta mais.
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
-  converterRecompensasNovas, criarVoo, posicaoDaMoeda, quantidadeDeMoedas,
-  contarVoos, reiniciarDeteccao, reiniciarRecompensas, temRecompensaViva, vooTerminou,
+  converterRecompensasNovas, criarVoo, posicaoNoChao, posicaoNoVoo, quantidadeDeMoedas, faseDaMoeda,
+  contarVoos, reiniciarDeteccao, reiniciarRecompensas, temRecompensaViva, vooTerminou, ESPERA_NO_CHAO, QUEDA,
 } from './vooDeRecompensa'
 import { UNIDADE_OURO, UNIDADE_XP, tipoDaRecompensa } from '@/data/recompensaDoAbate'
 
@@ -129,38 +129,67 @@ describe('geometria do voo (PH-191)', () => {
   it('sementes diferentes produzem leques diferentes', () => {
     const a = criarVoo('ouro', 240, { x: 10, y: 20 }, 1)
     const b = criarVoo('ouro', 240, { x: 10, y: 20 }, 2)
-    expect(a!.moedas[0].xm).not.toBe(b!.moedas[0].xm)
+    expect(a!.moedas[0].xc).not.toBe(b!.moedas[0].xc)
   })
 
-  it('as moedas saem PRA CIMA da origem', () => {
-    // Pra baixo elas atravessariam o corpo do POKE e o chao, e a carteira esta
-    // no topo — descer pra depois subir le como hesitacao.
+  it('as moedas caem no CHAO em volta do corpo, nao pra cima (08/10)', () => {
+    // Pedido do dono: o leque subindo na hora do abate cobria os golpes. A
+    // moeda pousa abaixo do centro do corpo (no chao) e espalhada em volta.
     const voo = criarVoo('ouro', 5000, { x: 100, y: 200 }, 3)!
+    let esquerda = false, direita = false
     for (const m of voo.moedas) {
-      expect(m.ym, 'moeda espalhou pra baixo da origem').toBeLessThan(m.y0)
+      // Anel ACHATADO no chao (camera 3/4): a moeda de tras fica mais alta na
+      // tela, mas nunca mais longe do pe que o raio achatado.
+      const pe = m.y0 + 8
+      expect(Math.abs(m.yc - pe), 'moeda fora do anel achatado do chao').toBeLessThanOrEqual(28 * 0.45 + 1e-9)
+      if (m.xc < m.x0) esquerda = true
+      if (m.xc > m.x0) direita = true
     }
+    expect(esquerda && direita, 'moedas nao se espalharam pros dois lados').toBe(true)
+  })
+
+  it('fica no chao ate 2 s e so entao voa', () => {
+    const voo = criarVoo('ouro', 240, { x: 0, y: 0 }, 5)!
+    const m = voo.moedas[0]
+    expect(faseDaMoeda(m, QUEDA + 0.01)).toBe('chao')
+    expect(posicaoNoChao(m, QUEDA + 0.01)).toEqual({ x: m.xc, y: m.yc, altura: 0 })
+    expect(faseDaMoeda(m, ESPERA_NO_CHAO - 0.01)).toBe('chao')
+    expect(faseDaMoeda(m, ESPERA_NO_CHAO + 0.01)).toBe('voo')
+    expect(posicaoNoChao(m, ESPERA_NO_CHAO + 0.01)).toBeNull()
+  })
+
+  it('na queda a moeda sai do corpo e pousa no ponto do chao', () => {
+    const voo = criarVoo('ouro', 240, { x: 50, y: 80 }, 6)!
+    const m = voo.moedas[0]
+    const inicio = posicaoNoChao(m, 0)!
+    expect(inicio.x).toBeCloseTo(m.x0)
+    expect(inicio.y - inicio.altura).toBeCloseTo(m.y0)
+    const fim = posicaoNoChao(m, QUEDA)!
+    expect(fim).toEqual({ x: m.xc, y: m.yc, altura: 0 })
   })
 
   it('a moeda chega no destino e depois some', () => {
     const voo = criarVoo('ouro', 240, { x: 0, y: 0 }, 5)!
     const destino = { x: 500, y: 40 }
+    const inicio = { x: 10, y: 300 }
     const m = voo.moedas[0]
 
     // Perto do fim do voo, mas antes de acabar: ja está quase no destino.
-    const quase = posicaoDaMoeda(m, m.atraso + 0.22 + m.duracao * 0.98, destino)
+    const quase = posicaoNoVoo(m, ESPERA_NO_CHAO + m.duracao * 0.98, inicio, destino)
     expect(quase).not.toBeNull()
     expect(Math.abs(quase!.x - destino.x)).toBeLessThan(20)
     expect(quase!.escala, 'devia estar encolhendo na chegada').toBeLessThan(1)
 
     // Passado o fim, nao existe mais.
-    expect(posicaoDaMoeda(m, m.atraso + 0.22 + m.duracao + 0.01, destino)).toBeNull()
+    expect(posicaoNoVoo(m, ESPERA_NO_CHAO + m.duracao + 0.01, inicio, destino)).toBeNull()
+    expect(faseDaMoeda(m, ESPERA_NO_CHAO + m.duracao + 0.01)).toBe('fim')
   })
 
   it('a moeda nao existe antes do proprio atraso', () => {
     const voo = criarVoo('ouro', 5000, { x: 0, y: 0 }, 9)!
     const ultima = voo.moedas[voo.moedas.length - 1]
     expect(ultima.atraso).toBeGreaterThan(0)
-    expect(posicaoDaMoeda(ultima, -0.01, { x: 1, y: 1 })).toBeNull()
+    expect(posicaoNoChao(ultima, -0.01)).toBeNull()
   })
 
   it('o voo so termina quando a ULTIMA moeda chega', () => {
