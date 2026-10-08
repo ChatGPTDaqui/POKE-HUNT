@@ -171,7 +171,16 @@ function renderizar(world: WorldState) {
     getContext: () => espiao.ctx,
     getBoundingClientRect: () => ({ left: 0, top: 0, width: 390, height: 844 }),
   } as unknown as HTMLCanvasElement
-  new Renderer(canvas).renderMap(world.mapDef!, world)
+  const renderer = new Renderer(canvas)
+  renderer.renderMap(world.mapDef!, world)
+  // A sombra do TREINADOR (08/10) e elipse no chao tambem, mas nao e marca de
+  // combate: ele fica em campo mesmo com o POKE derrubado. Sai da contagem.
+  const pe = renderer.treinador.pe
+  if (pe) {
+    const semSombra = espiao.elipses.filter((e) => !(e.x === pe.x && e.y === pe.y))
+    espiao.elipses.length = 0
+    espiao.elipses.push(...semSombra)
+  }
   return espiao
 }
 

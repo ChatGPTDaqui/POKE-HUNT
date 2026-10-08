@@ -28,6 +28,7 @@ import type { MapDef } from '@/data/maps'
 import { iniciarQuadroDeVfx } from './vfx/orcamento'
 import { novoQuadroDoPixelizador } from './vfx/pixelizador'
 import { desenharMoedasNoChao } from './vooDeRecompensa'
+import { TreinadorEmCampo } from './treinadorEmCampo'
 
 // Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
 // salaSystem.ts) mas ate 2026-08-15 o FUNDO ficava parado no do bioma inteiro
@@ -77,6 +78,10 @@ export class Renderer {
   width: number
   height: number
   zoom: number
+  /** Relogio do quadro anterior (ms), pra animacao do treinador em campo. */
+  private ultimoQuadro = 0
+  /** O boneco do treinador que anda atras do POKE (08/10). Um por cena. */
+  readonly treinador = new TreinadorEmCampo()
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -356,6 +361,17 @@ export class Renderer {
       }
     }
 
+    // TREINADOR (08/10): anda atras do POKE, 2 quadrados de espaco. Segue o
+    // POKE do mundo mesmo desmaiado ou saindo da bola — quem some e o POKE, nao
+    // o treinador. Ordem de profundidade pelo pe: mais acima na tela fica atras.
+    const agora = typeof performance !== 'undefined' ? performance.now() : 0
+    const dtDoTreinador = this.ultimoQuadro ? Math.min(0.1, (agora - this.ultimoQuadro) / 1000) : 0
+    this.ultimoQuadro = agora
+    this.treinador.atualizar(world.player, dtDoTreinador)
+    const peDoTreinadorAgora = this.treinador.pe
+    const treinadorAtras = !!peDoTreinadorAgora && (!jogadorVivo || peDoTreinadorAgora.y <= jogadorVivo.y + 8)
+    if (treinadorAtras) this.treinador.desenhar(ctx)
+
     if (jogadorVivo) {
       drawEntity(ctx, jogadorVivo)
       // SEM PORCENTAGEM NO MEU PROPRIO POKE (PH-281), a pedido do usuario. O
@@ -369,6 +385,7 @@ export class Renderer {
       drawHpBar(ctx, jogadorVivo)
       drawNameLevelTag(ctx, jogadorVivo)
     }
+    if (peDoTreinadorAgora && !treinadorAtras) this.treinador.desenhar(ctx)
 
     // Segunda passada de layout do texto flutuante (PH-189): a raia que o motor
     // reserva e por DONO e nao mede texto — ela nao sabe nada de dois POKE
