@@ -14,7 +14,7 @@
 // a nota original ja mencionava ("dois desenhos no mesmo tick, ex.
 // StrictMode double-invoke, podem corromper a posicao").
 import {
-  drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
+  drawEntity, drawCorpoPorCima, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
   drawMarcaDoAlvo, drawMarcaDoJogador, planejarTextoDeCombate,
 } from './sprites'
 import { desenharAmbiente } from './ambiente'
@@ -27,6 +27,8 @@ import { arteParaSala, backgroundParaSala } from '@/data/maps'
 import type { MapDef } from '@/data/maps'
 import { iniciarQuadroDeVfx } from './vfx/orcamento'
 import { novoQuadroDoPixelizador } from './vfx/pixelizador'
+import { desenharMoedasNoChao } from './vooDeRecompensa'
+import { TreinadorEmCampo } from './treinadorEmCampo'
 
 // Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
 // salaSystem.ts) mas ate 2026-08-15 o FUNDO ficava parado no do bioma inteiro
@@ -76,6 +78,10 @@ export class Renderer {
   width: number
   height: number
   zoom: number
+  /** Relogio do quadro anterior (ms), pra animacao do treinador em campo. */
+  private ultimoQuadro = 0
+  /** O boneco do treinador que anda atras do POKE (08/10). Um por cena. */
+  readonly treinador = new TreinadorEmCampo()
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -337,6 +343,9 @@ export class Renderer {
       const alvo = world.enemies.find((e) => e.id === idDoAlvo)
       if (alvo && alvo.poke.hp > 0) drawMarcaDoAlvo(ctx, alvo)
     }
+    // Ouro e XP do abate caidos no chao (08/10): tambem sao CHAO, e quem anda
+    // por cima deles os cobre. Sobem pra carteira 2 s depois, na camada de VFX.
+    desenharMoedasNoChao(ctx)
 
     // PH-236: tipo do protetor (Guardian/Lord) vem da sala, nao da entidade
     // — `entity.isProtetor` so marca QUE e protetor. Resolvido uma vez por
@@ -352,6 +361,17 @@ export class Renderer {
       }
     }
 
+    // TREINADOR (08/10): anda atras do POKE, 2 quadrados de espaco. Segue o
+    // POKE do mundo mesmo desmaiado ou saindo da bola — quem some e o POKE, nao
+    // o treinador. Ordem de profundidade pelo pe: mais acima na tela fica atras.
+    const agora = typeof performance !== 'undefined' ? performance.now() : 0
+    const dtDoTreinador = this.ultimoQuadro ? Math.min(0.1, (agora - this.ultimoQuadro) / 1000) : 0
+    this.ultimoQuadro = agora
+    this.treinador.atualizar(world.player, dtDoTreinador)
+    const peDoTreinadorAgora = this.treinador.pe
+    const treinadorAtras = !!peDoTreinadorAgora && (!jogadorVivo || peDoTreinadorAgora.y <= jogadorVivo.y + 8)
+    if (treinadorAtras) this.treinador.desenhar(ctx)
+
     if (jogadorVivo) {
       drawEntity(ctx, jogadorVivo)
       // SEM PORCENTAGEM NO MEU PROPRIO POKE (PH-281), a pedido do usuario. O
@@ -365,6 +385,7 @@ export class Renderer {
       drawHpBar(ctx, jogadorVivo)
       drawNameLevelTag(ctx, jogadorVivo)
     }
+    if (peDoTreinadorAgora && !treinadorAtras) this.treinador.desenhar(ctx)
 
     // Segunda passada de layout do texto flutuante (PH-189): a raia que o motor
     // reserva e por DONO e nao mede texto — ela nao sabe nada de dois POKE
@@ -377,6 +398,17 @@ export class Renderer {
     }
     // "Vai X!!" (PH-552) por cima da bola que esta se abrindo.
     drawBalaoDaAbertura(ctx, world)
+
+    // O CORPO TEM PRIORIDADE DE VISAO (08/10, pedido do dono): o que cobriu um
+    // POKE (golpe, numero, nome, barra do vizinho) fica semitransparente SO na
+    // parte que cobre o corpo. Redesenhar o sprite por cima com alfa parcial faz
+    // exatamente isso: onde nada cobre, sprite sobre o mesmo sprite nao muda
+    // pixel; onde algo cobre, o corpo aparece atraves dele. Antes do clima da
+    // frente, que tinge a cena inteira — o corpo tambem leva a tinta.
+    for (const enemy of world.enemies) {
+      if (!enemy.nascendo) drawCorpoPorCima(ctx, enemy)
+    }
+    if (jogadorVivo) drawCorpoPorCima(ctx, jogadorVivo)
 
     // Clima na FRENTE de tudo (PH-141): a passagem rasante, o filtro de cor, a
     // vinheta e o relampago. Depois dos efeitos de golpe de proposito — o

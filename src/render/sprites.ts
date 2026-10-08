@@ -368,7 +368,9 @@ function drawTintaDeStatus(
   off.fillRect(0, 0, frame.sw, frame.sh)
 
   ctx.save()
-  ctx.globalAlpha = FORCA_DA_TINTA_DE_STATUS
+  // Multiplica, e nao substitui: na passada do corpo por cima (alfa parcial) a
+  // tinta tem que vir na MESMA proporcao, senao o corpo saia tingido duas vezes.
+  ctx.globalAlpha *= FORCA_DA_TINTA_DE_STATUS
   ctx.imageSmoothingEnabled = false
   ctx.drawImage(canvasDeTinta, 0, 0, frame.sw, frame.sh, bounds.x, bounds.y, bounds.w, bounds.h)
   ctx.restore()
@@ -510,6 +512,25 @@ export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
   // colorida mesmo com a arte ja em cache.
   if (!drewSprite && !hasBattleSprites(getSpecies(entity).id)) drawPlaceholderShape(ctx, entity)
   drawVfxSobreCorpo(ctx, entity)
+}
+
+/**
+ * Quanto do corpo aparece ATRAVES do que o cobre (08/10). 0,55: o golpe por cima
+ * ainda le como golpe, e o POKE embaixo dele nao some. Ver o call site em
+ * renderer.ts#renderMap.
+ */
+export const ALFA_DO_CORPO_POR_CIMA = 0.55
+
+/**
+ * Redesenha SO o sprite do POKE (sem sombra, aura ou marca) com alfa parcial,
+ * depois de tudo que pode cobri-lo. Sprite sobre o mesmo sprite nao muda pixel
+ * onde nada cobriu; onde algo cobriu, aquilo fica semitransparente sobre o corpo.
+ */
+export function drawCorpoPorCima(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+  ctx.save()
+  ctx.globalAlpha = ALFA_DO_CORPO_POR_CIMA
+  drawBattleSprite(ctx, entity)
+  ctx.restore()
 }
 
 // --- quem sou eu, e em quem estou batendo (PH-189) ---------------------------

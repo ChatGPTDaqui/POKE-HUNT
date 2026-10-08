@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Campo de batalha mais limpo: moedas no chao, corpo por cima e o treinador.
+  {
+    version: '7.83',
+    date: '2026-10-08',
+    title: 'Seu treinador em campo',
+    highlights: [
+      'Agora o seu treinador anda atrás do POKE pelo campo, de boné vermelho e colete azul.',
+      'O ouro e a experiência do inimigo derrotado caem no chão em volta dele e só sobem para o cabeçalho depois de 2 segundos, sem cobrir os golpes.',
+      'Os POKE em campo ficam sempre visíveis: golpes, nomes e números que passam por cima deles ficam transparentes sobre o corpo.',
+    ],
+  },
   {
     version: '7.82',
     date: '2026-10-03',
