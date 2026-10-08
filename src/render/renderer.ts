@@ -14,7 +14,7 @@
 // a nota original ja mencionava ("dois desenhos no mesmo tick, ex.
 // StrictMode double-invoke, podem corromper a posicao").
 import {
-  drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
+  drawEntity, drawCorpoPorCima, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
   drawMarcaDoAlvo, drawMarcaDoJogador, planejarTextoDeCombate,
 } from './sprites'
 import { desenharAmbiente } from './ambiente'
@@ -381,6 +381,17 @@ export class Renderer {
     }
     // "Vai X!!" (PH-552) por cima da bola que esta se abrindo.
     drawBalaoDaAbertura(ctx, world)
+
+    // O CORPO TEM PRIORIDADE DE VISAO (08/10, pedido do dono): o que cobriu um
+    // POKE (golpe, numero, nome, barra do vizinho) fica semitransparente SO na
+    // parte que cobre o corpo. Redesenhar o sprite por cima com alfa parcial faz
+    // exatamente isso: onde nada cobre, sprite sobre o mesmo sprite nao muda
+    // pixel; onde algo cobre, o corpo aparece atraves dele. Antes do clima da
+    // frente, que tinge a cena inteira — o corpo tambem leva a tinta.
+    for (const enemy of world.enemies) {
+      if (!enemy.nascendo) drawCorpoPorCima(ctx, enemy)
+    }
+    if (jogadorVivo) drawCorpoPorCima(ctx, jogadorVivo)
 
     // Clima na FRENTE de tudo (PH-141): a passagem rasante, o filtro de cor, a
     // vinheta e o relampago. Depois dos efeitos de golpe de proposito — o
