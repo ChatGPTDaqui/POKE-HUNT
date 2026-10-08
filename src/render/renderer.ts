@@ -27,6 +27,7 @@ import { arteParaSala, backgroundParaSala } from '@/data/maps'
 import type { MapDef } from '@/data/maps'
 import { iniciarQuadroDeVfx } from './vfx/orcamento'
 import { novoQuadroDoPixelizador } from './vfx/pixelizador'
+import { desenharMoedasNoChao } from './vooDeRecompensa'
 
 // Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
 // salaSystem.ts) mas ate 2026-08-15 o FUNDO ficava parado no do bioma inteiro
@@ -337,6 +338,9 @@ export class Renderer {
       const alvo = world.enemies.find((e) => e.id === idDoAlvo)
       if (alvo && alvo.poke.hp > 0) drawMarcaDoAlvo(ctx, alvo)
     }
+    // Ouro e XP do abate caidos no chao (08/10): tambem sao CHAO, e quem anda
+    // por cima deles os cobre. Sobem pra carteira 2 s depois, na camada de VFX.
+    desenharMoedasNoChao(ctx)
 
     // PH-236: tipo do protetor (Guardian/Lord) vem da sala, nao da entidade
     // — `entity.isProtetor` so marca QUE e protetor. Resolvido uma vez por
