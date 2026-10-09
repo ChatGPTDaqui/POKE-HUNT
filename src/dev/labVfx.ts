@@ -35,6 +35,9 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { NEVOAS_EM_AREA_POR_GOLPE, NEVOAS_POR_GOLPE } from '@/render/vfx/coreografias/nevoas'
+import { SOPROS_POR_GOLPE } from '@/render/vfx/coreografias/sopros'
+import { PEDRAS_EM_AREA_POR_GOLPE, PEDRAS_POR_GOLPE } from '@/render/vfx/coreografias/pedras'
 import { RAJADAS_POR_GOLPE } from '@/render/vfx/coreografias/rajadas'
 import { ESFERAS_POR_GOLPE } from '@/render/vfx/coreografias/esferas'
 import { LUTA_EM_AREA_POR_GOLPE, LUTA_POR_GOLPE } from '@/render/vfx/coreografias/lutaCorpo'
@@ -207,6 +210,11 @@ familiaNoLab('Luta corporal', LUTA_POR_GOLPE, { 'double_slap': 'jynx', 'wake_up_
 familiaNoLab('Luta corporal', LUTA_EM_AREA_POR_GOLPE, { brutal_swing: 'umbreon' }, true)
 familiaNoLab('Esfera', ESFERAS_POR_GOLPE, { 'energy_ball': 'bulbasaur', 'aura_sphere': 'machop', 'focus_blast': 'machop', 'electro_ball': 'pikachu', 'weather_ball': 'eevee', 'mist_ball': 'espeon', 'luster_purge': 'espeon', 'seed_bomb': 'bulbasaur', 'egg_bomb': 'snorlax', 'mud_bomb': 'sandshrew', 'octazooka': 'squirtle', 'vacuum_wave': 'machop' })
 familiaNoLab('Rajada', RAJADAS_POR_GOLPE, { 'bullet_seed': 'bulbasaur', 'rock_blast': 'geodude', 'spike_cannon': 'jynx', 'icicle_spear': 'jynx', 'barrage': 'snorlax', 'bone_rush': 'cubone', 'fling': 'umbreon', 'present': 'jynx', 'hidden_power': 'eevee', 'pay_day': 'meowth', 'bonemerang': 'cubone', 'bone_club': 'cubone' })
+familiaNoLab('Pedra', PEDRAS_POR_GOLPE, { 'smack_down': 'geodude', 'ancient_power': 'geodude', 'avalanche': 'jynx' })
+familiaNoLab('Pedra', PEDRAS_EM_AREA_POR_GOLPE, { precipice_blades: 'sandshrew' }, true)
+familiaNoLab('Sopro', SOPROS_POR_GOLPE, { 'brine': 'squirtle', 'frost_breath': 'jynx', 'acid_spray': 'ekans', 'belch': 'snorlax', 'dragon_rage': 'dratini' })
+familiaNoLab('Névoa', NEVOAS_POR_GOLPE, { 'smog': 'ekans', 'clear_smog': 'ekans', 'venoshock': 'ekans', 'astonish': 'gengar', 'hex': 'gengar', 'night_shade': 'gengar', 'ominous_wind': 'gengar', 'silver_wind': 'scyther' })
+familiaNoLab('Névoa', NEVOAS_EM_AREA_POR_GOLPE, { powder_snow: 'jynx' }, true)
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

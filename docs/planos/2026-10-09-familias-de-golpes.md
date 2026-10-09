@@ -495,3 +495,38 @@ Spit Up e Trump Card ficam de fora (nunca disparam).
 | Pay Day | arremessa moedas; dá dinheiro | chuva de moedas de ouro girando que quicam e brilham |
 | Bonemerang | osso vai e volta, acerta duas vezes | bumerangue de osso contorna o alvo e acerta de novo voltando |
 | Bone Club | porrete de osso; pode fazer recuar | osso erguido e baixado na cabeça; linhas de susto |
+
+### 18. Pedra e cristal — `coreografias/pedras.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Smack Down | arremessa uma pedra; quem voa cai no chão | pedra em arco; linhas de queda e poeira: o alvo foi derrubado |
+| Ancient Power | poder pré-histórico; pode subir todos os status | pedras antigas com contorno brilhante orbitam e voam; setas de cinco cores |
+| Avalanche | dobra se foi ferido no turno | blocos de neve despencam de cima e soterram o alvo |
+| Precipice Blades (área) | o poder da terra em lâminas de pedra | rachaduras de lava pelo interior e lâminas de pedra brotando de dentro pra fora |
+
+### 19. Jato e sopro — `coreografias/sopros.ts`
+
+Os demais jatos (Ember, Flamethrower, Water Gun, Scald, Hydro Pump, Sludge...) são golpes-vitrine do tipo.
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Brine | dobra com HP do alvo pela metade | jato d'água com cristais de sal que grudam e cintilam |
+| Frost Breath | bafo gelado; sempre crítico | nuvem gelada da boca, cristais e brilho de crítico |
+| Acid Spray | cuspe que derrete; Sp. Def cai muito | cusparadas em arco; o ácido chia com bolhas; duas setas pra baixo |
+| Belch | arroto danoso | quem ataca incha e solta anéis grossos de gás esverdeado |
+| Dragon Rage | onda de fúria pura; sempre 40 de dano | olhos de raiva na boca; chama azul em onda (S) |
+
+### 20. Nuvem, pó e assombração — `coreografias/nevoas.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Smog | descarga de gases imundos | baforadas roxo-cinzentas encobrem o alvo; bolhas de veneno |
+| Clear Smog | bolo de lama especial; zera os status | lama estoura em névoa branca e as setas de status do alvo somem |
+| Venoshock | encharca em líquido venenoso | onda roxa cai de cima, pinga e faz poça |
+| Astonish | grita de um jeito assustador | cara de fantasma "BUU!" salta do lado do alvo; linhas de susto |
+| Hex | dano enorme em alvo com status | círculo de feitiço com olho no chão; chamas roxas sobem |
+| Night Shade | miragem assustadora | sombra gigante de olhos vermelhos se ergue atrás do alvo |
+| Ominous Wind | vento repulsivo; pode subir todos os status | rajada roxa com fantasminhas; setas de cinco cores |
+| Silver Wind | escamas em pó levadas pelo vento | vento prateado com escamas cintilantes; setas de cinco cores |
+| Powder Snow (área) | rajada de neve em pó; pode congelar | flocos rodopiando por toda a área, do centro pra borda |

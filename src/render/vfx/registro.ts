@@ -40,6 +40,9 @@ import { DRAGAO_AREA, DRAGAO_SINGLE } from './coreografias/dragao'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 import { SOCOS_POR_GOLPE } from './coreografias/socos'
 import { BEAMS_POR_GOLPE } from './coreografias/beams'
+import { NEVOAS_EM_AREA_POR_GOLPE, NEVOAS_POR_GOLPE } from './coreografias/nevoas'
+import { SOPROS_POR_GOLPE } from './coreografias/sopros'
+import { PEDRAS_EM_AREA_POR_GOLPE, PEDRAS_POR_GOLPE } from './coreografias/pedras'
 import { RAJADAS_POR_GOLPE } from './coreografias/rajadas'
 import { ESFERAS_POR_GOLPE } from './coreografias/esferas'
 import { LUTA_EM_AREA_POR_GOLPE, LUTA_POR_GOLPE } from './coreografias/lutaCorpo'
@@ -119,7 +122,10 @@ export const REGISTRO_POR_GOLPE: Record<string, EntradaDeCoreografia> = {
   ...LUTA_POR_GOLPE,
   ...ESFERAS_POR_GOLPE,
   ...RAJADAS_POR_GOLPE,
+  ...PEDRAS_POR_GOLPE,
+  ...SOPROS_POR_GOLPE,
+  ...NEVOAS_POR_GOLPE,
 }
 export const REGISTRO_POR_GOLPE_DE_AREA: Record<string, EntradaDeCoreografia> = {
-  ...LUTA_EM_AREA_POR_GOLPE,
+  ...LUTA_EM_AREA_POR_GOLPE,  ...PEDRAS_EM_AREA_POR_GOLPE,  ...NEVOAS_EM_AREA_POR_GOLPE,
 }
