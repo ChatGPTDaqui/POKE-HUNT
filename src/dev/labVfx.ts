@@ -35,6 +35,10 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { PUNHOS_PESADOS_POR_GOLPE } from '@/render/vfx/coreografias/punhosPesados'
+import { VENTOS_EM_AREA_POR_GOLPE, VENTOS_POR_GOLPE } from '@/render/vfx/coreografias/ventos'
+import { ONDAS_EM_AREA_POR_GOLPE, ONDAS_POR_GOLPE } from '@/render/vfx/coreografias/ondas'
+import { EXPLOSOES_EM_AREA_POR_GOLPE, EXPLOSOES_POR_GOLPE } from '@/render/vfx/coreografias/explosoes'
 import { LUZES_EM_AREA_POR_GOLPE, LUZES_POR_GOLPE } from '@/render/vfx/coreografias/luzes'
 import { MENTES_POR_GOLPE } from '@/render/vfx/coreografias/mentes'
 import { SONS_EM_AREA_POR_GOLPE, SONS_POR_GOLPE } from '@/render/vfx/coreografias/sons'
@@ -223,6 +227,14 @@ familiaNoLab('Mente', MENTES_POR_GOLPE, { 'extrasensory': 'espeon', 'psyshock': 
 familiaNoLab('Luz', LUZES_POR_GOLPE, { 'nuzzle': 'pikachu', 'tri_attack': 'eevee', 'sacred_fire': 'charmander' })
 familiaNoLab('Som', SONS_EM_AREA_POR_GOLPE, { boomburst: 'jynx' }, true)
 familiaNoLab('Luz', LUZES_EM_AREA_POR_GOLPE, { dazzling_gleam: 'clefairy' }, true)
+familiaNoLab('Explosão', EXPLOSOES_POR_GOLPE, { 'overheat': 'charmander', 'burn_up': 'charmander', 'inferno': 'charmander' })
+familiaNoLab('Onda', ONDAS_POR_GOLPE, { 'grass_knot': 'bulbasaur', 'waterfall': 'squirtle', 'freeze_dry': 'jynx', 'mirror_shot': 'magnemite', 'aeroblast': 'pidgey', 'zap_cannon': 'magnemite' })
+familiaNoLab('Vento', VENTOS_POR_GOLPE, { 'sonic_boom': 'magnemite', 'hurricane': 'pidgey', 'leaf_tornado': 'bulbasaur', 'fire_spin': 'charmander', 'whirlpool': 'squirtle', 'sand_tomb': 'sandshrew', 'infestation': 'scyther', 'absorb': 'bulbasaur', 'mega_drain': 'bulbasaur', 'giga_drain': 'bulbasaur', 'dream_eater': 'espeon' })
+familiaNoLab('Explosão', EXPLOSOES_EM_AREA_POR_GOLPE, { self_destruct: 'geodude', lava_plume: 'charmander', aoe50_fire: 'charmander',
+  aoe50_water: 'squirtle', aoe50_electric: 'pikachu', aoe50_grass: 'bulbasaur', aoe50_normal: 'eevee' }, true)
+familiaNoLab('Onda', ONDAS_EM_AREA_POR_GOLPE, { magnitude: 'sandshrew', muddy_water: 'squirtle', origin_pulse: 'squirtle' }, true)
+familiaNoLab('Vento', VENTOS_EM_AREA_POR_GOLPE, { razor_wind: 'pidgey' }, true)
+familiaNoLab('Soco pesado', PUNHOS_PESADOS_POR_GOLPE, { 'hammer_arm': 'machop', 'meteor_mash': 'magnemite' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

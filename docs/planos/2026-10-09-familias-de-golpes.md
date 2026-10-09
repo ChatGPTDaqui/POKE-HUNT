@@ -564,3 +564,58 @@ Os demais jatos (Ember, Flamethrower, Water Gun, Scald, Hydro Pump, Sludge...) s
 | Tri Attack | três feixes ao mesmo tempo; queima, congela ou paralisa | triângulo em quem ataca; feixes de fogo, gelo e raio convergem |
 | Sacred Fire | fogo místico intenso; pode queimar | pilar de chamas douradas brota do chão e engole o alvo |
 | Dazzling Gleam (área) | clarão poderoso | quem ataca vira estrela que estoura em raios pelo chão; a área toda cintila |
+
+### 24. Explosão + Explosão Elemental do nível 50 — `coreografias/explosoes.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Overheat | força total; Sp. Atk de quem usa cai muito | quem ataca fica branco de calor, solta cone de fogo; fumega e duas setas azuis |
+| Burn Up | queima tudo e deixa de ser tipo Fogo | labaredas enormes até o alvo; no fim o fogo de quem atacou se apaga em fumaça e brasa morta |
+| Inferno | engole o alvo em fogo intenso; sempre queima | anel de chamas se fecha numa fogueira; marquinha de queimadura |
+| Self-Destruct (área) | explode e desmaia | quem ataca pisca e incha; cúpula de explosão cobre a área; espiral de desmaio |
+| Lava Plume (área) | inferno de chamas escarlates em volta | jatos de lava brotam do chão pela área cuspindo gotas incandescentes |
+| Explosão Elemental (área, nível 50: Fogo, Água, Elétrico, Grama, Normal) | conteúdo do jogo: o elemento explode de quem ataca | frente de onda do tipo varre do centro à borda e deixa o elemento no interior (chamas, gotas, raios, folhas, estalos) |
+
+### 25. Tremor, onda e feixe — `coreografias/ondas.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Grass Knot | laça o alvo com capim e o derruba | laço de capim brota no pé do alvo, vira nó; tropeço com poeira |
+| Waterfall | investe e pode fazer recuar | coluna de água despenca do alto no alvo |
+| Freeze-Dry | resfria o alvo de repente | gotas em volta viram gelo no ar; casca de gelo fecha e trinca |
+| Mirror Shot | flash do corpo polido; pode cegar | reflexo corre pelo corpo; flash prateado; estrelinhas de ofuscado |
+| Aeroblast | vórtice de ar; crítico fácil | túnel de vento em espiral avançando; brilho de crítico |
+| Zap Cannon | rajada elétrica como canhão; paralisa | carga na boca do canhão; bola lenta e pesada com raios; estática presa |
+| Magnitude (área) | tremor de força variável | medidor de 4 a 10 barras sorteado; anéis e rachaduras seguem o nível |
+| Muddy Water (área) | jato de água lamacenta; pode cegar | onda de lama marrom em leque pela área, manchas no chão |
+| Origin Pulse (área) | incontáveis feixes de luz azul-profundo | feixes azuis saem de quem ataca e atingem cada ponto da área |
+
+### 26. Vento, vórtice e dreno — `coreografias/ventos.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Sonic Boom | onda de choque; sempre 20 de dano | cone de vapor estoura na frente; crescente de choque corre até o alvo |
+| Hurricane | vento feroz enrola o alvo e sobe ao céu; confunde | coluna de vento alta enroscada no alvo; estrelinhas de confusão |
+| Leaf Tornado | cerca o alvo de folhas afiadas | anel de folhas girando baixo em volta do alvo |
+| Fire Spin | prende num vórtice de fogo por turnos | funil de chamas girando em volta do alvo |
+| Whirlpool | prende num redemoinho d'água | espiral d'água no chão subindo pelas bordas |
+| Sand Tomb | prende numa tempestade de areia | cone de grãos de areia girando |
+| Infestation | infesta o alvo; ele não foge | enxame de bichinhos de asinha zumbindo em volta |
+| Absorb / Mega Drain / Giga Drain | drena nutrientes e cura metade | gotas de vida voltam a quem ataca: 2 → 4 com brilho → rio de 8 com aura de cura |
+| Dream Eater | come o sonho do alvo adormecido | balão de sonho (estrela e lua) sobe, voa até quem ataca e é mordido |
+| Razor Wind (área) | dois turnos: lâminas de vento no segundo | vento se enrola em quem ataca; dezenas de lâminas em crescente varrem a área |
+
+### 27. Soco (Hammer Arm e Meteor Mash) — `coreografias/punhosPesados.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Hammer Arm | punho pesado como martelo; a Speed de quem usa cai | punho sobe, gira por cima e desce como marreta; chão afunda; seta azul |
+| Meteor Mash | soco disparado como meteoro; pode subir o Ataque | punho de aço sobe, cai do céu com cauda de fogo; estilhaços; seta vermelha |
+
+## Fechamento (09/10)
+
+`src/render/vfx/coberturaDeGolpes.test.ts` trava a meta: todo golpe de dano
+que o motor dispara tem efeito próprio (registro por golpe, single ou área) ou
+é o golpe-vitrine do tipo/tier; Bullet Punch é a exceção pedida pelo dono.
+Custo dos golpes de área na cena do lab (p95): 2,9–5,8 ms, contra 6,2 ms do
+Petal Blizzard e 23,2 ms do Eruption no mesmo lote.
