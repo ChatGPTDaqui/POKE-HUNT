@@ -104,7 +104,9 @@ function soMaior(px) {
 }
 // Pose EM PE: tronco/cabeca do quadro; pernas redesenhadas retas. A cor de cada
 // linha da perna vem da perna APOIADA do proprio quadro (pele, meia, bota...).
-function emPe(px, vista, olha) {
+// `subir`: tronco 1 px acima e perna 1 px mais longa — o quadro NEUTRO da
+// caminhada do PMD (pernas se cruzando, corpo no alto do balanco).
+function emPe(px, vista, olha, subir = false) {
   const ymin = Math.min(...px.map(p => p.y)), Hh = -ymin, hipY = -Math.round((cfg.quadril || 0.28) * Hh)
   const tronco = px.filter(p => p.y >= hipY - 3 && p.y <= hipY)
   const hx = Math.round(tronco.reduce((a, p) => a + p.x, 0) / tronco.length)
@@ -123,10 +125,12 @@ function emPe(px, vista, olha) {
     corDaLinha[y] = ultima
   }
   const m = new Map()
-  for (const p of px) { if (p.y > hipY + 2) continue; if (p.y > hipY && Math.abs(p.x - hx) <= 5) continue; m.set(p.x + ',' + p.y, p) }
+  const dy = subir ? -1 : 0
+  for (const p of px) { if (p.y > hipY + 2) continue; if (p.y > hipY && Math.abs(p.x - hx) <= 5) continue; m.set(p.x + ',' + (p.y + dy), { ...p, y: p.y + dy }) }
+  if (subir) corDaLinha[hipY] = corDaLinha[hipY + 1]
   const pinta = (x, y, rgb) => m.set(x + ',' + y, { x, y, rgb })
   const perna = (x0, x1, bico) => {
-    for (let y = hipY + 1; y <= -1; y++) {
+    for (let y = hipY + 1 + dy; y <= -1; y++) {
       const sapato = y >= -2; const e = x0 - 1 - (sapato && bico < 0 ? 1 : 0), d = x1 + 1 + (sapato && bico > 0 ? 1 : 0)
       for (let x = e; x <= d; x++) pinta(x, y, (x === e || x === d || y === -1) ? contorno : corDaLinha[y])
     }
@@ -145,7 +149,6 @@ function folha(nq, fn) {
   return o
 }
 fs.mkdirSync(cfg.saida, { recursive: true })
-fs.writeFileSync(path.join(cfg.saida, 'Walk-Anim.png'), PNG.sync.write(folha(4, (lin, q) => red[MAPA[lin][0] + ',' + q])))
 const idleQ = {}
 for (let r = 0; r < NL; r++) {
   let bq = 0, bw = 1e9
@@ -155,6 +158,24 @@ for (let r = 0; r < NL; r++) {
   }
   idleQ[r] = bq
 }
+// Caminhada no ciclo do PMD (conferido no Machoke do SpriteCollab, AnimData
+// 8/10/8/10): NEUTRO, PASSO, NEUTRO, PASSO. O neutro e a pose em pe com o
+// corpo 1 px acima (o balanco do andar); os passos sao os 2 quadros da arte com
+// as pernas mais abertas (pe trocado). A arte da IA traz 4 passos sem neutro e sem balanco,
+// e as pernas "pedalavam" sem ritmo.
+const abertura = px => { const ymin = Math.min(...px.map(p => p.y)); const pes = px.filter(p => p.y > ymin * 0.25); return Math.max(...pes.map(p => p.x)) - Math.min(...pes.map(p => p.x)) }
+const passos = {}
+// Passos opostos (pe esquerdo/direito a frente) ficam a 2 quadros de distancia
+// no ciclo da arte: o par e (0,2) ou (1,3), o mais aberto dos dois.
+for (let r = 0; r < NL; r++) {
+  const ab = q => abertura(red[r + ',' + q])
+  passos[r] = ab(0) + ab(2) >= ab(1) + ab(3) ? [0, 2] : [1, 3]
+}
+fs.writeFileSync(path.join(cfg.saida, 'Walk-Anim.png'), PNG.sync.write(folha(4, (lin, q) => {
+  const [sr, esp] = MAPA[lin]; const lado = lin === 2 || lin === 6
+  if (q % 2 === 1) return red[sr + ',' + passos[sr][q === 1 ? 0 : 1]]
+  return emPe(red[sr + ',' + idleQ[sr]], lado ? 'lado' : 'frente', (lin === 2 ? 1 : -1) * (esp ? -1 : 1), true)
+})))
 fs.writeFileSync(path.join(cfg.saida, 'Idle-Anim.png'), PNG.sync.write(folha(2, (lin, q) => {
   const [sr, esp] = MAPA[lin]; const lado = lin === 2 || lin === 6
   const olha = (lin === 2 ? 1 : -1) * (esp ? -1 : 1)
@@ -177,4 +198,4 @@ for (let y = 0; y < o.height; y++) for (let x = 0; x < o.width; x++) {
   o.data[j + 3] = 255
 }
 fs.writeFileSync(cfg.saida + '-previa.png', PNG.sync.write(o))
-console.log('ok', cfg.saida, JSON.stringify(idleQ))
+console.log('ok', cfg.saida, 'idle', JSON.stringify(idleQ), 'passos', JSON.stringify(passos))
