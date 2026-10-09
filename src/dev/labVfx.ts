@@ -36,6 +36,7 @@ import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
 import { INVESTIDAS_POR_GOLPE } from '@/render/vfx/coreografias/investidas'
+import { GARRAS_POR_GOLPE } from '@/render/vfx/coreografias/garras'
 import { tierDoPoder } from '@/data/tierDoVfx'
 import { REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
@@ -169,6 +170,8 @@ familiaNoLab('Investida', INVESTIDAS_POR_GOLPE, { tackle: 'eevee', quick_attack:
   take_down: 'eevee', double_edge: 'eevee', body_slam: 'snorlax', giga_impact: 'snorlax', high_horsepower: 'sandshrew',
   last_resort: 'eevee', retaliate: 'rattata', chip_away: 'rattata', facade: 'rattata', return: 'eevee',
   frustration: 'eevee', strength: 'machop', heavy_slam: 'magnemite', u_turn: 'scyther', acrobatics: 'pidgey' })
+familiaNoLab('Garra', GARRAS_POR_GOLPE, { scratch: 'charmander', fury_swipes: 'meowth', crush_claw: 'sandshrew',
+  metal_claw: 'magnemite', shadow_claw: 'gengar', dragon_claw: 'dratini', false_swipe: 'scyther' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
