@@ -353,3 +353,17 @@ abaixo diz o que a frase vira na tela. A família é só agrupamento de trabalho
 | Flame Wheel | envolve-se em fogo e carrega; pode queimar | anel OCO de línguas de fogo girando |
 | Thrash | surra por 2–3 turnos e depois fica confuso | golpes de vários lados sem ritmo; estrelinhas de tontura em quem atacou |
 | Petal Dance | espalha pétalas por 2–3 turnos e depois fica confuso | redemoinho de pétalas em quem dança que varre o alvo; tontura no fim |
+
+### 10. Some e volta — `coreografias/someEVolta.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Fly | voa alto e ataca no turno seguinte | ave de vento decola de quem ataca soltando penas; mergulha do alto no alvo |
+| Bounce | quica bem alto e cai no alvo; pode paralisar | molas comprimem e lançam uma bola num arco alto; baque e estática no alvo |
+| Sky Drop | leva o alvo para o céu e o solta | ave agarra o alvo com as garras, linhas de subida, sombra do alvo encolhe; queda e baque |
+| Dive | mergulha e sobe atacando no turno seguinte | anel d'água onde quem ataca some; gêiser sobe por baixo do alvo |
+| Dig | cava e ataca no turno seguinte | monte de terra; calombo corre por baixo do chão; erupção sob o alvo |
+| Shadow Sneak | estica a sombra e ataca por trás; sempre primeiro | a sombra se estica pelo chão até o alvo; mão de sombra sobe ATRÁS dele |
+| Brave Bird | asas recolhidas, rasante; se fere bastante | ave de chama clara em rasante; penas no impacto; recuo |
+| Feint Attack | se aproxima desarmado e golpeia de surpresa; nunca erra | brilho "inofensivo" chega até o alvo e o golpe escuro sai pelas costas |
+| Feint | acerta quem usa Protect e quebra a proteção | redoma verde em volta do alvo que o golpe estilhaça |

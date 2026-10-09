@@ -3,7 +3,8 @@
 // Tudo com contorno escuro por baixo e faixas chapadas: o pixelizador encaixa
 // as cores na paleta e o contorno é o que separa o efeito do tileset.
 import { NEUTROS } from '../paletas'
-import { entrada, limitar, saida } from '../primitivas'
+import { entrada, limitar, pontosDeRaio, saida, tracarRaio } from '../primitivas'
+import { rngSemeado } from '../aleatorio'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
 
 export const [ESCURO, BRANCO] = NEUTROS
@@ -133,4 +134,43 @@ export function montarFamilia<P>(perfis: Record<string, P>, o: {
       ...(pele ? { pele } : {}),
     }]
   }))
+}
+
+/**
+ * Setas de mudança de status (↑ sobe, ↓ desce) em volta de alguém — o jeito
+ * do jogo de dizer "a Speed subiu", "a Defesa caiu".
+ */
+export function setasDeStatus(ctx: CanvasRenderingContext2D, p: Ponto, t: number, cor: string, n = 3, desce = false): void {
+  for (let k = 0; k < n; k++) {
+    const u = (t * 1.4 + k / n) % 1, x = p.x + (k - (n - 1) / 2) * 9
+    const y = desce ? p.y - 14 + u * 22 : p.y + 8 - u * 22
+    const s = 3.4 * (1 - entrada(u)), d = desce ? -1 : 1
+    if (s < .5) continue
+    const seta = (S: number, g: number) => [[x, y - d * (S + g)], [x + S + g, y + d * g], [x + S * .4 + g * .6, y + d * g], [x + S * .4 + g * .6, y + d * (S + g)], [x - S * .4 - g * .6, y + d * (S + g)], [x - S * .4 - g * .6, y + d * g], [x - S - g, y + d * g]] as const
+    poligono(ctx, seta(s, 1.4), ESCURO)
+    poligono(ctx, seta(s, 0), cor)
+  }
+}
+
+/** Curva grossa com contorno (cipó, cauda, tentáculo) por pontos, afinando na ponta. */
+export function corda(ctx: CanvasRenderingContext2D, pts: readonly Ponto[], largura: number, pele: Pele, cor = pele.base, luz = pele.meio): void {
+  if (pts.length < 2) return
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+  for (const [w, c] of [[largura + 2.6, pele.contorno], [largura, cor], [largura * .35, luz]] as const) {
+    for (let i = 1; i < pts.length; i++) {
+      const k = 1 - (i / pts.length) * .55
+      ctx.strokeStyle = c; ctx.lineWidth = Math.max(.6, w * k)
+      ctx.beginPath(); ctx.moveTo(pts[i - 1].x, pts[i - 1].y); ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke()
+    }
+  }
+}
+
+/** Estática de paralisia presa no alvo: zigue-zagues curtos que tremem (re-sorteados pela semente). */
+export function estatica(ctx: CanvasRenderingContext2D, alvo: Ponto, k: number, pele: Pele, semente: number): void {
+  if (k <= .1) return
+  for (let i = 0; i < 3; i++) {
+    const r = rngSemeado(semente + i * 7)
+    const a = { x: alvo.x - 9 + i * 9, y: alvo.y - 10 + r() * 4 }
+    tracarRaio(ctx, pontosDeRaio(a, { x: a.x + (r() - .5) * 6, y: a.y + 14 }, 3, 2, r), 1.2 * k, pele)
+  }
 }

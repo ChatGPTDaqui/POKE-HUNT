@@ -35,6 +35,7 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { SOME_E_VOLTA_POR_GOLPE } from '@/render/vfx/coreografias/someEVolta'
 import { INVESTIDAS_POR_GOLPE } from '@/render/vfx/coreografias/investidas'
 import { GARRAS_POR_GOLPE } from '@/render/vfx/coreografias/garras'
 import { LAMINAS_POR_GOLPE } from '@/render/vfx/coreografias/laminas'
@@ -190,6 +191,7 @@ familiaNoLab('Cabeçada', CABECADAS_POR_GOLPE, { skull_bash: 'squirtle', zen_hea
 familiaNoLab('Rolamento', ROLAMENTOS_POR_GOLPE, { rollout: 'geodude', ice_ball: 'jynx', rapid_spin: 'squirtle',
   gyro_ball: 'magnemite', steamroller: 'scyther', flame_wheel: 'charmander' })
 familiaNoLab('Fúria', FURIAS_POR_GOLPE, { thrash: 'snorlax', petal_dance: 'bulbasaur' })
+familiaNoLab('Some e volta', SOME_E_VOLTA_POR_GOLPE, { 'fly': 'pidgey', 'bounce': 'pidgey', 'sky_drop': 'pidgey', 'dive': 'squirtle', 'dig': 'sandshrew', 'shadow_sneak': 'gengar', 'brave_bird': 'pidgey', 'feint_attack': 'umbreon', 'feint': 'eevee' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
