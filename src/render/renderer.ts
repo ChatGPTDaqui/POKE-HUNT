@@ -23,7 +23,7 @@ import { desenharClimaFundo, desenharClimaFrente, familiaDoClima } from './clima
 import { CENA_HOSPITAL, ZOOM_DA_CENA, escalaDoPoke } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
 import { protetorDaSala } from '@/engine/systems/salaSystem'
-import { arteParaSala, backgroundParaSala } from '@/data/maps'
+import { arteParaSala, backgroundParaSala, isCellBlocked } from '@/data/maps'
 import type { MapDef } from '@/data/maps'
 import { iniciarQuadroDeVfx } from './vfx/orcamento'
 import { novoQuadroDoPixelizador } from './vfx/pixelizador'
@@ -374,7 +374,8 @@ export class Renderer {
       this.treinadorRival.parado(dele.pe, dele.olhando, dtDoTreinador)
       for (const t of [this.treinador, this.treinadorRival].sort((a, b) => a.pe!.y - b.pe!.y)) t.desenhar(ctx)
     } else {
-      this.treinador.atualizar(world.player, dtDoTreinador)
+      const mapa = world.mapDef
+      this.treinador.atualizar(world.player, dtDoTreinador, mapa ? (x, y) => isCellBlocked(mapa, x, y) : undefined)
     }
     const peDoTreinadorAgora = arena ? null : this.treinador.pe
     const treinadorAtras = !!peDoTreinadorAgora && (!jogadorVivo || peDoTreinadorAgora.y <= jogadorVivo.y + 8)
