@@ -165,6 +165,8 @@ export function GameCanvas() {
       ultimoQuadro = agora
 
       const world = useWorldStore.getState()
+      // Nome do treinador em cima do boneco que anda atras do POKE (08/10).
+      renderer.treinador.nome = useGameStateStore.getState().trainer.name
       if (world.mapDef) renderer.renderMap(world.mapDef, world)
       else renderer.renderHospital(world.player, enfermeiraEmFoco)
 
