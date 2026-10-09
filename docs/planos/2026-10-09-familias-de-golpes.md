@@ -298,3 +298,20 @@ Um gume limpo em arco (crescente) que atravessa o alvo; estrela atrás do gume.
 | Razor Shell | duas conchas-lâmina cruzando, gotas espirrando |
 | Fury Cutter | três cortes em escada, cada um maior que o anterior |
 | Cross Poison | X roxo, veneno pingando |
+
+### 5. Chute e pisão — `coreografias/chutes.ts`
+
+O pé é uma bota de perfil desenhada na grade (irmã do punho dos socos); muda o caminho.
+
+| Golpe | Meta (personalidade) |
+|---|---|
+| Jump Kick | pé sobe por trás e desce em diagonal no alvo |
+| High Jump Kick | salto mais alto, pé maior, poeira no impacto |
+| Rolling Kick | meia-volta em torno do alvo com rastro em crescente |
+| Triple Kick | um chute por acerto, cada um maior |
+| Low Kick | rasteira na altura das patas, poeira |
+| Low Sweep | rasteira mais larga, poeira |
+| Mega Kick | bota grande, preparo longo, estrela forte |
+| Blaze Kick | bota em chamas, fogo no impacto |
+| Stomp | pé gigante desce de cima com sombra crescendo, poeira |
+| Stomping Tantrum | três pisões emburrados em volta do alvo, rachaduras no chão |
