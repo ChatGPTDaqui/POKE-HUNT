@@ -10,8 +10,14 @@
 // cortando caminho em linha reta, ele atravessaria parede e virava junto com
 // cada meia-volta do POKE.
 //
-// Sprite gerado por scripts/gerar-sprite-do-treinador.mjs no formato das folhas
-// dos POKE (8 linhas de direcao x N quadros).
+// Sprite (08/10): arte enviada pelo dono (folha 4x8, JPEG ampliado ~3,25x com
+// fundo branco), convertida pro formato das folhas dos POKE — 8 linhas de
+// direcao na ordem do PMD x 4 quadros, quadro 32x40, pe na linha 37. Na
+// conversao: fundo tirado por preenchimento a partir da borda (o branco do bone
+// e das mangas fica), reducao por moda de cor em blocos de 3,25 px, paleta de
+// 18 cores. A arte so tinha lados ESQUERDOS (linhas 1, 2 e 4 da original:
+// baixo-esq, esq, cima-esq); os direitos sao espelho. Idle = quadro 0 parado.
+// (A v1/v2 gerada por script, colete azul, saiu junto com o gerador.)
 import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
 
@@ -32,8 +38,8 @@ const PE_NO_QUADRO = 37
 
 interface Anim { url: string; duracoes: number[] }
 const ANIMS: Record<'Walk' | 'Idle', Anim> = {
-  Walk: { url: 'assets/treinadores/campo/colete-azul/Walk-Anim.png', duracoes: [8, 8, 8, 8] },
-  Idle: { url: 'assets/treinadores/campo/colete-azul/Idle-Anim.png', duracoes: [40, 40] },
+  Walk: { url: 'assets/treinadores/campo/bone-vermelho/Walk-Anim.png', duracoes: [8, 8, 8, 8] },
+  Idle: { url: 'assets/treinadores/campo/bone-vermelho/Idle-Anim.png', duracoes: [40, 40] },
 }
 
 const imagens = new Map<string, HTMLImageElement>()
