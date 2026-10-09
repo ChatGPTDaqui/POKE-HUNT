@@ -1,9 +1,11 @@
 // Escolha da skin do treinador em campo (08/10), na secao "Outfit" do Perfil.
 //
 // Cada opcao mostra o boneco parado de frente (quadro 0 da linha "baixo" do
-// Idle). A troca vale na hora: o desenho do campo le a escolha a cada quadro.
+// Idle). A troca vale na hora no campo (cache local); a gravacao no servidor
+// (09/10, pro rival ver no duelo) vai por tras — se falhar, avisa.
 import { SKINS_DO_TREINADOR, folhaDaSkin } from '@/data/skinsDoTreinador'
 import { skinDe, useSkinDoTreinadorStore } from '@/stores/skinDoTreinadorStore'
+import { useToastStore } from '@/stores/toastStore'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -12,7 +14,14 @@ interface Props {
 
 export function SeletorDeSkin({ userId }: Props) {
   const atual = useSkinDoTreinadorStore((s) => skinDe(s.porUsuario, userId))
-  const definir = useSkinDoTreinadorStore((s) => s.definir)
+  const definirMeu = useSkinDoTreinadorStore((s) => s.definirMeu)
+
+  function escolher(id: string) {
+    if (id === atual) return
+    definirMeu(userId, id).catch(() => {
+      useToastStore.getState().pushToast('Skin trocada só neste aparelho: não deu pra salvar no servidor.', 'error', 'world')
+    })
+  }
 
   return (
     <div className="grid grid-cols-5 gap-[.35em]" data-testid="seletor-de-skin">
@@ -23,7 +32,7 @@ export function SeletorDeSkin({ userId }: Props) {
           title={s.nome}
           aria-label={s.nome}
           aria-pressed={atual === s.id}
-          onClick={() => definir(userId, s.id)}
+          onClick={() => escolher(s.id)}
           className={cn(
             'flex flex-col items-center gap-[.15em] rounded-[.5em] border bg-n800 px-[.2em] pb-[.25em] pt-[.35em]',
             atual === s.id ? 'border-gold' : 'border-n700 hover:border-n500',
