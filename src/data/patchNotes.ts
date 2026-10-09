@@ -12,6 +12,15 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Treinador em campo redesenhado.
+  {
+    version: '7.84',
+    date: '2026-10-08',
+    title: 'Treinador de cara nova',
+    highlights: [
+      'O treinador que anda atrás do POKE foi redesenhado: boné com brilho e aba, franja, rosto com olhos e bochechas, colete com zíper dourado e tênis vermelhos.',
+    ],
+  },
   // Campo de batalha mais limpo: moedas no chao, corpo por cima e o treinador.
   {
     version: '7.83',
