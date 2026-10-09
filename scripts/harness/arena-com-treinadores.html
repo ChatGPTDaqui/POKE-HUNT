@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<base href="/" />
+<title>Arena com treinadores</title>
+<!--
+  DUELO DE PVP COM OS DOIS TREINADORES (09/10), DESENHADO PELO PROPRIO JOGO
+
+  Mundo de arena real (`criarMundoArena` + `stepArena`) e o Renderer do jogo.
+  Os treinadores ficam parados atras da bola de cada lado. `?skin=` e
+  `?skinRival=` escolhem as skins; `window.__avancar(seg)` avanca o duelo.
+
+  COMO RODAR
+     npm run dev
+     abrir http://localhost:5173/scripts/harness/arena-com-treinadores.html
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14171a; color: #dfe4ea; font: 12px/1.5 ui-monospace, monospace; }
+  #jogo { width: 960px; height: 600px; margin: 12px; display: block; }
+  #log { margin: 0 12px; white-space: pre; }
+</style>
+</head>
+<body>
+<canvas id="jogo" width="960" height="600"></canvas>
+<p id="log"></p>
+<script type="module">
+import { createRng } from '/src/core/rng.ts'
+import { createPokeInstance } from '/src/data/pokes.ts'
+import { criarMundoArena, stepArena } from '/src/engine/arena.ts'
+import { Renderer } from '/src/render/renderer.ts'
+
+const params = new URLSearchParams(location.search)
+const PASSO = 1 / 60
+const renderer = new Renderer(document.getElementById('jogo'))
+renderer.treinador.nome = params.get('nome') || 'Ash'
+renderer.treinador.skin = params.get('skin') || 'mochila'
+renderer.treinadorRival.nome = params.get('rival') || 'Lance'
+renderer.treinadorRival.skin = params.get('skinRival') || 'lance'
+window.__renderer = renderer
+
+const rng = createRng(3)
+const world = criarMundoArena({
+  semente: 42,
+  meuTime: [createPokeInstance(rng, 'charizard', 50)],
+  rivalTime: [createPokeInstance(rng, 'dragonite', 50)],
+  nomeDoRival: renderer.treinadorRival.nome,
+})
+window.__mundo = world
+
+function tique() {
+  stepArena(world, PASSO)
+  renderer.renderMap(world.mapDef, world)
+  document.getElementById('log').textContent = `resultado ${world.arena.resultado} · ticks ${world.arena.ticks}`
+}
+window.__avancar = (seg) => { for (let i = 0; i < Math.round(seg * 60); i++) tique() }
+let rodando = !params.has('parado')
+window.__pausar = (v) => { rodando = !v }
+function quadro() { if (rodando) tique(); requestAnimationFrame(quadro) }
+quadro()
+</script>
+</body>
+</html>

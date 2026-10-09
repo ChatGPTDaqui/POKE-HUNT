@@ -1,6 +1,6 @@
 // O treinador anda atras do POKE, 2 quadrados de espaco, pelo RASTRO (08/10).
 import { describe, expect, it } from 'vitest'
-import { ESPACO_DO_TREINADOR, TreinadorEmCampo, pontoAtras } from './treinadorEmCampo'
+import { ESPACO_DO_TREINADOR, TreinadorEmCampo, lugarNoDuelo, pontoAtras } from './treinadorEmCampo'
 
 const RAIO = 12
 
@@ -111,5 +111,23 @@ describe('TreinadorEmCampo', () => {
     t.atualizar({ x, y: 100, radius: RAIO, facing: { x: 1, y: 0 } }, 1 / 60)
     expect(t.animacao).toBe('Walk')
     expect(t.quadro % 2).toBe(0)
+  })
+
+  it('duelo de PvP: atras da bola do proprio lado, olhando pro rival, parado e respirando', () => {
+    const meu = lugarNoDuelo({ x: 330, y: 1330 }, { x: 590, y: 1330 })
+    const dele = lugarNoDuelo({ x: 590, y: 1330 }, { x: 330, y: 1330 })
+    expect(meu.pe.x).toBe(330 - ESPACO_DO_TREINADOR)
+    expect(dele.pe.x).toBe(590 + ESPACO_DO_TREINADOR)
+    expect(meu.olhando).toEqual({ x: 1, y: 0 })
+    expect(dele.olhando).toEqual({ x: -1, y: 0 })
+
+    const t = new TreinadorEmCampo()
+    andar(t, { x: 0, y: 100 }, { x: 200, y: 100 })
+    for (let i = 0; i < 200; i++) t.parado(meu.pe, meu.olhando, 1 / 60)
+    expect(t.pe).toEqual(meu.pe)
+    expect(t.animacao).toBe('Idle')
+    // Saindo do duelo, volta pra tras do POKE em vez de atravessar o mapa andando.
+    t.atualizar({ x: 1000, y: 100, radius: RAIO, facing: { x: 1, y: 0 } }, 1 / 60)
+    expect(1000 - t.pe!.x).toBeCloseTo(ESPACO_DO_TREINADOR + RAIO + 6, 0)
   })
 })

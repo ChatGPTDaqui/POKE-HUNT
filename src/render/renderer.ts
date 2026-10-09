@@ -28,7 +28,7 @@ import type { MapDef } from '@/data/maps'
 import { iniciarQuadroDeVfx } from './vfx/orcamento'
 import { novoQuadroDoPixelizador } from './vfx/pixelizador'
 import { desenharMoedasNoChao } from './vooDeRecompensa'
-import { TreinadorEmCampo } from './treinadorEmCampo'
+import { TreinadorEmCampo, lugarNoDuelo } from './treinadorEmCampo'
 
 // Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
 // salaSystem.ts) mas ate 2026-08-15 o FUNDO ficava parado no do bioma inteiro
@@ -82,6 +82,8 @@ export class Renderer {
   private ultimoQuadro = 0
   /** O boneco do treinador que anda atras do POKE (08/10). Um por cena. */
   readonly treinador = new TreinadorEmCampo()
+  /** Treinador do RIVAL no duelo de PvP (09/10); fora da arena nao aparece. */
+  readonly treinadorRival = new TreinadorEmCampo()
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -352,6 +354,31 @@ export class Renderer {
     // frame (barato, `protetorDaSala` e pura) e repassado pra tag decidir o
     // texto.
     const tipoDeProtetorAtual = protetorDaSala(world.sala, world.mapDef?.id ?? '')
+
+    // TREINADOR (08/10): anda atras do POKE, 2 quadrados de espaco. Segue o
+    // POKE do mundo mesmo desmaiado ou saindo da bola — quem some e o POKE, nao
+    // o treinador. Ordem de profundidade pelo pe: mais acima na tela fica atras.
+    //
+    // DUELO DE PVP (09/10): os DOIS treinadores ficam parados atras da bola do
+    // proprio lado, olhando um pro outro, como nos jogos — nao seguem o POKE.
+    // Desenhados antes de todos os corpos: o duelo acontece entre eles, e o
+    // corpo do POKE tem prioridade visual (drawCorpoPorCima).
+    const agora = typeof performance !== 'undefined' ? performance.now() : 0
+    const dtDoTreinador = this.ultimoQuadro ? Math.min(0.1, (agora - this.ultimoQuadro) / 1000) : 0
+    this.ultimoQuadro = agora
+    const arena = world.arena
+    if (arena) {
+      const meu = lugarNoDuelo(arena.meuSpawn, arena.rivalSpawn)
+      const dele = lugarNoDuelo(arena.rivalSpawn, arena.meuSpawn)
+      this.treinador.parado(meu.pe, meu.olhando, dtDoTreinador)
+      this.treinadorRival.parado(dele.pe, dele.olhando, dtDoTreinador)
+      for (const t of [this.treinador, this.treinadorRival].sort((a, b) => a.pe!.y - b.pe!.y)) t.desenhar(ctx)
+    } else {
+      this.treinador.atualizar(world.player, dtDoTreinador)
+    }
+    const peDoTreinadorAgora = arena ? null : this.treinador.pe
+    const treinadorAtras = !!peDoTreinadorAgora && (!jogadorVivo || peDoTreinadorAgora.y <= jogadorVivo.y + 8)
+
     for (const enemy of world.enemies) {
       if (enemy.nascendo) continue
       drawEntity(ctx, enemy)
@@ -361,15 +388,6 @@ export class Renderer {
       }
     }
 
-    // TREINADOR (08/10): anda atras do POKE, 2 quadrados de espaco. Segue o
-    // POKE do mundo mesmo desmaiado ou saindo da bola — quem some e o POKE, nao
-    // o treinador. Ordem de profundidade pelo pe: mais acima na tela fica atras.
-    const agora = typeof performance !== 'undefined' ? performance.now() : 0
-    const dtDoTreinador = this.ultimoQuadro ? Math.min(0.1, (agora - this.ultimoQuadro) / 1000) : 0
-    this.ultimoQuadro = agora
-    this.treinador.atualizar(world.player, dtDoTreinador)
-    const peDoTreinadorAgora = this.treinador.pe
-    const treinadorAtras = !!peDoTreinadorAgora && (!jogadorVivo || peDoTreinadorAgora.y <= jogadorVivo.y + 8)
     if (treinadorAtras) this.treinador.desenhar(ctx)
 
     if (jogadorVivo) {

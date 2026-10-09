@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Treinadores nos duelos de PvP; skin salva na conta.
+  {
+    version: '7.90',
+    date: '2026-10-09',
+    title: 'Treinadores no duelo',
+    highlights: [
+      'Nos duelos de PvP, os dois treinadores aparecem em campo, cada um parado na borda da arena, de frente para o rival e com o nome em cima.',
+      'Você vê a skin que o rival escolheu. Bots ainda sem skin própria aparecem com a padrão — o Lance já vem com a dele.',
+      'A skin do treinador agora fica salva na sua conta, e não só neste aparelho. Quem já tinha escolhido não precisa escolher de novo.',
+    ],
+  },
   // Caminhada do treinador no ciclo do PMD.
   {
     version: '7.89',

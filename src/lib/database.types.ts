@@ -1261,6 +1261,7 @@ export type Database = {
           diamonds: number
           gold: number
           perf_stats: Json
+          skin_treinador: string | null
           trainer_exp: number
           trainer_level: number
           trainer_name: string
@@ -1284,6 +1285,7 @@ export type Database = {
           diamonds?: number
           gold?: number
           perf_stats?: Json
+          skin_treinador?: string | null
           trainer_exp?: number
           trainer_level?: number
           trainer_name?: string
@@ -1307,6 +1309,7 @@ export type Database = {
           diamonds?: number
           gold?: number
           perf_stats?: Json
+          skin_treinador?: string | null
           trainer_exp?: number
           trainer_level?: number
           trainer_name?: string
@@ -2535,6 +2538,7 @@ export type Database = {
         Row: {
           avatar: string | null
           eh_bot: boolean | null
+          skin_treinador: string | null
           trainer_exp: number | null
           trainer_level: number | null
           trainer_name: string | null
@@ -2543,6 +2547,7 @@ export type Database = {
         Insert: {
           avatar?: string | null
           eh_bot?: never
+          skin_treinador?: string | null
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
@@ -2551,6 +2556,7 @@ export type Database = {
         Update: {
           avatar?: string | null
           eh_bot?: never
+          skin_treinador?: string | null
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
@@ -3025,6 +3031,7 @@ export type Database = {
         Returns: Json
       }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
+      definir_skin_treinador: { Args: { p_skin: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       desconfirmar_troca: {
@@ -4823,6 +4830,7 @@ export type Database = {
           diamonds: number
           gold: number
           perf_stats: Json
+          skin_treinador: string | null
           trainer_exp: number
           trainer_level: number
           trainer_name: string
@@ -4846,6 +4854,7 @@ export type Database = {
           diamonds?: number
           gold?: number
           perf_stats?: Json
+          skin_treinador?: string | null
           trainer_exp?: number
           trainer_level?: number
           trainer_name?: string
@@ -4869,6 +4878,7 @@ export type Database = {
           diamonds?: number
           gold?: number
           perf_stats?: Json
+          skin_treinador?: string | null
           trainer_exp?: number
           trainer_level?: number
           trainer_name?: string
@@ -6097,6 +6107,7 @@ export type Database = {
         Row: {
           avatar: string | null
           eh_bot: boolean | null
+          skin_treinador: string | null
           trainer_exp: number | null
           trainer_level: number | null
           trainer_name: string | null
@@ -6105,6 +6116,7 @@ export type Database = {
         Insert: {
           avatar?: string | null
           eh_bot?: never
+          skin_treinador?: string | null
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
@@ -6113,6 +6125,7 @@ export type Database = {
         Update: {
           avatar?: string | null
           eh_bot?: never
+          skin_treinador?: string | null
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
@@ -6587,6 +6600,7 @@ export type Database = {
         Returns: Json
       }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
+      definir_skin_treinador: { Args: { p_skin: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       desconfirmar_troca: {
