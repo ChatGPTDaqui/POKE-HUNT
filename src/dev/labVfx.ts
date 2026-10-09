@@ -35,6 +35,9 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { LUZES_EM_AREA_POR_GOLPE, LUZES_POR_GOLPE } from '@/render/vfx/coreografias/luzes'
+import { MENTES_POR_GOLPE } from '@/render/vfx/coreografias/mentes'
+import { SONS_EM_AREA_POR_GOLPE, SONS_POR_GOLPE } from '@/render/vfx/coreografias/sons'
 import { NEVOAS_EM_AREA_POR_GOLPE, NEVOAS_POR_GOLPE } from '@/render/vfx/coreografias/nevoas'
 import { SOPROS_POR_GOLPE } from '@/render/vfx/coreografias/sopros'
 import { PEDRAS_EM_AREA_POR_GOLPE, PEDRAS_POR_GOLPE } from '@/render/vfx/coreografias/pedras'
@@ -215,6 +218,11 @@ familiaNoLab('Pedra', PEDRAS_EM_AREA_POR_GOLPE, { precipice_blades: 'sandshrew' 
 familiaNoLab('Sopro', SOPROS_POR_GOLPE, { 'brine': 'squirtle', 'frost_breath': 'jynx', 'acid_spray': 'ekans', 'belch': 'snorlax', 'dragon_rage': 'dratini' })
 familiaNoLab('Névoa', NEVOAS_POR_GOLPE, { 'smog': 'ekans', 'clear_smog': 'ekans', 'venoshock': 'ekans', 'astonish': 'gengar', 'hex': 'gengar', 'night_shade': 'gengar', 'ominous_wind': 'gengar', 'silver_wind': 'scyther' })
 familiaNoLab('Névoa', NEVOAS_EM_AREA_POR_GOLPE, { powder_snow: 'jynx' }, true)
+familiaNoLab('Som', SONS_POR_GOLPE, { 'uproar': 'jynx', 'echoed_voice': 'jynx', 'snore': 'snorlax', 'round': 'jynx', 'bug_buzz': 'scyther' })
+familiaNoLab('Mente', MENTES_POR_GOLPE, { 'extrasensory': 'espeon', 'psyshock': 'espeon', 'psywave': 'espeon', 'psycho_boost': 'espeon', 'future_sight': 'espeon', 'stored_power': 'espeon', 'heart_stamp': 'jynx', 'mirror_coat': 'espeon', 'doom_desire': 'magnemite' })
+familiaNoLab('Luz', LUZES_POR_GOLPE, { 'nuzzle': 'pikachu', 'tri_attack': 'eevee', 'sacred_fire': 'charmander' })
+familiaNoLab('Som', SONS_EM_AREA_POR_GOLPE, { boomburst: 'jynx' }, true)
+familiaNoLab('Luz', LUZES_EM_AREA_POR_GOLPE, { dazzling_gleam: 'clefairy' }, true)
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

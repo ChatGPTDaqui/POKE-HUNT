@@ -530,3 +530,37 @@ Os demais jatos (Ember, Flamethrower, Water Gun, Scald, Hydro Pump, Sludge...) s
 | Ominous Wind | vento repulsivo; pode subir todos os status | rajada roxa com fantasminhas; setas de cinco cores |
 | Silver Wind | escamas em pó levadas pelo vento | vento prateado com escamas cintilantes; setas de cinco cores |
 | Powder Snow (área) | rajada de neve em pó; pode congelar | flocos rodopiando por toda a área, do centro pra borda |
+
+### 21. Som — `coreografias/sons.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Uproar | algazarra por três turnos; ninguém dorme | ondas serrilhadas pra todo lado; "Zzz" riscado de vermelho no alvo |
+| Echoed Voice | voz que ecoa; mais forte se repetida | uma onda bate e voltam ecos cada vez mais fracos e largos |
+| Snore | só dormindo; ronco pode assustar | "Zzz" em quem ataca; bolha de ronco estoura em onda serrilhada |
+| Round | canta uma canção | notas musicais em fila ondulando até o alvo |
+| Bug Buzz | onda sonora por vibração; Sp. Def pode cair | asas vibrando; anéis verdes tremidos; seta pra baixo |
+| Boomburst (área) | som explosivo terrível em tudo em volta | anéis serrilhados grossos varrem o chão até a borda; estalos espalhados |
+
+### 22. Força mental — `coreografias/mentes.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Extrasensory | poder estranho e invisível; pode assustar | olho gigante se abre acima do alvo e o encara; ar ondulando |
+| Psyshock | onda psíquica materializada; dano físico | cristais sólidos rosados surgem em volta e se chocam no alvo |
+| Psywave | onda psíquica de intensidade variável | onda senoidal cuja amplitude muda o tempo todo |
+| Psycho Boost | força total; Sp. Atk de quem usa cai muito | esfera enorme se forma no alto e desce; duas setas azuis |
+| Future Sight | dois turnos depois, energia psíquica ataca | olho abre, esfera sobe e some no céu… e cai do alto no alvo |
+| Stored Power | mais forte quanto mais status subiu | setas de status de quem ataca se juntam numa esfera disparada |
+| Heart Stamp | fofura baixa a guarda, depois golpe cruel | coraçõezinhos boiam até o alvo; coração gigante cai como carimbo |
+| Mirror Coat | devolve o golpe especial em dobro | espelho na frente de quem ataca; raio vem fraco e volta em arco-íris |
+| Doom Desire | dois turnos depois, feixe de luz concentrada | estrela sobe e some; feixes de luz caem do céu e convergem no alvo |
+
+### 23. Luz e brilho (+ Nuzzle) — `coreografias/luzes.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Nuzzle | esfrega as bochechas elétricas; paralisa sempre | bochechas faiscando; esfrega-esfrega; estática presa no alvo |
+| Tri Attack | três feixes ao mesmo tempo; queima, congela ou paralisa | triângulo em quem ataca; feixes de fogo, gelo e raio convergem |
+| Sacred Fire | fogo místico intenso; pode queimar | pilar de chamas douradas brota do chão e engole o alvo |
+| Dazzling Gleam (área) | clarão poderoso | quem ataca vira estrela que estoura em raios pelo chão; a área toda cintila |

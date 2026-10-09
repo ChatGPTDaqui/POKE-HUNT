@@ -40,6 +40,9 @@ import { DRAGAO_AREA, DRAGAO_SINGLE } from './coreografias/dragao'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 import { SOCOS_POR_GOLPE } from './coreografias/socos'
 import { BEAMS_POR_GOLPE } from './coreografias/beams'
+import { LUZES_EM_AREA_POR_GOLPE, LUZES_POR_GOLPE } from './coreografias/luzes'
+import { MENTES_POR_GOLPE } from './coreografias/mentes'
+import { SONS_EM_AREA_POR_GOLPE, SONS_POR_GOLPE } from './coreografias/sons'
 import { NEVOAS_EM_AREA_POR_GOLPE, NEVOAS_POR_GOLPE } from './coreografias/nevoas'
 import { SOPROS_POR_GOLPE } from './coreografias/sopros'
 import { PEDRAS_EM_AREA_POR_GOLPE, PEDRAS_POR_GOLPE } from './coreografias/pedras'
@@ -125,7 +128,10 @@ export const REGISTRO_POR_GOLPE: Record<string, EntradaDeCoreografia> = {
   ...PEDRAS_POR_GOLPE,
   ...SOPROS_POR_GOLPE,
   ...NEVOAS_POR_GOLPE,
+  ...SONS_POR_GOLPE,
+  ...MENTES_POR_GOLPE,
+  ...LUZES_POR_GOLPE,
 }
 export const REGISTRO_POR_GOLPE_DE_AREA: Record<string, EntradaDeCoreografia> = {
-  ...LUTA_EM_AREA_POR_GOLPE,  ...PEDRAS_EM_AREA_POR_GOLPE,  ...NEVOAS_EM_AREA_POR_GOLPE,
+  ...LUTA_EM_AREA_POR_GOLPE,  ...PEDRAS_EM_AREA_POR_GOLPE,  ...NEVOAS_EM_AREA_POR_GOLPE,  ...SONS_EM_AREA_POR_GOLPE,  ...LUZES_EM_AREA_POR_GOLPE,
 }
