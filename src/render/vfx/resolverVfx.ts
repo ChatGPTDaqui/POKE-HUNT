@@ -7,7 +7,7 @@
 import { getAbility, isDamagingAbility } from '@/data/abilities'
 import { motivoDoGolpe, tetoDoTier, tierDoPoder } from '@/data/tierDoVfx'
 import type { ElementType } from '@/data/generated/types'
-import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE } from './registro'
+import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA } from './registro'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 
 // Faixas de poder, teto e motivo moraram aqui ate 02/10; foram pra
@@ -45,7 +45,10 @@ export function resolverVfx(pedido: PedidoDeVfx): VfxResolvido | null {
   // Motivo manda (D5) — mas so em golpe alvo-unico: area de "soco" nao existe
   // no catalogo, e um Earthquake nao tem forma de punho.
   const motivo = area ? null : motivoDoGolpe(golpe.id)
-  const porGolpe = area ? undefined : REGISTRO_POR_GOLPE[golpe.id]
+  // Efeito próprio do golpe (famílias, 09/10): área tem registro separado —
+  // um golpe de alvo único pedido em área (crítico de área não existe, mas o
+  // pedido é do chamador) nunca herda a coreografia de single.
+  const porGolpe = (area ? REGISTRO_POR_GOLPE_DE_AREA : REGISTRO_POR_GOLPE)[golpe.id]
   if (porGolpe) return { entrada: porGolpe, tipo, tier, area, motivo }
   if (motivo) {
     const entrada = REGISTRO_DE_MOTIVO[motivo]
