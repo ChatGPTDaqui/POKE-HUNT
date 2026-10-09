@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Caminhada do treinador no ciclo do PMD.
+  {
+    version: '7.89',
+    date: '2026-10-09',
+    title: 'Treinador caminhando de verdade',
+    highlights: [
+      'A caminhada do treinador segue o ritmo dos POKEs: pernas juntas, passo, pernas juntas, passo — com o leve sobe e desce do corpo.',
+      'A passada ficou mais longa e calma: antes as pernas trocavam rápido demais, como se estivesse correndo.',
+      'Ao parar no meio do passo, o treinador fecha as pernas em vez de congelar com a perna aberta. Vale para todas as skins.',
+    ],
+  },
   // Skins do treinador em campo, escolhidas no Perfil.
   {
     version: '7.88',
