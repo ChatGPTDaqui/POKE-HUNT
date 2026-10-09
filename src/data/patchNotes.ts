@@ -21,6 +21,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'Bite, Crunch, os Fangs, Bug Bite e Leech Life ganharam efeito próprio: uma boca aparece no alvo e fecha nele — cada uma do seu jeito (gelo que cresce, fogo nos cantos, veneno pingando, dentões que cortam ao meio...).',
       'Tackle, Quick Attack, Take Down, Double-Edge, Body Slam, Giga Impact e outros 12 golpes de investida agora mostram a onda de choque indo na frente do corpo, com o caminho e a marca de cada golpe.',
       'Golpes de garra (Scratch, Fury Swipes, Metal Claw, Shadow Claw, Dragon Claw...) deixam rasgos próprios, e os de lâmina (Slash, Night Slash, Cross Chop, Psycho Cut, Aerial Ace...) cortam com um gume do seu jeito.',
+      'Chutes e pisões (Jump Kick, Rolling Kick, Stomp, Blaze Kick...), cabeçadas (Skull Bash, Zen Headbutt, Iron Head, Head Smash, Wood Hammer), investidas elementais (Wild Charge, Volt Switch, Flare Blitz, Aqua Jet, Dragon Rush...), golpes de rolar (Rollout, Ice Ball, Rapid Spin, Gyro Ball, Steamroller, Flame Wheel), Thrash e Petal Dance também ganharam efeito próprio, cada um desenhado a partir do que o golpe faz.',
     ],
   },
   // Treinador nas hunts se move como gente.
