@@ -399,3 +399,62 @@ abaixo diz o que a frase vira na tela. A família é só agrupamento de trabalho
 regra não implementada — ver `abilities.ts`), então o efeito nunca apareceria:
 Beat Up, Fissure, Sheer Cold, Natural Gift, Spit Up, Bide, Guillotine, Horn
 Drill, Trump Card, Metal Burst. Se forem ligados um dia, entram numa família.
+
+### 13. Chifre, ferrão e bico — `coreografias/perfurar.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Horn Attack | estoca com um chifre pontudo | cone de marfim longo, uma estocada firme |
+| Fury Attack | estoca 2–5 vezes seguidas | uma estocada curta por acerto, em pontos diferentes |
+| Peck | bica com o bico | bico amarelo curto, bicada rápida, uma pena solta |
+| Pluck | bica; se o alvo tem fruta, come | bicada; a fruta salta do alvo, voa até quem bicou e vira migalha |
+| Drill Run | gira o corpo como broca; crítico fácil | broca com listras em espiral girando; terra espirra |
+| Poison Jab | apunhala com braço embebido em veneno | braço roxo pingando veneno crava; respingo roxo |
+| Twineedle | duas agulhadas seguidas; pode envenenar | duas agulhas finas, uma em cima e outra embaixo, uma depois da outra |
+| Fell Stinger | se nocautear, o Ataque sobe muito | ferrão de abelha listrado cravando fundo, brilho vermelho de "pronto pra subir" |
+| Smart Strike | chifre afiado; nunca erra | mira vermelha trava no alvo; chifre de aço faz curva e acerta o centro |
+
+### 14. Truque sombrio — `coreografias/truques.ts`
+
+O jogo não tem item segurado; a bolsinha mostra a ideia sem prometer mecânica.
+Beat Up fica de fora (nunca dispara).
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Covet | se aproxima fofo e rouba o item | corações flutuam até o alvo; a bolsinha vai embora num arco |
+| Thief | ataca e rouba o item ao mesmo tempo | mão de sombra dispara, agarra a bolsinha e puxa de volta |
+| Knock Off | derruba o item do alvo | tapa de cima; a bolsinha voa, quica no chão e some |
+| Punishment | mais forte quanto mais o alvo se fortaleceu | setas de aumento do alvo aparecem e um X escuro as quebra |
+| Payback | guarda força e revida | bolinhas escuras se juntam em quem ataca e saem numa onda de revide |
+| Assurance | dobra se o alvo já se feriu no turno | X vermelho marca a ferida; o golpe acerta duas vezes em cima dela |
+| Foul Play | usa a força do alvo contra ele | aura vermelha é arrancada do alvo, sobe num arco e cai nele |
+
+### 15. Luta corporal — `coreografias/lutaCorpo.ts`
+
+Bide e Metal Burst ficam de fora (nunca disparam). Brutal Swing é o primeiro
+golpe de ÁREA com efeito próprio (`REGISTRO_POR_GOLPE_DE_AREA`).
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Double Slap | tapas de ida e volta, 2–5 vezes | palma aberta alternando lados, uma por acerto |
+| Wake-Up Slap | forte em alvo dormindo; acorda | "Zzz" boiando estoura com o tapa; sobra um "!" |
+| Smelling Salts | forte em alvo paralisado; cura a paralisia | estática presa no alvo é espantada pelo tapa e se dispersa |
+| Arm Thrust | rajada de palmas abertas, 2–5 vezes | palmas em sequência em pontos diferentes |
+| Brick Break | cutelo rápido; quebra barreiras | parede de tijolos na frente do alvo parte ao meio |
+| Revenge | dobra se foi ferido no turno | quem ataca acende em vermelho e devolve |
+| Counter | devolve o golpe físico em dobro | pancada pequena vem do alvo, bate no bloqueio e volta vermelha e maior |
+| Reversal | mais forte quanto menos HP | barrinha de HP quase vazia piscando, aura de desespero, golpe só |
+| Endeavor | corta o HP do alvo até igualar o seu | duas barras de HP; a do alvo é cortada até o nível da de quem ataca |
+| Flail | debate-se sem rumo | arcos girando pra todo lado, suor; dois acertos |
+| Vital Throw | ataca por último; nunca erra | arco de arremesso por cima do ombro; o alvo "cai" atrás com poeira |
+| Circle Throw | arremessa e puxa outro POKE | volta completa em volta do alvo, empurrão e redemoinho de troca |
+| Storm Throw | golpe feroz sempre crítico | redemoinho em volta do alvo; brilho de crítico grande |
+| Seismic Toss | arremessa com a força da gravidade | sobe lá em cima, despenca na vertical, rachadura no chão |
+| Submission | agarra e se joga no chão; se fere | nuvem de briga de desenho rolando até o alvo; baque; recuo |
+| Superpower | força enorme; baixa Ataque e Defesa de quem usa | veias de força laranja inflando; golpe gigante; setas azuis caindo em quem usou |
+| Close Combat | luta colado sem guarda; baixa as defesas | seis golpes de perto de todos os lados; setas azuis caindo |
+| Fake Out | ataca primeiro e assusta | duas palmas batem na cara do alvo; linhas de susto |
+| Double Hit | bate duas vezes com cauda/cipó | duas chicotadas em arco, uma de cada lado |
+| Rage | Ataque sobe a cada golpe recebido | chamas vermelhas em quem ataca e setas de Ataque subindo |
+| Final Gambit | arrisca tudo: desmaia e causa dano igual ao HP | a vida sai como globo dourado esvaziando a barra; explode no alvo; espiral de desmaio |
+| Brutal Swing (área) | gira o corpo com violência e acerta tudo em volta | arcos enormes rodando no chão até a borda; estalos espalhados pelo interior |
