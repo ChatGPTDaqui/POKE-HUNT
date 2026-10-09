@@ -367,3 +367,35 @@ abaixo diz o que a frase vira na tela. A família é só agrupamento de trabalho
 | Brave Bird | asas recolhidas, rasante; se fere bastante | ave de chama clara em rasante; penas no impacto; recuo |
 | Feint Attack | se aproxima desarmado e golpeia de surpresa; nunca erra | brilho "inofensivo" chega até o alvo e o golpe escuro sai pelas costas |
 | Feint | acerta quem usa Protect e quebra a proteção | redoma verde em volta do alvo que o golpe estilhaça |
+
+### 11. Cauda, asa e chicote — `coreografias/caudas.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Power Whip | gira cipós/tentáculos com violência e chicoteia | cipó roda duas vezes acima de quem ataca e estala no alvo (leque de estalo) |
+| Slam | bate com cauda longa ou cipós | cauda sobe em arco por cima e desce batendo; poeira |
+| Aqua Tail | balança a cauda como onda brava numa tempestade | monte de água com crista enrolada varre o alvo; respingos |
+| Poison Tail | bate com a cauda; pode envenenar; crítico fácil | cauda roxa com ferrão em espada que pisca; bolhas de veneno sobem |
+| Dragon Tail | arremessa o alvo e puxa outro POKE pra luta | varrida larga; rastro de empurrão saindo do alvo e redemoinho de troca |
+| Steel Wing | bate com asas de aço; pode subir a Defesa | asa de aço com brilho correndo pela borda; corte; setas de Defesa |
+| Wing Attack | asas enormes e imponentes bem abertas | duas asas gigantes abrem atrás de quem ataca, batem e mandam rajada com penas |
+| Needle Arm | balança os braços espinhosos; pode fazer recuar | braço de cacto cheio de espinhos bate duas vezes; espinhos voam; linhas de susto |
+
+### 12. Aperto e pinça — `coreografias/apertos.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Wrap | corpo longo enrola e aperta por vários turnos | três voltas de corpo em espiral em volta do alvo, apertando |
+| Bind | corpos longos ou tentáculos amarram e apertam | dois tentáculos saem de quem ataca e amarram o alvo em X |
+| Constrict | gavinhas rastejantes; pode baixar a Speed | gavinhas sobem do chão pelo corpo do alvo; setas de Speed pra baixo |
+| Wring Out | torce o alvo com força | duas faixas giram em sentidos opostos (espremer pano); gotas espremidas |
+| Clamp | concha grossa prende e aperta | concha bivalve abre atrás do alvo e fecha nele |
+| Vice Grip | agarra e aperta dos dois lados | duas chapas de morsa chegam dos lados, com rosca girando |
+| Crabhammer | martela com uma pinça grande; crítico fácil | pinça gigante de caranguejo erguida desce como martelo; respingo e brilho |
+
+### Fora da meta: golpes que o motor nunca dispara
+
+`isDamagingAbility` é falso para estes 10 (OHKO desligado por balanceamento ou
+regra não implementada — ver `abilities.ts`), então o efeito nunca apareceria:
+Beat Up, Fissure, Sheer Cold, Natural Gift, Spit Up, Bide, Guillotine, Horn
+Drill, Trump Card, Metal Burst. Se forem ligados um dia, entram numa família.
