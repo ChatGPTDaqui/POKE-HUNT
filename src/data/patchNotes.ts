@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Treinador nas hunts se move como gente.
+  {
+    version: '7.91',
+    date: '2026-10-09',
+    title: 'Treinador com jeito de treinador',
+    highlights: [
+      'Nas hunts, o treinador não copia mais cada passo do POKE: fica parado assistindo enquanto o POKE luta por perto e só sai andando quando ele se afasta.',
+      'Andando, ele corta caminho pelo aberto, contorna paredes, sai e para sem tranco e aperta o passo quando fica para trás.',
+      'Parado, fica de olho no POKE. E agora mantém 3 quadrados de distância, um a mais que antes.',
+    ],
+  },
   // Treinadores nos duelos de PvP; skin salva na conta.
   {
     version: '7.90',
