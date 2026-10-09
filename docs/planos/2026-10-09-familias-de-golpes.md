@@ -282,3 +282,19 @@ depois do outro e se recolhem pela cauda; estrela atrás dos talhos.
 | Shadow Claw | mão de sombra sobe do chão do alvo e rasga de baixo pra cima |
 | Dragon Claw | arco de energia de quem ataca; talhos com halo dracônico (4 no T3+) |
 | False Swipe | um talho só, que freia; sobra um brilho de piedade |
+
+### 4. Lâmina — `coreografias/laminas.ts`
+
+Um gume limpo em arco (crescente) que atravessa o alvo; estrela atrás do gume.
+
+| Golpe | Meta (personalidade) |
+|---|---|
+| Slash | um arco largo e claro na diagonal |
+| Night Slash | meia-lua de escuridão atrás do alvo; o corte vem do lado de trás |
+| Karate Chop | gume reto de cima pra baixo, mão em cutelo |
+| Cross Chop | dois cutelos em X, o segundo mais forte |
+| Psycho Cut | lâmina rosa arremessada girando até o alvo |
+| Aerial Ace | rastro de velocidade e uma varrida larga por baixo; brilho no fim |
+| Razor Shell | duas conchas-lâmina cruzando, gotas espirrando |
+| Fury Cutter | três cortes em escada, cada um maior que o anterior |
+| Cross Poison | X roxo, veneno pingando |
