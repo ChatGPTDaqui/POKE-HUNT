@@ -85,4 +85,31 @@ describe('TreinadorEmCampo', () => {
     expect(textos[0].texto).toBe('Ash')
     expect(textos[0].y).toBeLessThan(t.pe!.y - 30)
   })
+
+  it('caminhada no ciclo do PMD: um quadro a cada ~10 px, volta inteira em 40 px', () => {
+    const t = new TreinadorEmCampo()
+    andar(t, { x: 0, y: 100 }, { x: 200, y: 100 })
+    // Comeca a contar do zero a partir daqui: reposiciona e anda 1 px por quadro.
+    const quadros: number[] = []
+    let x = 200
+    for (let i = 0; i < 80; i++) {
+      x += 1
+      t.atualizar({ x, y: 100, radius: RAIO, facing: { x: 1, y: 0 } }, 1 / 60)
+      quadros.push(t.quadro)
+    }
+    // Troca de quadro: 4 trocas por 40 px (9/11/9/11), e nao 8 (era 5 px cada).
+    const trocas = quadros.filter((q, i) => i > 0 && q !== quadros[i - 1]).length
+    expect(trocas).toBe(8)
+    expect(new Set(quadros)).toEqual(new Set([0, 1, 2, 3]))
+  })
+
+  it('parando no meio do passo, fecha as pernas no quadro neutro', () => {
+    const t = new TreinadorEmCampo()
+    andar(t, { x: 0, y: 100 }, { x: 200, y: 100 })
+    let x = 200
+    while (t.quadro % 2 === 0) { x += 1; t.atualizar({ x, y: 100, radius: RAIO, facing: { x: 1, y: 0 } }, 1 / 60) }
+    t.atualizar({ x, y: 100, radius: RAIO, facing: { x: 1, y: 0 } }, 1 / 60)
+    expect(t.animacao).toBe('Walk')
+    expect(t.quadro % 2).toBe(0)
+  })
 })

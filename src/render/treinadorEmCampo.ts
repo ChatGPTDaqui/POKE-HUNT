@@ -22,6 +22,11 @@
 // Tamanho (08/10, pedido do dono): o boneco tem 30 px de altura (a arte
 // anterior tinha 35) — um pouco menor, na proporcao dos POKE.
 //
+// Walk (09/10): ciclo do PMD (conferido no Machoke do SpriteCollab) — quadros
+// 0 e 2 sao o NEUTRO (pernas juntas, corpo 1 px acima: o balanco do andar), 1 e
+// 3 os passos com pe trocado. A arte da IA trazia 4 passos sem neutro nem
+// balanco, e a perna "pedalava".
+//
 // Idle: a folha so tem passos (um pe sempre no ar). A pose em pe usa cabeca e
 // tronco do passo mais fechado e redesenha as pernas paradas, lado a lado, com
 // as cores da propria folha; o segundo quadro desce o tronco 1 px (respiracao).
@@ -49,12 +54,16 @@ const ALTURA_DO_BONECO = 30
 /** Cor do nome do treinador: azul claro, pra nao confundir com o nome dos POKE (branco/raridade). */
 const COR_DO_NOME = '#9fd8ff'
 /**
- * Px de caminho por quadro de caminhada (08/10, "movimentos fluidos"). A
- * caminhada avanca pela DISTANCIA andada, e nao pelo relogio: com o relogio, o
- * passo seguia no mesmo ritmo com o POKE devagar ou rapido, e o pe escorregava
- * no chao. Por distancia, cada passo cobre sempre o mesmo chao.
+ * Px de caminho por quadro de caminhada. A caminhada avanca pela DISTANCIA
+ * andada, e nao pelo relogio (08/10): por distancia, cada passo cobre sempre o
+ * mesmo chao e o pe nao escorrega.
+ *
+ * 09/10: o ciclo e o do PMD — NEUTRO, PASSO, NEUTRO, PASSO, nas proporcoes
+ * 8/10/8/10 da AnimData (passo dura mais que o neutro). Volta inteira = 40 px.
+ * Era 5 px por quadro (20 px a volta): com o POKE a 91 px/s davam 18 quadros
+ * por segundo, perna de corrida num boneco que anda.
  */
-const PX_POR_QUADRO_DE_PASSO = 5
+const PX_POR_QUADRO_DE_PASSO = [9, 11, 9, 11]
 /** Parado por pelo menos isto (s) pra voltar a pose em pe — sem pisca andar/parar. */
 const FOLGA_PRA_PARAR = 0.15
 /** Quanto a direcao segue o movimento por quadro (0..1): vira suave, sem tremer de linha. */
@@ -62,7 +71,7 @@ const SUAVIZA_DIRECAO = 0.25
 
 /** Duracao (ticks de 1/60 s) de cada quadro. Toda skin tem o mesmo formato de folha. */
 const DURACOES: Record<'Walk' | 'Idle', number[]> = {
-  Walk: [8, 8, 8, 8],
+  Walk: [8, 10, 8, 10],
   // Idle: pose EM PE (ver topo); o segundo quadro e a respiracao.
   Idle: [50, 50],
 }
@@ -133,6 +142,11 @@ export class TreinadorEmCampo {
     return this.e.anim
   }
 
+  /** Quadro da animacao atual (0..3 na caminhada). */
+  get quadro(): number {
+    return this.e.quadro
+  }
+
   private reposicionar(poke: PokeEmCampo): void {
     const f = poke.facing && (poke.facing.x || poke.facing.y) ? poke.facing : { x: 0, y: 1 }
     const n = Math.hypot(f.x, f.y) || 1
@@ -188,14 +202,17 @@ export class TreinadorEmCampo {
       }
     } else {
       e.parado += dt
+      // Parou no meio do passo: fecha as pernas no NEUTRO (quadros pares) em vez
+      // de congelar de perna aberta durante a folga.
+      if (e.anim === 'Walk' && e.quadro % 2 === 1) { e.quadro -= 1; e.ticks = 0 }
     }
     const anim = andou || (e.anim === 'Walk' && e.parado < FOLGA_PRA_PARAR) ? 'Walk' : 'Idle'
     if (anim !== e.anim) { e.anim = anim; e.quadro = 0; e.ticks = 0 }
     const duracoes = DURACOES[e.anim]
     if (e.anim === 'Walk') {
       e.ticks += passo
-      while (e.ticks >= PX_POR_QUADRO_DE_PASSO) {
-        e.ticks -= PX_POR_QUADRO_DE_PASSO
+      while (e.ticks >= PX_POR_QUADRO_DE_PASSO[e.quadro]) {
+        e.ticks -= PX_POR_QUADRO_DE_PASSO[e.quadro]
         e.quadro = (e.quadro + 1) % duracoes.length
       }
     } else {
