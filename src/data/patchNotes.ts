@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Treinador em campo: caminhada fluida e pose em pe.
+  {
+    version: '7.86',
+    date: '2026-10-08',
+    title: 'Treinador andando com naturalidade',
+    highlights: [
+      'A caminhada do treinador ficou fluida: o passo acompanha a velocidade e o pé não escorrega mais no chão.',
+      'Parado, o treinador fica em pé com as pernas retas e respira de leve, em vez de congelar no meio do passo.',
+    ],
+  },
   // Treinador em campo com a arte escolhida pelo dono.
   {
     version: '7.85',
