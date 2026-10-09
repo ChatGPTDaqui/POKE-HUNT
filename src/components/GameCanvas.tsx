@@ -21,6 +21,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useAuthStore } from '@/stores/authStore'
 import { skinDe, useSkinDoTreinadorStore } from '@/stores/skinDoTreinadorStore'
+import { useArenaStore } from '@/features/arena/arena'
 import { useRendererStore } from '@/stores/rendererStore'
 import { controller } from '@/engine/controller'
 import { buildHospitalWorld, syncActivePokeToGameState } from '@/engine/simulation'
@@ -49,6 +50,10 @@ export function GameCanvas() {
     const canvas = canvasRef.current
     if (!canvas) return
     const renderer = new Renderer(canvas)
+    // Skin do treinador (09/10): le a propria do servidor e sobe a escolha
+    // local de quem escolheu antes dela existir no servidor.
+    const meuId = useAuthStore.getState().user?.id
+    if (meuId) void useSkinDoTreinadorStore.getState().sincronizarMinha(meuId)
     void preloadHospital()
     // Publica o renderer pro ZoomControl (que vive fora do canvas e precisa
     // chamar zoomStep/ler o % atual) — ver stores/rendererStore.ts.
@@ -169,7 +174,16 @@ export function GameCanvas() {
       const world = useWorldStore.getState()
       // Nome do treinador em cima do boneco que anda atras do POKE (08/10).
       renderer.treinador.nome = useGameStateStore.getState().trainer.name
-      renderer.treinador.skin = skinDe(useSkinDoTreinadorStore.getState().porUsuario, useAuthStore.getState().user?.id)
+      const skins = useSkinDoTreinadorStore.getState()
+      renderer.treinador.skin = skinDe(skins.porUsuario, useAuthStore.getState().user?.id)
+      // Duelo de PvP (09/10): o treinador do rival, parado do lado dele. Bot
+      // sem skin cai na padrao (skinDe). `pedir` e no-op depois da 1a vez.
+      if (world.arena) {
+        const { rivalId, nomeDoRival } = useArenaStore.getState()
+        if (rivalId) skins.pedir(rivalId)
+        renderer.treinadorRival.nome = nomeDoRival || world.arena.nomeDoRival
+        renderer.treinadorRival.skin = skinDe(skins.porUsuario, rivalId)
+      }
       if (world.mapDef) renderer.renderMap(world.mapDef, world)
       else renderer.renderHospital(world.player, enfermeiraEmFoco)
 

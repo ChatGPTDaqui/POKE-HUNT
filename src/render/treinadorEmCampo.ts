@@ -121,6 +121,28 @@ export function pontoAtras(rastro: readonly Ponto[], d: number): Ponto | null {
 type PokeEmCampo = Ponto & { radius: number; facing?: Ponto }
 
 /**
+ * Recuo do treinador atras da bola do proprio lado no duelo de PvP (09/10): a
+ * mesma folga do campo (2 quadrados). Na arena (tatame da arte do dragon.jpg)
+ * isso poe cada um na borda do tatame, de frente pro outro, como nos jogos.
+ */
+const RECUO_NO_DUELO = ESPACO_DO_TREINADOR
+
+/**
+ * Onde o treinador fica parado no duelo: atras da bola do lado dele, olhando
+ * pro rival. `bola` e o ponto de entrada (centro do POKE); `rival`, a bola do
+ * outro lado. Devolve o PE e a direcao.
+ */
+export function lugarNoDuelo(bola: Ponto, rival: Ponto): { pe: Ponto; olhando: Ponto } {
+  const dx = rival.x - bola.x, dy = rival.y - bola.y
+  const n = Math.hypot(dx, dy) || 1
+  const olhando = { x: dx / n, y: dy / n }
+  return {
+    pe: { x: bola.x - olhando.x * RECUO_NO_DUELO, y: bola.y - olhando.y * RECUO_NO_DUELO + DO_CENTRO_AO_CHAO },
+    olhando,
+  }
+}
+
+/**
  * Um treinador por `Renderer`: o estado (rastro, quadro da animacao) e de UMA
  * cena. Global, duas cenas na mesma pagina (as bancadas lado a lado) puxariam o
  * mesmo boneco de um mundo pro outro a cada quadro.
@@ -158,6 +180,27 @@ export class TreinadorEmCampo {
       pos: { x: atras.x, y: atras.y + DO_CENTRO_AO_CHAO },
       facing: { x: f.x / n, y: f.y / n },
       anim: 'Idle', quadro: 0, ticks: 0, parado: 0,
+    }
+  }
+
+  /**
+   * Duelo de PvP (09/10): fica PARADO no lugar dado, olhando pra `olhando`, so
+   * respirando — nao segue o POKE. Zera o rastro: ao voltar pro campo,
+   * `atualizar` reposiciona atras do POKE em vez de atravessar o mapa.
+   */
+  parado(pe: Ponto, olhando: Ponto, dt: number): void {
+    const e = this.e
+    if (e.anim !== 'Idle') { e.quadro = 0; e.ticks = 0 }
+    e.rastro = []
+    e.pos = { x: pe.x, y: pe.y }
+    e.facing = { x: olhando.x, y: olhando.y }
+    e.anim = 'Idle'
+    e.parado += dt
+    const duracoes = DURACOES.Idle
+    e.ticks += dt * 60
+    while (e.ticks >= duracoes[e.quadro]) {
+      e.ticks -= duracoes[e.quadro]
+      e.quadro = (e.quadro + 1) % duracoes.length
     }
   }
 
