@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Famílias de golpes com efeito próprio: Mordida e Investida.
+  {
+    version: '7.92',
+    date: '2026-10-09',
+    title: 'Mordidas e investidas com cara própria',
+    highlights: [
+      'Bite, Crunch, os Fangs, Bug Bite e Leech Life ganharam efeito próprio: uma boca aparece no alvo e fecha nele — cada uma do seu jeito (gelo que cresce, fogo nos cantos, veneno pingando, dentões que cortam ao meio...).',
+      'Tackle, Quick Attack, Take Down, Double-Edge, Body Slam, Giga Impact e outros 12 golpes de investida agora mostram a onda de choque indo na frente do corpo, com o caminho e a marca de cada golpe.',
+    ],
+  },
   // Treinador nas hunts se move como gente.
   {
     version: '7.91',
