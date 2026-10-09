@@ -3,8 +3,9 @@
 // Regra que vale a pena registrar: TUDO aqui e dado real. Rank, total de
 // jogadores, tempo de jogo e a data do Hall da Fama vem do servidor
 // (`/perfil`); o resto sai do save. Os dois blocos que o pedido descreve mas
-// que ainda nao tem sistema por tras — "Outfit" (skins) e "Especialidades" —
-// ficam com o layout pronto e um aviso honesto, e nao com numero inventado.
+// que ainda nao tem sistema por tras — "Especialidades" — fica com o layout
+// pronto e um aviso honesto, e nao com numero inventado. ("Outfit" ganhou as
+// skins do treinador em campo em 08/10.)
 // Barra que nunca anda e botao que nao faz nada lem como bug, nao como
 // recurso futuro (mesma decisao ja tomada em Tasks/Social/Mercado).
 import { useState } from 'react'
@@ -26,6 +27,7 @@ import { cn } from '@/lib/utils'
 import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { useAvatarStore } from '@/stores/avatarStore'
 import { SeletorDeAvatar } from './SeletorDeAvatar'
+import { SeletorDeSkin } from './SeletorDeSkin'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
 const CAPTURAS_NO_LOG = 12
@@ -185,17 +187,14 @@ export function PerfilTreinador() {
 
           <div className="flex flex-col gap-[.35em]">
             <SectionLabel>Outfit</SectionLabel>
+            {/* 08/10: skin do treinador que anda atras do POKE no campo. */}
             <GameCard>
-              <div className="flex items-center gap-[.45em]">
-                <TShirt className="text-[1.5em] text-n400" />
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-[.85em]">Nenhuma skin disponível</span>
-                  <span className="text-[.75em] text-n500">
-                    O jogo ainda não tem skins de treinador: não há arte alternativa no repositório nem
-                    campo de aparência no save. O botão fica aqui para quando existir.
-                  </span>
+              <div className="flex flex-col gap-[.45em]">
+                <div className="flex items-center gap-[.45em]">
+                  <TShirt className="text-[1.3em] text-n400" />
+                  <span className="text-[.75em] text-n400">Visual do seu treinador no campo. Vale na hora.</span>
                 </div>
-                <GameButton disabled>Trocar</GameButton>
+                {meuId && <SeletorDeSkin userId={meuId} />}
               </div>
             </GameCard>
           </div>
