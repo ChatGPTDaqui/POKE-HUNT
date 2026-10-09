@@ -10,7 +10,8 @@
 // cortando caminho em linha reta, ele atravessaria parede e virava junto com
 // cada meia-volta do POKE.
 //
-// Sprite (08/10, 2a arte do dono — bone vermelho, colete azul, mochila): folha
+// Sprite (08/10): uma folha por SKIN (`data/skinsDoTreinador.ts`, escolhida no
+// Perfil). A padrao, "mochila" (bone vermelho, colete azul, mochila), veio de uma folha
 // 4x7 em PNG com alpha, convertida pro formato das folhas dos POKE — 8 linhas
 // de direcao na ordem do PMD x 4 quadros, quadro 32x40, pe na linha 37. Na
 // conversao: reducao por moda de cor em blocos (~5,4 px), cada linha da
@@ -27,6 +28,7 @@
 import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
 import { FONTE } from './textoDeCombate'
+import { SKIN_PADRAO, folhaDaSkin } from '@/data/skinsDoTreinador'
 
 type Ponto = { x: number; y: number }
 
@@ -58,11 +60,11 @@ const FOLGA_PRA_PARAR = 0.15
 /** Quanto a direcao segue o movimento por quadro (0..1): vira suave, sem tremer de linha. */
 const SUAVIZA_DIRECAO = 0.25
 
-interface Anim { url: string; duracoes: number[] }
-const ANIMS: Record<'Walk' | 'Idle', Anim> = {
-  Walk: { url: 'assets/treinadores/campo/mochila/Walk-Anim.png', duracoes: [8, 8, 8, 8] },
+/** Duracao (ticks de 1/60 s) de cada quadro. Toda skin tem o mesmo formato de folha. */
+const DURACOES: Record<'Walk' | 'Idle', number[]> = {
+  Walk: [8, 8, 8, 8],
   // Idle: pose EM PE (ver topo); o segundo quadro e a respiracao.
-  Idle: { url: 'assets/treinadores/campo/mochila/Idle-Anim.png', duracoes: [50, 50] },
+  Idle: [50, 50],
 }
 
 const imagens = new Map<string, HTMLImageElement>()
@@ -117,6 +119,8 @@ type PokeEmCampo = Ponto & { radius: number; facing?: Ponto }
 export class TreinadorEmCampo {
   /** Nome mostrado em cima do boneco; `null`/vazio nao desenha nada. Quem monta a cena atualiza. */
   nome: string | null = null
+  /** Skin (pasta em `assets/treinadores/campo/`); id desconhecido cai na padrao. Quem monta a cena atualiza. */
+  skin: string = SKIN_PADRAO
 
   private e: Estado = { rastro: [], pos: null, facing: { x: 0, y: 1 }, anim: 'Idle', quadro: 0, ticks: 0, parado: 0 }
 
@@ -187,7 +191,7 @@ export class TreinadorEmCampo {
     }
     const anim = andou || (e.anim === 'Walk' && e.parado < FOLGA_PRA_PARAR) ? 'Walk' : 'Idle'
     if (anim !== e.anim) { e.anim = anim; e.quadro = 0; e.ticks = 0 }
-    const duracoes = ANIMS[e.anim].duracoes
+    const duracoes = DURACOES[e.anim]
     if (e.anim === 'Walk') {
       e.ticks += passo
       while (e.ticks >= PX_POR_QUADRO_DE_PASSO) {
@@ -216,7 +220,7 @@ export class TreinadorEmCampo {
     ctx.restore()
     // Nome antes da sprite: com a imagem ainda carregando, o nome ja aparece.
     this.desenharNome(ctx, pos)
-    const img = imagem(ANIMS[anim].url)
+    const img = imagem(folhaDaSkin(this.skin, anim))
     if (!img || !img.complete || img.naturalWidth === 0) return
     const linha = directionRowFromFacing(facing)
     const suave = ctx.imageSmoothingEnabled
