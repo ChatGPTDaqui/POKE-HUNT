@@ -33,13 +33,26 @@ const DO_CENTRO_AO_CHAO = 8
 const SALTO = 120
 
 const QUADRO_L = 32, QUADRO_A = 40
-/** Linha do pe dentro do quadro (o gerador desenha o pe nela). */
+/** Linha do pe dentro do quadro. */
 const PE_NO_QUADRO = 37
+/**
+ * Px de caminho por quadro de caminhada (08/10, "movimentos fluidos"). A
+ * caminhada avanca pela DISTANCIA andada, e nao pelo relogio: com o relogio, o
+ * passo seguia no mesmo ritmo com o POKE devagar ou rapido, e o pe escorregava
+ * no chao. Por distancia, cada passo cobre sempre o mesmo chao.
+ */
+const PX_POR_QUADRO_DE_PASSO = 5
+/** Parado por pelo menos isto (s) pra voltar a pose em pe — sem pisca andar/parar. */
+const FOLGA_PRA_PARAR = 0.15
+/** Quanto a direcao segue o movimento por quadro (0..1): vira suave, sem tremer de linha. */
+const SUAVIZA_DIRECAO = 0.25
 
 interface Anim { url: string; duracoes: number[] }
 const ANIMS: Record<'Walk' | 'Idle', Anim> = {
   Walk: { url: 'assets/treinadores/campo/bone-vermelho/Walk-Anim.png', duracoes: [8, 8, 8, 8] },
-  Idle: { url: 'assets/treinadores/campo/bone-vermelho/Idle-Anim.png', duracoes: [40, 40] },
+  // Idle (08/10): pose EM PE montada da folha (pes juntos sob o corpo), e o
+  // segundo quadro desce o tronco 1 px — respiracao lenta.
+  Idle: { url: 'assets/treinadores/campo/bone-vermelho/Idle-Anim.png', duracoes: [50, 50] },
 }
 
 const imagens = new Map<string, HTMLImageElement>()
@@ -58,8 +71,10 @@ interface Estado {
   facing: Ponto
   anim: 'Walk' | 'Idle'
   quadro: number
-  /** Ticks (1/60 s) no quadro atual. */
+  /** Ticks (1/60 s) no quadro atual (Idle) ou px andados no quadro atual (Walk). */
   ticks: number
+  /** Segundos sem andar. */
+  parado: number
 }
 
 /** Distancia do centro do POKE ate o pe do treinador, medida ao longo do rastro. */
@@ -90,7 +105,7 @@ type PokeEmCampo = Ponto & { radius: number; facing?: Ponto }
  * mesmo boneco de um mundo pro outro a cada quadro.
  */
 export class TreinadorEmCampo {
-  private e: Estado = { rastro: [], pos: null, facing: { x: 0, y: 1 }, anim: 'Idle', quadro: 0, ticks: 0 }
+  private e: Estado = { rastro: [], pos: null, facing: { x: 0, y: 1 }, anim: 'Idle', quadro: 0, ticks: 0, parado: 0 }
 
   /** Pe do treinador agora (px de mundo), ou `null` se ele nao esta em campo. */
   get pe(): Ponto | null {
@@ -111,7 +126,7 @@ export class TreinadorEmCampo {
       rastro: [atras, { x: poke.x, y: poke.y }],
       pos: { x: atras.x, y: atras.y + DO_CENTRO_AO_CHAO },
       facing: { x: f.x / n, y: f.y / n },
-      anim: 'Idle', quadro: 0, ticks: 0,
+      anim: 'Idle', quadro: 0, ticks: 0, parado: 0,
     }
   }
 
@@ -143,15 +158,35 @@ export class TreinadorEmCampo {
     }
 
     const dx = e.pos.x - antes.x, dy = e.pos.y - antes.y
-    const andou = Math.hypot(dx, dy) > 0.05
-    const anim = andou ? 'Walk' : 'Idle'
-    if (andou) e.facing = { x: dx, y: dy }
+    const passo = Math.hypot(dx, dy)
+    const andou = passo > 0.05
+    if (andou) {
+      e.parado = 0
+      // Direcao suavizada: o rastro tem quinas de 1 px, e seguir cada uma fazia
+      // a linha do sprite (8 direcoes) trocar quadro a quadro.
+      const n = Math.hypot(e.facing.x, e.facing.y) || 1
+      e.facing = {
+        x: (e.facing.x / n) * (1 - SUAVIZA_DIRECAO) + (dx / passo) * SUAVIZA_DIRECAO,
+        y: (e.facing.y / n) * (1 - SUAVIZA_DIRECAO) + (dy / passo) * SUAVIZA_DIRECAO,
+      }
+    } else {
+      e.parado += dt
+    }
+    const anim = andou || (e.anim === 'Walk' && e.parado < FOLGA_PRA_PARAR) ? 'Walk' : 'Idle'
     if (anim !== e.anim) { e.anim = anim; e.quadro = 0; e.ticks = 0 }
-    e.ticks += dt * 60
     const duracoes = ANIMS[e.anim].duracoes
-    while (e.ticks >= duracoes[e.quadro]) {
-      e.ticks -= duracoes[e.quadro]
-      e.quadro = (e.quadro + 1) % duracoes.length
+    if (e.anim === 'Walk') {
+      e.ticks += passo
+      while (e.ticks >= PX_POR_QUADRO_DE_PASSO) {
+        e.ticks -= PX_POR_QUADRO_DE_PASSO
+        e.quadro = (e.quadro + 1) % duracoes.length
+      }
+    } else {
+      e.ticks += dt * 60
+      while (e.ticks >= duracoes[e.quadro]) {
+        e.ticks -= duracoes[e.quadro]
+        e.quadro = (e.quadro + 1) % duracoes.length
+      }
     }
   }
 
