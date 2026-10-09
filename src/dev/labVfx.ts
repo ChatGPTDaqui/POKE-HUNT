@@ -40,6 +40,8 @@ import { GARRAS_POR_GOLPE } from '@/render/vfx/coreografias/garras'
 import { LAMINAS_POR_GOLPE } from '@/render/vfx/coreografias/laminas'
 import { CHUTES_POR_GOLPE } from '@/render/vfx/coreografias/chutes'
 import { CABECADAS_POR_GOLPE, INVESTIDAS_ELEMENTAIS_POR_GOLPE } from '@/render/vfx/coreografias/cargas'
+import { ROLAMENTOS_POR_GOLPE } from '@/render/vfx/coreografias/rolamentos'
+import { FURIAS_POR_GOLPE } from '@/render/vfx/coreografias/furias'
 import { tierDoPoder } from '@/data/tierDoVfx'
 import { REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
@@ -185,6 +187,9 @@ familiaNoLab('Investida elemental', INVESTIDAS_ELEMENTAIS_POR_GOLPE, { wild_char
   volt_switch: 'magnemite', flare_blitz: 'charmander', flame_charge: 'charmander', aqua_jet: 'squirtle', dragon_rush: 'dratini' })
 familiaNoLab('Cabeçada', CABECADAS_POR_GOLPE, { skull_bash: 'squirtle', zen_headbutt: 'espeon', iron_head: 'magnemite',
   head_smash: 'geodude', wood_hammer: 'bulbasaur' })
+familiaNoLab('Rolamento', ROLAMENTOS_POR_GOLPE, { rollout: 'geodude', ice_ball: 'jynx', rapid_spin: 'squirtle',
+  gyro_ball: 'magnemite', steamroller: 'scyther', flame_wheel: 'charmander' })
+familiaNoLab('Fúria', FURIAS_POR_GOLPE, { thrash: 'snorlax', petal_dance: 'bulbasaur' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

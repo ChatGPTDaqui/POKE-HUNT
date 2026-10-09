@@ -316,21 +316,40 @@ O pé é uma bota de perfil desenhada na grade (irmã do punho dos socos); muda 
 | Stomp | pé gigante desce de cima com sombra crescendo, poeira |
 | Stomping Tantrum | três pisões emburrados em volta do alvo, rachaduras no chão |
 
+### Método a partir daqui (09/10, pedido do dono)
+
+O dono achou genérico desenhar uma forma de família com variações ("trate cada
+golpe individualmente: veja a proposta do golpe, o que ele faz, a descrição, e
+a partir disso construa o efeito"). Agora cada golpe parte da descrição do jogo
+(PokeAPI: texto USUM + efeito). A frase vai no comentário do golpe, e o conceito
+abaixo diz o que a frase vira na tela. A família é só agrupamento de trabalho.
+
 ### 6–7. Investida elemental e Cabeçada — `coreografias/cargas.ts`
 
-A proa da Investida vestida pelo elemento ou pela cabeça (uma coreografia, duas famílias).
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Wild Charge | envolve-se em eletricidade e se choca; se fere um pouco | casulo de raios em volta do corpo; no choque, um raio VOLTA e acerta quem atacou |
+| Spark | trombada carregada; pode paralisar | faíscas nas bochechas; estática fica presa tremendo no alvo (paralisia) |
+| Volt Switch | ataca e volta correndo pra trocar de lugar | raio até o alvo, bola elétrica volta, e quem atacou vira o facho de luz de troca |
+| Flare Blitz | envolve-se em fogo e carrega; se fere muito; queima | labareda engole o corpo; cometa de fogo de cauda longa; quem atacou também pega fogo |
+| Flame Charge | envolto em chamas ataca; depois a Speed sobe | carga pequena de fogo; depois, setas de status e riscos de velocidade em quem atacou |
+| Aqua Jet | avança tão rápido que fica quase invisível; sempre primeiro | nenhum corpo viaja: um traço d'água instantâneo de ponta a ponta, que se desfaz em gotas |
+| Dragon Rush | trombada com ameaça avassaladora; pode fazer recuar | cabeça de dragão de energia se ergue rugindo e avança; linhas de susto no alvo |
+| Skull Bash | encolhe a cabeça e a Defesa sobe; no turno seguinte, aríete | escudo hexagonal + setas de Defesa; sai com o escudo na frente |
+| Zen Headbutt | concentra força de vontade na cabeça | joia rosa se concentra acima da cabeça (anéis fechando) e voa na testa do alvo |
+| Iron Head | golpeia com a cabeça dura como aço | elmo de metal com reflexo; no choque, CLANG: anéis de sino e fagulhas |
+| Head Smash | cabeçada de força total; se fere terrivelmente | o ar racha em volta do alvo; recuo grande, pedrinhas caindo em quem atacou |
+| Wood Hammer | bate o corpo rústico; se fere bastante | tronco de madeira com folhas ergue-se e desce como marreta; farpas |
 
-| Golpe | Meta (personalidade) |
-|---|---|
-| Wild Charge | raios em volta de quem carrega e da proa; recuo |
-| Spark | proa pequena com faíscas; raios curtos no impacto |
-| Volt Switch | bate e volta como bola elétrica em curva |
-| Flare Blitz | corpo em chamas na viagem, explosão de fogo; recuo |
-| Flame Charge | deixa chamas acesas no chão por onde passa |
-| Aqua Jet | sai quase sem preparo, rastro de gotas, coroa de respingo |
-| Dragon Rush | aura de dragão, proa dupla, choque duplo |
-| Skull Bash | levanta um escudo hexagonal no preparo longo e sai com ele |
-| Zen Headbutt | anéis psíquicos no preparo, na proa e no impacto |
-| Iron Head | reflexo branco correndo pela proa de aço, fagulhas |
-| Head Smash | pedras orbitando a cabeça, estilhaços grandes; recuo |
-| Wood Hammer | farpas de madeira orbitando e voando; recuo |
+### 8–9. Rolamento e Fúria — `coreografias/rolamentos.ts`, `coreografias/furias.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Rollout | rola contra o alvo turno após turno, mais forte a cada acerto | bate, recua quicando e volta MAIOR pra bater de novo |
+| Ice Ball | idem, com gelo | bola de neve que cresce enquanto rola e se estilhaça em gelo e neve |
+| Rapid Spin | giro que elimina Bind, Wrap, Leech Seed, Spikes | gira no lugar arremessando pra longe cipós/espinhos/sementes; sai girando |
+| Gyro Ball | trombada em giro altíssimo | giroscópio de aço com anéis que aceleram no preparo; fagulhas em roda |
+| Steamroller | esmaga rolando POR CIMA do alvo | rolo largo passa por cima e segue; linhas de achatamento |
+| Flame Wheel | envolve-se em fogo e carrega; pode queimar | anel OCO de línguas de fogo girando |
+| Thrash | surra por 2–3 turnos e depois fica confuso | golpes de vários lados sem ritmo; estrelinhas de tontura em quem atacou |
+| Petal Dance | espalha pétalas por 2–3 turnos e depois fica confuso | redemoinho de pétalas em quem dança que varre o alvo; tontura no fim |
