@@ -86,7 +86,7 @@ function poligono(ctx: CanvasRenderingContext2D, pts: readonly (readonly [number
  * A proa: onda de choque em "(" com a ponta pra +X. `largura` abre as asas
  * (Strength empurra uma parede, Tackle é uma cunha).
  */
-function proa(ctx: CanvasRenderingContext2D, p: Ponto, angulo: number, escala: number, largura: number, pele: Pele, aura?: string): void {
+export function proa(ctx: CanvasRenderingContext2D, p: Ponto, angulo: number, escala: number, largura: number, pele: Pele, aura?: string): void {
   ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(angulo); ctx.scale(escala, escala * largura)
   const forma = (k: number) => {
     ctx.beginPath(); ctx.moveTo(-9 - k, -13 - k)
@@ -140,7 +140,7 @@ function poeira(ctx: CanvasRenderingContext2D, p: Ponto, t: number, n: number, e
 }
 
 /** Arcos do choque abrindo do outro lado do alvo, na direção da pancada. */
-function ondaDeChoque(ctx: CanvasRenderingContext2D, alvo: Ponto, angulo: number, t: number, raio: number, n: number, pele: Pele): void {
+export function ondaDeChoque(ctx: CanvasRenderingContext2D, alvo: Ponto, angulo: number, t: number, raio: number, n: number, pele: Pele): void {
   for (let i = 0; i < n; i++) {
     const u = limitar((t - i * .12) / .8)
     if (u <= 0 || u >= 1) continue

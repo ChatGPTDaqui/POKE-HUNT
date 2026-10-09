@@ -38,6 +38,10 @@ import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
 import { INVESTIDAS_POR_GOLPE } from '@/render/vfx/coreografias/investidas'
 import { GARRAS_POR_GOLPE } from '@/render/vfx/coreografias/garras'
 import { LAMINAS_POR_GOLPE } from '@/render/vfx/coreografias/laminas'
+import { CHUTES_POR_GOLPE } from '@/render/vfx/coreografias/chutes'
+import { CABECADAS_POR_GOLPE, INVESTIDAS_ELEMENTAIS_POR_GOLPE } from '@/render/vfx/coreografias/cargas'
+import { ROLAMENTOS_POR_GOLPE } from '@/render/vfx/coreografias/rolamentos'
+import { FURIAS_POR_GOLPE } from '@/render/vfx/coreografias/furias'
 import { tierDoPoder } from '@/data/tierDoVfx'
 import { REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
@@ -176,6 +180,16 @@ familiaNoLab('Garra', GARRAS_POR_GOLPE, { scratch: 'charmander', fury_swipes: 'm
 familiaNoLab('Lâmina', LAMINAS_POR_GOLPE, { slash: 'scyther', night_slash: 'umbreon', karate_chop: 'machop',
   cross_chop: 'machop', psycho_cut: 'espeon', aerial_ace: 'pidgey', razor_shell: 'squirtle', fury_cutter: 'scyther',
   cross_poison: 'ekans' })
+familiaNoLab('Chute', CHUTES_POR_GOLPE, { jump_kick: 'hitmonlee', high_jump_kick: 'hitmonlee', rolling_kick: 'hitmonlee',
+  triple_kick: 'hitmontop', low_kick: 'machop', low_sweep: 'machop', mega_kick: 'hitmonlee', blaze_kick: 'charmander',
+  stomp: 'snorlax', stomping_tantrum: 'sandshrew' })
+familiaNoLab('Investida elemental', INVESTIDAS_ELEMENTAIS_POR_GOLPE, { wild_charge: 'pikachu', spark: 'pikachu',
+  volt_switch: 'magnemite', flare_blitz: 'charmander', flame_charge: 'charmander', aqua_jet: 'squirtle', dragon_rush: 'dratini' })
+familiaNoLab('Cabeçada', CABECADAS_POR_GOLPE, { skull_bash: 'squirtle', zen_headbutt: 'espeon', iron_head: 'magnemite',
+  head_smash: 'geodude', wood_hammer: 'bulbasaur' })
+familiaNoLab('Rolamento', ROLAMENTOS_POR_GOLPE, { rollout: 'geodude', ice_ball: 'jynx', rapid_spin: 'squirtle',
+  gyro_ball: 'magnemite', steamroller: 'scyther', flame_wheel: 'charmander' })
+familiaNoLab('Fúria', FURIAS_POR_GOLPE, { thrash: 'snorlax', petal_dance: 'bulbasaur' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
