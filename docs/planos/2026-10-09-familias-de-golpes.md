@@ -458,3 +458,40 @@ golpe de ÁREA com efeito próprio (`REGISTRO_POR_GOLPE_DE_AREA`).
 | Rage | Ataque sobe a cada golpe recebido | chamas vermelhas em quem ataca e setas de Ataque subindo |
 | Final Gambit | arrisca tudo: desmaia e causa dano igual ao HP | a vida sai como globo dourado esvaziando a barra; explode no alvo; espiral de desmaio |
 | Brutal Swing (área) | gira o corpo com violência e acerta tudo em volta | arcos enormes rodando no chão até a borda; estalos espalhados pelo interior |
+
+### 16. Esfera / bomba — `coreografias/esferas.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Energy Ball | tira força da natureza e dispara | brilhos verdes vêm de todos os lados e formam a bola; seta de Sp. Def caindo |
+| Aura Sphere | rajada de aura de dentro do corpo; nunca erra | bola azul com borda de aura tremendo, corrige o rumo até o alvo |
+| Focus Blast | aguça o foco e solta o poder | anéis se fecham em quem ataca; bola laranja com redemoinho; impacto enorme |
+| Electro Ball | arremessa orbe elétrico; mais rápido = mais forte | arremesso rápido com riscos longos, orbe com faíscas |
+| Weather Ball | muda com o tempo | bola-vitrine com sol, gota e floco trocando dentro |
+| Mist Ball | penugem como névoa envolve o alvo | bola felpuda branco-rosa que envolve o alvo e vira plumas |
+| Luster Purge | estouro de luz | joia de luz que explode em raios retos |
+| Seed Bomb | sementes de casca dura caem de cima | sementes caem do alto, uma após a outra, explodindo |
+| Egg Bomb | ovo grande arremessado com força | ovo pintado voa em arco, racha e explode |
+| Mud Bomb | bola de lama compacta; pode cegar | bola de lama em arco; manchas de lama grudam no alvo |
+| Octazooka | tinta na cara; pode cegar | bala de tinta preta estoura e escorre na cara do alvo |
+| Vacuum Wave | gira os punhos e manda vácuo; sempre primeiro | punhos giram; anéis só de contorno (vácuo) correm até o alvo |
+
+### 17. Rajada de projéteis — `coreografias/rajadas.ts`
+
+Os de 2–5 acertos desenham um projétil por acerto resolvido. Natural Gift,
+Spit Up e Trump Card ficam de fora (nunca disparam).
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Bullet Seed | atira sementes 2–5 vezes | metralhadora de sementes retas |
+| Rock Blast | arremessa pedras 2–5 vezes | pedras pesadas em arco, girando |
+| Spike Cannon | espinhos disparados em sequência | espinhos brancos finos e retos |
+| Icicle Spear | lanças de gelo 2–5 vezes | lanças de gelo compridas; estilhaços no fim |
+| Barrage | objetos redondos 2–5 vezes | bolas em arco alto |
+| Bone Rush | golpeia com osso 2–5 vezes | osso bate em ritmo, girando entre as pancadas |
+| Fling | arremessa o item segurado | bolsinha voa rodopiando |
+| Present | presente com armadilha | caixa de presente quica até o alvo, abre — é uma bomba |
+| Hidden Power | tipo depende de quem usa | seis orbes de cores diferentes giram (tipo secreto) e convergem |
+| Pay Day | arremessa moedas; dá dinheiro | chuva de moedas de ouro girando que quicam e brilham |
+| Bonemerang | osso vai e volta, acerta duas vezes | bumerangue de osso contorna o alvo e acerta de novo voltando |
+| Bone Club | porrete de osso; pode fazer recuar | osso erguido e baixado na cabeça; linhas de susto |

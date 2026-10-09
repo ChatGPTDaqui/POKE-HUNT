@@ -35,6 +35,8 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { RAJADAS_POR_GOLPE } from '@/render/vfx/coreografias/rajadas'
+import { ESFERAS_POR_GOLPE } from '@/render/vfx/coreografias/esferas'
 import { LUTA_EM_AREA_POR_GOLPE, LUTA_POR_GOLPE } from '@/render/vfx/coreografias/lutaCorpo'
 import { TRUQUES_POR_GOLPE } from '@/render/vfx/coreografias/truques'
 import { PERFURAR_POR_GOLPE } from '@/render/vfx/coreografias/perfurar'
@@ -203,6 +205,8 @@ familiaNoLab('Perfurar', PERFURAR_POR_GOLPE, { 'horn_attack': 'nidoran_m', 'fury
 familiaNoLab('Truque sombrio', TRUQUES_POR_GOLPE, { 'covet': 'eevee', 'thief': 'umbreon', 'knock_off': 'umbreon', 'punishment': 'umbreon', 'payback': 'umbreon', 'assurance': 'umbreon', 'foul_play': 'umbreon' })
 familiaNoLab('Luta corporal', LUTA_POR_GOLPE, { 'double_slap': 'jynx', 'wake_up_slap': 'machop', 'smelling_salts': 'machop', 'arm_thrust': 'machop', 'brick_break': 'machop', 'revenge': 'machop', 'counter': 'machop', 'reversal': 'machop', 'endeavor': 'rattata', 'flail': 'rattata', 'vital_throw': 'machop', 'circle_throw': 'machop', 'storm_throw': 'machop', 'seismic_toss': 'machop', 'submission': 'machop', 'superpower': 'machop', 'close_combat': 'machop', 'fake_out': 'meowth', 'double_hit': 'ekans', 'rage': 'rattata', 'final_gambit': 'machop' })
 familiaNoLab('Luta corporal', LUTA_EM_AREA_POR_GOLPE, { brutal_swing: 'umbreon' }, true)
+familiaNoLab('Esfera', ESFERAS_POR_GOLPE, { 'energy_ball': 'bulbasaur', 'aura_sphere': 'machop', 'focus_blast': 'machop', 'electro_ball': 'pikachu', 'weather_ball': 'eevee', 'mist_ball': 'espeon', 'luster_purge': 'espeon', 'seed_bomb': 'bulbasaur', 'egg_bomb': 'snorlax', 'mud_bomb': 'sandshrew', 'octazooka': 'squirtle', 'vacuum_wave': 'machop' })
+familiaNoLab('Rajada', RAJADAS_POR_GOLPE, { 'bullet_seed': 'bulbasaur', 'rock_blast': 'geodude', 'spike_cannon': 'jynx', 'icicle_spear': 'jynx', 'barrage': 'snorlax', 'bone_rush': 'cubone', 'fling': 'umbreon', 'present': 'jynx', 'hidden_power': 'eevee', 'pay_day': 'meowth', 'bonemerang': 'cubone', 'bone_club': 'cubone' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
