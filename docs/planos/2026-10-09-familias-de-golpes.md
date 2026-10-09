@@ -399,3 +399,32 @@ abaixo diz o que a frase vira na tela. A família é só agrupamento de trabalho
 regra não implementada — ver `abilities.ts`), então o efeito nunca apareceria:
 Beat Up, Fissure, Sheer Cold, Natural Gift, Spit Up, Bide, Guillotine, Horn
 Drill, Trump Card, Metal Burst. Se forem ligados um dia, entram numa família.
+
+### 13. Chifre, ferrão e bico — `coreografias/perfurar.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Horn Attack | estoca com um chifre pontudo | cone de marfim longo, uma estocada firme |
+| Fury Attack | estoca 2–5 vezes seguidas | uma estocada curta por acerto, em pontos diferentes |
+| Peck | bica com o bico | bico amarelo curto, bicada rápida, uma pena solta |
+| Pluck | bica; se o alvo tem fruta, come | bicada; a fruta salta do alvo, voa até quem bicou e vira migalha |
+| Drill Run | gira o corpo como broca; crítico fácil | broca com listras em espiral girando; terra espirra |
+| Poison Jab | apunhala com braço embebido em veneno | braço roxo pingando veneno crava; respingo roxo |
+| Twineedle | duas agulhadas seguidas; pode envenenar | duas agulhas finas, uma em cima e outra embaixo, uma depois da outra |
+| Fell Stinger | se nocautear, o Ataque sobe muito | ferrão de abelha listrado cravando fundo, brilho vermelho de "pronto pra subir" |
+| Smart Strike | chifre afiado; nunca erra | mira vermelha trava no alvo; chifre de aço faz curva e acerta o centro |
+
+### 14. Truque sombrio — `coreografias/truques.ts`
+
+O jogo não tem item segurado; a bolsinha mostra a ideia sem prometer mecânica.
+Beat Up fica de fora (nunca dispara).
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Covet | se aproxima fofo e rouba o item | corações flutuam até o alvo; a bolsinha vai embora num arco |
+| Thief | ataca e rouba o item ao mesmo tempo | mão de sombra dispara, agarra a bolsinha e puxa de volta |
+| Knock Off | derruba o item do alvo | tapa de cima; a bolsinha voa, quica no chão e some |
+| Punishment | mais forte quanto mais o alvo se fortaleceu | setas de aumento do alvo aparecem e um X escuro as quebra |
+| Payback | guarda força e revida | bolinhas escuras se juntam em quem ataca e saem numa onda de revide |
+| Assurance | dobra se o alvo já se feriu no turno | X vermelho marca a ferida; o golpe acerta duas vezes em cima dela |
+| Foul Play | usa a força do alvo contra ele | aura vermelha é arrancada do alvo, sobe num arco e cai nele |

@@ -35,6 +35,8 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { TRUQUES_POR_GOLPE } from '@/render/vfx/coreografias/truques'
+import { PERFURAR_POR_GOLPE } from '@/render/vfx/coreografias/perfurar'
 import { APERTOS_POR_GOLPE } from '@/render/vfx/coreografias/apertos'
 import { CAUDAS_POR_GOLPE } from '@/render/vfx/coreografias/caudas'
 import { SOME_E_VOLTA_POR_GOLPE } from '@/render/vfx/coreografias/someEVolta'
@@ -196,6 +198,8 @@ familiaNoLab('Fúria', FURIAS_POR_GOLPE, { thrash: 'snorlax', petal_dance: 'bulb
 familiaNoLab('Some e volta', SOME_E_VOLTA_POR_GOLPE, { 'fly': 'pidgey', 'bounce': 'pidgey', 'sky_drop': 'pidgey', 'dive': 'squirtle', 'dig': 'sandshrew', 'shadow_sneak': 'gengar', 'brave_bird': 'pidgey', 'feint_attack': 'umbreon', 'feint': 'eevee' })
 familiaNoLab('Cauda', CAUDAS_POR_GOLPE, { 'power_whip': 'bulbasaur', 'slam': 'ekans', 'aqua_tail': 'squirtle', 'poison_tail': 'ekans', 'dragon_tail': 'dratini', 'steel_wing': 'pidgey', 'wing_attack': 'pidgey', 'needle_arm': 'bulbasaur' })
 familiaNoLab('Aperto', APERTOS_POR_GOLPE, { 'wrap': 'ekans', 'bind': 'ekans', 'constrict': 'ekans', 'wring_out': 'snorlax', 'clamp': 'squirtle', 'vice_grip': 'scyther', 'crabhammer': 'squirtle' })
+familiaNoLab('Perfurar', PERFURAR_POR_GOLPE, { 'horn_attack': 'nidoran_m', 'fury_attack': 'nidoran_m', 'peck': 'pidgey', 'pluck': 'pidgey', 'drill_run': 'sandshrew', 'poison_jab': 'ekans', 'twineedle': 'scyther', 'fell_stinger': 'scyther', 'smart_strike': 'magnemite' })
+familiaNoLab('Truque sombrio', TRUQUES_POR_GOLPE, { 'covet': 'eevee', 'thief': 'umbreon', 'knock_off': 'umbreon', 'punishment': 'umbreon', 'payback': 'umbreon', 'assurance': 'umbreon', 'foul_play': 'umbreon' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
