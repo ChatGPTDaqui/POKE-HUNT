@@ -34,6 +34,7 @@ import { DRAGAO_AREA, DRAGAO_SINGLE, VITRINE_DO_DRAGAO } from '@/render/vfx/core
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
+import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
 import { tierDoPoder } from '@/data/tierDoVfx'
 import { REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
@@ -51,9 +52,12 @@ interface GolpeDoLab {
   antes?: EntradaDeCoreografia
   soco?: boolean
   beam?: boolean
+  /** Família de golpes (09/10): aparece no seletor como "Família: <nome>". */
+  familia?: string
 }
 
-const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
+// Chave = tipo (ElementType) ou "Família: <nome>" (golpes com efeito próprio, por forma).
+const TIPOS_DO_LAB: Partial<Record<string, GolpeDoLab[]>> = {
   FIRE: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
@@ -146,6 +150,20 @@ for (const [id, entrada] of Object.entries(BEAMS_POR_GOLPE)) {
   ;(TIPOS_DO_LAB[g.type] ??= []).push({ id, tipo: g.type, area: false, tier, entrada,
     atacante: ATACANTES_DE_BEAM[id], antes: BEAMS_COM_IMPACTO_ANTERIOR[id], beam: true })
 }
+
+// Famílias por forma (09/10, docs/planos/2026-10-09-familias-de-golpes.md):
+// a esquerda mostra o efeito ATUAL do jogo (coreografia do tipo no tier do
+// golpe), a direita o efeito próprio do golpe, ainda fora do registro.
+function familiaNoLab(nome: string, golpes: Record<string, EntradaDeCoreografia>, atacantes: Record<string, string>): void {
+  for (const [id, entrada] of Object.entries(golpes)) {
+    const g = getAbility(id)!, tier = tierDoPoder(g.power, false)
+    ;(TIPOS_DO_LAB[`Família: ${nome}`] ??= []).push({ id, tipo: g.type, area: false, tier, entrada,
+      atacante: atacantes[id], antes: REGISTRO_SINGLE[g.type]?.[tier], familia: nome })
+  }
+}
+familiaNoLab('Mordida', MORDIDAS_POR_GOLPE, { bite: 'umbreon', crunch: 'umbreon', hyper_fang: 'rattata',
+  super_fang: 'rattata', thunder_fang: 'pikachu', ice_fang: 'jynx', fire_fang: 'charmander',
+  poison_fang: 'ekans', bug_bite: 'scyther', leech_life: 'scyther' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
@@ -423,15 +441,22 @@ class Cena {
 // ---------------------------------------------------------------------------
 
 const cenas = [new Cena($('cena-tira'), 'tira'), new Cena($('cena-anime'), 'anime')]
-let tipoAtual: ElementType = 'FIRE'
+let tipoAtual = 'FIRE'
 let golpeAtual = 2
+
+function rotulo(g: GolpeDoLab): string {
+  if (g.familia) return g.familia
+  if (g.beam) return 'Beam'
+  if (g.soco) return 'Soco'
+  return g.area ? 'Área' : 'Single'
+}
 
 function montarBotoes(): void {
   const barra = $('golpes')
   barra.innerHTML = ''
   ;(TIPOS_DO_LAB[tipoAtual] ?? []).forEach((g, i) => {
     const b = document.createElement('button')
-    b.textContent = `${g.beam ? 'Beam' : g.soco ? 'Soco' : g.area ? 'Área' : 'Single'} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
+    b.textContent = `${rotulo(g)} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
     b.className = i === golpeAtual ? 'on' : ''
     b.onclick = () => { golpeAtual = i; montarBotoes(); reiniciar() }
     barra.append(b)
@@ -450,6 +475,10 @@ function reiniciar(): void {
     $('titulo-tira').textContent = 'Anterior: impacto da 7.81'
     $('titulo-anime').textContent = 'Novo: colisão sustentada do Beam'
   }
+  if (g.familia) {
+    $('titulo-tira').textContent = 'Atual no jogo: efeito do tipo'
+    $('titulo-anime').textContent = `Novo: família ${g.familia}`
+  }
   if (g.id === 'bullet_punch') {
     $('titulo-tira').textContent = 'Bullet Punch: sprite original'
     $('titulo-anime').textContent = 'Bullet Punch: sprite original preservada'
@@ -458,7 +487,7 @@ function reiniciar(): void {
 
 const tipoSel = $<HTMLSelectElement>('tipo')
 for (const t of Object.keys(TIPOS_DO_LAB)) tipoSel.add(new Option(t, t))
-tipoSel.onchange = () => { tipoAtual = tipoSel.value as ElementType; golpeAtual = 0; montarBotoes(); reiniciar() }
+tipoSel.onchange = () => { tipoAtual = tipoSel.value; golpeAtual = 0; montarBotoes(); reiniciar() }
 $<HTMLSelectElement>('acertos').onchange = () => { reiniciar(); quadroCongelado() }
 $<HTMLSelectElement>('distancia').onchange = () => { reiniciar(); quadroCongelado() }
 $<HTMLSelectElement>('quadro').onchange = e => {
@@ -486,9 +515,11 @@ new MutationObserver(() => {
   const d = document.body.dataset
   opt.congelado = d.labCongelar ? Number(d.labCongelar) : null
   if (d.labGolpe) {
-    const [tipo, i] = d.labGolpe.split(':')
+    // Último ":" separa o índice — a chave de família ("Família: Mordida") também tem ":".
+    const corte = d.labGolpe.lastIndexOf(':')
+    const tipo = d.labGolpe.slice(0, corte), i = d.labGolpe.slice(corte + 1)
     delete d.labGolpe
-    tipoAtual = tipo as ElementType; tipoSel.value = tipo; golpeAtual = Number(i); montarBotoes(); reiniciar()
+    tipoAtual = tipo; tipoSel.value = tipo; golpeAtual = Number(i); montarBotoes(); reiniciar()
   }
   // Desenha na hora: com a aba em segundo plano o requestAnimationFrame para.
   // Duas vezes: a primeira abre o turno, a segunda chega no ms pedido.
