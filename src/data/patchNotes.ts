@@ -12,6 +12,20 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Famílias de golpes com efeito próprio: Mordida e Investida.
+  {
+    version: '7.92',
+    date: '2026-10-09',
+    title: 'Mordidas, investidas e cortes com cara própria',
+    highlights: [
+      'Bite, Crunch, os Fangs, Bug Bite e Leech Life ganharam efeito próprio: uma boca aparece no alvo e fecha nele — cada uma do seu jeito (gelo que cresce, fogo nos cantos, veneno pingando, dentões que cortam ao meio...).',
+      'Tackle, Quick Attack, Take Down, Double-Edge, Body Slam, Giga Impact e outros 12 golpes de investida agora mostram a onda de choque indo na frente do corpo, com o caminho e a marca de cada golpe.',
+      'Golpes de garra (Scratch, Fury Swipes, Metal Claw, Shadow Claw, Dragon Claw...) deixam rasgos próprios, e os de lâmina (Slash, Night Slash, Cross Chop, Psycho Cut, Aerial Ace...) cortam com um gume do seu jeito.',
+      'Chutes e pisões (Jump Kick, Rolling Kick, Stomp, Blaze Kick...), cabeçadas (Skull Bash, Zen Headbutt, Iron Head, Head Smash, Wood Hammer), investidas elementais (Wild Charge, Volt Switch, Flare Blitz, Aqua Jet, Dragon Rush...), golpes de rolar (Rollout, Ice Ball, Rapid Spin, Gyro Ball, Steamroller, Flame Wheel), Thrash e Petal Dance também ganharam efeito próprio, cada um desenhado a partir do que o golpe faz.',
+      'Fly decola e mergulha, Dig cava um túnel até o alvo, Dive sobe num gêiser, Shadow Sneak estica a sombra e ataca por trás; caudas, asas e chicotes (Aqua Tail, Power Whip, Wing Attack...) e golpes de prender (Wrap, Bind, Clamp, Vice Grip, Crabhammer...) também ganharam efeito próprio.',
+      'Chifres, bicos e ferrões (Drill Run gira como broca, Smart Strike trava a mira, Pluck rouba a fruta), truques sombrios (Thief agarra a bolsinha, Foul Play usa a força do alvo contra ele) e 22 golpes de luta corporal (Brick Break quebra a parede, Endeavor iguala as barras de HP, Seismic Toss joga lá do alto, Final Gambit entrega a própria vida) também ganharam efeito próprio.',
+    ],
+  },
   // Treinador nas hunts se move como gente.
   {
     version: '7.91',

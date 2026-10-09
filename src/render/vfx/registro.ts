@@ -40,6 +40,20 @@ import { DRAGAO_AREA, DRAGAO_SINGLE } from './coreografias/dragao'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 import { SOCOS_POR_GOLPE } from './coreografias/socos'
 import { BEAMS_POR_GOLPE } from './coreografias/beams'
+import { LUTA_EM_AREA_POR_GOLPE, LUTA_POR_GOLPE } from './coreografias/lutaCorpo'
+import { TRUQUES_POR_GOLPE } from './coreografias/truques'
+import { PERFURAR_POR_GOLPE } from './coreografias/perfurar'
+import { APERTOS_POR_GOLPE } from './coreografias/apertos'
+import { CAUDAS_POR_GOLPE } from './coreografias/caudas'
+import { SOME_E_VOLTA_POR_GOLPE } from './coreografias/someEVolta'
+import { FURIAS_POR_GOLPE } from './coreografias/furias'
+import { ROLAMENTOS_POR_GOLPE } from './coreografias/rolamentos'
+import { CABECADAS_POR_GOLPE, INVESTIDAS_ELEMENTAIS_POR_GOLPE } from './coreografias/cargas'
+import { CHUTES_POR_GOLPE } from './coreografias/chutes'
+import { LAMINAS_POR_GOLPE } from './coreografias/laminas'
+import { GARRAS_POR_GOLPE } from './coreografias/garras'
+import { MORDIDAS_POR_GOLPE } from './coreografias/mordidas'
+import { INVESTIDAS_POR_GOLPE } from './coreografias/investidas'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
 
@@ -86,4 +100,22 @@ export const REGISTRO_DE_AREA: Partial<Record<ElementType, PorTier>> = {
 }
 
 export const REGISTRO_DE_MOTIVO: Partial<Record<Motivo, EntradaDeCoreografia>> = {}
-export const REGISTRO_POR_GOLPE: Record<string, EntradaDeCoreografia> = { ...SOCOS_POR_GOLPE, ...BEAMS_POR_GOLPE }
+// Famílias de golpes por forma (plano docs/planos/2026-10-09-familias-de-golpes.md).
+export const REGISTRO_POR_GOLPE: Record<string, EntradaDeCoreografia> = {
+  ...SOCOS_POR_GOLPE, ...BEAMS_POR_GOLPE, ...MORDIDAS_POR_GOLPE, ...INVESTIDAS_POR_GOLPE,
+  ...GARRAS_POR_GOLPE,
+  ...LAMINAS_POR_GOLPE,
+  ...CHUTES_POR_GOLPE,
+  ...INVESTIDAS_ELEMENTAIS_POR_GOLPE, ...CABECADAS_POR_GOLPE,
+  ...ROLAMENTOS_POR_GOLPE,
+  ...FURIAS_POR_GOLPE,
+  ...SOME_E_VOLTA_POR_GOLPE,
+  ...CAUDAS_POR_GOLPE,
+  ...APERTOS_POR_GOLPE,
+  ...PERFURAR_POR_GOLPE,
+  ...TRUQUES_POR_GOLPE,
+  ...LUTA_POR_GOLPE,
+}
+export const REGISTRO_POR_GOLPE_DE_AREA: Record<string, EntradaDeCoreografia> = {
+  ...LUTA_EM_AREA_POR_GOLPE,
+}

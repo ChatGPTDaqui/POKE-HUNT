@@ -34,8 +34,22 @@ import { DRAGAO_AREA, DRAGAO_SINGLE, VITRINE_DO_DRAGAO } from '@/render/vfx/core
 import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
+import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { LUTA_EM_AREA_POR_GOLPE, LUTA_POR_GOLPE } from '@/render/vfx/coreografias/lutaCorpo'
+import { TRUQUES_POR_GOLPE } from '@/render/vfx/coreografias/truques'
+import { PERFURAR_POR_GOLPE } from '@/render/vfx/coreografias/perfurar'
+import { APERTOS_POR_GOLPE } from '@/render/vfx/coreografias/apertos'
+import { CAUDAS_POR_GOLPE } from '@/render/vfx/coreografias/caudas'
+import { SOME_E_VOLTA_POR_GOLPE } from '@/render/vfx/coreografias/someEVolta'
+import { INVESTIDAS_POR_GOLPE } from '@/render/vfx/coreografias/investidas'
+import { GARRAS_POR_GOLPE } from '@/render/vfx/coreografias/garras'
+import { LAMINAS_POR_GOLPE } from '@/render/vfx/coreografias/laminas'
+import { CHUTES_POR_GOLPE } from '@/render/vfx/coreografias/chutes'
+import { CABECADAS_POR_GOLPE, INVESTIDAS_ELEMENTAIS_POR_GOLPE } from '@/render/vfx/coreografias/cargas'
+import { ROLAMENTOS_POR_GOLPE } from '@/render/vfx/coreografias/rolamentos'
+import { FURIAS_POR_GOLPE } from '@/render/vfx/coreografias/furias'
 import { tierDoPoder } from '@/data/tierDoVfx'
-import { REGISTRO_SINGLE } from '@/render/vfx/registro'
+import { REGISTRO_DE_AREA, REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
 import { desenharPixelizado } from '@/render/vfx/pixelizador'
@@ -51,9 +65,12 @@ interface GolpeDoLab {
   antes?: EntradaDeCoreografia
   soco?: boolean
   beam?: boolean
+  /** Família de golpes (09/10): aparece no seletor como "Família: <nome>". */
+  familia?: string
 }
 
-const TIPOS_DO_LAB: Partial<Record<ElementType, GolpeDoLab[]>> = {
+// Chave = tipo (ElementType) ou "Família: <nome>" (golpes com efeito próprio, por forma).
+const TIPOS_DO_LAB: Partial<Record<string, GolpeDoLab[]>> = {
   FIRE: [
     ...([1, 2, 3, 4] as const).map(t => ({ id: VITRINE_DO_FOGO.single[t], tipo: 'FIRE' as const, area: false, tier: t, entrada: FOGO_SINGLE[t], atacante: 'charmander' })),
     ...([1, 2, 3] as const).map(t => ({ id: VITRINE_DO_FOGO.area[t], tipo: 'FIRE' as const, area: true, tier: t, entrada: FOGO_AREA[t], atacante: 'charmander' })),
@@ -146,6 +163,46 @@ for (const [id, entrada] of Object.entries(BEAMS_POR_GOLPE)) {
   ;(TIPOS_DO_LAB[g.type] ??= []).push({ id, tipo: g.type, area: false, tier, entrada,
     atacante: ATACANTES_DE_BEAM[id], antes: BEAMS_COM_IMPACTO_ANTERIOR[id], beam: true })
 }
+
+// Famílias por forma (09/10, docs/planos/2026-10-09-familias-de-golpes.md):
+// a esquerda mostra o efeito ATUAL do jogo (coreografia do tipo no tier do
+// golpe), a direita o efeito próprio do golpe, ainda fora do registro.
+function familiaNoLab(nome: string, golpes: Record<string, EntradaDeCoreografia>, atacantes: Record<string, string>, area = false): void {
+  for (const [id, entrada] of Object.entries(golpes)) {
+    const g = getAbility(id)!, tier = tierDoPoder(g.power, area)
+    ;(TIPOS_DO_LAB[`Família: ${nome}`] ??= []).push({ id, tipo: g.type, area, tier, entrada,
+      atacante: atacantes[id], antes: (area ? REGISTRO_DE_AREA : REGISTRO_SINGLE)[g.type]?.[tier], familia: nome })
+  }
+}
+familiaNoLab('Mordida', MORDIDAS_POR_GOLPE, { bite: 'umbreon', crunch: 'umbreon', hyper_fang: 'rattata',
+  super_fang: 'rattata', thunder_fang: 'pikachu', ice_fang: 'jynx', fire_fang: 'charmander',
+  poison_fang: 'ekans', bug_bite: 'scyther', leech_life: 'scyther' })
+familiaNoLab('Investida', INVESTIDAS_POR_GOLPE, { tackle: 'eevee', quick_attack: 'rattata', extreme_speed: 'eevee',
+  take_down: 'eevee', double_edge: 'eevee', body_slam: 'snorlax', giga_impact: 'snorlax', high_horsepower: 'sandshrew',
+  last_resort: 'eevee', retaliate: 'rattata', chip_away: 'rattata', facade: 'rattata', return: 'eevee',
+  frustration: 'eevee', strength: 'machop', heavy_slam: 'magnemite', u_turn: 'scyther', acrobatics: 'pidgey' })
+familiaNoLab('Garra', GARRAS_POR_GOLPE, { scratch: 'charmander', fury_swipes: 'meowth', crush_claw: 'sandshrew',
+  metal_claw: 'magnemite', shadow_claw: 'gengar', dragon_claw: 'dratini', false_swipe: 'scyther' })
+familiaNoLab('Lâmina', LAMINAS_POR_GOLPE, { slash: 'scyther', night_slash: 'umbreon', karate_chop: 'machop',
+  cross_chop: 'machop', psycho_cut: 'espeon', aerial_ace: 'pidgey', razor_shell: 'squirtle', fury_cutter: 'scyther',
+  cross_poison: 'ekans' })
+familiaNoLab('Chute', CHUTES_POR_GOLPE, { jump_kick: 'hitmonlee', high_jump_kick: 'hitmonlee', rolling_kick: 'hitmonlee',
+  triple_kick: 'hitmontop', low_kick: 'machop', low_sweep: 'machop', mega_kick: 'hitmonlee', blaze_kick: 'charmander',
+  stomp: 'snorlax', stomping_tantrum: 'sandshrew' })
+familiaNoLab('Investida elemental', INVESTIDAS_ELEMENTAIS_POR_GOLPE, { wild_charge: 'pikachu', spark: 'pikachu',
+  volt_switch: 'magnemite', flare_blitz: 'charmander', flame_charge: 'charmander', aqua_jet: 'squirtle', dragon_rush: 'dratini' })
+familiaNoLab('Cabeçada', CABECADAS_POR_GOLPE, { skull_bash: 'squirtle', zen_headbutt: 'espeon', iron_head: 'magnemite',
+  head_smash: 'geodude', wood_hammer: 'bulbasaur' })
+familiaNoLab('Rolamento', ROLAMENTOS_POR_GOLPE, { rollout: 'geodude', ice_ball: 'jynx', rapid_spin: 'squirtle',
+  gyro_ball: 'magnemite', steamroller: 'scyther', flame_wheel: 'charmander' })
+familiaNoLab('Fúria', FURIAS_POR_GOLPE, { thrash: 'snorlax', petal_dance: 'bulbasaur' })
+familiaNoLab('Some e volta', SOME_E_VOLTA_POR_GOLPE, { 'fly': 'pidgey', 'bounce': 'pidgey', 'sky_drop': 'pidgey', 'dive': 'squirtle', 'dig': 'sandshrew', 'shadow_sneak': 'gengar', 'brave_bird': 'pidgey', 'feint_attack': 'umbreon', 'feint': 'eevee' })
+familiaNoLab('Cauda', CAUDAS_POR_GOLPE, { 'power_whip': 'bulbasaur', 'slam': 'ekans', 'aqua_tail': 'squirtle', 'poison_tail': 'ekans', 'dragon_tail': 'dratini', 'steel_wing': 'pidgey', 'wing_attack': 'pidgey', 'needle_arm': 'bulbasaur' })
+familiaNoLab('Aperto', APERTOS_POR_GOLPE, { 'wrap': 'ekans', 'bind': 'ekans', 'constrict': 'ekans', 'wring_out': 'snorlax', 'clamp': 'squirtle', 'vice_grip': 'scyther', 'crabhammer': 'squirtle' })
+familiaNoLab('Perfurar', PERFURAR_POR_GOLPE, { 'horn_attack': 'nidoran_m', 'fury_attack': 'nidoran_m', 'peck': 'pidgey', 'pluck': 'pidgey', 'drill_run': 'sandshrew', 'poison_jab': 'ekans', 'twineedle': 'scyther', 'fell_stinger': 'scyther', 'smart_strike': 'magnemite' })
+familiaNoLab('Truque sombrio', TRUQUES_POR_GOLPE, { 'covet': 'eevee', 'thief': 'umbreon', 'knock_off': 'umbreon', 'punishment': 'umbreon', 'payback': 'umbreon', 'assurance': 'umbreon', 'foul_play': 'umbreon' })
+familiaNoLab('Luta corporal', LUTA_POR_GOLPE, { 'double_slap': 'jynx', 'wake_up_slap': 'machop', 'smelling_salts': 'machop', 'arm_thrust': 'machop', 'brick_break': 'machop', 'revenge': 'machop', 'counter': 'machop', 'reversal': 'machop', 'endeavor': 'rattata', 'flail': 'rattata', 'vital_throw': 'machop', 'circle_throw': 'machop', 'storm_throw': 'machop', 'seismic_toss': 'machop', 'submission': 'machop', 'superpower': 'machop', 'close_combat': 'machop', 'fake_out': 'meowth', 'double_hit': 'ekans', 'rage': 'rattata', 'final_gambit': 'machop' })
+familiaNoLab('Luta corporal', LUTA_EM_AREA_POR_GOLPE, { brutal_swing: 'umbreon' }, true)
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
@@ -423,15 +480,22 @@ class Cena {
 // ---------------------------------------------------------------------------
 
 const cenas = [new Cena($('cena-tira'), 'tira'), new Cena($('cena-anime'), 'anime')]
-let tipoAtual: ElementType = 'FIRE'
+let tipoAtual = 'FIRE'
 let golpeAtual = 2
+
+function rotulo(g: GolpeDoLab): string {
+  if (g.familia) return g.familia
+  if (g.beam) return 'Beam'
+  if (g.soco) return 'Soco'
+  return g.area ? 'Área' : 'Single'
+}
 
 function montarBotoes(): void {
   const barra = $('golpes')
   barra.innerHTML = ''
   ;(TIPOS_DO_LAB[tipoAtual] ?? []).forEach((g, i) => {
     const b = document.createElement('button')
-    b.textContent = `${g.beam ? 'Beam' : g.soco ? 'Soco' : g.area ? 'Área' : 'Single'} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
+    b.textContent = `${rotulo(g)} T${g.tier} · ${getAbility(g.id)?.name ?? g.id}`
     b.className = i === golpeAtual ? 'on' : ''
     b.onclick = () => { golpeAtual = i; montarBotoes(); reiniciar() }
     barra.append(b)
@@ -450,6 +514,10 @@ function reiniciar(): void {
     $('titulo-tira').textContent = 'Anterior: impacto da 7.81'
     $('titulo-anime').textContent = 'Novo: colisão sustentada do Beam'
   }
+  if (g.familia) {
+    $('titulo-tira').textContent = 'Atual no jogo: efeito do tipo'
+    $('titulo-anime').textContent = `Novo: família ${g.familia}`
+  }
   if (g.id === 'bullet_punch') {
     $('titulo-tira').textContent = 'Bullet Punch: sprite original'
     $('titulo-anime').textContent = 'Bullet Punch: sprite original preservada'
@@ -458,7 +526,7 @@ function reiniciar(): void {
 
 const tipoSel = $<HTMLSelectElement>('tipo')
 for (const t of Object.keys(TIPOS_DO_LAB)) tipoSel.add(new Option(t, t))
-tipoSel.onchange = () => { tipoAtual = tipoSel.value as ElementType; golpeAtual = 0; montarBotoes(); reiniciar() }
+tipoSel.onchange = () => { tipoAtual = tipoSel.value; golpeAtual = 0; montarBotoes(); reiniciar() }
 $<HTMLSelectElement>('acertos').onchange = () => { reiniciar(); quadroCongelado() }
 $<HTMLSelectElement>('distancia').onchange = () => { reiniciar(); quadroCongelado() }
 $<HTMLSelectElement>('quadro').onchange = e => {
@@ -486,9 +554,11 @@ new MutationObserver(() => {
   const d = document.body.dataset
   opt.congelado = d.labCongelar ? Number(d.labCongelar) : null
   if (d.labGolpe) {
-    const [tipo, i] = d.labGolpe.split(':')
+    // Último ":" separa o índice — a chave de família ("Família: Mordida") também tem ":".
+    const corte = d.labGolpe.lastIndexOf(':')
+    const tipo = d.labGolpe.slice(0, corte), i = d.labGolpe.slice(corte + 1)
     delete d.labGolpe
-    tipoAtual = tipo as ElementType; tipoSel.value = tipo; golpeAtual = Number(i); montarBotoes(); reiniciar()
+    tipoAtual = tipo; tipoSel.value = tipo; golpeAtual = Number(i); montarBotoes(); reiniciar()
   }
   // Desenha na hora: com a aba em segundo plano o requestAnimationFrame para.
   // Duas vezes: a primeira abre o turno, a segunda chega no ms pedido.

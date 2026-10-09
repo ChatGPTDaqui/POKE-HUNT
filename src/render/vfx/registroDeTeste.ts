@@ -3,10 +3,10 @@
 // coreografias falsas; sem restaurar, um teste apagaria o FIRE de verdade pro
 // seguinte.
 import { afterEach, beforeEach } from 'vitest'
-import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE } from './registro'
+import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA } from './registro'
 
 export function isolarRegistros(): void {
-  const registros = [REGISTRO_SINGLE, REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_POR_GOLPE] as Record<string, unknown>[]
+  const registros = [REGISTRO_SINGLE, REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA] as Record<string, unknown>[]
   let guardados: Record<string, unknown>[] = []
   beforeEach(() => {
     guardados = registros.map(r => ({ ...r }))
