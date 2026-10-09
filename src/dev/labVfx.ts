@@ -35,6 +35,7 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { LUTA_EM_AREA_POR_GOLPE, LUTA_POR_GOLPE } from '@/render/vfx/coreografias/lutaCorpo'
 import { TRUQUES_POR_GOLPE } from '@/render/vfx/coreografias/truques'
 import { PERFURAR_POR_GOLPE } from '@/render/vfx/coreografias/perfurar'
 import { APERTOS_POR_GOLPE } from '@/render/vfx/coreografias/apertos'
@@ -48,7 +49,7 @@ import { CABECADAS_POR_GOLPE, INVESTIDAS_ELEMENTAIS_POR_GOLPE } from '@/render/v
 import { ROLAMENTOS_POR_GOLPE } from '@/render/vfx/coreografias/rolamentos'
 import { FURIAS_POR_GOLPE } from '@/render/vfx/coreografias/furias'
 import { tierDoPoder } from '@/data/tierDoVfx'
-import { REGISTRO_SINGLE } from '@/render/vfx/registro'
+import { REGISTRO_DE_AREA, REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
 import { PELES, paletaDaPele } from '@/render/vfx/paletas'
 import { desenharPixelizado } from '@/render/vfx/pixelizador'
@@ -166,11 +167,11 @@ for (const [id, entrada] of Object.entries(BEAMS_POR_GOLPE)) {
 // Famílias por forma (09/10, docs/planos/2026-10-09-familias-de-golpes.md):
 // a esquerda mostra o efeito ATUAL do jogo (coreografia do tipo no tier do
 // golpe), a direita o efeito próprio do golpe, ainda fora do registro.
-function familiaNoLab(nome: string, golpes: Record<string, EntradaDeCoreografia>, atacantes: Record<string, string>): void {
+function familiaNoLab(nome: string, golpes: Record<string, EntradaDeCoreografia>, atacantes: Record<string, string>, area = false): void {
   for (const [id, entrada] of Object.entries(golpes)) {
-    const g = getAbility(id)!, tier = tierDoPoder(g.power, false)
-    ;(TIPOS_DO_LAB[`Família: ${nome}`] ??= []).push({ id, tipo: g.type, area: false, tier, entrada,
-      atacante: atacantes[id], antes: REGISTRO_SINGLE[g.type]?.[tier], familia: nome })
+    const g = getAbility(id)!, tier = tierDoPoder(g.power, area)
+    ;(TIPOS_DO_LAB[`Família: ${nome}`] ??= []).push({ id, tipo: g.type, area, tier, entrada,
+      atacante: atacantes[id], antes: (area ? REGISTRO_DE_AREA : REGISTRO_SINGLE)[g.type]?.[tier], familia: nome })
   }
 }
 familiaNoLab('Mordida', MORDIDAS_POR_GOLPE, { bite: 'umbreon', crunch: 'umbreon', hyper_fang: 'rattata',
@@ -200,6 +201,8 @@ familiaNoLab('Cauda', CAUDAS_POR_GOLPE, { 'power_whip': 'bulbasaur', 'slam': 'ek
 familiaNoLab('Aperto', APERTOS_POR_GOLPE, { 'wrap': 'ekans', 'bind': 'ekans', 'constrict': 'ekans', 'wring_out': 'snorlax', 'clamp': 'squirtle', 'vice_grip': 'scyther', 'crabhammer': 'squirtle' })
 familiaNoLab('Perfurar', PERFURAR_POR_GOLPE, { 'horn_attack': 'nidoran_m', 'fury_attack': 'nidoran_m', 'peck': 'pidgey', 'pluck': 'pidgey', 'drill_run': 'sandshrew', 'poison_jab': 'ekans', 'twineedle': 'scyther', 'fell_stinger': 'scyther', 'smart_strike': 'magnemite' })
 familiaNoLab('Truque sombrio', TRUQUES_POR_GOLPE, { 'covet': 'eevee', 'thief': 'umbreon', 'knock_off': 'umbreon', 'punishment': 'umbreon', 'payback': 'umbreon', 'assurance': 'umbreon', 'foul_play': 'umbreon' })
+familiaNoLab('Luta corporal', LUTA_POR_GOLPE, { 'double_slap': 'jynx', 'wake_up_slap': 'machop', 'smelling_salts': 'machop', 'arm_thrust': 'machop', 'brick_break': 'machop', 'revenge': 'machop', 'counter': 'machop', 'reversal': 'machop', 'endeavor': 'rattata', 'flail': 'rattata', 'vital_throw': 'machop', 'circle_throw': 'machop', 'storm_throw': 'machop', 'seismic_toss': 'machop', 'submission': 'machop', 'superpower': 'machop', 'close_combat': 'machop', 'fake_out': 'meowth', 'double_hit': 'ekans', 'rage': 'rattata', 'final_gambit': 'machop' })
+familiaNoLab('Luta corporal', LUTA_EM_AREA_POR_GOLPE, { brutal_swing: 'umbreon' }, true)
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

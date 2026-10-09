@@ -428,3 +428,33 @@ Beat Up fica de fora (nunca dispara).
 | Payback | guarda força e revida | bolinhas escuras se juntam em quem ataca e saem numa onda de revide |
 | Assurance | dobra se o alvo já se feriu no turno | X vermelho marca a ferida; o golpe acerta duas vezes em cima dela |
 | Foul Play | usa a força do alvo contra ele | aura vermelha é arrancada do alvo, sobe num arco e cai nele |
+
+### 15. Luta corporal — `coreografias/lutaCorpo.ts`
+
+Bide e Metal Burst ficam de fora (nunca disparam). Brutal Swing é o primeiro
+golpe de ÁREA com efeito próprio (`REGISTRO_POR_GOLPE_DE_AREA`).
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Double Slap | tapas de ida e volta, 2–5 vezes | palma aberta alternando lados, uma por acerto |
+| Wake-Up Slap | forte em alvo dormindo; acorda | "Zzz" boiando estoura com o tapa; sobra um "!" |
+| Smelling Salts | forte em alvo paralisado; cura a paralisia | estática presa no alvo é espantada pelo tapa e se dispersa |
+| Arm Thrust | rajada de palmas abertas, 2–5 vezes | palmas em sequência em pontos diferentes |
+| Brick Break | cutelo rápido; quebra barreiras | parede de tijolos na frente do alvo parte ao meio |
+| Revenge | dobra se foi ferido no turno | quem ataca acende em vermelho e devolve |
+| Counter | devolve o golpe físico em dobro | pancada pequena vem do alvo, bate no bloqueio e volta vermelha e maior |
+| Reversal | mais forte quanto menos HP | barrinha de HP quase vazia piscando, aura de desespero, golpe só |
+| Endeavor | corta o HP do alvo até igualar o seu | duas barras de HP; a do alvo é cortada até o nível da de quem ataca |
+| Flail | debate-se sem rumo | arcos girando pra todo lado, suor; dois acertos |
+| Vital Throw | ataca por último; nunca erra | arco de arremesso por cima do ombro; o alvo "cai" atrás com poeira |
+| Circle Throw | arremessa e puxa outro POKE | volta completa em volta do alvo, empurrão e redemoinho de troca |
+| Storm Throw | golpe feroz sempre crítico | redemoinho em volta do alvo; brilho de crítico grande |
+| Seismic Toss | arremessa com a força da gravidade | sobe lá em cima, despenca na vertical, rachadura no chão |
+| Submission | agarra e se joga no chão; se fere | nuvem de briga de desenho rolando até o alvo; baque; recuo |
+| Superpower | força enorme; baixa Ataque e Defesa de quem usa | veias de força laranja inflando; golpe gigante; setas azuis caindo em quem usou |
+| Close Combat | luta colado sem guarda; baixa as defesas | seis golpes de perto de todos os lados; setas azuis caindo |
+| Fake Out | ataca primeiro e assusta | duas palmas batem na cara do alvo; linhas de susto |
+| Double Hit | bate duas vezes com cauda/cipó | duas chicotadas em arco, uma de cada lado |
+| Rage | Ataque sobe a cada golpe recebido | chamas vermelhas em quem ataca e setas de Ataque subindo |
+| Final Gambit | arrisca tudo: desmaia e causa dano igual ao HP | a vida sai como globo dourado esvaziando a barra; explode no alvo; espiral de desmaio |
+| Brutal Swing (área) | gira o corpo com violência e acerta tudo em volta | arcos enormes rodando no chão até a borda; estalos espalhados pelo interior |
