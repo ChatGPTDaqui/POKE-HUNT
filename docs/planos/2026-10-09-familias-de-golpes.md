@@ -315,3 +315,22 @@ O pé é uma bota de perfil desenhada na grade (irmã do punho dos socos); muda 
 | Blaze Kick | bota em chamas, fogo no impacto |
 | Stomp | pé gigante desce de cima com sombra crescendo, poeira |
 | Stomping Tantrum | três pisões emburrados em volta do alvo, rachaduras no chão |
+
+### 6–7. Investida elemental e Cabeçada — `coreografias/cargas.ts`
+
+A proa da Investida vestida pelo elemento ou pela cabeça (uma coreografia, duas famílias).
+
+| Golpe | Meta (personalidade) |
+|---|---|
+| Wild Charge | raios em volta de quem carrega e da proa; recuo |
+| Spark | proa pequena com faíscas; raios curtos no impacto |
+| Volt Switch | bate e volta como bola elétrica em curva |
+| Flare Blitz | corpo em chamas na viagem, explosão de fogo; recuo |
+| Flame Charge | deixa chamas acesas no chão por onde passa |
+| Aqua Jet | sai quase sem preparo, rastro de gotas, coroa de respingo |
+| Dragon Rush | aura de dragão, proa dupla, choque duplo |
+| Skull Bash | levanta um escudo hexagonal no preparo longo e sai com ele |
+| Zen Headbutt | anéis psíquicos no preparo, na proa e no impacto |
+| Iron Head | reflexo branco correndo pela proa de aço, fagulhas |
+| Head Smash | pedras orbitando a cabeça, estilhaços grandes; recuo |
+| Wood Hammer | farpas de madeira orbitando e voando; recuo |
