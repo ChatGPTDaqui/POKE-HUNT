@@ -12,6 +12,15 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Treinador em campo com a arte escolhida pelo dono.
+  {
+    version: '7.85',
+    date: '2026-10-08',
+    title: 'Novo visual do treinador',
+    highlights: [
+      'O treinador que anda atrás do POKE ganhou um visual novo: boné vermelho e branco, jaqueta azul e luvas, nas oito direções.',
+    ],
+  },
   // Treinador em campo redesenhado.
   {
     version: '7.84',
