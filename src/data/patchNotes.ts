@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Famílias de golpes com efeito próprio, desenhados pela descrição de cada golpe.
+  {
+    version: '7.93',
+    date: '2026-10-09',
+    title: 'Bolas, bombas e rajadas com cara própria',
+    highlights: [
+      'Golpes de bola e bomba ganharam efeito próprio, cada um a partir do que o golpe faz: Energy Ball junta força da natureza, Aura Sphere corrige o rumo, Weather Ball mostra o tempo dentro dela, Octazooka joga tinta na cara, Egg Bomb é um ovo pintado.',
+      'Rajadas também: uma semente, pedra ou lança de gelo por acerto (Bullet Seed, Rock Blast, Icicle Spear...), ossos que vão e voltam (Bonemerang), presente-bomba (Present), chuva de moedas (Pay Day) e os orbes de cores do Hidden Power.',
+    ],
+  },
   // Famílias de golpes com efeito próprio: Mordida e Investida.
   {
     version: '7.92',
