@@ -46,6 +46,8 @@ const params = new URLSearchParams(location.search)
 const MAPA = params.get('mapa') || 'route_46'
 const PASSO = 1 / 60
 const renderer = new Renderer(document.getElementById('jogo'))
+renderer.treinador.nome = params.get('nome') || 'Ash'
+window.__renderer = renderer
 registrarCanvasDeVfx(document.getElementById('vfx'))
 registrarPintor(pintorDeRecompensa)
 definirAncora(ANCORA.carteira, document.getElementById('carteira').getBoundingClientRect())

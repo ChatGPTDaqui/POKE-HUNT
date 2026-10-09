@@ -68,4 +68,21 @@ describe('TreinadorEmCampo', () => {
     t.atualizar(null, 1 / 60)
     expect(t.pe).toBeNull()
   })
+
+  it('desenha o nome do treinador em cima do boneco; sem nome, nenhum texto', () => {
+    const textos: { texto: string; y: number }[] = []
+    const ctx = {
+      save() {}, restore() {}, beginPath() {}, ellipse() {}, fill() {}, drawImage() {},
+      strokeText() {}, fillText(texto: string, _x: number, y: number) { textos.push({ texto, y }) },
+    } as unknown as CanvasRenderingContext2D
+    const t = new TreinadorEmCampo()
+    andar(t, { x: 0, y: 100 }, { x: 200, y: 100 })
+    t.desenhar(ctx)
+    expect(textos).toEqual([])
+    t.nome = 'Ash'
+    t.desenhar(ctx)
+    expect(textos).toHaveLength(1)
+    expect(textos[0].texto).toBe('Ash')
+    expect(textos[0].y).toBeLessThan(t.pe!.y - 30)
+  })
 })
