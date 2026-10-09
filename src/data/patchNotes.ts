@@ -16,10 +16,11 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   {
     version: '7.92',
     date: '2026-10-09',
-    title: 'Mordidas e investidas com cara própria',
+    title: 'Mordidas, investidas e cortes com cara própria',
     highlights: [
       'Bite, Crunch, os Fangs, Bug Bite e Leech Life ganharam efeito próprio: uma boca aparece no alvo e fecha nele — cada uma do seu jeito (gelo que cresce, fogo nos cantos, veneno pingando, dentões que cortam ao meio...).',
       'Tackle, Quick Attack, Take Down, Double-Edge, Body Slam, Giga Impact e outros 12 golpes de investida agora mostram a onda de choque indo na frente do corpo, com o caminho e a marca de cada golpe.',
+      'Golpes de garra (Scratch, Fury Swipes, Metal Claw, Shadow Claw, Dragon Claw...) deixam rasgos próprios, e os de lâmina (Slash, Night Slash, Cross Chop, Psycho Cut, Aerial Ace...) cortam com um gume do seu jeito.',
     ],
   },
   // Treinador nas hunts se move como gente.
