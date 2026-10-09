@@ -12,6 +12,28 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Skins do treinador em campo, escolhidas no Perfil.
+  {
+    version: '7.88',
+    date: '2026-10-09',
+    title: 'Skins de treinador',
+    highlights: [
+      'Quatro novas skins para o treinador que anda com você no campo: May, Dawn, Lance e Cynthia.',
+      'Troque em Perfil do Treinador → Outfit. A troca vale na hora e fica salva neste aparelho.',
+      'Parado, todo treinador fica em pé com as pernas retas.',
+    ],
+  },
+  // Treinador em campo: nova arte, tamanho menor e nome em cima.
+  {
+    version: '7.87',
+    date: '2026-10-08',
+    title: 'Treinador com mochila e nome',
+    highlights: [
+      'O treinador ganhou visual novo: boné vermelho, colete azul e mochila amarela, com as 8 direções.',
+      'O boneco ficou um pouco menor, mais na proporção dos POKEs.',
+      'O nome do treinador aparece em cima do boneco, em azul claro.',
+    ],
+  },
   // Treinador em campo: caminhada fluida e pose em pe.
   {
     version: '7.86',

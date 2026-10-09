@@ -19,6 +19,8 @@ import { converterDanoNovo, pintorDeDano } from '@/render/pulsoDeDanoRecebido'
 import { useGameLoop } from '@/engine/useGameLoop'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { useAuthStore } from '@/stores/authStore'
+import { skinDe, useSkinDoTreinadorStore } from '@/stores/skinDoTreinadorStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { controller } from '@/engine/controller'
 import { buildHospitalWorld, syncActivePokeToGameState } from '@/engine/simulation'
@@ -165,6 +167,9 @@ export function GameCanvas() {
       ultimoQuadro = agora
 
       const world = useWorldStore.getState()
+      // Nome do treinador em cima do boneco que anda atras do POKE (08/10).
+      renderer.treinador.nome = useGameStateStore.getState().trainer.name
+      renderer.treinador.skin = skinDe(useSkinDoTreinadorStore.getState().porUsuario, useAuthStore.getState().user?.id)
       if (world.mapDef) renderer.renderMap(world.mapDef, world)
       else renderer.renderHospital(world.player, enfermeiraEmFoco)
 

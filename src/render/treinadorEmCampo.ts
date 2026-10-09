@@ -10,16 +10,25 @@
 // cortando caminho em linha reta, ele atravessaria parede e virava junto com
 // cada meia-volta do POKE.
 //
-// Sprite (08/10): arte enviada pelo dono (folha 4x8, JPEG ampliado ~3,25x com
-// fundo branco), convertida pro formato das folhas dos POKE — 8 linhas de
-// direcao na ordem do PMD x 4 quadros, quadro 32x40, pe na linha 37. Na
-// conversao: fundo tirado por preenchimento a partir da borda (o branco do bone
-// e das mangas fica), reducao por moda de cor em blocos de 3,25 px, paleta de
-// 18 cores. A arte so tinha lados ESQUERDOS (linhas 1, 2 e 4 da original:
-// baixo-esq, esq, cima-esq); os direitos sao espelho. Idle = quadro 0 parado.
-// (A v1/v2 gerada por script, colete azul, saiu junto com o gerador.)
+// Sprite (08/10): uma folha por SKIN (`data/skinsDoTreinador.ts`, escolhida no
+// Perfil). A padrao, "mochila" (bone vermelho, colete azul, mochila), veio de uma folha
+// 4x7 em PNG com alpha, convertida pro formato das folhas dos POKE — 8 linhas
+// de direcao na ordem do PMD x 4 quadros, quadro 32x40, pe na linha 37. Na
+// conversao: reducao por moda de cor em blocos (~5,4 px), cada linha da
+// original na MESMA altura (a arte desenha os lados maiores que a frente) e
+// paleta de 20 cores. Baixo-esquerda e espelho da baixo-direita (a unica
+// direcao que faltava).
+//
+// Tamanho (08/10, pedido do dono): o boneco tem 30 px de altura (a arte
+// anterior tinha 35) — um pouco menor, na proporcao dos POKE.
+//
+// Idle: a folha so tem passos (um pe sempre no ar). A pose em pe usa cabeca e
+// tronco do passo mais fechado e redesenha as pernas paradas, lado a lado, com
+// as cores da propria folha; o segundo quadro desce o tronco 1 px (respiracao).
 import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
+import { FONTE } from './textoDeCombate'
+import { SKIN_PADRAO, folhaDaSkin } from '@/data/skinsDoTreinador'
 
 type Ponto = { x: number; y: number }
 
@@ -35,6 +44,10 @@ const SALTO = 120
 const QUADRO_L = 32, QUADRO_A = 40
 /** Linha do pe dentro do quadro. */
 const PE_NO_QUADRO = 37
+/** Altura do boneco (px), do pe ao topo do bone. */
+const ALTURA_DO_BONECO = 30
+/** Cor do nome do treinador: azul claro, pra nao confundir com o nome dos POKE (branco/raridade). */
+const COR_DO_NOME = '#9fd8ff'
 /**
  * Px de caminho por quadro de caminhada (08/10, "movimentos fluidos"). A
  * caminhada avanca pela DISTANCIA andada, e nao pelo relogio: com o relogio, o
@@ -47,12 +60,11 @@ const FOLGA_PRA_PARAR = 0.15
 /** Quanto a direcao segue o movimento por quadro (0..1): vira suave, sem tremer de linha. */
 const SUAVIZA_DIRECAO = 0.25
 
-interface Anim { url: string; duracoes: number[] }
-const ANIMS: Record<'Walk' | 'Idle', Anim> = {
-  Walk: { url: 'assets/treinadores/campo/bone-vermelho/Walk-Anim.png', duracoes: [8, 8, 8, 8] },
-  // Idle (08/10): pose EM PE montada da folha (pes juntos sob o corpo), e o
-  // segundo quadro desce o tronco 1 px — respiracao lenta.
-  Idle: { url: 'assets/treinadores/campo/bone-vermelho/Idle-Anim.png', duracoes: [50, 50] },
+/** Duracao (ticks de 1/60 s) de cada quadro. Toda skin tem o mesmo formato de folha. */
+const DURACOES: Record<'Walk' | 'Idle', number[]> = {
+  Walk: [8, 8, 8, 8],
+  // Idle: pose EM PE (ver topo); o segundo quadro e a respiracao.
+  Idle: [50, 50],
 }
 
 const imagens = new Map<string, HTMLImageElement>()
@@ -105,6 +117,11 @@ type PokeEmCampo = Ponto & { radius: number; facing?: Ponto }
  * mesmo boneco de um mundo pro outro a cada quadro.
  */
 export class TreinadorEmCampo {
+  /** Nome mostrado em cima do boneco; `null`/vazio nao desenha nada. Quem monta a cena atualiza. */
+  nome: string | null = null
+  /** Skin (pasta em `assets/treinadores/campo/`); id desconhecido cai na padrao. Quem monta a cena atualiza. */
+  skin: string = SKIN_PADRAO
+
   private e: Estado = { rastro: [], pos: null, facing: { x: 0, y: 1 }, anim: 'Idle', quadro: 0, ticks: 0, parado: 0 }
 
   /** Pe do treinador agora (px de mundo), ou `null` se ele nao esta em campo. */
@@ -174,7 +191,7 @@ export class TreinadorEmCampo {
     }
     const anim = andou || (e.anim === 'Walk' && e.parado < FOLGA_PRA_PARAR) ? 'Walk' : 'Idle'
     if (anim !== e.anim) { e.anim = anim; e.quadro = 0; e.ticks = 0 }
-    const duracoes = ANIMS[e.anim].duracoes
+    const duracoes = DURACOES[e.anim]
     if (e.anim === 'Walk') {
       e.ticks += passo
       while (e.ticks >= PX_POR_QUADRO_DE_PASSO) {
@@ -201,7 +218,9 @@ export class TreinadorEmCampo {
     ctx.ellipse(pos.x, pos.y, 7, 2.5, 0, 0, Math.PI * 2)
     ctx.fill()
     ctx.restore()
-    const img = imagem(ANIMS[anim].url)
+    // Nome antes da sprite: com a imagem ainda carregando, o nome ja aparece.
+    this.desenharNome(ctx, pos)
+    const img = imagem(folhaDaSkin(this.skin, anim))
     if (!img || !img.complete || img.naturalWidth === 0) return
     const linha = directionRowFromFacing(facing)
     const suave = ctx.imageSmoothingEnabled
@@ -211,5 +230,22 @@ export class TreinadorEmCampo {
       Math.round(pos.x - QUADRO_L / 2), Math.round(pos.y - PE_NO_QUADRO), QUADRO_L, QUADRO_A,
     )
     ctx.imageSmoothingEnabled = suave
+  }
+
+  /** Nome em cima do bone, no mesmo estilo da placa dos POKE (contorno preto). */
+  private desenharNome(ctx: CanvasRenderingContext2D, pos: Ponto): void {
+    const nome = this.nome?.trim()
+    if (!nome) return
+    const y = Math.round(pos.y - ALTURA_DO_BONECO - 4)
+    ctx.save()
+    ctx.font = FONTE.nomeDaEspecie
+    ctx.textAlign = 'center'
+    ctx.lineWidth = 3
+    ctx.lineJoin = 'round'
+    ctx.strokeStyle = '#000000'
+    ctx.strokeText(nome, pos.x, y)
+    ctx.fillStyle = COR_DO_NOME
+    ctx.fillText(nome, pos.x, y)
+    ctx.restore()
   }
 }
