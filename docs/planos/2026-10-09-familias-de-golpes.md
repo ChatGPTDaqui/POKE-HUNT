@@ -238,3 +238,31 @@ abrindo pra fora. Custo na cena: p95 1,4–2,1 ms (Petal Blizzard no mesmo lote:
 | Poison Fang | só a boca de cima (cobra), duas presas longas; veneno pinga e cai | lab |
 | Bug Bite | pinças em "( )" que beliscam duas vezes; migalhas voam | lab |
 | Leech Life | pinças menores; bolinhas de vida voltam ao atacante | lab |
+
+### 2. Investida — `coreografias/investidas.ts` (no lab, aguardando o dono)
+
+O VFX não move o sprite de quem ataca, então a forma da família é a PROA: a
+onda de choque em "(" que vai na frente do corpo, com riscos de velocidade, e
+os arcos do choque abrindo do outro lado do alvo. Custo na cena: p95 1,9–3,0 ms
+(Petal Blizzard no mesmo lote: 5,9).
+
+| Golpe | Meta (personalidade) | Estado |
+|---|---|---|
+| Tackle | cunha curta e reta, choque simples | lab |
+| Quick Attack | sai quase sem preparo, caminho em zigue-zague | lab |
+| Extreme Speed | três cortes de lados diferentes em sequência | lab |
+| Take Down | preparo raspando o chão; estalo de recuo em quem bate | lab |
+| Double-Edge | proa dupla (fio escuro atrás), choque forte, recuo maior | lab |
+| Body Slam | sombra cresce no alvo, proa cai de cima, poeira pros lados | lab |
+| Giga Impact | aura laranja pulsando no preparo, proa com aura, choque duplo + estilhaços | lab |
+| High Horsepower | poeira de galope ao longo do caminho, terra no impacto | lab |
+| Last Resort | cinco brilhos se juntam em quem ataca e viajam com a proa | lab |
+| Retaliate | veia de raiva vermelha pulsando em cima do alvo | lab |
+| Chip Away | três lasquinhas em pontos diferentes do alvo, uma após a outra | lab |
+| Facade | estouro de quadrinho (POW) amarelo no lugar da estrela | lab |
+| Return | corações seguem a proa e sobem do alvo | lab |
+| Frustration | rabisco de frustração embolado sobre o alvo | lab |
+| Strength | proa larga como parede, poeira no impacto | lab |
+| Heavy Slam | proa de aço cai de cima, fagulhas de metal no baque | lab |
+| U-turn | bate e volta em curva pra quem atacou | lab |
+| Acrobatics | dá uma pirueta no meio do caminho | lab |

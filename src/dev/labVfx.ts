@@ -35,6 +35,7 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { INVESTIDAS_POR_GOLPE } from '@/render/vfx/coreografias/investidas'
 import { tierDoPoder } from '@/data/tierDoVfx'
 import { REGISTRO_SINGLE } from '@/render/vfx/registro'
 import { retanguloDoEfeito } from '@/render/vfx/desenharVfx'
@@ -164,6 +165,10 @@ function familiaNoLab(nome: string, golpes: Record<string, EntradaDeCoreografia>
 familiaNoLab('Mordida', MORDIDAS_POR_GOLPE, { bite: 'umbreon', crunch: 'umbreon', hyper_fang: 'rattata',
   super_fang: 'rattata', thunder_fang: 'pikachu', ice_fang: 'jynx', fire_fang: 'charmander',
   poison_fang: 'ekans', bug_bite: 'scyther', leech_life: 'scyther' })
+familiaNoLab('Investida', INVESTIDAS_POR_GOLPE, { tackle: 'eevee', quick_attack: 'rattata', extreme_speed: 'eevee',
+  take_down: 'eevee', double_edge: 'eevee', body_slam: 'snorlax', giga_impact: 'snorlax', high_horsepower: 'sandshrew',
+  last_resort: 'eevee', retaliate: 'rattata', chip_away: 'rattata', facade: 'rattata', return: 'eevee',
+  frustration: 'eevee', strength: 'machop', heavy_slam: 'magnemite', u_turn: 'scyther', acrobatics: 'pidgey' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
