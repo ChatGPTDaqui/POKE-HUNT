@@ -458,3 +458,164 @@ golpe de ÁREA com efeito próprio (`REGISTRO_POR_GOLPE_DE_AREA`).
 | Rage | Ataque sobe a cada golpe recebido | chamas vermelhas em quem ataca e setas de Ataque subindo |
 | Final Gambit | arrisca tudo: desmaia e causa dano igual ao HP | a vida sai como globo dourado esvaziando a barra; explode no alvo; espiral de desmaio |
 | Brutal Swing (área) | gira o corpo com violência e acerta tudo em volta | arcos enormes rodando no chão até a borda; estalos espalhados pelo interior |
+
+### 16. Esfera / bomba — `coreografias/esferas.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Energy Ball | tira força da natureza e dispara | brilhos verdes vêm de todos os lados e formam a bola; seta de Sp. Def caindo |
+| Aura Sphere | rajada de aura de dentro do corpo; nunca erra | bola azul com borda de aura tremendo, corrige o rumo até o alvo |
+| Focus Blast | aguça o foco e solta o poder | anéis se fecham em quem ataca; bola laranja com redemoinho; impacto enorme |
+| Electro Ball | arremessa orbe elétrico; mais rápido = mais forte | arremesso rápido com riscos longos, orbe com faíscas |
+| Weather Ball | muda com o tempo | bola-vitrine com sol, gota e floco trocando dentro |
+| Mist Ball | penugem como névoa envolve o alvo | bola felpuda branco-rosa que envolve o alvo e vira plumas |
+| Luster Purge | estouro de luz | joia de luz que explode em raios retos |
+| Seed Bomb | sementes de casca dura caem de cima | sementes caem do alto, uma após a outra, explodindo |
+| Egg Bomb | ovo grande arremessado com força | ovo pintado voa em arco, racha e explode |
+| Mud Bomb | bola de lama compacta; pode cegar | bola de lama em arco; manchas de lama grudam no alvo |
+| Octazooka | tinta na cara; pode cegar | bala de tinta preta estoura e escorre na cara do alvo |
+| Vacuum Wave | gira os punhos e manda vácuo; sempre primeiro | punhos giram; anéis só de contorno (vácuo) correm até o alvo |
+
+### 17. Rajada de projéteis — `coreografias/rajadas.ts`
+
+Os de 2–5 acertos desenham um projétil por acerto resolvido. Natural Gift,
+Spit Up e Trump Card ficam de fora (nunca disparam).
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Bullet Seed | atira sementes 2–5 vezes | metralhadora de sementes retas |
+| Rock Blast | arremessa pedras 2–5 vezes | pedras pesadas em arco, girando |
+| Spike Cannon | espinhos disparados em sequência | espinhos brancos finos e retos |
+| Icicle Spear | lanças de gelo 2–5 vezes | lanças de gelo compridas; estilhaços no fim |
+| Barrage | objetos redondos 2–5 vezes | bolas em arco alto |
+| Bone Rush | golpeia com osso 2–5 vezes | osso bate em ritmo, girando entre as pancadas |
+| Fling | arremessa o item segurado | bolsinha voa rodopiando |
+| Present | presente com armadilha | caixa de presente quica até o alvo, abre — é uma bomba |
+| Hidden Power | tipo depende de quem usa | seis orbes de cores diferentes giram (tipo secreto) e convergem |
+| Pay Day | arremessa moedas; dá dinheiro | chuva de moedas de ouro girando que quicam e brilham |
+| Bonemerang | osso vai e volta, acerta duas vezes | bumerangue de osso contorna o alvo e acerta de novo voltando |
+| Bone Club | porrete de osso; pode fazer recuar | osso erguido e baixado na cabeça; linhas de susto |
+
+### 18. Pedra e cristal — `coreografias/pedras.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Smack Down | arremessa uma pedra; quem voa cai no chão | pedra em arco; linhas de queda e poeira: o alvo foi derrubado |
+| Ancient Power | poder pré-histórico; pode subir todos os status | pedras antigas com contorno brilhante orbitam e voam; setas de cinco cores |
+| Avalanche | dobra se foi ferido no turno | blocos de neve despencam de cima e soterram o alvo |
+| Precipice Blades (área) | o poder da terra em lâminas de pedra | rachaduras de lava pelo interior e lâminas de pedra brotando de dentro pra fora |
+
+### 19. Jato e sopro — `coreografias/sopros.ts`
+
+Os demais jatos (Ember, Flamethrower, Water Gun, Scald, Hydro Pump, Sludge...) são golpes-vitrine do tipo.
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Brine | dobra com HP do alvo pela metade | jato d'água com cristais de sal que grudam e cintilam |
+| Frost Breath | bafo gelado; sempre crítico | nuvem gelada da boca, cristais e brilho de crítico |
+| Acid Spray | cuspe que derrete; Sp. Def cai muito | cusparadas em arco; o ácido chia com bolhas; duas setas pra baixo |
+| Belch | arroto danoso | quem ataca incha e solta anéis grossos de gás esverdeado |
+| Dragon Rage | onda de fúria pura; sempre 40 de dano | olhos de raiva na boca; chama azul em onda (S) |
+
+### 20. Nuvem, pó e assombração — `coreografias/nevoas.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Smog | descarga de gases imundos | baforadas roxo-cinzentas encobrem o alvo; bolhas de veneno |
+| Clear Smog | bolo de lama especial; zera os status | lama estoura em névoa branca e as setas de status do alvo somem |
+| Venoshock | encharca em líquido venenoso | onda roxa cai de cima, pinga e faz poça |
+| Astonish | grita de um jeito assustador | cara de fantasma "BUU!" salta do lado do alvo; linhas de susto |
+| Hex | dano enorme em alvo com status | círculo de feitiço com olho no chão; chamas roxas sobem |
+| Night Shade | miragem assustadora | sombra gigante de olhos vermelhos se ergue atrás do alvo |
+| Ominous Wind | vento repulsivo; pode subir todos os status | rajada roxa com fantasminhas; setas de cinco cores |
+| Silver Wind | escamas em pó levadas pelo vento | vento prateado com escamas cintilantes; setas de cinco cores |
+| Powder Snow (área) | rajada de neve em pó; pode congelar | flocos rodopiando por toda a área, do centro pra borda |
+
+### 21. Som — `coreografias/sons.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Uproar | algazarra por três turnos; ninguém dorme | ondas serrilhadas pra todo lado; "Zzz" riscado de vermelho no alvo |
+| Echoed Voice | voz que ecoa; mais forte se repetida | uma onda bate e voltam ecos cada vez mais fracos e largos |
+| Snore | só dormindo; ronco pode assustar | "Zzz" em quem ataca; bolha de ronco estoura em onda serrilhada |
+| Round | canta uma canção | notas musicais em fila ondulando até o alvo |
+| Bug Buzz | onda sonora por vibração; Sp. Def pode cair | asas vibrando; anéis verdes tremidos; seta pra baixo |
+| Boomburst (área) | som explosivo terrível em tudo em volta | anéis serrilhados grossos varrem o chão até a borda; estalos espalhados |
+
+### 22. Força mental — `coreografias/mentes.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Extrasensory | poder estranho e invisível; pode assustar | olho gigante se abre acima do alvo e o encara; ar ondulando |
+| Psyshock | onda psíquica materializada; dano físico | cristais sólidos rosados surgem em volta e se chocam no alvo |
+| Psywave | onda psíquica de intensidade variável | onda senoidal cuja amplitude muda o tempo todo |
+| Psycho Boost | força total; Sp. Atk de quem usa cai muito | esfera enorme se forma no alto e desce; duas setas azuis |
+| Future Sight | dois turnos depois, energia psíquica ataca | olho abre, esfera sobe e some no céu… e cai do alto no alvo |
+| Stored Power | mais forte quanto mais status subiu | setas de status de quem ataca se juntam numa esfera disparada |
+| Heart Stamp | fofura baixa a guarda, depois golpe cruel | coraçõezinhos boiam até o alvo; coração gigante cai como carimbo |
+| Mirror Coat | devolve o golpe especial em dobro | espelho na frente de quem ataca; raio vem fraco e volta em arco-íris |
+| Doom Desire | dois turnos depois, feixe de luz concentrada | estrela sobe e some; feixes de luz caem do céu e convergem no alvo |
+
+### 23. Luz e brilho (+ Nuzzle) — `coreografias/luzes.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Nuzzle | esfrega as bochechas elétricas; paralisa sempre | bochechas faiscando; esfrega-esfrega; estática presa no alvo |
+| Tri Attack | três feixes ao mesmo tempo; queima, congela ou paralisa | triângulo em quem ataca; feixes de fogo, gelo e raio convergem |
+| Sacred Fire | fogo místico intenso; pode queimar | pilar de chamas douradas brota do chão e engole o alvo |
+| Dazzling Gleam (área) | clarão poderoso | quem ataca vira estrela que estoura em raios pelo chão; a área toda cintila |
+
+### 24. Explosão + Explosão Elemental do nível 50 — `coreografias/explosoes.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Overheat | força total; Sp. Atk de quem usa cai muito | quem ataca fica branco de calor, solta cone de fogo; fumega e duas setas azuis |
+| Burn Up | queima tudo e deixa de ser tipo Fogo | labaredas enormes até o alvo; no fim o fogo de quem atacou se apaga em fumaça e brasa morta |
+| Inferno | engole o alvo em fogo intenso; sempre queima | anel de chamas se fecha numa fogueira; marquinha de queimadura |
+| Self-Destruct (área) | explode e desmaia | quem ataca pisca e incha; cúpula de explosão cobre a área; espiral de desmaio |
+| Lava Plume (área) | inferno de chamas escarlates em volta | jatos de lava brotam do chão pela área cuspindo gotas incandescentes |
+| Explosão Elemental (área, nível 50: Fogo, Água, Elétrico, Grama, Normal) | conteúdo do jogo: o elemento explode de quem ataca | frente de onda do tipo varre do centro à borda e deixa o elemento no interior (chamas, gotas, raios, folhas, estalos) |
+
+### 25. Tremor, onda e feixe — `coreografias/ondas.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Grass Knot | laça o alvo com capim e o derruba | laço de capim brota no pé do alvo, vira nó; tropeço com poeira |
+| Waterfall | investe e pode fazer recuar | coluna de água despenca do alto no alvo |
+| Freeze-Dry | resfria o alvo de repente | gotas em volta viram gelo no ar; casca de gelo fecha e trinca |
+| Mirror Shot | flash do corpo polido; pode cegar | reflexo corre pelo corpo; flash prateado; estrelinhas de ofuscado |
+| Aeroblast | vórtice de ar; crítico fácil | túnel de vento em espiral avançando; brilho de crítico |
+| Zap Cannon | rajada elétrica como canhão; paralisa | carga na boca do canhão; bola lenta e pesada com raios; estática presa |
+| Magnitude (área) | tremor de força variável | medidor de 4 a 10 barras sorteado; anéis e rachaduras seguem o nível |
+| Muddy Water (área) | jato de água lamacenta; pode cegar | onda de lama marrom em leque pela área, manchas no chão |
+| Origin Pulse (área) | incontáveis feixes de luz azul-profundo | feixes azuis saem de quem ataca e atingem cada ponto da área |
+
+### 26. Vento, vórtice e dreno — `coreografias/ventos.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Sonic Boom | onda de choque; sempre 20 de dano | cone de vapor estoura na frente; crescente de choque corre até o alvo |
+| Hurricane | vento feroz enrola o alvo e sobe ao céu; confunde | coluna de vento alta enroscada no alvo; estrelinhas de confusão |
+| Leaf Tornado | cerca o alvo de folhas afiadas | anel de folhas girando baixo em volta do alvo |
+| Fire Spin | prende num vórtice de fogo por turnos | funil de chamas girando em volta do alvo |
+| Whirlpool | prende num redemoinho d'água | espiral d'água no chão subindo pelas bordas |
+| Sand Tomb | prende numa tempestade de areia | cone de grãos de areia girando |
+| Infestation | infesta o alvo; ele não foge | enxame de bichinhos de asinha zumbindo em volta |
+| Absorb / Mega Drain / Giga Drain | drena nutrientes e cura metade | gotas de vida voltam a quem ataca: 2 → 4 com brilho → rio de 8 com aura de cura |
+| Dream Eater | come o sonho do alvo adormecido | balão de sonho (estrela e lua) sobe, voa até quem ataca e é mordido |
+| Razor Wind (área) | dois turnos: lâminas de vento no segundo | vento se enrola em quem ataca; dezenas de lâminas em crescente varrem a área |
+
+### 27. Soco (Hammer Arm e Meteor Mash) — `coreografias/punhosPesados.ts`
+
+| Golpe | Descrição (jogo) | Conceito visual |
+|---|---|---|
+| Hammer Arm | punho pesado como martelo; a Speed de quem usa cai | punho sobe, gira por cima e desce como marreta; chão afunda; seta azul |
+| Meteor Mash | soco disparado como meteoro; pode subir o Ataque | punho de aço sobe, cai do céu com cauda de fogo; estilhaços; seta vermelha |
+
+## Fechamento (09/10)
+
+`src/render/vfx/coberturaDeGolpes.test.ts` trava a meta: todo golpe de dano
+que o motor dispara tem efeito próprio (registro por golpe, single ou área) ou
+é o golpe-vitrine do tipo/tier; Bullet Punch é a exceção pedida pelo dono.
+Custo dos golpes de área na cena do lab (p95): 2,9–5,8 ms, contra 6,2 ms do
+Petal Blizzard e 23,2 ms do Eruption no mesmo lote.

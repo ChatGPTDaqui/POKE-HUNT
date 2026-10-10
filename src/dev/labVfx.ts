@@ -35,6 +35,18 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { PUNHOS_PESADOS_POR_GOLPE } from '@/render/vfx/coreografias/punhosPesados'
+import { VENTOS_EM_AREA_POR_GOLPE, VENTOS_POR_GOLPE } from '@/render/vfx/coreografias/ventos'
+import { ONDAS_EM_AREA_POR_GOLPE, ONDAS_POR_GOLPE } from '@/render/vfx/coreografias/ondas'
+import { EXPLOSOES_EM_AREA_POR_GOLPE, EXPLOSOES_POR_GOLPE } from '@/render/vfx/coreografias/explosoes'
+import { LUZES_EM_AREA_POR_GOLPE, LUZES_POR_GOLPE } from '@/render/vfx/coreografias/luzes'
+import { MENTES_POR_GOLPE } from '@/render/vfx/coreografias/mentes'
+import { SONS_EM_AREA_POR_GOLPE, SONS_POR_GOLPE } from '@/render/vfx/coreografias/sons'
+import { NEVOAS_EM_AREA_POR_GOLPE, NEVOAS_POR_GOLPE } from '@/render/vfx/coreografias/nevoas'
+import { SOPROS_POR_GOLPE } from '@/render/vfx/coreografias/sopros'
+import { PEDRAS_EM_AREA_POR_GOLPE, PEDRAS_POR_GOLPE } from '@/render/vfx/coreografias/pedras'
+import { RAJADAS_POR_GOLPE } from '@/render/vfx/coreografias/rajadas'
+import { ESFERAS_POR_GOLPE } from '@/render/vfx/coreografias/esferas'
 import { LUTA_EM_AREA_POR_GOLPE, LUTA_POR_GOLPE } from '@/render/vfx/coreografias/lutaCorpo'
 import { TRUQUES_POR_GOLPE } from '@/render/vfx/coreografias/truques'
 import { PERFURAR_POR_GOLPE } from '@/render/vfx/coreografias/perfurar'
@@ -203,6 +215,26 @@ familiaNoLab('Perfurar', PERFURAR_POR_GOLPE, { 'horn_attack': 'nidoran_m', 'fury
 familiaNoLab('Truque sombrio', TRUQUES_POR_GOLPE, { 'covet': 'eevee', 'thief': 'umbreon', 'knock_off': 'umbreon', 'punishment': 'umbreon', 'payback': 'umbreon', 'assurance': 'umbreon', 'foul_play': 'umbreon' })
 familiaNoLab('Luta corporal', LUTA_POR_GOLPE, { 'double_slap': 'jynx', 'wake_up_slap': 'machop', 'smelling_salts': 'machop', 'arm_thrust': 'machop', 'brick_break': 'machop', 'revenge': 'machop', 'counter': 'machop', 'reversal': 'machop', 'endeavor': 'rattata', 'flail': 'rattata', 'vital_throw': 'machop', 'circle_throw': 'machop', 'storm_throw': 'machop', 'seismic_toss': 'machop', 'submission': 'machop', 'superpower': 'machop', 'close_combat': 'machop', 'fake_out': 'meowth', 'double_hit': 'ekans', 'rage': 'rattata', 'final_gambit': 'machop' })
 familiaNoLab('Luta corporal', LUTA_EM_AREA_POR_GOLPE, { brutal_swing: 'umbreon' }, true)
+familiaNoLab('Esfera', ESFERAS_POR_GOLPE, { 'energy_ball': 'bulbasaur', 'aura_sphere': 'machop', 'focus_blast': 'machop', 'electro_ball': 'pikachu', 'weather_ball': 'eevee', 'mist_ball': 'espeon', 'luster_purge': 'espeon', 'seed_bomb': 'bulbasaur', 'egg_bomb': 'snorlax', 'mud_bomb': 'sandshrew', 'octazooka': 'squirtle', 'vacuum_wave': 'machop' })
+familiaNoLab('Rajada', RAJADAS_POR_GOLPE, { 'bullet_seed': 'bulbasaur', 'rock_blast': 'geodude', 'spike_cannon': 'jynx', 'icicle_spear': 'jynx', 'barrage': 'snorlax', 'bone_rush': 'cubone', 'fling': 'umbreon', 'present': 'jynx', 'hidden_power': 'eevee', 'pay_day': 'meowth', 'bonemerang': 'cubone', 'bone_club': 'cubone' })
+familiaNoLab('Pedra', PEDRAS_POR_GOLPE, { 'smack_down': 'geodude', 'ancient_power': 'geodude', 'avalanche': 'jynx' })
+familiaNoLab('Pedra', PEDRAS_EM_AREA_POR_GOLPE, { precipice_blades: 'sandshrew' }, true)
+familiaNoLab('Sopro', SOPROS_POR_GOLPE, { 'brine': 'squirtle', 'frost_breath': 'jynx', 'acid_spray': 'ekans', 'belch': 'snorlax', 'dragon_rage': 'dratini' })
+familiaNoLab('Névoa', NEVOAS_POR_GOLPE, { 'smog': 'ekans', 'clear_smog': 'ekans', 'venoshock': 'ekans', 'astonish': 'gengar', 'hex': 'gengar', 'night_shade': 'gengar', 'ominous_wind': 'gengar', 'silver_wind': 'scyther' })
+familiaNoLab('Névoa', NEVOAS_EM_AREA_POR_GOLPE, { powder_snow: 'jynx' }, true)
+familiaNoLab('Som', SONS_POR_GOLPE, { 'uproar': 'jynx', 'echoed_voice': 'jynx', 'snore': 'snorlax', 'round': 'jynx', 'bug_buzz': 'scyther' })
+familiaNoLab('Mente', MENTES_POR_GOLPE, { 'extrasensory': 'espeon', 'psyshock': 'espeon', 'psywave': 'espeon', 'psycho_boost': 'espeon', 'future_sight': 'espeon', 'stored_power': 'espeon', 'heart_stamp': 'jynx', 'mirror_coat': 'espeon', 'doom_desire': 'magnemite' })
+familiaNoLab('Luz', LUZES_POR_GOLPE, { 'nuzzle': 'pikachu', 'tri_attack': 'eevee', 'sacred_fire': 'charmander' })
+familiaNoLab('Som', SONS_EM_AREA_POR_GOLPE, { boomburst: 'jynx' }, true)
+familiaNoLab('Luz', LUZES_EM_AREA_POR_GOLPE, { dazzling_gleam: 'clefairy' }, true)
+familiaNoLab('Explosão', EXPLOSOES_POR_GOLPE, { 'overheat': 'charmander', 'burn_up': 'charmander', 'inferno': 'charmander' })
+familiaNoLab('Onda', ONDAS_POR_GOLPE, { 'grass_knot': 'bulbasaur', 'waterfall': 'squirtle', 'freeze_dry': 'jynx', 'mirror_shot': 'magnemite', 'aeroblast': 'pidgey', 'zap_cannon': 'magnemite' })
+familiaNoLab('Vento', VENTOS_POR_GOLPE, { 'sonic_boom': 'magnemite', 'hurricane': 'pidgey', 'leaf_tornado': 'bulbasaur', 'fire_spin': 'charmander', 'whirlpool': 'squirtle', 'sand_tomb': 'sandshrew', 'infestation': 'scyther', 'absorb': 'bulbasaur', 'mega_drain': 'bulbasaur', 'giga_drain': 'bulbasaur', 'dream_eater': 'espeon' })
+familiaNoLab('Explosão', EXPLOSOES_EM_AREA_POR_GOLPE, { self_destruct: 'geodude', lava_plume: 'charmander', aoe50_fire: 'charmander',
+  aoe50_water: 'squirtle', aoe50_electric: 'pikachu', aoe50_grass: 'bulbasaur', aoe50_normal: 'eevee' }, true)
+familiaNoLab('Onda', ONDAS_EM_AREA_POR_GOLPE, { magnitude: 'sandshrew', muddy_water: 'squirtle', origin_pulse: 'squirtle' }, true)
+familiaNoLab('Vento', VENTOS_EM_AREA_POR_GOLPE, { razor_wind: 'pidgey' }, true)
+familiaNoLab('Soco pesado', PUNHOS_PESADOS_POR_GOLPE, { 'hammer_arm': 'machop', 'meteor_mash': 'magnemite' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

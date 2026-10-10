@@ -12,6 +12,19 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Famílias de golpes com efeito próprio, desenhados pela descrição de cada golpe.
+  {
+    version: '7.93',
+    date: '2026-10-09',
+    title: 'Todo golpe com cara própria',
+    highlights: [
+      'Golpes de bola e bomba ganharam efeito próprio, cada um a partir do que o golpe faz: Energy Ball junta força da natureza, Aura Sphere corrige o rumo, Weather Ball mostra o tempo dentro dela, Octazooka joga tinta na cara, Egg Bomb é um ovo pintado.',
+      'Rajadas também: uma semente, pedra ou lança de gelo por acerto (Bullet Seed, Rock Blast, Icicle Spear...), ossos que vão e voltam (Bonemerang), presente-bomba (Present), chuva de moedas (Pay Day) e os orbes de cores do Hidden Power.',
+      'Pedras e neve (Ancient Power com pedras antigas, Avalanche, Smack Down derrubando quem voa), lâminas de pedra brotando do chão em toda a área (Precipice Blades), sopros (Frost Breath, Acid Spray chiando, Belch, Dragon Rage) e assombrações (Astonish faz BUU, Night Shade ergue uma sombra gigante, Hex abre um círculo de feitiço) também têm efeito próprio.',
+      'Sons (Round canta notas, Echoed Voice ecoa, Boomburst estoura em toda a área), força mental (Future Sight cai do céu depois, Mirror Coat devolve em arco-íris, Heart Stamp carimba um coração), luz e fogo sagrado, explosões (Self-Destruct, Lava Plume, Overheat, Burn Up), ondas e tremores (Magnitude mostra o nível do tremor, Origin Pulse dispara feixes azuis), ventos, vórtices e drenos também ganharam efeito próprio.',
+      'O golpe de área do nível 50 de Fogo, Água, Elétrico, Grama e Normal agora tem a sua própria Explosão Elemental. Com isso, todo golpe de dano do jogo tem efeito próprio.',
+    ],
+  },
   // Famílias de golpes com efeito próprio: Mordida e Investida.
   {
     version: '7.92',
