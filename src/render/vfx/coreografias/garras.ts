@@ -8,6 +8,10 @@
 import { estilhacos, estrelaDeImpacto, limitar, riscos, saida } from '../primitivas'
 import { rngSemeado } from '../aleatorio'
 import { BRANCO, ESCURO, brilho, janela, montarFamilia, poligono, rastro, talho } from './formas'
+import { getAbility } from '@/data/abilities'
+import { PELES } from '../paletas'
+import { comAcento } from './formas'
+import { CORES_SECUNDARIAS, secundario } from './secundarios'
 import type { ContextoVfx, Pele, Ponto } from '../tipos'
 
 type Estilo = 'arranhao' | 'furia' | 'esmaga' | 'metal' | 'sombra' | 'dragao' | 'poupa'
@@ -134,7 +138,9 @@ function desenhar(perfil: Perfil, c: ContextoVfx): void {
 }
 
 export const GARRAS_POR_GOLPE = montarFamilia(PERFIS_DE_GARRA, {
-  desenhar,
+  desenhar: (p, c, id) => { desenhar(p, c); secundario(id, c, p.contato) },
+  margem: () => ({ cima: 54, baixo: 44, lados: 44 }),
+  pele: id => comAcento(PELES[getAbility(id)?.type ?? 'NORMAL'], ...CORES_SECUNDARIAS),
   duracao: duracaoDe,
   contato: p => p.contato,
   alcance: 44,

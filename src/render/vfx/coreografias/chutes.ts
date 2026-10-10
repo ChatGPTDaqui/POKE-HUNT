@@ -10,6 +10,7 @@ import { PELES } from '../paletas'
 import { crescente, estrelaDeImpacto, limitar, riscos, saida } from '../primitivas'
 import { rngSemeado } from '../aleatorio'
 import { BRANCO, ESCURO, entrePontos, janela, montarFamilia, nuvem, poligono, rastro } from './formas'
+import { CORES_SECUNDARIAS, secundario } from './secundarios'
 import type { ContextoVfx, Pele, Ponto } from '../tipos'
 
 type Caminho = 'reto' | 'salto' | 'giro' | 'rasteira' | 'pisao'
@@ -153,17 +154,17 @@ function desenhar(perfil: Perfil, c: ContextoVfx): void {
 }
 
 export const CHUTES_POR_GOLPE = montarFamilia(PERFIS_DE_CHUTE, {
-  desenhar,
+  desenhar: (p, c, id) => { desenhar(p, c); secundario(id, c, p.contato) },
   duracao: duracaoDe,
   contato: p => p.contato,
   alcance: 50,
   // Saltos começam acima de quem chuta: folga extra só pra cima.
-  margem: p => p.caminho === 'salto' || p.caminho === 'pisao' ? { cima: 70, baixo: 50, lados: 50 } : undefined,
+  margem: p => p.caminho === 'salto' || p.caminho === 'pisao' ? { cima: 70, baixo: 50, lados: 50 } : { cima: 56, baixo: 50, lados: 50 },
   // A poeira usa a pele do chão: as cores dela precisam estar na paleta.
-  pele: (id, p) => p.extra === 'poeira' || p.extra === 'tremor' || p.caminho === 'salto' ? peleComChao(id) : undefined,
+  pele: id => peleComChao(id),
 })
 
 function peleComChao(id: string): Pele {
   const base = PELES[getAbility(id)?.type ?? 'NORMAL'], chao = PELES.GROUND
-  return { ...base, acento: [...(base.acento ?? []), chao.base, chao.meio, chao.contorno] }
+  return { ...base, acento: [...(base.acento ?? []), chao.base, chao.meio, chao.contorno, ...CORES_SECUNDARIAS] }
 }
