@@ -6,6 +6,9 @@
 import { useMemo, useState } from 'react'
 import { JornadaDoTreinador } from './JornadaDoTreinador'
 import { aindaNaRota46 } from '@/data/primeirosPassos'
+import { textoDoRequisito } from '@/data/desbloqueios'
+import { usePassoQueTranca } from '@/features/primeirosPassos/useDesbloqueio'
+import { TRAINING_MAP_ID } from '@/data/trainingDummy'
 import { pedirAcao } from '@/data/remote/autoridade'
 // `MAPS` guarda HuntMapDef (a definicao crua). `MapDef` e a forma RESOLVIDA que
 // getMap() devolve (collisionGrid ja aplicado/anulado, respawnDelay ja
@@ -386,6 +389,7 @@ export function HuntMenu() {
 
   const activePoke = team[activeIndex] ?? null
   const emHunt = useWorldStore((s) => s.mapDef != null)
+  const trancaDoTreino = usePassoQueTranca('treinamento')
   const activeSpecies = activePoke ? (SPECIES[activePoke.speciesId] ?? null) : null
 
   // A LISTA DE CARDS SO MOSTRA O QUE NAO E ESTAGIO DE BIOMA (PH-431/523).
@@ -521,6 +525,9 @@ export function HuntMenu() {
     // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
     // continente e ANTES do custo em ouro, mesma prioridade do servidor.
     const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, biomaProgress)
+      // Primeiros Passos: o Treinamento (Lv 60) só abre no fim da cadeia. Trava
+      // só de interface; o servidor não conhece esta regra.
+      ?? (map.id === TRAINING_MAP_ID && trancaDoTreino ? textoDoRequisito(trancaDoTreino) : null)
     const temProtetor = parseEstagioId(map.id) != null
     // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
     // custo nasce liberada. Checar so a lista trancava visualmente as hunts

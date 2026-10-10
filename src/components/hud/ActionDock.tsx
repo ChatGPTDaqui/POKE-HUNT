@@ -44,6 +44,9 @@ import { Sheet } from '@/components/game/Sheet'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { TELAS_NA_COLUNA } from '@/components/hud/ColunaDeAtalhos'
 import { cn } from '@/lib/utils'
+import { MarcaDeCadeado } from '@/features/primeirosPassos/MarcaDeCadeado'
+import { avisarTrancado, useTrancas } from '@/features/primeirosPassos/useDesbloqueio'
+import { useDestaqueDoPasso } from '@/features/primeirosPassos/useDestaqueDoPasso'
 
 export interface Destino {
   /** Ausente nos slots que NAO abrem tela: Hospital (troca a cena) e Mais. */
@@ -172,6 +175,9 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
   // que clicou sem querer; sem isso ele fica 3 segundos preso a uma saida que
   // nao pediu.
   const viagemMarcada = useUiStore((s) => s.viagemAoHospital != null)
+  const tranca = useTrancas()
+  const destaqueEquipe = useDestaqueDoPasso('equipe')
+  const destaqueHunt = useDestaqueDoPasso('hunts')
   const iniciarViagem = useUiStore((s) => s.iniciarViagemAoHospital)
   const cancelarViagem = useUiStore((s) => s.cancelarViagemAoHospital)
   function irAoHospital() {
@@ -200,14 +206,16 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
           destino={d}
           ativo={currentScreen === d.screen}
           rotulo={!deitado}
-          onClick={() => toggleScreen(d.screen)}
+          destaque={d.screen === 'equipe' ? destaqueEquipe.classe : ''}
+          onClick={() => { if (d.screen === 'equipe') destaqueEquipe.aoTocar(); toggleScreen(d.screen) }}
         />
       ))}
 
       <SlotHunt
         ativo={currentScreen === 'hunts'}
         deitado={deitado}
-        onClick={() => toggleScreen('hunts')}
+        destaque={destaqueHunt.classe}
+        onClick={() => { destaqueHunt.aoTocar(); toggleScreen('hunts') }}
       />
 
       <SlotNav
@@ -232,7 +240,12 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         ativo={currentScreen === DIREITA[1].screen}
         rotulo={!deitado}
         badge={pendenciasMercado}
-        onClick={() => toggleScreen(DIREITA[1].screen)}
+        trancado={tranca(DIREITA[1].screen)}
+        onClick={() => {
+          const passo = tranca(DIREITA[1].screen)
+          if (passo) avisarTrancado(passo)
+          else toggleScreen(DIREITA[1].screen)
+        }}
       />
 
       <SlotNav
@@ -252,12 +265,16 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
 }
 
 function SlotNav({
-  destino, ativo, rotulo, badge = 0, descricaoDoBadge, onClick,
+  destino, ativo, rotulo, badge = 0, descricaoDoBadge, trancado, destaque, onClick,
 }: {
   destino: Destino
   ativo: boolean
   rotulo: boolean
   badge?: number
+  /** Passo que ainda tranca este menu (Primeiros Passos). */
+  trancado?: string | null
+  /** Classe do anel do passo atual, quando ele aponta pra este botão. */
+  destaque?: string
   /**
    * O que o selo esta contando, em palavras (PH-287).
    *
@@ -281,8 +298,11 @@ function SlotNav({
         'relative flex min-h-[44px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-[.15em]',
         'rounded-[.8em] px-[.1em] py-[.25em] font-[inherit] transition-colors',
         ativo ? 'bg-n800 text-foreground' : 'text-n400',
+        trancado && 'opacity-55',
+        destaque,
       )}
     >
+      {trancado && <MarcaDeCadeado passoId={trancado} />}
       {iconUrl && !imagemQuebrada ? (
         <img
           src={iconUrl}
@@ -320,7 +340,7 @@ function SlotNav({
 }
 
 // Hunt e o unico slot com peso visual proprio: pilula clara, o acento do tema.
-function SlotHunt({ ativo, deitado, onClick }: { ativo: boolean; deitado: boolean; onClick: () => void }) {
+function SlotHunt({ ativo, deitado, destaque, onClick }: { ativo: boolean; deitado: boolean; destaque?: string; onClick: () => void }) {
   return (
     <button
       type="button"
@@ -338,6 +358,7 @@ function SlotHunt({ ativo, deitado, onClick }: { ativo: boolean; deitado: boolea
           'flex items-center justify-center rounded-full transition-colors',
           deitado ? 'h-[2.05em] w-[2.05em]' : 'h-[2.3em] w-[2.3em]',
           ativo ? 'bg-primary text-primary-foreground' : 'bg-n800 text-n100',
+          destaque,
         )}
       >
         <MapTrifold className="text-[1.45em]" weight="fill" />
@@ -360,6 +381,7 @@ export function SheetMais() {
   const setMoreOpen = useUiStore((s) => s.setMoreOpen)
   const pendenciasSocial = usePendenciasDoSocial()
   const destinos = destinosDaGrade()
+  const tranca = useTrancas()
 
   if (!moreOpen) return null
 
@@ -377,7 +399,10 @@ export function SheetMais() {
             // ele tem espaco pra uma linha embaixo do rotulo — a doca, com oito
             // slots em 390px, nao tem.
             detalhe={screen === 'social' ? fraseDasPendencias(pendenciasSocial) : null}
+            trancado={tranca(screen)}
             onClick={() => {
+              const passo = tranca(screen)
+              if (passo) return avisarTrancado(passo)
               toggleScreen(screen)
               setMoreOpen(false)
             }}
@@ -389,11 +414,12 @@ export function SheetMais() {
 }
 
 function ItemGrade({
-  label, Icon, badge = 0, detalhe, onClick,
+  label, Icon, badge = 0, detalhe, trancado, onClick,
 }: {
   label: string
   Icon: Icon
   badge?: number
+  trancado?: string | null
   /** O que o selo esta contando, escrito (PH-287). `null` quando nao ha nada. */
   detalhe?: string | null
   onClick: () => void
@@ -406,8 +432,10 @@ function ItemGrade({
         'relative flex cursor-pointer flex-col items-center justify-center gap-[.35em] rounded-[.9em]',
         'border border-n800 bg-n900/70 px-[.2em] py-[.75em] font-[inherit] text-n300 transition-colors',
         'hover:border-n600 hover:text-foreground',
+        trancado && 'opacity-55',
       )}
     >
+      {trancado && <MarcaDeCadeado passoId={trancado} />}
       <Icon className="text-[1.5em]" />
       <span className="text-[.7em] leading-none">{label}</span>
       {/* PH-287: a linha so existe quando ha o que dizer, entao a grade sem
@@ -464,6 +492,7 @@ function BotaoAuto() {
   // quase o tempo todo, e um aviso de "as bolas estao acabando" que so aparece
   // depois de abrir chega tarde demais pra servir.
   const estoqueBaixo = useEstoqueBaixoNoAuto()
+  const destaque = useDestaqueDoPasso('auto')
   return (
     <button
       type="button"
@@ -473,8 +502,9 @@ function BotaoAuto() {
         ? `Automações — um consumível em uso está abaixo de ${LIMIAR_ESTOQUE_BAIXO}`
         : 'Automações'}
       aria-pressed={open}
-      onClick={() => setOpen(!open)}
+      onClick={() => { destaque.aoTocar(); setOpen(!open) }}
       className={cn(
+        destaque.classe,
         'vidro alvo-toque flex shrink-0 cursor-pointer items-center justify-center gap-[.25em] rounded-[.7em] px-[.5em]',
         'font-[inherit] text-[.85em] transition-colors',
         open ? 'border-primary text-n100' : 'text-n300',

@@ -20,6 +20,8 @@ import { ErroServidor, servidorAtivo } from '@/data/remote/servidor'
 import { Meter } from '@/components/game/controls'
 import { ProximoObjetivo } from '@/features/hunt/JornadaDoTreinador'
 import { cn } from '@/lib/utils'
+import { LockSimple } from '@phosphor-icons/react'
+import { useAvisoDeCadeado } from './useDesbloqueio'
 
 export function textoDaRecompensa(r: RecompensaDoPasso): string {
   const partes = r.ouro > 0 ? [`${r.ouro.toLocaleString('pt-BR')} ouro`] : []
@@ -74,6 +76,14 @@ export function CartaoDoPasso() {
   const { atual, indice, progresso, pronto } = useSituacao()
   const [coletando, setColetando] = useState(false)
   const emCampo = useWorldStore(s => s.mapDef != null)
+  const aviso = useAvisoDeCadeado()
+  const [avisoVisivel, setAvisoVisivel] = useState(false)
+  useEffect(() => {
+    if (!aviso.texto) return
+    setAvisoVisivel(true)
+    const id = setTimeout(() => setAvisoVisivel(false), 4000)
+    return () => clearTimeout(id)
+  }, [aviso.seq, aviso.texto])
 
   useEffect(() => {
     if (carregado) return
@@ -104,7 +114,12 @@ export function CartaoDoPasso() {
           <Gift weight="fill" className="shrink-0 text-warn" aria-hidden />
           <span className="truncate">{pronto ? 'Pronto! Colete a recompensa' : textoDaRecompensa(atual.recompensa)}</span>
         </div>
-        {!pronto && <p className="mt-[.15em] line-clamp-2 text-[.9em] text-n500">{(emCampo && atual.dicaEmCampo) || atual.dica}</p>}
+        {avisoVisivel && aviso.texto && (
+          <p role="status" className="mt-[.2em] flex items-center gap-[.3em] rounded-[.3em] bg-warn/15 px-[.3em] py-[.1em] text-[.9em] text-warn">
+            <LockSimple weight="fill" className="shrink-0" aria-hidden />{aviso.texto}
+          </p>
+        )}
+        {!pronto && !avisoVisivel && <p className="mt-[.15em] line-clamp-2 text-[.9em] text-n500">{(emCampo && atual.dicaEmCampo) || atual.dica}</p>}
       </button>
       {pronto && (
         <button type="button" disabled={coletando}
