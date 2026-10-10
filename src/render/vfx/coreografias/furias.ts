@@ -11,8 +11,8 @@
 import { estrelaDeImpacto, limitar, riscos, saida } from '../primitivas'
 import { PELES } from '../paletas'
 import { rngSemeado } from '../aleatorio'
-import { ESCURO, brilho, comAcento, janela, montarFamilia, poligono, rastro } from './formas'
-import { proa } from './investidas'
+import { ESCURO, brilho, comAcento, janela, montarFamilia, poligono, proa, rastro } from './formas'
+
 import type { ContextoVfx, Pele, Ponto } from '../tipos'
 
 interface Perfil { petalas: boolean; preparo: number }

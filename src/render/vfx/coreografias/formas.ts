@@ -3,7 +3,7 @@
 // Tudo com contorno escuro por baixo e faixas chapadas: o pixelizador encaixa
 // as cores na paleta e o contorno é o que separa o efeito do tileset.
 import { NEUTROS } from '../paletas'
-import { entrada, limitar, pontosDeRaio, saida, tracarRaio } from '../primitivas'
+import { crescente, entrada, limitar, pontosDeRaio, saida, tracarRaio } from '../primitivas'
 import { rngSemeado } from '../aleatorio'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto } from '../tipos'
 
@@ -174,3 +174,51 @@ export function estatica(ctx: CanvasRenderingContext2D, alvo: Ponto, k: number, 
     tracarRaio(ctx, pontosDeRaio(a, { x: a.x + (r() - .5) * 6, y: a.y + 14 }, 3, 2, r), 1.2 * k, pele)
   }
 }
+
+/**
+ * Proa: onda de choque em "(" com a ponta pra +X — a frente de quem investe.
+ * `largura` abre as asas (parede larga) e `aura` desenha um halo por fora.
+ */
+export function proa(ctx: CanvasRenderingContext2D, p: Ponto, angulo: number, escala: number, largura: number, pele: Pele, aura?: string): void {
+  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(angulo); ctx.scale(escala, escala * largura)
+  const forma = (k: number) => {
+    ctx.beginPath(); ctx.moveTo(-9 - k, -13 - k)
+    ctx.quadraticCurveTo(8 + k * 1.4, -9, 9 + k * 1.2, 0)
+    ctx.quadraticCurveTo(8 + k * 1.4, 9, -9 - k, 13 + k)
+    ctx.quadraticCurveTo(1 - k * .5, 0, -9 - k, -13 - k); ctx.closePath()
+  }
+  if (aura) { forma(4.2); ctx.fillStyle = aura; ctx.fill() }
+  forma(1.6); ctx.fillStyle = pele.contorno; ctx.fill()
+  forma(0); ctx.fillStyle = pele.base; ctx.fill()
+  ctx.save(); ctx.translate(3, 0); ctx.scale(.7, .72); forma(0); ctx.fillStyle = pele.meio; ctx.fill(); ctx.restore()
+  ctx.beginPath(); ctx.moveTo(1, -7); ctx.quadraticCurveTo(8, -4, 8.4, 0); ctx.quadraticCurveTo(8, 4, 1, 7)
+  ctx.strokeStyle = BRANCO; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke()
+  ctx.restore()
+}
+
+/** Arcos do choque abrindo do outro lado do alvo, na direção da pancada. */
+export function ondaDeChoque(ctx: CanvasRenderingContext2D, alvo: Ponto, angulo: number, t: number, raio: number, n: number, pele: Pele): void {
+  for (let i = 0; i < n; i++) {
+    const u = limitar((t - i * .12) / .8)
+    if (u <= 0 || u >= 1) continue
+    crescente(ctx, alvo, raio * (.55 + saida(u) * .6) + i * 4, angulo - .85, angulo + .85, 3.2 - i * .6, u, 0, pele, 1)
+  }
+}
+
+/** Linhas de susto (flinch) acima da cabeça do alvo. */
+export function susto(ctx: CanvasRenderingContext2D, alvo: Ponto, k: number): void {
+  if (k <= 0) return
+  for (const dx of [-6, 0, 6]) poligono(ctx, [[alvo.x + dx - 1, alvo.y - 16], [alvo.x + dx + 1, alvo.y - 16], [alvo.x + dx * 1.4 + .6, alvo.y - 16 - 7 * k], [alvo.x + dx * 1.4 - .6, alvo.y - 16 - 7 * k]], ESCURO)
+}
+
+/** Barra de HP pequena (verde/amarela/vermelha pela fração). */
+export function barraDeHp(ctx: CanvasRenderingContext2D, p: Ponto, frac: number, largura = 22): void {
+  poligono(ctx, [[p.x - largura / 2 - 1.4, p.y - 2.4], [p.x + largura / 2 + 1.4, p.y - 2.4], [p.x + largura / 2 + 1.4, p.y + 2.4], [p.x - largura / 2 - 1.4, p.y + 2.4]], ESCURO)
+  poligono(ctx, [[p.x - largura / 2, p.y - 1.2], [p.x + largura / 2, p.y - 1.2], [p.x + largura / 2, p.y + 1.2], [p.x - largura / 2, p.y + 1.2]], '#3a3040')
+  const cor = frac > .5 ? '#5cd65c' : frac > .2 ? '#ffd23a' : '#e0303a'
+  const w = largura * limitar(frac)
+  if (w > .5) poligono(ctx, [[p.x - largura / 2, p.y - 1.2], [p.x - largura / 2 + w, p.y - 1.2], [p.x - largura / 2 + w, p.y + 1.2], [p.x - largura / 2, p.y + 1.2]], cor)
+}
+
+/** Cores da barra de HP (entram na paleta de quem usa `barraDeHp`). */
+export const CORES_DE_HP = ['#5cd65c', '#ffd23a', '#e0303a', '#3a3040'] as const

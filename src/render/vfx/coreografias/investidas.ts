@@ -1,438 +1,490 @@
-// Família Investida (09/10): dezoito golpes em que o CORPO é a arma.
-//
-// O VFX não move o sprite de quem ataca (só desenho), então a forma da
-// família é a PROA: a onda de choque em "(" que vai na frente do corpo, com
-// riscos de velocidade atrás, e o choque que ela faz ao bater. Cada golpe tem
-// o seu caminho (reto, zigue-zague, de cima, em laço, ida e volta, de vários
-// lados) e a sua marca (recuo em quem bate, poeira de galope, corações,
-// rabisco de raiva...). Mesmo padrão dos socos e das mordidas: perfil por
-// golpe, uma coreografia, nada de estado entre quadros.
+// Família Investida (09/10, refeita golpe a golpe pela descrição): dezoito
+// golpes em que o CORPO é a arma. O VFX não move o sprite de quem ataca, então
+// cada golpe mostra o corpo do jeito que a descrição pede — vulto que se
+// choca, imagens residuais de velocidade, peso que despenca, os quatro golpes
+// do Last Resort, o aliado caído do Retaliate, o status do Facade... A frase
+// do jogo vai no comentário de cada golpe.
 import { getAbility } from '@/data/abilities'
-import { NEUTROS, PELES } from '../paletas'
+import { PELES } from '../paletas'
 import { crescente, entrada, estilhacos, estrelaDeImpacto, limitar, riscos, saida } from '../primitivas'
 import { rngSemeado } from '../aleatorio'
-import { em } from './comum'
-import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto, Tier } from '../tipos'
+import {
+  BRANCO, ESCURO, bola, brilho, comAcento, entrePontos, estatica, janela, montarFamilia, nuvem,
+  ondaDeChoque, poligono, rastro, setasDeStatus,
+} from './formas'
+import type { ContextoVfx, Pele, Ponto } from '../tipos'
 
-const [ESCURO, BRANCO] = NEUTROS
-
-/** Por onde a proa vai até o alvo. */
-type Caminho = 'reto' | 'zigue' | 'varios' | 'cima' | 'laco' | 'volta'
-/** O que distingue o golpe além do caminho. */
-type Marca =
-  | 'nenhuma' | 'recuo' | 'recuoDuplo' | 'giga' | 'galope' | 'estrelas' | 'raiva' | 'lascas'
-  | 'pow' | 'coracao' | 'rabisco' | 'muralha' | 'faisca' | 'baque'
-
-interface Perfil {
-  caminho: Caminho
-  marca: Marca
-  /** Preparação parado (agacha, junta força) antes de sair. */
-  preparo: number
-  /** Viagem até o alvo. */
-  viagem: number
-  tamanho: number
-  /** Cor de contraste fora da pele do tipo (entra na paleta do pixelizador). */
-  acento?: string
-}
+interface Perfil { contato: number; fim: number }
 
 export const PERFIS_DE_INVESTIDA: Record<string, Perfil> = {
-  tackle: { caminho: 'reto', marca: 'nenhuma', preparo: 60, viagem: 110, tamanho: .9 },
-  quick_attack: { caminho: 'zigue', marca: 'nenhuma', preparo: 20, viagem: 70, tamanho: .85 },
-  extreme_speed: { caminho: 'varios', marca: 'nenhuma', preparo: 30, viagem: 60, tamanho: .95 },
-  take_down: { caminho: 'reto', marca: 'recuo', preparo: 110, viagem: 120, tamanho: 1.05 },
-  double_edge: { caminho: 'reto', marca: 'recuoDuplo', preparo: 140, viagem: 120, tamanho: 1.2 },
-  body_slam: { caminho: 'cima', marca: 'baque', preparo: 90, viagem: 150, tamanho: 1.15 },
-  giga_impact: { caminho: 'reto', marca: 'giga', preparo: 200, viagem: 130, tamanho: 1.35, acento: '#ff9a3a' },
-  high_horsepower: { caminho: 'reto', marca: 'galope', preparo: 90, viagem: 150, tamanho: 1.15 },
-  last_resort: { caminho: 'reto', marca: 'estrelas', preparo: 200, viagem: 120, tamanho: 1.2, acento: '#ffd23a' },
-  retaliate: { caminho: 'reto', marca: 'raiva', preparo: 80, viagem: 110, tamanho: 1, acento: '#e0303a' },
-  chip_away: { caminho: 'reto', marca: 'lascas', preparo: 60, viagem: 110, tamanho: .95 },
-  facade: { caminho: 'reto', marca: 'pow', preparo: 90, viagem: 110, tamanho: 1, acento: '#ffd23a' },
-  return: { caminho: 'reto', marca: 'coracao', preparo: 80, viagem: 120, tamanho: 1, acento: '#ff6f9e' },
-  frustration: { caminho: 'reto', marca: 'rabisco', preparo: 80, viagem: 110, tamanho: 1 },
-  strength: { caminho: 'reto', marca: 'muralha', preparo: 130, viagem: 150, tamanho: 1.15 },
-  heavy_slam: { caminho: 'cima', marca: 'faisca', preparo: 110, viagem: 140, tamanho: 1.25 },
-  u_turn: { caminho: 'volta', marca: 'nenhuma', preparo: 40, viagem: 100, tamanho: .95 },
-  acrobatics: { caminho: 'laco', marca: 'nenhuma', preparo: 40, viagem: 170, tamanho: .95 },
+  tackle: { contato: 180, fim: 260 },
+  quick_attack: { contato: 80, fim: 260 },
+  extreme_speed: { contato: 120, fim: 360 },
+  take_down: { contato: 230, fim: 300 },
+  double_edge: { contato: 260, fim: 340 },
+  body_slam: { contato: 260, fim: 320 },
+  giga_impact: { contato: 340, fim: 420 },
+  high_horsepower: { contato: 250, fim: 300 },
+  last_resort: { contato: 380, fim: 300 },
+  retaliate: { contato: 280, fim: 300 },
+  chip_away: { contato: 160, fim: 420 },
+  facade: { contato: 260, fim: 300 },
+  return: { contato: 260, fim: 340 },
+  frustration: { contato: 240, fim: 340 },
+  strength: { contato: 300, fim: 300 },
+  heavy_slam: { contato: 280, fim: 340 },
+  u_turn: { contato: 160, fim: 380 },
+  acrobatics: { contato: 260, fim: 280 },
 }
 
-/** Vida do choque depois do contato. */
-const CHOQUE = 280
-/** Volta do U-turn. */
-const RETORNO = 160
-/** Extreme Speed: atraso entre os três cortes. */
-const PASSO_DOS_CORTES = 55
+const VERMELHO = '#e0303a', ROSA = '#ff6f9e', AMARELO = '#ffd23a', AZUL = '#58a6f0', LARANJA = '#ff9a3a'
+const CORES_DOS_GOLPES = ['#e0303a', '#58a6f0', '#5cd65c', '#ffd23a'] as const
 
-const contatoDe = (p: Perfil) => p.preparo + p.viagem
-function duracaoDe(p: Perfil): number {
-  let fim = contatoDe(p) + CHOQUE
-  if (p.caminho === 'volta') fim += RETORNO - 60
-  if (p.caminho === 'varios') fim += 2 * PASSO_DOS_CORTES
-  if (p.marca === 'rabisco' || p.marca === 'coracao' || p.marca === 'raiva') fim += 80
-  return fim
+interface Cena { c: ContextoVfx; pele: Pele; semente: number; ux: number; uy: number; angulo: number; contato: number; centro: Ponto; saida: Ponto; chegada: Ponto }
+function cena(p: Perfil, c: ContextoVfx): Cena {
+  const dx = c.alvo.x - c.origem.x, dy = c.alvo.y - c.origem.y, L = Math.hypot(dx, dy) || 1
+  const ux = dx / L, uy = dy / L
+  return { c, pele: c.pele, semente: Math.floor(c.rng() * 0xffffffff), ux, uy, angulo: Math.atan2(uy, ux), contato: p.contato,
+    centro: { x: c.alvo.x, y: c.alvo.y - 3 }, saida: { x: c.origem.x + ux * 4, y: c.origem.y - 2 }, chegada: { x: c.alvo.x - ux * 11, y: c.alvo.y - uy * 11 - 3 } }
 }
-
-// ---------------------------------------------------------------------------
-// Formas
-// ---------------------------------------------------------------------------
-
-function poligono(ctx: CanvasRenderingContext2D, pts: readonly (readonly [number, number])[], cor: string): void {
-  ctx.fillStyle = cor; ctx.beginPath()
-  pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))
-  ctx.closePath(); ctx.fill()
+function choque(s: Cena, t: number, tamanho: number, ponto = s.centro): void {
+  estrelaDeImpacto(s.c.ctx, ponto, tamanho + s.c.tier * 1.2, t, s.pele, rngSemeado(s.semente + 50))
+  riscos(s.c.ctx, ponto, s.c.pedir(2 + s.c.tier), 18 + s.c.tier * 3, t, s.pele.meio, rngSemeado(s.semente + 51))
 }
 
 /**
- * A proa: onda de choque em "(" com a ponta pra +X. `largura` abre as asas
- * (Strength empurra uma parede, Tackle é uma cunha).
+ * Vulto do corpo de quem investe: massa oval que estica na direção do
+ * movimento (`estica` 0..1) — é o corpo inteiro batendo, não um projétil.
  */
-export function proa(ctx: CanvasRenderingContext2D, p: Ponto, angulo: number, escala: number, largura: number, pele: Pele, aura?: string): void {
-  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(angulo); ctx.scale(escala, escala * largura)
-  const forma = (k: number) => {
-    ctx.beginPath(); ctx.moveTo(-9 - k, -13 - k)
-    ctx.quadraticCurveTo(8 + k * 1.4, -9, 9 + k * 1.2, 0)
-    ctx.quadraticCurveTo(8 + k * 1.4, 9, -9 - k, 13 + k)
-    ctx.quadraticCurveTo(1 - k * .5, 0, -9 - k, -13 - k); ctx.closePath()
+function vulto(ctx: CanvasRenderingContext2D, p: Ponto, angulo: number, r: number, estica: number, pele: Pele, cor = pele.base, soContorno = false): void {
+  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(angulo); ctx.scale(1 + estica * .6, 1 - estica * .25)
+  if (soContorno) {
+    ctx.strokeStyle = ESCURO; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.ellipse(0, 0, r, r * .85, 0, 0, Math.PI * 2); ctx.stroke()
+    ctx.strokeStyle = pele.meio; ctx.lineWidth = 1; ctx.stroke()
+  } else {
+    ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.ellipse(0, 0, r + 1.4, r * .85 + 1.4, 0, 0, Math.PI * 2); ctx.fill()
+    ctx.fillStyle = cor; ctx.beginPath(); ctx.ellipse(0, 0, r, r * .85, 0, 0, Math.PI * 2); ctx.fill()
+    ctx.fillStyle = pele.meio; ctx.beginPath(); ctx.ellipse(r * .2, -r * .25, r * .55, r * .35, 0, 0, Math.PI * 2); ctx.fill()
+    ctx.strokeStyle = BRANCO; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, r * .9, -.7, .7); ctx.stroke()
   }
-  if (aura) { forma(4.2); ctx.fillStyle = aura; ctx.fill() }
-  forma(1.6); ctx.fillStyle = pele.contorno; ctx.fill()
-  forma(0); ctx.fillStyle = pele.base; ctx.fill()
-  ctx.save(); ctx.translate(3, 0); ctx.scale(.7, .72); forma(0); ctx.fillStyle = pele.meio; ctx.fill(); ctx.restore()
-  // Fio branco na frente: é a borda que bate.
-  ctx.beginPath(); ctx.moveTo(1, -7); ctx.quadraticCurveTo(8, -4, 8.4, 0); ctx.quadraticCurveTo(8, 4, 1, 7)
-  ctx.strokeStyle = BRANCO; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke()
   ctx.restore()
 }
 
-/** Riscos de velocidade paralelos atrás da proa, do ponto `de` até `ate`. */
-function rastro(ctx: CanvasRenderingContext2D, de: Ponto, ate: Ponto, n: number, abertura: number, pele: Pele, rng: () => number, encolhe = 1): void {
-  const dx = ate.x - de.x, dy = ate.y - de.y, L = Math.hypot(dx, dy)
-  if (L < 2) return
-  const ux = dx / L, uy = dy / L
-  ctx.lineCap = 'round'
-  for (let i = 0; i < n; i++) {
-    const lado = (rng() * 2 - 1) * abertura, ini = rng() * .5, comp = (.35 + rng() * .5) * encolhe
-    const a = { x: de.x + dx * ini - uy * lado, y: de.y + dy * ini + ux * lado }
-    const b = { x: a.x + ux * L * comp * (1 - ini), y: a.y + uy * L * comp * (1 - ini) }
-    ctx.strokeStyle = pele.contorno; ctx.lineWidth = 2.6
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke()
-    ctx.strokeStyle = i % 2 ? BRANCO : pele.meio; ctx.lineWidth = 1.2
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke()
-  }
+/** Investida em linha reta com vulto + imagens residuais; devolve a posição. */
+function carga(s: Cena, ms: number, ini: number, dura: number, r: number, residuos: number, cor?: string): Ponto | null {
+  const u = janela(ms, ini, dura)
+  if (u === null) return null
+  const v = entrada(u) * .35 + saida(u) * .65
+  const q = entrePontos(s.saida, s.chegada, v)
+  for (let k = residuos; k >= 1; k--) vulto(s.c.ctx, entrePontos(s.saida, s.chegada, Math.max(0, v - k * .12)), s.angulo, r * (1 - k * .08), .3, s.pele, undefined, true)
+  rastro(s.c.ctx, s.saida, q, s.c.pedir(2 + s.c.tier), r * .6, s.pele, rngSemeado(s.semente + 1), .8)
+  vulto(s.c.ctx, q, s.angulo, r, u, s.pele, cor)
+  return q
 }
 
-/** Nuvem de poeira no chão: bolas que se espalham, sobem um pouco e encolhem. */
-function poeira(ctx: CanvasRenderingContext2D, p: Ponto, t: number, n: number, espalha: number, pele: Pele, rng: () => number): void {
-  const bolas: { x: number; y: number; r: number }[] = []
-  for (let i = 0; i < n; i++) {
-    const a = rng() * Math.PI * 2, d = espalha * (.4 + rng() * .6), r0 = 2.4 + rng() * 2.2
-    const r = r0 * (1 - entrada(limitar((t - .35) / .65))) * (.6 + saida(limitar(t * 3)) * .4)
-    if (r <= .4) continue
-    bolas.push({ x: p.x + Math.cos(a) * d * saida(t), y: p.y + Math.sin(a) * d * .35 * saida(t) - 5 * t, r })
-  }
-  for (const [g, cor] of [[1.3, pele.contorno], [0, pele.base], [-1, pele.meio]] as const) {
-    ctx.fillStyle = cor
-    for (const b of bolas) {
-      if (b.r + g <= .3) continue
-      ctx.beginPath(); ctx.arc(b.x - (g < 0 ? .6 : 0), b.y - (g < 0 ? .6 : 0), b.r + g, 0, Math.PI * 2); ctx.fill()
-    }
-  }
+function recuo(s: Cena, t: number, tamanho: number): void {
+  const tr = (t - .12) / .7
+  if (tr > 0 && tr < 1) estrelaDeImpacto(s.c.ctx, { x: s.c.origem.x, y: s.c.origem.y - 3 }, tamanho, tr, s.pele, rngSemeado(s.semente + 80))
 }
 
-/** Arcos do choque abrindo do outro lado do alvo, na direção da pancada. */
-export function ondaDeChoque(ctx: CanvasRenderingContext2D, alvo: Ponto, angulo: number, t: number, raio: number, n: number, pele: Pele): void {
-  for (let i = 0; i < n; i++) {
-    const u = limitar((t - i * .12) / .8)
-    if (u <= 0 || u >= 1) continue
-    crescente(ctx, alvo, raio * (.55 + saida(u) * .6) + i * 4, angulo - .85, angulo + .85, 3.2 - i * .6, u, 0, pele, 1)
-  }
-}
-
-function coracao(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, cor: string): void {
-  // Coração de 7x6 na grade, escalado: lê como pixel art até em tamanho 2.
+function coracao(ctx: CanvasRenderingContext2D, p: Ponto, s: number, cor: string): void {
+  if (s < .2) return
   const px = [[1,0],[2,0],[4,0],[5,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[1,3],[2,3],[3,3],[4,3],[5,3],[2,4],[3,4],[4,4],[3,5]]
   ctx.fillStyle = ESCURO
-  for (const [i, j] of px) ctx.fillRect(x + (i - 3.5) * s - s * .35, y + (j - 3) * s - s * .35, s * 1.7, s * 1.7)
+  for (const [i, j] of px) ctx.fillRect(p.x + (i - 3.5) * s - s * .35, p.y + (j - 3) * s - s * .35, s * 1.7, s * 1.7)
   ctx.fillStyle = cor
-  for (const [i, j] of px) ctx.fillRect(x + (i - 3.5) * s, y + (j - 3) * s, s, s)
-  ctx.fillStyle = BRANCO; ctx.fillRect(x - 2.5 * s, y - 2 * s, s, s)
+  for (const [i, j] of px) ctx.fillRect(p.x + (i - 3.5) * s, p.y + (j - 3) * s, s, s)
 }
 
-/** Veia de raiva de anime (as quatro "vírgulas" em cruz). */
-function veiaDeRaiva(ctx: CanvasRenderingContext2D, p: Ponto, s: number, cor: string): void {
-  ctx.save(); ctx.translate(p.x, p.y); ctx.scale(s, s)
-  for (let i = 0; i < 4; i++) {
-    ctx.rotate(Math.PI / 2)
-    poligono(ctx, [[1.2, -1.2], [5.6, -3.6], [6.6, -1.4], [3, -.2]], ESCURO)
-    poligono(ctx, [[1.8, -1.4], [5.2, -3], [5.8, -1.6], [3, -.8]], cor)
-  }
+const GOLPES: Record<string, (p: Perfil, s: Cena) => void> = {
+  /** "A physical attack in which the user charges and slams into the target with its whole body." */
+  tackle(p, s) {
+    // Corpo inteiro: o vulto avança, achata no contato e o alvo é empurrado.
+    carga(s, s.c.ms, 40, p.contato - 40, 8, 1)
+    const t = janela(s.c.ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 9)
+    ondaDeChoque(s.c.ctx, s.c.alvo, s.angulo, t, 13, 1, s.pele)
+  },
+
+  /** "Lunges at the target at a speed that makes it almost invisible. Always goes first." */
+  quick_attack(p, s) {
+    const { ctx, ms } = s.c
+    // Quase invisível: só aparecem os CONTORNOS do corpo em três pontos do
+    // caminho e um traço branco; nenhum vulto cheio.
+    const t0 = janela(ms, 0, p.contato + 80)
+    if (t0 !== null) {
+      for (let k = 0; k < 3; k++) {
+        const v = (k + 1) / 4
+        if (ms > p.contato * v + 60) continue
+        vulto(ctx, entrePontos(s.saida, s.chegada, v), s.angulo, 7, .6, s.pele, undefined, true)
+      }
+      const fio = 1 - limitar((ms - p.contato) / 80)
+      ctx.strokeStyle = BRANCO; ctx.lineWidth = 2 * fio + .3; ctx.lineCap = 'round'
+      ctx.beginPath(); ctx.moveTo(s.saida.x, s.saida.y); ctx.lineTo(s.chegada.x, s.chegada.y); ctx.stroke()
+    }
+    const t = janela(ms, s.contato, p.fim)
+    if (t !== null) choque(s, t, 8)
+  },
+
+  /** "Charges the target at blinding speed. This move always goes first." */
+  extreme_speed(p, s) {
+    const { ctx, ms } = s.c
+    // Velocidade CEGANTE: o corpo pisca em quatro lugares em volta do alvo
+    // (some e aparece) e acerta de lados diferentes, rápido demais pra seguir.
+    for (let k = 0; k < 4; k++) {
+      const a = s.angulo + Math.PI + [0, 2.2, -2.1, .9][k]
+      const q = { x: s.centro.x + Math.cos(a) * 14, y: s.centro.y + Math.sin(a) * 11 }
+      const pisca = janela(ms, p.contato - 60 + k * 70, 50)
+      if (pisca !== null) { vulto(ctx, q, a + Math.PI, 7, .8, s.pele); rastro(ctx, { x: q.x + Math.cos(a) * 16, y: q.y + Math.sin(a) * 16 }, q, 2, 3, s.pele, rngSemeado(s.semente + k)) }
+      const t = janela(ms, p.contato - 10 + k * 70, 180)
+      if (t !== null) choque(s, t, 6 + (k === 3 ? 4 : 0), { x: s.centro.x - Math.cos(a) * 3, y: s.centro.y - Math.sin(a) * 2 })
+    }
+  },
+
+  /** "A reckless, full-body charge attack for slamming into the target. Also damages the user a little." */
+  take_down(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Imprudente: o pé raspa o chão levantando poeira, carga pesada e, no
+    // choque, quem bateu também leva um estalinho.
+    const raspa = janela(ms, 0, 120)
+    if (raspa !== null) nuvem(ctx, { x: origem.x - s.ux * 8, y: origem.y + 11 }, raspa, s.c.pedir(3), 7, PELES.GROUND, rngSemeado(s.semente + 2))
+    carga(s, ms, 110, p.contato - 110, 9, 2)
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 11)
+    ondaDeChoque(ctx, s.c.alvo, s.angulo, t, 14, 2, s.pele)
+    recuo(s, t, 6)
+  },
+
+  /** "A reckless, life-risking tackle. This also damages the user quite a lot." */
+  double_edge(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Arriscando a vida: o corpo vem com um gume DUPLO (borda vermelha por
+    // fora) e o recuo é grande — um anel vermelho em quem bateu.
+    const q = carga(s, ms, 120, p.contato - 120, 9.5, 2)
+    if (q) crescente(ctx, q, 12, s.angulo - 1.1, s.angulo + 1.1, 2.6, .55, 0, { ...s.pele, meio: VERMELHO, nucleo: BRANCO }, 1)
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 13)
+    ondaDeChoque(ctx, s.c.alvo, s.angulo, t, 16, 2, s.pele)
+    recuo(s, t, 10)
+    if (t > .1 && t < .5) crescente(ctx, origem, 10, -Math.PI, Math.PI, 2.4, .5, 0, { ...s.pele, meio: VERMELHO }, 1)
+  },
+
+  /** "Drops onto the target with its full body weight. May leave the target with paralysis." */
+  body_slam(p, s) {
+    const { ctx, ms, alvo } = s.c
+    // Peso total: a sombra do corpo cresce em cima do alvo e o vulto ENORME cai
+    // de cima, achatando; o chão espirra e o alvo fica com estática (paralisia).
+    const chao = { x: alvo.x, y: alvo.y + 11 }
+    const cai = janela(ms, 40, p.contato - 40)
+    if (cai !== null) {
+      const r = 6 + 9 * cai
+      ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.ellipse(chao.x, chao.y, r, r * .35, 0, 0, Math.PI * 2); ctx.fill()
+      vulto(ctx, { x: alvo.x, y: alvo.y - 46 + 38 * entrada(cai) }, Math.PI / 2, 12, cai * .4, s.pele)
+    }
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    if (t < .25) vulto(ctx, { x: alvo.x, y: alvo.y - 6 }, 0, 12, 0, s.pele)
+    choque(s, t, 12, { x: alvo.x, y: alvo.y + 2 })
+    nuvem(ctx, chao, t, s.c.pedir(5 + s.c.tier), 20, PELES.GROUND, rngSemeado(s.semente + 2))
+    estatica(ctx, alvo, saida(limitar((t - .25) / .2)) * (1 - limitar((t - .85) / .15)), PELES.ELECTRIC, s.semente + 90 + Math.floor(ms / 66))
+  },
+
+  /** "Charges at the target using every bit of its power. The user can't move on the next turn." */
+  giga_impact(p, s) {
+    const { ctx, ms, origem } = s.c
+    // TODA a força: aura roxa e laranja pulsando; carga com o corpo envolto num
+    // cometa; choque gigante com estilhaços; e depois quem atacou fica exausto
+    // (gotas de suor caindo, sem se mexer).
+    const junta = janela(ms, 0, 200)
+    if (junta !== null) for (let k = 0; k < 2; k++) {
+      const u = (junta * 2 + k * .5) % 1
+      crescente(ctx, origem, 6 + u * 14, -Math.PI, Math.PI, 3 * (1 - u) + .4, .5, 0, { ...s.pele, meio: k ? LARANJA : PELES.GHOST.meio }, 1)
+    }
+    const q = carga(s, ms, 200, p.contato - 200, 11, 3)
+    if (q) crescente(ctx, q, 14, s.angulo - 1.3, s.angulo + 1.3, 3.6, .55, 0, { ...s.pele, meio: LARANJA }, 1)
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 16)
+    ondaDeChoque(ctx, s.c.alvo, s.angulo, t, 20, 3, { ...s.pele, meio: LARANJA })
+    estilhacos(ctx, s.centro, s.c.pedir(5 + s.c.tier), 28, t, PELES.ROCK, rngSemeado(s.semente + 3))
+    if (t > .4) for (const d of [-1, 1]) {
+      const v = ((t - .4) / .6 * 2 + (d > 0 ? .5 : 0)) % 1
+      ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.arc(origem.x + d * 9, origem.y - 10 + v * 8, 2.2, 0, Math.PI * 2); ctx.fill()
+      ctx.fillStyle = AZUL; ctx.beginPath(); ctx.arc(origem.x + d * 9, origem.y - 10 + v * 8, 1.4, 0, Math.PI * 2); ctx.fill()
+    }
+  },
+
+  /** "The user fiercely attacks the target using its entire body." */
+  high_horsepower(p, s) {
+    const { ctx, ms } = s.c
+    // Galope feroz: marcas de casco ficando no chão em ritmo de galope, poeira
+    // em cada batida e o vulto avançando aos solavancos.
+    const u = janela(ms, 0, p.contato)
+    if (u !== null) {
+      for (let k = 0; k < 5; k++) {
+        const v = (k + .5) / 5
+        if (v > u) continue
+        const q = entrePontos({ x: s.saida.x, y: s.saida.y + 13 }, { x: s.chegada.x, y: s.chegada.y + 13 }, v)
+        const lado = k % 2 ? 2.4 : -2.4
+        ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.ellipse(q.x, q.y + lado, 2.4, 1.2, 0, 0, Math.PI * 2); ctx.fill()
+        const tp = (u - v) * 5
+        if (tp < 1) nuvem(ctx, q, tp, Math.min(s.c.pedir(2), 2), 4, PELES.GROUND, rngSemeado(s.semente + 10 + k))
+      }
+      const q = entrePontos(s.saida, s.chegada, saida(u))
+      q.y -= Math.abs(Math.sin(u * Math.PI * 5)) * 3
+      vulto(ctx, q, s.angulo, 9, .4, s.pele)
+    }
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 12)
+    estilhacos(ctx, s.c.alvo, s.c.pedir(4), 22, t, PELES.GROUND, rngSemeado(s.semente + 3))
+  },
+
+  /** "Can be used only after the user has used all the other moves it knows in the battle." */
+  last_resort(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Último recurso: os QUATRO golpes que ele sabe aparecem como quatro orbes
+    // em volta (um de cada cor), acendem um por um, se fundem e o corpo
+    // carrega com a força de todos.
+    const junta = janela(ms, 0, 260)
+    if (junta !== null) CORES_DOS_GOLPES.forEach((cor, k) => {
+      const aceso = junta > k * .18
+      const a = -Math.PI / 2 + k * Math.PI / 2 + junta * 2, d = 16 * (1 - entrada(limitar((junta - .7) / .3)))
+      bola(ctx, { x: origem.x + Math.cos(a) * d, y: origem.y - 6 + Math.sin(a) * d * .7 }, aceso ? 3.4 : 2, s.pele, aceso ? cor : '#5e5766', BRANCO)
+    })
+    const q = carga(s, ms, 260, p.contato - 260, 9, 2)
+    if (q) CORES_DOS_GOLPES.forEach((cor, k) => brilho(ctx, q.x + Math.cos(k * 1.57 + ms / 40) * 11, q.y + Math.sin(k * 1.57 + ms / 40) * 9, 2.2, cor))
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 13)
+    CORES_DOS_GOLPES.forEach((cor, k) => { const a = k * Math.PI / 2 + .4, d = 18 * saida(t); brilho(ctx, s.centro.x + Math.cos(a) * d, s.centro.y + Math.sin(a) * d * .8, 3 * (1 - t), cor) })
+  },
+
+  /** "Gets revenge for a fainted ally. If an ally fainted in the previous turn, power increases." */
+  retaliate(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Vingança: o vulto apagado de um aliado caído (com espiral de desmaio)
+    // aparece ao lado de quem ataca; ele acende em vermelho e investe.
+    const aliado = janela(ms, 0, p.contato)
+    if (aliado !== null) {
+      const k = saida(limitar(aliado / .3)) * (1 - entrada(limitar((aliado - .7) / .3)))
+      const q = { x: origem.x - s.ux * 14, y: origem.y - 4 }
+      if (k > .05) {
+        vulto(ctx, q, 0, 7 * k, 0, s.pele, undefined, true)
+        crescente(ctx, { x: q.x, y: q.y - 10 }, 3 * k, ms / 40, ms / 40 + 4, 1.2, .5, 0, s.pele, .6)
+      }
+      crescente(ctx, origem, 10, -Math.PI, Math.PI, 2.6 * aliado, .5, 0, { ...s.pele, meio: VERMELHO }, 1)
+    }
+    carga(s, ms, 160, p.contato - 160, 9, 2, VERMELHO)
+    const t = janela(ms, s.contato, p.fim)
+    if (t !== null) choque(s, t, 12)
+  },
+
+  /** "Looking for an opening, the user strikes consistently. The target's stat changes don't affect it." */
+  chip_away(p, s) {
+    const { ctx, ms } = s.c
+    // Procurando brecha: o alvo tem um escudo de status (anel e setas); golpes
+    // curtos e CONSTANTES no mesmo ponto vão lascando o escudo até ele rachar.
+    const escudo = janela(ms, 0, p.contato + 260)
+    if (escudo !== null) {
+      const racha = limitar((ms - p.contato) / 260)
+      crescente(ctx, s.centro, 15, -Math.PI, Math.PI, 2.6 * (1 - racha), .5, 0, { ...s.pele, meio: AZUL }, 1)
+      if (racha < .8) setasDeStatus(ctx, s.c.alvo, .3, AZUL, 2)
+    }
+    const ponto = { x: s.centro.x - s.ux * 12, y: s.centro.y - s.uy * 12 }
+    for (let k = 0; k < 4; k++) {
+      const ini = p.contato - 40 + k * 70
+      const g = janela(ms, ini, 60)
+      if (g !== null) vulto(ctx, entrePontos({ x: ponto.x - s.ux * 10, y: ponto.y - s.uy * 10 }, ponto, saida(g)), s.angulo, 5, .6, s.pele)
+      const t = janela(ms, ini + 50, 180)
+      if (t !== null) { choque(s, t, 5, ponto); estilhacos(ctx, ponto, Math.min(s.c.pedir(2), 2), 12, t, { ...s.pele, meio: AZUL }, rngSemeado(s.semente + 20 + k)) }
+    }
+  },
+
+  /** "This attack move doubles its power if the user is poisoned, burned, or paralyzed." */
+  facade(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Fachada: os ícones de status de quem ataca (chama, gota de veneno,
+    // faísca) giram em volta dele e viram combustível — estouro POW no alvo.
+    const icones = janela(ms, 0, p.contato)
+    if (icones !== null) {
+      const junta = entrada(limitar((icones - .5) / .5))
+      const pts = [[-11, -10], [0, -16], [11, -10]].map(([x, y]) => ({ x: origem.x + x * (1 - junta), y: origem.y + y * (1 - junta) }))
+      ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y - 5); ctx.quadraticCurveTo(pts[0].x + 4, pts[0].y, pts[0].x, pts[0].y + 3); ctx.quadraticCurveTo(pts[0].x - 4, pts[0].y, pts[0].x, pts[0].y - 5); ctx.fill()
+      ctx.fillStyle = LARANJA; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y - 4); ctx.quadraticCurveTo(pts[0].x + 3, pts[0].y, pts[0].x, pts[0].y + 2); ctx.quadraticCurveTo(pts[0].x - 3, pts[0].y, pts[0].x, pts[0].y - 4); ctx.fill()
+      bola(ctx, pts[1], 2.6, s.pele, PELES.POISON.meio, BRANCO)
+      brilho(ctx, pts[2].x, pts[2].y, 2.8, AMARELO)
+    }
+    carga(s, ms, p.contato - 110, 110, 9, 1)
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    const r = (15 + s.c.tier * 2) * saida(limitar(t / .18)) * (1 - entrada(limitar((t - .5) / .5)))
+    if (r > 1) {
+      const estrela = (R: number) => { ctx.beginPath(); for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2, rr = i % 2 ? R * .62 : R * (i % 4 ? 1 : .86); ctx.lineTo(s.centro.x + Math.cos(a) * rr, s.centro.y + Math.sin(a) * rr * .8) } ctx.closePath() }
+      estrela(r + 2); ctx.fillStyle = ESCURO; ctx.fill(); estrela(r); ctx.fillStyle = AMARELO; ctx.fill(); estrela(r * .55); ctx.fillStyle = BRANCO; ctx.fill()
+    }
+  },
+
+  /** "This full-power attack grows more powerful the more the user likes its Trainer." */
+  return(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Amizade: corações sobem de quem ataca (carinho pelo treinador), o corpo
+    // carrega envolto em corações e o impacto solta um coração grande.
+    const ama = janela(ms, 0, p.contato)
+    if (ama !== null) for (let k = 0; k < 3; k++) { const v = (ama * 1.5 + k / 3) % 1; coracao(ctx, { x: origem.x + (k - 1) * 9, y: origem.y - 8 - v * 14 }, .8 * (1 - v), ROSA) }
+    const q = carga(s, ms, 140, p.contato - 140, 9, 1)
+    if (q) for (let k = 0; k < 2; k++) coracao(ctx, { x: q.x - s.ux * (12 + k * 10), y: q.y - 8 + k * 3 }, .7, ROSA)
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 11)
+    coracao(ctx, { x: s.centro.x, y: s.centro.y - 10 - 14 * saida(t) }, 1.5 * (1 - entrada(limitar((t - .6) / .4))), ROSA)
+  },
+
+  /** "This full-power attack grows more powerful the less the user likes its Trainer." */
+  frustration(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Frustração: um CORAÇÃO PARTIDO acima de quem ataca, as metades se
+    // separando; a carga sai bufando e o rabisco de raiva fica no alvo.
+    const parte = janela(ms, 0, p.contato)
+    if (parte !== null) {
+      const abre = saida(limitar((parte - .3) / .4)) * 3
+      ctx.save(); ctx.beginPath(); ctx.rect(origem.x - 20, origem.y - 30, 20, 30); ctx.clip()
+      coracao(ctx, { x: origem.x - abre, y: origem.y - 18 }, 1, '#8a6f84'); ctx.restore()
+      ctx.save(); ctx.beginPath(); ctx.rect(origem.x, origem.y - 30, 20, 30); ctx.clip()
+      coracao(ctx, { x: origem.x + abre, y: origem.y - 18 + abre * .6 }, 1, '#8a6f84'); ctx.restore()
+    }
+    carga(s, ms, 140, p.contato - 140, 9, 1)
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 11)
+    const k = saida(limitar(t / .25)) * (1 - entrada(limitar((t - .65) / .35)))
+    if (k > .05) {
+      const rng = rngSemeado(s.semente + 90 + Math.floor(ms / 100))
+      const pts: Ponto[] = Array.from({ length: 12 }, () => ({ x: s.centro.x + (rng() - .5) * 22 * k, y: s.centro.y - 14 + (rng() - .5) * 12 * k }))
+      for (const [cor, w] of [[BRANCO, 4.4], [ESCURO, 2.2]] as const) {
+        ctx.strokeStyle = cor; ctx.lineWidth = w; ctx.lineJoin = 'round'; ctx.beginPath()
+        pts.forEach((q, i) => i ? ctx.quadraticCurveTo((q.x + pts[i - 1].x) / 2 + 3, (q.y + pts[i - 1].y) / 2 - 3, q.x, q.y) : ctx.moveTo(q.x, q.y))
+        ctx.stroke()
+      }
+    }
+  },
+
+  /** "The target is slugged with a punch thrown at maximum power." */
+  strength(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Força máxima: o punho recua bem pra trás (preparo longo, tremendo) e sai
+    // num soco gigante; o ar em volta do alvo é empurrado numa parede.
+    const recua = janela(ms, 0, p.contato - 80)
+    const tremor = Math.floor(ms / 33) % 2 ? 1 : -1
+    if (recua !== null) punhoGrande(ctx, { x: origem.x - s.ux * (6 + 8 * saida(recua)) + tremor * recua, y: origem.y - 4 }, s.angulo, .9, s.pele)
+    const soco = janela(ms, p.contato - 80, 120)
+    if (soco !== null) {
+      const q = entrePontos({ x: origem.x - s.ux * 14, y: origem.y - 4 }, s.chegada, saida(limitar(soco * 1.4)))
+      rastro(ctx, origem, q, s.c.pedir(3), 6, s.pele, rngSemeado(s.semente + 1))
+      punhoGrande(ctx, q, s.angulo, 1.15 + s.c.tier * .04, s.pele)
+    }
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    choque(s, t, 15)
+    ondaDeChoque(ctx, s.c.alvo, s.angulo, t, 18, 2, s.pele)
+    nuvem(ctx, { x: s.c.alvo.x, y: s.c.alvo.y + 11 }, t, s.c.pedir(4), 14, PELES.GROUND, rngSemeado(s.semente + 2))
+  },
+
+  /** "Slams into the target with its heavy body. The more the user outweighs the target, the greater the power." */
+  heavy_slam(p, s) {
+    const { ctx, ms, alvo } = s.c
+    // PESO: um peso de ferro gigante (com alça) cai em cima do alvo; o chão
+    // racha em estrela e espirra.
+    const chao = { x: alvo.x, y: alvo.y + 11 }
+    const cai = janela(ms, 60, p.contato - 60)
+    if (cai !== null) {
+      const r = 5 + 10 * cai
+      ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.ellipse(chao.x, chao.y, r, r * .35, 0, 0, Math.PI * 2); ctx.fill()
+      pesoDeFerro(ctx, { x: alvo.x, y: alvo.y - 52 + 44 * entrada(cai) }, s.pele)
+    }
+    const t = janela(ms, s.contato, p.fim)
+    if (t === null) return
+    if (t < .3) pesoDeFerro(ctx, { x: alvo.x, y: alvo.y - 6 }, s.pele)
+    choque(s, t, 13, { x: alvo.x, y: alvo.y + 4 })
+    for (let k = 0; k < 6; k++) {
+      const a = k * Math.PI / 3, L = 18 * saida(limitar(t / .3)) * (1 - limitar((t - .7) / .3))
+      if (L > 1) poligono(ctx, [[chao.x, chao.y], [chao.x + Math.cos(a + .1) * L, chao.y + Math.sin(a + .1) * L * .4], [chao.x + Math.cos(a) * L * 1.1, chao.y + Math.sin(a) * L * .44], [chao.x + Math.cos(a - .1) * L, chao.y + Math.sin(a - .1) * L * .4]], ESCURO)
+    }
+    nuvem(ctx, chao, t, s.c.pedir(4), 18, PELES.GROUND, rngSemeado(s.semente + 2))
+  },
+
+  /** "After making its attack, the user rushes back to switch places with a party Pokémon." */
+  u_turn(p, s) {
+    const { ctx, ms, origem } = s.c
+    // Bate e VOLTA em U, e na volta vira o facho de troca (o recolher da Poké Ball).
+    carga(s, ms, 20, p.contato - 20, 7.5, 2)
+    const t = janela(ms, s.contato, 240)
+    if (t !== null) choque(s, t, 10)
+    const volta = janela(ms, s.contato + 40, 160)
+    if (volta !== null) {
+      const v = saida(volta), curva = Math.sin(v * Math.PI) * 16
+      const q = { x: s.chegada.x + (s.saida.x - s.chegada.x) * v - s.uy * curva, y: s.chegada.y + (s.saida.y - s.chegada.y) * v + s.ux * curva }
+      rastro(ctx, s.chegada, q, s.c.pedir(2), 4, s.pele, rngSemeado(s.semente + 3))
+      vulto(ctx, q, s.angulo + Math.PI, 7, .5, s.pele)
+    }
+    const troca = janela(ms, s.contato + 200, 180)
+    if (troca !== null) {
+      const h = 34 * saida(limitar(troca / .3)), w = 9 * (1 - entrada(limitar((troca - .5) / .5)))
+      if (w > .4) {
+        poligono(ctx, [[origem.x - w - 1.4, origem.y + 12], [origem.x + w + 1.4, origem.y + 12], [origem.x + w * .5 + 1.4, origem.y + 12 - h], [origem.x - w * .5 - 1.4, origem.y + 12 - h]], s.pele.contorno)
+        poligono(ctx, [[origem.x - w, origem.y + 12], [origem.x + w, origem.y + 12], [origem.x + w * .5, origem.y + 12 - h], [origem.x - w * .5, origem.y + 12 - h]], VERMELHO)
+        poligono(ctx, [[origem.x - w * .4, origem.y + 12], [origem.x + w * .4, origem.y + 12], [origem.x + w * .2, origem.y + 12 - h], [origem.x - w * .2, origem.y + 12 - h]], BRANCO)
+      }
+    }
+  },
+
+  /** "Nimbly strikes the target. If the user is not holding an item, massive damage." */
+  acrobatics(p, s) {
+    const { ctx, ms, alvo } = s.c
+    // Ágil: o corpo dá uma CAMBALHOTA no ar (laço visível) sobre o alvo e
+    // acerta três vezes leves: de cima, de lado e de baixo.
+    const voo = janela(ms, 0, p.contato)
+    if (voo !== null) {
+      const v = saida(voo)
+      const meio = entrePontos(s.saida, { x: alvo.x, y: alvo.y - 24 }, Math.min(1, v * 1.4))
+      const a = v * Math.PI * 2.4
+      crescente(ctx, meio, 10, a - 2.4, a, 2.4, .55, 0, { ...s.pele, meio: BRANCO }, 1)
+      vulto(ctx, { x: meio.x + Math.cos(a) * 10, y: meio.y + Math.sin(a) * 10 }, a + Math.PI / 2, 6.5, .4, s.pele)
+    }
+    for (const [k, dx, dy] of [[0, 0, -8], [1, 7, -2], [2, -4, 5]] as const) {
+      const t = janela(ms, s.contato + k * 60, 200)
+      if (t !== null) choque(s, t, 6 + k, { x: s.centro.x + dx, y: s.centro.y + dy })
+    }
+  },
+}
+
+function punhoGrande(ctx: CanvasRenderingContext2D, p: Ponto, angulo: number, s: number, pele: Pele): void {
+  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(angulo); ctx.scale(s, s)
+  ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.ellipse(0, 0, 9.4, 8, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = pele.base; ctx.beginPath(); ctx.ellipse(0, 0, 8, 6.6, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = pele.meio; ctx.beginPath(); ctx.ellipse(-1, -2, 5, 3, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = ESCURO; for (let k = 0; k < 3; k++) ctx.fillRect(3, -4 + k * 3, 4.6, 1)
+  ctx.fillStyle = BRANCO; ctx.fillRect(-4, -4, 2, 2)
   ctx.restore()
 }
 
-/** Rabisco de frustração: novelo de linha embolada. */
-function rabisco(ctx: CanvasRenderingContext2D, p: Ponto, t: number, semente: number): void {
-  const k = saida(limitar(t / .25)) * (1 - entrada(limitar((t - .65) / .35)))
-  if (k <= .05) return
-  const rng = rngSemeado(semente)
-  const pts: Ponto[] = []
-  for (let i = 0; i < 14; i++) pts.push({ x: p.x + (rng() - .5) * 24 * k, y: p.y - 4 + (rng() - .5) * 14 * k })
-  const linha = (cor: string, w: number) => {
-    ctx.strokeStyle = cor; ctx.lineWidth = w; ctx.lineJoin = 'round'; ctx.beginPath()
-    pts.forEach((q, i) => i ? ctx.quadraticCurveTo((q.x + pts[i - 1].x) / 2 + 3, (q.y + pts[i - 1].y) / 2 - 3, q.x, q.y) : ctx.moveTo(q.x, q.y))
-    ctx.stroke()
-  }
-  linha(BRANCO, 4.4); linha(ESCURO, 2.2)
+function pesoDeFerro(ctx: CanvasRenderingContext2D, p: Ponto, pele: Pele): void {
+  poligono(ctx, [[p.x - 13, p.y + 8], [p.x + 13, p.y + 8], [p.x + 9, p.y - 7], [p.x - 9, p.y - 7]], ESCURO)
+  poligono(ctx, [[p.x - 11.6, p.y + 6.8], [p.x + 11.6, p.y + 6.8], [p.x + 8, p.y - 5.8], [p.x - 8, p.y - 5.8]], pele.base)
+  poligono(ctx, [[p.x - 7, p.y - 5.8], [p.x + 2, p.y - 5.8], [p.x - 1, p.y + 6.8], [p.x - 10, p.y + 6.8]], pele.meio)
+  ctx.strokeStyle = ESCURO; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y - 8, 4, Math.PI, 0); ctx.stroke()
 }
 
-/** Estouro de quadrinho (POW): estrela larga de 12 pontas com borda grossa. */
-function estouroPow(ctx: CanvasRenderingContext2D, p: Ponto, t: number, raio: number, cor: string, pele: Pele): void {
-  const r = raio * saida(limitar(t / .18)) * (1 - entrada(limitar((t - .5) / .5)))
-  if (r <= 1) return
-  const estrela = (R: number) => {
-    ctx.beginPath()
-    for (let i = 0; i < 24; i++) {
-      const a = (i / 24) * Math.PI * 2, rr = i % 2 ? R * .62 : R * (i % 4 ? 1 : .86)
-      ctx.lineTo(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr * .8)
-    }
-    ctx.closePath()
-  }
-  estrela(r + 2); ctx.fillStyle = ESCURO; ctx.fill()
-  estrela(r); ctx.fillStyle = cor; ctx.fill()
-  estrela(r * .55); ctx.fillStyle = BRANCO; ctx.fill()
-  estrela(r * .3); ctx.fillStyle = pele.meio; ctx.fill()
-}
+const ACENTOS = [VERMELHO, ROSA, AMARELO, AZUL, LARANJA, '#8a6f84', '#5e5766', ...CORES_DOS_GOLPES,
+  PELES.GROUND.base, PELES.GROUND.meio, PELES.GROUND.contorno, PELES.GHOST.meio, PELES.POISON.meio,
+  PELES.ELECTRIC.base, PELES.ELECTRIC.meio, PELES.ELECTRIC.contorno, PELES.ROCK.base, PELES.ROCK.meio, PELES.ROCK.contorno]
 
-/** Brilho de 4 pontas (estrelas do Last Resort, fagulhas). */
-function brilho(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, cor: string): void {
-  if (r <= .5) return
-  poligono(ctx, [[x, y - r - 1.2], [x + r * .35 + .8, y - r * .35 - .8], [x + r + 1.2, y], [x + r * .35 + .8, y + r * .35 + .8], [x, y + r + 1.2], [x - r * .35 - .8, y + r * .35 + .8], [x - r - 1.2, y], [x - r * .35 - .8, y - r * .35 - .8]], ESCURO)
-  poligono(ctx, [[x, y - r], [x + r * .3, y - r * .3], [x + r, y], [x + r * .3, y + r * .3], [x, y + r], [x - r * .3, y + r * .3], [x - r, y], [x - r * .3, y - r * .3]], cor)
-  ctx.fillStyle = BRANCO; ctx.fillRect(x - .8, y - .8, 1.6, 1.6)
-}
-
-// ---------------------------------------------------------------------------
-// Caminho da proa
-// ---------------------------------------------------------------------------
-
-interface Pose { p: Ponto; angulo: number }
-
-/** Onde a proa está em `u` (0..1 da viagem). Termina com a frente encostando no alvo. */
-function poseNoCaminho(perfil: Perfil, u: number, origem: Ponto, chegada: Ponto, angulo: number): Pose {
-  const dx = chegada.x - origem.x, dy = chegada.y - origem.y
-  const nx = -Math.sin(angulo), ny = Math.cos(angulo)
-  const reta = (v: number): Ponto => ({ x: origem.x + dx * v, y: origem.y + dy * v })
-  switch (perfil.caminho) {
-    case 'zigue': {
-      // Dois cotovelos: some de um lado e aparece do outro.
-      const v = saida(u), desvio = Math.sin(v * Math.PI * 2) * 9 * (1 - v)
-      const q = reta(v)
-      return { p: { x: q.x + nx * desvio, y: q.y + ny * desvio }, angulo }
-    }
-    case 'laco': {
-      // Pirueta: dá uma volta inteira no meio do caminho e segue.
-      const v = saida(u), giro = limitar((u - .2) / .5)
-      const q = reta(v), raio = 10 * Math.sin(giro * Math.PI)
-      const a = giro * Math.PI * 2
-      return { p: { x: q.x + Math.sin(a) * raio * Math.cos(angulo) - (1 - Math.cos(a)) * raio * nx, y: q.y + Math.sin(a) * raio * Math.sin(angulo) - (1 - Math.cos(a)) * raio * ny }, angulo: angulo + a }
-    }
-    default: return { p: reta(saida(u)), angulo }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Coreografia
-// ---------------------------------------------------------------------------
-
-function coreografia(perfil: Perfil, c: ContextoVfx): void {
-  const { ctx, ms, tier, origem, alvo } = c
-  if (ms < 0 || ms >= c.duracao) return
-  const pele = c.pele
-  const cor = perfil.acento ?? pele.meio
-  const semente = Math.floor(c.rng() * 0xffffffff)
-  const dx = alvo.x - origem.x, dy = alvo.y - origem.y, L = Math.hypot(dx, dy)
-  const angulo = L > .01 ? Math.atan2(dy, dx) : c.angulo
-  const ux = Math.cos(angulo), uy = Math.sin(angulo)
-  const escala = .62 * perfil.tamanho * (1 + (tier - 1) * .07)
-  const contato = contatoDe(perfil)
-  const largura = perfil.marca === 'muralha' ? 1.5 : 1
-  const chegada = { x: alvo.x - ux * 9 * escala, y: alvo.y - uy * 9 * escala }
-  const saidaDe = { x: origem.x + ux * 6, y: origem.y + uy * 6 }
-  const pe = (p: Ponto): Ponto => ({ x: p.x, y: p.y + 11 })
-
-  // --- preparo: junta força no lugar ---
-  if (ms < perfil.preparo) {
-    const t = ms / perfil.preparo
-    const rng = rngSemeado(semente + 1)
-    if (perfil.marca === 'estrelas') {
-      // Last Resort: cinco brilhos de cores diferentes se juntam em quem ataca.
-      for (let i = 0; i < 5; i++) {
-        const a = (i / 5) * Math.PI * 2 + t * 2, d = 26 * (1 - saida(t))
-        brilho(ctx, origem.x + Math.cos(a) * d, origem.y - 2 + Math.sin(a) * d * .7, 3.8, i % 2 ? cor : BRANCO)
-      }
-    } else if (perfil.marca === 'giga') {
-      // Giga Impact: aura que pulsa e cresce em volta de quem ataca.
-      const r = 14 + saida(t) * 6 + (Math.floor(ms / 66) % 2) * 1.5
-      crescente(ctx, origem, r, -Math.PI, Math.PI, 2.6, .5, 0, { ...pele, meio: cor }, 1)
-      riscos(ctx, origem, c.pedir(4), 18, 1 - t, cor, rng)
-    } else if (perfil.caminho === 'cima') {
-      // Body Slam / Heavy Slam: sombra do corpo aparece em cima do alvo.
-      const r = 6 + 9 * saida(t)
-      ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.ellipse(alvo.x, alvo.y + 11, r, r * .35, 0, 0, Math.PI * 2); ctx.fill()
-    } else if (perfil.preparo >= 80) {
-      // Pé raspando o chão: poeirinha atrás de quem vai sair.
-      poeira(ctx, pe({ x: origem.x - ux * 6, y: origem.y }), t, Math.min(c.pedir(3), 3), 6, pele, rng)
-    }
-  }
-
-  // --- viagem ---
-  if (perfil.caminho === 'cima') {
-    const u = (ms - perfil.preparo) / perfil.viagem
-    if (u >= 0 && u < 1) {
-      const r = 15 * (.7 + entrada(u) * .3)
-      ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.ellipse(alvo.x, alvo.y + 11, r, r * .35, 0, 0, Math.PI * 2); ctx.fill()
-      const y = em(entrada(u), alvo.y - 46, alvo.y - 10)
-      const rng = rngSemeado(semente + 2)
-      rastro(ctx, { x: alvo.x, y: y - 24 }, { x: alvo.x, y }, c.pedir(3 + tier), 10, pele, rng, .7)
-      proa(ctx, { x: alvo.x, y }, Math.PI / 2, escala * 1.1, 1.3, pele, perfil.marca === 'faisca' ? cor : undefined)
-    }
-  } else if (perfil.caminho === 'varios') {
-    // Extreme Speed: três cortes de lados diferentes, o primeiro é o que conta.
-    for (let i = 0; i < 3; i++) {
-      const ini = perfil.preparo + i * PASSO_DOS_CORTES, u = (ms - ini) / perfil.viagem
-      if (u < 0 || u >= 1.6) continue
-      const a = angulo + [0, 2.3, -2.1][i]
-      const de = { x: alvo.x - Math.cos(a) * 48, y: alvo.y - Math.sin(a) * 30 }
-      const ate = { x: alvo.x - Math.cos(a) * 8 * escala, y: alvo.y - Math.sin(a) * 6 * escala }
-      const v = saida(limitar(u)), q = { x: de.x + (ate.x - de.x) * v, y: de.y + (ate.y - de.y) * v }
-      const encolhe = 1 - limitar(u - 1) / .6
-      rastro(ctx, de, q, c.pedir(3), 5, pele, rngSemeado(semente + 10 + i), encolhe)
-      if (u < 1) proa(ctx, q, Math.atan2(ate.y - de.y, ate.x - de.x), escala * .9, 1, pele)
-    }
-  } else {
-    const u = (ms - perfil.preparo) / perfil.viagem
-    if (u >= 0 && u < 1.35) {
-      const pose = poseNoCaminho(perfil, limitar(u), saidaDe, chegada, angulo)
-      const rng = rngSemeado(semente + 3)
-      const encolhe = 1 - limitar((u - 1) / .35)
-      rastro(ctx, saidaDe, pose.p, c.pedir(3 + tier), 6 * largura, pele, rng, encolhe)
-      if (perfil.marca === 'galope') {
-        // High Horsepower: cascos levantam poeira em batidas ao longo do caminho.
-        for (let k = 0; k < 4; k++) {
-          const v = (k + .5) / 4, t = (limitar(u) - v) / .5
-          if (t > 0 && t < 1) poeira(ctx, pe({ x: saidaDe.x + (chegada.x - saidaDe.x) * saida(v), y: saidaDe.y + (chegada.y - saidaDe.y) * saida(v) }), t, Math.min(c.pedir(3), 3), 6, pele, rngSemeado(semente + 20 + k))
-        }
-      }
-      if (perfil.marca === 'coracao' && u < 1) {
-        for (let k = 0; k < 2; k++) coracao(ctx, pose.p.x - ux * (10 + k * 12), pose.p.y - uy * (10 + k * 12) - 6 + k * 3, .9, cor)
-      }
-      if (perfil.marca === 'estrelas' && u < 1) {
-        for (let k = 0; k < 3; k++) brilho(ctx, pose.p.x - ux * (8 + k * 9) + (k - 1) * 3, pose.p.y - uy * (8 + k * 9) + (k - 1) * 4, 3, k % 2 ? cor : BRANCO)
-      }
-      if (u < 1) {
-        if (perfil.marca === 'recuoDuplo') proa(ctx, pose.p, pose.angulo, escala * 1.05, 1.25, { ...pele, base: pele.contorno }, undefined)
-        proa(ctx, pose.p, pose.angulo, escala, largura, pele, perfil.marca === 'giga' ? cor : undefined)
-      }
-    }
-  }
-
-  // --- volta (U-turn): bate e volta pra trás em curva ---
-  if (perfil.caminho === 'volta') {
-    const u = (ms - contato - 60) / RETORNO
-    if (u >= 0 && u < 1) {
-      const v = saida(u), curva = Math.sin(v * Math.PI) * 16
-      const nx = -uy, ny = ux
-      const q = { x: chegada.x + (saidaDe.x - chegada.x) * v + nx * curva, y: chegada.y + (saidaDe.y - chegada.y) * v + ny * curva }
-      rastro(ctx, chegada, q, c.pedir(3), 5, pele, rngSemeado(semente + 4))
-      proa(ctx, q, angulo + Math.PI + (1 - v) * 1.2, escala * .85, 1, pele)
-    }
-  }
-
-  // --- choque ---
-  const extras = perfil.caminho === 'varios' ? 3 : 1
-  for (let i = 0; i < extras; i++) {
-    const t = (ms - contato - i * PASSO_DOS_CORTES) / CHOQUE
-    if (t < 0 || t >= 1) continue
-    const rng = rngSemeado(semente + 50 + i)
-    const de = perfil.caminho === 'varios' ? angulo + [0, 2.3, -2.1][i] : perfil.caminho === 'cima' ? Math.PI / 2 : angulo
-    const forte = perfil.marca === 'giga' || perfil.marca === 'recuoDuplo' || perfil.marca === 'muralha' || perfil.caminho === 'cima'
-    if (perfil.marca === 'pow') estouroPow(ctx, alvo, t, 15 + tier * 2, cor, pele)
-    else estrelaDeImpacto(ctx, alvo, (forte ? 14 : 10) + tier * 1.5 - i * 3, t, pele, rng)
-    if (perfil.caminho === 'cima') {
-      // Baque: o chão espirra pros dois lados, rente.
-      poeira(ctx, pe(alvo), t, c.pedir(5 + tier), 20 + tier * 2, pele, rng)
-      if (perfil.marca === 'faisca') {
-        for (let k = 0; k < Math.min(c.pedir(4 + tier), 7); k++) {
-          const a = -Math.PI / 2 + (rng() - .5) * 2.6, d = (14 + rng() * 14) * saida(t)
-          brilho(ctx, alvo.x + Math.cos(a) * d, alvo.y + 6 + Math.sin(a) * d * .7 + 14 * t * t, 2.4 * (1 - t), k % 2 ? cor : BRANCO)
-        }
-      }
-    } else {
-      ondaDeChoque(ctx, alvo, de, t, 13 + tier * 2, forte ? 2 : 1, pele)
-      riscos(ctx, alvo, c.pedir(2 + tier), 20 + tier * 4, t, pele.meio, rng)
-    }
-    switch (perfil.marca) {
-      case 'giga':
-        ondaDeChoque(ctx, alvo, de, limitar(t * 1.2), 20 + tier * 2, 2, { ...pele, meio: cor })
-        estilhacos(ctx, alvo, c.pedir(3 + tier), 24 + tier * 3, t, pele, rng)
-        break
-      case 'galope': case 'muralha':
-        poeira(ctx, pe(alvo), t, c.pedir(3 + tier), 14 + tier * 2, pele, rng)
-        break
-      case 'lascas':
-        // Chip Away: três lasquinhas em pontos diferentes, uma depois da outra.
-        for (let k = 0; k < 3; k++) {
-          const tk = (t - k * .14) / .5
-          if (tk <= 0 || tk >= 1) continue
-          const p = { x: alvo.x + [-6, 5, -1][k], y: alvo.y + [-5, 0, 6][k] }
-          estilhacos(ctx, p, Math.min(c.pedir(2), 2), 12, tk, pele, rngSemeado(semente + 70 + k))
-          brilho(ctx, p.x, p.y, 3.2 * (1 - tk), BRANCO)
-        }
-        break
-      case 'recuo': case 'recuoDuplo': {
-        // Quem bate também sente: estalo menor do lado de quem atacou.
-        const tr = (t - .1) / .7
-        if (tr > 0 && tr < 1) estrelaDeImpacto(ctx, { x: chegada.x - ux * 12, y: chegada.y - uy * 12 - 4 }, perfil.marca === 'recuoDuplo' ? 9 : 6, tr, pele, rngSemeado(semente + 80))
-        break
-      }
-    }
-  }
-
-  // --- marcas que ficam depois do choque ---
-  const depois = (ms - contato) / (CHOQUE + 80)
-  if (depois >= 0 && depois < 1) {
-    if (perfil.marca === 'raiva') {
-      const s = saida(limitar(depois / .2)) * (1 - entrada(limitar((depois - .7) / .3)))
-      const pulsa = Math.floor(ms / 100) % 2 ? 1.1 : 1
-      if (s > .05) veiaDeRaiva(ctx, { x: alvo.x + 8, y: alvo.y - 14 }, s * pulsa * 1.7, cor)
-    }
-    if (perfil.marca === 'rabisco') rabisco(ctx, { x: alvo.x, y: alvo.y - 12 }, depois, semente + 90 + Math.floor(ms / 100))
-    if (perfil.marca === 'coracao') {
-      for (let k = 0; k < 3; k++) {
-        const t = (depois - k * .12) / .7
-        if (t <= 0 || t >= 1) continue
-        coracao(ctx, alvo.x + (k - 1) * 9, alvo.y - 8 - 16 * saida(t), .9 * (1 - entrada(limitar((t - .6) / .4))), cor)
-      }
-    }
-  }
-}
-
-const TIERS: readonly Tier[] = [1, 2, 3, 4]
-export const INVESTIDAS_POR_GOLPE: Record<string, EntradaDeCoreografia> = Object.fromEntries(
-  Object.entries(PERFIS_DE_INVESTIDA).map(([id, perfil]) => [id, {
-    desenhar: (c: ContextoVfx) => coreografia(perfil, c),
-    duracao: Object.fromEntries(TIERS.map(t => [t, duracaoDe(perfil)])),
-    impactos: Object.fromEntries(TIERS.map(t => [t, [contatoDe(perfil)]])),
-    alcance: 62,
-    // Body/Heavy Slam caem de cima: precisam de mais folga só pra cima.
-    ...(perfil.caminho === 'cima' ? { margem: { cima: 80, baixo: 62, lados: 62 } } : {}),
-    // Acento do golpe (vermelho da raiva, rosa do coração...) precisa estar na
-    // paleta do pixelizador, senão vira a cor mais próxima da pele do tipo.
-    ...(perfil.acento ? { pele: peleDaInvestida(id) } : {}),
-  }]),
-)
-
-/** Pele do tipo do golpe com o acento do perfil (o pixelizador só emite cores da pele). */
-function peleDaInvestida(id: string): Pele {
-  const base = PELES[getAbility(id)?.type ?? 'NORMAL'], acento = PERFIS_DE_INVESTIDA[id].acento!
-  return { ...base, acento: [...(base.acento ?? []), acento] }
-}
+export const INVESTIDAS_POR_GOLPE = montarFamilia(PERFIS_DE_INVESTIDA, {
+  desenhar: (p, c, id) => GOLPES[id](p, cena(p, c)),
+  duracao: p => p.contato + p.fim, contato: p => p.contato, alcance: 60,
+  margem: () => ({ cima: 80, baixo: 60, lados: 60 }),
+  pele: id => comAcento(PELES[getAbility(id)?.type ?? 'NORMAL'], ...ACENTOS),
+})
