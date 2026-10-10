@@ -154,17 +154,20 @@ function IconeDoBioma({ bioma, cor }: { bioma: BiomaDef; cor: string }) {
 }
 
 function CartaoDeBioma({
-  bioma, progresso, onEscolher, pesadelo = false,
+  bioma, progresso, onEscolher, pesadelo = false, semRecomendacao = false,
 }: {
   bioma: BiomaDef
   progresso: ProgressoPorBioma
   onEscolher: () => void
   pesadelo?: boolean
+  semRecomendacao?: boolean
 }) {
   const limpo = maiorEstagioLimpo(progresso, bioma.chave, pesadelo)
   const cor = colorForType(bioma.tipo)
   // PH-523: "COMECE AQUI" e orientacao de novato — so faz sentido no Mundo.
-  const recomendado = !pesadelo && bioma.chave === BIOMA_RECOMENDADO && limpo === 0
+  // Primeiros Passos (10/10): enquanto o jogador ainda está na Rota 46, o selo
+  // é dela — dois "comece aqui" ao mesmo tempo era o que confundia o novato.
+  const recomendado = !pesadelo && !semRecomendacao && bioma.chave === BIOMA_RECOMENDADO && limpo === 0
 
   return (
     <button
@@ -217,12 +220,14 @@ function CartaoDeBioma({
 }
 
 export function MapaDeBiomas({
-  progresso, onEscolher, pesadelo = false,
+  progresso, onEscolher, pesadelo = false, semRecomendacao = false,
 }: {
   progresso: ProgressoPorBioma
   onEscolher: (chave: string) => void
   /** PH-523: os 12 biomas, mas lendo/gravando na trilha do Modo Pesadelo. */
   pesadelo?: boolean
+  /** O selo "COMECE AQUI" está na Rota 46 agora. */
+  semRecomendacao?: boolean
 }) {
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(11em,1fr))] gap-[.5em]">
@@ -232,6 +237,7 @@ export function MapaDeBiomas({
           bioma={bioma}
           progresso={progresso}
           pesadelo={pesadelo}
+          semRecomendacao={semRecomendacao}
           onEscolher={() => onEscolher(bioma.chave)}
         />
       ))}

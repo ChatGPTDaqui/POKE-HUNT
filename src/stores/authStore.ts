@@ -12,6 +12,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { ehFalhaSemResposta, mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 import { flushAgora } from '@/data/remote/gameStatePersistence'
+import { usePassosStore } from './passosStore'
 import { pararFlushPeriodico } from '@/data/remote/autoridade'
 
 interface AuthState {
@@ -164,6 +165,7 @@ export const useAuthStore = create<AuthState>(() => ({
       console.warn('Falha ao salvar progresso antes do logout:', erro)
     })
     await supabase.auth.signOut()
+    usePassosStore.getState().limpar()
   },
 
   // NAO fecha `emRecuperacaoDeSenha` aqui: App.tsx troca de tela no MESMO

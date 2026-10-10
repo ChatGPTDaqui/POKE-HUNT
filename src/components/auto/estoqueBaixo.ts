@@ -149,10 +149,31 @@ export function itensEmUso(estado: {
   return [...new Set(ids)]
 }
 
+/**
+ * Curas de status que o jogador JÁ TEVE neste aparelho, nesta sessão.
+ *
+ * O Auto-Status nasce ligado e a conta nasce sem nenhuma cura — então a primeira
+ * mensagem do jogo inteiro era "O bot ficou sem Cura de confusão.", com o robô
+ * piscando em vermelho, sobre um item que o novato nem sabe que existe
+ * (diagnóstico das primeiras horas, 10/10). Cura de status só avisa depois de
+ * o jogador ter tido alguma; bola, poção e revive continuam avisando sempre,
+ * porque a conta nasce com eles e ficar sem é notícia de verdade.
+ */
+const curasQueJaTeve = new Set<string>()
+
+export function avisaSobre(id: string, quantidade: number): boolean {
+  if (!id.startsWith(FAMILIA_STATUS)) return true
+  if (quantidade > 0) curasQueJaTeve.add(id)
+  return curasQueJaTeve.has(id)
+}
+
 /** True se QUALQUER familia em uso estiver abaixo do limiar. */
 export function useEstoqueBaixoNoAuto(): boolean {
   return useGameStateStore((s) =>
-    itensEmUso(s).some((id) => estoqueDoItemDeRegra(s.items, id, s.autoStatusConfig) < LIMIAR_ESTOQUE_BAIXO),
+    itensEmUso(s).some((id) => {
+      const q = estoqueDoItemDeRegra(s.items, id, s.autoStatusConfig)
+      return q < LIMIAR_ESTOQUE_BAIXO && avisaSobre(id, q)
+    }),
   )
 }
 
@@ -178,7 +199,7 @@ export function observarEstoqueBaixo(
     const emUso = new Set(itensEmUso(s))
     for (const id of emUso) {
       const quantidade = estoqueDoItemDeRegra(s.items, id, s.autoStatusConfig)
-      if (quantidade < LIMIAR_ESTOQUE_BAIXO) {
+      if (quantidade < LIMIAR_ESTOQUE_BAIXO && avisaSobre(id, quantidade)) {
         if (jaAvisados.has(id)) continue
         jaAvisados.add(id)
         const nome = rotuloDaFamilia(id) ?? ITEMS[id]?.name ?? id
