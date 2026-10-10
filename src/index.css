@@ -306,6 +306,18 @@
   .animate-pulse-alerta { animation: none }
 }
 
+/* Primeiros Passos: o botão que o passo atual pede pulsa num anel da cor de
+   destaque (features/primeirosPassos/useDestaqueDoPasso.ts). Anel por
+   box-shadow, sem transform, pela mesma razão do pulso de alerta acima. */
+@keyframes pulso-do-passo {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-ok) 70%, transparent) }
+  50% { box-shadow: 0 0 0 .4em color-mix(in oklab, var(--color-ok) 0%, transparent) }
+}
+.destaque-do-passo { animation: pulso-do-passo 1.2s ease-out infinite; outline: 2px solid var(--color-ok); outline-offset: 1px }
+@media (prefers-reduced-motion: reduce) {
+  .destaque-do-passo { animation: none }
+}
+
 /* ============================================================================
    BLACK GLASS — linguagem de superficie da HUD mobile-first (v8)
    ============================================================================

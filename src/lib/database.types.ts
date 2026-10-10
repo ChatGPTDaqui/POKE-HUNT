@@ -3362,6 +3362,7 @@ export type Database = {
         Args: { p_species_id: string; p_tipo: string }
         Returns: Json
       }
+      reivindicar_passo: { Args: { p_passo: string }; Returns: Json }
       remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
       reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
       reservar_anuncio: {
@@ -6931,6 +6932,7 @@ export type Database = {
         Args: { p_species_id: string; p_tipo: string }
         Returns: Json
       }
+      reivindicar_passo: { Args: { p_passo: string }; Returns: Json }
       remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
       reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
       reservar_anuncio: {

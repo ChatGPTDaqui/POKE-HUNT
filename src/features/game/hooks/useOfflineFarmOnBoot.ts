@@ -13,6 +13,9 @@ import { servidorAtivo } from '@/data/remote/servidor'
 import { assentarUmaVez } from '../bootDaSessao'
 import { farmOfflineSemServidorEhConfiavel, deveSerPessimista } from '../utils'
 
+/** Abaixo disto a volta é silenciosa (o progresso é creditado do mesmo jeito). */
+export const MIN_SEGUNDOS_PARA_O_RESUMO = 5 * 60
+
 export function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: () => void } {
   const [summary, setSummary] = useState<OfflineSimSummary | null>(null)
   const ranRef = useRef(false)
@@ -41,7 +44,11 @@ export function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dis
         // esse caso que ficava sem relatorio nenhum. O jogador voltava depois de
         // uma noite fora, nao via modal, nao via ouro, e nao tinha como
         // descobrir que o POKE tinha caido nos primeiros minutos.
-        if (resumo && (resumo.kills > 0 || resumo.stoppedEarly)) setSummary(resumo)
+        // O crédito já entrou; o MODAL só aparece pra ausência que vale relatar.
+        // Recarregar a aba depois de 1 minuto abria "Bem-vindo de volta" com
+        // +10 de ouro e saldo vermelho — o jogador novo lia aquilo como prejuízo
+        // e fechava sem entender (diagnóstico das primeiras horas, 10/10).
+        if (resumo && (resumo.stoppedEarly || (resumo.kills > 0 && resumo.requestedSeconds >= MIN_SEGUNDOS_PARA_O_RESUMO))) setSummary(resumo)
       })
       return
     }

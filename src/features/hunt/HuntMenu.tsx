@@ -5,6 +5,10 @@
 // no card e a que da pra ler com calma e rolar.
 import { useMemo, useState } from 'react'
 import { JornadaDoTreinador } from './JornadaDoTreinador'
+import { aindaNaRota46 } from '@/data/primeirosPassos'
+import { textoDoRequisito } from '@/data/desbloqueios'
+import { usePassoQueTranca } from '@/features/primeirosPassos/useDesbloqueio'
+import { TRAINING_MAP_ID } from '@/data/trainingDummy'
 import { pedirAcao } from '@/data/remote/autoridade'
 // `MAPS` guarda HuntMapDef (a definicao crua). `MapDef` e a forma RESOLVIDA que
 // getMap() devolve (collisionGrid ja aplicado/anulado, respawnDelay ja
@@ -349,6 +353,9 @@ export function HuntMenu() {
   const unlockedMaps = useGameStateStore((s) => s.unlockedMaps)
   const unlockedContinents = useGameStateStore((s) => s.unlockedContinents)
   const biomaProgress = useGameStateStore((s) => s.biomaProgress)
+  // Uma fonte só de "por onde começar" (Primeiros Passos): até os 10 primeiros
+  // abates o selo é da Rota 46; depois, do Campo Aberto.
+  const naRota46 = useGameStateStore((s) => aindaNaRota46(s.pokedexKills))
 
   const continent = useUiStore((s) => s.huntContinent)
   const setContinent = useUiStore((s) => s.setHuntContinent)
@@ -381,6 +388,8 @@ export function HuntMenu() {
   )
 
   const activePoke = team[activeIndex] ?? null
+  const emHunt = useWorldStore((s) => s.mapDef != null)
+  const trancaDoTreino = usePassoQueTranca('treinamento')
   const activeSpecies = activePoke ? (SPECIES[activePoke.speciesId] ?? null) : null
 
   // A LISTA DE CARDS SO MOSTRA O QUE NAO E ESTAGIO DE BIOMA (PH-431/523).
@@ -438,8 +447,18 @@ export function HuntMenu() {
   }
   if (activePoke && activePoke.hp <= 0) {
     return (
-      <GameCard className="p-[.6em]">
-        Seu POKE esta desmaiado! Volte ao Hospital para cura-lo antes de sair para caçar.
+      // A AÇÃO MORA NO AVISO (10/10). Antes era só texto: o novato que já
+      // estava DENTRO do Hospital lia "volte ao Hospital" e não achava o que
+      // fazer — a cura é tocar na enfermeira, e nada dizia isso.
+      <GameCard className="flex flex-col items-start gap-[.5em] p-[.6em]">
+        <span>Seu POKE está desmaiado. A cura no Hospital é grátis, quantas vezes quiser.</span>
+        {emHunt ? (
+          <GameButton variant="primary" onClick={() => { useUiStore.getState().closeScreen(); useUiStore.getState().iniciarViagemAoHospital() }}>
+            Ir ao Hospital
+          </GameButton>
+        ) : (
+          <GameButton variant="primary" onClick={() => controller.healTeam()}>Curar a equipe</GameButton>
+        )}
       </GameCard>
     )
   }
@@ -506,6 +525,9 @@ export function HuntMenu() {
     // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
     // continente e ANTES do custo em ouro, mesma prioridade do servidor.
     const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, biomaProgress)
+      // Primeiros Passos: o Treinamento (Lv 60) só abre no fim da cadeia. Trava
+      // só de interface; o servidor não conhece esta regra.
+      ?? (map.id === TRAINING_MAP_ID && trancaDoTreino ? textoDoRequisito(trancaDoTreino) : null)
     const temProtetor = parseEstagioId(map.id) != null
     // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
     // custo nasce liberada. Checar so a lista trancava visualmente as hunts
@@ -564,6 +586,11 @@ export function HuntMenu() {
               {/* PH-244: o segundo canal da hunt ativa. Depois do selo de
                   boss porque os dois podem coexistir, e "onde eu estou" e
                   a informacao mais recente das duas. */}
+              {map.id === STARTER_HUNT_ID && naRota46 && !ehAtiva && (
+                <span className="ml-[.4em] rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-ok">
+                  COMECE AQUI
+                </span>
+              )}
               {ehAtiva && (
                 <span className="ml-[.4em] rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-ok">
                   EM CAÇADA
@@ -677,11 +704,6 @@ export function HuntMenu() {
         )}
       </StickyHeader>
 
-      <JornadaDoTreinador
-        onBioma={(chave, pesadelo) => { setContinent(pesadelo ? 'nightmare' : 'biomas'); setSearch(''); setTypeFilter('all'); setBiomaAberto(chave); setExpandedMapId(null) }}
-        onLance={() => { const lance = MAPS[LANCE_MAP_ID]; if (lance) { focusHunt(lance); setExpandedMapId(lance.id) } }}
-      />
-
       {/* PH-448: A ROTA 46 VEM ANTES DOS BIOMAS.
           Ela e a PRIMEIRA cacada do jogo (Lv 1 a 2, so tipo Normal) e estava
           no mesmo balde das hunts de fim de jogo, embaixo dos 12 biomas:
@@ -701,6 +723,7 @@ export function HuntMenu() {
         progresso={biomaProgress}
         onEscolher={setBiomaAberto}
         pesadelo={continent === 'nightmare'}
+        semRecomendacao={naRota46}
       />
 
       {huntsEspeciais.length > 0 && <SectionLabel>Hunts especiais</SectionLabel>}
@@ -711,6 +734,15 @@ export function HuntMenu() {
       )}
 
       {huntsEspeciais.map(cardDeHunt)}
+
+      {/* A JORNADA DESCEU PRA DEPOIS DAS HUNTS (10/10). Ela abria em cima de
+          tudo, com sete marcos em 0/12 — o novato rolava uma parede de metas de
+          fim de jogo antes de achar onde caçar. O "o que fazer agora" mora no
+          cartão de Primeiros Passos da HUD; aqui fica o mapa do longo prazo. */}
+      <JornadaDoTreinador
+        onBioma={(chave, pesadelo) => { setContinent(pesadelo ? 'nightmare' : 'biomas'); setSearch(''); setTypeFilter('all'); setBiomaAberto(chave); setExpandedMapId(null) }}
+        onLance={() => { const lance = MAPS[LANCE_MAP_ID]; if (lance) { focusHunt(lance); setExpandedMapId(lance.id) } }}
+      />
     </div>
   )
 }
