@@ -40,6 +40,18 @@ import { DRAGAO_AREA, DRAGAO_SINGLE } from './coreografias/dragao'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 import { SOCOS_POR_GOLPE } from './coreografias/socos'
 import { BEAMS_POR_GOLPE } from './coreografias/beams'
+import { PUNHOS_PESADOS_POR_GOLPE } from './coreografias/punhosPesados'
+import { VENTOS_EM_AREA_POR_GOLPE, VENTOS_POR_GOLPE } from './coreografias/ventos'
+import { ONDAS_EM_AREA_POR_GOLPE, ONDAS_POR_GOLPE } from './coreografias/ondas'
+import { EXPLOSOES_EM_AREA_POR_GOLPE, EXPLOSOES_POR_GOLPE } from './coreografias/explosoes'
+import { LUZES_EM_AREA_POR_GOLPE, LUZES_POR_GOLPE } from './coreografias/luzes'
+import { MENTES_POR_GOLPE } from './coreografias/mentes'
+import { SONS_EM_AREA_POR_GOLPE, SONS_POR_GOLPE } from './coreografias/sons'
+import { NEVOAS_EM_AREA_POR_GOLPE, NEVOAS_POR_GOLPE } from './coreografias/nevoas'
+import { SOPROS_POR_GOLPE } from './coreografias/sopros'
+import { PEDRAS_EM_AREA_POR_GOLPE, PEDRAS_POR_GOLPE } from './coreografias/pedras'
+import { RAJADAS_POR_GOLPE } from './coreografias/rajadas'
+import { ESFERAS_POR_GOLPE } from './coreografias/esferas'
 import { LUTA_EM_AREA_POR_GOLPE, LUTA_POR_GOLPE } from './coreografias/lutaCorpo'
 import { TRUQUES_POR_GOLPE } from './coreografias/truques'
 import { PERFURAR_POR_GOLPE } from './coreografias/perfurar'
@@ -115,7 +127,19 @@ export const REGISTRO_POR_GOLPE: Record<string, EntradaDeCoreografia> = {
   ...PERFURAR_POR_GOLPE,
   ...TRUQUES_POR_GOLPE,
   ...LUTA_POR_GOLPE,
+  ...ESFERAS_POR_GOLPE,
+  ...RAJADAS_POR_GOLPE,
+  ...PEDRAS_POR_GOLPE,
+  ...SOPROS_POR_GOLPE,
+  ...NEVOAS_POR_GOLPE,
+  ...SONS_POR_GOLPE,
+  ...MENTES_POR_GOLPE,
+  ...LUZES_POR_GOLPE,
+  ...EXPLOSOES_POR_GOLPE,
+  ...ONDAS_POR_GOLPE,
+  ...VENTOS_POR_GOLPE,
+  ...PUNHOS_PESADOS_POR_GOLPE,
 }
 export const REGISTRO_POR_GOLPE_DE_AREA: Record<string, EntradaDeCoreografia> = {
-  ...LUTA_EM_AREA_POR_GOLPE,
+  ...LUTA_EM_AREA_POR_GOLPE,  ...PEDRAS_EM_AREA_POR_GOLPE,  ...NEVOAS_EM_AREA_POR_GOLPE,  ...SONS_EM_AREA_POR_GOLPE,  ...LUZES_EM_AREA_POR_GOLPE,  ...EXPLOSOES_EM_AREA_POR_GOLPE,  ...ONDAS_EM_AREA_POR_GOLPE,  ...VENTOS_EM_AREA_POR_GOLPE,
 }
