@@ -66,11 +66,15 @@ export function JornadaDoTreinador({ onBioma, onLance }: {
       {bioma.nome} · estágio {maiorEstagioLimpo(progresso, bioma.chave, m.pesadelo) + 1}
     </GameButton>
   }
-  return <details className="rounded-[.6em] border border-primary/40 bg-n900 p-[.65em]" open>
-    <summary className="cursor-pointer font-medium">Jornada do Treinador · {marcos.filter(m => m.atual >= m.alvo).length}/{marcos.length} marcos</summary>
+  // Pesadelo só aparece depois de Lance: antes disso são dois marcos em 0/12
+  // sobre um modo que o jogador nem sabe que existe. Recolhida por padrão — o
+  // "o que fazer agora" é o cartão de Primeiros Passos da HUD.
+  const visiveis = marcos.filter(m => !m.pesadelo || lanceVencido)
+  return <details className="rounded-[.6em] border border-primary/40 bg-n900 p-[.65em]">
+    <summary className="cursor-pointer font-medium">Jornada do Treinador · {visiveis.filter(m => m.atual >= m.alvo).length}/{visiveis.length} marcos</summary>
     <p className="my-[.5em] text-[.8em] text-n400">{atual ? `Seu próximo marco: ${atual.nome}.` : 'Todos os marcos da jornada foram concluídos!'} As trilhas são metas sugeridas, não novas travas.</p>
     <div className="grid gap-[.5em] [grid-template-columns:repeat(auto-fit,minmax(min(100%,15em),1fr))]">
-      {marcos.map(m => <section key={m.id} aria-label={m.nome} className="rounded border border-n800 p-[.5em]">
+      {visiveis.map(m => <section key={m.id} aria-label={m.nome} className="rounded border border-n800 p-[.5em]">
         <div className="text-[.85em] font-medium">{m.atual >= m.alvo ? '✓ ' : ''}{m.nome} · {m.atual}/{m.alvo}</div>
         <Meter pct={m.atual / m.alvo * 100} height=".3em" color="var(--color-primary)" className="my-[.4em]" />
         <p className="mb-[.5em] text-[.75em] text-n400">{m.retorno}</p>
@@ -79,7 +83,7 @@ export function JornadaDoTreinador({ onBioma, onLance }: {
     </div>
     <div className="mt-[.6em] grid gap-[.5em] text-[.8em] [grid-template-columns:repeat(auto-fit,minmax(min(100%,14em),1fr))]">
       <section><h3 className="font-medium">Missões · ouro para sua equipe</h3><p className="my-[.4em] text-n400">{missao ? `${SPECIES[missao.speciesId]?.name ?? missao.speciesId}: ${Math.min(missao.total, missao.alvo)}/${missao.alvo} abates · ${missao.recompensa.toLocaleString('pt-BR')} ouro. ${missao.total >= missao.alvo ? 'Recompensa pronta para reivindicar.' : 'Conclua e reivindique para liberar a próxima missão do tipo.'}` : 'Todas as cadeias foram reivindicadas.'}</p><GameButton onClick={() => abrir('tasks')}>Ver missões</GameButton></section>
-      <section><h3 className="font-medium">Bestiário · pesquisa de espécies</h3><p className="my-[.4em] text-n400">{pesquisa ? `${SPECIES[pesquisa.id]?.name}: ${pesquisa.total.toLocaleString('pt-BR')}/${pesquisa.alvo.toLocaleString('pt-BR')} abates para o próximo estágio.` : 'Consulte as espécies pesquisadas ou escolha uma nova espécie para estudar.'} Esta trilha registra domínio; não concede itens ou ouro.</p><GameButton onClick={() => abrir('bestiario')}>Ver Bestiário</GameButton></section>
+      <section><h3 className="font-medium">Bestiário · pesquisa de espécies</h3><p className="my-[.4em] text-n400">{pesquisa ? `${SPECIES[pesquisa.id]?.name}: ${pesquisa.total.toLocaleString('pt-BR')}/${pesquisa.alvo.toLocaleString('pt-BR')} abates para o próximo estágio.` : 'Consulte as espécies pesquisadas ou escolha uma nova espécie para estudar.'}</p><GameButton onClick={() => abrir('bestiario')}>Ver Bestiário</GameButton></section>
       <section><h3 className="font-medium">Especialidades · fortaleça seus tipos</h3><p className="my-[.4em] text-n400">{tipo ? `${tipo}: dano ${especialidades[tipo]?.dano ?? 0}/${ESPECIALIDADE_NIVEL_MAX}, defesa ${especialidades[tipo]?.defesa ?? 0}/${ESPECIALIDADE_NIVEL_MAX}. Invista ouro e Stones em um tipo usado pela sua equipe.` : 'Todas as especialidades estão no máximo.'}</p><GameButton onClick={() => abrir('especialidades')}>Ver especialidades</GameButton></section>
     </div>
   </details>

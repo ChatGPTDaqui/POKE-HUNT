@@ -12,6 +12,18 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Primeiros Passos: direção das primeiras horas.
+  {
+    version: '7.95',
+    date: '2026-10-10',
+    title: 'Primeiros Passos',
+    highlights: [
+      'Novo cartão de objetivo no topo da tela: os Primeiros Passos mostram uma tarefa por vez (vencer os primeiros selvagens, capturar, montar a equipe, vencer o primeiro Lord, evoluir...), com a barra andando ao vivo e a recompensa à vista. Tocar no cartão leva até onde a tarefa se cumpre.',
+      'Cada passo cumprido paga ouro e itens, com muitas pokébolas: Poké, Great e Ultra Balls, poções, Revives e Max Revives. Quem já passou desses pontos pode coletar todos os passos, um de cada vez.',
+      'O começo ficou claro: o selo "COMECE AQUI" fica na Rota 46 até os primeiros abates e depois passa para o Campo Aberto. A Jornada do Treinador desceu para o fim da lista de Hunts e começa fechada; os marcos do Pesadelo só aparecem depois de vencer Lance.',
+      'O robô não avisa mais que ficou sem uma cura de status que você nunca teve. E com o POKE desmaiado, a tela de Hunt agora tem o botão para curar a equipe (ou ir ao Hospital) em vez de só um aviso.',
+    ],
+  },
   // Primeiras famílias refeitas pela descrição de cada golpe.
   {
     version: '7.94',

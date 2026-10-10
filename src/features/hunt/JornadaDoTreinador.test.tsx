@@ -29,8 +29,8 @@ describe('jornada na interface', () => {
     const onBioma = vi.fn()
     render(<JornadaDoTreinador onBioma={onBioma} onLance={vi.fn()} />)
     expect((screen.getByRole('button', { name: 'Ver Lance' }) as HTMLButtonElement).disabled).toBe(true)
-    const card = screen.getByRole('region', { name: 'Explorador do Pesadelo' })
-    expect((card.querySelector('button') as HTMLButtonElement).disabled).toBe(true)
+    // Antes de Lance os marcos do Pesadelo nem aparecem (Primeiros Passos, 10/10).
+    expect(screen.queryByRole('region', { name: 'Explorador do Pesadelo' })).toBeNull()
     fireEvent.click(screen.getAllByRole('button', { name: `${BIOMAS[0].nome} · estágio 1` })[0])
     expect(onBioma).toHaveBeenCalledWith(BIOMAS[0].chave, false)
     fireEvent.click(screen.getByRole('button', { name: 'Ver missões' }))
@@ -39,6 +39,10 @@ describe('jornada na interface', () => {
     expect(useUiStore.getState().currentScreen).toBe('bestiario')
     fireEvent.click(screen.getByRole('button', { name: 'Ver especialidades' }))
     expect(useUiStore.getState().currentScreen).toBe('especialidades')
+  })
+  it('começa recolhida: o objetivo imediato é o cartão de Primeiros Passos', () => {
+    const { container } = render(<JornadaDoTreinador onBioma={vi.fn()} onLance={vi.fn()} />)
+    expect((container.querySelector('details') as HTMLDetailsElement).open).toBe(false)
   })
   it('após Lance oferece Pesadelo sem exigir Mundo completo', () => {
     useGameStateStore.setState({ biomaProgress: Object.fromEntries(BIOMAS.map(b => [b.chave, 5])), unlockedContinents: ['biomas', 'nightmare'] })
