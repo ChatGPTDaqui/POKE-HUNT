@@ -10,7 +10,8 @@ Mobile-first; equipamento de jornada; menus claros/quentes e HUD escura discreta
 Hunt é o próprio jogo. Revisão explícita do usuário: remover botão de retorno;
 barra Equipe · Mochila · Pokédex · Hunt · Loja · Hospital · Mercado · Mais, na ordem
 original. Coluna abaixo do treinador: Diário · Especialidades · Tasks · Calculadora
-· PvP. Acessos permanentes não devem ficar escondidos no guia.
+· PvP. Revisão seguinte: coluna com apenas ícones, nomes acessíveis e tooltip no PC.
+Acessos permanentes não devem ficar escondidos no guia.
 
 ## Feito
 

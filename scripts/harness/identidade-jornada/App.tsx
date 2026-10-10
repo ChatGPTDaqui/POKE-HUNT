@@ -58,7 +58,7 @@ export function App() {
       <ReserveStrip active={active} />
       <nav className="trainer-shortcuts" aria-label="Atalhos do treinador">{SHORTCUTS.map(destination => {
         const Icon = SHORTCUT_ICONS[destination]
-        return <button key={destination} aria-current={view === destination ? 'page' : undefined} onClick={() => view === destination ? close() : navigate(destination)}><Icon size={23} weight="duotone" aria-hidden="true" /><span>{destination}</span></button>
+        return <button key={destination} aria-label={destination} title={destination} aria-current={view === destination ? 'page' : undefined} onClick={() => view === destination ? close() : navigate(destination)}><Icon size={23} weight="duotone" aria-hidden="true" /></button>
       })}</nav>
       <main id="journey-main" className="journey-main" ref={mainRef}>
         {view === 'hunt' ? <Adventure navigate={navigate} notify={setNotice} active={active} /> : <section className="journey-panel" aria-labelledby="panel-title">

@@ -18,7 +18,8 @@ describe('protótipo isolado da Jornada do Treinador', () => {
   it('mantém a coluna de atalhos disponível ao trocar painéis e fecha pelo mesmo atalho', () => {
     render(<App />)
     const shortcuts = within(screen.getByRole('navigation', { name: 'Atalhos do treinador' }))
-    expect(shortcuts.getAllByRole('button').map(button => button.textContent)).toEqual([...SHORTCUTS])
+    expect(shortcuts.getAllByRole('button').map(button => button.getAttribute('aria-label'))).toEqual([...SHORTCUTS])
+    expect(shortcuts.getAllByRole('button').every(button => button.textContent === '')).toBe(true)
     for (const destination of SHORTCUTS) {
       const button = shortcuts.getByRole('button', { name: destination })
       button.focus()
