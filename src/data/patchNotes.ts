@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Recompensas por nível de treinador.
+  {
+    version: '7.97',
+    date: '2026-10-10',
+    title: 'Prêmios de treinador',
+    highlights: [
+      'Subir de nível de treinador agora dá prêmio: a cada 5 níveis até o Lv 100 e a cada 25 níveis até o Lv 1000. O ouro cresce com o nível (625 no Lv 5, 17.500 no Lv 50, 60.000 no Lv 100, 480.000 no Lv 300) e todo prêmio vem com pokébolas: Great Balls no começo, Ultra Balls depois. A cada 25 níveis, Revives (até o Lv 100) ou Max Revives.',
+      'O prêmio aparece no topo da tela, embaixo do cartão de objetivo, com o botão Coletar. Quem já tem nível alto coleta todos os prêmios dos níveis que já passou de uma vez, com "Coletar tudo".',
+      'Depois dos Primeiros Passos, o topo da tela mostra o próximo prêmio de treinador e quanto falta para ele.',
+    ],
+  },
   // Primeiros Passos, parte 2: menus com cadeado e o botão do passo destacado.
   {
     version: '7.96',
