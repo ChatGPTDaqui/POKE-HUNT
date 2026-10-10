@@ -28,7 +28,7 @@ import {
   Backpack, BookOpen, Books, Calculator, ChatsCircle, CheckSquare, DotsThreeOutline,
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
   Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
-  ArrowsLeftRight, Sword,
+  ArrowsLeftRight, Sword, CalendarCheck,
 } from '@phosphor-icons/react'
 import { useWorldStore } from '@/stores/worldStore'
 import { useRendererStore } from '@/stores/rendererStore'
@@ -47,6 +47,8 @@ import { cn } from '@/lib/utils'
 import { MarcaDeCadeado } from '@/features/primeirosPassos/MarcaDeCadeado'
 import { avisarTrancado, useTrancas } from '@/features/primeirosPassos/useDesbloqueio'
 import { useDestaqueDoPasso } from '@/features/primeirosPassos/useDestaqueDoPasso'
+import { usePremiosProntosDoDiario } from '@/features/primeirosPassos/Diario'
+import { useDiarioStore } from '@/stores/diarioStore'
 
 export interface Destino {
   /** Ausente nos slots que NAO abrem tela: Hospital (troca a cena) e Mais. */
@@ -152,7 +154,8 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
   const navRef = useRef<HTMLElement>(null)
   useMedirAltura(navRef, useUiStore((s) => s.setNavHeight))
 
-  const pendenciasEmMais = destinosDaGrade().reduce((soma, d) => (
+  const premiosDoDiario = usePremiosProntosDoDiario()
+  const pendenciasEmMais = premiosDoDiario + destinosDaGrade().reduce((soma, d) => (
     soma + (d.screen === 'mercado' ? pendenciasMercado : d.screen === 'social' ? pendenciasSocial.total : 0)
   ), 0)
   // PH-287: o "Mais" e o unico lugar onde o numero do Social aparece somado ao
@@ -382,12 +385,29 @@ export function SheetMais() {
   const pendenciasSocial = usePendenciasDoSocial()
   const destinos = destinosDaGrade()
   const tranca = useTrancas()
+  const diarioCarregado = useDiarioStore((s) => s.carregado)
+  const premiosDoDiario = usePremiosProntosDoDiario()
 
   if (!moreOpen) return null
 
   return (
     <Sheet winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais">
       <div className="grid grid-cols-4 gap-[.5em]">
+        {/* O Diário não é uma `ScreenName` (é um painel por cima da HUD), por
+            isso entra à parte. É a entrada FIXA dele: a faixa do topo só
+            aparece com prêmio pronto durante os Primeiros Passos. */}
+        {diarioCarregado && (
+          <ItemGrade
+            label="Diário"
+            Icon={CalendarCheck}
+            badge={premiosDoDiario}
+            detalhe={premiosDoDiario > 0 ? 'prêmio para coletar' : null}
+            onClick={() => {
+              setMoreOpen(false)
+              useDiarioStore.getState().abrirPainel()
+            }}
+          />
+        )}
         {destinos.map(({ screen, label, Icon }) => (
           <ItemGrade
             key={screen}

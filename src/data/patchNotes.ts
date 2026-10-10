@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Entrada fixa do Diário.
+  {
+    version: '7.99',
+    date: '2026-10-10',
+    title: 'Diário sempre à mão',
+    highlights: [
+      'O Diário ganhou um botão fixo no menu Mais: dá para ver o calendário do mês e acompanhar as metas do dia a qualquer hora, não só quando há prêmio pronto.',
+      'Quando há prêmio do Diário para coletar, o botão Mais e o item Diário mostram o aviso.',
+    ],
+  },
   // Diário: login do mês e metas do dia.
   {
     version: '7.98',

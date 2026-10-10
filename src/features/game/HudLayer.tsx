@@ -37,7 +37,7 @@ import { PlacarDoDuelo } from '@/features/arena/PlacarDoDuelo'
 import { StatusRail } from '@/components/hud/StatusRail'
 import { CartaoDoPasso } from '@/features/primeirosPassos/CartaoDoPasso'
 import { FaixaDoTreinador } from '@/features/primeirosPassos/FaixaDoTreinador'
-import { FaixaDoDiario } from '@/features/primeirosPassos/Diario'
+import { FaixaDoDiario, PainelDoDiario } from '@/features/primeirosPassos/Diario'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip, salaNoTrilho } from '@/components/hud/SalaChip'
@@ -231,6 +231,7 @@ export function HudLayer() {
           organizacao — a janela do Auto e que precisa mesmo ficar fora da doca,
           porque ela SIM posiciona contra o ancestral. */}
       <SheetMais />
+      <PainelDoDiario />
       <AutoWindow />
       {chatFlutuante && <ChatLog />}
     </>
