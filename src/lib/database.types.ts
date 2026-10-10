@@ -1071,6 +1071,42 @@ export type Database = {
           },
         ]
       }
+      player_diario: {
+        Row: {
+          abates_base: number
+          coletados: string[]
+          dia: string
+          user_id: string
+        }
+        Insert: {
+          abates_base: number
+          coletados?: string[]
+          dia: string
+          user_id: string
+        }
+        Update: {
+          abates_base?: number
+          coletados?: string[]
+          dia?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_diario_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_diario_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       player_especialidades: {
         Row: {
           dano_nivel: number
@@ -2626,6 +2662,7 @@ export type Database = {
         Returns: boolean
       }
       _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
+      _dia_do_diario: { Args: never; Returns: string }
       _executar_troca: {
         Args: { p_sessao_id: string }
         Returns: {
@@ -2682,6 +2719,7 @@ export type Database = {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
       }
+      abrir_dia: { Args: never; Returns: Json }
       abrir_pvp: {
         Args: { p_convidado_id: string; p_poke: Json; p_pokemon_id: string }
         Returns: {
@@ -2954,6 +2992,7 @@ export type Database = {
       cancelar_oferta: { Args: { p_oferta_id: string }; Returns: Json }
       cancelar_ordem_mercado: { Args: { p_ordem_id: string }; Returns: Json }
       coletar_anexo_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      coletar_diario: { Args: { p_item: string }; Returns: Json }
       comprar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
       comprar_item: {
         Args: { p_item_id: string; p_qtd?: number }
@@ -4642,6 +4681,42 @@ export type Database = {
           },
         ]
       }
+      player_diario: {
+        Row: {
+          abates_base: number
+          coletados: string[]
+          dia: string
+          user_id: string
+        }
+        Insert: {
+          abates_base: number
+          coletados?: string[]
+          dia: string
+          user_id: string
+        }
+        Update: {
+          abates_base?: number
+          coletados?: string[]
+          dia?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_diario_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_diario_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       player_especialidades: {
         Row: {
           dano_nivel: number
@@ -6197,6 +6272,7 @@ export type Database = {
         Returns: boolean
       }
       _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
+      _dia_do_diario: { Args: never; Returns: string }
       _executar_troca: {
         Args: { p_sessao_id: string }
         Returns: {
@@ -6253,6 +6329,7 @@ export type Database = {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
       }
+      abrir_dia: { Args: never; Returns: Json }
       abrir_pvp: {
         Args: { p_convidado_id: string; p_poke: Json; p_pokemon_id: string }
         Returns: {
@@ -6525,6 +6602,7 @@ export type Database = {
       cancelar_oferta: { Args: { p_oferta_id: string }; Returns: Json }
       cancelar_ordem_mercado: { Args: { p_ordem_id: string }; Returns: Json }
       coletar_anexo_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      coletar_diario: { Args: { p_item: string }; Returns: Json }
       comprar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
       comprar_item: {
         Args: { p_item_id: string; p_qtd?: number }
