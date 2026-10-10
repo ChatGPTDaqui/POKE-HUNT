@@ -12,6 +12,8 @@ URL local: `http://127.0.0.1:5176/scripts/harness/identidade-jornada.html`.
 
 - Hunt ilustrativa; Equipe, Mochila, Hunt, Pokédex e guia Mais interativos.
 - Barra original: Equipe, Mochila, Pokédex, Hunt, Loja, Hospital, Mercado e Mais.
+- Hunt central levemente maior; grupos laterais em duas fileiras no mobile.
+- Quatro slots de golpes; cabeçalho só com Poké Bola; local junto dos companheiros.
 - Coluna abaixo do treinador: Diário, Especialidades, Tasks, Calculadora e PvP.
 - Sem botão de retorno: a hunt é o próprio jogo; X/Esc fecha apenas o painel.
 - Fixtures próprias, sem catálogo, stores, autenticação, saves ou clientes remotos.
