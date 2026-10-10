@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Primeiras famílias refeitas pela descrição de cada golpe.
+  {
+    version: '7.94',
+    date: '2026-10-09',
+    title: 'Mordidas, investidas, garras, cortes e chutes refeitos',
+    highlights: [
+      'Os 18 golpes de investida foram redesenhados a partir do que cada um faz: Quick Attack quase invisível, Extreme Speed piscando em volta do alvo, Body Slam despencando o peso, Giga Impact deixando quem atacou exausto, Last Resort juntando os quatro golpes, Heavy Slam com um peso de ferro, U-turn voltando para a troca.',
+      'Mordidas, garras, cortes e chutes agora mostram o efeito de cada golpe: Super Fang corta a barra de HP pela metade, False Swipe para em 1 de HP, Leech Life suga sangue, Bug Bite rouba a fruta, Dragon Claw ergue uma garra gigante, Aerial Ace confunde com imagens residuais, Low Sweep baixa a Speed.',
+    ],
+  },
   // Famílias de golpes com efeito próprio, desenhados pela descrição de cada golpe.
   {
     version: '7.93',
