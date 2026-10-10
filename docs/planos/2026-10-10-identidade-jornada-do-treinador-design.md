@@ -121,8 +121,9 @@ Em mobile estreito, duas fileiras de quatro destinos preservam ordem e alvos de 
 
 Diário, Especialidades, Tasks, Calculadora e PvP ficam em coluna logo abaixo do
 treinador, no canto superior direito, inclusive com gerenciamento aberto. Reservar
-largura para a coluna: não sobrepor painéis, ações ou barra inferior. Nomes visíveis,
-alvos de toque amplos, mesma ordem no mobile e PC.
+largura para a coluna: não sobrepor painéis, ações ou barra inferior. Conforme revisão
+seguinte do usuário, apenas ícones visíveis, com nomes acessíveis e tooltip no PC;
+alvos de toque amplos, mesma ordem no mobile e PC. Rótulos da barra inferior permanecem.
 
 ### Guia ilustrado
 
