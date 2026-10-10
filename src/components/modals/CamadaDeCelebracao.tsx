@@ -22,7 +22,13 @@ import { spriteUrl } from '@/data/sprites'
 import { useCelebracaoStore, type Celebracao } from '@/stores/celebracaoStore'
 import { useJanelaSobreOCampo } from '@/stores/janelaSobreOCampo'
 import { TETO_DE_EXTENSAO, duracaoDe, intensidadeDe, type Intensidade } from '@/data/marcoDaCelebracao'
+import { MARCOS_DE_TREINADOR } from '@/data/recompensasDeNivel'
 import { cn } from '@/lib/utils'
+
+/** Quantos marcos de treinador ficam no intervalo (de, ate]. */
+export function marcosNoIntervalo(de: number, ate: number): number {
+  return MARCOS_DE_TREINADOR.filter(m => m.nivel > de && m.nivel <= ate).length
+}
 
 // --- CSS ---------------------------------------------------------------------
 // POSICIONAMENTO NAO MORA NOS KEYFRAMES.
@@ -298,6 +304,14 @@ function Corpo({ c, cheio }: { c: Celebracao; cheio: boolean }) {
           Lv {rotuloDeIntervalo(c.nivelInicial, c.nivel)}
         </span>
         {c.nivel - c.nivelInicial > 1 && <SeloDeNiveis quantos={c.nivel - c.nivelInicial} cor="var(--color-gold)" />}
+        {/* Prêmios de treinador (7.97): o nível que libera prêmio diz isso na
+            hora da comemoração. Sem isto o jogador só descobria o prêmio se
+            olhasse o topo da tela depois que o cartão sumisse. */}
+        {marcosNoIntervalo(c.nivelInicial, c.nivel) > 0 && (
+          <span className="text-[.7em] font-medium text-ok">
+            {marcosNoIntervalo(c.nivelInicial, c.nivel) === 1 ? 'Prêmio de treinador liberado!' : `${marcosNoIntervalo(c.nivelInicial, c.nivel)} prêmios de treinador liberados!`} Colete no topo da tela.
+          </span>
+        )}
       </div>
     )
   }
