@@ -19,8 +19,10 @@ Brainstorming e especificação aprovados. Primeira composição implementada em
 [protótipo isolado](../../../scripts/harness/identidade-jornada/README.md).
 Nenhuma integração visual no jogo real, alteração de banco ou save nesta etapa.
 Primeiro protótipo na PR #875; revisão da navegação aplica o feedback acima,
-substituindo a proposta inicial de cinco destinos. Mobile estreito usa duas fileiras
-de quatro acessos inferiores; coluna direita permanece ao abrir painéis.
+substituindo a proposta inicial de cinco destinos. Revisão seguinte: Hunt central
+e levemente maior, grupos laterais em duas fileiras no mobile; quatro slots de golpes;
+marca só Poké Bola; Mata · expedição à direita de Companheiros; Hospital somente
+na barra, não junto de Conversas. Coluna direita permanece ao abrir painéis.
 
 ## Próximos passos
 
