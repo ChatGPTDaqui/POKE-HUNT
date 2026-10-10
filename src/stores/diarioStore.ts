@@ -19,6 +19,10 @@ interface DiarioState {
   abatesBase: number
   coletados: ReadonlySet<string>
   loginsNoMes: number
+  /** O painel do Diário (calendário e metas) está aberto. */
+  painelAberto: boolean
+  abrirPainel: () => void
+  fecharPainel: () => void
   abrir: () => Promise<void>
   limpar: () => void
 }
@@ -29,6 +33,9 @@ export const useDiarioStore = create<DiarioState>((set) => ({
   abatesBase: 0,
   coletados: new Set(),
   loginsNoMes: 0,
+  painelAberto: false,
+  abrirPainel: () => set({ painelAberto: true }),
+  fecharPainel: () => set({ painelAberto: false }),
 
   abrir: async () => {
     const { data, error } = await supabase.rpc('abrir_dia')
@@ -38,5 +45,5 @@ export const useDiarioStore = create<DiarioState>((set) => ({
     set({ carregado: true, dia: r.dia, abatesBase: Number(r.abatesBase), coletados: new Set(r.coletados), loginsNoMes: r.loginsNoMes })
   },
 
-  limpar: () => set({ carregado: false, dia: null, abatesBase: 0, coletados: new Set(), loginsNoMes: 0 }),
+  limpar: () => set({ carregado: false, dia: null, abatesBase: 0, coletados: new Set(), loginsNoMes: 0, painelAberto: false }),
 }))

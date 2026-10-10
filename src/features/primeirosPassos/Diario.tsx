@@ -61,7 +61,6 @@ export function FaixaDoDiario() {
   const dia = useDiarioStore(s => s.dia)
   const passosFeitos = usePassosStore(s => s.reivindicados.size >= PRIMEIROS_PASSOS.length)
   const oferta = useOferta()
-  const [aberto, setAberto] = useState(false)
   const [coletando, setColetando] = useState(false)
 
   // Abre o dia no boot e de novo quando vira a meia-noite de Brasília com o
@@ -82,7 +81,7 @@ export function FaixaDoDiario() {
         'pointer-events-auto flex w-[min(100%,24em)] items-center gap-[.4em] rounded-b border-x border-b bg-n900/92 px-[.55em] py-[.3em] text-[.78em]',
         oferta.tipo === 'pronto' ? 'border-ok/60' : 'border-n800',
       )}>
-        <button type="button" onClick={() => setAberto(true)} className="flex min-w-0 flex-1 items-center gap-[.4em] text-left" aria-label={`Abrir o Diário: ${oferta.titulo}`}>
+        <button type="button" onClick={() => useDiarioStore.getState().abrirPainel()} className="flex min-w-0 flex-1 items-center gap-[.4em] text-left" aria-label={`Abrir o Diário: ${oferta.titulo}`}>
           <CalendarCheck weight="fill" className="shrink-0 text-[1.2em] text-primary" aria-hidden />
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-[.4em]">
@@ -104,9 +103,32 @@ export function FaixaDoDiario() {
           </button>
         )}
       </div>
-      {aberto && <SheetDoDiario onClose={() => setAberto(false)} />}
     </>
   )
+}
+
+/**
+ * Quantos prêmios do Diário estão prontos agora (login do dia + metas batidas).
+ * Alimenta o selo do item "Diário" no menu Mais e o do próprio botão Mais.
+ */
+export function usePremiosProntosDoDiario(): number {
+  const carregado = useDiarioStore(s => s.carregado)
+  const coletados = useDiarioStore(s => s.coletados)
+  const abates = useAbatesHoje()
+  if (!carregado) return 0
+  return Number(!coletados.has('login')) + METAS_DO_DIA.filter(m => !coletados.has(m.id) && abates >= m.alvo).length
+}
+
+/**
+ * O painel do Diário, montado pela HUD e não pela faixa: a faixa some quando não
+ * há nada para coletar durante os Primeiros Passos, e o painel precisa abrir
+ * também pelo menu Mais nesse momento.
+ */
+export function PainelDoDiario() {
+  const aberto = useDiarioStore(s => s.painelAberto)
+  const carregado = useDiarioStore(s => s.carregado)
+  if (!aberto || !carregado) return null
+  return <SheetDoDiario onClose={() => useDiarioStore.getState().fecharPainel()} />
 }
 
 function SheetDoDiario({ onClose }: { onClose: () => void }) {
