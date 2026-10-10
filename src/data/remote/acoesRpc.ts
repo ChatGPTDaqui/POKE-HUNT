@@ -278,6 +278,10 @@ const DESPACHO: Record<string, Despacho> = {
       await refetchGold()
     },
   },
+  coletarDiario: {
+    chamar: rpc('coletar_diario', (a) => ({ p_item: a.item })),
+    aoSucesso: async () => { await Promise.all([refetchGold(), refetchTodosItens()]) },
+  },
   reivindicarNiveisDeTreinador: {
     chamar: rpc('reivindicar_niveis_de_treinador', () => ({})),
     aoSucesso: async () => { await Promise.all([refetchGold(), refetchTodosItens()]) },

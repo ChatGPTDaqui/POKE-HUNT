@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { ehFalhaSemResposta, mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 import { flushAgora } from '@/data/remote/gameStatePersistence'
 import { usePassosStore } from './passosStore'
+import { useDiarioStore } from './diarioStore'
 import { pararFlushPeriodico } from '@/data/remote/autoridade'
 
 interface AuthState {
@@ -166,6 +167,7 @@ export const useAuthStore = create<AuthState>(() => ({
     })
     await supabase.auth.signOut()
     usePassosStore.getState().limpar()
+    useDiarioStore.getState().limpar()
   },
 
   // NAO fecha `emRecuperacaoDeSenha` aqui: App.tsx troca de tela no MESMO
