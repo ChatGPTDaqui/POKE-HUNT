@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Diário: login do mês e metas do dia.
+  {
+    version: '7.98',
+    date: '2026-10-10',
+    title: 'Diário: login do mês e metas do dia',
+    highlights: [
+      'Login do mês: todo dia em que você entra tem um prêmio para coletar (Great Balls, Super Potions e ouro). Os dias 7, 14 e 21 dão Ultra Balls e Revives, e o dia 28 dá 100 Ultra Balls e 5 Max Revives. Conta os dias coletados: perder um dia não zera, só adia o próximo prêmio. Recomeça no dia 1 de cada mês.',
+      'Metas do dia: vença 100, 300 e 1000 selvagens desde a sua primeira entrada do dia, inclusive com a caçada rodando com o jogo fechado. Cada meta paga ouro e pokébolas, e o ouro cresce com o seu nível de treinador. As metas viram à meia-noite (horário de Brasília).',
+      'O prêmio do dia aparece no topo da tela com o botão Coletar. Tocar na faixa abre o Diário, com o calendário do mês e as três metas.',
+    ],
+  },
   // Recompensas por nível de treinador.
   {
     version: '7.97',
