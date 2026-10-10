@@ -8,6 +8,7 @@ import { ESPECIALIDADE_TYPES, ESPECIALIDADE_NIVEL_MAX } from '@/data/especialida
 import { SPECIES } from '@/data/pokes'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { GameButton, Meter } from '@/components/game/controls'
+import { avisarTrancado, useTrancas } from '@/features/primeirosPassos/useDesbloqueio'
 
 export function useJornada() {
   const progresso = useGameStateStore(s => s.biomaProgress)
@@ -41,7 +42,13 @@ export function JornadaDoTreinador({ onBioma, onLance }: {
   const especieAtiva = ativo ? SPECIES[ativo] : null
   const lanceVencido = marcos.find(m => m.id === 'lance')!.atual > 0
   const atual = marcos.find(m => m.atual < m.alvo)
-  const abrir = (screen: 'tasks' | 'bestiario' | 'especialidades') => useUiStore.getState().openScreen(screen)
+  const tranca = useTrancas()
+  // Mesmo cadeado da doca: atalho daqui não pode furar o que a barra tranca.
+  const abrir = (screen: 'tasks' | 'bestiario' | 'especialidades') => {
+    const passo = tranca(screen)
+    if (passo) avisarTrancado(passo)
+    else useUiStore.getState().openScreen(screen)
+  }
   const missao = MISSAO_TYPES.flatMap(tipo => {
     const m = cadeiaDoTipo(tipo).find(m => !missoes[chaveDaMissao(tipo, m.speciesId)])
     if (!m) return []

@@ -12,6 +12,17 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Primeiros Passos, parte 2: menus com cadeado e o botão do passo destacado.
+  {
+    version: '7.96',
+    date: '2026-10-10',
+    title: 'Menus que abrem com os Primeiros Passos',
+    highlights: [
+      'Tasks, Especialidades, Calculadora, Mercado, Troca, Bestiário, PvP, Ranking e o Treinamento aparecem com cadeado e o número do passo que os libera. Tocar num menu trancado mostra, no cartão de objetivo, qual tarefa falta. Quem já passou desses pontos encontra tudo aberto.',
+      'O botão que a tarefa atual pede (Hunt, Equipe, o robô das Automações, Tasks, Especialidades) pisca em verde até você tocar nele.',
+      'O tutorial de boas-vindas ficou com duas telas e apresenta o cartão de Primeiros Passos. O resumo "Bem-vindo de volta" só aparece depois de pelo menos 5 minutos fora (o progresso continua sendo creditado do mesmo jeito).',
+    ],
+  },
   // Primeiros Passos: direção das primeiras horas.
   {
     version: '7.95',

@@ -32,6 +32,9 @@ import { BookBookmark, CheckSquare, Sparkle, type Icon } from '@phosphor-icons/r
 import { CardDoTreinador } from '@/components/hud/CardDoTreinador'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
+import { MarcaDeCadeado } from '@/features/primeirosPassos/MarcaDeCadeado'
+import { avisarTrancado, useTrancas } from '@/features/primeirosPassos/useDesbloqueio'
+import { useDestaqueDoPasso } from '@/features/primeirosPassos/useDestaqueDoPasso'
 
 /**
  * Os tres destinos da coluna. Exportado porque `ActionDock` precisa filtrar
@@ -48,6 +51,8 @@ export const TELAS_NA_COLUNA: { screen: ScreenName; label: string; Icon: Icon }[
 export function ColunaDeAtalhos() {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const toggleScreen = useUiStore((s) => s.toggleScreen)
+  const tranca = useTrancas()
+  const destaques = { tasks: useDestaqueDoPasso('tasks'), especialidades: useDestaqueDoPasso('especialidades') } as Record<string, ReturnType<typeof useDestaqueDoPasso> | undefined>
   const trilhoHeight = useUiStore((s) => s.trilhoHeight)
   const { mode } = useDeviceMode()
   // 'deitado' conta como estreito aqui, ao contrario do trilho: ali o que
@@ -82,13 +87,20 @@ export function ColunaDeAtalhos() {
           data-keep-open
           aria-label={label}
           aria-pressed={currentScreen === screen}
-          onClick={() => toggleScreen(screen)}
+          onClick={() => {
+            const passo = tranca(screen)
+            if (passo) return avisarTrancado(passo)
+            destaques[screen]?.aoTocar()
+            toggleScreen(screen)
+          }}
           className={cn(
             'vidro alvo-toque pointer-events-auto flex cursor-pointer items-center gap-[.4em]',
             'rounded-[.7em] px-[.55em] py-[.35em] font-[inherit] text-[.78em] transition-colors',
             currentScreen === screen ? 'text-foreground' : 'text-n300',
+            'relative', tranca(screen) && 'opacity-55', destaques[screen]?.classe,
           )}
         >
+          {tranca(screen) && <MarcaDeCadeado passoId={tranca(screen)!} />}
           <Icon className="shrink-0 text-[1.15em]" weight={currentScreen === screen ? 'fill' : 'regular'} />
           {!soIcone && <span className="leading-none">{label}</span>}
         </button>

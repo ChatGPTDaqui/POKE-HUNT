@@ -65,36 +65,29 @@ export const TUTORIAL_ESTAGIOS = 'estagios'
 export const TUTORIAL_CAPTURA = 'captura'
 
 export const TUTORIAIS: Tutorial[] = [
-  // TRES PASSOS, E O CORTE FOI DELIBERADO. O que o jogador precisa pra sair da
-  // tela inicial e comecar a jogar e: (1) que ele nao aperta botao de ataque,
-  // (2) onde clicar pra comecar, (3) que errar nao custa nada. Todo o resto —
-  // automacao, estagio, captura, tipo elemental — tem tutorial proprio no
-  // gesto, ou esta na Wiki.
+  // DOIS PASSOS (10/10, Primeiros Passos). Eram três, e o do meio ("Comece pela
+  // Rota 46") virou o próprio cartão de objetivo da HUD, que mostra a tarefa,
+  // anda ao vivo e aponta o botão — ensinar isso em texto, antes de o jogador ver
+  // o cartão, era explicar o que a tela já mostra. O que sobra aqui é o que o
+  // cartão não diz: que o POKE luta sozinho e que errar não custa nada.
   {
     id: TUTORIAL_BOAS_VINDAS,
     titulo: 'Bem-vindo ao NOVO POKE IDLE',
-    resumo: 'O essencial: seu POKE luta sozinho, por onde começar e por que errar não custa nada.',
+    resumo: 'O essencial: seu POKE luta sozinho, o cartão de Primeiros Passos mostra o que fazer, e errar não custa nada.',
     passos: [
       {
         titulo: 'Seu POKE luta sozinho',
         corpo:
-          'Este é um jogo idle: você não aperta botão de ataque. Seu POKE em campo procura o selvagem mais ' +
-          'próximo, engaja e escolhe os golpes por conta própria. Seu trabalho é decidir ONDE caçar, cuidar ' +
-          'do time e gerenciar o que você ganha.',
+          'Este é um jogo idle: você não aperta botão de ataque. Seu POKE procura o selvagem mais próximo, ' +
+          'luta e escolhe os golpes por conta própria. Você decide onde caçar e cuida da equipe. Fechar a aba ' +
+          'não perde nada: a caçada continua e o resultado é creditado quando você volta.',
       },
       {
-        titulo: 'Comece pela Rota 46',
+        titulo: 'Siga os Primeiros Passos',
         corpo:
-          'O botão Hunt, no meio da barra de baixo, abre a lista de caçadas. A Rota 46 (Inicial) fica no topo, ' +
-          'acima do mapa dos biomas — ela é a única feita pro nível 1, e só aparecem POKEs de nível 1 e 2. ' +
-          'Entre nela e deixe rodando.',
-      },
-      {
-        titulo: 'Errar não custa nada',
-        corpo:
-          'Se seu POKE desmaiar, o botão Hospital (que aparece dentro da caçada) leva você até a enfermeira: ' +
-          'clique nela e o time inteiro é curado de graça, quantas vezes quiser. E fechar a aba não perde ' +
-          'progresso — o servidor continua a caçada e credita o resultado quando você voltar.',
+          'O cartão no topo da tela mostra uma tarefa por vez e o que ela paga. Toque nele para ir até onde ela ' +
+          'se cumpre; quando a barra encher, toque em Coletar. O botão que a tarefa pede pisca em verde. Se seu ' +
+          'POKE desmaiar, a cura no Hospital é grátis, quantas vezes quiser.',
       },
     ],
   },
