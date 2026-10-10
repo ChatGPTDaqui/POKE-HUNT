@@ -619,3 +619,10 @@ que o motor dispara tem efeito próprio (registro por golpe, single ou área) ou
 é o golpe-vitrine do tipo/tier; Bullet Punch é a exceção pedida pelo dono.
 Custo dos golpes de área na cena do lab (p95): 2,9–5,8 ms, contra 6,2 ms do
 Petal Blizzard e 23,2 ms do Eruption no mesmo lote.
+
+## Refação pela descrição (09/10): Mordida, Investida, Garra, Lâmina e Chute
+
+Os 54 golpes feitos antes do método novo foram revistos a partir da descrição do jogo.
+- **Investida** (`investidas.ts`) foi reescrita golpe a golpe. O corpo é um vulto que se choca. Quick Attack aparece só em contornos (quase invisível); Extreme Speed pisca em quatro lugares; Body Slam despenca o peso e deixa paralisia; Giga Impact termina com quem atacou exausto; Last Resort mostra os quatro golpes; Retaliate mostra o aliado caído; Chip Away lasca o escudo de status; Facade queima os ícones de status; Return e Frustration usam coração inteiro ou partido; Strength é um soco máximo; Heavy Slam é um peso de ferro; U-turn termina no facho de troca; Acrobatics é uma cambalhota.
+- **Mordida** ganhou o efeito secundário de cada golpe: susto (Bite, Hyper Fang), Defesa caindo (Crunch), barra de HP pela metade (Super Fang), estática (Thunder Fang), queimadura (Fire Fang), veneno grave borbulhando (Poison Fang), a fruta comida (Bug Bite) e gotas de sangue (Leech Life).
+- **Garra, Lâmina e Chute** ganharam os detalhes da descrição em `secundarios.ts`: crítico fácil, status que sobe ou cai, a garra gigante do Dragon Claw, a barra que para em 1 de HP no False Swipe, as imagens residuais do Aerial Ace, os degraus do Fury Cutter, a queda do Low Kick, as veias de força do Mega Kick e a raiva do Stomping Tantrum.
