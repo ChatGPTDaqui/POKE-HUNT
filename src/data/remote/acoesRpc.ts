@@ -278,6 +278,10 @@ const DESPACHO: Record<string, Despacho> = {
       await refetchGold()
     },
   },
+  reivindicarNiveisDeTreinador: {
+    chamar: rpc('reivindicar_niveis_de_treinador', () => ({})),
+    aoSucesso: async () => { await Promise.all([refetchGold(), refetchTodosItens()]) },
+  },
   reivindicarPasso: {
     chamar: rpc('reivindicar_passo', (a) => ({ p_passo: a.passoId })),
     aoSucesso: async () => { await Promise.all([refetchGold(), refetchTodosItens()]) },

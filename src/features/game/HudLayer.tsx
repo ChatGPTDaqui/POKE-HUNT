@@ -36,6 +36,7 @@ import { useRef } from 'react'
 import { PlacarDoDuelo } from '@/features/arena/PlacarDoDuelo'
 import { StatusRail } from '@/components/hud/StatusRail'
 import { CartaoDoPasso } from '@/features/primeirosPassos/CartaoDoPasso'
+import { FaixaDoTreinador } from '@/features/primeirosPassos/FaixaDoTreinador'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip, salaNoTrilho } from '@/components/hud/SalaChip'
@@ -109,6 +110,7 @@ export function HudLayer() {
           <div ref={trilhoRef}>
             <StatusRail />
             <CartaoDoPasso />
+            <FaixaDoTreinador />
           </div>
           {/* Placar do combate duelo (arena, Lance, covis) — PH-549 o colocava
               na fileira de chips (sala/clima), la embaixo das reservas. Com uma
