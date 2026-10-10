@@ -7,8 +7,8 @@ import { emitirParticulas } from '../particulas'
 import { PELES } from '../paletas'
 import { crescente, entrada, estilhacos, estrelaDeImpacto, limitar, pontosDeRaio, riscos, saida, tracarRaio } from '../primitivas'
 import { rngSemeado } from '../aleatorio'
-import { BRANCO, ESCURO, bola, brilho, comAcento, entrePontos, janela, montarFamilia, poligono, rastro } from './formas'
-import { ondaDeChoque, proa } from './investidas'
+import { BRANCO, ESCURO, bola, brilho, comAcento, entrePontos, janela, montarFamilia, ondaDeChoque, poligono, proa, rastro } from './formas'
+
 import type { ContextoVfx, Pele, Ponto } from '../tipos'
 
 interface Perfil { preparo: number; viagem: number; recuo?: boolean; volta?: boolean; duracaoExtra?: number }

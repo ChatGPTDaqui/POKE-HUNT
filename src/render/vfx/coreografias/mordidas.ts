@@ -7,10 +7,12 @@
 // vezes fecha e o rescaldo. Mesmo padrão dos socos: perfil por golpe, uma
 // coreografia, nada de estado entre quadros.
 import { emitirParticulas } from '../particulas'
-import { NEUTROS } from '../paletas'
+import { getAbility } from '@/data/abilities'
+import { NEUTROS, PELES } from '../paletas'
 import { entrada, estilhacos, estrelaDeImpacto, limitar, pontosDeRaio, riscos, saida, tracarRaio } from '../primitivas'
 import { rngSemeado } from '../aleatorio'
 import { em } from './comum'
+import { CORES_DE_HP, barraDeHp, bola, comAcento, entrePontos, estatica, setasDeStatus, susto } from './formas'
 import type { ContextoVfx, EntradaDeCoreografia, Pele, Ponto, Tier } from '../tipos'
 
 const [ESCURO, BRANCO] = NEUTROS
@@ -58,7 +60,7 @@ const VOLTA = 260
 
 function duracaoDe(p: Perfil): number {
   const ultimo = p.contato + (p.mordidas - 1) * SEGUNDA
-  return ultimo + APERTO + SOLTA + (p.rescaldo === 'dreno' ? VOLTA - SOLTA + 60 : p.rescaldo === 'sombra' || p.rescaldo === 'racha' ? MARCA : 40)
+  return ultimo + APERTO + SOLTA + (p.rescaldo === 'dreno' ? VOLTA - SOLTA + 60 : MARCA)
 }
 
 /** Meia abertura da boca fechada, por forma. */
@@ -287,10 +289,12 @@ function gotasDeVida(ctx: CanvasRenderingContext2D, de: Ponto, para: Ponto, t: n
     const x = de.x + dx * v - (dy / L) * onda, y = de.y + dy * v + (dx / L) * onda - Math.sin(u * Math.PI) * 8
     const r = 3.2 - u * 1.2
     ctx.beginPath(); ctx.arc(x, y, r + 1.2, 0, Math.PI * 2); ctx.fillStyle = pele.contorno; ctx.fill()
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = pele.meio; ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = SANGUE; ctx.fill()
     ctx.fillStyle = BRANCO; ctx.fillRect(x - 1, y - 1.4, 1.6, 1.6)
   }
 }
+
+const SANGUE = '#c81e2a', AZUL = '#58a6f0', FRUTA = ['#d83a4a', '#ff8a8a', '#4caf50'] as const
 
 // ---------------------------------------------------------------------------
 // Coreografia
@@ -418,7 +422,47 @@ function coreografia(perfil: Perfil, c: ContextoVfx): void {
     marcasDeDente(ctx, boca, (ms - contatos[contatos.length - 1] - APERTO - SOLTA) / MARCA, pele)
   }
 
-  // Leech Life: vida volta ao atacante depois do aperto.
+  // Efeito secundário de cada golpe, como a descrição do jogo diz.
+  const ultimo = contatos[contatos.length - 1]
+  const t2 = (ms - ultimo - 40) / (APERTO + SOLTA + MARCA - 40)
+  if (t2 > 0 && t2 < 1) {
+    const k = saida(limitar(t2 / .2)) * (1 - entrada(limitar((t2 - .75) / .25)))
+    switch (perfil.rescaldo) {
+      // Bite / Hyper Fang: "may make the target flinch".
+      case 'sombra': case 'estalo': susto(ctx, alvo, k); break
+      // Crunch: "may lower the target's Defense".
+      case 'racha': setasDeStatus(ctx, alvo, t2, AZUL, 1, true); break
+      // Super Fang: "cuts the target's HP in half" — a barra cai pela metade.
+      case 'metade': barraDeHp(ctx, { x: alvo.x, y: alvo.y + 17 }, 1 - .5 * saida(limitar(t2 / .4))); break
+      // Thunder Fang: "flinch or paralysis".
+      case 'raio': estatica(ctx, alvo, k, pele, Math.floor(ms / 66) * 7); break
+      // Fire Fang: "flinch or burn" — marquinha de queimadura em cima do alvo.
+      case 'chama':
+        if (k > .1) emitirParticulas(ctx, pele, { x: alvo.x + 9, y: alvo.y - 12 }, 1, 2, (t2 * 2) % 1, 4 * k, rngSemeado(7))
+        break
+      // Poison Fang: "badly poisoned" — bolhas roxas fundas subindo sem parar.
+      case 'veneno':
+        for (let i = 0; i < 4; i++) {
+          const v = (t2 * 1.6 + i * .25) % 1
+          bola(ctx, { x: alvo.x + (i - 1.5) * 6, y: alvo.y + 6 - v * 20 }, 2.4 * (1 - v) * k + .3, pele, pele.contorno, pele.meio)
+        }
+        break
+      // Bug Bite: "if the target is holding a Berry, the user eats it".
+      case 'migalha': {
+        const v = saida(limitar(t2 / .6)), q = entrePontos({ x: alvo.x, y: alvo.y - 8 }, { x: origem.x, y: origem.y - 6 }, v)
+        q.y -= Math.sin(v * Math.PI) * 12
+        if (v < .98) {
+          ctx.fillStyle = ESCURO; ctx.beginPath(); ctx.arc(q.x, q.y, 4.2, 0, Math.PI * 2); ctx.fill()
+          ctx.fillStyle = FRUTA[0]; ctx.beginPath(); ctx.arc(q.x, q.y, 3, 0, Math.PI * 2); ctx.fill()
+          ctx.fillStyle = FRUTA[1]; ctx.fillRect(q.x - 1.6, q.y - 1.8, 1.4, 1.4)
+          ctx.fillStyle = FRUTA[2]; ctx.fillRect(q.x, q.y - 4.6, 2, 1.6)
+        }
+        break
+      }
+    }
+  }
+
+  // Leech Life: "drains the target's blood" — gotas de SANGUE voltam a quem atacou.
   if (perfil.rescaldo === 'dreno') {
     const t = (ms - perfil.contato - 60) / VOLTA
     if (t >= 0 && t < 1) gotasDeVida(ctx, boca, { x: origem.x, y: origem.y - 2 }, t, pele, 2 + Math.min(c.pedir(2 + tier), 3))
@@ -432,5 +476,7 @@ export const MORDIDAS_POR_GOLPE: Record<string, EntradaDeCoreografia> = Object.f
     duracao: Object.fromEntries(TIERS.map(t => [t, duracaoDe(perfil)])),
     impactos: Object.fromEntries(TIERS.map(t => [t, [perfil.contato]])),
     alcance: 50,
+    margem: { cima: 60, baixo: 50, lados: 50 },
+    pele: comAcento(PELES[getAbility(id)?.type ?? 'NORMAL'], SANGUE, AZUL, ...FRUTA, ...CORES_DE_HP, PELES.ELECTRIC.meio),
   }]),
 )

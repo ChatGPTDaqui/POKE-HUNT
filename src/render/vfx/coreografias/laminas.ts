@@ -9,6 +9,10 @@
 import { crescente, estrelaDeImpacto, limitar, riscos, saida } from '../primitivas'
 import { rngSemeado } from '../aleatorio'
 import { BRANCO, bola, brilho, entrePontos, janela, montarFamilia, rastro, talho } from './formas'
+import { getAbility } from '@/data/abilities'
+import { PELES } from '../paletas'
+import { comAcento } from './formas'
+import { CORES_SECUNDARIAS, secundario } from './secundarios'
 import type { ContextoVfx, Pele, Ponto } from '../tipos'
 
 interface Corte {
@@ -145,7 +149,9 @@ function desenhar(perfil: Perfil, c: ContextoVfx): void {
 }
 
 export const LAMINAS_POR_GOLPE = montarFamilia(PERFIS_DE_LAMINA, {
-  desenhar,
+  desenhar: (p, c, id) => { desenhar(p, c); secundario(id, c, p.contato) },
+  margem: () => ({ cima: 56, baixo: 46, lados: 46 }),
+  pele: id => comAcento(PELES[getAbility(id)?.type ?? 'NORMAL'], ...CORES_SECUNDARIAS),
   duracao: duracaoDe,
   contato: p => p.contato,
   alcance: 46,
