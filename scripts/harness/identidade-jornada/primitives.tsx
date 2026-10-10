@@ -23,8 +23,8 @@ export function PanelHeader({ title, eyebrow, kind, subtitle, onClose, onBack }:
     </div>
     <EquipmentArt kind={kind} className="header-art" />
     <div className="panel-close">
-      {onBack && <button className="icon-button" aria-label="Voltar ao Menu" onClick={onBack}><ArrowLeft size={20} /></button>}
-      <button className="icon-button" aria-label="Fechar painel e voltar à aventura" onClick={onClose}><X size={21} /></button>
+      {onBack && <button className="icon-button" aria-label="Voltar a Mais" onClick={onBack}><ArrowLeft size={20} /></button>}
+      <button className="icon-button" aria-label="Fechar painel" onClick={onClose}><X size={21} /></button>
     </div>
   </header>
 }

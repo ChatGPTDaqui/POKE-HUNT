@@ -10,7 +10,10 @@ URL local: `http://127.0.0.1:5176/scripts/harness/identidade-jornada.html`.
 
 ## Escopo e segurança
 
-- Aventura ilustrativa; Equipe, Mochila, Explorar, Pokédex e guia Menu interativos.
+- Hunt ilustrativa; Equipe, Mochila, Hunt, Pokédex e guia Mais interativos.
+- Barra original: Equipe, Mochila, Pokédex, Hunt, Loja, Hospital, Mercado e Mais.
+- Coluna abaixo do treinador: Diário, Especialidades, Tasks, Calculadora e PvP.
+- Sem botão de retorno: a hunt é o próprio jogo; X/Esc fecha apenas o painel.
 - Fixtures próprias, sem catálogo, stores, autenticação, saves ou clientes remotos.
 - Outros destinos têm prévia explicitamente identificada, não implementação funcional.
 - Hospital não inicia viagem; itens não são consumidos; não há combate real.
@@ -26,7 +29,7 @@ URL local: `http://127.0.0.1:5176/scripts/harness/identidade-jornada.html`.
 - `npx vite build --config scripts/harness/identidade-jornada.vite.mts`
 - `npm run build:verificar` para verificar o build normal sem publicar assets.
 
-Navegação e cinco painéis inspecionados em 320×568, 360×640, 390×844, 430×932,
+Navegação e painéis inspecionados em 320×568, 360×640, 390×844, 430×932,
 844×390, 834×1194, 1366×768 e 1920×1080: sem overflow horizontal ou sobreposição
 com a barra de destinos. Selecionar integrante/item/registro revela sua ficha.
 Teclado, foco, Esc, filtros/vazio e ações locais cobertos nos testes.

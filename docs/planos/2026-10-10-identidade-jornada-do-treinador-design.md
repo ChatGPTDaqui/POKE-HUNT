@@ -1,7 +1,7 @@
 # Identidade visual — Jornada do Treinador
 
 Data: 10/10/2026. Projeto: POKE-HUNT. Prioridade: mobile.
-Status: especificação consolidada aprovada na conversa em 10/10/2026.
+Status: especificação consolidada aprovada e navegação revisada pelo usuário em 10/10/2026.
 Primeira etapa em protótipo isolado; integração com o jogo ainda não realizada.
 
 ## 1. Objetivo e decisões aprovadas
@@ -19,7 +19,11 @@ Decisões aprovadas:
 - Azul-marinho para texto/contornos; coral como marca; verde para exploração;
   azul para pesquisa; dourado moderado para recompensas.
 - Fredoka nos títulos e Manrope no conteúdo, inicialmente preservadas.
-- Barra principal com Equipe, Mochila, Explorar, Pokédex e Menu, nesta ordem.
+- A hunt é o próprio jogo e seu centro permanente, não uma atividade separada.
+- Barra principal na ordem existente: Equipe, Mochila, Pokédex, Hunt, Loja,
+  Hospital, Mercado e Mais. Sem botão "Voltar à aventura" ou "Voltar ao jogo".
+- Coluna superior direita abaixo do treinador: Diário, Especialidades, Tasks,
+  Calculadora e PvP, nesta ordem, disponível também com painéis abertos.
 - Guia ilustrado com grupos visuais, sem acrescentar níveis de submenu.
 - Ações curtas em painéis inferiores; gerenciamento extenso em superfície ampla.
 - PC utiliza largura para relacionar lista e detalhe, não apenas ampliar o celular.
@@ -83,7 +87,7 @@ piso físico em CSS px, independentemente de redução da fonte.
 |---|---|---|
 | Equipe/perfil Pokémon | Preparação da jornada | Integrante em campo, vitais, opções de equipe |
 | Mochila | Organizador de suprimentos | Item, quantidade, efeito e ação permitida |
-| Explorar | Guia de expedição | Destino, ambiente, dificuldade e requisitos existentes |
+| Hunt | Guia de expedição | Destino, ambiente, dificuldade e requisitos existentes |
 | Loja/Hospital | Serviços Pokémon | Preço/estoque ou estado de recuperação/viagem |
 | Pokédex/Bestiário | Instrumentos de pesquisa relacionados | Identidade, descoberta e dados de cada sistema |
 | Tasks/Especialidades | Progresso do treinador | Objetivo, progresso, requisito e recompensa existentes |
@@ -99,25 +103,36 @@ piso físico em CSS px, independentemente de redução da fonte.
 |---|---|---|
 | Equipe | `equipe` | Abre/troca o painel da equipe |
 | Mochila | `mochila` | Abre/troca o inventário |
-| Explorar | `hunts` | Abre seleção de hunt; abrir não inicia viagem |
 | Pokédex | `pokedex` | Abre a coleção existente |
-| Menu | Estado de abertura do guia | Abre destinos agrupados |
+| Hunt | `hunts` | Abre seleção de hunt; abrir não inicia viagem |
+| Loja | `loja` | Abre o serviço existente |
+| Hospital | Ação de cena | Preserva viagem/cancelamento e regras atuais |
+| Mercado | `mercado` | Abre o mercado existente |
+| Mais | Estado de abertura do guia | Abre os demais destinos agrupados |
 
-Rótulos completos visíveis, inclusive Pokédex e Menu; não usar somente Dex ou
+Rótulos completos visíveis, inclusive Pokédex e Mais; não usar somente Dex ou
 hambúrguer. Estado ativo identificável por forma/marcador e texto, além de cor.
 Manter ordem e significado nos três regimes. Não renomear chaves de persistência
-ou criar rotas por menu para fazer a troca de rótulo Hunt → Explorar.
+ou criar rotas por menu. Hunt mantém seu nome. A barra permanece disponível;
+fechar um painel usa o X, Esc ou o próprio acesso ativo, sem botão separado de retorno.
+Em mobile estreito, duas fileiras de quatro destinos preservam ordem e alvos de toque.
+
+### Coluna do treinador
+
+Diário, Especialidades, Tasks, Calculadora e PvP ficam em coluna logo abaixo do
+treinador, no canto superior direito, inclusive com gerenciamento aberto. Reservar
+largura para a coluna: não sobrepor painéis, ações ou barra inferior. Nomes visíveis,
+alvos de toque amplos, mesma ordem no mobile e PC.
 
 ### Guia ilustrado
 
 | Grupo | Acessos diretos |
 |---|---|
-| Preparar a jornada | Loja, Hospital, Especialidades, Tasks, Diário |
-| Encontrar outros treinadores | Social, Troca, Mercado, PvP, Ranking |
-| Consultar e ajustar | Bestiário, Wiki, Tutoriais, Calculadora, Ajustes |
+| Encontrar outros treinadores | Social, Troca, Ranking |
+| Consultar e ajustar | Bestiário, Wiki, Tutoriais, Ajustes |
 
 Cabeçalhos de grupo não abrem outro submenu. Cada destino abre com um toque
-após abrir Menu. Usar pequenas ilustrações consistentes, nome e, quando útil,
+após abrir Mais. Não duplicar acessos já fixos na barra ou coluna. Usar pequenas ilustrações consistentes, nome e, quando útil,
 uma descrição curta. Conteúdo pode rolar; título/fechar permanecem alcançáveis.
 
 O conjunto cobre todas as `ScreenName` atuais. Hospital permanece ação de cena.
@@ -126,15 +141,15 @@ Não remover função existente por não aparecer na barra principal.
 
 ### Acessos contextuais e sinais
 
-- Tasks: faixa de objetivo recolhível, com acesso direto; guia como alternativa fixa.
-- Especialidades: guia e painel do treinador, sem depender de objetivo ativo.
-- Hospital: guia sempre disponível segundo as regras atuais, mais atalho contextual
+- Tasks: coluna permanente e faixa de objetivo recolhível com acesso direto.
+- Especialidades: coluna permanente, sem depender de objetivo ativo.
+- Hospital: barra sempre disponível segundo as regras atuais, mais atalho contextual
   quando houver integrante desmaiado ou viagem pendente; não esperar aviso temporário.
 - Hospital preserva iniciar/cancelar viagem, contagem e restrições atuais. Não curar,
   teleportar ou iniciar compra automaticamente ao abrir o guia.
 - Pokédex e Bestiário não se fundem; atalhos relacionados mantêm nomes explícitos.
-- Badges derivam das fontes atuais. Agregação no Menu conta cada pendência uma vez;
-  abrir Menu não marca conteúdo como lido. Não somar cópias do mesmo destino.
+- Badges derivam das fontes atuais. Agregação em Mais conta cada pendência uma vez;
+  abrir Mais não marca conteúdo como lido. Não somar cópias do mesmo destino.
 - Trancas, explicações de desbloqueio e destaques do tutorial continuam funcionando.
 - Até existir objetivo elegível, não exibir objetivo fictício ou espaço vazio reservado.
 
@@ -151,15 +166,15 @@ atalhos permanentes espalhados pelas bordas. Manter disponíveis informações
 relevantes existentes: clima, sala, efeitos, taxas e comunicação, reorganizando
 apresentação sem apagar dados ou misturar sinais com significados diferentes.
 
-Rodapé distingue ação (golpes/automação) de navegação (cinco destinos).
+Rodapé distingue ação (golpes/automação) de navegação (oito destinos).
 Com gerenciamento extenso aberto, controles de combate são recolhidos, sem
 pausar o motor nem alterar a automação. Ao fechar, voltam ao estado anterior.
 Conteúdo não deve saltar ou ficar fora da tela por causa da nova altura medida.
 
 ### Painéis e ações
 
-Equipe, Mochila, Explorar e Pokédex usam a maior área útil entre cabeçalho e
-navegação. Mantêm contexto compacto no topo; não precisam mostrar golpes ao fundo.
+Equipe, Mochila, Hunt e Pokédex usam a área útil entre cabeçalho e
+navegação, reservando a coluna direita. Mantêm contexto compacto no topo; não precisam mostrar golpes ao fundo.
 Ações curtas usam sheet dimensionado ao conteúdo. Perfil e demais superfícies
 compartilham componentes e se ajustam ao volume de informação.
 
@@ -171,7 +186,7 @@ Sem arrasto obrigatório, hover obrigatório ou tooltip nativo como única expli
 ### Deitado, teclado e toque
 
 Preservar classificação por largura, altura e ponteiro de `useDeviceMode`.
-Em deitado, usar cabeçalho reduzido, cinco destinos compactos com nome legível
+Em deitado, usar cabeçalho reduzido, oito destinos compactos com nome legível
 e área de gerenciamento que pode cobrir detalhes da HUD. Priorizar conteúdo
 e caminho de saída; não empilhar a composição de retrato em pouca altura.
 
@@ -181,7 +196,7 @@ de pequenos puxadores de janela, mesmo que esteja classificado como amplo.
 
 ## 6. Composição PC
 
-Mesmos cinco destinos, nomes e agrupamentos. Cabeçalho mais informativo sem
+Mesmos oito destinos, coluna de cinco atalhos, nomes e agrupamentos. Cabeçalho mais informativo sem
 espalhar dados por toda a tela. Painéis abrem em posição previsível, utilizáveis
 sem arrastar. Arrasto opcional existente pode ser preservado onde não prejudicar.
 
@@ -233,7 +248,7 @@ coerentes e reversíveis, não uma refatoração geral dos domínios do jogo.
 1. Protótipo visual isolado: aventura, guia, Equipe e Mochila em mobile/PC,
    dados demonstrativos claramente identificados; sem escrita no Supabase.
 2. Fundação: tokens, controles, painéis e navegação, cobrindo acessos existentes.
-3. Jornada: Equipe/perfis, Mochila, Explorar, Pokédex/Bestiário, Loja/Hospital,
+3. Jornada: Equipe/perfis, Mochila, Hunt, Pokédex/Bestiário, Loja/Hospital,
    Tasks e Especialidades.
 4. Demais menus: Social, Troca, Mercado, PvP, Ranking e ferramentas de consulta.
 5. Consistência completa: entrada/autenticação/inicial, tutorial, configurações,
@@ -250,12 +265,13 @@ banco de dados, monetização, nova vila navegável ou redesenho de cada cenári
 
 ## 10. Critérios de aceite
 
-- Os cinco destinos estão legíveis, na ordem aprovada, em compacto/deitado/amplo.
+- Os oito destinos inferiores e os cinco atalhos direitos estão legíveis, na ordem
+  solicitada, em compacto/deitado/amplo; não existe botão redundante de retorno.
 - Todo destino anterior segue alcançável; nenhum exige submenu de grupo adicional.
 - Hospital respeita viagem/cancelamento; tutorial e trancas não ficam sem acesso.
 - Tasks, Especialidades, chat, automação e perfil do treinador permanecem claros.
 - Badges não duplicam contagens nem marcam leitura ao navegar.
-- Equipe, Mochila, Explorar e Pokédex têm superfície de gerenciamento confortável.
+- Equipe, Mochila, Hunt e Pokédex têm superfície de gerenciamento confortável.
 - Sem conteúdo inacessível, sobreposição de ações ou rolagem horizontal acidental.
 - Nome longo, equipe cheia, muitos itens, vazio, loading e erro continuam utilizáveis.
 - Foco/teclado/toque funcionam; troca e fechamento de painel preservam comportamento.
@@ -298,7 +314,7 @@ sem novas mecânicas ou dependência de arte para uso; protótipo separado de pr
 Primeira etapa implementada em `scripts/harness/identidade-jornada.html`.
 Retomada e próximos passos em [sessão local](identidade-jornada/_Session.md).
 O Diário, que ganhou entrada fixa em dev na PR #872 durante esta implementação,
-foi incluído no guia para preservar o acesso existente. O protótipo permanece
+agora está na coluna abaixo do treinador conforme revisão explícita do usuário. O protótipo permanece
 isolado do jogo; as próximas etapas continuam cobrindo todos os menus.
 
 O vault `E:/Context` não estava disponível. Esta cópia local em `docs/planos`
