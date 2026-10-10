@@ -12,6 +12,15 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Comemoração de nível de treinador avisa o prêmio liberado.
+  {
+    version: '8.00',
+    date: '2026-10-10',
+    title: 'Comemoração com prêmio',
+    highlights: [
+      'Quando o treinador sobe para um nível que dá prêmio (a cada 5 níveis até o 100, a cada 25 depois), o cartão de comemoração avisa "Prêmio de treinador liberado!" e diz onde coletar.',
+    ],
+  },
   // Entrada fixa do Diário.
   {
     version: '7.99',
