@@ -1,7 +1,9 @@
 // Fixtures de apresentação. Não importar catálogo, stores, controller ou clientes remotos.
-export const PRIMARY = ['Equipe', 'Mochila', 'Explorar', 'Pokédex', 'Menu'] as const
+// Ordem preservada da ActionDock real: ESQUERDA, Hunt, Loja, Hospital, Mercado, Mais.
+export const PRIMARY = ['Equipe', 'Mochila', 'Pokédex', 'Hunt', 'Loja', 'Hospital', 'Mercado', 'Mais'] as const
+export const SHORTCUTS = ['Diário', 'Especialidades', 'Tasks', 'Calculadora', 'PvP'] as const
 export type Primary = typeof PRIMARY[number]
-export type View = Primary | 'aventura' | 'Treinador' | typeof GROUPS[number]['destinations'][number]['name']
+export type View = Primary | 'hunt' | 'Treinador' | typeof GROUPS[number]['destinations'][number]['name']
 export type ArtKind = 'team' | 'bag' | 'map' | 'dex' | 'guide'
 
 export const GROUPS = [
@@ -28,6 +30,11 @@ export const GROUPS = [
   ] },
 ] as const
 
+// Destinos permanentes não são repetidos no guia.
+export const GUIDE_GROUPS = GROUPS.map(group => ({ ...group, destinations: group.destinations.filter(
+  destination => !PRIMARY.some(name => name === destination.name) && !SHORTCUTS.some(name => name === destination.name),
+) })).filter(group => group.destinations.length > 0)
+
 export const TEAM = [
   { id: 'charmeleon', name: 'Charmeleon', level: 24, types: ['Fogo'], hp: 82, maxHp: 96, number: '005', note: 'Seu parceiro de campo.', stats: [58, 64, 80] },
   { id: 'pikachu', name: 'Pikachu', level: 22, types: ['Elétrico'], hp: 68, maxHp: 68, number: '025', note: 'Sempre pronto para a próxima aventura.', stats: [55, 40, 90] },
@@ -50,7 +57,7 @@ export const ITEMS = [
 export type Item = typeof ITEMS[number]
 export const CATEGORIES = ['Todos', 'Poké Bolas', 'Recuperação', 'Pedras'] as const
 export type Category = typeof CATEGORIES[number]
-export const ART: Record<Primary, ArtKind> = { Equipe: 'team', Mochila: 'bag', Explorar: 'map', Pokédex: 'dex', Menu: 'guide' }
+export const ART: Partial<Record<Primary, ArtKind>> = { Equipe: 'team', Mochila: 'bag', Hunt: 'map', Pokédex: 'dex', Mais: 'guide' }
 export function filterItems(category: Category, search: string) {
   const query = search.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR')
   return ITEMS.filter(item => (category === 'Todos' || item.category === category)

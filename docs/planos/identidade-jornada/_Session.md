@@ -7,15 +7,19 @@ não refazer roteamento nas continuações desta tarefa.
 
 [Especificação aprovada](../2026-10-10-identidade-jornada-do-treinador-design.md).
 Mobile-first; equipamento de jornada; menus claros/quentes e HUD escura discreta;
-cinco destinos fixos Equipe · Mochila · Explorar · Pokédex · Menu.
+Hunt é o próprio jogo. Revisão explícita do usuário: remover botão de retorno;
+barra Equipe · Mochila · Pokédex · Hunt · Loja · Hospital · Mercado · Mais, na ordem
+original. Coluna abaixo do treinador: Diário · Especialidades · Tasks · Calculadora
+· PvP. Acessos permanentes não devem ficar escondidos no guia.
 
 ## Feito
 
 Brainstorming e especificação aprovados. Primeira composição implementada em
 [protótipo isolado](../../../scripts/harness/identidade-jornada/README.md).
 Nenhuma integração visual no jogo real, alteração de banco ou save nesta etapa.
-O Diário ganhou acesso fixo em dev durante este trabalho (PR #872): incluído no
-guia demonstrativo para não perder o novo destino; não altera a direção aprovada.
+Primeiro protótipo na PR #875; revisão da navegação aplica o feedback acima,
+substituindo a proposta inicial de cinco destinos. Mobile estreito usa duas fileiras
+de quatro acessos inferiores; coluna direita permanece ao abrir painéis.
 
 ## Próximos passos
 
