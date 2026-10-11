@@ -13,7 +13,7 @@ export function HomePage() {
   if (session) return <Navigate to="/jogo" replace />
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 text-center">
+    <div data-appearance="journey" className="journey-entry flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 text-center">
       <div className="space-y-3">
         <h1 className="text-3xl font-bold">NOVO POKE IDLE</h1>
         <p className="max-w-md text-muted-foreground">

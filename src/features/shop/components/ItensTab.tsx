@@ -180,7 +180,7 @@ export function ItensTab() {
             </GameButton>
           </div>
 
-          {ownedItemIds.length === 0 && <p className="text-n500">Nenhum item para vender.</p>}
+          {ownedItemIds.length === 0 && <p className="text-menu-muted">Nenhum item para vender.</p>}
 
           {/* No amplo a ficha fica ACIMA da grade; no compacto ela e o sheet no fim
               do arquivo. Mesma ficha nos dois — a diferenca e so onde ela cabe.

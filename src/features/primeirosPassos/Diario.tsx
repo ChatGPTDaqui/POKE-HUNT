@@ -95,18 +95,18 @@ export function FaixaDoDiario({ esconder = false }: { esconder?: boolean }) {
   return (
     <>
       <div className={cn(
-        'pointer-events-auto flex w-[min(100%,24em)] items-center gap-[.4em] rounded-b border-x border-b bg-n900/92 px-[.55em] py-[.3em] text-[.78em]',
-        oferta.tipo === 'pronto' ? 'border-ok/60' : 'border-n800',
+        'pointer-events-auto flex w-[min(100%,24em)] items-center gap-[.4em] rounded-b border-x border-b bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]',
+        oferta.tipo === 'pronto' ? 'border-ok/60' : 'border-menu-line',
       )}>
         <button type="button" onClick={() => useDiarioStore.getState().abrirPainel()} className="flex min-w-0 flex-1 items-center gap-[.4em] text-left" aria-label={`Abrir o Diário: ${oferta.titulo}`}>
-          <CalendarCheck weight="fill" className="shrink-0 text-[1.2em] text-primary" aria-hidden />
+          <CalendarCheck weight="fill" className="shrink-0 text-[1.2em] text-menu-brand" aria-hidden />
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-[.4em]">
-              <span className="truncate font-medium text-n100">{oferta.titulo}</span>
-              {oferta.tipo === 'andando' && <span className="ml-auto shrink-0 tabular-nums text-n300">{Math.min(oferta.abates, oferta.alvo)}/{oferta.alvo}</span>}
+              <span className="truncate font-medium text-menu-ink">{oferta.titulo}</span>
+              {oferta.tipo === 'andando' && <span className="ml-auto shrink-0 tabular-nums text-menu-ink">{Math.min(oferta.abates, oferta.alvo)}/{oferta.alvo}</span>}
             </div>
             {oferta.tipo === 'andando' && <Meter pct={oferta.abates / oferta.alvo * 100} height=".28em" color="var(--color-primary)" className="my-[.2em]" />}
-            <div className="flex items-center gap-[.3em] text-[.9em] text-n400">
+            <div className="flex items-center gap-[.3em] text-[.9em] text-menu-muted">
               <Gift weight="fill" className="shrink-0 text-warn" aria-hidden />
               <span className="truncate">{textoDaRecompensa(oferta.recompensa)}</span>
             </div>
@@ -144,7 +144,11 @@ export function usePremiosProntosDoDiario(): number {
 export function PainelDoDiario() {
   const aberto = useDiarioStore(s => s.painelAberto)
   const carregado = useDiarioStore(s => s.carregado)
-  if (!aberto || !carregado) return null
+  if (!aberto) return null
+  if (!carregado) return <Sheet winKey="diario" snap="conteudo" zIndex={33}
+    title="Diário" onClose={() => useDiarioStore.getState().fecharPainel()}>
+    <p role="status" className="text-menu-muted">Aguardando os dados do Diário. Se a conexão falhou, reconecte o jogo.</p>
+  </Sheet>
   return <SheetDoDiario onClose={() => useDiarioStore.getState().fecharPainel()} />
 }
 
@@ -162,9 +166,9 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Sheet winKey="diario" snap="conteudo" zIndex={33} onClose={onClose} title="Diário">
-      <h3 className="mb-[.3em] text-[.85em] font-medium text-n200">Login do mês · {loginsNoMes} dia(s) coletado(s)</h3>
-      <p className="mb-[.5em] text-[.75em] text-n500">Um prêmio por dia em que você entra. Perder um dia não zera: o próximo prêmio te espera. Recomeça no dia 1 de cada mês.</p>
+    <Sheet appearance="journey" winKey="diario" snap="cheia" zIndex={33} onClose={onClose} title="Diário">
+      <h3 className="mb-[.3em] text-[.85em] font-medium text-menu-ink">Login do mês · {loginsNoMes} dia(s) coletado(s)</h3>
+      <p className="mb-[.5em] text-[.75em] text-menu-muted">Um prêmio por dia em que você entra. Perder um dia não zera: o próximo prêmio te espera. Recomeça no dia 1 de cada mês.</p>
       <div className="grid grid-cols-7 gap-[.3em]">
         {Array.from({ length: DIAS_DO_CALENDARIO }, (_, i) => {
           const k = i + 1
@@ -174,7 +178,7 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
           return (
             <div key={k} className={cn(
               'flex aspect-square flex-col items-center justify-center rounded-[.4em] border text-[.7em]',
-              feito ? 'border-ok/50 bg-ok/15 text-ok' : hoje ? 'border-ok bg-n800 text-n100' : 'border-n800 bg-n900 text-n500',
+              feito ? 'border-ok/50 bg-ok/15 text-ok' : hoje ? 'border-ok bg-menu-wash text-menu-ink' : 'border-menu-line bg-menu-card text-menu-muted',
               especial && !feito && 'border-warn/60 text-warn',
             )}>
               {feito ? <Check weight="bold" aria-label={`Dia ${k} coletado`} /> : especial ? <Gift weight="fill" aria-hidden /> : null}
@@ -190,24 +194,24 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
           Coletar dia {loginsNoMes + 1}: {textoDaRecompensa(recompensaDoLogin(loginsNoMes + 1, nivel))}
         </button>
       )}
-      <p className="mt-[.4em] text-[.72em] text-n500">Dias 7, 14, 21 e 28 têm prêmio especial (o dia 28 dá 100 Ultra Balls e 5 Max Revives).</p>
+      <p className="mt-[.4em] text-[.72em] text-menu-muted">Dias 7, 14, 21 e 28 têm prêmio especial (o dia 28 dá 100 Ultra Balls e 5 Max Revives).</p>
 
-      <h3 className="mt-[.8em] mb-[.3em] text-[.85em] font-medium text-n200">Metas do dia · {abates} abates hoje</h3>
-      <p className="mb-[.4em] text-[.75em] text-n500">Contam os abates desde a sua primeira entrada do dia. Viram à meia-noite (Brasília).</p>
+      <h3 className="mt-[.8em] mb-[.3em] text-[.85em] font-medium text-menu-ink">Metas do dia · {abates} abates hoje</h3>
+      <p className="mb-[.4em] text-[.75em] text-menu-muted">Contam os abates desde a sua primeira entrada do dia. Viram à meia-noite (Brasília).</p>
       <div className="flex flex-col gap-[.4em]">
         {METAS_DO_DIA.map(m => {
           const feita = coletados.has(m.id)
           const pronta = !feita && abates >= m.alvo
           const r = recompensaDaMeta(m.id, nivel)
           return (
-            <div key={m.id} className="rounded-[.5em] border border-n800 p-[.45em] text-[.8em]">
+            <div key={m.id} className="rounded-[.5em] border border-menu-line p-[.45em] text-[.8em]">
               <div className="flex items-baseline gap-[.4em]">
-                <span className="font-medium text-n100">Vença {m.alvo} selvagens</span>
-                <span className="ml-auto tabular-nums text-n300">{feita ? 'Coletada' : `${Math.min(abates, m.alvo)}/${m.alvo}`}</span>
+                <span className="font-medium text-menu-ink">Vença {m.alvo} selvagens</span>
+                <span className="ml-auto tabular-nums text-menu-ink">{feita ? 'Coletada' : `${Math.min(abates, m.alvo)}/${m.alvo}`}</span>
               </div>
               <Meter pct={feita ? 100 : abates / m.alvo * 100} height=".28em" color={feita || pronta ? 'var(--color-ok)' : 'var(--color-primary)'} className="my-[.25em]" />
               <div className="flex items-center gap-[.4em]">
-                <span className="min-w-0 flex-1 truncate text-[.9em] text-n400">{textoDaRecompensa(r)}</span>
+                <span className="min-w-0 flex-1 truncate text-[.9em] text-menu-muted">{textoDaRecompensa(r)}</span>
                 {pronta && (
                   <button type="button" disabled={coletando != null} onClick={acao(m.id, r)}
                     className="jogo-botao shrink-0 rounded-[.4em] bg-ok px-[.6em] py-[.25em] font-bold text-n950 disabled:opacity-60">

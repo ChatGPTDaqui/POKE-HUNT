@@ -39,7 +39,7 @@ function Identidade({ item, owned }: { item: GeneratedItem; owned: number }) {
       </ItemTooltip>
       <div className="min-w-0 flex-1">
         <div className="break-words font-medium">{item.name}</div>
-        <div className="text-[.78em] text-n400">
+        <div className="text-[.78em] text-menu-muted">
           <span className="block text-gold">{fmt.format(item.buyPrice)} ouro</span>
           Na mochila: {fmt.format(owned)}
         </div>
@@ -103,7 +103,7 @@ export function TransacaoCompra({
 export function FichaCompra(props: AcoesCompra) {
   return (
     <div className="flex flex-col gap-[.5em]">
-      <div className="text-[.85em] text-n400">
+      <div className="text-[.85em] text-menu-muted">
         tem {fmt.format(props.owned)} ·{' '}
         <span className="text-gold">{fmt.format(props.item.buyPrice)}</span> cada
       </div>

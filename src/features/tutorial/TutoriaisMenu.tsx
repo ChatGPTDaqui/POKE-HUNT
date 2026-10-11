@@ -15,7 +15,7 @@ export function TutoriaisMenu() {
       {TUTORIAIS.map((tutorial) => (
         <GameCard key={tutorial.id}>
           <div className="flex items-start gap-[.5em]">
-            <GraduationCap className="mt-[.15em] shrink-0 text-[1.4em] text-n300" />
+            <GraduationCap className="mt-[.15em] shrink-0 text-[1.4em] text-menu-ink" />
             <div className="flex min-w-0 flex-1 flex-col gap-[.3em]">
               <div className="flex items-center gap-[.4em]">
                 <span className="font-semibold">{tutorial.titulo}</span>
@@ -25,12 +25,12 @@ export function TutoriaisMenu() {
                   </span>
                 )}
               </div>
-              <p className="text-[.82em] leading-[1.45] text-n300">{tutorial.resumo}</p>
+              <p className="text-[.82em] leading-[1.45] text-menu-ink">{tutorial.resumo}</p>
               <div className="mt-[.2em] flex items-center gap-[.5em]">
                 <GameButton onClick={() => abrir(tutorial.id)}>
                   {vistos.has(tutorial.id) ? 'Rever' : 'Ver agora'}
                 </GameButton>
-                <span className="text-[.75em] text-n400">{tutorial.passos.length} passos</span>
+                <span className="text-[.75em] text-menu-muted">{tutorial.passos.length} passos</span>
               </div>
             </div>
           </div>

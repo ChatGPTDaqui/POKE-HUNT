@@ -78,7 +78,7 @@ export function CutsceneDeEntrada() {
       rodape={demorou
         ? <BotaoDeSair aoSair={() => useCutsceneStore.getState().fechar(cena.id)} />
         : (
-            <div className="flex items-center gap-[.5em] text-[.85em] font-semibold tracking-[.14em] text-n300 uppercase">
+            <div className="flex items-center gap-[.5em] text-[.85em] font-semibold tracking-[.14em] text-menu-ink uppercase">
               <CircleNotch className="animate-spin" aria-hidden />
               Carregando
             </div>
@@ -103,17 +103,17 @@ export function CutsceneDeEntrada() {
 function BotaoDeSair({ aoSair }: { aoSair: () => void }) {
   return (
     <div className="pointer-events-auto flex flex-col items-center gap-[.5em]">
-      <span className="text-[.78em] tracking-[.1em] text-n400">
+      <span className="text-[.78em] tracking-[.1em] text-menu-muted">
         Está demorando mais que o normal.
       </span>
       <button
         type="button"
         onClick={aoSair}
         className={
-          'jogo-botao flex cursor-pointer items-center gap-[.45em] rounded-[.5em] border border-n600 '
-          + 'bg-n900/80 px-[1em] py-[.45em] text-[.85em] font-bold tracking-[.12em] text-n100 uppercase '
-          + 'transition-colors hover:border-n400 hover:bg-n800 '
-          + 'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none'
+          'jogo-botao flex cursor-pointer items-center gap-[.45em] rounded-[.5em] border border-menu-line '
+          + 'bg-menu-card/80 px-[1em] py-[.45em] text-[.85em] font-bold tracking-[.12em] text-menu-ink uppercase '
+          + 'transition-colors hover:border-menu-line hover:bg-menu-wash '
+          + 'focus-visible:ring-2 focus-visible:ring-menu-brand focus-visible:outline-none'
         }
       >
         <SignOut aria-hidden />

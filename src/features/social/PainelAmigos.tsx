@@ -46,7 +46,7 @@ export function PainelAmigos({
         </SectionLabel>
 
         {amigos.length === 0 && (
-          <p className="mt-[.3em] text-n400">
+          <p className="mt-[.3em] text-menu-muted">
             Voce ainda nao tem amigos. Mande um pedido pelo nick acima.
           </p>
         )}
@@ -60,14 +60,14 @@ export function PainelAmigos({
                 key={a.userId}
                 className={cn(
                   'flex flex-wrap items-center gap-[.5em] p-[.45em]',
-                  ativo && 'border-primary',
+                  ativo && 'border-menu-brand',
                 )}
                 onClick={() => onSelecionar(a)}
               >
                 <span
                   aria-hidden
                   title={a.online ? 'Online' : 'Offline'}
-                  className={cn('h-[.55em] w-[.55em] shrink-0 rounded-full', a.online ? 'bg-ok' : 'bg-n600')}
+                  className={cn('h-[.55em] w-[.55em] shrink-0 rounded-full', a.online ? 'bg-ok' : 'bg-menu-card')}
                 />
                 {/* PH-548: foto do amigo antes do POKE ativo. */}
                 <AvatarDoTreinador userId={a.userId} tamanho={2} />
@@ -80,12 +80,12 @@ export function PainelAmigos({
                   <div className="flex flex-wrap items-center gap-[.35em]">
                     <b className="font-medium">{a.nome}</b>
                     {a.naoLidas > 0 && (
-                      <span className="rounded-full bg-primary px-[.4em] text-[.7em] text-background">
+                      <span className="rounded-full bg-menu-brand px-[.4em] text-[.7em] text-menu-ink">
                         {a.naoLidas}
                       </span>
                     )}
                   </div>
-                  <div className="text-[.75em] text-n400">
+                  <div className="text-[.75em] text-menu-muted">
                     Treinador Nv {a.nivel}
                     {especie && a.pokeAtivo && ` · ${especie.name} Nv ${a.pokeAtivo.nivel}`}
                   </div>
@@ -158,9 +158,9 @@ export function PainelAmigos({
             {bloqueados.map((b) => (
               <div
                 key={b.userId}
-                className="flex items-center justify-between rounded-[.45em] border border-n800 px-[.6em] py-[.3em] text-[.85em]"
+                className="flex items-center justify-between rounded-[.45em] border border-menu-line px-[.6em] py-[.3em] text-[.85em]"
               >
-                <span className="text-n300">{b.nome}</span>
+                <span className="text-menu-ink">{b.nome}</span>
                 <GameButton variant="ghost" disabled={ocupado} onClick={() => onDesbloquear(b)}>
                   Desbloquear
                 </GameButton>

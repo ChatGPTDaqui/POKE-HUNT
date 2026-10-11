@@ -94,12 +94,12 @@ export function BestiarioMenu() {
   return (
     <div className="flex flex-col gap-[.55em]">
       <div className="flex flex-wrap items-center gap-[.65em]">
-        <div className="flex h-[3.4em] w-[3.4em] shrink-0 items-center justify-center rounded-full border-2 border-primary font-medium text-n200">
+        <div className="flex h-[2.1em] min-w-[2.6em] shrink-0 items-center justify-center rounded-[.5em] border border-menu-line bg-menu-wash px-[.3em] font-mono text-menu-ink">
           {pctCompleto}%
         </div>
         <div>
           <div className="font-medium">{resumo.completos} / {resumo.total} completos</div>
-          <div className="text-[.78em] text-n500">
+          <div className="text-[.78em] text-menu-muted">
             {resumo.emProgresso} em progresso · {fmt.format(resumo.abates)} abates no total
           </div>
         </div>
@@ -132,8 +132,8 @@ export function BestiarioMenu() {
                 type="button"
                 onClick={() => setSelectedId(species.id)}
                 className={cn(
-                  'relative flex cursor-pointer flex-col items-center gap-[.3em] rounded-[.6em] border bg-n900 px-[.3em] py-[.6em] font-[inherit]',
-                  selecionado ? 'border-primary' : p.completo ? 'border-gold' : 'border-n800 hover:border-primary',
+                  'relative flex cursor-pointer flex-col items-center gap-[.3em] rounded-[.6em] border bg-menu-card px-[.3em] py-[.6em] font-[inherit]',
+                  selecionado ? 'border-menu-brand' : p.completo ? 'border-gold' : 'border-menu-line hover:border-menu-brand',
                 )}
               >
                 {p.completo && (
@@ -145,11 +145,11 @@ export function BestiarioMenu() {
                   <span className="h-[2.8em] w-[2.8em] rounded-[.5em]" style={{ background: species.color }} />
                 )}
                 <span className="max-w-full truncate text-[.78em] font-medium">{species.name}</span>
-                <span className="text-[.72em] tabular-nums text-n400">{fmt.format(p.total)}</span>
+                <span className="text-[.72em] tabular-nums text-menu-muted">{fmt.format(p.total)}</span>
               </button>
             )
           })}
-          {visiveis.length === 0 && <p className="text-n500">Nenhum Pokemon corresponde aos filtros.</p>}
+          {visiveis.length === 0 && <p className="text-menu-muted">Nenhum Pokemon corresponde aos filtros.</p>}
         </div>
 
         {/* No celular o detalhe NAO fica embaixo da grade: com 226 especies em
@@ -184,7 +184,7 @@ function DetalheEspecie({
 }) {
   if (!species) {
     return (
-      <div className="self-start rounded-[.7em] border border-dashed border-n700 p-[.7em] text-[.85em] text-n500">
+      <div className="self-start rounded-[.7em] border border-dashed border-menu-line p-[.7em] text-[.85em] text-menu-muted">
         Escolha um Pokemon na grade para ver o progresso dele.
       </div>
     )
@@ -194,7 +194,7 @@ function DetalheEspecie({
   const proximoLimiar = STAGE_THRESHOLDS[p.stage]
 
   return (
-    <div className="flex flex-col gap-[.45em] self-start rounded-[.7em] border border-n800 bg-n900 p-[.6em]">
+    <div className="flex flex-col gap-[.45em] self-start rounded-[.7em] border border-menu-line bg-menu-card p-[.6em]">
       {!semNome && <div className="text-[1.05em] font-medium">{species.name}</div>}
       <div className="flex gap-[.3em]">
         <TypeChip type={species.type} />
@@ -209,7 +209,7 @@ function DetalheEspecie({
       </div>
 
       {proximoLimiar != null ? (
-        <div className="text-[.78em] text-n400">
+        <div className="text-[.78em] text-menu-muted">
           Proximo: faltam{' '}
           <b className="font-medium text-warn">{fmt.format(proximoLimiar - p.total)}</b>{' '}
           derrotas para o Estagio {p.stage + 1}
@@ -226,24 +226,24 @@ function DetalheEspecie({
         const atual = p.stage === i
         const concluido = p.stage > i
         return (
-          <div key={limiar} className="rounded-[.5em] border border-n800 bg-background p-[.5em]">
+          <div key={limiar} className="rounded-[.5em] border border-menu-line bg-menu-paper p-[.5em]">
             <div className="flex items-center gap-[.5em] text-[.85em]">
               <span
                 className="flex h-[1.4em] w-[1.4em] items-center justify-center rounded-full border text-[.8em]"
                 style={{
-                  color: concluido ? 'var(--color-gold)' : atual ? 'var(--color-n200)' : 'var(--color-n500)',
-                  borderColor: concluido ? 'var(--color-gold)' : atual ? 'var(--color-n200)' : 'var(--color-n600)',
+                  color: concluido ? 'var(--journey-warning, var(--color-gold))' : atual ? 'var(--color-menu-ink)' : 'var(--color-menu-muted)',
+                  borderColor: concluido ? 'var(--journey-warning, var(--color-gold))' : atual ? 'var(--color-menu-ink)' : 'var(--color-menu-line)',
                 }}
               >
                 {i + 1}
               </span>
               <b className="flex-1 font-medium">Estágio {i + 1}</b>
-              <span className="text-[.8em] text-n500">
+              <span className="text-[.8em] text-menu-muted">
                 {concluido ? 'CONCLUIDO' : atual ? 'ATUAL' : 'BLOQUEADO'}
               </span>
             </div>
             <Meter pct={pct} height=".3em" color="var(--color-primary)" className="mt-[.4em]" />
-            <div className="mt-[.2em] text-right text-[.7em] text-n500">
+            <div className="mt-[.2em] text-right text-[.7em] text-menu-muted">
               {fmt.format(Math.min(p.total, limiar))} / {fmt.format(limiar)}
             </div>
           </div>
@@ -254,7 +254,7 @@ function DetalheEspecie({
           Runas como recompensa de estagio, mas nao ha economia de token no jogo
           — nenhum sistema concede nem consome. Mostrar um saldo aqui seria um
           numero que nao faz nada. */}
-      <p className="text-[.75em] text-n500">
+      <p className="text-[.75em] text-menu-muted">
         As recompensas de estagio (tokens e Runas) ainda nao existem no jogo — por enquanto o Bestiario so
         acompanha o progresso real de abates.
       </p>
@@ -264,8 +264,8 @@ function DetalheEspecie({
 
 function Caixa({ label, valor }: { label: string; valor: string }) {
   return (
-    <div className="rounded-[.4em] border border-n800 bg-background px-[.5em] py-[.4em]">
-      <div className="text-[.85em] text-n500">{label}</div>
+    <div className="rounded-[.4em] border border-menu-line bg-menu-paper px-[.5em] py-[.4em]">
+      <div className="text-[.85em] text-menu-muted">{label}</div>
       <b className="font-medium tabular-nums">{valor}</b>
     </div>
   )

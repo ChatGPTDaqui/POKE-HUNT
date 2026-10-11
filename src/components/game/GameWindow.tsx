@@ -13,7 +13,7 @@ import { X } from '@phosphor-icons/react'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import { useWindowResize } from '@/hooks/useWindowResize'
 import { useFecharComEsc } from '@/hooks/useFecharComEsc'
-import type { WindowKey } from '@/stores/uiStore'
+import { useUiStore, type WindowKey } from '@/stores/uiStore'
 import { GameIconButton } from './controls'
 import { cn } from '@/lib/utils'
 
@@ -56,6 +56,9 @@ export function GameWindow({
 }: GameWindowProps) {
   const { pos, onPointerDown } = useWindowDrag(winKey)
   const { onPointerDownBorda } = useWindowResize(winKey)
+  const trilhoHeight = useUiStore((s) => s.trilhoHeight)
+  const navHeight = useUiStore((s) => s.navHeight)
+  const painelJornada = appearance === 'journey' && winKey === 'panel'
 
   // A largura padrao e escrita UMA vez, por ref, e nunca entra no `style`
   // reativo. Se entrasse, todo re-render que mudasse a posicao (ou seja, cada
@@ -129,7 +132,10 @@ export function GameWindow({
         ref={aplicarLarguraInicial}
         data-window={winKey}
         data-appearance={appearance}
-        style={{ ...style, zIndex }}
+        style={{ ...style, zIndex, ...(painelJornada ? {
+          ...(!pos ? { top: `calc(${trilhoHeight}px + .5em)` } : {}),
+          maxHeight: `calc(100% - ${trilhoHeight + navHeight}px - 1.5em)`,
+        } : {}) }}
         className={cn(
           // `min(86vh, 100vh - 12em)`: 86vh e o teto do handoff, mas em tela
           // baixa ele encosta na faixa do menu inferior — que fica ACIMA desta

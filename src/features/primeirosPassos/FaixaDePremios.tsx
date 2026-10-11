@@ -41,13 +41,13 @@ export function FaixaDePremios() {
       <>
         {/* Montada e escondida: o efeito do dia (abrir, virar à meia-noite) vive nela. */}
         <FaixaDoDiario esconder />
-        <div className="pointer-events-auto flex w-[min(100%,24em)] items-center gap-[.4em] rounded-b border-x border-b border-ok/60 bg-n900/92 px-[.55em] py-[.3em] text-[.78em]">
+        <div className="pointer-events-auto flex w-[min(100%,24em)] items-center gap-[.4em] rounded-b border-x border-b border-ok/60 bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]">
           <button type="button" onClick={() => useDiarioStore.getState().abrirPainel()} className="flex min-w-0 flex-1 items-center gap-[.4em] text-left"
             aria-label={`${total} prêmios para coletar. Abrir o Diário`}>
             <Gift weight="fill" className="shrink-0 text-[1.2em] text-warn" aria-hidden />
             <div className="min-w-0 flex-1">
-              <div className="truncate font-medium text-n100">{total} prêmios para coletar</div>
-              <div className="truncate text-[.9em] text-n400">{textoDaRecompensa(soma)}</div>
+              <div className="truncate font-medium text-menu-ink">{total} prêmios para coletar</div>
+              <div className="truncate text-[.9em] text-menu-muted">{textoDaRecompensa(soma)}</div>
             </div>
           </button>
           <button type="button" disabled={coletando}

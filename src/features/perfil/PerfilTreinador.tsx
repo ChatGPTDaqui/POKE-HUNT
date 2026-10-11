@@ -111,30 +111,30 @@ export function PerfilTreinador() {
       onClose={() => setAberto(false)}
       title="Perfil do Treinador"
       header={
-        <div className="flex items-center gap-[.6em] border-b border-n800 px-[.65em] pb-[.6em]">
+        <div className="flex items-center gap-[.6em] border-b border-menu-line px-[.65em] pb-[.6em]">
           {/* PH-548: o retrato abre o seletor de foto. */}
           <button
             type="button"
             aria-label="Trocar foto de perfil"
             aria-expanded={escolhendoFoto}
             onClick={() => setEscolhendoFoto((v) => !v)}
-            className="flex h-[4.6em] w-[4.6em] shrink-0 items-center justify-center rounded-[.7em] border border-n700 bg-n900 hover:border-n500"
+            className="flex h-[4.6em] w-[4.6em] shrink-0 items-center justify-center rounded-[.7em] border border-menu-line bg-menu-card hover:border-menu-line"
           >
             <AvatarDoTreinador userId={meuId} tamanho={4.2} />
           </button>
           <div className="flex min-w-0 flex-1 flex-col gap-[.25em]">
             <div className="truncate text-[1.15em] font-semibold">{trainer.name}</div>
-            <div className="flex items-center gap-[.5em] text-[.8em] text-n300">
+            <div className="flex items-center gap-[.5em] text-[.8em] text-menu-ink">
               <span>Nível {trainer.level}</span>
               {remoto && (
                 <span className="flex items-center gap-[.25em] text-gold">
                   <Trophy className="text-[1em]" /> Rank #{remoto.rank}
-                  <span className="text-n500">de {remoto.totalJogadores}</span>
+                  <span className="text-menu-muted">de {remoto.totalJogadores}</span>
                 </span>
               )}
             </div>
             <Meter pct={expPct} height=".4em" color="var(--color-gold)" />
-            <div className="text-[.7em] text-n500">
+            <div className="text-[.7em] text-menu-muted">
               {Math.floor(progresso.into).toLocaleString('pt-BR')} / {Math.floor(progresso.needed).toLocaleString('pt-BR')} XP
             </div>
           </div>
@@ -191,8 +191,8 @@ export function PerfilTreinador() {
             <GameCard>
               <div className="flex flex-col gap-[.45em]">
                 <div className="flex items-center gap-[.45em]">
-                  <TShirt className="text-[1.3em] text-n400" />
-                  <span className="text-[.75em] text-n400">Visual do seu treinador no campo. Vale na hora.</span>
+                  <TShirt className="text-[1.3em] text-menu-muted" />
+                  <span className="text-[.75em] text-menu-muted">Visual do seu treinador no campo. Vale na hora.</span>
                 </div>
                 {meuId && <SeletorDeSkin userId={meuId} />}
               </div>
@@ -227,7 +227,7 @@ export function PerfilTreinador() {
           {carregandoCapturas ? (
             <Carregando texto="Carregando suas capturas..." />
           ) : capturas.length === 0 ? (
-            <div className="p-[1.2em] text-center text-[.85em] text-n400">
+            <div className="p-[1.2em] text-center text-[.85em] text-menu-muted">
               Nenhuma captura registrada ainda. Ligue o Auto-Catch no painel do Bot.
             </div>
           ) : (
@@ -236,7 +236,7 @@ export function PerfilTreinador() {
               const url = faceIconUrl(poke.speciesId, poke.isShiny)
               const raridade = rarityOf(poke)
               return (
-                <div key={poke.uid} className="flex items-center gap-[.55em] rounded-[.45em] border border-n800 px-[.55em] py-[.35em]">
+                <div key={poke.uid} className="flex items-center gap-[.55em] rounded-[.45em] border border-menu-line px-[.55em] py-[.35em]">
                   {url && (
                     <img
                       src={url}
@@ -248,10 +248,10 @@ export function PerfilTreinador() {
                   <span className="min-w-0 flex-1 truncate text-[.88em]">
                     {poke.isShiny && <span className="text-shiny">✨ </span>}
                     {species?.name ?? poke.speciesId}
-                    <span className="text-n500"> · {raridade.label}</span>
+                    <span className="text-menu-muted"> · {raridade.label}</span>
                   </span>
-                  <span className="shrink-0 text-[.75em] text-n400">Lv {poke.level}</span>
-                  <span className="shrink-0 text-[.7em] text-n500">
+                  <span className="shrink-0 text-[.75em] text-menu-muted">Lv {poke.level}</span>
+                  <span className="shrink-0 text-[.7em] text-menu-muted">
                     {poke.capturedAt ? new Date(poke.capturedAt).toLocaleDateString('pt-BR') : ''}
                   </span>
                 </div>
@@ -266,9 +266,9 @@ export function PerfilTreinador() {
           <SectionLabel>Especialidades</SectionLabel>
           <GameCard>
             <div className="flex items-start gap-[.45em]">
-              <Star className="mt-[.15em] shrink-0 text-[1.4em] text-n400" />
-              <div className="flex flex-col gap-[.3em] text-[.82em] text-n300">
-                <span className="font-medium text-foreground">Ainda não implementado</span>
+              <Star className="mt-[.15em] shrink-0 text-[1.4em] text-menu-muted" />
+              <div className="flex flex-col gap-[.3em] text-[.82em] text-menu-ink">
+                <span className="font-medium text-menu-ink">Ainda não implementado</span>
                 <span>
                   Especialidades seriam bônus permanentes escolhidos pelo treinador (mais ouro, mais chance
                   de captura, mais EXP). Nada no save guarda escolha desse tipo e nenhuma fórmula lê um
@@ -288,10 +288,10 @@ function Estatistica({ icon, rotulo, valor, cor }: {
   icon: React.ReactNode; rotulo: string; valor: string; cor?: string
 }) {
   return (
-    <div className="flex items-center gap-[.5em] rounded-[.45em] border border-n800 px-[.55em] py-[.45em]">
-      <span className={cn('shrink-0 text-[1.2em]', cor ?? 'text-n400')}>{icon}</span>
+    <div className="flex items-center gap-[.5em] rounded-[.45em] border border-menu-line px-[.55em] py-[.45em]">
+      <span className={cn('shrink-0 text-[1.2em]', cor ?? 'text-menu-muted')}>{icon}</span>
       <div className="flex min-w-0 flex-col">
-        <span className="truncate text-[.7em] tracking-[.04em] text-n500 uppercase">{rotulo}</span>
+        <span className="truncate text-[.7em] tracking-[.04em] text-menu-muted uppercase">{rotulo}</span>
         <span className={cn('truncate font-mono text-[.95em] font-bold', cor)}>{valor}</span>
       </div>
     </div>

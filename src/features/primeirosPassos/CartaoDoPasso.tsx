@@ -98,19 +98,19 @@ export function CartaoDoPasso() {
   return (
     <div
       className={cn(
-        'pointer-events-auto flex w-[min(100%,24em)] items-stretch gap-[.4em] rounded-b border-x border-b bg-n900/92 px-[.55em] py-[.3em] text-[.78em]',
-        pronto ? 'border-ok/60' : 'border-n800',
+        'pointer-events-auto flex w-[min(100%,24em)] items-stretch gap-[.4em] rounded-b border-x border-b bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]',
+        pronto ? 'border-ok/60' : 'border-menu-line',
       )}
     >
       <button type="button" onClick={() => abrirDestino(atual)} className="min-w-0 flex-1 text-left"
         aria-label={`Primeiros Passos ${indice + 1} de ${PRIMEIROS_PASSOS.length}: ${atual.titulo}. ${atual.dica}`}>
         <div className="flex items-baseline gap-[.4em]">
-          <span className="shrink-0 rounded-[.3em] bg-primary/20 px-[.3em] text-[.8em] font-bold uppercase text-primary">Passo {indice + 1}</span>
-          <span className="truncate font-medium text-n100">{atual.titulo}</span>
-          <span className="ml-auto shrink-0 tabular-nums text-n300">{progresso}/{atual.alvo}</span>
+          <span className="shrink-0 rounded-[.3em] bg-menu-brand/20 px-[.3em] text-[.8em] font-bold uppercase text-menu-brand">Passo {indice + 1}</span>
+          <span className="truncate font-medium text-menu-ink">{atual.titulo}</span>
+          <span className="ml-auto shrink-0 tabular-nums text-menu-ink">{progresso}/{atual.alvo}</span>
         </div>
         <Meter pct={progresso / atual.alvo * 100} height=".28em" color={pronto ? 'var(--color-ok)' : 'var(--color-primary)'} className="my-[.25em]" />
-        <div className="flex items-center gap-[.3em] text-[.9em] text-n400">
+        <div className="flex items-center gap-[.3em] text-[.9em] text-menu-muted">
           <Gift weight="fill" className="shrink-0 text-warn" aria-hidden />
           <span className="truncate">{pronto ? 'Pronto! Colete a recompensa' : textoDaRecompensa(atual.recompensa)}</span>
         </div>
@@ -119,7 +119,7 @@ export function CartaoDoPasso() {
             <LockSimple weight="fill" className="shrink-0" aria-hidden />{aviso.texto}
           </p>
         )}
-        {!pronto && !avisoVisivel && <p className="mt-[.15em] line-clamp-2 text-[.9em] text-n500">{(emCampo && atual.dicaEmCampo) || atual.dica}</p>}
+        {!pronto && !avisoVisivel && <p className="mt-[.15em] line-clamp-2 text-[.9em] text-menu-muted">{(emCampo && atual.dicaEmCampo) || atual.dica}</p>}
       </button>
       {pronto && (
         <button type="button" disabled={coletando}

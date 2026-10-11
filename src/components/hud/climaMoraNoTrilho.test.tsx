@@ -59,11 +59,14 @@ describe('o clima nao volta pra fileira de chips (PH-285)', () => {
     expect(fonteDoHudLayer).not.toMatch(/^import .*ClimaChip.*$/m)
   })
 
-  it('StatusRail renderiza o clima nos DOIS regimes — com nome e so o simbolo', () => {
+  it('o contexto da hunt reúne clima e local ao lado dos Companheiros, sem duplicar no topo', () => {
     const fonte = codigo(fonteDoStatusRail)
     // No compacto entra so o simbolo; na faixa central entra o chip inteiro.
-    expect(fonte).toContain('<ClimaChip embutido soIcone />')
+    expect(fonte).toContain('export function ContextoDaHunt()')
+    expect(fonte.match(/<ClimaChip /g)).toHaveLength(1)
     expect(fonte).toContain('<ClimaChip embutido />')
+    expect(codigo(fonteDoHudLayer)).toContain('<ContextoDaHunt />')
+    expect(codigo(fonteDoHudLayer)).toContain('Companheiros')
   })
 })
 

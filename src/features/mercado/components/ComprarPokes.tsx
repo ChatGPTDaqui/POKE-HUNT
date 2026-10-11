@@ -42,7 +42,7 @@ function FiltroToggle({
       onClick={onClick}
       className={cn(
         'flex cursor-pointer items-center gap-[.3em] rounded-full border px-[.6em] py-[.25em] text-[.8em] transition-colors',
-        ativo ? 'border-current bg-n800 font-medium' : 'border-n700 text-n500 hover:border-n600',
+        ativo ? 'border-current bg-menu-wash font-medium' : 'border-menu-line text-menu-muted hover:border-menu-line',
       )}
       style={ativo && cor ? { color: cor } : undefined}
     >
@@ -116,7 +116,7 @@ function LinhaDeLeilao({
 
   return (
     <>
-      <span className="flex flex-col text-[.78em] text-n400">
+      <span className="flex flex-col text-[.78em] text-menu-muted">
         <span className="flex items-center gap-[.25em] text-warn">
           <Gavel weight="fill" /> Leilão · <TempoRestante expiraEm={anuncio.expira_em} />
         </span>
@@ -289,7 +289,7 @@ export function ComprarPokes() {
         </FiltroToggle>
       </div>
 
-      <div className="flex flex-wrap items-center gap-[.5em] text-[.8em] text-n400">
+      <div className="flex flex-wrap items-center gap-[.5em] text-[.8em] text-menu-muted">
         <label className="flex items-center gap-[.3em]">
           Nivel min
           <GameInput
@@ -330,7 +330,7 @@ export function ComprarPokes() {
           de 1000 linhas o `.length` do PostgREST corta e nao avisa, e a vitrine
           pararia de mostrar anuncio parecendo que o Mercado esta vazio. */}
       {total > 0 && (
-        <div className="flex items-center justify-between text-[.78em] text-n500">
+        <div className="flex items-center justify-between text-[.78em] text-menu-muted">
           <span>
             {inicio}–{fim} de {fmt.format(total)}
           </span>
@@ -338,7 +338,7 @@ export function ComprarPokes() {
         </div>
       )}
 
-      {filtrados.length === 0 && <p className="text-n500">Nenhum POKE a venda com esses filtros.</p>}
+      {filtrados.length === 0 && <p className="text-menu-muted">Nenhum POKE a venda com esses filtros.</p>}
 
       {filtrados.map((a) => {
         const species = SPECIES[a.species_id]
@@ -356,12 +356,12 @@ export function ComprarPokes() {
                 <b className={cn('font-medium', a.is_shiny && 'text-shiny')}>
                   {a.is_shiny ? '✨ ' : ''}{species?.name ?? a.species_id}
                 </b>
-                <span className="text-n400">Lv{a.level}</span>
+                <span className="text-menu-muted">Lv{a.level}</span>
                 <span className="text-[.78em]" style={cor ? { color: cor } : undefined}>
                   {RARITIES[a.rarity as RarityKey]?.label ?? a.rarity}
                 </span>
               </div>
-              <div className="text-[.75em] text-n500">
+              <div className="text-[.75em] text-menu-muted">
                 IV {a.iv_percent}% · vendedor{' '}
                 {/* PH-119: o nome do vendedor era texto morto. Vira o caminho
                     pro perfil dele, e de lá pra conversa — negociar preço era
@@ -376,12 +376,12 @@ export function ComprarPokes() {
                 {/* PH-548: a foto do vendedor ao lado do nome, em linha. */}
                 <AvatarDoTreinador userId={a.seller_id} tamanho={1.4} className="mr-[.25em] align-middle" />
                 {a.seller_id === meuId ? (
-                  <span className="text-n400">{a.vendedor} (você)</span>
+                  <span className="text-menu-muted">{a.vendedor} (você)</span>
                 ) : (
                   <>
                     <button
                       type="button"
-                      className="underline decoration-dotted underline-offset-2 transition-colors hover:text-n200"
+                      className="underline decoration-dotted underline-offset-2 transition-colors hover:text-menu-ink"
                       onClick={() => abrirPerfilPublico({ userId: a.seller_id, nome: a.vendedor ?? '?' })}
                     >
                       {a.vendedor}
@@ -395,7 +395,7 @@ export function ComprarPokes() {
                     <button
                       type="button"
                       aria-label={`Negociar ${SPECIES[a.species_id]?.name ?? a.species_id} com ${a.vendedor ?? 'o vendedor'}`}
-                      className="inline-flex items-center gap-[.2em] text-primary underline decoration-dotted underline-offset-2 transition-colors hover:text-n200"
+                      className="inline-flex items-center gap-[.2em] text-menu-brand underline decoration-dotted underline-offset-2 transition-colors hover:text-menu-ink"
                       onClick={() => abrirSocialCom({
                         userId: a.seller_id,
                         nick: a.vendedor ?? '?',
@@ -413,7 +413,7 @@ export function ComprarPokes() {
                   outros jogadores e nao tem como saber que ele foi combinado
                   nem que ninguem vai passar na frente. */}
               {a.reservado_para && a.reservado_para === meuId && (
-                <span className="mt-[.15em] flex w-fit items-center gap-[.2em] rounded-full bg-primary/15 px-[.4em] text-[.72em] text-primary">
+                <span className="mt-[.15em] flex w-fit items-center gap-[.2em] rounded-full bg-menu-brand/15 px-[.4em] text-[.72em] text-menu-brand">
                   <BookmarkSimple aria-hidden weight="fill" /> reservado para você
                 </span>
               )}
@@ -428,7 +428,7 @@ export function ComprarPokes() {
               />
             ) : a.apenas_oferta ? (
               <>
-                <span className="flex flex-col text-[.78em] text-n400">
+                <span className="flex flex-col text-[.78em] text-menu-muted">
                   <span className="flex items-center gap-[.25em] text-warn">
                     <Gavel weight="fill" /> Somente lance
                   </span>
@@ -488,7 +488,7 @@ export function ComprarPokes() {
               {precoAberto === a.id ? 'Fechar preço' : 'Preço'}
             </GameButton>
             {precoAberto === a.id && (
-              <div className="w-full border-t border-n700 pt-[.4em]">
+              <div className="w-full border-t border-menu-line pt-[.4em]">
                 <HistoricoDePreco speciesId={a.species_id} currency={a.currency} />
               </div>
             )}
@@ -508,7 +508,7 @@ export function ComprarPokes() {
           >
             ← Anterior
           </GameButton>
-          <span className="text-[.8em] tabular-nums text-n400">
+          <span className="text-[.8em] tabular-nums text-menu-muted">
             {pagina + 1} / {fmt.format(paginas)}
           </span>
           <GameButton

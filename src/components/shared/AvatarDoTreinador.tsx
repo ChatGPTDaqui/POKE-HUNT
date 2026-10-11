@@ -32,7 +32,7 @@ export function AvatarDoTreinador({ userId, avatar, tamanho = 2, className = '',
   const estilo = { width: `${tamanho}em`, height: `${tamanho}em` }
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[.5em] bg-n800 text-n300 ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[.5em] bg-menu-wash text-menu-ink ${className}`}
       style={estilo}
       aria-hidden={nome ? undefined : true}
       role={nome ? 'img' : undefined}

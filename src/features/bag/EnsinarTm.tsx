@@ -56,33 +56,33 @@ export function EnsinarTm({ itemId }: { itemId: string }) {
 
   return <div className="flex flex-col gap-[.4em]">
     {ability && (
-      <section aria-label={`Detalhes de ${ability.name}`} className="overflow-hidden rounded-[.4em] border border-n700 bg-n900">
-        <div className="flex flex-wrap items-center gap-[.4em] border-b border-n800 px-[.55em] py-[.4em]">
+      <section aria-label={`Detalhes de ${ability.name}`} className="overflow-hidden rounded-[.4em] border border-menu-line bg-menu-card">
+        <div className="flex flex-wrap items-center gap-[.4em] border-b border-menu-line px-[.55em] py-[.4em]">
           <b className="mr-auto">{ability.name}</b>
           <TypeChip type={ability.type} full />
-          <span className="text-[.78em] text-n300">{ROTULO_CATEGORIA[String(categoria)] ?? categoria}</span>
+          <span className="text-[.78em] text-menu-ink">{ROTULO_CATEGORIA[String(categoria)] ?? categoria}</span>
         </div>
-        <div className="grid grid-cols-3 gap-px bg-n800 text-center text-[.75em]">
-          <div className="bg-n900 px-[.35em] py-[.4em]"><span className="block text-n500">Dano base</span>{DANO_SEM_PODER_BASE.has(ability.id) || ability.power <= 0 ? '—' : ability.power}</div>
-          <div className="bg-n900 px-[.35em] py-[.4em]"><span className="block text-n500">Precisão</span>{isDamagingAbility(ability) ? `${ability.accuracy ?? 100}%` : '—'}</div>
-          <div className="bg-n900 px-[.35em] py-[.4em]"><span className="block text-n500">Recarga</span>{ability.cooldown != null ? `${recargaEfetivaDoGolpe(ability, selecionado?.stats.speed ?? VELOCIDADE_DE_REFERENCIA).toFixed(1)}s` : '—'}</div>
+        <div className="grid grid-cols-3 gap-px bg-menu-wash text-center text-[.75em]">
+          <div className="bg-menu-card px-[.35em] py-[.4em]"><span className="block text-menu-muted">Dano base</span>{DANO_SEM_PODER_BASE.has(ability.id) || ability.power <= 0 ? '—' : ability.power}</div>
+          <div className="bg-menu-card px-[.35em] py-[.4em]"><span className="block text-menu-muted">Precisão</span>{isDamagingAbility(ability) ? `${ability.accuracy ?? 100}%` : '—'}</div>
+          <div className="bg-menu-card px-[.35em] py-[.4em]"><span className="block text-menu-muted">Recarga</span>{ability.cooldown != null ? `${recargaEfetivaDoGolpe(ability, selecionado?.stats.speed ?? VELOCIDADE_DE_REFERENCIA).toFixed(1)}s` : '—'}</div>
         </div>
         <div className="flex flex-col gap-[.3em] px-[.55em] py-[.45em] text-[.78em]">
-          <p className="text-n300">{descricaoDoGolpe(ability)}</p>
+          <p className="text-menu-ink">{descricaoDoGolpe(ability)}</p>
           {ability.target === 'aoe' && <p className="text-sky-300">Atinge vários inimigos próximos.</p>}
-          {efeitos.length > 0 && <div className="flex flex-wrap gap-[.3em]">{efeitos.map(efeito => <span key={efeito} className="rounded-[.3em] bg-n800 px-[.4em] py-[.12em]">{efeito}</span>)}</div>}
+          {efeitos.length > 0 && <div className="flex flex-wrap gap-[.3em]">{efeitos.map(efeito => <span key={efeito} className="rounded-[.3em] bg-menu-wash px-[.4em] py-[.12em]">{efeito}</span>)}</div>}
           {aviso && <p className="text-warn">{aviso}</p>}
         </div>
       </section>
     )}
 
-    <div className="rounded-[.4em] border border-n800 px-[.55em] py-[.45em] text-[.78em] text-n300">
-      <b className="text-foreground">Como funciona:</b> a TM é consumida uma vez e o POKE aprende o golpe para sempre. Depois, abra o perfil dele e escolha o golpe entre os quatro ativos.
+    <div className="rounded-[.4em] border border-menu-line px-[.55em] py-[.45em] text-[.78em] text-menu-ink">
+      <b className="text-menu-ink">Como funciona:</b> a TM é consumida uma vez e o POKE aprende o golpe para sempre. Depois, abra o perfil dele e escolha o golpe entre os quatro ativos.
     </div>
     {erro && <p role="alert">{erro}</p>}
     {!carregada && <p>Carregando mochila…</p>}
     {motivoBloqueio && <p role="status" className="text-[.8em] text-warn">{motivoBloqueio}</p>}
-    <label className="flex flex-col gap-[.2em] text-[.78em] text-n300">
+    <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-ink">
       Quem vai aprender?
       <GameSelect aria-label="POKE que aprenderá a TM" value={uid} disabled={!carregada || !candidatos.length} onChange={e => setUid(e.target.value)}>
         <option value="">Escolha um POKE compatível</option>
@@ -94,7 +94,7 @@ export function EnsinarTm({ itemId }: { itemId: string }) {
         </optgroup>}
       </GameSelect>
     </label>
-    {selecionado && <p className="text-[.75em] text-n400">A recarga acima já considera a Velocidade deste POKE.</p>}
+    {selecionado && <p className="text-[.75em] text-menu-muted">A recarga acima já considera a Velocidade deste POKE.</p>}
     <GameButton disabled={!selecionado || Boolean(mapa) || locked || acao.pendingKey != null}
       carregando={acao.isPending('ensinar')}
       onClick={() => void acao.run('ensinar', () => pedirAcao({ tipo: 'ensinarTm', itemId, pokeUid: uid }, () => {

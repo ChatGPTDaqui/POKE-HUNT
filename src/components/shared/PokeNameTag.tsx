@@ -15,13 +15,13 @@ export type PokeNameTagTarget = Pick<PokeInstance, 'isShiny' | 'rarity'>
 export function PokeNameTag({ poke, species }: { poke: PokeNameTagTarget; species: Species }) {
   const rarity = rarityOf(poke)
   return (
-    <span className="inline-flex items-center gap-[.4em]">
+    <span className="inline-flex min-w-0 flex-wrap items-center gap-[.3em]">
       {poke.isShiny && <span aria-hidden>✨</span>}
       {/* Badge CONTORNADO, nao preenchido: um chip solido aqui competiria
           visualmente com os chips de tipo, que ficam na mesma linha. */}
       <span
         className="rounded-full border px-[.45em] py-[.1em] text-[.68em] leading-tight tracking-[.05em]"
-        style={{ color: rarity.color, borderColor: rarity.color }}
+        style={{ color: rarity.color, borderColor: rarity.color, background: 'var(--journey-data-ground, transparent)' }}
       >
         {rarity.label}
       </span>

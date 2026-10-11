@@ -11,7 +11,7 @@ export function TempoRestante({ expiraEm }: { expiraEm: string | null | undefine
   const urgente = segundos <= 60
   return (
     <span
-      className={urgente ? 'font-medium text-bad tabular-nums' : 'text-n400 tabular-nums'}
+      className={urgente ? 'font-medium text-bad tabular-nums' : 'text-menu-muted tabular-nums'}
       // O contador muda a cada segundo; sem isso um leitor de tela anunciaria
       // cada tique.
       aria-live="off"

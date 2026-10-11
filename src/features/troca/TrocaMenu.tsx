@@ -77,15 +77,15 @@ function LinhaDaOferta({ linha, aoTirar }: { linha: LinhaDaMesa; aoTirar?: () =>
   const ehPoke = linha.tipo === 'poke'
   const icone = ehPoke ? faceIconUrl(linha.speciesId ?? '') : itemIconUrl(linha.itemId ?? '')
   return (
-    <div className="flex items-center gap-[.4em] rounded-[.45em] border border-n800 bg-n900 px-[.4em] py-[.25em]">
+    <div className="flex items-center gap-[.4em] rounded-[.45em] border border-menu-line bg-menu-card px-[.4em] py-[.25em]">
       {icone ? <img src={icone} alt="" className="h-[1.5em] w-[1.5em] shrink-0 object-contain" /> : null}
       <span className="min-w-0 flex-1 truncate">
         {ehPoke ? nomeDaEspecie(linha.speciesId) : `${linha.quantidade}x ${nomeDoItem(linha.itemId)}`}
         {linha.shiny ? <span className="ml-[.3em] text-gold">shiny</span> : null}
       </span>
-      {ehPoke && linha.nivel != null ? <span className="shrink-0 text-[.8em] text-n300">Lv {linha.nivel}</span> : null}
+      {ehPoke && linha.nivel != null ? <span className="shrink-0 text-[.8em] text-menu-ink">Lv {linha.nivel}</span> : null}
       {ehPoke && linha.ivPercent != null ? (
-        <span className="shrink-0 font-mono text-[.7em] text-n500">{linha.ivPercent}% IV</span>
+        <span className="shrink-0 font-mono text-[.7em] text-menu-muted">{linha.ivPercent}% IV</span>
       ) : null}
       {aoTirar ? (
         <button
@@ -93,7 +93,7 @@ function LinhaDaOferta({ linha, aoTirar }: { linha: LinhaDaMesa; aoTirar?: () =>
           onClick={aoTirar}
           aria-label="Tirar da mesa"
           title="Tirar da mesa"
-          className="shrink-0 rounded-[.35em] p-[.15em] text-n500 transition-colors hover:bg-n800 hover:text-n100"
+          className="shrink-0 rounded-[.35em] p-[.15em] text-menu-muted transition-colors hover:bg-menu-wash hover:text-menu-ink"
         >
           <X className="text-[.95em]" />
         </button>
@@ -124,20 +124,20 @@ function EscolherPoke({ troca }: { troca: EstadoDaTroca }) {
   if (carregandoMochila) return <Carregando texto="Abrindo a mochila..." />
 
   return (
-    <div className="flex max-h-[10em] flex-col gap-[.25em] overflow-y-auto rounded-[.45em] border border-n800 p-[.3em]">
+    <div className="flex max-h-[10em] flex-col gap-[.25em] overflow-y-auto rounded-[.45em] border border-menu-line p-[.3em]">
       {bagPokes.length === 0 ? (
-        <span className="p-[.4em] text-[.85em] text-n500">Nenhum POKE na mochila.</span>
+        <span className="p-[.4em] text-[.85em] text-menu-muted">Nenhum POKE na mochila.</span>
       ) : bagPokes.map((p) => (
         <button
           key={p.uid}
           type="button"
           disabled={troca.ocupado}
           onClick={() => { void troca.porPoke(p.uid) }}
-          className="flex items-center gap-[.4em] rounded-[.4em] px-[.35em] py-[.2em] text-left transition-colors hover:bg-n800 disabled:opacity-40"
+          className="flex items-center gap-[.4em] rounded-[.4em] px-[.35em] py-[.2em] text-left transition-colors hover:bg-menu-wash disabled:opacity-40"
         >
           <img src={faceIconUrl(p.speciesId) ?? undefined} alt="" className="h-[1.4em] w-[1.4em] shrink-0 object-contain" />
           <span className="min-w-0 flex-1 truncate">{nomeDaEspecie(p.speciesId)}</span>
-          <span className="shrink-0 text-[.8em] text-n300">Lv {p.level}</span>
+          <span className="shrink-0 text-[.8em] text-menu-ink">Lv {p.level}</span>
         </button>
       ))}
     </div>
@@ -206,7 +206,7 @@ function Coluna({
       </div>
       <div className="flex min-h-[3em] flex-col gap-[.25em]">
         {linhas.length === 0
-          ? <span className="p-[.3em] text-[.8em] text-n500">nada na mesa</span>
+          ? <span className="p-[.3em] text-[.8em] text-menu-muted">nada na mesa</span>
           : linhas.map((l) => (
             <LinhaDaOferta
               key={l.id}
@@ -228,10 +228,10 @@ export function TrocaMenu() {
 
   if (!troca.sessao) {
     return (
-      <div className="flex flex-col items-center gap-[.5em] rounded-[.7em] border border-dashed border-n700 p-[1.2em] text-center">
-        <ArrowsLeftRight className="text-[1.8em] text-n500" />
-        <span className="text-[.9em] text-n300">Você não está em nenhuma troca.</span>
-        <span className="text-[.8em] text-n500">
+      <div className="flex flex-col items-center gap-[.5em] rounded-[.7em] border border-dashed border-menu-line p-[1.2em] text-center">
+        <ArrowsLeftRight className="text-[1.8em] text-menu-muted" />
+        <span className="text-[.9em] text-menu-ink">Você não está em nenhuma troca.</span>
+        <span className="text-[.8em] text-menu-muted">
           Convide alguem pelo Ranking ou pelo Social — o icone de troca aparece ao lado do nome.
         </span>
       </div>
@@ -247,7 +247,7 @@ export function TrocaMenu() {
             ? <><strong>{nick}</strong> quer trocar com você.</>
             : <>Convite enviado para <strong>{nick}</strong>. Esperando aceitar...</>}
         </span>
-        <span className="flex items-center gap-[.3em] text-[.8em] text-n500">
+        <span className="flex items-center gap-[.3em] text-[.8em] text-menu-muted">
           <Clock className="text-[.95em]" /> o convite expira em {restante}
         </span>
         <div className="flex gap-[.4em]">
@@ -272,7 +272,7 @@ export function TrocaMenu() {
         <span className="min-w-0 flex-1 truncate text-[.9em]">
           Trocando com <strong>{nick}</strong>
         </span>
-        <span className="flex shrink-0 items-center gap-[.25em] text-[.8em] text-n400">
+        <span className="flex shrink-0 items-center gap-[.25em] text-[.8em] text-menu-muted">
           <Clock className="text-[.95em]" /> {restante}
         </span>
       </div>
@@ -301,10 +301,10 @@ export function TrocaMenu() {
         </div>
       )}
 
-      <div className="flex flex-col gap-[.35em] border-t border-n800 pt-[.5em]">
+      <div className="flex flex-col gap-[.35em] border-t border-menu-line pt-[.5em]">
         {troca.euConfirmei ? (
           <>
-            <span className="text-[.8em] text-n400">
+            <span className="text-[.8em] text-menu-muted">
               Voce confirmou. Mexer na mesa desfaz isto — e desfaz a confirmacao dele tambem.
             </span>
             <GameButton block carregando={troca.ocupado} onClick={() => { void troca.desconfirmar() }}>

@@ -37,7 +37,7 @@ export function TeamMenu() {
   const [escolhendo, setEscolhendo] = useState<string | null>(null)
 
   if (team.length === 0) {
-    return <p className="text-n500">Você ainda não tem nenhum POKE.</p>
+    return <p className="text-menu-muted">Você ainda não tem nenhum POKE.</p>
   }
 
   const pokeEscolhendo = team.find((p) => p.uid === escolhendo)
@@ -90,9 +90,9 @@ export function TeamMenu() {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-[.4em]">
                 <PokeNameTag poke={poke} species={species} />
-                <span className="text-n400">Lv{poke.level}</span>
+                <span className="text-menu-muted">Lv{poke.level}</span>
                 {isActive && (
-                  <span className="rounded-full bg-primary px-[.5em] py-[.05em] text-[.7em] font-medium text-primary-foreground">
+                  <span className="rounded-full bg-menu-brand px-[.5em] py-[.05em] text-[.7em] font-medium text-primary-foreground">
                     Em campo
                   </span>
                 )}
@@ -114,7 +114,7 @@ export function TeamMenu() {
                 )}
               </div>
               <div className="mt-[.35em] flex flex-wrap gap-[.25em]">{[species.type, species.type2].map((type) => type && <TypeChip key={type} type={type} />)}</div>
-              <div className="mt-[.2em] text-[.78em] text-n400">
+              <div className="mt-[.2em] text-[.78em] text-menu-muted">
                 HP {Math.floor(poke.hp)}/{poke.stats.hp} · EXP {Math.max(0, Math.floor(progress.into))}/{progress.needed}
               </div>
               <Meter
@@ -126,7 +126,7 @@ export function TeamMenu() {
             </div>
             </div>
 
-            <div className={cn('flex shrink-0 gap-[.3em]', compacto ? 'flex-row' : 'flex-col')}>
+            <div className={cn('flex shrink-0 gap-[.3em]', compacto ? 'flex-row flex-wrap' : 'flex-col')}>
               {/* Caminho VISIVEL ate os 4 golpes. Antes a gestao existia so
                   dentro do perfil, atras de um clique no card e de uma aba que
                   nada anunciava — o jogador que quisesse trocar de golpe tinha

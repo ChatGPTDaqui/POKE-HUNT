@@ -103,7 +103,7 @@ function PrevisaoDeRecursos() {
       {previsoes.map((p) => {
         const rotulo = rotuloDoRecurso(p.itemId, (id) => ITEMS[id]?.name ?? id)
         return (
-          <span key={p.itemId} className="flex justify-between gap-[.45em] text-n300">
+          <span key={p.itemId} className="flex justify-between gap-[.45em] text-menu-ink">
             {/* `min-w-0` junto do `truncate` (PH-260): sem ele o `truncate` nao
                 tem efeito nenhum dentro de um flex — a base do item e `auto`, o
                 texto empurra a caixa e quem cede e a COLUNA DA DIREITA, que
@@ -113,7 +113,7 @@ function PrevisaoDeRecursos() {
             <span className="min-w-0 truncate" title={rotulo}>{rotulo}</span>
             <span className="shrink-0 tabular-nums">
               {formatarTempoRestante(p.horasRestantes)}
-              <span className="text-n500"> · {Math.round(p.porHora)}/h</span>
+              <span className="text-menu-muted"> · {Math.round(p.porHora)}/h</span>
             </span>
           </span>
         )
@@ -194,7 +194,7 @@ function AbaDeAutomacoes() {
       >
         <div className="grid grid-cols-2 gap-[.5em]">
           <label className="flex flex-col gap-[.25em]">
-            <span className="text-n400">Bola padrão</span>
+            <span className="text-menu-muted">Bola padrão</span>
             <ItemPicker
               label="Bola padrão"
               value={autoCatchConfig.ballId}
@@ -203,7 +203,7 @@ function AbaDeAutomacoes() {
             />
           </label>
           <label className="flex flex-col gap-[.25em]" style={{ opacity: autoCatchConfig.catchShinyEnabled ? 1 : 0.45 }}>
-            <span className="flex items-center justify-between gap-[.3em] text-n400">
+            <span className="flex items-center justify-between gap-[.3em] text-menu-muted">
               Bola Shiny
               <GameSwitch
                 checked={autoCatchConfig.catchShinyEnabled}
@@ -227,7 +227,7 @@ function AbaDeAutomacoes() {
         </div>
 
         {huntSpecies.length === 0 && (
-          <div className="text-n500">Entre numa hunt pra configurar regras por espécie.</div>
+          <div className="text-menu-muted">Entre numa hunt pra configurar regras por espécie.</div>
         )}
 
         {autoCatchRules.map((rule, index) => {
@@ -250,7 +250,7 @@ function AbaDeAutomacoes() {
             // Agora a especie ocupa a largura inteira em cima, e a bola + o
             // remover dividem a linha de baixo. Mesma altura de antes na
             // pratica (a linha ja quebrava), e o nome cabe.
-            <div key={index} className="flex flex-col gap-[.35em] rounded-[.5em] border border-n800 p-[.4em]">
+            <div key={index} className="flex flex-col gap-[.35em] rounded-[.5em] border border-menu-line p-[.4em]">
               <GameSelect
                 value={rule.speciesId}
                 onChange={(e) => updateAutoCatchRule(index, { speciesId: e.target.value })}
@@ -361,7 +361,7 @@ function AbaDeAutomacoes() {
             desligar a automacao inteira. */}
         <div className="flex flex-col gap-[.25em]">
           {opcoesCuraDeStatus.map((o) => (
-            <div key={o.id} className="flex items-center justify-between gap-[.5em] text-n400">
+            <div key={o.id} className="flex items-center justify-between gap-[.5em] text-menu-muted">
               {/* `min-w-0` no rotulo (PH-260): o `GameCheck` e um flex inline, e
                   sem isto o nome do item empurrava a linha e a contagem saia da
                   janela de 19em. Com ele o nome trunca (com `title`) e o numero
@@ -394,7 +394,7 @@ function AbaDeAutomacoes() {
             unico consumivel do bot sem contagem visivel nenhuma. */}
         <div className="flex flex-col gap-[.25em]">
           {opcoesRevive.map((o) => (
-            <div key={o.id} className="flex items-center justify-between gap-[.5em] text-n400">
+            <div key={o.id} className="flex items-center justify-between gap-[.5em] text-menu-muted">
               <span className="min-w-0 truncate" title={o.nome}>{o.nome}</span>
               {/* `shrink-0` (PH-260): a contagem e o dado que decide se a
                   automacao vai parar, e sem ele ela cedia largura pro nome do

@@ -11,7 +11,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { sairDaArena, useArenaStore, vereditoParaTela } from './arena'
 
 const TITULO = { vitoria: 'Vitória!', derrota: 'Derrota', empate: 'Empate' } as const
-const COR = { vitoria: 'text-amber-300', derrota: 'text-destructive', empate: 'text-n300' } as const
+const COR = { vitoria: 'text-gold', derrota: 'text-bad', empate: 'text-menu-ink' } as const
 
 export function ArenaOverlay() {
   const naArena = useWorldStore((s) => s.arena != null)
@@ -25,9 +25,9 @@ export function ArenaOverlay() {
 
   return (
     <CampoOverlay interativo>
-      <div className="mx-[1em] flex max-w-[22em] flex-col items-center gap-[.7em] rounded-xl border border-n700 bg-background px-[1.2em] py-[1em] text-center shadow-xl">
+      <div data-appearance="journey" className="journey-surface mx-[1em] flex max-w-[22em] flex-col items-center gap-[.5em] rounded-xl border border-menu-line bg-menu-paper p-[.7em] text-center shadow-xl">
         <div className={`text-[1.2em] font-bold ${COR[final]}`}>{TITULO[final]}</div>
-        <p className="text-[.85em] text-muted-foreground">Duelo contra {nomeDoRival}.</p>
+        <p className="text-[.85em] text-menu-muted">Duelo contra {nomeDoRival}.</p>
         <GameButton onClick={sairDaArena}>Voltar ao Centro Pokémon</GameButton>
       </div>
     </CampoOverlay>

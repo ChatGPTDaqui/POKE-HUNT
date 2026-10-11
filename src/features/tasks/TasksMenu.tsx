@@ -53,12 +53,12 @@ export function TasksMenu() {
   return (
     <div className="flex flex-col gap-[.55em]">
       <div className="flex flex-wrap items-center gap-[.65em]">
-        <div className="flex h-[3.4em] w-[3.4em] shrink-0 items-center justify-center rounded-full border-2 border-primary font-medium text-n200">
+        <div className="flex h-[2.1em] min-w-[2.6em] shrink-0 items-center justify-center rounded-[.5em] border border-menu-line bg-menu-wash px-[.3em] font-mono text-menu-ink">
           {Math.round((resumo.reivindicadas / resumo.total) * 100)}%
         </div>
         <div>
           <div className="font-medium">{resumo.reivindicadas} / {resumo.total} missões reivindicadas</div>
-          <div className="text-[.78em] text-n500">Cadeia de abate por tipo elemental — mata a espécie N, libera a N+1.</div>
+          <div className="text-[.78em] text-menu-muted">Cadeia de abate por tipo elemental — mata a espécie N, libera a N+1.</div>
         </div>
       </div>
 
@@ -74,8 +74,8 @@ export function TasksMenu() {
                 type="button"
                 onClick={() => setSelecionado(tipo)}
                 className={cn(
-                  'flex cursor-pointer flex-col items-center gap-[.3em] rounded-[.6em] border bg-n900 px-[.3em] py-[.6em] font-[inherit]',
-                  ativo ? 'border-primary' : reivindicadasDoTipo > 0 ? 'border-gold' : 'border-n800 hover:border-primary',
+                  'flex cursor-pointer flex-col items-center gap-[.3em] rounded-[.6em] border bg-menu-card px-[.3em] py-[.6em] font-[inherit]',
+                  ativo ? 'border-menu-brand' : reivindicadasDoTipo > 0 ? 'border-gold' : 'border-menu-line hover:border-menu-brand',
                 )}
               >
                 <span
@@ -85,7 +85,7 @@ export function TasksMenu() {
                   {tipo.slice(0, 3)}
                 </span>
                 <span className="max-w-full truncate text-[.78em] font-medium">{tipo}</span>
-                <span className="text-[.72em] tabular-nums text-n400">{reivindicadasDoTipo}/{cadeia.length}</span>
+                <span className="text-[.72em] tabular-nums text-menu-muted">{reivindicadasDoTipo}/{cadeia.length}</span>
               </button>
             )
           })}
@@ -119,14 +119,14 @@ function CadeiaDoTipo({ tipo, semTitulo }: { tipo: ElementType | null; semTitulo
 
   if (!tipo) {
     return (
-      <div className="self-start rounded-[.7em] border border-dashed border-n700 p-[.7em] text-[.85em] text-n500">
+      <div className="self-start rounded-[.7em] border border-dashed border-menu-line p-[.7em] text-[.85em] text-menu-muted">
         Escolha um tipo elemental na grade pra ver a cadeia de missões.
       </div>
     )
   }
   const cadeia = cadeiaCache(tipo)
   return (
-    <div className="flex flex-col gap-[.4em] self-start rounded-[.7em] border border-n800 bg-n900 p-[.6em]">
+    <div className="flex flex-col gap-[.4em] self-start rounded-[.7em] border border-menu-line bg-menu-card p-[.6em]">
       {!semTitulo && (
         <div className="flex items-center gap-[.4em]">
           <TypeChip type={tipo} full />
@@ -187,7 +187,7 @@ function MissaoCard({ tipo, missao, bloqueada }: { tipo: ElementType; missao: Mi
   }
 
   return (
-    <div className={cn('rounded-[.5em] border p-[.5em]', reivindicada ? 'border-gold bg-background' : bloqueada ? 'border-n800 bg-background opacity-60' : 'border-n800 bg-background')}>
+    <div className={cn('rounded-[.5em] border p-[.5em]', reivindicada ? 'border-gold bg-menu-paper' : bloqueada ? 'border-menu-line bg-menu-paper opacity-60' : 'border-menu-line bg-menu-paper')}>
       <div className="flex items-center gap-[.5em]">
         {(() => {
           const url = species ? faceIconUrl(species.id) : null
@@ -200,9 +200,9 @@ function MissaoCard({ tipo, missao, bloqueada }: { tipo: ElementType; missao: Mi
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-[.4em]">
             <b className="truncate text-[.9em] font-medium">{species?.name ?? missao.speciesId}</b>
-            <span className="text-[.72em] text-n500">#{missao.posicao + 1}</span>
+            <span className="text-[.72em] text-menu-muted">#{missao.posicao + 1}</span>
           </div>
-          <div className="text-[.72em] text-n500">
+          <div className="text-[.72em] text-menu-muted">
             {reivindicada ? 'Reivindicada' : bloqueada ? 'Bloqueada — complete a anterior' : `${fmt.format(abates)} / ${fmt.format(missao.alvo)} abates`}
           </div>
         </div>

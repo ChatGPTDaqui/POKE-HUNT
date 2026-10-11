@@ -32,7 +32,7 @@ export function ProximoGolpe({ poke, species, children }: {
             <>
               <span>No nível {proximo.nivel}, {species.name} aprenderá:</span>
               {proximo.golpes.map((golpe) => <span key={golpe.id}>{golpe.name}</span>)}
-              <span className="text-n400">Previsão da forma atual. Com quatro golpes ativos, escolha o novo na Equipe.</span>
+              <span className="text-menu-muted">Previsão da forma atual. Com quatro golpes ativos, escolha o novo na Equipe.</span>
             </>
           ) : <span>Esta forma não tem mais golpes para aprender por nível.</span>}
         </div>

@@ -90,12 +90,15 @@ export interface SheetProps {
 
 export function Sheet({
   winKey, onClose, title, header, subheader, footer,
-  snap = 'cheia', zIndex = 31, backdrop = true, children, bodyClassName, appearance,
+  snap = 'cheia', zIndex = 31, backdrop = true, children, bodyClassName, appearance = 'journey',
 }: SheetProps) {
   const footerHeight = useUiStore((s) => s.footerHeight)
   const navHeight = useUiStore((s) => s.navHeight)
+  const trilhoHeight = useUiStore((s) => s.trilhoHeight)
   const deitado = useDeviceMode().mode === 'deitado'
-  const reservaTopo = deitado ? RESERVA_TRILHO_DEITADO : RESERVA_TRILHO
+  const reservaTopo = appearance === 'journey' && trilhoHeight
+    ? `calc(${trilhoHeight}px + .25em)`
+    : deitado ? RESERVA_TRILHO_DEITADO : RESERVA_TRILHO
   // Um sheet 'cheia' para em cima da BARRA DE NAVEGACAO, e nao do rodape
   // inteiro. Medido em 390x844: o rodape tem 179px, dos quais 111 sao barra de
   // golpes, zoom, botao Auto e o ticker do chat — nada disso e acionavel
@@ -176,6 +179,7 @@ export function Sheet({
       <div
         data-window={winKey}
         data-appearance={appearance}
+        data-journey-rail-reserved={appearance === 'journey' && zIndex <= 35 ? '' : undefined}
         style={{
           zIndex,
           // `+ .5em` porque o rodape da HUD e ancorado em `bottom-[.5em]`:

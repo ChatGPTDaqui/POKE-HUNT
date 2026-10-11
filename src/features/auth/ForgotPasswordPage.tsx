@@ -27,7 +27,7 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-6">
+    <div data-appearance="journey" className="journey-entry flex min-h-svh items-center justify-center bg-background p-6">
       <div className="w-full max-w-sm space-y-5 rounded-lg border bg-card p-6">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold">Recuperar senha</h1>

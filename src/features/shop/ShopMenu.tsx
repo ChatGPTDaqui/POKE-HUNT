@@ -39,7 +39,7 @@ export function ShopMenu() {
         {/* No celular a carteira ja esta no trilho de status, logo acima — aqui
             ela so empurrava as abas. */}
         {!compacto && (
-          <span className="flex items-center gap-[.45em] text-[.85em] text-n300">
+          <span className="flex items-center gap-[.45em] text-[.85em] text-menu-ink">
             <span className="flex items-center gap-[.25em] text-gold">
               <Coin weight="fill" /> {fmt.format(gold)}
             </span>

@@ -34,13 +34,13 @@
 // Um backdrop que capturasse o toque faria trocar de tela exigir dois toques.
 import { useRef } from 'react'
 import { PlacarDoDuelo } from '@/features/arena/PlacarDoDuelo'
-import { StatusRail } from '@/components/hud/StatusRail'
+import { StatusRail, ContextoDaHunt } from '@/components/hud/StatusRail'
 import { CartaoDoPasso } from '@/features/primeirosPassos/CartaoDoPasso'
 import { PainelDoDiario } from '@/features/primeirosPassos/Diario'
+import { useDiarioStore } from '@/stores/diarioStore'
 import { FaixaDePremios } from '@/features/primeirosPassos/FaixaDePremios'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
-import { SalaChip, salaNoTrilho } from '@/components/hud/SalaChip'
 import { TaxasNoCanto } from '@/components/hud/TaxasNoCanto'
 import { ColunaDeAtalhos } from '@/components/hud/ColunaDeAtalhos'
 import { ChatLog } from '@/components/toasts/ChatLog'
@@ -59,6 +59,8 @@ export function HudLayer() {
   const { mode, width } = useDeviceMode()
   const setFooterHeight = useUiStore((s) => s.setFooterHeight)
   const chatFlutuante = mode === 'amplo' && width >= LARGURA_CHAT_FLUTUANTE
+  const diarioAberto = useDiarioStore((s) => s.painelAberto)
+  const painelAberto = useUiStore((s) => s.currentScreen != null || s.moreOpen) || diarioAberto
 
   // Mede o rodape ao vivo. Os sheets ancoram o proprio `bottom` neste numero
   // pra parar EM CIMA da doca em vez de cobri-la — a doca e o unico caminho de
@@ -110,8 +112,8 @@ export function HudLayer() {
               "logo abaixo do lvl do treinador", que mora no trilho. */}
           <div ref={trilhoRef}>
             <StatusRail />
-            <CartaoDoPasso />
-            <FaixaDePremios />
+            {!painelAberto && <CartaoDoPasso />}
+            {!painelAberto && <FaixaDePremios />}
           </div>
           {/* Placar do combate duelo (arena, Lance, covis) — PH-549 o colocava
               na fileira de chips (sala/clima), la embaixo das reservas. Com uma
@@ -144,54 +146,17 @@ export function HudLayer() {
               proposito: fora de duelo ele nao renderiza nada (fica vazio),
               entao esta regra continua valendo sempre que ela importa — hunt
               normal com reservas. */}
-          <ReservasRail />
-          {/* SO O CHIP DE SALA MORA AQUI (PH-285), e so no compacto. O clima
-              subiu pro trilho junto com ele; o `flex-wrap` continua porque a
-              linha ainda pode receber outro chip contextual um dia, e porque
-              tirar wrap de uma linha de chips e como se pede uma sobreposicao.
-              `:not(:empty)` (PH-197): a coluna nao espaca mais nada, entao o
-              respiro dos chips passa a ser deles — e so quando existem.
-
-              `justify-center` (PH-261): a linha e CENTRALIZADA, a pedido. Ela
-              descreve o LUGAR, nao o POKE, e colada a esquerda competia com o
-              cabecalho. O centro e o da coluna (`max-w-[64em]`), e nao o da
-              tela: em monitor ultralargo centralizar na tela jogaria o chip pra
-              longe do resto da HUD — exatamente o que o `max-w` e o
-              `items-start` do container existem pra evitar (PH-83). */}
-          <div className="flex w-full flex-wrap items-center justify-center gap-[.4em] [&:not(:empty)]:my-[.4em]">
-            {/* PH-272: em tela com largura o chip de sala subiu pro trilho, e
-                aqui ele nao pode aparecer de novo. Duas copias na tela nao dao
-                erro nenhum — so ficam erradas, e em silencio. Quem decide e
-                `salaNoTrilho`, a MESMA funcao que o `StatusRail` consulta.
-                No compacto ele continua aqui: o trilho de 390px nao tem largura
-                pra ele (ver a nota no topo de SalaChip.tsx). */}
-            {!salaNoTrilho(mode) && <SalaChip />}
-            {/* O CLIMA SAIU DAQUI (PH-285). Ele agora esta no trilho nas TRES
-                larguras: com o nome escrito na faixa central, e so como simbolo
-                no compacto, onde o vao tem 73px (ver `StatusRail`).
-
-                Era ele, sozinho, que deixava esta fileira ocupando o meio do
-                campo de jogo depois que a sala subiu pro trilho (PH-272) e o
-                chip do Lure saiu (PH-279) — no celular a fileira virava DUAS,
-                porque o chip de sala ja gasta 385px dos 390.
-
-                Nao ha condicao aqui de proposito: `ClimaChip` deixou de ser
-                renderizado nesta superficie, ponto. Uma segunda copia atras de
-                um `mode` seria a mesma armadilha que a linha acima documenta —
-                dois lugares pra manter de acordo, e nenhum erro quando eles
-                divergem. */}
-            {/* O CHIP DO LURE SAIU DAQUI (PH-279), a pedido do usuario.
-                Ele existia pra a mecanica nao ler como bug: durante a reuniao o
-                POKE atravessa a hunt passando ao lado de inimigos sem bater, e
-                o chip era a unica coisa na tela que dizia que aquilo era
-                intencional. Tirando ele, esse esclarecimento deixa de existir —
-                registrado aqui porque o mesmo comportamento ja foi relatado
-                como "o POKE anda travando" (PH-280). */}
+          <div className="flex items-start gap-[.4em] pr-[60px]">
+            <div className="min-w-0 shrink-0">
+              <span className="rounded-r bg-n900/85 px-[.5em] text-[.7em] text-n300">Companheiros</span>
+              <ReservasRail />
+            </div>
+            <div className="min-w-0 flex-1"><ContextoDaHunt /></div>
           </div>
         </div>
       </div>
 
-      {/* Coluna de atalhos (PH-257): Especialidades, Tasks e Bestiario no canto
+      {/* Coluna de atalhos: Diário, Especialidades, Tasks, Calculadora e PvP no canto
           superior direito, logo abaixo do card do treinador. Irma do bloco do
           topo, e nao filha: ela ancora na DIREITA e aquele container e uma
           coluna alinhada a esquerda. */}
@@ -220,7 +185,7 @@ export function HudLayer() {
             mode === 'deitado' ? 'max-w-[38em]' : 'max-w-[52em]',
           )}
         >
-          {!chatFlutuante && <ChatMobile />}
+          {!chatFlutuante && !painelAberto && <ChatMobile />}
           <ActionDock />
         </div>
       </div>

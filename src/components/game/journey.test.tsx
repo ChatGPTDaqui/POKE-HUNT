@@ -23,9 +23,9 @@ describe('fundação Jornada opt-in', () => {
   it.each([390, 1366])('preserva legado e encaminha aparência em %ipx', (width) => {
     useUiStore.setState({ viewportWidth: width, viewportHeight: 844, coarsePointer: width < 900 })
     const props = { winKey: 'panel' as const, widthEm: 28, zIndex: 31, onClose: vi.fn(), title: 'Mais' }
-    const view = render(<Painel {...props}>Conteúdo</Painel>)
-    expect(document.querySelector('[data-window]')?.getAttribute('data-appearance')).toBeNull()
-    view.rerender(<Painel {...props} appearance="journey">Conteúdo</Painel>)
+    const view = render(<Painel {...props} appearance="legacy">Conteúdo</Painel>)
+    expect(document.querySelector('[data-window]')?.getAttribute('data-appearance')).toBe('legacy')
+    view.rerender(<Painel {...props}>Conteúdo</Painel>)
     expect(document.querySelector('[data-window]')?.getAttribute('data-appearance')).toBe('journey')
     expect(screen.getByText('Conteúdo')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Fechar' }))

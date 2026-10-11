@@ -192,7 +192,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
         com o botao "Próximo Nível" dentro dela o toque que avanca a sala abriria
         a bolha por cima do proprio avanco. O aviso "Derrote o Lorde" fica dentro
         — ele e leitura, nao acao. */}
-    <div className="flex min-w-0 items-center gap-[.6em]">
+    <div className="flex min-w-0 flex-wrap items-center gap-x-[.6em] gap-y-[.2em]">
       <span className="shrink-0 text-[.72em] tabular-nums text-n400">
         Sala <b className="font-medium text-n100">{sala.indice + 1}</b>/{salas}
       </span>

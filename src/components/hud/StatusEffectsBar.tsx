@@ -257,7 +257,7 @@ function ListaDeEfeitos({ titulo, badges }: { titulo: string; badges: Badge[] })
         {badges.map((badge) => (
           <li
             key={badge.key}
-            className="flex items-center gap-[.5em] rounded-[.5em] border border-n800 px-[.6em] py-[.45em] text-[.85em]"
+            className="flex items-center gap-[.5em] rounded-[.5em] border border-menu-line px-[.6em] py-[.45em] text-[.85em]"
           >
             <span
               className="mt-[.35em] h-[.6em] w-[.6em] shrink-0 rounded-full"
@@ -272,12 +272,12 @@ function ListaDeEfeitos({ titulo, badges }: { titulo: string; badges: Badge[] })
                   estado. Vem primeiro que a explicacao generica: e a parte que
                   responde a pergunta do jogador naquele instante. */}
               {badge.fontes.length > 0 && (
-                <span className="leading-tight text-n300">
+                <span className="leading-tight text-menu-ink">
                   Origem: {badge.fontes.map(descreverFonte).join(' · ')}
                 </span>
               )}
               {badge.verbete.corpo.map((linha) => (
-                <span key={linha} className="leading-tight text-n400">{linha}</span>
+                <span key={linha} className="leading-tight text-menu-muted">{linha}</span>
               ))}
             </span>
           </li>
