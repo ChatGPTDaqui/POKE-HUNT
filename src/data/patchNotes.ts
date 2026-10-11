@@ -12,6 +12,15 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  {
+    version: '8.02',
+    date: '2026-10-11',
+    title: 'Menu Mais com identidade Jornada',
+    highlights: [
+      'O menu Mais ganhou uma superfície clara e uma grade compacta de três colunas, com nomes legíveis, avisos de pendências e os mesmos acessos e requisitos de desbloqueio.',
+      'Esta é a primeira aplicação da nova identidade visual aos menus do jogo. Os demais menus continuam com o visual atual.',
+    ],
+  },
   // Faixa única de prêmios e base do dia estável.
   {
     version: '8.01',
