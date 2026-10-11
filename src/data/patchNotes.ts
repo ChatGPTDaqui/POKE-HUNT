@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.06',
+    date: '2026-10-11',
+    title: 'Itens caem no chão',
+    highlights: [
+      'Os itens que o Pokémon derrotado deixa (poções, bolas, pedras e TMs) agora caem no chão junto com o ouro e o XP e depois voam para a Mochila.',
+      'Quanto mais raro o item, mais ele brilha: aura colorida nos incomuns (como as pedras), feixe de luz nos raros (Revive) e uma coluna de luz dourada nas TMs, que ficam mais tempo no chão.',
+      'Ao chegar na Mochila, os itens raros mostram o nome em destaque.',
+    ],
+  },
+  {
     version: '8.05',
     date: '2026-10-11',
     title: 'Golpes sincronizados com a animação',

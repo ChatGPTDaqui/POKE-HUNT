@@ -18,6 +18,7 @@ import {
 } from '@/hooks/usePendencias'
 import { useEstoqueBaixoNoAuto, LIMIAR_ESTOQUE_BAIXO } from '@/components/auto/estoqueBaixo'
 import { NotificationBadge } from '@/components/game/NotificationBadge'
+import { ANCORA, useAncoraDeVfx } from '@/hooks/useAncoraDeVfx'
 import { AbilityHud } from '@/components/hud/AbilityHud'
 import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
 import { Sheet } from '@/components/game/Sheet'
@@ -274,8 +275,12 @@ function SlotNav({
 }) {
   const [imagemQuebrada, setImagemQuebrada] = useState(false)
   const { Icon, iconUrl, label, art } = destino
+  // A Mochila e o destino dos itens que caem no chao (render/itemNoChao.ts).
+  const botaoRef = useRef<HTMLButtonElement>(null)
+  useAncoraDeVfx(destino.screen === 'mochila' ? ANCORA.mochila : null, botaoRef)
   return (
     <button
+      ref={botaoRef}
       type="button"
       aria-label={label}
       aria-pressed={ativo}
