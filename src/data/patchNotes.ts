@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.04',
+    date: '2026-10-11',
+    title: 'Claro/Jornada e Escuro/Dark Glass',
+    highlights: [
+      'Escolha o tema em Mais → Ajustes → Geral. Claro/Jornada agora inclui a HUD e a barra inferior; Escuro/Dark Glass também se aplica aos menus internos.',
+      'A preferência fica salva neste aparelho, sem reiniciar a hunt. Os dois temas mantêm a composição compacta, quatro slots de golpes e as cores de combate, tipos e raridades.',
+    ],
+  },
+  {
     version: '8.03',
     date: '2026-10-11',
     title: 'Jornada do Treinador — identidade visual completa',

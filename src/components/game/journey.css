@@ -1,5 +1,5 @@
 /* Opt-in por superfície. Nunca inverter n900/n100: combate e menus coexistem. */
-[data-appearance='journey'] {
+:root {
   --journey-paper: #faf7ef;
   --journey-card: #fffefa;
   --journey-ink: #203c42;
@@ -11,6 +11,13 @@
   --journey-focus: #476f83;
   --journey-warning: #795016;
   --journey-data-ground: #0e1016;
+  --journey-on-primary: #fffefa;
+  --journey-success: #216840;
+  --journey-danger: #ab302d;
+  --journey-exp: #315e91;
+  --journey-backdrop: none;
+}
+[data-appearance='journey'] {
   color: var(--journey-ink);
   font-family: var(--font-sans);
 }
@@ -19,7 +26,7 @@
   background: var(--journey-paper);
   border: 1px solid var(--journey-line);
   box-shadow: 0 .7em 2em #162c2e38;
-  backdrop-filter: none;
+  backdrop-filter: var(--journey-backdrop);
 }
 
 .journey-shortcut {
@@ -154,24 +161,24 @@
   --card: var(--journey-card);
   --card-foreground: var(--journey-ink);
   --primary: var(--journey-primary);
-  --primary-foreground: var(--journey-card);
+  --primary-foreground: var(--journey-on-primary);
   --border: var(--journey-line);
   --input: var(--journey-muted);
   --muted: var(--journey-wash);
   --muted-foreground: var(--journey-muted);
   --ring: var(--journey-focus);
-  background: radial-gradient(ellipse at top left, #dce8d7, transparent 65%), var(--journey-paper);
+  background: radial-gradient(ellipse at top left, var(--journey-wash), transparent 65%), var(--journey-paper);
   box-shadow: none;
   border: 0;
 }
 .journey-entry :is(input, button, a) { min-height: 44px; }
 .journey-entry > :is(form, div) { border-radius: 1em; }
 .journey-entry h1 { font-family: var(--font-heading); }
-[data-appearance='journey'] .bg-menu-brand { color: var(--journey-card); }
+[data-appearance='journey'] .bg-menu-brand { color: var(--journey-on-primary); }
 [data-appearance='journey'] :is(.text-gold, .text-warn, .text-amber-400) { color: var(--journey-warning); }
-[data-appearance='journey'] .text-ok { color: #216840; }
-[data-appearance='journey'] .text-bad { color: #ab302d; }
-[data-appearance='journey'] .text-exp { color: #315e91; }
+[data-appearance='journey'] .text-ok { color: var(--journey-success); }
+[data-appearance='journey'] .text-bad { color: var(--journey-danger); }
+[data-appearance='journey'] .text-exp { color: var(--journey-exp); }
 @media (max-width: 600px) {
   [data-appearance='journey'] .journey-profile-hero > div:first-child { height: 4.5em; width: 4.5em; }
 }
@@ -204,11 +211,11 @@
 [data-appearance='journey'] .journey-move-queue > span > span:nth-child(2) { flex: 1; }
 [data-appearance='journey'] .journey-move-queue button { min-width: 44px; flex-shrink: 0; }
 [data-appearance='journey'] .journey-moveset > div:first-child:not(.grid) { min-width: min(100%, 32em); }
-.journey-entry [data-slot='button'][class*='bg-ember'] { background: var(--journey-primary); color: var(--journey-card); }
+.journey-entry [data-slot='button'][class*='bg-ember'] { background: var(--journey-primary); color: var(--journey-on-primary); }
 
 /* Maior especificidade que a preferência de vidro da HUD; já é opaco. */
 .hud-root[data-blur='off'] [data-window][data-appearance='journey'] {
-  background: var(--journey-paper);
+  background: color-mix(in srgb, var(--journey-paper) 100%, transparent);
   backdrop-filter: none;
 }
 
@@ -246,7 +253,7 @@
 }
 
 [data-appearance='journey'] [data-game-button='primary'] {
-  color: var(--journey-card);
+  color: var(--journey-on-primary);
   background: var(--journey-primary);
   border-color: var(--journey-primary);
 }

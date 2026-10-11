@@ -5,6 +5,7 @@ import { controller } from '@/engine/controller'
 import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
 import { useUiStore, HUD_SCALE_MIN, HUD_SCALE_MAX } from '@/stores/uiStore'
 import { GameButton, GameCard, GameCheck, SegmentedTabs } from '@/components/game/controls'
+import { ThemeSelector } from './ThemeSelector'
 
 function GeralTab() {
   const askConfirm = useConfirmDialogStore((s) => s.confirm)
@@ -17,6 +18,7 @@ function GeralTab() {
 
   return (
     <div className="flex flex-col gap-[.5em]">
+      <ThemeSelector />
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
         <div className="font-medium">Tamanho da interface</div>
         <div className="text-[.8em] text-menu-muted">
