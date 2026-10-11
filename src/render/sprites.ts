@@ -14,7 +14,7 @@ import { directionRowFromFacing } from '@/engine/systems/animationSystem'
 import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
-import { atrasoDoNumeroDeDano, desenharVfxDeGolpe } from './vfx/desenharVfx'
+import { desenharVfxDeGolpe } from './vfx/desenharVfx'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
 import { footOffsetFraction } from '@/data/spriteFootOffsets'
@@ -2108,14 +2108,11 @@ export function drawEffect(
 ): void {
   const desvio = desvios?.get(effect.id) ?? 0
   if (effect.type === 'damageNumber') {
-    // Golpe com coreografia nova (render/vfx) tem VIAGEM: o dano ja aconteceu no
-    // motor, mas o fogo so chega no alvo 170-620 ms depois. O numero espera o
-    // impacto visual — e o tempo dele na tela encolhe junto, pra o fade de
-    // saida continuar inteiro. Golpe sem coreografia: atraso 0, nada muda.
-    const atraso = atrasoDoNumeroDeDano(effect.abilityId, effect.isCrit) / 1000
-    if (atraso <= 0) return drawDamageNumber(ctx, effect, world, desvio)
-    if (effect.age - effect.delay < atraso) return
-    return drawDamageNumber(ctx, { ...effect, delay: effect.delay + atraso, duration: effect.duration - atraso }, world, desvio)
+    // Desde 11/10 o motor so aplica o dano no PRIMEIRO impacto do VFX
+    // (engine/tempoDoGolpe.ts): o numero nasce junto do golpe batendo e sai na
+    // hora. Antes ele esperava `atrasoDoNumeroDeDano` porque o dano chegava
+    // antes do fogo.
+    return drawDamageNumber(ctx, effect, world, desvio)
   }
   if (effect.type === 'abilityName') return drawAbilityName(ctx, effect, world, desvio)
   if (effect.type === 'abilityEffect') return drawAbilityEffect(ctx, effect, world)

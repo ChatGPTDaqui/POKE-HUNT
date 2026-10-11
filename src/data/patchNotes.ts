@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.05',
+    date: '2026-10-11',
+    title: 'Golpes sincronizados com a animação',
+    highlights: [
+      'O golpe sai no ápice da animação de ataque de cada Pokémon (o quadro em que o soco encosta ou a boca abre), não mais depois que a pose acaba.',
+      'O dano, o número e a derrota acontecem quando o golpe atinge o alvo. Antes o inimigo caía com o golpe ainda no ar.',
+      'O Pokémon só volta a andar depois do último impacto do próprio golpe, mesmo quando derrota o alvo e quer ir para o próximo.',
+      'A pose de ataque toca a animação inteira da espécie, no ritmo original. Golpes em área seguram a pose de carga até o golpe bater.',
+    ],
+  },
+  {
     version: '8.04',
     date: '2026-10-11',
     title: 'Claro/Jornada e Escuro/Dark Glass',

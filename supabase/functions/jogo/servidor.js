@@ -101560,9 +101560,12 @@ function faceToward(entity, target) {
 		y: dy / dist
 	};
 }
-function triggerAttackAnim(entity, isAoe, target, duelo = false) {
-	entity.attackAnim = duelo ? "Attack" : isAoe ? "Charge" : "Shoot";
-	entity.attackAnimTimer = ATTACK_ANIM_DURATION;
+function poseDeAtaque(isAoe, duelo = false) {
+	return duelo ? "Attack" : isAoe ? "Charge" : "Shoot";
+}
+function triggerAttackAnim(entity, isAoe, target, duelo = false, duracao = ATTACK_ANIM_DURATION) {
+	entity.attackAnim = poseDeAtaque(isAoe, duelo);
+	entity.attackAnimTimer = duracao;
 	if (target) faceToward(entity, target);
 }
 /**
@@ -101576,6 +101579,2281 @@ function registrarDanoParaHurt(world, alvo, dano) {
 	if (dano < alvo.poke.stats.hp * .2) return;
 	if (isDead(alvo)) return;
 	alvo.hurtAnimTimer = HURT_ANIM_DURATION;
+}
+//#endregion
+//#region src/data/generated/apiceDoAtaque.generated.ts
+var APICE_DO_ATAQUE = {
+	"abra": {
+		"Shoot": 7,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"absol": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"aerodactyl": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"aggron": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"aipom": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"alakazam": {
+		"Shoot": 6,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"altaria": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"ampharos": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"anorith": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"arbok": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"arcanine": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"ariados": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"armaldo": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"aron": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"articuno": {
+		"Shoot": 12,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"azumarill": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"azurill": {
+		"Shoot": 0,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"bagon": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"baltoy": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"banette": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"barboach": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"bayleef": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"beautifly": {
+		"Shoot": 6,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"beedrill": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 10
+	},
+	"beldum": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 9
+	},
+	"bellossom": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"bellsprout": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"blastoise": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"blaziken": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"breloom": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"bulbasaur": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"butterfree": {
+		"Shoot": 10,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"cacnea": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"cacturne": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"camerupt": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"carvanha": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"cascoon": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"castform": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"caterpie": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"celebi": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 9
+	},
+	"charizard": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"charmander": {
+		"Charge": 5,
+		"Attack": 6
+	},
+	"charmeleon": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"chikorita": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"chimecho": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"chinchou": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"clamperl": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"claydol": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"clefable": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"clefairy": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"cleffa": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"cloyster": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"combusken": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"corphish": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"corsola": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"cradily": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"crawdaunt": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"crobat": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"croconaw": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"cubone": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"cyndaquil": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"delcatty": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"delibird": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"deoxys": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"dewgong": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"diglett": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"ditto": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"dodrio": {
+		"Charge": 5,
+		"Attack": 7
+	},
+	"doduo": {
+		"Charge": 5,
+		"Attack": 7
+	},
+	"donphan": {
+		"Shoot": 0,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"dragonair": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"dragonite": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"dratini": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"drowzee": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"dugtrio": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"dunsparce": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"dusclops": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"duskull": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"dustox": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"eevee": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"ekans": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"electabuzz": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"electrike": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"electrode": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"elekid": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"entei": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"espeon": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"exeggcute": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"exeggutor": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"exploud": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"farfetch_d": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"fearow": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"feebas": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"feraligatr": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"flaaffy": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"flareon": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"flygon": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"forretress": {
+		"Shoot": 7,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"furret": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"gardevoir": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"gastly": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"gengar": {
+		"Shoot": 6,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"geodude": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"girafarig": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 8
+	},
+	"glalie": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"gligar": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"gloom": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"golbat": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"goldeen": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"golduck": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"golem": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"gorebyss": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"granbull": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"graveler": {
+		"Shoot": 8,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"grimer": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"groudon": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"grovyle": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"growlithe": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"grumpig": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"gulpin": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"gyarados": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"hariyama": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"haunter": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"heracross": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"hitmonchan": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"hitmonlee": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"hitmontop": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"ho_oh": {
+		"Shoot": 8,
+		"Charge": 5,
+		"Attack": 8
+	},
+	"hoothoot": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"hoppip": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 8
+	},
+	"horsea": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"houndoom": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"houndour": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"huntail": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"hypno": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"igglybuff": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"illumise": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"ivysaur": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"jigglypuff": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"jirachi": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"jolteon": {
+		"Shoot": 0,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"jumpluff": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 8
+	},
+	"jynx": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"kabuto": {
+		"Shoot": 6,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"kabutops": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"kadabra": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"kakuna": {
+		"Charge": 5,
+		"Attack": 7
+	},
+	"kangaskhan": {
+		"Shoot": 8,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"kecleon": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"kingdra": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"kingler": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"kirlia": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"koffing": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"krabby": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"kyogre": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"lairon": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"lanturn": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"lapras": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"larvitar": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"latias": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"latios": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"ledian": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"ledyba": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"lickitung": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"lileep": {
+		"Shoot": 0,
+		"Charge": 5,
+		"Attack": 1
+	},
+	"linoone": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"lombre": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"lotad": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"loudred": {
+		"Shoot": 7,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"ludicolo": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"lugia": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"lunatone": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"luvdisc": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"machamp": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"machoke": {
+		"Charge": 5,
+		"Attack": 7
+	},
+	"machop": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"magby": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"magcargo": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"magikarp": {
+		"Shoot": 11,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"magmar": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"magnemite": {
+		"Shoot": 0,
+		"Charge": 5,
+		"Attack": 12
+	},
+	"magneton": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"makuhita": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"manectric": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"mankey": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"mantine": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"mareep": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"marill": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"marowak": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"marshtomp": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"masquerain": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"mawile": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"medicham": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"meditite": {
+		"Shoot": 6,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"meganium": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"meowth": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"metagross": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"metang": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"metapod": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"mew": {
+		"Shoot": 7,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"mewtwo": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"mightyena": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"milotic": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"miltank": {
+		"Shoot": 6,
+		"Charge": 5,
+		"Attack": 8
+	},
+	"minun": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"misdreavus": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"moltres": {
+		"Shoot": 6,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"mudkip": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"muk": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"murkrow": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"natu": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"nidoking": {
+		"Shoot": 6,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"nidoqueen": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"nidoran_f": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"nidoran_m": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"nidorina": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"nidorino": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"nincada": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"ninjask": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"noctowl": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"nosepass": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"numel": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"nuzleaf": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"octillery": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"oddish": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"omanyte": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"omastar": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"onix": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"paras": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"parasect": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"pelipper": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"persian": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"phanpy": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"pichu": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"pidgeot": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"pidgeotto": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"pidgey": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"pikachu": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"piloswine": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"pineco": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"pinsir": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"plusle": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"politoed": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"poliwag": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"poliwhirl": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"poliwrath": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"ponyta": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"poochyena": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"porygon": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"porygon2": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"primeape": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"psyduck": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"pupitar": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"quagsire": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"quilava": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"qwilfish": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"raichu": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"raikou": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"ralts": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"rapidash": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"raticate": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"rattata": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"rayquaza": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"regice": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"regirock": {
+		"Shoot": 0,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"registeel": {
+		"Shoot": 0,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"relicanth": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"remoraid": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"rhydon": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"rhyhorn": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"roselia": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"sableye": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"salamence": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sandshrew": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sandslash": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sceptile": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"scizor": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"scyther": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"seadra": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"seaking": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sealeo": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"seedot": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"seel": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sentret": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"seviper": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sharpedo": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"shedinja": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"shelgon": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"shellder": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"shiftry": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"shroomish": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"shuppet": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"silcoon": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"skarmory": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"skiploom": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 8
+	},
+	"skitty": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"slaking": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"slakoth": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"slowbro": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 11
+	},
+	"slowking": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"slowpoke": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"slugma": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"smeargle": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"smoochum": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sneasel": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"snorlax": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"snorunt": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"snubbull": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"solrock": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"spearow": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"spheal": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"spinarak": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"spinda": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"spoink": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"squirtle": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"stantler": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"starmie": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"staryu": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"steelix": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sudowoodo": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"suicune": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"sunflora": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"sunkern": {
+		"Shoot": 10,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"surskit": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"swablu": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"swalot": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"swampert": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"swellow": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"swinub": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"taillow": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"tangela": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"tauros": {
+		"Charge": 5,
+		"Attack": 4
+	},
+	"teddiursa": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"tentacool": {
+		"Shoot": 0,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"tentacruel": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"togepi": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"togetic": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"torchic": {
+		"Shoot": 7,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"torkoal": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"totodile": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"trapinch": {
+		"Shoot": 7,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"treecko": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"tropius": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"typhlosion": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"tyranitar": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"tyrogue": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"umbreon": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 2
+	},
+	"unown": {
+		"Charge": 5,
+		"Attack": 3
+	},
+	"ursaring": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"vaporeon": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"venomoth": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"venonat": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"venusaur": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"vibrava": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"victreebel": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"vigoroth": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"vileplume": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 7
+	},
+	"volbeat": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"voltorb": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"wailmer": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"wailord": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"walrein": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"wartortle": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"weedle": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"weepinbell": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"weezing": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"whiscash": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"whismur": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"wigglytuff": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"wingull": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"wobbuffet": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"wooper": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"wurmple": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"wynaut": {
+		"Shoot": 7,
+		"Charge": 5,
+		"Attack": 5
+	},
+	"xatu": {
+		"Shoot": 2,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"yanma": {
+		"Shoot": 4,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"zangoose": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 3
+	},
+	"zapdos": {
+		"Shoot": 3,
+		"Charge": 5,
+		"Attack": 4
+	},
+	"zigzagoon": {
+		"Shoot": 1,
+		"Charge": 5,
+		"Attack": 6
+	},
+	"zubat": {
+		"Shoot": 5,
+		"Charge": 5,
+		"Attack": 4
+	}
+};
+//#endregion
+//#region src/data/generated/impactosDosGolpes.generated.ts
+var IMPACTOS_DOS_GOLPES = {
+	absorb: [160, 160],
+	acid: [300, 300],
+	acid_spray: [220, 220],
+	acrobatics: [260, 260],
+	aerial_ace: [150, 150],
+	aeroblast: [280, 280],
+	air_cutter: [216, 216],
+	air_slash: [210, 390],
+	ancient_power: [320, 320],
+	aoe50_bug: [530, 530],
+	aoe50_dark: [350, 350],
+	aoe50_dragon: [300, 300],
+	aoe50_electric: [200, 200],
+	aoe50_fairy: [360, 360],
+	aoe50_fighting: [198.28991909384766, 198.28991909384766],
+	aoe50_fire: [200, 200],
+	aoe50_flying: [300, 300],
+	aoe50_ghost: [300, 300],
+	aoe50_grass: [200, 200],
+	aoe50_ground: [280, 280],
+	aoe50_ice: [300, 300],
+	aoe50_normal: [200, 200],
+	aoe50_poison: [370, 370],
+	aoe50_psychic: [320, 320],
+	aoe50_rock: [420, 420],
+	aoe50_steel: [300, 300],
+	aoe50_water: [200, 200],
+	aqua_jet: [80, 80],
+	aqua_tail: [220, 220],
+	arm_thrust: [90, 90],
+	assurance: [220, 220],
+	astonish: [180, 180],
+	aura_sphere: [260, 260],
+	aurora_beam: [200, 200],
+	avalanche: [260, 260],
+	barrage: [160, 160],
+	belch: [260, 260],
+	bind: [220, 220],
+	bite: [170, 170],
+	blaze_kick: [160, 160],
+	blizzard: [500, 1e3],
+	body_slam: [260, 260],
+	bone_club: [200, 200],
+	bone_rush: [120, 120],
+	bonemerang: [180, 180],
+	boomburst: [160, 160],
+	bounce: [320, 320],
+	brave_bird: [230, 230],
+	brick_break: [220, 220],
+	brine: [220, 220],
+	brutal_swing: [200, 200],
+	bubble: [400, 400],
+	bubble_beam: [190, 190],
+	bug_bite: [130, 130],
+	bug_buzz: [240, 240],
+	bulldoze: [270, 270],
+	bullet_seed: [120, 120],
+	burn_up: [300, 300],
+	charge_beam: [220, 220],
+	chip_away: [160, 160],
+	circle_throw: [300, 300],
+	clamp: [200, 200],
+	clear_smog: [220, 220],
+	close_combat: [120, 120],
+	comet_punch: [90, 90],
+	confusion: [300, 300],
+	constrict: [240, 240],
+	counter: [260, 260],
+	covet: [230, 230],
+	crabhammer: [220, 220],
+	cross_chop: [150, 150],
+	cross_poison: [140, 140],
+	crunch: [190, 190],
+	crush_claw: [170, 170],
+	dark_pulse: [340, 340],
+	dazzling_gleam: [160, 160],
+	dig: [320, 320],
+	disarming_voice: [280, 280],
+	discharge: [140, 410],
+	dive: [300, 300],
+	dizzy_punch: [160, 160],
+	doom_desire: [440, 440],
+	double_edge: [260, 260],
+	double_hit: [160, 160],
+	double_kick: [170, 360],
+	double_slap: [110, 110],
+	dragon_breath: [300, 300],
+	dragon_claw: [160, 160],
+	dragon_pulse: [380, 380],
+	dragon_rage: [240, 240],
+	dragon_rush: [310, 310],
+	dragon_tail: [200, 200],
+	draining_kiss: [300, 300],
+	dream_eater: [240, 240],
+	drill_peck: [300, 520],
+	drill_run: [230, 230],
+	dual_chop: [180, 320],
+	dynamic_punch: [200, 200],
+	earth_power: [340, 340],
+	earthquake: [230, 910],
+	echoed_voice: [200, 200],
+	egg_bomb: [300, 300],
+	electro_ball: [220, 220],
+	ember: [170, 350],
+	endeavor: [200, 200],
+	energy_ball: [300, 300],
+	eruption: [500, 1040],
+	explosion: [180, 180],
+	extrasensory: [260, 260],
+	extreme_speed: [120, 120],
+	facade: [260, 260],
+	fairy_wind: [300, 300],
+	fake_out: [140, 140],
+	false_swipe: [120, 120],
+	feint: [200, 200],
+	feint_attack: [260, 260],
+	fell_stinger: [150, 150],
+	final_gambit: [300, 300],
+	fire_blast: [620, 620],
+	fire_fang: [160, 160],
+	fire_punch: [140, 140],
+	fire_spin: [180, 180],
+	flail: [260, 260],
+	flame_burst: [260, 260],
+	flame_charge: [200, 200],
+	flame_wheel: [250, 250],
+	flamethrower: [250, 250],
+	flare_blitz: [280, 280],
+	flash_cannon: [320, 320],
+	fling: [220, 220],
+	fly: [300, 300],
+	focus_blast: [340, 340],
+	focus_punch: [240, 240],
+	force_palm: [270, 270],
+	foul_play: [280, 280],
+	freeze_dry: [260, 260],
+	frost_breath: [240, 240],
+	frustration: [240, 240],
+	fury_attack: [110, 110],
+	fury_cutter: [100, 100],
+	fury_swipes: [100, 100],
+	future_sight: [420, 420],
+	giga_drain: [200, 200],
+	giga_impact: [340, 340],
+	grass_knot: [220, 220],
+	gunk_shot: [640, 640],
+	gust: [470, 470],
+	gyro_ball: [260, 260],
+	hammer_arm: [280, 280],
+	head_smash: [320, 320],
+	headbutt: [240, 240],
+	heart_stamp: [260, 260],
+	heat_wave: [350, 350],
+	heavy_slam: [280, 280],
+	hex: [260, 260],
+	hidden_power: [300, 300],
+	high_horsepower: [250, 250],
+	high_jump_kick: [230, 230],
+	horn_attack: [170, 170],
+	hurricane: [220, 220],
+	hydro_pump: [470, 470],
+	hyper_beam: [300, 300],
+	hyper_fang: [140, 140],
+	hyper_voice: [230, 230],
+	ice_ball: [220, 220],
+	ice_beam: [200, 200],
+	ice_fang: [160, 160],
+	ice_punch: [140, 140],
+	ice_shard: [180, 340],
+	icicle_crash: [240, 240],
+	icicle_spear: [130, 130],
+	icy_wind: [300, 300],
+	incinerate: [200, 200],
+	inferno: [260, 260],
+	infestation: [180, 180],
+	iron_head: [220, 220],
+	iron_tail: [520, 520],
+	jump_kick: [170, 170],
+	karate_chop: [110, 110],
+	knock_off: [140, 140],
+	last_resort: [380, 380],
+	lava_plume: [220, 220],
+	leaf_blade: [260, 390],
+	leaf_storm: [620, 1100],
+	leaf_tornado: [200, 200],
+	leech_life: [150, 150],
+	lick: [300, 300],
+	low_kick: [130, 130],
+	low_sweep: [150, 150],
+	luster_purge: [280, 280],
+	mach_punch: [100, 100],
+	magical_leaf: [480, 480],
+	magnet_bomb: [400, 400],
+	magnitude: [160, 160],
+	mega_drain: [180, 180],
+	mega_kick: [220, 220],
+	mega_punch: [180, 180],
+	megahorn: [480, 480],
+	metal_claw: [140, 140],
+	meteor_mash: [300, 300],
+	mirror_coat: [300, 300],
+	mirror_shot: [220, 220],
+	mist_ball: [260, 260],
+	moonblast: [560, 560],
+	mud_bomb: [260, 260],
+	mud_shot: [260, 260],
+	mud_slap: [220, 380],
+	muddy_water: [220, 220],
+	needle_arm: [160, 160],
+	night_shade: [300, 300],
+	night_slash: [120, 120],
+	nuzzle: [200, 200],
+	octazooka: [220, 220],
+	ominous_wind: [220, 220],
+	origin_pulse: [260, 260],
+	outrage: [200, 760],
+	overheat: [300, 300],
+	pay_day: [200, 200],
+	payback: [260, 260],
+	peck: [110, 110],
+	petal_blizzard: [350, 350],
+	petal_dance: [240, 240],
+	phantom_force: [460, 460],
+	pin_missile: [190, 430],
+	play_rough: [560, 560],
+	pluck: [130, 130],
+	poison_fang: [160, 160],
+	poison_jab: [160, 160],
+	poison_sting: [180, 180],
+	poison_tail: [180, 180],
+	pound: [110, 270],
+	powder_snow: [200, 200],
+	power_gem: [420, 420],
+	power_whip: [300, 300],
+	precipice_blades: [300, 300],
+	present: [280, 280],
+	psybeam: [220, 220],
+	psychic: [560, 560],
+	psycho_boost: [340, 340],
+	psycho_cut: [200, 200],
+	psyshock: [260, 260],
+	psystrike: [840, 840],
+	psywave: [280, 280],
+	punishment: [230, 230],
+	pursuit: [260, 260],
+	quick_attack: [80, 80],
+	rage: [220, 220],
+	rapid_spin: [260, 260],
+	razor_leaf: [360, 360],
+	razor_shell: [140, 140],
+	razor_wind: [260, 260],
+	retaliate: [280, 280],
+	return: [260, 260],
+	revenge: [230, 230],
+	reversal: [240, 240],
+	rock_blast: [160, 160],
+	rock_slide: [420, 420],
+	rock_throw: [280, 400],
+	rock_tomb: [300, 300],
+	rolling_kick: [160, 160],
+	rollout: [190, 190],
+	round: [300, 300],
+	sacred_fire: [240, 240],
+	sand_tomb: [180, 180],
+	scald: [260, 260],
+	scratch: [110, 110],
+	seed_bomb: [240, 240],
+	seismic_toss: [380, 380],
+	self_destruct: [260, 260],
+	shadow_ball: [460, 460],
+	shadow_claw: [190, 190],
+	shadow_punch: [130, 130],
+	shadow_sneak: [220, 220],
+	shock_wave: [375, 375],
+	signal_beam: [170, 170],
+	silver_wind: [220, 220],
+	skull_bash: [370, 370],
+	sky_attack: [960, 960],
+	sky_drop: [360, 360],
+	sky_uppercut: [300, 300],
+	slam: [240, 240],
+	slash: [130, 130],
+	sludge: [380, 380],
+	sludge_bomb: [360, 360],
+	sludge_wave: [370, 370],
+	smack_down: [200, 200],
+	smart_strike: [260, 260],
+	smelling_salts: [200, 200],
+	smog: [220, 220],
+	snarl: [280, 280],
+	snore: [260, 260],
+	solar_beam: [360, 360],
+	sonic_boom: [200, 200],
+	spark: [160, 160],
+	spike_cannon: [110, 110],
+	steamroller: [250, 250],
+	steel_wing: [200, 200],
+	stomp: [170, 170],
+	stomping_tantrum: [150, 150],
+	stone_edge: [440, 440],
+	stored_power: [300, 300],
+	storm_throw: [260, 260],
+	strength: [300, 300],
+	struggle_bug: [280, 280],
+	submission: [300, 300],
+	sucker_punch: [100, 100],
+	super_fang: [200, 200],
+	superpower: [260, 260],
+	surf: [320, 320],
+	swift: [312, 312],
+	synchronoise: [380, 1100],
+	tackle: [180, 180],
+	take_down: [230, 230],
+	thief: [150, 150],
+	thrash: [120, 120],
+	thunder: [620, 620],
+	thunder_fang: [160, 160],
+	thunder_punch: [120, 120],
+	thunder_shock: [110, 110],
+	thunderbolt: [275, 275],
+	tri_attack: [260, 260],
+	triple_kick: [100, 100],
+	twineedle: [130, 130],
+	twister: [300, 300],
+	u_turn: [160, 160],
+	uproar: [220, 220],
+	vacuum_wave: [120, 120],
+	venoshock: [220, 220],
+	vice_grip: [200, 200],
+	vine_whip: [260, 430],
+	vital_throw: [300, 300],
+	volt_switch: [150, 150],
+	wake_up_slap: [220, 220],
+	water_gun: [150, 370],
+	water_pulse: [360, 360],
+	water_spout: [680, 780],
+	waterfall: [260, 260],
+	weather_ball: [260, 260],
+	whirlpool: [180, 180],
+	wild_charge: [260, 260],
+	wing_attack: [220, 220],
+	wood_hammer: [290, 290],
+	wrap: [220, 220],
+	wring_out: [260, 260],
+	x_scissor: [260, 260],
+	zap_cannon: [360, 360],
+	zen_headbutt: [310, 310]
+};
+//#endregion
+//#region src/engine/tempoDoGolpe.ts
+/** Pose de quem nao tem arte nenhuma (placeholder geometrico): o valor antigo. */
+var POSE_SEM_ARTE = .5;
+/** Onde cai o apice quando o acervo nao marca `HitFrame`: fracao da pose. */
+var APICE_ESTIMADO = .4;
+/**
+* Quanto o POKE ainda espera depois do ULTIMO impacto antes de andar. O dono
+* escolheu "ate o ultimo impacto" (nao a coreografia inteira com rescaldo): a
+* folga so evita que o passo comece no mesmo quadro da faisca.
+*/
+var FOLGA_DEPOIS_DO_IMPACTO = .15;
+var somaEmSegundos = (duracoes, quadros) => duracoes.slice(0, quadros).reduce((s, d) => s + d, 0) / 60;
+/**
+* `kind` e a pose que `triggerAttackAnim` vai tocar. A especie pode nao ter
+* essa arte (ANIM_FALLBACKS troca Shoot por Charge etc.): o apice e o da pose
+* que REALMENTE toca.
+*/
+function tempoDoGolpe(speciesId, kind, abilityId) {
+	const arte = resolveBattleAnim(speciesId, kind);
+	let duracao = POSE_SEM_ARTE;
+	let apice = POSE_SEM_ARTE * APICE_ESTIMADO;
+	if (arte && arte.durations.length > 0) {
+		duracao = somaEmSegundos(arte.durations, arte.durations.length);
+		const quadro = APICE_DO_ATAQUE[speciesId]?.[arte.name];
+		apice = quadro !== void 0 ? somaEmSegundos(arte.durations, quadro) : duracao * APICE_ESTIMADO;
+	}
+	const [primeiro, derradeiro] = IMPACTOS_DOS_GOLPES[abilityId] ?? [0, 0];
+	const impacto = apice + primeiro / 1e3;
+	const pose = arte?.name === "Charge" ? Math.max(duracao, impacto) : duracao;
+	return {
+		apice,
+		impacto,
+		pose,
+		soltura: Math.max(pose, apice + derradeiro / 1e3 + FOLGA_DEPOIS_DO_IMPACTO)
+	};
 }
 //#endregion
 //#region src/data/generated/subBiomas.generated.ts
@@ -104619,7 +106897,6 @@ function abrirRound(world, player, rival, regras, numero, espera) {
 }
 //#endregion
 //#region src/engine/systems/combatSystem.ts
-var HIT_LAND_DELAY = ATTACK_ANIM_DURATION;
 var IMPACT_EFFECT_DURATION = 3;
 var AOE_EFFECT_DURATION = 3;
 var STATUS_VFX_DURATION = 1.1;
@@ -105544,23 +107821,112 @@ function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 	if (escolhido) return escolhido;
 	return entity.kind === "enemy" ? tentarAtaqueBasico(entity, attackerSpecies, disabled) : null;
 }
-function queueHit(world, attacker, target, ability) {
+function iniciarPoseDoGolpe(world, atacante, ability, alvo) {
+	const duelo = world.mapDef?.encarada === true;
+	const area = ability.target === "aoe";
+	const tempo = tempoDoGolpe(atacante.poke.speciesId, poseDeAtaque(area, duelo), ability.id);
+	triggerAttackAnim(atacante, area, alvo, duelo, tempo.pose);
+	return tempo;
+}
+/**
+* O POKE nao anda enquanto o proprio golpe nao bateu pela ultima vez — mesmo
+* que o alvo ja tenha caido e ele queira ir pro proximo (pedido do dono, 11/10).
+* Armada no DISPARO e fora do `silent`: o servidor re-simula o movimento e tem
+* que parar o POKE igual ao cliente. Golpe de status nao trava (nao tem
+* coreografia que fique pra tras); so a pose segura a posicao.
+* Substitui a trava fixa de 0,7 s depois do pouso (03/10).
+*/
+function travarAteOGolpeAcabar(atacante, ability, tempo) {
+	if ((ability.target === "aoe" ? isDamagingAbility(ability) : ability.power > 0) && tempo.soltura > (atacante.travaDoGolpe ?? 0)) atacante.travaDoGolpe = tempo.soltura;
+}
+function removerEfeitoDoGolpe(world, efeitoId) {
+	if (efeitoId) world.effects = world.effects.filter((e) => e.id !== efeitoId);
+}
+function efeitoDoGolpeUnico(attacker, local, ability, extra) {
+	const mesmoLugar = local.x === attacker.x && local.y === attacker.y;
+	return {
+		type: "abilityEffect",
+		x: local.x,
+		y: local.y,
+		targetX: local.x,
+		targetY: local.y - local.radius * .6,
+		anguloDeAtaque: mesmoLugar ? void 0 : Math.atan2(local.y - attacker.y, local.x - attacker.x),
+		origemX: attacker.x,
+		origemY: attacker.y - attacker.radius * .6,
+		color: colorForType(ability.type),
+		isAoe: false,
+		delay: extra.delay,
+		isCrit: extra.isCrit || void 0,
+		acertosVisuais: extra.acertosVisuais,
+		duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
+		elementType: ability.type,
+		abilityId: ability.id,
+		statusDirection: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.direcao ?? "diminui" : void 0,
+		statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : void 0,
+		seguir: local,
+		apontarPara: mesmoLugar || !ehDirecional(ability.id) ? void 0 : attacker
+	};
+}
+function anelDoGolpeEmArea(attacker, ability, delay) {
+	return {
+		type: "abilityEffect",
+		x: attacker.x,
+		y: attacker.y,
+		targetX: attacker.x,
+		targetY: attacker.y - attacker.radius * .6,
+		origemX: attacker.x,
+		origemY: attacker.y - attacker.radius * .6,
+		color: colorForType(ability.type),
+		isAoe: true,
+		delay,
+		duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
+		worldSize: (ability.radius ?? 0) * 2,
+		elementType: ability.type,
+		abilityId: ability.id,
+		statusDirection: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.direcao ?? "diminui" : void 0,
+		statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : void 0,
+		seguir: attacker
+	};
+}
+function queueHit(world, attacker, target, ability, tempo, silent) {
+	const unico = ability.target !== "aoe";
+	const acertos = unico ? quantidadeDeAcertos(world.rng, ability) : void 0;
+	let efeitoId;
+	if (unico && ability.power > 0 && !silent) {
+		const efeito = createWorldEffect(world.counters, efeitoDoGolpeUnico(attacker, target, ability, {
+			delay: tempo.apice,
+			acertosVisuais: acertos && acertos > 1 ? acertos : void 0
+		}));
+		world.effects.push(efeito);
+		efeitoId = efeito.id;
+	}
 	world.pendingHits.push({
 		id: `hit-${world.counters.pendingHit++}`,
-		timer: HIT_LAND_DELAY,
+		timer: tempo.impacto,
 		attackerId: attacker.id,
 		targetId: target.id,
-		ability
+		ability,
+		acertos,
+		efeitoId,
+		pouso: tempo.impacto
 	});
 }
-function queueAoeVisual(world, attacker, ability) {
+function queueAoeVisual(world, attacker, ability, tempo, silent) {
+	let efeitoId;
+	if (!silent) {
+		const efeito = createWorldEffect(world.counters, anelDoGolpeEmArea(attacker, ability, tempo.apice));
+		world.effects.push(efeito);
+		efeitoId = efeito.id;
+	}
 	world.pendingHits.push({
 		id: `hit-${world.counters.pendingHit++}`,
-		timer: HIT_LAND_DELAY,
+		timer: tempo.impacto,
 		attackerId: attacker.id,
 		targetId: null,
 		ability,
-		isAoeVisual: true
+		isAoeVisual: true,
+		efeitoId,
+		pouso: tempo.impacto
 	});
 }
 function anunciarStatus(world, alvo, tipo, quando = "entrou") {
@@ -105771,7 +108137,7 @@ function executePlayerAction(world, player, engagedEnemies, silent, golpeEscolhi
 	if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(player, ability);
 	startGlobalCooldown(player, MIN_ACTION_GAP);
-	triggerAttackAnim(player, ability.target === "aoe", primaryTarget, world.mapDef?.encarada === true);
+	const tempo = iniciarPoseDoGolpe(world, player, ability, primaryTarget);
 	announceAbility(world, player, ability);
 	const miraGarantida = player.miraGarantidaAlvoId != null && player.miraGarantidaAlvoId === primaryTarget?.id;
 	if (miraGarantida) player.miraGarantidaAlvoId = null;
@@ -105785,8 +108151,9 @@ function executePlayerAction(world, player, engagedEnemies, silent, golpeEscolhi
 		armarCooldown(player, ability, world);
 		return;
 	}
-	for (const target of targets) queueHit(world, player, target, ability);
-	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
+	travarAteOGolpeAcabar(player, ability, tempo);
+	for (const target of targets) queueHit(world, player, target, ability, tempo, silent);
+	if (ability.target === "aoe") queueAoeVisual(world, player, ability, tempo, silent);
 }
 function executeEnemyAction(world, enemy, player, silent, golpeEscolhido = null) {
 	if (world.mapDef?.passiveEnemies) return;
@@ -105798,7 +108165,7 @@ function executeEnemyAction(world, enemy, player, silent, golpeEscolhido = null)
 	if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(enemy, ability);
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
-	triggerAttackAnim(enemy, ability.target === "aoe", player, world.mapDef?.encarada === true);
+	const tempo = iniciarPoseDoGolpe(world, enemy, ability, player);
 	announceAbility(world, enemy, ability);
 	const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id;
 	if (miraGarantida) enemy.miraGarantidaAlvoId = null;
@@ -105807,8 +108174,9 @@ function executeEnemyAction(world, enemy, player, silent, golpeEscolhido = null)
 		if (!silent) anunciarErro(world, enemy);
 		return;
 	}
-	queueHit(world, enemy, player, ability);
-	if (ability.target === "aoe") queueAoeVisual(world, enemy, ability);
+	travarAteOGolpeAcabar(enemy, ability, tempo);
+	queueHit(world, enemy, player, ability, tempo, silent);
+	if (ability.target === "aoe") queueAoeVisual(world, enemy, ability, tempo, silent);
 }
 function creditarMorteSeNecessario(entity, defeatedEnemyIds, onPlayerFainted) {
 	if (!isDead(entity)) return;
@@ -105968,7 +108336,7 @@ function trocarEstagios(a, b, stats) {
 *
 * O CANCELAMENTO JA EXISTIA E NUNCA DISPARAVA. `resolveHit` desiste na primeira
 * linha quando o atacante ja esta morto — mas dois golpes disparados no mesmo
-* tick nascem com o MESMO `HIT_LAND_DELAY`, entao pousam no mesmo tick, e a
+* tick nasciam com o mesmo atraso fixo, entao pousavam no mesmo tick, e a
 * ordem de resolucao era a de ENFILEIRAMENTO. Quem tivesse enfileirado antes
 * batia primeiro, independentemente de Velocidade, e o segundo ja estava com o
 * dano gravado antes de a guarda poder olhar pra ele. Resultado: troca mutua em
@@ -105996,42 +108364,52 @@ function trocarEstagios(a, b, stats) {
 */
 function ordenarPorVelocidade(world, hits) {
 	if (hits.length < 2) return hits;
-	const clima = world.clima?.tipo ?? null;
-	const velocidade = /* @__PURE__ */ new Map();
-	for (const hit of hits) {
-		if (velocidade.has(hit.attackerId)) continue;
-		const atacante = findEntityById(world.player, world.enemies, hit.attackerId);
-		velocidade.set(hit.attackerId, atacante ? velocidadeEfetiva(atacante, clima) : -Infinity);
-	}
 	return [...hits].sort((a, b) => {
-		const diff = (velocidade.get(b.attackerId) - velocidade.get(a.attackerId)) * ((world.trickRoomRestante ?? 0) > 0 ? -1 : 1);
+		const diff = rapidezNaOrdem(world, b.attackerId) - rapidezNaOrdem(world, a.attackerId);
 		return diff !== 0 ? diff : a.id.localeCompare(b.id);
 	});
 }
+/** Velocidade efetiva com o sinal do Trick Room — maior age antes. Sumido: -Infinity. */
+function rapidezNaOrdem(world, entityId) {
+	const atacante = findEntityById(world.player, world.enemies, entityId);
+	if (!atacante) return -Infinity;
+	return velocidadeEfetiva(atacante, world.clima?.tipo ?? null) * ((world.trickRoomRestante ?? 0) > 0 ? -1 : 1);
+}
 /**
-* Quanto o POKE fica PARADO depois que o proprio golpe de dano pousa (03/10),
-* pro golpe nao ficar pra tras quando o alvo cai. A pose (`attackAnimTimer`)
-* ja segurou ate o pouso; isto segura mais um tanto, IGUAL pra todo golpe — a
-* pedido do dono, em vez de variar com a coreografia de cada um.
-*
-* Por que 0,7 s: o ultimo impacto das coreografias cai em ate 370 ms na
-* mediana, 520 ms em 75% e 700 ms em 90% dos golpes de alvo unico, e o jato do
-* Flamethrower para de sair da boca em 640 ms. Fumaca e brasas que ainda
-* esfriam no alvo depois disso podem ficar pra tras.
-*
-* A primeira versao (02/10) travava a duracao INTEIRA de cada coreografia
-* (0,6 a 2,1 s) e custava de 4% a 11% dos abates por minuto.
+* PH-493 COM POUSO POR GOLPE (11/10). Desde que o dano cai no impacto do VFX,
+* dois golpes disparados no MESMO tick um contra o outro pousam em instantes
+* diferentes — o mais lento, com VFX curto, bateria antes e mataria quem era
+* mais rapido. Aqui o hit do mais lento ESPERA o pouso do mais rapido; os dois
+* caem no mesmo tick e `ordenarPorVelocidade` + a guarda de `resolveHit`
+* fazem o resto, como antes. So vale pro par que se ataca e saiu junto: golpe
+* disparado depois segue o proprio pouso.
 */
-var TRAVA_DEPOIS_DO_GOLPE = .7;
-/** Arma a trava sem nunca encurtar uma maior que ja esteja correndo. Ver movementSystem.ts#naoAnda. */
-function travarDepoisDoGolpe(attacker) {
-	if (.7 > (attacker.travaDoGolpe ?? 0)) attacker.travaDoGolpe = TRAVA_DEPOIS_DO_GOLPE;
+function esperaOMaisRapido(world, hit) {
+	if (hit.targetId == null || hit.pouso === void 0) return false;
+	const disparoDoHit = hit.pouso - hit.timer;
+	const meu = rapidezNaOrdem(world, hit.attackerId);
+	let espera = 0;
+	for (const outro of world.pendingHits) {
+		if (outro.attackerId !== hit.targetId || outro.targetId !== hit.attackerId || outro.pouso === void 0) continue;
+		if (Math.abs(outro.pouso - outro.timer - disparoDoHit) > 1e-6) continue;
+		if (rapidezNaOrdem(world, outro.attackerId) <= meu) continue;
+		espera = Math.max(espera, outro.timer);
+	}
+	if (espera <= 0) return false;
+	hit.timer = espera;
+	return true;
 }
 function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const attacker = findEntityById(world.player, world.enemies, hit.attackerId);
-	if (!attacker) return;
+	if (!attacker) {
+		removerEfeitoDoGolpe(world, hit.efeitoId);
+		return;
+	}
 	let { ability } = hit;
-	if (isDead(attacker)) return;
+	if (isDead(attacker)) {
+		removerEfeitoDoGolpe(world, hit.efeitoId);
+		return;
+	}
 	if (isAbilityReady(attacker, ability.id)) armarCooldown(attacker, ability, world);
 	if (ability.id === "fling") ability = {
 		...ability,
@@ -106045,25 +108423,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		ability = opcoes[Math.floor(nextFloat(world.rng) * opcoes.length)];
 	}
 	if (hit.isAoeVisual) {
-		if (isDamagingAbility(ability)) travarDepoisDoGolpe(attacker);
-		if (!silent) world.effects.push(createWorldEffect(world.counters, {
-			type: "abilityEffect",
-			x: attacker.x,
-			y: attacker.y,
-			targetX: attacker.x,
-			targetY: attacker.y - attacker.radius * .6,
-			origemX: attacker.x,
-			origemY: attacker.y - attacker.radius * .6,
-			color: colorForType(ability.type),
-			isAoe: true,
-			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
-			worldSize: (ability.radius ?? 0) * 2,
-			elementType: ability.type,
-			abilityId: ability.id,
-			statusDirection: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.direcao ?? "diminui" : void 0,
-			statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : void 0,
-			seguir: attacker
-		}));
+		if (!silent && !hit.efeitoId) world.effects.push(createWorldEffect(world.counters, anelDoGolpeEmArea(attacker, ability, 0)));
 		const alguemComDamp = [world.player, ...world.enemies].some((e) => e && !isDead(e) && traitDoPoke(e.poke) === "damp");
 		if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker) && !alguemComDamp) {
 			const recoil = Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT);
@@ -106122,7 +108482,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		target.y = clamp$1(target.y + dy / distancia * 100, target.radius, (world.mapDef?.bounds.height ?? 900) - target.radius);
 		target.globalCooldown = Math.max(target.globalCooldown, TURNO_SEGUNDOS);
 	}
-	const acertos = quantidadeDeAcertos(world.rng, ability);
+	const acertos = hit.acertos ?? quantidadeDeAcertos(world.rng, ability);
 	let danoFinal = 0;
 	let danoCausado = 0;
 	let houveCritico = false;
@@ -106573,31 +108933,17 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		attacker.y = clamp$1(attacker.y + dy / distancia * 60, attacker.radius, (bounds?.height ?? 900) - attacker.radius);
 	}
 	const isAoe = ability.target === "aoe";
-	if (!isAoe && ability.power > 0) travarDepoisDoGolpe(attacker);
-	if (!isAoe && !silent && (ability.power > 0 || statusRecebeuEm)) {
+	if (hit.efeitoId && !silent) {
+		const efeito = world.effects.find((e) => e.id === hit.efeitoId);
+		if (efeito) efeito.acertosVisuais = acertos > 1 ? acertosVisuais : void 0;
+	}
+	if (!isAoe && !silent && !hit.efeitoId && (ability.power > 0 || statusRecebeuEm)) {
 		const local = !isDamagingAbility(ability) && statusRecebeuEm ? statusRecebeuEm : target;
-		const mesmoLugar = local.x === attacker.x && local.y === attacker.y;
-		world.effects.push(createWorldEffect(world.counters, {
-			type: "abilityEffect",
-			x: local.x,
-			y: local.y,
-			targetX: local.x,
-			targetY: local.y - local.radius * .6,
-			anguloDeAtaque: mesmoLugar ? void 0 : Math.atan2(local.y - attacker.y, local.x - attacker.x),
-			origemX: attacker.x,
-			origemY: attacker.y - attacker.radius * .6,
-			color: colorForType(ability.type),
-			isAoe: false,
-			isCrit: houveCritico || void 0,
-			acertosVisuais: acertos > 1 ? acertosVisuais : void 0,
-			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
-			elementType: ability.type,
-			abilityId: ability.id,
-			statusDirection: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.direcao ?? "diminui" : void 0,
-			statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : void 0,
-			seguir: local,
-			apontarPara: mesmoLugar || !ehDirecional(ability.id) ? void 0 : attacker
-		}));
+		world.effects.push(createWorldEffect(world.counters, efeitoDoGolpeUnico(attacker, local, ability, {
+			delay: 0,
+			isCrit: houveCritico,
+			acertosVisuais: acertos > 1 ? acertosVisuais : void 0
+		})));
 	}
 	if (!isDead(target)) return;
 	if (traitDoPoke(attacker.poke) === "moxie" && !isDead(attacker)) {
@@ -106769,6 +109115,7 @@ function updateCombat(world, dt, opts = {}) {
 	}
 	tickEffects(world, dt);
 	for (const hit of world.pendingHits) hit.timer -= dt;
+	for (const hit of world.pendingHits) if (hit.timer <= 0) esperaOMaisRapido(world, hit);
 	const landed = ordenarPorVelocidade(world, world.pendingHits.filter((hit) => hit.timer <= 0));
 	world.pendingHits = world.pendingHits.filter((hit) => hit.timer > 0);
 	for (const hit of landed) {
