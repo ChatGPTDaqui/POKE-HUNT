@@ -45,7 +45,7 @@ export function Ativos() {
         <>
           <SectionLabel>LANCES RECEBIDOS ({recebidas.length})</SectionLabel>
           {recebidas.map((o) => (
-            <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] border-primary/40 p-[.4em]">
+            <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] border-menu-brand/40 p-[.4em]">
               {o.anuncio && (
                 <img
                   src={faceIconUrl(o.anuncio.species_id, o.anuncio.is_shiny) ?? undefined}
@@ -58,7 +58,7 @@ export function Ativos() {
                   {o.anuncio ? SPECIES[o.anuncio.species_id]?.name ?? o.anuncio.species_id : 'POKE'}
                   {o.anuncio ? ` Lv${o.anuncio.level}` : ''}
                 </b>
-                <div className="text-[.78em] text-n500">
+                <div className="text-[.78em] text-menu-muted">
                   lance de {o.comprador}
                   {/* Aceitar E vender, entao o liquido tem que estar na tela
                       antes do clique (PH-98) — nao depois, no extrato. */}
@@ -117,7 +117,7 @@ export function Ativos() {
           {minhas.map((o) => (
             <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
               <Gavel className="text-warn" />
-              <div className="min-w-[8em] flex-1 text-[.85em] text-n400">
+              <div className="min-w-[8em] flex-1 text-[.85em] text-menu-muted">
                 {o.modo === 'leilao'
                   ? <>Lance em leilão · encerra em <TempoRestante expiraEm={o.expira_em} /> · valor retido enquanto você estiver na frente</>
                   : <>Lance enviado · valor retido até o vendedor responder</>}
@@ -128,7 +128,7 @@ export function Ativos() {
                   perto do fim. O servidor recusa; a tela nao oferece um botao
                   que so serve pra dar erro. */}
               {o.modo === 'leilao' ? (
-                <span className="text-[.78em] text-n500">vale até alguém cobrir</span>
+                <span className="text-[.78em] text-menu-muted">vale até alguém cobrir</span>
               ) : (
                 <GameButton variant="danger" carregando={cancelarOferta.isPending} onClick={() => cancelarOferta.mutate(o.id)}>
                   <X /> Cancelar
@@ -140,13 +140,13 @@ export function Ativos() {
       )}
 
       <SectionLabel>MINHAS ORDENS DE ITEM</SectionLabel>
-      {ordens.length === 0 && <p className="text-n500">Nenhuma ordem ativa.</p>}
+      {ordens.length === 0 && <p className="text-menu-muted">Nenhuma ordem ativa.</p>}
       {ordens.map((o) => (
         <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
           <IconeItem itemId={o.item_id} />
           <div className="min-w-[8em] flex-1">
             <b className="font-medium">{ITEMS[o.item_id]?.name ?? o.item_id}</b>
-            <div className="text-[.78em] text-n500">
+            <div className="text-[.78em] text-menu-muted">
               {o.side === 'venda' ? 'Vendendo' : 'Comprando'} {fmt.format(o.remaining)} de {fmt.format(o.quantity)}
               {' · '}<span className="text-gold">{fmt.format(o.unit_price)}/un.</span>
               {o.side === 'compra' && o.gold_retido > 0 && ` · ${fmt.format(o.gold_retido)} de ouro retido`}
@@ -159,13 +159,13 @@ export function Ativos() {
       ))}
 
       <SectionLabel>MEUS POKES ANUNCIADOS</SectionLabel>
-      {anuncios.length === 0 && <p className="text-n500">Nenhum POKE anunciado.</p>}
+      {anuncios.length === 0 && <p className="text-menu-muted">Nenhum POKE anunciado.</p>}
       {anuncios.map((a) => (
         <GameCard key={a.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
           <img src={faceIconUrl(a.species_id, a.is_shiny) ?? undefined} alt="" className="h-[2.2em] w-[2.2em] rounded-[.4em] object-cover" />
           <div className="min-w-[8em] flex-1">
             <b className="font-medium">{SPECIES[a.species_id]?.name ?? a.species_id} Lv{a.level}</b>
-            <div className="text-[.78em] text-n500">
+            <div className="text-[.78em] text-menu-muted">
               IV {a.iv_percent}%{a.apenas_oferta && ` · ${a.ofertas ?? 0} lance(s)`}
               {a.modo === 'leilao' && <> · encerra em <TempoRestante expiraEm={a.expira_em} /></>}
             </div>
@@ -174,13 +174,13 @@ export function Ativos() {
                 esperando uma venda que ninguem mais pode fazer. */}
             {a.reservado_para && (
               <div className="mt-[.15em] flex flex-wrap items-center gap-[.3em] text-[.75em]">
-                <span className="flex items-center gap-[.2em] rounded-full bg-primary/15 px-[.4em] text-primary">
+                <span className="flex items-center gap-[.2em] rounded-full bg-menu-brand/15 px-[.4em] text-menu-brand">
                   <BookmarkSimple aria-hidden weight="fill" />
                   reservado para {a.reservado_nome ?? 'outro jogador'}
                 </span>
                 <button
                   type="button"
-                  className="text-n400 underline decoration-dotted underline-offset-2 hover:text-n200"
+                  className="text-menu-muted underline decoration-dotted underline-offset-2 hover:text-menu-ink"
                   onClick={() => reservar.mutate({ anuncioId: a.id, paraId: null })}
                 >
                   liberar
@@ -199,7 +199,7 @@ export function Ativos() {
               servidor recusa de qualquer forma — aqui a tela so nao mente sobre
               o que da pra fazer. */}
           {a.modo === 'leilao' && (a.ofertas ?? 0) > 0 ? (
-            <span className="text-[.78em] text-n500">
+            <span className="text-[.78em] text-menu-muted">
               travado até encerrar
             </span>
           ) : (

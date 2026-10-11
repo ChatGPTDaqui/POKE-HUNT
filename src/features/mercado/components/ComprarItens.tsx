@@ -44,21 +44,21 @@ function LivroDoItem({ itemId }: { itemId: string }) {
       <div className="grid grid-cols-2 gap-[.45em]">
         <div>
           <SectionLabel>OFERTAS DE VENDA</SectionLabel>
-          {(data?.vendas.length ?? 0) === 0 && <p className="text-n500">Ninguém vendendo.</p>}
+          {(data?.vendas.length ?? 0) === 0 && <p className="text-menu-muted">Ninguém vendendo.</p>}
           {data?.vendas.map((n) => (
             <div key={`v${n.unitPrice}`} className="flex justify-between text-[.85em]">
               <span className="text-gold">{fmt.format(n.unitPrice)}</span>
-              <span className="text-n400">x{fmt.format(n.quantity)}</span>
+              <span className="text-menu-muted">x{fmt.format(n.quantity)}</span>
             </div>
           ))}
         </div>
         <div>
           <SectionLabel>PROCURAS</SectionLabel>
-          {(data?.compras.length ?? 0) === 0 && <p className="text-n500">Ninguém procurando.</p>}
+          {(data?.compras.length ?? 0) === 0 && <p className="text-menu-muted">Ninguém procurando.</p>}
           {data?.compras.map((n) => (
             <div key={`c${n.unitPrice}`} className="flex justify-between text-[.85em]">
               <span className="text-ok">{fmt.format(n.unitPrice)}</span>
-              <span className="text-n400">x{fmt.format(n.quantity)}</span>
+              <span className="text-menu-muted">x{fmt.format(n.quantity)}</span>
             </div>
           ))}
         </div>
@@ -71,7 +71,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
       <HistoricoDePreco itemId={itemId} />
 
       <GameCard className="flex flex-wrap items-end gap-[.5em] p-[.6em]">
-        <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+        <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
           Preco por unidade
           <GameInput
             type="number" min={1} className="w-[7em]"
@@ -79,16 +79,16 @@ function LivroDoItem({ itemId }: { itemId: string }) {
             onChange={(e) => setPreco(Math.max(0, Math.floor(Number(e.target.value) || 0)))}
           />
         </label>
-        <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+        <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
           Quantidade
           <GameInput
             type="number" min={1} className="w-[6em]" value={qtd}
             onChange={(e) => setQtd(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
           />
         </label>
-        <div className="flex-1 text-[.8em] text-n400">
+        <div className="flex-1 text-[.8em] text-menu-muted">
           Total: <b className={custo > gold ? 'text-bad' : 'text-gold'}>{fmt.format(custo)}</b>
-          <div className="text-[.9em] text-n500">
+          <div className="text-[.9em] text-menu-muted">
             {melhorVenda > 0
               ? `Melhor venda agora: ${fmt.format(melhorVenda)}`
               : 'Sem oferta — sua ordem fica no livro esperando.'}
@@ -110,9 +110,9 @@ function LivroDoItem({ itemId }: { itemId: string }) {
       </GameCard>
 
       <SectionLabel>ÚLTIMOS NEGOCIOS</SectionLabel>
-      {(data?.negocios.length ?? 0) === 0 && <p className="text-n500">Nenhum negocio ainda.</p>}
+      {(data?.negocios.length ?? 0) === 0 && <p className="text-menu-muted">Nenhum negocio ainda.</p>}
       {data?.negocios.map((n) => (
-        <div key={n.id} className="flex justify-between text-[.8em] text-n400">
+        <div key={n.id} className="flex justify-between text-[.8em] text-menu-muted">
           <span>{item?.name ?? itemId} x{n.quantity}</span>
           <span className="text-gold">{fmt.format(n.unit_price)} / un.</span>
         </div>
@@ -169,7 +169,7 @@ export function ComprarItens() {
           placeholder="Buscar item..." value={busca}
           onChange={(e) => setBusca(e.target.value)}
         />
-        <p className="text-n500">Nenhum item a venda com esse nome.</p>
+        <p className="text-menu-muted">Nenhum item a venda com esse nome.</p>
       </div>
     )
   }
@@ -177,9 +177,9 @@ export function ComprarItens() {
   if (linhas.length === 0) {
     return (
       <GameCard className="flex flex-col items-center gap-[.3em] p-[1em] text-center">
-        <Tag className="text-[1.6em] text-n500" />
+        <Tag className="text-[1.6em] text-menu-muted" />
         <b className="font-medium">Nenhuma proposta existente no momento.</b>
-        <span className="text-[.85em] text-n500">
+        <span className="text-[.85em] text-menu-muted">
           Ninguém está anunciando itens agora. Use a aba <b>Vender</b> para ser o primeiro.
         </span>
       </GameCard>
@@ -209,18 +209,18 @@ export function ComprarItens() {
                 COMPRA — e ai nao ha nada a venda. Dizer "sem oferta" seria
                 confuso ao lado de uma linha que so aparece porque tem gente
                 querendo comprar: mostra a procura em vez de um vazio. */}
-            <span className="text-[.8em] text-n400">
+            <span className="text-[.8em] text-menu-muted">
               {resumo?.melhorVenda != null ? (
                 <>a partir de <b className="text-gold">{fmt.format(resumo.melhorVenda)}</b> · {fmt.format(resumo.emVenda)} un.</>
               ) : resumo?.melhorCompra != null ? (
                 <>procura-se a <b className="text-ok">{fmt.format(resumo.melhorCompra)}</b> · {fmt.format(resumo.emCompra)} un.</>
               ) : (
-                <span className="text-n600">sem oferta</span>
+                <span className="text-menu-muted">sem oferta</span>
               )}
             </span>
           </GameCard>
           {aberto === item.id && (
-            <div className="mt-[.4em] rounded-[.6em] border border-n800 p-[.6em]">
+            <div className="mt-[.4em] rounded-[.6em] border border-menu-line p-[.6em]">
               <LivroDoItem itemId={item.id} />
             </div>
           )}

@@ -9,9 +9,9 @@ import type { ReactNode } from 'react'
 
 export function WikiCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-lg border bg-n900 p-3">
+    <div className="rounded-lg border bg-menu-card p-3">
       <div className="mb-1.5 text-[.9em] font-medium">{title}</div>
-      <div className="text-[.8em] leading-relaxed text-n400">{children}</div>
+      <div className="text-[.8em] leading-relaxed text-menu-muted">{children}</div>
     </div>
   )
 }

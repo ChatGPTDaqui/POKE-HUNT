@@ -203,7 +203,7 @@ export function AbilityTooltip({
           {efeitos.length > 0 && (
             <div className="flex flex-wrap gap-[.3em]">
               {efeitos.map((efeito) => (
-                <span key={efeito} className="rounded-[.3em] bg-n800 px-[.4em] py-[.05em] text-[.8em]">
+                <span key={efeito} className="rounded-[.3em] bg-menu-wash px-[.4em] py-[.05em] text-[.8em]">
                   {efeito}
                 </span>
               ))}

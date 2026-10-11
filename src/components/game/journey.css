@@ -1,5 +1,5 @@
 /* Opt-in por superfície. Nunca inverter n900/n100: combate e menus coexistem. */
-[data-window][data-appearance='journey'] {
+[data-appearance='journey'] {
   --journey-paper: #faf7ef;
   --journey-card: #fffefa;
   --journey-ink: #203c42;
@@ -10,13 +10,201 @@
   --journey-primary: #ad3d2c;
   --journey-focus: #476f83;
   --journey-warning: #795016;
+  --journey-data-ground: #0e1016;
   color: var(--journey-ink);
+  font-family: var(--font-sans);
+}
+
+:is([data-window], .journey-surface, .journey-entry)[data-appearance='journey'] {
   background: var(--journey-paper);
   border: 1px solid var(--journey-line);
   box-shadow: 0 .7em 2em #162c2e38;
   backdrop-filter: none;
-  font-family: var(--font-sans);
 }
+
+.journey-shortcut {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: .7em;
+  font-size: 1.15em;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.journey-brand {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1.35em;
+  height: 1.35em;
+  border: 2px solid #203c42;
+  border-radius: 50%;
+  background: linear-gradient(#c64d39 0 45%, #203c42 45% 56%, #fffefa 56%);
+}
+.journey-brand::after {
+  content: '';
+  position: absolute;
+  inset: 32%;
+  border: 2px solid #203c42;
+  border-radius: 50%;
+  background: #fffefa;
+}
+@media (max-width: 380px) {
+  .journey-status-rail { gap: .3em; }
+  .journey-status-rail .journey-brand { width: 1em; height: 1em; }
+  .journey-vitals-bars { width: min(14em, 27vw); }
+}
+
+.journey-navigation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max(52px, 3.6em) minmax(0, 1fr);
+  gap: .25em;
+  align-items: center;
+}
+.journey-navigation-left, .journey-navigation-right {
+  display: grid;
+  min-width: 0;
+  align-items: stretch;
+  grid-template-columns: repeat(3, minmax(44px, 1fr));
+}
+.journey-navigation-right { grid-template-columns: repeat(4, minmax(44px, 1fr)); }
+.journey-navigation [data-journey-hunt] { min-height: 52px; }
+@media (max-width: 600px) {
+  .journey-navigation-left, .journey-navigation-right {
+    grid-template-columns: repeat(2, minmax(44px, 1fr));
+  }
+  .journey-navigation-left > :first-child { grid-column: 1 / -1; }
+  .journey-nav-slot > span { font-size: min(.7em, 2.8vw) !important; }
+}
+
+/* A coluna continua disponível; só o painel principal reserva sua largura. */
+:is([data-window='panel'], [data-journey-rail-reserved])[data-appearance='journey'] {
+  max-width: calc(100% - 60px);
+  min-width: 0;
+  min-height: 0;
+}
+@media (max-width: 900px), (pointer: coarse) {
+  :is([data-window='panel'], [data-journey-rail-reserved])[data-appearance='journey'] { right: 56px; }
+}
+
+[data-appearance='journey'] :is(input:not([type='checkbox']):not([type='range']), select, textarea) {
+  min-height: 44px;
+  color: var(--journey-ink);
+  background: var(--journey-card);
+  border-color: var(--journey-muted);
+}
+[data-appearance='journey'] :is(button, [role='button']):not([data-panel-handle]) {
+  min-height: 44px;
+}
+[data-appearance='journey'] input::placeholder { color: var(--journey-muted); }
+[data-appearance='journey'] input[type='range'] { min-width: 0; }
+[data-appearance='journey'] [data-sticky-header] {
+  top: -.4em;
+  margin: -.4em -.6em 0;
+  padding: .25em .6em;
+  gap: .25em;
+}
+[data-appearance='journey'] [data-panel-body] { scrollbar-gutter: stable; }
+[data-appearance='journey'] [data-panel-handle] { padding-top: .2em; }
+
+/* Materiais da mesma família, sem inverter a paleta de combate. */
+[data-appearance='journey'] .trainer-menu { --menu-accent: var(--journey-focus); gap: .45em; }
+[data-appearance='journey'] .trainer-menu[data-tone='team'] { --menu-accent: var(--journey-leaf); }
+[data-appearance='journey'] .trainer-menu[data-tone='shop'] { --menu-accent: var(--journey-warning); }
+[data-appearance='journey'] .trainer-menu[data-tone='arena'] { --menu-accent: var(--journey-primary); }
+[data-appearance='journey'] .trainer-menu :is(.inventory-toolbar, .inventory-grid, .formation-picker) {
+  background: var(--journey-wash);
+  border-color: var(--journey-line);
+  padding: .35em;
+}
+[data-appearance='journey'] .trainer-menu :is(.inventory-detail, .shop-counter, .shop-product, .team-member, .arena-surface, .formation-slot, .inventory-slot) {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--menu-accent) 7%, var(--journey-card)), var(--journey-card));
+  border-color: var(--journey-line);
+  box-shadow: none;
+}
+[data-appearance='journey'] .inventory-detail { padding: .5em; gap: .4em; }
+[data-appearance='journey'] .inventory-detail .detail-actions { border-color: var(--journey-line); padding-top: .35em; }
+[data-appearance='journey'] .inventory-slot[aria-checked='true'] {
+  background: var(--journey-wash);
+  border-color: var(--menu-accent);
+  box-shadow: inset 0 0 0 1px var(--menu-accent);
+}
+[data-appearance='journey'] .trainer-menu .team-member.is-active {
+  border-left-color: var(--journey-leaf);
+  background: linear-gradient(110deg, var(--journey-wash), var(--journey-card) 65%);
+}
+[data-appearance='journey'] :is(.selection-hint, .team-position, .formation-empty) { color: var(--journey-muted); }
+[data-appearance='journey'] .selection-hint { min-height: 0; flex-direction: row; padding: .5em; border-color: var(--journey-line); }
+[data-appearance='journey'] .formation-slot { min-height: 7em; padding: .45em; }
+[data-appearance='journey'] .team-roster { gap: .4em; }
+[data-appearance='journey'] .team-member [data-game-button] { max-width: 100%; white-space: normal; }
+.journey-title { display: flex; align-items: center; gap: .4em; min-width: 0; }
+.journey-title .equipment-art { flex-shrink: 0; width: 2em; height: 2em; }
+.journey-title > span { overflow: hidden; text-overflow: ellipsis; }
+
+.journey-ability-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: .45em; }
+@media (max-width: 380px) {
+  .journey-ability-slots { display: grid; grid-template-columns: repeat(2, max-content); gap: .55em; }
+}
+.journey-entry[data-appearance='journey'] {
+  --background: var(--journey-paper);
+  --foreground: var(--journey-ink);
+  --card: var(--journey-card);
+  --card-foreground: var(--journey-ink);
+  --primary: var(--journey-primary);
+  --primary-foreground: var(--journey-card);
+  --border: var(--journey-line);
+  --input: var(--journey-muted);
+  --muted: var(--journey-wash);
+  --muted-foreground: var(--journey-muted);
+  --ring: var(--journey-focus);
+  background: radial-gradient(ellipse at top left, #dce8d7, transparent 65%), var(--journey-paper);
+  box-shadow: none;
+  border: 0;
+}
+.journey-entry :is(input, button, a) { min-height: 44px; }
+.journey-entry > :is(form, div) { border-radius: 1em; }
+.journey-entry h1 { font-family: var(--font-heading); }
+[data-appearance='journey'] .bg-menu-brand { color: var(--journey-card); }
+[data-appearance='journey'] :is(.text-gold, .text-warn, .text-amber-400) { color: var(--journey-warning); }
+[data-appearance='journey'] .text-ok { color: #216840; }
+[data-appearance='journey'] .text-bad { color: #ab302d; }
+[data-appearance='journey'] .text-exp { color: #315e91; }
+@media (max-width: 600px) {
+  [data-appearance='journey'] .journey-profile-hero > div:first-child { height: 4.5em; width: 4.5em; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  [data-appearance='journey'] .journey-profile-hero > div:first-child { height: 3.5em; width: 3.5em; }
+  [data-appearance='journey'] .journey-profile-hero { padding-block: .25em; }
+}
+
+/* Uma faixa para canais e controles; sem título redundante na janela aberta. */
+.journey-chat-header { display: flex; align-items: center; flex-shrink: 0; min-height: 44px; padding: 0 .2em; border-bottom: 1px solid #ffffff24; }
+.journey-chat-tab { min-width: 44px; min-height: 44px; padding: 0 .5em; font: inherit; font-size: .78em; color: var(--color-n300); border-bottom: 2px solid transparent; cursor: pointer; }
+.journey-chat-tab.is-active { color: var(--color-gold); border-color: currentColor; }
+.journey-chat-control { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; color: var(--color-n300); cursor: pointer; }
+.journey-chat :is(input, button[type='submit']) { min-height: 44px; }
+.journey-chat button[type='submit'] { min-width: 44px; }
+.journey-chat form { padding-block: .15em; }
+.journey-chat-embedded .journey-chat-tab { flex: 1; padding-inline: .15em; font-size: .7em; }
+
+.journey-moveset > :is(.grid, .overflow-y-auto) { min-width: max(36em, 440px); }
+.journey-dex-moves > .grid { min-width: 32em; }
+[data-appearance='journey'] .journey-move-row {
+  grid-template-columns: 2.4em minmax(8em, 1fr) 3.4em 3.8em 3em 3em 2.4em 44px;
+}
+[data-appearance='journey'] .journey-move-choice { width: 44px; }
+[data-appearance='journey'] .journey-move-queue {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16em), 1fr));
+}
+[data-appearance='journey'] .journey-move-queue > span { min-width: 0; }
+[data-appearance='journey'] .journey-move-queue > span > span:nth-child(2) { flex: 1; }
+[data-appearance='journey'] .journey-move-queue button { min-width: 44px; flex-shrink: 0; }
+[data-appearance='journey'] .journey-moveset > div:first-child:not(.grid) { min-width: min(100%, 32em); }
+.journey-entry [data-slot='button'][class*='bg-ember'] { background: var(--journey-primary); color: var(--journey-card); }
 
 /* Maior especificidade que a preferência de vidro da HUD; já é opaco. */
 .hud-root[data-blur='off'] [data-window][data-appearance='journey'] {
@@ -76,6 +264,11 @@
 [data-appearance='journey'] [data-game-icon] {
   min-width: 44px;
 }
+
+/* Interruptores mantêm formato horizontal mesmo em blocos de fonte reduzida. */
+[data-appearance='journey'] .jogo-switch { width: max(64px, 3.2em); height: 44px; }
+[data-appearance='journey'] .jogo-switch > span { width: 20px; height: 20px; top: 11px; left: 6px; }
+[data-appearance='journey'] .jogo-switch[aria-checked='true'] > span { left: calc(100% - 26px); }
 
 [data-appearance='journey'] [data-game-button]:enabled:hover {
   box-shadow: inset 0 0 0 1px currentColor;
@@ -137,3 +330,5 @@
   overflow-wrap: anywhere;
   color: var(--journey-warning);
 }
+[data-appearance='journey'] .journey-ranking-row { flex-wrap: wrap; }
+[data-appearance='journey'] .journey-ranking-name { flex-basis: min(100%, 8em); }

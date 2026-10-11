@@ -40,7 +40,7 @@ export function TutorialModal() {
                 key={i}
                 className={cn(
                   'h-[.45em] w-[.45em] rounded-full transition-colors',
-                  i === passo ? 'bg-primary' : 'bg-n700',
+                  i === passo ? 'bg-menu-brand' : 'bg-menu-card',
                 )}
               />
             ))}
@@ -55,11 +55,11 @@ export function TutorialModal() {
       }
     >
       <div className="flex flex-col gap-[.45em]">
-        <div className="text-[.72em] tracking-[.08em] text-n400 uppercase">
+        <div className="text-[.72em] tracking-[.08em] text-menu-muted uppercase">
           Passo {passo + 1} de {aberto.passos.length}
         </div>
         <h3 className="text-[1.15em] font-semibold">{atual.titulo}</h3>
-        <p className="text-[.9em] leading-[1.55] text-n200">{atual.corpo}</p>
+        <p className="text-[.9em] leading-[1.55] text-menu-ink">{atual.corpo}</p>
       </div>
     </Painel>
   )

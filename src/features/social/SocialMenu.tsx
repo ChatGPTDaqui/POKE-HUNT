@@ -241,23 +241,23 @@ export function SocialMenu() {
       <GameCard
         className={cn(
           'flex cursor-pointer items-center gap-[.5em] p-[.45em]',
-          aberta && 'border-primary/60',
-          c.naoLidas > 0 && !aberta && 'border-primary/40',
+          aberta && 'border-menu-brand/60',
+          c.naoLidas > 0 && !aberta && 'border-menu-brand/40',
         )}
         onClick={() => abrirFio({ userId: c.userId, nick: c.nick, online: c.online })}
       >
         <span
           aria-hidden
-          className={cn('h-[.5em] w-[.5em] shrink-0 rounded-full', c.online ? 'bg-ok' : 'bg-n600')}
+          className={cn('h-[.5em] w-[.5em] shrink-0 rounded-full', c.online ? 'bg-ok' : 'bg-menu-card')}
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-[.4em]">
-            <b className="truncate font-medium text-foreground">{c.nick}</b>
-            <span className="shrink-0 text-[.7em] text-n500">{quando(c.ultimaEm)}</span>
+            <b className="truncate font-medium text-menu-ink">{c.nick}</b>
+            <span className="shrink-0 text-[.7em] text-menu-muted">{quando(c.ultimaEm)}</span>
           </div>
           <div className="flex items-center gap-[.35em]">
-            <span className="min-w-0 flex-1 truncate text-[.8em] text-n400">
-              {c.ultimaMinha && <span className="text-n500">Você: </span>}
+            <span className="min-w-0 flex-1 truncate text-[.8em] text-menu-muted">
+              {c.ultimaMinha && <span className="text-menu-muted">Você: </span>}
               {c.ultimoTrecho}
             </span>
             {/* PH-287: O ICONE GANHOU PALAVRA. Ele ja existia, mas sozinho — e
@@ -270,13 +270,13 @@ export function SocialMenu() {
                 coletar. Sao duas coisas, e o sino soma as duas — era essa soma
                 sem legenda que fazia o contador parecer travado (PH-213). */}
             {c.anexosPendentes > 0 && (
-              <span className="flex shrink-0 items-center gap-[.2em] rounded-full bg-primary/15 px-[.4em] text-[.7em] font-medium text-primary">
+              <span className="flex shrink-0 items-center gap-[.2em] rounded-full bg-menu-brand/15 px-[.4em] text-[.7em] font-medium text-menu-brand">
                 <Gift aria-hidden />
                 {c.anexosPendentes > 1 ? `${c.anexosPendentes} por coletar` : 'por coletar'}
               </span>
             )}
             {c.naoLidas > 0 && (
-              <span className="shrink-0 rounded-full bg-primary px-[.4em] text-[.7em] text-n900">
+              <span className="shrink-0 rounded-full bg-menu-brand px-[.4em] text-[.7em] text-menu-ink">
                 {c.naoLidas}
               </span>
             )}
@@ -311,13 +311,13 @@ export function SocialMenu() {
         />
       )}
 
-      {isLoading && <p className="text-n400">Carregando...</p>}
+      {isLoading && <p className="text-menu-muted">Carregando...</p>}
 
       {!isLoading && aba === 'conversas' && (
         <div>
           <SectionLabel>CONVERSAS {naoLidasConversas ? `(${naoLidasConversas} nova(s))` : ''}</SectionLabel>
           {conversas.length === 0 && (
-            <p className="text-n400">
+            <p className="text-menu-muted">
               Nenhuma conversa ainda. Use "Nova conversa" pra falar com alguem pelo nick.
             </p>
           )}
@@ -330,7 +330,7 @@ export function SocialMenu() {
       {!isLoading && aba === 'avisos' && (
         <div>
           <SectionLabel>AVISOS {naoLidosAvisos ? `(${naoLidosAvisos} novo(s))` : ''}</SectionLabel>
-          {avisos.length === 0 && <p className="text-n400">Nenhum aviso.</p>}
+          {avisos.length === 0 && <p className="text-menu-muted">Nenhum aviso.</p>}
           <div className="mt-[.4em] flex flex-col gap-[.4em]">
             {avisos.map((m) => (
               <LinhaDeMensagem
@@ -401,7 +401,7 @@ export function SocialMenu() {
   return (
     <div className="flex flex-col gap-[.55em]">
       <GameCard className="flex flex-wrap items-end gap-[.5em] p-[.6em]">
-        <label className="flex min-w-[10em] flex-1 flex-col gap-[.2em] text-[.8em] text-n300">
+        <label className="flex min-w-[10em] flex-1 flex-col gap-[.2em] text-[.8em] text-menu-ink">
           Adicionar amigo pelo nick
           <GameInput
             placeholder="Nome exato do treinador"

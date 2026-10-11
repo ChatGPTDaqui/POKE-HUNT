@@ -82,13 +82,13 @@ export function FichaVenda(props: AcoesVenda) {
   return (
     <div className="flex flex-col gap-[.5em]">
       <div className="flex items-center justify-between gap-[.5em]">
-        <span className="text-[.85em] text-n400">
+        <span className="text-[.85em] text-menu-muted">
           x{fmt.format(owned)} · <span className="text-gold">{fmt.format(item.sellPrice)}</span> cada
         </span>
         <BotaoTrava {...props} />
       </div>
       {locked
-        ? <p className="text-[.85em] text-n400">Item trancado — destranque para vender.</p>
+        ? <p className="text-[.85em] text-menu-muted">Item trancado — destranque para vender.</p>
         : <TransacaoVenda {...props} />}
     </div>
   )

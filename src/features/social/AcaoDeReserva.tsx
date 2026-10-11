@@ -69,7 +69,7 @@ export function AcaoDeReserva({ ctx, paraId, nick }: Props) {
   return (
     <div className="flex flex-col gap-[.2em]">
       <div className="flex flex-wrap items-end gap-[.35em]">
-        <label className="flex flex-col gap-[.15em] text-[.72em] text-n400">
+        <label className="flex flex-col gap-[.15em] text-[.72em] text-menu-muted">
           Reservar por
           <GameInput
             type="number"
@@ -90,7 +90,7 @@ export function AcaoDeReserva({ ctx, paraId, nick }: Props) {
           <BookmarkSimple /> Reservar para {nick}
         </GameButton>
       </div>
-      <span className="text-[.7em] text-n400">
+      <span className="text-[.7em] text-menu-muted">
         Sai da vitrine: só {nick} consegue comprar, pelo valor acima.
       </span>
     </div>

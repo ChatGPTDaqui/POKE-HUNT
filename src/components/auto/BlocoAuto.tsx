@@ -21,7 +21,7 @@ export function InfoIcon({ text }: { text: string }) {
       className="cursor-help"
       rotulo="O que isso faz"
     >
-      <span className="inline-flex h-[1.15em] w-[1.15em] items-center justify-center rounded-full border border-n600 text-n500">
+      <span className="inline-flex h-[1.15em] w-[1.15em] items-center justify-center rounded-full border border-menu-line text-menu-muted">
         <Question className="text-[.7em]" />
       </span>
     </Explicacao>
@@ -43,7 +43,7 @@ export function BlocoAuto({
     <section
       className={cn(
         'flex flex-col gap-[.5em] rounded-[.7em] border p-[.6em] transition-colors',
-        ligado ? 'border-n700 bg-n900/60' : 'border-n800',
+        ligado ? 'border-menu-line bg-menu-card/60' : 'border-menu-line',
       )}
     >
       <header className="flex items-center gap-[.5em]">

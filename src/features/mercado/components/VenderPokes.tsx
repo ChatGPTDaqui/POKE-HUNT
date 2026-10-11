@@ -52,7 +52,7 @@ export function VenderPokes() {
   if (!carregada) return <EstadoDaMochila />
 
   if (elegiveis.length === 0) {
-    return <p className="text-n500">Nenhum POKE destravado na mochila para anunciar.</p>
+    return <p className="text-menu-muted">Nenhum POKE destravado na mochila para anunciar.</p>
   }
 
   return (
@@ -63,7 +63,7 @@ export function VenderPokes() {
           shiny. O dado que estava no rotulo da opcao nao se perdeu — ele passou
           pro `title`/`aria-label` do slot e pra linha de resumo abaixo, que
           descreve o SELECIONADO em vez de todos ao mesmo tempo. */}
-      <div className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+      <div className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
         POKE
         <FiltroDePokes
           filtro={filtro}
@@ -74,7 +74,7 @@ export function VenderPokes() {
         {visiveis.length === 0 ? (
           // "Nada casa com o filtro" e "não tenho nada" são coisas diferentes, e
           // a lista vazia sozinha não distingue as duas.
-          <p className="py-[.4em] text-n500">Nenhum POKE casa com o filtro.</p>
+          <p className="py-[.4em] text-menu-muted">Nenhum POKE casa com o filtro.</p>
         ) : (
         <GradeDeInventario
           rotuloDoGrupo="POKE para anunciar"
@@ -90,7 +90,7 @@ export function VenderPokes() {
         />
         )}
         {escolhido && (
-          <span className="text-n300">
+          <span className="text-menu-ink">
             {escolhido.isShiny ? '✨ ' : ''}
             {SPECIES[escolhido.speciesId].name} Lv{escolhido.level} · {rarityOf(escolhido).label}
             {' · '}IV {averageIvPercent(escolhido.ivs).toFixed(0)}%
@@ -102,7 +102,7 @@ export function VenderPokes() {
           estados, dois deles sem significado — "leilao e preco fixo ao mesmo
           tempo" e uma combinacao que a check do banco recusa, e a tela nao
           deveria nem ser capaz de montar. */}
-      <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+      <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
         Como vender
         <GameSelect value={modo} onChange={(e) => setModo(e.target.value as Modo)}>
           <option value="preco_fixo">Preço fixo — compra direta</option>
@@ -115,7 +115,7 @@ export function VenderPokes() {
         {/* Sem compra direta nao existe preco — o campo sai da tela em vez de
             ficar desabilitado com um numero que nao vale nada. */}
         {modo === 'preco_fixo' && (
-          <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+          <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
             Preco
             <GameInput
               type="number" min={1} className="w-[8em]" value={preco}
@@ -125,7 +125,7 @@ export function VenderPokes() {
         )}
         {modo === 'leilao' && (
           <>
-            <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+            <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
               Duração
               <GameSelect value={horas} onChange={(e) => setHoras(Number(e.target.value) as Horas)}>
                 <option value={6}>6 horas</option>
@@ -133,14 +133,14 @@ export function VenderPokes() {
                 <option value={24}>24 horas</option>
               </GameSelect>
             </label>
-            <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+            <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
               Lance mínimo
               <GameInput
                 type="number" min={1} className="w-[8em]" value={lanceMinimo}
                 onChange={(e) => setLanceMinimo(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
               />
             </label>
-            <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+            <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
               Incremento
               <GameInput
                 type="number" min={1} className="w-[7em]" value={incremento}
@@ -149,14 +149,14 @@ export function VenderPokes() {
             </label>
           </>
         )}
-        <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+        <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
           Moeda
           <GameSelect value={moeda} onChange={(e) => setMoeda(e.target.value as typeof moeda)}>
             <option value="gold">Ouro</option>
             <option value="diamond">Diamante</option>
           </GameSelect>
         </label>
-        <div className="flex-1 text-[.8em] text-n400">
+        <div className="flex-1 text-[.8em] text-menu-muted">
           {/* So em preco fixo. Nos outros dois modos nao ha preco pra descontar
               ainda: em "somente lance" o valor sai do lance aceito (a taxa
               aparece na hora de aceitar, em Ativos) e em leilao sai do maior
@@ -165,22 +165,22 @@ export function VenderPokes() {
           {modo === 'preco_fixo' && (
             taxa > 0
               ? <>Você recebe <b className="text-gold">{fmt.format(preco - taxa)}</b>
-                <span className="text-n500"> (taxa de {regra.percentual}%: {fmt.format(taxa)})</span>.{' '}</>
+                <span className="text-menu-muted"> (taxa de {regra.percentual}%: {fmt.format(taxa)})</span>.{' '}</>
               : <>Você recebe <b className="text-gold">{fmt.format(preco)}</b>
-                <span className="text-n500"> (sem taxa em {moeda === 'gold' ? 'ouro' : 'diamante'})</span>.{' '}</>
+                <span className="text-menu-muted"> (sem taxa em {moeda === 'gold' ? 'ouro' : 'diamante'})</span>.{' '}</>
           )}
           O POKE sai da sua mochila enquanto o anuncio estiver de pe.
         </div>
       </div>
 
       {modo === 'lance' && (
-        <p className="text-[.78em] text-n500">
+        <p className="text-[.78em] text-menu-muted">
           O anúncio sai sem preço: outros jogadores enviam ofertas em {moeda === 'gold' ? 'ouro' : 'diamante'} e
           você aceita ou recusa em <b>Anúncios Ativos</b>. O valor de quem oferta fica retido até você responder.
         </p>
       )}
       {modo === 'leilao' && (
-        <p className="text-[.78em] text-n500">
+        <p className="text-[.78em] text-menu-muted">
           Encerra sozinho no fim do prazo e o maior lance leva —{' '}
           <b>você não decide, e não dá para retirar depois do primeiro lance</b>. Cada lance novo tem que superar o
           anterior pelo incremento. Lance nos últimos 30 segundos estende o leilão em 30 segundos, então quem quer

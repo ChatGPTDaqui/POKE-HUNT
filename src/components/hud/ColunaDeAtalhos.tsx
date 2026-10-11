@@ -1,34 +1,14 @@
-// Coluna de atalhos do canto superior direito: Especialidades, Tasks, Bestiario.
-//
-// POR QUE ELA EXISTE (PH-257)
-// ---------------------------------------------------------------------------
-// Os tres viviam atras de dois toques. Bestiario e Tasks so apareciam dentro do
-// sheet "Mais" da doca, e Especialidades so pela grade de la — telas que o
-// jogador abre varias vezes por sessao, escondidas no mesmo lugar em que moram
-// Wiki e Ajustes, que ele abre uma vez por mes. O pedido foi por uma coluna
-// fixa, no canto superior direito, logo abaixo do card do treinador.
-//
-// POR QUE ELA NAO E "MAIS UMA ANCORA DE BORDA"
-// ---------------------------------------------------------------------------
-// O cabecalho do HudLayer registra que cinco ancoras independentes nas bordas ja
-// existiram e se cobriam em 390px — uma delas era literalmente uma
-// `SideMenuColumn` a direita. O que fazia aquilo colidir era cada ancora
-// decidir a propria posicao por breakpoint. Esta aqui nao decide: ela comeca na
-// altura MEDIDA do trilho (`uiStore.trilhoHeight`, mesmo mecanismo do rodape) e
-// encolhe pra so-icone no compacto, onde a largura e disputada.
-//
-// PH-282: O CARD DO TREINADOR PASSOU A MORAR AQUI, no mesmo container, acima dos
-// atalhos. Ele vivia dentro do trilho, que tem teto de largura (`max-w-[64em]`)
-// e e alinhado a esquerda por PH-83 — em 1920px o trilho acaba por volta de
-// x=1440 e o card acabava junto, com ~480px de tela vazia a direita, desalinhado
-// desta coluna que ja estava colada na borda. Juntar os dois resolve as duas
-// coisas de uma vez: mesma borda, e a coluna continua logo abaixo do card sem
-// depender de medida nenhuma.
-//
-// O `top` medido continua existindo pro COMPACTO, onde o card nao e renderizado
-// (ele desce pra gaveta por falta de largura): sem ele, a coluna subiria pra
-// cima do trilho, que em 390px ocupa a largura inteira.
-import { BookBookmark, CheckSquare, Sparkle, type Icon } from '@phosphor-icons/react'
+// Atalhos permanentes abaixo do treinador: Diário, Especialidades, Tasks,
+// Calculadora e PvP. Ícones com nomes acessíveis em todos os regimes e bolha no PC.
+// O topo medido e a rolagem local evitam colisões com a HUD em telas baixas.
+import { CalendarCheck, Calculator, CheckSquare, Sparkle, Sword, type Icon } from '@phosphor-icons/react'
+import { useDiarioStore } from '@/stores/diarioStore'
+import { usePremiosProntosDoDiario } from '@/features/primeirosPassos/Diario'
+import { NotificationBadge } from '@/components/game/NotificationBadge'
+import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
+import { useAuthStore } from '@/stores/authStore'
+import { Explicacao } from '@/components/shared/Explicacao'
+import type { ReactNode } from 'react'
 import { CardDoTreinador } from '@/components/hud/CardDoTreinador'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
@@ -45,7 +25,8 @@ import { useDestaqueDoPasso } from '@/features/primeirosPassos/useDestaqueDoPass
 export const TELAS_NA_COLUNA: { screen: ScreenName; label: string; Icon: Icon }[] = [
   { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
   { screen: 'tasks', label: 'Tasks', Icon: CheckSquare },
-  { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
+  { screen: 'calc', label: 'Calculadora', Icon: Calculator },
+  { screen: 'pvp', label: 'PvP', Icon: Sword },
 ]
 
 export function ColunaDeAtalhos() {
@@ -55,6 +36,10 @@ export function ColunaDeAtalhos() {
   const destaques = { tasks: useDestaqueDoPasso('tasks'), especialidades: useDestaqueDoPasso('especialidades') } as Record<string, ReturnType<typeof useDestaqueDoPasso> | undefined>
   const trilhoHeight = useUiStore((s) => s.trilhoHeight)
   const { mode } = useDeviceMode()
+  const premios = usePremiosProntosDoDiario()
+  const meuId = useAuthStore((s) => s.user?.id ?? null)
+  const navHeight = useUiStore((s) => s.navHeight)
+  const diarioAberto = useDiarioStore((s) => s.painelAberto)
   // 'deitado' conta como estreito aqui, ao contrario do trilho: ali o que
   // sobra e largura, e o rotulo cabe. Aqui a coluna cresce pra BAIXO, e deitado
   // a tela tem 390px de altura — tres botoes com rotulo comeriam a faixa em que
@@ -70,15 +55,28 @@ export function ColunaDeAtalhos() {
     // estreita, mas a caixa dela nao pode capturar clique do canvas na faixa
     // vazia abaixo do ultimo botao.
     <div
-      className="pointer-events-none absolute right-[.5em] z-20 flex flex-col items-end gap-[.35em]"
+      data-journey-shortcuts
+      className="pointer-events-none absolute right-[.5em] z-[35] flex flex-col items-end gap-[.15em]"
       // No amplo/deitado o card do treinador abre esta coluna e ela comeca no
       // topo da tela; no compacto o card nao existe e ela precisa comecar
       // abaixo do trilho, que ali ocupa a largura toda.
-      style={{ top: soIcone ? `calc(${trilhoHeight}px + .5em)` : '.5em' }}
+      style={{ top: soIcone ? `calc(${trilhoHeight}px + .5em)` : '.5em',
+        maxHeight: `calc(100% - ${soIcone ? trilhoHeight + navHeight : navHeight}px - 1em)`, overflowY: 'auto' }}
     >
       {!soIcone && <CardDoTreinador />}
+      {soIcone && <button type="button" data-keep-open aria-label="Perfil do treinador"
+        onClick={() => useUiStore.getState().setPerfilOpen(true)} className="journey-shortcut vidro pointer-events-auto">
+        <AvatarDoTreinador userId={meuId} tamanho={1.5} />
+      </button>}
+      <ShortcutHint label="Diário"><button type="button" data-keep-open aria-label="Diário"
+        aria-pressed={diarioAberto}
+        onClick={() => useDiarioStore.getState().abrirPainel()}
+        className="journey-shortcut vidro pointer-events-auto relative">
+        <CalendarCheck aria-hidden weight={diarioAberto ? 'fill' : 'regular'} />
+        <NotificationBadge count={premios} titulo={`${premios} prêmios no Diário`} />
+      </button></ShortcutHint>
       {TELAS_NA_COLUNA.map(({ screen, label, Icon }) => (
-        <button
+        <ShortcutHint key={screen} label={label}><button
           key={screen}
           type="button"
           // `data-keep-open`: estes botoes ja alternam a tela sozinhos. Sem a
@@ -90,21 +88,25 @@ export function ColunaDeAtalhos() {
           onClick={() => {
             const passo = tranca(screen)
             if (passo) return avisarTrancado(passo)
+            useDiarioStore.getState().fecharPainel()
             destaques[screen]?.aoTocar()
             toggleScreen(screen)
           }}
           className={cn(
-            'vidro alvo-toque pointer-events-auto flex cursor-pointer items-center gap-[.4em]',
-            'rounded-[.7em] px-[.55em] py-[.35em] font-[inherit] text-[.78em] transition-colors',
+            'journey-shortcut vidro pointer-events-auto',
             currentScreen === screen ? 'text-foreground' : 'text-n300',
             'relative', tranca(screen) && 'opacity-55', destaques[screen]?.classe,
           )}
         >
           {tranca(screen) && <MarcaDeCadeado passoId={tranca(screen)!} />}
           <Icon className="shrink-0 text-[1.15em]" weight={currentScreen === screen ? 'fill' : 'regular'} />
-          {!soIcone && <span className="leading-none">{label}</span>}
-        </button>
+        </button></ShortcutHint>
       ))}
     </div>
   )
+}
+
+function ShortcutHint({ label, children }: { label: string; children: ReactNode }) {
+  const { coarse } = useDeviceMode()
+  return coarse ? children : <Explicacao envolve="bloco" conteudo={label} side="left">{children}</Explicacao>
 }

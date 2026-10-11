@@ -178,7 +178,7 @@ export function PvpBuildTab() {
       <div className="mb-[.6em] flex flex-wrap items-center justify-between gap-[.4em]">
         <SegmentedTabs<TipoPresetPvp> value={tipo} onChange={(t) => { setTipo(t); setEscolhendoSlot(null); setEditandoGolpes(null) }}
           options={[{ value: 'ataque', label: 'Ataque' }, { value: 'defesa', label: 'Defesa' }]} />
-        <span role="status" className="text-[.8em] text-n300">{salvando ? 'Salvando…' : `${prontos} prontos no ataque · salvamento automático`}</span>
+        <span role="status" className="text-[.8em] text-menu-ink">{salvando ? 'Salvando…' : `${prontos} prontos no ataque · salvamento automático`}</span>
       </div>
       <div className="mb-[.6em] grid grid-cols-3 gap-[.4em]" role="tablist" aria-label={`Times de ${tipo}`}>
         {POSICOES.map((pos) => {
@@ -190,7 +190,7 @@ export function PvpBuildTab() {
               <button type="button" role="tab" aria-selected={selecionado} className="text-left"
                 onClick={() => { setPosicaoEscolhida((m) => ({ ...m, [tipo]: pos })); setEscolhendoSlot(null); setEditandoGolpes(null) }}>
                 <strong className="block truncate text-[.85em]">{nomeDoPreset(p)}</strong>
-                <span className="text-[.75em] text-n400">{p.slots.length}/{SLOTS}{p.ativo ? ' · ATIVO' : ''}</span>
+                <span className="text-[.75em] text-menu-muted">{p.slots.length}/{SLOTS}{p.ativo ? ' · ATIVO' : ''}</span>
               </button>
               {!p.ativo && <GameButton className="text-[.75em]" disabled={salvando} onClick={() => { void ativar(p) }}>Usar este</GameButton>}
             </div>
@@ -203,7 +203,7 @@ export function PvpBuildTab() {
           onChange={(e) => salvar({ nome: e.target.value })} className="w-[12em] text-[.85em]" />
       </div>
       {defesaVazia && <p role="note" className="mb-[.7em] text-[.8em] text-bad">Sua defesa está vazia: você não aparece como alvo até montar e ativar um time de defesa.</p>}
-      <p className="mb-[.7em] text-[.8em] text-n400">
+      <p className="mb-[.7em] text-[.8em] text-menu-muted">
         {GATE_RANQUEADO_RELAXADO
           ? 'Arraste para reordenar. Cada slot pode ter golpes próprios (inclusive de TM). Durante os testes, basta 1 POKE no ataque para o ranqueado.'
           : `Arraste para reordenar. Preencha os 6 slots com POKEs nível ${NIVEL_MINIMO_PVP}+ e 4 golpes.`}
@@ -245,15 +245,15 @@ export function PvpBuildTab() {
                   </div>
                   <div className="flex flex-wrap items-center gap-[.5em]">
                     <PokeSwatch species={species} isShiny={poke.isShiny} size={3.2} />
-                    <div className="min-w-0 flex-1"><strong className="break-words text-[.9em]">{species.name}</strong><p className="text-[.78em] text-n400">Lv {poke.level} · IV {averageIvPercent(poke.ivs).toFixed(0)}%</p></div>
+                    <div className="min-w-0 flex-1"><strong className="break-words text-[.9em]">{species.name}</strong><p className="text-[.78em] text-menu-muted">Lv {poke.level} · IV {averageIvPercent(poke.ivs).toFixed(0)}%</p></div>
                   </div>
                   <div className="flex flex-wrap gap-[.25em]">{[species.type, species.type2].map((type) => type && <TypeChip key={type} type={type} />)}</div>
                   <p className={`flex items-center gap-[.3em] text-[.75em] ${pronto ? 'text-ok' : 'text-bad'}`}>
                     {pronto ? <CheckCircle /> : <Warning />}{pronto ? 'Pronto para lutar' : poke.level < NIVEL_MINIMO_PVP ? `Precisa nível ${NIVEL_MINIMO_PVP}+` : 'Faltam golpes ativos'}
                   </p>
-                  <p className="text-[.75em] leading-relaxed text-n400">
+                  <p className="text-[.75em] leading-relaxed text-menu-muted">
                     {kit.map((id) => getAbility(id)?.name ?? id).join(' · ') || 'Nenhum golpe escolhido'}
-                    {!slot.golpes.length && kit.length > 0 && <span className="text-n500"> (do POKE)</span>}
+                    {!slot.golpes.length && kit.length > 0 && <span className="text-menu-muted"> (do POKE)</span>}
                   </p>
                   <div className="mt-auto flex flex-wrap gap-[.3em]">
                     <GameButton data-slot={indice} disabled={salvando || !mochilaCarregada} onClick={abrir}>Trocar</GameButton>
@@ -277,7 +277,7 @@ export function PvpBuildTab() {
             <SectionLabel>ESCOLHER POKÉMON · SLOT {escolhendoSlot + 1}</SectionLabel>
             <GameButton variant="ghost" aria-label="Fechar seleção" onClick={() => setEscolhendoSlot(null)}><X /></GameButton>
           </div>
-          <input ref={buscaRef} aria-label="Buscar Pokémon para PvP" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome…" className="jogo-campo w-full rounded-[.45em] border border-n700 bg-n900 p-[.5em] text-[.85em]" />
+          <input ref={buscaRef} aria-label="Buscar Pokémon para PvP" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome…" className="jogo-campo w-full rounded-[.45em] border border-menu-line bg-menu-card p-[.5em] text-[.85em]" />
           <div className="candidate-list">
             {paginado.pagina.map((p) => (
               <button type="button" className="candidate" key={p.uid} onClick={() => {
@@ -285,12 +285,12 @@ export function PvpBuildTab() {
                 salvar({ slots: novos }); setEscolhendoSlot(null)
               }}>
                 <PokeSwatch species={SPECIES[p.speciesId]} isShiny={p.isShiny} size={2.5} />
-                <span className="min-w-0 flex-1"><strong className="block text-[.85em]">{SPECIES[p.speciesId].name}</strong><span className="text-[.75em] text-n400">Lv {p.level} · IV {averageIvPercent(p.ivs).toFixed(0)}%</span></span>
-                <span className="text-[.75em] text-n400">{pokeProntoPraRanqueado(p) ? 'Pronto' : 'Pendente'}</span>
+                <span className="min-w-0 flex-1"><strong className="block text-[.85em]">{SPECIES[p.speciesId].name}</strong><span className="text-[.75em] text-menu-muted">Lv {p.level} · IV {averageIvPercent(p.ivs).toFixed(0)}%</span></span>
+                <span className="text-[.75em] text-menu-muted">{pokeProntoPraRanqueado(p) ? 'Pronto' : 'Pendente'}</span>
               </button>
             ))}
           </div>
-          {disponiveis.length === 0 && <p className="p-[.6em] text-[.85em] text-n400">Nenhum Pokémon disponível para esta busca.</p>}
+          {disponiveis.length === 0 && <p className="p-[.6em] text-[.85em] text-menu-muted">Nenhum Pokémon disponível para esta busca.</p>}
           <Paginacao estado={paginado} rotulo="candidatos" />
         </section>
       )}
@@ -318,7 +318,7 @@ function SlotArrastavel({ id, selecionado, desabilitado, children }: { id: strin
       className={`formation-slot relative ${selecionado ? 'is-selected' : ''}`}>
       <button ref={setActivatorNodeRef} type="button" {...attributes} {...listeners}
         aria-label="Arrastar para reordenar" disabled={desabilitado}
-        className="absolute right-[2.4em] top-[.5em] cursor-grab touch-none text-n400 hover:text-foreground focus-visible:outline-2">
+        className="absolute right-[2.4em] top-[.5em] cursor-grab touch-none text-menu-muted hover:text-menu-ink focus-visible:outline-2">
         <DotsSixVertical />
       </button>
       {children}
@@ -358,7 +358,7 @@ function EditorDeGolpes({ indice, poke, species, escolhidos, onFechar, onMudar }
           <GameButton variant="ghost" aria-label="Fechar golpes" onClick={onFechar}><X /></GameButton>
         </div>
       </div>
-      <p className="mb-[.4em] text-[.75em] text-n400">
+      <p className="mb-[.4em] text-[.75em] text-menu-muted">
         {usaDoPoke ? 'Este slot usa os golpes ativos do POKE. Marque golpes para dar um kit só deste time.' : 'A ordem marcada é a rotação de combate.'}
       </p>
       <div className="candidate-list">
@@ -369,10 +369,10 @@ function EditorDeGolpes({ indice, poke, species, escolhidos, onFechar, onMudar }
           return (
             <button type="button" key={id} className={`candidate ${ordem >= 0 ? 'is-selected border-[var(--menu-accent)]' : ''}`}
               aria-pressed={ordem >= 0} onClick={() => alternar(id)}>
-              <span className={`w-[1.6em] text-center font-mono text-[.8em] ${ordem >= 0 ? 'text-foreground' : 'text-n500'}`}>{ordem >= 0 ? ordem + 1 : '·'}</span>
+              <span className={`w-[1.6em] text-center font-mono text-[.8em] ${ordem >= 0 ? 'text-menu-ink' : 'text-menu-muted'}`}>{ordem >= 0 ? ordem + 1 : '·'}</span>
               <span className="min-w-0 flex-1">
                 <strong className="block truncate text-[.85em]">{ability.name}{porTm.has(id) && <span className="ml-[.4em] text-[.8em] text-sky-400">TM</span>}</strong>
-                <span className="text-[.75em] text-n400">Dano {ability.power > 0 ? ability.power : '—'}</span>
+                <span className="text-[.75em] text-menu-muted">Dano {ability.power > 0 ? ability.power : '—'}</span>
               </span>
               <TypeChip type={ability.type} />
             </button>

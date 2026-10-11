@@ -128,7 +128,7 @@ function LetreiroDaArea({ titulo, subtitulo }: { titulo: string; subtitulo: stri
       </h2>
       {subtitulo && (
         <p
-          className="text-[.95em] font-bold tracking-[.22em] text-n200 uppercase"
+          className="text-[.95em] font-bold tracking-[.22em] text-menu-ink uppercase"
           style={{ textShadow: '0 .1em .25em rgba(0,0,0,.9)' }}
         >
           {subtitulo}

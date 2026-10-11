@@ -56,7 +56,7 @@ function PokeProfileModalBody(
       onClose={close}
       header={<ProfileHero poke={poke} species={species} />}
       subheader={
-        <div className="flex gap-[.65em] border-b border-n800 px-[.7em]">
+        <div className="flex gap-[.65em] border-b border-menu-line px-[.7em]">
           {(['status', 'golpes'] as const).map((tab) => (
             <button
               key={tab}
@@ -65,8 +65,8 @@ function PokeProfileModalBody(
               className={cn(
                 'cursor-pointer border-b-2 bg-transparent px-[.2em] py-[.4em] font-[inherit] text-[.9em]',
                 activeTab === tab
-                  ? 'border-primary text-foreground'
-                  : 'border-transparent text-n500 hover:text-foreground',
+                  ? 'border-menu-brand text-menu-ink'
+                  : 'border-transparent text-menu-muted hover:text-menu-ink',
               )}
             >
               {tab === 'status' ? 'Status' : 'Golpes'}

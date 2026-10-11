@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.03',
+    date: '2026-10-11',
+    title: 'Jornada do Treinador — identidade visual completa',
+    highlights: [
+      'Menus, perfis, Diário, automações e janelas auxiliares agora compartilham superfícies claras, cores consistentes e cabeçalhos compactos. O combate mantém sua HUD escura.',
+      'Hunt fica centralizada na barra inferior. Diário, Especialidades, Tasks, Calculadora e PvP ficam em uma coluna de ícones abaixo do treinador; local e condições ficam ao lado dos Companheiros.',
+      'O Chat reúne Log, Mundo e Comércio em uma faixa compacta, com minimizar e ampliar. Histórico, avisos do sistema e rascunho são preservados.',
+      'Mais espaço útil no celular: quatro slots de golpes, navegação identificada também em paisagem e controles de combate recolhidos durante a gestão dos menus.',
+    ],
+  },
+  {
     version: '8.02',
     date: '2026-10-11',
     title: 'Menu Mais com identidade Jornada',

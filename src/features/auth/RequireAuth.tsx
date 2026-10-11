@@ -21,7 +21,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   // sessao e recuperada do storage.
   if (loading) {
     return (
-      <div className="flex min-h-svh items-center justify-center bg-background text-sm text-muted-foreground">
+      <div data-appearance="journey" className="journey-entry flex min-h-svh items-center justify-center bg-background text-sm text-muted-foreground">
         Carregando...
       </div>
     )

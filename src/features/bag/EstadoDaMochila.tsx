@@ -32,5 +32,5 @@ export function EstadoDaMochila(): React.ReactElement | null {
     )
   }
 
-  return <p className="text-n500">{carregando ? 'Carregando a mochila…' : 'Mochila não carregada.'}</p>
+  return <p className="text-menu-muted">{carregando ? 'Carregando a mochila…' : 'Mochila não carregada.'}</p>
 }

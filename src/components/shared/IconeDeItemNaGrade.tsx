@@ -54,7 +54,7 @@ export function IconeDeItemNaGrade({
         // sigla repetida faria o leitor de tela dizer "GR Good Rod".
         aria-hidden
         className={cn(
-          'flex items-center justify-center rounded-[.25em] border border-n700 font-semibold text-[.7em] leading-none text-n300',
+          'flex items-center justify-center rounded-[.25em] border border-menu-line font-semibold text-[.7em] leading-none text-menu-ink',
           tamanho ? 'shrink-0' : 'h-full w-full',
         )}
         style={estilo}

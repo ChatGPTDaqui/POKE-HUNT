@@ -141,7 +141,7 @@ export function LinhaDeEspecie({
         </Explicacao>
       )}
       {pct != null && (
-        <span className="shrink-0 tabular-nums text-n400">{pct.toFixed(1)}%</span>
+        <span className="shrink-0 tabular-nums text-menu-muted">{pct.toFixed(1)}%</span>
       )}
     </div>
   )

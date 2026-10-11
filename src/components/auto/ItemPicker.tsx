@@ -37,7 +37,7 @@ function Linha({ opcao }: { opcao: OpcaoDeItem }) {
           style={borda ? { border: `2px solid ${borda}` } : undefined}
         />
       ) : (
-        <span className="h-[1.5em] w-[1.5em] shrink-0 rounded-[.25em] border border-n700" />
+        <span className="h-[1.5em] w-[1.5em] shrink-0 rounded-[.25em] border border-menu-line" />
       )}
       {/* `title` (PH-260): a linha trunca — a janela tem 19em, e nome de item
           longo nao cabe ao lado do icone e do estoque. Truncar sem saida nenhuma
@@ -50,7 +50,7 @@ function Linha({ opcao }: { opcao: OpcaoDeItem }) {
         // contagem grande: a conta de teste passa de 1.000 de um item so, e o
         // numero e o dado que decide se a automacao vai parar.
         <span
-          className={cn('shrink-0 tabular-nums', opcao.alerta ? 'font-semibold text-bad' : 'text-n400')}
+          className={cn('shrink-0 tabular-nums', opcao.alerta ? 'font-semibold text-bad' : 'text-menu-muted')}
           title={`${opcao.quantidade} em estoque`}
         >
           x{opcao.quantidade}
@@ -104,19 +104,19 @@ export function ItemPicker({
         disabled={disabled}
         onClick={() => setAberto((a) => !a)}
         className={cn(
-          'flex w-full min-w-0 cursor-pointer items-center gap-[.35em] rounded-[.45em] border border-n700 bg-n900',
-          'px-[.4em] py-[.28em] font-[inherit] text-[.85em] text-foreground',
-          'focus-visible:border-n500 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-45',
+          'flex w-full min-w-0 cursor-pointer items-center gap-[.35em] rounded-[.45em] border border-menu-line bg-menu-card',
+          'px-[.4em] py-[.28em] font-[inherit] text-[.85em] text-menu-ink',
+          'focus-visible:border-menu-line focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-45',
         )}
       >
         <Linha opcao={atual} />
-        <CaretDown className="shrink-0 text-n500" />
+        <CaretDown className="shrink-0 text-menu-muted" />
       </button>
 
       {aberto && (
         <div
           role="listbox"
-          className="absolute z-[60] mt-[.2em] max-h-[13em] w-full min-w-[11em] overflow-y-auto rounded-[.45em] border border-n700 bg-background p-[.2em] shadow-2xl"
+          className="absolute z-[60] mt-[.2em] max-h-[13em] w-full min-w-[11em] overflow-y-auto rounded-[.45em] border border-menu-line bg-menu-paper p-[.2em] shadow-2xl"
         >
           {opcoes.map((o) => (
             <button
@@ -127,8 +127,8 @@ export function ItemPicker({
               onClick={() => { onChange(o.id); setAberto(false) }}
               className={cn(
                 'flex w-full cursor-pointer items-center gap-[.35em] rounded-[.35em] px-[.35em] py-[.25em]',
-                'font-[inherit] text-[.85em] text-foreground hover:bg-n800',
-                o.id === value && 'bg-n800',
+                'font-[inherit] text-[.85em] text-menu-ink hover:bg-menu-wash',
+                o.id === value && 'bg-menu-wash',
               )}
             >
               <Linha opcao={o} />

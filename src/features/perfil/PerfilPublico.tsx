@@ -74,8 +74,8 @@ export function PerfilPublico() {
       onClose={fechar}
       title="Perfil do Treinador"
       header={
-        <div className="flex items-center gap-[.6em] border-b border-n800 px-[.65em] pb-[.6em]">
-          <div className="flex h-[3.8em] w-[3.8em] shrink-0 items-center justify-center rounded-[.7em] border border-n700 bg-n900">
+        <div className="flex items-center gap-[.6em] border-b border-menu-line px-[.65em] pb-[.6em]">
+          <div className="flex h-[3.8em] w-[3.8em] shrink-0 items-center justify-center rounded-[.7em] border border-menu-line bg-menu-card">
             {/* PH-548: a foto do outro jogador, pelo mesmo cache do ranking. */}
             <AvatarDoTreinador userId={alvo?.userId ?? null} tamanho={3.4} />
           </div>
@@ -83,12 +83,12 @@ export function PerfilPublico() {
             {/* O nome vem do anúncio, então o título aparece antes da RPC
                 responder — a janela nunca abre sem dizer de quem ela é. */}
             <div className="truncate text-[1.1em] font-semibold">{data?.nome ?? alvo.nome}</div>
-            <div className="flex items-center gap-[.5em] text-[.8em] text-n300">
+            <div className="flex items-center gap-[.5em] text-[.8em] text-menu-ink">
               {data && <span>Nível {data.nivel}</span>}
               {data && data.rank > 0 && (
                 <span className="flex items-center gap-[.25em] text-gold">
                   <Trophy className="text-[1em]" /> Rank #{data.rank}
-                  <span className="text-n500">de {data.totalJogadores}</span>
+                  <span className="text-menu-muted">de {data.totalJogadores}</span>
                 </span>
               )}
             </div>
@@ -99,7 +99,7 @@ export function PerfilPublico() {
       {isLoading && <Carregando />}
 
       {isError && (
-        <div className="px-[.65em] py-[.8em] text-center text-[.85em] text-n400">
+        <div className="px-[.65em] py-[.8em] text-center text-[.85em] text-menu-muted">
           Não deu para carregar este perfil agora.
         </div>
       )}
@@ -108,7 +108,7 @@ export function PerfilPublico() {
           chegar aqui a partir de um anúncio de conta removida é um caso real, e
           um toast vermelho seria a resposta errada. */}
       {!isLoading && !isError && !data && (
-        <div className="px-[.65em] py-[.8em] text-center text-[.85em] text-n400">
+        <div className="px-[.65em] py-[.8em] text-center text-[.85em] text-menu-muted">
           Este treinador não existe mais.
         </div>
       )}
@@ -140,7 +140,7 @@ export function PerfilPublico() {
               alcançável por qualquer caminho que passe um `userId`, e oferecer
               um botão que só produz erro é pior que não oferecer. */}
           {data.userId === meuId ? (
-            <p className="mt-[.2em] rounded-[.45em] border border-n800 px-[.55em] py-[.5em] text-center text-[.8em] text-n400">
+            <p className="mt-[.2em] rounded-[.45em] border border-menu-line px-[.55em] py-[.5em] text-center text-[.8em] text-menu-muted">
               Este é o seu perfil, do jeito que os outros jogadores veem.
             </p>
           ) : (
@@ -151,7 +151,7 @@ export function PerfilPublico() {
               >
                 <ChatCircle className="text-[1.1em]" /> Conversar
               </GameButton>
-              <p className="px-[.2em] text-[.7em] leading-snug text-n500">
+              <p className="px-[.2em] text-[.7em] leading-snug text-menu-muted">
                 Abre o Social já na conversa com {data.nome}. Não precisa ser amigo.
               </p>
             </>
@@ -166,10 +166,10 @@ function Estatistica({ icon, rotulo, valor, cor }: {
   icon: React.ReactNode; rotulo: string; valor: string; cor?: string
 }) {
   return (
-    <div className="flex items-center gap-[.5em] rounded-[.45em] border border-n800 px-[.55em] py-[.45em]">
-      <span className={cn('shrink-0 text-[1.2em]', cor ?? 'text-n400')}>{icon}</span>
+    <div className="flex items-center gap-[.5em] rounded-[.45em] border border-menu-line px-[.55em] py-[.45em]">
+      <span className={cn('shrink-0 text-[1.2em]', cor ?? 'text-menu-muted')}>{icon}</span>
       <div className="flex min-w-0 flex-col">
-        <span className="truncate text-[.7em] tracking-[.04em] text-n500 uppercase">{rotulo}</span>
+        <span className="truncate text-[.7em] tracking-[.04em] text-menu-muted uppercase">{rotulo}</span>
         <span className={cn('truncate font-mono text-[.95em] font-bold', cor)}>{valor}</span>
       </div>
     </div>

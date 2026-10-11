@@ -36,7 +36,7 @@ export interface PainelProps {
 
 export function Painel({
   winKey, widthEm, zIndex, backdropZIndex, fecharAoTocarFora, snap, defaultTop,
-  onClose, title, header, subheader, footer, children, bodyClassName, appearance,
+  onClose, title, header, subheader, footer, children, bodyClassName, appearance = 'journey',
 }: PainelProps) {
   const { usaSheet } = useDeviceMode()
 

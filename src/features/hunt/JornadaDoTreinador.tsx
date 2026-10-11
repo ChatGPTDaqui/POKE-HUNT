@@ -23,7 +23,7 @@ export function ProximoObjetivo() {
   const bioma = atual?.estagio ? proximoBioma(progresso, atual.estagio, atual.pesadelo) : null
   const detalhe = bioma ? `${bioma.nome} · estágio ${maiorEstagioLimpo(progresso, bioma.chave, atual?.pesadelo) + 1}` : atual?.nome
   return <button type="button" onClick={() => useUiStore.getState().openScreen('hunts')}
-    className="jogo-botao pointer-events-auto max-w-full truncate rounded-b bg-n900/90 px-[.6em] py-[.3em] text-[.72em] text-n300"
+    className="jogo-botao pointer-events-auto max-w-full truncate rounded-b bg-menu-card/90 px-[.6em] py-[.3em] text-[.72em] text-menu-ink"
     aria-label="Abrir jornada e próximo objetivo">
     {atual ? `Próximo objetivo: ${detalhe}` : 'Jornada concluída · explore suas trilhas paralelas'}
   </button>
@@ -77,21 +77,21 @@ export function JornadaDoTreinador({ onBioma, onLance }: {
   // sobre um modo que o jogador nem sabe que existe. Recolhida por padrão — o
   // "o que fazer agora" é o cartão de Primeiros Passos da HUD.
   const visiveis = marcos.filter(m => !m.pesadelo || lanceVencido)
-  return <details className="rounded-[.6em] border border-primary/40 bg-n900 p-[.65em]">
+  return <details className="rounded-[.6em] border border-menu-brand/40 bg-menu-card p-[.65em]">
     <summary className="cursor-pointer font-medium">Jornada do Treinador · {visiveis.filter(m => m.atual >= m.alvo).length}/{visiveis.length} marcos</summary>
-    <p className="my-[.5em] text-[.8em] text-n400">{atual ? `Seu próximo marco: ${atual.nome}.` : 'Todos os marcos da jornada foram concluídos!'} As trilhas são metas sugeridas, não novas travas.</p>
+    <p className="my-[.5em] text-[.8em] text-menu-muted">{atual ? `Seu próximo marco: ${atual.nome}.` : 'Todos os marcos da jornada foram concluídos!'} As trilhas são metas sugeridas, não novas travas.</p>
     <div className="grid gap-[.5em] [grid-template-columns:repeat(auto-fit,minmax(min(100%,15em),1fr))]">
-      {visiveis.map(m => <section key={m.id} aria-label={m.nome} className="rounded border border-n800 p-[.5em]">
+      {visiveis.map(m => <section key={m.id} aria-label={m.nome} className="rounded border border-menu-line p-[.5em]">
         <div className="text-[.85em] font-medium">{m.atual >= m.alvo ? '✓ ' : ''}{m.nome} · {m.atual}/{m.alvo}</div>
         <Meter pct={m.atual / m.alvo * 100} height=".3em" color="var(--color-primary)" className="my-[.4em]" />
-        <p className="mb-[.5em] text-[.75em] text-n400">{m.retorno}</p>
+        <p className="mb-[.5em] text-[.75em] text-menu-muted">{m.retorno}</p>
         {m.atual < m.alvo && acao(m)}
       </section>)}
     </div>
     <div className="mt-[.6em] grid gap-[.5em] text-[.8em] [grid-template-columns:repeat(auto-fit,minmax(min(100%,14em),1fr))]">
-      <section><h3 className="font-medium">Missões · ouro para sua equipe</h3><p className="my-[.4em] text-n400">{missao ? `${SPECIES[missao.speciesId]?.name ?? missao.speciesId}: ${Math.min(missao.total, missao.alvo)}/${missao.alvo} abates · ${missao.recompensa.toLocaleString('pt-BR')} ouro. ${missao.total >= missao.alvo ? 'Recompensa pronta para reivindicar.' : 'Conclua e reivindique para liberar a próxima missão do tipo.'}` : 'Todas as cadeias foram reivindicadas.'}</p><GameButton onClick={() => abrir('tasks')}>Ver missões</GameButton></section>
-      <section><h3 className="font-medium">Bestiário · pesquisa de espécies</h3><p className="my-[.4em] text-n400">{pesquisa ? `${SPECIES[pesquisa.id]?.name}: ${pesquisa.total.toLocaleString('pt-BR')}/${pesquisa.alvo.toLocaleString('pt-BR')} abates para o próximo estágio.` : 'Consulte as espécies pesquisadas ou escolha uma nova espécie para estudar.'}</p><GameButton onClick={() => abrir('bestiario')}>Ver Bestiário</GameButton></section>
-      <section><h3 className="font-medium">Especialidades · fortaleça seus tipos</h3><p className="my-[.4em] text-n400">{tipo ? `${tipo}: dano ${especialidades[tipo]?.dano ?? 0}/${ESPECIALIDADE_NIVEL_MAX}, defesa ${especialidades[tipo]?.defesa ?? 0}/${ESPECIALIDADE_NIVEL_MAX}. Invista ouro e Stones em um tipo usado pela sua equipe.` : 'Todas as especialidades estão no máximo.'}</p><GameButton onClick={() => abrir('especialidades')}>Ver especialidades</GameButton></section>
+      <section><h3 className="font-medium">Missões · ouro para sua equipe</h3><p className="my-[.4em] text-menu-muted">{missao ? `${SPECIES[missao.speciesId]?.name ?? missao.speciesId}: ${Math.min(missao.total, missao.alvo)}/${missao.alvo} abates · ${missao.recompensa.toLocaleString('pt-BR')} ouro. ${missao.total >= missao.alvo ? 'Recompensa pronta para reivindicar.' : 'Conclua e reivindique para liberar a próxima missão do tipo.'}` : 'Todas as cadeias foram reivindicadas.'}</p><GameButton onClick={() => abrir('tasks')}>Ver missões</GameButton></section>
+      <section><h3 className="font-medium">Bestiário · pesquisa de espécies</h3><p className="my-[.4em] text-menu-muted">{pesquisa ? `${SPECIES[pesquisa.id]?.name}: ${pesquisa.total.toLocaleString('pt-BR')}/${pesquisa.alvo.toLocaleString('pt-BR')} abates para o próximo estágio.` : 'Consulte as espécies pesquisadas ou escolha uma nova espécie para estudar.'}</p><GameButton onClick={() => abrir('bestiario')}>Ver Bestiário</GameButton></section>
+      <section><h3 className="font-medium">Especialidades · fortaleça seus tipos</h3><p className="my-[.4em] text-menu-muted">{tipo ? `${tipo}: dano ${especialidades[tipo]?.dano ?? 0}/${ESPECIALIDADE_NIVEL_MAX}, defesa ${especialidades[tipo]?.defesa ?? 0}/${ESPECIALIDADE_NIVEL_MAX}. Invista ouro e Stones em um tipo usado pela sua equipe.` : 'Todas as especialidades estão no máximo.'}</p><GameButton onClick={() => abrir('especialidades')}>Ver especialidades</GameButton></section>
     </div>
   </details>
 }

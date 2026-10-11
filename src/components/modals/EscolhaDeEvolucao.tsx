@@ -31,13 +31,13 @@ export function EscolhaDeEvolucao({
   const origem = SPECIES[poke.speciesId]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-[1em]">
+    <div data-appearance="journey" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-[1em]">
       <GameCard className="flex w-full max-w-[26em] flex-col gap-[.6em] p-[.8em]">
         <div className="flex flex-col gap-[.15em]">
-          <span className="text-[.95em] font-medium text-n100">
+          <span className="text-[.95em] font-medium text-menu-ink">
             {origem.name} pode evoluir de duas formas
           </span>
-          <span className="text-[.78em] text-n400">
+          <span className="text-[.78em] text-menu-muted">
             A escolha é permanente — não dá para voltar atrás nem trocar depois.
           </span>
         </div>
@@ -55,16 +55,16 @@ export function EscolhaDeEvolucao({
             return (
               <div
                 key={opcao.to}
-                className="flex items-center gap-[.6em] rounded-[.5em] border border-n700 p-[.5em]"
+                className="flex items-center gap-[.6em] rounded-[.5em] border border-menu-line p-[.5em]"
               >
                 <PokeSwatch species={alvo} isShiny={poke.isShiny} poke={poke} size={3} />
                 <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-[.85em] font-medium text-n100">{alvo.name}</span>
-                  <span className="text-[.72em] text-n400">
+                  <span className="truncate text-[.85em] font-medium text-menu-ink">{alvo.name}</span>
+                  <span className="text-[.72em] text-menu-muted">
                     {alvo.type}{alvo.type2 ? ` · ${alvo.type2}` : ''}
                   </span>
                   {req && (
-                    <span className={bloqueada ? 'text-[.72em] text-bad' : 'text-[.72em] text-n500'}>
+                    <span className={bloqueada ? 'text-[.72em] text-bad' : 'text-[.72em] text-menu-muted'}>
                       {req.count}x {ITEMS[stoneItemId(req.type)]?.name ?? req.itemId}
                       {bloqueada ? ` · faltam ${falta}` : ' · você tem'}
                     </span>

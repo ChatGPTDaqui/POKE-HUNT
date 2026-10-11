@@ -115,7 +115,7 @@ export function PokemonsTab() {
   const revelacao = useRevelacaoIncremental(visible)
 
   if (!carregada) return <EstadoDaMochila />
-  if (bagPokes.length === 0) return <p className="text-n500">Nenhum POKE na mochila.</p>
+  if (bagPokes.length === 0) return <p className="text-menu-muted">Nenhum POKE na mochila.</p>
 
   const canMove = teamLength < MAX_TEAM_SIZE
   // Da lista FILTRADA e nao da pagina: trocar de pagina ou de filtro nao pode
@@ -160,7 +160,7 @@ export function PokemonsTab() {
       </div>
 
       {visible.length === 0 ? (
-        <p className="text-n500">Nenhum POKE encontrado.</p>
+        <p className="text-menu-muted">Nenhum POKE encontrado.</p>
       ) : (
         <div className="inventory-workspace">
           {/* Grade, e nao uma linha por POKE (PH-118). Trancado e shiny
@@ -216,9 +216,9 @@ export function PokemonsTab() {
               <div className="detail-identity">
                 <div className="flex flex-wrap items-center gap-[.4em]">
                   <PokeNameTag poke={pokeEmFoco} species={SPECIES[pokeEmFoco.speciesId]} />
-                  <span className="text-n400">Lv{pokeEmFoco.level}</span>
+                  <span className="text-menu-muted">Lv{pokeEmFoco.level}</span>
                 </div>
-                <div className="text-[.75em] text-n500">
+                <div className="text-[.75em] text-menu-muted">
                   HP {Math.floor(pokeEmFoco.hp)}/{pokeEmFoco.stats.hp} · IV {averageIvPercent(pokeEmFoco.ivs).toFixed(0)}%
                 </div>
                 <div className="mt-[.4em] flex flex-wrap gap-[.25em]">
@@ -254,7 +254,7 @@ export function PokemonsTab() {
                   {compacto ? 'Equipar' : 'Mover p/ equipe'}
                 </GameButton>
               ) : (
-                <span className="text-[.78em] text-n500">Equipe cheia</span>
+                <span className="text-[.78em] text-menu-muted">Equipe cheia</span>
               )}
               </div>
             </GameCard>
@@ -313,7 +313,7 @@ export function ItensTab() {
   const filtrados = useMemo(() => ids.filter((id) => ITEMS[id].name.toLocaleLowerCase().includes(busca.trim().toLocaleLowerCase())), [ids, busca])
   const revelacao = useRevelacaoIncremental(filtrados)
 
-  if (ids.length === 0) return <p className="text-n500">Nenhum item.</p>
+  if (ids.length === 0) return <p className="text-menu-muted">Nenhum item.</p>
 
   // Da lista inteira e nao da pagina, pelo mesmo motivo da aba Pokemons. Item
   // que zerou (usado, vendido) sai de `ids` e a ficha fecha junto.
@@ -325,9 +325,9 @@ export function ItensTab() {
   return (
     <div className="flex flex-col gap-[.3em]">
       <label className="inventory-toolbar">
-        <span className="text-[.8em] text-n400">Buscar item</span>
+        <span className="text-[.8em] text-menu-muted">Buscar item</span>
         <GameInput aria-label="Buscar item" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nome do item…" className="flex-1" />
-        <span className="text-[.75em] text-n400">{filtrados.length} {filtrados.length === 1 ? 'tipo' : 'tipos'}</span>
+        <span className="text-[.75em] text-menu-muted">{filtrados.length} {filtrados.length === 1 ? 'tipo' : 'tipos'}</span>
       </label>
       <div className="inventory-workspace">
       {/* Grade, e nao uma linha por item (PH-118). O contador do slot e o
@@ -372,9 +372,9 @@ export function ItensTab() {
           <ItemTooltip item={itemEmFoco}>
             <div className="detail-identity cursor-help">
               <div className="font-medium">
-                {itemEmFoco.name} <span className="text-n400">x{items[itemEmFoco.id]}</span>
+                {itemEmFoco.name} <span className="text-menu-muted">x{items[itemEmFoco.id]}</span>
               </div>
-              <div className="text-[.75em] text-n500">{itemEmFoco.description}</div>
+              <div className="text-[.75em] text-menu-muted">{itemEmFoco.description}</div>
             </div>
           </ItemTooltip>
           <div className="detail-actions">
@@ -403,7 +403,7 @@ export function ItensTab() {
       </div>
 
       {filtrados.length === 0
-        ? <p className="text-[.85em] text-n400">Nenhum item encontrado.</p>
+        ? <p className="text-[.85em] text-menu-muted">Nenhum item encontrado.</p>
         : <RevelacaoIncremental estado={revelacao} rotulo="itens" />}
       {itemEmFoco?.kind === 'tm' && <EnsinarTm key={itemEmFoco.id} itemId={itemEmFoco.id} />}
     </div>
@@ -468,7 +468,7 @@ export function TmsTab() {
   const revelacao = useRevelacaoIncremental(filtrados)
   const mostradas = revelacao.mostrados
 
-  if (idsTm.length === 0) return <p className="text-n500">Nenhuma TM na mochila.</p>
+  if (idsTm.length === 0) return <p className="text-menu-muted">Nenhuma TM na mochila.</p>
 
   const itemEmFoco = foco != null && idsTm.includes(foco) ? TM_ITEMS[foco] : null
   const abilityEmFoco = itemEmFoco ? ABILITY_POR_TM[itemEmFoco.id] : null
@@ -545,7 +545,7 @@ export function TmsTab() {
               <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="3.8em" />
               <div className="detail-identity">
                 <div className="font-medium">
-                  {itemEmFoco.name} <span className="text-n400">x{items[itemEmFoco.id]}</span>
+                  {itemEmFoco.name} <span className="text-menu-muted">x{items[itemEmFoco.id]}</span>
                 </div>
                 {abilityEmFoco && (
                   <div className="mt-[.2em] flex flex-wrap items-center gap-[.3em]">
@@ -571,7 +571,7 @@ export function TmsTab() {
       </div>
 
       {filtrados.length === 0
-        ? <p className="text-[.85em] text-n400">Nenhuma TM encontrada.</p>
+        ? <p className="text-[.85em] text-menu-muted">Nenhuma TM encontrada.</p>
         : <RevelacaoIncremental estado={revelacao} rotulo="TMs" />}
     </div>
   )
@@ -586,8 +586,9 @@ export function BagMenu() {
         {/* Abas e gatilho da auto-venda na MESMA fileira. As duas abas usavam
             190px dos 374 uteis e o resto era vidro vazio, enquanto a auto-venda
             gastava uma linha inteira logo abaixo. */}
-        <div className="flex items-center gap-[.4em]">
+        <div className="flex flex-wrap items-center gap-[.4em]">
           <SegmentedTabs
+            className="max-w-full"
             value={tab}
             onChange={setTab}
             options={[

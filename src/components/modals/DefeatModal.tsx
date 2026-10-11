@@ -37,7 +37,7 @@ export function DefeatModal() {
       {/* Em `em`, e nao nos primitivos do shadcn (`rem`): dentro da HUD o
           tamanho tem que acompanhar a escala fluida e o `hudScale`, e o botao
           precisa do alvo de toque de 44px que so o `GameButton` carrega. */}
-      <div className="mx-[1em] flex max-w-[22em] flex-col items-center gap-[.7em] rounded-xl border border-destructive bg-background px-[1.2em] py-[1em] text-center shadow-xl">
+      <div data-appearance="journey" className="journey-surface mx-[1em] flex max-w-[22em] flex-col items-center gap-[.5em] rounded-xl border border-destructive bg-menu-paper p-[.7em] text-center shadow-xl">
         <div className="text-[1.05em] font-bold text-destructive">Você foi derrotado!</div>
         <p className="text-[.85em] text-muted-foreground">
           {huntBoss

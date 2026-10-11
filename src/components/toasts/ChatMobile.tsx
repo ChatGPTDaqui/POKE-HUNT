@@ -8,24 +8,19 @@
 // A ultima linha vem do LOG (combate/sistema), nao do chat de jogadores: e o
 // canal que descreve o que esta acontecendo no jogo enquanto o jogador olha.
 // Conversa de outros jogadores nao interrompe — ela espera dentro do sheet.
-import { useState, type CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
 import { ChatCircleDots } from '@phosphor-icons/react'
 import { useToastStore } from '@/stores/toastStore'
 import { ultimaLinhaDeTodasAsAbas } from '@/stores/toastStoreVanilla'
-import { useUiStore, type ChatTab } from '@/stores/uiStore'
-import { Sheet } from '@/components/game/Sheet'
+import { useUiStore } from '@/stores/uiStore'
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
-import { AbaMundo, LinhasDaAba, TABS } from './ChatLog'
+import { ChatLog } from './ChatLog'
 import { cn } from '@/lib/utils'
 
 export function ChatMobile() {
-  const [aberto, setAberto] = useState(false)
-  return (
-    <>
-      <Ticker onOpen={() => setAberto(true)} />
-      {aberto && <SheetChat onClose={() => setAberto(false)} />}
-    </>
-  )
+  const aberto = useUiStore((s) => s.chatOpen)
+  const setAberto = useUiStore((s) => s.setChatOpen)
+  return aberto ? <ChatLog embedded /> : <Ticker onOpen={() => setAberto(true)} />
 }
 
 // Mesma escala do chat e do toast: no compacto o ticker e o UNICO canal de
@@ -101,57 +96,6 @@ function Ticker({ onOpen }: { onOpen: () => void }) {
       >
         {ultima ? <TextoComRealce texto={ultima.message} realce={ultima.realce} /> : 'Chat'}
       </span>
-    </button>
-  )
-}
-
-function SheetChat({ onClose }: { onClose: () => void }) {
-  const activeTab = useUiStore((s) => s.chatTab)
-  const setActiveTab = useUiStore((s) => s.setChatTab)
-
-  return (
-    <Sheet
-      winKey="chat-mobile"
-      snap="meia"
-      zIndex={33}
-      onClose={onClose}
-      title="Chat"
-      // O corpo do chat gerencia a propria rolagem e o campo de digitacao fica
-      // colado embaixo: sem `p-0` o padrao do sheet empurraria o input pra
-      // dentro de uma area que rola.
-      bodyClassName="flex flex-col p-0"
-      subheader={
-        <div className="flex gap-[.25em] px-[.7em] pb-[.4em]">
-          {TABS.map((tab) => (
-            <BotaoAba
-              key={tab.key}
-              label={tab.label}
-              ativo={activeTab === tab.key}
-              onClick={() => setActiveTab(tab.key)}
-            />
-          ))}
-        </div>
-      }
-    >
-      {activeTab === 'mundo' ? <AbaMundo /> : <LinhasDaAba tab={activeTab as Exclude<ChatTab, 'mundo'>} />}
-    </Sheet>
-  )
-}
-
-function BotaoAba({ label, ativo, onClick }: { label: string; ativo: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        // `jogo-botao` e o gancho do alvo minimo de toque: sao quatro abas lado
-        // a lado com 27px de altura, e errar a vizinha troca o canal que o
-        // jogador esta lendo.
-        'jogo-botão flex-1 cursor-pointer rounded-[.6em] px-[.4em] py-[.45em] font-[inherit] text-[.75em]',
-        ativo ? 'bg-n800 text-foreground' : 'text-n500',
-      )}
-    >
-      {label}
     </button>
   )
 }

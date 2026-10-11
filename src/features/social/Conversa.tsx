@@ -204,23 +204,23 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
       <div className="flex items-center gap-[.4em]">
         <span
           aria-hidden
-          className={cn('h-[.5em] w-[.5em] rounded-full', contato.online ? 'bg-ok' : 'bg-n600')}
+          className={cn('h-[.5em] w-[.5em] rounded-full', contato.online ? 'bg-ok' : 'bg-menu-card')}
         />
         <b className="font-medium">{contato.nick}</b>
         {contato.online !== undefined && (
-          <span className="text-[.75em] text-n400">{contato.online ? 'online' : 'offline'}</span>
+          <span className="text-[.75em] text-menu-muted">{contato.online ? 'online' : 'offline'}</span>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-[.3em] overflow-y-auto rounded-[.5em] border border-n800 bg-n900 p-[.5em]">
+      <div className="flex flex-1 flex-col gap-[.3em] overflow-y-auto rounded-[.5em] border border-menu-line bg-menu-card p-[.5em]">
         {temMais && (
           <GameButton variant="ghost" carregando={carregandoMais} onClick={() => void carregarMais()}>
             <ArrowUp /> Ver mensagens anteriores
           </GameButton>
         )}
-        {carregando && <p className="text-[.8em] text-n400">Carregando conversa...</p>}
+        {carregando && <p className="text-[.8em] text-menu-muted">Carregando conversa...</p>}
         {!carregando && mensagens.length === 0 && (
-          <p className="text-[.8em] text-n400">
+          <p className="text-[.8em] text-menu-muted">
             Nenhuma mensagem ainda. Diga oi para {contato.nick}.
           </p>
         )}
@@ -255,17 +255,17 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
               <div
                 className={cn(
                   'max-w-[80%] rounded-[.5em] px-[.5em] py-[.3em] text-[.85em]',
-                  minha ? 'bg-primary/20 text-foreground' : 'bg-n800 text-foreground',
+                  minha ? 'bg-menu-brand/20 text-menu-ink' : 'bg-menu-wash text-menu-ink',
                 )}
               >
                 <div className="whitespace-pre-wrap break-words">{m.corpo}</div>
 
                 {anexos.length > 0 && (
-                  <div className="mt-[.3em] flex flex-wrap items-center gap-[.3em] border-t border-n700 pt-[.3em]">
+                  <div className="mt-[.3em] flex flex-wrap items-center gap-[.3em] border-t border-menu-line pt-[.3em]">
                     {anexos.map((a) => (
                       <span
                         key={a.itemId}
-                        className="flex items-center gap-[.25em] rounded-[.35em] border border-n700 bg-n900 px-[.35em] py-[.1em] text-[.78em]"
+                        className="flex items-center gap-[.25em] rounded-[.35em] border border-menu-line bg-menu-card px-[.35em] py-[.1em] text-[.78em]"
                       >
                         <img
                           src={itemIconUrl(a.itemId) ?? undefined}
@@ -287,12 +287,12 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
                       </GameButton>
                     )}
                     {!podeColetar && m.anexo_coletado_em && (
-                      <span className="text-[.72em] text-n500">coletado</span>
+                      <span className="text-[.72em] text-menu-muted">coletado</span>
                     )}
                   </div>
                 )}
 
-                <div className="mt-[.15em] text-right text-[.68em] text-n500">
+                <div className="mt-[.15em] text-right text-[.68em] text-menu-muted">
                   {new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>

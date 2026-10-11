@@ -54,7 +54,7 @@ function CustoDaEspecialidade() {
   return (
     <div>
       <div className="mb-[.45em] flex items-center gap-[.4em]">
-        <span className="text-[.8em] text-n400">Custo para</span>
+        <span className="text-[.8em] text-menu-muted">Custo para</span>
         <GameSelect value={tipo} onChange={(e) => setTipo(e.target.value as ElementType)} className="w-[9em]">
           {ESPECIALIDADE_TYPES.map((t) => (
             <option key={t} value={t}>{t}</option>
@@ -79,7 +79,7 @@ function CustoDaEspecialidade() {
           <span>{fmt.format(totalGold)}</span>
         </div>
       </div>
-      <div className="mt-[.4em] text-[.8em] text-n400">
+      <div className="mt-[.4em] text-[.8em] text-menu-muted">
         Esse é o custo de UMA trilha. Dano e defesa são separadas e cobram o mesmo — fechar as duas neste tipo
         custa {fmt.format(totalStones * 2)} pedras e {fmt.format(totalGold * 2)} de ouro.
       </div>
@@ -97,7 +97,7 @@ function CadeiaDeMissoes() {
   return (
     <div>
       <div className="mb-[.45em] flex items-center gap-[.4em]">
-        <span className="text-[.8em] text-n400">Cadeia de</span>
+        <span className="text-[.8em] text-menu-muted">Cadeia de</span>
         <GameSelect value={tipo} onChange={(e) => setTipo(e.target.value as ElementType)} className="w-[9em]">
           {ESPECIALIDADE_TYPES.map((t) => (
             <option key={t} value={t}>{t}</option>
@@ -106,9 +106,9 @@ function CadeiaDeMissoes() {
         <SharedTypeChip type={tipo} full />
       </div>
       {cadeia.length === 0 ? (
-        <div className="text-[.8em] text-n400">Este tipo não tem cadeia no elenco atual.</div>
+        <div className="text-[.8em] text-menu-muted">Este tipo não tem cadeia no elenco atual.</div>
       ) : (
-        <div className="text-[.8em] text-n400">
+        <div className="text-[.8em] text-menu-muted">
           <b>{cadeia.length} missões</b> nesta cadeia. A primeira pede{' '}
           <b>{fmt.format(primeira.alvo)} abates de {nomeDaEspecie(primeira.speciesId)}</b> e paga{' '}
           {fmt.format(primeira.recompensa)} de ouro. A última é{' '}

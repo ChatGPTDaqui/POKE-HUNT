@@ -133,7 +133,7 @@ export function FiltroDeItens({
 function Contador({ total, mostrando }: { total: number; mostrando: number }) {
   if (mostrando === total) return null
   return (
-    <span className="shrink-0 text-[.72em] tabular-nums text-n500">
+    <span className="shrink-0 text-[.72em] tabular-nums text-menu-muted">
       {mostrando} de {total}
     </span>
   )

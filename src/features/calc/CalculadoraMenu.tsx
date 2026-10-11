@@ -108,9 +108,9 @@ function PainelLado({
   }, [team])
 
   return (
-    <div className="flex flex-col gap-[.45em] rounded-[.7em] border border-n800 bg-n900 p-[.6em]">
+    <div className="flex flex-col gap-[.45em] rounded-[.7em] border border-menu-line bg-menu-card p-[.6em]">
       <div className="flex items-center gap-[.5em]">
-        <span className="flex h-[1.6em] w-[1.6em] items-center justify-center rounded-[.4em] bg-primary text-[.8em] font-semibold text-primary-foreground">
+        <span className="flex h-[1.6em] w-[1.6em] items-center justify-center rounded-[.4em] bg-menu-brand text-[.8em] font-semibold text-primary-foreground">
           {marca}
         </span>
         <GameSelect
@@ -142,7 +142,7 @@ function PainelLado({
       </div>
 
       {!resultado ? (
-        <div className="flex min-h-[10em] items-center justify-center rounded-[.6em] border border-dashed border-n700 p-[.6em] text-center text-[.8em] text-n500">
+        <div className="flex min-h-[10em] items-center justify-center rounded-[.6em] border border-dashed border-menu-line p-[.6em] text-center text-[.8em] text-menu-muted">
           Escolha um Pokemon para calcular os status — ou deixe vazio se so quer olhar o outro lado.
         </div>
       ) : (
@@ -168,14 +168,14 @@ function PainelLado({
           </div>
 
           <div className="grid grid-cols-2 gap-[.5em] text-[.8em]">
-            <label className="flex flex-col gap-[.2em] text-n400">
+            <label className="flex flex-col gap-[.2em] text-menu-muted">
               Nivel
               <GameInput
                 type="number" min={1} max={999} value={lado.level}
                 onChange={(e) => onChange({ ...lado, level: Math.max(1, Math.min(999, Number(e.target.value) || 1)) })}
               />
             </label>
-            <label className="flex flex-col gap-[.2em] text-n400">
+            <label className="flex flex-col gap-[.2em] text-menu-muted">
               Raridade
               <GameSelect
                 value={lado.rarity}
@@ -186,7 +186,7 @@ function PainelLado({
                 ))}
               </GameSelect>
             </label>
-            <label className="flex flex-col gap-[.2em] text-n400">
+            <label className="flex flex-col gap-[.2em] text-menu-muted">
               IV (0–{IV_MAX}, aplicado em todos)
               <GameInput
                 type="number" min={0} max={IV_MAX} value={lado.iv}
@@ -214,12 +214,12 @@ function PainelLado({
                 <div
                   key={key}
                   className={cn(
-                    'rounded-[.5em] border bg-background p-[.4em]',
+                    'rounded-[.5em] border bg-menu-paper p-[.4em]',
                     compacto ? 'flex items-center gap-[.4em]' : 'text-center',
                   )}
-                  style={{ borderColor: editado ? 'var(--color-primary)' : 'var(--color-n800)' }}
+                  style={{ borderColor: editado ? 'var(--color-menu-brand)' : 'var(--color-menu-line)' }}
                 >
-                  <div className={cn('text-[.72em] text-n500', compacto && 'min-w-0 flex-1 truncate')}>{label}</div>
+                  <div className={cn('text-[.72em] text-menu-muted', compacto && 'min-w-0 flex-1 truncate')}>{label}</div>
                   {/* Campo editavel, e nao numero fixo: o valor calculado e so
                       o ponto de partida. Digitar sobrescreve so este atributo;
                       apagar o campo devolve o controle ao calculo (por isso a
@@ -253,7 +253,7 @@ function PainelLado({
                     </div>
                   )}
                   {editado && (
-                    <div className="text-[.65em] text-n500">
+                    <div className="text-[.65em] text-menu-muted">
                       calc. {fmt.format(resultado.calculado[key])}
                     </div>
                   )}

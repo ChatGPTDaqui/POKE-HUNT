@@ -57,21 +57,21 @@ export function LinhaDeMensagem({
 
   return (
     <GameCard
-      className={cn('flex flex-wrap items-center gap-[.5em] p-[.4em]', pendente && 'border-primary/40')}
+      className={cn('flex flex-wrap items-center gap-[.5em] p-[.4em]', pendente && 'border-menu-brand/40')}
       onClick={() => { if (pendente && !ehPedido && !temAnexo) onMarcarLida(m.id) }}
     >
       <div className="min-w-[10em] flex-1">
         <div className="flex flex-wrap items-center gap-[.4em]">
-          <b className="font-medium text-foreground">{m.assunto ?? ROTULO_TIPO[m.tipo]}</b>
-          <span className="text-[.75em] text-n400">{ROTULO_TIPO[m.tipo]}</span>
-          {pendente && !ehPedido && <span className="text-[.75em] text-primary">nova</span>}
+          <b className="font-medium text-menu-ink">{m.assunto ?? ROTULO_TIPO[m.tipo]}</b>
+          <span className="text-[.75em] text-menu-muted">{ROTULO_TIPO[m.tipo]}</span>
+          {pendente && !ehPedido && <span className="text-[.75em] text-menu-brand">nova</span>}
         </div>
-        <div className="whitespace-pre-wrap break-words text-[.85em] text-n300">{m.corpo}</div>
+        <div className="whitespace-pre-wrap break-words text-[.85em] text-menu-ink">{m.corpo}</div>
 
         {temAnexo && (
           <div className="mt-[.25em] flex flex-wrap items-center gap-[.3em]">
             {pokeAnexado && (
-              <span className="flex items-center gap-[.25em] rounded-[.35em] border border-primary/50 bg-n800 px-[.35em] py-[.1em] text-[.78em] text-foreground">
+              <span className="flex items-center gap-[.25em] rounded-[.35em] border border-menu-brand/50 bg-menu-wash px-[.35em] py-[.1em] text-[.78em] text-menu-ink">
                 <img
                   src={faceIconUrl(pokeAnexado.speciesId, pokeAnexado.isShiny) ?? undefined}
                   alt=""
@@ -87,7 +87,7 @@ export function LinhaDeMensagem({
             {anexos.map((a) => (
               <span
                 key={a.itemId}
-                className="flex items-center gap-[.25em] rounded-[.35em] border border-n700 bg-n800 px-[.35em] py-[.1em] text-[.78em] text-foreground"
+                className="flex items-center gap-[.25em] rounded-[.35em] border border-menu-line bg-menu-wash px-[.35em] py-[.1em] text-[.78em] text-menu-ink"
               >
                 <img
                   src={itemIconUrl(a.itemId) ?? undefined}
@@ -102,7 +102,7 @@ export function LinhaDeMensagem({
           </div>
         )}
 
-        <div className="text-[.75em] text-n500">
+        <div className="text-[.75em] text-menu-muted">
           {m.de_id && <AvatarDoTreinador userId={m.de_id} tamanho={1.2} className="mr-[.25em] align-[-.25em]" />}
           {`de ${m.de_nome}`}
           {' · '}
@@ -142,7 +142,7 @@ export function LinhaDeMensagem({
         </div>
       )}
       {ehPedido && !pendente && (
-        <span className="text-[.8em] text-n400">
+        <span className="text-[.8em] text-menu-muted">
           {m.estado === 'aceito' ? 'Aceito' : 'Recusado'}
         </span>
       )}

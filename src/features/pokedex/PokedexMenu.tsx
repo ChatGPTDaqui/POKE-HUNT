@@ -138,7 +138,7 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
     .sort((a, b) => a.entry.levelReq - b.entry.levelReq)
 
   return (
-    <div className="flex flex-col gap-[.55em] border-t border-n800 p-[.55em]">
+    <div className="flex flex-col gap-[.55em] border-t border-menu-line p-[.55em]">
       {/* NAVEGACAO ANTERIOR/PROXIMO: sem ela, ver o Pokemon seguinte exigia
           fechar o card, rolar a lista ate achar o proximo e abrir de novo — e a
           lista tem 226 linhas. As setas percorrem a lista VISIVEL (ja filtrada
@@ -147,7 +147,7 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
       {onNavegar && (
         <div className="flex items-center justify-between gap-[.4em]">
           <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(-1) }}>← Anterior</GameButton>
-          <span className="text-[.75em] text-n500">#{dexNumber(species)} · {species.name}</span>
+          <span className="text-[.75em] text-menu-muted">#{dexNumber(species)} · {species.name}</span>
           <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(1) }}>Próximo →</GameButton>
         </div>
       )}
@@ -165,8 +165,8 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
             ['Captura', `${species.catchRate}/255`],
             ['Regiao', REGION_LABEL[regionOfSpecies(species.id)] ?? '—'],
           ] as const).map(([label, valor]) => (
-            <div key={label} className="flex justify-between rounded-[.4em] border border-n800 bg-background px-[.5em] py-[.35em] text-[.8em]">
-              <span className="text-n500">{label}</span>
+            <div key={label} className="flex justify-between rounded-[.4em] border border-menu-line bg-menu-paper px-[.5em] py-[.35em] text-[.8em]">
+              <span className="text-menu-muted">{label}</span>
               <b className="min-w-0 truncate pl-[.3em] font-medium">{valor}</b>
             </div>
           ))}
@@ -176,7 +176,7 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
       <div>
         <div className="mb-[.4em] font-medium">Evolução</div>
         {linha.length === 1 ? (
-          <span className="text-[.8em] text-n500">Não evolui e não vem de nenhuma evolução.</span>
+          <span className="text-[.8em] text-menu-muted">Não evolui e não vem de nenhuma evolução.</span>
         ) : (
           <div className="flex flex-col gap-[.3em] text-[.8em]">
             {linha.map((etapa, i) => {
@@ -185,14 +185,14 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
               const atual = etapa.id === species.id
               return (
                 <div key={etapa.id} className="flex flex-wrap items-center gap-[.35em]">
-                  <span className={atual ? 'font-medium text-foreground' : 'text-n400'}>
+                  <span className={atual ? 'font-medium text-menu-ink' : 'text-menu-muted'}>
                     {i + 1}. {etapa.name}{atual && ' (este)'}
                   </span>
                   {proximo && condicao && (
                     <>
-                      <span className="text-n600">→</span>
-                      <span className="text-n400">{proximo.name}</span>
-                      <span className={etapa.isSpecialEvolution ? 'text-warn' : 'text-n500'}>({condicao})</span>
+                      <span className="text-menu-muted">→</span>
+                      <span className="text-menu-muted">{proximo.name}</span>
+                      <span className={etapa.isSpecialEvolution ? 'text-warn' : 'text-menu-muted'}>({condicao})</span>
                     </>
                   )}
                 </div>
@@ -210,12 +210,12 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
           <div className="flex flex-col gap-[.3em] text-[.8em]">
             {[...traits.normais.map((k) => [k, false] as const), ...(traits.oculta ? [[traits.oculta, true] as const] : [])]
               .map(([chave, oculta]) => (
-                <div key={chave} className="rounded-[.4em] border border-n800 bg-background px-[.5em] py-[.35em]">
+                <div key={chave} className="rounded-[.4em] border border-menu-line bg-menu-paper px-[.5em] py-[.35em]">
                   <div className="flex items-center gap-[.35em]">
                     <b className="font-medium">{nomeDaTrait(chave) ?? chave}</b>
                     {oculta && <span className="text-[.85em] text-amber-400">oculta</span>}
                   </div>
-                  <p className="leading-tight text-n500">{descricaoDaTrait(chave)}</p>
+                  <p className="leading-tight text-menu-muted">{descricaoDaTrait(chave)}</p>
                   {motivoSemEfeito(chave) && (
                     <p className="text-[.9em] leading-tight text-amber-500/80">Sem efeito neste jogo.</p>
                   )}
@@ -229,8 +229,8 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
         <div className="mb-[.4em] font-medium">Status base</div>
         <div className="grid grid-cols-3 gap-[.4em]">
           {BASE_STAT_ROWS.map(([label, key]) => (
-            <div key={key} className="flex justify-between rounded-[.4em] border border-n800 bg-background px-[.5em] py-[.35em] text-[.8em]">
-              <Palavra verbete={verbeteDoStat(key)} className="text-n500">{label}</Palavra>
+            <div key={key} className="flex justify-between rounded-[.4em] border border-menu-line bg-menu-paper px-[.5em] py-[.35em] text-[.8em]">
+              <Palavra verbete={verbeteDoStat(key)} className="text-menu-muted">{label}</Palavra>
               <b className="font-medium">{species.base[key]}</b>
             </div>
           ))}
@@ -244,8 +244,8 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
 
       <div>
         <div className="mb-[.4em] font-medium">Golpes aprendidos</div>
-        <div className="overflow-hidden rounded-[.4em] border border-n800 text-[.8em]">
-          <div className="grid grid-cols-[2.4em_1fr_3.4em_4em_3em_3em_2.4em] gap-[.4em] border-b border-n800 bg-n800/60 px-[.5em] py-[.3em] font-medium">
+        <div className="journey-dex-moves overflow-x-auto rounded-[.4em] border border-menu-line text-[.8em]">
+          <div className="grid grid-cols-[2.4em_1fr_3.4em_4em_3em_3em_2.4em] gap-[.4em] border-b border-menu-line bg-menu-wash/60 px-[.5em] py-[.3em] font-medium">
             <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>Prec.</span><span>AOE</span>
           </div>
           <div className="max-h-[16em] overflow-y-auto">
@@ -260,19 +260,19 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
               return (
                 <div
                   key={entry.key}
-                  className="grid grid-cols-[2.4em_1fr_3.4em_4em_3em_3em_2.4em] items-center gap-[.4em] border-b border-n800 px-[.5em] py-[.3em] last:border-b-0"
+                  className="grid grid-cols-[2.4em_1fr_3.4em_4em_3em_3em_2.4em] items-center gap-[.4em] border-b border-menu-line px-[.5em] py-[.3em] last:border-b-0"
                 >
-                  <span className="text-n400">{entry.levelReq}</span>
+                  <span className="text-menu-muted">{entry.levelReq}</span>
                   <span className="truncate">{ability.name}</span>
                   <span><TypeChip type={ability.type} /></span>
-                  <span className="text-n400">{category === 'physical' ? 'Fisico' : 'Especial'}</span>
+                  <span className="text-menu-muted">{category === 'physical' ? 'Fisico' : 'Especial'}</span>
                   <span>{ability.power > 0 ? ability.power : '—'}</span>
                   {/* Mesma regra da ficha do POKE: precisao so pra golpe de
                       dano, e em amarelo quando erra. */}
-                  <span className={ability.power > 0 && (ability.accuracy ?? 100) < 100 ? 'text-warn' : 'text-n400'}>
+                  <span className={ability.power > 0 && (ability.accuracy ?? 100) < 100 ? 'text-warn' : 'text-menu-muted'}>
                     {ability.power > 0 ? `${ability.accuracy ?? 100}%` : '—'}
                   </span>
-                  <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>
+                  <span className="text-menu-muted">{ability.target === 'aoe' ? '✓' : '—'}</span>
                 </div>
               )
             })}
@@ -283,7 +283,7 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
       <div>
         <div className="mb-[.4em] font-medium">Onde encontrar</div>
         {hunts.length === 0 ? (
-          <span className="text-[.8em] text-n500">Nenhuma hunt conhecida ainda.</span>
+          <span className="text-[.8em] text-menu-muted">Nenhuma hunt conhecida ainda.</span>
         ) : (
           <div className="flex flex-wrap gap-[.4em]">
             {hunts.map((map) => (
@@ -405,7 +405,7 @@ export function PokedexMenu() {
               e.value === 'hunt' && !mapaAtual ? { ...e, label: 'Hunt Atual (fora)' } : e
             ))}
           />
-          <span className="text-[.75em] text-n500">
+          <span className="text-[.75em] text-menu-muted">
             {escopoAtivo === 'hunt' && mapaAtual && `${mapaAtual.name} · ${visible.length}`}
             {regiaoAtual && `${REGION_LABEL[regiaoAtual]} · ${visible.length}`}
             {escopoAtivo === 'tudo' && `${visible.length} espécies`}
@@ -413,28 +413,28 @@ export function PokedexMenu() {
         </div>
       </StickyHeader>
 
-      {visible.length === 0 && <p className="text-n500">Nenhum Pokemon encontrado.</p>}
+      {visible.length === 0 && <p className="text-menu-muted">Nenhum Pokemon encontrado.</p>}
 
       {visible.map((species) => {
         const kills = killCountFrom(pokedexKills, species.id, shinyView)
         const expanded = expandedSpeciesId === species.id
 
         return (
-          <div key={species.id} className="overflow-hidden rounded-[.6em] border border-n800 bg-n900">
+          <div key={species.id} className="overflow-hidden rounded-[.6em] border border-menu-line bg-menu-card">
             <div
               onClick={() => setExpandedSpeciesId(expanded ? null : species.id)}
-              className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-n800"
+              className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-menu-wash"
             >
               <PokeSwatch species={species} size={2.4} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-[.4em]">
-                  <span className="text-n500">#{dexNumber(species)}</span>
+                  <span className="text-menu-muted">#{dexNumber(species)}</span>
                   <span className="font-medium">{species.name}</span>
                   <TypeChip type={species.type} />
                   {species.type2 && <TypeChip type={species.type2} />}
                 </div>
               </div>
-              <span className="shrink-0 text-[.8em] text-n400">
+              <span className="shrink-0 text-[.8em] text-menu-muted">
                 {shinyView ? `✨ ${kills}` : `Abates: ${kills}`}
               </span>
             </div>

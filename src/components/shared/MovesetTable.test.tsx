@@ -95,7 +95,7 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(screen.getByText(/Golpes ativos/)).toBeTruthy()
 
     for (const key of poke.activeAbilities!) {
-      expect(botaoUsar(nomeDoGolpe(key))?.className).toContain('bg-primary')
+      expect(botaoUsar(nomeDoGolpe(key))?.className).toContain('bg-menu-brand')
     }
   })
 

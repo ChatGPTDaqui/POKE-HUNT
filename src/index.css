@@ -16,6 +16,14 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    /* Papéis dos menus: fallback escuro fora de uma superfície Jornada. */
+    --color-menu-paper: var(--journey-paper, var(--color-background));
+    --color-menu-card: var(--journey-card, var(--color-n900));
+    --color-menu-wash: var(--journey-wash, var(--color-n800));
+    --color-menu-line: var(--journey-line, var(--color-n700));
+    --color-menu-ink: var(--journey-ink, var(--color-n200));
+    --color-menu-muted: var(--journey-muted, var(--color-n400));
+    --color-menu-brand: var(--journey-primary, var(--color-primary));
     /* Heading e sans agora sao familias distintas (identidade "Vidro
        Noturno") — Fredoka so pra titulo/logo, Manrope pro resto da UI.
        @fontsource-variable/geist (nao-mono) foi removido do import acima:

@@ -57,13 +57,13 @@ export function ChipAutoVenda({ aberto, onToggle }: { aberto: boolean; onToggle:
       onClick={onToggle}
       className={cn(
         'jogo-botão flex min-w-0 shrink cursor-pointer items-center gap-[.3em] rounded-[.6em]',
-        'border border-n800 bg-n900 px-[.55em] font-[inherit] text-[.8em] transition-colors',
+        'border border-menu-line bg-menu-card px-[.55em] font-[inherit] text-[.8em] transition-colors',
         semRaridade && 'border-warn/60',
       )}
     >
-      <CurrencyCircleDollar className={cn('shrink-0 text-[1.15em]', ligada ? 'text-gold' : 'text-n500')} />
-      <span className="truncate text-n400">{resumo}</span>
-      <CaretDown className={cn('shrink-0 text-n500 transition-transform duration-150', aberto && 'rotate-180')} />
+      <CurrencyCircleDollar className={cn('shrink-0 text-[1.15em]', ligada ? 'text-gold' : 'text-menu-muted')} />
+      <span className="truncate text-menu-muted">{resumo}</span>
+      <CaretDown className={cn('shrink-0 text-menu-muted transition-transform duration-150', aberto && 'rotate-180')} />
     </button>
   )
 }
@@ -94,9 +94,9 @@ export function AutoVendaPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-[.5em] rounded-[.7em] border border-n800 bg-n900 px-[.6em] py-[.55em]">
+    <div className="flex flex-col gap-[.5em] rounded-[.7em] border border-menu-line bg-menu-card px-[.6em] py-[.55em]">
       <div className="flex items-center justify-between gap-[.5em]">
-        <span className="text-[.8em] text-n400">Vender captura na hora</span>
+        <span className="text-[.8em] text-menu-muted">Vender captura na hora</span>
         <GameSwitch
           label="Ligar auto-venda"
           checked={config.ligado}
@@ -104,7 +104,7 @@ export function AutoVendaPanel() {
         />
       </div>
 
-      <p className="text-[.75em] leading-[1.35] text-n400">
+      <p className="text-[.75em] leading-[1.35] text-menu-muted">
         Vende a captura na hora, antes de ela entrar na mochila.{' '}
         <b className="text-shiny">Shiny nunca é vendido</b>, mesmo com a raridade dele marcada.
       </p>
@@ -125,7 +125,7 @@ export function AutoVendaPanel() {
                 // vizinho no dedo liga a venda automatica de uma raridade que
                 // o jogador nao escolheu.
                 'jogo-botão flex cursor-pointer items-center rounded-[.35em] border px-[.5em] py-[.25em] text-[.72em] transition-colors',
-                marcada ? 'border-transparent font-semibold text-[#0b0e18]' : 'border-n700 text-n400',
+                marcada ? 'border-transparent font-semibold text-[#0b0e18]' : 'border-menu-line text-menu-muted',
               )}
               style={marcada ? { backgroundColor: def.color } : undefined}
             >

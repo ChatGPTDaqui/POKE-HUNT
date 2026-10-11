@@ -29,9 +29,9 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent'
 const BUTTON_VARIANT: Record<ButtonVariant, string> = {
   // "primary" e a pilula clara de estado ativo do tema black — conteudo escuro
   // sobre fundo claro, o unico acento forte da interface.
-  primary: 'bg-primary text-primary-foreground border-primary hover:bg-n200',
-  secondary: 'bg-n900 text-n200 border-n700 hover:border-n500 hover:bg-n800',
-  ghost: 'bg-transparent text-n300 border-transparent hover:bg-n800 hover:text-foreground',
+  primary: 'bg-menu-brand text-primary-foreground border-menu-brand hover:bg-menu-card',
+  secondary: 'bg-menu-card text-menu-ink border-menu-line hover:border-menu-line hover:bg-menu-wash',
+  ghost: 'bg-transparent text-menu-ink border-transparent hover:bg-menu-wash hover:text-menu-ink',
   danger: 'bg-transparent text-bad border-bad hover:bg-bad/12',
   accent: 'bg-transparent text-gold border-gold hover:bg-gold/12',
 }
@@ -67,7 +67,7 @@ export function GameButton({
       className={cn(
         'jogo-botão relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
         'px-[.55em] py-[.32em] font-[inherit] text-[.85em] leading-[1.35] whitespace-nowrap transition-colors',
-        'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
+        'focus-visible:ring-2 focus-visible:ring-menu-brand focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
         BUTTON_VARIANT[variant],
         block && 'w-full',
@@ -104,7 +104,7 @@ export function GameButton({
  */
 export function Carregando({ texto = 'Carregando...' }: { texto?: string }) {
   return (
-    <p className="flex items-center gap-[.4em] p-[.6em] text-[.85em] text-n500">
+    <p className="flex items-center gap-[.4em] p-[.6em] text-[.85em] text-menu-muted">
       <CircleNotch className="animate-spin" aria-hidden /> {texto}
     </p>
   )
@@ -133,9 +133,9 @@ export function GameInput({ className, ...props }: InputHTMLAttributes<HTMLInput
       {...props}
       name={props.name ?? props.id ?? autoId}
       className={cn(
-        'jogo-campo min-w-0 rounded-[.45em] border border-n700 bg-n900 px-[.55em] py-[.32em]',
-        'font-[inherit] text-[.85em] text-foreground placeholder:text-n500',
-        'focus-visible:border-n500 focus-visible:outline-none',
+        'jogo-campo min-w-0 rounded-[.45em] border border-menu-line bg-menu-card px-[.55em] py-[.32em]',
+        'font-[inherit] text-[.85em] text-menu-ink placeholder:text-menu-muted',
+        'focus-visible:border-menu-line focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
         className,
       )}
@@ -150,8 +150,8 @@ export function GameSelect({ className, ...props }: SelectHTMLAttributes<HTMLSel
       {...props}
       name={props.name ?? props.id ?? autoId}
       className={cn(
-        'jogo-campo min-w-0 cursor-pointer rounded-[.45em] border border-n700 bg-n900 px-[.4em] py-[.32em]',
-        'font-[inherit] text-[.85em] text-foreground',
+        'jogo-campo min-w-0 cursor-pointer rounded-[.45em] border border-menu-line bg-menu-card px-[.4em] py-[.32em]',
+        'font-[inherit] text-[.85em] text-menu-ink',
         'focus-visible:border-n500 focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
         className,
@@ -174,7 +174,7 @@ export function GameCheck({
   return (
     <label
       className={cn(
-        'jogo-check-rotulo inline-flex cursor-pointer items-center gap-[.4em] text-[.85em] text-n300 select-none',
+        'jogo-check-rotulo inline-flex cursor-pointer items-center gap-[.4em] text-[.85em] text-menu-ink select-none',
         disabled && 'cursor-not-allowed opacity-45',
         className,
       )}
@@ -185,7 +185,7 @@ export function GameCheck({
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="jogo-check h-[1em] w-[1em] shrink-0 cursor-pointer accent-primary"
+        className="jogo-check h-[1em] w-[1em] shrink-0 cursor-pointer accent-menu-brand"
       />
       {children}
     </label>
@@ -210,13 +210,13 @@ export function GameSwitch({
       className={cn(
         'jogo-switch relative h-[1.4em] w-[2.6em] shrink-0 cursor-pointer rounded-full border transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
-        checked ? 'border-primary bg-primary' : 'border-n600 bg-n800',
+        checked ? 'border-menu-brand bg-menu-brand' : 'border-menu-line bg-menu-wash',
       )}
     >
       <span
         className={cn(
           'absolute top-[.12em] h-[1em] w-[1em] rounded-full transition-[left]',
-          checked ? 'left-[1.35em] bg-[#0b0e18]' : 'left-[.12em] bg-n400',
+          checked ? 'left-[1.35em] bg-[#0b0e18]' : 'left-[.12em] bg-menu-card',
         )}
       />
     </button>
@@ -284,7 +284,7 @@ export function Meter({
 }) {
   return (
     <div
-      className={cn('overflow-hidden rounded-full bg-n800', className)}
+      className={cn('overflow-hidden rounded-full bg-menu-wash', className)}
       style={{ height }}
     >
       <div
@@ -302,12 +302,13 @@ export function Meter({
  * cancelam o padding do `GameWindow` pra faixa cobrir a largura inteira. Sem
  * elas a lista apareceria correndo pelas laterais, por baixo do cabecalho.
  *
- * `bg-background` solido (e nao translucido) pelo mesmo motivo: com alfa, o
+ * `bg-menu-paper` solido (e nao translucido) pelo mesmo motivo: com alfa, o
  * conteudo rolando por baixo continua legivel atraves do cabecalho.
  */
 export function StickyHeader({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
+      data-sticky-header
       className={cn(
         // `-top-[.7em]` e nao `top-0`: o `-mt-[.7em]` que cancela o padding do
         // corpo tambem desloca a posicao onde o sticky gruda (ele ancora pela
@@ -315,7 +316,7 @@ export function StickyHeader({ children, className }: { children: ReactNode; cla
         // cabecalho por onde a lista passava rolando. O deslocamento negativo
         // devolve a borda do cabecalho exatamente ao topo da area rolavel.
         'sticky -top-[.7em] z-[5] -mx-[.7em] -mt-[.7em] flex flex-col gap-[.4em]',
-        'border-b border-n800 bg-background px-[.7em] pt-[.45em] pb-[.35em]',
+        'border-b border-menu-line bg-menu-paper px-[.7em] pt-[.45em] pb-[.35em]',
         className,
       )}
     >
@@ -327,7 +328,7 @@ export function StickyHeader({ children, className }: { children: ReactNode; cla
 /** Cabecalho de secao (`COMPRAR`, `AMIGOS`, `CAPTURAS`). */
 export function SectionLabel({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('text-[.75em] tracking-[.08em] text-n500', className)}>{children}</div>
+    <div className={cn('text-[.75em] tracking-[.08em] text-menu-muted', className)}>{children}</div>
   )
 }
 
@@ -351,8 +352,8 @@ export function GameCard({
       title={title}
       onClick={onClick}
       className={cn(
-        'rounded-[.7em] border border-n800 bg-n900',
-        onClick && 'cursor-pointer transition-colors hover:border-primary',
+        'rounded-[.7em] border border-menu-line bg-menu-card',
+        onClick && 'cursor-pointer transition-colors hover:border-menu-brand',
         className,
       )}
     >
@@ -364,10 +365,10 @@ export function GameCard({
 /** Aviso de recurso ainda sem sistema de jogo por tras. */
 export function ComingSoon({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-[.45em] rounded-[.7em] border border-dashed border-n700 p-[1.2em] text-center">
-      <span className="text-[2em] text-n300">{icon}</span>
+    <div className="flex flex-col items-center gap-[.45em] rounded-[.7em] border border-dashed border-menu-line p-[1.2em] text-center">
+      <span className="text-[2em] text-menu-ink">{icon}</span>
       <div className="font-medium">{title}</div>
-      <div className="max-w-[24em] text-[.8em] text-n500">{children}</div>
+      <div className="max-w-[24em] text-[.8em] text-menu-muted">{children}</div>
     </div>
   )
 }
@@ -398,7 +399,7 @@ export function Recolhivel({
 }) {
   const [aberto, setAberto] = useState(inicialmenteAberto)
   return (
-    <div className={cn('overflow-hidden rounded-[.7em] border border-n800 bg-n900', className)}>
+    <div className={cn('overflow-hidden rounded-[.7em] border border-menu-line bg-menu-card', className)}>
       <button
         type="button"
         aria-expanded={aberto}
@@ -407,10 +408,10 @@ export function Recolhivel({
       >
         {icone}
         <span className="font-medium">{titulo}</span>
-        {resumo && <span className="min-w-0 flex-1 truncate text-right text-[.78em] text-n400">{resumo}</span>}
-        <CaretDown className={cn('shrink-0 text-n400 transition-transform duration-150', aberto && 'rotate-180')} />
+        {resumo && <span className="min-w-0 flex-1 truncate text-right text-[.78em] text-menu-muted">{resumo}</span>}
+        <CaretDown className={cn('shrink-0 text-menu-muted transition-transform duration-150', aberto && 'rotate-180')} />
       </button>
-      {aberto && <div className="border-t border-n800 px-[.6em] py-[.55em]">{children}</div>}
+      {aberto && <div className="border-t border-menu-line px-[.6em] py-[.55em]">{children}</div>}
     </div>
   )
 }

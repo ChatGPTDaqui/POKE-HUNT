@@ -48,8 +48,8 @@ export function StartScreen() {
   const [passo, setPasso] = useState<'nome' | 'inicial'>('nome')
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 overflow-y-auto bg-background/95 p-6">
-      <h2 className="text-2xl font-semibold">NOVO POKE IDLE</h2>
+    <div data-appearance="journey" className="journey-entry flex h-full flex-col items-center justify-center gap-3 overflow-y-auto bg-background/95 p-4">
+      <h2 className="font-heading text-2xl font-semibold">Sua jornada começa aqui</h2>
       {passo === 'nome' ? (
         <PassoNome nomeAtual={nomeAtual} aoConfirmar={() => setPasso('inicial')} />
       ) : (

@@ -281,8 +281,8 @@ function SalasDaHunt({ mapId }: { mapId: string }) {
   const total = salas.reduce((s, x) => s + x.sub.peso, 0)
 
   return (
-    <div className="flex flex-col gap-[.25em] rounded-[.5em] bg-n800/50 p-[.45em]">
-      <div className="text-[.75em] text-n500">
+    <div className="flex flex-col gap-[.25em] rounded-[.5em] bg-menu-wash/50 p-[.45em]">
+      <div className="text-[.75em] text-menu-muted">
         {quantidadeDeSalas(mapId)} salas · cada uma sorteia um sub-bioma
       </div>
       <div className="flex flex-wrap gap-[.35em]">
@@ -303,11 +303,11 @@ function SalasDaHunt({ mapId }: { mapId: string }) {
                 </span>
               )}
               rotulo={sub.nome}
-              className="rounded-[.35em] border border-n700 px-[.45em] py-[.2em] text-[.72em]"
+              className="rounded-[.35em] border border-menu-line px-[.45em] py-[.2em] text-[.72em]"
               tabIndex={0}
             >
               {sub.nome}{' '}
-              <b className="tabular-nums font-medium text-n300">{((sub.peso / total) * 100).toFixed(0)}%</b>
+              <b className="tabular-nums font-medium text-menu-ink">{((sub.peso / total) * 100).toFixed(0)}%</b>
             </Explicacao>
           ))}
       </div>
@@ -547,16 +547,16 @@ export function HuntMenu() {
       <div
         key={map.id}
         className={cn(
-          'overflow-hidden rounded-[.7em] border bg-n900',
+          'overflow-hidden rounded-[.7em] border bg-menu-card',
           // Borda, e nao so o selo: a borda le de relance na lista rolando,
           // e o selo responde "por que este esta diferente" quando o olho
           // para nele. Um canal sozinho obriga a ler cada card.
-          ehAtiva ? 'border-ok' : 'border-n800',
+          ehAtiva ? 'border-ok' : 'border-menu-line',
         )}
       >
         <div
           onClick={() => setExpandedMapId(expanded ? null : map.id)}
-          className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-n800"
+          className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-menu-wash"
         >
           <span
             className="h-[2.2em] w-[2.2em] shrink-0 rounded-full"
@@ -568,7 +568,7 @@ export function HuntMenu() {
           <div className="min-w-0 flex-1">
             <div className="truncate font-medium">
               {map.name}{' '}
-              <span className="font-normal text-n400">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
+              <span className="font-normal text-menu-muted">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
               {/* PH-229/236: selo de protetor — motor exige Guardian/Lord
                   em toda sala de todo bioma (PH-225), entao vale pra
                   qualquer hunt que pertenca a ORDEM_DOS_BIOMAS. Selo
@@ -639,14 +639,14 @@ export function HuntMenu() {
         </div>
 
         {expanded && (
-          <div className="flex flex-col gap-[.4em] border-t border-n800 p-[.55em]">
+          <div className="flex flex-col gap-[.4em] border-t border-menu-line p-[.55em]">
             <SalasDaHunt mapId={map.id} />
-            <div className="text-[.75em] text-n500">
+            <div className="text-[.75em] text-menu-muted">
               Pokemons de {map.name}
               {/* A % ja e a real: P(sala) x P(especie | sala). Sem dizer
                   isso, o jogador soma as porcentagens do card com as da
                   sala em que esta e nao fecham. */}
-              <span className="text-n600"> — chance considerando o sorteio de sala</span>
+              <span className="text-menu-muted"> — chance considerando o sorteio de sala</span>
             </div>
             {odds.species.map(({ id, species: sp, pct }) => (
               <LinhaDeEspecie key={id} species={sp} pct={pct} ativo={activeSpecies} />
@@ -696,7 +696,7 @@ export function HuntMenu() {
             <span className="rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] text-[.85em] font-bold text-ok">
               EM CAÇADA
             </span>
-            <span className="min-w-0 truncate text-n300">{mapaAtivo.name}</span>
+            <span className="min-w-0 truncate text-menu-ink">{mapaAtivo.name}</span>
             <GameButton variant="ghost" onClick={() => focusHunt(mapaAtivo)}>
               Ver na lista
             </GameButton>
@@ -728,7 +728,7 @@ export function HuntMenu() {
 
       {huntsEspeciais.length > 0 && <SectionLabel>Hunts especiais</SectionLabel>}
       {huntsEspeciais.length === 0 && !huntInicial && (
-        <p className="text-[.8em] text-n600">
+        <p className="text-[.8em] text-menu-muted">
           Nenhuma hunt especial nesta aba (as hunts de bioma estão acima, na trilha de cada um).
         </p>
       )}

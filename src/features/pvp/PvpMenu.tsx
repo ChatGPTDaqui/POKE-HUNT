@@ -83,7 +83,7 @@ function PvpConteudo() {
       {abas}
       <div className="arena-surface">
         <div className="mb-[.45em] flex items-center gap-[.35em]">
-          <Sword className="text-[1.1em] text-n300" />
+          <Sword className="text-[1.1em] text-menu-ink" />
           <SectionLabel>CONVITE</SectionLabel>
         </div>
 
@@ -119,12 +119,12 @@ function PvpConteudo() {
                   : <>Convite enviado para <strong>{nickDoOutro}</strong>.</>}
               </span>
             </span>
-            <span className="flex items-center gap-[.25em] text-[.78em] text-n500">
+            <span className="flex items-center gap-[.25em] text-[.78em] text-menu-muted">
               <Clock /> aguardando aceite
             </span>
             {souConvidado ? (
               <div className="flex flex-col gap-[.3em]">
-                <span className="text-[.78em] text-n500">Duelo automático — escolha qual time leva pra luta:</span>
+                <span className="text-[.78em] text-menu-muted">Duelo automático — escolha qual time leva pra luta:</span>
                 <div className="flex gap-[.4em]">
                   <GameButton variant="primary" block carregando={pvp.ocupado} onClick={() => { void pvp.aceitar(false) }}>
                     Time atual
@@ -150,7 +150,7 @@ function PvpConteudo() {
         <SectionLabel>HISTÓRICO PVP</SectionLabel>
         <div className="mt-[.45em] flex max-h-[15em] flex-col gap-[.3em] overflow-y-auto">
           {pvp.historico.length === 0 ? (
-            <span className="text-[.82em] text-n500">Nenhum duelo registrado ainda.</span>
+            <span className="text-[.82em] text-menu-muted">Nenhum duelo registrado ainda.</span>
           ) : pvp.historico.map((h) => {
             const euVenci = h.vencedorId != null && h.vencedorId === meuId
             const empate = h.vencedorId == null
@@ -158,15 +158,15 @@ function PvpConteudo() {
             const defendi = h.modo === 'ranqueado' && h.convidadoId === meuId
             const delta = h.anfitriaoId === meuId ? h.pdlDeltaAnfitriao : h.pdlDeltaConvidado
             return (
-              <div key={h.id} className="flex items-center gap-[.45em] rounded-[.45em] border border-n800 px-[.45em] py-[.35em]">
-                <span className={euVenci ? 'text-green-400' : empate ? 'text-n400' : 'text-bad'}>
+              <div key={h.id} className="flex items-center gap-[.45em] rounded-[.45em] border border-menu-line px-[.45em] py-[.35em]">
+                <span className={euVenci ? 'text-green-400' : empate ? 'text-menu-muted' : 'text-bad'}>
                   {empate ? 'Encerrado' : defendi ? (euVenci ? 'Defendeu' : 'Defesa caiu') : euVenci ? 'Vitória' : 'Derrota'}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[.82em] text-n400">
+                <span className="min-w-0 flex-1 truncate text-[.82em] text-menu-muted">
                   {h.modo === 'ranqueado' ? (defendi ? 'ataque sofrido' : 'ranqueado') : h.modo === 'ranqueado_bot' ? 'treino contra bot' : 'amistoso'}
                   {delta != null && delta !== 0 && <span className={delta > 0 ? ' text-green-400' : ' text-bad'}> {delta > 0 ? '+' : ''}{delta} PDL</span>}
                 </span>
-                <span className="shrink-0 text-[.75em] text-n500">{formatarData(h.encerradaEm)}</span>
+                <span className="shrink-0 text-[.75em] text-menu-muted">{formatarData(h.encerradaEm)}</span>
               </div>
             )
           })}

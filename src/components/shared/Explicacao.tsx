@@ -143,7 +143,7 @@ export function BolhaDoVerbete({ v }: { v: Verbete }) {
       ))}
       {/* Sem link: no dedo, um link dentro da bolha competiria com o toque que
           a fecha. Dizer ONDE ler mais ja resolve o caso comum. */}
-      {v.wiki && <span className="text-[.85em] text-n500">Mais na Wiki, aba {v.wiki}</span>}
+      {v.wiki && <span className="text-[.85em] text-menu-muted">Mais na Wiki, aba {v.wiki}</span>}
     </div>
   )
 }

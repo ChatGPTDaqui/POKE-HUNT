@@ -67,9 +67,9 @@ export function PvpRankedTab() {
           <div className="flex items-center justify-between">
             <div>
               <div className="font-heading text-[1.5em]">{NOME_DIVISAO[rank.divisao] ?? rank.divisao}</div>
-              <div className="text-[.8em] text-n400">{rank.pdl} PDL · {rank.vitorias}V {rank.derrotas}D</div>
+              <div className="text-[.8em] text-menu-muted">{rank.pdl} PDL · {rank.vitorias}V {rank.derrotas}D</div>
             </div>
-            <div className={`text-[.85em] ${limiteAtingido ? 'text-bad' : 'text-n400'}`}>
+            <div className={`text-[.85em] ${limiteAtingido ? 'text-bad' : 'text-menu-muted'}`}>
               {rank.partidasHoje}/{LIMITE_DIARIO} partidas hoje
             </div>
           </div>
@@ -81,40 +81,40 @@ export function PvpRankedTab() {
           onClick={() => { void pvp.atacar() }}>
           <Sword /> Atacar
         </GameButton>
-        <p className="mt-[.45em] text-[.78em] text-n500">
+        <p className="mt-[.45em] text-[.78em] text-menu-muted">
           Você enfrenta a defesa salva de um treinador da sua faixa, esteja ele online ou não. Sem ninguém na faixa, um treinador bot entra (sem PDL).
         </p>
         {limiteAtingido && (
-          <div className="mt-[.4em] text-[.78em] text-n500">Limite diário atingido — volta amanhã.</div>
+          <div className="mt-[.4em] text-[.78em] text-menu-muted">Limite diário atingido — volta amanhã.</div>
         )}
       </div>
 
       <section className="arena-surface" aria-label="Sua defesa">
         <div className="mb-[.45em] flex items-center gap-[.35em]">
-          <Shield weight="duotone" className="text-[1.6em] text-n300" />
+          <Shield weight="duotone" className="text-[1.6em] text-menu-ink" />
           <SectionLabel>SUA DEFESA</SectionLabel>
         </div>
         {!mochilaCarregada ? (
-          <p className="text-[.82em] text-n500">Carregando sua defesa…</p>
+          <p className="text-[.82em] text-menu-muted">Carregando sua defesa…</p>
         ) : defesaValida.length === 0 ? (
           <p role="note" className="text-[.82em] text-bad">Sua defesa está vazia: você não aparece como alvo até montar e ativar um time de defesa na aba Equipe PvP.</p>
         ) : (
-          <p className="text-[.82em] text-n300">
+          <p className="text-[.82em] text-menu-ink">
             {pvp.defesa?.nome.trim() || `Time ${pvp.defesa?.posicao}`} · {defesaValida.map((p) => SPECIES[p.speciesId]?.name ?? p.speciesId).join(' · ')}
           </p>
         )}
         <div className="mt-[.5em] flex flex-col gap-[.3em]">
           {pvp.defesasRecentes.length === 0 ? (
-            <span className="text-[.78em] text-n500">Ninguém atacou sua defesa ainda.</span>
+            <span className="text-[.78em] text-menu-muted">Ninguém atacou sua defesa ainda.</span>
           ) : pvp.defesasRecentes.map((h) => {
             const defendeu = h.vencedorId === h.convidadoId
             return (
-              <div key={h.id} className="flex items-center gap-[.45em] rounded-[.45em] border border-n800 px-[.45em] py-[.3em] text-[.8em]">
-                <span className={defendeu ? 'text-green-400' : h.vencedorId == null ? 'text-n400' : 'text-bad'}>
+              <div key={h.id} className="flex items-center gap-[.45em] rounded-[.45em] border border-menu-line px-[.45em] py-[.3em] text-[.8em]">
+                <span className={defendeu ? 'text-green-400' : h.vencedorId == null ? 'text-menu-muted' : 'text-bad'}>
                   {defendeu ? 'Defendeu' : h.vencedorId == null ? 'Empate' : 'Caiu'}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-n400">contra {nomes[h.anfitriaoId] ?? '…'}</span>
-                <span className="shrink-0 text-n500">{formatarDelta(h.pdlDeltaConvidado)}</span>
+                <span className="min-w-0 flex-1 truncate text-menu-muted">contra {nomes[h.anfitriaoId] ?? '…'}</span>
+                <span className="shrink-0 text-menu-muted">{formatarDelta(h.pdlDeltaConvidado)}</span>
               </div>
             )
           })}

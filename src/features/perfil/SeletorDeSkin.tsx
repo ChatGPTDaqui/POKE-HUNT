@@ -34,8 +34,8 @@ export function SeletorDeSkin({ userId }: Props) {
           aria-pressed={atual === s.id}
           onClick={() => escolher(s.id)}
           className={cn(
-            'flex flex-col items-center gap-[.15em] rounded-[.5em] border bg-n800 px-[.2em] pb-[.25em] pt-[.35em]',
-            atual === s.id ? 'border-gold' : 'border-n700 hover:border-n500',
+            'flex flex-col items-center gap-[.15em] rounded-[.5em] border bg-menu-wash px-[.2em] pb-[.25em] pt-[.35em]',
+            atual === s.id ? 'border-gold' : 'border-menu-line hover:border-menu-line',
           )}
         >
           {/* Folha Idle: 2 quadros x 8 linhas de 32x40 px, mostrada a 2x. */}
@@ -49,7 +49,7 @@ export function SeletorDeSkin({ userId }: Props) {
               backgroundRepeat: 'no-repeat',
             }}
           />
-          <span className="max-w-full truncate text-[.7em] text-n300">{s.nome}</span>
+          <span className="max-w-full truncate text-[.7em] text-menu-ink">{s.nome}</span>
         </button>
       ))}
     </div>

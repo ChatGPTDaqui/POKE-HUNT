@@ -43,10 +43,10 @@ export function CardDoAnuncio({ ctx, meuId, pendente, aoDescartar }: Props) {
     <div
       className={cn(
         'flex flex-wrap items-center gap-[.4em] rounded-[.5em] border px-[.45em] py-[.35em] text-[.8em]',
-        pendente ? 'border-primary/50 bg-primary/10' : 'border-n700 bg-n800',
+        pendente ? 'border-menu-brand/50 bg-menu-brand/10' : 'border-menu-line bg-menu-wash',
       )}
     >
-      <span className="flex shrink-0 items-center gap-[.25em] text-[.85em] text-n400">
+      <span className="flex shrink-0 items-center gap-[.25em] text-[.85em] text-menu-muted">
         {ctx.modo === 'leilao' ? <Gavel aria-hidden /> : <Storefront aria-hidden />}
         {/* A frase é a razão de o card existir: os dois lados leem a MESMA
             linha e sabem que a conversa saiu do Mercado, não do nada. */}
@@ -68,9 +68,9 @@ export function CardDoAnuncio({ ctx, meuId, pendente, aoDescartar }: Props) {
           <b className={cn('font-medium', ctx.isShiny && 'text-shiny')}>
             {ctx.isShiny ? '✨ ' : ''}{especie?.name ?? ctx.speciesId}
           </b>
-          <span className="text-n400"> Lv{ctx.level}</span>
+          <span className="text-menu-muted"> Lv{ctx.level}</span>
         </span>
-        <span className="text-[.85em] text-n400">
+        <span className="text-[.85em] text-menu-muted">
           IV {ctx.ivPercent}%
           {cor && <> · <span style={{ color: cor }}>{RARITIES[ctx.rarity as RarityKey]?.label ?? ctx.rarity}</span></>}
         </span>
@@ -95,7 +95,7 @@ export function CardDoAnuncio({ ctx, meuId, pendente, aoDescartar }: Props) {
       {pendente && aoDescartar && (
         <button
           type="button"
-          className="shrink-0 text-n400 underline decoration-dotted underline-offset-2 hover:text-n200"
+          className="shrink-0 text-menu-muted underline decoration-dotted underline-offset-2 hover:text-menu-ink"
           onClick={aoDescartar}
         >
           tirar
