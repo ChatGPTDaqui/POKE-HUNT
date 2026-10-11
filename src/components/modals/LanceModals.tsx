@@ -31,7 +31,7 @@ export function LanceVictoryReturn() {
       className="pointer-events-auto fixed inset-x-0 z-[55] flex flex-col items-center gap-2 px-[1em]"
       style={{ top: 'calc(4.6em + var(--sa-top, 0px))' }}
     >
-      <div className="rounded-lg border border-amber-500 bg-background/95 px-[1em] py-[.7em] text-center shadow-xl">
+      <div data-appearance="journey" className="journey-surface rounded-lg border border-amber-500 bg-menu-paper/95 px-[1em] py-[.7em] text-center shadow-xl">
         <div className="mb-[.5em] font-semibold text-amber-300">Você derrotou o Campeão Lance!</div>
         <GameButton onClick={() => controller.returnToHospital({ x: 0, y: 0 })}>
           Retornar ao Centro Pokemon

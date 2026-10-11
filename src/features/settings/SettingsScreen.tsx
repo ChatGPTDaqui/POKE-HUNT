@@ -5,6 +5,7 @@ import { controller } from '@/engine/controller'
 import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
 import { useUiStore, HUD_SCALE_MIN, HUD_SCALE_MAX } from '@/stores/uiStore'
 import { GameButton, GameCard, GameCheck, SegmentedTabs } from '@/components/game/controls'
+import { ThemeSelector } from './ThemeSelector'
 
 function GeralTab() {
   const askConfirm = useConfirmDialogStore((s) => s.confirm)
@@ -17,11 +18,11 @@ function GeralTab() {
 
   return (
     <div className="flex flex-col gap-[.5em]">
+      <ThemeSelector />
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
         <div className="font-medium">Tamanho da interface</div>
-        <div className="text-[.8em] text-n500">
-          A HUD ja escala sozinha com a largura da tela. Este ajuste multiplica essa escala — util em monitor
-          muito grande ou pra quem prefere tudo maior. Fica salvo neste aparelho.
+        <div className="text-[.8em] text-menu-muted">
+          Aumente ou reduza menus e controles. O ajuste fica salvo neste aparelho.
         </div>
         <div className="flex items-center gap-[.45em]">
           <input
@@ -32,10 +33,10 @@ function GeralTab() {
             step={0.05}
             value={hudScale}
             onChange={(e) => setHudScale(Number(e.target.value))}
-            className="jogo-range h-[1em] flex-1 cursor-pointer accent-primary"
+            className="jogo-range h-[1em] flex-1 cursor-pointer accent-menu-brand"
             aria-label="Escala da interface"
           />
-          <span className="w-[3.5em] text-right tabular-nums text-n300">
+          <span className="w-[3.5em] text-right tabular-nums text-menu-ink">
             {Math.round(hudScale * 100)}%
           </span>
           <GameButton variant="ghost" onClick={() => setHudScale(1)}>Padrão</GameButton>
@@ -43,32 +44,25 @@ function GeralTab() {
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
-        <div className="font-medium">Reduzir transparência</div>
-        <div className="text-[.8em] text-n500">
-          As superfícies da interface desfocam o jogo por trás, e o desfoque é recalculado enquanto o jogo se
-          move. Em celular mais simples isso pode derrubar a taxa de quadros — se o seu engasgar, desligue aqui:
-          as superfícies ficam quase opacas e o resto continua igual.
-        </div>
         <GameCheck checked={vidroFosco} onChange={setVidroFosco} className="self-start">
           Desligar o desfoque
         </GameCheck>
+        <div className="text-[.8em] text-menu-muted">
+          Se o jogo engasgar, desligue o desfoque. Os painéis ficam mais opacos, sem mudar a jogabilidade.
+        </div>
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
-        <div className="font-medium">Vida no cenário</div>
-        <div className="text-[.8em] text-n500">
-          Folha caindo na floresta, brilho na água, brasa no vulcão, poeira na caverna, neve na montanha — cada
-          bioma ganha o movimento que combina com ele. É só enfeite: não muda em nada o combate, a captura nem
-          por onde o POKE anda. Se o seu aparelho engasgar, desligue aqui.
-        </div>
         <GameCheck checked={vidaNoCenario} onChange={setVidaNoCenario} className="self-start">
           Mostrar movimento no cenário
         </GameCheck>
+        <div className="text-[.8em] text-menu-muted">
+          Efeitos decorativos de cada bioma. Desligue para aliviar o aparelho; combate e captura não mudam.
+        </div>
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
-        <div className="font-medium">Iniciar novo jogo</div>
-        <div className="text-[.8em] text-n500">
+        <div className="text-[.8em] text-menu-muted">
           Apaga todo o progresso (equipe, itens, ouro, mapas) e comeca do zero.
         </div>
         <GameButton
@@ -99,9 +93,9 @@ function PatchNotesTab() {
         <GameCard key={note.version} className="p-[.6em]">
           <div className="flex items-baseline justify-between gap-[.5em]">
             <b className="font-medium">{note.title}</b>
-            <span className="shrink-0 text-[.75em] text-n500">v{note.version} · {note.date}</span>
+            <span className="shrink-0 text-[.75em] text-menu-muted">v{note.version} · {note.date}</span>
           </div>
-          <ul className="mt-[.4em] list-disc pl-[1.2em] text-[.8em] text-n400">
+          <ul className="mt-[.4em] list-disc pl-[1.2em] text-[.8em] text-menu-muted">
             {note.highlights.map((h, i) => (
               <li key={i}>{h}</li>
             ))}

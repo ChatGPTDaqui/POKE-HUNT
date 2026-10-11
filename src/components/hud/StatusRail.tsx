@@ -66,58 +66,14 @@ export function StatusRail() {
           // `overflow-hidden` e rede de seguranca, nao layout: se algum dado
           // novo (um nome de treinador longo, uma moeda de 13 digitos) estourar
           // a conta de novo, ele corta em vez de deixar o avatar sair da tela.
-          'vidro flex items-center gap-[.5em] overflow-hidden rounded-[1.1em] py-[.35em] pr-[.4em] pl-[.35em]',
+          'journey-status-rail vidro flex items-center gap-[.5em] overflow-hidden rounded-[1.1em] py-[.35em] pr-[.4em] pl-[.35em]',
         )}
       >
+        <span className="journey-brand" role="img" aria-label="Poké Bola — ícone do jogo" />
         <FacePoke />
         <VitaisPoke />
-        {/* Sobra de largura vira espaco AQUI, e nao barra de HP mais longa (ver
-            `VitaisPoke`): sem este vao, com as barras tendo teto, o grupo da
-            direita (carteira, detalhes, avatar) descolava da borda do trilho e
-            ficava flutuando no meio dele — os vizinhos sao todos `shrink-0` e
-            nenhum cresce pra ocupar o resto.
-
-            PH-272: O VAO DEIXOU DE SER VAZIO. Ele e a faixa central do trilho, e
-            e nela que "Sala 3/10 Relvado" mora agora, a pedido do usuario.
-            `justify-center` dentro do proprio vao: o chip fica no meio do espaco
-            que sobra, sem nunca sobrepor os vizinhos. Posicao absoluta
-            centralizada na TELA foi descartada — em largura media ela passaria
-            por cima da carteira, e o trilho ja teve esse defeito uma vez (ver o
-            cabecalho deste arquivo).
-
-            A sobra continua virando espaco quando nao ha o que mostrar, entao a
-            razao original do vao segue de pe. */}
-        <div className="flex min-w-0 flex-1 items-center justify-center">
-          {/* PH-285: NO COMPACTO O VAO NAO FICA MAIS VAZIO — o clima entra
-              nele, so como simbolo. O chip de SALA continua de fora aqui (ele
-              pede ~15em; ver o cabecalho de SalaChip.tsx), mas o clima cabe:
-              medido no aparelho, o vao tem 73px livres em 390px e o simbolo
-              sozinho ocupa ~20px.
-
-              Sem isto o clima ficava numa fileira propria abaixo do cabecalho,
-              boiando em cima do cenario — o defeito que a issue descreve, e que
-              no celular era o unico lugar onde ele ainda acontecia. */}
-          {estreito ? <ClimaChip embutido soIcone /> : <FaixaCentral />}
-        </div>
-        {/* AS TAXAS E A CARTEIRA SAIRAM DAQUI (PH-279), a pedido do usuario.
-            As taxas foram pro canto inferior direito (`TaxasNoCanto`) e a
-            carteira entrou no card do treinador, logo ali na direita.
-
-            Ganho de largura que isso deu ao trilho, medido em 1280: ~430px, que
-            eram a soma das tres taxas (~230px) com o ouro e o diamante em valor
-            cheio (~200px). Era essa largura que faltava pra faixa central — a
-            PH-272 tinha acabado de reduzir as taxas a so `Gold/h` pra o nome do
-            sub-bioma caber, e agora nem isso e preciso.
-
-            As duas continuam na gaveta logo abaixo: as taxas em grade de quatro
-            e o valor CHEIO da carteira no `title` do card e no perfil. */}
-        {/* NO COMPACTO A CARTEIRA FICA AQUI MESMO, e nao no card: o card do
-            treinador nao existe em 390px — ele desce pra gaveta por falta de
-            largura (ali o avatar virava um icone generico ocupando ~46px
-            permanentes da faixa mais disputada da tela). Mandar a carteira pra
-            dentro dele sem esta linha tirava ouro e diamante da tela inteira no
-            celular, deixando o jogador sem saber quanto tem sem abrir a
-            gaveta. */}
+        {/* O contexto da hunt fica ao lado dos Companheiros; a sobra mantém a carteira na borda. */}
+        <div className="min-w-0 flex-1" />
         {estreito && <Carteira abreviada />}
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
         {/* PH-282: o card do treinador NAO fica mais aqui. Ele e o primeiro item
@@ -282,7 +238,7 @@ function VitaisPoke() {
             PH-157 protegeu. Antes ela era `flex-1` dentro de um bloco fixo, o
             que dava no mesmo enquanto o vizinho da direita nao mudava — mas
             fazia qualquer coluna nova de rotulo sair do tamanho da barra. */}
-        <div className="flex w-[min(14em,34vw)] shrink-0 flex-col gap-[.12em]">
+        <div className="journey-vitals-bars flex w-[min(14em,34vw)] shrink-0 flex-col gap-[.12em]">
           <Barra pct={hpPct} altura=".34em" cor={hpBaixo ? 'var(--color-hp-low)' : 'var(--color-hp)'} />
           <Barra pct={expPct} altura=".18em" cor="var(--color-exp)" />
         </div>
@@ -372,7 +328,7 @@ function useTaxas() {
  * e o jogador ficaria sem saber onde esta — essa razao continua valendo, e por
  * isso ele nao sumiu: virou o outro lado deste `if`.
  */
-function FaixaCentral() {
+export function ContextoDaHunt() {
   const temSala = useWorldStore((s) => s.sala != null)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
   return (
@@ -389,7 +345,7 @@ function FaixaCentral() {
     //
     // `min-w-0` nos dois: o nome do sub-bioma trunca em vez de empurrar o clima
     // pra fora, que e a regra que o trilho segue desde a PH-157.
-    <div className="flex min-w-0 items-center justify-center gap-[.5em]">
+    <div className="vidro flex w-fit min-w-0 max-w-full flex-wrap items-center gap-[.35em] rounded-[.65em] px-[.5em] py-[.25em]">
       {temSala
         ? <SalaChip embutido />
         : <div className="min-w-0 max-w-[12em] truncate text-center text-[.72em] text-n300">{huntName}</div>}
@@ -463,7 +419,7 @@ function GavetaDetalhes({ comTreinador }: { comTreinador: boolean }) {
 
 function Taxa({ rotulo, valor, cor }: { rotulo: string; valor: string; cor?: string }) {
   return (
-    <div className="flex flex-col gap-[.1em] rounded-[.5em] bg-n900/60 py-[.3em]">
+    <div className="flex flex-col gap-[.1em] rounded-[.5em] bg-menu-wash py-[.3em]">
       <span className="text-[.8em] text-n500">{rotulo}</span>
       <b className="font-medium tabular-nums" style={cor ? { color: cor } : undefined}>{valor}</b>
     </div>

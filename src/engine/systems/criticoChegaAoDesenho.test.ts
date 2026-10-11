@@ -102,17 +102,23 @@ describe('o critico chega ao efeito de dano (PH-131)', () => {
 // esperava o impacto do tier de cima (`atrasoDoNumeroDeDano`) — mas o
 // `abilityEffect` nascia sem `isCrit`, entao o desenho nunca subia e o numero
 // saia atrasado em relacao ao que estava na tela.
-describe('o critico chega ao efeito do golpe (03/10)', () => {
+describe('o critico e o efeito do golpe (03/10, revisto 11/10)', () => {
   const efeitosDoGolpe = (world: ReturnType<typeof cenario>['world']) =>
     world.effects.filter((e) => e.type === 'abilityEffect')
 
-  it('hit critico marca `isCrit` no efeito do golpe', () => {
+  // 11/10: o VFX de golpe de dano nasce no APICE da pose, antes do impacto — e
+  // o critico so e decidido no impacto (computeDamage). O efeito que ja esta no
+  // ar nao troca de tier no meio do voo; o critico chega ao NUMERO de dano
+  // (casos acima). Este caso tranca que o efeito nao finge saber o resultado.
+  it('hit critico NAO reescreve o efeito que ja saiu no apice', () => {
     const mundo = cenario(GOLPE)
     mundo.player.proximoGolpeCriticoGarantido = true
     umUso(mundo.world)
     const golpes = efeitosDoGolpe(mundo.world)
     expect(golpes.length, 'nenhum efeito de golpe saiu — o cenario nao bateu').toBeGreaterThan(0)
-    expect(golpes.some((e) => e.isCrit === true)).toBe(true)
+    expect(golpes.every((e) => !e.isCrit)).toBe(true)
+    const numeros = mundo.world.effects.filter((e) => e.type === 'damageNumber')
+    expect(numeros.some((e) => e.isCrit === true), 'o critico tem que chegar ao numero').toBe(true)
   })
 
   it('hit sem critico nao marca o efeito do golpe', () => {

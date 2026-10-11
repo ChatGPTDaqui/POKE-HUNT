@@ -38,17 +38,17 @@ export function EspecialidadesMenu() {
   return (
     <div className="flex flex-col gap-[.55em]">
       <div className="flex flex-wrap items-center gap-[.65em]">
-        <div className="flex h-[3.4em] w-[3.4em] shrink-0 items-center justify-center rounded-full border-2 border-primary font-medium text-n200">
+        <div className="flex h-[2.1em] min-w-[2.6em] shrink-0 items-center justify-center rounded-[.5em] border border-menu-line bg-menu-wash px-[.3em] font-mono text-menu-ink">
           {Math.round((global.atual / global.max) * 100)}%
         </div>
         <div>
           <div className="font-medium">{global.atual} / {global.max} níveis · {titulo}</div>
-          <div className="text-[.78em] text-n500">Progresso de dano/defesa por tipo elemental.</div>
+          <div className="text-[.78em] text-menu-muted">Progresso de dano/defesa por tipo elemental.</div>
         </div>
       </div>
 
       <div className={compacto ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-[1.4fr_1fr] gap-[.65em]'}>
-        <div className="grid content-start gap-[.5em] [grid-template-columns:repeat(auto-fill,minmax(7em,1fr))]">
+        <div className="journey-type-grid">
           {ESPECIALIDADE_TYPES.map((tipo) => {
             const p = especialidades[tipo]
             const total = p.dano + p.defesa
@@ -59,9 +59,10 @@ export function EspecialidadesMenu() {
                 type="button"
                 onClick={() => setSelecionado(tipo)}
                 className={cn(
-                  'flex cursor-pointer flex-col items-center gap-[.3em] rounded-[.6em] border bg-n900 px-[.3em] py-[.6em] font-[inherit]',
-                  ativo ? 'border-primary' : total > 0 ? 'border-gold' : 'border-n800 hover:border-primary',
+                  'journey-type-choice rounded-[.6em] border bg-menu-card font-[inherit]',
+                  ativo ? 'border-menu-brand' : total > 0 ? 'border-gold' : 'border-menu-line hover:border-menu-brand',
                 )}
+                aria-pressed={ativo}
               >
                 <span
                   className="flex h-[2.4em] w-[2.4em] items-center justify-center rounded-full text-[.7em] font-semibold text-[#0b0e18]"
@@ -70,7 +71,7 @@ export function EspecialidadesMenu() {
                   {tipo.slice(0, 3)}
                 </span>
                 <span className="max-w-full truncate text-[.78em] font-medium">{tipo}</span>
-                <span className="text-[.72em] tabular-nums text-n400">{total}/{ESPECIALIDADE_NIVEL_MAX * 2}</span>
+                <span className="text-[.72em] tabular-nums text-menu-muted">{total}/{ESPECIALIDADE_NIVEL_MAX * 2}</span>
               </button>
             )
           })}
@@ -97,14 +98,14 @@ export function EspecialidadesMenu() {
 function DetalheEspecialidade({ tipo, semTitulo }: { tipo: ElementType | null; semTitulo?: boolean }) {
   if (!tipo) {
     return (
-      <div className="self-start rounded-[.7em] border border-dashed border-n700 p-[.7em] text-[.85em] text-n500">
+      <div className="self-start rounded-[.7em] border border-dashed border-menu-line p-[.7em] text-[.85em] text-menu-muted">
         Escolha um tipo elemental na grade pra ver o progresso.
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-[.5em] self-start rounded-[.7em] border border-n800 bg-n900 p-[.6em]">
+    <div className="flex flex-col gap-[.5em] self-start rounded-[.7em] border border-menu-line bg-menu-card p-[.6em]">
       {!semTitulo && (
         <div className="flex items-center gap-[.4em]">
           <TypeChip type={tipo} full />
@@ -163,12 +164,12 @@ function Trilha({
     && custo != null && gold >= custo.gold && stoneQtd >= custo.stoneQtd
 
   return (
-    <div className="rounded-[.5em] border border-n800 bg-background p-[.5em]">
+    <div className="rounded-[.5em] border border-menu-line bg-menu-paper p-[.5em]">
       <div className="flex items-center justify-between text-[.85em]">
         <b className="font-medium">{rotulo}</b>
-        <span className="text-n500">{nivel}/{ESPECIALIDADE_NIVEL_MAX}</span>
+        <span className="text-menu-muted">{nivel}/{ESPECIALIDADE_NIVEL_MAX}</span>
       </div>
-      <div className="text-[.72em] text-n500">{descricao}</div>
+      <div className="text-[.72em] text-menu-muted">{descricao}</div>
       <Meter pct={(nivel / ESPECIALIDADE_NIVEL_MAX) * 100} height=".3em" color="var(--color-primary)" className="mt-[.35em]" />
 
       {noMax ? (
@@ -177,10 +178,10 @@ function Trilha({
         <>
           <SectionLabel className="mt-[.45em]">PRÓXIMO NÍVEL {nivel + 1}</SectionLabel>
           <div className="mt-[.2em] flex flex-wrap items-center gap-[.6em] text-[.78em]">
-            <span className={cn('tabular-nums', stoneQtd >= custo!.stoneQtd ? 'text-n300' : 'text-warn')}>
+            <span className={cn('tabular-nums', stoneQtd >= custo!.stoneQtd ? 'text-menu-ink' : 'text-warn')}>
               {stoneName(tipo)} {fmt.format(stoneQtd)}/{fmt.format(custo!.stoneQtd)}
             </span>
-            <span className={cn('tabular-nums', gold >= custo!.gold ? 'text-n300' : 'text-warn')}>
+            <span className={cn('tabular-nums', gold >= custo!.gold ? 'text-menu-ink' : 'text-warn')}>
               Gold {fmt.format(gold)}/{fmt.format(custo!.gold)}
             </span>
           </div>

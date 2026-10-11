@@ -47,12 +47,12 @@ function Metrica({
   cor?: string
 }) {
   return (
-    <div className="flex flex-col gap-[.15em] rounded-[.55em] border border-n800 bg-n900 px-[.55em] py-[.55em]">
-      <span className="flex items-center gap-[.35em] text-[.75em] text-n500">
+    <div className="flex flex-col gap-[.15em] rounded-[.55em] border border-menu-line bg-menu-card px-[.45em] py-[.3em]">
+      <span className="flex items-center gap-[.35em] text-[.75em] text-menu-muted">
         {icone} {rotulo}
       </span>
       <b className="text-[1.15em] font-medium tabular-nums" style={cor ? { color: cor } : undefined}>{valor}</b>
-      {detalhe && <span className="text-[.72em] text-n500">{detalhe}</span>}
+      {detalhe && <span className="text-[.72em] text-menu-muted">{detalhe}</span>}
     </div>
   )
 }
@@ -108,21 +108,21 @@ export function HuntAnalyzer() {
       onClose={fechar}
       title="Hunt Analyzer"
     >
-      <div className="flex flex-col gap-[.55em]">
+      <div className="flex flex-col gap-[.35em]">
         <div className="flex flex-wrap items-center gap-[.5em]">
           <b className="font-medium">{mapDef?.name ?? 'Hospital'}</b>
           {mapDef && (
-            <span className="text-[.8em] text-n500">
+            <span className="text-[.8em] text-menu-muted">
               Lv {mapDef.levelRange[0]}–{mapDef.levelRange[1]}
             </span>
           )}
           <span className="flex-1" />
-          <span className="text-[.8em] text-n500">
+          <span className="text-[.8em] text-menu-muted">
             {amostraIniciada ? `Amostra desta sessão: ${duracao(segundos)}` : 'Amostra ainda não iniciada — entre numa hunt'}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-[.5em] sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-[.3em] sm:grid-cols-4">
           <Metrica
             icone={<Coin weight="fill" />} rotulo="Ouro / hora"
             valor={fmt.format(taxas.goldPerHour)} cor="var(--color-gold)"
@@ -147,7 +147,7 @@ export function HuntAnalyzer() {
 
         <div>
           <SectionLabel>POR ABATE</SectionLabel>
-          <div className="mt-[.35em] grid grid-cols-3 gap-[.5em]">
+          <div className="mt-[.25em] grid grid-cols-3 gap-[.3em]">
             <Metrica icone={<Coin />} rotulo="Ouro medio" valor={ouroPorAbate.toFixed(1)} cor="var(--color-gold)" />
             <Metrica icone={<Lightning />} rotulo="XP medio" valor={xpPorAbate.toFixed(1)} />
             <Metrica icone={<Clock />} rotulo="Tempo medio" valor={duracao(segundosPorAbate)} />
@@ -156,7 +156,7 @@ export function HuntAnalyzer() {
 
         <div>
           <SectionLabel>NESTE RITMO</SectionLabel>
-          <div className="mt-[.35em] grid grid-cols-2 gap-[.5em] sm:grid-cols-4">
+          <div className="mt-[.25em] grid grid-cols-2 gap-[.3em] sm:grid-cols-4">
             <Metrica
               icone={<ChartLineUp />} rotulo="Ouro em 1h"
               valor={fmt.format(taxas.goldPerHour)} cor="var(--color-gold)"
@@ -186,23 +186,23 @@ export function HuntAnalyzer() {
         {odds && (
           <div>
             <SectionLabel>O QUE NASCE AQUI</SectionLabel>
-            <div className="mt-[.35em] max-h-[14em] overflow-y-auto rounded-[.5em] border border-n800">
+            <div className="mt-[.35em] max-h-[14em] overflow-y-auto rounded-[.5em] border border-menu-line">
               {odds.species.map(({ id, species: sp, pct }) => (
-                <div key={id} className="flex items-center gap-[.5em] border-b border-n800 px-[.6em] py-[.3em] text-[.82em] last:border-b-0">
+                <div key={id} className="flex items-center gap-[.5em] border-b border-menu-line px-[.6em] py-[.3em] text-[.82em] last:border-b-0">
                   {faceIconUrl(sp.id) && (
                     <img src={faceIconUrl(sp.id) ?? undefined} alt="" className="h-[1.6em] w-[1.6em] shrink-0 object-contain" />
                   )}
                   <span className="min-w-[6em] flex-1 truncate">{sp.name}</span>
                   <TypeChip type={sp.type} />
                   {sp.type2 && <TypeChip type={sp.type2} />}
-                  <span className="w-[4em] text-right tabular-nums text-n400">{pct.toFixed(1)}%</span>
+                  <span className="w-[4em] text-right tabular-nums text-menu-muted">{pct.toFixed(1)}%</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <p className="text-[.72em] text-n500">
+        <p className="text-[.72em] text-menu-muted">
           A amostra zera toda vez que você entra numa hunt (é ela que o servidor usa como referência do
           piso do farm offline). Trocar de hunt recomeça a medição.
         </p>

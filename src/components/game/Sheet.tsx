@@ -84,16 +84,21 @@ export interface SheetProps {
   backdrop?: boolean
   children: ReactNode
   bodyClassName?: string
+  /** Migração opt-in: não muda as superfícies ainda não adaptadas. */
+  appearance?: 'legacy' | 'journey'
 }
 
 export function Sheet({
   winKey, onClose, title, header, subheader, footer,
-  snap = 'cheia', zIndex = 31, backdrop = true, children, bodyClassName,
+  snap = 'cheia', zIndex = 31, backdrop = true, children, bodyClassName, appearance = 'journey',
 }: SheetProps) {
   const footerHeight = useUiStore((s) => s.footerHeight)
   const navHeight = useUiStore((s) => s.navHeight)
+  const trilhoHeight = useUiStore((s) => s.trilhoHeight)
   const deitado = useDeviceMode().mode === 'deitado'
-  const reservaTopo = deitado ? RESERVA_TRILHO_DEITADO : RESERVA_TRILHO
+  const reservaTopo = appearance === 'journey' && trilhoHeight
+    ? `calc(${trilhoHeight}px + .25em)`
+    : deitado ? RESERVA_TRILHO_DEITADO : RESERVA_TRILHO
   // Um sheet 'cheia' para em cima da BARRA DE NAVEGACAO, e nao do rodape
   // inteiro. Medido em 390x844: o rodape tem 179px, dos quais 111 sao barra de
   // golpes, zoom, botao Auto e o ticker do chat — nada disso e acionavel
@@ -173,6 +178,8 @@ export function Sheet({
 
       <div
         data-window={winKey}
+        data-appearance={appearance}
+        data-journey-rail-reserved={appearance === 'journey' && zIndex <= 35 ? '' : undefined}
         style={{
           zIndex,
           // `+ .5em` porque o rodape da HUD e ancorado em `bottom-[.5em]`:
@@ -209,6 +216,7 @@ export function Sheet({
             tinha de altura. */}
         <div
           onPointerDown={onPointerDown}
+          data-panel-handle
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
@@ -231,6 +239,7 @@ export function Sheet({
           </div>
         ) : (
           <div
+            data-panel-header
             className={cn(
               'flex shrink-0 items-center justify-between gap-[.5em] px-[.9em]',
               deitado ? 'pt-0 pb-[.2em]' : 'pb-[.25em]',
@@ -246,6 +255,7 @@ export function Sheet({
         {subheader && <div className="shrink-0">{subheader}</div>}
 
         <div
+          data-panel-body
           className={cn(
             'min-h-0 flex-1 overflow-auto overscroll-contain px-[.75em] pt-[.1em] pb-[1em] text-[.85em]',
             bodyClassName,
@@ -254,7 +264,7 @@ export function Sheet({
           {children}
         </div>
 
-        {footer && <div className="shrink-0 border-t border-n800 px-[.9em] py-[.6em]">{footer}</div>}
+        {footer && <div data-panel-footer className="shrink-0 border-t border-n800 px-[.9em] py-[.6em]">{footer}</div>}
       </div>
     </>,
     alvo,

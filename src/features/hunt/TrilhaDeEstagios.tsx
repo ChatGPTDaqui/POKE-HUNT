@@ -174,19 +174,22 @@ function CartaoDeBioma({
       type="button"
       onClick={onEscolher}
       className={cn(
-        'group flex min-w-0 flex-col gap-[.35em] rounded-[.7em] border p-[.5em] text-left transition-colors',
-        'border-n800 bg-n900 hover:border-n600 hover:bg-n800',
+        'journey-biome-card group flex min-w-0 flex-col gap-[.35em] rounded-[.7em] border p-[.5em] text-left transition-colors',
+        'border-menu-line bg-menu-card hover:border-menu-line hover:bg-menu-wash',
       )}
     >
+      <span className="journey-biome-cover" aria-hidden="true" style={{ backgroundColor: bioma.bg.primary }}>
+        <img src={urlDaMiniaturaDoBioma(bioma.chave)} alt="" loading="lazy" decoding="async" />
+      </span>
       <div className="flex min-w-0 items-center gap-[.45em]">
         <IconeDoBioma bioma={bioma} cor={cor} />
         <div className="min-w-0 flex-1">
-          <div className="truncate font-medium text-n100">{bioma.nome}</div>
+          <div className="truncate font-medium text-menu-ink">{bioma.nome}</div>
           {/* O SELO VAI EMBAIXO, E NAO AO LADO DO NOME. Na bancada, com ele na
               mesma linha, "Campo Aberto" virava "Ca…" e o subtitulo quebrava em
               tres linhas — o cartao recomendado era o unico ilegivel da grade,
               justamente o que o novato precisa ler. */}
-          <div className="flex min-w-0 flex-wrap items-center gap-[.3em] text-[.72em] text-n500">
+          <div className="flex min-w-0 flex-wrap items-center gap-[.3em] text-[.72em] text-menu-muted">
             <span className="truncate">
               {limpo === 0
                 ? 'nenhum estágio limpo'
@@ -210,7 +213,7 @@ function CartaoDeBioma({
         {Array.from({ length: ESTAGIOS_POR_BIOMA }, (_, i) => (
           <span
             key={i}
-            className={cn('h-[.3em] flex-1 rounded-full', i < limpo ? '' : 'bg-n700')}
+            className={cn('h-[.3em] flex-1 rounded-full', i < limpo ? '' : 'bg-menu-card')}
             style={i < limpo ? { background: cor } : undefined}
           />
         ))}
@@ -521,7 +524,7 @@ function DicaDoEstagio({
       aria-hidden
       className={cn(
         'pointer-events-none absolute z-[3] w-[11em] -translate-x-1/2 rounded-[.5em]',
-        'border border-n700 bg-n900/95 p-[.45em] text-left shadow-lg',
+        'border border-menu-line bg-menu-card/95 p-[.45em] text-left shadow-lg',
         acima ? '-translate-y-[calc(100%+1.6em)]' : 'translate-y-[1.6em]',
       )}
       style={{
@@ -532,23 +535,23 @@ function DicaDoEstagio({
       }}
     >
       <div className="flex items-baseline gap-[.35em]">
-        <b className="text-[.9em] text-n100">Estágio {estagio}</b>
-        <span className="text-[.72em] text-n400">Lv {niveis[0]}-{niveis[1]}</span>
+        <b className="text-[.9em] text-menu-ink">Estágio {estagio}</b>
+        <span className="text-[.72em] text-menu-muted">Lv {niveis[0]}-{niveis[1]}</span>
       </div>
-      <div className="text-[.7em] text-n500">
+      <div className="text-[.7em] text-menu-muted">
         {salas} salas · {ROTULO_CURTO_DO_ESTADO[estado]}
         {ehAtiva && <span className="font-bold text-ok"> · em caçada</span>}
       </div>
       {composicao.length > 0 && (
-        <div className="mt-[.25em] flex flex-col gap-[.1em] text-[.7em] text-n300">
+        <div className="mt-[.25em] flex flex-col gap-[.1em] text-[.7em] text-menu-ink">
           {composicao.slice(0, 3).map((s) => (
             <div key={s.chave} className="flex justify-between gap-[.4em]">
               <span className="min-w-0 truncate">{s.nome}</span>
-              <b className="tabular-nums text-n100">{Math.round(s.pct)}%</b>
+              <b className="tabular-nums text-menu-ink">{Math.round(s.pct)}%</b>
             </div>
           ))}
           {composicao.length > 3 && (
-            <div className="text-n600">+{composicao.length - 3} sub-biomas</div>
+            <div className="text-menu-muted">+{composicao.length - 3} sub-biomas</div>
           )}
         </div>
       )}
@@ -684,16 +687,16 @@ function PainelDoEstagio({
   const bloqueado = estado === 'bloqueado'
 
   return (
-    <div className="flex flex-col gap-[.4em] rounded-[.6em] border border-n800 bg-n900 p-[.55em]">
+    <div className="flex flex-col gap-[.4em] rounded-[.6em] border border-menu-line bg-menu-card p-[.55em]">
       <div className="flex flex-wrap items-center gap-[.4em]">
-        <span className="font-semibold text-n100">Estágio {estagio}</span>
-        <span className="text-[.8em] text-n400">Lv {lo}-{hi}</span>
-        <span className="text-[.72em] text-n600">{quantidadeDeSalas(mapId)} salas</span>
+        <span className="font-semibold text-menu-ink">Estágio {estagio}</span>
+        <span className="text-[.8em] text-menu-muted">Lv {lo}-{hi}</span>
+        <span className="text-[.72em] text-menu-muted">{quantidadeDeSalas(mapId)} salas</span>
         {ROTULO_DO_ESTADO[estado] && (
           <span
             className={cn(
               'rounded-[.3em] px-[.35em] py-[.05em] text-[.62em] font-bold',
-              estado === 'limpo' ? 'bg-n700 text-n300' : 'bg-ok/20 text-ok',
+              estado === 'limpo' ? 'bg-menu-card text-menu-ink' : 'bg-ok/20 text-ok',
             )}
           >
             {ROTULO_DO_ESTADO[estado]}
@@ -745,7 +748,7 @@ function PainelDoEstagio({
         />
       )}
 
-      <div className="text-[.72em] text-n500">
+      <div className="text-[.72em] text-menu-muted">
         {elenco.length} POKEs
         {recorte
           ? ` em ${subBiomas.find((s) => s.chave === recorte)?.nome ?? recorte}`
@@ -753,7 +756,7 @@ function PainelDoEstagio({
         {/* Sem esta frase o jogador soma a % do painel com a da sala em que
             esta e as duas nao fecham — a do painel ja inclui o sorteio de
             sub-bioma e a media sobre as salas. */}
-        <span className="text-n600">
+        <span className="text-menu-muted">
           {recorte
             ? ' — chance dentro deste sub-bioma'
             : ' — chance já considerando o sorteio de sala'}
@@ -795,11 +798,11 @@ function ControlesDeFimDeEstagio() {
   const recuarSePerder = useGameStateStore((s) => s.autoToggles.recuarSePerder)
   const setAutoToggle = useGameStateStore((s) => s.setAutoToggle)
   return (
-    // Fundo PROPRIO (bg-n900/90 + borda), e nao so o dos cartoes: `BlocoAuto`
+    // Fundo PROPRIO (bg-menu-card/90 + borda), e nao so o dos cartoes: `BlocoAuto`
     // desligado nao tem fundo nenhum (so borda), e sobre uma arte de cena com
     // area clara o texto ficaria ilegivel. Mesmo tratamento da bolha de dica
     // do no (`DicaDoEstagio`) — e o mesmo problema de legibilidade sobre foto.
-    <div className="absolute right-[.5em] top-[.5em] z-[4] flex w-[9.5em] flex-col gap-[.3em] rounded-[.6em] border border-n700 bg-n900/90 p-[.35em] text-[.72em] shadow-lg">
+    <div className="absolute right-[.5em] top-[.5em] z-[4] flex w-[9.5em] flex-col gap-[.3em] rounded-[.6em] border border-menu-line bg-menu-card/90 p-[.35em] text-[.72em] shadow-lg">
       <BlocoAuto
         titulo="Avançar de estágio ao concluir"
         dica="Ao limpar a última sala do estágio, entra no estágio seguinte em vez de repetir o mesmo. Se não houver próximo — ou se ele ainda estiver bloqueado — o estágio atual repete."
@@ -872,9 +875,9 @@ function BotaoDeEntrar({
         // PH-491 — ele deixou de fechar o painel e passou a fechar a LINHA.
         'jogo-botao ml-auto flex shrink-0 cursor-pointer items-center justify-center gap-[.4em]',
         'rounded-[.55em] border-2 px-[.9em] py-[.35em] text-[.95em] font-black uppercase tracking-[.12em]',
-        'transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
+        'transition-all focus-visible:ring-2 focus-visible:ring-menu-brand focus-visible:outline-none',
         bloqueado || entrando
-          ? 'cursor-not-allowed border-n700 bg-n800 text-n600'
+          ? 'cursor-not-allowed border-menu-line bg-menu-wash text-menu-muted'
           : 'text-n50 hover:brightness-115 active:translate-y-[.06em]',
       )}
       style={bloqueado || entrando ? undefined : {
@@ -974,12 +977,12 @@ export function TrilhaDoBioma({
         <button
           type="button"
           onClick={onVoltar}
-          className="rounded-[.4em] bg-n800 px-[.5em] py-[.2em] text-[.8em] text-n300 hover:bg-n700"
+          className="rounded-[.4em] bg-menu-wash px-[.5em] py-[.2em] text-[.8em] text-menu-ink hover:bg-menu-card"
         >
           ← Biomas
         </button>
-        <span className="min-w-0 truncate font-medium text-n100">{bioma.nome}</span>
-        <span className="text-[.75em] text-n500">
+        <span className="min-w-0 truncate font-medium text-menu-ink">{bioma.nome}</span>
+        <span className="text-[.75em] text-menu-muted">
           {limpo} de {ESTAGIOS_POR_BIOMA} estágios
         </span>
       </div>
@@ -988,7 +991,7 @@ export function TrilhaDoBioma({
           relativas do caminho valerem em qualquer largura de tela. */}
       <div
         data-testid="mapa-da-trilha"
-        className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-[.7em] border border-n800"
+        className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-[.7em] border border-menu-line"
         style={{ background: bioma.bg.primary }}
       >
         <FundoDoBioma biomaChave={bioma.chave} />

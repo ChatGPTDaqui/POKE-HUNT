@@ -72,7 +72,7 @@ export function ReviveCountdownModal() {
         {Math.ceil(countdown)}
       </div>
       {!temRevive && (
-        <div className="text-center text-xs text-n300">
+        <div className="text-center text-xs text-menu-ink">
           Compre um na Loja antes do tempo acabar, ou seu POKE fica caído.
         </div>
       )}

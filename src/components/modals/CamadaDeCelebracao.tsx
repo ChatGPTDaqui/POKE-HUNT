@@ -291,7 +291,7 @@ function Corpo({ c, cheio }: { c: Celebracao; cheio: boolean }) {
       <div className="flex flex-col items-center gap-[.35em]">
         <Retrato id={c.especieId} shiny grande={cheio} />
         <span className="text-[.9em] font-medium" style={{ color: 'var(--color-shiny)' }}>{c.nome}</span>
-        <span className="text-[.7em] text-n300">Um encontro raro.</span>
+        <span className="text-[.7em] text-menu-ink">Um encontro raro.</span>
       </div>
     )
   }
@@ -299,7 +299,7 @@ function Corpo({ c, cheio }: { c: Celebracao; cheio: boolean }) {
   if (c.tipo === 'treinador') {
     return (
       <div className="flex flex-col items-center gap-[.2em]">
-        <span className="text-[.75em] text-n400">{c.nome}</span>
+        <span className="text-[.75em] text-menu-muted">{c.nome}</span>
         <span className="text-[1.3em] font-bold tabular-nums" style={{ color: 'var(--color-gold)' }}>
           Lv {rotuloDeIntervalo(c.nivelInicial, c.nivel)}
         </span>
@@ -322,7 +322,7 @@ function Corpo({ c, cheio }: { c: Celebracao; cheio: boolean }) {
         {/* ANTES → DEPOIS. "Evoluiu" sem mostrar em QUE obriga a abrir o perfil. */}
         <div className="flex flex-col items-center gap-[.15em]">
           <Retrato id={c.deId} shiny={c.isShiny} grande={false} opaco />
-          <span className="text-[.62em] text-n400">{c.deNome}</span>
+          <span className="text-[.62em] text-menu-muted">{c.deNome}</span>
         </div>
         {/* `celeb-entra` e nao `celeb-decorativo`: sob reduced-motion o
             decorativo e REMOVIDO, e esta seta e INFORMACAO — ela diz o sentido
@@ -345,7 +345,7 @@ function Corpo({ c, cheio }: { c: Celebracao; cheio: boolean }) {
   return (
     <div className="flex flex-col items-center gap-[.45em]">
       <div className="flex items-baseline gap-[.35em]">
-        <span className="text-[.75em] text-n400">{c.nome}</span>
+        <span className="text-[.75em] text-menu-muted">{c.nome}</span>
         <span className="text-[1.1em] font-bold tabular-nums" style={{ color: 'var(--color-exp)' }}>
           Lv {rotuloDeIntervalo(c.nivelInicial, c.nivel)}
         </span>
@@ -361,7 +361,7 @@ function Corpo({ c, cheio }: { c: Celebracao; cheio: boolean }) {
             Golpe novo
           </span>
           {c.golpesNovos.map((g) => (
-            <span key={g} className="text-[.8em] font-medium text-n100">{g}</span>
+            <span key={g} className="text-[.8em] font-medium text-menu-ink">{g}</span>
           ))}
         </div>
       )}
@@ -393,7 +393,7 @@ function SeloDeNiveis({ quantos, cor }: { quantos: number; cor: string }) {
 function ListaDeGanhos({ ganhos }: { ganhos: StatBlock | null }) {
   const subiram = statsQueSubiram(ganhos)
   if (subiram.length === 0) {
-    return <span className="text-[.65em] text-n500">Nenhum atributo mudou neste nível.</span>
+    return <span className="text-[.65em] text-menu-muted">Nenhum atributo mudou neste nível.</span>
   }
   return (
     <div className="grid grid-cols-2 gap-x-[.7em] gap-y-[.15em]">
@@ -403,7 +403,7 @@ function ListaDeGanhos({ ganhos }: { ganhos: StatBlock | null }) {
           className="celeb-entra flex items-center justify-between gap-[.5em] text-[.72em] tabular-nums"
           style={{ animation: `celeb-stat 260ms ease-out ${140 + i * 70}ms both` }}
         >
-          <span className="text-n400">{STAT_LABEL[k]}</span>
+          <span className="text-menu-muted">{STAT_LABEL[k]}</span>
           <b className="font-bold" style={{ color: 'var(--color-ok)' }}>+{v}</b>
         </span>
       ))}

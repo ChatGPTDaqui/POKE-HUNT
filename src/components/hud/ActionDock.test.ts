@@ -43,7 +43,7 @@ describe('destinos da barra e da grade', () => {
     // sair. PvP (PH-512) entrou logo apos, mesmo grupo de "duelo com outro
     // jogador".
     expect(telas).toEqual(
-      ['social', 'troca', 'pvp', 'calc', 'ranking', 'wiki', 'tutoriais', 'config'],
+      ['social', 'troca', 'ranking', 'bestiario', 'wiki', 'tutoriais', 'config'],
     )
   })
 })

@@ -115,7 +115,9 @@ hambúrguer. Estado ativo identificável por forma/marcador e texto, além de co
 Manter ordem e significado nos três regimes. Não renomear chaves de persistência
 ou criar rotas por menu. Hunt mantém seu nome. A barra permanece disponível;
 fechar um painel usa o X, Esc ou o próprio acesso ativo, sem botão separado de retorno.
-Em mobile estreito, duas fileiras de quatro destinos preservam ordem e alvos de toque.
+Hunt fica no centro geométrico da barra, levemente maior. Equipe/Mochila/Pokédex
+formam o grupo esquerdo; Loja/Hospital/Mercado/Mais, o direito. Em mobile, os grupos
+laterais usam duas fileiras com Hunt central entre eles; no PC, uma fileira.
 
 ### Coluna do treinador
 
@@ -160,7 +162,9 @@ Não remover função existente por não aparecer na barra principal.
 
 Topo contém Pokémon em campo, vitais e acesso compacto ao treinador/carteira.
 Reservas permanecem associadas ao integrante ativo, sem invadir o cenário.
-Local/condições e objetivo aparecem em faixas compactas com função explícita.
+Marca no cabeçalho: somente a Poké Bola, sem texto POKE-HUNT ou subtítulo.
+Local/condições aparecem à direita de Companheiros, na mesma faixa; objetivo
+mantém sua faixa recolhível. Não repetir Hospital junto de Conversas.
 
 Campo de batalha ocupa a região central. Avisos contextuais não se tornam
 atalhos permanentes espalhados pelas bordas. Manter disponíveis informações
@@ -168,6 +172,8 @@ relevantes existentes: clima, sala, efeitos, taxas e comunicação, reorganizand
 apresentação sem apagar dados ou misturar sinais com significados diferentes.
 
 Rodapé distingue ação (golpes/automação) de navegação (oito destinos).
+HUD de golpes possui quatro slots: 2×2 no mobile estreito e quatro lado a lado
+quando houver largura útil. Automação permanece separada, com alvo de toque amplo.
 Com gerenciamento extenso aberto, controles de combate são recolhidos, sem
 pausar o motor nem alterar a automação. Ao fechar, voltam ao estado anterior.
 Conteúdo não deve saltar ou ficar fora da tela por causa da nova altura medida.

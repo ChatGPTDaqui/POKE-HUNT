@@ -43,7 +43,7 @@ function StatusAoVivo() {
   const esperando = useWorldStore((s) => s.lure?.esperandoRetardatario ?? false)
   const naHunt = useWorldStore((s) => s.mapDef != null)
 
-  if (!naHunt) return <div className="text-n500">Entre numa hunt pra ver a reunião acontecendo.</div>
+  if (!naHunt) return <div className="text-menu-muted">Entre numa hunt pra ver a reunião acontecendo.</div>
   if (fase == null) return null
 
   const rotulo = fase === 'reunindo'
@@ -51,9 +51,9 @@ function StatusAoVivo() {
     : 'Lutando com o grupo'
 
   return (
-    <div className="flex items-center justify-between gap-[.5em] rounded-[.5em] border border-n800 px-[.6em] py-[.4em]">
-      <span className="text-n400">{rotulo}</span>
-      <span className="tabular-nums font-medium text-n100">{reunidos}/{alvo}</span>
+    <div className="flex items-center justify-between gap-[.5em] rounded-[.5em] border border-menu-line px-[.6em] py-[.4em]">
+      <span className="text-menu-muted">{rotulo}</span>
+      <span className="tabular-nums font-medium text-menu-ink">{reunidos}/{alvo}</span>
     </div>
   )
 }
@@ -90,7 +90,7 @@ export function LurePanel() {
         aoLigar={(v) => setLureConfig({ ligado: v })}
       >
         <label className="flex flex-col gap-[.3em]">
-          <span className="text-n400">Quantos POKEs reunir antes de bater</span>
+          <span className="text-menu-muted">Quantos POKEs reunir antes de bater</span>
           <SegmentedTabs
             value={String(lureConfig.quantidade)}
             options={OPCOES_DE_QUANTIDADE}
@@ -104,7 +104,7 @@ export function LurePanel() {
             que nenhuma delas e adivinhavel olhando a tela: o dano entra
             multiplicado, o ganho depende de ter golpe de área na rotação, e o
             lure sai de cena sozinho quando aparece shiny. */}
-        <ul className="flex flex-col gap-[.2em] text-[.92em] text-n500">
+        <ul className="flex flex-col gap-[.2em] text-[.92em] text-menu-muted">
           <li>· Reunir {lureConfig.quantidade} multiplica o dano que entra no seu POKE.</li>
           <li>· O ganho vem do golpe de área: sem um na rotação, o grupo só bate mais em você.</li>
           <li>· Shiny em campo cancela a reunião — ele continua tendo prioridade.</li>

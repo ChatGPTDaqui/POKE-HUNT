@@ -27,7 +27,7 @@ export function BotaoConvidarTroca({ userId }: { userId: string }) {
       title="Convidar para trocar"
       disabled={enviando}
       onClick={(e) => { e.stopPropagation(); convidar(userId) }}
-      className="shrink-0 rounded-[.35em] p-[.25em] text-n500 transition-colors hover:bg-n800 hover:text-n100 disabled:opacity-40"
+      className="shrink-0 rounded-[.35em] p-[.25em] text-menu-muted transition-colors hover:bg-menu-wash hover:text-menu-ink disabled:opacity-40"
     >
       <ArrowsLeftRight className="text-[1.05em]" />
     </button>

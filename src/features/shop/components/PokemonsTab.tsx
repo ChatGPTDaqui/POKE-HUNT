@@ -187,14 +187,14 @@ export function PokemonsTab() {
           onChange={(e) => setSearch(e.target.value)}
           className="min-w-[9em] flex-1"
         />
-        <label className="flex items-center gap-[.3em] text-[.8em] text-n400">
+        <label className="flex items-center gap-[.3em] text-[.8em] text-menu-muted">
           IV min
           <GameInput
             type="number" min={0} max={100} value={ivMin} className="w-[3.4em] text-center"
             onChange={(e) => setIvMin(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
           />
         </label>
-        <label className="flex items-center gap-[.3em] text-[.8em] text-n400">
+        <label className="flex items-center gap-[.3em] text-[.8em] text-menu-muted">
           IV max
           <GameInput
             type="number" min={0} max={100} value={ivMax} className="w-[3.4em] text-center"
@@ -260,9 +260,9 @@ export function PokemonsTab() {
         <p className="text-[.78em] text-warn">IV min maior que IV max — invertido automaticamente para filtrar.</p>
       )}
       {!carregada && <EstadoDaMochila />}
-      {carregada && bagPokes.length === 0 && <p className="text-n500">Nenhum POKE extra na mochila.</p>}
+      {carregada && bagPokes.length === 0 && <p className="text-menu-muted">Nenhum POKE extra na mochila.</p>}
       {carregada && bagPokes.length > 0 && filtered.length === 0 && (
-        <p className="text-n500">Nenhum POKE corresponde aos filtros.</p>
+        <p className="text-menu-muted">Nenhum POKE corresponde aos filtros.</p>
       )}
 
       {/* Grade, e nao uma linha por POKE (PH-118). O clique MARCA pro lote e
@@ -331,10 +331,10 @@ export function PokemonsTab() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-[.4em]">
               <PokeNameTag poke={pokeEmFoco.poke} species={SPECIES[pokeEmFoco.poke.speciesId]} />
-              <span className="text-n400">Lv{pokeEmFoco.poke.level}</span>
-              <span className="text-[.78em] text-n500">IV {pokeEmFoco.ivPct.toFixed(0)}%</span>
+              <span className="text-menu-muted">Lv{pokeEmFoco.poke.level}</span>
+              <span className="text-[.78em] text-menu-muted">IV {pokeEmFoco.ivPct.toFixed(0)}%</span>
             </div>
-            <div className="text-[.75em] text-n500">
+            <div className="text-[.75em] text-menu-muted">
               {selectedUids.has(pokeEmFoco.poke.uid) ? 'Marcado para o lote' : 'Fora do lote'}
             </div>
           </div>

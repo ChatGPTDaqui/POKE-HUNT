@@ -9,6 +9,7 @@ import { registrarErrosGlobais } from '@/lib/globalErrorHandlers'
 import { iniciarCapturaDeErroDeToast } from '@/lib/errorToastReporting'
 import './index.css'
 import App from './App.tsx'
+import { ThemeProvider } from '@/components/game/ThemeProvider'
 
 /**
  * DUAS condicoes, e cada uma responde por uma coisa diferente (PH-127):
@@ -38,7 +39,7 @@ createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <App />
+          <ThemeProvider><App /></ThemeProvider>
         </TooltipProvider>
         {mostrarDevtools() && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>

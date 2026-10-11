@@ -1,5 +1,4 @@
-// Equipe: um card por POKE. O card inteiro abre o perfil; os botoes dentro
-// dele param a propagacao.
+// Equipe: seleção compacta e ficha focada, sem repetir ações em cada integrante.
 import { SPECIES } from '@/data/pokes'
 import { stoneName } from '@/data/stones'
 import { canEvolve, evolutionStoneRequirement, expProgressForInstance, opcoesDisponiveis } from '@/engine/systems/progressionSystem'
@@ -17,6 +16,8 @@ import { useDeviceMode } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 import { MenuScene } from '@/components/game/MenuScene'
 import { TypeChip } from '@/components/shared/TypeChip'
+import { JourneyPokeArt } from '@/components/game/JourneyPokeArt'
+import { EquipmentArt } from '@/components/game/JourneyArtwork'
 
 // PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
 // enquanto duram. O guard de verdade esta em controller.setActiveTeamIndex; aqui
@@ -35,9 +36,13 @@ export function TeamMenu() {
   const { compacto } = useDeviceMode()
   // PH-139: uid do POKE cuja escolha de evolucao esta aberta, ou null.
   const [escolhendo, setEscolhendo] = useState<string | null>(null)
+  const [selectedUid, setSelectedUid] = useState<string | null>(null)
+  const selected = team.find((p) => p.uid === selectedUid && SPECIES[p.speciesId])
+    ?? (SPECIES[team[activeIndex]?.speciesId] ? team[activeIndex] : undefined)
+    ?? team.find((p) => SPECIES[p.speciesId])
 
   if (team.length === 0) {
-    return <p className="text-n500">Você ainda não tem nenhum POKE.</p>
+    return <div className="journey-empty"><EquipmentArt kind="team" className="journey-empty-art" /><p>Você ainda não tem nenhum POKE.</p></div>
   }
 
   const pokeEscolhendo = team.find((p) => p.uid === escolhendo)
@@ -45,7 +50,19 @@ export function TeamMenu() {
 
   return (
     <MenuScene tone="team">
-      <div className="team-roster">
+      <div className="journey-team-workspace">
+      <div className="journey-team-list" role="group" aria-label="Integrantes da equipe">
+        {team.map((poke, index) => {
+          const species = SPECIES[poke.speciesId]
+          if (!species) return null
+          return <button key={poke.uid} type="button" className="journey-team-choice" aria-label={`Selecionar ${species.name}`} aria-pressed={selected?.uid === poke.uid} onClick={() => setSelectedUid(poke.uid)}>
+            <span className="team-position">{String(index + 1).padStart(2, '0')}</span>
+            <PokeSwatch species={species} isShiny={poke.isShiny} size={2.8} />
+            <span className="journey-team-copy"><PokeNameTag poke={poke} species={species} /><span>Lv{poke.level} · HP {Math.floor(poke.hp)}/{poke.stats.hp}</span>{index === activeIndex && <small>Em campo</small>}</span>
+          </button>
+        })}
+      </div>
+      <div className="team-roster journey-team-focus" aria-label="Pokémon selecionado">
       {pokeEscolhendo && especieEscolhendo && (
         <EscolhaDeEvolucao
           poke={pokeEscolhendo}
@@ -59,6 +76,7 @@ export function TeamMenu() {
         />
       )}
       {team.map((poke, index) => {
+        if (poke.uid !== selected?.uid) return null
         const species = SPECIES[poke.speciesId]
         // Guard herdado do vanilla: um unico POKE com especie invalida (save
         // legado) nao pode cortar o resto da lista.
@@ -76,23 +94,22 @@ export function TeamMenu() {
         return (
           <GameCard
             key={poke.uid}
-            onClick={() => showProfile(poke, species)}
             // No celular as acoes descem pra uma segunda fileira, e nao ficam
             // numa coluna a direita: "Colocar em campo" e "Retirar da equipe"
             // empilhados custavam 45% da largura do card e empurravam nome, HP
             // e barra pra uma coluna de 8em.
-            className={cn('team-member flex gap-[.65em] p-[.7em]', isActive && 'is-active', compacto ? 'flex-col' : 'items-center')}
+            className={cn('team-member flex flex-col gap-[.4em] p-[.45em]', isActive && 'is-active')}
           >
             <div className={cn('flex min-w-0 gap-[.55em]', compacto ? 'items-center' : 'flex-1 items-center')}>
             <span className="team-position">{String(index + 1).padStart(2, '0')}</span>
-            <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={3.6} />
+            <JourneyPokeArt species={species} isShiny={poke.isShiny} />
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-[.4em]">
                 <PokeNameTag poke={poke} species={species} />
-                <span className="text-n400">Lv{poke.level}</span>
+                <span className="text-menu-muted">Lv{poke.level}</span>
                 {isActive && (
-                  <span className="rounded-full bg-primary px-[.5em] py-[.05em] text-[.7em] font-medium text-primary-foreground">
+                  <span className="rounded-full bg-menu-brand px-[.5em] py-[.05em] text-[.7em] font-medium text-primary-foreground">
                     Em campo
                   </span>
                 )}
@@ -114,7 +131,7 @@ export function TeamMenu() {
                 )}
               </div>
               <div className="mt-[.35em] flex flex-wrap gap-[.25em]">{[species.type, species.type2].map((type) => type && <TypeChip key={type} type={type} />)}</div>
-              <div className="mt-[.2em] text-[.78em] text-n400">
+              <div className="mt-[.2em] text-[.78em] text-menu-muted">
                 HP {Math.floor(poke.hp)}/{poke.stats.hp} · EXP {Math.max(0, Math.floor(progress.into))}/{progress.needed}
               </div>
               <Meter
@@ -126,7 +143,15 @@ export function TeamMenu() {
             </div>
             </div>
 
-            <div className={cn('flex shrink-0 gap-[.3em]', compacto ? 'flex-row' : 'flex-col')}>
+            <dl className="journey-team-stats" aria-label="Atributos do Pokémon">
+              {([
+                ['HP', poke.stats.hp], ['Ataque', poke.stats.atkFis], ['Defesa', poke.stats.def],
+                ['At. especial', poke.stats.atkEsp], ['Def. especial', poke.stats.defEsp], ['Velocidade', poke.stats.speed],
+              ] as const).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+            </dl>
+
+            <div className="flex shrink-0 flex-wrap gap-[.3em]">
+              <GameButton variant="ghost" onClick={() => showProfile(poke, species)}>Ver perfil completo</GameButton>
               {/* Caminho VISIVEL ate os 4 golpes. Antes a gestao existia so
                   dentro do perfil, atras de um clique no card e de uma aba que
                   nada anunciava — o jogador que quisesse trocar de golpe tinha
@@ -179,6 +204,7 @@ export function TeamMenu() {
           </GameCard>
         )
       })}
+      </div>
       </div>
     </MenuScene>
   )

@@ -14,8 +14,7 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 
-import { StatusRail } from './StatusRail'
-import { salaNoTrilho } from './SalaChip'
+import { StatusRail, ContextoDaHunt } from './StatusRail'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -35,7 +34,7 @@ describe('sala no cabecalho (PH-272)', () => {
 
   it('em hunt, o trilho mostra a sala e o sub-bioma', () => {
     useWorldStore.setState({ sala: SALA, mapDef: MAPA } as never, false)
-    render(<StatusRail />)
+    render(<ContextoDaHunt />)
     // "Sala 3/10" sai partido em varios elementos (o numero e um `<b>`), entao a
     // busca e pelo texto do container inteiro.
     expect(document.body.textContent).toContain('Sala')
@@ -45,7 +44,7 @@ describe('sala no cabecalho (PH-272)', () => {
   })
 
   it('fora de hunt, a faixa central mostra o LUGAR — nunca fica vazia', () => {
-    render(<StatusRail />)
+    render(<ContextoDaHunt />)
     expect(screen.getByText('Hospital')).toBeTruthy()
   })
 
@@ -53,7 +52,7 @@ describe('sala no cabecalho (PH-272)', () => {
     // Hunt inicial, BOSS e Lance nao tem sala. Sem este caso o jogador ficaria
     // sem saber onde esta justamente nas hunts em que nao ha sub-bioma pra ler.
     useWorldStore.setState({ sala: null, mapDef: { ...MAPA, name: 'Route 46' } } as never, false)
-    render(<StatusRail />)
+    render(<ContextoDaHunt />)
     expect(screen.getByText('Route 46')).toBeTruthy()
   })
 
@@ -66,15 +65,15 @@ describe('sala no cabecalho (PH-272)', () => {
     useWorldStore.setState({ sala: SALA, mapDef: MAPA } as never, false)
     render(<StatusRail />)
     expect(document.body.textContent).not.toContain('Relvado')
-    expect(salaNoTrilho('compacto')).toBe(false)
   })
 
-  it('`salaNoTrilho` responde igual pros dois lados que perguntam', () => {
+  it.each([390, 844, 1440])('o contexto mostra uma única sala em %ipx', largura => {
     // A funcao E o contrato entre `StatusRail` e `HudLayer`. Se ela passar a
     // depender de outra coisa (largura, toggle, hunt), os dois continuam de
     // acordo — que e o ponto de ela existir.
-    expect(salaNoTrilho('amplo')).toBe(true)
-    expect(salaNoTrilho('deitado')).toBe(true)
-    expect(salaNoTrilho('compacto')).toBe(false)
+    useUiStore.setState({ viewportWidth: largura })
+    useWorldStore.setState({ sala: SALA, mapDef: MAPA } as never, false)
+    render(<ContextoDaHunt />)
+    expect(screen.getAllByText('Relvado')).toHaveLength(1)
   })
 })

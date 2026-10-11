@@ -8,6 +8,24 @@ Tipografia: consulte ../operacao/preservacao-visual.md quando a tarefa exigir pr
 --font-mono já existe em src/index.css; não repetir o diagnóstico do prompt antigo.
 Canvas usa ctx.font e não herda CSS. Arte/VFX podem afetar o bundle de authority: confira dependências.
 
+## Temas da interface
+
+ThemeProvider aplica Claro/Jornada (padrão) ou Escuro/Dark Glass na raiz, inclusive
+HUD, navegação, chat e portais. Ajuste em Mais → Ajustes → Geral, persistido só no
+aparelho por useSecureStorage; falha de storage não impede a troca em memória.
+journey.css mantém composição/densidade e themes.css define os materiais. Não
+inverter a escala n900/n100 global: dados de combate e raridades conservam sua paleta.
+A preferência de reduzir transparência continua independente do tema.
+
+## Espaço útil
+
+Painel usa snap `conteudo` por padrão: cresce só até o conteúdo ou o limite seguro,
+sem reservar altura vazia. Listas longas mantêm rolagem; `cheia` continua explícito.
+Durante consultas, `useGestaoAberta` recolhe controles de campo e chat mobile para
+liberar altura. Auto não participa desse recolhimento: precisa acompanhar a batalha.
+Compactar espaçamentos e duplicações, não reduzir tipografia nem alvos de toque.
+Evidência e limites da varredura: [auditoria de densidade](../planos/2026-10-11-espaco-util-interface.md).
+
 ## Consulta detalhada
 
 - [O fundamento: escala fluida em em](../arquivo/2026-09-08/docs/09-interface.md#o-fundamento-escala-fluida-em-em)

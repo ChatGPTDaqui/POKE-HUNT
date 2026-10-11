@@ -2,6 +2,7 @@
 //
 // Metas: 3 degraus de abates contados desde a primeira abertura do dia (o
 // servidor anota a base em `abrir_dia()`; o cliente não consegue forjar).
+// Farm offline NÃO existe (quarentena): só conta o que o jogo caçou aberto.
 // Login: um prêmio por dia em que o jogador coleta, contando DIAS COLETADOS no
 // mês — perder um dia não zera, só atrasa. Dias 7/14/21/28 são especiais.
 //

@@ -47,7 +47,7 @@ function TypeChip({ type }: { type: ElementType }) {
 function LinhaDeMenu({ Icon, nome, children }: { Icon: Icon; nome: string; children: ReactNode }) {
   return (
     <li className="flex items-start gap-[.5em]">
-      <Icon className="mt-[.15em] shrink-0 text-[1.2em] text-n300" />
+      <Icon className="mt-[.15em] shrink-0 text-[1.2em] text-menu-ink" />
       <span>
         <b>{nome}</b> — {children}
       </span>
@@ -56,7 +56,7 @@ function LinhaDeMenu({ Icon, nome, children }: { Icon: Icon; nome: string; child
 }
 
 function ChipList({ types }: { types: ElementType[] }) {
-  if (types.length === 0) return <span className="text-[.8em] text-n400">Nenhum</span>
+  if (types.length === 0) return <span className="text-[.8em] text-menu-muted">Nenhum</span>
   return (
     <div className="flex flex-wrap gap-1">
       {types.map((t) => (
@@ -242,7 +242,7 @@ function TypeMatrix() {
                   m === 2 ? 'bg-emerald-500/25 font-semibold'
                     : m === 0.5 ? 'bg-amber-500/20'
                       : m === 0 ? 'bg-destructive/25 font-semibold'
-                        : 'text-n400'
+                        : 'text-menu-muted'
                 return (
                   <td key={def} className={`border px-1 py-0.5 text-center ${cls}`}>
                     {m === 1 ? '·' : m}
@@ -283,9 +283,9 @@ function TiposTab() {
 
   return (
     <div className="space-y-2">
-      <div className="rounded-lg border bg-n900 p-3">
+      <div className="rounded-lg border bg-menu-card p-3">
         <div className="mb-1.5 text-[.9em] font-medium">Como funciona a efetividade de tipos</div>
-        <div className="text-[.8em] leading-relaxed text-n400">
+        <div className="text-[.8em] leading-relaxed text-menu-muted">
           Todo golpe tem um tipo elemental. Quando ele acerta um POKE, o dano e multiplicado de acordo com o
           tipo do defensor: <b>2x</b> (super eficaz), <b>0.5x</b> (pouco eficaz/resistido) ou <b>0x</b> (sem
           efeito/imune) — sem multiplicador nenhum, o golpe causa dano normal (1x). POKEs com <b>dois tipos</b>{' '}
@@ -303,39 +303,39 @@ function TiposTab() {
         </GameSelect>
       </div>
 
-      <div className="rounded-lg border bg-n900 p-3">
+      <div className="rounded-lg border bg-menu-card p-3">
         <div className="mb-1.5 flex items-center gap-1.5 text-[.9em] font-medium">
           Atacando com golpes de <TypeChip type={selected} />
         </div>
         <div className="space-y-1.5">
-          <div className="text-[.8em] text-n400">Super eficaz (2x) contra:</div>
+          <div className="text-[.8em] text-menu-muted">Super eficaz (2x) contra:</div>
           <ChipList types={strongAtk} />
-          <div className="text-[.8em] text-n400">Pouco eficaz (0.5x) contra:</div>
+          <div className="text-[.8em] text-menu-muted">Pouco eficaz (0.5x) contra:</div>
           <ChipList types={weakAtk} />
-          <div className="text-[.8em] text-n400">Sem efeito (0x) contra:</div>
+          <div className="text-[.8em] text-menu-muted">Sem efeito (0x) contra:</div>
           <ChipList types={noEffAtk} />
         </div>
       </div>
 
-      <div className="rounded-lg border bg-n900 p-3">
+      <div className="rounded-lg border bg-menu-card p-3">
         <div className="mb-1.5 flex items-center gap-1.5 text-[.9em] font-medium">
           Defendendo como um POKE de <TypeChip type={selected} />
         </div>
         <div className="space-y-1.5">
-          <div className="text-[.8em] text-n400">Fraqueza — recebe 2x de:</div>
+          <div className="text-[.8em] text-menu-muted">Fraqueza — recebe 2x de:</div>
           <ChipList types={weaknesses} />
-          <div className="text-[.8em] text-n400">Resistência — recebe 0.5x de:</div>
+          <div className="text-[.8em] text-menu-muted">Resistência — recebe 0.5x de:</div>
           <ChipList types={resistances} />
-          <div className="text-[.8em] text-n400">Imunidade — recebe 0x de:</div>
+          <div className="text-[.8em] text-menu-muted">Imunidade — recebe 0x de:</div>
           <ChipList types={immunities} />
         </div>
       </div>
 
-      <div className="rounded-lg border bg-n900 p-3">
+      <div className="rounded-lg border bg-menu-card p-3">
         <div className="mb-1.5 text-[.9em] font-medium">
           Tabela completa (linhas = golpe atacante, colunas = POKE defensor)
         </div>
-        <div className="mb-2 text-[.8em] text-n400">
+        <div className="mb-2 text-[.8em] text-menu-muted">
           Arraste pros lados pra ver a tabela inteira. "·" = dano normal (1x).
         </div>
         <TypeMatrix />
@@ -357,7 +357,7 @@ function RaridadesTab() {
         fortes de verdade.
       </WikiCard>
 
-      <div className="rounded-lg border bg-n900 p-3">
+      <div className="rounded-lg border bg-menu-card p-3">
         <div className="mb-1.5 text-[.9em] font-medium">Tabela de raridades</div>
         <div className="overflow-hidden rounded-md border text-[.8em]">
           <div className="grid grid-cols-4 gap-1 border-b bg-muted/50 px-2 py-1 font-medium">
@@ -567,18 +567,18 @@ function StatusCard({ tipo }: { tipo: StatusCondition }) {
   const curas = itensQueCuram(tipo)
 
   return (
-    <div className="rounded-lg border bg-n900 p-3">
+    <div className="rounded-lg border bg-menu-card p-3">
       <div className="mb-1.5 flex items-center gap-1.5 text-[.9em] font-medium">
         <StatusIcon className="text-[1.2em]" style={{ color: cor }} weight="fill" />
         {nomeDoStatus(tipo)}
       </div>
-      <ul className="mb-2 list-disc space-y-1 pl-4 text-[.8em] leading-relaxed text-n400">{linhas}</ul>
+      <ul className="mb-2 list-disc space-y-1 pl-4 text-[.8em] leading-relaxed text-menu-muted">{linhas}</ul>
       {regra.imunidadesPorTipo.length > 0 && (
-        <div className="mb-2 flex flex-wrap items-center gap-1.5 text-[.8em] text-n400">
+        <div className="mb-2 flex flex-wrap items-center gap-1.5 text-[.8em] text-menu-muted">
           Imune por tipo: <ChipList types={regra.imunidadesPorTipo} />
         </div>
       )}
-      <div className="text-[.8em] text-n400">
+      <div className="text-[.8em] text-menu-muted">
         Cura: {curas.length === 0 ? 'só no Hospital' : `${curas.map((i) => i.name).join(', ')}, ou o Hospital de graça`}
       </div>
     </div>
@@ -737,7 +737,7 @@ function TraitTable({ traits }: { traits: { id: TraitId; efeito: ReactNode }[] }
       {traits.map((t) => (
         <div key={t.id} className="grid grid-cols-[9em_1fr] gap-2 border-b px-2 py-1 last:border-b-0">
           <span className="font-semibold">{nomeDaTrait(t.id)}</span>
-          <span className="text-n400">{t.efeito}</span>
+          <span className="text-menu-muted">{t.efeito}</span>
         </div>
       ))}
     </div>
@@ -849,7 +849,7 @@ function CombateTab() {
         <div className="mt-[.5em]">
           <TraitTable traits={TRAITS_IMPLEMENTADAS} />
         </div>
-        <div className="mt-[.5em] text-[.75em] text-n500">
+        <div className="mt-[.5em] text-[.75em] text-menu-muted">
           As demais Traits do jogo ({TRAITS_SEM_MECANICA.map(nomeDaTrait).join(', ')}) ja existem no dado das
           especies mas ainda nao tem efeito nenhum implementado em combate — decorativas por enquanto, honesto
           dizer isso aqui em vez de fingir que fazem algo.

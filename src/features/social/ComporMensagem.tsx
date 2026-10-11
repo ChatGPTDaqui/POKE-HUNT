@@ -60,7 +60,7 @@ export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: 
   }
 
   return (
-    <div className="flex flex-col gap-[.5em] rounded-[.7em] border border-primary/40 bg-n900 p-[.7em]">
+    <div className="flex flex-col gap-[.5em] rounded-[.7em] border border-menu-brand/40 bg-menu-card p-[.7em]">
       <div className="flex items-center justify-between">
         <SectionLabel>NOVA CONVERSA</SectionLabel>
         <GameButton variant="ghost" onClick={onCancelar} aria-label="Fechar">
@@ -68,7 +68,7 @@ export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: 
         </GameButton>
       </div>
 
-      <label className="flex flex-col gap-[.2em] text-[.78em] text-n300">
+      <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-ink">
         Para (nick exato)
         <GameInput
           value={nick}
@@ -78,7 +78,7 @@ export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: 
         />
       </label>
 
-      <label className="flex flex-col gap-[.2em] text-[.78em] text-n300">
+      <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-ink">
         Mensagem
         <textarea
           value={corpo}
@@ -87,12 +87,12 @@ export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: 
           placeholder="Escreva aqui"
           onChange={(e) => setCorpo(e.target.value)}
           className={cn(
-            'jogo-campo min-w-0 resize-y rounded-[.45em] border border-n700 bg-n900 px-[.55em] py-[.32em]',
-            'font-[inherit] text-[.85em] text-foreground placeholder:text-n500',
-            'focus-visible:border-n500 focus-visible:outline-none',
+            'jogo-campo min-w-0 resize-y rounded-[.45em] border border-menu-line bg-menu-card px-[.55em] py-[.32em]',
+            'font-[inherit] text-[.85em] text-menu-ink placeholder:text-menu-muted',
+            'focus-visible:border-menu-line focus-visible:outline-none',
           )}
         />
-        <span className={cn('self-end text-[.72em]', corpo.length >= MAX_CORPO ? 'text-bad' : 'text-n500')}>
+        <span className={cn('self-end text-[.72em]', corpo.length >= MAX_CORPO ? 'text-bad' : 'text-menu-muted')}>
           {corpo.length}/{MAX_CORPO}
         </span>
       </label>
@@ -105,7 +105,7 @@ export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: 
               {anexos.map((a) => (
                 <span
                   key={a.itemId}
-                  className="flex items-center gap-[.3em] rounded-[.35em] border border-n700 bg-n800 px-[.35em] py-[.1em] text-[.78em]"
+                  className="flex items-center gap-[.3em] rounded-[.35em] border border-menu-line bg-menu-wash px-[.35em] py-[.1em] text-[.78em]"
                 >
                   <img
                     src={itemIconUrl(a.itemId) ?? undefined}
@@ -118,7 +118,7 @@ export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: 
                   <button
                     type="button"
                     aria-label={`Remover ${getItem(a.itemId)?.name ?? a.itemId}`}
-                    className="text-n400 hover:text-bad"
+                    className="text-menu-muted hover:text-bad"
                     onClick={() => setAnexos((prev) => prev.filter((x) => x.itemId !== a.itemId))}
                   >
                     <Trash />
@@ -158,7 +158,7 @@ export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: 
           )}
 
         {disponiveis.length === 0 && anexos.length === 0 && (
-          <p className="text-[.75em] text-n500">
+          <p className="text-[.75em] text-menu-muted">
             Nenhum item disponivel. Itens travados nao podem ser anexados.
           </p>
         )}

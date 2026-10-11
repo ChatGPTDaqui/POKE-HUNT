@@ -133,4 +133,31 @@ describe('ordem de resolucao por Velocidade (PH-493)', () => {
     expect(world.player!.poke.hp).toBeLessThan(CHEIO)
     expect(world.enemies[0].poke.hp).toBeLessThan(CHEIO)
   })
+
+  // 11/10: o dano passou a cair no impacto do VFX, que varia por golpe. Dois
+  // golpes disparados JUNTOS um contra o outro deixaram de pousar juntos — e o
+  // mais lento, com VFX curto, matava o mais rapido antes de ele bater.
+  it('disparados juntos: o golpe curto do LENTO espera o pouso do RAPIDO', () => {
+    const world = duelo(300, 50)
+    // Mesmo instante de disparo (pouso - timer = 0 nos dois), pousos diferentes:
+    // o lento (inimigo) bate em 0,1 s, o rapido (jogador) em 0,4 s.
+    world.pendingHits = [
+      { id: 'hit-1', timer: 0.1, pouso: 0.1, attackerId: 'enemy-1', targetId: 'player-1', ability: BASIC_ATTACK },
+      { id: 'hit-2', timer: 0.4, pouso: 0.4, attackerId: 'player-1', targetId: 'enemy-1', ability: BASIC_ATTACK },
+    ]
+    for (let i = 0; i < 40; i++) updateCombat(world, 0.016, { silent: true })
+    expect(world.enemies[0].poke.hp, 'o lento tinha que cair').toBe(0)
+    expect(world.player!.poke.hp, 'o lento bateu antes do rapido').toBe(1)
+  })
+
+  it('disparado DEPOIS nao espera ninguem: segue o proprio pouso', () => {
+    const world = duelo(300, 50)
+    // O inimigo disparou 0,2 s depois do jogador (pouso - timer diferente).
+    world.pendingHits = [
+      { id: 'hit-1', timer: 0.1, pouso: 0.1, attackerId: 'enemy-1', targetId: 'player-1', ability: BASIC_ATTACK },
+      { id: 'hit-2', timer: 0.4, pouso: 0.6, attackerId: 'player-1', targetId: 'enemy-1', ability: BASIC_ATTACK },
+    ]
+    for (let i = 0; i < 12; i++) updateCombat(world, 0.016, { silent: true })
+    expect(world.player!.poke.hp, 'o golpe do lento tinha que pousar no proprio tempo').toBe(0)
+  })
 })

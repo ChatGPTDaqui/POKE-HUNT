@@ -98,8 +98,8 @@ export function AuthForm({
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-6">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-5 rounded-lg border bg-card p-6">
+    <div data-appearance="journey" className="journey-entry flex min-h-svh items-center justify-center bg-background p-6">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-6">
         <div className="space-y-1">
           <h1 className="font-heading text-xl font-semibold">{titulo}</h1>
           <p className="text-sm text-muted-foreground">{descricao}</p>

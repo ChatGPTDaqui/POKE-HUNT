@@ -17,7 +17,7 @@ import { pedirAcao, liquidar } from '@/data/remote/autoridade'
 import { Meter } from '@/components/game/controls'
 import { textoDaRecompensa } from './CartaoDoPasso'
 
-async function coletarTudo(pendentes: MarcoDeTreinador[]): Promise<void> {
+export async function coletarTudo(pendentes: MarcoDeTreinador[]): Promise<void> {
   // O nível recém-subido precisa estar gravado: a RPC lê `players.trainer_level`.
   await liquidar().catch(() => {})
   const soma = somaDasRecompensas(pendentes)
@@ -33,7 +33,16 @@ async function coletarTudo(pendentes: MarcoDeTreinador[]): Promise<void> {
   useToastStore.getState().pushToast(`Recompensa de treinador: ${textoDaRecompensa(soma)}`, 'success', 'world')
 }
 
-export function FaixaDoTreinador() {
+/** Marcos de treinador alcançados e não coletados. */
+export function usePendentesDeTreinador(): MarcoDeTreinador[] {
+  const carregado = usePassosStore(s => s.carregado)
+  const coletados = usePassosStore(s => s.niveisColetados)
+  const nivel = useGameStateStore(s => s.trainer.level)
+  return useMemo(() => carregado ? situacaoDosMarcos(nivel, coletados).pendentes : [], [carregado, nivel, coletados])
+}
+
+/** `modo`: quem decide é a `FaixaDePremios` — "um objetivo por vez" no topo. */
+export function FaixaDoTreinador({ modo = 'tudo' }: { modo?: 'tudo' | 'so-pronto' | 'nada' }) {
   const carregado = usePassosStore(s => s.carregado)
   const coletados = usePassosStore(s => s.niveisColetados)
   const passosFeitos = usePassosStore(s => s.reivindicados.size >= PRIMEIROS_PASSOS.length)
@@ -41,18 +50,18 @@ export function FaixaDoTreinador() {
   const { pendentes, proximo } = useMemo(() => situacaoDosMarcos(trainer.level, coletados), [trainer.level, coletados])
   const [coletando, setColetando] = useState(false)
 
-  if (!carregado) return null
+  if (!carregado || modo === 'nada') return null
 
   if (pendentes.length > 0) {
     const soma = somaDasRecompensas(pendentes)
     return (
-      <div className="pointer-events-auto flex w-[min(100%,24em)] items-center gap-[.4em] rounded-b border-x border-b border-ok/60 bg-n900/92 px-[.55em] py-[.3em] text-[.78em]">
+      <div className="pointer-events-auto flex w-[min(100%,24em)] items-center gap-[.4em] rounded-b border-x border-b border-ok/60 bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]">
         <Gift weight="fill" className="shrink-0 text-[1.2em] text-warn" aria-hidden />
         <div className="min-w-0 flex-1">
-          <div className="truncate font-medium text-n100">
+          <div className="truncate font-medium text-menu-ink">
             {pendentes.length === 1 ? `Prêmio do Lv ${pendentes[0].nivel} de treinador` : `${pendentes.length} prêmios de treinador`}
           </div>
-          <div className="truncate text-[.9em] text-n400">{textoDaRecompensa(soma)}</div>
+          <div className="truncate text-[.9em] text-menu-muted">{textoDaRecompensa(soma)}</div>
         </div>
         <button type="button" disabled={coletando}
           onClick={async () => { setColetando(true); try { await coletarTudo(pendentes) } finally { setColetando(false) } }}
@@ -63,20 +72,20 @@ export function FaixaDoTreinador() {
     )
   }
 
-  if (!passosFeitos || !proximo) return null
+  if (modo === 'so-pronto' || !passosFeitos || !proximo) return null
   // Barra do marco anterior até o próximo, contando a fração do nível atual.
   const anterior = [...MARCOS_DE_TREINADOR].reverse().find(m => m.nivel <= trainer.level)?.nivel ?? 1
   const { into, needed } = trainerExpProgress(trainer)
   const pct = Math.min(100, ((trainer.level - anterior + into / needed) / (proximo.nivel - anterior)) * 100)
   return (
-    <div className="pointer-events-auto w-[min(100%,24em)] rounded-b border-x border-b border-n800 bg-n900/92 px-[.55em] py-[.3em] text-[.78em]">
+    <div className="pointer-events-auto w-[min(100%,24em)] rounded-b border-x border-b border-menu-line bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]">
       <div className="flex items-baseline gap-[.4em]">
-        <span className="shrink-0 rounded-[.3em] bg-primary/20 px-[.3em] text-[.8em] font-bold uppercase text-primary">Treinador</span>
-        <span className="truncate font-medium text-n100">Próximo prêmio no Lv {proximo.nivel}</span>
-        <span className="ml-auto shrink-0 tabular-nums text-n300">Lv {trainer.level}</span>
+        <span className="shrink-0 rounded-[.3em] bg-menu-brand/20 px-[.3em] text-[.8em] font-bold uppercase text-menu-brand">Treinador</span>
+        <span className="truncate font-medium text-menu-ink">Próximo prêmio no Lv {proximo.nivel}</span>
+        <span className="ml-auto shrink-0 tabular-nums text-menu-ink">Lv {trainer.level}</span>
       </div>
       <Meter pct={pct} height=".28em" color="var(--color-primary)" className="my-[.25em]" />
-      <div className="flex items-center gap-[.3em] text-[.9em] text-n400">
+      <div className="flex items-center gap-[.3em] text-[.9em] text-menu-muted">
         <Gift weight="fill" className="shrink-0 text-warn" aria-hidden />
         <span className="truncate">{textoDaRecompensa(proximo.recompensa)}</span>
       </div>

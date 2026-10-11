@@ -96,7 +96,7 @@ function TabelaDeClima() {
           <div className={`text-[.85em] font-medium ${ap.cor}`}>
             {ap.simbolo} {ap.nome}
           </div>
-          <ul className="mt-[.2em] list-disc pl-[1.1em] text-[.8em] text-n400">
+          <ul className="mt-[.2em] list-disc pl-[1.1em] text-[.8em] text-menu-muted">
             {ap.efeitos.map((efeito) => (
               <li key={efeito}>{efeito}</li>
             ))}

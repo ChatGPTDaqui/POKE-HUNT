@@ -61,7 +61,7 @@ export function MercadoMenu() {
       {aba === 'historico' && <Historico />}
 
       {aba === 'comprar' && tipo === 'itens' && (
-        <p className="flex items-start gap-[.4em] text-[.75em] text-n500">
+        <p className="flex items-start gap-[.4em] text-[.75em] text-menu-muted">
           <Tag className="mt-[.2em] shrink-0" />
           Itens usam livro de ofertas: sua ordem casa com a melhor do outro lado e você paga o preço de
           quem já estava lá — o troco volta na hora. O que não casar fica esperando.

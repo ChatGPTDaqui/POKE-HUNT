@@ -65,7 +65,7 @@ export function RecebimentoDePoke({ poke, onFechar }: Props) {
     >
       <style>{CSS}</style>
       <div
-        className="recebimento-arte flex w-full max-w-[22em] flex-col items-center gap-[.6em] rounded-[.8em] border border-amber-500/60 bg-n900 px-[1.2em] py-[1.4em] text-center shadow-2xl"
+        className="recebimento-arte flex w-full max-w-[22em] flex-col items-center gap-[.6em] rounded-[.8em] border border-amber-500/60 bg-menu-card px-[1.2em] py-[1.4em] text-center shadow-2xl"
         style={{ animation: 'recebimento-entrada .45s ease-out both' }}
         // O clique no cartao nao pode fechar junto com o do fundo.
         onClick={(e) => e.stopPropagation()}
@@ -91,14 +91,14 @@ export function RecebimentoDePoke({ poke, onFechar }: Props) {
         </div>
 
         <div className="flex flex-col gap-[.15em]">
-          <b className="text-[1.3em] font-semibold text-foreground">
+          <b className="text-[1.3em] font-semibold text-menu-ink">
             {poke.isShiny && <span className="text-[#b366ff]">✨ </span>}
             {poke.nome}
           </b>
-          <span className="text-[.85em] text-n400">Nível {poke.level}</span>
+          <span className="text-[.85em] text-menu-muted">Nível {poke.level}</span>
         </div>
 
-        <p className="text-[.85em] text-n300">
+        <p className="text-[.85em] text-menu-ink">
           {poke.nome} entrou na sua equipe.
         </p>
 

@@ -31,17 +31,19 @@ export interface PainelProps {
   footer?: ReactNode
   children: ReactNode
   bodyClassName?: string
+  appearance?: 'legacy' | 'journey'
 }
 
 export function Painel({
-  winKey, widthEm, zIndex, backdropZIndex, fecharAoTocarFora, snap, defaultTop,
-  onClose, title, header, subheader, footer, children, bodyClassName,
+  winKey, widthEm, zIndex, backdropZIndex, fecharAoTocarFora, snap = 'conteudo', defaultTop,
+  onClose, title, header, subheader, footer, children, bodyClassName, appearance = 'journey',
 }: PainelProps) {
   const { usaSheet } = useDeviceMode()
 
   if (usaSheet) {
     return (
       <Sheet
+        appearance={appearance}
         winKey={winKey}
         zIndex={zIndex}
         backdrop={backdropZIndex != null}
@@ -60,6 +62,7 @@ export function Painel({
 
   return (
     <GameWindow
+      appearance={appearance}
       winKey={winKey}
       widthEm={widthEm}
       defaultTop={defaultTop}

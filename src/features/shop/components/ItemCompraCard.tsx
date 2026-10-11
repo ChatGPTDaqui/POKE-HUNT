@@ -39,7 +39,7 @@ function Identidade({ item, owned }: { item: GeneratedItem; owned: number }) {
       </ItemTooltip>
       <div className="min-w-0 flex-1">
         <div className="break-words font-medium">{item.name}</div>
-        <div className="text-[.78em] text-n400">
+        <div className="text-[.78em] text-menu-muted">
           <span className="block text-gold">{fmt.format(item.buyPrice)} ouro</span>
           Na mochila: {fmt.format(owned)}
         </div>
@@ -103,7 +103,7 @@ export function TransacaoCompra({
 export function FichaCompra(props: AcoesCompra) {
   return (
     <div className="flex flex-col gap-[.5em]">
-      <div className="text-[.85em] text-n400">
+      <div className="text-[.85em] text-menu-muted">
         tem {fmt.format(props.owned)} ·{' '}
         <span className="text-gold">{fmt.format(props.item.buyPrice)}</span> cada
       </div>
@@ -124,12 +124,15 @@ export function ItemCompraCard({ onAbrir, ...props }: AcoesCompra & { onAbrir: (
   if (estreito) {
     return (
       <GameCard
-        onClick={onAbrir}
-        title={`Comprar ${item.name}`}
-        className="shop-product flex min-h-[44px] flex-wrap items-center gap-[.35em] p-[.45em]"
+        className="shop-product grid grid-cols-[auto_minmax(0,1fr)] items-center gap-[.3em] p-[.3em]"
       >
-        <Identidade item={item} owned={owned} />
-        <GameButton className="w-full" aria-label={`Comprar ${item.name}`} onClick={(e) => { e.stopPropagation(); onAbrir() }}>Comprar</GameButton>
+        <ItemTooltip item={item}><span className="cursor-help"><ItemIcon itemId={item.id} name={item.name} /></span></ItemTooltip>
+        <button type="button" aria-label={`Comprar ${item.name}`} onClick={onAbrir}
+          className="flex min-h-[44px] min-w-0 cursor-pointer flex-col justify-center text-left font-[inherit]">
+          <span className="break-words font-medium">{item.name}</span>
+          <span className="text-[.78em] text-gold">{fmt.format(item.buyPrice)} ouro</span>
+          <span className="text-[.78em] text-menu-muted">Na mochila: {fmt.format(owned)}</span>
+        </button>
       </GameCard>
     )
   }

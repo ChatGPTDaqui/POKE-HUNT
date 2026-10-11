@@ -36,7 +36,7 @@ export function SeletorDeAvatar({ userId, atual, aoFechar }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-[.4em] rounded-[.7em] border border-n700 bg-n900 p-[.6em]" data-testid="seletor-de-avatar">
+    <div className="flex flex-col gap-[.4em] rounded-[.7em] border border-menu-line bg-menu-card p-[.6em]" data-testid="seletor-de-avatar">
       <SectionLabel>Foto de perfil</SectionLabel>
       {/* PH-550: 36 retratos — rola dentro do painel em vez de empurrar as abas. */}
       <div className="grid max-h-[13em] grid-cols-6 gap-[.35em] overflow-y-auto pr-[.2em] sm:grid-cols-9">
@@ -47,8 +47,8 @@ export function SeletorDeAvatar({ userId, atual, aoFechar }: Props) {
           aria-pressed={atual == null}
           onClick={() => void escolher(null)}
           className={cn(
-            'flex aspect-square items-center justify-center rounded-[.5em] border bg-n800 text-[1.4em] text-n300',
-            atual == null ? 'border-gold' : 'border-n700 hover:border-n500',
+            'flex aspect-square items-center justify-center rounded-[.5em] border bg-menu-wash text-[1.4em] text-menu-ink',
+            atual == null ? 'border-gold' : 'border-menu-line hover:border-menu-line',
           )}
         >
           <User weight="fill" />
@@ -63,8 +63,8 @@ export function SeletorDeAvatar({ userId, atual, aoFechar }: Props) {
             aria-pressed={atual === a.id}
             onClick={() => void escolher(a.id)}
             className={cn(
-              'aspect-square overflow-hidden rounded-[.5em] border bg-n800',
-              atual === a.id ? 'border-gold' : 'border-n700 hover:border-n500',
+              'aspect-square overflow-hidden rounded-[.5em] border bg-menu-wash',
+              atual === a.id ? 'border-gold' : 'border-menu-line hover:border-menu-line',
             )}
           >
             <img src={avatarUrl(a.id) ?? undefined} alt="" className="h-full w-full object-cover [image-rendering:pixelated]" draggable={false} />

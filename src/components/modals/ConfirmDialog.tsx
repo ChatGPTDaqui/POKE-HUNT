@@ -100,10 +100,11 @@ function Dialogo({
     >
       <div
         ref={caixaRef}
-        className="flex w-[22em] max-w-[calc(100vw-2em)] flex-col gap-[.5em] rounded-xl border border-n700 bg-background p-[1.1em] shadow-2xl"
+        data-appearance="journey"
+        className="journey-surface flex w-[22em] max-w-[calc(100vw-2em)] flex-col gap-[.5em] rounded-xl border border-menu-line bg-menu-paper p-[.7em] shadow-2xl"
       >
         <div className="font-medium">{request.title}</div>
-        <div className="text-[.85em] text-n400">{request.message}</div>
+        <div className="text-[.85em] text-menu-muted">{request.message}</div>
         <div className="flex justify-end gap-[.5em]">
           <GameButton variant="ghost" onClick={aoFechar}>
             {request.cancelLabel ?? 'Cancelar'}

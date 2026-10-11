@@ -188,10 +188,16 @@ export function faceToward(entity: PlayerEntity | EnemyEntity, target: Point): v
 // `Attack`, alvo unico ou area — o acervo PMD nao separa por alcance, e o
 // pedido foi "a sprite attack" pra todo golpe do duelo. O combate livre
 // continua com Shoot/Charge.
-export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boolean, target?: Point, duelo = false): void {
-  const kind: AttackAnimKind = duelo ? 'Attack' : isAoe ? 'Charge' : 'Shoot'
-  entity.attackAnim = kind
-  entity.attackAnimTimer = ATTACK_ANIM_DURATION
+export function poseDeAtaque(isAoe: boolean, duelo = false): AttackAnimKind {
+  return duelo ? 'Attack' : isAoe ? 'Charge' : 'Shoot'
+}
+
+// `duracao` (11/10): o combate passa o tempo REAL da arte da especie (ver
+// engine/tempoDoGolpe.ts) — a pose toca do quadro 0 ao fim, uma vez (Charge em
+// loop ate o golpe bater). O padrao fica pros chamadores sem golpe.
+export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boolean, target?: Point, duelo = false, duracao = ATTACK_ANIM_DURATION): void {
+  entity.attackAnim = poseDeAtaque(isAoe, duelo)
+  entity.attackAnimTimer = duracao
   if (target) faceToward(entity, target)
 }
 

@@ -1,36 +1,16 @@
-// Doca de acao — a UNICA superficie permanente do rodape.
-//
-// Junta o que antes eram tres coisas soltas que se empurravam: a barra de
-// golpes, o `MainMenu` (8 circulos que quebravam em duas fileiras em 390px) e o
-// botao Auto flutuante, que tinha que MEDIR o rodape pra nao ficar por tras
-// dele. Aqui os tres sao filhos do mesmo flex — nao ha o que medir.
-//
-// A navegacao e uma barra de 8 slots FIXOS, iguais nos tres regimes: Equipe,
-// Mochila, Pokedex, Hunt, Loja, Hospital, Mercado, Mais. Nada entra ou sai por
-// largura de tela — o jogador aprende a posicao uma vez e ela nao se mexe.
-//
-// Hunt tem peso proprio (pilula do acento, icone maior) por ser a acao que
-// troca a CENA do jogo, e nao so a tela por cima dela. Hospital e a outra
-// metade desse par: fora de uma hunt ele e o destino atual, e aparece marcado.
-//
-// **Hunt nao fica em cima do centro exato da barra, e nao da pra ficar.** Sao
-// 7 destinos alem dele — numero impar — entao qualquer divisao deixa 3 de um
-// lado e 4 do outro, e o centro do slot do meio cai meio slot (~21px em 390px)
-// a esquerda do centro da barra. As unicas saidas exatas sao 6 ou 8 destinos
-// alem do Hunt. A alternativa — grupos de larguras diferentes pra compensar —
-// foi medida e rejeitada: em 390px joga os 4 slots da direita pra 38,7px, e em
-// 320px pra 31px, abaixo do minimo de toque.
-//
-// Em 'deitado' os rotulos somem e tudo vira uma fileira so: com 390px de altura
-// cada linha do rodape custa 13% do jogo visivel.
+// Doca da Jornada: oito destinos na ordem original, Hunt no centro geométrico.
+// Grupos laterais têm a mesma largura; no mobile usam duas fileiras para manter
+// alvos de toque. Paisagem preserva os nomes. Gestão recolhe apenas os controles
+// visuais de combate — Auto e o motor continuam funcionando.
 import { useRef, useState } from 'react'
 import {
   Backpack, BookOpen, Books, Calculator, ChatsCircle, CheckSquare, DotsThreeOutline,
-  FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
+  FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus,
   Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
-  ArrowsLeftRight, Sword, CalendarCheck,
+  ArrowsLeftRight, Sword,
 } from '@phosphor-icons/react'
 import { useWorldStore } from '@/stores/worldStore'
+import { useDiarioStore } from '@/stores/diarioStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
 import {
@@ -41,14 +21,15 @@ import { NotificationBadge } from '@/components/game/NotificationBadge'
 import { AbilityHud } from '@/components/hud/AbilityHud'
 import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
 import { Sheet } from '@/components/game/Sheet'
+import { JourneyDestination } from '@/components/game/JourneyDestination'
+import { EquipmentArt, type ArtKind } from '@/components/game/JourneyArtwork'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
+import { useGestaoAberta } from '@/hooks/useGestaoAberta'
 import { TELAS_NA_COLUNA } from '@/components/hud/ColunaDeAtalhos'
 import { cn } from '@/lib/utils'
 import { MarcaDeCadeado } from '@/features/primeirosPassos/MarcaDeCadeado'
 import { avisarTrancado, useTrancas } from '@/features/primeirosPassos/useDesbloqueio'
 import { useDestaqueDoPasso } from '@/features/primeirosPassos/useDestaqueDoPasso'
-import { usePremiosProntosDoDiario } from '@/features/primeirosPassos/Diario'
-import { useDiarioStore } from '@/stores/diarioStore'
 
 export interface Destino {
   /** Ausente nos slots que NAO abrem tela: Hospital (troca a cena) e Mais. */
@@ -57,6 +38,7 @@ export interface Destino {
   Icon: Icon
   /** Imagem que substitui o icone vetorial; o `Icon` continua sendo o fallback. */
   iconUrl?: string
+  art?: ArtKind
 }
 
 // Os tres slots a esquerda do Hunt e os dois de tela a direita dele. Hospital
@@ -65,13 +47,13 @@ export interface Destino {
 type DestinoDeTela = Destino & { screen: ScreenName }
 
 const ESQUERDA: DestinoDeTela[] = [
-  { screen: 'equipe', label: 'Equipe', Icon: UsersThree, iconUrl: 'assets/ui-icons/equipe.png' },
-  { screen: 'mochila', label: 'Mochila', Icon: Backpack },
-  { screen: 'pokedex', label: 'Pokedex', Icon: BookOpen },
+  { screen: 'equipe', label: 'Equipe', Icon: UsersThree, art: 'team' },
+  { screen: 'mochila', label: 'Mochila', Icon: Backpack, art: 'bag' },
+  { screen: 'pokedex', label: 'Pokédex', Icon: BookOpen, art: 'dex' },
 ]
 const DIREITA: DestinoDeTela[] = [
-  { screen: 'loja', label: 'Loja', Icon: Storefront },
-  { screen: 'mercado', label: 'Mercado', Icon: Scales },
+  { screen: 'loja', label: 'Loja', Icon: Storefront, art: 'shop' },
+  { screen: 'mercado', label: 'Mercado', Icon: Scales, art: 'market' },
 ]
 
 // O que vive dentro de "Mais". Ordem por frequencia de uso real, nao
@@ -82,12 +64,12 @@ const SECUNDARIOS: DestinoDeTela[] = [
   // carta em PH-81, e o envelope era a ultima peca dizendo o contrario.
   { screen: 'social', label: 'Social', Icon: ChatsCircle },
   { screen: 'troca', label: 'Troca', Icon: ArrowsLeftRight },
+  { screen: 'ranking', label: 'Ranking', Icon: Trophy },
   { screen: 'pvp', label: 'PvP', Icon: Sword },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
   { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
   { screen: 'tasks', label: 'Tasks', Icon: CheckSquare },
   { screen: 'calc', label: 'Calculadora', Icon: Calculator },
-  { screen: 'ranking', label: 'Ranking', Icon: Trophy },
   { screen: 'wiki', label: 'Wiki', Icon: Books },
   { screen: 'tutoriais', label: 'Tutoriais', Icon: GraduationCap },
   { screen: 'config', label: 'Ajustes', Icon: Gear },
@@ -122,19 +104,20 @@ export function ActionDock() {
   const { mode } = useDeviceMode()
   const emHunt = useWorldStore((s) => s.mapDef != null)
   const deitado = mode === 'deitado'
+  const painelAberto = useGestaoAberta()
 
   return (
     <div className="pointer-events-auto flex flex-col items-center gap-[.35em]">
-      <StatusEffectsBar />
+      {!painelAberto && <StatusEffectsBar />}
 
       {/* Linha de acao: zoom (so em hunt), golpes, Auto. Os tres na mesma
           fileira porque sao o que o jogador toca DURANTE a luta; a barra de
           navegacao embaixo e pra sair dela. */}
-      <div className="flex w-full items-end justify-center gap-[.4em]">
+      {!painelAberto && <div className="flex w-full items-end justify-center gap-[.4em]">
         {emHunt && <ControleZoom />}
         <AbilityHud />
         <BotaoAuto />
-      </div>
+      </div>}
 
       <BarraNavegacao deitado={deitado} />
     </div>
@@ -154,8 +137,7 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
   const navRef = useRef<HTMLElement>(null)
   useMedirAltura(navRef, useUiStore((s) => s.setNavHeight))
 
-  const premiosDoDiario = usePremiosProntosDoDiario()
-  const pendenciasEmMais = premiosDoDiario + destinosDaGrade().reduce((soma, d) => (
+  const pendenciasEmMais = destinosDaGrade().reduce((soma, d) => (
     soma + (d.screen === 'mercado' ? pendenciasMercado : d.screen === 'social' ? pendenciasSocial.total : 0)
   ), 0)
   // PH-287: o "Mais" e o unico lugar onde o numero do Social aparece somado ao
@@ -197,22 +179,23 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
     // viraria "fecha e reabre".
     <nav
       ref={navRef}
+      onClickCapture={() => useDiarioStore.getState().fecharPainel()}
       data-keep-open
       className={cn(
-        'vidro flex w-full items-center justify-around gap-[.15em] rounded-[1.15em]',
+        'journey-navigation vidro w-full rounded-[1.15em]',
         deitado ? 'px-[.5em] py-[.2em]' : 'px-[.4em] py-[.3em]',
       )}
     >
-      {ESQUERDA.map((d) => (
+      <div className="journey-navigation-left">{ESQUERDA.map((d) => (
         <SlotNav
           key={d.screen}
           destino={d}
           ativo={currentScreen === d.screen}
-          rotulo={!deitado}
+          rotulo
           destaque={d.screen === 'equipe' ? destaqueEquipe.classe : ''}
           onClick={() => { if (d.screen === 'equipe') destaqueEquipe.aoTocar(); toggleScreen(d.screen) }}
         />
-      ))}
+      ))}</div>
 
       <SlotHunt
         ativo={currentScreen === 'hunts'}
@@ -221,10 +204,10 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         onClick={() => { destaqueHunt.aoTocar(); toggleScreen('hunts') }}
       />
 
-      <SlotNav
+      <div className="journey-navigation-right"><SlotNav
         destino={DIREITA[0]}
         ativo={currentScreen === DIREITA[0].screen}
-        rotulo={!deitado}
+        rotulo
         onClick={() => toggleScreen(DIREITA[0].screen)}
       />
 
@@ -232,16 +215,16 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
           e nao so quando a viagem termina — sem isso o unico sinal de que o
           comando pegou seria o overlay no meio do campo. */}
       <SlotNav
-        destino={{ label: 'Hospital', Icon: FirstAid }}
+        destino={{ label: 'Hospital', Icon: FirstAid, art: 'hospital' }}
         ativo={!emHunt || viagemMarcada}
-        rotulo={!deitado}
+        rotulo
         onClick={irAoHospital}
       />
 
       <SlotNav
         destino={DIREITA[1]}
         ativo={currentScreen === DIREITA[1].screen}
-        rotulo={!deitado}
+        rotulo
         badge={pendenciasMercado}
         trancado={tranca(DIREITA[1].screen)}
         onClick={() => {
@@ -252,9 +235,9 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
       />
 
       <SlotNav
-        destino={{ label: 'Mais', Icon: DotsThreeOutline }}
+        destino={{ label: 'Mais', Icon: DotsThreeOutline, art: 'guide' }}
         ativo={moreOpen}
-        rotulo={!deitado}
+        rotulo
         badge={pendenciasEmMais}
         // PH-287: o selo do "Mais" soma Social e Mercado, e o numero sozinho
         // nao diz de onde ele vem. Quando o que esta pendente e do Social, o
@@ -262,7 +245,7 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         // 1 mensagem por ler e 1 item por coletar".
         descricaoDoBadge={detalheDoSocial ?? undefined}
         onClick={() => setMoreOpen(!moreOpen)}
-      />
+      /></div>
     </nav>
   )
 }
@@ -290,7 +273,7 @@ function SlotNav({
   onClick: () => void
 }) {
   const [imagemQuebrada, setImagemQuebrada] = useState(false)
-  const { Icon, iconUrl, label } = destino
+  const { Icon, iconUrl, label, art } = destino
   return (
     <button
       type="button"
@@ -298,7 +281,7 @@ function SlotNav({
       aria-pressed={ativo}
       onClick={onClick}
       className={cn(
-        'relative flex min-h-[44px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-[.15em]',
+        'journey-nav-slot relative flex min-h-[44px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-[.15em]',
         'rounded-[.8em] px-[.1em] py-[.25em] font-[inherit] transition-colors',
         ativo ? 'bg-n800 text-foreground' : 'text-n400',
         trancado && 'opacity-55',
@@ -306,7 +289,7 @@ function SlotNav({
       )}
     >
       {trancado && <MarcaDeCadeado passoId={trancado} />}
-      {iconUrl && !imagemQuebrada ? (
+      {art ? <EquipmentArt kind={art} className="journey-nav-art" /> : iconUrl && !imagemQuebrada ? (
         <img
           src={iconUrl}
           alt=""
@@ -315,7 +298,7 @@ function SlotNav({
           style={{ imageRendering: 'pixelated' }}
         />
       ) : (
-        <Icon className="text-[1.25em]" weight={ativo ? 'fill' : 'regular'} />
+        <Icon className="journey-nav-symbol text-[1.25em]" weight="duotone" />
       )}
       {/* O rotulo NAO e enfeite no toque: sem hover nao existe `title`, e um
           icone sozinho e adivinhacao. Ele so sai em 'deitado', onde cada
@@ -348,6 +331,7 @@ function SlotHunt({ ativo, deitado, destaque, onClick }: { ativo: boolean; deita
     <button
       type="button"
       aria-label="Hunt"
+      data-journey-hunt
       aria-pressed={ativo}
       onClick={onClick}
       className={cn(
@@ -364,9 +348,9 @@ function SlotHunt({ ativo, deitado, destaque, onClick }: { ativo: boolean; deita
           destaque,
         )}
       >
-        <MapTrifold className="text-[1.45em]" weight="fill" />
+        <EquipmentArt kind="map" className="journey-hunt-art" />
       </span>
-      {!deitado && <span className="leading-none" style={{ fontSize: 'min(.58em, 2.3vw)' }}>Hunt</span>}
+      <span className="leading-none" style={{ fontSize: 'min(.68em, 2.6vw)' }}>Hunt</span>
     </button>
   )
 }
@@ -385,34 +369,26 @@ export function SheetMais() {
   const pendenciasSocial = usePendenciasDoSocial()
   const destinos = destinosDaGrade()
   const tranca = useTrancas()
-  const diarioCarregado = useDiarioStore((s) => s.carregado)
-  const premiosDoDiario = usePremiosProntosDoDiario()
 
   if (!moreOpen) return null
 
   return (
-    <Sheet winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais">
-      <div className="grid grid-cols-4 gap-[.5em]">
-        {/* O Diário não é uma `ScreenName` (é um painel por cima da HUD), por
-            isso entra à parte. É a entrada FIXA dele: a faixa do topo só
-            aparece com prêmio pronto durante os Primeiros Passos. */}
-        {diarioCarregado && (
-          <ItemGrade
-            label="Diário"
-            Icon={CalendarCheck}
-            badge={premiosDoDiario}
-            detalhe={premiosDoDiario > 0 ? 'prêmio para coletar' : null}
-            onClick={() => {
-              setMoreOpen(false)
-              useDiarioStore.getState().abrirPainel()
-            }}
-          />
-        )}
-        {destinos.map(({ screen, label, Icon }) => (
-          <ItemGrade
+    <Sheet appearance="journey" winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais">
+      <div className="journey-guide">
+        <div className="journey-guide-intro"><EquipmentArt kind="guide" /><p>Seu guia de jornada<span>Encontre treinadores e consulte suas ferramentas.</span></p></div>
+        {[
+          { title: 'Encontrar outros treinadores', screens: ['social', 'troca', 'ranking'] },
+          { title: 'Consultar e ajustar', screens: ['bestiario', 'wiki', 'tutoriais', 'config'] },
+        ].map((group) => <section key={group.title} aria-label={group.title}>
+        <h3 className="journey-guide-heading">{group.title}</h3>
+        <div className="journey-destinations">
+        {/* Atalhos permanentes, incluindo Diário, ficam na coluna direita. */}
+        {destinos.filter((d) => group.screens.includes(d.screen)).map(({ screen, label, Icon }) => (
+          <JourneyDestination
             key={screen}
             label={label}
             Icon={Icon}
+            description={DESCRICOES_DO_GUIA[screen]}
             badge={screen === 'social' ? pendenciasSocial.total : 0}
             // PH-287: aqui a frase e VISIVEL, nao so acessivel. Este sheet e a
             // tela em que o jogador chega procurando "o que e que esta aceso", e
@@ -428,50 +404,15 @@ export function SheetMais() {
             }}
           />
         ))}
+        </div></section>)}
       </div>
     </Sheet>
   )
 }
 
-function ItemGrade({
-  label, Icon, badge = 0, detalhe, trancado, onClick,
-}: {
-  label: string
-  Icon: Icon
-  badge?: number
-  trancado?: string | null
-  /** O que o selo esta contando, escrito (PH-287). `null` quando nao ha nada. */
-  detalhe?: string | null
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'relative flex cursor-pointer flex-col items-center justify-center gap-[.35em] rounded-[.9em]',
-        'border border-n800 bg-n900/70 px-[.2em] py-[.75em] font-[inherit] text-n300 transition-colors',
-        'hover:border-n600 hover:text-foreground',
-        trancado && 'opacity-55',
-      )}
-    >
-      {trancado && <MarcaDeCadeado passoId={trancado} />}
-      <Icon className="text-[1.5em]" />
-      <span className="text-[.7em] leading-none">{label}</span>
-      {/* PH-287: a linha so existe quando ha o que dizer, entao a grade sem
-          pendencia nenhuma fica identica ao que era. `text-warn` e nao `text-bad`:
-          nao e erro, e coisa esperando. */}
-      {detalhe && (
-        <span className="px-[.2em] text-center text-[.6em] leading-[1.15] text-warn">
-          {detalhe}
-        </span>
-      )}
-      <NotificationBadge
-        count={badge}
-        titulo={detalhe ? `${label}: ${detalhe}` : `${badge} pendência(s) em ${label}`}
-      />
-    </button>
-  )
+const DESCRICOES_DO_GUIA: Partial<Record<ScreenName, string>> = {
+  social: 'Amigos e mensagens', troca: 'Troque com outros treinadores', ranking: 'Acompanhe suas conquistas',
+  bestiario: 'Encontros e descobertas', wiki: 'Conhecimento da jornada', tutoriais: 'Aprenda a jogar', config: 'Preferências do jogo',
 }
 
 // --- zoom e auto -------------------------------------------------------------

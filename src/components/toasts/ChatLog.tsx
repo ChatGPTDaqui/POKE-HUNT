@@ -1,23 +1,22 @@
 // Janela de chat/log retratil, canto inferior esquerdo.
 //
-// Quatro abas, e a divisao entre elas nao e cosmetica:
+// Três abas; avisos do sistema continuam no Log, sem uma quarta faixa.
 //   Mundo    — mensagens de OUTROS JOGADORES (rede, chatStore). Unica que
 //              aceita digitacao.
-//   Sistema  — avisos do jogo pro jogador (o antigo canal `world`).
 //   Comercio — resultado de compra/venda.
-//   Log      — combate.
+//   Log      — combate e avisos do jogo pro jogador.
 //
 // Ela se posiciona sozinha (em vez de o GameShell posiciona-la) porque a
 // posicao depende de estado que so ela conhece: aberta/fechada muda a altura, e
 // arrastar substitui o ancoramento inteiro. Largura e ancoragem vertical
 // respondem a dois breakpoints diferentes — em <1180 ela estreita pra nao
 // encostar no menu central, e em <780 ela sobe pra cima do menu inferior.
-import { useEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
-import { Minus, PaperPlaneRight, Plus } from '@phosphor-icons/react'
+import { ArrowsOutSimple, Minus, PaperPlaneRight, Plus } from '@phosphor-icons/react'
 import { useToastStore, type ToastType } from '@/stores/toastStore'
 import { useChatStore } from '@/stores/chatStore'
-import { useUiStore, useBreakpoints, type ChatTab } from '@/stores/uiStore'
+import { useUiStore, type ChatTab } from '@/stores/uiStore'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import type { AnexoChat } from '@/data/remote/servidor'
 import { RARITIES, type RarityKey } from '@/data/rarity'
@@ -27,20 +26,19 @@ import { usePedirAmizade } from '@/features/social/usePedirAmizade'
 import { cn } from '@/lib/utils'
 
 export const TABS: { key: ChatTab; label: string }[] = [
-  { key: 'mundo', label: 'Mundo' },
-  { key: 'sistema', label: 'Sistema' },
-  { key: 'trade', label: 'Comercio' },
   { key: 'log', label: 'Log' },
+  { key: 'mundo', label: 'Mundo' },
+  { key: 'trade', label: 'Comércio' },
 ]
 
 const TYPE_COLOR: Record<ToastType, string> = {
-  gold: 'var(--color-gold)',
-  levelup: '#7dd3fc',
-  success: 'var(--color-ok)',
-  error: 'var(--color-bad)',
-  'capture-success': 'var(--color-ok)',
-  'capture-fail': 'var(--color-warn)',
-  info: 'var(--color-n300)',
+  gold: 'var(--chat-gold, var(--color-gold))',
+  levelup: 'var(--chat-level, #7dd3fc)',
+  success: 'var(--chat-success, var(--color-ok))',
+  error: 'var(--chat-error, var(--color-bad))',
+  'capture-success': 'var(--chat-success, var(--color-ok))',
+  'capture-fail': 'var(--chat-gold, var(--color-warn))',
+  info: 'var(--chat-info, var(--color-n300))',
 }
 
 function horaDe(iso: string): string {
@@ -62,7 +60,7 @@ function LinkAnexo({ anexo }: { anexo: AnexoChat }) {
     : 'var(--color-gold)'
   return (
     <Explicacao
-      className="cursor-help rounded-[.3em] border px-[.3em] whitespace-nowrap"
+      className="journey-chat-attachment cursor-help rounded-[.3em] border px-[.3em] whitespace-nowrap"
       estilo={{ borderColor: cor, color: cor }}
       conteudo={
         anexo.kind === 'poke' ? (
@@ -199,7 +197,10 @@ export function AbaMundo() {
  */
 export function LinhasDaAba({ tab }: { tab: Exclude<ChatTab, 'mundo'> }) {
   const chatLines = useToastStore((s) => s.chatLines)
-  const lines = chatLines[tab]
+  // Avisos do sistema continuam visíveis, em ordem de chegada, junto ao Log.
+  const lines = tab === 'log'
+    ? [...chatLines.log, ...chatLines.sistema].sort((a, b) => a.seq - b.seq)
+    : chatLines[tab]
   const linesRef = useRef<HTMLDivElement>(null)
 
   // Rola pro fim sempre que chegar linha nova.
@@ -226,108 +227,47 @@ export function LinhasDaAba({ tab }: { tab: Exclude<ChatTab, 'mundo'> }) {
   )
 }
 
-export function ChatLog() {
+/** Mesmo comunicador no PC e no mobile; histórico e rascunho vivem nas stores. */
+export function ChatLog({ embedded = false }: { embedded?: boolean }) {
   const activeTab = useUiStore((s) => s.chatTab)
   const setActiveTab = useUiStore((s) => s.setChatTab)
   const open = useUiStore((s) => s.chatOpen)
   const setOpen = useUiStore((s) => s.setChatOpen)
   const footerHeight = useUiStore((s) => s.footerHeight)
-  const { narrow, chatNarrow } = useBreakpoints()
   const { pos, onPointerDown } = useWindowDrag('chat')
-
-  // O chat ganhou uma aba a mais e um campo de digitacao: nas larguras onde ele
-  // ja era estreito, 4 abas em `13em` quebravam em duas fileiras e comiam a
-  // area de leitura.
-  const width = narrow ? '16.5em' : chatNarrow ? '15em' : '21em'
-  // SEMPRE acima do rodape medido, e nao so em tela estreita. A doca da HUD
-  // nova ocupa ate 52em centralizados: em 1440px isso vai de x=202 a x=1237, e
-  // o chat ancorado no canto inferior esquerdo cobria os slots Equipe e
-  // Mochila — verificado na tela, com o rotulo "Mochila" aparecendo cortado
-  // atras da janela. A regra antiga ("acima de 780px o rodape e uma fileira
-  // central estreita, longe do chat") descrevia o menu de circulos, que nao
-  // existe mais. O fallback so vale ate a primeira medida chegar.
-  const bottom = footerHeight ? `calc(${footerHeight}px + .8em)` : (narrow ? '13.5em' : '10.6em')
-  // Recolhida a janela NAO leva a largura guardada (PH-84): ela encolhe pro
-  // conteudo, que passa a ser so o rotulo "Chat" e o botao de expandir. Sem
-  // isto "recolher" so tirava altura — a barra continuava atravessando a tela
-  // com as quatro abas, e a janela nao saia da frente de nada. A largura fica
-  // guardada em `width` e volta inteira ao expandir.
-  // ENCOSTADA NA BORDA ESQUERDA (PH-494), e nao mais a `.8em` dela. Pedido do
-  // dono do projeto: "mover o chat do jogo para a esquerda, tocando a tela".
-  //
-  // O vao de `.8em` fazia a janela LER como solta no meio do campo de jogo — o
-  // cenario aparecia dos dois lados dela, e o olho a tratava como mais um
-  // elemento sobre a cena em vez de uma borda da interface. Zero encosta, e a
-  // leitura vira "isto e a moldura, aquilo e o jogo".
-  //
-  // A margem SO some na horizontal. O `bottom` continua acima do rodape medido
-  // pelo mesmo motivo de sempre (a doca da HUD ocupa ate 52em centralizados e a
-  // janela cobria os slots Equipe e Mochila) — encostar embaixo tambem poria a
-  // janela por cima da doca, que e o defeito que aquele calculo existe pra
-  // evitar.
-  //
-  // ARRASTAR CONTINUA GANHANDO: `pos` vem primeiro no ternario. Quem quiser a
-  // janela solta arrasta, e `winPos.chat` nao e persistido de proposito (ver
-  // uiStore) — recarregar devolve ela pra ca.
-  const style: CSSProperties = pos
-    ? { left: pos.x, top: pos.y, ...(open ? { width } : {}) }
-    : { left: 0, bottom, ...(open ? { width } : {}) }
+  const [expanded, setExpanded] = useState(false)
+  const tabAtual = activeTab === 'sistema' ? 'log' : activeTab
+  const style: CSSProperties = embedded
+    ? { position: 'relative', width: 'calc(100% - 56px)', height: expanded ? 'min(24em, 35dvh)' : 'min(10em, 24dvh)' }
+    : {
+        ...(pos ? { left: pos.x, top: pos.y } : { left: 0, bottom: footerHeight ? `calc(${footerHeight}px + .8em)` : '10.6em' }),
+        ...(open ? { width: 'min(29em, 42vw)', height: expanded ? 'min(28em, 60dvh)' : '11em' } : {}),
+      }
 
   return (
-    <div
-      data-window="chat"
-      style={{ ...style, height: open ? '21em' : 'auto' }}
-      className={cn(
-        'vidro-flutua pointer-events-auto absolute z-[21] flex max-h-[72vh] max-w-[min(28em,94vw)]',
-        'flex-col overflow-hidden',
-        // CANTOS DA ESQUERDA RETOS ENQUANTO ELA ESTA ENCOSTADA (PH-494). Canto
-        // arredondado contra a borda da tela deixa passar uma lasca de cenario
-        // dentro do que devia ser a moldura — e a lasca e o que denuncia que a
-        // janela nao encosta de verdade. Arrastada (`pos`), ela volta a ser uma
-        // janela solta e recupera os quatro cantos.
-        pos ? 'rounded-xl' : 'rounded-r-xl',
-        // O piso de largura e pra JANELA ABERTA nao virar uma coluna estreita
-        // demais pra ler mensagem. Recolhida ela nao tem mensagem nenhuma, e o
-        // piso so deixava um retangulo vazio de 12em ao lado da palavra "Chat".
-        open ? 'min-w-[12em] resize' : 'min-w-0',
-      )}
-    >
-      <div
-        onPointerDown={onPointerDown}
-        className="win-drag-handle flex shrink-0 flex-wrap items-center gap-[.25em] px-[.45em] py-[.35em]"
-      >
-        {/* Recolhida, so o rotulo. As abas continuam MONTADAS no estado (o
-            `activeTab` nao e tocado aqui), entao expandir volta na mesma aba em
-            vez de resetar pra Mundo. A barra segue sendo o punho de arrastar
-            nos dois casos — o `onPointerDown` esta neste div, nao nas abas. */}
+    <div data-window="chat" style={style}
+      className={cn('journey-chat vidro-flutua pointer-events-auto z-[21] flex flex-col overflow-hidden',
+        embedded && 'journey-chat-embedded',
+        pos && !embedded ? 'rounded-xl' : 'rounded-r-xl',
+        !embedded && 'absolute', open ? 'min-w-0' : 'w-fit')}>
+      <div onPointerDown={embedded ? undefined : onPointerDown}
+        className="journey-chat-header win-drag-handle">
         {open ? TABS.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
+          <button key={tab.key} type="button" aria-pressed={tabAtual === tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={cn(
-              'cursor-pointer rounded-[.5em] px-[.55em] py-[.28em] font-[inherit] text-[.74em]',
-              activeTab === tab.key ? 'bg-n800 text-foreground' : 'text-n500 hover:bg-n800/60',
-            )}
-          >
+            className={cn('journey-chat-tab', tabAtual === tab.key && 'is-active')}>
             {tab.label}
           </button>
-        )) : (
-          <span className="px-[.55em] py-[.28em] text-[.74em] text-n300">Chat</span>
-        )}
+        )) : <span className="px-[.55em] text-[.8em]">Chat</span>}
         <span className="flex-1" />
-        <button
-          type="button"
-          title={open ? 'Recolher' : 'Expandir'}
-          aria-label={open ? 'Recolher chat' : 'Expandir chat'}
-          onClick={() => setOpen(!open)}
-          className="flex h-[1.9em] w-[1.9em] cursor-pointer items-center justify-center rounded-[.4em] text-n300 hover:bg-n800"
-        >
-          {open ? <Minus /> : <Plus />}
-        </button>
+        {open && <button type="button" aria-label={expanded ? 'Reduzir chat' : 'Ampliar chat'}
+          title={expanded ? 'Reduzir chat' : 'Ampliar chat'} onClick={() => setExpanded(!expanded)}
+          className="journey-chat-control"><ArrowsOutSimple aria-hidden /></button>}
+        <button type="button" title={open ? 'Recolher chat' : 'Expandir chat'}
+          aria-label={open ? 'Recolher chat' : 'Expandir chat'} onClick={() => setOpen(!open)}
+          className="journey-chat-control">{open ? <Minus /> : <Plus />}</button>
       </div>
-
-      {open && (activeTab === 'mundo' ? <AbaMundo /> : <LinhasDaAba tab={activeTab} />)}
+      {open && (tabAtual === 'mundo' ? <AbaMundo /> : <LinhasDaAba tab={tabAtual} />)}
     </div>
   )
 }

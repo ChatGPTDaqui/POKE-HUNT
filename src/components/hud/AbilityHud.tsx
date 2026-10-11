@@ -201,7 +201,7 @@ export function AbilityHud() {
           </span>
         </div>
       )}
-      <div className="flex flex-wrap justify-center gap-[.45em]">
+      <div className="journey-ability-slots">
       {abilities.map((ability) => {
         // DESEMPATE SO QUANDO HA EMPATE (PH-193, item 6). O cabecalho deste
         // arquivo assume o tradeoff de trocar o rotulo pelo icone do tipo; o
@@ -474,7 +474,7 @@ function SheetDoGolpe({
 }) {
   const categoria = resolveAbilityCategory(ability, poke)
   return (
-    <Sheet winKey="golpe" snap="conteudo" zIndex={33} onClose={onClose} title={ability.name}>
+    <Sheet appearance="journey" winKey="golpe" snap="conteudo" zIndex={33} onClose={onClose} title={ability.name}>
       <div className="flex flex-col gap-[.7em]">
         <div className="flex flex-wrap items-center gap-[.4em]">
           <Palavra
@@ -488,7 +488,7 @@ function SheetDoGolpe({
               {ability.type}
             </span>
           </Palavra>
-          <Palavra verbete="categoriaDoGolpe" className="text-[.85em] text-n400">
+          <Palavra verbete="categoriaDoGolpe" className="text-[.85em] text-menu-muted">
             {ROTULO_CATEGORIA[String(categoria)] ?? String(categoria)}
           </Palavra>
         </div>
@@ -532,11 +532,11 @@ function SheetDoGolpe({
           />
         </div>
 
-        <p className="text-[.85em] text-n300">{descricaoDoGolpe(ability)}</p>
+        <p className="text-[.85em] text-menu-ink">{descricaoDoGolpe(ability)}</p>
         {/* Mesma correcao do tooltip: o "Dano base —" acima nao diz de onde o
             dano sai, e nesses golpes ele sai de uma regra propria. */}
         {DANO_SEM_PODER_BASE.has(ability.id) && (
-          <p className="text-[.85em] text-n400">{AVISO_DANO_POR_REGRA_PROPRIA}</p>
+          <p className="text-[.85em] text-menu-muted">{AVISO_DANO_POR_REGRA_PROPRIA}</p>
         )}
 
         {/* Substitui o duplo-clique do desktop. O rotulo diz o ESTADO RESULTANTE
@@ -559,8 +559,8 @@ function SheetDoGolpe({
 
 function Ficha({ rotulo, valor, verbete }: { rotulo: string; valor: string; verbete: VerbeteId }) {
   return (
-    <div className="flex flex-col gap-[.1em] rounded-[.5em] border border-n800 px-[.6em] py-[.4em]">
-      <Palavra verbete={verbete} className="text-[.8em] text-n500">{rotulo}</Palavra>
+    <div className="flex flex-col gap-[.1em] rounded-[.5em] border border-menu-line px-[.6em] py-[.4em]">
+      <Palavra verbete={verbete} className="text-[.8em] text-menu-muted">{rotulo}</Palavra>
       <b className="font-medium tabular-nums">{valor}</b>
     </div>
   )

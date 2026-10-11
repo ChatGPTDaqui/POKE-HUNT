@@ -52,12 +52,12 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
 
   return (
-    <div className="flex items-start gap-[.6em] border-b border-n800 p-[.7em]">
+    <div className="journey-profile-hero flex items-start gap-[.5em] border-b border-menu-line p-[.5em] pr-[3.5em]">
       <div
         // `object-contain` num box fixo: o GIF nativo varia muito de tamanho
         // (Charmander 41x42, Gyarados 102x84) e sem o box a arte "pula" de
         // tamanho a cada POKE aberto.
-        className="flex h-[7em] w-[7em] shrink-0 items-center justify-center rounded-[.7em] border-2 bg-n900"
+        className="flex h-[7em] w-[7em] shrink-0 items-center justify-center rounded-[.7em] border-2 bg-menu-card"
         style={{ borderColor: rarityOf(poke).color }}
       >
         {/* `h-full w-full` (e nao `max-h/max-w`): os GIFs nativos variam muito
@@ -75,7 +75,7 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
       <div className="flex min-w-0 flex-1 flex-col gap-[.35em]">
         <div className="flex flex-wrap items-center gap-[.4em]">
           <PokeNameTag poke={poke} species={species} />
-          <ProximoGolpe poke={poke} species={species}><span className="text-n400">Lv{poke.level}</span></ProximoGolpe>
+          <ProximoGolpe poke={poke} species={species}><span className="text-menu-muted">Lv{poke.level}</span></ProximoGolpe>
         </div>
         {/* Um gatilho pros DOIS chips, nao um por chip: a fraqueza de verdade
             sai da combinacao dos dois tipos (o 4x so existe assim), entao duas
@@ -88,7 +88,7 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
           <TypeChip type={species.type} />
           {species.type2 && <TypeChip type={species.type2} />}
         </Palavra>
-        <div className="flex items-center gap-[.4em] text-[.75em] text-n400">
+        <div className="flex items-center gap-[.4em] text-[.75em] text-menu-muted">
           <span>HP {Math.floor(poke.hp)}/{poke.stats.hp}</span>
           {/* So o nao-volatil aqui: a ficha abre pra qualquer POKE da equipe ou
               da mochila, e confusao so existe pra quem esta em campo. */}
@@ -125,9 +125,9 @@ function TracosIndividuais({ poke }: { poke: PokeInstance }) {
     // natureza") e o VALOR explica AQUELE sorteio ("o que Hardy faz"). Pedido
     // explicito do usuario, e a divisao se sustenta — quem toca o rotulo nao sabe
     // o que o campo e; quem toca o valor ja sabe e quer o efeito.
-    <div className="flex flex-col gap-[.35em] rounded-[.4em] border border-n800 bg-n900 px-[.55em] py-[.45em] text-[.85em]">
+    <div className="flex flex-col gap-[.35em] rounded-[.4em] border border-menu-line bg-menu-card px-[.55em] py-[.45em] text-[.85em]">
       <div className="flex items-baseline justify-between gap-[.5em]">
-        <Palavra verbete="natureza" className="shrink-0 text-n500">Natureza</Palavra>
+        <Palavra verbete="natureza" className="shrink-0 text-menu-muted">Natureza</Palavra>
         <Palavra
           verbete={verbeteDaNatureza(poke.nature)}
           className="min-w-0 truncate text-right font-medium"
@@ -139,7 +139,7 @@ function TracosIndividuais({ poke }: { poke: PokeInstance }) {
       {trait && (
         <div className="flex flex-col gap-[.15em]">
           <div className="flex items-baseline justify-between gap-[.5em]">
-            <Palavra verbete="habilidade" className="shrink-0 text-n500">Habilidade</Palavra>
+            <Palavra verbete="habilidade" className="shrink-0 text-menu-muted">Habilidade</Palavra>
             <Palavra
               verbete={verbeteDaTrait(trait, oculta)}
               className="min-w-0 truncate text-right font-medium"
@@ -151,7 +151,7 @@ function TracosIndividuais({ poke }: { poke: PokeInstance }) {
               {oculta && <span className="ml-[.35em] text-[.85em] text-amber-400 no-underline">oculta</span>}
             </Palavra>
           </div>
-          <p className="text-[.85em] leading-tight text-n500">{descricaoDaTrait(trait)}</p>
+          <p className="text-[.85em] leading-tight text-menu-muted">{descricaoDaTrait(trait)}</p>
           {/* Habilidade sem efeito AQUI e dita em voz alta, com o motivo. O
               contrario — mostrar a descricao real de uma habilidade que o motor
               ignora — seria a ficha mentindo pro jogador. */}
@@ -163,7 +163,7 @@ function TracosIndividuais({ poke }: { poke: PokeInstance }) {
 
       {caracteristica && (
         <div className="flex items-baseline justify-between gap-[.5em]">
-          <Palavra verbete="caracteristica" className="shrink-0 text-n500">Caracteristica</Palavra>
+          <Palavra verbete="caracteristica" className="shrink-0 text-menu-muted">Caracteristica</Palavra>
           <Palavra
             verbete={verbeteDaCaracteristica(caracteristica)}
             className="min-w-0 truncate text-right font-medium"
@@ -183,8 +183,8 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
       {/* Ausente em POKE anterior a coluna `original_trainer` que o backfill
           nao alcancou (nenhum hoje) — a linha some em vez de mostrar vazio. */}
       {poke.originalTrainer && (
-        <div className="flex items-center justify-between rounded-[.4em] border border-n800 bg-n900 px-[.55em] py-[.4em] text-[.85em]">
-          <span className="text-n500">Treinador original</span>
+        <div className="flex items-center justify-between rounded-[.4em] border border-menu-line bg-menu-card px-[.55em] py-[.4em] text-[.85em]">
+          <span className="text-menu-muted">Treinador original</span>
           <b className="min-w-0 truncate font-medium">{poke.originalTrainer}</b>
         </div>
       )}
@@ -199,8 +199,8 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
           ['Def Esp', 'defEsp', poke.stats.defEsp],
           ['Velocidade', 'speed', poke.stats.speed],
         ] as const).map(([label, stat, value]) => (
-          <div key={label} className="flex justify-between rounded-[.4em] border border-n800 bg-n900 px-[.55em] py-[.4em]">
-            <Palavra verbete={verbeteDoStat(stat)} className="text-[.85em] text-n500">{label}</Palavra>
+          <div key={label} className="flex justify-between rounded-[.4em] border border-menu-line bg-menu-card px-[.55em] py-[.4em]">
+            <Palavra verbete={verbeteDoStat(stat)} className="text-[.85em] text-menu-muted">{label}</Palavra>
             <b className="font-medium">{value}</b>
           </div>
         ))}
@@ -209,7 +209,7 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
       <div className="flex flex-wrap items-center gap-[.3em]">
         {/* A fileira nunca disse em nenhum lugar que aqueles seis numeros SAO os
             IVs — quem nao conhece o termo via "HP 24 AF 31" e mais nada. */}
-        <Palavra verbete="iv" className="text-[.72em] text-n500">IVs</Palavra>
+        <Palavra verbete="iv" className="text-[.72em] text-menu-muted">IVs</Palavra>
         {Object.entries(poke.ivs).map(([key, value]) => {
           const perfeito = value >= IV_MAX
           return (
@@ -217,7 +217,7 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
               <span
                 className="rounded-[.4em] border px-[.5em] py-[.15em] text-[.72em]"
                 style={{
-                  color: perfeito ? '#4ade80' : 'var(--color-n400)',
+                  color: perfeito ? 'var(--journey-leaf, #4ade80)' : 'var(--color-menu-muted)',
                   borderColor: perfeito ? '#4ade80' : 'var(--color-n700)',
                 }}
               >
@@ -238,7 +238,7 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
 // precisao — ver combatSystem#danoEsperado), entao um golpe de 110 de poder com
 // 70% de precisao vale menos que um de 90 com 100%. Sem a coluna, a tela pedia
 // ao jogador uma escolha que ela nao tinha como informar.
-const MOVE_GRID = 'grid grid-cols-[2.4em_1fr_3.4em_3.8em_3em_3em_2.4em_2.6em] items-center gap-[.4em]'
+const MOVE_GRID = 'journey-move-row grid grid-cols-[2.4em_1fr_3.4em_3.8em_3em_3em_2.4em_2.6em] items-center gap-[.4em]'
 
 /**
  * "100%" / "70%". Golpe SEM dano nao mostra precisao — Danca das Espadas com
@@ -265,7 +265,7 @@ function CelulaOrdem(
   { aprendido, ordem, habilitado, desligado, onClick }:
   { aprendido: boolean; ordem: number | null; habilitado: boolean; desligado?: boolean; onClick: () => void },
 ) {
-  if (!aprendido) return <span className="text-n700">—</span>
+  if (!aprendido) return <span className="text-menu-ink">—</span>
   const ativo = ordem != null
   return (
     <button
@@ -280,9 +280,9 @@ function CelulaOrdem(
             : 'Adicionar ao fim da fila'
       }
       className={cn(
-        'h-[1.4em] w-[1.4em] rounded-[.25em] border font-[inherit] text-[.85em] leading-none',
-        ativo ? 'border-primary bg-primary text-n900' : 'border-n700 bg-transparent text-n700',
-        ativo && desligado && 'border-n600 bg-n600 text-n900 line-through',
+        'journey-move-choice h-[1.4em] w-[1.4em] rounded-[.25em] border font-[inherit] text-[.85em] leading-none',
+        ativo ? 'border-menu-brand bg-menu-brand text-menu-ink' : 'border-menu-line bg-transparent text-menu-ink',
+        ativo && desligado && 'border-menu-line bg-menu-card text-menu-ink line-through',
         habilitado ? 'cursor-pointer' : 'cursor-not-allowed opacity-45',
       )}
     >
@@ -311,18 +311,18 @@ function FilaDeGolpes(
 ) {
   return (
     <div className="flex flex-col gap-[.2em]">
-      <span className="text-[.9em] text-n500">
+      <span className="text-[.9em] text-menu-muted">
         Ordem de uso: o POKE tenta o 1º, depois o 2º, e volta ao começo.
       </span>
-      <div className="flex flex-wrap gap-[.3em]">
+      <div className="journey-move-queue flex flex-wrap gap-[.3em]">
         {ativos.map((key, i) => {
           const ability = getAbility(key)
           return (
             <span
               key={`${key}-${i}`}
-              className="flex items-center gap-[.25em] rounded-full border border-n700 bg-n800 pr-[.15em] pl-[.5em]"
+              className="flex items-center gap-[.25em] rounded-full border border-menu-line bg-menu-wash pr-[.15em] pl-[.5em]"
             >
-              <span className="tabular-nums text-n500">{i + 1}º</span>
+              <span className="tabular-nums text-menu-muted">{i + 1}º</span>
               <span className="max-w-[7em] truncate">{ability?.name ?? key}</span>
               {/* Duas setas por chip em vez de arrastar: arrastar exige
                   biblioteca de DnD e nao tem equivalente de teclado, e a fila
@@ -338,8 +338,8 @@ function FilaDeGolpes(
                     title={podeMover ? (passo === -1 ? 'Usar mais cedo' : 'Usar mais tarde') : 'Saia da hunt para reordenar'}
                     onClick={() => onMover(i, passo)}
                     className={cn(
-                      'h-[1.3em] w-[1.3em] rounded-full border-0 bg-transparent font-[inherit] text-[.9em] leading-none text-n300',
-                      !podeMover || limite ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:text-foreground',
+                      'h-[1.3em] w-[1.3em] rounded-full border-0 bg-transparent font-[inherit] text-[.9em] leading-none text-menu-ink',
+                      !podeMover || limite ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:text-menu-ink',
                     )}
                   >
                     {passo === -1 ? '‹' : '›'}
@@ -446,14 +446,14 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   }
 
   return (
-    <div className="overflow-hidden rounded-[.4em] border border-n800 text-[.8em]">
+    <div className="journey-moveset overflow-x-auto rounded-[.4em] border border-menu-line text-[.8em]">
       {meu && (
-        <div className="flex flex-col gap-[.3em] border-b border-n800 bg-n900 px-[.5em] py-[.35em]">
+        <div className="flex flex-col gap-[.3em] border-b border-menu-line bg-menu-card px-[.5em] py-[.35em]">
           <div className="flex items-center justify-between gap-[.5em]">
-            <span className="text-n400">
-              Golpes ativos <span className="text-foreground">{ativos.length}/{MAX_ACTIVE_ABILITIES}</span>
+            <span className="text-menu-muted">
+              Golpes ativos <span className="text-menu-ink">{ativos.length}/{MAX_ACTIVE_ABILITIES}</span>
             </span>
-            <span className="min-w-0 truncate text-n500">
+            <span className="min-w-0 truncate text-menu-muted">
               {emHunt ? 'Saia da hunt para trocar de golpe.' : 'Clique na coluna Usar para escolher.'}
             </span>
           </div>
@@ -461,7 +461,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
         </div>
       )}
       <div
-        className={`${MOVE_GRID} overflow-y-hidden border-b border-n800 bg-n800/60 px-[.5em] py-[.3em] font-medium`}
+        className={`${MOVE_GRID} overflow-y-hidden border-b border-menu-line bg-menu-wash/60 px-[.5em] py-[.3em] font-medium`}
         style={{ scrollbarGutter: 'stable' }}
       >
         <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>Prec.</span><span>AOE</span><span>Usar</span>
@@ -473,18 +473,18 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           dois, a largura util fica igual com ou sem overflow. */}
       <div className="max-h-[18em] overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
         {meu && (
-          <div className={`${MOVE_GRID} border-b border-n800 bg-n900 px-[.5em] py-[.3em] text-foreground`}>
-            <span className="text-n400">—</span>
+          <div className={`${MOVE_GRID} border-b border-menu-line bg-menu-card px-[.5em] py-[.3em] text-menu-ink`}>
+            <span className="text-menu-muted">—</span>
             <AbilityTooltip ability={BASIC_ATTACK} poke={poke}>
               <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
                 {BASIC_ATTACK.name}
               </span>
             </AbilityTooltip>
             <span><TypeChip type={BASIC_ATTACK.type} /></span>
-            <span className="text-n400">{ROTULO_CATEGORIA[resolveAbilityCategory(BASIC_ATTACK, poke)]}</span>
+            <span className="text-menu-muted">{ROTULO_CATEGORIA[resolveAbilityCategory(BASIC_ATTACK, poke)]}</span>
             <span>{BASIC_ATTACK.power > 0 ? BASIC_ATTACK.power : '—'}</span>
-            <span className="text-n400">{textoDePrecisao(BASIC_ATTACK)}</span>
-            <span className="text-n400">—</span>
+            <span className="text-menu-muted">{textoDePrecisao(BASIC_ATTACK)}</span>
+            <span className="text-menu-muted">—</span>
             <span>
               {/* Golpe comum desde 2026-08-18: ocupa um dos 4 slots como
                   qualquer outro, com a mesma celula de ORDEM. Todo POKE
@@ -509,28 +509,28 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               // mesmo golpe em dois niveis (forma evoluida herda no nivel 1 e
               // reaprende no nivel real dela) — so a chave do golpe duplicaria.
               key={`${entry.key}-${index}`}
-              className={`${MOVE_GRID} border-b border-n800 px-[.5em] py-[.3em] last:border-b-0 ${
-                learned ? 'bg-n900 text-foreground' : 'text-n500 opacity-45'
+              className={`${MOVE_GRID} border-b border-menu-line px-[.5em] py-[.3em] last:border-b-0 ${
+                learned ? 'bg-menu-card text-menu-ink' : 'text-menu-muted opacity-45'
               }`}
             >
-              <span className={porTm ? 'text-sky-400' : 'text-n400'}>{porTm ? 'TM' : entry.levelReq}</span>
+              <span className={porTm ? 'text-sky-400' : 'text-menu-muted'}>{porTm ? 'TM' : entry.levelReq}</span>
               <AbilityTooltip ability={ability} poke={poke}>
                 <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
                   {ability.name}
                 </span>
               </AbilityTooltip>
               <span><TypeChip type={ability.type} /></span>
-              <span className="text-n400">
+              <span className="text-menu-muted">
                 {ROTULO_CATEGORIA[resolveAbilityCategory(ability, poke)]}
               </span>
               <span>{ability.power > 0 ? ability.power : '—'}</span>
               {/* Abaixo de 100% em amarelo: o numero cru some no meio da linha,
                   e "esse golpe erra" e exatamente a informacao que muda a
                   escolha. 100% fica em cinza pra nao virar ruido em toda linha. */}
-              <span className={(ability.accuracy ?? 100) < 100 && ability.power > 0 ? 'text-warn' : 'text-n400'}>
+              <span className={(ability.accuracy ?? 100) < 100 && ability.power > 0 ? 'text-warn' : 'text-menu-muted'}>
                 {textoDePrecisao(ability)}
               </span>
-              <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>
+              <span className="text-menu-muted">{ability.target === 'aoe' ? '✓' : '—'}</span>
               {/* A Explosao Elemental (aoe50) usava uma celula propria de
                   liga/desliga porque nao ocupava slot. Desde 2026-08-18 ela e
                   golpe comum e cai na MESMA celula de ordem do resto. */}

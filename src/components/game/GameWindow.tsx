@@ -13,7 +13,7 @@ import { X } from '@phosphor-icons/react'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import { useWindowResize } from '@/hooks/useWindowResize'
 import { useFecharComEsc } from '@/hooks/useFecharComEsc'
-import type { WindowKey } from '@/stores/uiStore'
+import { useUiStore, type WindowKey } from '@/stores/uiStore'
 import { GameIconButton } from './controls'
 import { cn } from '@/lib/utils'
 
@@ -46,14 +46,19 @@ export interface GameWindowProps {
   children: ReactNode
   className?: string
   bodyClassName?: string
+  /** Migração opt-in: o restante da HUD mantém o vidro escuro. */
+  appearance?: 'legacy' | 'journey'
 }
 
 export function GameWindow({
   winKey, widthEm, defaultTop = '7.5vh', zIndex, backdrop, fecharAoTocarFora,
-  onClose, title, header, subheader, footer, children, className, bodyClassName,
+  onClose, title, header, subheader, footer, children, className, bodyClassName, appearance,
 }: GameWindowProps) {
   const { pos, onPointerDown } = useWindowDrag(winKey)
   const { onPointerDownBorda } = useWindowResize(winKey)
+  const trilhoHeight = useUiStore((s) => s.trilhoHeight)
+  const navHeight = useUiStore((s) => s.navHeight)
+  const painelJornada = appearance === 'journey' && winKey === 'panel'
 
   // A largura padrao e escrita UMA vez, por ref, e nunca entra no `style`
   // reativo. Se entrasse, todo re-render que mudasse a posicao (ou seja, cada
@@ -126,7 +131,11 @@ export function GameWindow({
       <div
         ref={aplicarLarguraInicial}
         data-window={winKey}
-        style={{ ...style, zIndex }}
+        data-appearance={appearance}
+        style={{ ...style, zIndex, ...(painelJornada ? {
+          ...(!pos ? { top: `calc(${trilhoHeight}px + .5em)` } : {}),
+          maxHeight: `calc(100% - ${trilhoHeight + navHeight}px - 1.5em)`,
+        } : {}) }}
         className={cn(
           // `min(86vh, 100vh - 12em)`: 86vh e o teto do handoff, mas em tela
           // baixa ele encosta na faixa do menu inferior — que fica ACIMA desta
@@ -202,6 +211,7 @@ export function GameWindow({
         ) : (
           <div
             onPointerDown={onPointerDown}
+            data-panel-header
             // PH-560: padding vertical apertado (era py-[.55em]) — pedido do
             // dono do projeto pra sobrar mais tela pro conteudo em vez de
             // moldura. A barra de titulo continua com alvo de toque valido: o
@@ -217,9 +227,9 @@ export function GameWindow({
 
         {subheader && <div className="shrink-0">{subheader}</div>}
 
-        <div className={cn('min-h-0 flex-1 overflow-auto p-[.5em] text-[.85em]', bodyClassName)}>{children}</div>
+        <div data-panel-body className={cn('min-h-0 flex-1 overflow-auto p-[.5em] text-[.85em]', bodyClassName)}>{children}</div>
 
-        {footer && <div className="shrink-0 border-t border-n800 px-[.5em] py-[.45em]">{footer}</div>}
+        {footer && <div data-panel-footer className="shrink-0 border-t border-n800 px-[.5em] py-[.45em]">{footer}</div>}
       </div>
     </>
   )

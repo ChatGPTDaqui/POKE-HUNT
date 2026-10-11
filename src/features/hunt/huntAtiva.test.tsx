@@ -97,7 +97,7 @@ describe('indicador de hunt ativa (PH-244)', () => {
     entrarNaHunt(PRIMEIRA.id)
     render(<HuntMenu />)
     expect(cardDa(PRIMEIRA.name).className).toContain('border-ok')
-    expect(cardDa(SEGUNDA.name).className).toContain('border-n800')
+    expect(cardDa(SEGUNDA.name).className).toContain('border-menu-line')
   })
 
   it('o cabecalho diz onde voce esta mesmo com a hunt filtrada pra fora da lista', () => {

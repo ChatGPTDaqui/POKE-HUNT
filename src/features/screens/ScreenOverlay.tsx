@@ -12,6 +12,7 @@
 import { useUiStore, type ScreenName } from '@/stores/uiStore'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
 import { Painel } from '@/components/game/Painel'
+import { EquipmentArt, RouteDecoration, type ArtKind } from '@/components/game/JourneyArtwork'
 import { TeamMenu } from '@/features/team/TeamMenu'
 import { BagMenu } from '@/features/bag/BagMenu'
 import { ShopMenu } from '@/features/shop/ShopMenu'
@@ -54,8 +55,8 @@ const TITLES: Record<ScreenName, string> = {
   equipe: 'Equipe',
   mochila: 'Mochila',
   loja: 'Loja',
-  hunts: 'Selecione um mapa',
-  pokedex: 'Pokedex',
+  hunts: 'Hunt',
+  pokedex: 'Pokédex',
   wiki: 'Wiki',
   config: 'Configurações',
   bestiario: 'Bestiário',
@@ -75,9 +76,15 @@ const TITLES: Record<ScreenName, string> = {
 // 36em do painel comum as colunas ficam apertadas em QUALQUER viewport (era o
 // item 2 da auditoria). Bestiario tem grade + painel de detalhe lado a lado.
 const DEFAULT_WIDTH = 36
+const ART: Partial<Record<ScreenName, ArtKind>> = {
+  equipe: 'team', mochila: 'bag', loja: 'shop', hunts: 'map', pokedex: 'dex', bestiario: 'dex',
+  especialidades: 'dex', tasks: 'guide', wiki: 'guide', tutoriais: 'guide', calc: 'guide',
+  social: 'guide', troca: 'team', mercado: 'market', ranking: 'team', pvp: 'team', config: 'guide',
+}
 const WIDTHS: Partial<Record<ScreenName, number>> = {
   mochila: 48,
-  equipe: 42,
+  equipe: 50,
+  pokedex: 56,
   pvp: 48,
   loja: 52,
   bestiario: 56,
@@ -109,12 +116,14 @@ export function ScreenOverlay() {
     // significa nada (ele ocupa a tela), e era ela que fazia a Loja (52em)
     // nascer colada nas duas bordas do celular.
     <Painel
+      appearance="journey"
+      snap="conteudo"
       winKey="panel"
       widthEm={WIDTHS[currentScreen] ?? DEFAULT_WIDTH}
       zIndex={31}
       backdropZIndex={30}
       onClose={closeScreen}
-      title={title}
+      title={<span className="journey-title"><RouteDecoration /><EquipmentArt kind={ART[currentScreen] ?? 'guide'} /><span>{title}</span></span>}
     >
       <Panel />
     </Painel>

@@ -4,7 +4,7 @@ import { EquipmentArt, Portrait } from './Artwork'
 import { PRIMARY, SHORTCUTS, ART, TEAM } from './data'
 import type { ArtKind, Primary, View, TeamMember } from './data'
 import { PanelHeader, Meter } from './primitives'
-import { Adventure, ReserveStrip } from './Adventure'
+import { Adventure, HuntContext } from './Adventure'
 import { TeamPanel } from './TeamPanel'
 import { BagPanel } from './BagPanel'
 import { GuidePanel } from './GuidePanel'
@@ -45,17 +45,22 @@ export function App() {
   }, [view])
   const description = (isPrimary(view) ? DESCRIPTIONS[view] : undefined) ?? { eyebrow: 'GUIA DO TREINADOR', subtitle: 'Ferramentas que acompanham sua hunt.' }
   const art: ArtKind = (isPrimary(view) ? ART[view] : undefined) ?? 'guide'
+  function navButton(destination: Primary) {
+    const kind = ART[destination]
+    const Icon = destination in NAV_ICONS ? NAV_ICONS[destination as keyof typeof NAV_ICONS] : Compass
+    return <button key={destination} className={destination === 'Hunt' ? 'hunt-nav' : undefined} aria-current={view === destination ? 'page' : undefined} onClick={() => view === destination ? close() : navigate(destination)}>{kind ? <EquipmentArt kind={kind} /> : <Icon className="nav-icon" size={32} weight="duotone" aria-hidden="true" />}<span>{destination}</span><i aria-hidden="true" /></button>
+  }
   return <div className="journey-prototype" onKeyDown={event => { if (event.key === 'Escape') close() }}>
     <a className="skip-link" href="#journey-main">Pular para o conteúdo</a>
     <div className="prototype-banner"><span><i />PROTÓTIPO VISUAL</span><span>Dados demonstrativos · sem conexão com saves</span></div>
     <div className="game-frame" data-panel={view !== 'hunt'}>
       <div className="world-backdrop" aria-hidden="true" />
       <header className="game-header">
-        <div className="brand"><span className="brand-ball" /><span>POKE<span>HUNT</span><small>JORNADA DO TREINADOR</small></span></div>
+        <div className="brand" role="img" aria-label="Poké Bola — ícone do jogo"><span className="brand-ball" /></div>
         <div className="active-companion"><Portrait id={active.id} /><div><span><strong>{active.name}</strong><small>Lv. {active.level}</small></span><div className="active-hp"><Heart size={12} aria-hidden="true" /><Meter value={active.hp} max={active.maxHp} label="HP do Pokémon em campo demonstrativo" /><small>{active.hp}/{active.maxHp}</small></div></div></div>
         <button className="trainer-access" aria-label="Abrir perfil do treinador" onClick={() => navigate('Treinador')}><img src="/assets/treinadores/rosto/red.png" alt="" width="40" height="40" /><span><strong>Treinador</strong><small>12.480 moedas · exemplo</small></span><ArrowUpRight size={17} aria-hidden="true" /></button>
       </header>
-      <ReserveStrip active={active} />
+      <HuntContext active={active} />
       <nav className="trainer-shortcuts" aria-label="Atalhos do treinador">{SHORTCUTS.map(destination => {
         const Icon = SHORTCUT_ICONS[destination]
         return <button key={destination} aria-label={destination} title={destination} aria-current={view === destination ? 'page' : undefined} onClick={() => view === destination ? close() : navigate(destination)}><Icon size={23} weight="duotone" aria-hidden="true" /></button>
@@ -70,11 +75,11 @@ export function App() {
         </section>}
       </main>
       <footer className="game-footer">
-        <nav className="primary-nav" aria-label="Navegação principal">{PRIMARY.map(destination => {
-          const kind = ART[destination]
-          const Icon = destination in NAV_ICONS ? NAV_ICONS[destination as keyof typeof NAV_ICONS] : Compass
-          return <button key={destination} aria-current={view === destination ? 'page' : undefined} onClick={() => view === destination ? close() : navigate(destination)}>{kind ? <EquipmentArt kind={kind} /> : <Icon className="nav-icon" size={32} weight="duotone" aria-hidden="true" />}<span>{destination}</span><i aria-hidden="true" /></button>
-        })}</nav>
+        <nav className="primary-nav" aria-label="Navegação principal">
+          <div className="nav-group nav-group--left">{PRIMARY.slice(0, 3).map(navButton)}</div>
+          {navButton('Hunt')}
+          <div className="nav-group nav-group--right">{PRIMARY.slice(4).map(navButton)}</div>
+        </nav>
       </footer>
       {notice && <div className="notice" role="status"><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Dispensar aviso">×</button></div>}
     </div>

@@ -105,7 +105,7 @@ export function SplashDeSala() {
         aria-live="polite"
       >
         <div
-          className="splash-sala-cartao relative overflow-hidden rounded-[.9em] border border-sky-300/30 bg-n900/85 px-[1.4em] py-[.7em] text-center shadow-[0_8px_30px_rgba(0,0,0,.45)] backdrop-blur-[3px]"
+          className="splash-sala-cartao relative overflow-hidden rounded-[.9em] border border-sky-300/30 bg-menu-card/85 px-[1.4em] py-[.7em] text-center shadow-[0_8px_30px_rgba(0,0,0,.45)] backdrop-blur-[3px]"
           style={{
             // `--dur` alimenta tambem o fallback de `prefers-reduced-motion`.
             ['--dur' as string]: `${DURACAO_DO_SPLASH_DE_SALA_MS}ms`,
@@ -129,7 +129,7 @@ export function SplashDeSala() {
               {fechouEstagio ? `Estágio concluído` : 'Nova área'}
             </span>
             <span className="text-[1.15em] font-black leading-tight text-n50">{nome}</span>
-            <span className="flex items-center gap-[.5em] text-[.66em] text-n400">
+            <span className="flex items-center gap-[.5em] text-[.66em] text-menu-muted">
               <span className="tabular-nums">Sala {sala.indice + 1}/{salas}</span>
               {janela && <span className="tabular-nums">Lv {janela[0]}-{janela[1]}</span>}
               {bioma && <span className="max-w-[8em] truncate">{bioma}</span>}

@@ -26,7 +26,7 @@ function formatDuration(totalSeconds: number): string {
 function StatRow({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div className="flex justify-between gap-[.65em]">
-      <span className="text-n400">{label}</span>
+      <span className="text-menu-muted">{label}</span>
       <b className="font-medium" style={color ? { color } : undefined}>{value}</b>
     </div>
   )
@@ -95,7 +95,7 @@ function Captures({ captures }: { captures: OfflineSimSummary['captures'] }) {
           // ActivePokeCard. `spriteUrl` fica de reserva.
           const url = faceIconUrl(c.speciesId, c.isShiny) ?? spriteUrl(c.speciesId, c.isShiny)
           return (
-            <div key={i} className="flex items-center gap-[.4em] overflow-hidden rounded-[.35em] border border-n800 px-[.4em] py-[.25em] text-[.8em]">
+            <div key={i} className="flex items-center gap-[.4em] overflow-hidden rounded-[.35em] border border-menu-line px-[.4em] py-[.25em] text-[.8em]">
               {url && <img src={url} alt="" className="h-[1.6em] w-[1.6em] shrink-0 rounded-[.2em] object-cover" />}
               <span className="truncate">
                 <PokeNameTag poke={c} species={species} /> Lv{c.level}
@@ -105,7 +105,7 @@ function Captures({ captures }: { captures: OfflineSimSummary['captures'] }) {
         })}
       </div>
       {captures.length > MAX_CAPTURES_SHOWN && (
-        <div className="text-n500">+{captures.length - MAX_CAPTURES_SHOWN} outro(s)...</div>
+        <div className="text-menu-muted">+{captures.length - MAX_CAPTURES_SHOWN} outro(s)...</div>
       )}
     </div>
   )
@@ -133,9 +133,9 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
       backdropZIndex={50}
       onClose={onClose}
       header={
-        <div className="border-b border-n800 p-[.7em]">
+        <div className="border-b border-menu-line p-[.7em]">
           <div className="text-[1.05em] font-medium">Bem-vindo de volta!</div>
-          <div className="text-[.8em] text-n400">
+          <div className="text-[.8em] text-menu-muted">
             Voce ficou fora por {formatDuration(summary.requestedSeconds)}.
           </div>
         </div>
@@ -147,7 +147,7 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
       }
     >
       <div className="flex flex-col gap-[.5em]">
-        {capNote && <div className="text-n500">{capNote}</div>}
+        {capNote && <div className="text-menu-muted">{capNote}</div>}
         {summary.stoppedEarly && (
           <div className="text-warn">
             Seu POKE desmaiou e ficou sem Revive para reanimar automaticamente — a farm parou antes do tempo acabar.
@@ -164,7 +164,7 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
         )}
 
         {summary.kills === 0 ? (
-          <div className="text-n500">Nada aconteceu enquanto você esteve fora.</div>
+          <div className="text-menu-muted">Nada aconteceu enquanto você esteve fora.</div>
         ) : (
           <>
             <div className="flex flex-col gap-[.15em]">
@@ -212,7 +212,7 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
             )}
 
             {(gainedValue > 0 || spentValue > 0) && (
-              <div className="flex flex-col gap-[.15em] border-t border-n800 pt-[.5em]">
+              <div className="flex flex-col gap-[.15em] border-t border-menu-line pt-[.5em]">
                 <SectionLabel>BALANCO ESTIMADO</SectionLabel>
                 {gainedValue > 0 && (
                   <StatRow label="Ganho (ouro + itens + POKEs)" value={`+${fmt.format(Math.round(gainedValue))}`} />

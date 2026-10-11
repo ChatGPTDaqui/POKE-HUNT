@@ -36,7 +36,7 @@ export function VenderItens() {
   const taxa = taxaDeVenda(bruto, 'gold', regra)
 
   if (disponiveis.length === 0) {
-    return <p className="text-n500">Nenhum item destravado na mochila para anunciar.</p>
+    return <p className="text-menu-muted">Nenhum item destravado na mochila para anunciar.</p>
   }
 
   return (
@@ -46,7 +46,7 @@ export function VenderItens() {
         {/* Grade, e nao dropdown (PH-114). O contador do slot substitui o
             "(x30)" que estava no texto da opcao — ele fica visivel em TODOS os
             itens de uma vez, e nao so no que esta selecionado. */}
-        <div className="flex w-full flex-col gap-[.2em] text-[.78em] text-n400">
+        <div className="flex w-full flex-col gap-[.2em] text-[.78em] text-menu-muted">
           Item
           <FiltroDeItens
             filtro={filtro}
@@ -56,7 +56,7 @@ export function VenderItens() {
             mostrando={visiveis.length}
           />
           {visiveis.length === 0 ? (
-            <p className="py-[.4em] text-n500">Nenhum item casa com o filtro.</p>
+            <p className="py-[.4em] text-menu-muted">Nenhum item casa com o filtro.</p>
           ) : (
           <GradeDeInventario
             rotuloDoGrupo="Item para anunciar"
@@ -70,16 +70,16 @@ export function VenderItens() {
             }))}
           />
           )}
-          {escolhido && <span className="text-n300">{ITEMS[escolhido].name}</span>}
+          {escolhido && <span className="text-menu-ink">{ITEMS[escolhido].name}</span>}
         </div>
-        <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+        <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
           Preco/un.
           <GameInput
             type="number" min={1} className="w-[7em]" value={preco}
             onChange={(e) => setPreco(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
           />
         </label>
-        <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+        <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
           Quantidade
           <GameInput
             type="number" min={1} max={maximo} className="w-[6em]" value={Math.min(qtd, maximo)}
@@ -87,12 +87,12 @@ export function VenderItens() {
           />
         </label>
       </div>
-      <div className="text-[.8em] text-n400">
+      <div className="text-[.8em] text-menu-muted">
         Você recebe até <b className="text-gold">{fmt.format(bruto - taxa)}</b> de ouro.
         {/* A taxa aparece ANTES de confirmar (PH-98). Descobrir depois de vender
             e indistinguivel de bug de ouro faltando. */}
         {taxa > 0 && (
-          <span className="text-n500">
+          <span className="text-menu-muted">
             {' '}(bruto {fmt.format(bruto)} − taxa de {regra.percentual}%: {fmt.format(taxa)})
           </span>
         )}

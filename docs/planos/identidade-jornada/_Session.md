@@ -1,5 +1,25 @@
 # Retomada — identidade Jornada do Treinador
 
+## Estado vigente — 11/10/2026
+
+Modelo B, GPT-6.1 Sol já escolhido; não rerotear continuações.
+Pedido: concluir todos os menus juntos, usuário testa somente ao final.
+**Não promover para main/produção sem aval explícito do usuário.**
+Branch `codex/identidade-jornada-completa`, base dev `59a6db6`.
+Integração global implementada: 17 destinos reais, conteúdos por domínio,
+perfis, Auto, Diário, tutorial, confirmações/relatórios e entrada.
+Fundação/piloto descritos abaixo são histórico, não o estado atual.
+[Progresso, verificações e limites](integracao-completa.md).
+Suíte completa: 4361 aprovados/5 ignorados; build limpo aprovado.
+Fumaça staging: login, estado, CORS e corpo aprovados.
+PR/checks/merge/deploy dev e SHA do cliente ainda precisam ser fechados.
+Bancada atual: `/scripts/harness/jornada-completa.html`, componentes reais
+isolados sem servidor/conta/motor. O endereço `identidade-jornada.html` é antigo.
+Sem mudanças de banco, save, motor ou regras de combate/economia.
+Arquivos alheios preservados: retomada VFX de 03/10 e `promo-video/`.
+
+## Histórico anterior — piloto de 10/10
+
 Data: 10/10/2026. Modelo escolhido pelo usuário: opção B, GPT-6.1 Sol;
 não refazer roteamento nas continuações desta tarefa.
 
@@ -17,12 +37,38 @@ Acessos permanentes não devem ficar escondidos no guia.
 
 Brainstorming e especificação aprovados. Primeira composição implementada em
 [protótipo isolado](../../../scripts/harness/identidade-jornada/README.md).
-Nenhuma integração visual no jogo real, alteração de banco ou save nesta etapa.
+Protótipo inicialmente sem integração; a fundação descrita abaixo inicia a adoção
+no jogo real. Nenhuma alteração de banco, save, combate ou regras de navegação.
 Primeiro protótipo na PR #875; revisão da navegação aplica o feedback acima,
-substituindo a proposta inicial de cinco destinos. Mobile estreito usa duas fileiras
-de quatro acessos inferiores; coluna direita permanece ao abrir painéis.
+substituindo a proposta inicial de cinco destinos. Revisão seguinte: Hunt central
+e levemente maior, grupos laterais em duas fileiras no mobile; quatro slots de golpes;
+marca só Poké Bola; Mata · expedição à direita de Companheiros; Hospital somente
+na barra, não junto de Conversas. Coluna direita permanece ao abrir painéis.
 
 ## Próximos passos
+
+Fundação iniciada: `appearance="journey"` opt-in em Painel/Sheet/GameWindow;
+tokens semânticos separados dos neutros da HUD, botões e destinos compactos.
+Primeiro piloto real: SheetMais, conservando lista/ordem atuais, trancas, Diário,
+contadores e callbacks. Os outros menus reais continuam no tema legado.
+[Bancada de componentes reais e limites da verificação](../../../scripts/harness/fundacao-jornada.md).
+Ainda faltam migração por domínio, navegação final e demais superfícies; não
+confundir este piloto com entrega global da identidade.
+
+Critério de densidade estendido aos menus do protótipo: cabeçalho de 56px com
+título/ícone/fechar; ocultar copy decorativa e rodapé duplicado. Listas, fichas,
+artes de apresentação e espaçamentos compactados; barra mobile de 143 para 123px,
+ordem e destaque central de Hunt preservados. Controles dos menus >=44px;
+descrições úteis e aviso de prévia não integrada mantidos. Não altera os menus
+reais do jogo: aplicar este critério na integração futura, por domínio.
+
+Comunicador aprovado: [design](../2026-10-10-comunicador-hunt-design.md).
+Protótipo com Log/Mundo/Comércio, acompanhamento compacto, minimização e expansão;
+mensagens somente locais. Sem chat conectado nem badge fictício de não lidas.
+Feedback aplicado: sem título na janela aberta; canais e controles numa faixa
+única enxuta, sem reservar uma linha só para Conversas.
+Integração futura deve preservar histórico entre menus e tratar eventos reais,
+notificações, falhas e teclado mobile; o protótipo reinicia ao sair da hunt.
 
 Apresentar a composição concreta e incorporar feedback visual. Em seguida,
 fundação de tokens/controles/painéis e navegação real; migrar os domínios e demais

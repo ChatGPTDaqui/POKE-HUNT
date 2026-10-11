@@ -39,7 +39,7 @@ interface Props {
 }
 
 function Vazio({ motivo }: { motivo: string }) {
-  return <p className="text-[.75em] text-n500">{motivo}</p>
+  return <p className="text-[.75em] text-menu-muted">{motivo}</p>
 }
 
 function LinhaDeResumo({ resumo, currency }: { resumo: NonNullable<Dados['resumo']>; currency: string }) {
@@ -47,26 +47,26 @@ function LinhaDeResumo({ resumo, currency }: { resumo: NonNullable<Dados['resumo
   return (
     <div className="flex flex-wrap items-baseline gap-x-[.9em] gap-y-[.15em] text-[.8em] tabular-nums">
       <span>
-        <span className="text-n500">24h </span>
+        <span className="text-menu-muted">24h </span>
         {/* `null` e "não houve negocio", nao zero. Mostrar 0 aqui daria um
             preco em que da pra clicar. */}
         {resumo.mediana24h == null
-          ? <span className="text-n500">—</span>
+          ? <span className="text-menu-muted">—</span>
           : <span className="font-medium text-gold">{unidade} {fmt.format(resumo.mediana24h)}</span>}
       </span>
       <span>
-        <span className="text-n500">7d </span>
+        <span className="text-menu-muted">7d </span>
         {resumo.mediana7d == null
-          ? <span className="text-n500">—</span>
+          ? <span className="text-menu-muted">—</span>
           : <span className="font-medium text-gold">{unidade} {fmt.format(resumo.mediana7d)}</span>}
       </span>
       <span>
-        <span className="text-n500">vol 24h </span>
-        <span className="text-n300">{fmt.format(resumo.volume24h)}</span>
+        <span className="text-menu-muted">vol 24h </span>
+        <span className="text-menu-ink">{fmt.format(resumo.volume24h)}</span>
       </span>
       <span>
-        <span className="text-n500">30d </span>
-        <span className="text-n300">{fmt.format(resumo.negocios30d)} negócios</span>
+        <span className="text-menu-muted">30d </span>
+        <span className="text-menu-ink">{fmt.format(resumo.negocios30d)} negócios</span>
       </span>
     </div>
   )
@@ -155,7 +155,7 @@ function Grafico({ serie, currency }: { serie: PontoDeHistorico[]; currency: str
 
       {/* Leitura do ponto sob o cursor/dedo. Ocupa altura fixa pra o painel nao
           pular de tamanho quando o cursor entra e sai. */}
-      <div className="min-h-[1.2em] text-[.72em] tabular-nums text-n400">
+      <div className="min-h-[1.2em] text-[.72em] tabular-nums text-menu-muted">
         {emFoco
           ? `${emFoco.dado.dia} · ${unidade} ${fmt.format(emFoco.dado.mediana)} · ${fmt.format(emFoco.dado.volume)} un`
           : `min ${unidade} ${fmt.format(geo.min)} · max ${unidade} ${fmt.format(geo.max)} · 30 dias`}
