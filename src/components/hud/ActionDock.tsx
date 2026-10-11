@@ -24,6 +24,7 @@ import { Sheet } from '@/components/game/Sheet'
 import { JourneyDestination } from '@/components/game/JourneyDestination'
 import { EquipmentArt, type ArtKind } from '@/components/game/JourneyArtwork'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
+import { useGestaoAberta } from '@/hooks/useGestaoAberta'
 import { TELAS_NA_COLUNA } from '@/components/hud/ColunaDeAtalhos'
 import { cn } from '@/lib/utils'
 import { MarcaDeCadeado } from '@/features/primeirosPassos/MarcaDeCadeado'
@@ -103,8 +104,7 @@ export function ActionDock() {
   const { mode } = useDeviceMode()
   const emHunt = useWorldStore((s) => s.mapDef != null)
   const deitado = mode === 'deitado'
-  const diarioAberto = useDiarioStore((s) => s.painelAberto)
-  const painelAberto = useUiStore((s) => s.currentScreen != null || s.moreOpen) || diarioAberto
+  const painelAberto = useGestaoAberta()
 
   return (
     <div className="pointer-events-auto flex flex-col items-center gap-[.35em]">

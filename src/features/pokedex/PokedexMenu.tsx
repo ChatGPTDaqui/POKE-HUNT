@@ -35,7 +35,7 @@ import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { Palavra } from '@/components/shared/Explicacao'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
-import { GameButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
+import { GameButton, GameIconButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { focusHunt } from '@/features/hunt/HuntMenu'
 
 // Instancia so-pra-exibicao do botao "Ver perfil completo": uma especie sozinha
@@ -125,7 +125,7 @@ const BASE_STAT_ROWS = [
   ['Defesa', 'def'], ['Def Esp', 'defEsp'], ['Velocidade', 'speed'],
 ] as const
 
-function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (delta: number) => void }) {
+function SpeciesDetail({ species }: { species: Species }) {
   const hunts = huntsForSpecies(species.id)
   const openScreen = useUiStore((s) => s.openScreen)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
@@ -140,19 +140,6 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
 
   return (
     <div className="flex flex-col gap-[.55em] border-t border-menu-line p-[.55em]">
-      {/* NAVEGACAO ANTERIOR/PROXIMO: sem ela, ver o Pokemon seguinte exigia
-          fechar o card, rolar a lista ate achar o proximo e abrir de novo — e a
-          lista tem 226 linhas. As setas percorrem a lista VISIVEL (ja filtrada
-          por busca e escopo), nao o dex inteiro: navegar pra fora do filtro que
-          o jogador acabou de aplicar seria mais confuso que util. */}
-      {onNavegar && (
-        <div className="flex items-center justify-between gap-[.4em]">
-          <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(-1) }}>← Anterior</GameButton>
-          <span className="text-[.75em] text-menu-muted">#{dexNumber(species)} · {species.name}</span>
-          <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(1) }}>Próximo →</GameButton>
-        </div>
-      )}
-
       <div>
         <div className="mb-[.4em] font-medium">Ficha</div>
         <div className="grid grid-cols-2 gap-[.4em] sm:grid-cols-3">
@@ -385,6 +372,11 @@ export function PokedexMenu() {
   }, [allSpecies, search, escopoAtivo, mapaAtual, regiaoAtual])
   // A ficha acompanha o filtro: nunca exibe uma espécie escondida pela busca.
   const selected = visible.find((species) => species.id === expandedSpeciesId) ?? visible[0]
+  function navegar(delta: number) {
+    if (!selected || visible.length === 0) return
+    const index = visible.findIndex((species) => species.id === selected.id)
+    setExpandedSpeciesId(visible[(index + delta + visible.length) % visible.length].id)
+  }
 
   return (
     <div className="flex flex-col gap-[.3em]">
@@ -447,18 +439,13 @@ export function PokedexMenu() {
       })}
       </div>
       {selected && <section className="journey-dex-focus" aria-label={`Ficha de ${selected.name}`}>
-        <div className="journey-research-heading"><JourneyPokeArt species={selected} /><div><small>#{String(dexNumber(selected)).padStart(3, '0')} · Registro de pesquisa</small><h3>{selected.name}</h3><TypeChip type={selected.type} /> {selected.type2 && <TypeChip type={selected.type2} />}</div></div>
-              <SpeciesDetail
-                species={selected}
-                onNavegar={(delta) => {
-                  const i = visible.findIndex((s) => s.id === selected.id)
-                  // Circular de proposito: chegar no fim da lista e ficar com um
-                  // botao morto seria pior que voltar ao comeco, ainda mais numa
-                  // lista filtrada que pode ter 3 itens.
-                  const alvo = visible[(i + delta + visible.length) % visible.length]
-                  if (alvo) setExpandedSpeciesId(alvo.id)
-                }}
-              />
+        <div className="journey-research-heading">
+          <GameIconButton variant="ghost" aria-label="← Anterior" onClick={() => navegar(-1)}>←</GameIconButton>
+          <JourneyPokeArt species={selected} />
+          <div><small>#{String(dexNumber(selected)).padStart(3, '0')}</small><h3>{selected.name}</h3><TypeChip type={selected.type} /> {selected.type2 && <TypeChip type={selected.type2} />}</div>
+          <GameIconButton variant="ghost" aria-label="Próximo →" onClick={() => navegar(1)}>→</GameIconButton>
+        </div>
+        <SpeciesDetail species={selected} />
       </section>}
       </div>
     </div>

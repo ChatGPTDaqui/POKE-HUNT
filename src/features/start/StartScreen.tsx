@@ -113,20 +113,20 @@ function PassoInicial({ nome, aoVoltar }: { nome: string; aoVoltar: () => void }
         Tudo certo, {nome}. Escolha um POKE para chamar de seu.
       </p>
 
-      <div className="flex flex-wrap justify-center gap-4">
+      <div className="journey-starter-options flex w-full max-w-3xl flex-col gap-2 sm:flex-row">
         {STARTER_SPECIES_IDS.map((speciesId) => {
           const species = SPECIES[speciesId]
           if (!species) return null
           return (
-            <div key={speciesId} className="flex w-56 flex-col items-center gap-2 rounded-lg border bg-card p-4">
+            <div key={speciesId} className="journey-starter-card grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border bg-card p-2 sm:flex sm:flex-col sm:p-4">
               <img
                 src={gen5SpriteUrl(species.id, false)}
                 alt={species.name}
-                className="h-24 w-24 object-contain [image-rendering:pixelated]"
+                className="row-span-2 h-14 w-14 object-contain [image-rendering:pixelated] sm:h-24 sm:w-24"
               />
-              <div className="text-base font-medium">{species.name}</div>
-              <div className="text-center text-xs text-muted-foreground">{species.description}</div>
-              <Button className="mt-1 w-full" onClick={() => controller.chooseStarter(species.id, INERT_HOSPITAL_SPOT)}>
+              <div className="col-start-2 text-base font-medium">{species.name}</div>
+              <div className="col-start-2 row-start-2 text-xs text-muted-foreground sm:text-center">{species.description}</div>
+              <Button className="col-start-3 row-span-2 row-start-1 sm:mt-1 sm:w-full" onClick={() => controller.chooseStarter(species.id, INERT_HOSPITAL_SPOT)}>
                 Escolher
               </Button>
             </div>

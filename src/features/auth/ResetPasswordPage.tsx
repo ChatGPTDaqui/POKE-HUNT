@@ -34,7 +34,7 @@ export function ResetPasswordPage() {
 
   return (
     <div data-appearance="journey" className="journey-entry flex min-h-svh items-center justify-center bg-background p-6">
-      <div className="w-full max-w-sm space-y-5 rounded-lg border bg-card p-6">
+      <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-6">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold">Definir senha nova</h1>
           <p className="text-sm text-muted-foreground">
@@ -53,7 +53,7 @@ export function ResetPasswordPage() {
             Ir pro jogo
           </Button>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="senha">Senha nova</Label>
               <Input

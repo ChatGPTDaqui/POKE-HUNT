@@ -105,14 +105,15 @@ export function BestiarioMenu() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-[.5em]">
+      <div className="journey-research-filters">
         <GameInput
           className="min-w-[9em] flex-1"
           placeholder="Buscar Pokemon..."
+          aria-label="Buscar Pokémon no Bestiário"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <GameSelect value={filtro} onChange={(e) => setFiltro(e.target.value as Filtro)}>
+        <GameSelect aria-label="Progresso no Bestiário" value={filtro} onChange={(e) => setFiltro(e.target.value as Filtro)}>
           <option value="todos">Todos</option>
           <option value="progresso">Em progresso</option>
           <option value="completo">Completo</option>
@@ -121,7 +122,7 @@ export function BestiarioMenu() {
       </div>
 
       <div className={compacto ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-[1.4fr_1fr] gap-[.65em]'}>
-        <div className="grid content-start gap-[.5em] [grid-template-columns:repeat(auto-fill,minmax(6em,1fr))]">
+        <div className="journey-bestiary-grid">
           {visiveis.map((species) => {
             const p = progressoDe(pokedexKills, species.id)
             const selecionado = selectedId === species.id
@@ -132,9 +133,10 @@ export function BestiarioMenu() {
                 type="button"
                 onClick={() => setSelectedId(species.id)}
                 className={cn(
-                  'relative flex cursor-pointer flex-col items-center gap-[.3em] rounded-[.6em] border bg-menu-card px-[.3em] py-[.6em] font-[inherit]',
+                  'journey-bestiary-choice relative rounded-[.6em] border bg-menu-card font-[inherit]',
                   selecionado ? 'border-menu-brand' : p.completo ? 'border-gold' : 'border-menu-line hover:border-menu-brand',
                 )}
+                aria-pressed={selecionado}
               >
                 {p.completo && (
                   <CheckCircle weight="fill" className="absolute top-[.25em] right-[.25em] text-gold" />
@@ -142,7 +144,7 @@ export function BestiarioMenu() {
                 {url ? (
                   <img src={url} alt="" className="h-[2.8em] w-[2.8em] object-contain" />
                 ) : (
-                  <span className="h-[2.8em] w-[2.8em] rounded-[.5em]" style={{ background: species.color }} />
+                  <span className="journey-bestiary-fallback h-[2.8em] w-[2.8em] rounded-[.5em]" style={{ background: species.color }} />
                 )}
                 <span className="max-w-full truncate text-[.78em] font-medium">{species.name}</span>
                 <span className="text-[.72em] tabular-nums text-menu-muted">{fmt.format(p.total)}</span>

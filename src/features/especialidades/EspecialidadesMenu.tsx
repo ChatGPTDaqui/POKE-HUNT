@@ -48,7 +48,7 @@ export function EspecialidadesMenu() {
       </div>
 
       <div className={compacto ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-[1.4fr_1fr] gap-[.65em]'}>
-        <div className="grid content-start gap-[.5em] [grid-template-columns:repeat(auto-fill,minmax(7em,1fr))]">
+        <div className="journey-type-grid">
           {ESPECIALIDADE_TYPES.map((tipo) => {
             const p = especialidades[tipo]
             const total = p.dano + p.defesa
@@ -59,9 +59,10 @@ export function EspecialidadesMenu() {
                 type="button"
                 onClick={() => setSelecionado(tipo)}
                 className={cn(
-                  'flex cursor-pointer flex-col items-center gap-[.3em] rounded-[.6em] border bg-menu-card px-[.3em] py-[.6em] font-[inherit]',
+                  'journey-type-choice rounded-[.6em] border bg-menu-card font-[inherit]',
                   ativo ? 'border-menu-brand' : total > 0 ? 'border-gold' : 'border-menu-line hover:border-menu-brand',
                 )}
+                aria-pressed={ativo}
               >
                 <span
                   className="flex h-[2.4em] w-[2.4em] items-center justify-center rounded-full text-[.7em] font-semibold text-[#0b0e18]"

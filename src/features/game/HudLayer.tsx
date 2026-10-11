@@ -37,7 +37,6 @@ import { PlacarDoDuelo } from '@/features/arena/PlacarDoDuelo'
 import { StatusRail, ContextoDaHunt } from '@/components/hud/StatusRail'
 import { CartaoDoPasso } from '@/features/primeirosPassos/CartaoDoPasso'
 import { PainelDoDiario } from '@/features/primeirosPassos/Diario'
-import { useDiarioStore } from '@/stores/diarioStore'
 import { FaixaDePremios } from '@/features/primeirosPassos/FaixaDePremios'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
@@ -48,6 +47,7 @@ import { ChatMobile } from '@/components/toasts/ChatMobile'
 import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
 import { useDeviceMode, useUiStore } from '@/stores/uiStore'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
+import { useGestaoAberta } from '@/hooks/useGestaoAberta'
 import { cn } from '@/lib/utils'
 
 // Acima disto o chat volta a ser janela flutuante no canto: e a largura em que
@@ -59,8 +59,7 @@ export function HudLayer() {
   const { mode, width } = useDeviceMode()
   const setFooterHeight = useUiStore((s) => s.setFooterHeight)
   const chatFlutuante = mode === 'amplo' && width >= LARGURA_CHAT_FLUTUANTE
-  const diarioAberto = useDiarioStore((s) => s.painelAberto)
-  const painelAberto = useUiStore((s) => s.currentScreen != null || s.moreOpen) || diarioAberto
+  const painelAberto = useGestaoAberta()
 
   // Mede o rodape ao vivo. Os sheets ancoram o proprio `bottom` neste numero
   // pra parar EM CIMA da doca em vez de cobri-la — a doca e o unico caminho de

@@ -18,7 +18,7 @@ window.fetch = (input, init) => {
 const [{ useGameStateStore }, { useMochilaStore }, { useUiStore }, { createPokeInstance },
   { HudLayer }, { ScreenOverlay }, { PokeProfileModal }, { useChatStore }, { useToastStore },
   { useDiarioStore }, { PerfilTreinador }, { ConfirmDialog }, { useWorldStore }, { AuthForm },
-  { ForgotPasswordPage }, { ResetPasswordPage }, { DeviceTakeoverPage }, { StartScreen }] = await Promise.all([
+  { ForgotPasswordPage }, { ResetPasswordPage }, { DeviceTakeoverPage }, { StartScreen }, { HuntAnalyzer }] = await Promise.all([
   import('@/stores/gameStateStore'), import('@/stores/mochilaStore'), import('@/stores/uiStore'), import('@/data/pokes'),
   import('@/features/game/HudLayer'), import('@/features/screens/ScreenOverlay'), import('@/components/modals/PokeProfileModal'),
   import('@/stores/chatStore'), import('@/stores/toastStore'), import('@/stores/diarioStore'),
@@ -26,6 +26,7 @@ const [{ useGameStateStore }, { useMochilaStore }, { useUiStore }, { createPokeI
   import('@/stores/worldStore'),
   import('@/features/auth/AuthForm'), import('@/features/auth/ForgotPasswordPage'),
   import('@/features/auth/ResetPasswordPage'), import('@/features/auth/DeviceTakeoverPage'), import('@/features/start/StartScreen'),
+  import('@/features/hunt/HuntAnalyzer'),
 ])
 useGameStateStore.persist.setOptions({ storage: { getItem: () => null, setItem: () => {}, removeItem: () => {} } })
 const ids = ['charizard', 'blastoise', 'venusaur', 'pikachu', 'gengar', 'dragonite', 'lapras', 'scizor', 'snorlax']
@@ -82,7 +83,7 @@ function Bancada() {
     {view === 'jogo' ? <div className="hud-root" data-blur={vidroFosco ? 'off' : undefined} data-toque={innerWidth < 900 ? '1' : undefined}
       style={{ position: 'fixed', inset: '44px 0 0', overflow: 'hidden', background: 'radial-gradient(ellipse at center, #496e45, #1c3933)', '--hud-scale': scale } as CSSProperties}>
       <div id="camada-hud" className="hud-safe"><HudLayer /></div>
-      <ScreenOverlay /><PokeProfileModal /><PerfilTreinador /><ConfirmDialog />
+      <ScreenOverlay /><PokeProfileModal /><PerfilTreinador /><HuntAnalyzer /><ConfirmDialog />
     </div> : <div style={{ position: 'fixed', inset: '44px 0 0', overflow: 'auto' }}><MemoryRouter>
       {view === 'login' || view === 'cadastro' ? <AuthForm
         titulo={view === 'login' ? 'Entrar' : 'Criar conta'} descricao="Bancada isolada — nenhum cadastro ou login é enviado."

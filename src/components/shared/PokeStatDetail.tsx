@@ -52,7 +52,7 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
 
   return (
-    <div className="journey-profile-hero flex items-start gap-[.5em] border-b border-menu-line p-[.5em]">
+    <div className="journey-profile-hero flex items-start gap-[.5em] border-b border-menu-line p-[.5em] pr-[3.5em]">
       <div
         // `object-contain` num box fixo: o GIF nativo varia muito de tamanho
         // (Charmander 41x42, Gyarados 102x84) e sem o box a arte "pula" de

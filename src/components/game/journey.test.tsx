@@ -47,6 +47,18 @@ describe('fundação Jornada opt-in', () => {
     expect(fechar).toHaveBeenCalledTimes(1)
   })
 
+  it('ajusta por conteúdo por padrão sem impedir expansão explícita', () => {
+    const props = { winKey: 'profile' as const, widthEm: 28, zIndex: 46, onClose: vi.fn(), title: 'Ficha' }
+    const view = render(<Painel {...props}>Ficha curta</Painel>)
+    const sheet = document.querySelector<HTMLElement>('[data-window]')!
+    expect(sheet.style.top).toBe('')
+    expect(sheet.style.height).toBe('')
+    expect(sheet.style.maxHeight).toContain('calc(')
+    view.rerender(<Painel {...props} snap="cheia">Lista longa</Painel>)
+    expect(sheet.style.top).not.toBe('')
+    expect(sheet.style.bottom).toContain('64px')
+  })
+
   it('mantém mensagem, contador acessível e ação de um destino', () => {
     const abrir = vi.fn()
     render(<JourneyDestination label="Social" Icon={ChatsCircle} badge={3} detalhe="2 mensagens · 1 anexo" onClick={abrir} />)
