@@ -16,10 +16,9 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   {
     version: '8.01',
     date: '2026-10-10',
-    title: 'Topo mais limpo e metas do dia certas',
+    title: 'Topo mais limpo',
     highlights: [
       'Os prêmios no topo da tela viraram uma faixa só: com dois ou mais prontos (treinador, login do mês, metas do dia), aparece "N prêmios para coletar" com Coletar tudo, em vez de três faixas empilhadas cobrindo o campo.',
-      'As metas do dia passam a contar sempre a caçada que rodou com o jogo fechado até você voltar. Antes, dependendo de qual parte do jogo carregava primeiro, esses abates às vezes ficavam de fora.',
     ],
   },
   // Comemoração de nível de treinador avisa o prêmio liberado.
@@ -48,7 +47,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
     title: 'Diário: login do mês e metas do dia',
     highlights: [
       'Login do mês: todo dia em que você entra tem um prêmio para coletar (Great Balls, Super Potions e ouro). Os dias 7, 14 e 21 dão Ultra Balls e Revives, e o dia 28 dá 100 Ultra Balls e 5 Max Revives. Conta os dias coletados: perder um dia não zera, só adia o próximo prêmio. Recomeça no dia 1 de cada mês.',
-      'Metas do dia: vença 100, 300 e 1000 selvagens desde a sua primeira entrada do dia, inclusive com a caçada rodando com o jogo fechado. Cada meta paga ouro e pokébolas, e o ouro cresce com o seu nível de treinador. As metas viram à meia-noite (horário de Brasília).',
+      'Metas do dia: vença 100, 300 e 1000 selvagens desde a sua primeira entrada do dia. Cada meta paga ouro e pokébolas, e o ouro cresce com o seu nível de treinador. As metas viram à meia-noite (horário de Brasília).',
       'O prêmio do dia aparece no topo da tela com o botão Coletar. Tocar na faixa abre o Diário, com o calendário do mês e as três metas.',
     ],
   },
@@ -71,7 +70,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
     highlights: [
       'Tasks, Especialidades, Calculadora, Mercado, Troca, Bestiário, PvP, Ranking e o Treinamento aparecem com cadeado e o número do passo que os libera. Tocar num menu trancado mostra, no cartão de objetivo, qual tarefa falta. Quem já passou desses pontos encontra tudo aberto.',
       'O botão que a tarefa atual pede (Hunt, Equipe, o robô das Automações, Tasks, Especialidades) pisca em verde até você tocar nele.',
-      'O tutorial de boas-vindas ficou com duas telas e apresenta o cartão de Primeiros Passos. O resumo "Bem-vindo de volta" só aparece depois de pelo menos 5 minutos fora (o progresso continua sendo creditado do mesmo jeito).',
+      'O tutorial de boas-vindas ficou com duas telas e apresenta o cartão de Primeiros Passos.',
     ],
   },
   // Primeiros Passos: direção das primeiras horas.

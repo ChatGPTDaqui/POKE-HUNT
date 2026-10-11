@@ -79,8 +79,7 @@ export const TUTORIAIS: Tutorial[] = [
         titulo: 'Seu POKE luta sozinho',
         corpo:
           'Este é um jogo idle: você não aperta botão de ataque. Seu POKE procura o selvagem mais próximo, ' +
-          'luta e escolhe os golpes por conta própria. Você decide onde caçar e cuida da equipe. Fechar a aba ' +
-          'não perde nada: a caçada continua e o resultado é creditado quando você volta.',
+          'luta e escolhe os golpes por conta própria. Você decide onde caçar e cuida da equipe.',
       },
       {
         titulo: 'Siga os Primeiros Passos',
