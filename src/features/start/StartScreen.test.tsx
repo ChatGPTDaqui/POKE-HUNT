@@ -14,7 +14,7 @@ it('mantém os três iniciais e só escolhe após confirmação explícita', asy
   useGameStateStore.setState({ trainer: { ...useGameStateStore.getState().trainer, name: 'Treinador_Teste' } })
   render(<StartScreen />)
   fireEvent.click(screen.getByRole('button', { name: 'Confirmar e escolher meu POKE' }))
-  const escolhas = await screen.findAllByRole('button', { name: 'Escolher', exact: true })
+  const escolhas = await screen.findAllByRole('button', { name: 'Escolher' })
   expect(escolhas).toHaveLength(3)
   for (const nome of ['Charmander', 'Squirtle', 'Bulbasaur']) expect(screen.getByRole('img', { name: nome })).toBeTruthy()
   expect(controller.chooseStarter).not.toHaveBeenCalled()
