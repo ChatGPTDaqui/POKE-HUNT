@@ -44,6 +44,17 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('Mochila em grade (PH-118)', () => {
+  it('filtra categorias reais e não mantém ficha de um item fora do filtro', () => {
+    render(<ItensTab />)
+    fireEvent.click(screen.getByRole('radio', { name: `${ITEMS[BALL].name} (x30)` }))
+    const category = screen.getByRole('combobox', { name: 'Categoria dos itens' })
+    fireEvent.change(category, { target: { value: 'consumiveis' } })
+    expect(screen.queryByRole('radio', { name: `${ITEMS[BALL].name} (x30)` })).toBeNull()
+    expect(screen.queryByText(ITEMS[BALL].description)).toBeNull()
+    expect(screen.getByRole('radio', { name: `${ITEMS[POCAO].name} (x4) — trancado` })).toBeTruthy()
+    fireEvent.change(category, { target: { value: 'todos' } })
+    expect(screen.getByRole('radio', { name: `${ITEMS[BALL].name} (x30)` })).toBeTruthy()
+  })
   it('cada item e um slot com nome acessivel e contador', () => {
     render(<ItensTab />)
     expect(screen.getByRole('radiogroup', { name: 'Itens da mochila' })).toBeTruthy()

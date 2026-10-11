@@ -289,6 +289,7 @@ export function ItensTab() {
   const [foco, setFoco] = useState<string | null>(null)
 
   const [busca, setBusca] = useState('')
+  const [categoria, setCategoria] = useState('todos')
 
   // Memo pra `usePaginacao` nao recortar um array novo a cada render (o objeto
   // `items` muda de identidade em todo flush do servidor).
@@ -310,25 +311,31 @@ export function ItensTab() {
   )
   // A lista de itens tambem pagina: com as 17 Stones + bolas/pocoes/revives ela
   // ja passa de 30 linhas, cada uma com icone proprio.
-  const filtrados = useMemo(() => ids.filter((id) => ITEMS[id].name.toLocaleLowerCase().includes(busca.trim().toLocaleLowerCase())), [ids, busca])
+  const filtrados = useMemo(() => ids.filter((id) =>
+    ITEMS[id].name.toLocaleLowerCase().includes(busca.trim().toLocaleLowerCase())
+    && (categoria === 'todos' || (categoria === 'consumiveis'
+      ? ['potion', 'revive', 'status_heal'].includes(ITEMS[id].kind)
+      : ITEMS[id].kind === categoria)),
+  ), [ids, busca, categoria])
   const revelacao = useRevelacaoIncremental(filtrados)
 
   if (ids.length === 0) return <p className="text-menu-muted">Nenhum item.</p>
 
   // Da lista inteira e nao da pagina, pelo mesmo motivo da aba Pokemons. Item
   // que zerou (usado, vendido) sai de `ids` e a ficha fecha junto.
-  const itemEmFoco = foco != null && ids.includes(foco) ? ITEMS[foco] : null
+  const itemEmFoco = foco != null && filtrados.includes(foco) ? ITEMS[foco] : null
   const podeUsar = itemEmFoco != null && hasStarter && (itemEmFoco.kind === 'revive'
     ? fainted
     : itemEmFoco.kind === 'potion' ? !fainted && !vidaCheia : false)
 
   return (
     <div className="flex flex-col gap-[.3em]">
-      <label className="inventory-toolbar">
-        <span className="text-[.8em] text-menu-muted">Buscar item</span>
-        <GameInput aria-label="Buscar item" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nome do item…" className="flex-1" />
-        <span className="text-[.75em] text-menu-muted">{filtrados.length} {filtrados.length === 1 ? 'tipo' : 'tipos'}</span>
-      </label>
+      <div className="journey-item-filters">
+        <GameInput aria-label="Buscar item" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar item…" />
+        <GameSelect aria-label="Categoria dos itens" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+        <option value="todos">Todos</option><option value="ball">Bolas</option><option value="consumiveis">Consumíveis</option><option value="stone">Evolução</option><option value="tm">TMs</option><option value="rod">Varas</option>
+      </GameSelect></div>
+      <span className="text-[.75em] text-menu-muted">{filtrados.length} {filtrados.length === 1 ? 'tipo' : 'tipos'}</span>
       <div className="inventory-workspace">
       {/* Grade, e nao uma linha por item (PH-118). O contador do slot e o
           "x30" que estava no texto da linha, e ele fica visivel em TODOS os
@@ -365,8 +372,8 @@ export function ItensTab() {
           className={cn('inventory-detail', lockedItems[itemEmFoco.id] && 'border-gold/40')}
         >
           <ItemTooltip item={itemEmFoco}>
-            <span className="cursor-help">
-              <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="3.8em" />
+            <span className="cursor-help journey-item-stage">
+              <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="4.5em" />
             </span>
           </ItemTooltip>
           <ItemTooltip item={itemEmFoco}>
@@ -542,7 +549,7 @@ export function TmsTab() {
               onClick={(e) => { tratouComoLink(e, () => linkarItem(itemEmFoco, items[itemEmFoco.id])) }}
               className={cn('inventory-detail', lockedItems[itemEmFoco.id] && 'border-gold/40')}
             >
-              <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="3.8em" />
+              <span className="journey-item-stage"><IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="4.5em" /></span>
               <div className="detail-identity">
                 <div className="font-medium">
                   {itemEmFoco.name} <span className="text-menu-muted">x{items[itemEmFoco.id]}</span>
