@@ -48,7 +48,6 @@ import { servidorAtivo } from '@/data/remote/servidor'
 import { controller } from '@/engine/controller'
 import type { RespostaFlush } from '@/data/remote/servidor'
 import { deveRetomarHunt } from './utils'
-import { useDiarioStore } from '@/stores/diarioStore'
 
 export type ResumoDeAssentamento = RespostaFlush['resumo'] | null
 
@@ -59,13 +58,7 @@ let promessa: Promise<ResumoDeAssentamento> | null = null
  * recebem a mesma promessa.
  */
 export function assentarUmaVez(): Promise<ResumoDeAssentamento> {
-  // O DIÁRIO ABRE ANTES DO ASSENTAMENTO (10/10). `abrir_dia` anota a base de
-  // abates do dia; se o crédito da caçada offline entrasse antes, os abates da
-  // noite ficavam fora das metas — e se entrasse depois, dentro. A ordem dependia
-  // de quem chegava primeiro. Agora é fixa: a caçada que rodou com o jogo fechado
-  // conta para o dia em que o jogador volta. Falha do Diário não segura o boot.
-  promessa ??= (servidorAtivo() ? useDiarioStore.getState().abrir().catch(() => {}) : Promise.resolve())
-    .then(() => assentarSessaoPendente())
+  promessa ??= assentarSessaoPendente()
   return promessa
 }
 

@@ -193,7 +193,7 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
       <p className="mt-[.4em] text-[.72em] text-n500">Dias 7, 14, 21 e 28 têm prêmio especial (o dia 28 dá 100 Ultra Balls e 5 Max Revives).</p>
 
       <h3 className="mt-[.8em] mb-[.3em] text-[.85em] font-medium text-n200">Metas do dia · {abates} abates hoje</h3>
-      <p className="mb-[.4em] text-[.75em] text-n500">Contam os abates do dia, inclusive a caçada que rodou com o jogo fechado até você voltar. Viram à meia-noite (Brasília).</p>
+      <p className="mb-[.4em] text-[.75em] text-n500">Contam os abates desde a sua primeira entrada do dia. Viram à meia-noite (Brasília).</p>
       <div className="flex flex-col gap-[.4em]">
         {METAS_DO_DIA.map(m => {
           const feita = coletados.has(m.id)
