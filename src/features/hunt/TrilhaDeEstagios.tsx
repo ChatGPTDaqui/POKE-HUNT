@@ -174,10 +174,13 @@ function CartaoDeBioma({
       type="button"
       onClick={onEscolher}
       className={cn(
-        'group flex min-w-0 flex-col gap-[.35em] rounded-[.7em] border p-[.5em] text-left transition-colors',
+        'journey-biome-card group flex min-w-0 flex-col gap-[.35em] rounded-[.7em] border p-[.5em] text-left transition-colors',
         'border-menu-line bg-menu-card hover:border-menu-line hover:bg-menu-wash',
       )}
     >
+      <span className="journey-biome-cover" aria-hidden="true" style={{ backgroundColor: bioma.bg.primary }}>
+        <img src={urlDaMiniaturaDoBioma(bioma.chave)} alt="" loading="lazy" decoding="async" />
+      </span>
       <div className="flex min-w-0 items-center gap-[.45em]">
         <IconeDoBioma bioma={bioma} cor={cor} />
         <div className="min-w-0 flex-1">

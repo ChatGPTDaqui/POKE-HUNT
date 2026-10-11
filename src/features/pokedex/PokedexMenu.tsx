@@ -7,6 +7,7 @@
 // detalhe que tinha acabado de abrir. Abrir o perfil agora e um botao explicito
 // dentro do detalhe.
 import { useMemo, useState } from 'react'
+import { JourneyPokeArt } from '@/components/game/JourneyPokeArt'
 import {
   SPECIES, createPokeInstance, SPECIAL_EVOLUTION_LEVEL, SPECIAL_EVOLUTION_STONE_COUNT,
   type Species,
@@ -382,6 +383,8 @@ export function PokedexMenu() {
     })()
     return term ? doEscopo.filter((s) => s.name.toLowerCase().includes(term)) : doEscopo
   }, [allSpecies, search, escopoAtivo, mapaAtual, regiaoAtual])
+  // A ficha acompanha o filtro: nunca exibe uma espécie escondida pela busca.
+  const selected = visible.find((species) => species.id === expandedSpeciesId) ?? visible[0]
 
   return (
     <div className="flex flex-col gap-[.3em]">
@@ -390,6 +393,7 @@ export function PokedexMenu() {
           <GameInput
             className="flex-1"
             placeholder="Buscar Pokemon..."
+            aria-label="Buscar Pokémon"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -415,15 +419,16 @@ export function PokedexMenu() {
 
       {visible.length === 0 && <p className="text-menu-muted">Nenhum Pokemon encontrado.</p>}
 
+      <div className="journey-dex-workspace">
+      <div className="journey-dex-grid" role="group" aria-label="Espécies da Pokédex">
       {visible.map((species) => {
         const kills = killCountFrom(pokedexKills, species.id, shinyView)
-        const expanded = expandedSpeciesId === species.id
+        const expanded = selected?.id === species.id
 
         return (
-          <div key={species.id} className="overflow-hidden rounded-[.6em] border border-menu-line bg-menu-card">
-            <div
-              onClick={() => setExpandedSpeciesId(expanded ? null : species.id)}
-              className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-menu-wash"
+            <button key={species.id} type="button" aria-label={`Selecionar ${species.name}`} aria-pressed={expanded}
+              onClick={() => setExpandedSpeciesId(species.id)}
+              className="journey-dex-choice"
             >
               <PokeSwatch species={species} size={2.4} />
               <div className="min-w-0 flex-1">
@@ -437,12 +442,16 @@ export function PokedexMenu() {
               <span className="shrink-0 text-[.8em] text-menu-muted">
                 {shinyView ? `✨ ${kills}` : `Abates: ${kills}`}
               </span>
-            </div>
-            {expanded && (
+            </button>
+        )
+      })}
+      </div>
+      {selected && <section className="journey-dex-focus" aria-label={`Ficha de ${selected.name}`}>
+        <div className="journey-research-heading"><JourneyPokeArt species={selected} /><div><small>#{String(dexNumber(selected)).padStart(3, '0')} · Registro de pesquisa</small><h3>{selected.name}</h3><TypeChip type={selected.type} /> {selected.type2 && <TypeChip type={selected.type2} />}</div></div>
               <SpeciesDetail
-                species={species}
+                species={selected}
                 onNavegar={(delta) => {
-                  const i = visible.findIndex((s) => s.id === species.id)
+                  const i = visible.findIndex((s) => s.id === selected.id)
                   // Circular de proposito: chegar no fim da lista e ficar com um
                   // botao morto seria pior que voltar ao comeco, ainda mais numa
                   // lista filtrada que pode ter 3 itens.
@@ -450,10 +459,8 @@ export function PokedexMenu() {
                   if (alvo) setExpandedSpeciesId(alvo.id)
                 }}
               />
-            )}
-          </div>
-        )
-      })}
+      </section>}
+      </div>
     </div>
   )
 }
