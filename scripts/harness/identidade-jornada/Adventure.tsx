@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ArrowRight, CaretDown, ChatCircle, Lightning, Robot, Sun, MapPin } from '@phosphor-icons/react'
+import { ArrowRight, CaretDown, Lightning, Robot, Sun, MapPin } from '@phosphor-icons/react'
+import { Chat } from './Chat'
 import { Portrait } from './Artwork'
 import { TEAM } from './data'
 import type { View, TeamMember } from './data'
@@ -13,10 +14,10 @@ export function Adventure({ navigate, notify, active }: { navigate: (view: View)
       <div className="wild-poke"><span>Caterpie <small>Lv. 12</small></span><img src="/assets/gen5ani/caterpie.gif" alt="Caterpie" /></div>
       <div className="player-poke"><img src={`/assets/gen5ani/${active.id}.gif`} alt={active.name} /><span>{active.name}</span></div>
     </div>
-    <div className="adventure-bottom"><div className="field-actions"><button onClick={() => navigate('Social')}><ChatCircle size={19} aria-hidden="true" />Conversas</button></div>
+    <div className="adventure-dock"><Chat /><div className="adventure-bottom">
       <div className="combat-strip"><div className="move-buttons" role="group" aria-label="Quatro slots de golpes demonstrativos">{['Ember', 'Scratch', 'Growl', 'Smokescreen'].map(move => <button key={move} onClick={() => notify(`${move}: demonstração visual, sem executar golpe.`)}><Lightning size={18} aria-hidden="true" /><span>{move}</span></button>)}</div><button className="auto-button" aria-pressed={automatic} onClick={() => { setAutomatic(!automatic); notify('Automação alterada somente nesta prévia.') }}><Robot size={21} aria-hidden="true" /><span>Auto <small>{automatic ? 'Ligado' : 'Pausado'}</small></span></button></div>
       <p className="field-caption">Cenário e encontros ilustrativos · nenhum combate está rodando</p>
-    </div>
+    </div></div>
   </div>
 }
 

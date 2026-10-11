@@ -26,6 +26,12 @@ na barra, não junto de Conversas. Coluna direita permanece ao abrir painéis.
 
 ## Próximos passos
 
+Comunicador aprovado: [design](../2026-10-10-comunicador-hunt-design.md).
+Protótipo com Log/Mundo/Comércio, acompanhamento compacto, minimização e expansão;
+mensagens somente locais. Sem chat conectado nem badge fictício de não lidas.
+Integração futura deve preservar histórico entre menus e tratar eventos reais,
+notificações, falhas e teclado mobile; o protótipo reinicia ao sair da hunt.
+
 Apresentar a composição concreta e incorporar feedback visual. Em seguida,
 fundação de tokens/controles/painéis e navegação real; migrar os domínios e demais
 superfícies conforme seção 9 da especificação. Não tratar o protótipo como entrega

@@ -14,6 +14,8 @@ URL local: `http://127.0.0.1:5176/scripts/harness/identidade-jornada.html`.
 - Barra original: Equipe, Mochila, Pokédex, Hunt, Loja, Hospital, Mercado e Mais.
 - Hunt central levemente maior; grupos laterais em duas fileiras no mobile.
 - Quatro slots de golpes; cabeçalho só com Poké Bola; local junto dos companheiros.
+- Comunicador Conversas: Log/Mundo/Comércio; compacto, expandido e minimizado.
+- Mensagens demonstrativas em memória; nenhum envio ao chat real ou servidor.
 - Coluna abaixo do treinador: Diário, Especialidades, Tasks, Calculadora e PvP.
 - Sem botão de retorno: a hunt é o próprio jogo; X/Esc fecha apenas o painel.
 - Fixtures próprias, sem catálogo, stores, autenticação, saves ou clientes remotos.
@@ -28,6 +30,7 @@ URL local: `http://127.0.0.1:5176/scripts/harness/identidade-jornada.html`.
 
 - `npx tsc -p scripts/harness/identidade-jornada/tsconfig.json`
 - `npx vitest run scripts/harness/identidade-jornada/App.test.tsx`
+- `npx vitest run scripts/harness/identidade-jornada/Chat.test.tsx`
 - `npx vite build --config scripts/harness/identidade-jornada.vite.mts`
 - `npm run build:verificar` para verificar o build normal sem publicar assets.
 
