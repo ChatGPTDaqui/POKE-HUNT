@@ -41,6 +41,7 @@ import { NotificationBadge } from '@/components/game/NotificationBadge'
 import { AbilityHud } from '@/components/hud/AbilityHud'
 import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
 import { Sheet } from '@/components/game/Sheet'
+import { JourneyDestination } from '@/components/game/JourneyDestination'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { TELAS_NA_COLUNA } from '@/components/hud/ColunaDeAtalhos'
 import { cn } from '@/lib/utils'
@@ -391,13 +392,13 @@ export function SheetMais() {
   if (!moreOpen) return null
 
   return (
-    <Sheet winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais">
-      <div className="grid grid-cols-4 gap-[.5em]">
+    <Sheet appearance="journey" winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais">
+      <div className="journey-destinations">
         {/* O Diário não é uma `ScreenName` (é um painel por cima da HUD), por
             isso entra à parte. É a entrada FIXA dele: a faixa do topo só
             aparece com prêmio pronto durante os Primeiros Passos. */}
         {diarioCarregado && (
-          <ItemGrade
+          <JourneyDestination
             label="Diário"
             Icon={CalendarCheck}
             badge={premiosDoDiario}
@@ -409,7 +410,7 @@ export function SheetMais() {
           />
         )}
         {destinos.map(({ screen, label, Icon }) => (
-          <ItemGrade
+          <JourneyDestination
             key={screen}
             label={label}
             Icon={Icon}
@@ -430,47 +431,6 @@ export function SheetMais() {
         ))}
       </div>
     </Sheet>
-  )
-}
-
-function ItemGrade({
-  label, Icon, badge = 0, detalhe, trancado, onClick,
-}: {
-  label: string
-  Icon: Icon
-  badge?: number
-  trancado?: string | null
-  /** O que o selo esta contando, escrito (PH-287). `null` quando nao ha nada. */
-  detalhe?: string | null
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'relative flex cursor-pointer flex-col items-center justify-center gap-[.35em] rounded-[.9em]',
-        'border border-n800 bg-n900/70 px-[.2em] py-[.75em] font-[inherit] text-n300 transition-colors',
-        'hover:border-n600 hover:text-foreground',
-        trancado && 'opacity-55',
-      )}
-    >
-      {trancado && <MarcaDeCadeado passoId={trancado} />}
-      <Icon className="text-[1.5em]" />
-      <span className="text-[.7em] leading-none">{label}</span>
-      {/* PH-287: a linha so existe quando ha o que dizer, entao a grade sem
-          pendencia nenhuma fica identica ao que era. `text-warn` e nao `text-bad`:
-          nao e erro, e coisa esperando. */}
-      {detalhe && (
-        <span className="px-[.2em] text-center text-[.6em] leading-[1.15] text-warn">
-          {detalhe}
-        </span>
-      )}
-      <NotificationBadge
-        count={badge}
-        titulo={detalhe ? `${label}: ${detalhe}` : `${badge} pendência(s) em ${label}`}
-      />
-    </button>
   )
 }
 

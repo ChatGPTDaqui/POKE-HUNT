@@ -11,6 +11,7 @@
    CANVAS (src/render/sprites.ts) continua em `monospace` literal de proposito:
    ele nao herda CSS e e pixel-art do mundo, nao chrome. */
 @import "@fontsource-variable/geist-mono";
+@import "./components/game/journey.css";
 
 @custom-variant dark (&:is(.dark *));
 

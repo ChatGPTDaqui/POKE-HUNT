@@ -61,6 +61,7 @@ export function GameButton({
     <button
       type="button"
       {...props}
+      data-game-button={variant}
       disabled={disabled || carregando}
       aria-busy={carregando || undefined}
       className={cn(
@@ -114,6 +115,7 @@ export function GameIconButton({ className, ...props }: GameButtonProps) {
   return (
     <GameButton
       {...props}
+      data-game-icon
       className={cn('jogo-botão-ícone h-[1.9em] w-[1.9em] shrink-0 px-0 py-0 text-[1em]', className)}
     />
   )
