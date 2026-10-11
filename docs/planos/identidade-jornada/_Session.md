@@ -19,10 +19,20 @@ Brainstorming e especificação aprovados. Primeira composição implementada em
 [protótipo isolado](../../../scripts/harness/identidade-jornada/README.md).
 Nenhuma integração visual no jogo real, alteração de banco ou save nesta etapa.
 Primeiro protótipo na PR #875; revisão da navegação aplica o feedback acima,
-substituindo a proposta inicial de cinco destinos. Mobile estreito usa duas fileiras
-de quatro acessos inferiores; coluna direita permanece ao abrir painéis.
+substituindo a proposta inicial de cinco destinos. Revisão seguinte: Hunt central
+e levemente maior, grupos laterais em duas fileiras no mobile; quatro slots de golpes;
+marca só Poké Bola; Mata · expedição à direita de Companheiros; Hospital somente
+na barra, não junto de Conversas. Coluna direita permanece ao abrir painéis.
 
 ## Próximos passos
+
+Comunicador aprovado: [design](../2026-10-10-comunicador-hunt-design.md).
+Protótipo com Log/Mundo/Comércio, acompanhamento compacto, minimização e expansão;
+mensagens somente locais. Sem chat conectado nem badge fictício de não lidas.
+Feedback aplicado: sem título na janela aberta; canais e controles numa faixa
+única enxuta, sem reservar uma linha só para Conversas.
+Integração futura deve preservar histórico entre menus e tratar eventos reais,
+notificações, falhas e teclado mobile; o protótipo reinicia ao sair da hunt.
 
 Apresentar a composição concreta e incorporar feedback visual. Em seguida,
 fundação de tokens/controles/painéis e navegação real; migrar os domínios e demais

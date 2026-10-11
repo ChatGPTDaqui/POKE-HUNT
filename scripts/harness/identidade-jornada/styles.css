@@ -47,10 +47,7 @@ img { display: block; max-width: 100%; }
 .world-backdrop { position: absolute; inset: 0; z-index: -2; background: linear-gradient(180deg, #18363733, #102d2a1a 55%, #112b3299), url('/assets/hunt-backgrounds/forest.jpg') 50% 48% / cover; }
 .game-frame[data-panel='true'] .world-backdrop::after { content: ''; position: absolute; inset: 0; background: #142e3440; }
 .game-header { display: flex; align-items: center; gap: 28px; padding: 12px 22px; background: var(--j-hud); color: var(--j-hud-text); border-bottom: 1px solid #d6dcd126; }
-.brand { border: 0; background: none; padding: 0; display: flex; align-items: center; gap: 9px; text-align: left; flex: 1; }
-.brand > span:last-child { font-family: 'Fredoka Variable', sans-serif; font-size: 1.25rem; line-height: 1; letter-spacing: .04em; font-weight: 600; }
-.brand > span:last-child > span { color: var(--j-coral); margin-left: 3px; }
-.brand small { display: block; margin-top: 6px; font: 650 .5rem 'Manrope Variable',sans-serif; letter-spacing: .19em; }
+.brand { display: flex; align-items: center; flex: 0 0 32px; }
 .brand-ball { position: relative; display: block; width: 32px; height: 32px; border: 2px solid var(--j-paper); border-radius: 50%; background: linear-gradient(var(--j-coral) 0 44%, var(--j-hud) 44% 56%, var(--j-paper) 56%); transform: rotate(-20deg); }
 .brand-ball::after { content: ''; position: absolute; width: 9px; height: 9px; border: 2px solid var(--j-hud); border-radius: 50%; background: var(--j-paper); left: 8px; top: 8px; }
 .active-companion { display: flex; gap: 10px; align-items: center; width: 250px; }
@@ -73,6 +70,8 @@ img { display: block; max-width: 100%; }
 .reserve-strip > span:first-child { font-size: .55rem; letter-spacing: .1em; margin-right: 8px; }
 .reserve-strip > span:last-child { font-size: .65rem; margin-left: 6px; }
 .reserve-strip .portrait { width: 27px; height: 27px; border: 1px solid #ffffff38; border-radius: 7px; }
+.hunt-context { display: flex; align-items: center; gap: 10px; padding-right: calc(var(--rail-width) + var(--rail-right) + 8px); min-width: 0; }
+.hunt-context .adventure-location { white-space: nowrap; padding: 6px 10px; gap: 10px; }
 .journey-main { min-height: 0; min-width: 0; padding: 14px calc(var(--rail-width) + var(--rail-right) + 12px) 8px 28px; display: flex; justify-content: center; }
 .trainer-shortcuts { position: absolute; z-index: 3; top: var(--rail-top); right: var(--rail-right); width: var(--rail-width); display: flex; flex-direction: column; gap: 6px; }
 .trainer-shortcuts > button { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 48px; padding: 8px; border: 1px solid var(--j-line); border-radius: 12px; background: var(--j-paper); color: var(--j-ink); box-shadow: 0 3px 0 var(--j-hud); }
@@ -220,18 +219,22 @@ img { display: block; max-width: 100%; }
 .service-notice strong { font-size: .85rem; }
 .service-notice p { margin: 6px 0 0; }
 .game-footer { position: relative; display: flex; align-items: center; justify-content: center; gap: 24px; padding: 4px 20px 8px; }
-.primary-nav { position: relative; display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); width: min(100%,960px); padding: 3px 10px; border-radius: 18px; background: var(--j-paper); border: 1px solid var(--j-line); box-shadow: 0 5px 0 #173938,0 10px 20px #152e3433; }
-.primary-nav > button { position: relative; display: flex; align-items: center; flex-direction: column; justify-content: center; gap: 0; min-width: 0; min-height: 70px; background: none; border: none; border-radius: 12px; padding: 3px; font-size: .7rem; font-weight: 800; }
-.primary-nav > button > .equipment-art { width: 44px; height: 44px; }
-.primary-nav > button > .nav-icon { width: 32px; height: 44px; }
-.primary-nav > button[aria-current] { background: var(--j-leaf-wash); color: var(--j-leaf); }
-.primary-nav > button > i { height: 3px; width: 12px; background: transparent; border-radius: 3px; margin-top: 5px; }
-.primary-nav > button[aria-current] > i { background: var(--j-leaf); }
+.primary-nav { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 88px minmax(0,1fr); align-items: center; width: min(100%,960px); padding: 3px 10px; border-radius: 18px; background: var(--j-paper); border: 1px solid var(--j-line); box-shadow: 0 5px 0 #173938,0 10px 20px #152e3433; }
+.nav-group { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); min-width: 0; }
+.nav-group--right { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.primary-nav button { position: relative; display: flex; align-items: center; flex-direction: column; justify-content: center; gap: 0; min-width: 0; min-height: 70px; background: none; border: none; border-radius: 12px; padding: 3px; font-size: .7rem; font-weight: 800; }
+.primary-nav button > .equipment-art { width: 44px; height: 44px; }
+.primary-nav button > .nav-icon { width: 32px; height: 44px; }
+.primary-nav button[aria-current] { background: var(--j-leaf-wash); color: var(--j-leaf); }
+.primary-nav button > i { height: 3px; width: 12px; background: transparent; border-radius: 3px; margin-top: 5px; }
+.primary-nav button[aria-current] > i { background: var(--j-leaf); }
+.primary-nav .hunt-nav { min-height: 80px; margin-inline: 4px; border: 1px solid var(--j-coral); background: var(--j-leaf-wash); font-size: .8rem; }
+.primary-nav .hunt-nav > .equipment-art { width: 50px; height: 50px; }
 .footer-brand { color: var(--j-hud-text); font-size: .5rem; letter-spacing: .08em; background: #183638ed; border-radius: 6px; padding: 10px; }
 .notice { position: absolute; z-index: 5; left: 50%; bottom: 104px; transform: translateX(-50%); display: flex; align-items: center; max-width: 90%; width: 420px; gap: 12px; background: var(--j-hud); color: var(--j-hud-text); padding: 8px 12px 8px 16px; border: 1px solid #ffffff50; border-radius: 12px; box-shadow: var(--j-shadow); font-size: .75rem; line-height: 1.6; }
 .notice > button { flex-shrink: 0; min-width: 44px; min-height: 44px; background: none; border: 0; color: inherit; font-size: 1.5rem; }
 .adventure { position: relative; width: 100%; height: 100%; min-height: 0; color: var(--j-hud-text); display: flex; flex-direction: column; }
-.adventure-location { display: flex; justify-content: space-between; align-items: center; max-width: 400px; border: 1px solid #d6dcd140; background: #183638ed; padding: 9px 12px; border-radius: 10px; font-size: .7rem; }
+.adventure-location { display: flex; justify-content: space-between; align-items: center; max-width: 400px; color: var(--j-hud-text); border: 1px solid #d6dcd140; background: #183638ed; padding: 9px 12px; border-radius: 10px; font-size: .7rem; }
 .adventure-location > span { display: flex; align-items: center; gap: 6px; }
 .objective { max-width: 340px; border: 1px solid #d6dcd140; background: #183638ed; border-radius: 12px; margin-top: 10px; overflow: hidden; }
 .objective-toggle { display: flex; align-items: center; gap: 10px; border: 0; background: none; width: 100%; color: inherit; padding: 9px 12px; min-height: 48px; text-align: left; }
@@ -252,7 +255,7 @@ img { display: block; max-width: 100%; }
 .field-actions { display: flex; gap: 7px; justify-content: flex-end; margin: 10px 0; }
 .field-actions > button { display: flex; gap: 7px; align-items: center; padding: 8px 11px; min-height: 44px; border: 1px solid #ffffff45; background: #183638ed; color: inherit; border-radius: 9px; font-size: .7rem; }
 .combat-strip { display: flex; gap: 8px; padding: 8px; border: 1px solid #ffffff45; border-radius: 14px; background: #183638ed; }
-.move-buttons { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); flex: 1; gap: 6px; }
+.move-buttons { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); flex: 1; gap: 6px; }
 .move-buttons > button { display: flex; justify-content: center; align-items: center; gap: 5px; border: 1px solid #ffffff40; border-radius: 8px; color: inherit; background: #33574d; min-height: 44px; font-size: .65rem; }
 .auto-button { display: flex; gap: 5px; align-items: center; border: 1px solid #ffffff50; border-radius: 8px; padding: 5px 8px; color: inherit; background: #33574d; min-height: 44px; font-size: .65rem; }
 .auto-button small { display: block; font-size: .5rem; margin-top: 2px; color: #d3e6cc; }
@@ -260,7 +263,7 @@ img { display: block; max-width: 100%; }
 .field-caption { text-align: center; margin-top: 7px; padding: 4px; border-radius: 5px; font-size: .55rem; background: #183638df; }
 @media (hover: hover) {
   .roster-card:hover, .item-tile:hover, .destination-card:hover, .biome-card:hover { border-color: var(--j-leaf); }
-  .primary-nav > button:hover { background: var(--j-leaf-wash); }
+  .primary-nav button:hover { background: var(--j-leaf-wash); }
   .primary-button:hover { background: #943322; }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -281,16 +284,22 @@ img { display: block; max-width: 100%; }
   .prototype-banner { min-height: 25px; padding: max(4px,env(safe-area-inset-top)) 10px 4px; gap: 5px; font-size: .5rem; }
   .prototype-banner > span:first-child { letter-spacing: .03em; }
   .prototype-banner > span:last-child { font-size: .48rem; }
-  .game-frame { --rail-width: 80px; --rail-right: 12px; --rail-top: 72px; border: 0; border-radius: 0; grid-template-rows: 64px 34px minmax(0,1fr) calc(143px + env(safe-area-inset-bottom)); }
+  .game-frame { --rail-width: 80px; --rail-right: 12px; --rail-top: 72px; border: 0; border-radius: 0; grid-template-rows: 64px 48px minmax(0,1fr) calc(143px + env(safe-area-inset-bottom)); }
   .game-header { padding: 8px 12px; gap: 9px; }
-  .brand { display: none; }
-  .active-companion { width: 225px; max-width: calc(100% - 60px); margin-right: auto; }
+  .brand { display: flex; }
+  .active-companion { flex: 1; min-width: 0; width: auto; max-width: none; margin-right: auto; gap: 7px; }
+  .active-companion > div > span { font-size: .75rem; gap: 4px; }
+  .active-companion small { font-size: .6rem; }
   .trainer-access { padding: 3px; width: 48px; min-width: 48px; height: 48px; justify-content: center; }
   .trainer-access > span, .trainer-access > svg { display: none; }
-  .reserve-strip { padding: 3px 8px; gap: 4px; border-radius: 0 0 12px 0; max-width: calc(100% - 100px); }
-  .reserve-strip > span:first-child { display: none; }
-  .reserve-strip .portrait { width: 25px; height: 25px; border-radius: 6px; }
-  .reserve-strip > span:last-child { font-size: .55rem; }
+  .hunt-context { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px; padding-left: 8px; }
+  .reserve-strip { padding: 2px 0; gap: 3px; flex-wrap: wrap; border-radius: 0; max-width: none; background: none; }
+  .reserve-strip > span:first-child { display: block; flex-basis: 100%; font-size: .46rem; line-height: 1; margin: 0; }
+  .reserve-strip .portrait { width: 22px; height: 22px; border-radius: 4px; }
+  .reserve-strip > span:last-child { font-size: .5rem; margin-left: 1px; }
+  .hunt-context .adventure-location { padding: 5px 4px; gap: 4px; font-size: .5rem; }
+  .hunt-context .adventure-location > span { gap: 3px; }
+  .hunt-context .adventure-location svg { width: 12px; height: 12px; }
   .journey-main { padding: 9px calc(var(--rail-width) + var(--rail-right) + 8px) 5px 8px; }
   .trainer-shortcuts { gap: 5px; }
   .trainer-shortcuts > button { flex-direction: column; justify-content: center; gap: 3px; min-height: 52px; padding: 5px 3px; font-size: .59rem; line-height: 1.3; }
@@ -358,10 +367,14 @@ img { display: block; max-width: 100%; }
   .dex-detail { padding: 18px; }
   .dex-detail > img { height: 100px; margin-block: 12px; }
   .game-footer { padding: 4px 10px calc(7px + env(safe-area-inset-bottom)); gap: 0; }
-  .primary-nav { width: 100%; grid-template-columns: repeat(4,minmax(0,1fr)); padding: 3px 4px; border-radius: 15px; }
-  .primary-nav > button { min-height: 62px; font-size: .64rem; }
-  .primary-nav > button > .equipment-art { width: 39px; height: 39px; }
-  .primary-nav > button > i { margin-top: 3px; }
+  .primary-nav { width: 100%; grid-template-columns: minmax(0,1fr) 64px minmax(0,1fr); padding: 3px 4px; border-radius: 15px; }
+  .nav-group, .nav-group--right { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .primary-nav button { min-height: 62px; font-size: .58rem; }
+  .primary-nav button > .equipment-art { width: 36px; height: 36px; }
+  .primary-nav button > .nav-icon { width: 28px; height: 36px; }
+  .primary-nav button > i { margin-top: 3px; }
+  .primary-nav .hunt-nav { min-height: 78px; margin-inline: 2px; font-size: .72rem; }
+  .primary-nav .hunt-nav > .equipment-art { width: 46px; height: 46px; }
   .footer-brand { display: none; }
   .notice { bottom: calc(152px + env(safe-area-inset-bottom)); font-size: .72rem; }
   .adventure-location { font-size: .62rem; }
@@ -373,7 +386,7 @@ img { display: block; max-width: 100%; }
   .wild-poke > span, .player-poke > span { font-size: .6rem; }
   .field-actions { margin: 7px 0; }
   .combat-strip { gap: 5px; padding: 6px; }
-  .move-buttons { gap: 4px; }
+  .move-buttons { gap: 4px; grid-template-columns: repeat(2,minmax(0,1fr)); }
   .move-buttons > button { flex-direction: column; gap: 2px; font-size: .55rem; }
   .auto-button { font-size: .6rem; }
   .field-caption { font-size: .5rem; }
@@ -391,15 +404,19 @@ img { display: block; max-width: 100%; }
 @media (max-height: 519px) and (orientation: landscape) {
   .journey-prototype { padding: 0; }
   .prototype-banner { min-height: 20px; padding: 2px 12px; font-size: .5rem; }
-  .game-frame { --rail-width: 48px; --rail-right: 12px; --rail-top: 58px; border-radius: 0; grid-template-rows: 52px minmax(0,1fr) 64px; }
+  .game-frame { --rail-width: 48px; --rail-right: 12px; --rail-top: 58px; border-radius: 0; grid-template-rows: 52px 24px minmax(0,1fr) 64px; }
   .game-header { padding: 4px 12px; }
-  .reserve-strip { display: none; }
-  .brand { display: none; }
+  .hunt-context { display: flex; }
+  .reserve-strip { display: flex; background: none; padding: 0 12px; }
+  .reserve-strip > span:first-child { flex-basis: auto; font-size: .46rem; margin-right: 4px; }
+  .reserve-strip .portrait { width: 18px; height: 18px; }
+  .hunt-context .adventure-location { font-size: .55rem; padding: 3px 6px; }
+  .brand { display: flex; }
   .trainer-access { min-height: 44px; height: 44px; }
   .trainer-access > img { width: 32px; height: 32px; }
   .active-companion > .portrait { height: 36px; width: 36px; }
   .journey-main { padding: 5px calc(var(--rail-width) + var(--rail-right) + 8px) 5px 10px; }
-  .trainer-shortcuts { gap: 4px; }
+  .trainer-shortcuts { gap: 3px; }
   .trainer-shortcuts > button { flex-direction: row; min-height: 44px; padding: 4px 8px; gap: 6px; font-size: .65rem; }
   .panel-header { min-height: 65px; padding: 8px 18px; }
   .panel-heading { padding-right: 100px; }
@@ -410,10 +427,15 @@ img { display: block; max-width: 100%; }
   .panel-footnote { display: none; }
   .team-workspace, .bag-workspace, .dex-workspace { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; }
   .game-footer { padding: 2px 10px 6px; }
-  .primary-nav { grid-template-columns: repeat(8,minmax(0,1fr)); width: 100%; max-width: 960px; padding: 0 8px; }
-  .primary-nav > button { min-height: 52px; font-size: .6rem; }
-  .primary-nav > button > .equipment-art { width: 28px; height: 28px; }
-  .primary-nav > button > .nav-icon { width: 26px; height: 28px; }
+  .primary-nav { grid-template-columns: minmax(0,1fr) 72px minmax(0,1fr); width: 100%; max-width: 960px; padding: 0 8px; }
+  .nav-group { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .nav-group--right { grid-template-columns: repeat(4,minmax(0,1fr)); }
+  .primary-nav button { min-height: 52px; font-size: .6rem; }
+  .primary-nav button > .equipment-art { width: 28px; height: 28px; }
+  .primary-nav button > .nav-icon { width: 26px; height: 28px; }
+  .primary-nav .hunt-nav { min-height: 58px; font-size: .68rem; }
+  .primary-nav .hunt-nav > .equipment-art { width: 34px; height: 34px; }
+  .move-buttons { grid-template-columns: repeat(4,minmax(0,1fr)); }
   .footer-brand { display: none; }
   .adventure-location { max-width: 310px; padding: 5px 10px; }
   .objective { display: none; }
@@ -424,4 +446,74 @@ img { display: block; max-width: 100%; }
   .adventure-bottom { width: min(100%,450px); margin-left: auto; align-self: flex-end; }
   .field-actions, .field-caption { display: none; }
   .notice { bottom: 70px; }
+}
+/* Comunicador: o acompanhamento ocupa espaço próprio, nunca cobre o encontro. */
+.adventure { gap: 10px; }
+.encounter-scene { position: relative; inset: auto; flex: 1; min-height: 100px; }
+.adventure-dock { display: grid; grid-template-columns: minmax(250px,360px) minmax(0,530px); gap: 20px; align-items: end; justify-content: space-between; flex-shrink: 0; }
+.adventure-bottom { width: 100%; margin: 0; }
+.hunt-chat { position: relative; min-width: 0; border: 1px solid #c2d9c74d; border-radius: 13px; background: #142f32ed; color: var(--j-hud-text); box-shadow: 0 6px 24px #0c25283d; overflow: hidden; }
+.hunt-chat button { min-height: 44px; border: 0; background: none; color: inherit; }
+.chat-heading { position: absolute; top: 0; right: 0; display: flex; align-items: center; }
+.chat-heading > button { width: 32px; min-height: 28px; flex-shrink: 0; display: grid; place-items: center; }
+.chat-heading > button:hover, .chat-channels > button:hover { background: #ffffff10; }
+.chat-channels { display: flex; padding: 0 64px 0 6px; border-bottom: 1px solid #c2d9c724; }
+.chat-channels > button { flex: 1; min-height: 28px; padding: 1px 6px; font-size: .72rem; border-bottom: 2px solid transparent; color: #c2d9c7; }
+.chat-channels > button[aria-pressed='true'] { color: #f5cf81; border-bottom-color: var(--j-gold); background: #e7b95a0a; }
+.chat-history { height: 85px; overflow: auto; padding: 0 9px; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #92bd8366 transparent; }
+.chat-history:focus-visible { outline: 2px solid var(--j-gold); outline-offset: -2px; }
+.chat-message { font-size: .7rem; line-height: 17px; overflow-wrap: anywhere; }
+.hunt-chat[data-mode='compact'] .chat-message { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hunt-chat[data-mode='compact'] .chat-history { overflow: hidden; }
+.chat-message > strong { color: #a9d2d8; font-weight: 700; }
+.hunt-chat--minimized { width: fit-content; }
+.hunt-chat--minimized > button { display: flex; align-items: center; gap: 8px; padding: 4px 12px; font-size: .75rem; }
+.hunt-chat--minimized > button > span { font-size: .55rem; color: #c2d9c7; }
+.hunt-chat[data-mode='expanded'] { position: absolute; z-index: 5; left: 0; bottom: 0; width: min(100%,480px); max-height: 100%; display: flex; flex-direction: column; }
+.hunt-chat[data-mode='expanded'] .chat-history { height: 220px; min-height: 0; flex: 1 1 auto; }
+.chat-heading, .chat-channels, .chat-compose, .chat-demo-note, .chat-readonly { flex-shrink: 0; }
+.chat-demo-note, .chat-readonly { font-size: .6rem; padding: 7px 12px; color: #c2d9c7; }
+.chat-readonly { border-top: 1px solid #c2d9c724; }
+.chat-compose { display: flex; gap: 4px; border-top: 1px solid #c2d9c740; padding: 6px; }
+.chat-compose > input { min-width: 0; flex: 1; min-height: 44px; border: 1px solid #c2d9c740; border-radius: 7px; padding: 7px; background: #ffffff0a; color: var(--j-hud-text); font-size: 16px; }
+.chat-compose > input::placeholder { color: #c2d9c7; }
+.chat-compose > button { width: 44px; background: var(--j-leaf); border-radius: 7px; }
+.chat-compose > button:disabled { opacity: .4; }
+.chat-latest { width: 100%; color: #f5cf81 !important; font-size: .7rem; }
+@media (max-width: 1100px) {
+  .adventure-dock { grid-template-columns: minmax(0,1fr); gap: 8px; width: min(100%,530px); align-self: center; }
+  .chat-history { height: 51px; }
+  .hunt-chat[data-mode='compact'] .chat-message:nth-last-child(n+4) { display: none; }
+  .chat-message { font-size: .65rem; }
+  .chat-channels { padding: 0 64px 0 0; }
+  .chat-channels > button { min-width: 0; padding-inline: 3px; font-size: .65rem; }
+  .wild-poke { top: 0; right: 8%; }
+  .player-poke { bottom: 0; left: 8%; }
+}
+@media (max-width: 819px) and (max-height: 740px) {
+  .adventure:not(:has(.hunt-chat--minimized)) .objective { display: none; }
+  .encounter-scene { min-height: 75px; }
+  .wild-poke, .player-poke { gap: 2px; }
+  .wild-poke > img, .player-poke > img { width: 48px; height: 48px; }
+  .wild-poke > span, .player-poke > span { padding: 3px 6px; }
+  .field-caption { display: none; }
+  .adventure { gap: 5px; }
+}
+@media (max-height: 519px) and (orientation: landscape) {
+  .adventure-dock { grid-template-columns: minmax(0,280px) minmax(0,450px); width: 100%; gap: 12px; }
+  .adventure-bottom { width: 100%; }
+  .encounter-scene { min-height: 65px; }
+  .wild-poke, .player-poke { top: 0; bottom: auto; }
+  .chat-history { height: 51px; }
+}
+@media (max-width: 819px) and (max-height: 620px) and (orientation: portrait) {
+  .move-buttons { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 2px; }
+  .combat-strip { padding: 4px; gap: 4px; }
+  .move-buttons > button { min-width: 0; font-size: .48rem; padding: 2px; overflow-wrap: anywhere; }
+  .auto-button { flex: 0 0 44px; flex-direction: column; justify-content: center; gap: 1px; padding: 0; }
+  .auto-button > svg { width: 16px; height: 16px; }
+  .auto-button small { display: none; }
+}
+@media (max-height: 620px) {
+  .hunt-chat[data-mode='compact'] .chat-channels > button { font-size: .6rem; }
 }
