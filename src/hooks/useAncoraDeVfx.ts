@@ -14,17 +14,17 @@
 //    mudar de tamanho — que e o caso mais comum aqui (um vizinho `shrink-0`
 //    aparece no trilho e empurra a Carteira pro lado). Sem isso a ancora fica
 //    apontando pro lugar antigo, e o efeito erra o alvo em silencio.
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, type RefObject } from 'react'
 import { definirAncora } from '@/render/camadaVfx'
 
-export function useAncoraDeVfx(nome: string, ref: RefObject<HTMLElement | null>): void {
-  const nomeRef = useRef(nome)
-  nomeRef.current = nome
-
+// `nome` null: o elemento nao publica ancora (componente reutilizado em que so
+// uma instancia e destino de efeito, ex. o botao Mochila entre os slots da barra).
+export function useAncoraDeVfx(nome: string | null, ref: RefObject<HTMLElement | null>): void {
   useEffect(() => {
     const el = ref.current
-    if (!el) return
-    const publicar = () => definirAncora(nomeRef.current, el.getBoundingClientRect())
+    const nomeAtivo = nome
+    if (!el || !nomeAtivo) return
+    const publicar = () => definirAncora(nomeAtivo, el.getBoundingClientRect())
     publicar()
 
     const ro = new ResizeObserver(publicar)
@@ -41,9 +41,9 @@ export function useAncoraDeVfx(nome: string, ref: RefObject<HTMLElement | null>)
       window.removeEventListener('scroll', publicar, { capture: true })
       // Limpa ao desmontar: ancora apontando pra elemento que saiu da arvore
       // faria o efeito mirar num retangulo congelado.
-      definirAncora(nomeRef.current, null)
+      definirAncora(nomeAtivo, null)
     }
-  }, [ref])
+  }, [ref, nome])
 }
 
 /**
@@ -56,4 +56,6 @@ export function useAncoraDeVfx(nome: string, ref: RefObject<HTMLElement | null>)
 export const ANCORA = {
   /** A Carteira do trilho de status (ouro + diamantes). Destino do PH-191. */
   carteira: 'carteira',
+  /** Botao Mochila da barra de navegacao. Destino dos itens que caem (11/10). */
+  mochila: 'nav-mochila',
 } as const

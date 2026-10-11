@@ -28,6 +28,7 @@ import type { MapDef } from '@/data/maps'
 import { iniciarQuadroDeVfx } from './vfx/orcamento'
 import { novoQuadroDoPixelizador } from './vfx/pixelizador'
 import { desenharMoedasNoChao } from './vooDeRecompensa'
+import { desenharItensNoChao } from './itemNoChao'
 import { TreinadorEmCampo, lugarNoDuelo } from './treinadorEmCampo'
 
 // Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
@@ -348,6 +349,8 @@ export class Renderer {
     // Ouro e XP do abate caidos no chao (08/10): tambem sao CHAO, e quem anda
     // por cima deles os cobre. Sobem pra carteira 2 s depois, na camada de VFX.
     desenharMoedasNoChao(ctx)
+    // Itens do abate (11/10): mesmo chao, depois das moedas pra o item ficar por cima delas.
+    desenharItensNoChao(ctx)
 
     // PH-236: tipo do protetor (Guardian/Lord) vem da sala, nao da entidade
     // — `entity.isProtetor` so marca QUE e protetor. Resolvido uma vez por

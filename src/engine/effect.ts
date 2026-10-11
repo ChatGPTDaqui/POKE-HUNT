@@ -25,6 +25,8 @@ export interface CreateWorldEffectParams {
   isCrit?: boolean
   text?: string
   unit?: string
+  /** `rewardText` de item (`unit: 'item'`): qual item caiu. Ver render/itemNoChao.ts. */
+  itemId?: string
   isAoe?: boolean
   worldSize?: number
   elementType?: WorldEffect['elementType']
@@ -64,7 +66,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25, delay = 0,
     value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1,
     worldSize, elementType, abilityId, acertosVisuais, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection,
-    statusStat,
+    statusStat, itemId,
     seguir = null, apontarPara = null,
   } = params
 
@@ -82,7 +84,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     effectivenessLabel: effectivenessLabel ?? undefined,
     isCrit,
     text, unit, isAoe, worldSize, elementType, abilityId, acertosVisuais, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection,
-    statusStat,
+    statusStat, itemId,
     laneSize,
     ownerId: owner ? owner.id : null,
     lane,

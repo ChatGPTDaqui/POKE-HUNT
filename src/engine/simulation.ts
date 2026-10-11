@@ -1370,6 +1370,12 @@ export function handleEnemyDefeated(
     for (const itemId of loot.droppedItems) {
       const item = getItem(itemId)
       if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, 'success', 'world')
+      // Cai no CHAO junto do ouro e do XP e voa pra Mochila (11/10) — o cliente
+      // converte em render/itemNoChao.ts; nada aqui mexe em estado de jogo.
+      world.effects.push(createWorldEffect(world.counters, {
+        type: 'rewardText', x: enemy.x, y: enemy.y, targetX: enemy.x, targetY: enemy.y,
+        value: 1, unit: 'item', itemId, duration: 1.1,
+      }))
     }
 
     // Animacao de arremesso de Pokebola — so pra uma tentativa de verdade.
