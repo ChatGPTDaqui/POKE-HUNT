@@ -670,6 +670,18 @@ export interface PendingHit {
   targetId: string | null // null pra hits isAoeVisual (sem alvo unico, ver combatSystem.ts#queueAoeVisual)
   ability: Ability
   isAoeVisual?: boolean
+  /**
+   * Acertos de golpe multiplo sorteados no DISPARO (11/10): o VFX nasce no
+   * apice, antes da resolucao, e ja desenha a quantidade certa de golpes.
+   */
+  acertos?: number
+  /** VFX do golpe criado no disparo; some junto se o golpe for cancelado. */
+  efeitoId?: string
+  /**
+   * Segundos do disparo ate o pouso (`timer` inicial). `pouso - timer` e o
+   * tempo desde o disparo — igual pra dois golpes disparados no mesmo tick.
+   */
+  pouso?: number
 }
 
 // Fila de Wish (cura atrasada 2 turnos) — MESMO padrao de PendingHit: tick
