@@ -142,7 +142,7 @@ function PainelLado({
       </div>
 
       {!resultado ? (
-        <div className="flex min-h-[10em] items-center justify-center rounded-[.6em] border border-dashed border-menu-line p-[.6em] text-center text-[.8em] text-menu-muted">
+        <div className="rounded-[.6em] border border-dashed border-menu-line p-[.6em] text-[.8em] text-menu-muted">
           Escolha um Pokemon para calcular os status — ou deixe vazio se so quer olhar o outro lado.
         </div>
       ) : (

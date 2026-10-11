@@ -44,27 +44,24 @@ function GeralTab() {
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
-        <div className="font-medium">Reduzir transparência</div>
-        <div className="text-[.8em] text-menu-muted">
-          Se o jogo engasgar, desligue o desfoque. Os painéis ficam mais opacos, sem mudar a jogabilidade.
-        </div>
         <GameCheck checked={vidroFosco} onChange={setVidroFosco} className="self-start">
           Desligar o desfoque
         </GameCheck>
+        <div className="text-[.8em] text-menu-muted">
+          Se o jogo engasgar, desligue o desfoque. Os painéis ficam mais opacos, sem mudar a jogabilidade.
+        </div>
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
-        <div className="font-medium">Vida no cenário</div>
-        <div className="text-[.8em] text-menu-muted">
-          Efeitos decorativos de cada bioma. Desligue para aliviar o aparelho; combate e captura não mudam.
-        </div>
         <GameCheck checked={vidaNoCenario} onChange={setVidaNoCenario} className="self-start">
           Mostrar movimento no cenário
         </GameCheck>
+        <div className="text-[.8em] text-menu-muted">
+          Efeitos decorativos de cada bioma. Desligue para aliviar o aparelho; combate e captura não mudam.
+        </div>
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
-        <div className="font-medium">Iniciar novo jogo</div>
         <div className="text-[.8em] text-menu-muted">
           Apaga todo o progresso (equipe, itens, ouro, mapas) e comeca do zero.
         </div>

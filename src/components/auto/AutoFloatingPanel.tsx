@@ -57,7 +57,7 @@ export function AutoWindow() {
       // Nao escurece o jogo, mas SEMPRE fechou ao clicar fora — as duas coisas
       // andavam juntas na GameWindow e aqui precisam andar separadas.
       fecharAoTocarFora
-      snap="meia"
+      snap="conteudo"
       onClose={() => setOpen(false)}
       title={titulo}
     >

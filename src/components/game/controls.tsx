@@ -365,8 +365,8 @@ export function GameCard({
 /** Aviso de recurso ainda sem sistema de jogo por tras. */
 export function ComingSoon({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-[.45em] rounded-[.7em] border border-dashed border-menu-line p-[1.2em] text-center">
-      <span className="text-[2em] text-menu-ink">{icon}</span>
+    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-[.3em_.5em] rounded-[.7em] border border-dashed border-menu-line p-[.5em]">
+      <span className="row-span-2 text-[1.5em] text-menu-ink">{icon}</span>
       <div className="font-medium">{title}</div>
       <div className="max-w-[24em] text-[.8em] text-menu-muted">{children}</div>
     </div>

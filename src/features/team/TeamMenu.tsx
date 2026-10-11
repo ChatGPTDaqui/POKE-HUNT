@@ -98,7 +98,7 @@ export function TeamMenu() {
             // numa coluna a direita: "Colocar em campo" e "Retirar da equipe"
             // empilhados custavam 45% da largura do card e empurravam nome, HP
             // e barra pra uma coluna de 8em.
-            className={cn('team-member flex flex-col gap-[.65em] p-[.7em]', isActive && 'is-active')}
+            className={cn('team-member flex flex-col gap-[.4em] p-[.45em]', isActive && 'is-active')}
           >
             <div className={cn('flex min-w-0 gap-[.55em]', compacto ? 'items-center' : 'flex-1 items-center')}>
             <span className="team-position">{String(index + 1).padStart(2, '0')}</span>

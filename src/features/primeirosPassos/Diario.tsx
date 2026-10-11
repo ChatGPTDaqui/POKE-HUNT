@@ -166,7 +166,7 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Sheet appearance="journey" winKey="diario" snap="cheia" zIndex={33} onClose={onClose} title="Diário">
+    <Sheet appearance="journey" winKey="diario" snap="conteudo" zIndex={33} onClose={onClose} title="Diário">
       <h3 className="mb-[.3em] text-[.85em] font-medium text-menu-ink">Login do mês · {loginsNoMes} dia(s) coletado(s)</h3>
       <p className="mb-[.5em] text-[.75em] text-menu-muted">Um prêmio por dia em que você entra. Perder um dia não zera: o próximo prêmio te espera. Recomeça no dia 1 de cada mês.</p>
       <div className="grid grid-cols-7 gap-[.3em]">

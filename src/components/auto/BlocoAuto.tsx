@@ -42,7 +42,7 @@ export function BlocoAuto({
   return (
     <section
       className={cn(
-        'flex flex-col gap-[.5em] rounded-[.7em] border p-[.6em] transition-colors',
+        'flex flex-col gap-[.3em] rounded-[.7em] border p-[.4em] transition-colors',
         ligado ? 'border-menu-line bg-menu-card/60' : 'border-menu-line',
       )}
     >
@@ -57,7 +57,7 @@ export function BlocoAuto({
       {/* O corpo continua visivel com a automacao desligada, so esmaecido: a
           configuracao e o motivo de o jogador abrir este painel, e escondê-la
           faria "ligar" virar um salto no escuro. */}
-      {children && <div className={cn('flex flex-col gap-[.5em]', !ligado && 'opacity-55')}>{children}</div>}
+      {children && <div className={cn('flex flex-col gap-[.3em]', !ligado && 'opacity-55')}>{children}</div>}
     </section>
   )
 }
