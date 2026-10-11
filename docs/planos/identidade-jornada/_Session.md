@@ -17,7 +17,8 @@ Acessos permanentes não devem ficar escondidos no guia.
 
 Brainstorming e especificação aprovados. Primeira composição implementada em
 [protótipo isolado](../../../scripts/harness/identidade-jornada/README.md).
-Nenhuma integração visual no jogo real, alteração de banco ou save nesta etapa.
+Protótipo inicialmente sem integração; a fundação descrita abaixo inicia a adoção
+no jogo real. Nenhuma alteração de banco, save, combate ou regras de navegação.
 Primeiro protótipo na PR #875; revisão da navegação aplica o feedback acima,
 substituindo a proposta inicial de cinco destinos. Revisão seguinte: Hunt central
 e levemente maior, grupos laterais em duas fileiras no mobile; quatro slots de golpes;
@@ -25,6 +26,14 @@ marca só Poké Bola; Mata · expedição à direita de Companheiros; Hospital s
 na barra, não junto de Conversas. Coluna direita permanece ao abrir painéis.
 
 ## Próximos passos
+
+Fundação iniciada: `appearance="journey"` opt-in em Painel/Sheet/GameWindow;
+tokens semânticos separados dos neutros da HUD, botões e destinos compactos.
+Primeiro piloto real: SheetMais, conservando lista/ordem atuais, trancas, Diário,
+contadores e callbacks. Os outros menus reais continuam no tema legado.
+[Bancada de componentes reais e limites da verificação](../../../scripts/harness/fundacao-jornada.md).
+Ainda faltam migração por domínio, navegação final e demais superfícies; não
+confundir este piloto com entrega global da identidade.
 
 Critério de densidade estendido aos menus do protótipo: cabeçalho de 56px com
 título/ícone/fechar; ocultar copy decorativa e rodapé duplicado. Listas, fichas,

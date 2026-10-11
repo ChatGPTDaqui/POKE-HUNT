@@ -1,0 +1,139 @@
+/* Opt-in por superfície. Nunca inverter n900/n100: combate e menus coexistem. */
+[data-window][data-appearance='journey'] {
+  --journey-paper: #faf7ef;
+  --journey-card: #fffefa;
+  --journey-ink: #203c42;
+  --journey-muted: #576b6c;
+  --journey-line: #d6dcd1;
+  --journey-leaf: #2d6650;
+  --journey-wash: #e6eddf;
+  --journey-primary: #ad3d2c;
+  --journey-focus: #476f83;
+  --journey-warning: #795016;
+  color: var(--journey-ink);
+  background: var(--journey-paper);
+  border: 1px solid var(--journey-line);
+  box-shadow: 0 .7em 2em #162c2e38;
+  backdrop-filter: none;
+  font-family: var(--font-sans);
+}
+
+/* Maior especificidade que a preferência de vidro da HUD; já é opaco. */
+.hud-root[data-blur='off'] [data-window][data-appearance='journey'] {
+  background: var(--journey-paper);
+  backdrop-filter: none;
+}
+
+[data-appearance='journey'] > [data-panel-header] {
+  min-height: 44px;
+  padding: .15em .5em .15em .75em;
+  border-color: var(--journey-line);
+  font-family: var(--font-heading);
+  font-weight: 550;
+}
+
+[data-appearance='journey'] > [data-panel-handle] > span {
+  background: var(--journey-muted);
+}
+
+[data-appearance='journey'] > [data-panel-body] {
+  padding: .4em .6em .6em;
+}
+
+[data-appearance='journey'] > [data-panel-footer] {
+  padding: .4em .6em;
+  border-color: var(--journey-line);
+}
+
+[data-appearance='journey'] [data-game-button] {
+  min-height: 44px;
+  color: var(--journey-ink);
+  background: var(--journey-card);
+  border-color: var(--journey-muted);
+}
+
+[data-appearance='journey'] [data-game-button='ghost'] {
+  background: transparent;
+  border-color: transparent;
+}
+
+[data-appearance='journey'] [data-game-button='primary'] {
+  color: var(--journey-card);
+  background: var(--journey-primary);
+  border-color: var(--journey-primary);
+}
+
+[data-appearance='journey'] [data-game-button='danger'] {
+  color: var(--journey-primary);
+  border-color: var(--journey-primary);
+}
+
+[data-appearance='journey'] [data-game-button='accent'] {
+  color: var(--journey-leaf);
+  border-color: var(--journey-leaf);
+}
+
+[data-appearance='journey'] [data-game-icon] {
+  min-width: 44px;
+}
+
+[data-appearance='journey'] [data-game-button]:enabled:hover {
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+[data-appearance='journey'] :is(button, input, select, a):focus-visible {
+  outline: 2px solid var(--journey-focus);
+  outline-offset: 2px;
+  --tw-ring-color: transparent;
+}
+
+.journey-destinations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .35em;
+}
+
+.journey-destination {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: .15em;
+  min-height: max(44px, 3.25em);
+  padding: .35em .3em;
+  border: 1px solid var(--journey-line);
+  border-radius: .65em;
+  background: var(--journey-card);
+  color: var(--journey-ink);
+  text-align: center;
+  font: inherit;
+  cursor: pointer;
+}
+
+.journey-destination:hover {
+  background: var(--journey-wash);
+  border-color: var(--journey-leaf);
+}
+
+.journey-destination-icon {
+  flex-shrink: 0;
+  font-size: 1.4em;
+  color: var(--journey-leaf);
+}
+
+.journey-destination-label {
+  max-width: 100%;
+  font-size: .85em;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.journey-destination-detail {
+  max-width: 100%;
+  font-size: .75em;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  color: var(--journey-warning);
+}

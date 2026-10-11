@@ -46,11 +46,13 @@ export interface GameWindowProps {
   children: ReactNode
   className?: string
   bodyClassName?: string
+  /** Migração opt-in: o restante da HUD mantém o vidro escuro. */
+  appearance?: 'legacy' | 'journey'
 }
 
 export function GameWindow({
   winKey, widthEm, defaultTop = '7.5vh', zIndex, backdrop, fecharAoTocarFora,
-  onClose, title, header, subheader, footer, children, className, bodyClassName,
+  onClose, title, header, subheader, footer, children, className, bodyClassName, appearance,
 }: GameWindowProps) {
   const { pos, onPointerDown } = useWindowDrag(winKey)
   const { onPointerDownBorda } = useWindowResize(winKey)
@@ -126,6 +128,7 @@ export function GameWindow({
       <div
         ref={aplicarLarguraInicial}
         data-window={winKey}
+        data-appearance={appearance}
         style={{ ...style, zIndex }}
         className={cn(
           // `min(86vh, 100vh - 12em)`: 86vh e o teto do handoff, mas em tela
@@ -202,6 +205,7 @@ export function GameWindow({
         ) : (
           <div
             onPointerDown={onPointerDown}
+            data-panel-header
             // PH-560: padding vertical apertado (era py-[.55em]) — pedido do
             // dono do projeto pra sobrar mais tela pro conteudo em vez de
             // moldura. A barra de titulo continua com alvo de toque valido: o
@@ -217,9 +221,9 @@ export function GameWindow({
 
         {subheader && <div className="shrink-0">{subheader}</div>}
 
-        <div className={cn('min-h-0 flex-1 overflow-auto p-[.5em] text-[.85em]', bodyClassName)}>{children}</div>
+        <div data-panel-body className={cn('min-h-0 flex-1 overflow-auto p-[.5em] text-[.85em]', bodyClassName)}>{children}</div>
 
-        {footer && <div className="shrink-0 border-t border-n800 px-[.5em] py-[.45em]">{footer}</div>}
+        {footer && <div data-panel-footer className="shrink-0 border-t border-n800 px-[.5em] py-[.45em]">{footer}</div>}
       </div>
     </>
   )
