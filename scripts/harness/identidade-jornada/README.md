@@ -16,6 +16,9 @@ URL local: `http://127.0.0.1:5176/scripts/harness/identidade-jornada.html`.
 - Quatro slots de golpes; cabeçalho só com Poké Bola; local junto dos companheiros.
 - Comunicador Chat: Log/Mundo/Comércio; compacto, expandido e minimizado.
 - Mensagens demonstrativas em memória; nenhum envio ao chat real ou servidor.
+- Menus densos: faixa de título de 56px, sem subtítulos decorativos/rodapé repetido;
+  cartões, fichas e capas compactos; barra inferior mobile 20px menor.
+- Identificação, filtros, descrições úteis, avisos e controles de 44px preservados.
 - Coluna abaixo do treinador: Diário, Especialidades, Tasks, Calculadora e PvP.
 - Sem botão de retorno: a hunt é o próprio jogo; X/Esc fecha apenas o painel.
 - Fixtures próprias, sem catálogo, stores, autenticação, saves ou clientes remotos.
