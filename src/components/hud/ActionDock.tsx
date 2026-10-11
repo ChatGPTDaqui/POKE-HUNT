@@ -5,7 +5,7 @@
 import { useRef, useState } from 'react'
 import {
   Backpack, BookOpen, Books, Calculator, ChatsCircle, CheckSquare, DotsThreeOutline,
-  FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
+  FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus,
   Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
   ArrowsLeftRight, Sword,
 } from '@phosphor-icons/react'
@@ -22,6 +22,7 @@ import { AbilityHud } from '@/components/hud/AbilityHud'
 import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
 import { Sheet } from '@/components/game/Sheet'
 import { JourneyDestination } from '@/components/game/JourneyDestination'
+import { EquipmentArt, type ArtKind } from '@/components/game/JourneyArtwork'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { TELAS_NA_COLUNA } from '@/components/hud/ColunaDeAtalhos'
 import { cn } from '@/lib/utils'
@@ -36,6 +37,7 @@ export interface Destino {
   Icon: Icon
   /** Imagem que substitui o icone vetorial; o `Icon` continua sendo o fallback. */
   iconUrl?: string
+  art?: ArtKind
 }
 
 // Os tres slots a esquerda do Hunt e os dois de tela a direita dele. Hospital
@@ -44,13 +46,13 @@ export interface Destino {
 type DestinoDeTela = Destino & { screen: ScreenName }
 
 const ESQUERDA: DestinoDeTela[] = [
-  { screen: 'equipe', label: 'Equipe', Icon: UsersThree, iconUrl: 'assets/ui-icons/equipe.png' },
-  { screen: 'mochila', label: 'Mochila', Icon: Backpack },
-  { screen: 'pokedex', label: 'Pokedex', Icon: BookOpen },
+  { screen: 'equipe', label: 'Equipe', Icon: UsersThree, art: 'team' },
+  { screen: 'mochila', label: 'Mochila', Icon: Backpack, art: 'bag' },
+  { screen: 'pokedex', label: 'Pokédex', Icon: BookOpen, art: 'dex' },
 ]
 const DIREITA: DestinoDeTela[] = [
-  { screen: 'loja', label: 'Loja', Icon: Storefront },
-  { screen: 'mercado', label: 'Mercado', Icon: Scales },
+  { screen: 'loja', label: 'Loja', Icon: Storefront, art: 'shop' },
+  { screen: 'mercado', label: 'Mercado', Icon: Scales, art: 'market' },
 ]
 
 // O que vive dentro de "Mais". Ordem por frequencia de uso real, nao
@@ -213,7 +215,7 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
           e nao so quando a viagem termina — sem isso o unico sinal de que o
           comando pegou seria o overlay no meio do campo. */}
       <SlotNav
-        destino={{ label: 'Hospital', Icon: FirstAid }}
+        destino={{ label: 'Hospital', Icon: FirstAid, art: 'hospital' }}
         ativo={!emHunt || viagemMarcada}
         rotulo
         onClick={irAoHospital}
@@ -233,7 +235,7 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
       />
 
       <SlotNav
-        destino={{ label: 'Mais', Icon: DotsThreeOutline }}
+        destino={{ label: 'Mais', Icon: DotsThreeOutline, art: 'guide' }}
         ativo={moreOpen}
         rotulo
         badge={pendenciasEmMais}
@@ -271,7 +273,7 @@ function SlotNav({
   onClick: () => void
 }) {
   const [imagemQuebrada, setImagemQuebrada] = useState(false)
-  const { Icon, iconUrl, label } = destino
+  const { Icon, iconUrl, label, art } = destino
   return (
     <button
       type="button"
@@ -287,7 +289,7 @@ function SlotNav({
       )}
     >
       {trancado && <MarcaDeCadeado passoId={trancado} />}
-      {iconUrl && !imagemQuebrada ? (
+      {art ? <EquipmentArt kind={art} className="journey-nav-art" /> : iconUrl && !imagemQuebrada ? (
         <img
           src={iconUrl}
           alt=""
@@ -296,7 +298,7 @@ function SlotNav({
           style={{ imageRendering: 'pixelated' }}
         />
       ) : (
-        <Icon className="text-[1.25em]" weight={ativo ? 'fill' : 'regular'} />
+        <Icon className="journey-nav-symbol text-[1.25em]" weight="duotone" />
       )}
       {/* O rotulo NAO e enfeite no toque: sem hover nao existe `title`, e um
           icone sozinho e adivinhacao. Ele so sai em 'deitado', onde cada
@@ -346,7 +348,7 @@ function SlotHunt({ ativo, deitado, destaque, onClick }: { ativo: boolean; deita
           destaque,
         )}
       >
-        <MapTrifold className="text-[1.45em]" weight="fill" />
+        <EquipmentArt kind="map" className="journey-hunt-art" />
       </span>
       <span className="leading-none" style={{ fontSize: 'min(.68em, 2.6vw)' }}>Hunt</span>
     </button>
@@ -372,13 +374,21 @@ export function SheetMais() {
 
   return (
     <Sheet appearance="journey" winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais">
-      <div className="journey-destinations">
+      <div className="journey-guide">
+        <div className="journey-guide-intro"><EquipmentArt kind="guide" /><p>Seu guia de jornada<span>Encontre treinadores e consulte suas ferramentas.</span></p></div>
+        {[
+          { title: 'Encontrar outros treinadores', screens: ['social', 'troca', 'ranking'] },
+          { title: 'Consultar e ajustar', screens: ['bestiario', 'wiki', 'tutoriais', 'config'] },
+        ].map((group) => <section key={group.title} aria-label={group.title}>
+        <h3 className="journey-guide-heading">{group.title}</h3>
+        <div className="journey-destinations">
         {/* Atalhos permanentes, incluindo Diário, ficam na coluna direita. */}
-        {destinos.map(({ screen, label, Icon }) => (
+        {destinos.filter((d) => group.screens.includes(d.screen)).map(({ screen, label, Icon }) => (
           <JourneyDestination
             key={screen}
             label={label}
             Icon={Icon}
+            description={DESCRICOES_DO_GUIA[screen]}
             badge={screen === 'social' ? pendenciasSocial.total : 0}
             // PH-287: aqui a frase e VISIVEL, nao so acessivel. Este sheet e a
             // tela em que o jogador chega procurando "o que e que esta aceso", e
@@ -394,9 +404,15 @@ export function SheetMais() {
             }}
           />
         ))}
+        </div></section>)}
       </div>
     </Sheet>
   )
+}
+
+const DESCRICOES_DO_GUIA: Partial<Record<ScreenName, string>> = {
+  social: 'Amigos e mensagens', troca: 'Troque com outros treinadores', ranking: 'Acompanhe suas conquistas',
+  bestiario: 'Encontros e descobertas', wiki: 'Conhecimento da jornada', tutoriais: 'Aprenda a jogar', config: 'Preferências do jogo',
 }
 
 // --- zoom e auto -------------------------------------------------------------

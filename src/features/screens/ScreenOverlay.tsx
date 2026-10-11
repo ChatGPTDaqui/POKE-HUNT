@@ -12,7 +12,7 @@
 import { useUiStore, type ScreenName } from '@/stores/uiStore'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
 import { Painel } from '@/components/game/Painel'
-import { EquipmentArt, type ArtKind } from '@/components/game/JourneyArtwork'
+import { EquipmentArt, RouteDecoration, type ArtKind } from '@/components/game/JourneyArtwork'
 import { TeamMenu } from '@/features/team/TeamMenu'
 import { BagMenu } from '@/features/bag/BagMenu'
 import { ShopMenu } from '@/features/shop/ShopMenu'
@@ -77,13 +77,14 @@ const TITLES: Record<ScreenName, string> = {
 // item 2 da auditoria). Bestiario tem grade + painel de detalhe lado a lado.
 const DEFAULT_WIDTH = 36
 const ART: Partial<Record<ScreenName, ArtKind>> = {
-  equipe: 'team', mochila: 'bag', loja: 'bag', hunts: 'map', pokedex: 'dex', bestiario: 'dex',
+  equipe: 'team', mochila: 'bag', loja: 'shop', hunts: 'map', pokedex: 'dex', bestiario: 'dex',
   especialidades: 'dex', tasks: 'guide', wiki: 'guide', tutoriais: 'guide', calc: 'guide',
-  social: 'guide', troca: 'team', mercado: 'bag', ranking: 'team', pvp: 'team', config: 'guide',
+  social: 'guide', troca: 'team', mercado: 'market', ranking: 'team', pvp: 'team', config: 'guide',
 }
 const WIDTHS: Partial<Record<ScreenName, number>> = {
   mochila: 48,
-  equipe: 42,
+  equipe: 50,
+  pokedex: 56,
   pvp: 48,
   loja: 52,
   bestiario: 56,
@@ -121,7 +122,7 @@ export function ScreenOverlay() {
       zIndex={31}
       backdropZIndex={30}
       onClose={closeScreen}
-      title={<span className="journey-title"><EquipmentArt kind={ART[currentScreen] ?? 'guide'} /><span>{title}</span></span>}
+      title={<span className="journey-title"><RouteDecoration /><EquipmentArt kind={ART[currentScreen] ?? 'guide'} /><span>{title}</span></span>}
     >
       <Panel />
     </Painel>

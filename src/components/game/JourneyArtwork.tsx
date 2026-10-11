@@ -1,10 +1,39 @@
-export type ArtKind = 'bag' | 'dex' | 'map' | 'team' | 'guide'
+export type ArtKind = 'bag' | 'dex' | 'map' | 'team' | 'guide' | 'shop' | 'hospital' | 'market'
+
+/** Cartografia discreta: decorativa, não interfere no arraste ou no foco. */
+export function RouteDecoration() {
+  return <svg viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" className="journey-route-decoration">
+    <path d="M-30 120Q80-30 125 75T280 42 440 20" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="5 9" />
+    <circle cx="125" cy="75" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
+    <circle cx="280" cy="42" r="5" fill="currentColor" />
+    <path d="m330 105 15-27 15 27Zm-30 8 12-21 12 21Z" fill="none" stroke="currentColor" strokeWidth="2" />
+  </svg>
+}
 
 /** Pequenas ilustrações vetoriais originais: mesma linha, material e perspectiva. */
 export function EquipmentArt({ kind, className = '' }: { kind: ArtKind; className?: string }) {
   return <svg viewBox="0 0 100 100" className={`equipment-art ${className}`} aria-hidden="true" focusable="false">
     <ellipse cx="51" cy="86" rx="32" ry="6" fill="var(--journey-ink)" opacity=".13" />
     <g stroke="var(--journey-ink)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
+      {kind === 'shop' && <>
+        <path d="M21 40h58v44H21Z" fill="var(--journey-paper)" />
+        <path d="m15 36 9-19h52l9 19v11q-7 9-14 0-7 9-14 0-7 9-14 0-7 9-14 0-7 9-14 0Z" fill="var(--journey-primary)" />
+        <path d="m35 17-5 19m20-19v19m15-19 5 19" stroke="var(--journey-paper)" />
+        <rect x="30" y="57" width="17" height="16" rx="2" fill="var(--journey-wash)" />
+        <path d="M57 84V58h13v26" fill="var(--journey-leaf)" />
+      </>}
+      {kind === 'hospital' && <>
+        <rect x="18" y="25" width="64" height="60" rx="12" fill="var(--journey-paper)" />
+        <path d="M18 44h64V36q0-11-12-11H30q-12 0-12 11Z" fill="var(--journey-primary)" />
+        <path d="M38 25V15h24v10" fill="none" />
+        <path d="M45 51h10v10h10v10H55v10H45V71H35V61h10Z" fill="var(--journey-leaf)" />
+      </>}
+      {kind === 'market' && <>
+        <path d="M50 17v60M24 84h52M33 77h34M21 30l58-7" fill="none" />
+        <circle cx="50" cy="24" r="7" fill="var(--journey-warning)" />
+        <path d="m23 31-13 27h26Zm54-7L64 52h26Z" fill="var(--journey-wash)" />
+        <path d="M10 58q13 18 26 0ZM64 52q13 18 26 0Z" fill="var(--journey-primary)" />
+      </>}
       {kind === 'bag' && <>
         <path d="M36 25v-6c0-12 28-12 28 0v6" fill="none" />
         <path d="M26 33 18 76q-1 10 11 10h44q11 0 9-11l-8-42" fill="var(--journey-wash)" />

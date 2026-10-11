@@ -6,7 +6,8 @@
 // tem que existir — e ele precisa abrir JA na aba certa, senao troca um passo
 // escondido por outro.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, act } from '@testing-library/react'
+import { controller } from '@/engine/controller'
 import userEvent from '@testing-library/user-event'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { getAbility } from '@/data/abilities'
@@ -42,6 +43,7 @@ function poke(): PokeInstance {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks()
   useGameStateStore.setState({ team: [poke()], activeIndex: 0 })
   usePokeProfileStore.setState({ open: null })
 })
@@ -58,12 +60,29 @@ describe('TeamMenu — atalho pros golpes', () => {
     expect(aberto?.aba).toBe('golpes')
   })
 
-  it('clicar no card continua abrindo em Status, como sempre', async () => {
+  it('selecionar não cobre a ficha; perfil completo continua disponível', async () => {
     render(<TeamMenu />)
 
-    // O card inteiro e clicavel; os botoes dentro dele param a propagacao.
-    await userEvent.click(screen.getByText(ESPECIE.name))
-
+    // A seleção fica no menu; abrir o perfil é uma ação explícita.
+    await userEvent.click(screen.getByRole('button', { name: `Selecionar ${ESPECIE.name}` }))
+    expect(usePokeProfileStore.getState().open).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: 'Ver perfil completo' }))
+    expect(usePokeProfileStore.getState().open?.poke.uid).toBe('poke-da-equipe')
     expect(usePokeProfileStore.getState().open?.aba).toBeUndefined()
+  })
+  it('ações usam o integrante selecionado e a ficha se recupera quando ele sai', async () => {
+    const second = { ...poke(), uid: 'segundo', speciesId: 'squirtle' }
+    useGameStateStore.setState({ team: [poke(), second] })
+    render(<TeamMenu />)
+    await userEvent.click(screen.getByRole('button', { name: `Selecionar ${SPECIES.squirtle.name}` }))
+    await userEvent.click(screen.getByRole('button', { name: /golpes/i }))
+    expect(usePokeProfileStore.getState().open?.poke.uid).toBe('segundo')
+    await userEvent.click(screen.getByRole('button', { name: /colocar em campo|pôr em campo/i }))
+    expect(controller.setActiveTeamIndex).toHaveBeenCalledWith(1)
+    await userEvent.click(screen.getByRole('button', { name: /retirar/i }))
+    expect(controller.removeFromTeam).toHaveBeenCalledWith('segundo')
+    act(() => useGameStateStore.setState({ team: [poke()] }))
+    expect(screen.getByRole('button', { name: `Selecionar ${ESPECIE.name}` }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.queryByRole('button', { name: /retirar/i })).toBeNull()
   })
 })

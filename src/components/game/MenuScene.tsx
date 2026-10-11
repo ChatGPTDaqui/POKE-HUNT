@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useDeviceMode } from '@/stores/uiStore'
 import './menu-scene.css'
+import { EquipmentArt } from './JourneyArtwork'
 
 /** Identidade dos menus do treinador; escala e regime continuam vindo da HUD. */
 export function MenuScene({ children, tone = 'collection' }: {
@@ -12,5 +13,5 @@ export function MenuScene({ children, tone = 'collection' }: {
 }
 
 export function SelectionHint({ children }: { children: ReactNode }) {
-  return <div className="selection-hint"><span aria-hidden className="text-[2em]">◇</span><p>{children}</p></div>
+  return <div className="selection-hint"><EquipmentArt kind="bag" className="journey-empty-art" /><p>{children}</p></div>
 }

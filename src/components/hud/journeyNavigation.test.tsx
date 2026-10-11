@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { ActionDock } from './ActionDock'
+import { ActionDock, SheetMais } from './ActionDock'
 import { ColunaDeAtalhos, TELAS_NA_COLUNA } from './ColunaDeAtalhos'
 import { useUiStore } from '@/stores/uiStore'
 import { useWorldStore } from '@/stores/worldStore'
@@ -27,7 +27,8 @@ describe('navegação Jornada', () => {
     useUiStore.setState({ viewportWidth: width, viewportHeight: width === 844 ? 390 : 844 })
     render(<ActionDock />)
     const nomes = within(screen.getByRole('navigation')).getAllByRole('button').map(b => b.getAttribute('aria-label'))
-    expect(nomes).toEqual(['Equipe', 'Mochila', 'Pokedex', 'Hunt', 'Loja', 'Hospital', 'Mercado', 'Mais'])
+    expect(nomes).toEqual(['Equipe', 'Mochila', 'Pokédex', 'Hunt', 'Loja', 'Hospital', 'Mercado', 'Mais'])
+    expect(screen.getByRole('navigation').querySelectorAll('.equipment-art')).toHaveLength(8)
     expect(within(screen.getByRole('navigation')).getByText('Hospital')).toBeTruthy()
   })
   it('troca menus em um toque e esconde só os controles visuais de combate', () => {
@@ -65,5 +66,16 @@ describe('navegação Jornada', () => {
     expect(coluna.textContent).not.toContain('Especialidades')
     fireEvent.click(screen.getByRole('button', { name: 'Diário' }))
     expect(useDiarioStore.getState().painelAberto).toBe(true)
+  })
+  it('agrupa o guia sem perder destinos ou repetir os atalhos fixos', () => {
+    useUiStore.setState({ moreOpen: true })
+    render(<div id="camada-hud"><SheetMais /></div>)
+    const social = screen.getByRole('region', { name: 'Encontrar outros treinadores' })
+    expect(within(social).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Social', 'Troca', 'Ranking'])
+    const tools = screen.getByRole('region', { name: 'Consultar e ajustar' })
+    expect(within(tools).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Bestiário', 'Wiki', 'Tutoriais', 'Ajustes'])
+    fireEvent.click(within(tools).getByRole('button', { name: 'Wiki' }))
+    expect(useUiStore.getState().currentScreen).toBe('wiki')
+    expect(useUiStore.getState().moreOpen).toBe(false)
   })
 })
