@@ -419,7 +419,7 @@ function GavetaDetalhes({ comTreinador }: { comTreinador: boolean }) {
 
 function Taxa({ rotulo, valor, cor }: { rotulo: string; valor: string; cor?: string }) {
   return (
-    <div className="flex flex-col gap-[.1em] rounded-[.5em] bg-n900/60 py-[.3em]">
+    <div className="flex flex-col gap-[.1em] rounded-[.5em] bg-menu-wash py-[.3em]">
       <span className="text-[.8em] text-n500">{rotulo}</span>
       <b className="font-medium tabular-nums" style={cor ? { color: cor } : undefined}>{valor}</b>
     </div>

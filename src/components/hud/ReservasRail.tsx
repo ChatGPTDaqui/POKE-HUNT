@@ -217,7 +217,7 @@ export function ReservasRail() {
                   transform: arrastando ? `translateY(${arrasto.deslocamento}px)` : undefined,
                 }}
                 className={cn(
-                  'flex select-none items-center gap-[.3em] border bg-n900/85 p-[.2em] pr-[.4em]',
+                  'journey-reserve flex select-none items-center gap-[.3em] border bg-menu-paper p-[.2em] pr-[.4em]',
                   cantoDoBloco,
                   'backdrop-blur-[2px] transition-colors',
                   arrastando ? 'z-10 border-primary opacity-90 shadow-lg' : 'border-n800 hover:border-n600',

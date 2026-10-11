@@ -7,6 +7,7 @@ import { createRng } from '@/core/rng'
 import { createPlayerEntity } from '@/engine/entity'
 import { MAPS } from '@/data/maps'
 import { MemoryRouter } from 'react-router-dom'
+import { ThemeProvider } from '@/components/game/ThemeProvider'
 
 const fetchLocal = window.fetch.bind(window)
 window.fetch = (input, init) => {
@@ -67,6 +68,7 @@ queryClient.setQueryData(['social'], { conversas: [], avisos: [], amigos: [], bl
 function Bancada() {
   const [scale, setScale] = useState(1)
   const [view, setView] = useState('jogo')
+  const vidroFosco = useUiStore(s => s.vidroFosco)
   return <QueryClientProvider client={queryClient}>
     <div style={{ height: 44, display: 'flex', gap: 8, alignItems: 'center', paddingInline: 8, background: '#203c42', color: '#fffefa', fontSize: 12 }}>
       <select aria-label="Superfície da bancada" value={view} onChange={e => setView(e.target.value)} style={{ minWidth: 0, flex: 1 }}>
@@ -77,7 +79,7 @@ function Bancada() {
         {[.7, 1, 1.4].map(v => <option key={v}>{v}</option>)}
       </select></label>
     </div>
-    {view === 'jogo' ? <div className="hud-root" data-toque={innerWidth < 900 ? '1' : undefined}
+    {view === 'jogo' ? <div className="hud-root" data-blur={vidroFosco ? 'off' : undefined} data-toque={innerWidth < 900 ? '1' : undefined}
       style={{ position: 'fixed', inset: '44px 0 0', overflow: 'hidden', background: 'radial-gradient(ellipse at center, #496e45, #1c3933)', '--hud-scale': scale } as CSSProperties}>
       <div id="camada-hud" className="hud-safe"><HudLayer /></div>
       <ScreenOverlay /><PokeProfileModal /><PerfilTreinador /><ConfirmDialog />
@@ -92,4 +94,4 @@ function Bancada() {
     </MemoryRouter></div>}
   </QueryClientProvider>
 }
-createRoot(document.getElementById('root')!).render(<Bancada />)
+createRoot(document.getElementById('root')!).render(<ThemeProvider><Bancada /></ThemeProvider>)

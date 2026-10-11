@@ -148,7 +148,7 @@ export function HudLayer() {
               normal com reservas. */}
           <div className="flex items-start gap-[.4em] pr-[60px]">
             <div className="min-w-0 shrink-0">
-              <span className="rounded-r bg-n900/85 px-[.5em] text-[.7em] text-n300">Companheiros</span>
+              <span className="rounded-r bg-menu-paper px-[.5em] text-[.7em] text-menu-ink">Companheiros</span>
               <ReservasRail />
             </div>
             <div className="min-w-0 flex-1"><ContextoDaHunt /></div>

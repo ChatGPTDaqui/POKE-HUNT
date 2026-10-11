@@ -32,13 +32,13 @@ export const TABS: { key: ChatTab; label: string }[] = [
 ]
 
 const TYPE_COLOR: Record<ToastType, string> = {
-  gold: 'var(--color-gold)',
-  levelup: '#7dd3fc',
-  success: 'var(--color-ok)',
-  error: 'var(--color-bad)',
-  'capture-success': 'var(--color-ok)',
-  'capture-fail': 'var(--color-warn)',
-  info: 'var(--color-n300)',
+  gold: 'var(--chat-gold, var(--color-gold))',
+  levelup: 'var(--chat-level, #7dd3fc)',
+  success: 'var(--chat-success, var(--color-ok))',
+  error: 'var(--chat-error, var(--color-bad))',
+  'capture-success': 'var(--chat-success, var(--color-ok))',
+  'capture-fail': 'var(--chat-gold, var(--color-warn))',
+  info: 'var(--chat-info, var(--color-n300))',
 }
 
 function horaDe(iso: string): string {
@@ -60,7 +60,7 @@ function LinkAnexo({ anexo }: { anexo: AnexoChat }) {
     : 'var(--color-gold)'
   return (
     <Explicacao
-      className="cursor-help rounded-[.3em] border px-[.3em] whitespace-nowrap"
+      className="journey-chat-attachment cursor-help rounded-[.3em] border px-[.3em] whitespace-nowrap"
       estilo={{ borderColor: cor, color: cor }}
       conteudo={
         anexo.kind === 'poke' ? (

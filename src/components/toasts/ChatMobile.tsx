@@ -27,13 +27,13 @@ export function ChatMobile() {
 // feedback que sobra, entao a cor tem que carregar a mesma informacao que
 // carregava no toast (verde capturou, laranja escapou, vermelho falhou).
 const COR_POR_TIPO: Record<string, string> = {
-  gold: 'var(--color-gold)',
-  levelup: '#7dd3fc',
-  success: 'var(--color-ok)',
-  error: 'var(--color-bad)',
-  'capture-success': 'var(--color-ok)',
-  'capture-fail': 'var(--color-warn)',
-  info: 'var(--color-n300)',
+  gold: 'var(--chat-gold, var(--color-gold))',
+  levelup: 'var(--chat-level, #7dd3fc)',
+  success: 'var(--chat-success, var(--color-ok))',
+  error: 'var(--chat-error, var(--color-bad))',
+  'capture-success': 'var(--chat-success, var(--color-ok))',
+  'capture-fail': 'var(--chat-gold, var(--color-warn))',
+  info: 'var(--chat-info, var(--color-n300))',
 }
 
 function Ticker({ onOpen }: { onOpen: () => void }) {

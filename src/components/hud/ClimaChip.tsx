@@ -224,7 +224,7 @@ export function ClimaChip({ embutido = false, soIcone = false }: ClimaChipProps 
           {aparencia.simbolo}
         </span>
         {!soIcone && (
-          <span className={cn('text-[.75em] font-medium', aparencia.cor)}>{aparencia.nome}</span>
+          <span className={cn('journey-weather-label text-[.75em] font-medium', aparencia.cor)}>{aparencia.nome}</span>
         )}
         {turnos != null && !soIcone && (
           // A contagem so aparece no clima de golpe. No de ambiente ela seria

@@ -1,0 +1,105 @@
+/* Uma composição, dois materiais. Neutros de combate/tipos/raridades intactos. */
+:root[data-ui-theme='dark'] {
+  --journey-paper: #12161df5;
+  --journey-card: #1c222cf5;
+  --journey-wash: #252e39;
+  --journey-ink: #f2f1eb;
+  --journey-muted: #b2bdc9;
+  --journey-line: #ffffff26;
+  --journey-leaf: #8dd5ac;
+  --journey-primary: #ffac91;
+  --journey-on-primary: #2c1813;
+  --journey-focus: #9ed4ee;
+  --journey-warning: #f5ca76;
+  --journey-success: #8dd5ac;
+  --journey-danger: #ff9b91;
+  --journey-exp: #9ec8ff;
+  --journey-backdrop: blur(20px) saturate(1.2);
+}
+
+:root[data-ui-theme='light'] {
+  --background: #faf7ef;
+  --foreground: #203c42;
+  --card: #fffefa;
+  --card-foreground: #203c42;
+  --popover: #fffefa;
+  --popover-foreground: #203c42;
+  --primary: #ad3d2c;
+  --primary-foreground: #fffefa;
+  --secondary: #e6eddf;
+  --secondary-foreground: #203c42;
+  --muted: #e6eddf;
+  --muted-foreground: #576b6c;
+  --accent: #e6eddf;
+  --accent-foreground: #203c42;
+  --border: #d6dcd1;
+  --input: #576b6c;
+  --ring: #476f83;
+}
+
+:root[data-ui-theme='light'] .hud-root {
+  --vidro-tinta: #faf7ef;
+  --vidro-fio: #203c4233;
+  --vidro-luz: inset 0 1px 0 #ffffffb3;
+  --vidro-sombra: 0 .5em 1.5em -.6em #162c2e55;
+}
+
+/* Só superfícies da interface: não recolore sprites nem textos sobre o mapa. */
+:root[data-ui-theme='light'] :is(.vidro, .vidro-flutua, .vidro-alto, .hud-surface) {
+  color: var(--journey-ink);
+  background: color-mix(in srgb, var(--vidro-tinta) 96%, transparent);
+}
+:root[data-ui-theme='light'] :is(.vidro, .vidro-flutua, .vidro-alto, .hud-surface) :is(.text-n100, .text-n200, .text-n300, .text-foreground) {
+  color: var(--journey-ink);
+}
+:root[data-ui-theme='light'] :is(.vidro, .vidro-flutua, .vidro-alto, .hud-surface) :is(.text-n400, .text-n500, .text-n600) {
+  color: var(--journey-muted);
+}
+:root[data-ui-theme='light'] :is(.vidro, .vidro-flutua, .vidro-alto) :is(.text-gold, .text-warn) {
+  color: var(--journey-warning);
+}
+:root[data-ui-theme='light'] :is(.vidro, .vidro-flutua, .vidro-alto) .text-diamond { color: #006e67; }
+:root[data-ui-theme='light'] .journey-nav-slot[aria-pressed='true'] {
+  background: var(--journey-wash);
+  color: var(--journey-leaf);
+}
+:root[data-ui-theme='light'] .journey-reserve { border-color: var(--journey-line); }
+:root[data-ui-theme='light'] .journey-reserve :is(.text-n200, .text-n300) { color: var(--journey-ink); }
+:root[data-ui-theme='light'] .journey-reserve :is(.text-n400, .text-n500) { color: var(--journey-muted); }
+:root[data-ui-theme='light'] .journey-weather-label { color: var(--journey-exp); }
+:root[data-ui-theme='light'] [data-journey-hunt] > span:first-child {
+  background: var(--journey-wash);
+  color: var(--journey-leaf);
+}
+:root[data-ui-theme='light'] [data-journey-hunt][aria-pressed='true'] > span:first-child {
+  background: var(--journey-primary);
+  color: var(--journey-on-primary);
+}
+:root[data-ui-theme='light'] .journey-chat :is(input, button[type='submit']) {
+  color: var(--journey-ink);
+  background: var(--journey-card);
+  border-color: var(--journey-line);
+}
+:root[data-ui-theme='light'] .journey-chat-header { border-color: var(--journey-line); }
+:root[data-ui-theme='light'] :is(.journey-chat-tab, .journey-chat-control) { color: var(--journey-muted); }
+:root[data-ui-theme='light'] .journey-chat-tab.is-active { color: var(--journey-primary); }
+:root[data-ui-theme='light'] .journey-chat input::placeholder { color: var(--journey-muted); }
+:root[data-ui-theme='light'] :is(.journey-chat, .hud-ticker-linha) {
+  --chat-gold: var(--journey-warning);
+  --chat-info: var(--journey-ink);
+  --chat-level: var(--journey-exp);
+  --chat-success: var(--journey-success);
+  --chat-error: var(--journey-danger);
+}
+/* Raridade é um dado, conserva a cor e ganha uma base de contraste estável. */
+.journey-chat-attachment { background: var(--journey-data-ground); }
+:root[data-ui-theme='light'] .hud-root :is(button, a, input):focus-visible {
+  outline: 2px solid var(--journey-focus);
+  outline-offset: 2px;
+}
+/* Sem desfoque significa também painéis Dark Glass opacos. */
+:root[data-ui-theme='dark'] .hud-root[data-blur='off'] [data-appearance='journey'] {
+  --journey-paper: #12161d;
+  --journey-card: #1c222c;
+  --journey-backdrop: none;
+}
