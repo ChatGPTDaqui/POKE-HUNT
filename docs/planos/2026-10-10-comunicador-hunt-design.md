@@ -26,7 +26,7 @@ Revisão explícita: janela aberta sem título Conversas; canais e controles em 
 única faixa de 28px; alvos de controle 32×28px. Revisão seguinte do usuário:
 reduzir ainda mais a altura, com linhas de mensagens de 17px e sem espaçamento
 vertical extra. Chat compacto mobile de 82px, preservando três linhas completas.
-Nome Conversas somente
+Nome vigente: Chat (revisão do usuário), somente
 no botão minimizado. Priorizar área útil de mensagens, sem duas linhas de cabeçalho.
 No PC, chat à esquerda dos golpes; no mobile, acima dos golpes em espaço próprio.
 O acompanhamento não cobre Pokémon, navegação ou atalhos. Em pouca altura,
