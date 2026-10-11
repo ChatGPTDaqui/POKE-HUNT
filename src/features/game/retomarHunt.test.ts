@@ -69,6 +69,11 @@ vi.mock('@/data/remote/servidor', () => ({
 vi.mock('@/engine/controller', () => ({
   controller: { enterMap: (...args: unknown[]) => enterMap(...args) },
 }))
+const ordem: string[] = []
+const abrirDia = vi.fn(async () => { ordem.push('abrir_dia') })
+vi.mock('@/stores/diarioStore', () => ({
+  useDiarioStore: { getState: () => ({ abrir: () => abrirDia() }) },
+}))
 
 describe('assentarUmaVez', () => {
   beforeEach(() => {
@@ -156,9 +161,25 @@ describe('retomarHuntSeHavia', () => {
     const { retomarHuntSeHavia } = await import('./bootDaSessao')
 
     expect(await retomarHuntSeHavia()).toBe(false)
-    expect(assentarSessaoPendente).toHaveBeenCalledTimes(1)
+    await vi.waitFor(() => expect(assentarSessaoPendente).toHaveBeenCalledTimes(1))
     expect(enterMap).not.toHaveBeenCalled()
     resolver(null)
+  })
+
+  it('abre o Diário ANTES de creditar a caçada offline (base de abates do dia)', async () => {
+    ordem.length = 0
+    assentarSessaoPendente.mockImplementation(async () => { ordem.push('assentar'); return null })
+    const { assentarUmaVez } = await import('./bootDaSessao')
+    await assentarUmaVez()
+    expect(ordem).toEqual(['abrir_dia', 'assentar'])
+  })
+
+  it('falha do Diário não segura o boot', async () => {
+    abrirDia.mockRejectedValueOnce(new Error('rede'))
+    assentarSessaoPendente.mockResolvedValue(null)
+    const { assentarUmaVez } = await import('./bootDaSessao')
+    await expect(assentarUmaVez()).resolves.toBeNull()
+    expect(assentarSessaoPendente).toHaveBeenCalledTimes(1)
   })
 
   it('cacada encerrada com o POKE no chao: zera o mapa em vez de reentrar', async () => {

@@ -17,7 +17,7 @@ import { pedirAcao, liquidar } from '@/data/remote/autoridade'
 import { Meter } from '@/components/game/controls'
 import { textoDaRecompensa } from './CartaoDoPasso'
 
-async function coletarTudo(pendentes: MarcoDeTreinador[]): Promise<void> {
+export async function coletarTudo(pendentes: MarcoDeTreinador[]): Promise<void> {
   // O nível recém-subido precisa estar gravado: a RPC lê `players.trainer_level`.
   await liquidar().catch(() => {})
   const soma = somaDasRecompensas(pendentes)
@@ -33,7 +33,16 @@ async function coletarTudo(pendentes: MarcoDeTreinador[]): Promise<void> {
   useToastStore.getState().pushToast(`Recompensa de treinador: ${textoDaRecompensa(soma)}`, 'success', 'world')
 }
 
-export function FaixaDoTreinador() {
+/** Marcos de treinador alcançados e não coletados. */
+export function usePendentesDeTreinador(): MarcoDeTreinador[] {
+  const carregado = usePassosStore(s => s.carregado)
+  const coletados = usePassosStore(s => s.niveisColetados)
+  const nivel = useGameStateStore(s => s.trainer.level)
+  return useMemo(() => carregado ? situacaoDosMarcos(nivel, coletados).pendentes : [], [carregado, nivel, coletados])
+}
+
+/** `modo`: quem decide é a `FaixaDePremios` — "um objetivo por vez" no topo. */
+export function FaixaDoTreinador({ modo = 'tudo' }: { modo?: 'tudo' | 'so-pronto' | 'nada' }) {
   const carregado = usePassosStore(s => s.carregado)
   const coletados = usePassosStore(s => s.niveisColetados)
   const passosFeitos = usePassosStore(s => s.reivindicados.size >= PRIMEIROS_PASSOS.length)
@@ -41,7 +50,7 @@ export function FaixaDoTreinador() {
   const { pendentes, proximo } = useMemo(() => situacaoDosMarcos(trainer.level, coletados), [trainer.level, coletados])
   const [coletando, setColetando] = useState(false)
 
-  if (!carregado) return null
+  if (!carregado || modo === 'nada') return null
 
   if (pendentes.length > 0) {
     const soma = somaDasRecompensas(pendentes)
@@ -63,7 +72,7 @@ export function FaixaDoTreinador() {
     )
   }
 
-  if (!passosFeitos || !proximo) return null
+  if (modo === 'so-pronto' || !passosFeitos || !proximo) return null
   // Barra do marco anterior até o próximo, contando a fração do nível atual.
   const anterior = [...MARCOS_DE_TREINADOR].reverse().find(m => m.nivel <= trainer.level)?.nivel ?? 1
   const { into, needed } = trainerExpProgress(trainer)
