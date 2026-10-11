@@ -7,6 +7,14 @@ import { GUIDE_GROUPS, PRIMARY, SHORTCUTS, filterItems } from './data'
 afterEach(cleanup)
 
 describe('protótipo isolado da Jornada do Treinador', () => {
+  it('mantém quatro slots de golpes, marca só com Poké Bola e Hospital apenas na barra', () => {
+    render(<App />)
+    expect(within(screen.getByRole('group', { name: 'Quatro slots de golpes demonstrativos' })).getAllByRole('button')).toHaveLength(4)
+    expect(screen.getByRole('img', { name: 'Poké Bola — ícone do jogo' }).textContent).toBe('')
+    expect(screen.getAllByRole('button', { name: 'Hospital' })).toHaveLength(1)
+    expect(screen.getByText('Mata · expedição').closest('.hunt-context')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Hunt' }).classList.contains('hunt-nav')).toBe(true)
+  })
   it('preserva os oito destinos inferiores e sua ordem original, sem botão de voltar', () => {
     render(<App />)
     expect(screen.getByText('PROTÓTIPO VISUAL')).toBeTruthy()
