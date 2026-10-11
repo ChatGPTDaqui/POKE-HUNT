@@ -12,6 +12,16 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Faixa única de prêmios e base do dia estável.
+  {
+    version: '8.01',
+    date: '2026-10-10',
+    title: 'Topo mais limpo e metas do dia certas',
+    highlights: [
+      'Os prêmios no topo da tela viraram uma faixa só: com dois ou mais prontos (treinador, login do mês, metas do dia), aparece "N prêmios para coletar" com Coletar tudo, em vez de três faixas empilhadas cobrindo o campo.',
+      'As metas do dia passam a contar sempre a caçada que rodou com o jogo fechado até você voltar. Antes, dependendo de qual parte do jogo carregava primeiro, esses abates às vezes ficavam de fora.',
+    ],
+  },
   // Comemoração de nível de treinador avisa o prêmio liberado.
   {
     version: '8.00',
