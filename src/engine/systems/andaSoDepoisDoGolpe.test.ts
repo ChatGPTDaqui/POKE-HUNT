@@ -1,10 +1,10 @@
-// O POKE FICA PARADO UM TEMPO FIXO DEPOIS DO GOLPE (02/10, fixo desde 03/10).
+// O POKE SO ANDA DEPOIS DO ULTIMO IMPACTO DO PROPRIO GOLPE (11/10).
 //
-// Pedido do dono: "o poke para rapidamente e ja comeca a andar de novo caso ele
-// tenha derrotado o inimigo, isso faz com que a skill fique para tras". A trava
-// era so a pose (0,5 s); o efeito nasce quando o golpe pousa e dura mais 0,6 a
-// 2,1 s. Agora o POKE fica parado a pose E mais `TRAVA_DEPOIS_DO_GOLPE` (0,7 s),
-// igual pra todo golpe — o dono preferiu um tempo padrao a um por coreografia.
+// Pedido do dono: "o poke nao andar sem a animacao do golpe ter concluido,
+// mesmo que ele tenha derrotado o poke inimigo e queira ir para o proximo".
+// "Concluido" = ate o ULTIMO impacto da coreografia + folga (escolha do dono;
+// fumaca/brasas que ainda esfriam podem ficar pra tras). Substitui a trava fixa
+// de 0,7 s depois do pouso (03/10). O instante sai de engine/tempoDoGolpe.ts.
 //
 // O cenario e o caso exato da queixa: o golpe DERROTA o alvo, e ha outro
 // inimigo longe pra onde o POKE quer andar. Mede, no motor inteiro
@@ -20,8 +20,9 @@ import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld, stepWorld } from '../simulation'
-import { ATTACK_ANIM_DURATION } from './animationSystem'
-import { TRAVA_DEPOIS_DO_GOLPE } from './combatSystem'
+import { tempoDoGolpe, FOLGA_DEPOIS_DO_IMPACTO } from '../tempoDoGolpe'
+import { IMPACTOS_DOS_GOLPES } from '@/data/generated/impactosDosGolpes.generated'
+import { poseDeAtaque } from './animationSystem'
 
 const PASSO = 1 / 60
 const GOLPE = 'ember'
@@ -84,22 +85,25 @@ function ateAndar(silent: boolean): number {
   return Infinity
 }
 
-describe('o POKE fica parado depois do golpe (02/10)', () => {
-  const efeito = TRAVA_DEPOIS_DO_GOLPE
+describe('o POKE so anda depois do ultimo impacto do golpe (11/10)', () => {
+  const tempo = tempoDoGolpe('charmander', poseDeAtaque(false), GOLPE)
 
-  it('a trava existe (anti-teste-vacuo)', () => {
-    expect(efeito).toBeGreaterThan(0.3)
+  it('o golpe tem impacto depois do primeiro (anti-teste-vacuo)', () => {
+    // Ember: duas brasas, a ultima bem depois da primeira — o caso em que o
+    // POKE saia andando com o golpe ainda no ar.
+    const [primeiro, derradeiro] = IMPACTOS_DOS_GOLPES[GOLPE]
+    expect(derradeiro).toBeGreaterThan(primeiro)
+    expect(tempo.soltura).toBeCloseTo(tempo.apice + derradeiro / 1000 + FOLGA_DEPOIS_DO_IMPACTO, 6)
   })
 
   it.each([
     { modo: 'cliente', silent: false },
     { modo: 'servidor (silent, sem efeito nenhum)', silent: true },
-  ])('$modo: fica parado a pose E a trava, e anda logo depois', ({ silent }) => {
+  ])('$modo: derrota o alvo e so anda depois do ultimo impacto', ({ silent }) => {
     const andou = ateAndar(silent)
-    // Antes: andava logo depois da pose (~0,5 s), com o efeito no meio.
-    expect(andou, 'andou antes da trava acabar').toBeGreaterThanOrEqual(ATTACK_ANIM_DURATION + efeito - 2 * PASSO)
+    expect(andou, 'andou antes do ultimo impacto').toBeGreaterThanOrEqual(tempo.soltura - 2 * PASSO)
     // E nao fica preso alem disso.
-    expect(andou, 'ficou parado alem da trava').toBeLessThan(ATTACK_ANIM_DURATION + efeito + 0.25)
+    expect(andou, 'ficou parado alem da soltura').toBeLessThan(tempo.soltura + 0.25)
   })
 
   it('cliente e servidor travam o MESMO tempo', () => {

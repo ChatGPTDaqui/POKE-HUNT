@@ -55,7 +55,8 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange, clamp } from '@/core/random'
-import { ATTACK_ANIM_DURATION, registrarDanoParaHurt, triggerAttackAnim } from './animationSystem'
+import { poseDeAtaque, registrarDanoParaHurt, triggerAttackAnim } from './animationSystem'
+import { tempoDoGolpe, type TempoDoGolpe } from '../tempoDoGolpe'
 // Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
 // turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
 // dura 30 abates, entao 5 turnos de clima passavam antes de qualquer coisa
@@ -65,7 +66,7 @@ import { CLIMA_DE_GOLPE_TURNOS } from './climaAmbiente'
 import { reunindoParaLure } from './lureSystem'
 import { executarRodadaDeDuelo, tickRodadaDeDuelo } from './rodadaDeDuelo'
 import { ehAlvoPrioritario } from './movementSystem'
-import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
+import { createWorldEffect, type CreateWorldEffectParams, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
   startCooldown, canAct, startGlobalCooldown, takeDamage, heal, getMaxHp, releaseEffectLane, findEntityById,
@@ -78,18 +79,9 @@ import type {
 // Quanto tempo depois do golpe disparar a resolucao pousa: arte do golpe,
 // numero de dano, status, tratamento de derrota.
 //
-// PH-175: de volta a `ATTACK_ANIM_DURATION` (0,5s) — sequencial, a pose
-// termina, so ENTAO a arte do golpe/resolucao acontece. Chegou a ser 0,3s de
-// proposito (pose e arte sobrepostas nos ultimos 0,2s, pra parecer o golpe
-// conectando), mas pedido explicito revertendo aquilo: a sobreposicao lia como
-// incoerente, nao como golpe conectando.
-//
-// Nada mais depende do valor mudar aqui: `MIN_ACTION_GAP` (o TURNO, 3s desde a
-// PH-376) continua sendo
-// o que impede golpe empilhado, e o travamento de movimento ja lia
-// `attackAnimTimer` (tambem `ATTACK_ANIM_DURATION`) — os dois relogios voltam
-// a bater.
-const HIT_LAND_DELAY = ATTACK_ANIM_DURATION
+// 11/10: o pouso NAO e mais um atraso fixo. O dano cai no primeiro impacto do
+// VFX, que nasce no apice da pose da especie — ver engine/tempoDoGolpe.ts. A
+// sequencia "pose inteira, depois arte" da PH-175 virou "arte no apice da pose".
 
 // Tempo de tela de um efeito de golpe.
 //
@@ -2049,20 +2041,131 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
 
 // Contador no WorldState, nao em modulo — ver a nota em types.ts#WorldCounters.
 
-// Enfileira um hit pra acontecer HIT_LAND_DELAY segundos a partir de agora —
-// resolveHit() aplica o dano/efeito/derrota real quando esse timer zera, em
-// sincronia com a pose Shoot/Charge terminando.
-function queueHit(world: WorldState, attacker: WorldEntity, target: WorldEntity, ability: Ability): void {
-  world.pendingHits.push({ id: `hit-${world.counters.pendingHit++}`, timer: HIT_LAND_DELAY, attackerId: attacker.id, targetId: target.id, ability })
+// Comeca a pose do golpe com a duracao REAL da arte da especie e devolve a
+// linha do tempo dele (apice, impacto, soltura). Mesmo caminho pro jogador e
+// pro selvagem, livre e duelo.
+function iniciarPoseDoGolpe(world: WorldState, atacante: PlayerEntity | EnemyEntity, ability: Ability, alvo?: WorldEntity): TempoDoGolpe {
+  const duelo = world.mapDef?.encarada === true
+  const area = ability.target === 'aoe'
+  const tempo = tempoDoGolpe(atacante.poke.speciesId, poseDeAtaque(area, duelo), ability.id)
+  triggerAttackAnim(atacante, area, alvo, duelo, tempo.pose)
+  return tempo
 }
 
-// Golpes AOE ganham EXATAMENTE UM anel visual, centrado no atacante,
-// pousando no mesmo instante que os hits de dano por-alvo. Enfileirado do
-// mesmo jeito que um hit de verdade (sem `target`) pra pousar em sincronia
-// com a pose de ataque terminando; resolveHit trata `isAoeVisual` como caso
-// especial e pula o anel por-alvo abaixo.
-function queueAoeVisual(world: WorldState, attacker: WorldEntity, ability: Ability): void {
-  world.pendingHits.push({ id: `hit-${world.counters.pendingHit++}`, timer: HIT_LAND_DELAY, attackerId: attacker.id, targetId: null, ability, isAoeVisual: true })
+/**
+ * O POKE nao anda enquanto o proprio golpe nao bateu pela ultima vez — mesmo
+ * que o alvo ja tenha caido e ele queira ir pro proximo (pedido do dono, 11/10).
+ * Armada no DISPARO e fora do `silent`: o servidor re-simula o movimento e tem
+ * que parar o POKE igual ao cliente. Golpe de status nao trava (nao tem
+ * coreografia que fique pra tras); so a pose segura a posicao.
+ * Substitui a trava fixa de 0,7 s depois do pouso (03/10).
+ */
+function travarAteOGolpeAcabar(atacante: PlayerEntity | EnemyEntity, ability: Ability, tempo: TempoDoGolpe): void {
+  const trava = ability.target === 'aoe' ? isDamagingAbility(ability) : ability.power > 0
+  if (trava && tempo.soltura > (atacante.travaDoGolpe ?? 0)) atacante.travaDoGolpe = tempo.soltura
+}
+
+function removerEfeitoDoGolpe(world: WorldState, efeitoId: string | undefined): void {
+  if (efeitoId) world.effects = world.effects.filter((e) => e.id !== efeitoId)
+}
+
+// O VFX de golpe de alvo unico. Nasce no DISPARO com `delay` = apice (o golpe
+// sai junto do quadro de ataque) ou, quando o disparo nao pode saber o que vai
+// acontecer (golpe de status que so mostra arte se pegou, Sleep Talk trocando o
+// golpe), na resolucao com `delay` 0.
+function efeitoDoGolpeUnico(
+  attacker: WorldEntity, local: WorldEntity, ability: Ability,
+  extra: { delay: number; isCrit?: boolean; acertosVisuais?: number },
+): CreateWorldEffectParams {
+  // Golpe em si mesmo (Danca das Espadas e afins) nao tem direcao: dx=dy=0
+  // sairia como angulo 0 e apontaria a arte pra direita sem motivo.
+  const mesmoLugar = local.x === attacker.x && local.y === attacker.y
+  return {
+    type: 'abilityEffect',
+    x: local.x, y: local.y,
+    targetX: local.x, targetY: local.y - local.radius * 0.6,
+    anguloDeAtaque: mesmoLugar ? undefined : Math.atan2(local.y - attacker.y, local.x - attacker.x),
+    // Mesma altura de "peito" do alvo logo acima, pra o jato sair e chegar
+    // no mesmo plano. So o VFX procedural le (render/vfx).
+    origemX: attacker.x, origemY: attacker.y - attacker.radius * 0.6,
+    color: colorForType(ability.type),
+    isAoe: false,
+    delay: extra.delay,
+    // Critico sobe um tier visual (D7 do spec de VFX) — so quando o efeito nasce
+    // na resolucao. O que nasce no apice ainda nao sabe se vai ser critico.
+    isCrit: extra.isCrit || undefined,
+    acertosVisuais: extra.acertosVisuais,
+    duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
+    elementType: ability.type,
+    abilityId: ability.id,
+    // PH-416: a direcao E o atributo saem do MESMO `statChanges[0]`, por
+    // `estagioDoGolpe`. Derivar os dois por regras diferentes produziria par
+    // torto — escudo com motes subindo num golpe que baixa Defesa.
+    statusDirection: !isDamagingAbility(ability)
+      ? (estagioDoGolpe(ability.statChanges)?.direcao ?? 'diminui')
+      : undefined,
+    statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : undefined,
+    // A arte pousa em cima de `local` (o alvo, ou quem de fato recebeu o
+    // status) e acompanha ele enquanto dura.
+    seguir: local,
+    // Arte direcional (PH-110) e um risco que LIGA atacante e alvo: congelar
+    // uma ponta descola o rastro do punho. Essas reapontam a cada frame.
+    apontarPara: mesmoLugar || !ehDirecional(ability.id) ? undefined : attacker,
+  }
+}
+
+// O UNICO anel de um golpe em area, centrado em quem lancou (e o acompanha).
+function anelDoGolpeEmArea(attacker: WorldEntity, ability: Ability, delay: number): CreateWorldEffectParams {
+  return {
+    type: 'abilityEffect',
+    x: attacker.x, y: attacker.y,
+    targetX: attacker.x, targetY: attacker.y - attacker.radius * 0.6,
+    origemX: attacker.x, origemY: attacker.y - attacker.radius * 0.6,
+    color: colorForType(ability.type),
+    isAoe: true,
+    delay,
+    duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
+    worldSize: (ability.radius ?? 0) * 2,
+    elementType: ability.type,
+    abilityId: ability.id,
+    // Golpe de status em area troca pra arte de buff/debuff mesmo que acerte 0
+    // alvos (mesmo espirito de announceAbility). PH-416: ver efeitoDoGolpeUnico.
+    statusDirection: !isDamagingAbility(ability)
+      ? (estagioDoGolpe(ability.statChanges)?.direcao ?? 'diminui')
+      : undefined,
+    statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : undefined,
+    seguir: attacker,
+  }
+}
+
+// Enfileira o hit pra pousar no PRIMEIRO impacto do VFX (`tempo.impacto`).
+// Golpe de dano de alvo unico ja cria o VFX aqui, nascendo no apice da pose, e
+// sorteia os acertos de golpe multiplo pra o desenho saber quantos sao.
+function queueHit(world: WorldState, attacker: WorldEntity, target: WorldEntity, ability: Ability, tempo: TempoDoGolpe, silent: boolean): void {
+  const unico = ability.target !== 'aoe'
+  const acertos = unico ? quantidadeDeAcertos(world.rng, ability) : undefined
+  let efeitoId: string | undefined
+  if (unico && ability.power > 0 && !silent) {
+    const efeito = createWorldEffect(world.counters, efeitoDoGolpeUnico(attacker, target, ability, {
+      delay: tempo.apice, acertosVisuais: acertos && acertos > 1 ? acertos : undefined,
+    }))
+    world.effects.push(efeito)
+    efeitoId = efeito.id
+  }
+  world.pendingHits.push({ id: `hit-${world.counters.pendingHit++}`, timer: tempo.impacto, attackerId: attacker.id, targetId: target.id, ability, acertos, efeitoId, pouso: tempo.impacto })
+}
+
+// Golpes AOE ganham EXATAMENTE UM anel visual, centrado no atacante, nascendo
+// no apice e pousando (efeitos do cast) junto dos hits de dano por-alvo.
+// resolveHit trata `isAoeVisual` como caso especial e pula o anel por-alvo.
+function queueAoeVisual(world: WorldState, attacker: WorldEntity, ability: Ability, tempo: TempoDoGolpe, silent: boolean): void {
+  let efeitoId: string | undefined
+  if (!silent) {
+    const efeito = createWorldEffect(world.counters, anelDoGolpeEmArea(attacker, ability, tempo.apice))
+    world.effects.push(efeito)
+    efeitoId = efeito.id
+  }
+  world.pendingHits.push({ id: `hit-${world.counters.pendingHit++}`, timer: tempo.impacto, attackerId: attacker.id, targetId: null, ability, isAoeVisual: true, efeitoId, pouso: tempo.impacto })
 }
 
 // Texto flutuante de status ("Envenenado!", "Acordou"). Reusa o mesmo efeito
@@ -2124,7 +2227,7 @@ function anunciarEstagios(world: WorldState, alvo: WorldEntity, mudancas: StatCh
 
 // Aparece o nome do golpe logo abaixo do usuario no instante em que e
 // usado — separado do numero de dano de queueHit, que so aparece quando o
-// hit realmente pousa HIT_LAND_DELAY segundos depois.
+// hit realmente pousa no impacto do VFX (engine/tempoDoGolpe.ts).
 function announceAbility(world: WorldState, attacker: WorldEntity, ability: Ability): void {
   world.effects.push(createWorldEffect(world.counters, {
     type: 'abilityName',
@@ -2356,7 +2459,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   // PH-176: cooldown NAO arma aqui mais — so no erro/AOE-sem-alvo abaixo, ou
   // em `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`).
   startGlobalCooldown(player, MIN_ACTION_GAP)
-  triggerAttackAnim(player, ability.target === 'aoe', primaryTarget, world.mapDef?.encarada === true)
+  const tempo = iniciarPoseDoGolpe(world, player, ability, primaryTarget)
   announceAbility(world, player, ability)
 
   // Lock-On/Mind Reader (Fase 12): garantia de acerto e "uma vez, contra
@@ -2387,10 +2490,11 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   // Explosao/Autodestruicao mata o proprio atacante — enfileirado antes dos
   // hits de dano real, o guard cancelava o dano no(s) alvo(s) sempre que o
   // recoil terminava de matar quem usou o golpe.
+  travarAteOGolpeAcabar(player, ability, tempo)
   for (const target of targets) {
-    queueHit(world, player, target, ability)
+    queueHit(world, player, target, ability, tempo, silent)
   }
-  if (ability.target === 'aoe') queueAoeVisual(world, player, ability)
+  if (ability.target === 'aoe') queueAoeVisual(world, player, ability, tempo, silent)
 }
 
 function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity, silent: boolean, golpeEscolhido: Ability | null = null): void {
@@ -2418,7 +2522,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   // `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`). Inimigo
   // sempre mira o jogador unico, entao nao existe caso "AOE sem alvo".
   startGlobalCooldown(enemy, MIN_ACTION_GAP)
-  triggerAttackAnim(enemy, ability.target === 'aoe', player, world.mapDef?.encarada === true)
+  const tempo = iniciarPoseDoGolpe(world, enemy, ability, player)
   announceAbility(world, enemy, ability)
 
   const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id
@@ -2431,8 +2535,9 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
 
   // Mesma ordem de executePlayerAction acima — dano real antes do recoil de
   // AOE (PH-10).
-  queueHit(world, enemy, player, ability)
-  if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability)
+  travarAteOGolpeAcabar(enemy, ability, tempo)
+  queueHit(world, enemy, player, ability, tempo, silent)
+  if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability, tempo, silent)
 }
 
 // Credita a morte de `entity` pelo mesmo caminho que qualquer outra —
@@ -2622,7 +2727,7 @@ function trocarEstagios(a: WorldEntity, b: WorldEntity, stats: StatDeEstagio[]):
  *
  * O CANCELAMENTO JA EXISTIA E NUNCA DISPARAVA. `resolveHit` desiste na primeira
  * linha quando o atacante ja esta morto — mas dois golpes disparados no mesmo
- * tick nascem com o MESMO `HIT_LAND_DELAY`, entao pousam no mesmo tick, e a
+ * tick nasciam com o mesmo atraso fixo, entao pousavam no mesmo tick, e a
  * ordem de resolucao era a de ENFILEIRAMENTO. Quem tivesse enfileirado antes
  * batia primeiro, independentemente de Velocidade, e o segundo ja estava com o
  * dano gravado antes de a guarda poder olhar pra ele. Resultado: troca mutua em
@@ -2650,52 +2755,56 @@ function trocarEstagios(a: WorldEntity, b: WorldEntity, stats: StatDeEstagio[]):
  */
 function ordenarPorVelocidade(world: WorldState, hits: PendingHit[]): PendingHit[] {
   if (hits.length < 2) return hits
-  const clima = world.clima?.tipo ?? null
-  const velocidade = new Map<string, number>()
-  for (const hit of hits) {
-    if (velocidade.has(hit.attackerId)) continue
-    const atacante = findEntityById(world.player, world.enemies, hit.attackerId)
-    velocidade.set(hit.attackerId, atacante ? velocidadeEfetiva(atacante, clima) : -Infinity)
-  }
   return [...hits].sort((a, b) => {
-    const diff = (velocidade.get(b.attackerId)! - velocidade.get(a.attackerId)!)
-      * ((world.trickRoomRestante ?? 0) > 0 ? -1 : 1)
+    const diff = rapidezNaOrdem(world, b.attackerId) - rapidezNaOrdem(world, a.attackerId)
     return diff !== 0 ? diff : a.id.localeCompare(b.id)
   })
 }
 
-/**
- * Quanto o POKE fica PARADO depois que o proprio golpe de dano pousa (03/10),
- * pro golpe nao ficar pra tras quando o alvo cai. A pose (`attackAnimTimer`)
- * ja segurou ate o pouso; isto segura mais um tanto, IGUAL pra todo golpe — a
- * pedido do dono, em vez de variar com a coreografia de cada um.
- *
- * Por que 0,7 s: o ultimo impacto das coreografias cai em ate 370 ms na
- * mediana, 520 ms em 75% e 700 ms em 90% dos golpes de alvo unico, e o jato do
- * Flamethrower para de sair da boca em 640 ms. Fumaca e brasas que ainda
- * esfriam no alvo depois disso podem ficar pra tras.
- *
- * A primeira versao (02/10) travava a duracao INTEIRA de cada coreografia
- * (0,6 a 2,1 s) e custava de 4% a 11% dos abates por minuto.
- */
-export const TRAVA_DEPOIS_DO_GOLPE = 0.7
+/** Velocidade efetiva com o sinal do Trick Room — maior age antes. Sumido: -Infinity. */
+function rapidezNaOrdem(world: WorldState, entityId: string): number {
+  const atacante = findEntityById(world.player, world.enemies, entityId)
+  if (!atacante) return -Infinity
+  return velocidadeEfetiva(atacante, world.clima?.tipo ?? null) * ((world.trickRoomRestante ?? 0) > 0 ? -1 : 1)
+}
 
-/** Arma a trava sem nunca encurtar uma maior que ja esteja correndo. Ver movementSystem.ts#naoAnda. */
-function travarDepoisDoGolpe(attacker: PlayerEntity | EnemyEntity): void {
-  if (TRAVA_DEPOIS_DO_GOLPE > (attacker.travaDoGolpe ?? 0)) attacker.travaDoGolpe = TRAVA_DEPOIS_DO_GOLPE
+/**
+ * PH-493 COM POUSO POR GOLPE (11/10). Desde que o dano cai no impacto do VFX,
+ * dois golpes disparados no MESMO tick um contra o outro pousam em instantes
+ * diferentes — o mais lento, com VFX curto, bateria antes e mataria quem era
+ * mais rapido. Aqui o hit do mais lento ESPERA o pouso do mais rapido; os dois
+ * caem no mesmo tick e `ordenarPorVelocidade` + a guarda de `resolveHit`
+ * fazem o resto, como antes. So vale pro par que se ataca e saiu junto: golpe
+ * disparado depois segue o proprio pouso.
+ */
+function esperaOMaisRapido(world: WorldState, hit: PendingHit): boolean {
+  if (hit.targetId == null || hit.pouso === undefined) return false
+  const disparoDoHit = hit.pouso - hit.timer
+  const meu = rapidezNaOrdem(world, hit.attackerId)
+  let espera = 0
+  for (const outro of world.pendingHits) {
+    if (outro.attackerId !== hit.targetId || outro.targetId !== hit.attackerId || outro.pouso === undefined) continue
+    if (Math.abs((outro.pouso - outro.timer) - disparoDoHit) > 1e-6) continue
+    if (rapidezNaOrdem(world, outro.attackerId) <= meu) continue
+    espera = Math.max(espera, outro.timer)
+  }
+  if (espera <= 0) return false
+  hit.timer = espera
+  return true
 }
 
 function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string[], onPlayerFainted: () => void, silent: boolean): void {
   const attacker = findEntityById(world.player, world.enemies, hit.attackerId)
-  if (!attacker) return
+  // Golpe cancelado leva junto o VFX que ja tinha saido no apice.
+  if (!attacker) { removerEfeitoDoGolpe(world, hit.efeitoId); return }
   let { ability } = hit
 
   // Bug relatado explicitamente: um POKE derrotado entre o enfileiramento
   // de um hit (pose de ataque comeca) e o hit realmente pousar
-  // (HIT_LAND_DELAY depois) ainda causava dano. Um atacante desmaiado/morto
+  // (no impacto do VFX) ainda causava dano. Um atacante desmaiado/morto
   // nao pode mais concretizar nada que enfileirou antes de morrer — cancela
-  // a acao inteira, dano incluso.
-  if (isDead(attacker)) return
+  // a acao inteira, dano incluso — e o VFX que ja tinha saido no apice.
+  if (isDead(attacker)) { removerEfeitoDoGolpe(world, hit.efeitoId); return }
 
   // PH-176: golpe que acertou arma o cooldown AQUI, na resolucao, nao no
   // disparo. AOE gera varios `pendingHits` (um por alvo) pro MESMO uso —
@@ -2716,44 +2825,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   }
 
   if (hit.isAoeVisual) {
-    // Trava FORA do `silent`: o servidor re-simula o movimento e tem que parar
-    // o POKE igual ao cliente, mesmo sem efeito nenhum nascendo aqui.
-    if (isDamagingAbility(ability)) travarDepoisDoGolpe(attacker)
-    // O unico anel deste cast AOE, centrado no atacante — ver
-    // queueAoeVisual. Hits individuais por-alvo abaixo pulam desenhar o
-    // proprio. Pulado em silent (PH-11): farm offline/flush headless roda
-    // isto ate 250k vezes por chamada sem ninguem renderizando.
-    if (!silent) {
-      world.effects.push(createWorldEffect(world.counters, {
-        type: 'abilityEffect',
-        x: attacker.x, y: attacker.y,
-        targetX: attacker.x, targetY: attacker.y - attacker.radius * 0.6,
-        origemX: attacker.x, origemY: attacker.y - attacker.radius * 0.6,
-        color: colorForType(ability.type),
-        isAoe: true,
-        duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
-        worldSize: (ability.radius ?? 0) * 2,
-        elementType: ability.type,
-        abilityId: ability.id,
-        // Anel unico do cast AOE inteiro (nao um por alvo) — gate por
-        // `power === 0` aqui e o mais fino que da pra fazer sem duplicar
-        // a checagem de sucesso por alvo (statusVaiPegar corre depois, por
-        // hit individual). Golpe de status em area troca pra arte de
-        // buff/debuff mesmo que acerte 0 alvos de verdade — mesmo espirito
-        // do resto do jogo, que mostra a animacao do golpe independente do
-        // resultado (ver announceAbility).
-        // PH-416: a direcao E o atributo saem do MESMO `statChanges[0]`, por
-        // `estagioDoGolpe`. Derivar os dois por regras diferentes produziria par
-        // torto — escudo com motes subindo num golpe que baixa Defesa.
-        statusDirection: !isDamagingAbility(ability)
-          ? (estagioDoGolpe(ability.statChanges)?.direcao ?? 'diminui')
-          : undefined,
-        statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : undefined,
-        // O anel e centrado em quem lancou: se ele anda durante os 1,2s de
-        // animacao, a arte anda junto em vez de ficar plantada onde ele estava.
-        seguir: attacker,
-      }))
-    }
+    // O anel nasce no disparo (queueAoeVisual), no apice da pose. So nasce aqui
+    // quando o disparo nao o criou (Sleep Talk troca o golpe na resolucao).
+    if (!silent && !hit.efeitoId) world.effects.push(createWorldEffect(world.counters, anelDoGolpeEmArea(attacker, ability, 0)))
 
     // DAMP: "enquanto o Pokemon estiver EM CAMPO" — por isso a varredura no
     // mundo inteiro e nao no par atacante/alvo. Este ramo e o do anel visual da
@@ -2852,7 +2926,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     target.y = clamp(target.y + dy / distancia * 100, target.radius, (world.mapDef?.bounds.height ?? 900) - target.radius)
     target.globalCooldown = Math.max(target.globalCooldown, TURNO_SEGUNDOS)
   }
-  const acertos = quantidadeDeAcertos(world.rng, ability)
+  const acertos = hit.acertos ?? quantidadeDeAcertos(world.rng, ability)
   // `danoFinal` daqui pra baixo e o total da sequencia. Os usos posteriores
   // dele sao todos `danoFinal > 0` ("este golpe causou dano?"), entao somar e o
   // que preserva o significado com 1 ou com 5 acertos.
@@ -3607,55 +3681,24 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     attacker.y = clamp(attacker.y + dy / distancia * 60, attacker.radius, (bounds?.height ?? 900) - attacker.radius)
   }
   const isAoe = ability.target === 'aoe'
-  // Mesmo gatilho do efeito de dano abaixo, fora do `silent`. Golpe de status
-  // (Danca das Espadas, Rosnado) nao trava: nao tem coreografia que fique pra tras.
-  if (!isAoe && ability.power > 0) travarDepoisDoGolpe(attacker)
   // Golpe de status alvo-unico: SO mostra VFX quando algo de fato pegou
   // (`statusRecebeuEm`) — golpe que falhou (imunidade, ja tinha status,
   // janela de reaplicacao) nao fica com um circulo colorido em cima de nada
   // ter acontecido. Em cima de quem RECEBEU, nao sempre do alvo do hit
-  // (Danca das Espadas acerta o proprio atacante).
-  if (!isAoe && !silent && (ability.power > 0 || statusRecebeuEm)) {
+  // (Danca das Espadas acerta o proprio atacante). Golpe de dano ja nasceu no
+  // apice da pose (queueHit) — aqui so quando o disparo nao o criou.
+  // VFX que nasceu no apice desenhou os acertos SORTEADOS; a resolucao cai no
+  // primeiro impacto, antes dos socos seguintes — corta os que nao sairam
+  // (alvo caiu no primeiro: um Comet Punch nao inventa mais socos).
+  if (hit.efeitoId && !silent) {
+    const efeito = world.effects.find((e) => e.id === hit.efeitoId)
+    if (efeito) efeito.acertosVisuais = acertos > 1 ? acertosVisuais : undefined
+  }
+  if (!isAoe && !silent && !hit.efeitoId && (ability.power > 0 || statusRecebeuEm)) {
     const local = !isDamagingAbility(ability) && statusRecebeuEm ? statusRecebeuEm : target
-    // Golpe em si mesmo (Danca das Espadas e afins) nao tem direcao: dx=dy=0
-    // sairia como angulo 0 e apontaria a arte pra direita sem motivo.
-    const mesmoLugar = local.x === attacker.x && local.y === attacker.y
-    world.effects.push(createWorldEffect(world.counters, {
-      type: 'abilityEffect',
-      x: local.x, y: local.y,
-      targetX: local.x, targetY: local.y - local.radius * 0.6,
-      anguloDeAtaque: mesmoLugar ? undefined : Math.atan2(local.y - attacker.y, local.x - attacker.x),
-      // Mesma altura de "peito" do alvo logo acima, pra o jato sair e chegar
-      // no mesmo plano. So o VFX procedural le (render/vfx).
-      origemX: attacker.x, origemY: attacker.y - attacker.radius * 0.6,
-      color: colorForType(ability.type),
-      isAoe: false,
-      // Critico sobe um tier visual (decisao D7 do spec de VFX). Ate 03/10 o
-      // efeito nascia sem isso: o desenho nunca subia de tier, mas o numero de
-      // dano (`atrasoDoNumeroDeDano`) esperava o impacto do tier de cima.
-      isCrit: houveCritico || undefined,
-      acertosVisuais: acertos > 1 ? acertosVisuais : undefined,
-      duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
-      elementType: ability.type,
-      abilityId: ability.id,
-      // PH-416: ver a nota no ramo de area, logo acima.
-      statusDirection: !isDamagingAbility(ability)
-        ? (estagioDoGolpe(ability.statChanges)?.direcao ?? 'diminui')
-        : undefined,
-      statusStat: !isDamagingAbility(ability) ? estagioDoGolpe(ability.statChanges)?.stat : undefined,
-      // A arte pousa em cima de `local` (o alvo, ou quem de fato recebeu o
-      // status) e acompanha ele pelo 1,0-1,1s que dura.
-      seguir: local,
-      // `anguloDeAtaque` segue congelado pra arte NAO direcional — ele registra
-      // de onde o golpe veio, e girar no meio da animacao nao acrescenta nada
-      // num impacto redondo.
-      //
-      // Arte direcional e outra historia (PH-110): ela e um risco que LIGA
-      // atacante e alvo. Congelar uma ponta e mover a outra descola o rastro do
-      // punho, e o Bullet Punch mostrou isso em jogo. Essas recebem o atacante
-      // e o laco de efeitos reaponta a cada frame.
-      apontarPara: mesmoLugar || !ehDirecional(ability.id) ? undefined : attacker,
-    }))
+    world.effects.push(createWorldEffect(world.counters, efeitoDoGolpeUnico(attacker, local, ability, {
+      delay: 0, isCrit: houveCritico, acertosVisuais: acertos > 1 ? acertosVisuais : undefined,
+    })))
   }
 
   if (!isDead(target)) return
@@ -3902,6 +3945,7 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   tickEffects(world, dt)
 
   for (const hit of world.pendingHits) hit.timer -= dt
+  for (const hit of world.pendingHits) if (hit.timer <= 0) esperaOMaisRapido(world, hit)
   const landed = ordenarPorVelocidade(world, world.pendingHits.filter((hit) => hit.timer <= 0))
   world.pendingHits = world.pendingHits.filter((hit) => hit.timer > 0)
   for (const hit of landed) {
