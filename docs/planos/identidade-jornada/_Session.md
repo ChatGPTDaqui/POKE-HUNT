@@ -26,6 +26,13 @@ na barra, não junto de Conversas. Coluna direita permanece ao abrir painéis.
 
 ## Próximos passos
 
+Critério de densidade estendido aos menus do protótipo: cabeçalho de 56px com
+título/ícone/fechar; ocultar copy decorativa e rodapé duplicado. Listas, fichas,
+artes de apresentação e espaçamentos compactados; barra mobile de 143 para 123px,
+ordem e destaque central de Hunt preservados. Controles dos menus >=44px;
+descrições úteis e aviso de prévia não integrada mantidos. Não altera os menus
+reais do jogo: aplicar este critério na integração futura, por domínio.
+
 Comunicador aprovado: [design](../2026-10-10-comunicador-hunt-design.md).
 Protótipo com Log/Mundo/Comércio, acompanhamento compacto, minimização e expansão;
 mensagens somente locais. Sem chat conectado nem badge fictício de não lidas.

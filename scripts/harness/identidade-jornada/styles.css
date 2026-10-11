@@ -517,3 +517,103 @@ img { display: block; max-width: 100%; }
 @media (max-height: 620px) {
   .hunt-chat[data-mode='compact'] .chat-channels > button { font-size: .6rem; }
 }
+/* Densidade dos menus: identidade em uma faixa, conteúdo antes da decoração. */
+.journey-panel .panel-header { min-height: 56px; padding: 6px 60px 6px 52px; }
+.journey-panel .panel-heading { min-width: 0; padding: 0; }
+.journey-panel .panel-heading > .eyebrow,
+.journey-panel .panel-heading > p,
+.journey-panel .route-decoration,
+.journey-panel .panel-footnote { display: none; }
+.journey-panel .panel-header h1 { font-size: 1.35rem; margin: 0; line-height: 1.2; overflow-wrap: anywhere; }
+.journey-panel .header-art { display: block; width: 32px; height: 32px; left: 12px; right: auto; top: 12px; transform: none; }
+.journey-panel .panel-close { top: 6px; right: 6px; gap: 4px; }
+.journey-panel .panel-header:has(.panel-close button:nth-child(2)) { padding-right: 104px; }
+.journey-panel .panel-body { padding: 12px 16px; }
+.journey-panel .section-line { gap: 8px; margin-bottom: 8px; }
+.journey-panel .team-workspace,
+.journey-panel .bag-workspace,
+.journey-panel .dex-workspace,
+.journey-panel .explore-workspace { gap: 16px; }
+.journey-panel .roster { gap: 6px; }
+.journey-panel .roster-card { min-height: 56px; padding: 6px; }
+.journey-panel .pokemon-detail,
+.journey-panel .item-detail,
+.journey-panel .dex-detail { padding: 12px; }
+.journey-panel .pokemon-stage { height: 88px; }
+.journey-panel .pokemon-stage > img { height: 70px; }
+.journey-panel .pokemon-identity h2,
+.journey-panel .item-detail h2,
+.journey-panel .dex-detail h2 { font-size: 1.4rem; margin-bottom: 4px; }
+.journey-panel .pokemon-identity p { margin: 6px 0 8px; }
+.journey-panel .stat-row { margin: 8px 0; padding: 8px 0; }
+.journey-panel .demo-caption { margin-top: 6px; }
+.journey-panel .search-field { margin-bottom: 6px; }
+.journey-panel .category-tabs { margin-bottom: 8px; }
+.journey-panel .item-grid,
+.journey-panel .dex-grid { gap: 6px; }
+.journey-panel .item-tile { min-height: 80px; padding: 7px 4px; gap: 4px; }
+.journey-panel .item-tile > img { width: 36px; height: 36px; }
+.journey-panel .item-stage { min-height: 80px; margin-bottom: 6px; }
+.journey-panel .item-stage > img { width: 64px; height: 64px; }
+.journey-panel .item-stock { padding: 8px 0; margin: 8px 0; }
+.journey-panel .category-chip { margin-bottom: 4px; }
+.journey-panel .inventory-note { display: none; }
+.journey-panel .empty-state { padding: 16px 8px; }
+.journey-panel .dex-entry { min-height: 98px; padding: 6px 4px; }
+.journey-panel .dex-entry > img { height: 44px; margin: 3px 0; }
+.journey-panel .dex-entry small { display: none; }
+.journey-panel .dex-detail > img { height: 80px; margin: 8px auto; }
+.journey-panel .dex-detail > p { margin-top: 8px; }
+.journey-panel .guide-intro { display: none; }
+.journey-panel .guide-workspace { display: block; }
+.journey-panel .guide-groups { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.journey-panel .group-heading { gap: 6px; margin-bottom: 8px; }
+.journey-panel .destination-grid { grid-template-columns: minmax(0,1fr); gap: 6px; }
+.journey-panel .destination-card { min-height: 56px; padding: 6px; gap: 6px; }
+.journey-panel .destination-icon { width: 32px; height: 32px; }
+.journey-panel .expedition-cover { min-height: 240px; }
+.journey-panel .expedition-cover > div { left: 12px; right: 12px; bottom: 12px; }
+.journey-panel .expedition-cover h2 { font-size: 1.8rem; margin: 3px 0; }
+.journey-panel .expedition-tag { top: 10px; left: 10px; padding: 4px; }
+.journey-panel .biome-card { gap: 8px; padding: 5px; margin-bottom: 6px; min-height: 56px; }
+.journey-panel .biome-card > img { width: 44px; height: 44px; }
+.journey-panel .encounter-preview { margin: 10px 0; }
+.journey-panel .encounter-preview > div { margin: 6px 0; }
+.journey-panel .service-preview { padding: 0; text-align: left; }
+.journey-panel .service-preview > .equipment-art,
+.journey-panel .service-preview > .eyebrow,
+.journey-panel .service-preview > h2 { display: none; }
+.journey-panel .hospital-cover { height: 88px; margin-bottom: 8px; }
+.journey-panel .service-preview p { font-size: .8rem; line-height: 1.5; margin: 0 0 8px; }
+.journey-panel .service-notice { margin: 8px 0; padding: 10px; }
+.journey-panel .service-notice p { margin: 4px 0 0; }
+@media (max-width: 1100px) {
+  .journey-panel .guide-groups { grid-template-columns: minmax(0,1fr); gap: 12px; }
+  .journey-panel .destination-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 819px) {
+  .journey-panel .panel-body { padding: 8px; }
+  .journey-panel .panel-header h1 { font-size: 1.18rem; }
+  .journey-panel .team-workspace,
+  .journey-panel .bag-workspace,
+  .journey-panel .dex-workspace,
+  .journey-panel .explore-workspace { gap: 10px; }
+  .journey-panel .roster-card { min-height: 76px; padding: 5px 3px; }
+  .journey-panel .roster-card > .portrait { width: 28px; height: 28px; }
+  .journey-panel .item-detail { gap: 6px 8px; grid-template-columns: 56px minmax(0,1fr); }
+  .journey-panel .item-detail > .eyebrow { display: none; }
+  .journey-panel .item-stage { grid-row: 1/4; min-height: 64px; margin: 0; }
+  .journey-panel .item-stage > img { width: 48px; height: 48px; }
+  .journey-panel .expedition-cover { min-height: 128px; }
+  .journey-panel .expedition-cover .eyebrow,
+  .journey-panel .expedition-tag { display: none; }
+  .journey-panel .expedition-cover p { font-size: .7rem; line-height: 1.4; }
+}
+@media (max-width: 819px) and (min-height: 520px) {
+  .game-frame { grid-template-rows: 64px 48px minmax(0,1fr) calc(123px + env(safe-area-inset-bottom)); }
+  .primary-nav button { min-height: 52px; }
+  .primary-nav button > .equipment-art { width: 28px; height: 28px; }
+  .primary-nav button > .nav-icon { height: 28px; }
+  .primary-nav .hunt-nav { min-height: 68px; }
+  .primary-nav .hunt-nav > .equipment-art { width: 38px; height: 38px; }
+}
