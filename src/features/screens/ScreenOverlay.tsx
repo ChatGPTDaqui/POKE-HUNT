@@ -117,6 +117,7 @@ export function ScreenOverlay() {
     // nascer colada nas duas bordas do celular.
     <Painel
       appearance="journey"
+      snap="conteudo"
       winKey="panel"
       widthEm={WIDTHS[currentScreen] ?? DEFAULT_WIDTH}
       zIndex={31}

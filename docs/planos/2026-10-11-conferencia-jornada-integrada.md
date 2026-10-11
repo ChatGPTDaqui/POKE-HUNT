@@ -15,6 +15,7 @@ componentes reais em `scripts/harness/jornada-completa.html`.
 | Mochila | Faltavam categorias e destaque ilustrado da ficha | Categorias derivadas de `AnyItem.kind`, arte destacada, seleção/quantidade/efeito/trava/uso/TMs preservados |
 | Hunt | Arte quase invisível no seletor de biomas | Capas compactas com as miniaturas existentes; trilha e fundo do ambiente preservados |
 | Moldura e vazios | Decoração cartográfica e equipamento ausentes | Cabeçalho compacto com rota decorativa; ilustrações nos estados sem seleção da Mochila e equipe vazia |
+| Altura mobile | Painéis curtos esticados com grande área vazia | `ScreenOverlay` usa snap por conteúdo; menus longos continuam limitados ao espaço disponível e roláveis |
 
 ## Inventário conferido
 
