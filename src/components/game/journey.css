@@ -89,23 +89,24 @@
 
 .journey-destinations {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: .35em;
 }
 
 .journey-destination {
   position: relative;
-  display: grid;
-  grid-template-columns: 1.65em minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: .1em .4em;
+  gap: .15em;
   min-height: max(44px, 3.25em);
-  padding: .4em 1.1em .4em .55em;
+  padding: .35em .3em;
   border: 1px solid var(--journey-line);
   border-radius: .65em;
   background: var(--journey-card);
   color: var(--journey-ink);
-  text-align: left;
+  text-align: center;
   font: inherit;
   cursor: pointer;
 }
@@ -116,12 +117,13 @@
 }
 
 .journey-destination-icon {
-  grid-row: 1 / span 2;
-  font-size: 1.5em;
+  flex-shrink: 0;
+  font-size: 1.4em;
   color: var(--journey-leaf);
 }
 
 .journey-destination-label {
+  max-width: 100%;
   font-size: .85em;
   font-weight: 700;
   line-height: 1.25;
@@ -129,8 +131,9 @@
 }
 
 .journey-destination-detail {
-  grid-column: 2;
+  max-width: 100%;
   font-size: .75em;
   line-height: 1.25;
+  overflow-wrap: anywhere;
   color: var(--journey-warning);
 }
