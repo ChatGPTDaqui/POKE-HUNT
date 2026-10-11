@@ -29,6 +29,8 @@ na barra, não junto de Conversas. Coluna direita permanece ao abrir painéis.
 Comunicador aprovado: [design](../2026-10-10-comunicador-hunt-design.md).
 Protótipo com Log/Mundo/Comércio, acompanhamento compacto, minimização e expansão;
 mensagens somente locais. Sem chat conectado nem badge fictício de não lidas.
+Feedback aplicado: sem título na janela aberta; canais e controles numa faixa
+única enxuta, sem reservar uma linha só para Conversas.
 Integração futura deve preservar histórico entre menus e tratar eventos reais,
 notificações, falhas e teclado mobile; o protótipo reinicia ao sair da hunt.
 

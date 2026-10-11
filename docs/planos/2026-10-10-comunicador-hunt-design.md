@@ -22,6 +22,9 @@ não conecta chat real, servidor, saves, jogadores ou comércio.
 ## Layout
 
 Fundo escuro translúcido, canais com acento dourado e autores em azul claro.
+Revisão explícita: janela aberta sem título Conversas; canais e controles em uma
+única faixa de 32px no PC com mouse, 44px no mobile/toque. Nome Conversas somente
+no botão minimizado. Priorizar área útil de mensagens, sem duas linhas de cabeçalho.
 No PC, chat à esquerda dos golpes; no mobile, acima dos golpes em espaço próprio.
 O acompanhamento não cobre Pokémon, navegação ou atalhos. Em pouca altura,
 toolbar e canais compartilham uma linha e a HUD acomoda quatro golpes lado a lado.
