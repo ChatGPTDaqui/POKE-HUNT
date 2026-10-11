@@ -53374,7 +53374,7 @@ function findEntityById(player, enemies, id) {
 //#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
-	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, acertosVisuais, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection, statusStat, seguir = null, apontarPara = null } = params;
+	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, acertosVisuais, anguloDeAtaque, origemX, origemY, ballItemId, success, statusDirection, statusStat, itemId, seguir = null, apontarPara = null } = params;
 	const id = `effect-${counters.effect++}`;
 	const lane = owner ? claimEffectLane(owner, id, laneSize) : 0;
 	return {
@@ -53407,6 +53407,7 @@ function createWorldEffect(counters, params) {
 		success,
 		statusDirection,
 		statusStat,
+		itemId,
 		laneSize,
 		ownerId: owner ? owner.id : null,
 		lane,
@@ -111760,6 +111761,17 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		for (const itemId of loot.droppedItems) {
 			const item = getItem(itemId);
 			if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
+			world.effects.push(createWorldEffect(world.counters, {
+				type: "rewardText",
+				x: enemy.x,
+				y: enemy.y,
+				targetX: enemy.x,
+				targetY: enemy.y,
+				value: 1,
+				unit: "item",
+				itemId,
+				duration: 1.1
+			}));
 		}
 		let atrasoDoToastMs = 0;
 		if (captureResult && "ballItemId" in captureResult && captureResult.ballItemId) {

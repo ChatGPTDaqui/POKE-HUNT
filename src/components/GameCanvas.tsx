@@ -15,6 +15,7 @@ import { useEffect, useRef } from 'react'
 import { Renderer } from '@/render/renderer'
 import { desenharVfx, registrarPintor } from '@/render/camadaVfx'
 import { converterRecompensasNovas, pintorDeRecompensa } from '@/render/vooDeRecompensa'
+import { converterItensNovos, pintorDeItemNoChao } from '@/render/itemNoChao'
 import { converterDanoNovo, pintorDeDano } from '@/render/pulsoDeDanoRecebido'
 import { useGameLoop } from '@/engine/useGameLoop'
 import { useWorldStore } from '@/stores/worldStore'
@@ -62,6 +63,8 @@ export function GameCanvas() {
     // Pintor do voo de recompensa (PH-191). Registrado uma vez, pro ciclo de
     // vida do canvas — ele mesmo nao desenha nada quando nao ha voo vivo.
     const soltarPintorDeRecompensa = registrarPintor(pintorDeRecompensa)
+    // Itens do abate voando pra Mochila (11/10), mesmo contrato do voo de moedas.
+    const soltarPintorDeItem = registrarPintor(pintorDeItemNoChao)
     // Borda vermelha de dano recebido (PH-189). Mesmo contrato: registrado uma
     // vez, no-op nos quadros sem clarao vivo. Registrado DEPOIS da recompensa
     // pra pintar por cima dela — o alerta de "estou apanhando" nao pode ficar
@@ -193,6 +196,8 @@ export function GameCanvas() {
       // `null` e nada e lancado.
       converterRecompensasNovas(world.effects, (p) =>
         renderer.mundoParaTela(world.mapDef, world.player, p))
+      converterItensNovos(world.effects, (p) =>
+        renderer.mundoParaTela(world.mapDef, world.player, p))
       // Dano recebido -> borda vermelha na moldura da tela (PH-189). Le os
       // mesmos `damageNumber` que a placa do PH-131 le; sao canais separados
       // pro mesmo fato, e por isso nunca discordam.
@@ -218,6 +223,7 @@ export function GameCanvas() {
       canvas.removeEventListener('wheel', handleWheel)
       cancelAnimationFrame(rafId)
       soltarPintorDeRecompensa()
+      soltarPintorDeItem()
       soltarPintorDeDano()
       clearInterval(syncInterval)
       useRendererStore.getState().setRenderer(null)

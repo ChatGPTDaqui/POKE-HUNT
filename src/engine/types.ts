@@ -597,6 +597,8 @@ export interface WorldEffect {
   isCrit?: boolean
   text?: string
   unit?: string
+  /** `rewardText` de item (`unit: 'item'`): qual item caiu. Ver render/itemNoChao.ts. */
+  itemId?: string
   isAoe?: boolean
   worldSize?: number
   elementType?: ElementType
