@@ -20,9 +20,8 @@
 // cada mudanca — e `sincronizarAuto` manda o BATCH COMPLETO, entao seriam dois
 // requests iguais por clique. O lugar e `JogoCarregado`, junto dos outros hooks
 // de sessao.
-import { useEffect, useRef } from 'react'
-
 import { sincronizarAuto } from '@/data/remote/autoridade'
+import { useEnviarQuandoConteudoMudar } from '@/hooks/useEnviarQuandoConteudoMudar'
 import { useGameStateStore } from '@/stores/gameStateStore'
 
 export function useSincronizarAuto(): void {
@@ -36,14 +35,11 @@ export function useSincronizarAuto(): void {
   // de mutacao um a um — ver `sincronizarAuto()`. Nao e cosmetico: o servidor le
   // estas regras ao decidir usar pocao/bola durante a simulacao.
   //
-  // O PRIMEIRO DISPARO E IGNORADO de proposito: ele acontece logo apos o estado
-  // chegar DO servidor, e mandaria os mesmos valores de volta a cada boot.
-  const primeiraSync = useRef(true)
-  useEffect(() => {
-    if (primeiraSync.current) {
-      primeiraSync.current = false
-      return
-    }
-    sincronizarAuto()
-  }, [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules, autoStatusConfig])
+  // Por CONTEUDO, e nao por referencia: todo flush troca a referencia destes
+  // objetos sem mudar o valor (ver `useEnviarQuandoConteudoMudar`). O primeiro
+  // valor e a linha de base — e o estado que acabou de chegar DO servidor.
+  useEnviarQuandoConteudoMudar(
+    [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules, autoStatusConfig],
+    sincronizarAuto,
+  )
 }
