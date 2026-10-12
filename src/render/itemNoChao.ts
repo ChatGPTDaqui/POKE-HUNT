@@ -188,8 +188,9 @@ function desenharAura(ctx: CanvasRenderingContext2D, item: ItemCaido, x: number,
  * colorida sozinha some em bioma da mesma cor (verde do incomum na grama,
  * medido em producao); o branco destaca em qualquer fundo.
  */
-function desenharHalo(ctx: CanvasRenderingContext2D, x: number, y: number, raio: number, tempo: number): void {
-  const pisca = 0.45 + 0.4 * Math.max(0, Math.sin(tempo * 6))
+function desenharHalo(ctx: CanvasRenderingContext2D, x: number, y: number, raio: number, tempo: number, fixo?: number): void {
+  // `fixo`: brilho constante, sem piscar (item comum — destaca sem disputar com os raros).
+  const pisca = fixo ?? 0.45 + 0.4 * Math.max(0, Math.sin(tempo * 6))
   const g = ctx.createRadialGradient(x, y, raio * 0.2, x, y, raio)
   g.addColorStop(0, `rgba(255,255,255,${0.75 * pisca})`)
   g.addColorStop(0.6, `rgba(255,255,255,${0.3 * pisca})`)
@@ -278,11 +279,14 @@ export function desenharItensNoChao(ctx: CanvasRenderingContext2D): void {
       desenharAura(ctx, item, p.x, p.y, t)
       ctx.globalCompositeOperation = 'source-over'
     }
-    // Sombra no chao (some quando o feixe ja ilumina o piso do raro).
-    ctx.globalAlpha = 0.35
+    // Sombra no chao, mais larga que o icone: a de antes (0,45 x 0,18) ficava
+    // quase inteira escondida embaixo dele e o comum parecia colado no piso
+    // (relato do dono, 11/10). Na queda ela encolhe com a altura.
+    const naQueda = Math.max(0.55, 1 - p.altura / 40)
+    ctx.globalAlpha = 0.5 * naQueda
     ctx.fillStyle = '#000000'
     ctx.beginPath()
-    ctx.ellipse(p.x, p.y + 3, TAMANHO_NO_CHAO * 0.45, TAMANHO_NO_CHAO * 0.18, 0, 0, Math.PI * 2)
+    ctx.ellipse(p.x, p.y + 2, TAMANHO_NO_CHAO * 0.62 * naQueda, TAMANHO_NO_CHAO * 0.24 * naQueda, 0, 0, Math.PI * 2)
     ctx.fill()
     ctx.globalAlpha = 1
 
@@ -295,11 +299,13 @@ export function desenharItensNoChao(ctx: CanvasRenderingContext2D): void {
     }
 
     // Respira levemente no chao (sobe 1 px): parado, um icone le como decalque.
-    const respiro = pousou && brilha ? Math.sin(t * 4) * 1 : 0
+    const respiro = pousou ? Math.sin(t * 4) * 1 : 0
     const yIcone = p.y - p.altura - TAMANHO_NO_CHAO * 0.4 - respiro
-    if (brilha && pousou) {
+    if (pousou) {
       ctx.globalCompositeOperation = 'lighter'
-      desenharHalo(ctx, p.x, yIcone, TAMANHO_NO_CHAO * (item.raridade === 'lendario' ? 1.15 : 0.95), t)
+      // Comum: contorno branco suave e FIXO; os que brilham piscam e sao maiores.
+      if (brilha) desenharHalo(ctx, p.x, yIcone, TAMANHO_NO_CHAO * (item.raridade === 'lendario' ? 1.15 : 0.95), t)
+      else desenharHalo(ctx, p.x, yIcone, TAMANHO_NO_CHAO * 0.78, t, 0.42)
       ctx.globalCompositeOperation = 'source-over'
     }
     desenharIcone(ctx, item, p.x, yIcone, TAMANHO_NO_CHAO)
