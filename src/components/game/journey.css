@@ -278,6 +278,43 @@
 [data-appearance='journey'] .jogo-switch > span { width: 20px; height: 20px; top: 11px; left: 6px; }
 [data-appearance='journey'] .jogo-switch[aria-checked='true'] > span { left: calc(100% - 26px); }
 
+/* Auto: desenho pequeno, alvo de toque intacto; não amplia a pílula inteira. */
+[data-appearance='journey'] .journey-auto .jogo-switch {
+  --alvo-folga: 0px;
+  --alvo-folga-x: 0px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: transparent;
+  border: 0;
+}
+[data-appearance='journey'] .journey-auto .jogo-switch::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 12px;
+  width: 36px;
+  height: 20px;
+  border: 1px solid var(--journey-muted);
+  border-radius: 999px;
+  background: var(--journey-wash);
+}
+[data-appearance='journey'] .journey-auto .jogo-switch[aria-checked='true']::before {
+  background: var(--journey-primary);
+  border-color: var(--journey-primary);
+}
+[data-appearance='journey'] .journey-auto .jogo-switch > span {
+  width: 14px;
+  height: 14px;
+  top: 15px;
+  left: 7px;
+  background: var(--journey-ink);
+}
+[data-appearance='journey'] .journey-auto .jogo-switch[aria-checked='true'] > span {
+  left: 23px;
+  background: var(--journey-on-primary);
+}
+
 [data-appearance='journey'] [data-game-button]:enabled:hover {
   box-shadow: inset 0 0 0 1px currentColor;
 }

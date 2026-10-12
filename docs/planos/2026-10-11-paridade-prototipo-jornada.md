@@ -85,6 +85,15 @@ Alterações posteriores de densidade/tema explicam parte das diferenças, não 
 
 ## Cobertura e limites da inspeção
 
+Revisão de Automações: cartões substituídos por linhas com interruptor e resumo;
+regras/estoques detalhados recolhíveis sem desmontagem nem alteração do bot.
+Avisos de estoque baixo permanecem no resumo e a previsão global continua visível.
+Desenho do interruptor menor, alvo real de 44×44 px. Abas Rotinas/Lure evitam
+repetir Automações no título e na aba. Lure mantém controles e cuidados visíveis.
+Inspecionados 390×844, 320×568 em escala 1,4 e desktop; telas baixas mantêm rolagem.
+O fundo dos companheiros foi suavizado e a moldura mobile reduzida para 46 px,
+sem reduzir os botões de 44 px nem criar vão entre reservas e ativo.
+
 Comparação de todos os componentes de conteúdo do protótipo: App/Adventure/Chat,
 TeamPanel/BagPanel/DexPanel/ExplorePanel/GuidePanel/ServicePanel e primitivos.
 Na bancada real foram abertos Equipe, Mochila/Itens, Pokédex, Hunt, Mais,
