@@ -9,11 +9,20 @@ begin;
 -- apaga nada. Com 16 jobs (alguns a cada 5 minutos) ela chegou a 60.864 linhas
 -- e 14 MB em 53 dias, e e a maior tabela do banco. Sete dias bastam pra
 -- investigar um job que falhou.
-select cron.schedule(
-  'cron-historico-purge',
-  '37 4 * * *',
-  $$delete from cron.job_run_details where end_time < now() - interval '7 days'$$
-);
+--
+-- Dentro de um DO condicionado ao pg_cron: o banco descartavel do check de
+-- schema (scripts/ci/schema-sandbox.sh) nao tem a extensao, e o projeto tem.
+do $do$
+begin
+  if exists (select 1 from pg_extension where extname = 'pg_cron') then
+    perform cron.schedule(
+      'cron-historico-purge',
+      '37 4 * * *',
+      $delete from cron.job_run_details where end_time < now() - interval '7 days'$
+    );
+  end if;
+end
+$do$;
 
 -- 2. SOBRECARGA ANTIGA DE gravar_flush_de_sessao.
 --
