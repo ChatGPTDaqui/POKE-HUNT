@@ -114,7 +114,7 @@ export function HudLayer() {
           <div ref={trilhoRef} className="relative">
             <StatusRail />
             <div ref={salaRef} className="journey-room-anchor"
-              style={{ maxWidth: mode === 'amplo' ? 'calc(100% - 34em)' : 'calc(100% - 112px)' }}>
+              style={{ maxWidth: mode === 'amplo' ? 'calc(100% - min(34em, 60vw))' : 'calc(100% - 112px)' }}>
               <ContextoDaHunt />
             </div>
           </div>
