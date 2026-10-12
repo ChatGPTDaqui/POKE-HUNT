@@ -298,7 +298,7 @@ export async function coletarAnexo(mensagemId: string): Promise<ResultadoDaColet
  * de sistema e pedido de amizade, todos na mesma tabela.
  *
  * Broadcast privado no topico `<schema>:social:<meu id>` (ver
- * data/remote/aoVivo.ts): o trigger `avisar_correio_ao_vivo` manda a linha de
+ * data/remote/aoVivo.ts): o trigger `avisar_social_ao_vivo` manda a linha de
  * toda mudanca com `para_id` = eu. O eco das MINHAS mensagens ja vem do
  * retorno de `enviarMensagem`, sem depender do socket. `aoChegar` recebe a
  * linha nova pra quem estiver com um fio aberto poder anexar sem refetch;

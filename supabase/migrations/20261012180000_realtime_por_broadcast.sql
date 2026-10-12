@@ -29,8 +29,10 @@
 begin;
 
 -- ---------------------------------------------------------------------------
--- Funcoes de aviso. `realtime.send` ja engole erro internamente: um problema no
--- Realtime nunca derruba o INSERT/UPDATE do jogo.
+-- Funcoes de aviso. Cada uma termina em `exception when others then return null`
+-- (regra da PH-100, conferida por supabase/testes/avisoDeNegocio.test.ts): o
+-- aviso e entrega ao vivo, nao negocio, e uma falha nele nunca pode desfazer a
+-- mensagem, a troca ou o PvP que o disparou.
 -- ---------------------------------------------------------------------------
 
 -- Chat: manda a linha inteira, o cliente anexa sem refetch.
@@ -43,11 +45,13 @@ as $$
 begin
   perform realtime.send(to_jsonb(new), tg_op, tg_table_schema || ':chat', true);
   return null;
+exception when others then
+  return null;
 end;
 $$;
 
--- Correio: a linha vai so pro destinatario (para_id). DELETE manda a antiga.
-create or replace function public.avisar_correio_ao_vivo()
+-- Social: a linha vai so pro destinatario (para_id). DELETE manda a antiga.
+create or replace function public.avisar_social_ao_vivo()
 returns trigger
 language plpgsql
 security definer
@@ -59,6 +63,8 @@ begin
   if linha->>'para_id' is not null then
     perform realtime.send(linha, tg_op, tg_table_schema || ':social:' || (linha->>'para_id'), true);
   end if;
+  return null;
+exception when others then
   return null;
 end;
 $$;
@@ -92,11 +98,13 @@ begin
     );
   end loop;
   return null;
+exception when others then
+  return null;
 end;
 $$;
 
 revoke all on function public.avisar_chat_ao_vivo() from public, anon, authenticated;
-revoke all on function public.avisar_correio_ao_vivo() from public, anon, authenticated;
+revoke all on function public.avisar_social_ao_vivo() from public, anon, authenticated;
 revoke all on function public.avisar_participantes_ao_vivo() from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -110,12 +118,12 @@ drop trigger if exists chat_ao_vivo on dev.chat_messages;
 create trigger chat_ao_vivo after insert on dev.chat_messages
   for each row execute function public.avisar_chat_ao_vivo();
 
-drop trigger if exists correio_ao_vivo on public.mail_messages;
-create trigger correio_ao_vivo after insert or update or delete on public.mail_messages
-  for each row execute function public.avisar_correio_ao_vivo();
-drop trigger if exists correio_ao_vivo on dev.mail_messages;
-create trigger correio_ao_vivo after insert or update or delete on dev.mail_messages
-  for each row execute function public.avisar_correio_ao_vivo();
+drop trigger if exists social_ao_vivo on public.mail_messages;
+create trigger social_ao_vivo after insert or update or delete on public.mail_messages
+  for each row execute function public.avisar_social_ao_vivo();
+drop trigger if exists social_ao_vivo on dev.mail_messages;
+create trigger social_ao_vivo after insert or update or delete on dev.mail_messages
+  for each row execute function public.avisar_social_ao_vivo();
 
 drop trigger if exists pvp_sessao_ao_vivo on public.pvp_sessao;
 create trigger pvp_sessao_ao_vivo after insert or update or delete on public.pvp_sessao
