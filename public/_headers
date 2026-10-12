@@ -1,0 +1,20 @@
+# Cloudflare Pages: cache do navegador.
+#
+# Sem este arquivo o Pages manda `public, max-age=0, must-revalidate` em tudo,
+# entao cada visita revalidava o bundle e centenas de sprites antes de a hunt
+# abrir (uma ida e volta por arquivo, medido em 12/10/2026).
+#
+# /build/* tem hash no nome (Vite): o conteudo de uma URL nunca muda, entao o
+# cache pode ser eterno.
+/build/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# /assets/* NAO tem hash: a arte e trocada mantendo o nome do arquivo. Uma hora
+# sem nenhuma revalidacao; depois disso o navegador usa a copia que tem e
+# revalida em segundo plano, entao uma arte nova aparece no carregamento seguinte.
+/assets/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800
+
+# index.html (e as rotas da SPA que o _redirects reescreve pra ele) e
+# build-info.json ficam de fora de proposito: o padrao do Pages, revalidar
+# sempre, e o que faz um deploy novo aparecer no carregamento seguinte.
