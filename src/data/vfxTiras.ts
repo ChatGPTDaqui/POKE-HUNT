@@ -550,19 +550,47 @@ export const COR_DE_STATUS_NO_CORPO: Record<string, string> = {
 /** Quanto do tom entra. Acima disso o POKE vira uma silhueta colorida. */
 export const FORCA_DA_TINTA_DE_STATUS = 0.45
 
-/** Toda URL deste modulo — usado pelo preload. */
-export function todasAsTirasDeVfx(): string[] {
+/**
+ * As tiras que nao dependem do tipo do golpe: cura, sono, confusao e condicao
+ * persistente. Aparecem em todo combate, entao entram sempre no preload da
+ * entrada.
+ */
+function tirasForaDeTipo(): string[] {
   return [
-    ...Object.values(TIRA_POR_ELEMENTO).map((t) => t.url),
-    // A camada de AREA entra no preload junto com a de impacto, e nao fica de
-    // fora como a de GOLPE: sao 13 arquivos que TODO combate usa (a Explosao
-    // Elemental de nivel 50 e area, e toda especie ganha a do proprio tipo), e
-    // nao 22 que o jogador talvez nunca veja.
-    ...Object.values(TIRA_AOE_POR_ELEMENTO).map((t) => t.url),
     TIRA_CURA_HP.url, TIRA_CURA_STATUS.url, TIRA_CONFUSAO.url, TIRA_SONO.url,
     // Condicao persistente aparece em todo combate, entao ela entra no
     // preload junto com sono e confusao — e nao fica de fora como a arte por
     // GOLPE, que o jogador talvez nunca veja.
     ...Object.values(TIRA_POR_CONDICAO_NO_CORPO).map((t) => t!.url),
   ]
+}
+
+/** Toda URL deste modulo. */
+export function todasAsTirasDeVfx(): string[] {
+  return [
+    ...Object.values(TIRA_POR_ELEMENTO).map((t) => t.url),
+    ...Object.values(TIRA_AOE_POR_ELEMENTO).map((t) => t.url),
+    ...tirasForaDeTipo(),
+  ]
+}
+
+/**
+ * O que a ENTRADA da hunt precisa: impacto e area so dos tipos que alguem nesta
+ * hunt pode usar, mais as tiras fora de tipo.
+ *
+ * As 31 tiras de elemento somam ~3,4 MB, e baixar todas antes da cena aparecer
+ * era a maior parte do preload que segura o botao Entrar (medido em 12/10/2026).
+ * As dos outros tipos vao pro aquecimento de segundo plano (data/preload.ts) e,
+ * enquanto nao chegam, o golpe cai no burst procedural — a rede de seguranca que
+ * existe pra isso.
+ */
+export function tirasDeVfxDosTipos(tipos: Iterable<string>): string[] {
+  const urls: string[] = []
+  for (const tipo of new Set(tipos)) {
+    const impacto = tiraDoElemento(tipo)
+    if (impacto) urls.push(impacto.url)
+    const area = tiraDeAreaDoElemento(tipo)
+    if (area) urls.push(area.url)
+  }
+  return [...urls, ...tirasForaDeTipo()]
 }
