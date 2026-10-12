@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.08',
+    date: '2026-10-11',
+    title: 'Itens comuns também se destacam',
+    highlights: [
+      'Poções e Poké Balls caídas no chão ganharam uma sombra de verdade e um contorno branco suave, e não somem mais no cenário. O brilho piscando continua reservado aos itens mais raros.',
+    ],
+  },
+  {
     version: '8.07',
     date: '2026-10-11',
     title: 'Itens no chão mais visíveis',
