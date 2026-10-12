@@ -32,7 +32,7 @@
 // mesmo assim segue tocavel: o backdrop e puramente visual
 // (`pointer-events:none`) e o fechar-ao-tocar-fora e um listener de documento.
 // Um backdrop que capturasse o toque faria trocar de tela exigir dois toques.
-import { useRef } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { PlacarDoDuelo } from '@/features/arena/PlacarDoDuelo'
 import { StatusRail, ContextoDaHunt } from '@/components/hud/StatusRail'
 import { JornadaNaHud } from '@/components/hud/JornadaNaHud'
@@ -59,6 +59,9 @@ export function HudLayer() {
   const setFooterHeight = useUiStore((s) => s.setFooterHeight)
   const chatFlutuante = mode === 'amplo' && width >= LARGURA_CHAT_FLUTUANTE
   const painelAberto = useGestaoAberta()
+  const salaRef = useRef<HTMLDivElement>(null)
+  const [salaHeight, setSalaHeight] = useState(0)
+  useMedirAltura(salaRef, setSalaHeight)
 
   // Mede o rodape ao vivo. Os sheets ancoram o proprio `bottom` neste numero
   // pra parar EM CIMA da doca em vez de cobri-la — a doca e o unico caminho de
@@ -108,20 +111,25 @@ export function HudLayer() {
               os dois juntos empurraria a coluna de atalhos pra baixo da fila de
               reservas, que cresce com o tamanho da equipe — e o pedido era
               "logo abaixo do lvl do treinador", que mora no trilho. */}
-          <div ref={trilhoRef}>
+          <div ref={trilhoRef} className="relative">
             <StatusRail />
+            <div ref={salaRef} className="journey-room-anchor"
+              style={{ maxWidth: mode === 'amplo' ? 'calc(100% - min(34em, 60vw))' : 'calc(100% - 112px)' }}>
+              <ContextoDaHunt />
+            </div>
           </div>
           {/* Duelo mantém seu placar de largura própria; não cabe na coluna estreita. */}
-          <div className="flex w-full justify-center [&:not(:empty)]:my-[.4em]">
+          <div className="flex w-full justify-center [&:not(:empty)]:mb-[.4em] [&:not(:empty)]:pt-[var(--room-clearance)]"
+            style={{ '--room-clearance': `${salaHeight + 4}px` } as CSSProperties}>
             <PlacarDoDuelo />
           </div>
           {/* Reservas encostam no ativo e compartilham o material da moldura.
-              Contexto/objetivos ficam ao lado no mobile, sem cortar essa união.
+              Objetivos ficam ao lado no mobile, abaixo da sala centralizada.
               A medida dos atalhos continua sendo somente a do status acima. */}
           <div className={cn('journey-companions flex min-w-0 items-start gap-[4px]', mode !== 'amplo' ? 'flex-row pr-[120px]' : 'flex-col pr-[60px]')}>
             <ReservasRail />
-            <div className="flex min-w-0 flex-col items-start gap-[4px] pt-[4px]">
-              <ContextoDaHunt />
+            <div className="flex min-w-0 flex-col items-start gap-[4px]"
+              style={{ paddingTop: mode !== 'amplo' ? salaHeight + 4 : 4 }}>
               {!painelAberto && <JornadaNaHud />}
             </div>
           </div>

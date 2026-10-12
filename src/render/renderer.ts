@@ -416,21 +416,31 @@ export class Renderer {
     // `render/textoDeCombate.ts`.
     const desviosDeTexto = planejarTextoDeCombate(ctx, world, { y: janela.y, h: janela.h })
     for (const effect of world.effects) {
-      drawEffect(ctx, effect, world, desviosDeTexto)
+      if (effect.type !== 'abilityEffect') drawEffect(ctx, effect, world, desviosDeTexto)
     }
     // "Vai X!!" (PH-552) por cima da bola que esta se abrindo.
     drawBalaoDaAbertura(ctx, world)
 
-    // O CORPO TEM PRIORIDADE DE VISAO (08/10, pedido do dono): o que cobriu um
-    // POKE (golpe, numero, nome, barra do vizinho) fica semitransparente SO na
-    // parte que cobre o corpo. Redesenhar o sprite por cima com alfa parcial faz
-    // exatamente isso: onde nada cobre, sprite sobre o mesmo sprite nao muda
-    // pixel; onde algo cobre, o corpo aparece atraves dele. Antes do clima da
-    // frente, que tinge a cena inteira — o corpo tambem leva a tinta.
+    // Informações de campo nunca encobrem o corpo: passada totalmente opaca.
+    // Os golpes são a exceção: ficam depois dela e recebem uma segunda passada
+    // a 80%. Não reduzimos a opacidade de todos os Pokémon quando um golpe
+    // qualquer está ativo; a composição só revela o corpo onde há sobreposição.
     for (const enemy of world.enemies) {
-      if (!enemy.nascendo) drawCorpoPorCima(ctx, enemy)
+      if (!enemy.nascendo) drawCorpoPorCima(ctx, enemy, 1)
     }
-    if (jogadorVivo) drawCorpoPorCima(ctx, jogadorVivo)
+    if (jogadorVivo) drawCorpoPorCima(ctx, jogadorVivo, 1)
+    let temGolpe = false
+    for (const effect of world.effects) {
+      if (effect.type !== 'abilityEffect') continue
+      temGolpe = true
+      drawEffect(ctx, effect, world, desviosDeTexto)
+    }
+    if (temGolpe) {
+      for (const enemy of world.enemies) {
+        if (!enemy.nascendo) drawCorpoPorCima(ctx, enemy)
+      }
+      if (jogadorVivo) drawCorpoPorCima(ctx, jogadorVivo)
+    }
 
     // Clima na FRENTE de tudo (PH-141): a passagem rasante, o filtro de cor, a
     // vinheta e o relampago. Depois dos efeitos de golpe de proposito — o
