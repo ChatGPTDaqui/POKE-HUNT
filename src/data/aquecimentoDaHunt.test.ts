@@ -17,8 +17,13 @@ import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 
 import {
   fundosDasOutrasSalas, tirasDosGolpesDoTime, aquecerHuntEmSegundoPlano, pararAquecimento,
+  preloadHunt, tiposDeGolpe, battleSpriteUrlsFor,
 } from './preload'
 import { SUB_BIOMA_POR_CHAVE } from './biomas'
+import { STARTER_HUNT_ID } from './huntSpawnOverrides'
+import { getMap } from './maps'
+import { getEncounter } from './enemies'
+import { todasAsTirasDeVfx, TIRA_POR_ELEMENTO } from './vfxTiras'
 
 vi.mock('@/render/sprites', () => ({
   primeImage: vi.fn(() => Promise.resolve()),
@@ -161,6 +166,73 @@ describe('o aquecimento e sequencial e cancelavel (PH-400)', () => {
     aquecerHuntEmSegundoPlano({ chave: 'cave' }, [])
     resolver!()
     await vi.waitFor(() => expect(chamadas().length).toBeGreaterThan(1))
-    expect(chamadas()[1], 'a fila antiga continuou').not.toBe(primeira)
+    // A fila nova recomeca do inicio (as tiras de elemento vem antes dos fundos
+    // nas duas); a antiga teria seguido pro SEGUNDO item dela.
+    expect(chamadas()[1], 'a fila antiga continuou').toBe(primeira)
+    expect(primeira).toBe(todasAsTirasDeVfx()[0])
+  })
+})
+
+// 12/10/2026: entrar na Route 46 baixava 311 imagens (11,9 MB) antes da cena
+// aparecer — a paleta shiny de todo o pool e as 31 tiras de elemento entravam
+// no preload que segura o botao Entrar.
+// As suites de cima trocam a implementacao por promessas penduradas, e
+// `clearAllMocks` so zera as chamadas.
+const resolverNaHora = () => {
+  ;(primeImage as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => Promise.resolve())
+}
+
+describe('o preload da ENTRADA traz so o que a cena usa de cara', () => {
+  beforeEach(resolverNaHora)
+
+  const pool = [...new Set(getMap(STARTER_HUNT_ID)!.enemyPool
+    .map((id) => getEncounter(id)?.speciesId).filter((id): id is string => !!id))]
+
+  it('o pool entra na paleta normal, e a shiny NAO', async () => {
+    await preloadHunt(STARTER_HUNT_ID, null)
+    const pedidas = new Set(chamadas())
+    for (const speciesId of pool) {
+      for (const url of battleSpriteUrlsFor(speciesId, false)) expect(pedidas.has(url), url).toBe(true)
+      for (const url of battleSpriteUrlsFor(speciesId, true)) expect(pedidas.has(url), url).toBe(false)
+    }
+  })
+
+  it('o POKE do jogador entra na paleta dele, mesmo shiny', async () => {
+    await preloadHunt(STARTER_HUNT_ID, { speciesId: 'squirtle', isShiny: true })
+    const pedidas = new Set(chamadas())
+    for (const url of battleSpriteUrlsFor('squirtle', true)) expect(pedidas.has(url), url).toBe(true)
+  })
+
+  it('as tiras de elemento sao so dos tipos de golpe da hunt', async () => {
+    await preloadHunt(STARTER_HUNT_ID, null, { especies: ['squirtle'], golpes: [] })
+    const pedidas = new Set(chamadas())
+    const tipos = tiposDeGolpe(['squirtle', ...pool])
+    for (const [tipo, tira] of Object.entries(TIRA_POR_ELEMENTO)) {
+      expect(pedidas.has(tira.url), tipo).toBe(tipos.has(tipo))
+    }
+    // E de fato corta: a hunt inicial nao usa os 18 tipos.
+    expect(tipos.size).toBeLessThan(Object.keys(TIRA_POR_ELEMENTO).length)
+  })
+
+  it('golpe de maquina conta, mesmo fora do learnset', () => {
+    const semMaquina = tiposDeGolpe(['squirtle'])
+    const comMaquina = tiposDeGolpe(['squirtle'], ['flamethrower'])
+    expect(semMaquina.has('FIRE')).toBe(false)
+    expect(comMaquina.has('FIRE')).toBe(true)
+  })
+})
+
+describe('o aquecimento completa o que a entrada deixou de fora', () => {
+  beforeEach(resolverNaHora)
+
+  it('traz todas as tiras de elemento e a paleta shiny do pool, nessa ordem', async () => {
+    aquecerHuntEmSegundoPlano(null, [], STARTER_HUNT_ID)
+    const especie = getEncounter(getMap(STARTER_HUNT_ID)!.enemyPool[0])!.speciesId
+    const shiny = battleSpriteUrlsFor(especie, true)[0]
+    await vi.waitFor(() => expect(chamadas()).toContain(shiny))
+    const pedidas = chamadas()
+    for (const url of todasAsTirasDeVfx()) expect(pedidas).toContain(url)
+    // Shiny por ultimo: e o unico item que pode nem ser usado na sessao.
+    expect(pedidas.indexOf(shiny)).toBeGreaterThan(pedidas.indexOf(todasAsTirasDeVfx()[0]))
   })
 })

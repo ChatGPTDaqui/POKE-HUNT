@@ -171,7 +171,11 @@ export const controller = {
     // data/preload.ts). Tem teto de tempo proprio, entao rede ruim atrasa a
     // entrada mas nunca a impede. Depois da sessao ja estar aceita de proposito:
     // se o servidor recusar, nao ha por que gastar banda.
-    await preloadHunt(mapId, { speciesId: activePoke.speciesId, isShiny: activePoke.isShiny })
+    const time = useGameStateStore.getState().team
+    await preloadHunt(mapId, { speciesId: activePoke.speciesId, isShiny: activePoke.isShiny }, {
+      especies: time.map((p) => p.speciesId),
+      golpes: time.flatMap((p) => [...(p.golpesDeMaquina ?? []), ...(p.activeAbilities ?? [])]),
+    })
     // PH-400: o que a hunt precisa DEPOIS do primeiro frame — a arte de fundo das
     // outras salas que ela pode sortear (~2,9 MB cada) e as tiras dos golpes que
     // o time conhece. Nao entra no `preloadHunt` acima porque bioma de 4
@@ -183,6 +187,7 @@ export const controller = {
     aquecerHuntEmSegundoPlano(
       sessao.sala ?? null,
       useGameStateStore.getState().team.map((p) => p.speciesId),
+      mapId,
     )
     // A sala inicial e a que o servidor decidiu na abertura. Sem passa-la aqui, a
     // simulacao local sorteia a propria e o jogador ve o sub-bioma trocar poucos
