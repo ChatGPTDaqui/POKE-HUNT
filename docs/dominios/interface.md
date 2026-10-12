@@ -10,9 +10,14 @@ Canvas usa ctx.font e não herda CSS. Arte/VFX podem afetar o bundle de authorit
 
 ## Temas da interface
 
-ThemeProvider aplica Claro/Jornada (padrão) ou Escuro/Dark Glass na raiz, inclusive
+ThemeProvider aplica Claro/Jornada ou Escuro/Dark Glass (padrão) na raiz, inclusive
 HUD, navegação, chat e portais. Ajuste em Mais → Ajustes → Geral, persistido só no
 aparelho por useSecureStorage; falha de storage não impede a troca em memória.
+Uma preferência válida salva continua sendo respeitada; ausência/valor inválido usa Escuro.
+EquipmentArt mantém pigmentos próprios nos dois temas; controles monocromáticos
+continuam herdando contraste. Sala/clima ancoram no centro abaixo do cabeçalho,
+sem entrar na altura medida dos atalhos. No Canvas, corpos cobrem informações
+com opacidade 1; a passada sobre golpes usa 0,8. Clima mantém sua composição global.
 journey.css mantém composição/densidade e themes.css define os materiais. Não
 inverter a escala n900/n100 global: dados de combate e raridades conservam sua paleta.
 A preferência de reduzir transparência continua independente do tema.

@@ -59,13 +59,15 @@ describe('o clima nao volta pra fileira de chips (PH-285)', () => {
     expect(fonteDoHudLayer).not.toMatch(/^import .*ClimaChip.*$/m)
   })
 
-  it('o contexto da hunt reúne clima e local ao lado dos Companheiros, sem duplicar no topo', () => {
+  it('o contexto reúne clima e local numa única âncora central do cabeçalho', () => {
     const fonte = codigo(fonteDoStatusRail)
     // No compacto entra só o símbolo; no amplo, o nome também é visível.
     expect(fonte).toContain('export function ContextoDaHunt()')
     expect(fonte.match(/<ClimaChip /g)).toHaveLength(1)
     expect(fonte).toContain('<ClimaChip embutido soIcone={compacto} />')
     expect(codigo(fonteDoHudLayer)).toContain('<ContextoDaHunt />')
+    expect(codigo(fonteDoHudLayer).match(/<ContextoDaHunt \/>/g)).toHaveLength(1)
+    expect(codigo(fonteDoHudLayer)).toContain('journey-room-anchor')
     expect(codigo(fonteDoHudLayer)).toContain('journey-companions')
   })
 })

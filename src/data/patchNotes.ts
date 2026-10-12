@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.10',
+    date: '2026-10-12',
+    title: 'Dark Glass e campo mais legível',
+    highlights: [
+      'Dark Glass é o tema padrão para aparelhos sem preferência salva. Quem escolheu Claro continua com sua escolha.',
+      'As ilustrações dos menus mantêm suas cores originais nos dois temas.',
+      'Sala e clima ficam centralizados e encostados abaixo do cabeçalho superior.',
+      'Os corpos dos Pokémon ficam totalmente visíveis sobre informações de combate. Sobre golpes, reaparecem com 80% de opacidade.',
+    ],
+  },
+  {
     version: '8.09',
     date: '2026-10-12',
     title: 'HUD mais livre para a hunt',

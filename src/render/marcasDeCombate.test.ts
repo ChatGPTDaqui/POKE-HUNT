@@ -11,7 +11,8 @@
 //   - a porcentagem de HP sai no meu POKE e no alvo, e NAO num mob de passagem
 //     — devolver texto pra todo mundo e o excesso que a issue esta tirando;
 //   - `Renderer#renderMap` liga as duas coisas a quem de direito.
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import * as sprites from './sprites'
 
 import { drawHpBar, drawMarcaDoAlvo, drawMarcaDoJogador } from './sprites'
 import { Renderer } from './renderer'
@@ -54,6 +55,31 @@ function entidade(id: string, over: Partial<WorldEntity> = {}): WorldEntity {
 }
 
 describe('marca do meu POKE e do alvo (PH-189)', () => {
+  it('desenha a sprite a 100% ou 80% e restaura o alfa do contexto', () => {
+    vi.stubGlobal('Image', class {
+      complete = true
+      naturalWidth = 32
+      naturalHeight = 32
+      src = ''
+    })
+    const alfas: number[] = []
+    const pilha: number[] = []
+    const ctx = ctxEspiao().ctx
+    ctx.globalAlpha = .3
+    ctx.save = () => { pilha.push(ctx.globalAlpha) }
+    ctx.restore = () => { ctx.globalAlpha = pilha.pop()! }
+    ctx.drawImage = () => { alfas.push(ctx.globalAlpha) }
+    const e = entidade('alpha', { animFrame: 0, battleAnim: {
+      name: 'Idle', frameWidth: 32, frameHeight: 32, durations: [8], url: '/teste-corpo-opaco.png',
+    } })
+    try {
+      sprites.drawCorpoPorCima(ctx, e, 1)
+      sprites.drawCorpoPorCima(ctx, e)
+      expect(alfas).toEqual([1, .8])
+      expect(ctx.globalAlpha).toBe(.3)
+    } finally { vi.unstubAllGlobals() }
+  })
+
   it('a marca do jogador e um anel no CHAO, embaixo do corpo', () => {
     const { ctx, elipses } = ctxEspiao()
     const eu = entidade('player-1')
@@ -185,6 +211,30 @@ function renderizar(world: WorldState) {
 }
 
 describe('quem recebe marca e porcentagem, no quadro de verdade (PH-189)', () => {
+  it.each([false, true])('corpo opaco cobre informações; só golpes recebem 80%% (golpe: %s)', temGolpe => {
+    const ordem: string[] = []
+    const corpo = vi.spyOn(sprites, 'drawCorpoPorCima').mockImplementation((_ctx, e, alpha = sprites.ALFA_DO_CORPO_POR_CIMA) => {
+      ordem.push(`corpo:${e.id}:${alpha}`)
+    })
+    const efeito = vi.spyOn(sprites, 'drawEffect').mockImplementation((_ctx, e) => { ordem.push(e.type) })
+    try {
+      const effects = [
+        { type: 'damageNumber', id: 'dano', age: .1, delay: 0, duration: 1, x: 100, y: 100, value: 1 },
+        ...(temGolpe ? [{ type: 'abilityEffect', id: 'golpe' }] : []),
+      ] as WorldState['effects']
+      const w = mundo({ effects })
+      w.enemies.push(entidade('nascendo', { nascendo: true }) as WorldState['enemies'][number])
+      renderizar(w)
+      expect(ordem[0]).toBe('damageNumber')
+      expect(ordem.slice(1, 4)).toEqual(['corpo:enemy-1:1', 'corpo:enemy-2:1', 'corpo:player-1:1'])
+      expect(ordem.slice(4)).toEqual(temGolpe
+        ? ['abilityEffect', 'corpo:enemy-1:0.8', 'corpo:enemy-2:0.8', 'corpo:player-1:0.8'] : [])
+    } finally {
+      corpo.mockRestore()
+      efeito.mockRestore()
+    }
+  })
+
   it('SO o alvo recebe porcentagem — nem o meu POKE, nem o mob de passagem', () => {
     // PH-281: o numero do MEU POKE saiu do campo, a pedido do usuario. Ele ja
     // esta no cabecalho, com rotulo `HP` e largura reservada (PH-157/PH-193), e

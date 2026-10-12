@@ -8,7 +8,7 @@ const ThemeContext = createContext<{ theme: UiTheme; setTheme: (theme: UiTheme) 
 /** Só altera tokens CSS. Canvas, partida e árvore de menus não são recriados. */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { getItem, setItem } = useSecureStorage()
-  const [theme, setTheme] = useState<UiTheme>(() => getItem(UI_THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light')
+  const [theme, setTheme] = useState<UiTheme>(() => getItem(UI_THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark')
 
   useLayoutEffect(() => {
     const root = document.documentElement
