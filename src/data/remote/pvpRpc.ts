@@ -1,6 +1,7 @@
-import { schema, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import type { PokeInstance } from '@/data/pokes'
 import { pvpRowToPoke, type LinhaTimePvp } from '@/engine/pokeDoSnapshotDePvp'
+import { assinarTopico, topico } from './aoVivo'
 
 const db = supabase as unknown as {
   from: (tabela: string) => any
@@ -191,16 +192,12 @@ export async function historicoPvp(limite = 20): Promise<HistoricoPvp[]> {
   }))
 }
 
-// `sufixo` separa assinantes: `supabase.channel(nome)` devolve o MESMO canal
-// pra nome repetido, e adicionar callback num canal ja inscrito estoura
-// ("cannot add postgres_changes callbacks ... after subscribe()").
-export function assinarMeuPvp(userId: string, aoMudar: () => void, sufixo = ''): () => void {
-  const canal = supabase
-    .channel(`pvp-${userId}${sufixo}`)
-    .on('postgres_changes', { event: '*', schema, table: 'pvp_sessao' }, () => aoMudar())
-    .on('postgres_changes', { event: '*', schema, table: 'pvp_historico' }, () => aoMudar())
-    .subscribe()
-  return () => { void supabase.removeChannel(canal) }
+// Broadcast privado no topico `<schema>:pvp:<meu id>` (ver data/remote/aoVivo.ts):
+// o trigger `avisar_participantes_ao_vivo` avisa os dois lados de toda mudanca
+// em `pvp_sessao` e `pvp_historico`. Quem escuta faz refetch — o payload so diz
+// qual tabela mudou. Dois assinantes (amistoso e ranqueado) dividem o canal.
+export function assinarMeuPvp(userId: string, aoMudar: () => void): () => void {
+  return assinarTopico(topico('pvp', userId), () => aoMudar())
 }
 
 // --- time e rank do PvP ranqueado (PH-529/PH-530) --------------------------

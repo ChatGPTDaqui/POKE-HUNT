@@ -19,8 +19,9 @@
 // achou no chat mundial e que o Social evita do mesmo jeito.
 //
 // A LEITURA e RLS-direta: a policy da tabela ja limita a linha a quem esta nela.
-import { schema, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
+import { assinarTopico, topico } from './aoVivo'
 import { ESTADOS_VIVOS, type EstadoDeTroca, type TipoDeOferta } from '@/data/troca'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { mochilaCarregada, useMochilaStore } from '@/stores/mochilaStore'
@@ -448,22 +449,15 @@ function aposATrocaExecutar(): void {
  * ou delete de linha de oferta, porque e assim que a versao sobe. Entao toda
  * alteracao da mesa ja produz um evento aqui, sem excecao.
  *
- * Publicar `troca_oferta` junto nao daria nada de graca e traria um problema:
- * com `replica identity` default, o DELETE so leva a chave, e o Realtime
- * descarta o evento por nao conseguir avaliar a RLS. Ver a migration da PH-314.
- *
- * SEM FILTRO no `postgres_changes`. A policy de `troca_sessao` ja limita as
- * linhas aos dois participantes, e um filtro por `anfitriao_id` deixaria de
- * fora justamente a metade das mesas em que o jogador e o convidado.
+ * Broadcast privado no topico `<schema>:troca:<meu id>` (ver
+ * data/remote/aoVivo.ts): o trigger `avisar_participantes_ao_vivo` em
+ * `troca_sessao` avisa os DOIS participantes, entao o jogador recebe as mesas
+ * em que e anfitriao e as em que e convidado.
  *
  * O callback NAO recebe a linha: quem escuta faz refetch. Aplicar o payload
  * seria confiar num estado que chegou por fora do caminho de leitura, e a
  * confirmacao da fatia 3 depende da `versao` estar certa.
  */
 export function assinarMinhaTroca(userId: string, aoMudar: () => void): () => void {
-  const canal = supabase
-    .channel(`troca-${userId}`)
-    .on('postgres_changes', { event: '*', schema, table: 'troca_sessao' }, () => aoMudar())
-    .subscribe()
-  return () => { void supabase.removeChannel(canal) }
+  return assinarTopico(topico('troca', userId), () => aoMudar())
 }

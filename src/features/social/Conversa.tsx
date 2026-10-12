@@ -118,15 +118,14 @@ export function Conversa({ contato, meuId, aoMarcarLidas, anuncio }: Props) {
   // Realtime: so o que CHEGA. O eco das minhas sai do retorno de
   // `enviarMensagem`, entao a mensagem aparece mesmo com o socket caido.
   useEffect(() => {
-    // Sufixo proprio: o menu ja tem um canal `social-<id>-menu` vivo, e
-    // reusar o nome faria o `.on()` estourar em cima do canal ja inscrito.
+    // O menu ja escuta o mesmo topico; `assinarTopico` divide o canal.
     const parar = social.assinarSocialAoVivo(meuId, () => {}, (m) => {
       if (m.de_id !== contato.userId || m.tipo !== 'texto') return
       // O guard de id evita linha duplicada se o socket entregar duas vezes
       // (reconexao reenvia o backlog).
       setMensagens((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]))
       void social.marcarConversaLida(contato.userId).then(aoMarcarLidas).catch(() => {})
-    }, 'fio')
+    })
     return parar
   }, [contato.userId, meuId, aoMarcarLidas])
 
