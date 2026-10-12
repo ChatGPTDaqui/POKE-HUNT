@@ -18,6 +18,18 @@ it('oferece as quatro rotinas sem empilhar suas configurações', () => {
   expect(screen.queryByRole('button', { name: 'Bola padrão' })).toBeNull()
 })
 
+it('mantém seletores padrão e shiny independentes do interruptor shiny', () => {
+  render(<AutoPanel />)
+  fireEvent.click(screen.getByRole('button', { name: 'Configurar Auto-catch' }))
+  const padrao = screen.getByRole('button', { name: 'Bola padrão' })
+  const shiny = screen.getByRole('button', { name: 'Bola Shiny' })
+  expect(padrao.closest('label')).toBeNull()
+  expect(shiny.closest('label')).toBeNull()
+  fireEvent.click(screen.getByRole('switch', { name: 'Usar bola diferente em shinies' }))
+  expect((shiny as HTMLButtonElement).disabled).toBe(!useGameStateStore.getState().autoCatchConfig.catchShinyEnabled)
+  expect((padrao as HTMLButtonElement).disabled).toBe(false)
+})
+
 it('permite editar poção mesmo desligada e mantém o valor ao recolher', () => {
   useGameStateStore.setState({
     autoPotRules: [{ hpPercent: 70, itemId: 'potion' }],

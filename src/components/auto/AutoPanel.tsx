@@ -194,33 +194,30 @@ function AbaDeAutomacoes() {
         ligado={autoToggles.autoCatch}
         aoLigar={(v) => setAutoToggle('autoCatch', v)}
       >
-        <div className="grid grid-cols-2 gap-[.5em]">
-          <label className="flex flex-col gap-[.25em]">
-            <span className="text-menu-muted">Bola padrão</span>
-            <ItemPicker
-              label="Bola padrão"
-              value={autoCatchConfig.ballId}
-              opcoes={opcoesBola}
-              onChange={(ballId) => setAutoCatchConfig({ ballId })}
+        {/* Cabeçalhos compartilham a mesma linha: o switch shiny não desloca seu seletor. */}
+        <div className="grid min-w-0 grid-cols-2 items-center gap-x-[.5em] gap-y-[.25em]">
+          <span className="text-menu-muted">Bola padrão</span>
+          <div className="flex min-w-0 items-center justify-between gap-[.3em] text-menu-muted">
+            <span>Bola Shiny</span>
+            <GameSwitch
+              checked={autoCatchConfig.catchShinyEnabled}
+              onChange={(v) => setAutoCatchConfig({ catchShinyEnabled: v })}
+              label="Usar bola diferente em shinies"
             />
-          </label>
-          <label className="flex flex-col gap-[.25em]" style={{ opacity: autoCatchConfig.catchShinyEnabled ? 1 : 0.45 }}>
-            <span className="flex items-center justify-between gap-[.3em] text-menu-muted">
-              Bola Shiny
-              <GameSwitch
-                checked={autoCatchConfig.catchShinyEnabled}
-                onChange={(v) => setAutoCatchConfig({ catchShinyEnabled: v })}
-                label="Usar bola diferente em shinies"
-              />
-            </span>
-            <ItemPicker
-              label="Bola Shiny"
-              value={autoCatchConfig.shinyBallId}
-              opcoes={opcoesBolaShiny}
-              disabled={!autoCatchConfig.catchShinyEnabled}
-              onChange={(shinyBallId) => setAutoCatchConfig({ shinyBallId })}
-            />
-          </label>
+          </div>
+          <ItemPicker
+            label="Bola padrão"
+            value={autoCatchConfig.ballId}
+            opcoes={opcoesBola}
+            onChange={(ballId) => setAutoCatchConfig({ ballId })}
+          />
+          <ItemPicker
+            label="Bola Shiny"
+            value={autoCatchConfig.shinyBallId}
+            opcoes={opcoesBolaShiny}
+            disabled={!autoCatchConfig.catchShinyEnabled}
+            onChange={(shinyBallId) => setAutoCatchConfig({ shinyBallId })}
+          />
         </div>
 
         <div className="flex items-center gap-[.4em] font-medium">
