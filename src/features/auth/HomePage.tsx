@@ -18,7 +18,7 @@ export function HomePage() {
         <h1 className="text-3xl font-bold">NOVO POKE IDLE</h1>
         <p className="max-w-md text-muted-foreground">
           Um idle de captura e batalha automatica. Escolha seu inicial, explore as hunts e evolua
-          sua equipe — o progresso continua rodando enquanto voce esta fora.
+          sua equipe — a cacada roda sozinha enquanto o jogo esta aberto.
         </p>
       </div>
       {/* `buttonVariants` em vez de <Button asChild>: este Button (base-ui)
