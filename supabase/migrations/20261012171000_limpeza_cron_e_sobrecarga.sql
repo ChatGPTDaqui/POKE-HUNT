@@ -18,7 +18,7 @@ begin
     perform cron.schedule(
       'cron-historico-purge',
       '37 4 * * *',
-      $delete from cron.job_run_details where end_time < now() - interval '7 days'$
+      'delete from cron.job_run_details where end_time < now() - interval ''7 days'''
     );
   end if;
 end
