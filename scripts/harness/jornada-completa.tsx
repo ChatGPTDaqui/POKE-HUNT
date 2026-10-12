@@ -31,7 +31,7 @@ const [{ useGameStateStore }, { useMochilaStore }, { useUiStore }, { createPokeI
 useGameStateStore.persist.setOptions({ storage: { getItem: () => null, setItem: () => {}, removeItem: () => {} } })
 const ids = ['charizard', 'blastoise', 'venusaur', 'pikachu', 'gengar', 'dragonite', 'lapras', 'scizor', 'snorlax']
 const pokes = ids.map((id, i) => createPokeInstance(createRng(554 + i), id, 80 + i, { uid: `jornada-fixture-${i}` }))
-useGameStateStore.setState({ team: pokes.slice(0, 4), bagPokes: pokes.slice(4), activeIndex: 0,
+useGameStateStore.setState({ team: pokes.slice(0, 6), bagPokes: pokes.slice(6), activeIndex: 0,
   trainer: { ...useGameStateStore.getState().trainer, name: 'Treinador_Teste' },
   wallet: { gold: 98540, diamonds: 420 },
   pokedexKills: Object.fromEntries(ids.map((id, i) => [id, { normal: 350 * (i + 1), shiny: i }])),

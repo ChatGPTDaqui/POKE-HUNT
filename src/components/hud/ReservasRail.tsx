@@ -31,21 +31,9 @@ import { useDeviceMode } from '@/stores/uiStore'
 import { PokeTooltipContent } from '@/components/shared/PokeTooltipContent'
 import { cn } from '@/lib/utils'
 
-/**
- * Lado do quadrado da foto, em `em`, por regime.
- *
- * Metade do que era (2.6 / 1.9) por pedido explicito (PH-111): o substituto fica
- * no trilho de forma REPRESENTATIVA, e nao pra ser examinado — quem quer olhar o
- * POKE abre o perfil, que e o que o card ja faz no toque.
- *
- * A altura do card NAO acompanha essa reducao: ela e ditada pela coluna de
- * nome/nivel/HP ao lado, nao pela foto. Isso e o que mantem o alvo de toque
- * (o card inteiro e o `role="button"`) grande o bastante pra arrastar e abrir o
- * menu no celular. Encolher a foto sem encolher o alvo e exatamente o que se
- * queria aqui.
- */
-const TAMANHO_AMPLO = 1.3
-const TAMANHO_COMPACTO = 0.95
+/** Retratos representativos; o botão preserva no mínimo 44×44 px. */
+const TAMANHO_AMPLO = 1.8
+const TAMANHO_COMPACTO = 1.6
 
 /**
  * Quantos pixels o ponteiro precisa andar pra virar arrasto.
@@ -59,7 +47,7 @@ const FOLGA_DE_ARRASTO = 6
 interface Arrasto {
   /** Indice NA EQUIPE (nao no trilho): reserva 0 do trilho e equipe 1. */
   indice: number
-  yInicial: number
+  xInicial: number
   deslocamento: number
   passou: boolean
 }
@@ -73,7 +61,7 @@ export function ReservasRail() {
   const [arrasto, setArrasto] = useState<Arrasto | null>(null)
   const [menuAberto, setMenuAberto] = useState<string | null>(null)
   const [sobre, setSobre] = useState<string | null>(null)
-  const alturaDoCard = useRef(0)
+  const passoDoCard = useRef(0)
   const trilhoRef = useRef<HTMLDivElement>(null)
 
   // O POKE em campo vive no StatusRail e NAO se repete aqui.
@@ -92,9 +80,9 @@ export function ReservasRail() {
 
   // Quantas posicoes o card andou, a partir do deslocamento em pixels.
   const deslocamentoEmPosicoes = useCallback((px: number) => {
-    const h = alturaDoCard.current
-    if (!h) return 0
-    return Math.round(px / h)
+    const passo = passoDoCard.current
+    if (!passo) return 0
+    return Math.round(px / passo)
   }, [])
 
   // Fecha o menu ao tocar/clicar fora. Listener de documento, mesmo padrao do
@@ -113,21 +101,24 @@ export function ReservasRail() {
   // altura no topo da tela.
   if (reservas.length === 0) return null
 
-  function aoDescer(e: React.PointerEvent<HTMLDivElement>, indiceNaEquipe: number) {
+  function aoDescer(e: React.PointerEvent<HTMLButtonElement>, indiceNaEquipe: number) {
     // So o botao principal arrasta; o direito e do menu de contexto do browser.
     if (e.button !== 0) return
-    alturaDoCard.current = e.currentTarget.getBoundingClientRect().height
+    const cards = trilhoRef.current?.querySelectorAll<HTMLElement>('[data-reserva]')
+    passoDoCard.current = cards && cards.length > 1
+      ? cards[1].getBoundingClientRect().left - cards[0].getBoundingClientRect().left
+      : e.currentTarget.getBoundingClientRect().width
     // Captura opcional: ela so mantem os eventos chegando quando o ponteiro sai
     // do card no meio do gesto. Chamada sem guarda, ela DERRUBA o clique inteiro
     // onde a API nao existe (jsdom, e navegador antigo sem Pointer Events) — e
     // o clique e o caminho pro menu, que e a funcao principal do card.
     e.currentTarget.setPointerCapture?.(e.pointerId)
-    setArrasto({ indice: indiceNaEquipe, yInicial: e.clientY, deslocamento: 0, passou: false })
+    setArrasto({ indice: indiceNaEquipe, xInicial: e.clientX, deslocamento: 0, passou: false })
   }
 
-  function aoMover(e: React.PointerEvent<HTMLDivElement>) {
+  function aoMover(e: React.PointerEvent<HTMLButtonElement>) {
     if (!arrasto) return
-    const deslocamento = e.clientY - arrasto.yInicial
+    const deslocamento = e.clientX - arrasto.xInicial
     setArrasto((a) => (a ? {
       ...a,
       deslocamento,
@@ -135,7 +126,7 @@ export function ReservasRail() {
     } : a))
   }
 
-  function aoSubir(e: React.PointerEvent<HTMLDivElement>, poke: PokeInstance) {
+  function aoSubir(e: React.PointerEvent<HTMLButtonElement>, poke: PokeInstance) {
     if (!arrasto) return
     const { indice, deslocamento, passou } = arrasto
     setArrasto(null)
@@ -151,7 +142,7 @@ export function ReservasRail() {
 
     const destino = indice + deslocamentoEmPosicoes(deslocamento)
     // `clamp` no intervalo das RESERVAS: 1 (logo atras do campo) ate o fim.
-    // Arrastar pra cima alem do topo NAO promove pra campo — isso e o
+    // Arrastar para a esquerda além do início NÃO promove para campo — isso é o
     // "Colocar em campo" do menu, que faz o preload da arte e mexe no
     // worldStore. A RPC recusa qualquer ordem que mude o slot 0.
     const alvo = Math.max(1, Math.min(team.length - 1, destino))
@@ -162,21 +153,13 @@ export function ReservasRail() {
     // Wrapper sem clique: a camada da HUD inteira e `pointer-events-none` (ver
     // JogoCarregado.tsx) e cada filho reativa so a propria area. Um wrapper
     // clicavel de largura total bloquearia o toque no canvas na faixa toda.
-    <div ref={trilhoRef} className="pointer-events-none flex">
-      {/* PH-197: sem `gap` entre os cards. Eles eram seis mini-janelas soltas
-          empilhadas; agora leem como um bloco unico. O que fecha a emenda sao
-          tres coisas juntas — gap zero aqui, `-mt-px` no card a partir do
-          segundo (senao as bordas vizinhas somam e viram uma linha de 2px), e
-          arredondamento so nas pontas do bloco (ver `cantoDoBloco`). */}
-      <div className="pointer-events-auto flex flex-col">
-        {reservas.map(({ poke, indice: indiceNaEquipe }, i) => {
-          // Canto arredondado so onde o BLOCO termina, nao em cada card. Com
-          // uma reserva unica as duas condicoes valem e ela volta a ser um card
-          // redondo sozinho, como antes.
-          const cantoDoBloco = cn(
-            i === 0 && 'rounded-t-[.5em]',
-            i === reservas.length - 1 && 'rounded-b-[.5em]',
-          )
+    <div ref={trilhoRef} className="journey-reserves pointer-events-none relative min-w-0 w-full">
+      {/* Uma fila horizontal sob o ativo, como no protótipo aprovado.
+          Espaço constante entre os cards entra na medida real do arraste. */}
+      <div className="journey-reserves-row pointer-events-auto grid gap-[2px]"
+        role="group" aria-label="Companheiros da equipe"
+        style={{ gridTemplateColumns: `repeat(${reservas.length}, minmax(44px, 1fr))`, maxWidth: `${reservas.length * 3.4}em` }}>
+        {reservas.map(({ poke, indice: indiceNaEquipe }) => {
           const especie = SPECIES[poke.speciesId]
           if (!especie) return null
           const arrastando = arrasto?.indice === indiceNaEquipe && arrasto.passou
@@ -204,21 +187,21 @@ export function ReservasRail() {
             ?? faceIconUrl(especie.id, poke.isShiny)
 
           return (
-            <div key={poke.uid} className={cn('relative', i > 0 && '-mt-px')}>
-              <div
-                role="button"
-                tabIndex={0}
+            <div key={poke.uid} className="min-w-0">
+              <button
+                type="button"
+                data-reserva
                 aria-label={`Reserva ${indiceNaEquipe + 1}: ${especie.name} nível ${poke.level}`}
+                aria-expanded={menuAberto === poke.uid}
                 // `touch-action: none` e o que permite arrastar no toque: sem
-                // isto o navegador trata o gesto vertical como rolagem e nunca
+                // isto o navegador pode tratar o gesto como rolagem e nunca
                 // entrega os `pointermove`.
                 style={{
                   touchAction: 'none',
-                  transform: arrastando ? `translateY(${arrasto.deslocamento}px)` : undefined,
+                  transform: arrastando ? `translateX(${arrasto.deslocamento}px)` : undefined,
                 }}
                 className={cn(
-                  'journey-reserve flex select-none items-center gap-[.3em] border bg-menu-paper p-[.2em] pr-[.4em]',
-                  cantoDoBloco,
+                  'journey-reserve relative flex min-h-[44px] w-full min-w-[44px] cursor-pointer select-none flex-col items-center justify-center gap-[.15em] rounded-[.5em] border bg-menu-paper p-[.2em]',
                   'backdrop-blur-[2px] transition-colors',
                   arrastando ? 'z-10 border-primary opacity-90 shadow-lg' : 'border-n800 hover:border-n600',
                   menuAberto === poke.uid && 'border-primary',
@@ -228,23 +211,23 @@ export function ReservasRail() {
                 onPointerMove={aoMover}
                 onPointerUp={(e) => aoSubir(e, poke)}
                 onPointerCancel={() => setArrasto(null)}
+                onClick={(e) => {
+                  // Ponteiro é tratado no pointerup; clique nativo de teclado tem detail=0.
+                  if (e.detail === 0) setMenuAberto((atual) => (atual === poke.uid ? null : poke.uid))
+                }}
                 // Hover so com mouse. Em aparelho de toque o resumo vai no
                 // menu — `pointerenter` dispara no toque tambem e deixaria a
                 // bolha presa na tela depois do dedo sair.
                 onPointerEnter={(e) => { if (e.pointerType === 'mouse') setSobre(poke.uid) }}
                 onPointerLeave={() => setSobre(null)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    setMenuAberto((atual) => (atual === poke.uid ? null : poke.uid))
-                  }
                   // Setas movem sem arrastar: e o caminho de teclado pra
                   // reordenar, que ponteiro nenhum cobre.
-                  if (e.key === 'ArrowUp' && indiceNaEquipe > 1) {
+                  if ((e.key === 'ArrowLeft' || e.key === 'ArrowUp') && indiceNaEquipe > 1) {
                     e.preventDefault()
                     controller.reorderTeam(indiceNaEquipe, indiceNaEquipe - 1)
                   }
-                  if (e.key === 'ArrowDown' && indiceNaEquipe < team.length - 1) {
+                  if ((e.key === 'ArrowRight' || e.key === 'ArrowDown') && indiceNaEquipe < team.length - 1) {
                     e.preventDefault()
                     controller.reorderTeam(indiceNaEquipe, indiceNaEquipe + 1)
                   }
@@ -252,7 +235,7 @@ export function ReservasRail() {
               >
                 <span
                   aria-hidden
-                  className="w-[1em] shrink-0 text-center text-[.62em] text-n500"
+                  className="absolute left-[.2em] top-[.1em] text-[.62em] text-n500"
                 >
                   {indiceNaEquipe + 1}
                 </span>
@@ -276,30 +259,14 @@ export function ReservasRail() {
                   )}
                 </span>
 
-                <span className="flex min-w-0 flex-col leading-tight">
-                  {/* ESPECIE E SELO DE KO (PH-193, item 5).
-                      O trilho dizia so `Nv 28`: pra saber QUAL POKE era, o
-                      jogador dependia da miniatura, que o PH-111 reduziu pela
-                      metade de proposito — o nome era o que faltava pra foto
-                      poder ser pequena.
-                      Nome e nivel dividem a MESMA linha porque a altura do card
-                      e ditada por esta coluna (ver o comentario de
-                      `TAMANHO_AMPLO`); uma linha nova multiplicaria por seis a
-                      altura do trilho inteiro.
-                      O `KO` e selo com fundo, nao so cor de texto: o PH-137
-                      registra que KO e o unico estado que muda o que se PODE
-                      FAZER com o POKE, e ele dependia so do `grayscale` — que
-                      some pra quem nao distingue saturacao e desaparece de vez
-                      contra uma foto ja acinzentada. */}
-                  <span className="flex min-w-0 items-center gap-[.25em] text-[.68em] text-n300">
-                    <span className="min-w-0 max-w-[5.5em] truncate font-medium">{especie.name}</span>
+                <span className="flex w-full min-w-0 flex-col items-center leading-tight">
+                  {/* Retratos compactos como no protótipo; nome e nível ficam
+                      acessíveis no botão e no resumo, sem engrossar a faixa. */}
+                  <span className="sr-only">
+                    <span className="w-full min-w-0 truncate font-medium">{especie.name}</span>
                     <span className="shrink-0 text-n400">Nv {poke.level}</span>
-                    {desmaiado && (
-                      <span className="shrink-0 rounded-[.25em] bg-bad px-[.25em] text-[.85em] font-bold text-white">
-                        KO
-                      </span>
-                    )}
                   </span>
+                  {desmaiado && <span className="absolute right-0 top-0 rounded-[.25em] bg-bad px-[.25em] text-[.55em] font-bold text-white">KO</span>}
                   {/* Barra de HP fina: e o dado que decide se vale trocar, e
                       ler "45/120" em 0.6em no celular nao funciona. */}
                   <span className="mt-[.15em] block h-[.22em] w-[2.6em] overflow-hidden rounded-full bg-n800">
@@ -309,19 +276,19 @@ export function ReservasRail() {
                     />
                   </span>
                 </span>
-              </div>
+              </button>
 
               {/* Resumo de hover. Painel proprio em vez de `Explicacao`: aquele
                   componente tambem abre no TOQUE, e o toque aqui ja e o menu —
                   os dois no mesmo gatilho brigariam. */}
               {sobre === poke.uid && !arrasto && !coarse && (
-                <div className="absolute top-0 left-full z-20 ml-[.35em] w-max rounded-[.5em] border border-n700 bg-background px-[.6em] py-[.4em] text-[.7em] shadow-xl">
+                <div className="absolute top-full left-0 z-20 mt-[.25em] w-max max-w-full rounded-[.5em] border border-menu-line bg-menu-paper px-[.6em] py-[.4em] text-[.7em] shadow-xl">
                   <PokeTooltipContent poke={poke} species={especie} />
                 </div>
               )}
 
               {menuAberto === poke.uid && (
-                <div className="absolute top-0 left-full z-30 ml-[.35em] w-max rounded-[.5em] border border-n700 bg-background p-[.3em] shadow-xl">
+                <div data-appearance="journey" className="absolute top-full left-0 z-30 mt-[.25em] w-max max-w-full rounded-[.5em] border border-menu-line bg-menu-paper p-[.3em] shadow-xl">
                   {/* No toque nao houve hover nenhum, entao o resumo tem que
                       estar AQUI — senao o dado que decide a troca so existe
                       pra quem usa mouse. */}

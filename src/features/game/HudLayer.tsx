@@ -111,8 +111,6 @@ export function HudLayer() {
               "logo abaixo do lvl do treinador", que mora no trilho. */}
           <div ref={trilhoRef}>
             <StatusRail />
-            {!painelAberto && <CartaoDoPasso />}
-            {!painelAberto && <FaixaDePremios />}
           </div>
           {/* Placar do combate duelo (arena, Lance, covis) — PH-549 o colocava
               na fileira de chips (sala/clima), la embaixo das reservas. Com uma
@@ -145,13 +143,15 @@ export function HudLayer() {
               proposito: fora de duelo ele nao renderiza nada (fica vazio),
               entao esta regra continua valendo sempre que ela importa — hunt
               normal com reservas. */}
-          <div className="flex items-start gap-[.4em] pr-[60px]">
-            <div className="min-w-0 shrink-0">
+          <div className="journey-companions flex min-w-0 flex-col gap-[.15em] pr-[60px]">
+            <div className="flex min-w-0 items-center gap-[.4em]">
               <span className="rounded-r bg-menu-paper px-[.5em] text-[.7em] text-menu-ink">Companheiros</span>
-              <ReservasRail />
+              <div className="min-w-0 flex-1"><ContextoDaHunt /></div>
             </div>
-            <div className="min-w-0 flex-1"><ContextoDaHunt /></div>
+            <ReservasRail />
           </div>
+          {!painelAberto && <CartaoDoPasso />}
+          {!painelAberto && <FaixaDePremios />}
         </div>
       </div>
 

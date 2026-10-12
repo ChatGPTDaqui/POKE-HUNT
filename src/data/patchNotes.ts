@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.07',
+    date: '2026-10-11',
+    title: 'Companheiros em uma faixa horizontal',
+    highlights: [
+      'Os Pokémon de reserva ficam lado a lado logo abaixo do Pokémon em campo, sem a antiga coluna vertical.',
+      'Toque em um retrato para consultar os dados, abrir o perfil ou colocar em campo. A barra de HP e o aviso de KO continuam visíveis.',
+      'Arraste para os lados ou use as setas do teclado para organizar as reservas.',
+    ],
+  },
+  {
     version: '8.06',
     date: '2026-10-11',
     title: 'Itens caem no chão',
