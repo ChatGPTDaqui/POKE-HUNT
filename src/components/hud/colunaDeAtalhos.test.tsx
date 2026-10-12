@@ -11,7 +11,9 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 
 import { useUiStore } from '@/stores/uiStore'
+import { useGameStateStore } from '@/stores/gameStateStore'
 import { ColunaDeAtalhos, TELAS_NA_COLUNA } from './ColunaDeAtalhos'
+import { StatusRail } from './StatusRail'
 
 describe('coluna de atalhos do canto superior direito (PH-257)', () => {
   beforeEach(() => {
@@ -52,14 +54,23 @@ describe('coluna de atalhos do canto superior direito (PH-257)', () => {
     expect(coluna.style.top).toContain('87px')
   })
 
-  it('no amplo a coluna comeca no TOPO, e o card do treinador vem junto', () => {
-    // PH-282: com o card dentro dela, a coluna ancora no canto superior direito
-    // e a altura do trilho deixa de importar aqui. Era o trilho que impedia o
-    // card de alcancar a borda em tela larga.
+  it('mantém foto e nome do treinador visíveis no mobile, com acesso ao perfil', () => {
+    useUiStore.setState({ viewportWidth: 390, viewportHeight: 844, perfilOpen: false })
+    const nome = useGameStateStore.getState().trainer.name
+    render(<StatusRail />)
+    expect(screen.getByText(nome)).toBeTruthy()
+    expect(screen.getByRole('img', { name: `Foto de ${nome}` })).toBeTruthy()
+    expect(screen.getByRole('img', { name: `Foto de ${nome}` }).closest('.journey-status-rail')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: `Perfil do treinador: ${nome}` }))
+    expect(useUiStore.getState().perfilOpen).toBe(true)
+  })
+
+  it('no amplo os atalhos ficam abaixo do cabeçalho e não duplicam o treinador', () => {
+    // O treinador foi integrado ao trilho; os atalhos respeitam sua altura.
     useUiStore.setState({ viewportWidth: 1440, viewportHeight: 900, trilhoHeight: 87 } as never, false)
     const { container } = render(<ColunaDeAtalhos />)
     const coluna = container.firstElementChild as HTMLElement
-    expect(coluna.style.top).not.toContain('87px')
-    expect(screen.getByLabelText('Perfil do treinador'), 'o card nao veio junto').toBeTruthy()
+    expect(coluna.style.top).toContain('87px')
+    expect(screen.queryByLabelText('Perfil do treinador')).toBeNull()
   })
 })

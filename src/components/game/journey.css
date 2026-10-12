@@ -65,6 +65,14 @@
   .journey-vitals-bars { width: min(14em, 27vw); }
 }
 
+/* Reserva explícita para o treinador: moedas e nomes não redimensionam o HP. */
+.journey-status-mobile { gap: 4px; padding: 4px; }
+.journey-status-mobile .journey-vitals { min-width: 0; flex: 1; overflow: hidden; }
+.journey-status-mobile .journey-header-space { display: none; }
+.journey-status-mobile .journey-vitals-bars { width: min(8em, 18vw); flex-shrink: 1; min-width: 0; }
+.journey-status-mobile .journey-brand { width: 14px; height: 14px; }
+.journey-status-mobile .journey-poke-face { width: 44px; height: 44px; }
+
 .journey-navigation {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max(52px, 3.6em) minmax(0, 1fr);
@@ -277,6 +285,43 @@
 [data-appearance='journey'] .jogo-switch { width: max(64px, 3.2em); height: 44px; }
 [data-appearance='journey'] .jogo-switch > span { width: 20px; height: 20px; top: 11px; left: 6px; }
 [data-appearance='journey'] .jogo-switch[aria-checked='true'] > span { left: calc(100% - 26px); }
+
+/* Auto: desenho pequeno, alvo de toque intacto; não amplia a pílula inteira. */
+[data-appearance='journey'] .journey-auto .jogo-switch {
+  --alvo-folga: 0px;
+  --alvo-folga-x: 0px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: transparent;
+  border: 0;
+}
+[data-appearance='journey'] .journey-auto .jogo-switch::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 12px;
+  width: 36px;
+  height: 20px;
+  border: 1px solid var(--journey-muted);
+  border-radius: 999px;
+  background: var(--journey-wash);
+}
+[data-appearance='journey'] .journey-auto .jogo-switch[aria-checked='true']::before {
+  background: var(--journey-primary);
+  border-color: var(--journey-primary);
+}
+[data-appearance='journey'] .journey-auto .jogo-switch > span {
+  width: 14px;
+  height: 14px;
+  top: 15px;
+  left: 7px;
+  background: var(--journey-ink);
+}
+[data-appearance='journey'] .journey-auto .jogo-switch[aria-checked='true'] > span {
+  left: 23px;
+  background: var(--journey-on-primary);
+}
 
 [data-appearance='journey'] [data-game-button]:enabled:hover {
   box-shadow: inset 0 0 0 1px currentColor;

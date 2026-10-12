@@ -1,12 +1,13 @@
 // Skins do TREINADOR em campo (o boneco que anda atras do POKE, 08/10).
 //
 // Cada skin e uma pasta em `assets/treinadores/campo/<id>/` com `Walk-Anim.png`
-// e `Idle-Anim.png` no formato das folhas dos POKE (8 direcoes x 4 quadros,
-// quadro 32x40) — geradas da arte do dono por
-// `scripts/arte/converter-treinador-de-campo.cjs`.
+// e `Idle-Anim.png` com recortes RGBA na resolução original (8 direções).
+// Geometria gerada por scripts/arte/importar-treinadores-sem-perda.cjs.
 //
 // Nao confundir com a FOTO de perfil (`avatares.ts`): a foto e social, os
 // outros jogadores veem; a skin so aparece no campo do proprio jogador.
+
+import quadros from './quadrosDoTreinador.json'
 
 export interface SkinDoTreinador {
   id: string
@@ -30,4 +31,8 @@ export function skinValida(id: string | null | undefined): string {
 
 export function folhaDaSkin(id: string, anim: 'Walk' | 'Idle'): string {
   return `assets/treinadores/campo/${skinValida(id)}/${anim}-Anim.png`
+}
+
+export function quadroDaSkin(id: string) {
+  return quadros[skinValida(id) as keyof typeof quadros]
 }

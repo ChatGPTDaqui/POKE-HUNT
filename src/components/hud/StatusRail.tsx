@@ -31,6 +31,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useUiStore, useDeviceMode } from '@/stores/uiStore'
 import { Carteira } from '@/components/hud/Carteira'
+import { CardDoTreinador } from '@/components/hud/CardDoTreinador'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { useFaceDoPoke } from '@/hooks/useFaceDoPoke'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -67,23 +68,37 @@ export function StatusRail() {
           // novo (um nome de treinador longo, uma moeda de 13 digitos) estourar
           // a conta de novo, ele corta em vez de deixar o avatar sair da tela.
           'journey-status-rail vidro flex items-center gap-[.5em] overflow-hidden rounded-[1.1em] py-[.35em] pr-[.4em] pl-[.35em]',
+          estreito && 'journey-status-mobile',
         )}
       >
         <span className="journey-brand" role="img" aria-label="Poké Bola — ícone do jogo" />
         <FacePoke />
         <VitaisPoke />
         {/* O contexto da hunt fica ao lado dos Companheiros; a sobra mantém a carteira na borda. */}
-        <div className="min-w-0 flex-1" />
-        {estreito && <Carteira abreviada />}
+        <div className="journey-header-space min-w-0 flex-1" />
+        {estreito ? <TreinadorNoCabecalho /> : <CardDoTreinador />}
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
-        {/* PH-282: o card do treinador NAO fica mais aqui. Ele e o primeiro item
-            da coluna do canto superior direito (`ColunaDeAtalhos`), porque este
-            trilho para em `max-w-[64em]` e o card parava junto — em 1920px
-            sobravam ~480px de tela a direita dele. */}
       </div>
 
       {gavetaAberta && <GavetaDetalhes comTreinador={estreito} />}
       <ChipEvolucao />
+    </div>
+  )
+}
+
+function TreinadorNoCabecalho() {
+  const meuId = useAuthStore((s) => s.user?.id ?? null)
+  const nome = useGameStateStore((s) => s.trainer.name)
+  const abrirPerfil = useUiStore((s) => s.setPerfilOpen)
+  return (
+    <div className="journey-trainer-inline relative w-[100px] shrink-0">
+      <button type="button" data-keep-open aria-label={`Perfil do treinador: ${nome}`}
+        onClick={() => abrirPerfil(true)}
+        className="flex min-h-[max(44px,3.1em)] w-full cursor-pointer items-center gap-[4px] rounded-[.4em] text-left">
+        <AvatarDoTreinador userId={meuId} tamanho={1.5} nome={nome} />
+        <span className="min-w-0 self-start truncate text-[.7em] font-medium leading-tight">{nome}</span>
+      </button>
+      <div className="absolute right-0 bottom-0"><Carteira abreviada /></div>
     </div>
   )
 }
@@ -122,7 +137,7 @@ function FacePoke() {
       // A raridade vira a MOLDURA em vez de um selo de texto ao lado do nome:
       // no trilho de uma linha nao ha largura pra "MYTHIC" escrito, e a cor
       // carrega a mesma informacao de relance.
-      className="h-[2.5em] w-[2.5em] shrink-0 cursor-pointer overflow-hidden rounded-[.6em] border-2 bg-n900"
+      className="journey-poke-face h-[2.5em] w-[2.5em] shrink-0 cursor-pointer overflow-hidden rounded-[.6em] border-2 bg-n900"
       style={{ borderColor: rarity.color }}
     >
       {url && <img src={url} alt="" className="h-full w-full object-cover [image-rendering:pixelated]" />}
@@ -156,6 +171,7 @@ function VitaisPoke() {
   const hpNumero = poke.hp > 0 ? Math.max(1, Math.floor(hpPct)) : 0
 
   return (
+    // Mobile: journey-status-mobile reduz a barra para reservar foto/nome do treinador.
     // LARGURA FIXA (PH-157), e nao mais uma coluna elastica entre piso e teto.
     //
     // Antes daqui saiam `min-w-[min(9em,34vw)] max-w-[14em] flex-1`, e esta era
@@ -210,7 +226,7 @@ function VitaisPoke() {
     // Agora o bloco cresce com o nome ate um teto proprio e a sobra vira o
     // mesmo `flex-1` vazio de antes; a barra nao muda de tamanho em nenhum dos
     // dois casos, que e a unica coisa que o PH-157 pediu.
-    <div className="flex shrink-0 flex-col gap-[.18em]">
+    <div className="journey-vitals flex shrink-0 flex-col gap-[.18em]">
       {/* Teto proprio da linha do nome: sem ele, uma especie de nome longo
           empurraria a carteira pra fora em tela estreita. Medido — ver o
           comentario do bloco das porcentagens. */}
@@ -279,11 +295,8 @@ function Barra({ pct, altura, cor }: { pct: number; altura: string; cor: string 
 }
 
 // --- carteira e treinador ----------------------------------------------------
-// PH-282: as duas mudaram de arquivo. A carteira foi pra hud/Carteira.tsx
-// (ela e usada nos dois lugares agora) e o card do treinador virou
-// components/hud/CardDoTreinador.tsx, ancorado no canto superior direito junto
-// com a coluna de atalhos — dentro do trilho ele nunca alcancava a borda em
-// tela larga, porque o trilho para em 64em.
+// Carteira e perfil compartilham o cabeçalho do Pokémon em todos os regimes.
+// A coluna lateral contém apenas os atalhos, sem duplicar foto/nome.
 
 // --- gaveta de detalhes ------------------------------------------------------
 function BotaoDetalhes({ aberta, onToggle }: { aberta: boolean; onToggle: () => void }) {
@@ -329,6 +342,7 @@ function useTaxas() {
  * isso ele nao sumiu: virou o outro lado deste `if`.
  */
 export function ContextoDaHunt() {
+  const { compacto } = useDeviceMode()
   const temSala = useWorldStore((s) => s.sala != null)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
   return (
@@ -345,11 +359,11 @@ export function ContextoDaHunt() {
     //
     // `min-w-0` nos dois: o nome do sub-bioma trunca em vez de empurrar o clima
     // pra fora, que e a regra que o trilho segue desde a PH-157.
-    <div className="vidro flex w-fit min-w-0 max-w-full flex-wrap items-center gap-[.35em] rounded-[.65em] px-[.5em] py-[.25em]">
+    <div className="journey-field-chip flex min-h-[44px] w-fit min-w-0 max-w-full items-center gap-[.35em] rounded-[.5em] px-[.4em]">
       {temSala
-        ? <SalaChip embutido />
+        ? <SalaChip embutido resumo={compacto} />
         : <div className="min-w-0 max-w-[12em] truncate text-center text-[.72em] text-n300">{huntName}</div>}
-      <ClimaChip embutido />
+      <ClimaChip embutido soIcone={compacto} />
     </div>
   )
 }

@@ -13,7 +13,6 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 
 import { StatusRail } from './StatusRail'
-import { ColunaDeAtalhos } from './ColunaDeAtalhos'
 import { TaxasNoCanto } from './TaxasNoCanto'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -35,11 +34,10 @@ describe('carteira no card e taxas no canto (PH-279)', () => {
 
   it('no amplo, o ouro aparece DENTRO do card do treinador, abreviado', () => {
     comOuro(1_002_017_245)
-    // PH-282: o card saiu do trilho e virou o primeiro item da coluna do canto
-    // superior direito — dentro do trilho ele nunca alcancava a borda em tela
-    // larga. Por isso o teste renderiza a COLUNA, e nao o trilho.
-    render(<ColunaDeAtalhos />)
+    // Treinador e carteira compartilham o cabeçalho do Pokémon em campo.
+    render(<StatusRail />)
     const card = screen.getByLabelText('Perfil do treinador')
+    expect(card.closest('.journey-status-rail')).toBeTruthy()
     // `1B`, e nao `1.002.017.245`: 13 digitos nao cabem no card sem empurrar o
     // nome do treinador pra fora.
     expect(card.textContent).toContain('1B')

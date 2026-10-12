@@ -1,0 +1,7 @@
+{
+  "mochila": { "source": "assets/treinadores/originais/mochila.png", "rows": 7, "map": [[0,0],[1,0],[2,0],[6,0],[4,0],[5,0],[3,0],[1,1]] },
+  "cynthia": { "source": "assets/treinadores/originais/cynthia.png", "rows": 7, "map": [[0,0],[6,0],[5,0],[4,0],[3,0],[4,1],[2,0],[6,1]] },
+  "lance": { "source": "assets/treinadores/originais/lance.png", "rows": 6, "map": [[0,0],[1,0],[4,0],[3,0],[3,0],[3,0],[2,0],[5,0]] },
+  "may": { "source": "assets/treinadores/originais/may.png", "rows": 6, "map": [[0,0],[1,0],[4,0],[3,0],[3,0],[3,0],[2,0],[1,1]] },
+  "dawn": { "source": "assets/treinadores/originais/dawn.png", "rows": 6, "map": [[0,0],[1,0],[5,0],[3,0],[3,0],[3,0],[2,0],[4,0]] }
+}

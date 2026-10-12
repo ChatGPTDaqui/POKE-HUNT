@@ -188,37 +188,36 @@ function AbaDeAutomacoes() {
 
       <BlocoAuto
         titulo="Auto-catch"
+        alerta={opcoesBola.find(o => o.id === autoCatchConfig.ballId)?.alerta || opcoesBolaShiny.find(o => o.id === autoCatchConfig.shinyBallId)?.alerta || autoCatchRules.some(r => opcoesBola.find(o => o.id === r.ballItemId)?.alerta)}
+        resumo={`${ITEMS[autoCatchConfig.ballId]?.name ?? autoCatchConfig.ballId} ×${opcoesBola.find(o => o.id === autoCatchConfig.ballId)?.quantidade ?? 0}${autoCatchConfig.catchShinyEnabled ? ` · Shiny: ${ITEMS[autoCatchConfig.shinyBallId]?.name ?? autoCatchConfig.shinyBallId}` : ''}`}
         dica="Lança a bola em todo inimigo derrotado; capturas vão para a mochila."
         ligado={autoToggles.autoCatch}
         aoLigar={(v) => setAutoToggle('autoCatch', v)}
       >
-        <div className="grid grid-cols-2 gap-[.5em]">
-          <label className="flex flex-col gap-[.25em]">
-            <span className="text-menu-muted">Bola padrão</span>
-            <ItemPicker
-              label="Bola padrão"
-              value={autoCatchConfig.ballId}
-              opcoes={opcoesBola}
-              onChange={(ballId) => setAutoCatchConfig({ ballId })}
+        {/* Cabeçalhos compartilham a mesma linha: o switch shiny não desloca seu seletor. */}
+        <div className="grid min-w-0 grid-cols-2 items-center gap-x-[.5em] gap-y-[.25em]">
+          <span className="text-menu-muted">Bola padrão</span>
+          <div className="flex min-w-0 items-center justify-between gap-[.3em] text-menu-muted">
+            <span>Bola Shiny</span>
+            <GameSwitch
+              checked={autoCatchConfig.catchShinyEnabled}
+              onChange={(v) => setAutoCatchConfig({ catchShinyEnabled: v })}
+              label="Usar bola diferente em shinies"
             />
-          </label>
-          <label className="flex flex-col gap-[.25em]" style={{ opacity: autoCatchConfig.catchShinyEnabled ? 1 : 0.45 }}>
-            <span className="flex items-center justify-between gap-[.3em] text-menu-muted">
-              Bola Shiny
-              <GameSwitch
-                checked={autoCatchConfig.catchShinyEnabled}
-                onChange={(v) => setAutoCatchConfig({ catchShinyEnabled: v })}
-                label="Usar bola diferente em shinies"
-              />
-            </span>
-            <ItemPicker
-              label="Bola Shiny"
-              value={autoCatchConfig.shinyBallId}
-              opcoes={opcoesBolaShiny}
-              disabled={!autoCatchConfig.catchShinyEnabled}
-              onChange={(shinyBallId) => setAutoCatchConfig({ shinyBallId })}
-            />
-          </label>
+          </div>
+          <ItemPicker
+            label="Bola padrão"
+            value={autoCatchConfig.ballId}
+            opcoes={opcoesBola}
+            onChange={(ballId) => setAutoCatchConfig({ ballId })}
+          />
+          <ItemPicker
+            label="Bola Shiny"
+            value={autoCatchConfig.shinyBallId}
+            opcoes={opcoesBolaShiny}
+            disabled={!autoCatchConfig.catchShinyEnabled}
+            onChange={(shinyBallId) => setAutoCatchConfig({ shinyBallId })}
+          />
         </div>
 
         <div className="flex items-center gap-[.4em] font-medium">
@@ -293,6 +292,8 @@ function AbaDeAutomacoes() {
 
       <BlocoAuto
         titulo="Auto-pot"
+        alerta={autoPotRules.some(r => opcoesPocao.find(o => o.id === r.itemId)?.alerta)}
+        resumo={autoPotRules.map(r => `HP ≤ ${r.hpPercent}% · ${r.itemId === BEST_POTION_OPTION ? 'Melhor poção' : ITEMS[r.itemId]?.name ?? r.itemId}`).join(' / ') || 'Nenhuma regra'}
         dica="Usa poção quando o HP cai do limite. A primeira regra que casar (na ordem da lista) e usada."
         ligado={autoToggles.autoPot}
         aoLigar={(v) => setAutoToggle('autoPot', v)}
@@ -349,6 +350,8 @@ function AbaDeAutomacoes() {
 
       <BlocoAuto
         titulo="Auto-status"
+        alerta={opcoesCuraDeStatus.some(o => o.alerta)}
+        resumo={`${opcoesCuraDeStatus.filter(o => autoStatusConfig[o.id] !== false).length} curas permitidas · ${opcoesCuraDeStatus.filter(o => autoStatusConfig[o.id] !== false).reduce((n, o) => n + (o.quantidade ?? 0), 0)} em estoque`}
         dica="Cura veneno, queimadura, paralisia, sono, congelamento e confusao com o item mais barato que resolver."
         ligado={autoToggles.autoStatus}
         aoLigar={(v) => setAutoToggle('autoStatus', v)}
@@ -385,6 +388,8 @@ function AbaDeAutomacoes() {
 
       <BlocoAuto
         titulo="Auto-revive"
+        alerta={opcoesRevive.some(o => o.alerta)}
+        resumo={opcoesRevive.map(o => `${o.nome} ×${o.quantidade}`).join(' · ')}
         dica="Se o POKE em campo desmaiar, usa um Revive da mochila automaticamente."
         ligado={autoToggles.autoRevive}
         aoLigar={(v) => setAutoToggle('autoRevive', v)}
@@ -431,7 +436,7 @@ function AbaDeAutomacoes() {
 type AbaDoBot = 'automacoes' | 'lure'
 
 const ABAS: { value: AbaDoBot; label: string }[] = [
-  { value: 'automacoes', label: 'Automações' },
+  { value: 'automacoes', label: 'Rotinas' },
   { value: 'lure', label: 'Lure' },
 ]
 
@@ -443,8 +448,8 @@ const ABAS: { value: AbaDoBot; label: string }[] = [
  * aba nao perde config nem dispara sync a toa — o primeiro disparo de cada uma
  * e ignorado de proposito. Ver a nota longa em `AbaDeAutomacoes`.
  *
- * `text-[.8em]` fica AQUI, uma vez: as abas e as duas telas escalam juntas, e
- * era daqui que o tamanho de fonte do painel sempre saiu.
+ * O tamanho fica aqui uma vez; a densidade vem de recolher detalhes, não de
+ * diminuir letras ou alvos de toque.
  */
 export function AutoPanel() {
   const [aba, setAba] = useState<AbaDoBot>('automacoes')
@@ -466,7 +471,7 @@ export function AutoPanel() {
   }, [])
 
   return (
-    <div className="flex flex-col gap-[.5em] text-[.8em]">
+    <div className="journey-auto flex min-w-0 flex-col gap-[.25em] text-[1.05em]">
       <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
       {aba === 'automacoes' ? <AbaDeAutomacoes /> : <LurePanel />}
     </div>
