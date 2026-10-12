@@ -6,6 +6,26 @@ Comparação com componentes reais na bancada `scripts/harness/jornada-completa.
 
 ## Correção desta entrega
 
+### Revisão após feedback visual
+
+O pedido posterior substitui a decisão horizontal no mobile: reservas verticais
+em coluna de 44 px no modo compacto; fila horizontal no PC. Arraste acompanha
+o eixo de cada modo. Superfícies de contexto usam vidro escuro discreto nos dois
+temas, sem alterar os menus de gerenciamento claros/escuros.
+Sala/clima ficam em uma faixa resumida; objetivo/prêmios permanecem montados,
+mas recolhidos no controle Objetivos, com fechamento por Escape ou toque externo.
+O painel aberto tem altura limitada e rolagem. Avisos de avanço bloqueado são
+mantidos, podendo quebrar linha. Esta revisão está em prévia, não publicada.
+
+Verificação desta revisão: 390×844, 320×568 com escala 1,4 e PC 1366×768.
+Em 320 px as cinco reservas medem 44 px de largura, sem overflow interno;
+o painel Objetivos aberto termina em x=248 e y=323, dentro do viewport.
+No PC as cinco reservas compartilham a mesma coordenada Y. Objetivos abre
+os dados reais e Escape recolhe sem acionar coleta. Não comprova aparelho físico.
+24 testes direcionados passaram; typecheck e build da bancada também passaram.
+
+### Primeira implementação e evidência anterior (superada no mobile)
+
 `ReservasRail` ainda era uma coluna vertical e seu arraste usava o eixo Y.
 Agora mostra até cinco reservas em uma fila horizontal sob o ativo, antes do
 objetivo e dos prêmios. Retratos, barra de HP e KO continuam visíveis; nome,
@@ -24,10 +44,10 @@ Emulação não comprova toque ou safe area de aparelho físico.
 | Parte | Resultado da comparação |
 |---|---|
 | Marca | Poké Bola sem nome do jogo presente. |
-| Companheiros | Horizontal corrigido aqui; contador `6/6` do protótipo ainda ausente nesta faixa. |
-| Local e clima | À direita de Companheiros, mas sala/progresso/clima quebram em várias linhas no mobile; o volume visual não corresponde ao chip enxuto da prévia. |
+| Companheiros | Vertical compacto no mobile e horizontal no PC, conforme feedback posterior; contador `6/6` do protótipo ainda ausente nesta faixa. |
+| Local e clima | Resumo de sala/abates/clima em faixa discreta no mobile; nome completo e explicação sob demanda. Avisos acionáveis continuam visíveis. |
 | Treinador/cabeçalho | Acesso e carteira preservados. No mobile, avatar está na coluna direita e carteira no cabeçalho; a composição unificada do protótipo não foi reproduzida. PC mantém trilho largo com área vazia. |
-| Objetivo | Existe objetivo real, recolhível. Agora fica depois dos companheiros; apresentação ainda diferente do cartão ilustrado. A faixa larga e prêmios competem visualmente com a coluna no mobile em escala alta. |
+| Objetivo | Objetivo e prêmios recolhidos juntos em Objetivos; não ocupam uma faixa larga permanente na hunt. Conteúdo real e ações de coleta preservados. |
 | Golpes/Auto | Quatro slots e Auto existentes, com 2×2 na tela estreita. Permanecem ícones, siglas e potência da HUD anterior; não são os botões com nomes e indicação Ligado/Pausado apresentados na prévia. |
 | Chat | Canais, recolhimento e expansão presentes; não há título redundante aberto. Estado recolhido e mensagens vêm do sistema real, não dos exemplos. |
 | Barra inferior | Oito destinos na ordem, Hunt central, desenhos de equipamento presentes. Duas fileiras laterais no mobile e uma no PC. |
@@ -43,8 +63,8 @@ Emulação não comprova toque ou safe area de aparelho físico.
 
 ## Lacunas prioritárias restantes
 
-1. Compactar a faixa local/clima e conter objetivo/prêmios antes da coluna direita,
-   especialmente em 320 px com escala alta; impedir que gerenciamento cubra os companheiros.
+1. Impedir que gerenciamento cubra os companheiros no PC. Contexto e objetivo/prêmios
+   já foram compactados nesta revisão; dependem de aprovação visual antes de publicar.
 2. Completar o contexto dos companheiros com contagem real, sem duplicar ativo.
 3. Reconciliar cabeçalho/treinador e apresentação dos quatro golpes com a prévia.
 4. Recuperar destaque de expedição na Hunt com arte leve e dados reais.

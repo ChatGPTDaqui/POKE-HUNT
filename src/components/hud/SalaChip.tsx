@@ -42,7 +42,7 @@ export function salaNoTrilho(mode: DeviceMode): boolean {
  * uma) e sem o arredondamento proprio. O conteudo e o mesmo nos dois lugares de
  * proposito: o jogador que troca de aparelho le a mesma coisa.
  */
-export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
+export function SalaChip({ embutido = false, resumo = false }: { embutido?: boolean; resumo?: boolean } = {}) {
   const sala = useWorldStore((s) => s.sala)
   const faixa = useWorldStore((s) => s.mapDef?.levelRange)
   // PH-427: quantas salas o estagio tem sai do mapId, nao de uma constante — a
@@ -192,11 +192,11 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
         com o botao "Próximo Nível" dentro dela o toque que avanca a sala abriria
         a bolha por cima do proprio avanco. O aviso "Derrote o Lorde" fica dentro
         — ele e leitura, nao acao. */}
-    <div className="flex min-w-0 flex-wrap items-center gap-x-[.6em] gap-y-[.2em]">
+    <div className={cn('flex min-w-0 items-center gap-x-[.6em] gap-y-[.2em]', resumo && !quotaFechada ? 'flex-nowrap' : 'flex-wrap')}>
       <span className="shrink-0 text-[.72em] tabular-nums text-n400">
         Sala <b className="font-medium text-n100">{sala.indice + 1}</b>/{salas}
       </span>
-      <span className="min-w-0 truncate text-[.78em] font-medium text-n100">{nome}</span>
+      <span className={cn('min-w-0 truncate text-[.78em] font-medium text-n100', resumo && 'sr-only')}>{nome}</span>
       {janela && !embutido && (
         <span className="shrink-0 text-[.7em] tabular-nums text-n500">Lv {janela[0]}-{janela[1]}</span>
       )}
@@ -205,14 +205,14 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
           `shrink-0`: no trilho ela e o primeiro item que o flex tentaria
           espremer, e barra de progresso encolhida nao diz mais nada — quem cede
           largura e o nome do sub-bioma, que trunca com reticencia legivel. */}
-      <span className="relative h-[.4em] w-[4.5em] shrink-0 overflow-hidden rounded-full bg-n800">
+      <span className={cn('relative h-[.4em] w-[4.5em] shrink-0 overflow-hidden rounded-full bg-n800', resumo && 'hidden')}>
         <span
           className="absolute inset-y-0 left-0 rounded-full bg-ok transition-[width] duration-300"
           style={{ width: `${progresso * 100}%` }}
         />
       </span>
       <span className="shrink-0 text-[.7em] tabular-nums text-n500">
-        {restantes} {embutido ? 'restam' : 'p/ limpar'}
+        {resumo ? `${sala.abates}/${ABATES_POR_SALA}` : `${restantes} ${embutido ? 'restam' : 'p/ limpar'}`}
       </span>
       {sala.ciclos > 0 && !embutido && (
         <span className="shrink-0 text-[.7em] tabular-nums text-n500">· ciclo {sala.ciclos + 1}</span>
@@ -222,7 +222,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
           e com o avanco manual ligado ele ainda clicava num botao que o
           servidor recusa. Aparece com ou sem o toggle: o motivo e o mesmo. */}
       {quotaFechada && travadaPeloProtetor && (
-        <span className="shrink-0 text-[.7em] font-medium text-warn">
+        <span className={cn('text-[.7em] font-medium text-warn', resumo ? 'basis-full whitespace-normal' : 'shrink-0')}>
           Derrote o {tipoDeProtetor === 'lord' ? 'Lord' : 'Guardião'}
         </span>
       )}
@@ -230,7 +230,7 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
           errado nem pede acao do jogador — a area seguinte esta a caminho, e
           enquanto ela nao chega o farm continua rendendo. */}
       {esperandoAAutoridade && (
-        <span className="shrink-0 text-[.7em] font-medium text-n400">
+        <span className={cn('text-[.7em] font-medium text-n400', resumo ? 'basis-full whitespace-normal' : 'shrink-0')}>
           Preparando a próxima área...
         </span>
       )}

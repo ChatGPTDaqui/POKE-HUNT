@@ -35,9 +35,8 @@
 import { useRef } from 'react'
 import { PlacarDoDuelo } from '@/features/arena/PlacarDoDuelo'
 import { StatusRail, ContextoDaHunt } from '@/components/hud/StatusRail'
-import { CartaoDoPasso } from '@/features/primeirosPassos/CartaoDoPasso'
+import { JornadaNaHud } from '@/components/hud/JornadaNaHud'
 import { PainelDoDiario } from '@/features/primeirosPassos/Diario'
-import { FaixaDePremios } from '@/features/primeirosPassos/FaixaDePremios'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { TaxasNoCanto } from '@/components/hud/TaxasNoCanto'
@@ -145,13 +144,14 @@ export function HudLayer() {
               normal com reservas. */}
           <div className="journey-companions flex min-w-0 flex-col gap-[.15em] pr-[60px]">
             <div className="flex min-w-0 items-center gap-[.4em]">
-              <span className="rounded-r bg-menu-paper px-[.5em] text-[.7em] text-menu-ink">Companheiros</span>
+              <span className="journey-field-label px-[.4em] text-[.65em]">Companheiros</span>
               <div className="min-w-0 flex-1"><ContextoDaHunt /></div>
             </div>
-            <ReservasRail />
+            <div className={cn('flex items-start gap-[4px]', mode !== 'amplo' ? 'flex-row' : 'flex-col')}>
+              <ReservasRail />
+              {!painelAberto && <JornadaNaHud />}
+            </div>
           </div>
-          {!painelAberto && <CartaoDoPasso />}
-          {!painelAberto && <FaixaDePremios />}
         </div>
       </div>
 

@@ -1,4 +1,10 @@
 /* Uma composição, dois materiais. Neutros de combate/tipos/raridades intactos. */
+:root {
+  --field-surface: #122e32e6;
+  --field-ink: #fffefa;
+  --field-muted: #d0ddd5;
+  --field-line: #ffffff30;
+}
 :root[data-ui-theme='dark'] {
   --journey-paper: #12161df5;
   --journey-card: #1c222cf5;
@@ -103,3 +109,14 @@
   --journey-card: #1c222c;
   --journey-backdrop: none;
 }
+
+/* Contexto de combate discreto nos dois temas; menus continuam claros/escuros. */
+.hud-root .journey-field-chip {
+  color: var(--field-ink);
+  background: var(--field-surface);
+  border-color: var(--field-line);
+}
+:root[data-ui-theme] .journey-field-chip :is(.text-n100, .text-n200, .text-n300) { color: var(--field-ink); }
+:root[data-ui-theme] .journey-field-chip :is(.text-n400, .text-n500, .text-n600) { color: var(--field-muted); }
+.journey-field-label { color: var(--field-ink); text-shadow: 0 1px 3px var(--field-surface); }
+.journey-hud-agenda > summary::-webkit-details-marker { display: none; }

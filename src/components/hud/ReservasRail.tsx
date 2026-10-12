@@ -47,7 +47,7 @@ const FOLGA_DE_ARRASTO = 6
 interface Arrasto {
   /** Indice NA EQUIPE (nao no trilho): reserva 0 do trilho e equipe 1. */
   indice: number
-  xInicial: number
+  inicio: number
   deslocamento: number
   passou: boolean
 }
@@ -105,20 +105,21 @@ export function ReservasRail() {
     // So o botao principal arrasta; o direito e do menu de contexto do browser.
     if (e.button !== 0) return
     const cards = trilhoRef.current?.querySelectorAll<HTMLElement>('[data-reserva]')
+    const eixo = compacto ? 'top' : 'left'
     passoDoCard.current = cards && cards.length > 1
-      ? cards[1].getBoundingClientRect().left - cards[0].getBoundingClientRect().left
-      : e.currentTarget.getBoundingClientRect().width
+      ? cards[1].getBoundingClientRect()[eixo] - cards[0].getBoundingClientRect()[eixo]
+      : e.currentTarget.getBoundingClientRect()[compacto ? 'height' : 'width']
     // Captura opcional: ela so mantem os eventos chegando quando o ponteiro sai
     // do card no meio do gesto. Chamada sem guarda, ela DERRUBA o clique inteiro
     // onde a API nao existe (jsdom, e navegador antigo sem Pointer Events) — e
     // o clique e o caminho pro menu, que e a funcao principal do card.
     e.currentTarget.setPointerCapture?.(e.pointerId)
-    setArrasto({ indice: indiceNaEquipe, xInicial: e.clientX, deslocamento: 0, passou: false })
+    setArrasto({ indice: indiceNaEquipe, inicio: compacto ? e.clientY : e.clientX, deslocamento: 0, passou: false })
   }
 
   function aoMover(e: React.PointerEvent<HTMLButtonElement>) {
     if (!arrasto) return
-    const deslocamento = e.clientX - arrasto.xInicial
+    const deslocamento = (compacto ? e.clientY : e.clientX) - arrasto.inicio
     setArrasto((a) => (a ? {
       ...a,
       deslocamento,
@@ -153,12 +154,12 @@ export function ReservasRail() {
     // Wrapper sem clique: a camada da HUD inteira e `pointer-events-none` (ver
     // JogoCarregado.tsx) e cada filho reativa so a propria area. Um wrapper
     // clicavel de largura total bloquearia o toque no canvas na faixa toda.
-    <div ref={trilhoRef} className="journey-reserves pointer-events-none relative min-w-0 w-full">
-      {/* Uma fila horizontal sob o ativo, como no protótipo aprovado.
-          Espaço constante entre os cards entra na medida real do arraste. */}
+    <div ref={trilhoRef} className={cn('journey-reserves pointer-events-none relative min-w-0', compacto ? 'w-[44px] shrink-0' : 'w-full')}>
+      {/* Mobile preserva a borda esquerda; PC aproveita a largura disponível. */}
       <div className="journey-reserves-row pointer-events-auto grid gap-[2px]"
         role="group" aria-label="Companheiros da equipe"
-        style={{ gridTemplateColumns: `repeat(${reservas.length}, minmax(44px, 1fr))`, maxWidth: `${reservas.length * 3.4}em` }}>
+        data-orientation={compacto ? 'vertical' : 'horizontal'}
+        style={{ gridTemplateColumns: compacto ? '44px' : `repeat(${reservas.length}, minmax(44px, 1fr))`, maxWidth: compacto ? '44px' : `${reservas.length * 3.4}em` }}>
         {reservas.map(({ poke, indice: indiceNaEquipe }) => {
           const especie = SPECIES[poke.speciesId]
           if (!especie) return null
@@ -198,10 +199,10 @@ export function ReservasRail() {
                 // entrega os `pointermove`.
                 style={{
                   touchAction: 'none',
-                  transform: arrastando ? `translateX(${arrasto.deslocamento}px)` : undefined,
+                  transform: arrastando ? `translate${compacto ? 'Y' : 'X'}(${arrasto.deslocamento}px)` : undefined,
                 }}
                 className={cn(
-                  'journey-reserve relative flex min-h-[44px] w-full min-w-[44px] cursor-pointer select-none flex-col items-center justify-center gap-[.15em] rounded-[.5em] border bg-menu-paper p-[.2em]',
+                  'journey-reserve journey-field-chip relative flex min-h-[44px] w-full min-w-[44px] cursor-pointer select-none flex-col items-center justify-center gap-[.15em] rounded-[.5em] border p-[.2em]',
                   'backdrop-blur-[2px] transition-colors',
                   arrastando ? 'z-10 border-primary opacity-90 shadow-lg' : 'border-n800 hover:border-n600',
                   menuAberto === poke.uid && 'border-primary',
@@ -240,7 +241,7 @@ export function ReservasRail() {
                   {indiceNaEquipe + 1}
                 </span>
 
-                <span className="relative inline-block shrink-0" style={{ width: `${tamanho}em`, height: `${tamanho}em` }}>
+                <span className="relative inline-block shrink-0" style={{ width: compacto ? `min(${tamanho}em, 32px)` : `${tamanho}em`, height: compacto ? `min(${tamanho}em, 32px)` : `${tamanho}em` }}>
                   {url ? (
                     <img
                       src={url}
@@ -269,7 +270,7 @@ export function ReservasRail() {
                   {desmaiado && <span className="absolute right-0 top-0 rounded-[.25em] bg-bad px-[.25em] text-[.55em] font-bold text-white">KO</span>}
                   {/* Barra de HP fina: e o dado que decide se vale trocar, e
                       ler "45/120" em 0.6em no celular nao funciona. */}
-                  <span className="mt-[.15em] block h-[.22em] w-[2.6em] overflow-hidden rounded-full bg-n800">
+                  <span className="mt-[.15em] block h-[.22em] w-[2.6em] max-w-full overflow-hidden rounded-full bg-n800">
                     <span
                       className={cn('block h-full rounded-full', hpPct <= 25 ? 'bg-hp-low' : 'bg-hp')}
                       style={{ width: `${hpPct}%` }}
@@ -282,13 +283,13 @@ export function ReservasRail() {
                   componente tambem abre no TOQUE, e o toque aqui ja e o menu —
                   os dois no mesmo gatilho brigariam. */}
               {sobre === poke.uid && !arrasto && !coarse && (
-                <div className="absolute top-full left-0 z-20 mt-[.25em] w-max max-w-full rounded-[.5em] border border-menu-line bg-menu-paper px-[.6em] py-[.4em] text-[.7em] shadow-xl">
+                <div className={cn('absolute z-20 w-max rounded-[.5em] border border-menu-line bg-menu-paper px-[.6em] py-[.4em] text-[.7em] shadow-xl', compacto ? 'top-0 left-full ml-[4px] max-w-[calc(100vw-108px)]' : 'top-full left-0 mt-[.25em] max-w-full')}>
                   <PokeTooltipContent poke={poke} species={especie} />
                 </div>
               )}
 
               {menuAberto === poke.uid && (
-                <div data-appearance="journey" className="absolute top-full left-0 z-30 mt-[.25em] w-max max-w-full rounded-[.5em] border border-menu-line bg-menu-paper p-[.3em] shadow-xl">
+                <div data-appearance="journey" className={cn('absolute z-30 w-max rounded-[.5em] border border-menu-line bg-menu-paper p-[.3em] shadow-xl', compacto ? 'top-0 left-full ml-[4px] max-w-[calc(100vw-108px)]' : 'top-full left-0 mt-[.25em] max-w-full')}>
                   {/* No toque nao houve hover nenhum, entao o resumo tem que
                       estar AQUI — senao o dado que decide a troca so existe
                       pra quem usa mouse. */}

@@ -78,13 +78,22 @@ describe('o que o trilho mostra', () => {
     expect(screen.getByText('Nv 12')).toBeTruthy()
   })
 
-  it('acomoda as cinco reservas em uma única fila com piso de toque de 44px', () => {
+  it('mantém as cinco reservas em coluna no mobile', () => {
     montarEquipe(6)
     useUiStore.setState({ viewportWidth: 320, viewportHeight: 568, coarsePointer: true })
     render(<ReservasRail />)
     const fila = screen.getByRole('group', { name: 'Companheiros da equipe' })
-    expect(fila.style.gridTemplateColumns).toBe('repeat(5, minmax(44px, 1fr))')
+    expect(fila.dataset.orientation).toBe('vertical')
+    expect(fila.style.gridTemplateColumns).toBe('44px')
     expect(screen.getAllByRole('button')).toHaveLength(5)
+  })
+
+  it('usa uma fila horizontal no PC', () => {
+    montarEquipe(6)
+    render(<ReservasRail />)
+    const fila = screen.getByRole('group', { name: 'Companheiros da equipe' })
+    expect(fila.dataset.orientation).toBe('horizontal')
+    expect(fila.style.gridTemplateColumns).toBe('repeat(5, minmax(44px, 1fr))')
   })
 })
 
@@ -183,19 +192,21 @@ describe('teclado', () => {
   })
 })
 
-describe('arraste horizontal', () => {
-  it('mede a distância entre cards no eixo X e não abre menu ao soltar', () => {
+describe('arraste acompanha a disposição', () => {
+  it.each(['PC', 'mobile'])('mede o eixo correto no %s e não abre menu ao soltar', (regime) => {
+    const mobile = regime === 'mobile'
+    if (mobile) useUiStore.setState({ viewportWidth: 390, viewportHeight: 844, coarsePointer: true })
     montarEquipe(4)
     render(<ReservasRail />)
     const cards = screen.getAllByRole('button')
     const geometria = cards.map((card, i) => vi.spyOn(card, 'getBoundingClientRect')
-      .mockReturnValue({ left: i * 54, width: 52 } as DOMRect))
+      .mockReturnValue({ left: mobile ? 0 : i * 54, top: mobile ? i * 54 : 0, width: 52, height: 52 } as DOMRect))
     // PointerEvent não existe em todas as versões do jsdom.
     vi.stubGlobal('PointerEvent', MouseEvent)
     try {
       fireEvent.pointerDown(cards[0], { button: 0, clientX: 20, clientY: 20 })
-      fireEvent.pointerMove(cards[0], { clientX: 74, clientY: 120 })
-      fireEvent.pointerUp(cards[0], { clientX: 74, clientY: 120 })
+      fireEvent.pointerMove(cards[0], { clientX: mobile ? 120 : 74, clientY: mobile ? 74 : 120 })
+      fireEvent.pointerUp(cards[0], { clientX: mobile ? 120 : 74, clientY: mobile ? 74 : 120 })
       fireEvent.click(cards[0], { detail: 1 })
       expect(reorderTeam).toHaveBeenCalledWith(1, 2)
       expect(screen.queryByRole('button', { name: 'Perfil' })).toBeNull()

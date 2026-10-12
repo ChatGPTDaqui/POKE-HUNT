@@ -15,11 +15,12 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   {
     version: '8.07',
     date: '2026-10-11',
-    title: 'Companheiros em uma faixa horizontal',
+    title: 'HUD mais livre para a hunt',
     highlights: [
-      'Os Pokémon de reserva ficam lado a lado logo abaixo do Pokémon em campo, sem a antiga coluna vertical.',
+      'As reservas ficam em uma coluna estreita no mobile e lado a lado sob o Pokémon em campo no PC.',
       'Toque em um retrato para consultar os dados, abrir o perfil ou colocar em campo. A barra de HP e o aviso de KO continuam visíveis.',
-      'Arraste para os lados ou use as setas do teclado para organizar as reservas.',
+      'Arraste na vertical no mobile ou na horizontal no PC para organizar as reservas. As setas do teclado continuam disponíveis.',
+      'Objetivo e recompensas ficam recolhidos em Objetivos, e o contexto da sala e do clima ocupa uma faixa discreta para liberar o cenário.',
     ],
   },
   {

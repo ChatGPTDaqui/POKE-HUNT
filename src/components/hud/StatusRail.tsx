@@ -329,6 +329,7 @@ function useTaxas() {
  * isso ele nao sumiu: virou o outro lado deste `if`.
  */
 export function ContextoDaHunt() {
+  const { compacto } = useDeviceMode()
   const temSala = useWorldStore((s) => s.sala != null)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
   return (
@@ -345,11 +346,11 @@ export function ContextoDaHunt() {
     //
     // `min-w-0` nos dois: o nome do sub-bioma trunca em vez de empurrar o clima
     // pra fora, que e a regra que o trilho segue desde a PH-157.
-    <div className="vidro flex w-fit min-w-0 max-w-full flex-wrap items-center gap-[.35em] rounded-[.65em] px-[.5em] py-[.25em]">
+    <div className="journey-field-chip flex min-h-[44px] w-fit min-w-0 max-w-full items-center gap-[.35em] rounded-[.5em] px-[.4em]">
       {temSala
-        ? <SalaChip embutido />
+        ? <SalaChip embutido resumo={compacto} />
         : <div className="min-w-0 max-w-[12em] truncate text-center text-[.72em] text-n300">{huntName}</div>}
-      <ClimaChip embutido />
+      <ClimaChip embutido soIcone={compacto} />
     </div>
   )
 }
