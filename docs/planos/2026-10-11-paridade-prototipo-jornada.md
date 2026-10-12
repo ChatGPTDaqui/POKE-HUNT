@@ -85,6 +85,14 @@ Alterações posteriores de densidade/tema explicam parte das diferenças, não 
 
 ## Cobertura e limites da inspeção
 
+Revisão de 12/10: foto/nome do treinador movidos da coluna lateral para o mesmo
+cabeçalho do Pokémon em campo, também no mobile. Carteira preservada, barra de
+HP/XP encurtada no compacto e atalhos abaixo da altura medida. No PC, o card
+perde o fundo/borda próprios ao entrar no cabeçalho. Esta decisão substitui a
+posição anterior do treinador. Conferência visual desta revisão está pendente:
+o navegador recusou o acesso automatizado à bancada por política de segurança.
+Não promover antes do teste visual do usuário.
+
 Revisão de Automações: cartões substituídos por linhas com interruptor e resumo;
 regras/estoques detalhados recolhíveis sem desmontagem nem alteração do bot.
 Avisos de estoque baixo permanecem no resumo e a previsão global continua visível.

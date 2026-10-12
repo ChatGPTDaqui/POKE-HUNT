@@ -5,12 +5,8 @@ import { CalendarCheck, Calculator, CheckSquare, Sparkle, Sword, type Icon } fro
 import { useDiarioStore } from '@/stores/diarioStore'
 import { usePremiosProntosDoDiario } from '@/features/primeirosPassos/Diario'
 import { NotificationBadge } from '@/components/game/NotificationBadge'
-import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
-import { useAuthStore } from '@/stores/authStore'
-import { useGameStateStore } from '@/stores/gameStateStore'
 import { Explicacao } from '@/components/shared/Explicacao'
 import type { ReactNode } from 'react'
-import { CardDoTreinador } from '@/components/hud/CardDoTreinador'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 import { MarcaDeCadeado } from '@/features/primeirosPassos/MarcaDeCadeado'
@@ -36,17 +32,9 @@ export function ColunaDeAtalhos() {
   const tranca = useTrancas()
   const destaques = { tasks: useDestaqueDoPasso('tasks'), especialidades: useDestaqueDoPasso('especialidades') } as Record<string, ReturnType<typeof useDestaqueDoPasso> | undefined>
   const trilhoHeight = useUiStore((s) => s.trilhoHeight)
-  const { mode } = useDeviceMode()
   const premios = usePremiosProntosDoDiario()
-  const meuId = useAuthStore((s) => s.user?.id ?? null)
-  const nomeDoTreinador = useGameStateStore((s) => s.trainer.name)
   const navHeight = useUiStore((s) => s.navHeight)
   const diarioAberto = useDiarioStore((s) => s.painelAberto)
-  // 'deitado' conta como estreito aqui, ao contrario do trilho: ali o que
-  // sobra e largura, e o rotulo cabe. Aqui a coluna cresce pra BAIXO, e deitado
-  // a tela tem 390px de altura — tres botoes com rotulo comeriam a faixa em que
-  // o jogador precisa ver o proprio POKE.
-  const soIcone = mode !== 'amplo'
 
   return (
     // `top` vem da medida do trilho, e nao de um `em` fixo: a altura dele muda
@@ -59,17 +47,10 @@ export function ColunaDeAtalhos() {
     <div
       data-journey-shortcuts
       className="pointer-events-none absolute right-[.5em] z-[35] flex flex-col items-end gap-[.15em]"
-      // No mobile, foto e nome permanecem acima dos atalhos, abaixo do trilho.
-      // No amplo, o card completo ocupa o canto superior direito.
-      style={{ top: soIcone ? `calc(${trilhoHeight}px + .5em)` : '.5em',
-        maxHeight: `calc(100% - ${soIcone ? trilhoHeight + navHeight : navHeight}px - 1em)`, overflowY: 'auto' }}
+      // Treinador no cabeçalho; atalhos abaixo da altura realmente medida.
+      style={{ top: `calc(${trilhoHeight}px + .5em)`,
+        maxHeight: `calc(100% - ${trilhoHeight + navHeight}px - 1em)`, overflowY: 'auto' }}
     >
-      {!soIcone && <CardDoTreinador />}
-      {soIcone && <button type="button" data-keep-open aria-label={`Perfil do treinador: ${nomeDoTreinador}`}
-        onClick={() => useUiStore.getState().setPerfilOpen(true)} className="journey-trainer-mobile vidro pointer-events-auto flex min-h-[44px] w-[104px] items-center gap-[4px] rounded-[.65em] p-[4px] text-left">
-        <AvatarDoTreinador userId={meuId} tamanho={1.5} nome={nomeDoTreinador} />
-        <span className="min-w-0 truncate text-[.7em] font-medium leading-tight">{nomeDoTreinador}</span>
-      </button>}
       <ShortcutHint label="Diário"><button type="button" data-keep-open aria-label="Diário"
         aria-pressed={diarioAberto}
         onClick={() => useDiarioStore.getState().abrirPainel()}

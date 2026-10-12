@@ -65,6 +65,14 @@
   .journey-vitals-bars { width: min(14em, 27vw); }
 }
 
+/* Reserva explícita para o treinador: moedas e nomes não redimensionam o HP. */
+.journey-status-mobile { gap: 4px; padding: 4px; }
+.journey-status-mobile .journey-vitals { min-width: 0; flex: 1; overflow: hidden; }
+.journey-status-mobile .journey-header-space { display: none; }
+.journey-status-mobile .journey-vitals-bars { width: min(8em, 18vw); flex-shrink: 1; min-width: 0; }
+.journey-status-mobile .journey-brand { width: 14px; height: 14px; }
+.journey-status-mobile .journey-poke-face { width: 44px; height: 44px; }
+
 .journey-navigation {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max(52px, 3.6em) minmax(0, 1fr);
