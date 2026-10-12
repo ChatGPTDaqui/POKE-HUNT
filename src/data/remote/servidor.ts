@@ -21,6 +21,28 @@ import type { ClimaTipo, ProtetorDaAutoridade, SalaAtiva } from '@/engine/types'
 
 const BASE = (import.meta.env.VITE_SERVIDOR_URL || '').replace(/\/$/, '')
 
+// A Edge Function roda na regiao MAIS PERTO DO JOGADOR (sa-east-1 pra quem joga
+// do Brasil), mas o banco fica em us-east-1. Cada ida da funcao ao PostgREST
+// atravessava o continente: ~160-250 ms no gateway contra ~25 ms dentro do
+// banco, e o flush faz ~13 idas em serie — 3 s de mediana medidos em producao em
+// 12/10/2026. Fixar a funcao na regiao do banco troca essas 13 travessias por
+// uma so, a do jogador ate a funcao.
+//
+// Query string (`forceFunctionRegion`) e nao o header `x-region`: header novo
+// exigiria liberar no CORS da funcao (origens.ts) antes de o cliente mandar, e um
+// cliente publicado antes da funcao quebraria todo request no preflight.
+//
+// So pra funcao hospedada no Supabase: o servidor local de desenvolvimento
+// (localhost:8787) nao conhece o parametro.
+const REGIAO_DO_BANCO = import.meta.env.VITE_SERVIDOR_REGIAO || 'us-east-1'
+
+/** URL completa de uma rota do servico, ja fixada na regiao do banco. */
+export function urlDoServidor(caminho: string, base = BASE, regiao = REGIAO_DO_BANCO): string {
+  const url = `${base}${caminho}`
+  if (!regiao || !/\.supabase\.co\//.test(url)) return url
+  return `${url}${url.includes('?') ? '&' : '?'}forceFunctionRegion=${encodeURIComponent(regiao)}`
+}
+
 /** Se o jogo esta rodando sob autoridade do servidor. */
 export function servidorAtivo(): boolean {
   return BASE.length > 0
@@ -103,7 +125,7 @@ async function pedir<T>(caminho: string, { retentavel = false, timeoutMs = TIMEO
   for (let tentativa = 0; tentativa < tentativas; tentativa++) {
     if (tentativa > 0) await dormir(ESPERA_ENTRE_TENTATIVAS_MS[tentativa - 1])
     try {
-      const resposta = await fetch(`${BASE}${caminho}`, {
+      const resposta = await fetch(urlDoServidor(caminho), {
         ...init,
         signal: AbortSignal.timeout(timeoutMs),
         headers: {
@@ -651,7 +673,7 @@ export async function flushAoSair(): Promise<void> {
   const token = data.session?.access_token
   if (!token) return
   try {
-    await fetch(`${BASE}/sessao/flush`, {
+    await fetch(urlDoServidor('/sessao/flush'), {
       method: 'POST',
       keepalive: true,
       headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' },
