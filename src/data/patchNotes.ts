@@ -23,6 +23,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'Arraste na vertical no mobile ou na horizontal no PC para organizar as reservas. As setas do teclado continuam disponíveis.',
       'Objetivo e recompensas ficam recolhidos em Objetivos, e o contexto da sala e do clima ocupa uma faixa discreta para liberar o cenário.',
       'Automações usa linhas compactas com resumo e interruptor. Toque na rotina para configurar; avisos de estoque continuam visíveis mesmo recolhidos.',
+      'As cinco skins dos treinadores em campo usam recortes na resolução original, com cores, transparência e passos preservados, sem aumentar o porte no cenário.',
     ],
   },
   {

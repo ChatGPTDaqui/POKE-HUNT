@@ -1,0 +1,37 @@
+{
+  "mochila": {
+    "frameWidth": 149,
+    "frameHeight": 201,
+    "footX": 74,
+    "footY": 195,
+    "bodyHeight": 178
+  },
+  "cynthia": {
+    "frameWidth": 197,
+    "frameHeight": 199,
+    "footX": 98,
+    "footY": 193,
+    "bodyHeight": 183
+  },
+  "lance": {
+    "frameWidth": 203,
+    "frameHeight": 222,
+    "footX": 101,
+    "footY": 216,
+    "bodyHeight": 201
+  },
+  "may": {
+    "frameWidth": 187,
+    "frameHeight": 228,
+    "footX": 93,
+    "footY": 222,
+    "bodyHeight": 204.5
+  },
+  "dawn": {
+    "frameWidth": 191,
+    "frameHeight": 250,
+    "footX": 95,
+    "footY": 244,
+    "bodyHeight": 227
+  }
+}
