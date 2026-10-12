@@ -3172,42 +3172,24 @@ export type Database = {
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       expirar_trocas: { Args: never; Returns: number }
       fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
-      gravar_flush_de_sessao:
-        | {
-            Args: {
-              p_ciclos: number
-              p_poke_uid: string
-              p_protetor: Json
-              p_rng_draws: number
-              p_rng_state: number
-              p_sala_abates: number
-              p_sala_chave: string
-              p_sala_indice: number
-              p_sequence_cleared: boolean
-              p_sequence_index: number
-              p_session_id: string
-              p_simulated_seconds: number
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              p_ciclos: number
-              p_poke_uid: string
-              p_protetor: Json
-              p_rng_draws: number
-              p_rng_state: number
-              p_sala_abates: number
-              p_sala_chave: string
-              p_sala_indice: number
-              p_sequence_cleared: boolean
-              p_sequence_hp: number
-              p_sequence_index: number
-              p_session_id: string
-              p_simulated_seconds: number
-            }
-            Returns: undefined
-          }
+      gravar_flush_de_sessao: {
+        Args: {
+          p_ciclos: number
+          p_poke_uid: string
+          p_protetor: Json
+          p_rng_draws: number
+          p_rng_state: number
+          p_sala_abates: number
+          p_sala_chave: string
+          p_sala_indice: number
+          p_sequence_cleared: boolean
+          p_sequence_hp: number
+          p_sequence_index: number
+          p_session_id: string
+          p_simulated_seconds: number
+        }
+        Returns: undefined
+      }
       gravar_progresso: {
         Args: {
           p_patch: Json
@@ -6782,42 +6764,24 @@ export type Database = {
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       expirar_trocas: { Args: never; Returns: number }
       fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
-      gravar_flush_de_sessao:
-        | {
-            Args: {
-              p_ciclos: number
-              p_poke_uid: string
-              p_protetor: Json
-              p_rng_draws: number
-              p_rng_state: number
-              p_sala_abates: number
-              p_sala_chave: string
-              p_sala_indice: number
-              p_sequence_cleared: boolean
-              p_sequence_index: number
-              p_session_id: string
-              p_simulated_seconds: number
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              p_ciclos: number
-              p_poke_uid: string
-              p_protetor: Json
-              p_rng_draws: number
-              p_rng_state: number
-              p_sala_abates: number
-              p_sala_chave: string
-              p_sala_indice: number
-              p_sequence_cleared: boolean
-              p_sequence_hp: number
-              p_sequence_index: number
-              p_session_id: string
-              p_simulated_seconds: number
-            }
-            Returns: undefined
-          }
+      gravar_flush_de_sessao: {
+        Args: {
+          p_ciclos: number
+          p_poke_uid: string
+          p_protetor: Json
+          p_rng_draws: number
+          p_rng_state: number
+          p_sala_abates: number
+          p_sala_chave: string
+          p_sala_indice: number
+          p_sequence_cleared: boolean
+          p_sequence_hp: number
+          p_sequence_index: number
+          p_session_id: string
+          p_simulated_seconds: number
+        }
+        Returns: undefined
+      }
       gravar_progresso: {
         Args: {
           p_patch: Json
