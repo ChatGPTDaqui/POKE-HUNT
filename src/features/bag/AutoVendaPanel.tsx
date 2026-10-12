@@ -11,11 +11,11 @@
 // (`sincronizarAuto`), porque o servidor LE esta regra durante a simulacao:
 // config dessincronizada aqui e POKE vendido (ou nao vendido) contra a vontade
 // do jogador.
-import { useEffect, useRef } from 'react'
 import { CaretDown, CurrencyCircleDollar } from '@phosphor-icons/react'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { sincronizarAuto } from '@/data/remote/autoridade'
+import { useEnviarQuandoConteudoMudar } from '@/hooks/useEnviarQuandoConteudoMudar'
 import { GameSwitch } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
@@ -72,17 +72,10 @@ export function AutoVendaPanel() {
   const config = useGameStateStore((s) => s.autoSellConfig)
   const setAutoSellConfig = useGameStateStore((s) => s.setAutoSellConfig)
 
-  // Mesmo desenho do AutoPanel: sincroniza em bloco quando muda, e IGNORA o
-  // primeiro disparo — ele aconteceria logo depois de o estado chegar do
-  // servidor e mandaria os mesmos valores de volta a cada abertura da tela.
-  const primeiraSync = useRef(true)
-  useEffect(() => {
-    if (primeiraSync.current) {
-      primeiraSync.current = false
-      return
-    }
-    sincronizarAuto()
-  }, [config])
+  // Por CONTEUDO, e nao por referencia (ver `useEnviarQuandoConteudoMudar`):
+  // todo flush troca a referencia sem mudar o valor, e o primeiro valor — o que
+  // acabou de chegar DO servidor — e a linha de base, nao um envio.
+  useEnviarQuandoConteudoMudar(config, sincronizarAuto)
 
   function alternarRaridade(chave: RarityKey) {
     const marcada = config.raridades.includes(chave)
