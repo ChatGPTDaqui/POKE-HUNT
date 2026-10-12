@@ -196,7 +196,7 @@ export function SalaChip({ embutido = false, resumo = false }: { embutido?: bool
       <span className="shrink-0 text-[.72em] tabular-nums text-n400">
         Sala <b className="font-medium text-n100">{sala.indice + 1}</b>/{salas}
       </span>
-      <span className={cn('min-w-0 truncate text-[.78em] font-medium text-n100', resumo && 'sr-only')}>{nome}</span>
+      <span className={cn('min-w-0 truncate text-[.78em] font-medium text-n100', resumo && 'max-w-[8em]')}>{nome}</span>
       {janela && !embutido && (
         <span className="shrink-0 text-[.7em] tabular-nums text-n500">Lv {janela[0]}-{janela[1]}</span>
       )}

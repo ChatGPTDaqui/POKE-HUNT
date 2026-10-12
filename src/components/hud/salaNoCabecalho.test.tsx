@@ -75,5 +75,6 @@ describe('sala no cabecalho (PH-272)', () => {
     useWorldStore.setState({ sala: SALA, mapDef: MAPA } as never, false)
     render(<ContextoDaHunt />)
     expect(screen.getAllByText('Relvado')).toHaveLength(1)
+    expect(screen.getByText('Relvado').className).not.toContain('sr-only')
   })
 })

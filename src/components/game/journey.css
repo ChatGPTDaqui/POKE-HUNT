@@ -30,6 +30,32 @@
   backdrop-filter: var(--journey-backdrop);
 }
 
+/* A arte tem pigmentos próprios, independentes do material claro/escuro.
+   Ícones monocromáticos de controles continuam herdando contraste acessível. */
+.equipment-art {
+  --journey-paper: #faf7ef;
+  --journey-card: #fffefa;
+  --journey-ink: #203c42;
+  --journey-line: #d6dcd1;
+  --journey-leaf: #2d6650;
+  --journey-wash: #e6eddf;
+  --journey-primary: #ad3d2c;
+  --journey-focus: #476f83;
+  --journey-warning: #795016;
+}
+.journey-room-anchor {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 112px);
+  pointer-events: auto;
+}
+.journey-room-anchor .journey-field-chip {
+  border-radius: 0 0 .5em .5em;
+}
+
 .journey-shortcut {
   display: grid;
   place-items: center;

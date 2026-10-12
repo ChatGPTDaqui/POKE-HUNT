@@ -74,7 +74,7 @@ export function StatusRail() {
         <span className="journey-brand" role="img" aria-label="Poké Bola — ícone do jogo" />
         <FacePoke />
         <VitaisPoke />
-        {/* O contexto da hunt fica ao lado dos Companheiros; a sobra mantém a carteira na borda. */}
+        {/* O contexto fica centralizado abaixo; a sobra mantém a carteira na borda. */}
         <div className="journey-header-space min-w-0 flex-1" />
         {estreito ? <TreinadorNoCabecalho /> : <CardDoTreinador />}
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />

@@ -159,7 +159,7 @@ export function ReservasRail() {
       <div className="journey-reserves-row vidro pointer-events-auto grid gap-[2px]"
         role="group" aria-label="Companheiros da equipe"
         data-orientation={compacto ? 'vertical' : 'horizontal'}
-        style={{ gridTemplateColumns: compacto ? '44px' : `repeat(${reservas.length}, minmax(44px, 1fr))`, maxWidth: compacto ? '44px' : `${reservas.length * 3.4}em` }}>
+        style={{ gridTemplateColumns: compacto ? '44px' : `repeat(${reservas.length}, minmax(44px, 1fr))`, maxWidth: compacto ? '44px' : `min(${reservas.length * 3.4}em, 30vw)` }}>
         {reservas.map(({ poke, indice: indiceNaEquipe }) => {
           const especie = SPECIES[poke.speciesId]
           if (!especie) return null

@@ -515,20 +515,20 @@ export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
 }
 
 /**
- * Quanto do corpo aparece ATRAVES do que o cobre (08/10). 0,55: o golpe por cima
- * ainda le como golpe, e o POKE embaixo dele nao some. Ver o call site em
+ * Quanto do corpo aparece sobre golpes: 80% opaco. Informações recebem uma
+ * passada opaca antes dos golpes. Ver o call site em
  * renderer.ts#renderMap.
  */
-export const ALFA_DO_CORPO_POR_CIMA = 0.55
+export const ALFA_DO_CORPO_POR_CIMA = 0.8
 
 /**
  * Redesenha SO o sprite do POKE (sem sombra, aura ou marca) com alfa parcial,
  * depois de tudo que pode cobri-lo. Sprite sobre o mesmo sprite nao muda pixel
  * onde nada cobriu; onde algo cobriu, aquilo fica semitransparente sobre o corpo.
  */
-export function drawCorpoPorCima(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+export function drawCorpoPorCima(ctx: CanvasRenderingContext2D, entity: WorldEntity, alpha = ALFA_DO_CORPO_POR_CIMA): void {
   ctx.save()
-  ctx.globalAlpha = ALFA_DO_CORPO_POR_CIMA
+  ctx.globalAlpha = alpha
   drawBattleSprite(ctx, entity)
   ctx.restore()
 }
