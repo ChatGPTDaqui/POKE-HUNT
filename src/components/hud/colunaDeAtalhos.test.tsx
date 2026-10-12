@@ -11,6 +11,7 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 
 import { useUiStore } from '@/stores/uiStore'
+import { useGameStateStore } from '@/stores/gameStateStore'
 import { ColunaDeAtalhos, TELAS_NA_COLUNA } from './ColunaDeAtalhos'
 
 describe('coluna de atalhos do canto superior direito (PH-257)', () => {
@@ -50,6 +51,16 @@ describe('coluna de atalhos do canto superior direito (PH-257)', () => {
     const { container } = render(<ColunaDeAtalhos />)
     const coluna = container.firstElementChild as HTMLElement
     expect(coluna.style.top).toContain('87px')
+  })
+
+  it('mantém foto e nome do treinador visíveis no mobile, com acesso ao perfil', () => {
+    useUiStore.setState({ viewportWidth: 390, viewportHeight: 844, perfilOpen: false })
+    const nome = useGameStateStore.getState().trainer.name
+    render(<ColunaDeAtalhos />)
+    expect(screen.getByText(nome)).toBeTruthy()
+    expect(screen.getByRole('img', { name: `Foto de ${nome}` })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: `Perfil do treinador: ${nome}` }))
+    expect(useUiStore.getState().perfilOpen).toBe(true)
   })
 
   it('no amplo a coluna comeca no TOPO, e o card do treinador vem junto', () => {

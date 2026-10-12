@@ -18,6 +18,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
     title: 'HUD mais livre para a hunt',
     highlights: [
       'As reservas ficam em uma coluna estreita no mobile e lado a lado sob o Pokémon em campo no PC.',
+      'Pokémon ativo e reservas compartilham uma moldura conectada. Foto e nome do treinador permanecem visíveis também no mobile.',
       'Toque em um retrato para consultar os dados, abrir o perfil ou colocar em campo. A barra de HP e o aviso de KO continuam visíveis.',
       'Arraste na vertical no mobile ou na horizontal no PC para organizar as reservas. As setas do teclado continuam disponíveis.',
       'Objetivo e recompensas ficam recolhidos em Objetivos, e o contexto da sala e do clima ocupa uma faixa discreta para liberar o cenário.',

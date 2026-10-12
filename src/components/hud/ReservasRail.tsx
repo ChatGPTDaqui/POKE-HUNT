@@ -154,9 +154,9 @@ export function ReservasRail() {
     // Wrapper sem clique: a camada da HUD inteira e `pointer-events-none` (ver
     // JogoCarregado.tsx) e cada filho reativa so a propria area. Um wrapper
     // clicavel de largura total bloquearia o toque no canvas na faixa toda.
-    <div ref={trilhoRef} className={cn('journey-reserves pointer-events-none relative min-w-0', compacto ? 'w-[44px] shrink-0' : 'w-full')}>
+    <div ref={trilhoRef} className={cn('journey-reserves pointer-events-none relative min-w-0', compacto ? 'w-[50px] shrink-0' : 'w-full')}>
       {/* Mobile preserva a borda esquerda; PC aproveita a largura disponível. */}
-      <div className="journey-reserves-row pointer-events-auto grid gap-[2px]"
+      <div className="journey-reserves-row vidro pointer-events-auto grid gap-[2px]"
         role="group" aria-label="Companheiros da equipe"
         data-orientation={compacto ? 'vertical' : 'horizontal'}
         style={{ gridTemplateColumns: compacto ? '44px' : `repeat(${reservas.length}, minmax(44px, 1fr))`, maxWidth: compacto ? '44px' : `${reservas.length * 3.4}em` }}>
@@ -202,7 +202,7 @@ export function ReservasRail() {
                   transform: arrastando ? `translate${compacto ? 'Y' : 'X'}(${arrasto.deslocamento}px)` : undefined,
                 }}
                 className={cn(
-                  'journey-reserve journey-field-chip relative flex min-h-[44px] w-full min-w-[44px] cursor-pointer select-none flex-col items-center justify-center gap-[.15em] rounded-[.5em] border p-[.2em]',
+                  'journey-reserve relative flex min-h-[44px] w-full min-w-[44px] cursor-pointer select-none flex-col items-center justify-center gap-[.15em] rounded-[.5em] border p-[.2em]',
                   'backdrop-blur-[2px] transition-colors',
                   arrastando ? 'z-10 border-primary opacity-90 shadow-lg' : 'border-n800 hover:border-n600',
                   menuAberto === poke.uid && 'border-primary',

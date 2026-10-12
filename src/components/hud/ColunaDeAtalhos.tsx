@@ -7,6 +7,7 @@ import { usePremiosProntosDoDiario } from '@/features/primeirosPassos/Diario'
 import { NotificationBadge } from '@/components/game/NotificationBadge'
 import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { useAuthStore } from '@/stores/authStore'
+import { useGameStateStore } from '@/stores/gameStateStore'
 import { Explicacao } from '@/components/shared/Explicacao'
 import type { ReactNode } from 'react'
 import { CardDoTreinador } from '@/components/hud/CardDoTreinador'
@@ -38,6 +39,7 @@ export function ColunaDeAtalhos() {
   const { mode } = useDeviceMode()
   const premios = usePremiosProntosDoDiario()
   const meuId = useAuthStore((s) => s.user?.id ?? null)
+  const nomeDoTreinador = useGameStateStore((s) => s.trainer.name)
   const navHeight = useUiStore((s) => s.navHeight)
   const diarioAberto = useDiarioStore((s) => s.painelAberto)
   // 'deitado' conta como estreito aqui, ao contrario do trilho: ali o que
@@ -57,16 +59,16 @@ export function ColunaDeAtalhos() {
     <div
       data-journey-shortcuts
       className="pointer-events-none absolute right-[.5em] z-[35] flex flex-col items-end gap-[.15em]"
-      // No amplo/deitado o card do treinador abre esta coluna e ela comeca no
-      // topo da tela; no compacto o card nao existe e ela precisa comecar
-      // abaixo do trilho, que ali ocupa a largura toda.
+      // No mobile, foto e nome permanecem acima dos atalhos, abaixo do trilho.
+      // No amplo, o card completo ocupa o canto superior direito.
       style={{ top: soIcone ? `calc(${trilhoHeight}px + .5em)` : '.5em',
         maxHeight: `calc(100% - ${soIcone ? trilhoHeight + navHeight : navHeight}px - 1em)`, overflowY: 'auto' }}
     >
       {!soIcone && <CardDoTreinador />}
-      {soIcone && <button type="button" data-keep-open aria-label="Perfil do treinador"
-        onClick={() => useUiStore.getState().setPerfilOpen(true)} className="journey-shortcut vidro pointer-events-auto">
-        <AvatarDoTreinador userId={meuId} tamanho={1.5} />
+      {soIcone && <button type="button" data-keep-open aria-label={`Perfil do treinador: ${nomeDoTreinador}`}
+        onClick={() => useUiStore.getState().setPerfilOpen(true)} className="journey-trainer-mobile vidro pointer-events-auto flex min-h-[44px] w-[104px] items-center gap-[4px] rounded-[.65em] p-[4px] text-left">
+        <AvatarDoTreinador userId={meuId} tamanho={1.5} nome={nomeDoTreinador} />
+        <span className="min-w-0 truncate text-[.7em] font-medium leading-tight">{nomeDoTreinador}</span>
       </button>}
       <ShortcutHint label="Diário"><button type="button" data-keep-open aria-label="Diário"
         aria-pressed={diarioAberto}

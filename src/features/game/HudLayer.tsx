@@ -97,7 +97,7 @@ export function HudLayer() {
             reservas, sem nada no meio. Com `gap-0` a linha vazia sai de cena de
             verdade, e a margem propria dela (abaixo) so vale quando ela tem
             conteudo. */}
-        <div className="flex w-full max-w-[64em] flex-col gap-0">
+        <div className="journey-party flex w-full max-w-[64em] flex-col gap-0">
           {/* Medido pra `ColunaDeAtalhos` (PH-257) saber onde o trilho acaba —
               ela comeca logo abaixo do card do treinador. Um `div` so pra
               medida, sem estilo nenhum: `StatusRail` ja e uma coluna com
@@ -111,44 +111,17 @@ export function HudLayer() {
           <div ref={trilhoRef}>
             <StatusRail />
           </div>
-          {/* Placar do combate duelo (arena, Lance, covis) — PH-549 o colocava
-              na fileira de chips (sala/clima), la embaixo das reservas. Com uma
-              equipe cheia a fileira de reservas empurra o card pra baixo o
-              bastante pra ele acabar no meio da tela, longe do cabecalho que
-              ele descreve. Mora AQUI agora, entre o cabecalho e as reservas —
-              proprio slot, nao a mesma fileira dos chips, pra nao herdar o
-              `justify-center` pensado pra chips pequenos.
-              So existe (e so entao ganha margem) quando ha duelo — `PlacarDoDuelo`
-              devolve `null` fora dele, e a div fica vazia de verdade, mesmo
-              padrao `:not(:empty)` que a fileira de chips ja usa abaixo. */}
+          {/* Duelo mantém seu placar de largura própria; não cabe na coluna estreita. */}
           <div className="flex w-full justify-center [&:not(:empty)]:my-[.4em]">
             <PlacarDoDuelo />
           </div>
-          {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
-              ancora propria na borda esquerda. A ancora foi tentada uma vez
-              (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em
-              390px. Aqui ele empurra em vez de sobrepor, e continua no canto
-              superior esquerdo porque o proprio componente se alinha a esquerda
-              dentro da linha.
-
-              ELE VEM LOGO DEPOIS DO CABECALHO DO POKE ATIVO (PH-261), e nao
-              depois dos chips. A fila de reservas E a continuacao do POKE em
-              campo — o slot 1 e o campo, e a numeracao dela comeca em 2 (ver
-              ReservasRail). A linha de sala/clima ficava no meio dos dois e
-              cortava essa leitura: no PC as reservas apareciam como um bloco
-              solto abaixo de um chip, sem relacao visivel com o POKE.
-
-              O slot do placar de duelo, logo acima, e a UNICA excecao de
-              proposito: fora de duelo ele nao renderiza nada (fica vazio),
-              entao esta regra continua valendo sempre que ela importa — hunt
-              normal com reservas. */}
-          <div className="journey-companions flex min-w-0 flex-col gap-[.15em] pr-[60px]">
-            <div className="flex min-w-0 items-center gap-[.4em]">
-              <span className="journey-field-label px-[.4em] text-[.65em]">Companheiros</span>
-              <div className="min-w-0 flex-1"><ContextoDaHunt /></div>
-            </div>
-            <div className={cn('flex items-start gap-[4px]', mode !== 'amplo' ? 'flex-row' : 'flex-col')}>
-              <ReservasRail />
+          {/* Reservas encostam no ativo e compartilham o material da moldura.
+              Contexto/objetivos ficam ao lado no mobile, sem cortar essa união.
+              A medida dos atalhos continua sendo somente a do status acima. */}
+          <div className={cn('journey-companions flex min-w-0 items-start gap-[4px]', mode !== 'amplo' ? 'flex-row pr-[120px]' : 'flex-col pr-[60px]')}>
+            <ReservasRail />
+            <div className="flex min-w-0 flex-col items-start gap-[4px] pt-[4px]">
+              <ContextoDaHunt />
               {!painelAberto && <JornadaNaHud />}
             </div>
           </div>

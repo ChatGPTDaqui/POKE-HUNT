@@ -120,3 +120,25 @@
 :root[data-ui-theme] .journey-field-chip :is(.text-n400, .text-n500, .text-n600) { color: var(--field-muted); }
 .journey-field-label { color: var(--field-ink); text-shadow: 0 1px 3px var(--field-surface); }
 .journey-hud-agenda > summary::-webkit-details-marker { display: none; }
+
+/* Uma única moldura de equipe em L, sem preencher o espaço do cenário. */
+.journey-party:has(.journey-reserves-row) .journey-status-rail {
+  border-bottom-left-radius: 0;
+}
+.hud-root .journey-reserves-row {
+  box-sizing: content-box;
+  border-top: 0;
+  border-radius: 0 0 .65em .65em;
+  padding: 2px 2px 4px;
+  box-shadow: none;
+}
+.hud-root .journey-reserve {
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+}
+.hud-root .journey-reserve:hover,
+.hud-root .journey-reserve[aria-expanded='true'] {
+  background: var(--journey-wash);
+  border-color: var(--journey-line);
+}

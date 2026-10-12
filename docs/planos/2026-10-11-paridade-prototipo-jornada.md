@@ -26,6 +26,15 @@ os dados reais e Escape recolhe sem acionar coleta. Não comprova aparelho físi
 
 ### Primeira implementação e evidência anterior (superada no mobile)
 
+Revisão seguinte: ativo e reservas têm continuidade de moldura/material, em L
+no mobile, sem local/clima entre eles. O rótulo redundante Companheiros saiu da
+HUD visual; o grupo mantém nome acessível. Contexto e objetivos
+ficam ao lado da coluna no mobile. O placar de duelo mantém seu slot largo
+entre o status e as reservas, como exceção contextual já existente.
+Foto e nome do treinador ficam permanentes
+acima dos atalhos; nomes longos truncam visualmente, com nome completo no botão.
+O avatar usa o cache real do perfil, com ícone padrão para quem não tem foto.
+
 `ReservasRail` ainda era uma coluna vertical e seu arraste usava o eixo Y.
 Agora mostra até cinco reservas em uma fila horizontal sob o ativo, antes do
 objetivo e dos prêmios. Retratos, barra de HP e KO continuam visíveis; nome,
@@ -46,7 +55,7 @@ Emulação não comprova toque ou safe area de aparelho físico.
 | Marca | Poké Bola sem nome do jogo presente. |
 | Companheiros | Vertical compacto no mobile e horizontal no PC, conforme feedback posterior; contador `6/6` do protótipo ainda ausente nesta faixa. |
 | Local e clima | Resumo de sala/abates/clima em faixa discreta no mobile; nome completo e explicação sob demanda. Avisos acionáveis continuam visíveis. |
-| Treinador/cabeçalho | Acesso e carteira preservados. No mobile, avatar está na coluna direita e carteira no cabeçalho; a composição unificada do protótipo não foi reproduzida. PC mantém trilho largo com área vazia. |
+| Treinador/cabeçalho | Foto e nome agora permanentes na coluna direita também no mobile, carteira no cabeçalho. A composição unificada do protótipo não foi reproduzida. PC mantém trilho largo com área vazia. |
 | Objetivo | Objetivo e prêmios recolhidos juntos em Objetivos; não ocupam uma faixa larga permanente na hunt. Conteúdo real e ações de coleta preservados. |
 | Golpes/Auto | Quatro slots e Auto existentes, com 2×2 na tela estreita. Permanecem ícones, siglas e potência da HUD anterior; não são os botões com nomes e indicação Ligado/Pausado apresentados na prévia. |
 | Chat | Canais, recolhimento e expansão presentes; não há título redundante aberto. Estado recolhido e mensagens vêm do sistema real, não dos exemplos. |
