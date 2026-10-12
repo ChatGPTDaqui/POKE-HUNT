@@ -52,8 +52,11 @@ const ESPERA_DO_LENDARIO = 4
 const VOO = 0.7
 /** Tamanho do icone no chao, px de MUNDO. */
 const TAMANHO_NO_CHAO = 12
-/** No voo: px de tela por px de mundo (mesmo fator das moedas). */
-const ESCALA_NA_TELA = 1.6
+/**
+ * No voo: px de tela por px de mundo. Maior que o das moedas (1,6): medido em
+ * producao (11/10), o item voando a 1,6 tinha ~15 px na tela e sumia no caminho.
+ */
+const ESCALA_NA_TELA = 2.6
 const DURACAO_PULSO = 1.1
 const DO_CENTRO_AO_CHAO = 8
 
@@ -124,7 +127,8 @@ export function posicaoDoItemNoVoo(item: ItemCaido, t: number, inicio: Ponto, de
   const k = (t - item.espera) / item.duracaoVoo
   const s = suavizar(k)
   const arco = Math.sin(k * Math.PI) * 34
-  return { x: inicio.x + (destino.x - inicio.x) * s, y: inicio.y + (destino.y - inicio.y) * s - arco, escala: 1 - 0.45 * s }
+  // Encolhe pouco: chega na Mochila ainda legivel.
+  return { x: inicio.x + (destino.x - inicio.x) * s, y: inicio.y + (destino.y - inicio.y) * s - arco, escala: 1 - 0.3 * s }
 }
 
 // --- imagens ------------------------------------------------------------------
@@ -179,6 +183,24 @@ function desenharAura(ctx: CanvasRenderingContext2D, item: ItemCaido, x: number,
   ctx.fill()
 }
 
+/**
+ * Halo BRANCO piscando atras do icone, em todo item que brilha (11/10). A aura
+ * colorida sozinha some em bioma da mesma cor (verde do incomum na grama,
+ * medido em producao); o branco destaca em qualquer fundo.
+ */
+function desenharHalo(ctx: CanvasRenderingContext2D, x: number, y: number, raio: number, tempo: number, fixo?: number): void {
+  // `fixo`: brilho constante, sem piscar (item comum — destaca sem disputar com os raros).
+  const pisca = fixo ?? 0.45 + 0.4 * Math.max(0, Math.sin(tempo * 6))
+  const g = ctx.createRadialGradient(x, y, raio * 0.2, x, y, raio)
+  g.addColorStop(0, `rgba(255,255,255,${0.75 * pisca})`)
+  g.addColorStop(0.6, `rgba(255,255,255,${0.3 * pisca})`)
+  g.addColorStop(1, 'rgba(255,255,255,0)')
+  ctx.fillStyle = g
+  ctx.beginPath()
+  ctx.arc(x, y, raio, 0, Math.PI * 2)
+  ctx.fill()
+}
+
 /** Feixe vertical (raro) ou coluna (lendario), aditivo — nunca escurece o cenario. */
 function desenharFeixe(ctx: CanvasRenderingContext2D, item: ItemCaido, x: number, y: number, tempo: number, entrada: number): void {
   const lendario = item.raridade === 'lendario'
@@ -202,7 +224,7 @@ function desenharFeixe(ctx: CanvasRenderingContext2D, item: ItemCaido, x: number
 /** Faiscas subindo (raro) e estrelas girando (lendario). Deterministico no tempo. */
 function desenharFaiscas(ctx: CanvasRenderingContext2D, item: ItemCaido, x: number, y: number, tempo: number): void {
   const lendario = item.raridade === 'lendario'
-  const n = lendario ? 7 : 4
+  const n = lendario ? 7 : item.raridade === 'raro' ? 4 : 3
   ctx.fillStyle = lendario ? '#fff7cc' : '#ffffff'
   for (let i = 0; i < n; i++) {
     const fase = (tempo * 0.9 + i / n) % 1
@@ -257,11 +279,14 @@ export function desenharItensNoChao(ctx: CanvasRenderingContext2D): void {
       desenharAura(ctx, item, p.x, p.y, t)
       ctx.globalCompositeOperation = 'source-over'
     }
-    // Sombra no chao (some quando o feixe ja ilumina o piso do raro).
-    ctx.globalAlpha = 0.35
+    // Sombra no chao, mais larga que o icone: a de antes (0,45 x 0,18) ficava
+    // quase inteira escondida embaixo dele e o comum parecia colado no piso
+    // (relato do dono, 11/10). Na queda ela encolhe com a altura.
+    const naQueda = Math.max(0.55, 1 - p.altura / 40)
+    ctx.globalAlpha = 0.5 * naQueda
     ctx.fillStyle = '#000000'
     ctx.beginPath()
-    ctx.ellipse(p.x, p.y + 3, TAMANHO_NO_CHAO * 0.45, TAMANHO_NO_CHAO * 0.18, 0, 0, Math.PI * 2)
+    ctx.ellipse(p.x, p.y + 2, TAMANHO_NO_CHAO * 0.62 * naQueda, TAMANHO_NO_CHAO * 0.24 * naQueda, 0, 0, Math.PI * 2)
     ctx.fill()
     ctx.globalAlpha = 1
 
@@ -274,10 +299,19 @@ export function desenharItensNoChao(ctx: CanvasRenderingContext2D): void {
     }
 
     // Respira levemente no chao (sobe 1 px): parado, um icone le como decalque.
-    const respiro = pousou && brilha ? Math.sin(t * 4) * 1 : 0
-    desenharIcone(ctx, item, p.x, p.y - p.altura - TAMANHO_NO_CHAO * 0.4 - respiro, TAMANHO_NO_CHAO)
+    const respiro = pousou ? Math.sin(t * 4) * 1 : 0
+    const yIcone = p.y - p.altura - TAMANHO_NO_CHAO * 0.4 - respiro
+    if (pousou) {
+      ctx.globalCompositeOperation = 'lighter'
+      // Comum: contorno branco suave e FIXO; os que brilham piscam e sao maiores.
+      if (brilha) desenharHalo(ctx, p.x, yIcone, TAMANHO_NO_CHAO * (item.raridade === 'lendario' ? 1.15 : 0.95), t)
+      else desenharHalo(ctx, p.x, yIcone, TAMANHO_NO_CHAO * 0.78, t, 0.42)
+      ctx.globalCompositeOperation = 'source-over'
+    }
+    desenharIcone(ctx, item, p.x, yIcone, TAMANHO_NO_CHAO)
 
-    if ((item.raridade === 'raro' || item.raridade === 'lendario') && pousou) desenharFaiscas(ctx, item, p.x, p.y, t)
+    // Faiscas em todo item que brilha: no incomum sao 3, so pra chamar o olho.
+    if (brilha && pousou) desenharFaiscas(ctx, item, p.x, p.y, t)
   }
   ctx.restore()
 }
@@ -325,6 +359,11 @@ export function pintorDeItemNoChao(ctx: CanvasRenderingContext2D, info: PintorIn
       }
       ctx.globalCompositeOperation = 'source-over'
       ctx.globalAlpha = 1
+    }
+    if (item.raridade !== 'comum') {
+      ctx.globalCompositeOperation = 'lighter'
+      desenharHalo(ctx, agora.x, agora.y, tam * 0.8, t)
+      ctx.globalCompositeOperation = 'source-over'
     }
     desenharIcone(ctx, item, agora.x, agora.y, tam)
   }

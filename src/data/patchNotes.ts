@@ -13,17 +13,34 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
-    version: '8.07',
-    date: '2026-10-11',
+    version: '8.09',
+    date: '2026-10-12',
     title: 'HUD mais livre para a hunt',
     highlights: [
       'As reservas ficam em uma coluna estreita no mobile e lado a lado sob o Pokémon em campo no PC.',
-      'Pokémon ativo e reservas compartilham uma moldura conectada. Foto e nome do treinador permanecem visíveis também no mobile.',
+      'Pokémon ativo e reservas compartilham uma moldura conectada mais discreta. Foto e nome do treinador ficam no mesmo cabeçalho do Pokémon, também no mobile.',
       'Toque em um retrato para consultar os dados, abrir o perfil ou colocar em campo. A barra de HP e o aviso de KO continuam visíveis.',
       'Arraste na vertical no mobile ou na horizontal no PC para organizar as reservas. As setas do teclado continuam disponíveis.',
       'Objetivo e recompensas ficam recolhidos em Objetivos, e o contexto da sala e do clima ocupa uma faixa discreta para liberar o cenário.',
       'Automações usa linhas compactas com resumo e interruptor. Toque na rotina para configurar; avisos de estoque continuam visíveis mesmo recolhidos.',
       'As cinco skins dos treinadores em campo usam recortes na resolução original, com cores, transparência e passos preservados, sem aumentar o porte no cenário.',
+    ],
+  },
+  {
+    version: '8.08',
+    date: '2026-10-11',
+    title: 'Itens comuns também se destacam',
+    highlights: [
+      'Poções e Poké Balls caídas no chão ganharam uma sombra de verdade e um contorno branco suave, e não somem mais no cenário. O brilho piscando continua reservado aos itens mais raros.',
+    ],
+  },
+  {
+    version: '8.07',
+    date: '2026-10-11',
+    title: 'Itens no chão mais visíveis',
+    highlights: [
+      'Itens que brilham ganharam um halo branco piscando e faíscas, e se destacam até em bioma de grama (antes a aura verde das pedras quase sumia no verde).',
+      'O item voando até a Mochila ficou maior e mais fácil de acompanhar.',
     ],
   },
   {
