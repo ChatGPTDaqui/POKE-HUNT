@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.07',
+    date: '2026-10-11',
+    title: 'Itens no chão mais visíveis',
+    highlights: [
+      'Itens que brilham ganharam um halo branco piscando e faíscas, e se destacam até em bioma de grama (antes a aura verde das pedras quase sumia no verde).',
+      'O item voando até a Mochila ficou maior e mais fácil de acompanhar.',
+    ],
+  },
+  {
     version: '8.06',
     date: '2026-10-11',
     title: 'Itens caem no chão',
