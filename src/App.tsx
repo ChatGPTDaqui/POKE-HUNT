@@ -10,6 +10,7 @@
 //   nao ha motivo pra virar URL: nenhuma delas e compartilhavel ou faz sentido
 //   como deep-link, e transformar em rota so somaria remount de tela cheia num
 //   app com canvas rodando por baixo.
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { HomePage } from '@/features/auth/HomePage'
 import { LoginPage } from '@/features/auth/LoginPage'
@@ -18,10 +19,24 @@ import { RequireAuth } from '@/features/auth/RequireAuth'
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
 import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage'
 import { DeviceTakeoverPage } from '@/features/auth/DeviceTakeoverPage'
-import { GameShell } from '@/features/game/GameShell'
 import { RequireAdmin } from '@/features/admin/RequireAdmin'
-import { AdminErrorsPage } from '@/features/admin/AdminErrorsPage'
 import { useAuthStore } from '@/stores/authStore'
+
+// O jogo e o painel de admin em CHUNKS PROPRIOS. Com tudo num bundle so, a Home
+// e o Login baixavam o motor, o catalogo e o Canvas inteiros (2,9 MB, ~730 kB
+// em Brotli, medido em 12/10/2026) antes de mostrar um formulario. Agora quem
+// abre a Home baixa so a casca publica, e o jogo vem quando a rota /jogo monta
+// — com a sessao ja recuperada, entao o download corre em paralelo com o boot.
+const GameShell = lazy(() => import('@/features/game/GameShell').then((m) => ({ default: m.GameShell })))
+const AdminErrorsPage = lazy(() => import('@/features/admin/AdminErrorsPage').then((m) => ({ default: m.AdminErrorsPage })))
+
+function CarregandoChunk() {
+  return (
+    <div data-appearance="journey" className="journey-entry flex min-h-svh items-center justify-center bg-background text-sm text-muted-foreground">
+      Carregando...
+    </div>
+  )
+}
 
 function App() {
   // O Supabase trata o token do link de recovery como sessao valida — sem
@@ -44,6 +59,7 @@ function App() {
       ) : precisaConfirmarDispositivo ? (
         <DeviceTakeoverPage />
       ) : (
+        <Suspense fallback={<CarregandoChunk />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -70,6 +86,7 @@ function App() {
           {/* URL desconhecida volta pra home em vez de tela branca. */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       )}
     </BrowserRouter>
   )

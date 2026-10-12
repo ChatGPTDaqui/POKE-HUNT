@@ -11,8 +11,9 @@
 // porque bloqueio, rate limit e debito de anexo vivem dentro de
 // `enviar_mensagem`. Uma policy de insert abriria rota paralela sem nenhuma
 // dessas checagens — o mesmo furo que PH-23 achou no chat mundial.
-import { schema, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
+import { assinarTopico, topico } from './aoVivo'
 import type {
   AmigoDetalhado, AnexoItemSocial, BloqueadoRemoto, ContextoAnuncioSocial, ConversaResumo,
   MensagemSocial,
@@ -296,38 +297,24 @@ export async function coletarAnexo(mensagemId: string): Promise<ResultadoDaColet
  * Assina o que CHEGA pra mim em `mail_messages` — mensagem de conversa, aviso
  * de sistema e pedido de amizade, todos na mesma tabela.
  *
- * O filtro e so `para_id`: o Realtime aceita um filtro por assinatura, e o eco
- * das MINHAS mensagens ja vem do retorno de `enviarMensagem`, sem depender do
- * socket. `aoChegar` recebe a linha nova pra quem estiver com um fio aberto
- * poder anexar sem refetch; `aoMudar` avisa a lista pra recontar.
+ * Broadcast privado no topico `<schema>:social:<meu id>` (ver
+ * data/remote/aoVivo.ts): o trigger `avisar_social_ao_vivo` manda a linha de
+ * toda mudanca com `para_id` = eu. O eco das MINHAS mensagens ja vem do
+ * retorno de `enviarMensagem`, sem depender do socket. `aoChegar` recebe a
+ * linha nova pra quem estiver com um fio aberto poder anexar sem refetch;
+ * `aoMudar` avisa a lista pra recontar.
+ *
+ * Mais de um assinante ao mesmo tempo (o menu recontando badges e o fio aberto
+ * anexando) compartilham o mesmo canal — `assinarTopico` cuida disso, e o
+ * sufixo de nome que existia pra contornar o canal repetido saiu.
  */
 export function assinarSocialAoVivo(
   userId: string,
   aoMudar: () => void,
   aoChegar?: (m: MensagemSocial) => void,
-  /**
-   * Sufixo do nome do canal. OBRIGATORIO quando ha mais de um assinante vivo ao
-   * mesmo tempo — e ha: o menu escuta pra recontar os badges e o fio aberto
-   * escuta pra anexar a linha nova.
-   *
-   * `supabase.channel(nome)` com um nome JA INSCRITO devolve o MESMO canal, e o
-   * `.on()` seguinte estoura com "cannot add postgres_changes callbacks after
-   * subscribe()". E o mesmo defeito que o comentario de `SocialMenu.tsx`
-   * descreve pro caso de remontagem — aqui seriam dois componentes distintos
-   * disputando um nome so.
-   */
-  sufixo = 'menu',
 ): () => void {
-  const canal = supabase
-    .channel(`social-${userId}-${sufixo}`)
-    .on(
-      'postgres_changes',
-      { event: '*', schema, table: 'mail_messages', filter: `para_id=eq.${userId}` },
-      (payload) => {
-        if (payload.eventType === 'INSERT' && aoChegar) aoChegar(payload.new as unknown as MensagemSocial)
-        aoMudar()
-      },
-    )
-    .subscribe()
-  return () => { void supabase.removeChannel(canal) }
+  return assinarTopico(topico('social', userId), ({ evento, payload }) => {
+    if (evento === 'INSERT' && aoChegar) aoChegar(payload as unknown as MensagemSocial)
+    aoMudar()
+  })
 }
