@@ -9,11 +9,11 @@
 // a hunt passando ao lado de inimigos sem bater, e nada na tela diz que aquilo
 // e intencional. Mesmo raciocinio do `SalaChip` — a barra de abates da sala foi
 // adicionada porque "quanto falta" era invisivel.
-import { useEffect, useRef } from 'react'
 import { LURE_QUANTIDADE_MAX, LURE_QUANTIDADE_MIN } from '@/stores/gameStateDefaults'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { sincronizarLure } from '@/data/remote/autoridade'
+import { useEnviarQuandoConteudoMudar } from '@/hooks/useEnviarQuandoConteudoMudar'
 import { SegmentedTabs } from '@/components/game/controls'
 import { BlocoAuto } from './BlocoAuto'
 
@@ -62,9 +62,9 @@ export function LurePanel() {
   const lureConfig = useGameStateStore((s) => s.lureConfig)
   const setLureConfig = useGameStateStore((s) => s.setLureConfig)
 
-  // Mesmo desenho do `AutoPanel`: sincroniza quando a config muda, e IGNORA o
-  // primeiro disparo — ele aconteceria logo apos o estado chegar DO servidor e
-  // mandaria os mesmos valores de volta a cada abertura da aba.
+  // Por CONTEUDO, e nao por referencia (ver `useEnviarQuandoConteudoMudar`):
+  // todo flush troca a referencia sem mudar o valor, e o primeiro valor — o que
+  // acabou de chegar DO servidor — e a linha de base, nao um envio.
   //
   // O servidor precisa desta config, e nao e detalhe de persistencia: ele
   // resimula a janela de flush com o MESMO motor, e sem o lure do lado dele o
@@ -72,14 +72,7 @@ export function LurePanel() {
   //
   // `sincronizarLure` e nao `sincronizarAuto`: chamada separada de proposito —
   // ver o cabecalho dela em data/remote/autoridade.ts.
-  const primeiraSync = useRef(true)
-  useEffect(() => {
-    if (primeiraSync.current) {
-      primeiraSync.current = false
-      return
-    }
-    sincronizarLure()
-  }, [lureConfig])
+  useEnviarQuandoConteudoMudar(lureConfig, sincronizarLure)
 
   return (
     <div className="flex flex-col gap-[.45em]">
