@@ -16,6 +16,6 @@ export default mergeConfig(harnessBase, defineConfig({
   server: { host: '127.0.0.1', port: 5176, strictPort: true },
   build: {
     outDir: 'node_modules/.tmp/identidade-jornada-build',
-    rollupOptions: { input: ['scripts/harness/identidade-jornada.html', 'scripts/harness/jornada-completa.html'] },
+    rollupOptions: { input: ['scripts/harness/identidade-jornada.html', 'scripts/harness/jornada-completa.html', 'scripts/harness/treinadores-fieis.html'] },
   },
 }))

@@ -1,3 +1,5 @@
+// LEGADO: não usar para as skins atuais; descarta resolução/cores e redesenha
+// poses. A importação vigente é importar-treinadores-sem-perda.cjs.
 // Converte a folha de um treinador de campo (arte do dono: N linhas x 4 quadros
 // de passo, PNG com alpha) pro formato das folhas dos POKE: 8 direcoes na ordem
 // do PMD x 4 quadros, quadro 32x40, pe na linha 37, boneco com 30 px de altura.
@@ -16,6 +18,9 @@
 // (As folhas de 6 linhas nao tem diagonais de costas: cima-dir/esq usam a de costas.)
 const fs = require('fs'), path = require('path')
 const { PNG } = require('pngjs')
+if (!process.argv.includes('--legado')) {
+  throw new Error('Conversão destrutiva legada bloqueada. Use scripts/arte/importar-treinadores-sem-perda.cjs; --legado permite reprodução histórica explícita.')
+}
 const cfg = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'))
 const ALVO_H = cfg.altura || 30, NL = cfg.linhas
 const src = PNG.sync.read(fs.readFileSync(cfg.src))

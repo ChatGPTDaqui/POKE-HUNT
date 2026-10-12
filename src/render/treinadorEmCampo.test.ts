@@ -1,5 +1,6 @@
 // O treinador em campo: segue o POKE como GENTE, a 3 quadrados (09/10).
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { quadroDaSkin, SKINS_DO_TREINADOR } from '@/data/skinsDoTreinador'
 import { ESPACO_DO_TREINADOR, TreinadorEmCampo, lugarNoDuelo, pontoAtras } from './treinadorEmCampo'
 
 const RAIO = 12
@@ -43,6 +44,28 @@ describe('pontoAtras', () => {
 })
 
 describe('TreinadorEmCampo: seguidor de gente (09/10)', () => {
+  it('desenha recorte nativo de cada skin em escala de mundo, sem alterar suavização dos outros sprites', () => {
+    vi.stubGlobal('Image', class { complete = true; naturalWidth = 1000; src = '' })
+    try {
+      for (const skin of SKINS_DO_TREINADOR) {
+        const drawImage = vi.fn()
+        const ctx = { save() {}, restore() {}, beginPath() {}, ellipse() {}, fill() {},
+          drawImage, imageSmoothingEnabled: false, imageSmoothingQuality: 'low' } as unknown as CanvasRenderingContext2D
+        const t = new TreinadorEmCampo()
+        t.skin = skin.id
+        t.parado({ x: 200, y: 200 }, { x: 0, y: 1 }, DT)
+        t.desenhar(ctx)
+        const g = quadroDaSkin(skin.id), scale = 30 / g.bodyHeight
+        expect(drawImage).toHaveBeenCalledOnce()
+        const args = drawImage.mock.calls[0]
+        expect(args.slice(3, 5)).toEqual([g.frameWidth, g.frameHeight])
+        expect(args.slice(5)).toEqual([200 - g.footX * scale, 200 - g.footY * scale, g.frameWidth * scale, g.frameHeight * scale])
+        expect(ctx.imageSmoothingEnabled).toBe(false)
+        expect(ctx.imageSmoothingQuality).toBe('low')
+      }
+      expect(quadroDaSkin('desconhecido')).toEqual(quadroDaSkin('mochila'))
+    } finally { vi.unstubAllGlobals() }
+  })
   it('3 quadrados de espaco: ao parar, alcanca e fica na distancia de conforto', () => {
     const t = new TreinadorEmCampo()
     andar(t, { x: 0, y: 100 }, { x: 400, y: 100 })
@@ -141,7 +164,7 @@ describe('TreinadorEmCampo: seguidor de gente (09/10)', () => {
     expect(textos[0].y).toBeLessThan(t.pe!.y - 30)
   })
 
-  it('caminhada no ciclo do PMD: um quadro a cada ~10 px andados pelo TREINADOR', () => {
+  it('caminhada conserva a cadência: um quadro a cada ~10 px andados pelo TREINADOR', () => {
     const t = new TreinadorEmCampo()
     andar(t, { x: 0, y: 100 }, { x: 300, y: 100 })
     let andado = 0, trocas = 0
@@ -161,16 +184,16 @@ describe('TreinadorEmCampo: seguidor de gente (09/10)', () => {
     expect(vistos).toEqual(new Set([0, 1, 2, 3]))
   })
 
-  it('parando no meio do passo, fecha as pernas no quadro neutro', () => {
+  it('parando no meio do passo, estabiliza em quadro par até entrar no idle', () => {
     const t = new TreinadorEmCampo()
     andar(t, { x: 0, y: 100 }, { x: 300, y: 100 })
     let x = 300
     while (t.quadro % 2 === 0 || t.animacao !== 'Walk') { x += 1.5; t.atualizar({ x, y: 100, radius: RAIO, facing: { x: 1, y: 0 } }, DT) }
-    // POKE para: o treinador ainda anda ate o conforto, mas nunca congela de perna aberta.
+    // POKE para: o treinador ainda anda até o conforto e estabiliza o quadro.
     for (let i = 0; i < 120; i++) {
       const pe = { ...t.pe! }
       t.atualizar({ x, y: 100, radius: RAIO }, DT)
-      // (No Idle o quadro 1 e a respiracao, nao passo.)
+      // No Idle os dois quadros conservam a mesma pose da fonte.
       if (t.animacao === 'Walk' && t.pe!.x === pe.x && t.pe!.y === pe.y) expect(t.quadro % 2).toBe(0)
     }
   })

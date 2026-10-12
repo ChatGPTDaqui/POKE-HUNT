@@ -47,6 +47,11 @@ funcionais aprovados para substituir suas implementações reais.
 
 ## Evidência e limites
 
+Revisão posterior: este inventário não demonstrou paridade visual completa.
+O usuário identificou a fila horizontal ausente. A comparação complementar,
+com lacunas ainda abertas, está em
+[auditoria de paridade](2026-10-11-paridade-prototipo-jornada.md).
+
 Abertura dos 17 menus reais na bancada isolada a 390×844: moldura Jornada,
 largura contida e acessos preservados. Equipe medida em 320×568, 360×640,
 390×844, 430×932, 844×390, 834×1194, 1366×768 e 1920×1080, nas escalas

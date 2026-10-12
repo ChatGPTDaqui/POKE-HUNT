@@ -1,23 +1,5 @@
-// O card do jogador: avatar, nome, nivel, carteira e o anel de EXP.
-//
-// MORAVA DENTRO DO TRILHO, E POR ISSO NAO FICAVA NO CANTO (PH-282)
-// ---------------------------------------------------------------------------
-// Ele era o ultimo item do trilho de status. O trilho tem teto de largura
-// (`max-w-[64em]`) e e alinhado a esquerda — decisao de PH-83, pra o cabecalho
-// do POKE nao fugir pro meio da tela em monitor grande. A consequencia so
-// aparece acima de 64em: o trilho acaba antes da borda da janela, e o card
-// acabava junto. Medido em 1920px, ele terminava por volta de x=1440, com
-// ~480px de tela vazia a direita — e desalinhado da coluna de atalhos, que ja
-// estava colada na borda.
-//
-// Agora ele e o primeiro item da coluna do canto superior direito
-// (`ColunaDeAtalhos`), que ancora em `right`. Card e atalhos passam a dividir a
-// mesma borda, e a coluna continua logo abaixo dele sem medir nada.
-//
-// NAO APARECE NO COMPACTO, e isso e antigo: em 390px o avatar virava um icone
-// generico ocupando ~46px permanentes da faixa mais disputada da tela, sem
-// largura pro nome nem pro nivel. Ali ele desce pra gaveta de detalhes, onde
-// cabe COM nome e nivel escritos — e a carteira fica no trilho (PH-279).
+// Treinador integrado ao StatusRail no PC: foto, nome, nível, carteira e EXP.
+// No mobile, TreinadorNoCabecalho reserva uma coluna menor na mesma superfície.
 import { trainerExpProgress } from '@/engine/systems/progressionSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -39,12 +21,12 @@ export function CardDoTreinador() {
       aria-label="Perfil do treinador"
       onClick={() => setPerfilOpen(true)}
       className={
-        'vidro pointer-events-auto relative flex shrink-0 cursor-pointer items-center gap-[.4em] '
-        + 'rounded-[.7em] border border-n700 p-[.25em] pr-[.35em]'
+        'pointer-events-auto relative flex shrink-0 cursor-pointer items-center gap-[.4em] '
+        + 'rounded-[.7em] p-[.25em] pr-[.35em]'
       }
     >
       {/* PH-548: a foto escolhida no perfil; sem foto, o icone de sempre. */}
-      <AvatarDoTreinador userId={meuId} tamanho={2} />
+      <AvatarDoTreinador userId={meuId} tamanho={2} nome={trainer.name} />
       <span className="flex flex-col items-start gap-[.2em] pr-[.2em]">
         <span className="max-w-[7em] truncate text-[.78em] leading-none">{trainer.name}</span>
         <span className="text-[.7em] leading-none text-n400">Lv {trainer.level}</span>

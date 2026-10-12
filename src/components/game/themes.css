@@ -1,4 +1,10 @@
 /* Uma composição, dois materiais. Neutros de combate/tipos/raridades intactos. */
+:root {
+  --field-surface: #122e32e6;
+  --field-ink: #fffefa;
+  --field-muted: #d0ddd5;
+  --field-line: #ffffff30;
+}
 :root[data-ui-theme='dark'] {
   --journey-paper: #12161df5;
   --journey-card: #1c222cf5;
@@ -102,4 +108,44 @@
   --journey-paper: #12161d;
   --journey-card: #1c222c;
   --journey-backdrop: none;
+}
+
+/* Contexto de combate discreto nos dois temas; menus continuam claros/escuros. */
+.hud-root .journey-field-chip {
+  color: var(--field-ink);
+  background: var(--field-surface);
+  border-color: var(--field-line);
+}
+:root[data-ui-theme] .journey-field-chip :is(.text-n100, .text-n200, .text-n300) { color: var(--field-ink); }
+:root[data-ui-theme] .journey-field-chip :is(.text-n400, .text-n500, .text-n600) { color: var(--field-muted); }
+.journey-field-label { color: var(--field-ink); text-shadow: 0 1px 3px var(--field-surface); }
+.journey-hud-agenda > summary::-webkit-details-marker { display: none; }
+
+/* Uma única moldura de equipe em L, sem preencher o espaço do cenário. */
+.journey-party:has(.journey-reserves-row) .journey-status-rail {
+  border-bottom-left-radius: 0;
+}
+.hud-root .journey-reserves-row {
+  box-sizing: content-box;
+  border-top: 0;
+  border-radius: 0 0 .65em .65em;
+  padding: 0 0 2px;
+  box-shadow: none;
+}
+:root[data-ui-theme='light'] .hud-root .journey-reserves-row {
+  background: color-mix(in srgb, var(--vidro-tinta) 24%, transparent);
+}
+:root[data-ui-theme='light'] .journey-reserve .text-n500 {
+  color: var(--field-ink);
+  text-shadow: 0 1px 2px var(--field-surface);
+}
+.hud-root .journey-reserve {
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+}
+.hud-root .journey-reserve:hover,
+.hud-root .journey-reserve[aria-expanded='true'] {
+  background: var(--journey-wash);
+  border-color: var(--journey-line);
 }

@@ -10,30 +10,15 @@
 // cortando caminho em linha reta, ele atravessaria parede e virava junto com
 // cada meia-volta do POKE.
 //
-// Sprite (08/10): uma folha por SKIN (`data/skinsDoTreinador.ts`, escolhida no
-// Perfil). A padrao, "mochila" (bone vermelho, colete azul, mochila), veio de uma folha
-// 4x7 em PNG com alpha, convertida pro formato das folhas dos POKE — 8 linhas
-// de direcao na ordem do PMD x 4 quadros, quadro 32x40, pe na linha 37. Na
-// conversao: reducao por moda de cor em blocos (~5,4 px), cada linha da
-// original na MESMA altura (a arte desenha os lados maiores que a frente) e
-// paleta de 20 cores. Baixo-esquerda e espelho da baixo-direita (a unica
-// direcao que faltava).
-//
-// Tamanho (08/10, pedido do dono): o boneco tem 30 px de altura (a arte
-// anterior tinha 35) — um pouco menor, na proporcao dos POKE.
-//
-// Walk (09/10): ciclo do PMD (conferido no Machoke do SpriteCollab) — quadros
-// 0 e 2 sao o NEUTRO (pernas juntas, corpo 1 px acima: o balanco do andar), 1 e
-// 3 os passos com pe trocado. A arte da IA trazia 4 passos sem neutro nem
-// balanco, e a perna "pedalava".
-//
-// Idle: a folha so tem passos (um pe sempre no ar). A pose em pe usa cabeca e
-// tronco do passo mais fechado e redesenha as pernas paradas, lado a lado, com
-// as cores da propria folha; o segundo quadro desce o tronco 1 px (respiracao).
+// Skins (12/10): recortes RGBA em resolução original, quatro passos originais
+// por direção, sem paleta reduzida ou pernas redesenhadas. Geometria por skin.
+// O porte continua ~30 px de mundo; a redução acontece só ao desenhar.
+// Idle usa um passo pouco aberto da fonte, estático: não há idle dedicado na
+// arte recebida. Vistas ausentes continuam reutilizadas/espelhadas pelo mapa.
 import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
 import { FONTE } from './textoDeCombate'
-import { SKIN_PADRAO, folhaDaSkin } from '@/data/skinsDoTreinador'
+import { SKIN_PADRAO, folhaDaSkin, quadroDaSkin } from '@/data/skinsDoTreinador'
 
 type Ponto = { x: number; y: number }
 
@@ -76,9 +61,6 @@ const DO_CENTRO_AO_CHAO = 8
 /** Salto maior que isto num quadro (troca de sala, reconstrucao) reposiciona sem andar. */
 const SALTO = 120
 
-const QUADRO_L = 32, QUADRO_A = 40
-/** Linha do pe dentro do quadro. */
-const PE_NO_QUADRO = 37
 /** Altura do boneco (px), do pe ao topo do bone. */
 const ALTURA_DO_BONECO = 30
 /** Cor do nome do treinador: azul claro, pra nao confundir com o nome dos POKE (branco/raridade). */
@@ -102,7 +84,7 @@ const SUAVIZA_DIRECAO = 0.25
 /** Duracao (ticks de 1/60 s) de cada quadro. Toda skin tem o mesmo formato de folha. */
 const DURACOES: Record<'Walk' | 'Idle', number[]> = {
   Walk: [8, 10, 8, 10],
-  // Idle: pose EM PE (ver topo); o segundo quadro e a respiracao.
+  // Dois quadros iguais: pose disponível na fonte, sem respiração inventada.
   Idle: [50, 50],
 }
 
@@ -424,7 +406,7 @@ export class TreinadorEmCampo {
           y: (e.facing.y / n) * (1 - SUAVIZA_OLHAR) + (oy / on) * SUAVIZA_OLHAR,
         }
       }
-      // Parou no meio do passo: fecha as pernas no NEUTRO (quadros pares) em vez
+      // Parou no meio do passo: estabiliza no quadro par até entrar no Idle em vez
       // de congelar de perna aberta durante a folga.
       if (e.anim === 'Walk' && e.quadro % 2 === 1) { e.quadro -= 1; e.ticks = 0 }
     }
@@ -477,13 +459,19 @@ export class TreinadorEmCampo {
     const img = imagem(folhaDaSkin(this.skin, anim))
     if (!img || !img.complete || img.naturalWidth === 0) return
     const linha = directionRowFromFacing(facing)
-    const suave = ctx.imageSmoothingEnabled
-    ctx.imageSmoothingEnabled = false
+    const { frameWidth, frameHeight, footX, footY, bodyHeight } = quadroDaSkin(this.skin)
+    // Resolução da fonte independente do tamanho de mundo: não destruir a
+    // arte na importação. Filtragem de redução só aqui, na apresentação.
+    const scale = ALTURA_DO_BONECO / bodyHeight
+    const suave = ctx.imageSmoothingEnabled, qualidade = ctx.imageSmoothingQuality
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
     ctx.drawImage(
-      img, quadro * QUADRO_L, linha * QUADRO_A, QUADRO_L, QUADRO_A,
-      Math.round(pos.x - QUADRO_L / 2), Math.round(pos.y - PE_NO_QUADRO), QUADRO_L, QUADRO_A,
+      img, quadro * frameWidth, linha * frameHeight, frameWidth, frameHeight,
+      pos.x - footX * scale, pos.y - footY * scale, frameWidth * scale, frameHeight * scale,
     )
     ctx.imageSmoothingEnabled = suave
+    ctx.imageSmoothingQuality = qualidade
   }
 
   /** Nome em cima do bone, no mesmo estilo da placa dos POKE (contorno preto). */

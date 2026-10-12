@@ -7,7 +7,7 @@
 // coluna com informacao repetida. Como consequencia, a numeracao visivel comeca
 // em 2 — o slot 1 e o campo.
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
@@ -53,7 +53,7 @@ describe('o que o trilho mostra', () => {
     expect(screen.getAllByRole('button')).toHaveLength(2)
   })
 
-  it('numera as reservas a partir de 2, de cima pra baixo', () => {
+  it('numera as reservas a partir de 2, da esquerda para a direita', () => {
     montarEquipe(4)
     render(<ReservasRail />)
 
@@ -76,6 +76,24 @@ describe('o que o trilho mostra', () => {
     // Equipe montada com nivel 10+i, entao as reservas sao 11 e 12.
     expect(screen.getByText('Nv 11')).toBeTruthy()
     expect(screen.getByText('Nv 12')).toBeTruthy()
+  })
+
+  it('mantém as cinco reservas em coluna no mobile', () => {
+    montarEquipe(6)
+    useUiStore.setState({ viewportWidth: 320, viewportHeight: 568, coarsePointer: true })
+    render(<ReservasRail />)
+    const fila = screen.getByRole('group', { name: 'Companheiros da equipe' })
+    expect(fila.dataset.orientation).toBe('vertical')
+    expect(fila.style.gridTemplateColumns).toBe('44px')
+    expect(screen.getAllByRole('button')).toHaveLength(5)
+  })
+
+  it('usa uma fila horizontal no PC', () => {
+    montarEquipe(6)
+    render(<ReservasRail />)
+    const fila = screen.getByRole('group', { name: 'Companheiros da equipe' })
+    expect(fila.dataset.orientation).toBe('horizontal')
+    expect(fila.style.gridTemplateColumns).toBe('repeat(5, minmax(44px, 1fr))')
   })
 })
 
@@ -125,6 +143,22 @@ describe('menu de clique', () => {
 })
 
 describe('teclado', () => {
+  it('Enter abre o menu nativo sem alternar duas vezes', async () => {
+    montarEquipe(3)
+    render(<ReservasRail />)
+    screen.getAllByRole('button')[0].focus()
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByRole('button', { name: 'Perfil' })).toBeTruthy()
+  })
+
+  it('setas horizontais seguem a disposição da fila', async () => {
+    montarEquipe(4)
+    render(<ReservasRail />)
+    screen.getAllByRole('button')[1].focus()
+    await userEvent.keyboard('{ArrowLeft}{ArrowRight}')
+    expect(reorderTeam.mock.calls).toEqual([[2, 1], [2, 3]])
+  })
+
   it('seta pra baixo desce a reserva uma posicao', async () => {
     montarEquipe(4)
     render(<ReservasRail />)
@@ -155,5 +189,30 @@ describe('teclado', () => {
     await userEvent.keyboard('{ArrowDown}')
 
     expect(reorderTeam).not.toHaveBeenCalled()
+  })
+})
+
+describe('arraste acompanha a disposição', () => {
+  it.each(['PC', 'mobile'])('mede o eixo correto no %s e não abre menu ao soltar', (regime) => {
+    const mobile = regime === 'mobile'
+    if (mobile) useUiStore.setState({ viewportWidth: 390, viewportHeight: 844, coarsePointer: true })
+    montarEquipe(4)
+    render(<ReservasRail />)
+    const cards = screen.getAllByRole('button')
+    const geometria = cards.map((card, i) => vi.spyOn(card, 'getBoundingClientRect')
+      .mockReturnValue({ left: mobile ? 0 : i * 54, top: mobile ? i * 54 : 0, width: 52, height: 52 } as DOMRect))
+    // PointerEvent não existe em todas as versões do jsdom.
+    vi.stubGlobal('PointerEvent', MouseEvent)
+    try {
+      fireEvent.pointerDown(cards[0], { button: 0, clientX: 20, clientY: 20 })
+      fireEvent.pointerMove(cards[0], { clientX: mobile ? 120 : 74, clientY: mobile ? 74 : 120 })
+      fireEvent.pointerUp(cards[0], { clientX: mobile ? 120 : 74, clientY: mobile ? 74 : 120 })
+      fireEvent.click(cards[0], { detail: 1 })
+      expect(reorderTeam).toHaveBeenCalledWith(1, 2)
+      expect(screen.queryByRole('button', { name: 'Perfil' })).toBeNull()
+    } finally {
+      vi.unstubAllGlobals()
+      geometria.forEach(mock => mock.mockRestore())
+    }
   })
 })

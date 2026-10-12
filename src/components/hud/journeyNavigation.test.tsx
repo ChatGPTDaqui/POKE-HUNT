@@ -62,7 +62,8 @@ describe('navegação Jornada', () => {
     expect(TELAS_NA_COLUNA.map(d => d.screen)).toEqual(['especialidades', 'tasks', 'calc', 'pvp'])
     const coluna = document.querySelector<HTMLElement>('[data-journey-shortcuts]')!
     expect(within(coluna).getAllByRole('button').map(b => b.getAttribute('aria-label')))
-      .toEqual(['Perfil do treinador', 'Diário', 'Especialidades', 'Tasks', 'Calculadora', 'PvP'])
+      .toEqual(['Diário', 'Especialidades', 'Tasks', 'Calculadora', 'PvP'])
+    expect(within(coluna).queryByRole('button', { name: /Perfil do treinador/ })).toBeNull()
     expect(coluna.textContent).not.toContain('Especialidades')
     fireEvent.click(screen.getByRole('button', { name: 'Diário' }))
     expect(useDiarioStore.getState().painelAberto).toBe(true)
