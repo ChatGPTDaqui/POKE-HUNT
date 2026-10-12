@@ -20,7 +20,7 @@ import { battleSpriteUrl } from './battleSprites'
 import { getMap } from './maps'
 import { getEncounter } from './enemies'
 import { faceIconUrl, spriteUrl } from './sprites'
-import { todasAsTirasDeVfx } from './vfxTiras'
+import { todasAsTirasDeVfx, tirasDeVfxDosTipos } from './vfxTiras'
 import { todosOsIconesDeHabilidade } from './abilityIcons'
 import { todosOsVfxDeStatus } from './statusVfx'
 import { urlDeCondicaoAplicada } from './estagioVfx'
@@ -31,6 +31,7 @@ import { todasAsTirasDeCaptura } from './captureAnim'
 import { SUB_BIOMA_POR_CHAVE } from './biomas'
 import { SPECIES } from './pokes'
 import { nivelDeAprendizado } from './activeAbilities'
+import { BASIC_ATTACK, getAbility } from './abilities'
 import { vfxDoGolpe } from './moveVfx'
 import { TETO_DE_CARREGAMENTO_MS } from './tetoDeCarregamento'
 
@@ -109,6 +110,13 @@ export function iconUrlsFor(speciesId: string, isShiny: boolean): string[] {
   return [spriteUrl(speciesId, isShiny), faceIconUrl(speciesId, isShiny)].filter((u): u is string => u != null)
 }
 
+/** O time do jogador, como o preload precisa dele. */
+export interface TimeParaPreload {
+  especies: string[]
+  /** Golpes de maquina e escolhidos: nao saem do learnset da especie. */
+  golpes: string[]
+}
+
 export interface EspeciePreload {
   speciesId: string
   isShiny: boolean
@@ -129,32 +137,73 @@ export async function preloadEspecies(
 }
 
 /**
- * Tudo que a hunt `mapId` vai desenhar: o fundo, o POKE do jogador e TODA especie
- * do pool de encontros — nas duas paletas (normal e shiny), porque um shiny pode
- * nascer no primeiro spawn e a versao shiny e um arquivo diferente.
+ * Os tipos dos golpes que estas especies podem usar (o learnset inteiro, que ja
+ * inclui o golpe de area de nivel 50) mais os golpes avulsos dados — maquina e
+ * escolha gravada do time, que nao saem do learnset. O ataque basico entra
+ * sempre: todo POKE tem.
  */
-export async function preloadHunt(mapId: string, jogador: EspeciePreload | null): Promise<void> {
+export function tiposDeGolpe(especies: string[], golpesAvulsos: string[] = []): Set<string> {
+  const tipos = new Set<string>([BASIC_ATTACK.type])
+  const somar = (abilityId: string) => {
+    const tipo = getAbility(abilityId)?.type
+    if (tipo) tipos.add(tipo)
+  }
+  for (const speciesId of especies) {
+    const species = SPECIES[speciesId]
+    if (!species) continue
+    for (const abilityId of nivelDeAprendizado(species).keys()) somar(abilityId)
+  }
+  for (const abilityId of golpesAvulsos) somar(abilityId)
+  return tipos
+}
+
+/** As especies do pool de encontros da hunt, sem repetir. */
+function especiesDoPool(mapId: string): string[] {
+  const mapDef = getMap(mapId)
+  if (!mapDef) return []
+  const especies = new Set<string>()
+  for (const encounterId of mapDef.enemyPool) {
+    const encounter = getEncounter(encounterId)
+    if (encounter) especies.add(encounter.speciesId)
+  }
+  return [...especies]
+}
+
+/**
+ * Tudo que a hunt `mapId` vai desenhar logo de cara: o fundo, o time e TODA
+ * especie do pool de encontros na paleta normal.
+ *
+ * A paleta SHINY do pool nao entra aqui: um shiny e raro, e baixar a versao
+ * shiny de todo o pool dobrava os sprites que seguram o botao Entrar (311
+ * imagens e 11,9 MB na Route 46, medido em 12/10/2026). Ela vai pro aquecimento
+ * de segundo plano (`aquecerHuntEmSegundoPlano`).
+ *
+ * `time` e o time inteiro, e nao so o POKE ativo: e dele que saem os tipos de
+ * golpe (inclusive maquinas) cujas tiras precisam estar prontas.
+ */
+export async function preloadHunt(
+  mapId: string,
+  jogador: EspeciePreload | null,
+  time: TimeParaPreload = { especies: [], golpes: [] },
+): Promise<void> {
   const mapDef = getMap(mapId)
   if (!mapDef) return
 
+  const pool = especiesDoPool(mapId)
   const especies: EspeciePreload[] = jogador ? [jogador] : []
-  for (const encounterId of mapDef.enemyPool) {
-    const encounter = getEncounter(encounterId)
-    if (!encounter) continue
-    especies.push({ speciesId: encounter.speciesId, isShiny: false })
-    especies.push({ speciesId: encounter.speciesId, isShiny: true })
-  }
+  for (const speciesId of pool) especies.push({ speciesId, isShiny: false })
 
   const fundo = mapDef.bg?.image ? [primeImage(mapDef.bg.image)] : []
-  // Arte de efeito de golpe (18 tipos, 1 tira cada — ver data/vfxTiras.ts),
-  // faisca de cura, simbolos de sono/confusao e icone de slot. Todos de uma
-  // vez em vez de derivar quais tipos esta hunt pode usar: o proprio POKE do
-  // jogador muda de golpe ao subir de nivel e ao evoluir, e "quais tipos vao
-  // aparecer" nao e uma pergunta que da pra responder na entrada da hunt.
+  // Tiras de elemento SO dos tipos que alguem nesta hunt pode usar: o learnset
+  // inteiro do time e do pool (e nao so os 4 golpes de agora — subir de nivel
+  // troca golpe no meio da hunt), mais maquinas e escolhas gravadas do time.
+  // Evoluir no meio da hunt pode trazer tipo novo; esse tipo e as demais tiras
+  // vem no aquecimento de segundo plano, e ate chegarem o golpe cai no burst
+  // procedural. Antes entravam as 31 tiras (~3,4 MB) sempre.
   //
-  // As tiras somam ~1 MB (PNG-8; eram 4,5 MB em RGBA). E o item mais pesado
-  // deste preload, e o teto de PRELOAD_TIMEOUT_MS existe justamente pra rede
-  // ruim nao transformar isso em "o botao Entrar nao funciona".
+  // Faisca de cura, simbolos de sono/confusao e icone de slot entram sempre.
+  // O teto de PRELOAD_TIMEOUT_MS existe pra rede ruim nao transformar isto em
+  // "o botao Entrar nao funciona".
   // Arte por GOLPE nao entra aqui de proposito (ver o cabecalho de
   // data/moveVfx.ts): sao 23 tiras hoje, e um jogador ve os golpes que o
   // time dele sabe — meia duzia. Aquecer arquivo que a sessao nao vai usar
@@ -166,7 +215,8 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   // quadro da cena, e sao a unica arte deste preload cuja ausencia apareceria
   // parada no cenario em vez de piscar durante um golpe.
   const efeitos = [
-    ...todasAsTirasDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus(),
+    ...tirasDeVfxDosTipos(tiposDeGolpe([...time.especies, ...pool], time.golpes)),
+    ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus(),
     ...todasAsTirasDeProps(),
     // PH-416: o selo de status. Golpe de status e das primeiras coisas que
     // acontecem numa hunt (o auto-play usa o que o POKE sabe, e Growl/Tail
@@ -292,13 +342,26 @@ export function tirasDosGolpesDoTime(especies: string[]): string[] {
 export function aquecerHuntEmSegundoPlano(
   sala: { chave: string } | null,
   especiesDoTime: string[],
+  mapId: string | null = null,
 ): void {
   pararAquecimento()
   if (!conexaoPermiteAquecer()) return
 
   // Golpes primeiro, fundos depois: as tiras sao ~33 kB e podem ser precisas no
   // PROXIMO turno de combate; o fundo da sala seguinte tem um minuto de prazo.
-  const urls = [...tirasDosGolpesDoTime(especiesDoTime), ...fundosDasOutrasSalas(sala)]
+  // Depois, as tiras de elemento que o preload de entrada deixou de fora (tipo
+  // que so aparece se o POKE evoluir) e, por ultimo, a paleta shiny do pool:
+  // shiny e raro, e e o unico item da fila que pode nem ser usado na sessao.
+  // Repetir URL ja carregada custa so a consulta ao cache (`primeImage`).
+  const shinyDoPool = mapId
+    ? especiesDoPool(mapId).flatMap((speciesId) => [
+      ...battleSpriteUrlsFor(speciesId, true), ...iconUrlsFor(speciesId, true),
+    ])
+    : []
+  const urls = [...new Set([
+    ...tirasDosGolpesDoTime(especiesDoTime), ...todasAsTirasDeVfx(),
+    ...fundosDasOutrasSalas(sala), ...shinyDoPool,
+  ])]
   if (urls.length === 0) return
 
   let cancelado = false
