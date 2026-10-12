@@ -45,7 +45,10 @@ const listaDeOrigens = origensPermitidas(Deno.env.get('ORIGENS_PERMITIDAS'))
 //
 // Se a chave do projeto girar e esta var ficar velha, nao quebra: o `kid` novo
 // nao vai estar aqui e auth.ts cai no fallback de busca sozinho.
-const jwksJson = Deno.env.get('JOGO_JWKS') ?? undefined
+// `SUPABASE_JWKS` e injetada pela plataforma (aparece nos secrets desde
+// 11/10/2026) e acompanha a rotacao de chave sozinha; `JOGO_JWKS` fica na frente
+// so pra quem quiser fixar o valor a mao. Sem nenhuma das duas, auth.ts busca.
+const jwksJson = Deno.env.get('JOGO_JWKS') ?? Deno.env.get('SUPABASE_JWKS') ?? undefined
 
 const handler = criarApp({
   supabaseUrl, serviceRoleKey, schema, jwksJson,
