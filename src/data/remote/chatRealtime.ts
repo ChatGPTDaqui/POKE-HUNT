@@ -2,8 +2,9 @@
 // sem invariante alem do dono da linha e do check de tamanho ja no banco) +
 // Supabase Realtime no lugar do polling de 6s — mensagem de outro jogador
 // chega via websocket, nao por reconsulta periodica.
-import { schema, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
+import { assinarTopico, topico } from './aoVivo'
 import type { AnexoChat, MensagemChat } from './servidor'
 
 const LIMITE_HISTORICO = 50
@@ -29,15 +30,14 @@ export async function enviarChat(body: string, anexos: AnexoChat[]): Promise<voi
   if (error) throw new ErroServidor(409, error.message)
 }
 
-/** Assina o INSERT ao vivo. Devolve a funcao de cancelar a assinatura. */
+/**
+ * Assina o INSERT ao vivo. Devolve a funcao de cancelar a assinatura.
+ *
+ * Broadcast privado no topico do chat (ver data/remote/aoVivo.ts): o trigger
+ * `avisar_chat_ao_vivo` manda a linha inteira, entao nao ha refetch.
+ */
 export function assinarChatAoVivo(aoChegar: (mensagem: MensagemChat) => void): () => void {
-  const canal = supabase
-    .channel('chat-mundo')
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema, table: 'chat_messages' },
-      (payload) => aoChegar(payload.new as unknown as MensagemChat),
-    )
-    .subscribe()
-  return () => { void supabase.removeChannel(canal) }
+  return assinarTopico(topico('chat'), ({ evento, payload }) => {
+    if (evento === 'INSERT') aoChegar(payload as unknown as MensagemChat)
+  })
 }

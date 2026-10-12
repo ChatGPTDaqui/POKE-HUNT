@@ -13,7 +13,7 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
-    version: '8.10',
+    version: '8.11',
     date: '2026-10-12',
     title: 'Dark Glass e campo mais legível',
     highlights: [
@@ -21,6 +21,17 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'As ilustrações dos menus mantêm suas cores originais nos dois temas.',
       'Sala e clima ficam centralizados e encostados abaixo do cabeçalho superior.',
       'Os corpos dos Pokémon ficam totalmente visíveis sobre informações de combate. Sobre golpes, reaparecem com 80% de opacidade.',
+    ],
+  },
+  {
+    version: '8.10',
+    date: '2026-10-12',
+    title: 'Jogo mais leve e mais rápido',
+    highlights: [
+      'Entrar numa hunt baixa muito menos coisa antes de a cena aparecer: o que só é usado depois (a versão shiny dos POKEs selvagens e efeitos de golpes de outros tipos) chega em segundo plano, com o jogo já rodando.',
+      'A tela inicial e o login abrem sem carregar o jogo inteiro, e quem volta ao jogo não baixa de novo o que já tem guardado no navegador.',
+      'O salvamento da hunt com o servidor ficou cerca de duas vezes mais rápido.',
+      'Chat, Social, PvP e Troca continuam ao vivo, agora por um canal mais leve para o servidor.',
     ],
   },
   {
