@@ -129,8 +129,15 @@
   box-sizing: content-box;
   border-top: 0;
   border-radius: 0 0 .65em .65em;
-  padding: 2px 2px 4px;
+  padding: 0 0 2px;
   box-shadow: none;
+}
+:root[data-ui-theme='light'] .hud-root .journey-reserves-row {
+  background: color-mix(in srgb, var(--vidro-tinta) 24%, transparent);
+}
+:root[data-ui-theme='light'] .journey-reserve .text-n500 {
+  color: var(--field-ink);
+  text-shadow: 0 1px 2px var(--field-surface);
 }
 .hud-root .journey-reserve {
   background: transparent;

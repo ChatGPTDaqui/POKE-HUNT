@@ -154,7 +154,7 @@ export function ReservasRail() {
     // Wrapper sem clique: a camada da HUD inteira e `pointer-events-none` (ver
     // JogoCarregado.tsx) e cada filho reativa so a propria area. Um wrapper
     // clicavel de largura total bloquearia o toque no canvas na faixa toda.
-    <div ref={trilhoRef} className={cn('journey-reserves pointer-events-none relative min-w-0', compacto ? 'w-[50px] shrink-0' : 'w-full')}>
+    <div ref={trilhoRef} className={cn('journey-reserves pointer-events-none relative min-w-0', compacto ? 'w-[46px] shrink-0' : 'w-full')}>
       {/* Mobile preserva a borda esquerda; PC aproveita a largura disponível. */}
       <div className="journey-reserves-row vidro pointer-events-auto grid gap-[2px]"
         role="group" aria-label="Companheiros da equipe"
