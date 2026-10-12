@@ -42,6 +42,17 @@ describe('a mesa entra no Realtime, e so ela (PH-314)', () => {
     expect(TEMPO_REAL_DEV).toContain('alter publication supabase_realtime add table dev.troca_sessao')
   })
 
+  it('desde 12/10/2026 a mesa avisa por Broadcast, e saiu da publicacao', () => {
+    // O ao vivo da troca trocou de mecanismo (postgres_changes -> Broadcast
+    // privado, ver src/data/remote/aoVivo.ts). Continua valendo "uma tabela so":
+    // o trigger fica em troca_sessao, que ja muda a cada alteracao da oferta.
+    const broadcast = semComentarios(migration('_realtime_por_broadcast.sql'))
+    expect(broadcast).toContain('after insert or update or delete on public.troca_sessao')
+    expect(broadcast).toContain('after insert or update or delete on dev.troca_sessao')
+    expect(broadcast).not.toContain('troca_oferta')
+    expect(migration('_realtime_sem_postgres_changes.sql')).toContain("'troca_sessao'")
+  })
+
   it('NAO publica troca_oferta', () => {
     // O trigger de versao ja faz a sessao mudar a cada alteracao da oferta.
     // Publicar as duas exigiria `replica identity full` pra o DELETE sobreviver
