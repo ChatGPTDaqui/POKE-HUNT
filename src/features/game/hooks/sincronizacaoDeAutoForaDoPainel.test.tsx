@@ -62,6 +62,24 @@ describe('a sincronização de auto não depende do painel (PH-490)', () => {
     expect(sincronizarAuto).toHaveBeenCalledTimes(2)
   })
 
+  it('o flush trocar a referência sem mudar o valor NÃO sincroniza', () => {
+    // `aplicarEstadoDoServidor` faz `...doServidor` a cada flush: objetos novos,
+    // mesmo conteúdo. Por referência isso virava um `configurar_auto` por flush
+    // (~850 escritas/dia em produção para 1 jogador, medido em 12/10/2026).
+    render(<Montado />)
+    act(() => {
+      const s = useGameStateStore.getState()
+      useGameStateStore.setState({
+        autoToggles: structuredClone(s.autoToggles),
+        autoPotRules: structuredClone(s.autoPotRules),
+        autoCatchConfig: structuredClone(s.autoCatchConfig),
+        autoCatchRules: structuredClone(s.autoCatchRules),
+        autoStatusConfig: structuredClone(s.autoStatusConfig),
+      })
+    })
+    expect(sincronizarAuto).not.toHaveBeenCalled()
+  })
+
   it('UMA mudança dispara UMA sincronização', () => {
     // Dois pontos de montagem dobrariam o request a cada clique — e
     // `sincronizarAuto` manda o batch completo, então seriam dois requests
