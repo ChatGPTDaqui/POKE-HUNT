@@ -11,10 +11,8 @@ import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { ehFalhaSemResposta, mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
-import { flushAgora } from '@/data/remote/gameStatePersistence'
 import { usePassosStore } from './passosStore'
 import { useDiarioStore } from './diarioStore'
-import { pararFlushPeriodico } from '@/data/remote/autoridade'
 
 interface AuthState {
   session: Session | null
@@ -154,6 +152,16 @@ export const useAuthStore = create<AuthState>(() => ({
     // tick que ainda pegue o timer vivo consome o gap "offline" em silencio —
     // o Farm Offline credita mas o modal de "Bem-vindo de volta" nao aparece
     // (o `assentarSessaoPendente` do proximo boot ve kills=0, ja gasto aqui).
+    //
+    // Import DINAMICO dos dois modulos de persistencia: eles puxam o motor, o
+    // catalogo e o Canvas, e este store e importado pela Home e pelo Login. Com
+    // import estatico a casca publica carregava o jogo inteiro (2,4 MB) so pra
+    // mostrar o formulario. Quem desloga de dentro do jogo ja tem os dois
+    // modulos carregados, entao o import resolve na hora.
+    const [{ pararFlushPeriodico }, { flushAgora }] = await Promise.all([
+      import('@/data/remote/autoridade'),
+      import('@/data/remote/gameStatePersistence'),
+    ])
     pararFlushPeriodico()
     // PH-17: sem isto, o cleanup reativo de useProgressoRemoto (que roda
     // depois que `user` vira null no store) so chama flushAgora() DEPOIS que
