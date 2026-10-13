@@ -84,17 +84,8 @@ export function HudLayer() {
     <>
       {/* Topo: trilho + o que for contextual embaixo dele. Uma coluna so, pra
           o chip de sala e o de evolucao empurrarem em vez de sobrepor. */}
-      {/* `items-start`, nao `items-center` (PH-83): o `max-w-[64em]` de baixo
-          impede o trilho de esticar em tela ultralarga, mas centralizado ele
-          empurrava a coluna inteira pra dentro assim que a janela passava de
-          64em — 112px em 1440, 352px em 1920, 672px em 2560. Em monitor grande
-          o cabecalho do POKE aparecia no MEIO da tela em vez do canto. Alinhar
-          a esquerda mantem o teto de largura e devolve o canto. */}
-      {/* PH-197: `inset-x-0 top-0`, nao `inset-x-[.5em] top-[.5em]`. A folga de
-          meio `em` deixava a coluna sempre descolada do canto — alinhar a
-          esquerda (PH-83) acertou a DIRECAO, mas o recuo fixo continuava ali em
-          qualquer largura. O teto de `max-w-[64em]` da linha de baixo e o que
-          impede o trilho de esticar; ele nao depende deste recuo. */}
+      {/* Largura segura inteira, sem teto: Pokémon no canto esquerdo e retrato
+          do treinador sempre na extremidade direita, mesmo em ultrawide. */}
       <div className="absolute inset-x-0 top-0 flex flex-col items-start gap-[.4em]">
         {/* PH-197: coluna com `gap-0`. O trilho de reservas cola no cabecalho
             do POKE ativo em vez de flutuar abaixo dele. O espacamento que
@@ -104,7 +95,7 @@ export function HudLayer() {
             reservas, sem nada no meio. Com `gap-0` a linha vazia sai de cena de
             verdade, e a margem propria dela (abaixo) so vale quando ela tem
             conteudo. */}
-        <div className="journey-party flex w-full max-w-[64em] flex-col gap-0" style={{
+        <div className="journey-party flex w-full flex-col gap-0" style={{
           '--journey-side-clearance': mode === 'amplo' ? '0px' : '52px',
           '--journey-details-offset': `${mode === 'amplo' ? reservasHeight : salaHeight + 48}px`,
         } as CSSProperties}>

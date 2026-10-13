@@ -26,6 +26,8 @@ Cabeçalho e equipe formam uma âncora permanente: gaveta de detalhes, evoluçã
 placar são camadas absolutas, nunca espaçadores entre ativo e reservas. Cabeçalho
 e reservas ficam em z59, acima dos painéis comuns e abaixo das confirmações z60.
 Os retratos de treinador e Pokémon usam a mesma medida (44px no mobile, 2,5em no PC).
+O cabeçalho ocupa a largura segura inteira: retrato do treinador na extremidade
+direita, nome/carteira à esquerda dele, sem limitar sua âncora em monitores largos.
 Skins preservam recortes RGBA nativos; a geometria gerada informa também quantos
 quadros originais há na caminhada. Vistas ausentes são espelhadas, sem gerar arte.
 

@@ -76,8 +76,8 @@ export function StatusRail() {
         <VitaisPoke />
         {/* O contexto fica centralizado abaixo; a sobra mantém a carteira na borda. */}
         <div className="journey-header-space min-w-0 flex-1" />
-        {estreito ? <TreinadorNoCabecalho /> : <CardDoTreinador />}
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
+        {estreito ? <TreinadorNoCabecalho /> : <CardDoTreinador />}
       </div>
 
       {/* Conteúdo contextual nunca participa da altura da âncora da equipe. */}
@@ -98,12 +98,12 @@ function TreinadorNoCabecalho() {
     <div className="journey-trainer-inline relative w-[max(112px,6.5em)] shrink-0">
       <button type="button" data-keep-open aria-label={`Perfil do treinador: ${nome}`}
         onClick={() => abrirPerfil(true)}
-        className="flex min-h-[max(44px,3.1em)] w-full cursor-pointer items-center gap-[4px] rounded-[.4em] text-left">
+        className="flex min-h-[max(44px,3.1em)] w-full cursor-pointer items-center justify-between gap-[4px] rounded-[.4em] text-left">
+        <span className="min-w-0 self-start truncate text-[.7em] font-medium leading-tight">{nome}</span>
         <AvatarDoTreinador userId={meuId} tamanho={2.5} nome={nome} className="border-2 border-menu-line"
           style={{ width: 'var(--journey-portrait-size, 2.5em)', height: 'var(--journey-portrait-size, 2.5em)' }} />
-        <span className="min-w-0 self-start truncate text-[.7em] font-medium leading-tight">{nome}</span>
       </button>
-      <div className="absolute right-0 bottom-0"><Carteira abreviada /></div>
+      <div className="absolute left-0 bottom-0"><Carteira abreviada /></div>
     </div>
   )
 }

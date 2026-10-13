@@ -28,7 +28,7 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('retratos e âncora permanente da equipe', () => {
-  it.each([390, 844, 1366])('usa uma medida única para as duas fotos em %ipx', width => {
+  it.each([390, 844, 1366, 2560])('usa uma medida única para as duas fotos em %ipx', width => {
     useUiStore.setState({ viewportWidth: width, viewportHeight: width === 844 ? 390 : 844 })
     render(<HudLayer />)
     const poke = screen.getByRole('button', { name: 'Perfil de Bulbasaur' })
@@ -36,6 +36,10 @@ describe('retratos e âncora permanente da equipe', () => {
     expect(poke.style.width).toBe('var(--journey-portrait-size, 2.5em)')
     expect(treinador.style.width).toBe(poke.style.width)
     expect(treinador.style.height).toBe(poke.style.height)
+    expect(document.querySelector('.journey-party')!.className).not.toContain('max-w-')
+    const header = document.querySelector('.journey-status-rail')!
+    expect(header.lastElementChild!.contains(treinador)).toBe(true)
+    expect(width === 390 ? treinador === treinador.parentElement!.lastElementChild : treinador.classList.contains('order-last')).toBe(true)
   })
   it.each([390, 1366])('reservas não saem do cabeçalho com detalhes, placar ou gestão em %ipx', width => {
     useUiStore.setState({ viewportWidth: width })
