@@ -26,7 +26,8 @@ export function CardDoTreinador() {
       }
     >
       {/* PH-548: a foto escolhida no perfil; sem foto, o icone de sempre. */}
-      <AvatarDoTreinador userId={meuId} tamanho={2} nome={trainer.name} />
+      <AvatarDoTreinador userId={meuId} tamanho={2.5} nome={trainer.name} className="border-2 border-menu-line"
+        style={{ width: 'var(--journey-portrait-size, 2.5em)', height: 'var(--journey-portrait-size, 2.5em)' }} />
       <span className="flex flex-col items-start gap-[.2em] pr-[.2em]">
         <span className="max-w-[7em] truncate text-[.78em] leading-none">{trainer.name}</span>
         <span className="text-[.7em] leading-none text-n400">Lv {trainer.level}</span>

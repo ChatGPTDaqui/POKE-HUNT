@@ -10,7 +10,7 @@
 // cortando caminho em linha reta, ele atravessaria parede e virava junto com
 // cada meia-volta do POKE.
 //
-// Skins (12/10): recortes RGBA em resolução original, quatro passos originais
+// Skins (12/10): recortes RGBA em resolução original, passos originais
 // por direção, sem paleta reduzida ou pernas redesenhadas. Geometria por skin.
 // O porte continua ~30 px de mundo; a redução acontece só ao desenhar.
 // Idle usa um passo pouco aberto da fonte, estático: não há idle dedicado na
@@ -81,7 +81,7 @@ const FOLGA_PRA_PARAR = 0.15
 /** Quanto a direcao segue o movimento por quadro (0..1): vira suave, sem tremer de linha. */
 const SUAVIZA_DIRECAO = 0.25
 
-/** Duracao (ticks de 1/60 s) de cada quadro. Toda skin tem o mesmo formato de folha. */
+/** Duração do Idle; Walk conserva o ciclo de 40px com 4 ou 5 poses por skin. */
 const DURACOES: Record<'Walk' | 'Idle', number[]> = {
   Walk: [8, 10, 8, 10],
   // Dois quadros iguais: pose disponível na fonte, sem respiração inventada.
@@ -414,10 +414,13 @@ export class TreinadorEmCampo {
     if (anim !== e.anim) { e.anim = anim; e.quadro = 0; e.ticks = 0 }
     const duracoes = DURACOES[e.anim]
     if (e.anim === 'Walk') {
+      const quadros = quadroDaSkin(this.skin).walkFrames
+      e.quadro %= quadros
       e.ticks += passo
-      while (e.ticks >= PX_POR_QUADRO_DE_PASSO[e.quadro]) {
-        e.ticks -= PX_POR_QUADRO_DE_PASSO[e.quadro]
-        e.quadro = (e.quadro + 1) % duracoes.length
+      const distanciaDoQuadro = () => quadros === 4 ? PX_POR_QUADRO_DE_PASSO[e.quadro] : 40 / quadros
+      while (e.ticks >= distanciaDoQuadro()) {
+        e.ticks -= distanciaDoQuadro()
+        e.quadro = (e.quadro + 1) % quadros
       }
     } else {
       e.ticks += dt * 60
@@ -459,7 +462,7 @@ export class TreinadorEmCampo {
     const img = imagem(folhaDaSkin(this.skin, anim))
     if (!img || !img.complete || img.naturalWidth === 0) return
     const linha = directionRowFromFacing(facing)
-    const { frameWidth, frameHeight, footX, footY, bodyHeight } = quadroDaSkin(this.skin)
+    const { frameWidth, frameHeight, footX, footY, bodyHeight, walkFrames } = quadroDaSkin(this.skin)
     // Resolução da fonte independente do tamanho de mundo: não destruir a
     // arte na importação. Filtragem de redução só aqui, na apresentação.
     const scale = ALTURA_DO_BONECO / bodyHeight
@@ -467,7 +470,7 @@ export class TreinadorEmCampo {
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
     ctx.drawImage(
-      img, quadro * frameWidth, linha * frameHeight, frameWidth, frameHeight,
+      img, (quadro % (anim === 'Walk' ? walkFrames : 2)) * frameWidth, linha * frameHeight, frameWidth, frameHeight,
       pos.x - footX * scale, pos.y - footY * scale, frameWidth * scale, frameHeight * scale,
     )
     ctx.imageSmoothingEnabled = suave
