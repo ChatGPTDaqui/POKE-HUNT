@@ -20,6 +20,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'A foto do treinador no cabeçalho tem o mesmo tamanho do retrato do Pokémon, no mobile e no PC.',
       'O retrato do treinador permanece na extremidade superior direita, inclusive em monitores largos, com nome e carteira ao lado.',
       'A equipe permanece conectada ao cabeçalho ao abrir detalhes, menus ou o placar de duelo. Painéis comuns não escondem os retratos.',
+      'As janelas reservam espaço para a equipe fixa, evitando que os retratos cubram textos ou campos.',
       'Professor Carvalho, Jessie e Red estão disponíveis como skins de campo no Perfil → Outfit, com cores e resolução originais preservadas.',
       'Red usa os cinco quadros originais de caminhada. As prévias das skins mantêm as proporções sem mostrar quadros vizinhos.',
     ],

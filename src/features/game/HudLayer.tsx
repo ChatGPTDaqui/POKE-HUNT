@@ -64,7 +64,8 @@ export function HudLayer() {
   const [salaHeight, setSalaHeight] = useState(0)
   useMedirAltura(salaRef, setSalaHeight)
   const reservasRef = useRef<HTMLDivElement>(null)
-  const [reservasHeight, setReservasHeight] = useState(0)
+  const reservasHeight = useUiStore(s => s.reservasHeight)
+  const setReservasHeight = useUiStore(s => s.setReservasHeight)
   useMedirAltura(reservasRef, setReservasHeight)
 
   // Mede o rodape ao vivo. Os sheets ancoram o proprio `bottom` neste numero

@@ -95,9 +95,13 @@ export function Sheet({
   const footerHeight = useUiStore((s) => s.footerHeight)
   const navHeight = useUiStore((s) => s.navHeight)
   const trilhoHeight = useUiStore((s) => s.trilhoHeight)
-  const deitado = useDeviceMode().mode === 'deitado'
+  const reservasHeight = useUiStore((s) => s.reservasHeight)
+  const { mode, compacto } = useDeviceMode()
+  const deitado = mode === 'deitado'
+  const topoProtegido = trilhoHeight + (compacto ? 0 : reservasHeight)
+  const protegeLateral = appearance === 'journey' && compacto && reservasHeight > 0
   const reservaTopo = appearance === 'journey' && trilhoHeight
-    ? `calc(${trilhoHeight}px + .25em)`
+    ? `calc(${topoProtegido}px + .25em)`
     : deitado ? RESERVA_TRILHO_DEITADO : RESERVA_TRILHO
   // Um sheet 'cheia' para em cima da BARRA DE NAVEGACAO, e nao do rodape
   // inteiro. Medido em 390x844: o rodape tem 179px, dos quais 111 sao barra de
@@ -182,6 +186,8 @@ export function Sheet({
         data-journey-rail-reserved={appearance === 'journey' && zIndex <= 35 ? '' : undefined}
         style={{
           zIndex,
+          ...(protegeLateral ? { left: 52, right: zIndex <= 35 ? 56 : 0,
+            maxWidth: `calc(100% - ${zIndex <= 35 ? 108 : 52}px)` } : {}),
           // `+ .5em` porque o rodape da HUD e ancorado em `bottom-[.5em]`:
           // sem a folga o sheet cobre os 8px do canto arredondado da barra de
           // navegacao e ela parece cortada.

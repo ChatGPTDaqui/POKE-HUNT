@@ -279,6 +279,9 @@ interface UiState {
   // cobrindo a carteira ou flutuando no meio da tela.
   trilhoHeight: number
   setTrilhoHeight: (height: number) => void
+  // Medida transitória da equipe fixa; não é preferência nem dado do servidor.
+  reservasHeight: number
+  setReservasHeight: (height: number) => void
 
   // Largura E ALTURA do viewport em px. Vivem na store (e nao num `useState`
   // por componente) porque varias superficies decidem posicao a partir delas:
@@ -451,6 +454,11 @@ export const useUiStore = create<UiState>((set, get) => ({
   setTrilhoHeight: (height) => {
     const r = Math.round(height)
     if (get().trilhoHeight !== r) set({ trilhoHeight: r })
+  },
+  reservasHeight: 0,
+  setReservasHeight: (height) => {
+    const r = Math.max(0, Math.round(height))
+    if (get().reservasHeight !== r) set({ reservasHeight: r })
   },
 
   viewportWidth: typeof window === 'undefined' ? 1280 : window.innerWidth,
