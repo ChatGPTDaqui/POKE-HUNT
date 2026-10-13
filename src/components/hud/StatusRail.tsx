@@ -61,13 +61,13 @@ export function StatusRail() {
   const [gavetaAberta, setGavetaAberta] = useState(false)
 
   return (
-    <div className="pointer-events-auto flex flex-col items-stretch gap-[.4em]">
+    <div className="pointer-events-auto relative flex flex-col items-stretch">
       <div
         className={cn(
           // `overflow-hidden` e rede de seguranca, nao layout: se algum dado
           // novo (um nome de treinador longo, uma moeda de 13 digitos) estourar
           // a conta de novo, ele corta em vez de deixar o avatar sair da tela.
-          'journey-status-rail vidro flex items-center gap-[.5em] overflow-hidden rounded-[1.1em] py-[.35em] pr-[.4em] pl-[.35em]',
+          'journey-status-rail vidro relative z-[59] flex items-center gap-[.5em] overflow-hidden rounded-[1.1em] py-[.35em] pr-[.4em] pl-[.35em]',
           estreito && 'journey-status-mobile',
         )}
       >
@@ -76,12 +76,16 @@ export function StatusRail() {
         <VitaisPoke />
         {/* O contexto fica centralizado abaixo; a sobra mantém a carteira na borda. */}
         <div className="journey-header-space min-w-0 flex-1" />
-        {estreito ? <TreinadorNoCabecalho /> : <CardDoTreinador />}
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
+        {estreito ? <TreinadorNoCabecalho /> : <CardDoTreinador />}
       </div>
 
-      {gavetaAberta && <GavetaDetalhes comTreinador={estreito} />}
-      <ChipEvolucao />
+      {/* Conteúdo contextual nunca participa da altura da âncora da equipe. */}
+      <div className="journey-status-extra pointer-events-none absolute top-full z-[21] flex flex-col gap-[4px] [&>*]:pointer-events-auto"
+        style={{ left: 'var(--journey-side-clearance, 0px)', right: '60px', paddingTop: 'calc(var(--journey-details-offset, 0px) + 4px)' }}>
+        {gavetaAberta && <GavetaDetalhes comTreinador={estreito} />}
+        <ChipEvolucao />
+      </div>
     </div>
   )
 }
@@ -91,14 +95,15 @@ function TreinadorNoCabecalho() {
   const nome = useGameStateStore((s) => s.trainer.name)
   const abrirPerfil = useUiStore((s) => s.setPerfilOpen)
   return (
-    <div className="journey-trainer-inline relative w-[100px] shrink-0">
+    <div className="journey-trainer-inline relative w-[max(112px,6.5em)] shrink-0">
       <button type="button" data-keep-open aria-label={`Perfil do treinador: ${nome}`}
         onClick={() => abrirPerfil(true)}
-        className="flex min-h-[max(44px,3.1em)] w-full cursor-pointer items-center gap-[4px] rounded-[.4em] text-left">
-        <AvatarDoTreinador userId={meuId} tamanho={1.5} nome={nome} />
+        className="flex min-h-[max(44px,3.1em)] w-full cursor-pointer items-center justify-between gap-[4px] rounded-[.4em] text-left">
         <span className="min-w-0 self-start truncate text-[.7em] font-medium leading-tight">{nome}</span>
+        <AvatarDoTreinador userId={meuId} tamanho={2.5} nome={nome} className="border-2 border-menu-line"
+          style={{ width: 'var(--journey-portrait-size, 2.5em)', height: 'var(--journey-portrait-size, 2.5em)' }} />
       </button>
-      <div className="absolute right-0 bottom-0"><Carteira abreviada /></div>
+      <div className="absolute left-0 bottom-0"><Carteira abreviada /></div>
     </div>
   )
 }
@@ -137,8 +142,8 @@ function FacePoke() {
       // A raridade vira a MOLDURA em vez de um selo de texto ao lado do nome:
       // no trilho de uma linha nao ha largura pra "MYTHIC" escrito, e a cor
       // carrega a mesma informacao de relance.
-      className="journey-poke-face h-[2.5em] w-[2.5em] shrink-0 cursor-pointer overflow-hidden rounded-[.6em] border-2 bg-n900"
-      style={{ borderColor: rarity.color }}
+      className="journey-poke-face shrink-0 cursor-pointer overflow-hidden rounded-[.6em] border-2 bg-n900"
+      style={{ borderColor: rarity.color, width: 'var(--journey-portrait-size, 2.5em)', height: 'var(--journey-portrait-size, 2.5em)' }}
     >
       {url && <img src={url} alt="" className="h-full w-full object-cover [image-rendering:pixelated]" />}
     </button>

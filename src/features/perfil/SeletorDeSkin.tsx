@@ -3,7 +3,7 @@
 // Cada opcao mostra o boneco parado de frente (quadro 0 da linha "baixo" do
 // Idle). A troca vale na hora no campo (cache local); a gravacao no servidor
 // (09/10, pro rival ver no duelo) vai por tras — se falhar, avisa.
-import { SKINS_DO_TREINADOR, folhaDaSkin } from '@/data/skinsDoTreinador'
+import { SKINS_DO_TREINADOR, folhaDaSkin, quadroDaSkin } from '@/data/skinsDoTreinador'
 import { skinDe, useSkinDoTreinadorStore } from '@/stores/skinDoTreinadorStore'
 import { useToastStore } from '@/stores/toastStore'
 import { cn } from '@/lib/utils'
@@ -24,7 +24,7 @@ export function SeletorDeSkin({ userId }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-5 gap-[.35em]" data-testid="seletor-de-skin">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(64px,1fr))] gap-[.35em]" data-testid="seletor-de-skin">
       {SKINS_DO_TREINADOR.map((s) => (
         <button
           key={s.id}
@@ -38,20 +38,19 @@ export function SeletorDeSkin({ userId }: Props) {
             atual === s.id ? 'border-gold' : 'border-menu-line hover:border-menu-line',
           )}
         >
-          {/* Folha Idle: 2 quadros x 8 linhas de 32x40 px, mostrada a 2x. */}
-          <span
-            aria-hidden
-            className="block h-[4em] w-[3.2em] [image-rendering:pixelated]"
-            style={{
-              backgroundImage: `url(${folhaDaSkin(s.id, 'Idle')})`,
-              backgroundSize: '6.4em 32em',
-              backgroundPosition: '0 0',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
+          <PreviaDaSkin id={s.id} />
           <span className="max-w-full truncate text-[.7em] text-menu-ink">{s.nome}</span>
         </button>
       ))}
     </div>
   )
+}
+
+/** O viewport recorta um único quadro; a imagem não é esticada nem mostra o vizinho. */
+function PreviaDaSkin({ id }: { id: string }) {
+  const { frameWidth, frameHeight } = quadroDaSkin(id)
+  return <svg aria-hidden="true" focusable="false" className="block h-[4em] w-full overflow-hidden"
+    viewBox={`0 0 ${frameWidth} ${frameHeight}`}>
+    <image href={folhaDaSkin(id, 'Idle')} width={frameWidth * 2} height={frameHeight * 8} />
+  </svg>
 }

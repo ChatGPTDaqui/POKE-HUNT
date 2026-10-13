@@ -8,9 +8,10 @@ const config = require('./treinadores-de-campo.json')
 const geometry = require('../../src/data/quadrosDoTreinador.json')
 const root = path.resolve(__dirname, '../..')
 
-for (const [skin, entry] of Object.entries(config)) test(`${skin}: recortes mantêm RGBA e quatro poses originais, inclusive espelhos`, () => {
+for (const [skin, entry] of Object.entries(config)) test(`${skin}: recortes mantêm RGBA e todas as poses originais, inclusive espelhos`, () => {
   const source = PNG.sync.read(fs.readFileSync(path.join(root, entry.source)))
-  const result = recortar(source, entry.rows, entry.map)
+  const columns = entry.columns ?? 4
+  const result = recortar(source, entry.rows, entry.map, columns)
   assert.deepEqual(result.geometry, geometry[skin])
   const walk = PNG.sync.read(fs.readFileSync(path.join(root, `assets/treinadores/campo/${skin}/Walk-Anim.png`)))
   const idle = PNG.sync.read(fs.readFileSync(path.join(root, `assets/treinadores/campo/${skin}/Idle-Anim.png`)))
@@ -19,7 +20,8 @@ for (const [skin, entry] of Object.entries(config)) test(`${skin}: recortes mant
   const { frameWidth, frameHeight, footX, footY } = result.geometry
   const colors = new Set()
   let partialAlpha = 0
-  for (let row = 0; row < 8; row++) for (let q = 0; q < 4; q++) {
+  assert.equal(walk.width, frameWidth * columns)
+  for (let row = 0; row < 8; row++) for (let q = 0; q < columns; q++) {
     const [sourceRow, mirror] = entry.map[row], f = result.frames[sourceRow][q]
     for (let y = f.y0; y <= f.y1; y++) {
       const expected = Buffer.alloc((f.x1 - f.x0 + 1) * 4)

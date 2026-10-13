@@ -22,6 +22,15 @@ journey.css mantém composição/densidade e themes.css define os materiais. Nã
 inverter a escala n900/n100 global: dados de combate e raridades conservam sua paleta.
 A preferência de reduzir transparência continua independente do tema.
 
+Cabeçalho e equipe formam uma âncora permanente: gaveta de detalhes, evolução e
+placar são camadas absolutas, nunca espaçadores entre ativo e reservas. Cabeçalho
+e reservas ficam em z59, acima dos painéis comuns e abaixo das confirmações z60.
+Os retratos de treinador e Pokémon usam a mesma medida (44px no mobile, 2,5em no PC).
+O cabeçalho ocupa a largura segura inteira: retrato do treinador na extremidade
+direita, nome/carteira à esquerda dele, sem limitar sua âncora em monitores largos.
+Skins preservam recortes RGBA nativos; a geometria gerada informa também quantos
+quadros originais há na caminhada. Vistas ausentes são espelhadas, sem gerar arte.
+
 ## Espaço útil
 
 Painel usa snap `conteudo` por padrão: cresce só até o conteúdo ou o limite seguro,

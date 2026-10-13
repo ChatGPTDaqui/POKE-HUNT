@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event'
 
 const rpc = vi.hoisted(() => ({ definirSkin: vi.fn(), skinsDe: vi.fn() }))
 vi.mock('@/data/remote/skinRpc', () => rpc)
-import { SKINS_DO_TREINADOR, SKIN_PADRAO, folhaDaSkin, skinValida } from '@/data/skinsDoTreinador'
+import { SKINS_DO_TREINADOR, SKIN_PADRAO, folhaDaSkin, skinValida, quadroDaSkin } from '@/data/skinsDoTreinador'
 import { skinDe, useSkinDoTreinadorStore } from '@/stores/skinDoTreinadorStore'
 import { SeletorDeSkin } from './SeletorDeSkin'
 
@@ -30,6 +30,16 @@ describe('skins do treinador em campo', () => {
     for (const s of SKINS_DO_TREINADOR) {
       expect(existsSync(folhaDaSkin(s.id, 'Walk')), s.id).toBe(true)
       expect(existsSync(folhaDaSkin(s.id, 'Idle')), s.id).toBe(true)
+    }
+  })
+
+  it('oferece as três novas skins e recorta somente um quadro na prévia', () => {
+    render(<SeletorDeSkin userId={EU} />)
+    for (const [id, nome] of [['carvalho', 'Professor Carvalho'], ['jessie', 'Jessie'], ['red', 'Red']]) {
+      const button = screen.getByRole('button', { name: nome })
+      const g = quadroDaSkin(id)
+      expect(button.querySelector('svg')!.getAttribute('viewBox')).toBe(`0 0 ${g.frameWidth} ${g.frameHeight}`)
+      expect(button.querySelector('image')!.getAttribute('href')).toBe(folhaDaSkin(id, 'Idle'))
     }
   })
 

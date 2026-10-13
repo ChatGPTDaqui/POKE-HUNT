@@ -20,6 +20,9 @@ export const SKINS_DO_TREINADOR: readonly SkinDoTreinador[] = [
   { id: 'dawn', nome: 'Dawn' },
   { id: 'lance', nome: 'Lance' },
   { id: 'cynthia', nome: 'Cynthia' },
+  { id: 'carvalho', nome: 'Professor Carvalho' },
+  { id: 'jessie', nome: 'Jessie' },
+  { id: 'red', nome: 'Red' },
 ]
 
 export const SKIN_PADRAO = 'mochila'

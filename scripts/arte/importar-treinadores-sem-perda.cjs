@@ -4,9 +4,9 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { PNG } = require('pngjs')
 
-function recortar(source, rows, map) {
+function recortar(source, rows, map, columns = 4) {
   const { width: W, height: H, data: D } = source
-  if (W % 4 || map.length !== 8 || !Number.isInteger(rows) || rows < 1) throw new Error('Grade inválida')
+  if (!Number.isInteger(columns) || columns < 1 || map.length !== 8 || !Number.isInteger(rows) || rows < 1) throw new Error('Grade inválida')
   // Alpha forte localiza os corpos; o recorte copia RGBA da fonte, incluindo
   // as bordas semitransparentes. Não é uma máscara de remoção de pixels.
   const labels = new Int32Array(W * H).fill(-1), centers = [], components = []
@@ -30,15 +30,15 @@ function recortar(source, rows, map) {
     if (n >= 150) components.push({ n, cx: sumX / n, cy: sumY / n, x0, x1, y0, y1 })
   }
   centers.sort((a, b) => a - b)
-  if (centers.length < rows * 4) throw new Error('Corpos insuficientes para localizar as linhas')
+  if (centers.length < rows * columns) throw new Error('Corpos insuficientes para localizar as linhas')
   const cuts = centers.slice(1).map((y, i) => ({ y: Math.round((y + centers[i]) / 2), gap: y - centers[i] }))
     .sort((a, b) => b.gap - a.gap).slice(0, rows - 1).map(c => c.y).sort((a, b) => a - b)
   const bounds = [0, ...cuts, H], frames = []
   for (let row = 0; row < rows; row++) {
     frames[row] = []
-    for (let q = 0; q < 4; q++) {
+    for (let q = 0; q < columns; q++) {
       let x0 = W, y0 = H, x1 = -1, y1 = -1
-      const candidates = components.filter(c => c.cy >= bounds[row] && c.cy < bounds[row + 1] && Math.floor(c.cx / (W / 4)) === q).sort((a, b) => b.n - a.n)
+      const candidates = components.filter(c => c.cy >= bounds[row] && c.cy < bounds[row + 1] && Math.floor(c.cx / (W / columns)) === q).sort((a, b) => b.n - a.n)
       const main = candidates[0]
       if (!main) throw new Error(`Corpo ausente ${row},${q}`)
       for (const c of candidates) {
@@ -51,7 +51,7 @@ function recortar(source, rows, map) {
       for (let y = y0; y <= (y0 + y1) / 2; y++) for (let x = x0; x <= x1; x++) {
         if (D[(y * W + x) * 4 + 3] > 128) { sumX += x; count++ }
       }
-      frames[row][q] = { x0: Math.max(q * W / 4, x0 - 3), x1: Math.min((q + 1) * W / 4 - 1, x1 + 3),
+      frames[row][q] = { x0: Math.max(Math.ceil(q * W / columns), x0 - 3), x1: Math.min(Math.ceil((q + 1) * W / columns) - 1, x1 + 3),
         y0: Math.max(bounds[row], y0 - 3), y1: Math.min(bounds[row + 1] - 1, y1 + 3),
         foot: y1, center: Math.round(sumX / count), bodyHeight: y1 - y0 + 1 }
     }
@@ -90,8 +90,8 @@ function recortar(source, rows, map) {
     }
     return out
   }
-  return { walk: atlas(4, (_r, q) => q), idle: atlas(2, r => idle[r]),
-    geometry: { frameWidth, frameHeight, footX: halfWidth, footY, bodyHeight }, frames, idleFrames: idle }
+  return { walk: atlas(columns, (_r, q) => q), idle: atlas(2, r => idle[r]),
+    geometry: { frameWidth, frameHeight, footX: halfWidth, footY, bodyHeight, walkFrames: columns }, frames, idleFrames: idle }
 }
 
 function main() {
@@ -100,7 +100,7 @@ function main() {
   const geometry = {}
   for (const [skin, entry] of Object.entries(config)) {
     const source = PNG.sync.read(fs.readFileSync(path.join(root, entry.source)))
-    const result = recortar(source, entry.rows, entry.map)
+    const result = recortar(source, entry.rows, entry.map, entry.columns)
     const target = path.join(root, 'assets/treinadores/campo', skin)
     fs.mkdirSync(target, { recursive: true })
     fs.writeFileSync(path.join(target, 'Walk-Anim.png'), PNG.sync.write(result.walk))

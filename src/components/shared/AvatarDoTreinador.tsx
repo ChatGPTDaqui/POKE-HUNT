@@ -6,7 +6,7 @@
 //
 // Sem foto (ou id fora do catalogo) cai no icone generico, que e o que a HUD
 // sempre mostrou. Tamanho em `em` pra acompanhar a escala da HUD e dos menus.
-import { useEffect } from 'react'
+import { useEffect, type CSSProperties } from 'react'
 import { User } from '@phosphor-icons/react'
 import { avatarUrl } from '@/data/avatares'
 import { useAvatarStore } from '@/stores/avatarStore'
@@ -17,11 +17,12 @@ interface Props {
   /** Lado do quadrado, em `em`. */
   tamanho?: number
   className?: string
+  style?: CSSProperties
   /** Nome do jogador, so pra acessibilidade; a imagem e decorativa ao lado do nome. */
   nome?: string
 }
 
-export function AvatarDoTreinador({ userId, avatar, tamanho = 2, className = '', nome }: Props) {
+export function AvatarDoTreinador({ userId, avatar, tamanho = 2, className = '', style, nome }: Props) {
   const pedir = useAvatarStore((s) => s.pedir)
   const doCache = useAvatarStore((s) => (userId ? s.porUsuario[userId] : undefined))
   useEffect(() => {
@@ -33,7 +34,7 @@ export function AvatarDoTreinador({ userId, avatar, tamanho = 2, className = '',
   return (
     <span
       className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[.5em] bg-menu-wash text-menu-ink ${className}`}
-      style={estilo}
+      style={{ ...estilo, ...style }}
       aria-hidden={nome ? undefined : true}
       role={nome ? 'img' : undefined}
       aria-label={nome ? `Foto de ${nome}` : undefined}
