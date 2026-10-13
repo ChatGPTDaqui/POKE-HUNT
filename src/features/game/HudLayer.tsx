@@ -25,11 +25,12 @@
 //   40     painel Auto (nao passa pelo backdrop, de proposito)
 //   45/46  perfil do POKE
 //   50/51  relatorio offline
+//   59     cabeçalho e equipe permanentes (contexto continua em 20/21)
 //   60     confirmacao
 //   70     toasts
 //
-// A HUD continua ABAIXO do backdrop na pilha (ela escurece junto com o jogo) e
-// mesmo assim segue tocavel: o backdrop e puramente visual
+// Cabeçalho/equipe ficam acima dos painéis comuns, sem encobrir confirmações.
+// O restante da HUD continua abaixo do backdrop e segue tocavel: ele e visual
 // (`pointer-events:none`) e o fechar-ao-tocar-fora e um listener de documento.
 // Um backdrop que capturasse o toque faria trocar de tela exigir dois toques.
 import { useRef, useState, type CSSProperties } from 'react'
@@ -62,6 +63,10 @@ export function HudLayer() {
   const salaRef = useRef<HTMLDivElement>(null)
   const [salaHeight, setSalaHeight] = useState(0)
   useMedirAltura(salaRef, setSalaHeight)
+  const reservasRef = useRef<HTMLDivElement>(null)
+  const reservasHeight = useUiStore(s => s.reservasHeight)
+  const setReservasHeight = useUiStore(s => s.setReservasHeight)
+  useMedirAltura(reservasRef, setReservasHeight)
 
   // Mede o rodape ao vivo. Os sheets ancoram o proprio `bottom` neste numero
   // pra parar EM CIMA da doca em vez de cobri-la — a doca e o unico caminho de
@@ -80,18 +85,9 @@ export function HudLayer() {
     <>
       {/* Topo: trilho + o que for contextual embaixo dele. Uma coluna so, pra
           o chip de sala e o de evolucao empurrarem em vez de sobrepor. */}
-      {/* `items-start`, nao `items-center` (PH-83): o `max-w-[64em]` de baixo
-          impede o trilho de esticar em tela ultralarga, mas centralizado ele
-          empurrava a coluna inteira pra dentro assim que a janela passava de
-          64em — 112px em 1440, 352px em 1920, 672px em 2560. Em monitor grande
-          o cabecalho do POKE aparecia no MEIO da tela em vez do canto. Alinhar
-          a esquerda mantem o teto de largura e devolve o canto. */}
-      {/* PH-197: `inset-x-0 top-0`, nao `inset-x-[.5em] top-[.5em]`. A folga de
-          meio `em` deixava a coluna sempre descolada do canto — alinhar a
-          esquerda (PH-83) acertou a DIRECAO, mas o recuo fixo continuava ali em
-          qualquer largura. O teto de `max-w-[64em]` da linha de baixo e o que
-          impede o trilho de esticar; ele nao depende deste recuo. */}
-      <div className="absolute inset-x-0 top-0 z-20 flex flex-col items-start gap-[.4em]">
+      {/* Largura segura inteira, sem teto: Pokémon no canto esquerdo e retrato
+          do treinador sempre na extremidade direita, mesmo em ultrawide. */}
+      <div className="absolute inset-x-0 top-0 flex flex-col items-start gap-[.4em]">
         {/* PH-197: coluna com `gap-0`. O trilho de reservas cola no cabecalho
             do POKE ativo em vez de flutuar abaixo dele. O espacamento que
             sobrava nao era so estetico: a linha de sala/clima abaixo renderiza
@@ -100,7 +96,10 @@ export function HudLayer() {
             reservas, sem nada no meio. Com `gap-0` a linha vazia sai de cena de
             verdade, e a margem propria dela (abaixo) so vale quando ela tem
             conteudo. */}
-        <div className="journey-party flex w-full max-w-[64em] flex-col gap-0">
+        <div className="journey-party flex w-full flex-col gap-0" style={{
+          '--journey-side-clearance': mode === 'amplo' ? '0px' : '52px',
+          '--journey-details-offset': `${mode === 'amplo' ? reservasHeight : salaHeight + 48}px`,
+        } as CSSProperties}>
           {/* Medido pra `ColunaDeAtalhos` (PH-257) saber onde o trilho acaba —
               ela comeca logo abaixo do card do treinador. Um `div` so pra
               medida, sem estilo nenhum: `StatusRail` ja e uma coluna com
@@ -113,22 +112,23 @@ export function HudLayer() {
               "logo abaixo do lvl do treinador", que mora no trilho. */}
           <div ref={trilhoRef} className="relative">
             <StatusRail />
-            <div ref={salaRef} className="journey-room-anchor"
+            <div ref={salaRef} className="journey-room-anchor z-20"
               style={{ maxWidth: mode === 'amplo' ? 'calc(100% - min(34em, 60vw))' : 'calc(100% - 112px)' }}>
               <ContextoDaHunt />
             </div>
-          </div>
-          {/* Duelo mantém seu placar de largura própria; não cabe na coluna estreita. */}
-          <div className="flex w-full justify-center [&:not(:empty)]:mb-[.4em] [&:not(:empty)]:pt-[var(--room-clearance)]"
-            style={{ '--room-clearance': `${salaHeight + 4}px` } as CSSProperties}>
-            <PlacarDoDuelo />
+            {/* Placar é contextual: não desloca o ponto de conexão das reservas. */}
+            <div className="absolute top-full right-[60px] z-20 flex justify-center"
+              style={{ left: mode === 'amplo' ? 0 : 52,
+                paddingTop: mode === 'amplo' ? Math.max(reservasHeight, salaHeight) + 4 : salaHeight + 52 }}>
+              <PlacarDoDuelo />
+            </div>
           </div>
           {/* Reservas encostam no ativo e compartilham o material da moldura.
               Objetivos ficam ao lado no mobile, abaixo da sala centralizada.
               A medida dos atalhos continua sendo somente a do status acima. */}
           <div className={cn('journey-companions flex min-w-0 items-start gap-[4px]', mode !== 'amplo' ? 'flex-row pr-[120px]' : 'flex-col pr-[60px]')}>
-            <ReservasRail />
-            <div className="flex min-w-0 flex-col items-start gap-[4px]"
+            <div ref={reservasRef} className={mode === 'amplo' ? 'w-full' : 'shrink-0'}><ReservasRail /></div>
+            <div className="relative z-20 flex min-w-0 flex-col items-start gap-[4px]"
               style={{ paddingTop: mode !== 'amplo' ? salaHeight + 4 : 4 }}>
               {!painelAberto && <JornadaNaHud />}
             </div>

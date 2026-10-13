@@ -13,7 +13,7 @@ import { X } from '@phosphor-icons/react'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import { useWindowResize } from '@/hooks/useWindowResize'
 import { useFecharComEsc } from '@/hooks/useFecharComEsc'
-import { useUiStore, type WindowKey } from '@/stores/uiStore'
+import { useUiStore, useDeviceMode, type WindowKey } from '@/stores/uiStore'
 import { GameIconButton } from './controls'
 import { cn } from '@/lib/utils'
 
@@ -57,6 +57,10 @@ export function GameWindow({
   const { pos, onPointerDown } = useWindowDrag(winKey)
   const { onPointerDownBorda } = useWindowResize(winKey)
   const trilhoHeight = useUiStore((s) => s.trilhoHeight)
+  const reservasHeight = useUiStore((s) => s.reservasHeight)
+  const { compacto } = useDeviceMode()
+  const topoProtegido = trilhoHeight + (compacto ? 0 : reservasHeight)
+  const protegeEquipe = appearance === 'journey' && reservasHeight > 0
   const navHeight = useUiStore((s) => s.navHeight)
   const painelJornada = appearance === 'journey' && winKey === 'panel'
 
@@ -133,8 +137,14 @@ export function GameWindow({
         data-window={winKey}
         data-appearance={appearance}
         style={{ ...style, zIndex, ...(painelJornada ? {
-          ...(!pos ? { top: `calc(${trilhoHeight}px + .5em)` } : {}),
-          maxHeight: `calc(100% - ${trilhoHeight + navHeight}px - 1.5em)`,
+          ...(!pos ? { top: `calc(${topoProtegido}px + .5em)` } : {}),
+          maxHeight: `calc(100% - ${topoProtegido + navHeight}px - 1.5em)`,
+        } : {}), ...(protegeEquipe ? {
+          top: `max(${pos ? `${pos.y}px` : defaultTop ?? '0px'}, calc(${topoProtegido}px + .5em))`,
+          maxHeight: `calc(100% - ${topoProtegido + navHeight}px - 1.5em)`,
+          minHeight: 0,
+          minWidth: 0,
+          ...(compacto ? { left: pos ? Math.max(52, pos.x) : 52, maxWidth: 'calc(100% - 60px)' } : {}),
         } : {}) }}
         className={cn(
           // `min(86vh, 100vh - 12em)`: 86vh e o teto do handoff, mas em tela

@@ -4,34 +4,63 @@
     "frameHeight": 201,
     "footX": 74,
     "footY": 195,
-    "bodyHeight": 178
+    "bodyHeight": 178,
+    "walkFrames": 4
   },
   "cynthia": {
     "frameWidth": 197,
     "frameHeight": 199,
     "footX": 98,
     "footY": 193,
-    "bodyHeight": 183
+    "bodyHeight": 183,
+    "walkFrames": 4
   },
   "lance": {
     "frameWidth": 203,
     "frameHeight": 222,
     "footX": 101,
     "footY": 216,
-    "bodyHeight": 201
+    "bodyHeight": 201,
+    "walkFrames": 4
   },
   "may": {
     "frameWidth": 187,
     "frameHeight": 228,
     "footX": 93,
     "footY": 222,
-    "bodyHeight": 204.5
+    "bodyHeight": 204.5,
+    "walkFrames": 4
   },
   "dawn": {
     "frameWidth": 191,
     "frameHeight": 250,
     "footX": 95,
     "footY": 244,
-    "bodyHeight": 227
+    "bodyHeight": 227,
+    "walkFrames": 4
+  },
+  "carvalho": {
+    "frameWidth": 121,
+    "frameHeight": 190,
+    "footX": 60,
+    "footY": 184,
+    "bodyHeight": 166,
+    "walkFrames": 4
+  },
+  "jessie": {
+    "frameWidth": 195,
+    "frameHeight": 199,
+    "footX": 97,
+    "footY": 193,
+    "bodyHeight": 175,
+    "walkFrames": 4
+  },
+  "red": {
+    "frameWidth": 169,
+    "frameHeight": 242,
+    "footX": 84,
+    "footY": 236,
+    "bodyHeight": 223,
+    "walkFrames": 5
   }
 }
