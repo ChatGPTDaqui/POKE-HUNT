@@ -12,7 +12,7 @@ beforeEach(() => {
   camada.id = 'camada-hud'
   document.body.append(camada)
   useUiStore.setState({ viewportWidth: 390, viewportHeight: 844, coarsePointer: true,
-    footerHeight: 160, navHeight: 64 })
+    footerHeight: 160, navHeight: 64, reservasHeight: 0 })
 })
 afterEach(() => {
   cleanup()
@@ -20,6 +20,21 @@ afterEach(() => {
 })
 
 describe('fundação Jornada opt-in', () => {
+  it.each([390, 1366])('reserva espaço real para a equipe fixa sem cobrir o conteúdo em %ipx', width => {
+    useUiStore.setState({ viewportWidth: width, coarsePointer: width === 390,
+      trilhoHeight: 60, reservasHeight: width === 390 ? 224 : 56 })
+    render(<Painel winKey="panel" widthEm={28} zIndex={31} snap="cheia" onClose={vi.fn()} title="Mochila">Conteúdo</Painel>)
+    const panel = document.querySelector<HTMLElement>('[data-window]')!
+    if (width === 390) {
+      expect(panel.style.left).toBe('52px')
+      expect(panel.style.right).toBe('56px')
+      expect(panel.style.maxWidth).toContain('108px')
+      expect(panel.style.top).toContain('60px')
+    } else {
+      expect(panel.style.top).toContain('116px')
+      expect(panel.style.maxHeight).toContain('180px')
+    }
+  })
   it.each([390, 1366])('preserva legado e encaminha aparência em %ipx', (width) => {
     useUiStore.setState({ viewportWidth: width, viewportHeight: 844, coarsePointer: width < 900 })
     const props = { winKey: 'panel' as const, widthEm: 28, zIndex: 31, onClose: vi.fn(), title: 'Mais' }

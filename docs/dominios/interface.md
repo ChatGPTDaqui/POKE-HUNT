@@ -28,6 +28,9 @@ e reservas ficam em z59, acima dos painéis comuns e abaixo das confirmações z
 Os retratos de treinador e Pokémon usam a mesma medida (44px no mobile, 2,5em no PC).
 O cabeçalho ocupa a largura segura inteira: retrato do treinador na extremidade
 direita, nome/carteira à esquerda dele, sem limitar sua âncora em monitores largos.
+Painéis reservam a altura medida das reservas no PC e 52px de faixa lateral no
+mobile, somente quando há reservas. A coluna de atalhos continua usando só a altura
+do cabeçalho. Medidas são transitórias, nunca persistidas nem enviadas ao servidor.
 Skins preservam recortes RGBA nativos; a geometria gerada informa também quantos
 quadros originais há na caminhada. Vistas ausentes são espelhadas, sem gerar arte.
 
