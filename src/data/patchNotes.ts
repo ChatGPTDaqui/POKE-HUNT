@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.13',
+    date: '2026-10-14',
+    title: 'Próximo golpe à vista',
+    highlights: [
+      'O cabeçalho mostra o próximo golpe do Pokémon em campo e o nível em que ele será aprendido, no mobile e no PC.',
+      'Toque na previsão para ver todos os golpes do mesmo nível e os detalhes da forma atual. A indicação acompanha a troca de Pokémon, evolução e subida de nível.',
+    ],
+  },
+  {
     version: '8.12',
     date: '2026-10-13',
     title: 'Treinadores e equipe sempre à vista',
