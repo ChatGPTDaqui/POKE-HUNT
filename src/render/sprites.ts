@@ -38,11 +38,13 @@ import { vfxDoGolpe } from '@/data/moveVfx'
 import { tiraDeEstagio, SELO_LARGURA, SELO_ALTURA } from '@/data/estagioVfx'
 import { textoDoSelo } from '@/data/statLabels'
 import {
-  tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
+  tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
   TIRA_POR_CONDICAO_NO_CORPO, FPS_DA_ARTE_DE_EFEITO, PISO_DE_PROLONGAMENTO,
   COR_DE_STATUS_NO_CORPO, FORCA_DA_TINTA_DE_STATUS, type TiraDeVfx,
 } from '@/data/vfxTiras'
 import { VFX_CURA_DURACAO } from '@/engine/entity'
+import { desenharCura, usaPulsoDeCura } from './cura'
+import { getAbility } from '@/data/abilities'
 import type { Species } from '@/data/pokes'
 import type { WorldEntity, WorldEffect, WorldState } from '@/engine/types'
 import type { MapBackground } from '@/data/generated/types'
@@ -719,20 +721,26 @@ function drawVfxSobreCorpo(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
     )
   }
 
-  // --- evento: faisca de cura ----------------------------------------------
-  // `vfxCuraHp`/`vfxCuraStatus` sao CONTAGENS REGRESSIVAS (engine/types.ts),
-  // entao a fase e o complemento delas. As duas podem tocar juntas — poção
-  // que cura HP e Antidoto usado no mesmo instante — e sobrepor as duas cores
-  // e a leitura certa, nao um conflito.
+  // Cura de status preserva sua arte. Cura de HP usa drawCuraDaEntidade após
+  // as passadas de corpo do Renderer, para não ser apagada por elas.
   const alturaDaFaisca = Math.max(28, alturaDoCorpo * 0.95)
   for (const [restante, tira] of [
     [entity.vfxCuraStatus, TIRA_CURA_STATUS] as const,
-    [entity.vfxCuraHp, TIRA_CURA_HP] as const,
   ]) {
     if (!restante) continue
     const fase = Math.min(1, Math.max(0, 1 - restante / VFX_CURA_DURACAO))
     drawQuadroDeTira(ctx, tira, fase, entity.x, meioDoCorpo, alturaDaFaisca, VFX_CURA_OPACIDADE)
   }
+}
+
+/** Cura de HP vem depois das passadas do corpo, sem ser apagada por elas. */
+export function drawCuraDaEntidade(ctx: CanvasRenderingContext2D, entity: WorldEntity, reduzido = false): void {
+  if (!entity.vfxCuraHp || entity.poke.hp <= 0) return
+  const topo = entity.y - visualTopOffset(entity)
+  const peY = entity.y + groundOffset(entity)
+  const altura = peY - topo
+  desenharCura(ctx, { x: entity.x, peY, altura, raio: Math.max(entity.radius * 1.15, altura * .32) },
+    1 - entity.vfxCuraHp / VFX_CURA_DURACAO, reduzido)
 }
 
 // Pedido explicito: a faisca de cura fica "com 90% de transparencia sobre o
@@ -1694,6 +1702,9 @@ function drawSeloDeEstagio(
 function drawAbilityEffect(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState,
 ): void {
+  // O ganho real já dispara o pulso na entidade. Não empilhar a tira antiga
+  // de cruzes, nem anunciar recuperação no cast de Wish antes da hora.
+  if (usaPulsoDeCura(effect.abilityId, getAbility(effect.abilityId ?? '')?.healPercent)) return
   // A camada por GOLPE (data/moveVfx.ts) vence a de tipo, e isso inclui o VFX
   // de status. Ate a PH-367 nao incluia: `drawStatusEffect` era tentado ANTES e
   // devolvia true pra todo golpe de status cujo TIPO tem GIF, entao a arte

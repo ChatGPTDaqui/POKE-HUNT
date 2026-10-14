@@ -217,6 +217,7 @@ describe('quem recebe marca e porcentagem, no quadro de verdade (PH-189)', () =>
       ordem.push(`corpo:${e.id}:${alpha}`)
     })
     const efeito = vi.spyOn(sprites, 'drawEffect').mockImplementation((_ctx, e) => { ordem.push(e.type) })
+    const cura = vi.spyOn(sprites, 'drawCuraDaEntidade').mockImplementation((_ctx, e) => { ordem.push(`cura:${e.id}`) })
     try {
       const effects = [
         { type: 'damageNumber', id: 'dano', age: .1, delay: 0, duration: 1, x: 100, y: 100, value: 1 },
@@ -227,11 +228,14 @@ describe('quem recebe marca e porcentagem, no quadro de verdade (PH-189)', () =>
       renderizar(w)
       expect(ordem[0]).toBe('damageNumber')
       expect(ordem.slice(1, 4)).toEqual(['corpo:enemy-1:1', 'corpo:enemy-2:1', 'corpo:player-1:1'])
-      expect(ordem.slice(4)).toEqual(temGolpe
-        ? ['abilityEffect', 'corpo:enemy-1:0.8', 'corpo:enemy-2:0.8', 'corpo:player-1:0.8'] : [])
+      expect(ordem.slice(4)).toEqual([
+        ...(temGolpe ? ['abilityEffect', 'corpo:enemy-1:0.8', 'corpo:enemy-2:0.8', 'corpo:player-1:0.8'] : []),
+        'cura:enemy-1', 'cura:enemy-2', 'cura:player-1',
+      ])
     } finally {
       corpo.mockRestore()
       efeito.mockRestore()
+      cura.mockRestore()
     }
   })
 

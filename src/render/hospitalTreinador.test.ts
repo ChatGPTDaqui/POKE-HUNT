@@ -17,8 +17,9 @@ function cena(width: number, height: number) {
   const ctx = {
     clearRect: vi.fn(), fillRect: vi.fn(), save: vi.fn(), restore: vi.fn(),
     translate: vi.fn(), scale: vi.fn(), drawImage: vi.fn(), beginPath: vi.fn(),
-    ellipse: vi.fn(), fill: vi.fn(), stroke: vi.fn(), moveTo: vi.fn(), arcTo: vi.fn(),
-    closePath: vi.fn(), strokeText: vi.fn(), fillText: vi.fn(),
+    ellipse: vi.fn(), arc: vi.fn(), fill: vi.fn(), stroke: vi.fn(), moveTo: vi.fn(), arcTo: vi.fn(),
+    closePath: vi.fn(), strokeText: vi.fn(), fillText: vi.fn(), lineTo: vi.fn(),
+    createRadialGradient: () => ({ addColorStop: vi.fn() }), globalAlpha: 1,
     measureText: () => ({ width: 40 }), imageSmoothingEnabled: false,
     imageSmoothingQuality: 'low',
   }
@@ -33,6 +34,24 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('treinador no Hospital', () => {
+  it('a confirmação de cura é temporária, ligada à máquina e não substitui o treinador', () => {
+    const clock = vi.spyOn(performance, 'now').mockReturnValue(100)
+    try {
+      const { renderer, ctx } = cena(390, 844)
+      renderer.iniciarCuraNoCentro(3)
+      clock.mockReturnValue(700)
+      renderer.renderHospital(null)
+      expect(ctx.arc).toHaveBeenCalledTimes(12)
+      expect(ctx.ellipse.mock.calls.some(c => c[0] === CENA_HOSPITAL.maquinaCura.x * CENA_HOSPITAL.largura)).toBe(true)
+      expect(renderer.treinador.pe).toEqual({ x: CENA_HOSPITAL.tapete.x * CENA_HOSPITAL.largura, y: CENA_HOSPITAL.tapete.y * CENA_HOSPITAL.altura })
+      ctx.ellipse.mockClear()
+      ctx.arc.mockClear()
+      clock.mockReturnValue(2100)
+      renderer.renderHospital(null)
+      expect(ctx.arc).not.toHaveBeenCalled()
+      expect(ctx.ellipse).toHaveBeenCalledOnce() // somente sombra do treinador
+    } finally { clock.mockRestore() }
+  })
   it.each([[390, 844], [844, 390], [1366, 768]])('substitui só o desenho do Pokémon e preserva cura em %ix%i', (width, height) => {
     const { renderer, ctx } = cena(width, height)
     const player = buildHospitalWorld(createPokeInstance(createRng(1), 'squirtle', 10), { x: 10, y: 20 }).player!

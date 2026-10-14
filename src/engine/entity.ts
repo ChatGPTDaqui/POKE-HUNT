@@ -233,9 +233,7 @@ export function takeDamage(entity: BaseEntity, amount: number, category?: Abilit
   }
 }
 
-// Quanto tempo a faisca de cura fica na tela. Uma volta inteira dos 16
-// quadros da arte; nao acompanha nenhuma duracao de combate porque nao e
-// consequencia de um golpe — Ingrain e poção usam o mesmo tempo.
+// Duração visual, independente do combate: Ingrain e poção usam o mesmo pulso.
 export const VFX_CURA_DURACAO = 0.9
 
 /**
