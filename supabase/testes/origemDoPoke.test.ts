@@ -4,9 +4,8 @@
 // Duas coisas sustentam isso e as duas sao faceis de perder sem erro nenhum:
 //  1. o trigger `origem_do_poke` (origem imutavel; troca de dono vira
 //     `transferido`);
-//  2. a configuracao `jogo.origem_poke` nas RPCs que criam POKE. Um
-//     `create or replace function` posterior APAGA essa configuracao em
-//     silencio — o inicial passaria a nascer `desconhecida`.
+//  2. o INSERT das RPCs que criam POKE declarando a origem. Uma redefinicao
+//     futura que copie o corpo antigo faria o inicial nascer `desconhecida`.
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -16,6 +15,9 @@ const ARQUIVOS = readdirSync(DIR).filter((f) => f.endsWith('.sql')).sort()
 const SQL = ARQUIVOS.map((f) => [f, readFileSync(join(DIR, f), 'utf8').replace(/--[^\n]*/g, '')] as const)
 
 const ORIGEM = SQL.find(([f]) => f.endsWith('_origem_do_poke.sql'))?.[1] ?? ''
+
+const INSERT_COM_ORIGEM = /insert into [a-z_.]*pokemon_instances \([^)]*\borigem\b/i
+const FIM_DA_FUNCAO = /\$(function)?\$;/
 
 describe('origem do POKE', () => {
   it('a migration existe e liga o trigger nos dois schemas', () => {
@@ -29,34 +31,27 @@ describe('origem do POKE', () => {
     expect(ORIGEM).toMatch(/new\.origem := old\.origem/)
   })
 
-  // Para cada RPC que cria POKE: depois da ULTIMA vez que ela foi (re)criada,
-  // alguem precisa ter declarado a origem — no proprio create (`set
-  // jogo.origem_poke`) ou num `alter function ... set jogo.origem_poke`.
+  // Para cada RPC que cria POKE: a ULTIMA definicao dela precisa declarar a
+  // origem no INSERT.
   for (const [schema, funcao, origem] of [
     ['public', 'escolher_starter', 'inicial'],
     ['dev', 'escolher_starter', 'inicial'],
     ['public', 'coletar_anexo_correio', 'recompensa'],
     ['dev', 'coletar_anexo_correio', 'recompensa'],
   ] as const) {
-    it(`${schema}.${funcao} declara origem ${origem} depois da ultima redefinicao`, () => {
+    it(`${schema}.${funcao} declara origem ${origem} na ultima definicao`, () => {
       const criar = new RegExp(`create\\s+(or\\s+replace\\s+)?function\\s+${schema}\\.${funcao}\\s*\\(`, 'i')
-      const declarar = new RegExp(
-        `(alter\\s+function\\s+${schema}\\.${funcao}\\s*\\([^)]*\\)\\s+set\\s+jogo\\.origem_poke\\s*=\\s*'${origem}')`,
-        'i',
-      )
-      let ultimaCriacao = -1
-      let ultimaDeclaracao = -1
-      SQL.forEach(([, sql], i) => {
-        if (criar.test(sql)) ultimaCriacao = i
-        if (declarar.test(sql) || (criar.test(sql) && new RegExp(`set\\s+jogo\\.origem_poke\\s*=\\s*'${origem}'`, 'i').test(sql))) {
-          ultimaDeclaracao = i
-        }
-      })
-      expect(ultimaCriacao, `nao achei nenhuma definicao de ${schema}.${funcao}`).toBeGreaterThanOrEqual(0)
-      expect(
-        ultimaDeclaracao,
-        `${schema}.${funcao} foi redefinida (${ARQUIVOS[ultimaCriacao]}) sem repetir set jogo.origem_poke = '${origem}'`,
-      ).toBeGreaterThanOrEqual(ultimaCriacao)
+      let corpo = ''
+      for (const [, sql] of SQL) {
+        const m = criar.exec(sql)
+        if (!m) continue
+        const resto = sql.slice(m.index)
+        const fim = resto.search(FIM_DA_FUNCAO)
+        corpo = fim === -1 ? resto : resto.slice(0, fim)
+      }
+      expect(corpo, `nao achei definicao de ${schema}.${funcao}`).not.toBe('')
+      expect(corpo, 'o INSERT nao lista a coluna origem').toMatch(INSERT_COM_ORIGEM)
+      expect(corpo, `o INSERT nao declara '${origem}'`).toContain(`'${origem}'`)
     })
   }
 })
