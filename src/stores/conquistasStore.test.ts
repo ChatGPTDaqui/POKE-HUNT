@@ -1,7 +1,9 @@
 // O store so repassa o que o servidor fechou: guarda e celebra, UMA vez.
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@/data/remote/conquistasRpc', () => ({ lerMinhasConquistas: vi.fn() }))
+vi.mock('@/data/remote/conquistasRpc', () => ({
+  lerMinhasConquistas: vi.fn(), conquistasPublicas: vi.fn(), definirTitulo: vi.fn(), definirVitrine: vi.fn(),
+}))
 
 const { useConquistasStore } = await import('./conquistasStore')
 const { celebracaoStore } = await import('./celebracaoStoreVanilla')
@@ -38,5 +40,19 @@ describe('conquistasStore.receberNovas', () => {
   it('resposta sem o campo (servidor antigo) nao faz nada', () => {
     useConquistasStore.getState().receberNovas(undefined)
     expect(celebracaoStore.getState().fila).toHaveLength(0)
+  })
+})
+
+describe('conquistasStore.alternarVitrine', () => {
+  it('liga ate 3 e nao passa disso; desligar libera vaga', async () => {
+    const s = useConquistasStore.getState()
+    await s.alternarVitrine('a')
+    await s.alternarVitrine('b')
+    await s.alternarVitrine('c')
+    await s.alternarVitrine('d')
+    expect(useConquistasStore.getState().vitrine).toEqual(['a', 'b', 'c'])
+    await s.alternarVitrine('b')
+    await s.alternarVitrine('d')
+    expect(useConquistasStore.getState().vitrine).toEqual(['a', 'c', 'd'])
   })
 })

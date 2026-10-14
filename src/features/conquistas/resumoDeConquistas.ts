@@ -47,3 +47,17 @@ export function textoDoProgresso(c: Pick<ConquistaDaTela, 'alvo' | 'unidade'>, v
   if (c.unidade === 'tempo') return `${tempo(atual)} / ${tempo(c.alvo)}`
   return `${fmt.format(atual)} / ${fmt.format(c.alvo)}`
 }
+
+/**
+ * Moldura do retrato pelo percentual da platina (spec: Bronze 25%, Prata 50%,
+ * Ouro 75%, Platina ao platinar). `null` abaixo de 25%: sem moldura.
+ */
+export function nivelDaMoldura(feitas: number, total: number, platinado: boolean): 'bronze' | 'prata' | 'ouro' | 'platina' | null {
+  if (platinado) return 'platina'
+  if (!total) return null
+  const pct = feitas / total
+  if (pct >= 0.75) return 'ouro'
+  if (pct >= 0.5) return 'prata'
+  if (pct >= 0.25) return 'bronze'
+  return null
+}

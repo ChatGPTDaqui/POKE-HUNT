@@ -4,13 +4,13 @@
 // do servidor ao abrir a tela (`minhas_conquistas`, que avalia antes de
 // responder). Nada aqui decide se uma conquista fechou.
 import { useEffect, useMemo, useState } from 'react'
-import { Medal, LockSimple, Trophy } from '@phosphor-icons/react'
+import { Medal, LockSimple, Star, Trophy } from '@phosphor-icons/react'
 import { CATALOGO_DE_CONQUISTAS } from '@/data/generated/conquistas.generated'
 import { NOME_DA_CATEGORIA, type CategoriaDeConquista, type ConquistaDaTela } from '@/data/conquistas'
-import { useConquistasStore } from '@/stores/conquistasStore'
-import { Meter, SegmentedTabs } from '@/components/game/controls'
+import { TAMANHO_DA_VITRINE, useConquistasStore } from '@/stores/conquistasStore'
+import { GameSelect, Meter, SegmentedTabs } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
-import { COR_DO_NIVEL_DE_CONQUISTA, NOME_DO_NIVEL_DE_CONQUISTA } from './nivelDeConquista'
+import { COR_DO_NIVEL_DE_CONQUISTA, NOME_DO_NIVEL_DE_CONQUISTA, ordenarPorNivel } from './nivelDeConquista'
 import { resumoDaPlatina, textoDoProgresso } from './resumoDeConquistas'
 
 type Filtro = 'todas' | 'faltando' | 'desbloqueadas'
@@ -46,6 +46,8 @@ export function ConquistasMenu() {
   return (
     <div className="flex flex-col gap-[.6em]">
       <Cabecalho resumo={resumo} platina={platina} platinado={platina ? Boolean(desbloqueadas[platina.id]) : false} />
+
+      {carregado && <TituloEVitrine desbloqueadas={desbloqueadas} />}
 
       <p className="text-[.74em] text-menu-muted">
         Só conta o que você conquistou: POKE comprado no Mercado ou recebido em troca não vale. Conquistas de
@@ -132,6 +134,37 @@ function Cabecalho({ resumo, platina, platinado }: {
   )
 }
 
+/** Niveis que dao titulo (o SQL de `definir_titulo` aceita os mesmos). */
+const NIVEIS_DE_TITULO = new Set(['ouro', 'impossivel', 'platina'])
+
+function TituloEVitrine({ desbloqueadas }: { desbloqueadas: Record<string, string> }) {
+  const titulo = useConquistasStore((s) => s.titulo)
+  const vitrine = useConquistasStore((s) => s.vitrine)
+  const escolherTitulo = useConquistasStore((s) => s.escolherTitulo)
+  const opcoes = ordenarPorNivel(
+    CATALOGO_DE_CONQUISTAS.filter((c) => NIVEIS_DE_TITULO.has(c.nivel) && desbloqueadas[c.id]),
+  )
+  return (
+    <div className="flex flex-col gap-[.35em] rounded-[.6em] border border-menu-line p-[.55em] text-[.8em]">
+      <label className="flex flex-wrap items-center gap-[.5em]">
+        <span className="text-menu-muted">Título no perfil</span>
+        <GameSelect
+          value={titulo ?? ''}
+          onChange={(e) => void escolherTitulo(e.target.value || null)}
+          disabled={opcoes.length === 0}
+          className="min-w-0 flex-1"
+        >
+          <option value="">{opcoes.length ? 'Sem título' : 'Desbloqueie uma Ouro para ter título'}</option>
+          {opcoes.map((c) => <option key={c.id} value={c.id}>{c.nome} ({NOME_DO_NIVEL_DE_CONQUISTA[c.nivel]})</option>)}
+        </GameSelect>
+      </label>
+      <span className="text-menu-muted">
+        Vitrine: {vitrine.length}/{TAMANHO_DA_VITRINE} — toque na estrela de uma conquista desbloqueada para exibi-la no seu perfil.
+      </span>
+    </div>
+  )
+}
+
 function ChipDeCategoria({ ativo, onClick, children }: { ativo: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
@@ -190,8 +223,31 @@ function CartaoDeConquista({ c, em, valor }: { c: ConquistaDaTela; em: string | 
         )}
       </div>
       {tem && (
-        <span className="shrink-0 text-[.66em] tabular-nums text-menu-muted">{fmtData.format(new Date(em))}</span>
+        <div className="flex shrink-0 flex-col items-end gap-[.2em]">
+          <span className="text-[.66em] tabular-nums text-menu-muted">{fmtData.format(new Date(em))}</span>
+          <BotaoDaVitrine id={c.id} nome={c.nome} />
+        </div>
       )}
     </li>
+  )
+}
+
+function BotaoDaVitrine({ id, nome }: { id: string; nome: string }) {
+  const vitrine = useConquistasStore((s) => s.vitrine)
+  const alternar = useConquistasStore((s) => s.alternarVitrine)
+  const exibida = vitrine.includes(id)
+  const cheia = !exibida && vitrine.length >= TAMANHO_DA_VITRINE
+  return (
+    <button
+      type="button"
+      aria-pressed={exibida}
+      aria-label={exibida ? `Tirar ${nome} da vitrine` : `Exibir ${nome} na vitrine`}
+      title={cheia ? `A vitrine já tem ${TAMANHO_DA_VITRINE}. Tire uma para trocar.` : undefined}
+      disabled={cheia}
+      onClick={() => void alternar(id)}
+      className="rounded-[.3em] p-[.15em] text-[1em] disabled:opacity-35"
+    >
+      <Star weight={exibida ? 'fill' : 'regular'} className={exibida ? 'text-gold' : 'text-menu-muted'} />
+    </button>
   )
 }
