@@ -6,12 +6,15 @@
 // um lendario numa regra contraria a decisao do dono (lendarios vao virar
 // eventos — spec 2026-10-14-conquistas-design).
 import { describe, expect, it } from 'vitest'
-import { CONQUISTAS, PONTOS_POR_NIVEL } from './conquistas'
-import { CATALOGO_DE_CONQUISTAS } from './generated/conquistas.generated'
-import { resolverCatalogo, sqlDoCatalogo, tsDoCatalogo, catalogoDaTela } from '../../scripts/conquistas/resolver'
-import { SPECIES } from './pokes'
-import { LEGENDARY_SPECIES_IDS } from './legendaries'
-import fonteGerada from './generated/conquistas.generated.ts?raw'
+// Mora em scripts/ (e nao em src/) porque importa o resolvedor, que le
+// scripts/usum/catalog.json: em src/ ele entraria no programa do `build:engine`
+// e quebraria o `rootDir` das declaracoes.
+import { CONQUISTAS, PONTOS_POR_NIVEL } from '../../src/data/conquistas'
+import { CATALOGO_DE_CONQUISTAS } from '../../src/data/generated/conquistas.generated'
+import { resolverCatalogo, sqlDoCatalogo, tsDoCatalogo, catalogoDaTela } from './resolver'
+import { SPECIES } from '../../src/data/pokes'
+import { LEGENDARY_SPECIES_IDS } from '../../src/data/legendaries'
+import fonteGerada from '../../src/data/generated/conquistas.generated.ts?raw'
 
 const MIGRATIONS = import.meta.glob('/supabase/migrations/*.sql', {
   query: '?raw', import: 'default', eager: true,

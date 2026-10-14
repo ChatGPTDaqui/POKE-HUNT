@@ -5,7 +5,7 @@
 // Funcao pura, usada por DOIS lados que precisam concordar:
 //   * scripts/conquistas/gerar.ts escreve o resultado no generated.ts e na
 //     migration;
-//   * src/data/conquistasCatalogo.test.ts roda de novo e compara com os dois
+//   * scripts/conquistas/catalogo.test.ts roda de novo e compara com os dois
 //     arquivos — catalogo editado sem regerar reprova.
 //
 // Le scripts/usum/catalog.json SO pelo numero de Pokedex (pra saber a regiao).
@@ -177,7 +177,7 @@ export function tsDoCatalogo(): string {
   const linhas = catalogoDaTela().map((c) => `  ${JSON.stringify(c)},`)
   return [
     '// AUTO-GENERATED por `npm run conquistas:gerar` a partir de src/data/conquistas.ts.',
-    '// Nao edite a mao: conquistasCatalogo.test.ts reprova se divergir do autoral.',
+    '// Nao edite a mao: scripts/conquistas/catalogo.test.ts reprova se divergir do autoral.',
     "import type { ConquistaDaTela } from '../conquistas'",
     '',
     'export const CATALOGO_DE_CONQUISTAS: ConquistaDaTela[] = [',

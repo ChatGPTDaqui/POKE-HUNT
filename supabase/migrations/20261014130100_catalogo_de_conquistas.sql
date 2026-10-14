@@ -1,6 +1,6 @@
 -- Catalogo de conquistas — GERADO por `npm run conquistas:gerar` a partir de
 -- src/data/conquistas.ts (resolvido por scripts/conquistas/resolver.ts).
--- Nao edite: conquistasCatalogo.test.ts compara esta migration com o autoral.
+-- Nao edite: scripts/conquistas/catalogo.test.ts compara esta migration com o autoral.
 -- Remover do catalogo uma conquista que alguem ja tem FALHA (FK sem cascade):
 -- conquista e permanente, e apagar desbloqueio precisa ser decisao explicita.
 begin;

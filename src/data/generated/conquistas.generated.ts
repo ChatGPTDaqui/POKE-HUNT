@@ -1,5 +1,5 @@
 // AUTO-GENERATED por `npm run conquistas:gerar` a partir de src/data/conquistas.ts.
-// Nao edite a mao: conquistasCatalogo.test.ts reprova se divergir do autoral.
+// Nao edite a mao: scripts/conquistas/catalogo.test.ts reprova se divergir do autoral.
 import type { ConquistaDaTela } from '../conquistas'
 
 export const CATALOGO_DE_CONQUISTAS: ConquistaDaTela[] = [

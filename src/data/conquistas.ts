@@ -9,7 +9,7 @@
 //   * src/data/generated/conquistas.generated.ts — o que a tela usa;
 //   * uma migration com as linhas de `conquista_catalogo` — o que o servidor
 //     avalia.
-// `conquistasCatalogo.test.ts` reprova se os dois sairem do passo com isto.
+// `scripts/conquistas/catalogo.test.ts` reprova se os dois sairem do passo com isto.
 //
 // REGRAS DE PRODUTO (decisoes do dono, 14/10):
 //  * recompensa so cosmetica (titulo nas Ouro/Impossivel/Platina);
