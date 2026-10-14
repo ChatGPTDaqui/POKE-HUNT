@@ -17,14 +17,20 @@ export function proximoAprendizado(poke: PokeInstance, species: Species) {
 }
 
 export function ProximoGolpe({ poke, species, children }: {
-  poke: PokeInstance; species: Species; children: ReactNode
+  poke: PokeInstance; species: Species; children?: ReactNode
 }) {
   const proximo = proximoAprendizado(poke, species)
+  const resumo = children === undefined
+  const descricao = proximo
+    ? `Próximo golpe de ${species.name}: ${proximo.golpes.map(g => g.name).join(', ')} no nível ${proximo.nivel}`
+    : `${species.name}: sem novos golpes por nível nesta forma`
   return (
     <Explicacao
       tabIndex={0}
-      rotulo={`Próximo golpe de ${species.name}`}
-      className="inline-flex shrink-0 cursor-help touch-manipulation underline decoration-dotted underline-offset-[.2em] focus-visible:outline focus-visible:outline-2"
+      rotulo={resumo ? descricao : `Próximo golpe de ${species.name}`}
+      className={resumo
+        ? 'journey-next-move flex w-full min-w-0 items-center gap-[.3em] cursor-help touch-manipulation text-[.7em] leading-tight text-menu-muted focus-visible:outline focus-visible:outline-2'
+        : 'inline-flex shrink-0 cursor-help touch-manipulation underline decoration-dotted underline-offset-[.2em] focus-visible:outline focus-visible:outline-2'}
       conteudo={(
         <div className="flex flex-col gap-[.3em] text-left">
           <b>Próximo aprendizado</b>
@@ -38,7 +44,14 @@ export function ProximoGolpe({ poke, species, children }: {
         </div>
       )}
     >
-      {children}
+      {resumo ? proximo ? (
+        <>
+          <span aria-hidden="true" className="shrink-0">↗</span>
+          <span className="min-w-0 truncate font-medium text-menu-ink">{proximo.golpes[0].name}</span>
+          {proximo.golpes.length > 1 && <span className="shrink-0">+{proximo.golpes.length - 1}</span>}
+          <span className="shrink-0 tabular-nums">Lv {proximo.nivel}</span>
+        </>
+      ) : <span className="truncate">Sem novos golpes por nível</span> : children}
     </Explicacao>
   )
 }
