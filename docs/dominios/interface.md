@@ -36,6 +36,9 @@ ativo. A previsão usa nivelDeAprendizado da forma atual; empates mostram +N e t
 os nomes na explicação por toque/foco. Sem futuro, informa o fim do aprendizado.
 Skins preservam recortes RGBA nativos; a geometria gerada informa também quantos
 quadros originais há na caminhada. Vistas ausentes são espelhadas, sem gerar arte.
+No Hospital, o treinador com a skin selecionada ocupa o tapete, virado para a
+câmera, no lugar do Pokémon. Nome legível independe da escala da cena; cura e
+Pokémon ativo do cabeçalho continuam usando a entidade original, sem mutação.
 
 ## Espaço útil
 
