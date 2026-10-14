@@ -21,13 +21,19 @@ import { SegmentedTabs, GameSelect, SectionLabel, GameButton } from '@/component
 import { cn } from '@/lib/utils'
 import { entrarNaArena } from '@/features/arena/arena'
 import { randomSeed } from '@/core/rng'
+import { rankingConquistas, type EntradaRankingConquistas } from '@/data/remote/conquistasRpc'
+import { CATALOGO_DE_CONQUISTAS } from '@/data/generated/conquistas.generated'
+import { COR_DO_NIVEL_DE_CONQUISTA } from '@/features/conquistas/nivelDeConquista'
+import { nivelDaMoldura, resumoDaPlatina } from '@/features/conquistas/resumoDeConquistas'
+import { TituloDoTreinador } from '@/features/conquistas/ConquistasDoTreinador'
 
-type Aba = 'treinadores' | 'pokemon' | 'hall'
+type Aba = 'treinadores' | 'pokemon' | 'hall' | 'conquistas'
 
 const ABAS: { value: Aba; label: string }[] = [
   { value: 'treinadores', label: 'Treinadores' },
   { value: 'pokemon', label: 'Pokémon' },
   { value: 'hall', label: 'Hall da Fama' },
+  { value: 'conquistas', label: 'Conquistas' },
 ]
 
 const CRITERIOS: { value: CriterioPoke; label: string }[] = [
@@ -65,6 +71,7 @@ export function RankingMenu() {
         </>
       )}
       {aba === 'hall' && <AbaHall />}
+      {aba === 'conquistas' && <AbaConquistas />}
     </div>
   )
 }
@@ -258,5 +265,45 @@ function AbaHall() {
         </div>
       </Estado>
     </div>
+  )
+}
+
+// Total da platina (bronze/prata/ouro): o mesmo para todo mundo, sai do catalogo.
+const TOTAL_DA_PLATINA = resumoDaPlatina(CATALOGO_DE_CONQUISTAS, {}).total
+
+function AbaConquistas() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['ranking', 'conquistas'],
+    queryFn: () => rankingConquistas(),
+    staleTime: STALE_MS,
+  })
+  const entradas: EntradaRankingConquistas[] = data ?? []
+
+  return (
+    <Estado carregando={isLoading} erro={error} vazio={entradas.length === 0}>
+      <div className="flex flex-col gap-[.3em]">
+        {entradas.map((e, i) => {
+          const moldura = nivelDaMoldura(e.feitas, TOTAL_DA_PLATINA, e.platinado)
+          const cor = moldura ? COR_DO_NIVEL_DE_CONQUISTA[moldura] : undefined
+          return (
+            <Linha key={e.userId}>
+              <Posicao n={i + 1} />
+              <span
+                className={cn('shrink-0 rounded-full', cor ? 'border-2' : 'border border-transparent')}
+                style={cor ? { borderColor: cor } : undefined}
+              >
+                <AvatarDoTreinador userId={e.userId} tamanho={1.6} />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                <span className="journey-ranking-name truncate">{e.nome}</span>
+                <TituloDoTreinador id={e.titulo} className="truncate text-[.68em]" />
+              </span>
+              <span className="shrink-0 text-[.75em] text-menu-muted tabular-nums">{e.feitas}/{TOTAL_DA_PLATINA}</span>
+              <span className="shrink-0 font-mono text-[.85em] font-bold tabular-nums">{e.pontos.toLocaleString('pt-BR')} pts</span>
+            </Linha>
+          )
+        })}
+      </div>
+    </Estado>
   )
 }

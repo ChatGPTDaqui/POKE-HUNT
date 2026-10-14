@@ -1416,6 +1416,7 @@ export type Database = {
           gold: number
           perf_stats: Json
           skin_treinador: string | null
+          titulo: string | null
           trainer_exp: number
           trainer_level: number
           trainer_name: string
@@ -1423,6 +1424,7 @@ export type Database = {
           unlocked_maps: string[]
           updated_at: string
           user_id: string
+          vitrine: string[]
         }
         Insert: {
           active_team_index?: number
@@ -1440,6 +1442,7 @@ export type Database = {
           gold?: number
           perf_stats?: Json
           skin_treinador?: string | null
+          titulo?: string | null
           trainer_exp?: number
           trainer_level?: number
           trainer_name?: string
@@ -1447,6 +1450,7 @@ export type Database = {
           unlocked_maps?: string[]
           updated_at?: string
           user_id: string
+          vitrine?: string[]
         }
         Update: {
           active_team_index?: number
@@ -1464,6 +1468,7 @@ export type Database = {
           gold?: number
           perf_stats?: Json
           skin_treinador?: string | null
+          titulo?: string | null
           trainer_exp?: number
           trainer_level?: number
           trainer_name?: string
@@ -1471,6 +1476,7 @@ export type Database = {
           unlocked_maps?: string[]
           updated_at?: string
           user_id?: string
+          vitrine?: string[]
         }
         Relationships: []
       }
@@ -2696,28 +2702,34 @@ export type Database = {
           avatar: string | null
           eh_bot: boolean | null
           skin_treinador: string | null
+          titulo: string | null
           trainer_exp: number | null
           trainer_level: number | null
           trainer_name: string | null
           user_id: string | null
+          vitrine: string[] | null
         }
         Insert: {
           avatar?: string | null
           eh_bot?: never
           skin_treinador?: string | null
+          titulo?: string | null
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
           user_id?: string | null
+          vitrine?: string[] | null
         }
         Update: {
           avatar?: string | null
           eh_bot?: never
           skin_treinador?: string | null
+          titulo?: string | null
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
           user_id?: string | null
+          vitrine?: string[] | null
         }
         Relationships: []
       }
@@ -3198,6 +3210,8 @@ export type Database = {
       }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       definir_skin_treinador: { Args: { p_skin: string }; Returns: Json }
+      definir_titulo: { Args: { p_conquista: string }; Returns: Json }
+      definir_vitrine: { Args: { p_conquistas: string[] }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       desconfirmar_troca: {
@@ -3476,6 +3490,18 @@ export type Database = {
       pvp_validar_poke: {
         Args: { p_eu: string; p_poke: Json; p_pokemon_id: string }
         Returns: undefined
+      }
+      ranking_conquistas: {
+        Args: { p_limite?: number }
+        Returns: {
+          feitas: number
+          lendas: number
+          platinado: boolean
+          pontos: number
+          titulo: string
+          trainer_name: string
+          user_id: string
+        }[]
       }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
@@ -5157,6 +5183,7 @@ export type Database = {
           gold: number
           perf_stats: Json
           skin_treinador: string | null
+          titulo: string | null
           trainer_exp: number
           trainer_level: number
           trainer_name: string
@@ -5164,6 +5191,7 @@ export type Database = {
           unlocked_maps: string[]
           updated_at: string
           user_id: string
+          vitrine: string[]
         }
         Insert: {
           active_team_index?: number
@@ -5181,6 +5209,7 @@ export type Database = {
           gold?: number
           perf_stats?: Json
           skin_treinador?: string | null
+          titulo?: string | null
           trainer_exp?: number
           trainer_level?: number
           trainer_name?: string
@@ -5188,6 +5217,7 @@ export type Database = {
           unlocked_maps?: string[]
           updated_at?: string
           user_id: string
+          vitrine?: string[]
         }
         Update: {
           active_team_index?: number
@@ -5205,6 +5235,7 @@ export type Database = {
           gold?: number
           perf_stats?: Json
           skin_treinador?: string | null
+          titulo?: string | null
           trainer_exp?: number
           trainer_level?: number
           trainer_name?: string
@@ -5212,6 +5243,7 @@ export type Database = {
           unlocked_maps?: string[]
           updated_at?: string
           user_id?: string
+          vitrine?: string[]
         }
         Relationships: []
       }
@@ -6437,28 +6469,34 @@ export type Database = {
           avatar: string | null
           eh_bot: boolean | null
           skin_treinador: string | null
+          titulo: string | null
           trainer_exp: number | null
           trainer_level: number | null
           trainer_name: string | null
           user_id: string | null
+          vitrine: string[] | null
         }
         Insert: {
           avatar?: string | null
           eh_bot?: never
           skin_treinador?: string | null
+          titulo?: string | null
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
           user_id?: string | null
+          vitrine?: string[] | null
         }
         Update: {
           avatar?: string | null
           eh_bot?: never
           skin_treinador?: string | null
+          titulo?: string | null
           trainer_exp?: number | null
           trainer_level?: number | null
           trainer_name?: string | null
           user_id?: string | null
+          vitrine?: string[] | null
         }
         Relationships: []
       }
@@ -6939,6 +6977,8 @@ export type Database = {
       }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       definir_skin_treinador: { Args: { p_skin: string }; Returns: Json }
+      definir_titulo: { Args: { p_conquista: string }; Returns: Json }
+      definir_vitrine: { Args: { p_conquistas: string[] }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       desconfirmar_troca: {
@@ -7217,6 +7257,18 @@ export type Database = {
       pvp_validar_poke: {
         Args: { p_eu: string; p_poke: Json; p_pokemon_id: string }
         Returns: undefined
+      }
+      ranking_conquistas: {
+        Args: { p_limite?: number }
+        Returns: {
+          feitas: number
+          lendas: number
+          platinado: boolean
+          pontos: number
+          titulo: string
+          trainer_name: string
+          user_id: string
+        }[]
       }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }

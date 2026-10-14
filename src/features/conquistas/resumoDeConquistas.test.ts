@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CATALOGO_DE_CONQUISTAS } from '@/data/generated/conquistas.generated'
 import type { ConquistaDaTela } from '@/data/conquistas'
-import { resumoDaPlatina, textoDoProgresso } from './resumoDeConquistas'
+import { nivelDaMoldura, resumoDaPlatina, textoDoProgresso } from './resumoDeConquistas'
 
 const c = (id: string, nivel: ConquistaDaTela['nivel'], secreta = false, pontos = 10): ConquistaDaTela => ({
   id, nome: id, descricao: '', categoria: 'cacada', nivel, pontos, secreta, ordem: 1, ref: null, alvo: 1, unidade: null,
@@ -39,5 +39,16 @@ describe('textoDoProgresso', () => {
   it('conquista de tempo em minutos e horas', () => {
     expect(textoDoProgresso({ alvo: 3600, unidade: 'tempo' }, 1800)).toBe('30 min / 1 h')
     expect(textoDoProgresso({ alvo: 360000, unidade: 'tempo' }, 9000)).toBe('2,5 h / 100 h')
+  })
+})
+
+describe('nivelDaMoldura', () => {
+  it('segue os degraus de 25/50/75% e a platina', () => {
+    expect(nivelDaMoldura(10, 100, false)).toBeNull()
+    expect(nivelDaMoldura(25, 100, false)).toBe('bronze')
+    expect(nivelDaMoldura(50, 100, false)).toBe('prata')
+    expect(nivelDaMoldura(75, 100, false)).toBe('ouro')
+    expect(nivelDaMoldura(75, 100, true)).toBe('platina')
+    expect(nivelDaMoldura(0, 0, false)).toBeNull()
   })
 })
