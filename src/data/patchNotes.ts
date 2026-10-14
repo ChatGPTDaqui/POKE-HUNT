@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.14',
+    date: '2026-10-14',
+    title: 'Conquistas: hora de platinar',
+    highlights: [
+      'Nova tela de Conquistas no menu Mais: 149 conquistas inspiradas nas temporadas de Kanto e das Ilhas Laranja e no universo Pokémon, de Bronze a Ouro, mais as secretas.',
+      'Desbloqueie todas as Bronze, Prata e Ouro, inclusive as secretas, para ganhar a Platina "Mestre Pokémon". As conquistas Lenda Viva são quase impossíveis e ficam numa vitrine à parte.',
+      'Só vale o que você conquistou: POKE comprado no Mercado ou recebido em troca não conta. Conquistas de POKE valem para as capturas a partir de hoje.',
+      'Quem já jogava recebe na hora o que já tinha feito: abates, estágios limpos, Campeão Lance, nível de treinador, Pokédex e PvP.',
+      'As recompensas são para exibir: escolha um título, monte uma vitrine com 3 conquistas no seu perfil e ganhe moldura no retrato conforme avança na platina. O Ranking ganhou a aba Conquistas.',
+    ],
+  },
+  {
     version: '8.13',
     date: '2026-10-14',
     title: 'Próximo golpe à vista',
