@@ -50,7 +50,8 @@
     "usum:baixar": "node scripts/fetch-usum-catalog.js",
     "usum:gerar": "node scripts/generate-catalog-usum.js",
     "usum:conferir": "node scripts/verify-usum-bulbapedia.js",
-    "usum:learnsets": "node scripts/verify-usum-learnsets.js"
+    "usum:learnsets": "node scripts/verify-usum-learnsets.js",
+    "conquistas:gerar": "vite build --config vite.conquistas.config.ts && node scripts/.gerado/conquistas/gerar.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
