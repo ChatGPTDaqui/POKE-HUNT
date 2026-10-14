@@ -447,25 +447,26 @@ export class TreinadorEmCampo {
   }
 
   /** Desenha o treinador (sombra + sprite). Coordenada de mundo, camera ja aplicada. */
-  desenhar(ctx: CanvasRenderingContext2D): void {
+  desenhar(ctx: CanvasRenderingContext2D, altura = ALTURA_DO_BONECO, escalaDoNome = 1): void {
     const { pos, anim, quadro, facing } = this.e
     if (!pos) return
     ctx.save()
     ctx.globalAlpha = 0.3
     ctx.fillStyle = '#000000'
     ctx.beginPath()
-    ctx.ellipse(pos.x, pos.y, 7, 2.5, 0, 0, Math.PI * 2)
+    const proporcao = altura / ALTURA_DO_BONECO
+    ctx.ellipse(pos.x, pos.y, 7 * proporcao, 2.5 * proporcao, 0, 0, Math.PI * 2)
     ctx.fill()
     ctx.restore()
     // Nome antes da sprite: com a imagem ainda carregando, o nome ja aparece.
-    this.desenharNome(ctx, pos)
+    this.desenharNome(ctx, pos, altura, escalaDoNome)
     const img = imagem(folhaDaSkin(this.skin, anim))
     if (!img || !img.complete || img.naturalWidth === 0) return
     const linha = directionRowFromFacing(facing)
     const { frameWidth, frameHeight, footX, footY, bodyHeight, walkFrames } = quadroDaSkin(this.skin)
     // Resolução da fonte independente do tamanho de mundo: não destruir a
     // arte na importação. Filtragem de redução só aqui, na apresentação.
-    const scale = ALTURA_DO_BONECO / bodyHeight
+    const scale = altura / bodyHeight
     const suave = ctx.imageSmoothingEnabled, qualidade = ctx.imageSmoothingQuality
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
@@ -478,19 +479,24 @@ export class TreinadorEmCampo {
   }
 
   /** Nome em cima do bone, no mesmo estilo da placa dos POKE (contorno preto). */
-  private desenharNome(ctx: CanvasRenderingContext2D, pos: Ponto): void {
+  private desenharNome(ctx: CanvasRenderingContext2D, pos: Ponto, altura: number, escala: number): void {
     const nome = this.nome?.trim()
     if (!nome) return
-    const y = Math.round(pos.y - ALTURA_DO_BONECO - 4)
     ctx.save()
+    if (escala !== 1) {
+      ctx.translate(pos.x, pos.y)
+      ctx.scale(escala, escala)
+    }
+    const x = escala === 1 ? pos.x : 0
+    const y = Math.round((escala === 1 ? pos.y : 0) - altura / escala - 4)
     ctx.font = FONTE.nomeDaEspecie
     ctx.textAlign = 'center'
     ctx.lineWidth = 3
     ctx.lineJoin = 'round'
     ctx.strokeStyle = '#000000'
-    ctx.strokeText(nome, pos.x, y)
+    ctx.strokeText(nome, x, y)
     ctx.fillStyle = COR_DO_NOME
-    ctx.fillText(nome, pos.x, y)
+    ctx.fillText(nome, x, y)
     ctx.restore()
   }
 }

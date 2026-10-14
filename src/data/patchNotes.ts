@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.15',
+    date: '2026-10-14',
+    title: 'Treinador no Centro Pokémon',
+    highlights: [
+      'No Hospital, seu treinador aparece no lugar do Pokémon no tapete, com a skin escolhida no Perfil. O Pokémon continua no cabeçalho e volta ao campo normalmente nas hunts.',
+    ],
+  },
+  {
     version: '8.14',
     date: '2026-10-14',
     title: 'Conquistas: hora de platinar',
