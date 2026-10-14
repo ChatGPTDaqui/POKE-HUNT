@@ -151,6 +151,36 @@ export type Database = {
         }
         Relationships: []
       }
+      conquista_catalogo: {
+        Row: {
+          categoria: string
+          id: string
+          nivel: string
+          ordem: number
+          pontos: number
+          regra: Json
+          secreta: boolean
+        }
+        Insert: {
+          categoria: string
+          id: string
+          nivel: string
+          ordem: number
+          pontos: number
+          regra: Json
+          secreta?: boolean
+        }
+        Update: {
+          categoria?: string
+          id?: string
+          nivel?: string
+          ordem?: number
+          pontos?: number
+          regra?: Json
+          secreta?: boolean
+        }
+        Relationships: []
+      }
       creditos_tm: {
         Row: {
           item_id: string
@@ -206,6 +236,21 @@ export type Database = {
           percent?: number
           slot?: number
           slot_count?: number
+        }
+        Relationships: []
+      }
+      especie_traco_oculto: {
+        Row: {
+          species_id: string
+          trait: string
+        }
+        Insert: {
+          species_id: string
+          trait: string
+        }
+        Update: {
+          species_id?: string
+          trait?: string
         }
         Relationships: []
       }
@@ -1064,6 +1109,79 @@ export type Database = {
           },
           {
             foreignKeyName: "player_auto_catch_rules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_conquistas: {
+        Row: {
+          conquista_id: string
+          conquistado_em: string
+          user_id: string
+        }
+        Insert: {
+          conquista_id: string
+          conquistado_em?: string
+          user_id: string
+        }
+        Update: {
+          conquista_id?: string
+          conquistado_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_conquistas_conquista_id_fkey"
+            columns: ["conquista_id"]
+            isOneToOne: false
+            referencedRelation: "conquista_catalogo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_conquistas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_conquistas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_contador: {
+        Row: {
+          chave: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          chave: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          chave?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_contador_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_contador_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "treinadores_publico"
@@ -2989,6 +3107,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      avaliar_conquistas: { Args: { p_user: string }; Returns: string[] }
       bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
       cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
@@ -3031,6 +3150,11 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      conquista_alvo: { Args: { p_regra: Json }; Returns: number }
+      conquista_valor: {
+        Args: { p_regra: Json; p_user: string }
+        Returns: number
       }
       conversas: { Args: never; Returns: Json }
       creditar_drop_tm: {
@@ -3245,6 +3369,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      minhas_conquistas: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
@@ -3252,6 +3377,19 @@ export type Database = {
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
       perfil_publico: { Args: { p_user_id: string }; Returns: Json }
+      poke_satisfaz: {
+        Args: {
+          p_filtro: Json
+          p_ivs: number[]
+          p_level: number
+          p_nature: string
+          p_rarity: string
+          p_shiny: boolean
+          p_species: string
+          p_trait: string
+        }
+        Returns: boolean
+      }
       por_item_na_mesa: {
         Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
         Returns: {
@@ -3343,6 +3481,10 @@ export type Database = {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
       }
+      registrar_conquistas_do_flush: {
+        Args: { p_contadores: Json; p_user: string }
+        Returns: string[]
+      }
       registrar_evento_auditoria: {
         Args: {
           p_contexto?: Json
@@ -3424,6 +3566,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      somar_contadores: {
+        Args: { p_deltas: Json; p_user: string }
+        Returns: undefined
       }
       subir_nivel_especialidade: {
         Args: { p_tipo: string; p_trilha: string }
@@ -3746,6 +3892,36 @@ export type Database = {
         }
         Relationships: []
       }
+      conquista_catalogo: {
+        Row: {
+          categoria: string
+          id: string
+          nivel: string
+          ordem: number
+          pontos: number
+          regra: Json
+          secreta: boolean
+        }
+        Insert: {
+          categoria: string
+          id: string
+          nivel: string
+          ordem: number
+          pontos: number
+          regra: Json
+          secreta?: boolean
+        }
+        Update: {
+          categoria?: string
+          id?: string
+          nivel?: string
+          ordem?: number
+          pontos?: number
+          regra?: Json
+          secreta?: boolean
+        }
+        Relationships: []
+      }
       creditos_tm: {
         Row: {
           item_id: string
@@ -3801,6 +3977,21 @@ export type Database = {
           percent?: number
           slot?: number
           slot_count?: number
+        }
+        Relationships: []
+      }
+      especie_traco_oculto: {
+        Row: {
+          species_id: string
+          trait: string
+        }
+        Insert: {
+          species_id: string
+          trait: string
+        }
+        Update: {
+          species_id?: string
+          trait?: string
         }
         Relationships: []
       }
@@ -4659,6 +4850,79 @@ export type Database = {
           },
           {
             foreignKeyName: "player_auto_catch_rules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_conquistas: {
+        Row: {
+          conquista_id: string
+          conquistado_em: string
+          user_id: string
+        }
+        Insert: {
+          conquista_id: string
+          conquistado_em?: string
+          user_id: string
+        }
+        Update: {
+          conquista_id?: string
+          conquistado_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_conquistas_conquista_id_fkey"
+            columns: ["conquista_id"]
+            isOneToOne: false
+            referencedRelation: "conquista_catalogo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_conquistas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_conquistas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_contador: {
+        Row: {
+          chave: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          chave: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          chave?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_contador_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_contador_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "treinadores_publico"
@@ -6584,6 +6848,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      avaliar_conquistas: { Args: { p_user: string }; Returns: string[] }
       bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
       cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
@@ -6626,6 +6891,11 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      conquista_alvo: { Args: { p_regra: Json }; Returns: number }
+      conquista_valor: {
+        Args: { p_regra: Json; p_user: string }
+        Returns: number
       }
       conversas: { Args: never; Returns: Json }
       creditar_drop_tm: {
@@ -6840,6 +7110,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      minhas_conquistas: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
@@ -6847,6 +7118,19 @@ export type Database = {
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
       perfil_publico: { Args: { p_user_id: string }; Returns: Json }
+      poke_satisfaz: {
+        Args: {
+          p_filtro: Json
+          p_ivs: number[]
+          p_level: number
+          p_nature: string
+          p_rarity: string
+          p_shiny: boolean
+          p_species: string
+          p_trait: string
+        }
+        Returns: boolean
+      }
       por_item_na_mesa: {
         Args: { p_item_id: string; p_quantidade: number; p_sessao_id: string }
         Returns: {
@@ -6938,6 +7222,10 @@ export type Database = {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
       }
+      registrar_conquistas_do_flush: {
+        Args: { p_contadores: Json; p_user: string }
+        Returns: string[]
+      }
       registrar_evento_auditoria: {
         Args: {
           p_contexto?: Json
@@ -7019,6 +7307,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      somar_contadores: {
+        Args: { p_deltas: Json; p_user: string }
+        Returns: undefined
       }
       subir_nivel_especialidade: {
         Args: { p_tipo: string; p_trilha: string }
