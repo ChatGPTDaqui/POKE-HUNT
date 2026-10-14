@@ -2,17 +2,8 @@
 // zoom, chamado imperativamente pelo loop de rAF do <GameCanvas> (Fase 5) —
 // nunca via re-render do React.
 //
-// Desvio deliberado do original em renderHospital: o vanilla mutava
-// `playerEntity.x/y` temporariamente (pra reusar drawEntity/drawHpBar/
-// drawNameLevelTag na posicao fixa da cena do Hospital) e restaurava depois.
-// Isso e seguro com um objeto de classe mutavel solto, mas `playerEntity`
-// aqui vem do `worldStore` (Zustand+immer) — em desenvolvimento o Immer
-// congela (`Object.freeze`) o estado que produz, entao mutar
-// `playerEntity.x = ...` direto lançaria erro ("Cannot assign to read only
-// property"). Troquei por uma copia rasa com x/y sobrescritos — mesmo
-// resultado visual, sem mutar nada do store, e de brinde evita o hazard que
-// a nota original ja mencionava ("dois desenhos no mesmo tick, ex.
-// StrictMode double-invoke, podem corromper a posicao").
+// Hospital mostra só o treinador; a entidade Pokémon permanece intacta no
+// worldStore para cura e cabeçalho. Apresentação nunca muta o estado do motor.
 import {
   drawEntity, drawCorpoPorCima, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
   drawMarcaDoAlvo, drawMarcaDoJogador, planejarTextoDeCombate,
@@ -20,7 +11,7 @@ import {
 import { desenharAmbiente } from './ambiente'
 import { drawBalaoDaAbertura } from './balaoDaAbertura'
 import { desenharClimaFundo, desenharClimaFrente, familiaDoClima } from './climaVisual'
-import { CENA_HOSPITAL, ZOOM_DA_CENA, escalaDoPoke } from '@/data/hospital'
+import { CENA_HOSPITAL, ZOOM_DA_CENA } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
 import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { arteParaSala, backgroundParaSala, isCellBlocked } from '@/data/maps'
@@ -45,10 +36,10 @@ import { TreinadorEmCampo, lugarNoDuelo } from './treinadorEmCampo'
 // entao a troca "cor solida -> imagem" nao pisca.
 const HOSPITAL_FALLBACK = '#0d0d10'
 
-// Tamanho de tela do nome/nivel e da barra de HP do POKE no Hospital. 1.5 e o
+// Tamanho de tela do nome do treinador no Hospital. 1.5 e o
 // zoom padrao com que a hunt desenha os mesmos elementos, entao o rotulo tem
 // ali a mesma legibilidade que tem no combate.
-const ESCALA_ROTULO_POKE = 1.5
+const ESCALA_ROTULO_HOSPITAL = 1.5
 
 const MIN_ZOOM = 0.5
 const MAX_ZOOM = 2.5
@@ -182,7 +173,7 @@ export class Renderer {
     return fx >= a.x1 - fgx && fx <= a.x2 + fgx && fy >= a.y1 - fgy && fy <= a.y2 + fgy
   }
 
-  renderHospital(playerEntity: WorldEntity | null, nurseHovered = false): void {
+  renderHospital(_playerEntity: WorldEntity | null, nurseHovered = false): void {
     const ctx = this.ctx
     this.clear()
     ctx.fillStyle = HOSPITAL_FALLBACK
@@ -200,58 +191,22 @@ export class Renderer {
     ctx.scale(escala, escala)
 
     if (fundo) ctx.drawImage(fundo, 0, 0, CENA_HOSPITAL.largura, CENA_HOSPITAL.altura)
-    if (playerEntity) this._drawHospitalPoke(ctx, playerEntity, escala)
+    this._drawHospitalTrainer(ctx, escala)
     this._drawHealLabel(ctx, nurseHovered)
 
     ctx.restore()
   }
 
-  private _drawHospitalPoke(ctx: CanvasRenderingContext2D, playerEntity: WorldEntity, escala: number): void {
+  private _drawHospitalTrainer(ctx: CanvasRenderingContext2D, escala: number): void {
     const pes = {
       x: CENA_HOSPITAL.tapete.x * CENA_HOSPITAL.largura,
       y: CENA_HOSPITAL.tapete.y * CENA_HOSPITAL.altura,
     }
-    const k = escalaDoPoke(playerEntity.battleAnim?.frameHeight ?? 0)
-    // Virado pra camera: `facing` fica com o que sobrou da ultima hunt, entao
-    // sem isto o POKE aparece de costas no saguao. Row 0 do sheet PMD e Down —
-    // ver SECTOR_TO_ROW em animationSystem.
-    const display: WorldEntity = { ...playerEntity, x: pes.x, y: pes.y, facing: { x: 0, y: 1 } }
-
-    ctx.save()
-    ctx.translate(pes.x, pes.y)
-    ctx.scale(k, k)
-    ctx.translate(-pes.x, -pes.y)
-    drawEntity(ctx, display)
-    ctx.restore()
-
-    // Barra de HP e nome NAO entram na escala do sprite: a 5x, a fonte de 9px
-    // viraria 45px e o nome ficaria maior que a enfermeira.
-    //
-    // Tambem nao podem sair na escala da IMAGEM: numa janela quase quadrada o
-    // cover fica em ~0.64, e o nome sairia com 6px de tela — ilegivel (visto ao
-    // vivo). Entao eles sao desenhados numa escala que CANCELA a da imagem e
-    // fixa o tamanho em pixel de tela, no mesmo tamanho aparente que tem dentro
-    // da hunt (que desenha com zoom 1.5 por padrao).
-    //
-    // A ancora vertical usa `frameHeight * k` porque e exatamente isso que
-    // `visualTopOffset` le pra decidir a que altura o rotulo fica — o sprite ja
-    // esta ampliado, o rotulo tem que subir junto.
-    const legivel = ESCALA_ROTULO_POKE / escala
-    const anim = display.battleAnim
-    // `k / legivel` e o que faz o rotulo pousar no topo do sprite APESAR de o
-    // contexto estar em outra escala: `visualTopOffset` e linear no
-    // frameHeight, entao dividir aqui cancela o `scale(legivel)` de baixo e
-    // sobra exatamente o `k` do sprite.
-    const ancora: WorldEntity = anim
-      ? { ...display, battleAnim: { ...anim, frameHeight: (anim.frameHeight * k) / legivel } }
-      : display
-    ctx.save()
-    ctx.translate(pes.x, pes.y)
-    ctx.scale(legivel, legivel)
-    ctx.translate(-pes.x, -pes.y)
-    drawHpBar(ctx, ancora)
-    drawNameLevelTag(ctx, ancora)
-    ctx.restore()
+    // Hospital é apresentação, nunca troca a entidade usada para curar/equipar.
+    // Limpar o rastro evita carregar coordenadas da hunt para o saguão e vice-versa.
+    this.ultimoQuadro = 0
+    this.treinador.parado(pes, { x: 0, y: 1 }, 0)
+    this.treinador.desenhar(ctx, CENA_HOSPITAL.alturaTreinador, ESCALA_ROTULO_HOSPITAL / escala)
   }
 
   // "Curar" acima da cabeca da enfermeira. E o unico aviso de que ela e

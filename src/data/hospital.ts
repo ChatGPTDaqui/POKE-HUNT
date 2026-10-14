@@ -23,8 +23,11 @@ export const CENA_HOSPITAL = {
   largura: 2000,
   altura: 2000,
 
-  /** Onde os PES do POKE encostam: centro do tapete redondo do saguao. */
+  /** Onde os pés do treinador encostam: centro do tapete redondo do saguão. */
   tapete: { x: 0.5015, y: 0.655 },
+
+  /** Porte do treinador em pixels da arte, independente da skin selecionada. */
+  alturaTreinador: 160,
 
   /** Centro da enfermeira atras do balcao (referencia do rotulo "Curar"). */
   enfermeira: { x: 0.5025, y: 0.418 },
