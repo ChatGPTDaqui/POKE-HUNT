@@ -38,6 +38,57 @@ function porLotesDeId(ids: string[]): string[][] {
 // so a constante sobrevive, e so aqui, unico lugar que ainda escreve nela.
 const CONQUISTA_LANCE = 'boss_lance'
 
+/**
+ * As chaves de `player_contador` que uma janela de hunt fez andar (conquistas,
+ * spec 2026-10-14-conquistas-design). Pura, pra ser testada sem banco.
+ *
+ * O que entra e so o que a SIMULACAO AUTORITATIVA resolveu: capturas (inclusive
+ * as auto-vendidas — foram capturadas), ouro da caca, tempo simulado, tempo com
+ * cada especie em campo, tempo sob cada clima de ambiente e itens consumidos.
+ * Abates nao entram: ja moram em `player_pokedex`, e o SQL le de la.
+ */
+export function contadoresDaJanela(
+  resumo: Pick<OfflineSimSummary, 'captures' | 'autoVendidos' | 'gold' | 'simulatedSeconds' | 'itemsConsumed'>,
+  especieAtiva: string | null,
+  clima: ClimaTipo | null,
+): Record<string, number> {
+  const contadores: Record<string, number> = {}
+  const somar = (chave: string, valor: number) => {
+    const inteiro = Math.floor(valor)
+    if (inteiro > 0) contadores[chave] = (contadores[chave] ?? 0) + inteiro
+  }
+  somar('captura_total', resumo.captures.length + resumo.autoVendidos)
+  for (const captura of resumo.captures) somar(`captura:${captura.speciesId}`, 1)
+  somar('ouro_caca', resumo.gold)
+  somar('hunt_seg', resumo.simulatedSeconds)
+  if (especieAtiva) somar(`ativo_seg:${especieAtiva}`, resumo.simulatedSeconds)
+  if (clima) somar(`clima_seg:${clima}`, resumo.simulatedSeconds)
+  for (const [itemId, quantidade] of Object.entries(resumo.itemsConsumed)) somar(`item:${itemId}`, quantidade)
+  return contadores
+}
+
+/**
+ * Soma os contadores da janela e avalia as conquistas. Devolve os ids que
+ * fecharam agora (o cliente mostra a celebracao).
+ *
+ * NUNCA derruba o flush: conquista e enfeite em cima de progresso ja gravado.
+ * Erro aqui vira log e lista vazia — o proximo flush (ou a tela de Conquistas,
+ * que tambem avalia) pega o que ficou pra tras.
+ */
+async function registrarConquistasDaJanela(
+  cfg: Config, userId: string, contadores: Record<string, number>,
+): Promise<string[]> {
+  try {
+    const novas = await chamarRpc<string[] | null>(cfg, 'registrar_conquistas_do_flush', {
+      p_user: userId, p_contadores: contadores,
+    })
+    return Array.isArray(novas) ? novas : []
+  } catch (erro) {
+    console.error('[conquistas] falha ao registrar a janela', erro)
+    return []
+  }
+}
+
 // Teto de quanto tempo um unico flush pode creditar. NAO e uma regra de
 // balanceamento — e o limite que impede um relogio maluco (ou uma sessao
 // esquecida aberta por uma semana) de virar uma simulacao de dias num request.
@@ -1041,6 +1092,8 @@ export interface ResultadoFlush {
    * avancar. Sempre `false` quando `forcarAvancoDeSala` nao foi pedido.
    */
   avancoDeSalaAplicado: boolean
+  /** Conquistas que fecharam nesta janela (ids do catalogo). */
+  conquistasNovas: string[]
 }
 
 /**
@@ -1541,6 +1594,13 @@ async function simularSessao(
     p_protetor: payloadDoProtetorOuDoCaido(world, tipoDeProtetor),
   })
 
+  // Depois de TUDO gravado: as conquistas leem o estado ja creditado (abates na
+  // Pokedex, POKEs novos com origem captura, nivel de treinador).
+  const conquistasNovas = await registrarConquistasDaJanela(
+    cfg, userId,
+    contadoresDaJanela(resumo, world.player?.poke.speciesId ?? null, world.climaAmbiente?.tipo ?? null),
+  )
+
   return {
     segundosCreditados: segundos,
     truncado,
@@ -1571,5 +1631,6 @@ async function simularSessao(
       : null,
     encerrada: resumo.stoppedEarly ? 'desmaio' : null,
     avancoDeSalaAplicado,
+    conquistasNovas,
   }
 }
