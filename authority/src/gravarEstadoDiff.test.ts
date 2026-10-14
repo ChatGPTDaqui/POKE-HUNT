@@ -11,7 +11,7 @@
 // aparece como progresso que volta atras.
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import {
-  defaultGameStateData,
+  defaultGameStateData, createPokeInstance, createRng,
   gameStateToPokemonRows, gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   type GameStateData, type PlayerSnapshot,
 } from '#engine'
@@ -106,6 +106,22 @@ describe('gravarEstado() — diff de escrita', () => {
     expect(db.chamarRpc).toHaveBeenCalledTimes(1)
     expect(db.selecionarTudo).not.toHaveBeenCalled()
   })
+  it('POKE capturado na janela sobe com origem captura (merito proprio das conquistas)', async () => {
+    const estado = estadoComItens()
+    const baseline = baselineDe(estado)
+    estado.bagPokes = [createPokeInstance(createRng(7), 'pidgey', 3, {})]
+
+    await gravarEstado(cfg, USER, estado, new Set(), tabelaPlayers.updated_at, baseline)
+
+    const chamada = vi.mocked(db.inserir).mock.calls.find((c) => c[1] === 'pokemon_instances')
+    expect(chamada, 'o POKE novo nao foi gravado').toBeDefined()
+    const linhas = chamada![2] as Record<string, unknown>[]
+    expect(linhas).toHaveLength(1)
+    // Numa linha que ja existe, quem segura a origem antiga e o trigger
+    // `origem_do_poke` (migration 20261014120000), nao este codigo.
+    expect(linhas[0].origem).toBe('captura')
+  })
+
   it('janela sem nenhum evento: grava so a linha de players', async () => {
     const estado = estadoComItens()
 

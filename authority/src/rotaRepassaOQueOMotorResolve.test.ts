@@ -35,6 +35,7 @@ const OBRIGATORIOS = [
   ['sala', 'o cliente exibiria a sala que ele mesmo sorteou como predicao'],
   ['clima', 'o jogador levaria dano de areia sob um ceu limpo (PH-140)'],
   ['protetor', 'o cliente voltaria a sortear o proprio chefe (PH-475)'],
+  ['conquistasNovas', 'a conquista fecharia no banco e o jogador nunca veria a celebracao'],
 ] as const
 
 /** Corpo do `json({...})` da funcao nomeada. */
@@ -68,7 +69,7 @@ describe('a rota de sessao repassa o que aplicarFlush resolveu (PH-475)', () => 
     }
   }
 
-  it('o tipo do motor declara os tres campos — a rota nao inventa nenhum', () => {
+  it('o tipo do motor declara os campos — a rota nao inventa nenhum', () => {
     // O outro lado da regra: um campo repassado que `ResultadoFlush` nao tem
     // seria `undefined` na resposta, e o cliente o leria como "servidor
     // velho" — a mesma falha silenciosa, so pela ponta oposta.

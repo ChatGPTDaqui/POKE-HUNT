@@ -522,6 +522,7 @@ async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Res
       piso: { aplicado: false, ouroAdicionado: 0, xpAdicionado: 0 },
       estadoParcial: parcial,
       estado: await carregarEstado(cfg, userId, { comBag: !parcial }),
+      conquistasNovas: [],
     })
   }
   if (!resultado) {
@@ -559,6 +560,8 @@ async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Res
     // na tela do jogador.
     estadoParcial: parcial,
     estado: resultado.estado,
+    // Conquistas que fecharam nesta janela — o cliente mostra a celebracao.
+    conquistasNovas: resultado.conquistasNovas,
   })
 }
 
@@ -598,6 +601,8 @@ async function avancarSala(cfg: Config, userId: string, parcial: boolean): Promi
     avancoAplicado: resultado.avancoDeSalaAplicado,
     estadoParcial: parcial,
     estado: resultado.estado,
+    // Conquistas que fecharam nesta janela — o cliente mostra a celebracao.
+    conquistasNovas: resultado.conquistasNovas,
   })
 }
 
@@ -615,6 +620,8 @@ async function fechar(cfg: Config, userId: string, parcial: boolean): Promise<Re
     piso: resultado.piso,
     estadoParcial: parcial,
     estado: resultado.estado,
+    // Conquistas que fecharam nesta janela — o cliente mostra a celebracao.
+    conquistasNovas: resultado.conquistasNovas,
   })
 }
 

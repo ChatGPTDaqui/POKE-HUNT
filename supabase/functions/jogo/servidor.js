@@ -111074,9 +111074,14 @@ function somarGanhos(a, b) {
 function podeJuntar(a, b) {
 	if (!a) return false;
 	if (a.tipo === "treinador" && b.tipo === "treinador") return true;
+	if (a.tipo === "conquista" && b.tipo === "conquista") return true;
 	return false;
 }
 function juntar(a, b) {
+	if (a.tipo === "conquista" && b.tipo === "conquista") return {
+		tipo: "conquista",
+		ids: [.../* @__PURE__ */ new Set([...a.ids, ...b.ids])]
+	};
 	if (a.tipo === "nivel" && b.tipo === "nivel") {
 		const x = a;
 		const y = b;
@@ -112985,6 +112990,50 @@ function porLotesDeId(ids) {
 	return lotes;
 }
 var CONQUISTA_LANCE = "boss_lance";
+/**
+* As chaves de `player_contador` que uma janela de hunt fez andar (conquistas,
+* spec 2026-10-14-conquistas-design). Pura, pra ser testada sem banco.
+*
+* O que entra e so o que a SIMULACAO AUTORITATIVA resolveu: capturas (inclusive
+* as auto-vendidas — foram capturadas), ouro da caca, tempo simulado, tempo com
+* cada especie em campo, tempo sob cada clima de ambiente e itens consumidos.
+* Abates nao entram: ja moram em `player_pokedex`, e o SQL le de la.
+*/
+function contadoresDaJanela(resumo, especieAtiva, clima) {
+	const contadores = {};
+	const somar = (chave, valor) => {
+		const inteiro = Math.floor(valor);
+		if (inteiro > 0) contadores[chave] = (contadores[chave] ?? 0) + inteiro;
+	};
+	somar("captura_total", resumo.captures.length + resumo.autoVendidos);
+	for (const captura of resumo.captures) somar(`captura:${captura.speciesId}`, 1);
+	somar("ouro_caca", resumo.gold);
+	somar("hunt_seg", resumo.simulatedSeconds);
+	if (especieAtiva) somar(`ativo_seg:${especieAtiva}`, resumo.simulatedSeconds);
+	if (clima) somar(`clima_seg:${clima}`, resumo.simulatedSeconds);
+	for (const [itemId, quantidade] of Object.entries(resumo.itemsConsumed)) somar(`item:${itemId}`, quantidade);
+	return contadores;
+}
+/**
+* Soma os contadores da janela e avalia as conquistas. Devolve os ids que
+* fecharam agora (o cliente mostra a celebracao).
+*
+* NUNCA derruba o flush: conquista e enfeite em cima de progresso ja gravado.
+* Erro aqui vira log e lista vazia — o proximo flush (ou a tela de Conquistas,
+* que tambem avalia) pega o que ficou pra tras.
+*/
+async function registrarConquistasDaJanela(cfg, userId, contadores) {
+	try {
+		const novas = await chamarRpc(cfg, "registrar_conquistas_do_flush", {
+			p_user: userId,
+			p_contadores: contadores
+		});
+		return Array.isArray(novas) ? novas : [];
+	} catch (erro) {
+		console.error("[conquistas] falha ao registrar a janela", erro);
+		return [];
+	}
+}
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
 /**
 * Quanto tempo de um intervalo bruto vira simulação de verdade (PH-495).
@@ -113311,7 +113360,10 @@ async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtE
 			const atual = porId.get(String(l.id));
 			return atual == null || aindaMeu(atual);
 		});
-		if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke, { upsert: "id" });
+		if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke.map((l) => ({
+			...l,
+			origem: "captura"
+		})), { upsert: "id" });
 	}
 	const todosItens = gameStateToItemRows(userId, estado);
 	for (const item of todosItens.filter((l) => l.item_id?.startsWith("tm_"))) {
@@ -113523,6 +113575,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		p_ciclos: world.sala?.ciclos ?? 0,
 		p_protetor: payloadDoProtetorOuDoCaido(world, tipoDeProtetor)
 	});
+	const conquistasNovas = await registrarConquistasDaJanela(cfg, userId, contadoresDaJanela(resumo, world.player?.poke.speciesId ?? null, world.climaAmbiente?.tipo ?? null));
 	return {
 		segundosCreditados: segundos,
 		truncado,
@@ -113536,7 +113589,8 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 			resolvido: world.protetorResolvido
 		} : null,
 		encerrada: resumo.stoppedEarly ? "desmaio" : null,
-		avancoDeSalaAplicado
+		avancoDeSalaAplicado,
+		conquistasNovas
 	};
 }
 //#endregion
@@ -113868,7 +113922,8 @@ async function flush(cfg, userId, parcial) {
 			xpAdicionado: 0
 		},
 		estadoParcial: parcial,
-		estado: await carregarEstado(cfg, userId, { comBag: !parcial })
+		estado: await carregarEstado(cfg, userId, { comBag: !parcial }),
+		conquistasNovas: []
 	});
 	if (!resultado) {
 		await sairDaHunt(cfg, userId, sessao.id);
@@ -113885,7 +113940,8 @@ async function flush(cfg, userId, parcial) {
 		clima: resultado.clima,
 		protetor: resultado.protetor,
 		estadoParcial: parcial,
-		estado: resultado.estado
+		estado: resultado.estado,
+		conquistasNovas: resultado.conquistasNovas
 	});
 }
 /**
@@ -113920,7 +113976,8 @@ async function avancarSala(cfg, userId, parcial) {
 		protetor: resultado.protetor,
 		avancoAplicado: resultado.avancoDeSalaAplicado,
 		estadoParcial: parcial,
-		estado: resultado.estado
+		estado: resultado.estado,
+		conquistasNovas: resultado.conquistasNovas
 	});
 }
 async function fechar(cfg, userId, parcial) {
@@ -113937,7 +113994,8 @@ async function fechar(cfg, userId, parcial) {
 		resumo: resultado.resumo,
 		piso: resultado.piso,
 		estadoParcial: parcial,
-		estado: resultado.estado
+		estado: resultado.estado,
+		conquistasNovas: resultado.conquistasNovas
 	});
 }
 //#endregion

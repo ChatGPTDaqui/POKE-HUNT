@@ -231,7 +231,7 @@ function VitaisPoke() {
     // Agora o bloco cresce com o nome ate um teto proprio e a sobra vira o
     // mesmo `flex-1` vazio de antes; a barra nao muda de tamanho em nenhum dos
     // dois casos, que e a unica coisa que o PH-157 pediu.
-    <div className="journey-vitals flex shrink-0 flex-col gap-[.18em]">
+    <div className="journey-vitals flex min-w-0 max-w-[min(22em,52vw)] shrink-0 flex-col gap-[.18em]">
       {/* Teto proprio da linha do nome: sem ele, uma especie de nome longo
           empurraria a carteira pra fora em tela estreita. Medido — ver o
           comentario do bloco das porcentagens. */}
@@ -239,7 +239,7 @@ function VitaisPoke() {
         <span className={cn('truncate font-medium', poke.isShiny && 'text-shiny')}>
           {poke.isShiny && '✨'}{species.name}
         </span>
-        <ProximoGolpe poke={poke} species={species}><span className="shrink-0 text-[.85em] text-n400">Lv {poke.level}</span></ProximoGolpe>
+        <span className="shrink-0 text-[.85em] text-n400">Lv {poke.level}</span>
         {fainted && <span className="shrink-0 text-[.85em] font-medium text-bad">KO</span>}
         <StatusBadge status={poke.status} />
         <StatusBadge status={statusVolatil} />
@@ -284,6 +284,7 @@ function VitaisPoke() {
           </div>
         </div>
       </div>
+      <ProximoGolpe poke={poke} species={species} />
     </div>
   )
 }

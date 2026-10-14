@@ -31,6 +31,9 @@ direita, nome/carteira à esquerda dele, sem limitar sua âncora em monitores la
 Painéis reservam a altura medida das reservas no PC e 52px de faixa lateral no
 mobile, somente quando há reservas. A coluna de atalhos continua usando só a altura
 do cabeçalho. Medidas são transitórias, nunca persistidas nem enviadas ao servidor.
+Próximo golpe e nível de aprendizado ficam visíveis sob HP/XP, junto do Pokémon
+ativo. A previsão usa nivelDeAprendizado da forma atual; empates mostram +N e todos
+os nomes na explicação por toque/foco. Sem futuro, informa o fim do aprendizado.
 Skins preservam recortes RGBA nativos; a geometria gerada informa também quantos
 quadros originais há na caminhada. Vistas ausentes são espelhadas, sem gerar arte.
 

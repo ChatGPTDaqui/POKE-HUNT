@@ -23,6 +23,8 @@ import { useCelebracaoStore, type Celebracao } from '@/stores/celebracaoStore'
 import { useJanelaSobreOCampo } from '@/stores/janelaSobreOCampo'
 import { TETO_DE_EXTENSAO, duracaoDe, intensidadeDe, type Intensidade } from '@/data/marcoDaCelebracao'
 import { MARCOS_DE_TREINADOR } from '@/data/recompensasDeNivel'
+import { CATALOGO_DE_CONQUISTAS } from '@/data/generated/conquistas.generated'
+import { COR_DO_NIVEL_DE_CONQUISTA, NOME_DO_NIVEL_DE_CONQUISTA, ordenarPorNivel } from '@/features/conquistas/nivelDeConquista'
 import { cn } from '@/lib/utils'
 
 /** Quantos marcos de treinador ficam no intervalo (de, ate]. */
@@ -258,7 +260,16 @@ function Cartao({ c, intensidade }: { c: Celebracao; intensidade: Intensidade })
   )
 }
 
+/** As conquistas do cartao, da mais valiosa pra menos (o catalogo resolve id -> nome/nivel). */
+function conquistasDo(c: Extract<Celebracao, { tipo: 'conquista' }>) {
+  return ordenarPorNivel(CATALOGO_DE_CONQUISTAS.filter((k) => c.ids.includes(k.id)))
+}
+
 function corDe(c: Celebracao): string {
+  if (c.tipo === 'conquista') {
+    const melhor = conquistasDo(c)[0]
+    return melhor ? COR_DO_NIVEL_DE_CONQUISTA[melhor.nivel] : 'var(--color-gold)'
+  }
   if (c.tipo === 'shiny') return 'var(--color-shiny)'
   if (c.tipo === 'evolucao') return 'var(--color-gold)'
   if (c.tipo === 'treinador') return 'var(--color-gold)'
@@ -266,7 +277,9 @@ function corDe(c: Celebracao): string {
 }
 
 function Titulo({ c, cor }: { c: Celebracao; cor: string }) {
-  const texto = c.tipo === 'evolucao'
+  const texto = c.tipo === 'conquista'
+    ? (c.ids.length > 1 ? `${c.ids.length} CONQUISTAS!` : 'CONQUISTA!')
+    : c.tipo === 'evolucao'
     ? 'EVOLUIU!'
     : c.tipo === 'shiny' ? 'SHINY!' : c.tipo === 'treinador' ? 'TREINADOR' : 'SUBIU DE NÍVEL'
   return (
@@ -286,6 +299,28 @@ function Titulo({ c, cor }: { c: Celebracao; cor: string }) {
 }
 
 function Corpo({ c, cheio }: { c: Celebracao; cheio: boolean }) {
+  if (c.tipo === 'conquista') {
+    const lista = conquistasDo(c)
+    // Tres no cartao e o resto em "+N": o cartao fica 2,6s, e uma lista longa
+    // nao da pra ler nesse tempo. A tela de Conquistas mostra todas.
+    const visiveis = lista.slice(0, 3)
+    return (
+      <div className="flex flex-col items-center gap-[.3em]">
+        {visiveis.map((k) => (
+          <div key={k.id} className="flex flex-col items-center leading-tight">
+            <span className="text-[.95em] font-bold text-menu-ink">{k.nome}</span>
+            <span className="text-[.6em] uppercase tracking-wide" style={{ color: COR_DO_NIVEL_DE_CONQUISTA[k.nivel] }}>
+              {NOME_DO_NIVEL_DE_CONQUISTA[k.nivel]}
+            </span>
+          </div>
+        ))}
+        {lista.length > visiveis.length && (
+          <span className="text-[.7em] text-menu-muted">+{lista.length - visiveis.length} na tela de Conquistas</span>
+        )}
+      </div>
+    )
+  }
+
   if (c.tipo === 'shiny') {
     return (
       <div className="flex flex-col items-center gap-[.35em]">

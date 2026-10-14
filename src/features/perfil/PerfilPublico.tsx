@@ -32,6 +32,9 @@ import { useUiStore } from '@/stores/uiStore'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
+import {
+  ConquistasDoTreinador, TituloDoTreinador, useConquistasPublicas, useCorDaMoldura,
+} from '@/features/conquistas/ConquistasDoTreinador'
 
 function formatarDuracao(segundos: number): string {
   if (segundos < 60) return `${Math.floor(segundos)}s`
@@ -52,6 +55,10 @@ export function PerfilPublico() {
   const fechar = useUiStore((s) => s.fecharPerfilPublico)
   const abrirSocialCom = useUiStore((s) => s.abrirSocialCom)
   const meuId = useAuthStore((s) => s.user?.id ?? null)
+  // Conquistas (14/10/2026): moldura pelo percentual da platina e titulo
+  // escolhido. Leitura publica; sem dado, nada muda no perfil.
+  const corDaMoldura = useCorDaMoldura(alvo?.userId ?? null)
+  const { data: conquistas } = useConquistasPublicas(alvo?.userId ?? null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['perfil-publico', alvo?.userId],
@@ -75,7 +82,13 @@ export function PerfilPublico() {
       title="Perfil do Treinador"
       header={
         <div className="flex items-center gap-[.6em] border-b border-menu-line px-[.65em] pb-[.6em]">
-          <div className="flex h-[3.8em] w-[3.8em] shrink-0 items-center justify-center rounded-[.7em] border border-menu-line bg-menu-card">
+          <div
+            className={cn(
+              'flex h-[3.8em] w-[3.8em] shrink-0 items-center justify-center rounded-[.7em] bg-menu-card',
+              corDaMoldura ? 'border-2' : 'border border-menu-line',
+            )}
+            style={corDaMoldura ? { borderColor: corDaMoldura, boxShadow: `0 0 10px ${corDaMoldura}66` } : undefined}
+          >
             {/* PH-548: a foto do outro jogador, pelo mesmo cache do ranking. */}
             <AvatarDoTreinador userId={alvo?.userId ?? null} tamanho={3.4} />
           </div>
@@ -83,6 +96,7 @@ export function PerfilPublico() {
             {/* O nome vem do anúncio, então o título aparece antes da RPC
                 responder — a janela nunca abre sem dizer de quem ela é. */}
             <div className="truncate text-[1.1em] font-semibold">{data?.nome ?? alvo.nome}</div>
+            <TituloDoTreinador id={conquistas?.titulo ?? null} className="truncate text-[.75em] font-medium" />
             <div className="flex items-center gap-[.5em] text-[.8em] text-menu-ink">
               {data && <span>Nível {data.nivel}</span>}
               {data && data.rank > 0 && (
@@ -126,6 +140,8 @@ export function PerfilPublico() {
             />
             <Estatistica icon={<User />} rotulo="Joga desde" valor={formatarData(data.contaCriadaEm)} />
           </div>
+
+          <ConquistasDoTreinador userId={data.userId} />
 
           {data.noHallDaFama && (
             <div className="flex items-center gap-[.5em] rounded-[.45em] border border-gold/40 bg-gold/10 px-[.55em] py-[.45em] text-[.8em]">

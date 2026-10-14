@@ -116,7 +116,9 @@ export const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is
  * LEITURA.
  */
 // A migration de golpes_de_maquina já foi promovida; leitura e tipo incluem a coluna.
-export type LinhaLidaDePoke = Omit<PokemonRow, 'user_id' | 'updated_at'>
+// `origem` (merito proprio das conquistas, migration 20261014120000) fica de
+// fora: so o servidor le, a tela nunca precisou dela.
+export type LinhaLidaDePoke = Omit<PokemonRow, 'user_id' | 'updated_at' | 'origem'>
 
 /**
  * Especies desconhecidas ja avisadas — o aviso e por ESPECIE, nao por POKE.

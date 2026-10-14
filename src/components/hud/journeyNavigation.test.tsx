@@ -74,7 +74,7 @@ describe('navegação Jornada', () => {
     const social = screen.getByRole('region', { name: 'Encontrar outros treinadores' })
     expect(within(social).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Social', 'Troca', 'Ranking'])
     const tools = screen.getByRole('region', { name: 'Consultar e ajustar' })
-    expect(within(tools).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Bestiário', 'Wiki', 'Tutoriais', 'Ajustes'])
+    expect(within(tools).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Conquistas', 'Bestiário', 'Wiki', 'Tutoriais', 'Ajustes'])
     fireEvent.click(within(tools).getByRole('button', { name: 'Wiki' }))
     expect(useUiStore.getState().currentScreen).toBe('wiki')
     expect(useUiStore.getState().moreOpen).toBe(false)

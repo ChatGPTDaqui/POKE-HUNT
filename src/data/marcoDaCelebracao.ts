@@ -56,7 +56,7 @@ export function cruzouMultiplo(de: number, ate: number, passo: number): boolean 
  * `36 % 5` da 1. O marco se perderia exatamente no caso mais impressionante.
  */
 export function ehMarco(c: Celebracao): boolean {
-  if (c.tipo === 'evolucao' || c.tipo === 'shiny') return true
+  if (c.tipo === 'evolucao' || c.tipo === 'shiny' || c.tipo === 'conquista') return true
   if (c.tipo === 'treinador') {
     return cruzouMultiplo(c.nivelInicial, c.nivel, PASSO_DO_MARCO_DO_TREINADOR)
   }
@@ -66,7 +66,7 @@ export function ehMarco(c: Celebracao): boolean {
 }
 
 export function intensidadeDe(c: Celebracao): Intensidade {
-  if (c.tipo === 'evolucao' || c.tipo === 'shiny') return 'cheio'
+  if (c.tipo === 'evolucao' || c.tipo === 'shiny' || c.tipo === 'conquista') return 'cheio'
   return ehMarco(c) ? 'medio' : 'discreto'
 }
 
