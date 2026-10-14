@@ -5,6 +5,7 @@
 // SOBRESCRITO pela resposta; sem a variavel, ela executa o `fallback` local de
 // sempre. Assim cada tela tem um caminho so, e ligar/desligar a autoridade nao
 // exige mexer em nenhuma tela.
+import { useConquistasStore } from '@/stores/conquistasStore'
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { sanearAutoToggles } from '@/stores/gameStateDefaults'
 import { useToastStore } from '@/stores/toastStore'
@@ -598,6 +599,7 @@ export async function liquidar(): Promise<void> {
   try {
     const r = await servidor.flush()
     aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
+    useConquistasStore.getState().receberNovas(r.conquistasNovas)
     // A sala do servidor manda. A simulacao local sorteia a propria (ela e
     // predicao e tem sequencia de sorteio propria), entao sem esta linha a
     // sala exibida seria um palpite — e o pool/loot que o jogador de fato
@@ -888,6 +890,7 @@ export async function avancarSalaManualmente(): Promise<void> {
   try {
     const r = await servidor.avancarSalaManual()
     aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
+    useConquistasStore.getState().receberNovas(r.conquistasNovas)
     if (r.sala !== undefined) useWorldStore.getState().definirSala(r.sala, r.clima)
     tratarEncerramento(r.sessaoEncerrada)
     if (r.truncado) {
@@ -974,6 +977,7 @@ export async function fecharSessaoDeHunt(): Promise<void> {
   try {
     const r = await servidor.fecharSessao()
     if (r.estado) aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
+    useConquistasStore.getState().receberNovas(r.conquistasNovas)
   } catch (erro) {
     reportarErro(erro)
   }
@@ -1119,6 +1123,7 @@ export async function assentarSessaoPendente(): Promise<RespostaFlush['resumo'] 
     const r = await servidor.fecharSessao()
     if (!r.fechada) return null
     if (r.estado) aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
+    useConquistasStore.getState().receberNovas(r.conquistasNovas)
     return r.resumo ?? null
   } catch (erro) {
     reportarErro(erro)

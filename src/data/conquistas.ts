@@ -125,6 +125,8 @@ export interface ConquistaDaTela {
   ordem: number
   ref: string | null
   alvo: number
+  /** `tempo`: alvo e progresso em SEGUNDOS (a tela mostra em horas/minutos). */
+  unidade: 'tempo' | null
 }
 
 export interface ConquistaAutoral {

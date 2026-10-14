@@ -43,6 +43,13 @@ export type Celebracao =
       isShiny: boolean
     }
   | { tipo: 'shiny'; especieId: string; nome: string }
+  /**
+   * Conquistas que o SERVIDOR fechou (resposta do flush ou `minhas_conquistas`).
+   * Varias no mesmo evento viram UM cartao — a primeira janela depois do
+   * lancamento pode fechar meia duzia de uma vez, e meia duzia de cartoes de
+   * 2,6s seria mais tempo de cartao que de jogo.
+   */
+  | { tipo: 'conquista'; ids: string[] }
 
 /**
  * Uma celebracao na fila, com identidade propria.
@@ -107,6 +114,7 @@ function somarGanhos(a: StatBlock | null, b: StatBlock | null): StatBlock | null
 function podeJuntar(a: Celebracao | undefined, b: Celebracao): boolean {
   if (!a) return false
   if (a.tipo === 'treinador' && b.tipo === 'treinador') return true
+  if (a.tipo === 'conquista' && b.tipo === 'conquista') return true
   // Evolucao, shiny e nivel de POKE NAO coalescem: cada um e um evento unico.
   return false
 }
@@ -128,6 +136,9 @@ function podeJuntar(a: Celebracao | undefined, b: Celebracao): boolean {
 export const TETO_DA_FILA = 3
 
 function juntar(a: Celebracao, b: Celebracao): Celebracao {
+  if (a.tipo === 'conquista' && b.tipo === 'conquista') {
+    return { tipo: 'conquista', ids: [...new Set([...a.ids, ...b.ids])] }
+  }
   if (a.tipo === 'nivel' && b.tipo === 'nivel') {
     const x = a as CelebNivel
     const y = b as CelebNivel

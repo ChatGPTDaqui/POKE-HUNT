@@ -111074,9 +111074,14 @@ function somarGanhos(a, b) {
 function podeJuntar(a, b) {
 	if (!a) return false;
 	if (a.tipo === "treinador" && b.tipo === "treinador") return true;
+	if (a.tipo === "conquista" && b.tipo === "conquista") return true;
 	return false;
 }
 function juntar(a, b) {
+	if (a.tipo === "conquista" && b.tipo === "conquista") return {
+		tipo: "conquista",
+		ids: [.../* @__PURE__ */ new Set([...a.ids, ...b.ids])]
+	};
 	if (a.tipo === "nivel" && b.tipo === "nivel") {
 		const x = a;
 		const y = b;
