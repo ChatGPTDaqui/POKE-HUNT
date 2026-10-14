@@ -168,8 +168,18 @@ export function alvoDaRegra(regra: RegraResolvida): number {
   }
 }
 
+/** Contador de tempo: as chaves `*_seg` (hunt_seg, ativo_seg:..., clima_seg:...). */
+function ehDeTempo(regra: RegraResolvida): boolean {
+  const chaves = [regra.chave, ...((regra.chaves as unknown[] | undefined) ?? [])].filter((k): k is string => typeof k === 'string')
+  // `contadores_todos` mede QUANTAS chaves passaram do alvo — o numero da tela
+  // e uma contagem, nao tempo, mesmo com chaves de tempo.
+  return regra.t !== 'contadores_todos' && chaves.length > 0 && chaves.every((k) => /_seg(:|$)/.test(k))
+}
+
 export function catalogoDaTela(): ConquistaDaTela[] {
-  return resolverCatalogo().map(({ regra, ...resto }) => ({ ...resto, alvo: alvoDaRegra(regra) }))
+  return resolverCatalogo().map(({ regra, ...resto }) => ({
+    ...resto, alvo: alvoDaRegra(regra), unidade: ehDeTempo(regra) ? 'tempo' : null,
+  }))
 }
 
 /** Conteudo de src/data/generated/conquistas.generated.ts. */

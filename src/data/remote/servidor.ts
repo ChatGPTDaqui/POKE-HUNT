@@ -181,6 +181,11 @@ export interface RespostaComEstado {
    */
   estadoParcial?: boolean
   mensagem?: string
+  /**
+   * Conquistas que o servidor fechou nesta janela (flush, avancar-sala,
+   * fechar). Ausente = servidor anterior as conquistas.
+   */
+  conquistasNovas?: string[]
 }
 
 /**

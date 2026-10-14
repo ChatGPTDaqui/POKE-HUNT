@@ -7,7 +7,7 @@ import {
   Backpack, BookOpen, Books, Calculator, ChatsCircle, CheckSquare, DotsThreeOutline,
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus,
   Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
-  ArrowsLeftRight, Sword,
+  ArrowsLeftRight, Sword, Medal,
 } from '@phosphor-icons/react'
 import { useWorldStore } from '@/stores/worldStore'
 import { useDiarioStore } from '@/stores/diarioStore'
@@ -66,6 +66,7 @@ const SECUNDARIOS: DestinoDeTela[] = [
   { screen: 'social', label: 'Social', Icon: ChatsCircle },
   { screen: 'troca', label: 'Troca', Icon: ArrowsLeftRight },
   { screen: 'ranking', label: 'Ranking', Icon: Trophy },
+  { screen: 'conquistas', label: 'Conquistas', Icon: Medal },
   { screen: 'pvp', label: 'PvP', Icon: Sword },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
   { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
@@ -383,7 +384,7 @@ export function SheetMais() {
         <div className="journey-guide-intro"><EquipmentArt kind="guide" /><p>Seu guia de jornada<span>Encontre treinadores e consulte suas ferramentas.</span></p></div>
         {[
           { title: 'Encontrar outros treinadores', screens: ['social', 'troca', 'ranking'] },
-          { title: 'Consultar e ajustar', screens: ['bestiario', 'wiki', 'tutoriais', 'config'] },
+          { title: 'Consultar e ajustar', screens: ['conquistas', 'bestiario', 'wiki', 'tutoriais', 'config'] },
         ].map((group) => <section key={group.title} aria-label={group.title}>
         <h3 className="journey-guide-heading">{group.title}</h3>
         <div className="journey-destinations">
