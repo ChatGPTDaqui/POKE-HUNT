@@ -13,6 +13,20 @@ const species: Species = { ...SPECIES.charmander, id: 'fixture-proximo', abiliti
 ] }
 
 describe('próximo aprendizado', () => {
+  it('mostra nome e nível sem interação, preservando o nível quando há vários golpes', () => {
+    const { rerender } = render(<ProximoGolpe poke={poke} species={species} />)
+    expect(screen.getByText('Ember')).toBeTruthy()
+    expect(screen.getByText('Lv 7')).toBeTruthy()
+    expect(screen.getByText('+1')).toBeTruthy()
+    expect(screen.getByLabelText(/Ember, Growl no nível 7/)).toBeTruthy()
+    rerender(<ProximoGolpe poke={{ ...poke, level: 7 }} species={species} />)
+    expect(screen.getByText('Flamethrower')).toBeTruthy()
+    expect(screen.getByText('Lv 20')).toBeTruthy()
+    expect(screen.queryByText('+1')).toBeNull()
+    rerender(<ProximoGolpe poke={{ ...poke, level: 100 }} species={species} />)
+    expect(screen.getByText('Sem novos golpes por nível')).toBeTruthy()
+    expect(screen.queryByText('Lv 20')).toBeNull()
+  })
   it('agrupa todos os golpes do próximo nível e avança depois dele', () => {
     const proximo = proximoAprendizado(poke, species)!
     expect(proximo.nivel).toBe(7)

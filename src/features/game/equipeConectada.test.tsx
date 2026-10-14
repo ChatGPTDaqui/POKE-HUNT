@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { createPokeInstance } from '@/data/pokes'
 import { createRng } from '@/core/rng'
+import { SPECIES } from '@/data/pokes'
+import { proximoAprendizado } from '@/components/shared/ProximoGolpe'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -28,6 +30,28 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('retratos e âncora permanente da equipe', () => {
+  it.each([320, 390, 844, 1366])('mostra próximo golpe junto ao ativo e acompanha troca/nível em %ipx', width => {
+    useUiStore.setState({ viewportWidth: width })
+    const view = render(<HudLayer />)
+    const conferir = () => {
+      const ativo = useGameStateStore.getState().team[useGameStateStore.getState().activeIndex]
+      const futuro = proximoAprendizado(ativo, SPECIES[ativo.speciesId])!
+      const resumo = document.querySelector('.journey-next-move')!
+      expect(resumo.closest('.journey-status-rail')).toBeTruthy()
+      expect(resumo.closest('.journey-vitals')).toBeTruthy()
+      expect(resumo.textContent).toContain(futuro.golpes[0].name)
+      expect(resumo.textContent).toContain(`Lv ${futuro.nivel}`)
+    }
+    conferir()
+    useGameStateStore.setState({ activeIndex: 1 })
+    view.rerender(<HudLayer />)
+    conferir()
+    const ativo = useGameStateStore.getState().team[1]
+    const futuro = proximoAprendizado(ativo, SPECIES[ativo.speciesId])!
+    useGameStateStore.setState({ team: [useGameStateStore.getState().team[0], { ...ativo, level: futuro.nivel }] })
+    view.rerender(<HudLayer />)
+    conferir()
+  })
   it.each([390, 844, 1366, 2560])('usa uma medida única para as duas fotos em %ipx', width => {
     useUiStore.setState({ viewportWidth: width, viewportHeight: width === 844 ? 390 : 844 })
     render(<HudLayer />)
