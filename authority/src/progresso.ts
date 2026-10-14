@@ -853,7 +853,15 @@ export async function gravarEstado(
         const atual = porId.get(String(l.id))
         return atual == null || aindaMeu(atual)
       })
-    if (gravarPoke.length) await inserir(cfg, 'pokemon_instances', gravarPoke, { upsert: 'id' })
+    // `origem: 'captura'` em TODA linha, e nao so nas novas: o servidor de
+    // sessoes so CRIA POKE por captura (entregas do Mercado sao ouro/item), e
+    // numa linha que ja existe o trigger `origem_do_poke` mantem a origem que
+    // ela tinha — migration 20261014120000. Fica FORA de `linhasQueMudaram` de
+    // proposito: o load traz a origem do banco, e comparar contra ela faria toda
+    // linha parecer mudada a cada flush.
+    if (gravarPoke.length) {
+      await inserir(cfg, 'pokemon_instances', gravarPoke.map((l) => ({ ...l, origem: 'captura' })), { upsert: 'id' })
+    }
   }
 
   const todosItens = gameStateToItemRows(userId, estado)

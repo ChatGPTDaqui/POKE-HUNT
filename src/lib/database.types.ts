@@ -1376,6 +1376,7 @@ export type Database = {
           location: Database["dev"]["Enums"]["pokemon_location"]
           locked: boolean
           nature: string | null
+          origem: string
           original_trainer: string | null
           rarity: Database["dev"]["Enums"]["rarity_tier"]
           species_id: string
@@ -1412,6 +1413,7 @@ export type Database = {
           location: Database["dev"]["Enums"]["pokemon_location"]
           locked?: boolean
           nature?: string | null
+          origem?: string
           original_trainer?: string | null
           rarity?: Database["dev"]["Enums"]["rarity_tier"]
           species_id: string
@@ -1448,6 +1450,7 @@ export type Database = {
           location?: Database["dev"]["Enums"]["pokemon_location"]
           locked?: boolean
           nature?: string | null
+          origem?: string
           original_trainer?: string | null
           rarity?: Database["dev"]["Enums"]["rarity_tier"]
           species_id?: string
@@ -4968,6 +4971,7 @@ export type Database = {
           location: Database["public"]["Enums"]["pokemon_location"]
           locked: boolean
           nature: string | null
+          origem: string
           original_trainer: string | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
           species_id: string
@@ -5004,6 +5008,7 @@ export type Database = {
           location: Database["public"]["Enums"]["pokemon_location"]
           locked?: boolean
           nature?: string | null
+          origem?: string
           original_trainer?: string | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
           species_id: string
@@ -5040,6 +5045,7 @@ export type Database = {
           location?: Database["public"]["Enums"]["pokemon_location"]
           locked?: boolean
           nature?: string | null
+          origem?: string
           original_trainer?: string | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
           species_id?: string
