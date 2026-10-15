@@ -5,7 +5,7 @@
 // Hospital mostra só o treinador; a entidade Pokémon permanece intacta no
 // worldStore para cura e cabeçalho. Apresentação nunca muta o estado do motor.
 import {
-  drawEntity, drawCorpoPorCima, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
+  drawEntity, drawCorpoPorCima, drawCuraDaEntidade, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
   drawMarcaDoAlvo, drawMarcaDoJogador, planejarTextoDeCombate,
 } from './sprites'
 import { desenharAmbiente } from './ambiente'
@@ -21,6 +21,8 @@ import { novoQuadroDoPixelizador } from './vfx/pixelizador'
 import { desenharMoedasNoChao } from './vooDeRecompensa'
 import { desenharItensNoChao } from './itemNoChao'
 import { TreinadorEmCampo, lugarNoDuelo } from './treinadorEmCampo'
+import { desenharCura, desenharCuraNoCentro, DURACAO_CURA_CENTRO_MS } from './cura'
+import { VFX_CURA_DURACAO } from '@/engine/entity'
 
 // Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
 // salaSystem.ts) mas ate 2026-08-15 o FUNDO ficava parado no do bioma inteiro
@@ -65,6 +67,8 @@ function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
 }
 
 export class Renderer {
+  movimentoReduzido = false
+  private curaNoCentro: { inicio: number; equipe: number } | null = null
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
   width: number
@@ -173,7 +177,12 @@ export class Renderer {
     return fx >= a.x1 - fgx && fx <= a.x2 + fgx && fy >= a.y1 - fgy && fy <= a.y2 + fgy
   }
 
-  renderHospital(_playerEntity: WorldEntity | null, nurseHovered = false): void {
+  /** Só confirmação visual, nunca trava a UI ou altera HP. Substitui o pulso anterior. */
+  iniciarCuraNoCentro(equipe: number): void {
+    this.curaNoCentro = equipe > 0 ? { inicio: performance.now(), equipe: Math.min(6, equipe) } : null
+  }
+
+  renderHospital(playerEntity: WorldEntity | null, nurseHovered = false): void {
     const ctx = this.ctx
     this.clear()
     ctx.fillStyle = HOSPITAL_FALLBACK
@@ -192,9 +201,25 @@ export class Renderer {
 
     if (fundo) ctx.drawImage(fundo, 0, 0, CENA_HOSPITAL.largura, CENA_HOSPITAL.altura)
     this._drawHospitalTrainer(ctx, escala)
+    this._drawHospitalHeal(ctx, playerEntity)
     this._drawHealLabel(ctx, nurseHovered)
 
     ctx.restore()
+  }
+
+  private _drawHospitalHeal(ctx: CanvasRenderingContext2D, player: WorldEntity | null): void {
+    const maquina = CENA_HOSPITAL.maquinaCura
+    const ancora = { x: maquina.x * CENA_HOSPITAL.largura, peY: maquina.y * CENA_HOSPITAL.altura,
+      altura: maquina.altura, raio: maquina.raio }
+    iniciarQuadroDeVfx()
+    if (this.curaNoCentro) {
+      const fase = (performance.now() - this.curaNoCentro.inicio) / DURACAO_CURA_CENTRO_MS
+      if (fase >= 1) this.curaNoCentro = null
+      else desenharCuraNoCentro(ctx, ancora, fase, this.curaNoCentro.equipe, this.movimentoReduzido)
+    } else if (player?.vfxCuraHp) {
+      // Poção no Hospital: indica cura na máquina, não sobre o treinador.
+      desenharCura(ctx, ancora, 1 - player.vfxCuraHp / VFX_CURA_DURACAO, this.movimentoReduzido, true)
+    }
   }
 
   private _drawHospitalTrainer(ctx: CanvasRenderingContext2D, escala: number): void {
@@ -242,6 +267,7 @@ export class Renderer {
   }
 
   renderMap(mapDef: MapDef, world: WorldState): void {
+    this.curaNoCentro = null // nada da confirmação da enfermeira atravessa a hunt
     const ctx = this.ctx
     this.clear()
     // Teto de particulas do VFX de golpe e POR QUADRO, somado entre todos os
@@ -396,6 +422,12 @@ export class Renderer {
       }
       if (jogadorVivo) drawCorpoPorCima(ctx, jogadorVivo)
     }
+
+    // Cura é feedback local, leve e desenhado uma única vez após os corpos.
+    for (const enemy of world.enemies) {
+      if (!enemy.nascendo) drawCuraDaEntidade(ctx, enemy, this.movimentoReduzido)
+    }
+    if (jogadorVivo) drawCuraDaEntidade(ctx, jogadorVivo, this.movimentoReduzido)
 
     // Clima na FRENTE de tudo (PH-141): a passagem rasante, o filtro de cor, a
     // vinheta e o relampago. Depois dos efeitos de golpe de proposito — o

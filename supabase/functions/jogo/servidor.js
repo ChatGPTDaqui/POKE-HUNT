@@ -54511,10 +54511,8 @@ function tickStatus(rng, entity, dt, clima = null) {
 	let dano = 0;
 	const nv = statusNaoVolatil(entity);
 	if (nv) {
-		if (nv.tipo === "poison" && traitDoPoke(entity.poke) === "poison_heal") {
-			const cura = danoPorTurno(nv.tipo, entity.poke.stats.hp);
-			entity.poke.hp = Math.min(entity.poke.stats.hp, entity.poke.hp + cura);
-		} else dano += danoPorTurno(nv.tipo, entity.poke.stats.hp);
+		if (nv.tipo === "poison" && traitDoPoke(entity.poke) === "poison_heal") heal(entity, danoPorTurno(nv.tipo, entity.poke.stats.hp));
+		else dano += danoPorTurno(nv.tipo, entity.poke.stats.hp);
 		const chanceDeSair = chanceDeDescongelar(nv.tipo);
 		if (chanceDeSair > 0) {
 			if (nextFloat(rng) < chanceDeSair) {
@@ -101500,6 +101498,17 @@ function desiredAnimName(entity) {
 	if (entity.state === "wander") return entity.wanderTarget ? "Walk" : "Idle";
 	return "Idle";
 }
+/** Só apresentação: também expira no saguão, sem avançar combate/cooldowns. */
+function tickCuraTimers(entity, dt) {
+	if (!entity.vfxCuraHp && !entity.vfxCuraStatus) return;
+	for (const campo of ["vfxCuraHp", "vfxCuraStatus"]) {
+		const restante = entity[campo];
+		if (!restante) continue;
+		const resta = restante - dt;
+		if (resta > 0) entity[campo] = resta;
+		else delete entity[campo];
+	}
+}
 function tickAttackAnimTimers(world, dt) {
 	const entities = [world.player, ...world.enemies];
 	for (const entity of entities) {
@@ -101515,16 +101524,7 @@ function tickAttackAnimTimers(world, dt) {
 			if (resta > 0) entity.hurtAnimTimer = resta;
 			else delete entity.hurtAnimTimer;
 		}
-		if (entity.vfxCuraHp) {
-			const resta = entity.vfxCuraHp - dt;
-			if (resta > 0) entity.vfxCuraHp = resta;
-			else delete entity.vfxCuraHp;
-		}
-		if (entity.vfxCuraStatus) {
-			const resta = entity.vfxCuraStatus - dt;
-			if (resta > 0) entity.vfxCuraStatus = resta;
-			else delete entity.vfxCuraStatus;
-		}
+		tickCuraTimers(entity, dt);
 	}
 }
 function updateAnimations(world, dt) {
@@ -108853,15 +108853,15 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		case "pain_split":
 			if (!isDead(target)) {
 				const media = Math.round((attacker.poke.hp + target.poke.hp) / 2);
-				attacker.poke.hp = Math.min(attacker.poke.stats.hp, media);
-				target.poke.hp = Math.min(target.poke.stats.hp, media);
+				for (const entity of [attacker, target]) if (media > entity.poke.hp) heal(entity, media - entity.poke.hp);
+				else entity.poke.hp = Math.min(entity.poke.stats.hp, media);
 			}
 			break;
 		case "heal_block":
 			if (!isDead(target)) target.curaBloqueadaAte = HEAL_BLOCK_SEGUNDOS;
 			break;
 		case "rest": {
-			attacker.poke.hp = attacker.poke.stats.hp;
+			heal(attacker, attacker.poke.stats.hp - attacker.poke.hp);
 			const traitAttacker = traitDoPoke(attacker.poke);
 			if (traitAttacker !== "insomnia" && traitAttacker !== "vital_spirit") {
 				attacker.poke.status = {
@@ -111867,6 +111867,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		return [];
 	}
 	if (!world.mapDef) {
+		if (world.player) tickCuraTimers(world.player, dt);
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}

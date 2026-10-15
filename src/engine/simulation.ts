@@ -49,7 +49,7 @@ import { tickVitoriaDoDuelo } from './systems/vitoriaDoDuelo'
 import { aplicarStatus, apagarTodosOsEstagios, limparEfeitosAoDesmaiar } from './systems/statusSystem'
 import { bloqueiaAcaoSempre } from '@/data/statusEffects'
 import { climaAmbienteDaSala, climaDeAmbiente, tickClimaDeGolpe } from './systems/climaAmbiente'
-import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
+import { updateAnimations, tickAttackAnimTimers, tickCuraTimers } from './systems/animationSystem'
 import { updateAutoHeal, maybeAutoCatch, temSubstitutoDeEquipe } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
 import { awardKillLoot } from './systems/economySystem'
@@ -1570,6 +1570,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   }
 
   if (!world.mapDef) {
+    // Poção no Hospital também termina; só timers visuais, sem cooldown/combate.
+    if (world.player) tickCuraTimers(world.player, dt)
     // Hospital: sem movimento/combate, mas o battle sprite continua animando.
     if (!silent) updateAnimations(world, dt)
     return []

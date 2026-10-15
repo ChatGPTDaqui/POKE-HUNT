@@ -40,6 +40,23 @@ No Hospital, o treinador com a skin selecionada ocupa o tapete, virado para a
 câmera, no lugar do Pokémon. Nome legível independe da escala da cena; cura e
 Pokémon ativo do cabeçalho continuam usando a entidade original, sem mutação.
 
+## Cura visual
+
+Cura de HP usa render/cura.ts: pulso mentolado, aros abertos e brilhos ascendentes,
+desenhados uma única vez após as passadas de corpo e antes do clima. O marcador
+vfxCuraHp só arma com ganho real; Poison Heal, Rest e Pain Split usam também heal.
+Casts puramente curativos não empilham cruzes antigas; Wish aguarda a cura real.
+Cura de status mantém a arte anterior. Timers visuais expiram inclusive no Hospital
+e em silent, sem descontar cooldowns nem introduzir combate no saguão.
+No Centro, a confirmação aceita dispara uma sequência rosada na máquina com uma
+Poké Bola por membro (máximo seis), usando relógio visual local do Renderer, nunca
+estado persistido. Trocar para hunt descarta a sequência. Poções no Hospital usam
+a máquina como âncora; não curam visualmente o treinador.
+GameCanvas acompanha prefers-reduced-motion: geometria estática com fade, sem
+remover o feedback. Partículas usam o orçamento global de VFX, sem filtro/blur ou
+flash de tela. A montagem scripts/harness/cura-quadros.mjs usa código e sprites
+reais para contraste/escala; não equivale a uma captura de gameplay.
+
 ## Espaço útil
 
 Painel usa snap `conteudo` por padrão: cresce só até o conteúdo ou o limite seguro,

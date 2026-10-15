@@ -51,6 +51,10 @@ export function GameCanvas() {
     const canvas = canvasRef.current
     if (!canvas) return
     const renderer = new Renderer(canvas)
+    const preferenciaDeMovimento = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    const atualizarMovimento = () => { renderer.movimentoReduzido = preferenciaDeMovimento?.matches ?? false }
+    atualizarMovimento()
+    preferenciaDeMovimento?.addEventListener('change', atualizarMovimento)
     // Skin do treinador (09/10): le a propria do servidor e sobe a escolha
     // local de quem escolheu antes dela existir no servidor.
     const meuId = useAuthStore.getState().user?.id
@@ -216,6 +220,7 @@ export function GameCanvas() {
     }, SYNC_INTERVAL_MS)
 
     return () => {
+      preferenciaDeMovimento?.removeEventListener('change', atualizarMovimento)
       window.removeEventListener('resize', resize)
       canvas.removeEventListener('click', handleClick)
       canvas.removeEventListener('mousemove', handleMouseMove)

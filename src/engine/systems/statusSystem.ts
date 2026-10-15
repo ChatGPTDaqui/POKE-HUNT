@@ -777,7 +777,7 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
     // aqui, no HP do proprio POKE.
     if (nv.tipo === 'poison' && traitDoPoke(entity.poke) === 'poison_heal') {
       const cura = danoPorTurno(nv.tipo, entity.poke.stats.hp)
-      entity.poke.hp = Math.min(entity.poke.stats.hp, entity.poke.hp + cura)
+      heal(entity, cura)
     } else {
       dano += danoPorTurno(nv.tipo, entity.poke.stats.hp)
     }

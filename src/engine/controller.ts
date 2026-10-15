@@ -16,6 +16,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useCutsceneStore } from '@/stores/cutsceneStore'
+import { useRendererStore } from '@/stores/rendererStore'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { preloadEspecies, preloadHunt, preloadArteDeCena, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
@@ -368,16 +369,21 @@ export const controller = {
 
   healTeam(): void {
     const gameState = useGameStateStore.getState()
-    void pedirAcao({ tipo: 'curarEquipe' }, () => gameState.healTeamFully())
+    const renderer = useRendererStore.getState().renderer
+    const quantidade = gameState.team.length
+    void pedirAcao({ tipo: 'curarEquipe' }, () => gameState.healTeamFully()).then(ok => {
+      // Só animar a confirmação aceita, ainda na mesma cena do Hospital.
+      if (ok && !useWorldStore.getState().mapDef && renderer === useRendererStore.getState().renderer) {
+        renderer?.iniciarCuraNoCentro(quantidade)
+      }
+    })
     const world = useWorldStore.getState()
     if (world.player) {
       useWorldStore.getState().update((draft) => {
         if (!draft.player) return
-        // A faisca de cura e marcada a mao aqui porque este caminho NAO passa
-        // por `heal()` — ele troca o `poke` inteiro pra reidratar o objeto, e
-        // nao soma HP. Sem esta linha a enfermeira seria a unica fonte de cura
-        // sem retorno visual.
-        if (draft.player.poke.hp < draft.player.poke.stats.hp) draft.player.vfxCuraHp = VFX_CURA_DURACAO
+        // Fora do Hospital, preserva o marcador da cura no corpo. No saguão,
+        // a sequência na máquina só dispara após a confirmação aceita acima.
+        if (world.mapDef && draft.player.poke.hp < draft.player.poke.stats.hp) draft.player.vfxCuraHp = VFX_CURA_DURACAO
         // `status: null` limpa paralisia/veneno/etc residual (PH-45) — mesma
         // classe do bug de fainted/state logo abaixo: `gameStateStore.healTeamFully()`
         // ja zerava `status` no store persistido, mas so isso nao chegava aqui no

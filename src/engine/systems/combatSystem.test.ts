@@ -765,6 +765,8 @@ describe('Fase 12: golpes de suporte sem dano', () => {
 
     expect(player.poke.hp).toBe(200)
     expect(enemy.poke.hp).toBe(200)
+    expect(player.vfxCuraHp).toBeUndefined()
+    expect(enemy.vfxCuraHp).toBeGreaterThan(0)
   })
 
   it('Heal Block impede golpe de cura enquanto ativo', () => {
@@ -776,6 +778,7 @@ describe('Fase 12: golpes de suporte sem dano', () => {
     resolverHit(world, player.id, enemy.id, 'synthesis')
 
     expect(player.poke.hp).toBe(hpAntes)
+    expect(player.vfxCuraHp).toBeUndefined()
   })
 
   it('...mas cura normalmente quando nao esta bloqueado (prova que o teste acima vale)', () => {
@@ -786,6 +789,7 @@ describe('Fase 12: golpes de suporte sem dano', () => {
     resolverHit(world, player.id, enemy.id, 'synthesis')
 
     expect(player.poke.hp).toBeGreaterThan(hpAntes)
+    expect(player.vfxCuraHp).toBeGreaterThan(0)
   })
 
   it('usar Heal Block no alvo trava a cura DELE por alguns turnos', () => {
@@ -804,6 +808,7 @@ describe('Fase 12: golpes de suporte sem dano', () => {
 
     expect(player.poke.hp).toBe(player.poke.stats.hp)
     expect(player.poke.status).toEqual({ tipo: 'sleep', turnosRestantes: 2 })
+    expect(player.vfxCuraHp).toBeGreaterThan(0)
   })
 
   it('Belly Drum perde metade do HP MAXIMO e sobe Ataque Fisico ao teto (+6) de uma vez', () => {
