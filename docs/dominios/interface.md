@@ -59,6 +59,12 @@ reais para contraste/escala; não equivale a uma captura de gameplay.
 
 ## Espaço útil
 
+Menu inferior mantém uma única fileira: Equipe, Mochila, Pokédex, Social, Hunt,
+Loja, Hospital, Mercado e Mais. Hunt ocupa o centro entre dois grupos iguais de
+quatro destinos. Laterais têm rolagem horizontal local quando não cabem alvos de
+44px; nunca quebram em fileiras nem deslocam Hunt. Ícones compartilham a mesma
+linha vertical. Social concentra seu próprio selo, sem duplicação em Mais.
+
 Painel usa snap `conteudo` por padrão: cresce só até o conteúdo ou o limite seguro,
 sem reservar altura vazia. Listas longas mantêm rolagem; `cheia` continua explícito.
 Durante consultas, `useGestaoAberta` recolhe controles de campo e chat mobile para

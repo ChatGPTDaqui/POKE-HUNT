@@ -2,7 +2,7 @@
 // lugares somam badge de pendencia, entao a duplicata faz o jogador ver "2
 // pendencias" quando ha uma. Nao lanca, nao quebra render — so mente.
 //
-// Desde que a barra virou 8 slots fixos, Pokedex e Mercado moram nela nos tres
+// Desde que a barra ganhou slots fixos, Pokedex e Mercado moram nela nos tres
 // regimes; o risco de duplicata deixou de depender de largura de tela e passou
 // a depender so desta lista nao sair de sincronia com a grade.
 //
@@ -13,9 +13,9 @@ import { destinosDaGrade, TELAS_NA_BARRA } from './ActionDock'
 import { TELAS_NA_COLUNA } from './ColunaDeAtalhos'
 
 describe('destinos da barra e da grade', () => {
-  it('a barra cobre os cinco destinos de tela fixos', () => {
+  it('a barra cobre os seis destinos de tela fixos', () => {
     expect([...TELAS_NA_BARRA].sort()).toEqual(
-      ['equipe', 'loja', 'mercado', 'mochila', 'pokedex'],
+      ['equipe', 'loja', 'mercado', 'mochila', 'pokedex', 'social'],
     )
   })
 
@@ -43,7 +43,7 @@ describe('destinos da barra e da grade', () => {
     // sair. PvP (PH-512) entrou logo apos, mesmo grupo de "duelo com outro
     // jogador".
     expect(telas).toEqual(
-      ['social', 'troca', 'ranking', 'conquistas', 'bestiario', 'wiki', 'tutoriais', 'config'],
+      ['troca', 'ranking', 'conquistas', 'bestiario', 'wiki', 'tutoriais', 'config'],
     )
   })
 })
