@@ -1,4 +1,4 @@
-export type ArtKind = 'bag' | 'dex' | 'map' | 'team' | 'guide' | 'shop' | 'hospital' | 'market'
+export type ArtKind = 'bag' | 'dex' | 'map' | 'team' | 'guide' | 'shop' | 'hospital' | 'market' | 'social'
 
 /** Cartografia discreta: decorativa, não interfere no arraste ou no foco. */
 export function RouteDecoration() {
@@ -15,6 +15,11 @@ export function EquipmentArt({ kind, className = '' }: { kind: ArtKind; classNam
   return <svg viewBox="0 0 100 100" className={`equipment-art ${className}`} aria-hidden="true" focusable="false">
     <ellipse cx="51" cy="86" rx="32" ry="6" fill="var(--journey-ink)" opacity=".13" />
     <g stroke="var(--journey-ink)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
+      {kind === 'social' && <>
+        <path d="M35 39h44v31H67L55 82V70H35Z" fill="var(--journey-leaf)" />
+        <path d="M16 18h49v34H38L24 64V52h-8Z" fill="var(--journey-paper)" />
+        <path d="M27 30h27M27 40h18" stroke="var(--journey-primary)" />
+      </>}
       {kind === 'shop' && <>
         <path d="M21 40h58v44H21Z" fill="var(--journey-paper)" />
         <path d="m15 36 9-19h52l9 19v11q-7 9-14 0-7 9-14 0-7 9-14 0-7 9-14 0-7 9-14 0Z" fill="var(--journey-primary)" />
