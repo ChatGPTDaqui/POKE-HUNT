@@ -1,6 +1,6 @@
-// Doca da Jornada: oito destinos na ordem original, Hunt no centro geométrico.
-// Grupos laterais têm a mesma largura; no mobile usam duas fileiras para manter
-// alvos de toque. Paisagem preserva os nomes. Gestão recolhe apenas os controles
+// Doca da Jornada: nove destinos em uma fileira, Hunt no centro geométrico.
+// Grupos laterais têm a mesma largura; rolagem local preserva alvos de toque
+// nas telas estreitas sem mover Hunt. Gestão recolhe apenas os controles
 // visuais de combate — Auto e o motor continuam funcionando.
 import { useRef, useState } from 'react'
 import {
@@ -42,7 +42,7 @@ export interface Destino {
   art?: ArtKind
 }
 
-// Os tres slots a esquerda do Hunt e os dois de tela a direita dele. Hospital
+// Os quatro slots a esquerda do Hunt e os dois de tela a direita dele. Hospital
 // e Mais nao entram aqui: nenhum dos dois e uma `ScreenName` (um troca a cena
 // do canvas, o outro abre a grade).
 type DestinoDeTela = Destino & { screen: ScreenName }
@@ -51,6 +51,7 @@ const ESQUERDA: DestinoDeTela[] = [
   { screen: 'equipe', label: 'Equipe', Icon: UsersThree, art: 'team' },
   { screen: 'mochila', label: 'Mochila', Icon: Backpack, art: 'bag' },
   { screen: 'pokedex', label: 'Pokédex', Icon: BookOpen, art: 'dex' },
+  { screen: 'social', label: 'Social', Icon: ChatsCircle, art: 'social' },
 ]
 const DIREITA: DestinoDeTela[] = [
   { screen: 'loja', label: 'Loja', Icon: Storefront, art: 'shop' },
@@ -142,10 +143,7 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
   const pendenciasEmMais = destinosDaGrade().reduce((soma, d) => (
     soma + (d.screen === 'mercado' ? pendenciasMercado : d.screen === 'social' ? pendenciasSocial.total : 0)
   ), 0)
-  // PH-287: o "Mais" e o unico lugar onde o numero do Social aparece somado ao
-  // do Mercado, entao a frase dele nao serve pro selo inteiro. Ela vai no rotulo
-  // acessivel do item de Social dentro do sheet, que e onde o jogador chega
-  // depois de tocar aqui.
+  // O Social tem seu próprio selo e descrição, sem repetir pendências em Mais.
   const detalheDoSocial = fraseDasPendencias(pendenciasSocial)
 
   // Hospital nao abre tela: ele TROCA a cena do canvas. Fora de uma hunt o
@@ -195,6 +193,8 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
           ativo={currentScreen === d.screen}
           rotulo
           destaque={d.screen === 'equipe' ? destaqueEquipe.classe : ''}
+          badge={d.screen === 'social' ? pendenciasSocial.total : 0}
+          descricaoDoBadge={d.screen === 'social' ? detalheDoSocial ?? undefined : undefined}
           onClick={() => { if (d.screen === 'equipe') destaqueEquipe.aoTocar(); toggleScreen(d.screen) }}
         />
       ))}</div>
@@ -241,11 +241,6 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         ativo={moreOpen}
         rotulo
         badge={pendenciasEmMais}
-        // PH-287: o selo do "Mais" soma Social e Mercado, e o numero sozinho
-        // nao diz de onde ele vem. Quando o que esta pendente e do Social, o
-        // rotulo passa a dizer o que e — a diferenca entre "tem 2 coisas" e "tem
-        // 1 mensagem por ler e 1 item por coletar".
-        descricaoDoBadge={detalheDoSocial ?? undefined}
         onClick={() => setMoreOpen(!moreOpen)}
       /></div>
     </nav>
@@ -295,25 +290,21 @@ function SlotNav({
       )}
     >
       {trancado && <MarcaDeCadeado passoId={trancado} />}
-      {art ? <EquipmentArt kind={art} className="journey-nav-art" /> : iconUrl && !imagemQuebrada ? (
-        <img
-          src={iconUrl}
-          alt=""
-          onError={() => setImagemQuebrada(true)}
-          className="h-[1.25em] w-[1.25em] object-contain"
-          style={{ imageRendering: 'pixelated' }}
-        />
-      ) : (
-        <Icon className="journey-nav-symbol text-[1.25em]" weight="duotone" />
-      )}
-      {/* O rotulo NAO e enfeite no toque: sem hover nao existe `title`, e um
-          icone sozinho e adivinhacao. Ele so sai em 'deitado', onde cada
-          linha custa 13% da altura do jogo. */}
+      <span className="journey-nav-icon">
+        {art ? <EquipmentArt kind={art} className="journey-nav-art" /> : iconUrl && !imagemQuebrada ? (
+          <img
+            src={iconUrl}
+            alt=""
+            onError={() => setImagemQuebrada(true)}
+            className="h-[1.25em] w-[1.25em] object-contain"
+            style={{ imageRendering: 'pixelated' }}
+          />
+        ) : (
+          <Icon className="journey-nav-symbol text-[1.25em]" weight="duotone" />
+        )}
+      </span>
+      {/* Rótulos permanecem visíveis em todos os regimes, inclusive paisagem. */}
       {rotulo && (
-        // `min()` e nao `.58em` seco: com 8 slots a largura util e 1/8 da barra,
-        // e em 320px isso da 34px — "Hospital" e "Mercado" truncavam pra
-        // "Hospit…". O rotulo passa a encolher junto com a tela. Medido: em
-        // 320px nenhum dos oito trunca, em 390px o texto volta ao tamanho cheio.
         <span
           className="w-full truncate text-center leading-none tracking-[.01em]"
           style={{ fontSize: 'min(.58em, 2.3vw)' }}
@@ -349,14 +340,15 @@ function SlotHunt({ ativo, deitado, destaque, onClick }: { ativo: boolean; deita
       <span
         className={cn(
           'flex items-center justify-center rounded-full transition-colors',
-          deitado ? 'h-[2.05em] w-[2.05em]' : 'h-[2.3em] w-[2.3em]',
+          'journey-nav-icon',
+          deitado ? 'w-[2.05em]' : 'w-[2.3em]',
           ativo ? 'bg-primary text-primary-foreground' : 'bg-n800 text-n100',
           destaque,
         )}
       >
         <EquipmentArt kind="map" className="journey-hunt-art" />
       </span>
-      <span className="leading-none" style={{ fontSize: 'min(.68em, 2.6vw)' }}>Hunt</span>
+      <span className="journey-nav-label leading-none" style={{ fontSize: 'min(.58em, 2.3vw)' }}>Hunt</span>
     </button>
   )
 }

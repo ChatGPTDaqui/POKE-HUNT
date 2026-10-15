@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.17',
+    date: '2026-10-14',
+    title: 'Menu inferior alinhado',
+    highlights: [
+      'Os ícones do menu inferior ficam em uma única fileira, com Hunt no centro e Social acessível diretamente na barra.',
+      'Em telas estreitas, deslize as laterais do menu para acessar todos os destinos sem reduzir os botões de toque.',
+    ],
+  },
+  {
     version: '8.16',
     date: '2026-10-14',
     title: 'Uma nova luz para a cura',
