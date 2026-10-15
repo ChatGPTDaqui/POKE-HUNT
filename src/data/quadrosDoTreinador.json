@@ -1,65 +1,65 @@
 {
   "mochila": {
-    "frameWidth": 149,
-    "frameHeight": 201,
-    "footX": 74,
-    "footY": 195,
+    "frameWidth": 161,
+    "frameHeight": 213,
+    "footX": 80,
+    "footY": 201,
     "bodyHeight": 178,
     "walkFrames": 4
   },
   "cynthia": {
-    "frameWidth": 197,
-    "frameHeight": 199,
-    "footX": 98,
-    "footY": 193,
+    "frameWidth": 209,
+    "frameHeight": 211,
+    "footX": 104,
+    "footY": 199,
     "bodyHeight": 183,
     "walkFrames": 4
   },
   "lance": {
-    "frameWidth": 203,
-    "frameHeight": 222,
-    "footX": 101,
-    "footY": 216,
+    "frameWidth": 217,
+    "frameHeight": 236,
+    "footX": 108,
+    "footY": 223,
     "bodyHeight": 201,
     "walkFrames": 4
   },
   "may": {
-    "frameWidth": 189,
-    "frameHeight": 228,
-    "footX": 94,
-    "footY": 222,
+    "frameWidth": 203,
+    "frameHeight": 242,
+    "footX": 101,
+    "footY": 229,
     "bodyHeight": 204.5,
     "walkFrames": 4
   },
   "dawn": {
-    "frameWidth": 191,
-    "frameHeight": 250,
-    "footX": 95,
-    "footY": 244,
+    "frameWidth": 207,
+    "frameHeight": 266,
+    "footX": 103,
+    "footY": 252,
     "bodyHeight": 227,
     "walkFrames": 4
   },
   "carvalho": {
-    "frameWidth": 121,
-    "frameHeight": 190,
-    "footX": 60,
-    "footY": 184,
+    "frameWidth": 133,
+    "frameHeight": 202,
+    "footX": 66,
+    "footY": 190,
     "bodyHeight": 166,
     "walkFrames": 4
   },
   "jessie": {
-    "frameWidth": 195,
-    "frameHeight": 199,
-    "footX": 97,
-    "footY": 193,
+    "frameWidth": 207,
+    "frameHeight": 211,
+    "footX": 103,
+    "footY": 199,
     "bodyHeight": 175,
     "walkFrames": 4
   },
   "red": {
-    "frameWidth": 169,
-    "frameHeight": 242,
-    "footX": 84,
-    "footY": 236,
+    "frameWidth": 183,
+    "frameHeight": 256,
+    "footX": 91,
+    "footY": 243,
     "bodyHeight": 223,
     "walkFrames": 5
   }
