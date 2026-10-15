@@ -35,7 +35,7 @@ import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { Palavra } from '@/components/shared/Explicacao'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
-import { GameButton, GameIconButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
+import { GameButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { focusHunt } from '@/features/hunt/HuntMenu'
 
 // Instancia so-pra-exibicao do botao "Ver perfil completo": uma especie sozinha
@@ -370,12 +370,26 @@ export function PokedexMenu() {
     })()
     return term ? doEscopo.filter((s) => s.name.toLowerCase().includes(term)) : doEscopo
   }, [allSpecies, search, escopoAtivo, mapaAtual, regiaoAtual])
-  // A ficha acompanha o filtro: nunca exibe uma espécie escondida pela busca.
-  const selected = visible.find((species) => species.id === expandedSpeciesId) ?? visible[0]
+  // A ficha mostra a especie escolhida mesmo que ela nao esteja na lista (as
+  // setas saem do filtro de proposito, ver `navegar`). Digitar na busca e o que
+  // reconcilia: ver `aoDigitarBusca`.
+  const selected = (expandedSpeciesId ? SPECIES[expandedSpeciesId] : undefined) ?? visible[0]
+  // As setas andam pela Pokedex INTEIRA, na ordem do numero, e nao pelo que o
+  // filtro deixou visivel: buscar "char" e apertar → tem que ir para a proxima
+  // especie da Pokedex, nao para a proxima que contem "char".
   function navegar(delta: number) {
-    if (!selected || visible.length === 0) return
-    const index = visible.findIndex((species) => species.id === selected.id)
-    setExpandedSpeciesId(visible[(index + delta + visible.length) % visible.length].id)
+    if (!selected) return
+    const index = allSpecies.findIndex((species) => species.id === selected.id)
+    setExpandedSpeciesId(allSpecies[(index + delta + allSpecies.length) % allSpecies.length].id)
+  }
+
+  // Digitar mexe no filtro, e a ficha nunca fica numa especie que a NOVA busca
+  // esconde: se a escolhida nao casa mais, solta a escolha e a ficha cai na
+  // primeira da lista. So as setas podem sair do filtro.
+  function aoDigitarBusca(valor: string) {
+    setSearch(valor)
+    const termo = valor.trim().toLowerCase()
+    if (termo && selected && !selected.name.toLowerCase().includes(termo)) setExpandedSpeciesId(null)
   }
 
   return (
@@ -387,7 +401,7 @@ export function PokedexMenu() {
             placeholder="Buscar Pokemon..."
             aria-label="Buscar Pokémon"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => aoDigitarBusca(e.target.value)}
           />
           <GameButton variant={shinyView ? 'primary' : 'secondary'} onClick={() => setShinyView((v) => !v)}>
             ✨ {shinyView ? 'Abates Shiny' : 'Abates Totais'}
@@ -440,10 +454,10 @@ export function PokedexMenu() {
       </div>
       {selected && <section className="journey-dex-focus" aria-label={`Ficha de ${selected.name}`}>
         <div className="journey-research-heading">
-          <GameIconButton variant="ghost" aria-label="← Anterior" onClick={() => navegar(-1)}>←</GameIconButton>
+          <GameButton variant="secondary" className="journey-dex-seta" aria-label="← Anterior" title="Pokémon anterior" onClick={() => navegar(-1)}>←</GameButton>
           <JourneyPokeArt species={selected} />
           <div><small>#{String(dexNumber(selected)).padStart(3, '0')}</small><h3>{selected.name}</h3><TypeChip type={selected.type} /> {selected.type2 && <TypeChip type={selected.type2} />}</div>
-          <GameIconButton variant="ghost" aria-label="Próximo →" onClick={() => navegar(1)}>→</GameIconButton>
+          <GameButton variant="secondary" className="journey-dex-seta" aria-label="Próximo →" title="Próximo Pokémon" onClick={() => navegar(1)}>→</GameButton>
         </div>
         <SpeciesDetail species={selected} />
       </section>}

@@ -39,10 +39,25 @@ describe('Pokédex — grade e ficha de pesquisa', () => {
     expect(screen.queryByRole('region', { name: /Ficha de/ })).toBeNull()
     expect(screen.getByText('Nenhum Pokemon encontrado.')).toBeTruthy()
   })
-  it('navega circularmente somente pelas espécies filtradas', () => {
+  it('as setas andam pela Pokédex inteira, nao pelo que a busca deixou visivel', () => {
     render(<PokedexMenu />)
     fireEvent.change(screen.getByRole('textbox', { name: 'Buscar Pokémon' }), { target: { value: 'pikachu' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Selecionar Pikachu' }))
     fireEvent.click(screen.getByRole('button', { name: /Próximo/i }))
+    // So o Pikachu casa com a busca; a seta tem que sair dele.
+    expect(screen.queryByRole('region', { name: 'Ficha de Pikachu' })).toBeNull()
+    expect(screen.getByRole('region', { name: /Ficha de / })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /Anterior/i }))
     expect(screen.getByRole('region', { name: 'Ficha de Pikachu' })).toBeTruthy()
+  })
+  it('a seta anda uma especie por vez na ordem do numero e da a volta no fim', () => {
+    render(<PokedexMenu />)
+    const titulo = () => screen.getByRole('region', { name: /Ficha de / }).getAttribute('aria-label')
+    const primeira = titulo()
+    fireEvent.click(screen.getByRole('button', { name: /Anterior/i }))
+    const ultima = titulo()
+    expect(ultima).not.toBe(primeira)
+    fireEvent.click(screen.getByRole('button', { name: /Próximo/i }))
+    expect(titulo()).toBe(primeira)
   })
 })
