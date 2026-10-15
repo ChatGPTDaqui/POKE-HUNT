@@ -27,7 +27,7 @@ function recortar(source, rows, map, columns = 4) {
       }
     }
     if (n >= 2000) centers.push(sumY / n)
-    if (n >= 150) components.push({ n, cx: sumX / n, cy: sumY / n, x0, x1, y0, y1 })
+    if (n >= 150) components.push({ id: id - 1, n, cx: sumX / n, cy: sumY / n, x0, x1, y0, y1 })
   }
   centers.sort((a, b) => a - b)
   if (centers.length < rows * columns) throw new Error('Corpos insuficientes para localizar as linhas')
@@ -38,12 +38,14 @@ function recortar(source, rows, map, columns = 4) {
     frames[row] = []
     for (let q = 0; q < columns; q++) {
       let x0 = W, y0 = H, x1 = -1, y1 = -1
+      const meus = new Set()
       const candidates = components.filter(c => c.cy >= bounds[row] && c.cy < bounds[row + 1] && Math.floor(c.cx / (W / columns)) === q).sort((a, b) => b.n - a.n)
       const main = candidates[0]
       if (!main) throw new Error(`Corpo ausente ${row},${q}`)
       for (const c of candidates) {
         if (c !== main && !(c.x0 < main.x1 + 10 && c.x1 > main.x0 - 10 && c.y0 < main.y1 + 10 && c.y1 > main.y0 - 10)) continue
         x0 = Math.min(x0, c.x0); x1 = Math.max(x1, c.x1); y0 = Math.min(y0, c.y0); y1 = Math.max(y1, c.y1)
+        meus.add(c.id)
       }
       if (x1 < x0) throw new Error(`Quadro vazio ${row},${q}`)
       // Âncora pelo tronco/cabeça, não pelo pé que avança durante o passo.
@@ -51,9 +53,14 @@ function recortar(source, rows, map, columns = 4) {
       for (let y = y0; y <= (y0 + y1) / 2; y++) for (let x = x0; x <= x1; x++) {
         if (D[(y * W + x) * 4 + 3] > 128) { sumX += x; count++ }
       }
-      frames[row][q] = { x0: Math.max(Math.ceil(q * W / columns), x0 - 3), x1: Math.min(Math.ceil((q + 1) * W / columns) - 1, x1 + 3),
+      // O recorte NAO fica preso a coluna fixa da folha (W / colunas): num passo
+      // largo o corpo atravessa a divisa e o limite fixo cortava o boneco numa
+      // reta vertical (Carvalho, quadros 1 e 4 — 87 a 134 px de corte). O corpo
+      // so e limitado pela imagem; o que pertence a OUTRO boneco e filtrado na
+      // copia (`meus`), nao pelo retangulo.
+      frames[row][q] = { x0: Math.max(0, x0 - 3), x1: Math.min(W - 1, x1 + 3),
         y0: Math.max(bounds[row], y0 - 3), y1: Math.min(bounds[row + 1] - 1, y1 + 3),
-        foot: y1, center: Math.round(sumX / count), bodyHeight: y1 - y0 + 1 }
+        foot: y1, center: Math.round(sumX / count), bodyHeight: y1 - y0 + 1, meus }
     }
   }
   if (map.some(([row, mirror]) => !frames[row] || ![0, 1].includes(mirror))) throw new Error('Mapa inválido')
@@ -84,6 +91,10 @@ function recortar(source, rows, map, columns = 4) {
       for (let y = f.y0; y <= f.y1; y++) for (let x = f.x0; x <= f.x1; x++) {
         const tx = halfWidth + (mirror ? f.center - x : x - f.center), ty = footY + y - f.foot
         if (tx < 0 || tx >= frameWidth || ty < 0 || ty >= frameHeight) throw new Error('Recorte ultrapassa o quadro')
+        // Pixel forte de outro boneco (a borda da vizinha entrando no retangulo)
+        // fica de fora; franja semitransparente (sem corpo) segue como sempre.
+        const dono = labels[y * W + x]
+        if (dono >= 0 && !f.meus.has(dono) && D[(y * W + x) * 4 + 3] > 128) continue
         const from = (y * W + x) * 4, to = ((row * frameHeight + ty) * out.width + q * frameWidth + tx) * 4
         D.copy(out.data, to, from, from + 4)
       }

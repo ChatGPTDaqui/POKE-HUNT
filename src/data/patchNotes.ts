@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.18',
+    date: '2026-10-15',
+    title: 'Pokédex mais fácil de folhear',
+    highlights: [
+      'As setas de anterior e próximo da Pokédex ficaram maiores e andam pela Pokédex inteira, mesmo depois de uma busca.',
+      'A lista de espécies ocupa toda a altura da ficha, sem espaço vazio embaixo.',
+      'Professor Carvalho, Jessie e May não aparecem mais com partes do corpo cortadas em alguns quadros da caminhada.',
+    ],
+  },
+  {
     version: '8.17',
     date: '2026-10-14',
     title: 'Menu inferior alinhado',
