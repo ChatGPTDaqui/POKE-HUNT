@@ -29,6 +29,9 @@ export const CENA_HOSPITAL = {
   /** Porte do treinador em pixels da arte, independente da skin selecionada. */
   alturaTreinador: 160,
 
+  /** Câmara de cura à direita de Chansey, medida sobre a arte de 2000px. */
+  maquinaCura: { x: 0.674, y: 0.44, altura: 180, raio: 58 },
+
   /** Centro da enfermeira atras do balcao (referencia do rotulo "Curar"). */
   enfermeira: { x: 0.5025, y: 0.418 },
 

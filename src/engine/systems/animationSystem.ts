@@ -1,7 +1,7 @@
 // Port de js/systems/AnimationSystem.js.
 import { resolveBattleAnim } from '@/data/battleSprites'
 import type { AnimName } from '@/data/battleSpriteAnims'
-import type { AttackAnimKind, PlayerEntity, EnemyEntity, Point, WorldState } from '../types'
+import type { AttackAnimKind, PlayerEntity, EnemyEntity, Point, WorldState, WorldEntity } from '../types'
 import { getSpecies, isDead } from '../entity'
 import { imobilizadoPorStatus } from './statusSystem'
 
@@ -70,6 +70,18 @@ export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
   return 'Idle'
 }
 
+/** Só apresentação: também expira no saguão, sem avançar combate/cooldowns. */
+export function tickCuraTimers(entity: WorldEntity, dt: number): void {
+  if (!entity.vfxCuraHp && !entity.vfxCuraStatus) return
+  for (const campo of ['vfxCuraHp', 'vfxCuraStatus'] as const) {
+    const restante = entity[campo]
+    if (!restante) continue
+    const resta = restante - dt
+    if (resta > 0) entity[campo] = resta
+    else delete entity[campo]
+  }
+}
+
 // Decrementa attackAnimTimer de toda entidade — separado de updateAnimations
 // abaixo (que e pulado em modo silent/headless) porque MovementSystem.ts
 // tambem le esse mesmo timer pra TRAVAR o movimento enquanto uma pose de
@@ -101,16 +113,7 @@ export function tickAttackAnimTimers(world: WorldState, dt: number): void {
     // pelo mesmo motivo do `attackAnimTimer`: esta funcao roda tambem no modo
     // silencioso do servidor, e um timer que so desce no cliente ficaria
     // travado num snapshot vindo de um flush.
-    if (entity.vfxCuraHp) {
-      const resta = entity.vfxCuraHp - dt
-      if (resta > 0) entity.vfxCuraHp = resta
-      else delete entity.vfxCuraHp
-    }
-    if (entity.vfxCuraStatus) {
-      const resta = entity.vfxCuraStatus - dt
-      if (resta > 0) entity.vfxCuraStatus = resta
-      else delete entity.vfxCuraStatus
-    }
+    tickCuraTimers(entity, dt)
   }
 }
 

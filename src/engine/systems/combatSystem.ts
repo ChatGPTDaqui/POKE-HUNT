@@ -3571,8 +3571,10 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     case 'pain_split':
       if (!isDead(target)) {
         const media = Math.round((attacker.poke.hp + target.poke.hp) / 2)
-        attacker.poke.hp = Math.min(attacker.poke.stats.hp, media)
-        target.poke.hp = Math.min(target.poke.stats.hp, media)
+        for (const entity of [attacker, target]) {
+          if (media > entity.poke.hp) heal(entity, media - entity.poke.hp)
+          else entity.poke.hp = Math.min(entity.poke.stats.hp, media)
+        }
       }
       break
     case 'heal_block':
@@ -3583,7 +3585,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // sorteio de chance nem checagem de "ja tem status" (Rest SUBSTITUI
       // qualquer status que o usuario tivesse, como nos jogos). Insomnia/
       // Vital Spirit ainda assim impedem o proprio sono — o portador so cura.
-      attacker.poke.hp = attacker.poke.stats.hp
+      heal(attacker, attacker.poke.stats.hp - attacker.poke.hp)
       const traitAttacker = traitDoPoke(attacker.poke)
       if (traitAttacker !== 'insomnia' && traitAttacker !== 'vital_spirit') {
         attacker.poke.status = { tipo: 'sleep', turnosRestantes: 2 }

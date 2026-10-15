@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.16',
+    date: '2026-10-14',
+    title: 'Uma nova luz para a cura',
+    highlights: [
+      'Poções, golpes de recuperação e curas passivas agora envolvem o Pokémon em um pulso verde-menta com brilhos ascendentes, sem esconder seu corpo.',
+      'No Centro Pokémon, a máquina acende uma Poké Bola por membro da equipe e conclui a recuperação com uma luz rosada. Seu treinador permanece no saguão.',
+      'O efeito respeita a preferência de movimento reduzido do aparelho e só indica ganho de HP quando a vida realmente aumenta.',
+    ],
+  },
+  {
     version: '8.15',
     date: '2026-10-14',
     title: 'Treinador no Centro Pokémon',
