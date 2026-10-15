@@ -437,10 +437,15 @@ export function PokedexMenu() {
               className="journey-dex-choice"
             >
               <PokeSwatch species={species} size={2.4} />
+              {/* Nome numa linha so (reticencias) e tipos na de baixo: com a quebra
+                  livre, nome comprido empurrava os tipos e os cards saiam com
+                  alturas diferentes, desalinhando a grade. */}
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-[.4em]">
-                  <span className="text-menu-muted">#{dexNumber(species)}</span>
+                <div className="journey-dex-nome">
+                  <span className="text-menu-muted">#{dexNumber(species)}</span>{' '}
                   <span className="font-medium">{species.name}</span>
+                </div>
+                <div className="journey-dex-tipos">
                   <TypeChip type={species.type} />
                   {species.type2 && <TypeChip type={species.type2} />}
                 </div>

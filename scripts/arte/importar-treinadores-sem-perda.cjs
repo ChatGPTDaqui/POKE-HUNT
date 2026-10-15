@@ -4,7 +4,44 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { PNG } = require('pngjs')
 
-function recortar(source, rows, map, columns = 4) {
+// Altura do boneco em campo (src/render/treinadorEmCampo.ts#ALTURA_DO_BONECO).
+const ALTURA_DE_CAMPO = 30
+
+/**
+ * Borda preta em volta do que e corpo (alpha forte), dentro de cada celula.
+ * O pixel semitransparente da franja da fonte fica POR CIMA do preto, entao a
+ * transicao corpo -> contorno continua suave. Disco de raio `r`.
+ */
+function aplicarContorno(png, celulaW, celulaH, r) {
+  const { width: W, height: H, data } = png
+  const origem = Buffer.from(data)
+  const offsets = []
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx * dx + dy * dy <= r * r + 1) offsets.push([dx, dy])
+  for (let cy = 0; cy < H / celulaH; cy++) {
+    for (let cx = 0; cx < W / celulaW; cx++) {
+      const x0 = cx * celulaW, y0 = cy * celulaH
+      for (let y = 0; y < celulaH; y++) for (let x = 0; x < celulaW; x++) {
+        const i = ((y0 + y) * W + x0 + x) * 4
+        const a = origem[i + 3]
+        if (a === 255) continue
+        let perto = false
+        for (const [dx, dy] of offsets) {
+          const nx = x + dx, ny = y + dy
+          if (nx < 0 || nx >= celulaW || ny < 0 || ny >= celulaH) continue
+          if (origem[((y0 + ny) * W + x0 + nx) * 4 + 3] > 128) { perto = true; break }
+        }
+        if (!perto) continue
+        const f = a / 255
+        data[i] = Math.round(origem[i] * f)
+        data[i + 1] = Math.round(origem[i + 1] * f)
+        data[i + 2] = Math.round(origem[i + 2] * f)
+        data[i + 3] = 255
+      }
+    }
+  }
+}
+
+function recortar(source, rows, map, columns = 4, comContorno = true) {
   const { width: W, height: H, data: D } = source
   if (!Number.isInteger(columns) || columns < 1 || map.length !== 8 || !Number.isInteger(rows) || rows < 1) throw new Error('Grade inválida')
   // Alpha forte localiza os corpos; o recorte copia RGBA da fonte, incluindo
@@ -65,12 +102,18 @@ function recortar(source, rows, map, columns = 4) {
   }
   if (map.some(([row, mirror]) => !frames[row] || ![0, 1].includes(mirror))) throw new Error('Mapa inválido')
   const all = frames.flat()
-  const halfWidth = Math.max(...all.map(f => Math.max(f.center - f.x0, f.x1 - f.center))) + 2
-  const frameWidth = 2 * halfWidth + 1
-  const footY = Math.max(...all.map(f => f.foot - f.y0)) + 2
-  const frameHeight = footY + 6
   const heights = all.map(f => f.bodyHeight).sort((a, b) => a - b)
   const bodyHeight = (heights[Math.floor((heights.length - 1) / 2)] + heights[Math.floor(heights.length / 2)]) / 2
+  // CONTORNO PRETO (pedido do dono, 15/10/2026): o boneco ganha uma borda preta
+  // como a dos sprites dos Pokemon, pra se destacar do cenario. A espessura e
+  // proporcional ao corpo (cerca de 1 px de mundo, que e o que o boneco mede em
+  // campo: ALTURA_DO_BONECO = 30), e nao um numero fixo, porque cada skin tem
+  // uma fonte de tamanho diferente. O quadro cresce em volta pra caber.
+  const contorno = comContorno ? Math.max(2, Math.round(bodyHeight / ALTURA_DE_CAMPO)) : 0
+  const halfWidth = Math.max(...all.map(f => Math.max(f.center - f.x0, f.x1 - f.center))) + 2 + contorno
+  const frameWidth = 2 * halfWidth + 1
+  const footY = Math.max(...all.map(f => f.foot - f.y0)) + 2 + contorno
+  const frameHeight = footY + 6 + contorno
   const idle = frames.map(row => {
     // Sem idle original: selecionar o passo de pés menos afastados.
     // Não fabricar pernas nem uma falsa respiração.
@@ -101,7 +144,9 @@ function recortar(source, rows, map, columns = 4) {
     }
     return out
   }
-  return { walk: atlas(columns, (_r, q) => q), idle: atlas(2, r => idle[r]),
+  const walk = atlas(columns, (_r, q) => q), idleAtlas = atlas(2, r => idle[r])
+  if (contorno > 0) { aplicarContorno(walk, frameWidth, frameHeight, contorno); aplicarContorno(idleAtlas, frameWidth, frameHeight, contorno) }
+  return { walk, idle: idleAtlas,
     geometry: { frameWidth, frameHeight, footX: halfWidth, footY, bodyHeight, walkFrames: columns }, frames, idleFrames: idle }
 }
 
