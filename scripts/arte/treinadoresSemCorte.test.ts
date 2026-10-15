@@ -4,6 +4,9 @@
 // largo o boneco atravessa a divisa — Carvalho perdia 87 a 134 px de altura de
 // casaco, Jessie 65 a 76.
 //
+// O CONTORNO PRETO (15/10/2026) e ignorado na conta: ele acompanha a silhueta e
+// somaria a altura de um corte reto qualquer. So pixel de corpo conta.
+//
 // Detector: a coluna de pixels opacos mais a esquerda/direita de um quadro e,
 // num corpo inteiro, uma ponta de braco ou casaco (poucas dezenas de pixels).
 // Uma coluna com mais que o limite e um corte reto.
@@ -16,6 +19,9 @@ import quadros from '../../src/data/quadrosDoTreinador.json'
 const RAIZ = join(__dirname, '..', '..')
 // Folga acima do maior valor "natural" medido (35 px: braco estendido).
 const LIMITE_DE_CORTE_RETO = 50
+// Soma R+G+B abaixo disto e o contorno preto (puro: 0). A arte original tem
+// bordas escuras, mas marrons/azuis, bem acima disto.
+const CONTORNO_PRETO = 30
 
 function cortesRetos(skin: string, anim: 'Walk' | 'Idle'): string[] {
   const { frameWidth: fw, frameHeight: fh } = quadros[skin as keyof typeof quadros]
@@ -28,7 +34,10 @@ function cortesRetos(skin: string, anim: 'Walk' | 'Idle'): string[] {
       const alturas: number[] = []
       for (let x = 0; x < fw; x++) {
         let n = 0
-        for (let y = 0; y < fh; y++) if (p.data[((r * fh + y) * p.width + c * fw + x) * 4 + 3] > 200) n++
+        for (let y = 0; y < fh; y++) {
+          const i = ((r * fh + y) * p.width + c * fw + x) * 4
+          if (p.data[i + 3] > 200 && p.data[i] + p.data[i + 1] + p.data[i + 2] > CONTORNO_PRETO) n++
+        }
         alturas.push(n)
       }
       const ocupadas = alturas.map((n, i) => (n ? i : -1)).filter((i) => i >= 0)
@@ -65,5 +74,20 @@ describe('skins de treinador em campo', () => {
     }
     const primeira = alturas.findIndex((n) => n > 0)
     expect(alturas[primeira]).toBeGreaterThanOrEqual(LIMITE_DE_CORTE_RETO)
+  })
+})
+
+describe('contorno preto das skins', () => {
+  it('todo quadro tem borda preta opaca em volta do corpo', () => {
+    for (const skin of Object.keys(quadros)) {
+      const { frameWidth: fw, frameHeight: fh } = quadros[skin as keyof typeof quadros]
+      const p = PNG.sync.read(readFileSync(join(RAIZ, `assets/treinadores/campo/${skin}/Idle-Anim.png`)))
+      let pretos = 0
+      for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) {
+        const i = (y * p.width + x) * 4
+        if (p.data[i + 3] === 255 && p.data[i] + p.data[i + 1] + p.data[i + 2] <= 3) pretos++
+      }
+      expect(pretos, `${skin}: o primeiro quadro nao tem contorno preto`).toBeGreaterThan(200)
+    }
   })
 })

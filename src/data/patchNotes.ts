@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.19',
+    date: '2026-10-15',
+    title: 'Treinadores com contorno e Pokédex alinhada',
+    highlights: [
+      'Os treinadores em campo ganharam um contorno preto, como o dos Pokémon, e se destacam mais do cenário.',
+      'Os cards da lista da Pokédex voltaram a ter o mesmo tamanho: o nome fica numa linha e os tipos logo abaixo, sem texto cortado.',
+    ],
+  },
+  {
     version: '8.18',
     date: '2026-10-15',
     title: 'Pokédex mais fácil de folhear',
