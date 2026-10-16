@@ -25,6 +25,13 @@ const BIOMAS_POKEROGUE = import.meta.glob('/scripts/pokerogue/biomas.json', {
   eager: true,
 }) as Record<string, Record<string, { clima?: Record<string, number> }>>
 
+// Os sub-biomas autorais (onda 1, 16/10/2026) nao existem no PokeRogue: o clima
+// deles vem do arquivo autoral, no mesmo formato, e e contra ele que se compara.
+const BIOMAS_AUTORAIS = import.meta.glob('/scripts/subbiomas-autorais.json', {
+  import: 'default',
+  eager: true,
+}) as Record<string, Record<string, { clima?: Record<string, number> }>>
+
 function sala(chave: string, indice: number, ciclos = 0): SalaAtiva {
   return { chave, indice, abates: 0, ciclos }
 }
@@ -142,14 +149,14 @@ describe('a tabela nao pode divergir do PokeRogue (PH-140)', () => {
   }
 
   it('cada sub-bioma tem os mesmos pesos do `weatherPool` de origem', () => {
-    const biomas = Object.values(BIOMAS_POKEROGUE)[0]
+    const biomas = { ...Object.values(BIOMAS_POKEROGUE)[0], ...Object.values(BIOMAS_AUTORAIS)[0] }
     // Guarda anti-teste-vacuo: sem o JSON, o `for` abaixo nao iteraria nada.
     expect(biomas, 'nao consegui ler scripts/pokerogue/biomas.json').toBeDefined()
     expect(Object.keys(SUB_BIOMA_CLIMA).length).toBeGreaterThan(30)
 
     for (const [chave, pesos] of Object.entries(SUB_BIOMA_CLIMA)) {
       const origem = biomas[chave]?.clima
-      expect(origem, `sub-bioma ${chave} nao existe em biomas.json`).toBeDefined()
+      expect(origem, `sub-bioma ${chave} nao existe em biomas.json nem em subbiomas-autorais.json`).toBeDefined()
       const esperado: Record<string, number> = {}
       for (const [tipoPr, peso] of Object.entries(origem!)) {
         const nosso = CLIMA_DO_POKEROGUE[tipoPr]

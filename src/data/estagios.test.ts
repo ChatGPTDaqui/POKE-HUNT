@@ -105,9 +105,10 @@ describe('id de estagio', () => {
 })
 
 describe('peso de sub-bioma por estagio', () => {
-  it('tem perfil declarado pros 33 sub-biomas, e nenhum sobrando', () => {
+  it('tem perfil declarado pros 65 sub-biomas, e nenhum sobrando', () => {
     const doJogo = new Set(BIOMAS.flatMap((b) => b.subBiomas.map((s) => s.chave)))
-    expect(doJogo.size).toBe(33)
+    // 33 ate a onda 1 de sub-biomas novos (16/10/2026), que trouxe mais 32.
+    expect(doJogo.size).toBe(65)
     for (const chave of doJogo) {
       expect(PERFIL_POR_SUB_BIOMA[chave], `sub-bioma ${chave} sem perfil`).toBeTruthy()
     }
@@ -182,11 +183,33 @@ describe('peso de sub-bioma por estagio', () => {
     }
   })
 
-  it('da 100% ao sub-bioma unico do Igneo nos 10 estagios', () => {
+  // Ate a onda 1 (16/10/2026) o Igneo tinha um sub-bioma so, e este teste
+  // cobrava 100% de Vulcao nos 10 estagios. Agora ele afunda como os outros:
+  // entra pelo tunel de lava e termina na cratera.
+  it('o Igneo afunda do Caminho Ardente pro Vulcao', () => {
     const igneo = BIOMA_POR_CHAVE['igneo']
-    expect(igneo.subBiomas.length).toBe(1)
-    for (const estagio of TODOS_OS_ESTAGIOS) {
-      expect(pesosDoEstagio(igneo, estagio)['volcano']).toBeCloseTo(1, 10)
+    const e1 = pesosDoEstagio(igneo, 1)
+    const e10 = pesosDoEstagio(igneo, 10)
+    expect(e1['fiery-path']).toBeGreaterThan(0.4)
+    expect(e1['volcano'] ?? 0).toBe(0)
+    expect(e10['fiery-path'] ?? 0).toBe(0)
+    expect(e10['volcano']).toBeGreaterThan(0.6)
+  })
+
+  it('todo bioma tem pelo menos 5 sub-biomas (pedido do dono, 16/10/2026)', () => {
+    for (const bioma of BIOMAS) {
+      expect(bioma.subBiomas.length, bioma.chave).toBeGreaterThanOrEqual(5)
+    }
+  })
+
+  it('todo sub-bioma aparece em pelo menos um estagio', () => {
+    // Alcance curto demais pode deixar um sub-bioma com peso zero nos 10
+    // estagios: ele existiria no arquivo e nunca no jogo.
+    for (const bioma of BIOMAS) {
+      for (const sub of bioma.subBiomas) {
+        const algum = TODOS_OS_ESTAGIOS.some((e) => (pesosDoEstagio(bioma, e)[sub.chave] ?? 0) > 0)
+        expect(algum, `${bioma.chave}/${sub.chave} nunca aparece`).toBe(true)
+      }
     }
   })
 

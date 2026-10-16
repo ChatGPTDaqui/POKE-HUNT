@@ -235,7 +235,13 @@ export interface PerfilDeProfundidade {
 export const ALCANCE_PADRAO = 0.75
 
 /**
- * Perfil de cada um dos 33 sub-biomas.
+ * Perfil de cada um dos 65 sub-biomas.
+ *
+ * ONDA 1 (16/10/2026): os 32 sub-biomas novos entram com `alcance` CURTO
+ * (0,3 a 0,5). Com 5 ou 6 sub-biomas por bioma e o alcance padrao, quase todo
+ * estagio teria os seis ao mesmo tempo, cada um com uma fatia pequena, e a
+ * identidade de cada lugar sumiria. Com o alcance curto o lugar novo e um
+ * DEGRAU do bioma: manda em dois ou tres estagios e some fora deles.
  *
  * Escrito a mao, pelo mesmo motivo que os pesos de `biomas.ts` sao: "o que e
  * raso e o que e fundo neste lugar" e decisao tematica, nao dado derivavel.
@@ -248,6 +254,8 @@ export const PERFIL_POR_SUB_BIOMA: Record<string, PerfilDeProfundidade> = {
   plains: { profundidade: 0.35, pico: 10 },
   grass: { profundidade: 0.45, pico: 10 },
   meadow: { profundidade: 0.85, pico: 8 },
+  farm: { profundidade: 0.2, pico: 8, alcance: 0.45 },
+  'cycling-road': { profundidade: 0.65, pico: 8, alcance: 0.45 },
 
   // mata — da floresta de entrada pro mato alto, e dai pro fundo da selva.
   //
@@ -279,58 +287,93 @@ export const PERFIL_POR_SUB_BIOMA: Record<string, PerfilDeProfundidade> = {
   forest: { profundidade: 0.15, pico: 10 },
   'tall-grass': { profundidade: 0.5, pico: 10 },
   jungle: { profundidade: 0.95, pico: 10 },
+  'mushroom-glade': { profundidade: 0.05, pico: 8, alcance: 0.4 },
+  'ilex-forest': { profundidade: 0.35, pico: 8, alcance: 0.45 },
+  treetops: { profundidade: 0.75, pico: 8, alcance: 0.45 },
 
   // marinho — a costa fica pra tras e o mapa afunda.
   beach: { profundidade: 0.0, pico: 6 },
   sea: { profundidade: 0.45, pico: 10 },
   seabed: { profundidade: 1.0, pico: 10 },
+  'coral-reef': { profundidade: 0.55, pico: 8, alcance: 0.4 },
+  'whirl-islands': { profundidade: 0.7, pico: 8, alcance: 0.35 },
 
-  // aguas_interiores — so dois sub-biomas, entao a troca e suave de proposito:
-  // zerar um deles cedo demais deixaria metade do bioma com uma sala so.
+  // aguas_interiores — eram so dois sub-biomas, e a troca suave entre eles era
+  // de proposito (zerar um cedo deixaria metade do bioma com uma sala so). Com
+  // os tres da onda 1 isso deixou de ser risco: lagoa rasa, lago, rio,
+  // cachoeira e pantano no fundo.
   lake: { profundidade: 0.25, pico: 10 },
   swamp: { profundidade: 0.9, pico: 9 },
+  'lily-pond': { profundidade: 0.05, pico: 9, alcance: 0.5 },
+  river: { profundidade: 0.45, pico: 10, alcance: 0.5 },
+  waterfall: { profundidade: 0.7, pico: 8, alcance: 0.45 },
 
   // aridos — ermos, deserto, e o fundo devastado.
   badlands: { profundidade: 0.1, pico: 10 },
   desert: { profundidade: 0.5, pico: 10 },
   wasteland: { profundidade: 1.0, pico: 10 },
+  canyon: { profundidade: 0.35, pico: 9, alcance: 0.5 },
+  // O Oasis e o raro do bioma: pico baixo e alcance curto.
+  oasis: { profundidade: 0.65, pico: 5, alcance: 0.33 },
 
   // subterraneo — aqui "afundar" e literal: comeca na montanha, termina na
   // caverna. A ordem de `biomas.ts` (cave primeiro) e de insercao, nao de
   // profundidade.
   mountain: { profundidade: 0.15, pico: 9 },
   cave: { profundidade: 0.85, pico: 10 },
+  'rock-tunnel': { profundidade: 0.3, pico: 9, alcance: 0.45 },
+  'dark-cave': { profundidade: 0.5, pico: 8, alcance: 0.45 },
+  'meteor-falls': { profundidade: 0.65, pico: 8, alcance: 0.45 },
+  // A Estrada da Vitoria so existe nos estagios 8 a 10: e o teste final.
+  'victory-road': { profundidade: 1.0, pico: 8, alcance: 0.3 },
 
   // gelido — da floresta nevada pra dentro da caverna de gelo.
   'snowy-forest': { profundidade: 0.15, pico: 9 },
   'ice-cave': { profundidade: 0.85, pico: 10 },
+  'seafoam-islands': { profundidade: 0.35, pico: 9, alcance: 0.5 },
+  'shoal-cave': { profundidade: 0.55, pico: 8, alcance: 0.4 },
+  tundra: { profundidade: 0.7, pico: 9, alcance: 0.5 },
 
-  // igneo — sub-bioma unico, entao a profundidade nao muda nada: ele e 100%
-  // dos 10 estagios. Fica no meio pra deixar isso explicito em vez de
-  // acidental.
-  volcano: { profundidade: 0.5, pico: 10 },
+  // igneo — ate a onda 1 o Vulcao era o sub-bioma unico (100% dos 10
+  // estagios), e por isso ficava no meio. Agora ele e o FUNDO do bioma: entra
+  // pelo tunel de lava, sobe a encosta, atravessa as cinzas e as termas, e
+  // chega na cratera.
+  'fiery-path': { profundidade: 0.05, pico: 10, alcance: 0.5 },
+  'mt-ember': { profundidade: 0.3, pico: 10, alcance: 0.5 },
+  'ash-field': { profundidade: 0.5, pico: 7, alcance: 0.45 },
+  'hot-springs': { profundidade: 0.7, pico: 8, alcance: 0.45 },
+  volcano: { profundidade: 0.9, pico: 10 },
 
   // urbano — o Dojo e o fundo do bioma de FIGHTING, nao a entrada: e onde os
   // fortes treinam.
   metropolis: { profundidade: 0.2, pico: 10 },
   slum: { profundidade: 0.6, pico: 8 },
   dojo: { profundidade: 0.95, pico: 10 },
+  harbor: { profundidade: 0.35, pico: 9, alcance: 0.5 },
+  underground: { profundidade: 0.6, pico: 8, alcance: 0.3 },
 
   // industrial — da obra a ceu aberto ao laboratorio no fundo.
   'construction-site': { profundidade: 0.05, pico: 10 },
   factory: { profundidade: 0.4, pico: 10 },
   'power-plant': { profundidade: 0.7, pico: 9 },
   laboratory: { profundidade: 1.0, pico: 10 },
+  junkyard: { profundidade: 0.25, pico: 9, alcance: 0.45 },
 
   // sagrado — ruinas na superficie, gruta feerica no fundo.
   ruins: { profundidade: 0.15, pico: 10 },
   temple: { profundidade: 0.55, pico: 10 },
   'fairy-cave': { profundidade: 1.0, pico: 10 },
+  'sprout-tower': { profundidade: 0.45, pico: 9, alcance: 0.35 },
+  'meditation-shrine': { profundidade: 0.6, pico: 8, alcance: 0.35 },
+  'sky-pillar': { profundidade: 0.8, pico: 7, alcance: 0.18 },
 
   // sombrio — cemiterio, abismo, e o vazio.
   graveyard: { profundidade: 0.1, pico: 10 },
   abyss: { profundidade: 0.6, pico: 10 },
   space: { profundidade: 1.0, pico: 10 },
+  'mt-pyre': { profundidade: 0.4, pico: 9, alcance: 0.35 },
+  'burned-tower': { profundidade: 0.55, pico: 8, alcance: 0.3 },
+  'abandoned-ship': { profundidade: 0.8, pico: 6, alcance: 0.35 },
 }
 
 /**

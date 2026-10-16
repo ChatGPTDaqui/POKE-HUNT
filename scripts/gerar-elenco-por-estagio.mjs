@@ -144,12 +144,16 @@ const SPECIES = lerCatalogo()
 const grafo = grafoDeEvolucao(SPECIES)
 
 // ---------------------------------------------------------------------------
-// Os 33 sub-biomas, lidos de biomas.ts (e nao redigitados)
+// Os sub-biomas, lidos de biomas.ts (e nao redigitados)
 // ---------------------------------------------------------------------------
 const fonteBiomas = fs.readFileSync(path.join(RAIZ, 'src/data/biomas.ts'), 'utf8')
 const SUB_BIOMAS = [...fonteBiomas.matchAll(/\{ chave: '([a-z-]+)', nome:/g)].map((m) => m[1])
-if (SUB_BIOMAS.length !== 33) {
-  throw new Error(`esperado 33 sub-biomas em biomas.ts, achei ${SUB_BIOMAS.length}`)
+// A contagem esperada vem do proprio arquivo de biomas (cada `chave:` de
+// sub-bioma), e a regex de cima tem que achar todas: se ela perder uma (outro
+// formato de linha), a tabela daquele sub-bioma some sem erro.
+const ESPERADOS = [...fonteBiomas.matchAll(/^\s+\{ chave: '[a-z-]+'/gm)].length
+if (SUB_BIOMAS.length === 0 || SUB_BIOMAS.length !== ESPERADOS) {
+  throw new Error(`esperado ${ESPERADOS} sub-biomas em biomas.ts, achei ${SUB_BIOMAS.length}`)
 }
 
 // ---------------------------------------------------------------------------
@@ -386,8 +390,9 @@ out.push('// data/spawnPorTier.ts e o cabecalho do gerador).')
 out.push('//')
 out.push(`// ${SUB_BIOMAS.length} sub-biomas x ${ESTAGIOS} estagios = ${SUB_BIOMAS.length * ESTAGIOS} tabelas, ${nLinhas} linhas.`)
 out.push(`// ${nReal} linhas vem do dado real dos jogos (rb/gsc/emerald) e ${nLinhas - nReal} do pool`)
-out.push('// do PokeRogue, que e a fonte dos 11 sub-biomas sem analogo em Gen I-III:')
-out.push(`// ${SEM_ANALOGO_REAL.join(', ')}.`)
+out.push('// do PokeRogue ou dos pools autorais (scripts/subbiomas-autorais.json), que sao')
+out.push('// a fonte dos sub-biomas sem analogo em Gen I-III:')
+out.push(`// ${SEM_ANALOGO_REAL.join(', ')}, e os ${Object.keys(JSON.parse(fs.readFileSync(path.join(RAIZ, 'scripts/subbiomas-autorais.json'), 'utf8'))).filter((k) => k !== '_origem').length} autorais.`)
 out.push('//')
 out.push('// A `fatia` e a chance da LINHA EVOLUTIVA, e nao da forma. Qual forma nasce sai')
 out.push('// da janela de nivel da sala (huntSpawnOverrides#trechosDaLinha) — e o que faz o')
