@@ -13,7 +13,7 @@ import { SPECIES_DATA } from './generated/pokes.generated'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import {
-  BIOMAS, GRUPOS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL,
+  BIOMAS, GRUPOS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL, SALA_ESPECIAL_POR_CHAVE,
 } from './biomas'
 import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, quantidadeDeSalas, zonaMaximaDoEstagio } from './estagios'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
@@ -57,7 +57,7 @@ describe('estrutura', () => {
   })
 
   it('todo sub-bioma declarado em biomas.ts tem elenco gerado, e vice-versa', () => {
-    const declarados = new Set(BIOMAS.flatMap((b) => b.subBiomas.map((s) => s.chave)))
+    const declarados = new Set(BIOMAS.flatMap((b) => [...b.subBiomas, ...(b.especiais ?? [])].map((s) => s.chave)))
     const gerados = new Set(Object.keys(SUB_BIOMA_ESPECIES))
     expect([...declarados].filter((c) => !gerados.has(c)), 'em biomas.ts sem elenco gerado').toEqual([])
     expect([...gerados].filter((c) => !declarados.has(c)), 'gerado e nao agrupado em nenhum bioma').toEqual([])
@@ -168,9 +168,33 @@ describe('cobertura de especies', () => {
     // a especie so volta a spawnar. Foi assim que as cinco evolucoes do Eevee
     // ficaram no mato: elas entraram no roster, o PokeRogue deu casa pras
     // cinco, e a lista do gerador tinha so as tres chaves originais.
-    const alocadas = new Set(Object.values(SUB_BIOMA_ESPECIES).flat())
-    const vazaram = [...NON_WILD_SPECIES].filter((id) => alocadas.has(id)).sort()
+    //
+    // ONDA 2 (16/10/2026): Eevee e Porygon passaram a nascer em SALA ESPECIAL
+    // (Mansao Celadon, Silph S.A.), por decisao do dono. A regra virou "so ali":
+    // em sub-bioma comum continuam proibidas, e as evolucoes do Eevee nao nascem
+    // em lugar nenhum.
+    const especiais = new Set(BIOMAS.flatMap((b) => (b.especiais ?? []).map((e) => e.chave)))
+    const vazaram = Object.entries(SUB_BIOMA_ESPECIES)
+      .filter(([chave]) => !especiais.has(chave))
+      .flatMap(([chave, lista]) => lista.filter((id) => NON_WILD_SPECIES.has(id)).map((id) => `${chave}: ${id}`))
+      .sort()
     expect(vazaram).toEqual([])
+    const ondeNascem = Object.fromEntries([...NON_WILD_SPECIES].sort().map((id) => [
+      id, Object.entries(SUB_BIOMA_ESPECIES).filter(([, lista]) => lista.includes(id)).map(([chave]) => chave),
+    ]))
+    expect(ondeNascem).toEqual({
+      eevee: ['celadon-mansion'], espeon: [], flareon: [], jolteon: [], umbreon: [], vaporeon: [],
+      porygon: ['silph-co'], porygon2: ['silph-co'],
+    })
+  })
+
+  it('os iniciais de Kanto so nascem na sala especial deles (onda 2)', () => {
+    const ondeNascem = Object.fromEntries(['bulbasaur', 'charmander', 'squirtle'].map((id) => [
+      id, Object.entries(SUB_BIOMA_ESPECIES).filter(([, lista]) => lista.includes(id)).map(([chave]) => chave),
+    ]))
+    expect(ondeNascem).toEqual({
+      bulbasaur: ['mysterious-garden'], charmander: ['stray-charmander'], squirtle: ['squirtle-squad'],
+    })
   })
 
   it('nada de NON_WILD_SPECIES spawna em hunt nenhuma', () => {
@@ -589,9 +613,12 @@ describe('pesos de spawn', () => {
     }
   })
 
-  it('o enemyPool da hunt e exatamente a uniao dos pools de sala', () => {
+  it('o enemyPool da hunt e exatamente a uniao dos pools de sala COMUNS', () => {
+    // As salas especiais (onda 2) ficam fora do `enemyPool` de proposito: ele e
+    // o recuo de quando nao ha sala e a base do preco das Especialidades.
+    const especiais = new Set(BIOMAS.flatMap((b) => (b.especiais ?? []).map((e) => e.chave)))
     for (const [hunt, salas] of Object.entries(POOL_POR_SALA)) {
-      const uniao = [...new Set(Object.values(salas).flat())].sort()
+      const uniao = [...new Set(Object.entries(salas).filter(([c]) => !especiais.has(c)).flatMap(([, ids]) => ids))].sort()
       expect([...MAPS[hunt].enemyPool].sort(), hunt).toEqual(uniao)
     }
   })
@@ -724,7 +751,10 @@ describe('espelho do Modo Pesadelo', () => {
         expect(ENCOUNTERS[encId], `${id}/${chave} aponta pro encontro inexistente ${encId}`).toBeDefined()
       }
       // E o pool da sala tem que estar dentro do pool da hunt, senao o
-      // `poolAtivo` da sala spawna bicho que a hunt diz nao ter.
+      // `poolAtivo` da sala spawna bicho que a hunt diz nao ter. A SALA
+      // ESPECIAL (onda 2) e a excecao declarada: ela fica fora do `enemyPool`
+      // de proposito (ver `huntSpawnOverrides#montarHunt`).
+      if (SALA_ESPECIAL_POR_CHAVE[chave]) continue
       const daHunt = new Set(MAPS[id].enemyPool)
       for (const encId of pool) expect(daHunt.has(encId), `${encId} fora do enemyPool de ${id}`).toBe(true)
     }

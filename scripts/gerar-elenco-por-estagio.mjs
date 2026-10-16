@@ -143,6 +143,23 @@ const CASAS_DA_FATIA = 5
 const SPECIES = lerCatalogo()
 const grafo = grafoDeEvolucao(SPECIES)
 
+// Especie fora de `elegivel` (inicial de Kanto, Eevee, Porygon) que o
+// gerador de sub-biomas ALOCOU numa sala especial. Vale so ali, e so ela: a
+// familia nao herda (Vaporeon nao nasce na Mansao Celadon so porque a Eevee
+// nasce). A lista de quem pode vem de SUB_BIOMA_ESPECIES, que ja aplicou a
+// regra.
+const ESPECIES_ALOCADAS = (() => {
+  const fonte = fs.readFileSync(path.join(RAIZ, 'src/data/generated/subBiomas.generated.ts'), 'utf8')
+  const bloco = /SUB_BIOMA_ESPECIES: SubBiomaEspecies = \{([\s\S]*?)\n\};/.exec(fonte)
+  if (!bloco) throw new Error('SUB_BIOMA_ESPECIES nao encontrado em subBiomas.generated.ts')
+  const mapa = new Map()
+  for (const m of bloco[1].matchAll(/'([a-z-]+)': \[([\s\S]*?)\]/g)) {
+    mapa.set(m[1], new Set([...m[2].matchAll(/'([a-z0-9_]+)'/g)].map((x) => x[1])))
+  }
+  return mapa
+})()
+const elegivelEm = (k, sub) => elegivel(k) || (ESPECIES_ALOCADAS.get(sub)?.has(k) ?? false)
+
 // ---------------------------------------------------------------------------
 // Os sub-biomas, lidos de biomas.ts (e nao redigitados)
 // ---------------------------------------------------------------------------
@@ -219,7 +236,7 @@ for (const bloco of blocoTiers[1].matchAll(/'([a-z-]+)': \{([\s\S]*?)\n  \}/g)) 
   for (const tierBloco of bloco[2].matchAll(/(COMMON|UNCOMMON|RARE|SUPER_RARE|ULTRA_RARE): \[([\s\S]*?)\]/g)) {
     const vaga = VAGA_DO_TIER[tierBloco[1]]
     for (const sp of tierBloco[2].matchAll(/'([a-z0-9_]+)'/g)) {
-      if (!elegivel(sp[1])) continue
+      if (!elegivelEm(sp[1], sub)) continue
       const linha = grafo.raiz(sp[1])
       // A linha vale pela vaga MAIS COMUM entre os membros dela naquele lugar:
       // se existe um caminho pelo qual a familia e comum ali, ela e comum.
@@ -428,7 +445,7 @@ for (const sub of SUB_BIOMAS) {
   for (let e = 1; e <= ESTAGIOS; e++) {
     for (const x of tabela[sub][e]) {
       for (const membro of grafo.membros.get(grafo.familia(x.linha)) ?? []) {
-        if (elegivel(membro)) familias.add(membro)
+        if (elegivelEm(membro, sub)) familias.add(membro)
       }
     }
   }

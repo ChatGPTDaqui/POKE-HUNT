@@ -203,6 +203,8 @@ export type PerfilDeLoot =
   // LUGAR, e nao so da distancia. Mesmos itens de sempre, nenhum item novo:
   // so que a cura de status certa aparece onde o perigo dela mora.
   | 'termal' | 'toxico' | 'ardente' | 'gelado' | 'portuario' | 'sucata' | 'sonolento' | 'vitoria'
+  // Onda 2 (salas especiais).
+  | 'safari' | 'cofre'
 
 export const LOOT: Record<PerfilDeLoot, MapItemDrop[]> = {
   // O mesmo drop que todas as hunts tinham. Lugar comum, item comum.
@@ -274,6 +276,19 @@ export const LOOT: Record<PerfilDeLoot, MapItemDrop[]> = {
     { itemId: 'poke_ball', chance: 0.1 },
     { itemId: 'awakening', chance: 0.08 },
   ],
+  // Zona Safari: o lugar das bolas boas.
+  safari: [
+    { itemId: 'great_ball', chance: 0.12 },
+    { itemId: 'ultra_ball', chance: 0.06 },
+    { itemId: 'super_potion', chance: 0.08 },
+  ],
+  // Esconderijo Rocket: o cofre do cassino, bola em volume.
+  cofre: [
+    { itemId: 'poke_ball', chance: 0.2 },
+    { itemId: 'great_ball', chance: 0.1 },
+    { itemId: 'ultra_ball', chance: 0.04 },
+    { itemId: 'antidote', chance: 0.06 },
+  ],
   // Estrada da Vitoria: o teste final pede Revive.
   vitoria: [
     { itemId: 'hyper_potion', chance: 0.06 },
@@ -305,6 +320,25 @@ export interface SubBiomaDef {
   bg?: { primary: string; secondary: string; image: string }
 }
 
+/**
+ * SALA ESPECIAL (onda 2, 16/10/2026): lugar raro, tirado do anime e dos jogos
+ * (Zona Safari, Monte Lua, Torre Pokemon...). NAO entra na curva de
+ * profundidade nem na trilha do menu: `novaSala` tenta primeiro a sala
+ * especial, com `CHANCE_DE_SALA_ESPECIAL`, e so cai no sorteio normal se ela
+ * nao sair.
+ *
+ * `peso` e o peso ENTRE as especiais do mesmo bioma (hoje todas 1: sorteio
+ * uniforme). E o UNICO lugar onde os iniciais de Kanto, Eevee e Porygon nascem.
+ */
+export interface SalaEspecialDef extends SubBiomaDef {
+  /** A partir de que estagio do bioma ela pode aparecer. */
+  estagioMinimo: number
+  /** Pedra tematica: um sorteio EXTRA de Pedra deste tipo a cada abate na sala. */
+  pedra?: ElementType
+  /** Chance de shiny multiplicada para UMA especie nesta sala (Lago da Furia). */
+  shiny?: { especie: string; multiplicador: number }
+}
+
 export interface BiomaDef {
   chave: string
   nome: string
@@ -312,7 +346,32 @@ export interface BiomaDef {
   tipo: ElementType
   bg: { primary: string; secondary: string; image: string }
   subBiomas: SubBiomaDef[]
+  /** Salas especiais do bioma (onda 2). Ausente = o bioma nao tem. */
+  especiais?: SalaEspecialDef[]
 }
+
+/**
+ * Chance de a PROXIMA sala virar uma sala especial do bioma.
+ *
+ * 5% DURANTE O BETA, por decisao do dono (16/10/2026); depois do beta cai pra
+ * 1%. E UMA constante so, e de proposito: cliente e servidor rodam este mesmo
+ * bundle, entao trocar aqui troca nos dois.
+ */
+export const CHANCE_DE_SALA_ESPECIAL = 0.05
+
+/**
+ * Chance do sorteio EXTRA da Pedra tematica numa sala especial. Igual a chance
+ * de Pedra comum (`STONE_DROP_CHANCE`): na sala especial a Pedra cai em dobro,
+ * e a metade extra e sempre do tipo do lugar.
+ */
+export const CHANCE_DA_PEDRA_TEMATICA = 0.05
+
+/**
+ * Teto do multiplicador de shiny de uma sala especial. O dono aprovou "com
+ * teto" (16/10/2026): shiny alimenta o Mercado, e o teste do catalogo reprova
+ * acima disto.
+ */
+export const MULTIPLICADOR_DE_SHINY_MAXIMO = 10
 
 // As 7 imagens antigas (uma por bioma, compartilhada por todos os sub-biomas
 // dele) saem de uso aqui, substituidas pela leva de 2026-08-15 — ficam no
@@ -375,6 +434,10 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'farm', nome: 'Fazenda MuuMuu', peso: 6, loot: 'civilizado' },
       { chave: 'cycling-road', nome: 'Estrada de Ciclismo', peso: 6, loot: 'toxico' },
     ],
+    especiais: [
+      { chave: 'safari-zone', nome: 'Zona Safári', peso: 1, loot: 'safari', estagioMinimo: 4, pedra: 'NORMAL', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.matoAlto } },
+      { chave: 'stray-charmander', nome: 'Charmander na Chuva', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'FIRE', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.planicie } },
+    ],
   },
   {
     chave: 'mata',
@@ -391,6 +454,10 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'mushroom-glade', nome: 'Clareira dos Cogumelos', peso: 10, loot: 'toxico' },
       { chave: 'ilex-forest', nome: 'Bosque de Ilex', peso: 6, loot: 'basico' },
       { chave: 'treetops', nome: 'Copa das Árvores', peso: 6, loot: 'remoto', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.selva } },
+    ],
+    especiais: [
+      { chave: 'mysterious-garden', nome: 'Jardim Misterioso', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'GRASS', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.campina } },
+      { chave: 'pikachu-colony', nome: 'Colônia de Pikachu', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'ELECTRIC' },
     ],
   },
   {
@@ -409,6 +476,10 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'coral-reef', nome: 'Recife de Coral', peso: 6, loot: 'remoto', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.praia } },
       { chave: 'whirl-islands', nome: 'Ilhas Redemoinho', peso: 6, loot: 'remoto' },
     ],
+    especiais: [
+      { chave: 'orange-archipelago', nome: 'Arquipélago Laranja', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'WATER', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.praia } },
+      { chave: 'maidens-peak', nome: 'Pico da Donzela', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'GHOST' },
+    ],
   },
   {
     chave: 'aguas_interiores',
@@ -425,6 +496,10 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'river', nome: 'Rio e Corredeira', peso: 10, loot: 'basico' },
       { chave: 'waterfall', nome: 'Cachoeira de Tohjo', peso: 6, loot: 'remoto' },
     ],
+    especiais: [
+      { chave: 'lake-of-rage', nome: 'Lago da Fúria', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'WATER', shiny: { especie: 'gyarados', multiplicador: 10 } },
+      { chave: 'squirtle-squad', nome: 'Esquadrão Squirtle', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'WATER' },
+    ],
   },
   {
     chave: 'aridos',
@@ -440,6 +515,9 @@ export const BIOMAS: BiomaDef[] = [
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
       { chave: 'canyon', nome: 'Cânion da Rota 45', peso: 6, loot: 'remoto' },
       { chave: 'oasis', nome: 'Oásis', peso: 3, loot: 'remoto', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.deserto } },
+    ],
+    especiais: [
+      { chave: 'grampa-canyon', nome: 'Cânion do Vovô', peso: 1, loot: 'profundo', estagioMinimo: 6, pedra: 'ROCK' },
     ],
   },
   {
@@ -458,6 +536,10 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'meteor-falls', nome: 'Cataratas Meteoro', peso: 6, loot: 'remoto', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
       { chave: 'victory-road', nome: 'Estrada da Vitória', peso: 3, loot: 'vitoria', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
     ],
+    especiais: [
+      { chave: 'mt-moon', nome: 'Monte Lua', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'FAIRY', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.grutaFeerica } },
+      { chave: 'digletts-cave', nome: 'Caverna dos Diglett', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'GROUND', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
+    ],
   },
   {
     chave: 'gelido',
@@ -475,6 +557,10 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'shoal-cave', nome: 'Gruta da Maré', peso: 6, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.cavernaDeGelo } },
       { chave: 'tundra', nome: 'Tundra', peso: 10, loot: 'gelado' },
     ],
+    especiais: [
+      { chave: 'jynx-holiday', nome: 'Natal da Jynx', peso: 1, loot: 'gelado', estagioMinimo: 2, pedra: 'ICE' },
+      { chave: 'mt-silver-summit', nome: 'Cume do Monte Prata', peso: 1, loot: 'vitoria', estagioMinimo: 10, pedra: 'DARK' },
+    ],
   },
   {
     chave: 'igneo',
@@ -490,6 +576,9 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'mt-ember', nome: 'Encosta do Monte Brasa', peso: 10, loot: 'remoto' },
       { chave: 'ash-field', nome: 'Campo de Cinzas', peso: 6, loot: 'basico', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.florestaQueimada } },
       { chave: 'hot-springs', nome: 'Fontes Termais', peso: 6, loot: 'termal' },
+    ],
+    especiais: [
+      { chave: 'pokemon-mansion', nome: 'Mansão Pokémon', peso: 1, loot: 'profundo', estagioMinimo: 5, pedra: 'FIRE', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.florestaQueimada } },
     ],
   },
   {
@@ -512,6 +601,11 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'harbor', nome: 'Cais do Porto', peso: 10, loot: 'portuario', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.metropole } },
       { chave: 'underground', nome: 'Galerias Subterrâneas', peso: 6, loot: 'toxico', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.cortico } },
     ],
+    especiais: [
+      { chave: 'bug-contest', nome: 'Concurso de Insetos', peso: 1, loot: 'civilizado', estagioMinimo: 1, pedra: 'BUG', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.campina } },
+      { chave: 'rocket-hideout', nome: 'Esconderijo Rocket', peso: 1, loot: 'cofre', estagioMinimo: 3, pedra: 'POISON', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.industrial } },
+      { chave: 'celadon-mansion', nome: 'Mansão Celadon', peso: 1, loot: 'civilizado', estagioMinimo: 2, pedra: 'NORMAL', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.metropole } },
+    ],
   },
   {
     chave: 'industrial',
@@ -529,6 +623,9 @@ export const BIOMAS: BiomaDef[] = [
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
       { chave: 'junkyard', nome: 'Ferro-Velho', peso: 10, loot: 'sucata', bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.obra } },
     ],
+    especiais: [
+      { chave: 'silph-co', nome: 'Silph S.A.', peso: 1, loot: 'profundo', estagioMinimo: 3, pedra: 'ELECTRIC' },
+    ],
   },
   {
     chave: 'sagrado',
@@ -545,6 +642,9 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'sprout-tower', nome: 'Torre Broto', peso: 10, loot: 'sonolento' },
       { chave: 'meditation-shrine', nome: 'Santuário de Meditação', peso: 6, loot: 'remoto' },
       { chave: 'sky-pillar', nome: 'Pilar Celeste', peso: 3, loot: 'profundo', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.ruinas } },
+    ],
+    especiais: [
+      { chave: 'mirage-island', nome: 'Ilha Miragem', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'PSYCHIC', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.ilha } },
     ],
   },
   {
@@ -564,6 +664,9 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'mt-pyre', nome: 'Monte Pira', peso: 10, loot: 'remoto' },
       { chave: 'burned-tower', nome: 'Torre Queimada', peso: 6, loot: 'ardente' },
       { chave: 'abandoned-ship', nome: 'Navio Abandonado', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
+    ],
+    especiais: [
+      { chave: 'pokemon-tower', nome: 'Torre Pokémon', peso: 1, loot: 'sonolento', estagioMinimo: 1, pedra: 'GHOST', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.temploMistico } },
     ],
   },
 ]
@@ -693,7 +796,14 @@ export const BIOMA_POR_CHAVE: Record<string, BiomaDef> = Object.fromEntries(
 // banco), mas com a ordem dos biomas CONGELADA junto dela — ver
 // `ORDEM_LEGADA_DOS_BIOMAS`.
 
+// As salas especiais entram aqui tambem: nome, loot, arte, clima e protetor
+// se resolvem pela chave igual a de um sub-bioma comum.
 export const SUB_BIOMA_POR_CHAVE: Record<string, { sub: SubBiomaDef; bioma: BiomaDef }> =
   Object.fromEntries(
-    BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, { sub, bioma }]))
+    BIOMAS.flatMap((bioma) => [...bioma.subBiomas, ...(bioma.especiais ?? [])].map((sub) => [sub.chave, { sub, bioma }]))
   )
+
+/** A sala especial desta chave, ou undefined se a chave e de sub-bioma comum. */
+export const SALA_ESPECIAL_POR_CHAVE: Record<string, SalaEspecialDef> = Object.fromEntries(
+  BIOMAS.flatMap((bioma) => (bioma.especiais ?? []).map((e) => [e.chave, e])),
+)

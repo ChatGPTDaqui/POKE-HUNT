@@ -29,11 +29,12 @@
 //
 // O anti-reroll que sobra e o custo: sair da hunt fecha a sessao, entao voltar
 // recomeca no ciclo 1, sala 1.
-import { weightedPick } from '@/core/random'
+import { rollChance, weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import {
   ABATES_POR_SALA, ABATES_COMUNS_POR_SALA, BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, LOOT,
-  type SubBiomaDef,
+  CHANCE_DE_SALA_ESPECIAL, SALA_ESPECIAL_POR_CHAVE,
+  type SalaEspecialDef, type SubBiomaDef,
 } from '@/data/biomas'
 import {
   estagioId, parseEstagioIdOuEspelho, pesosDoEstagio, quantidadeDeSalas,
@@ -220,8 +221,50 @@ export function distribuicaoDeSala(mapId: string): Record<string, number> {
   return saida
 }
 
+/**
+ * As salas especiais que PODEM sair nesta hunt agora (onda 2, 16/10/2026):
+ * as do bioma da hunt, a partir do `estagioMinimo` de cada uma, e com pool.
+ *
+ * O espelho do Pesadelo entra junto (parser permissivo): ele copia o Mundo,
+ * inclusive as salas especiais.
+ */
+export function salasEspeciaisPossiveis(mapId: string): SalaEspecialDef[] {
+  const salas = POOL_POR_SALA[mapId]
+  const doMapa = parseEstagioIdOuEspelho(mapId)
+  if (!salas || !doMapa) return []
+  const bioma = BIOMA_POR_CHAVE[doMapa.bioma]
+  return (bioma?.especiais ?? []).filter(
+    (e) => doMapa.estagio >= e.estagioMinimo && (salas[e.chave]?.length ?? 0) > 0,
+  )
+}
+
+/**
+ * Tenta transformar a proxima sala numa SALA ESPECIAL do bioma.
+ *
+ * Um sorteio de `CHANCE_DE_SALA_ESPECIAL` e, se sair, um segundo entre as
+ * especiais possiveis. Hunt sem especial possivel nao gasta numero nenhum da
+ * sequencia (hunt inicial, BOSS, Lance, estagio abaixo do minimo de todas).
+ *
+ * A PRIMEIRA SALA DA SESSAO NUNCA E ESPECIAL, e isso e o anti-reroll: sair da
+ * hunt fecha a sessao e voltar sorteia a sala 1 de novo. Se a sala 1 pudesse
+ * ser especial, entrar e sair seria uma maquina de 5% de graca.
+ */
+export function sortearSalaEspecial(rng: Rng, mapId: string, indice: number, ciclos: number): string | null {
+  if (indice === 0 && ciclos === 0) return null
+  const opcoes = salasEspeciaisPossiveis(mapId)
+  if (opcoes.length === 0) return null
+  if (!rollChance(rng, CHANCE_DE_SALA_ESPECIAL)) return null
+  if (opcoes.length === 1) return opcoes[0].chave
+  return weightedPick(rng, opcoes, (e) => e.peso).chave
+}
+
+/** A sala e uma sala especial? */
+export function ehSalaEspecial(sala: SalaAtiva | null | undefined): boolean {
+  return sala != null && SALA_ESPECIAL_POR_CHAVE[sala.chave] != null
+}
+
 export function novaSala(rng: Rng, mapId: string, indice: number, ciclos: number): SalaAtiva | null {
-  const chave = sortearSala(rng, mapId)
+  const chave = sortearSalaEspecial(rng, mapId, indice, ciclos) ?? sortearSala(rng, mapId)
   if (!chave) return null
   return { indice, chave, abates: 0, ciclos }
 }
@@ -280,6 +323,12 @@ export interface ContextoDeSpawn {
    * pra caber numa sala estragaria a fatia dele na sala vizinha.
    */
   peso: (encounterId: string) => number
+  /**
+   * Multiplicador da chance de shiny desta especie NESTA sala (Lago da Furia,
+   * onda 2). Ausente = 1. Vai pro `createPokeInstance`, que continua gastando
+   * o mesmo numero da sequencia: muda a chance, nao a quantidade de sorteios.
+   */
+  multiplicadorDeShiny?: (speciesId: string) => number
 }
 
 // ---------------------------------------------------------------------------
@@ -456,7 +505,21 @@ export function contextoDeSpawn(
     `${mapId}|${sala.chave}|${sala.indice}`, sala.chave, doMapa?.estagio ?? null, ativo,
     noRecuo ? null : janela,
   )
-  return { pool: ativo, janela, peso: (id) => pesos.get(id) ?? 0 }
+  const especial = SALA_ESPECIAL_POR_CHAVE[sala.chave]
+  const shiny = especial?.shiny
+  return {
+    pool: ativo, janela, peso: (id) => pesos.get(id) ?? 0,
+    ...(shiny ? { multiplicadorDeShiny: (sp: string) => (sp === shiny.especie ? shiny.multiplicador : 1) } : {}),
+  }
+}
+
+/**
+ * Pedra tematica da sala atual (onda 2): o tipo da Pedra que a sala especial
+ * solta num sorteio extra a cada abate. `null` fora de sala especial.
+ */
+export function pedraTematicaDaSala(sala: SalaAtiva | null): SalaEspecialDef['pedra'] | null {
+  if (!sala) return null
+  return SALA_ESPECIAL_POR_CHAVE[sala.chave]?.pedra ?? null
 }
 
 /** Loot que pode cair agora: o do sub-bioma, ou o da hunt inteira. */
@@ -579,6 +642,7 @@ export function contextoDoProtetor(
     pool: escolhidos,
     janela: ctx.janela,
     peso: (id) => pesos.get(id) ?? 0,
+    ...(ctx.multiplicadorDeShiny ? { multiplicadorDeShiny: ctx.multiplicadorDeShiny } : {}),
   }
   cacheDeProtetor.set(chaveCache, doProtetor)
   return doProtetor

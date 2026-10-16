@@ -10,7 +10,8 @@ import { FORMULAS } from '@/data/generated/formulas.generated'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import type { MapDef } from '@/data/maps'
-import type { MapItemDrop } from '@/data/generated/types'
+import type { ElementType, MapItemDrop } from '@/data/generated/types'
+import { CHANCE_DA_PEDRA_TEMATICA } from '@/data/biomas'
 import type { EnemyEntity } from '../types'
 
 const formulaEngine = createFormulaEngine(FORMULAS)
@@ -84,6 +85,10 @@ export function awardKillLoot(
   enemy: EnemyEntity,
   mapDef: MapDef,
   drops: MapItemDrop[] = mapDef.itemDrops,
+  // Onda 2: a sala especial solta, alem da Pedra comum, um sorteio EXTRA da
+  // Pedra do tipo dela. `null` (fora de sala especial) nao gasta numero da
+  // sequencia, entao o resto do jogo segue com o mesmo RNG de antes.
+  pedraTematica: ElementType | null = null,
 ): KillLoot {
   const species = SPECIES[enemy.poke.speciesId]
   // Valor BRUTO de proposito (ver pokemonBaseValue): o piso de venda nao vale
@@ -109,6 +114,12 @@ export function awardKillLoot(
     // sequencia identica de qualquer jeito.
     const tipoDaStone = species.type2 && rollChance(rng, 0.5) ? species.type2 : species.type
     const stoneId = stoneItemId(tipoDaStone)
+    gameState.addItem(stoneId, 1)
+    droppedItems.push(stoneId)
+  }
+
+  if (pedraTematica && rollChance(rng, CHANCE_DA_PEDRA_TEMATICA)) {
+    const stoneId = stoneItemId(pedraTematica)
     gameState.addItem(stoneId, 1)
     droppedItems.push(stoneId)
   }

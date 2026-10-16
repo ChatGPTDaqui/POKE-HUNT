@@ -163,13 +163,26 @@ for (const [a, b] of Object.entries(evolui)) if (SPECIES[b]) pai[acha(a)] = acha
 // cruzamento
 // ---------------------------------------------------------------------------
 const PR = JSON.parse(fs.readFileSync(ENTRADA, 'utf8'))
+// Salas ESPECIAIS (onda 2): unico lugar onde os iniciais de Kanto, Eevee e
+// Porygon podem nascer (decisao do dono, 16/10/2026).
+const ESPECIAIS = new Set()
 {
   const { _origem, ...autorais } = JSON.parse(fs.readFileSync(AUTORAIS, 'utf8'))
   for (const [chave, def] of Object.entries(autorais)) {
     if (PR[chave]) throw new Error(`sub-bioma autoral "${chave}" ja existe no PokeRogue`)
     PR[chave] = def
+    if (def.especial) ESPECIAIS.add(chave)
   }
 }
+
+/**
+ * Especie RESTRITA: inicial de Kanto ou NAO_SELVAGENS. Fora do mato comum, mas
+ * pode morar numa sala especial onde esteja listada DIRETAMENTE. Nunca herda
+ * casa pela familia: sem este corte, Bulbasaur herdaria o `grass` do Ivysaur e
+ * Vaporeon herdaria a Mansao Celadon da Eevee.
+ */
+const restrita = (k) => INICIAIS_BASE.has(k) || NAO_SELVAGENS.has(k)
+const elegivelEm = (k, chave) => elegivel(k) || (restrita(k) && ESPECIAIS.has(chave))
 const chaves = Object.keys(PR).filter((k) => !DESCARTADOS.has(k)).sort()
 
 // Os nove tiers do PokeRogue, na ordem do enum `BiomePoolTier` dele — a ordem
@@ -210,7 +223,7 @@ for (const chave of chaves) {
     for (const nome of nomes) {
       const nosso = PORNORM.get(norm(nome))
       if (!nosso) { foraDoRoster.add(nome); continue }
-      if (!elegivel(nosso)) continue
+      if (!elegivelEm(nosso, chave)) continue
       if (SAI_DO_SUB_BIOMA[chave]?.has(nosso)) continue
       // `Math.min`: a mesma especie aparece em mais de um tier do mesmo bioma
       // (Sableye e COMMON e BOSS no Abismo). Vale o mais comum dos dois.
@@ -256,6 +269,11 @@ for (const [sp, casas] of casaDireta) {
 const casa = new Map()
 const herdadas = []
 for (const sp of Object.keys(SPECIES)) {
+  if (restrita(sp) && !LENDARIOS.has(sp)) {
+    const diretas = [...(casaDireta.get(sp) ?? [])].filter((c) => ESPECIAIS.has(c))
+    if (diretas.length) casa.set(sp, new Set(diretas))
+    continue
+  }
   if (!elegivel(sp)) continue
   const f = porFamilia.get(acha(sp))
   if (!f?.size) continue

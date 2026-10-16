@@ -446,18 +446,25 @@ export interface CreatePokeInstanceOptions {
   isShiny?: boolean
   trait?: string
   uid?: string
+  /**
+   * Multiplica a chance de shiny (onda 2: o Gyarados do Lago da Furia). O
+   * sorteio continua sendo UM so, entao a sequencia do RNG nao muda de tamanho
+   * — cliente e servidor seguem gastando os mesmos numeros. Teto em
+   * `biomas.ts#MULTIPLICADOR_DE_SHINY_MAXIMO`.
+   */
+  multiplicadorDeShiny?: number
 }
 
 // `rng` e o primeiro parametro (e obrigatorio) de proposito: os tres sorteios
 // aqui — IV, raridade e shiny — sao exatamente os que o servidor precisa poder
 // reconferir na Fase D. Um default pra `Math.random()` deixaria um caminho
 // silencioso de volta pro nao-verificavel.
-export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature, isShiny: fixedIsShiny, trait: fixedTrait, uid: fixedUid }: CreatePokeInstanceOptions = {}): PokeInstance {
+export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature, isShiny: fixedIsShiny, trait: fixedTrait, uid: fixedUid, multiplicadorDeShiny = 1 }: CreatePokeInstanceOptions = {}): PokeInstance {
   const species = SPECIES[speciesId]
   if (!species) throw new Error(`Espécie desconhecida: ${speciesId}`)
   const ivs = fixedIvs || rollIvs(rng, speciesId)
   const rarity = fixedRarity || rollRarity(rng)
-  const shinyChance = (species.catchRate / MAX_CATCH_RATE) * SHINY_CHANCE_AT_MAX_CATCH_RATE
+  const shinyChance = Math.min(1, (species.catchRate / MAX_CATCH_RATE) * SHINY_CHANCE_AT_MAX_CATCH_RATE * multiplicadorDeShiny)
   const isShiny = fixedIsShiny ?? rollChance(rng, shinyChance)
   // Os TRES tracos individuais dos jogos, sorteados aqui e so aqui:
   // NATUREZA (uniforme entre as 25, como nos jogos), HABILIDADE (entre os slots
