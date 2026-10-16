@@ -454,7 +454,10 @@ function montarHunt(bioma: BiomaDef, estagio: number): void {
   const [lo, hi] = niveisDoEstagio(estagio)
 
   const porSala: Record<string, string[]> = {}
-  for (const sub of bioma.subBiomas) {
+  // As SALAS ESPECIAIS (onda 2) ganham pool aqui tambem, em todo estagio: quem
+  // decide se ela pode sair neste estagio e o sorteio (`estagioMinimo`), e um
+  // pool que nao existisse faria a sala especial nascer vazia.
+  for (const sub of [...bioma.subBiomas, ...(bioma.especiais ?? [])]) {
     // QUEM MORA AQUI NESTE ESTAGIO SAI DA TABELA DE ELENCO (PH-502), e nao mais
     // da lista inteira do sub-bioma.
     //
@@ -475,7 +478,12 @@ function montarHunt(bioma: BiomaDef, estagio: number): void {
     porSala[sub.chave] = ids
   }
 
-  const enemyPool = [...new Set(Object.values(porSala).flat())]
+  // O `enemyPool` da hunt e so dos sub-biomas COMUNS. Ele e o recuo de quando
+  // nao ha sala ativa, e e a base da medicao de oferta de Pedra que define o
+  // preco das Especialidades (`ofertaDeStone.ts`). Somar as especiais aqui
+  // espalharia Eevee e Porygon pelo recuo de toda hunt e mexeria no preco.
+  const comuns = new Set(bioma.subBiomas.map((s) => s.chave))
+  const enemyPool = [...new Set(Object.entries(porSala).filter(([chave]) => comuns.has(chave)).flatMap(([, ids]) => ids))]
   if (enemyPool.length === 0) {
     throw new Error(
       `Hunt "${id}" nasceria sem nenhum encontro (estágio ${estagio}, Lv ${lo}-${hi}). ` +

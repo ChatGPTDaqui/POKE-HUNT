@@ -55,7 +55,7 @@ import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } fr
 import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/farmRates'
 import {
-  contextoDeSpawn, lootAtivo, novaSala, registrarAbate, temSalas,
+  contextoDeSpawn, lootAtivo, pedraTematicaDaSala, novaSala, registrarAbate, temSalas,
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
   estagioJaLimpo, proximoEstagioLiberado, estagioAnterior,
@@ -512,7 +512,8 @@ function criarEntidadeDoProtetor(
     if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
     const level = tipo === 'lord' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
     const ivs = rollIvsDoProtetor(rng)
-    const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs })
+    const multiplicadorDeShiny = ctx.multiplicadorDeShiny?.(encounter.speciesId)
+    const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs, ...(multiplicadorDeShiny ? { multiplicadorDeShiny } : {}) })
     escolhido = { encounterId, level, ivs, poke }
     if (!atacante) break
     const candidato = createEnemyEntity({ ...counters }, { poke, x: point.x, y: point.y, encounterId })
@@ -790,7 +791,8 @@ function spawnEnemyAt(
   const level = encounter.levelWeights?.length
     ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level
     : randInt(rng, Math.min(lo, hi), Math.max(lo, hi))
-  const poke = createPokeInstance(rng, encounter.speciesId, level)
+  const multiplicadorDeShiny = ctx.multiplicadorDeShiny?.(encounter.speciesId)
+  const poke = createPokeInstance(rng, encounter.speciesId, level, multiplicadorDeShiny ? { multiplicadorDeShiny } : {})
   return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }
 
@@ -1273,7 +1275,7 @@ export function handleEnemyDefeated(
   const trainerResult = grantTrainerExp(gameState.trainer, expGain)
   gameState.setTrainer(trainerResult.trainer)
 
-  const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef!, lootAtivo(world.sala, world.mapDef!.itemDrops))
+  const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef!, lootAtivo(world.sala, world.mapDef!.itemDrops), pedraTematicaDaSala(world.sala))
   // Champion Lance (data/nightmareMaps.ts) proibe captura explicitamente —
   // seu `noCatch` e o unico lugar que isso e setado.
   //
