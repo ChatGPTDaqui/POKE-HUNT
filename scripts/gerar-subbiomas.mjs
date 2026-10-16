@@ -42,6 +42,14 @@ import { fileURLToPath } from 'node:url'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const ENTRADA = path.join(RAIZ, 'scripts/pokerogue/biomas.json')
+// Sub-biomas AUTORAIS (onda 1 de 16/10/2026): lugares que o PokeRogue nao tem
+// (Fazenda MuuMuu, Rota 119, Estrada da Vitoria...). Mesmo formato do JSON do
+// PokeRogue, escrito a mao a partir das fichas de
+// docs/planos/2026-10-16-sub-biomas-brainstorm.md. Entram no cruzamento como se
+// fossem biomas do PokeRogue: mesma guarda de roster, mesma heranca por familia,
+// mesmo tier. Chave repetida entre os dois arquivos estoura, porque um
+// sobrescreveria o outro em silencio.
+const AUTORAIS = path.join(RAIZ, 'scripts/subbiomas-autorais.json')
 const SAIDA = path.join(RAIZ, 'src/data/generated/subBiomas.generated.ts')
 
 // Biomas do PokeRogue que nao entram: as pools deles sao 100% de geracoes que
@@ -155,6 +163,13 @@ for (const [a, b] of Object.entries(evolui)) if (SPECIES[b]) pai[acha(a)] = acha
 // cruzamento
 // ---------------------------------------------------------------------------
 const PR = JSON.parse(fs.readFileSync(ENTRADA, 'utf8'))
+{
+  const { _origem, ...autorais } = JSON.parse(fs.readFileSync(AUTORAIS, 'utf8'))
+  for (const [chave, def] of Object.entries(autorais)) {
+    if (PR[chave]) throw new Error(`sub-bioma autoral "${chave}" ja existe no PokeRogue`)
+    PR[chave] = def
+  }
+}
 const chaves = Object.keys(PR).filter((k) => !DESCARTADOS.has(k)).sort()
 
 // Os nove tiers do PokeRogue, na ordem do enum `BiomePoolTier` dele — a ordem

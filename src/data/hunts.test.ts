@@ -88,7 +88,8 @@ describe('estrutura', () => {
         }
       }
     }
-    expect(pares).toBe(330)
+    // 330 ate a onda 1 de sub-biomas novos (16/10/2026): 65 sub-biomas x 10.
+    expect(pares).toBe(650)
     expect(vazios).toEqual([])
   })
 

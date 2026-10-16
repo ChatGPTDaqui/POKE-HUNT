@@ -1,0 +1,483 @@
+{
+  "_origem": "Pools AUTORAIS dos sub-biomas que nao existem no PokeRogue (onda 1, 16/10/2026). Mesmo formato de scripts/pokerogue/biomas.json: nove tiers por sub-bioma, links e clima com os WeatherType do PokeRogue. gerar-subbiomas.mjs junta este arquivo ao do PokeRogue, e gerar-elenco-por-estagio.mjs converte os tiers em fatia (sem dado real: 100% daqui). Fichas e inspiracao em docs/planos/2026-10-16-sub-biomas-brainstorm.md.",
+  "farm": {
+    "pools": {
+      "COMMON": ["miltank", "tauros", "mareep", "rattata"],
+      "UNCOMMON": ["ponyta", "doduo", "skitty", "zigzagoon"],
+      "RARE": ["growlithe", "snubbull", "farfetch_d"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["tauros", "miltank", "ampharos"],
+      "BOSS_RARE": ["arcanine", "rapidash"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 6, "SUNNY": 4 }
+  },
+  "cycling-road": {
+    "pools": {
+      "COMMON": ["doduo", "spearow", "rattata"],
+      "UNCOMMON": ["grimer", "koffing", "taillow", "poochyena"],
+      "RARE": ["ponyta"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["dodrio", "weezing", "fearow"],
+      "BOSS_RARE": ["muk", "mightyena"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 8, "SUNNY": 3 }
+  },
+  "mushroom-glade": {
+    "pools": {
+      "COMMON": ["shroomish", "paras", "wurmple"],
+      "UNCOMMON": ["oddish", "venonat", "slakoth"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["breloom", "parasect", "vileplume"],
+      "BOSS_RARE": ["slaking"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 5, "RAIN": 4, "FOG": 2 }
+  },
+  "ilex-forest": {
+    "pools": {
+      "COMMON": ["caterpie", "weedle", "oddish", "hoothoot"],
+      "UNCOMMON": ["paras", "zubat", "psyduck", "pineco"],
+      "RARE": ["farfetch_d"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["noctowl", "forretress", "butterfree", "beedrill"],
+      "BOSS_RARE": ["golduck"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 5, "FOG": 4 }
+  },
+  "treetops": {
+    "pools": {
+      "COMMON": ["aipom", "pineco", "pidgey", "taillow"],
+      "UNCOMMON": ["spearow", "ekans", "hoothoot", "seedot", "slakoth"],
+      "RARE": ["heracross", "exeggcute"],
+      "SUPER_RARE": ["tropius"],
+      "ULTRA_RARE": [],
+      "BOSS": ["heracross", "shiftry", "pidgeot", "forretress"],
+      "BOSS_RARE": ["tropius", "exeggutor"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 7, "RAIN": 3 }
+  },
+  "coral-reef": {
+    "pools": {
+      "COMMON": ["corsola", "luvdisc", "staryu", "wingull"],
+      "UNCOMMON": ["remoraid", "horsea", "chinchou", "shellder", "qwilfish"],
+      "RARE": ["mantine", "clamperl"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["starmie", "octillery", "lanturn", "cloyster"],
+      "BOSS_RARE": ["mantine", "kingdra"],
+      "BOSS_SUPER_RARE": ["gorebyss", "huntail"],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 4, "SUNNY": 6 }
+  },
+  "whirl-islands": {
+    "pools": {
+      "COMMON": ["krabby", "tentacool", "zubat", "shellder"],
+      "UNCOMMON": ["seel", "horsea", "slowpoke", "magikarp"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["kingler", "dewgong", "tentacruel", "slowbro"],
+      "BOSS_RARE": ["kingdra", "gyarados"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 3, "RAIN": 5, "FOG": 3 }
+  },
+  "lily-pond": {
+    "pools": {
+      "COMMON": ["lotad", "surskit", "poliwag", "wooper"],
+      "UNCOMMON": ["psyduck", "marill", "oddish"],
+      "RARE": ["yanma"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["ludicolo", "politoed", "masquerain", "quagsire"],
+      "BOSS_RARE": ["bellossom", "azumarill"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 5, "RAIN": 4, "SUNNY": 3 }
+  },
+  "river": {
+    "pools": {
+      "COMMON": ["barboach", "goldeen", "magikarp", "poliwag"],
+      "UNCOMMON": ["psyduck", "marill", "surskit", "corphish"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": ["feebas"],
+      "BOSS": ["whiscash", "seaking", "golduck", "crawdaunt"],
+      "BOSS_RARE": ["gyarados", "azumarill"],
+      "BOSS_SUPER_RARE": ["milotic"],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 2, "RAIN": 9 }
+  },
+  "waterfall": {
+    "pools": {
+      "COMMON": ["magikarp", "goldeen", "poliwag"],
+      "UNCOMMON": ["psyduck", "slowpoke", "marill", "zubat"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["gyarados", "poliwrath", "seaking", "golduck"],
+      "BOSS_RARE": ["slowking", "politoed"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 4, "FOG": 5 }
+  },
+  "canyon": {
+    "pools": {
+      "COMMON": ["geodude", "sandshrew", "phanpy", "spearow"],
+      "UNCOMMON": ["gligar", "rhyhorn", "cubone"],
+      "RARE": ["skarmory", "onix"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["donphan", "golem", "sandslash", "fearow"],
+      "BOSS_RARE": ["skarmory", "rhydon", "steelix"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 4, "SUNNY": 4, "SANDSTORM": 2 }
+  },
+  "oasis": {
+    "pools": {
+      "COMMON": ["cacnea", "sandshrew", "trapinch", "psyduck"],
+      "UNCOMMON": ["doduo", "marill", "numel", "baltoy"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["cacturne", "golduck", "claydol", "camerupt"],
+      "BOSS_RARE": ["flygon"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 3, "SUNNY": 7 }
+  },
+  "rock-tunnel": {
+    "pools": {
+      "COMMON": ["zubat", "geodude", "machop"],
+      "UNCOMMON": ["cubone", "mankey"],
+      "RARE": ["onix"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["onix", "machoke", "golbat", "graveler"],
+      "BOSS_RARE": ["marowak", "primeape"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 1 }
+  },
+  "dark-cave": {
+    "pools": {
+      "COMMON": ["zubat", "geodude", "teddiursa"],
+      "UNCOMMON": ["whismur", "wynaut"],
+      "RARE": ["dunsparce"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["ursaring", "golbat", "exploud"],
+      "BOSS_RARE": ["wobbuffet", "dunsparce"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 1 }
+  },
+  "meteor-falls": {
+    "pools": {
+      "COMMON": ["zubat", "goldeen", "magikarp", "barboach"],
+      "UNCOMMON": ["lunatone", "solrock"],
+      "RARE": [],
+      "SUPER_RARE": ["bagon"],
+      "ULTRA_RARE": [],
+      "BOSS": ["lunatone", "solrock", "whiscash", "golbat"],
+      "BOSS_RARE": ["shelgon", "gyarados"],
+      "BOSS_SUPER_RARE": ["salamence"],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 4, "FOG": 3 }
+  },
+  "victory-road": {
+    "pools": {
+      "COMMON": ["machop", "geodude", "zubat", "onix"],
+      "UNCOMMON": ["cubone", "teddiursa", "rhyhorn", "makuhita", "aron"],
+      "RARE": ["phanpy", "meditite", "sableye", "mawile"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["machamp", "golem", "steelix", "aggron"],
+      "BOSS_RARE": ["hariyama", "medicham", "donphan", "rhydon"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 1 }
+  },
+  "seafoam-islands": {
+    "pools": {
+      "COMMON": ["seel", "shellder", "zubat", "psyduck"],
+      "UNCOMMON": ["slowpoke", "horsea", "krabby", "staryu"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["dewgong", "cloyster", "golduck", "slowbro"],
+      "BOSS_RARE": ["seadra", "starmie"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 3, "SNOW": 6 }
+  },
+  "shoal-cave": {
+    "pools": {
+      "COMMON": ["spheal", "zubat", "tentacool"],
+      "UNCOMMON": ["shellder", "snorunt"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["sealeo", "glalie", "tentacruel", "cloyster"],
+      "BOSS_RARE": ["walrein"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 3, "SNOW": 5, "HAIL": 2 }
+  },
+  "tundra": {
+    "pools": {
+      "COMMON": ["swinub", "snorunt", "teddiursa", "spheal"],
+      "UNCOMMON": ["sneasel", "delibird", "smoochum", "stantler"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["piloswine", "glalie", "ursaring", "jynx"],
+      "BOSS_RARE": ["walrein", "sneasel"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "SNOW": 6, "HAIL": 3 }
+  },
+  "fiery-path": {
+    "pools": {
+      "COMMON": ["numel", "koffing", "slugma", "machop"],
+      "UNCOMMON": ["grimer", "torkoal"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["torkoal", "camerupt", "weezing", "magcargo"],
+      "BOSS_RARE": ["muk", "machoke"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 4, "SUNNY": 6 }
+  },
+  "mt-ember": {
+    "pools": {
+      "COMMON": ["ponyta", "slugma", "geodude", "machop"],
+      "UNCOMMON": ["spearow", "magby"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["rapidash", "magmar", "magcargo", "golem"],
+      "BOSS_RARE": ["machamp", "fearow"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 3, "SUNNY": 7 }
+  },
+  "ash-field": {
+    "pools": {
+      "COMMON": ["spinda", "slugma", "sandshrew"],
+      "UNCOMMON": ["numel"],
+      "RARE": ["skarmory"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["skarmory", "sandslash", "magcargo"],
+      "BOSS_RARE": ["camerupt", "spinda"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 5, "FOG": 4 }
+  },
+  "hot-springs": {
+    "pools": {
+      "COMMON": ["numel", "slowpoke", "psyduck", "spoink"],
+      "UNCOMMON": ["growlithe", "ponyta", "magby", "torkoal", "houndour"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["camerupt", "slowbro", "golduck", "grumpig"],
+      "BOSS_RARE": ["arcanine", "houndoom", "magmar"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 4, "FOG": 5, "SUNNY": 2 }
+  },
+  "harbor": {
+    "pools": {
+      "COMMON": ["tentacool", "wingull", "krabby", "magikarp"],
+      "UNCOMMON": ["machop", "shellder", "staryu", "psyduck", "meowth"],
+      "RARE": ["grimer", "corphish"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["machoke", "pelipper", "kingler", "tentacruel"],
+      "BOSS_RARE": ["machamp", "gyarados", "persian"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 7, "RAIN": 3 }
+  },
+  "underground": {
+    "pools": {
+      "COMMON": ["rattata", "grimer", "koffing", "zubat"],
+      "UNCOMMON": ["ekans", "drowzee", "gulpin"],
+      "RARE": [],
+      "SUPER_RARE": ["ditto"],
+      "ULTRA_RARE": [],
+      "BOSS": ["muk", "weezing", "swalot", "raticate"],
+      "BOSS_RARE": ["arbok", "hypno"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 1 }
+  },
+  "junkyard": {
+    "pools": {
+      "COMMON": ["grimer", "koffing", "magnemite", "rattata"],
+      "UNCOMMON": ["voltorb", "gulpin"],
+      "RARE": ["nosepass"],
+      "SUPER_RARE": ["ditto"],
+      "ULTRA_RARE": [],
+      "BOSS": ["magneton", "muk", "weezing", "electrode"],
+      "BOSS_RARE": ["swalot", "nosepass"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 7, "RAIN": 3 }
+  },
+  "sprout-tower": {
+    "pools": {
+      "COMMON": ["bellsprout", "rattata", "gastly"],
+      "UNCOMMON": ["hoothoot", "natu", "drowzee"],
+      "RARE": ["abra"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["victreebel", "hypno", "noctowl", "xatu"],
+      "BOSS_RARE": ["haunter", "kadabra"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 1 }
+  },
+  "meditation-shrine": {
+    "pools": {
+      "COMMON": ["meditite", "spoink", "natu", "slowpoke"],
+      "UNCOMMON": ["girafarig", "smoochum", "abra"],
+      "RARE": ["chimecho"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["medicham", "grumpig", "xatu", "jynx"],
+      "BOSS_RARE": ["alakazam", "slowking", "girafarig"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 1 }
+  },
+  "sky-pillar": {
+    "pools": {
+      "COMMON": ["baltoy", "shuppet", "duskull", "swablu"],
+      "UNCOMMON": ["sableye", "mawile", "golbat"],
+      "RARE": ["beldum"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["claydol", "banette", "dusclops", "altaria"],
+      "BOSS_RARE": ["metang", "sableye"],
+      "BOSS_SUPER_RARE": ["metagross"],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 1 }
+  },
+  "mt-pyre": {
+    "pools": {
+      "COMMON": ["shuppet", "duskull", "wingull"],
+      "UNCOMMON": ["meditite", "gastly"],
+      "RARE": ["chimecho"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["banette", "dusclops", "medicham", "haunter"],
+      "BOSS_RARE": ["chimecho", "gengar"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 3, "FOG": 5 }
+  },
+  "burned-tower": {
+    "pools": {
+      "COMMON": ["rattata", "koffing", "zubat"],
+      "UNCOMMON": ["magby", "houndour", "murkrow"],
+      "RARE": ["misdreavus"],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["houndoom", "weezing", "magmar", "raticate"],
+      "BOSS_RARE": ["misdreavus", "golbat"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 4, "FOG": 4 }
+  },
+  "abandoned-ship": {
+    "pools": {
+      "COMMON": ["tentacool", "zubat", "krabby", "shuppet"],
+      "UNCOMMON": ["duskull", "gastly", "grimer"],
+      "RARE": [],
+      "SUPER_RARE": [],
+      "ULTRA_RARE": [],
+      "BOSS": ["tentacruel", "banette", "dusclops", "kingler"],
+      "BOSS_RARE": ["gengar", "muk"],
+      "BOSS_SUPER_RARE": [],
+      "BOSS_ULTRA_RARE": []
+    },
+    "links": [],
+    "clima": { "NONE": 2, "FOG": 4, "RAIN": 3 }
+  }
+}
