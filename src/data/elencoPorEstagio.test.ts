@@ -27,7 +27,21 @@ import { SPECIES } from '@/data/pokes'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { NON_WILD_SPECIES } from '@/data/regions'
 
-const SUB_BIOMAS = BIOMAS.flatMap((b) => b.subBiomas.map((s) => s.chave))
+// Os sub-biomas comuns e as salas especiais (onda 2): toda chave com tabela.
+const SUB_BIOMAS = BIOMAS.flatMap((b) => [...b.subBiomas, ...(b.especiais ?? [])].map((s) => s.chave))
+
+/**
+ * As chaves de sala que o jogo pode SORTEAR neste estagio: todo sub-bioma comum
+ * e as salas especiais a partir do `estagioMinimo` delas. A especial tem pool
+ * em todo estagio, mas abaixo do minimo ela nunca sai, e medi-la ali seria
+ * reprovar uma sala que nao existe.
+ */
+function chavesSorteaveis(bioma: (typeof BIOMAS)[number], estagio: number): string[] {
+  return [
+    ...bioma.subBiomas.map((s) => s.chave),
+    ...(bioma.especiais ?? []).filter((e) => estagio >= e.estagioMinimo).map((e) => e.chave),
+  ]
+}
 
 /** Toda sala do jogo: (estagio, sub-bioma, indice), com o contexto de sorteio. */
 function todasAsSalas() {
@@ -40,7 +54,7 @@ function todasAsSalas() {
       const mapId = estagioId(bioma.chave, estagio)
       const map = MAPS[mapId]
       const faixa = niveisDoEstagio(estagio)
-      for (const chave of Object.keys(POOL_POR_SALA[mapId] ?? {})) {
+      for (const chave of chavesSorteaveis(bioma, estagio)) {
         for (let indice = 0; indice < salasDoEstagio(estagio); indice++) {
           const ctx = contextoDeSpawn(mapId, faixa, { chave, indice, abates: 0, ciclos: 0 }, map.enemyPool)
           const soma = ctx.pool.reduce((s, id) => s + ctx.peso(id), 0)
@@ -59,7 +73,7 @@ function todasAsSalas() {
 }
 
 describe('a tabela de elenco', () => {
-  it('cobre os 33 sub-biomas nos 10 estagios', () => {
+  it('cobre os 85 sub-biomas e salas especiais nos 10 estagios', () => {
     expect(Object.keys(ELENCO_POR_ESTAGIO).sort()).toEqual([...SUB_BIOMAS].sort())
     for (const sub of SUB_BIOMAS) {
       for (let e = 1; e <= ESTAGIOS_POR_BIOMA; e++) {
@@ -112,11 +126,14 @@ describe('a tabela de elenco', () => {
   })
 
   it('nao poe lendario nem NON_WILD_SPECIES em sub-bioma de bioma', () => {
-    const proibidos = new Set<string>([...LEGENDARY_SPECIES_IDS, ...NON_WILD_SPECIES])
+    // Lendario: em lugar nenhum. NON_WILD (Eevee, Porygon): so em sala especial
+    // (onda 2, decisao do dono), e la o teste de `hunts.test.ts` confere qual.
+    const especiais = new Set(BIOMAS.flatMap((b) => (b.especiais ?? []).map((e) => e.chave)))
     const achados: string[] = []
     for (const sub of SUB_BIOMAS) {
       for (const sp of ELENCO_DO_SUB_BIOMA[sub]) {
-        if (proibidos.has(sp)) achados.push(`${sub}: ${sp}`)
+        if (LEGENDARY_SPECIES_IDS.includes(sp)) achados.push(`${sub}: ${sp}`)
+        if (NON_WILD_SPECIES.has(sp) && !especiais.has(sub)) achados.push(`${sub}: ${sp}`)
       }
     }
     expect(achados).toEqual([])
@@ -165,7 +182,7 @@ describe('o resultado nas 1.815 salas', () => {
 
   it('mede as salas todas (contra passar de vazio)', () => {
     const esperado = BIOMAS.reduce((total, bioma) => total + Array.from(
-      { length: ESTAGIOS_POR_BIOMA }, (_, i) => bioma.subBiomas.length * salasDoEstagio(i + 1),
+      { length: ESTAGIOS_POR_BIOMA }, (_, i) => chavesSorteaveis(bioma, i + 1).length * salasDoEstagio(i + 1),
     ).reduce((a, b) => a + b, 0), 0)
     expect(salas.length).toBe(esperado)
   })

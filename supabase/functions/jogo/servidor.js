@@ -40255,12 +40255,12 @@ function rollIvsDoProtetor(rng) {
 function novoPokeUid() {
 	return crypto.randomUUID();
 }
-function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature, isShiny: fixedIsShiny, trait: fixedTrait, uid: fixedUid } = {}) {
+function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature, isShiny: fixedIsShiny, trait: fixedTrait, uid: fixedUid, multiplicadorDeShiny = 1 } = {}) {
 	const species = SPECIES[speciesId];
 	if (!species) throw new Error(`Espécie desconhecida: ${speciesId}`);
 	const ivs = fixedIvs || rollIvs(rng, speciesId);
 	const rarity = fixedRarity || rollRarity(rng);
-	const shinyChance = species.catchRate / MAX_CATCH_RATE * SHINY_CHANCE_AT_MAX_CATCH_RATE;
+	const shinyChance = Math.min(1, species.catchRate / MAX_CATCH_RATE * SHINY_CHANCE_AT_MAX_CATCH_RATE * multiplicadorDeShiny);
 	const isShiny = fixedIsShiny ?? rollChance(rng, shinyChance);
 	const nature = fixedNature ?? NATURE_LIST[randInt(rng, 0, NATURE_LIST.length - 1)].key;
 	const trait = fixedTrait ?? sortearTrait(rng, speciesId) ?? void 0;
@@ -43351,6 +43351,38 @@ var LOOT = {
 			chance: .08
 		}
 	],
+	safari: [
+		{
+			itemId: "great_ball",
+			chance: .12
+		},
+		{
+			itemId: "ultra_ball",
+			chance: .06
+		},
+		{
+			itemId: "super_potion",
+			chance: .08
+		}
+	],
+	cofre: [
+		{
+			itemId: "poke_ball",
+			chance: .2
+		},
+		{
+			itemId: "great_ball",
+			chance: .1
+		},
+		{
+			itemId: "ultra_ball",
+			chance: .04
+		},
+		{
+			itemId: "antidote",
+			chance: .06
+		}
+	],
 	vitoria: [
 		{
 			itemId: "hyper_potion",
@@ -43459,7 +43491,32 @@ var BIOMAS = [
 				peso: 6,
 				loot: "toxico"
 			}
-		]
+		],
+		especiais: [{
+			chave: "safari-zone",
+			nome: "Zona Safári",
+			peso: 1,
+			loot: "safari",
+			estagioMinimo: 4,
+			pedra: "NORMAL",
+			bg: {
+				primary: "#3f5a34",
+				secondary: "#4a6a3d",
+				image: ARTE.matoAlto
+			}
+		}, {
+			chave: "stray-charmander",
+			nome: "Charmander na Chuva",
+			peso: 1,
+			loot: "basico",
+			estagioMinimo: 1,
+			pedra: "FIRE",
+			bg: {
+				primary: "#3f5a34",
+				secondary: "#4a6a3d",
+				image: ARTE.planicie
+			}
+		}]
 	},
 	{
 		chave: "mata",
@@ -43522,7 +43579,27 @@ var BIOMAS = [
 					image: ARTE.selva
 				}
 			}
-		]
+		],
+		especiais: [{
+			chave: "mysterious-garden",
+			nome: "Jardim Misterioso",
+			peso: 1,
+			loot: "remoto",
+			estagioMinimo: 1,
+			pedra: "GRASS",
+			bg: {
+				primary: "#284b3c",
+				secondary: "#2e5544",
+				image: ARTE.campina
+			}
+		}, {
+			chave: "pikachu-colony",
+			nome: "Colônia de Pikachu",
+			peso: 1,
+			loot: "basico",
+			estagioMinimo: 1,
+			pedra: "ELECTRIC"
+		}]
 	},
 	{
 		chave: "marinho",
@@ -43579,7 +43656,27 @@ var BIOMAS = [
 				peso: 6,
 				loot: "remoto"
 			}
-		]
+		],
+		especiais: [{
+			chave: "orange-archipelago",
+			nome: "Arquipélago Laranja",
+			peso: 1,
+			loot: "remoto",
+			estagioMinimo: 2,
+			pedra: "WATER",
+			bg: {
+				primary: "#1f3d52",
+				secondary: "#27506b",
+				image: ARTE.praia
+			}
+		}, {
+			chave: "maidens-peak",
+			nome: "Pico da Donzela",
+			peso: 1,
+			loot: "remoto",
+			estagioMinimo: 2,
+			pedra: "GHOST"
+		}]
 	},
 	{
 		chave: "aguas_interiores",
@@ -43626,7 +43723,26 @@ var BIOMAS = [
 				peso: 6,
 				loot: "remoto"
 			}
-		]
+		],
+		especiais: [{
+			chave: "lake-of-rage",
+			nome: "Lago da Fúria",
+			peso: 1,
+			loot: "remoto",
+			estagioMinimo: 2,
+			pedra: "WATER",
+			shiny: {
+				especie: "gyarados",
+				multiplicador: 10
+			}
+		}, {
+			chave: "squirtle-squad",
+			nome: "Esquadrão Squirtle",
+			peso: 1,
+			loot: "basico",
+			estagioMinimo: 1,
+			pedra: "WATER"
+		}]
 	},
 	{
 		chave: "aridos",
@@ -43683,7 +43799,15 @@ var BIOMAS = [
 					image: ARTE.deserto
 				}
 			}
-		]
+		],
+		especiais: [{
+			chave: "grampa-canyon",
+			nome: "Cânion do Vovô",
+			peso: 1,
+			loot: "profundo",
+			estagioMinimo: 6,
+			pedra: "ROCK"
+		}]
 	},
 	{
 		chave: "subterraneo",
@@ -43756,7 +43880,32 @@ var BIOMAS = [
 					image: ARTE.cavernaVulcanica
 				}
 			}
-		]
+		],
+		especiais: [{
+			chave: "mt-moon",
+			nome: "Monte Lua",
+			peso: 1,
+			loot: "remoto",
+			estagioMinimo: 1,
+			pedra: "FAIRY",
+			bg: {
+				primary: "#3a3340",
+				secondary: "#463d4d",
+				image: ARTE.grutaFeerica
+			}
+		}, {
+			chave: "digletts-cave",
+			nome: "Caverna dos Diglett",
+			peso: 1,
+			loot: "basico",
+			estagioMinimo: 1,
+			pedra: "GROUND",
+			bg: {
+				primary: "#3a3340",
+				secondary: "#463d4d",
+				image: ARTE.cavernaVulcanica
+			}
+		}]
 	},
 	{
 		chave: "gelido",
@@ -43813,7 +43962,22 @@ var BIOMAS = [
 				peso: 10,
 				loot: "gelado"
 			}
-		]
+		],
+		especiais: [{
+			chave: "jynx-holiday",
+			nome: "Natal da Jynx",
+			peso: 1,
+			loot: "gelado",
+			estagioMinimo: 2,
+			pedra: "ICE"
+		}, {
+			chave: "mt-silver-summit",
+			nome: "Cume do Monte Prata",
+			peso: 1,
+			loot: "vitoria",
+			estagioMinimo: 10,
+			pedra: "DARK"
+		}]
 	},
 	{
 		chave: "igneo",
@@ -43865,7 +44029,20 @@ var BIOMAS = [
 				peso: 6,
 				loot: "termal"
 			}
-		]
+		],
+		especiais: [{
+			chave: "pokemon-mansion",
+			nome: "Mansão Pokémon",
+			peso: 1,
+			loot: "profundo",
+			estagioMinimo: 5,
+			pedra: "FIRE",
+			bg: {
+				primary: "#5a2a1e",
+				secondary: "#6d3626",
+				image: ARTE.florestaQueimada
+			}
+		}]
 	},
 	{
 		chave: "urbano",
@@ -43932,6 +44109,47 @@ var BIOMAS = [
 					image: ARTE.cortico
 				}
 			}
+		],
+		especiais: [
+			{
+				chave: "bug-contest",
+				nome: "Concurso de Insetos",
+				peso: 1,
+				loot: "civilizado",
+				estagioMinimo: 1,
+				pedra: "BUG",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.campina
+				}
+			},
+			{
+				chave: "rocket-hideout",
+				nome: "Esconderijo Rocket",
+				peso: 1,
+				loot: "cofre",
+				estagioMinimo: 3,
+				pedra: "POISON",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.industrial
+				}
+			},
+			{
+				chave: "celadon-mansion",
+				nome: "Mansão Celadon",
+				peso: 1,
+				loot: "civilizado",
+				estagioMinimo: 2,
+				pedra: "NORMAL",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.metropole
+				}
+			}
 		]
 	},
 	{
@@ -43984,7 +44202,15 @@ var BIOMAS = [
 					image: ARTE.obra
 				}
 			}
-		]
+		],
+		especiais: [{
+			chave: "silph-co",
+			nome: "Silph S.A.",
+			peso: 1,
+			loot: "profundo",
+			estagioMinimo: 3,
+			pedra: "ELECTRIC"
+		}]
 	},
 	{
 		chave: "sagrado",
@@ -44047,7 +44273,20 @@ var BIOMAS = [
 					image: ARTE.ruinas
 				}
 			}
-		]
+		],
+		especiais: [{
+			chave: "mirage-island",
+			nome: "Ilha Miragem",
+			peso: 1,
+			loot: "remoto",
+			estagioMinimo: 1,
+			pedra: "PSYCHIC",
+			bg: {
+				primary: "#4a3a55",
+				secondary: "#584565",
+				image: ARTE.ilha
+			}
+		}]
 	},
 	{
 		chave: "sombrio",
@@ -44110,7 +44349,20 @@ var BIOMAS = [
 					image: ARTE.abismo
 				}
 			}
-		]
+		],
+		especiais: [{
+			chave: "pokemon-tower",
+			nome: "Torre Pokémon",
+			peso: 1,
+			loot: "sonolento",
+			estagioMinimo: 1,
+			pedra: "GHOST",
+			bg: {
+				primary: "#2b2733",
+				secondary: "#35303f",
+				image: ARTE.temploMistico
+			}
+		}]
 	}
 ];
 var GEOMETRIA = {
@@ -44152,10 +44404,12 @@ var GEOMETRIA = {
 	]
 };
 var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
-var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
+var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => [...bioma.subBiomas, ...bioma.especiais ?? []].map((sub) => [sub.chave, {
 	sub,
 	bioma
 }])));
+/** A sala especial desta chave, ou undefined se a chave e de sub-bioma comum. */
+var SALA_ESPECIAL_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => (bioma.especiais ?? []).map((e) => [e.chave, e])));
 //#endregion
 //#region src/data/generated/elencoPorEstagio.generated.ts
 /**
@@ -44604,6 +44858,53 @@ var ELENCO_DO_SUB_BIOMA = {
 		"taillow",
 		"swellow"
 	],
+	"safari-zone": [
+		"nidoran_f",
+		"nidorina",
+		"nidoqueen",
+		"nidoran_m",
+		"nidorino",
+		"nidoking",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"doduo",
+		"dodrio",
+		"exeggcute",
+		"exeggutor",
+		"cubone",
+		"marowak",
+		"rhyhorn",
+		"rhydon",
+		"kangaskhan",
+		"scyther",
+		"pinsir",
+		"tauros",
+		"dratini",
+		"dragonair",
+		"dragonite",
+		"girafarig",
+		"scizor",
+		"heracross",
+		"phanpy",
+		"donphan"
+	],
+	"stray-charmander": [
+		"charmander",
+		"charmeleon",
+		"charizard",
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"rattata",
+		"raticate",
+		"spearow",
+		"fearow",
+		"oddish",
+		"gloom",
+		"vileplume"
+	],
 	"forest": [
 		"caterpie",
 		"metapod",
@@ -44800,6 +45101,40 @@ var ELENCO_DO_SUB_BIOMA = {
 		"slaking",
 		"tropius"
 	],
+	"mysterious-garden": [
+		"bulbasaur",
+		"ivysaur",
+		"venusaur",
+		"oddish",
+		"gloom",
+		"vileplume",
+		"bellsprout",
+		"weepinbell",
+		"victreebel",
+		"bellossom",
+		"hoppip",
+		"skiploom",
+		"jumpluff",
+		"sunkern",
+		"sunflora",
+		"roselia"
+	],
+	"pikachu-colony": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"pikachu",
+		"raichu",
+		"pichu",
+		"plusle",
+		"minun"
+	],
 	"sea": [
 		"zubat",
 		"golbat",
@@ -44932,6 +45267,47 @@ var ELENCO_DO_SUB_BIOMA = {
 		"gyarados",
 		"crobat",
 		"kingdra"
+	],
+	"orange-archipelago": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"psyduck",
+		"golduck",
+		"tentacool",
+		"tentacruel",
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"exeggcute",
+		"exeggutor",
+		"horsea",
+		"seadra",
+		"staryu",
+		"starmie",
+		"magikarp",
+		"gyarados",
+		"lapras",
+		"marill",
+		"azumarill",
+		"kingdra",
+		"azurill"
+	],
+	"maidens-peak": [
+		"tentacool",
+		"tentacruel",
+		"shellder",
+		"cloyster",
+		"gastly",
+		"haunter",
+		"gengar",
+		"krabby",
+		"kingler",
+		"staryu",
+		"starmie",
+		"wingull",
+		"pelipper"
 	],
 	"lake": [
 		"wartortle",
@@ -45083,6 +45459,39 @@ var ELENCO_DO_SUB_BIOMA = {
 		"slowking",
 		"azurill"
 	],
+	"lake-of-rage": [
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"slowpoke",
+		"slowbro",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"marill",
+		"azumarill",
+		"wooper",
+		"quagsire",
+		"azurill"
+	],
+	"squirtle-squad": [
+		"squirtle",
+		"wartortle",
+		"blastoise",
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"marill",
+		"azumarill",
+		"wooper",
+		"quagsire",
+		"azurill"
+	],
 	"badlands": [
 		"sandshrew",
 		"sandslash",
@@ -45195,6 +45604,19 @@ var ELENCO_DO_SUB_BIOMA = {
 		"cacturne",
 		"baltoy",
 		"claydol"
+	],
+	"grampa-canyon": [
+		"cubone",
+		"marowak",
+		"omanyte",
+		"omastar",
+		"kabuto",
+		"kabutops",
+		"aerodactyl",
+		"lileep",
+		"cradily",
+		"anorith",
+		"armaldo"
 	],
 	"cave": [
 		"rattata",
@@ -45445,6 +45867,31 @@ var ELENCO_DO_SUB_BIOMA = {
 		"meditite",
 		"medicham"
 	],
+	"mt-moon": [
+		"sandshrew",
+		"sandslash",
+		"clefairy",
+		"clefable",
+		"zubat",
+		"golbat",
+		"paras",
+		"parasect",
+		"geodude",
+		"graveler",
+		"golem",
+		"crobat",
+		"cleffa"
+	],
+	"digletts-cave": [
+		"zubat",
+		"golbat",
+		"diglett",
+		"dugtrio",
+		"geodude",
+		"graveler",
+		"golem",
+		"crobat"
+	],
 	"ice-cave": [
 		"zubat",
 		"golbat",
@@ -45538,6 +45985,42 @@ var ELENCO_DO_SUB_BIOMA = {
 		"spheal",
 		"sealeo",
 		"walrein"
+	],
+	"jynx-holiday": [
+		"jynx",
+		"sneasel",
+		"swinub",
+		"piloswine",
+		"delibird",
+		"stantler",
+		"smoochum",
+		"snorunt",
+		"glalie",
+		"spheal",
+		"sealeo",
+		"walrein"
+	],
+	"mt-silver-summit": [
+		"zubat",
+		"golbat",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"crobat",
+		"misdreavus",
+		"steelix",
+		"sneasel",
+		"teddiursa",
+		"ursaring",
+		"phanpy",
+		"donphan",
+		"larvitar",
+		"pupitar",
+		"tyranitar"
 	],
 	"volcano": [
 		"charmeleon",
@@ -45637,6 +46120,21 @@ var ELENCO_DO_SUB_BIOMA = {
 		"spoink",
 		"grumpig"
 	],
+	"pokemon-mansion": [
+		"rattata",
+		"raticate",
+		"growlithe",
+		"arcanine",
+		"ponyta",
+		"rapidash",
+		"grimer",
+		"muk",
+		"koffing",
+		"weezing",
+		"magmar",
+		"ditto",
+		"magby"
+	],
 	"metropolis": [
 		"rattata",
 		"raticate",
@@ -45721,6 +46219,66 @@ var ELENCO_DO_SUB_BIOMA = {
 		"crobat",
 		"gulpin",
 		"swalot"
+	],
+	"bug-contest": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"scyther",
+		"pinsir",
+		"ledyba",
+		"ledian",
+		"spinarak",
+		"ariados",
+		"scizor"
+	],
+	"rocket-hideout": [
+		"rattata",
+		"raticate",
+		"ekans",
+		"arbok",
+		"zubat",
+		"golbat",
+		"meowth",
+		"persian",
+		"grimer",
+		"muk",
+		"drowzee",
+		"hypno",
+		"koffing",
+		"weezing",
+		"crobat",
+		"murkrow",
+		"sneasel",
+		"houndour",
+		"houndoom"
+	],
+	"celadon-mansion": [
+		"pikachu",
+		"raichu",
+		"clefairy",
+		"clefable",
+		"jigglypuff",
+		"wigglytuff",
+		"meowth",
+		"persian",
+		"growlithe",
+		"arcanine",
+		"eevee",
+		"pichu",
+		"cleffa",
+		"igglybuff",
+		"snubbull",
+		"granbull",
+		"skitty",
+		"delcatty"
 	],
 	"construction-site": [
 		"diglett",
@@ -45811,6 +46369,15 @@ var ELENCO_DO_SUB_BIOMA = {
 		"nosepass",
 		"gulpin",
 		"swalot"
+	],
+	"silph-co": [
+		"magnemite",
+		"magneton",
+		"voltorb",
+		"electrode",
+		"ditto",
+		"porygon",
+		"porygon2"
 	],
 	"ruins": [
 		"sandshrew",
@@ -45932,6 +46499,14 @@ var ELENCO_DO_SUB_BIOMA = {
 		"metang",
 		"metagross"
 	],
+	"mirage-island": [
+		"jynx",
+		"natu",
+		"xatu",
+		"wobbuffet",
+		"smoochum",
+		"wynaut"
+	],
 	"graveyard": [
 		"rattata",
 		"raticate",
@@ -46032,6 +46607,16 @@ var ELENCO_DO_SUB_BIOMA = {
 		"crobat",
 		"shuppet",
 		"banette",
+		"duskull",
+		"dusclops"
+	],
+	"pokemon-tower": [
+		"gastly",
+		"haunter",
+		"gengar",
+		"cubone",
+		"marowak",
+		"misdreavus",
 		"duskull",
 		"dusclops"
 	]
@@ -47328,6 +47913,260 @@ var ELENCO_POR_ESTAGIO = {
 			["ponyta", .05556]
 		]
 	},
+	"safari-zone": {
+		1: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		2: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		3: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		4: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		5: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		6: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		7: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		8: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		9: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		],
+		10: [
+			["nidoran_f", .09676],
+			["nidoran_m", .09677],
+			["paras", .09677],
+			["venonat", .09677],
+			["doduo", .09677],
+			["exeggcute", .06452],
+			["cubone", .06452],
+			["rhyhorn", .06452],
+			["girafarig", .06452],
+			["phanpy", .06452],
+			["kangaskhan", .03226],
+			["scyther", .03226],
+			["pinsir", .03226],
+			["tauros", .03226],
+			["dratini", .03226],
+			["heracross", .03226]
+		]
+	},
+	"stray-charmander": {
+		1: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		2: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		3: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		4: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		5: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		6: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		7: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		8: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		9: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		],
+		10: [
+			["charmander", .23076],
+			["pidgey", .23077],
+			["rattata", .23077],
+			["spearow", .15385],
+			["oddish", .15385]
+		]
+	},
 	"forest": {
 		1: [
 			["weedle", .34792],
@@ -48324,6 +49163,180 @@ var ELENCO_POR_ESTAGIO = {
 			["tropius", .04]
 		]
 	},
+	"mysterious-garden": {
+		1: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		2: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		3: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		4: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		5: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		6: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		7: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		8: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		9: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		],
+		10: [
+			["bulbasaur", .17647],
+			["oddish", .17647],
+			["hoppip", .17647],
+			["sunkern", .17647],
+			["bellsprout", .11765],
+			["roselia", .11765],
+			["bellossom", .05882]
+		]
+	},
+	"pikachu-colony": {
+		1: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		2: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		3: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		4: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		5: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		6: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		7: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		8: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		9: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		],
+		10: [
+			["caterpie", .20001],
+			["weedle", .2],
+			["pichu", .2],
+			["pidgey", .13333],
+			["plusle", .13333],
+			["minun", .13333]
+		]
+	},
 	"sea": {
 		1: [
 			["tentacool", .40868],
@@ -49020,6 +50033,220 @@ var ELENCO_POR_ESTAGIO = {
 			["magikarp", .1]
 		]
 	},
+	"orange-archipelago": {
+		1: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		2: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		3: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		4: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		5: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		6: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		7: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		8: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		9: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		],
+		10: [
+			["tentacool", .11542],
+			["shellder", .11538],
+			["krabby", .11538],
+			["staryu", .11538],
+			["azurill", .11538],
+			["caterpie", .07692],
+			["psyduck", .07692],
+			["exeggcute", .07692],
+			["horsea", .07692],
+			["magikarp", .07692],
+			["lapras", .03846]
+		]
+	},
+	"maidens-peak": {
+		1: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		2: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		3: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		4: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		5: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		6: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		7: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		8: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		9: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		],
+		10: [
+			["shellder", .1875],
+			["gastly", .1875],
+			["krabby", .1875],
+			["staryu", .1875],
+			["tentacool", .125],
+			["wingull", .125]
+		]
+	},
 	"lake": {
 		1: [
 			["magikarp", .29523],
@@ -49705,6 +50932,170 @@ var ELENCO_POR_ESTAGIO = {
 			["slowking", .05]
 		]
 	},
+	"lake-of-rage": {
+		1: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		2: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		3: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		4: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		5: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		6: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		7: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		8: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		9: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		],
+		10: [
+			["goldeen", .17646],
+			["magikarp", .17647],
+			["azurill", .17647],
+			["psyduck", .11765],
+			["poliwag", .11765],
+			["slowpoke", .11765],
+			["wooper", .11765]
+		]
+	},
+	"squirtle-squad": {
+		1: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		2: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		3: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		4: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		5: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		6: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		7: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		8: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		9: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		],
+		10: [
+			["squirtle", .21427],
+			["psyduck", .21429],
+			["poliwag", .21429],
+			["azurill", .21429],
+			["wooper", .14286]
+		]
+	},
 	"badlands": {
 		1: [
 			["spinda", .31815],
@@ -50313,6 +51704,88 @@ var ELENCO_POR_ESTAGIO = {
 			["doduo", .09524],
 			["numel", .09524],
 			["baltoy", .09524]
+		]
+	},
+	"grampa-canyon": {
+		1: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		2: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		3: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		4: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		5: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		6: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		7: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		8: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		9: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
+		],
+		10: [
+			["cubone", .21427],
+			["omanyte", .21429],
+			["kabuto", .21429],
+			["lileep", .14286],
+			["anorith", .14286],
+			["aerodactyl", .07143]
 		]
 	},
 	"cave": {
@@ -51132,6 +52605,130 @@ var ELENCO_POR_ESTAGIO = {
 			["meditite", .03846]
 		]
 	},
+	"mt-moon": {
+		1: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		2: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		3: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		4: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		5: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		6: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		7: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		8: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		9: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		],
+		10: [
+			["zubat", .21427],
+			["paras", .21429],
+			["geodude", .21429],
+			["cleffa", .21429],
+			["sandshrew", .14286]
+		]
+	},
+	"digletts-cave": {
+		1: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		2: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		3: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		4: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		5: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		6: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		7: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		8: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		9: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		],
+		10: [
+			["zubat", .375],
+			["diglett", .375],
+			["geodude", .25]
+		]
+	},
 	"ice-cave": {
 		1: [
 			["zubat", .46252],
@@ -51635,6 +53232,210 @@ var ELENCO_POR_ESTAGIO = {
 			["delibird", .1],
 			["stantler", .1],
 			["smoochum", .1]
+		]
+	},
+	"jynx-holiday": {
+		1: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		2: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		3: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		4: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		5: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		6: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		7: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		8: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		9: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		],
+		10: [
+			["swinub", .16666],
+			["delibird", .16667],
+			["smoochum", .16667],
+			["snorunt", .16667],
+			["sneasel", .11111],
+			["stantler", .11111],
+			["spheal", .11111]
+		]
+	},
+	"mt-silver-summit": {
+		1: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		2: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		3: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		4: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		5: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		6: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		7: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		8: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		9: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
+		],
+		10: [
+			["geodude", .14284],
+			["sneasel", .14286],
+			["teddiursa", .14286],
+			["phanpy", .14286],
+			["zubat", .09524],
+			["machop", .09524],
+			["onix", .09524],
+			["misdreavus", .09524],
+			["larvitar", .04762]
 		]
 	},
 	"volcano": {
@@ -52147,6 +53948,98 @@ var ELENCO_POR_ESTAGIO = {
 			["torkoal", .09091]
 		]
 	},
+	"pokemon-mansion": {
+		1: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		2: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		3: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		4: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		5: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		6: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		7: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		8: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		9: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		],
+		10: [
+			["rattata", .16665],
+			["growlithe", .16667],
+			["ponyta", .16667],
+			["grimer", .16667],
+			["koffing", .16667],
+			["magby", .11111],
+			["ditto", .05556]
+		]
+	},
 	"metropolis": {
 		1: [
 			["rattata", .20688],
@@ -52655,6 +54548,332 @@ var ELENCO_POR_ESTAGIO = {
 			["drowzee", .10811],
 			["gulpin", .10811],
 			["ditto", .02703]
+		]
+	},
+	"bug-contest": {
+		1: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		2: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		3: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		4: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		5: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		6: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		7: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		8: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		9: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		],
+		10: [
+			["caterpie", .16665],
+			["weedle", .16667],
+			["paras", .16667],
+			["venonat", .16667],
+			["ledyba", .11111],
+			["spinarak", .11111],
+			["scyther", .05556],
+			["pinsir", .05556]
+		]
+	},
+	"rocket-hideout": {
+		1: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		2: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		3: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		4: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		5: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		6: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		7: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		8: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		9: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		],
+		10: [
+			["rattata", .11542],
+			["ekans", .11538],
+			["zubat", .11538],
+			["meowth", .11538],
+			["grimer", .11538],
+			["koffing", .11538],
+			["drowzee", .07692],
+			["murkrow", .07692],
+			["sneasel", .07692],
+			["houndour", .07692]
+		]
+	},
+	"celadon-mansion": {
+		1: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		2: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		3: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		4: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		5: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		6: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		7: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		8: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		9: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
+		],
+		10: [
+			["meowth", .15],
+			["pichu", .15],
+			["cleffa", .15],
+			["igglybuff", .15],
+			["skitty", .15],
+			["growlithe", .1],
+			["snubbull", .1],
+			["eevee", .05]
 		]
 	},
 	"construction-site": {
@@ -53167,6 +55386,68 @@ var ELENCO_POR_ESTAGIO = {
 			["gulpin", .11429],
 			["nosepass", .05714],
 			["ditto", .02857]
+		]
+	},
+	"silph-co": {
+		1: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		2: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		3: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		4: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		5: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		6: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		7: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		8: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		9: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
+		],
+		10: [
+			["magnemite", .33334],
+			["voltorb", .33333],
+			["porygon", .22222],
+			["ditto", .11111]
 		]
 	},
 	"ruins": {
@@ -53783,6 +56064,58 @@ var ELENCO_POR_ESTAGIO = {
 			["beldum", .05]
 		]
 	},
+	"mirage-island": {
+		1: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		2: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		3: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		4: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		5: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		6: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		7: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		8: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		9: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		],
+		10: [
+			["natu", .375],
+			["wynaut", .375],
+			["smoochum", .25]
+		]
+	},
 	"graveyard": {
 		1: [
 			["koffing", .59],
@@ -54342,6 +56675,68 @@ var ELENCO_POR_ESTAGIO = {
 			["gastly", .11111],
 			["duskull", .11111]
 		]
+	},
+	"pokemon-tower": {
+		1: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		2: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		3: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		4: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		5: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		6: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		7: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		8: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		9: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		],
+		10: [
+			["gastly", .3],
+			["cubone", .3],
+			["misdreavus", .2],
+			["duskull", .2]
+		]
 	}
 };
 //#endregion
@@ -54781,10 +57176,11 @@ function buildNightmareMirror(sourceMaps, sourceEncounters, sourcePorSala = {}) 
 	for (const map of Object.values(sourceMaps)) {
 		const newId = `nightmare_${map.id}`;
 		const enemyPool = [];
-		for (const encId of map.enemyPool) {
+		const espelhar = (encId) => {
 			const enc = sourceEncounters[encId];
-			if (!enc) continue;
+			if (!enc) return null;
 			const newEncId = `nightmare_${encId}`;
+			if (encounters[newEncId]) return newEncId;
 			encounters[newEncId] = {
 				...enc,
 				id: newEncId,
@@ -54795,7 +57191,11 @@ function buildNightmareMirror(sourceMaps, sourceEncounters, sourcePorSala = {}) 
 					level: shiftLevel(lw.level)
 				})) } : {}
 			};
-			enemyPool.push(newEncId);
+			return newEncId;
+		};
+		for (const encId of map.enemyPool) {
+			const novo = espelhar(encId);
+			if (novo) enemyPool.push(novo);
 		}
 		maps[newId] = {
 			...map,
@@ -54810,7 +57210,7 @@ function buildNightmareMirror(sourceMaps, sourceEncounters, sourcePorSala = {}) 
 		const salasDaOrigem = sourcePorSala[map.id];
 		if (salasDaOrigem) {
 			const salas = {};
-			for (const [chave, ids] of Object.entries(salasDaOrigem)) salas[chave] = ids.map((id) => `nightmare_${id}`).filter((id) => encounters[id] != null);
+			for (const [chave, ids] of Object.entries(salasDaOrigem)) salas[chave] = ids.map((id) => espelhar(id)).filter((id) => id != null);
 			porSala[newId] = salas;
 		}
 	}
@@ -55809,13 +58209,14 @@ function montarHunt(bioma, estagio) {
 	const id = estagioId(bioma.chave, estagio);
 	const [lo, hi] = niveisDoEstagio(estagio);
 	const porSala = {};
-	for (const sub of bioma.subBiomas) {
+	for (const sub of [...bioma.subBiomas, ...bioma.especiais ?? []]) {
 		const doSub = new Set(ELENCO_DO_SUB_BIOMA[sub.chave] ?? []);
 		const ids = [];
 		for (const [raiz] of ELENCO_POR_ESTAGIO[sub.chave]?.[estagio] ?? []) for (const trecho of trechosDaLinha(raiz, estagio, doSub)) ids.push(addEncounter(id, trecho));
 		porSala[sub.chave] = ids;
 	}
-	const enemyPool = [...new Set(Object.values(porSala).flat())];
+	const comuns = new Set(bioma.subBiomas.map((s) => s.chave));
+	const enemyPool = [...new Set(Object.entries(porSala).filter(([chave]) => comuns.has(chave)).flatMap(([, ids]) => ids))];
 	if (enemyPool.length === 0) throw new Error(`Hunt "${id}" nasceria sem nenhum encontro (estágio ${estagio}, Lv ${lo}-${hi}). Hunt vazia não da erro em runtime: ela só nunca spawna nada e o jogador fica num mapa morto.`);
 	POOL_POR_SALA[id] = porSala;
 	maps[id] = {
@@ -108520,6 +110921,41 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"bug-contest": {
+		COMMON: [
+			"caterpie",
+			"weedle",
+			"paras",
+			"venonat"
+		],
+		UNCOMMON: [
+			"metapod",
+			"kakuna",
+			"ledyba",
+			"spinarak"
+		],
+		RARE: [
+			"butterfree",
+			"beedrill",
+			"parasect",
+			"venomoth",
+			"scyther",
+			"pinsir",
+			"ledian",
+			"ariados"
+		],
+		SUPER_RARE: ["scizor"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"butterfree",
+			"beedrill",
+			"parasect",
+			"venomoth"
+		],
+		BOSS_RARE: ["scyther", "pinsir"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"burned-tower": {
 		COMMON: [
 			"rattata",
@@ -108622,6 +111058,42 @@ var SUB_BIOMA_TIERS = {
 			"exploud"
 		],
 		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"celadon-mansion": {
+		COMMON: [
+			"clefairy",
+			"jigglypuff",
+			"meowth",
+			"pichu",
+			"cleffa",
+			"igglybuff",
+			"skitty"
+		],
+		UNCOMMON: [
+			"pikachu",
+			"clefable",
+			"growlithe",
+			"snubbull"
+		],
+		RARE: [
+			"raichu",
+			"wigglytuff",
+			"persian",
+			"eevee",
+			"granbull",
+			"delcatty"
+		],
+		SUPER_RARE: ["arcanine"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"wigglytuff",
+			"persian",
+			"granbull",
+			"delcatty"
+		],
+		BOSS_RARE: ["arcanine"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -108801,6 +111273,26 @@ var SUB_BIOMA_TIERS = {
 			"cradily",
 			"armaldo"
 		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"digletts-cave": {
+		COMMON: ["zubat", "diglett"],
+		UNCOMMON: ["geodude"],
+		RARE: [
+			"golbat",
+			"dugtrio",
+			"graveler",
+			"crobat"
+		],
+		SUPER_RARE: ["golem"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golbat",
+			"dugtrio",
+			"graveler"
+		],
+		BOSS_RARE: [],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -109012,6 +111504,34 @@ var SUB_BIOMA_TIERS = {
 			"heracross",
 			"stantler",
 			"sceptile"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"grampa-canyon": {
+		COMMON: [
+			"cubone",
+			"omanyte",
+			"kabuto"
+		],
+		UNCOMMON: ["lileep", "anorith"],
+		RARE: [
+			"marowak",
+			"omastar",
+			"kabutops",
+			"aerodactyl"
+		],
+		SUPER_RARE: ["cradily", "armaldo"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"marowak",
+			"omastar",
+			"kabutops"
+		],
+		BOSS_RARE: [
+			"aerodactyl",
+			"cradily",
+			"armaldo"
 		],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
@@ -109315,6 +111835,36 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"jynx-holiday": {
+		COMMON: [
+			"swinub",
+			"delibird",
+			"smoochum",
+			"snorunt"
+		],
+		UNCOMMON: [
+			"sneasel",
+			"stantler",
+			"spheal"
+		],
+		RARE: [
+			"jynx",
+			"piloswine",
+			"glalie",
+			"sealeo"
+		],
+		SUPER_RARE: ["walrein"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"jynx",
+			"piloswine",
+			"delibird",
+			"glalie"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"laboratory": {
 		COMMON: ["grimer", "voltorb"],
 		UNCOMMON: ["magnemite"],
@@ -109377,6 +111927,40 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"lake-of-rage": {
+		COMMON: [
+			"goldeen",
+			"magikarp",
+			"azurill"
+		],
+		UNCOMMON: [
+			"psyduck",
+			"poliwag",
+			"slowpoke",
+			"marill",
+			"wooper"
+		],
+		RARE: [
+			"golduck",
+			"poliwhirl",
+			"slowbro",
+			"seaking",
+			"gyarados",
+			"azumarill",
+			"quagsire"
+		],
+		SUPER_RARE: ["poliwrath"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"seaking",
+			"gyarados",
+			"quagsire"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"lily-pond": {
 		COMMON: [
 			"poliwag",
@@ -109415,6 +111999,36 @@ var SUB_BIOMA_TIERS = {
 			"masquerain"
 		],
 		BOSS_RARE: ["bellossom", "azumarill"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"maidens-peak": {
+		COMMON: [
+			"shellder",
+			"gastly",
+			"krabby",
+			"staryu"
+		],
+		UNCOMMON: [
+			"tentacool",
+			"kingler",
+			"wingull"
+		],
+		RARE: [
+			"tentacruel",
+			"cloyster",
+			"haunter",
+			"starmie",
+			"pelipper"
+		],
+		SUPER_RARE: ["gengar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"cloyster",
+			"haunter",
+			"starmie"
+		],
+		BOSS_RARE: ["gengar"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -109556,6 +112170,25 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"mirage-island": {
+		COMMON: ["natu", "wynaut"],
+		UNCOMMON: ["smoochum"],
+		RARE: [
+			"jynx",
+			"xatu",
+			"wobbuffet"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"jynx",
+			"xatu",
+			"wobbuffet"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"mountain": {
 		COMMON: [
 			"pidgey",
@@ -109641,6 +112274,37 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"mt-moon": {
+		COMMON: [
+			"clefairy",
+			"zubat",
+			"paras",
+			"geodude"
+		],
+		UNCOMMON: [
+			"sandshrew",
+			"parasect",
+			"cleffa"
+		],
+		RARE: [
+			"sandslash",
+			"clefable",
+			"golbat",
+			"graveler",
+			"golem",
+			"crobat"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"clefable",
+			"golbat",
+			"graveler"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"mt-pyre": {
 		COMMON: [
 			"wingull",
@@ -109668,6 +112332,46 @@ var SUB_BIOMA_TIERS = {
 			"dusclops"
 		],
 		BOSS_RARE: ["gengar", "chimecho"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mt-silver-summit": {
+		COMMON: [
+			"geodude",
+			"sneasel",
+			"teddiursa",
+			"phanpy"
+		],
+		UNCOMMON: [
+			"zubat",
+			"machop",
+			"machoke",
+			"graveler",
+			"onix",
+			"misdreavus"
+		],
+		RARE: [
+			"golbat",
+			"machamp",
+			"golem",
+			"ursaring",
+			"donphan",
+			"larvitar",
+			"pupitar"
+		],
+		SUPER_RARE: [
+			"crobat",
+			"steelix",
+			"tyranitar"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"machamp",
+			"golem",
+			"ursaring",
+			"donphan"
+		],
+		BOSS_RARE: ["steelix", "tyranitar"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -109700,6 +112404,42 @@ var SUB_BIOMA_TIERS = {
 			"breloom"
 		],
 		BOSS_RARE: ["slaking"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mysterious-garden": {
+		COMMON: [
+			"bulbasaur",
+			"oddish",
+			"hoppip",
+			"sunkern"
+		],
+		UNCOMMON: [
+			"gloom",
+			"bellsprout",
+			"skiploom",
+			"roselia"
+		],
+		RARE: [
+			"ivysaur",
+			"vileplume",
+			"weepinbell",
+			"jumpluff",
+			"sunflora"
+		],
+		SUPER_RARE: [
+			"venusaur",
+			"victreebel",
+			"bellossom"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"ivysaur",
+			"vileplume",
+			"jumpluff",
+			"sunflora"
+		],
+		BOSS_RARE: ["venusaur", "bellossom"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -109736,6 +112476,82 @@ var SUB_BIOMA_TIERS = {
 			"claydol"
 		],
 		BOSS_RARE: ["flygon"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"orange-archipelago": {
+		COMMON: [
+			"tentacool",
+			"shellder",
+			"krabby",
+			"staryu",
+			"azurill"
+		],
+		UNCOMMON: [
+			"caterpie",
+			"psyduck",
+			"cloyster",
+			"exeggcute",
+			"horsea",
+			"magikarp",
+			"marill"
+		],
+		RARE: [
+			"metapod",
+			"golduck",
+			"tentacruel",
+			"kingler",
+			"exeggutor",
+			"seadra",
+			"starmie",
+			"lapras",
+			"azumarill"
+		],
+		SUPER_RARE: [
+			"butterfree",
+			"gyarados",
+			"kingdra"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"kingler",
+			"exeggutor",
+			"starmie"
+		],
+		BOSS_RARE: ["gyarados", "lapras"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"pikachu-colony": {
+		COMMON: [
+			"caterpie",
+			"weedle",
+			"pikachu",
+			"pichu"
+		],
+		UNCOMMON: [
+			"metapod",
+			"kakuna",
+			"pidgey",
+			"plusle",
+			"minun"
+		],
+		RARE: [
+			"butterfree",
+			"beedrill",
+			"pidgeotto",
+			"raichu"
+		],
+		SUPER_RARE: ["pidgeot"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"butterfree",
+			"beedrill",
+			"pidgeotto",
+			"raichu"
+		],
+		BOSS_RARE: [],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -109786,6 +112602,53 @@ var SUB_BIOMA_TIERS = {
 			"linoone"
 		],
 		BOSS_RARE: ["farfetch_d", "snorlax"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"pokemon-mansion": {
+		COMMON: [
+			"rattata",
+			"growlithe",
+			"ponyta",
+			"grimer",
+			"koffing"
+		],
+		UNCOMMON: ["raticate", "magby"],
+		RARE: [
+			"arcanine",
+			"rapidash",
+			"muk",
+			"weezing",
+			"ditto"
+		],
+		SUPER_RARE: ["magmar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"arcanine",
+			"rapidash",
+			"muk",
+			"weezing"
+		],
+		BOSS_RARE: ["magmar"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"pokemon-tower": {
+		COMMON: ["gastly", "cubone"],
+		UNCOMMON: ["misdreavus", "duskull"],
+		RARE: [
+			"haunter",
+			"marowak",
+			"dusclops"
+		],
+		SUPER_RARE: ["gengar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"haunter",
+			"marowak",
+			"dusclops"
+		],
+		BOSS_RARE: ["gengar"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -109885,6 +112748,42 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"rocket-hideout": {
+		COMMON: [
+			"rattata",
+			"ekans",
+			"zubat",
+			"meowth",
+			"grimer",
+			"koffing"
+		],
+		UNCOMMON: [
+			"raticate",
+			"golbat",
+			"drowzee",
+			"murkrow",
+			"sneasel",
+			"houndour"
+		],
+		RARE: [
+			"arbok",
+			"persian",
+			"muk",
+			"weezing",
+			"crobat"
+		],
+		SUPER_RARE: ["hypno", "houndoom"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"arbok",
+			"persian",
+			"muk",
+			"weezing"
+		],
+		BOSS_RARE: ["hypno", "houndoom"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"ruins": {
 		COMMON: [
 			"drowzee",
@@ -109916,6 +112815,59 @@ var SUB_BIOMA_TIERS = {
 			"claydol"
 		],
 		BOSS_RARE: ["wobbuffet"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"safari-zone": {
+		COMMON: [
+			"nidoran_f",
+			"nidoran_m",
+			"paras",
+			"venonat",
+			"doduo"
+		],
+		UNCOMMON: [
+			"nidorina",
+			"nidorino",
+			"parasect",
+			"venomoth",
+			"dodrio",
+			"exeggcute",
+			"cubone",
+			"rhyhorn",
+			"girafarig",
+			"phanpy"
+		],
+		RARE: [
+			"nidoqueen",
+			"nidoking",
+			"exeggutor",
+			"marowak",
+			"rhydon",
+			"kangaskhan",
+			"scyther",
+			"pinsir",
+			"tauros",
+			"heracross",
+			"donphan"
+		],
+		SUPER_RARE: [
+			"dratini",
+			"dragonair",
+			"scizor"
+		],
+		ULTRA_RARE: ["dragonite"],
+		BOSS: [
+			"exeggutor",
+			"rhydon",
+			"kangaskhan",
+			"tauros"
+		],
+		BOSS_RARE: [
+			"scyther",
+			"pinsir",
+			"dragonair"
+		],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -110087,6 +113039,26 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"silph-co": {
+		COMMON: ["magnemite", "voltorb"],
+		UNCOMMON: ["porygon"],
+		RARE: [
+			"magneton",
+			"electrode",
+			"ditto",
+			"porygon2"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"magneton",
+			"electrode",
+			"porygon2"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"sky-pillar": {
 		COMMON: [
 			"zubat",
@@ -110228,6 +113200,61 @@ var SUB_BIOMA_TIERS = {
 			"xatu"
 		],
 		BOSS_RARE: ["kadabra", "haunter"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"squirtle-squad": {
+		COMMON: [
+			"squirtle",
+			"psyduck",
+			"poliwag",
+			"azurill"
+		],
+		UNCOMMON: [
+			"poliwhirl",
+			"marill",
+			"wooper"
+		],
+		RARE: [
+			"wartortle",
+			"golduck",
+			"poliwrath",
+			"quagsire"
+		],
+		SUPER_RARE: ["blastoise", "azumarill"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"wartortle",
+			"golduck",
+			"quagsire"
+		],
+		BOSS_RARE: ["blastoise", "azumarill"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"stray-charmander": {
+		COMMON: [
+			"charmander",
+			"pidgey",
+			"rattata"
+		],
+		UNCOMMON: ["spearow", "oddish"],
+		RARE: [
+			"charmeleon",
+			"pidgeotto",
+			"pidgeot",
+			"raticate",
+			"fearow",
+			"gloom"
+		],
+		SUPER_RARE: ["charizard", "vileplume"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"charmeleon",
+			"pidgeotto",
+			"raticate"
+		],
+		BOSS_RARE: ["charizard"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -110805,6 +113832,10 @@ var SUB_BIOMA_CLIMA = {
 		chuva: 3,
 		sol: 5
 	},
+	"bug-contest": {
+		limpo: 7,
+		sol: 3
+	},
 	"burned-tower": {
 		limpo: 4,
 		nevoa: 4
@@ -110815,6 +113846,7 @@ var SUB_BIOMA_CLIMA = {
 		areia: 2
 	},
 	"cave": { limpo: 1 },
+	"celadon-mansion": { limpo: 1 },
 	"construction-site": { limpo: 1 },
 	"coral-reef": {
 		limpo: 4,
@@ -110830,6 +113862,7 @@ var SUB_BIOMA_CLIMA = {
 		areia: 8,
 		sol: 5
 	},
+	"digletts-cave": { limpo: 1 },
 	"dojo": { limpo: 1 },
 	"factory": { limpo: 1 },
 	"fairy-cave": { limpo: 1 },
@@ -110844,6 +113877,10 @@ var SUB_BIOMA_CLIMA = {
 	"forest": {
 		limpo: 8,
 		chuva: 4
+	},
+	"grampa-canyon": {
+		limpo: 5,
+		areia: 3
 	},
 	"grass": {
 		limpo: 8,
@@ -110881,16 +113918,25 @@ var SUB_BIOMA_CLIMA = {
 		limpo: 7,
 		chuva: 3
 	},
+	"jynx-holiday": { neve: 1 },
 	"laboratory": { limpo: 1 },
 	"lake": {
 		limpo: 10,
 		chuva: 4,
 		nevoa: 1
 	},
+	"lake-of-rage": {
+		limpo: 3,
+		chuva: 6
+	},
 	"lily-pond": {
 		limpo: 5,
 		chuva: 4,
 		sol: 3
+	},
+	"maidens-peak": {
+		limpo: 3,
+		nevoa: 7
 	},
 	"meadow": {
 		limpo: 3,
@@ -110902,32 +113948,66 @@ var SUB_BIOMA_CLIMA = {
 		nevoa: 3
 	},
 	"metropolis": { limpo: 1 },
+	"mirage-island": {
+		limpo: 6,
+		sol: 4
+	},
 	"mountain": { limpo: 1 },
 	"mt-ember": {
 		limpo: 3,
 		sol: 7
 	},
+	"mt-moon": { limpo: 1 },
 	"mt-pyre": {
 		limpo: 3,
 		nevoa: 5
+	},
+	"mt-silver-summit": {
+		neve: 6,
+		granizo: 3
 	},
 	"mushroom-glade": {
 		limpo: 5,
 		chuva: 4,
 		nevoa: 2
 	},
+	"mysterious-garden": {
+		limpo: 4,
+		sol: 6
+	},
 	"oasis": {
 		limpo: 3,
 		sol: 7
 	},
+	"orange-archipelago": {
+		limpo: 4,
+		sol: 6
+	},
+	"pikachu-colony": {
+		limpo: 7,
+		sol: 3
+	},
 	"plains": { limpo: 1 },
+	"pokemon-mansion": {
+		limpo: 3,
+		sol: 2
+	},
+	"pokemon-tower": {
+		limpo: 2,
+		nevoa: 8
+	},
 	"power-plant": { limpo: 1 },
 	"river": {
 		limpo: 2,
 		chuva: 9
 	},
 	"rock-tunnel": { limpo: 1 },
+	"rocket-hideout": { limpo: 1 },
 	"ruins": { limpo: 1 },
+	"safari-zone": {
+		limpo: 6,
+		sol: 4
+	},
 	"sea": {
 		limpo: 3,
 		chuva: 12
@@ -110942,6 +114022,7 @@ var SUB_BIOMA_CLIMA = {
 		neve: 5,
 		granizo: 2
 	},
+	"silph-co": { limpo: 1 },
 	"sky-pillar": { limpo: 1 },
 	"slum": { limpo: 1 },
 	"snowy-forest": {
@@ -110950,6 +114031,11 @@ var SUB_BIOMA_CLIMA = {
 	},
 	"space": { limpo: 1 },
 	"sprout-tower": { limpo: 1 },
+	"squirtle-squad": {
+		limpo: 3,
+		sol: 7
+	},
+	"stray-charmander": { chuva: 1 },
 	"swamp": {
 		limpo: 3,
 		chuva: 4,
@@ -115401,7 +118487,7 @@ function pokemonBaseValue(level, baseExp, rarityKey) {
 function pokemonSellValue(level, baseExp, rarityKey) {
 	return MIN_POKEMON_SELL_VALUE + pokemonBaseValue(level, baseExp, rarityKey);
 }
-function awardKillLoot(rng, gameState, enemy, mapDef, drops = mapDef.itemDrops) {
+function awardKillLoot(rng, gameState, enemy, mapDef, drops = mapDef.itemDrops, pedraTematica = null) {
 	const species = SPECIES[enemy.poke.speciesId];
 	const sellValue = pokemonBaseValue(enemy.poke.level, species.baseExp, enemy.poke.rarity);
 	const baseGold = Math.max(1, Math.floor(formulaEngine$3.eval("MONEY_FOR_KILL", {
@@ -115417,6 +118503,11 @@ function awardKillLoot(rng, gameState, enemy, mapDef, drops = mapDef.itemDrops) 
 	}
 	if (rollChance(rng, STONE_DROP_CHANCE)) {
 		const stoneId = stoneItemId(species.type2 && rollChance(rng, .5) ? species.type2 : species.type);
+		gameState.addItem(stoneId, 1);
+		droppedItems.push(stoneId);
+	}
+	if (pedraTematica && rollChance(rng, .05)) {
+		const stoneId = stoneItemId(pedraTematica);
 		gameState.addItem(stoneId, 1);
 		droppedItems.push(stoneId);
 	}
@@ -116079,8 +119170,40 @@ function sortearSala(rng, mapId) {
 	if (opcoes.length === 1) return opcoes[0].chave;
 	return weightedPick(rng, opcoes, peso).chave;
 }
+/**
+* As salas especiais que PODEM sair nesta hunt agora (onda 2, 16/10/2026):
+* as do bioma da hunt, a partir do `estagioMinimo` de cada uma, e com pool.
+*
+* O espelho do Pesadelo entra junto (parser permissivo): ele copia o Mundo,
+* inclusive as salas especiais.
+*/
+function salasEspeciaisPossiveis(mapId) {
+	const salas = POOL_POR_SALA[mapId];
+	const doMapa = parseEstagioIdOuEspelho(mapId);
+	if (!salas || !doMapa) return [];
+	return (BIOMA_POR_CHAVE[doMapa.bioma]?.especiais ?? []).filter((e) => doMapa.estagio >= e.estagioMinimo && (salas[e.chave]?.length ?? 0) > 0);
+}
+/**
+* Tenta transformar a proxima sala numa SALA ESPECIAL do bioma.
+*
+* Um sorteio de `CHANCE_DE_SALA_ESPECIAL` e, se sair, um segundo entre as
+* especiais possiveis. Hunt sem especial possivel nao gasta numero nenhum da
+* sequencia (hunt inicial, BOSS, Lance, estagio abaixo do minimo de todas).
+*
+* A PRIMEIRA SALA DA SESSAO NUNCA E ESPECIAL, e isso e o anti-reroll: sair da
+* hunt fecha a sessao e voltar sorteia a sala 1 de novo. Se a sala 1 pudesse
+* ser especial, entrar e sair seria uma maquina de 5% de graca.
+*/
+function sortearSalaEspecial(rng, mapId, indice, ciclos) {
+	if (indice === 0 && ciclos === 0) return null;
+	const opcoes = salasEspeciaisPossiveis(mapId);
+	if (opcoes.length === 0) return null;
+	if (!rollChance(rng, .05)) return null;
+	if (opcoes.length === 1) return opcoes[0].chave;
+	return weightedPick(rng, opcoes, (e) => e.peso).chave;
+}
 function novaSala(rng, mapId, indice, ciclos) {
-	const chave = sortearSala(rng, mapId);
+	const chave = sortearSalaEspecial(rng, mapId, indice, ciclos) ?? sortearSala(rng, mapId);
 	if (!chave) return null;
 	return {
 		indice,
@@ -116218,11 +119341,21 @@ function contextoDeSpawn(mapId, faixa, sala, fallback) {
 	const ativo = noRecuo ? pool : naJanela;
 	const doMapa = parseEstagioIdOuEspelho(mapId);
 	const pesos = pesosDaSala(`${mapId}|${sala.chave}|${sala.indice}`, sala.chave, doMapa?.estagio ?? null, ativo, noRecuo ? null : janela);
+	const shiny = SALA_ESPECIAL_POR_CHAVE[sala.chave]?.shiny;
 	return {
 		pool: ativo,
 		janela,
-		peso: (id) => pesos.get(id) ?? 0
+		peso: (id) => pesos.get(id) ?? 0,
+		...shiny ? { multiplicadorDeShiny: (sp) => sp === shiny.especie ? shiny.multiplicador : 1 } : {}
 	};
+}
+/**
+* Pedra tematica da sala atual (onda 2): o tipo da Pedra que a sala especial
+* solta num sorteio extra a cada abate. `null` fora de sala especial.
+*/
+function pedraTematicaDaSala(sala) {
+	if (!sala) return null;
+	return SALA_ESPECIAL_POR_CHAVE[sala.chave]?.pedra ?? null;
 }
 /** Loot que pode cair agora: o do sub-bioma, ou o da hunt inteira. */
 function lootAtivo(sala, fallback) {
@@ -116298,7 +119431,8 @@ function contextoDoProtetor(mapId, ctx, sala, tipo) {
 	const doProtetor = {
 		pool: escolhidos,
 		janela: ctx.janela,
-		peso: (id) => pesos.get(id) ?? 0
+		peso: (id) => pesos.get(id) ?? 0,
+		...ctx.multiplicadorDeShiny ? { multiplicadorDeShiny: ctx.multiplicadorDeShiny } : {}
 	};
 	cacheDeProtetor.set(chaveCache, doProtetor);
 	return doProtetor;
@@ -117119,7 +120253,11 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 		if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
 		const level = tipo === "lord" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
 		const ivs = rollIvsDoProtetor(rng);
-		const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs });
+		const multiplicadorDeShiny = ctx.multiplicadorDeShiny?.(encounter.speciesId);
+		const poke = createPokeInstance(rng, encounter.speciesId, level, {
+			ivs,
+			...multiplicadorDeShiny ? { multiplicadorDeShiny } : {}
+		});
 		escolhido = {
 			encounterId,
 			level,
@@ -117225,8 +120363,9 @@ function spawnEnemyAt(world, mapDef, ctx, player, entrada, ocupados = []) {
 	const lo = Math.max(encounter.minLevel, Math.min(jmin, encounter.maxLevel));
 	const hi = Math.min(encounter.maxLevel, Math.max(jmax, encounter.minLevel));
 	const level = encounter.levelWeights?.length ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level : randInt(rng, Math.min(lo, hi), Math.max(lo, hi));
+	const multiplicadorDeShiny = ctx.multiplicadorDeShiny?.(encounter.speciesId);
 	return createEnemyEntity(counters, {
-		poke: createPokeInstance(rng, encounter.speciesId, level),
+		poke: createPokeInstance(rng, encounter.speciesId, level, multiplicadorDeShiny ? { multiplicadorDeShiny } : {}),
 		x: point.x,
 		y: point.y,
 		encounterId
@@ -117440,7 +120579,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 	gameState.updatePokeInstance(grantResult.poke.uid, () => grantResult.poke);
 	const trainerResult = grantTrainerExp(gameState.trainer, expGain);
 	gameState.setTrainer(trainerResult.trainer);
-	const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef, lootAtivo(world.sala, world.mapDef.itemDrops));
+	const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef, lootAtivo(world.sala, world.mapDef.itemDrops), pedraTematicaDaSala(world.sala));
 	const captureResult = world.mapDef.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke, Boolean(enemy.isProtetor));
 	recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny));
 	const ouroDeAutoVenda = captureResult?.success && captureResult.location === "vendido" ? captureResult.vendidoPor : 0;

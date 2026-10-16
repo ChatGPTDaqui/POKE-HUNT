@@ -26,7 +26,7 @@
 // sobre o jogo ja rodando, e diz `Sala N/M` e a faixa de nivel — o dado de
 // progresso. Este aqui e a apresentacao do lugar, com o jogo parado.
 import { backgroundParaSala } from '@/data/maps'
-import { nomeDaSala } from '@/engine/systems/salaSystem'
+import { ehSalaEspecial, nomeDaSala } from '@/engine/systems/salaSystem'
 import { useWorldStore } from '@/stores/worldStore'
 import { CutsceneDeArea } from './CutsceneDeArea'
 
@@ -51,7 +51,7 @@ export function SalaCountdownModal() {
       arte={fundo?.image ?? null}
       corDeFundo={fundo?.primary ?? '#0b0b12'}
       titulo={nomeDaSala(pendente ?? null) ?? 'Nova área'}
-      subtitulo={fechouEstagio ? 'Estágio concluído' : 'Nova área'}
+      subtitulo={fechouEstagio ? 'Estágio concluído' : ehSalaEspecial(pendente) ? '✨ Sala especial!' : 'Nova área'}
       rodape={
         <div
           className="font-mono text-[3.2em] leading-none font-black text-sky-300"
