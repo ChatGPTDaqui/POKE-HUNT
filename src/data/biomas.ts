@@ -1,4 +1,4 @@
-// Os 12 biomas do jogo, seus sub-biomas e as 3 faixas de nivel.
+// Os 12 biomas do jogo e seus sub-biomas (65 desde a onda 1 de 16/10/2026).
 //
 // Este arquivo SUBSTITUI o desenho antigo de hunts ("1 tipo elemental = 1
 // bioma", que vivia em scripts/sync-planilha.js#TYPE_BIOME_PLAN e produzia 69
@@ -197,7 +197,12 @@ export function traduzirGruposLiberados(gravados: readonly string[] | null | und
 // As Pedras (data/stones.ts) continuam FORA daqui — elas caem por um roll
 // universal de 20% por abate, com o tipo primario do inimigo
 // (economySystem#awardKillLoot), e nao por hunt.
-export type PerfilDeLoot = 'basico' | 'civilizado' | 'remoto' | 'profundo'
+export type PerfilDeLoot =
+  | 'basico' | 'civilizado' | 'remoto' | 'profundo'
+  // Onda 1 dos sub-biomas novos (16/10/2026): o perfil passa a dizer algo do
+  // LUGAR, e nao so da distancia. Mesmos itens de sempre, nenhum item novo:
+  // so que a cura de status certa aparece onde o perigo dela mora.
+  | 'termal' | 'toxico' | 'ardente' | 'gelado' | 'portuario' | 'sucata' | 'sonolento' | 'vitoria'
 
 export const LOOT: Record<PerfilDeLoot, MapItemDrop[]> = {
   // O mesmo drop que todas as hunts tinham. Lugar comum, item comum.
@@ -222,6 +227,59 @@ export const LOOT: Record<PerfilDeLoot, MapItemDrop[]> = {
     { itemId: 'hyper_potion', chance: 0.06 },
     { itemId: 'ultra_ball', chance: 0.05 },
     { itemId: 'max_revive', chance: 0.015 },
+  ],
+  // Fontes Termais: o lugar de descanso. Mais pocao que qualquer outro
+  // sub-bioma, inclusive Hiper Pocao fora do fundo do mapa.
+  termal: [
+    { itemId: 'potion', chance: 0.2 },
+    { itemId: 'super_potion', chance: 0.12 },
+    { itemId: 'hyper_potion', chance: 0.04 },
+    { itemId: 'burn_heal', chance: 0.05 },
+  ],
+  // Esgoto, ciclovia dos motoqueiros (Koffing), clareira de esporos.
+  toxico: [
+    { itemId: 'potion', chance: 0.15 },
+    { itemId: 'poke_ball', chance: 0.1 },
+    { itemId: 'antidote', chance: 0.1 },
+  ],
+  // Tuneis de lava e torre queimada.
+  ardente: [
+    { itemId: 'potion', chance: 0.12 },
+    { itemId: 'great_ball', chance: 0.06 },
+    { itemId: 'burn_heal', chance: 0.08 },
+  ],
+  // Gelo: remoto, com Antigelo.
+  gelado: [
+    { itemId: 'super_potion', chance: 0.1 },
+    { itemId: 'great_ball', chance: 0.08 },
+    { itemId: 'ice_heal', chance: 0.08 },
+    { itemId: 'revive', chance: 0.02 },
+  ],
+  // Cais do porto: carga de navio. A Premier Ball so cai aqui.
+  portuario: [
+    { itemId: 'potion', chance: 0.16 },
+    { itemId: 'poke_ball', chance: 0.14 },
+    { itemId: 'premier_ball', chance: 0.06 },
+  ],
+  // Ferro-velho: lixo toxico e fio desencapado.
+  sucata: [
+    { itemId: 'potion', chance: 0.15 },
+    { itemId: 'poke_ball', chance: 0.1 },
+    { itemId: 'antidote', chance: 0.06 },
+    { itemId: 'paralyze_heal', chance: 0.06 },
+  ],
+  // Torre Broto: Gastly, Hypno e o incenso dos Sabios.
+  sonolento: [
+    { itemId: 'potion', chance: 0.15 },
+    { itemId: 'poke_ball', chance: 0.1 },
+    { itemId: 'awakening', chance: 0.08 },
+  ],
+  // Estrada da Vitoria: o teste final pede Revive.
+  vitoria: [
+    { itemId: 'hyper_potion', chance: 0.06 },
+    { itemId: 'ultra_ball', chance: 0.05 },
+    { itemId: 'revive', chance: 0.05 },
+    { itemId: 'max_revive', chance: 0.02 },
   ],
 }
 
@@ -311,6 +369,11 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'grass', nome: 'Relvado', peso: 10, loot: 'basico' },
       { chave: 'meadow', nome: 'Campina', peso: 6, loot: 'basico' },
       { chave: 'town', nome: 'Vilarejo', peso: 6, loot: 'civilizado', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.vilarejo } },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'farm', nome: 'Fazenda MuuMuu', peso: 6, loot: 'civilizado' },
+      { chave: 'cycling-road', nome: 'Estrada de Ciclismo', peso: 6, loot: 'toxico' },
     ],
   },
   {
@@ -322,6 +385,12 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'forest', nome: 'Floresta', peso: 10, loot: 'basico' },
       { chave: 'tall-grass', nome: 'Mato Alto', peso: 10, loot: 'basico', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.matoAlto } },
       { chave: 'jungle', nome: 'Selva', peso: 6, loot: 'remoto', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.selva } },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'mushroom-glade', nome: 'Clareira dos Cogumelos', peso: 10, loot: 'toxico' },
+      { chave: 'ilex-forest', nome: 'Bosque de Ilex', peso: 6, loot: 'basico' },
+      { chave: 'treetops', nome: 'Copa das Árvores', peso: 6, loot: 'remoto', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.selva } },
     ],
   },
   {
@@ -334,6 +403,11 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'beach', nome: 'Praia', peso: 6, loot: 'civilizado', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.praia } },
       // Sem arte propria — herda o fundo do bioma (a ilha).
       { chave: 'seabed', nome: 'Leito Oceanico', peso: 3, loot: 'profundo' },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'coral-reef', nome: 'Recife de Coral', peso: 6, loot: 'remoto', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.praia } },
+      { chave: 'whirl-islands', nome: 'Ilhas Redemoinho', peso: 6, loot: 'remoto' },
     ],
   },
   {
@@ -344,6 +418,12 @@ export const BIOMAS: BiomaDef[] = [
     subBiomas: [
       { chave: 'lake', nome: 'Lago', peso: 10, loot: 'basico' },
       { chave: 'swamp', nome: 'Pantano', peso: 6, loot: 'remoto', bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.pantano } },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'lily-pond', nome: 'Lagoa das Vitórias-Régias', peso: 10, loot: 'basico' },
+      { chave: 'river', nome: 'Rio e Corredeira', peso: 10, loot: 'basico' },
+      { chave: 'waterfall', nome: 'Cachoeira de Tohjo', peso: 6, loot: 'remoto' },
     ],
   },
   {
@@ -355,6 +435,11 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'badlands', nome: 'Ermos', peso: 10, loot: 'basico' },
       { chave: 'desert', nome: 'Deserto', peso: 6, loot: 'remoto', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.deserto } },
       { chave: 'wasteland', nome: 'Terra Devastada', peso: 3, loot: 'profundo', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.terraDevastada } },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'canyon', nome: 'Cânion da Rota 45', peso: 6, loot: 'remoto' },
+      { chave: 'oasis', nome: 'Oásis', peso: 3, loot: 'remoto', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.deserto } },
     ],
   },
   {
@@ -365,6 +450,13 @@ export const BIOMAS: BiomaDef[] = [
     subBiomas: [
       { chave: 'cave', nome: 'Caverna', peso: 10, loot: 'basico', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
       { chave: 'mountain', nome: 'Montanha', peso: 6, loot: 'remoto' },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'rock-tunnel', nome: 'Túnel de Pedra', peso: 10, loot: 'basico', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
+      { chave: 'dark-cave', nome: 'Caverna Escura', peso: 6, loot: 'basico', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
+      { chave: 'meteor-falls', nome: 'Cataratas Meteoro', peso: 6, loot: 'remoto', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
+      { chave: 'victory-road', nome: 'Estrada da Vitória', peso: 3, loot: 'vitoria', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
     ],
   },
   {
@@ -376,6 +468,12 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'ice-cave', nome: 'Caverna de Gelo', peso: 10, loot: 'remoto', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.cavernaDeGelo } },
       // Sem arte propria — herda o fundo do bioma (montanha de gelo).
       { chave: 'snowy-forest', nome: 'Floresta Nevada', peso: 6, loot: 'basico' },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'seafoam-islands', nome: 'Ilhas Espuma', peso: 10, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.cavernaDeGelo } },
+      { chave: 'shoal-cave', nome: 'Gruta da Maré', peso: 6, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.cavernaDeGelo } },
+      { chave: 'tundra', nome: 'Tundra', peso: 10, loot: 'gelado' },
     ],
   },
   {
@@ -385,6 +483,13 @@ export const BIOMAS: BiomaDef[] = [
     bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.vulcao },
     subBiomas: [
       { chave: 'volcano', nome: 'Vulcao', peso: 10, loot: 'remoto' },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'fiery-path', nome: 'Caminho Ardente', peso: 10, loot: 'ardente', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.cavernaVulcanica } },
+      { chave: 'mt-ember', nome: 'Encosta do Monte Brasa', peso: 10, loot: 'remoto' },
+      { chave: 'ash-field', nome: 'Campo de Cinzas', peso: 6, loot: 'basico', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.florestaQueimada } },
+      { chave: 'hot-springs', nome: 'Fontes Termais', peso: 6, loot: 'termal' },
     ],
   },
   {
@@ -401,6 +506,11 @@ export const BIOMAS: BiomaDef[] = [
       // Dojo preserva a arte propria (ARTE.dojo) — nao herda o fundo novo do
       // bioma, de proposito (ver comentario no topo de ARTE).
       { chave: 'dojo', nome: 'Dojo', peso: 6, loot: 'basico', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.dojo } },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'harbor', nome: 'Cais do Porto', peso: 10, loot: 'portuario', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.metropole } },
+      { chave: 'underground', nome: 'Galerias Subterrâneas', peso: 6, loot: 'toxico', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.cortico } },
     ],
   },
   {
@@ -414,6 +524,10 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'factory', nome: 'Fabrica', peso: 6, loot: 'civilizado' },
       { chave: 'power-plant', nome: 'Usina', peso: 6, loot: 'remoto' },
       { chave: 'laboratory', nome: 'Laboratório', peso: 3, loot: 'profundo' },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'junkyard', nome: 'Ferro-Velho', peso: 10, loot: 'sucata', bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.obra } },
     ],
   },
   {
@@ -425,6 +539,12 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'ruins', nome: 'Ruinas', peso: 10, loot: 'remoto', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.ruinas } },
       { chave: 'temple', nome: 'Templo', peso: 6, loot: 'remoto' },
       { chave: 'fairy-cave', nome: 'Gruta Feerica', peso: 3, loot: 'profundo', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.grutaFeerica } },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'sprout-tower', nome: 'Torre Broto', peso: 10, loot: 'sonolento' },
+      { chave: 'meditation-shrine', nome: 'Santuário de Meditação', peso: 6, loot: 'remoto' },
+      { chave: 'sky-pillar', nome: 'Pilar Celeste', peso: 3, loot: 'profundo', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.ruinas } },
     ],
   },
   {
@@ -438,6 +558,12 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'abyss', nome: 'Abismo', peso: 6, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
       // Reaproveita o Abismo: vazio/cosmico e o mais proximo dos 27 arquivos novos.
       { chave: 'space', nome: 'Espaço', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
+      // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
+      // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
+      // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
+      { chave: 'mt-pyre', nome: 'Monte Pira', peso: 10, loot: 'remoto' },
+      { chave: 'burned-tower', nome: 'Torre Queimada', peso: 6, loot: 'ardente' },
+      { chave: 'abandoned-ship', nome: 'Navio Abandonado', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
     ],
   },
 ]
