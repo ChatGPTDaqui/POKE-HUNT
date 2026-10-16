@@ -13,6 +13,19 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.21',
+    date: '2026-10-16',
+    title: 'Salas especiais',
+    highlights: [
+      'Ao trocar de sala numa caçada, existe uma chance pequena de cair numa sala especial, inspirada no anime e nos jogos. Quando acontece, a troca de sala avisa: "Sala especial!".',
+      'São 20 lugares, pelo menos um em cada bioma: Zona Safári, Monte Lua, Torre Pokémon, Lago da Fúria, Esconderijo Rocket, Mansão Celadon, Silph S.A., Caverna dos Diglett, Cume do Monte Prata e outros.',
+      'Alguns Pokémon só aparecem nessas salas: Bulbasaur no Jardim Misterioso, Charmander no Charmander na Chuva, Squirtle no Esquadrão Squirtle, Eevee na Mansão Celadon e Porygon na Silph S.A.',
+      'Cada sala especial solta Pedras extras do tipo dela: Pedra FAIRY no Monte Lua, GHOST na Torre Pokémon, e assim por diante.',
+      'No Lago da Fúria o Gyarados aparece shiny com muito mais frequência, em homenagem ao Gyarados vermelho.',
+      'Algumas salas só aparecem em estágios mais fundos: a Zona Safári a partir do estágio 4, o Cânion do Vovô a partir do 6 e o Cume do Monte Prata só no estágio 10. A primeira sala de cada caçada nunca é especial.',
+    ],
+  },
+  {
     version: '8.20',
     date: '2026-10-16',
     title: '32 lugares novos para caçar',
