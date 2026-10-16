@@ -43240,6 +43240,134 @@ var LOOT = {
 			itemId: "max_revive",
 			chance: .015
 		}
+	],
+	termal: [
+		{
+			itemId: "potion",
+			chance: .2
+		},
+		{
+			itemId: "super_potion",
+			chance: .12
+		},
+		{
+			itemId: "hyper_potion",
+			chance: .04
+		},
+		{
+			itemId: "burn_heal",
+			chance: .05
+		}
+	],
+	toxico: [
+		{
+			itemId: "potion",
+			chance: .15
+		},
+		{
+			itemId: "poke_ball",
+			chance: .1
+		},
+		{
+			itemId: "antidote",
+			chance: .1
+		}
+	],
+	ardente: [
+		{
+			itemId: "potion",
+			chance: .12
+		},
+		{
+			itemId: "great_ball",
+			chance: .06
+		},
+		{
+			itemId: "burn_heal",
+			chance: .08
+		}
+	],
+	gelado: [
+		{
+			itemId: "super_potion",
+			chance: .1
+		},
+		{
+			itemId: "great_ball",
+			chance: .08
+		},
+		{
+			itemId: "ice_heal",
+			chance: .08
+		},
+		{
+			itemId: "revive",
+			chance: .02
+		}
+	],
+	portuario: [
+		{
+			itemId: "potion",
+			chance: .16
+		},
+		{
+			itemId: "poke_ball",
+			chance: .14
+		},
+		{
+			itemId: "premier_ball",
+			chance: .06
+		}
+	],
+	sucata: [
+		{
+			itemId: "potion",
+			chance: .15
+		},
+		{
+			itemId: "poke_ball",
+			chance: .1
+		},
+		{
+			itemId: "antidote",
+			chance: .06
+		},
+		{
+			itemId: "paralyze_heal",
+			chance: .06
+		}
+	],
+	sonolento: [
+		{
+			itemId: "potion",
+			chance: .15
+		},
+		{
+			itemId: "poke_ball",
+			chance: .1
+		},
+		{
+			itemId: "awakening",
+			chance: .08
+		}
+	],
+	vitoria: [
+		{
+			itemId: "hyper_potion",
+			chance: .06
+		},
+		{
+			itemId: "ultra_ball",
+			chance: .05
+		},
+		{
+			itemId: "revive",
+			chance: .05
+		},
+		{
+			itemId: "max_revive",
+			chance: .02
+		}
 	]
 };
 var ARTE = {
@@ -43318,6 +43446,18 @@ var BIOMAS = [
 					secondary: "#4a6a3d",
 					image: ARTE.vilarejo
 				}
+			},
+			{
+				chave: "farm",
+				nome: "Fazenda MuuMuu",
+				peso: 6,
+				loot: "civilizado"
+			},
+			{
+				chave: "cycling-road",
+				nome: "Estrada de Ciclismo",
+				peso: 6,
+				loot: "toxico"
 			}
 		]
 	},
@@ -43351,6 +43491,29 @@ var BIOMAS = [
 			{
 				chave: "jungle",
 				nome: "Selva",
+				peso: 6,
+				loot: "remoto",
+				bg: {
+					primary: "#284b3c",
+					secondary: "#2e5544",
+					image: ARTE.selva
+				}
+			},
+			{
+				chave: "mushroom-glade",
+				nome: "Clareira dos Cogumelos",
+				peso: 10,
+				loot: "toxico"
+			},
+			{
+				chave: "ilex-forest",
+				nome: "Bosque de Ilex",
+				peso: 6,
+				loot: "basico"
+			},
+			{
+				chave: "treetops",
+				nome: "Copa das Árvores",
 				peso: 6,
 				loot: "remoto",
 				bg: {
@@ -43398,6 +43561,23 @@ var BIOMAS = [
 				nome: "Leito Oceanico",
 				peso: 3,
 				loot: "profundo"
+			},
+			{
+				chave: "coral-reef",
+				nome: "Recife de Coral",
+				peso: 6,
+				loot: "remoto",
+				bg: {
+					primary: "#1f3d52",
+					secondary: "#27506b",
+					image: ARTE.praia
+				}
+			},
+			{
+				chave: "whirl-islands",
+				nome: "Ilhas Redemoinho",
+				peso: 6,
+				loot: "remoto"
 			}
 		]
 	},
@@ -43410,22 +43590,43 @@ var BIOMAS = [
 			secondary: "#2c5850",
 			image: ARTE.lago
 		},
-		subBiomas: [{
-			chave: "lake",
-			nome: "Lago",
-			peso: 10,
-			loot: "basico"
-		}, {
-			chave: "swamp",
-			nome: "Pantano",
-			peso: 6,
-			loot: "remoto",
-			bg: {
-				primary: "#24463f",
-				secondary: "#2c5850",
-				image: ARTE.pantano
+		subBiomas: [
+			{
+				chave: "lake",
+				nome: "Lago",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "swamp",
+				nome: "Pantano",
+				peso: 6,
+				loot: "remoto",
+				bg: {
+					primary: "#24463f",
+					secondary: "#2c5850",
+					image: ARTE.pantano
+				}
+			},
+			{
+				chave: "lily-pond",
+				nome: "Lagoa das Vitórias-Régias",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "river",
+				nome: "Rio e Corredeira",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "waterfall",
+				nome: "Cachoeira de Tohjo",
+				peso: 6,
+				loot: "remoto"
 			}
-		}]
+		]
 	},
 	{
 		chave: "aridos",
@@ -43464,6 +43665,23 @@ var BIOMAS = [
 					secondary: "#6d5838",
 					image: ARTE.terraDevastada
 				}
+			},
+			{
+				chave: "canyon",
+				nome: "Cânion da Rota 45",
+				peso: 6,
+				loot: "remoto"
+			},
+			{
+				chave: "oasis",
+				nome: "Oásis",
+				peso: 3,
+				loot: "remoto",
+				bg: {
+					primary: "#5c4a30",
+					secondary: "#6d5838",
+					image: ARTE.deserto
+				}
 			}
 		]
 	},
@@ -43476,22 +43694,69 @@ var BIOMAS = [
 			secondary: "#463d4d",
 			image: ARTE.montanha
 		},
-		subBiomas: [{
-			chave: "cave",
-			nome: "Caverna",
-			peso: 10,
-			loot: "basico",
-			bg: {
-				primary: "#3a3340",
-				secondary: "#463d4d",
-				image: ARTE.cavernaVulcanica
+		subBiomas: [
+			{
+				chave: "cave",
+				nome: "Caverna",
+				peso: 10,
+				loot: "basico",
+				bg: {
+					primary: "#3a3340",
+					secondary: "#463d4d",
+					image: ARTE.cavernaVulcanica
+				}
+			},
+			{
+				chave: "mountain",
+				nome: "Montanha",
+				peso: 6,
+				loot: "remoto"
+			},
+			{
+				chave: "rock-tunnel",
+				nome: "Túnel de Pedra",
+				peso: 10,
+				loot: "basico",
+				bg: {
+					primary: "#3a3340",
+					secondary: "#463d4d",
+					image: ARTE.cavernaVulcanica
+				}
+			},
+			{
+				chave: "dark-cave",
+				nome: "Caverna Escura",
+				peso: 6,
+				loot: "basico",
+				bg: {
+					primary: "#3a3340",
+					secondary: "#463d4d",
+					image: ARTE.cavernaVulcanica
+				}
+			},
+			{
+				chave: "meteor-falls",
+				nome: "Cataratas Meteoro",
+				peso: 6,
+				loot: "remoto",
+				bg: {
+					primary: "#3a3340",
+					secondary: "#463d4d",
+					image: ARTE.cavernaVulcanica
+				}
+			},
+			{
+				chave: "victory-road",
+				nome: "Estrada da Vitória",
+				peso: 3,
+				loot: "vitoria",
+				bg: {
+					primary: "#3a3340",
+					secondary: "#463d4d",
+					image: ARTE.cavernaVulcanica
+				}
 			}
-		}, {
-			chave: "mountain",
-			nome: "Montanha",
-			peso: 6,
-			loot: "remoto"
-		}]
+		]
 	},
 	{
 		chave: "gelido",
@@ -43502,22 +43767,53 @@ var BIOMAS = [
 			secondary: "#3d6070",
 			image: ARTE.montanhaDeGelo
 		},
-		subBiomas: [{
-			chave: "ice-cave",
-			nome: "Caverna de Gelo",
-			peso: 10,
-			loot: "remoto",
-			bg: {
-				primary: "#33505e",
-				secondary: "#3d6070",
-				image: ARTE.cavernaDeGelo
+		subBiomas: [
+			{
+				chave: "ice-cave",
+				nome: "Caverna de Gelo",
+				peso: 10,
+				loot: "remoto",
+				bg: {
+					primary: "#33505e",
+					secondary: "#3d6070",
+					image: ARTE.cavernaDeGelo
+				}
+			},
+			{
+				chave: "snowy-forest",
+				nome: "Floresta Nevada",
+				peso: 6,
+				loot: "basico"
+			},
+			{
+				chave: "seafoam-islands",
+				nome: "Ilhas Espuma",
+				peso: 10,
+				loot: "gelado",
+				bg: {
+					primary: "#33505e",
+					secondary: "#3d6070",
+					image: ARTE.cavernaDeGelo
+				}
+			},
+			{
+				chave: "shoal-cave",
+				nome: "Gruta da Maré",
+				peso: 6,
+				loot: "gelado",
+				bg: {
+					primary: "#33505e",
+					secondary: "#3d6070",
+					image: ARTE.cavernaDeGelo
+				}
+			},
+			{
+				chave: "tundra",
+				nome: "Tundra",
+				peso: 10,
+				loot: "gelado"
 			}
-		}, {
-			chave: "snowy-forest",
-			nome: "Floresta Nevada",
-			peso: 6,
-			loot: "basico"
-		}]
+		]
 	},
 	{
 		chave: "igneo",
@@ -43528,12 +43824,48 @@ var BIOMAS = [
 			secondary: "#6d3626",
 			image: ARTE.vulcao
 		},
-		subBiomas: [{
-			chave: "volcano",
-			nome: "Vulcao",
-			peso: 10,
-			loot: "remoto"
-		}]
+		subBiomas: [
+			{
+				chave: "volcano",
+				nome: "Vulcao",
+				peso: 10,
+				loot: "remoto"
+			},
+			{
+				chave: "fiery-path",
+				nome: "Caminho Ardente",
+				peso: 10,
+				loot: "ardente",
+				bg: {
+					primary: "#5a2a1e",
+					secondary: "#6d3626",
+					image: ARTE.cavernaVulcanica
+				}
+			},
+			{
+				chave: "mt-ember",
+				nome: "Encosta do Monte Brasa",
+				peso: 10,
+				loot: "remoto"
+			},
+			{
+				chave: "ash-field",
+				nome: "Campo de Cinzas",
+				peso: 6,
+				loot: "basico",
+				bg: {
+					primary: "#5a2a1e",
+					secondary: "#6d3626",
+					image: ARTE.florestaQueimada
+				}
+			},
+			{
+				chave: "hot-springs",
+				nome: "Fontes Termais",
+				peso: 6,
+				loot: "termal"
+			}
+		]
 	},
 	{
 		chave: "urbano",
@@ -43577,6 +43909,28 @@ var BIOMAS = [
 					secondary: "#4a4640",
 					image: ARTE.dojo
 				}
+			},
+			{
+				chave: "harbor",
+				nome: "Cais do Porto",
+				peso: 10,
+				loot: "portuario",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.metropole
+				}
+			},
+			{
+				chave: "underground",
+				nome: "Galerias Subterrâneas",
+				peso: 6,
+				loot: "toxico",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.cortico
+				}
 			}
 		]
 	},
@@ -43618,6 +43972,17 @@ var BIOMAS = [
 				nome: "Laboratório",
 				peso: 3,
 				loot: "profundo"
+			},
+			{
+				chave: "junkyard",
+				nome: "Ferro-Velho",
+				peso: 10,
+				loot: "sucata",
+				bg: {
+					primary: "#3b3f4a",
+					secondary: "#474c59",
+					image: ARTE.obra
+				}
 			}
 		]
 	},
@@ -43658,6 +44023,29 @@ var BIOMAS = [
 					secondary: "#584565",
 					image: ARTE.grutaFeerica
 				}
+			},
+			{
+				chave: "sprout-tower",
+				nome: "Torre Broto",
+				peso: 10,
+				loot: "sonolento"
+			},
+			{
+				chave: "meditation-shrine",
+				nome: "Santuário de Meditação",
+				peso: 6,
+				loot: "remoto"
+			},
+			{
+				chave: "sky-pillar",
+				nome: "Pilar Celeste",
+				peso: 3,
+				loot: "profundo",
+				bg: {
+					primary: "#4a3a55",
+					secondary: "#584565",
+					image: ARTE.ruinas
+				}
 			}
 		]
 	},
@@ -43691,6 +44079,29 @@ var BIOMAS = [
 			{
 				chave: "space",
 				nome: "Espaço",
+				peso: 3,
+				loot: "profundo",
+				bg: {
+					primary: "#2b2733",
+					secondary: "#35303f",
+					image: ARTE.abismo
+				}
+			},
+			{
+				chave: "mt-pyre",
+				nome: "Monte Pira",
+				peso: 10,
+				loot: "remoto"
+			},
+			{
+				chave: "burned-tower",
+				nome: "Torre Queimada",
+				peso: 6,
+				loot: "ardente"
+			},
+			{
+				chave: "abandoned-ship",
+				nome: "Navio Abandonado",
 				peso: 3,
 				loot: "profundo",
 				bg: {
@@ -44153,6 +44564,46 @@ var ELENCO_DO_SUB_BIOMA = {
 		"skitty",
 		"delcatty"
 	],
+	"farm": [
+		"rattata",
+		"raticate",
+		"growlithe",
+		"arcanine",
+		"ponyta",
+		"rapidash",
+		"farfetch_d",
+		"doduo",
+		"dodrio",
+		"tauros",
+		"mareep",
+		"flaaffy",
+		"ampharos",
+		"snubbull",
+		"granbull",
+		"miltank",
+		"zigzagoon",
+		"linoone",
+		"skitty",
+		"delcatty"
+	],
+	"cycling-road": [
+		"rattata",
+		"raticate",
+		"spearow",
+		"fearow",
+		"ponyta",
+		"rapidash",
+		"doduo",
+		"dodrio",
+		"grimer",
+		"muk",
+		"koffing",
+		"weezing",
+		"poochyena",
+		"mightyena",
+		"taillow",
+		"swellow"
+	],
 	"forest": [
 		"caterpie",
 		"metapod",
@@ -44283,6 +44734,72 @@ var ELENCO_DO_SUB_BIOMA = {
 		"seviper",
 		"tropius"
 	],
+	"mushroom-glade": [
+		"oddish",
+		"gloom",
+		"vileplume",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"wurmple",
+		"silcoon",
+		"beautifly",
+		"shroomish",
+		"breloom",
+		"slakoth",
+		"vigoroth",
+		"slaking"
+	],
+	"ilex-forest": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"zubat",
+		"golbat",
+		"oddish",
+		"gloom",
+		"vileplume",
+		"paras",
+		"parasect",
+		"psyduck",
+		"golduck",
+		"farfetch_d",
+		"hoothoot",
+		"noctowl",
+		"crobat",
+		"pineco",
+		"forretress"
+	],
+	"treetops": [
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"spearow",
+		"fearow",
+		"ekans",
+		"arbok",
+		"exeggcute",
+		"exeggutor",
+		"hoothoot",
+		"noctowl",
+		"aipom",
+		"pineco",
+		"forretress",
+		"heracross",
+		"seedot",
+		"nuzleaf",
+		"shiftry",
+		"taillow",
+		"swellow",
+		"slakoth",
+		"vigoroth",
+		"slaking",
+		"tropius"
+	],
 	"sea": [
 		"zubat",
 		"golbat",
@@ -44374,6 +44891,48 @@ var ELENCO_DO_SUB_BIOMA = {
 		"relicanth",
 		"luvdisc"
 	],
+	"coral-reef": [
+		"shellder",
+		"cloyster",
+		"horsea",
+		"seadra",
+		"staryu",
+		"starmie",
+		"chinchou",
+		"lanturn",
+		"qwilfish",
+		"corsola",
+		"remoraid",
+		"octillery",
+		"mantine",
+		"kingdra",
+		"wingull",
+		"pelipper",
+		"clamperl",
+		"huntail",
+		"gorebyss",
+		"luvdisc"
+	],
+	"whirl-islands": [
+		"zubat",
+		"golbat",
+		"tentacool",
+		"tentacruel",
+		"slowpoke",
+		"slowbro",
+		"seel",
+		"dewgong",
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"horsea",
+		"seadra",
+		"magikarp",
+		"gyarados",
+		"crobat",
+		"kingdra"
+	],
 	"lake": [
 		"wartortle",
 		"blastoise",
@@ -44458,6 +45017,72 @@ var ELENCO_DO_SUB_BIOMA = {
 		"barboach",
 		"whiscash"
 	],
+	"lily-pond": [
+		"oddish",
+		"gloom",
+		"vileplume",
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"bellossom",
+		"marill",
+		"azumarill",
+		"politoed",
+		"yanma",
+		"wooper",
+		"quagsire",
+		"lotad",
+		"lombre",
+		"ludicolo",
+		"surskit",
+		"masquerain",
+		"azurill"
+	],
+	"river": [
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"marill",
+		"azumarill",
+		"surskit",
+		"masquerain",
+		"azurill",
+		"barboach",
+		"whiscash",
+		"corphish",
+		"crawdaunt",
+		"feebas",
+		"milotic"
+	],
+	"waterfall": [
+		"zubat",
+		"golbat",
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"slowpoke",
+		"slowbro",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"crobat",
+		"marill",
+		"azumarill",
+		"politoed",
+		"slowking",
+		"azurill"
+	],
 	"badlands": [
 		"sandshrew",
 		"sandslash",
@@ -44531,6 +45156,45 @@ var ELENCO_DO_SUB_BIOMA = {
 		"bagon",
 		"shelgon",
 		"salamence"
+	],
+	"canyon": [
+		"spearow",
+		"fearow",
+		"sandshrew",
+		"sandslash",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"cubone",
+		"marowak",
+		"rhyhorn",
+		"rhydon",
+		"gligar",
+		"steelix",
+		"skarmory",
+		"phanpy",
+		"donphan"
+	],
+	"oasis": [
+		"sandshrew",
+		"sandslash",
+		"psyduck",
+		"golduck",
+		"doduo",
+		"dodrio",
+		"marill",
+		"azumarill",
+		"azurill",
+		"numel",
+		"camerupt",
+		"trapinch",
+		"vibrava",
+		"flygon",
+		"cacnea",
+		"cacturne",
+		"baltoy",
+		"claydol"
 	],
 	"cave": [
 		"rattata",
@@ -44702,6 +45366,85 @@ var ELENCO_DO_SUB_BIOMA = {
 		"swablu",
 		"altaria"
 	],
+	"rock-tunnel": [
+		"zubat",
+		"golbat",
+		"mankey",
+		"primeape",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"cubone",
+		"marowak",
+		"crobat",
+		"steelix"
+	],
+	"dark-cave": [
+		"zubat",
+		"golbat",
+		"geodude",
+		"graveler",
+		"golem",
+		"crobat",
+		"wobbuffet",
+		"dunsparce",
+		"teddiursa",
+		"ursaring",
+		"whismur",
+		"loudred",
+		"exploud",
+		"wynaut"
+	],
+	"meteor-falls": [
+		"zubat",
+		"golbat",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"crobat",
+		"lunatone",
+		"solrock",
+		"barboach",
+		"whiscash",
+		"bagon",
+		"shelgon",
+		"salamence"
+	],
+	"victory-road": [
+		"zubat",
+		"golbat",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"cubone",
+		"marowak",
+		"rhyhorn",
+		"rhydon",
+		"crobat",
+		"steelix",
+		"teddiursa",
+		"ursaring",
+		"phanpy",
+		"donphan",
+		"makuhita",
+		"hariyama",
+		"sableye",
+		"mawile",
+		"aron",
+		"lairon",
+		"aggron",
+		"meditite",
+		"medicham"
+	],
 	"ice-cave": [
 		"zubat",
 		"golbat",
@@ -44746,6 +45489,56 @@ var ELENCO_DO_SUB_BIOMA = {
 		"snorunt",
 		"glalie"
 	],
+	"seafoam-islands": [
+		"zubat",
+		"golbat",
+		"psyduck",
+		"golduck",
+		"slowpoke",
+		"slowbro",
+		"seel",
+		"dewgong",
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"horsea",
+		"seadra",
+		"staryu",
+		"starmie",
+		"crobat",
+		"kingdra"
+	],
+	"shoal-cave": [
+		"zubat",
+		"golbat",
+		"tentacool",
+		"tentacruel",
+		"shellder",
+		"cloyster",
+		"crobat",
+		"snorunt",
+		"glalie",
+		"spheal",
+		"sealeo",
+		"walrein"
+	],
+	"tundra": [
+		"jynx",
+		"sneasel",
+		"teddiursa",
+		"ursaring",
+		"swinub",
+		"piloswine",
+		"delibird",
+		"stantler",
+		"smoochum",
+		"snorunt",
+		"glalie",
+		"spheal",
+		"sealeo",
+		"walrein"
+	],
 	"volcano": [
 		"charmeleon",
 		"charizard",
@@ -44784,6 +45577,65 @@ var ELENCO_DO_SUB_BIOMA = {
 		"grumpig",
 		"swablu",
 		"altaria"
+	],
+	"fiery-path": [
+		"machop",
+		"machoke",
+		"machamp",
+		"grimer",
+		"muk",
+		"koffing",
+		"weezing",
+		"slugma",
+		"magcargo",
+		"numel",
+		"camerupt",
+		"torkoal"
+	],
+	"mt-ember": [
+		"spearow",
+		"fearow",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"ponyta",
+		"rapidash",
+		"magmar",
+		"slugma",
+		"magcargo",
+		"magby"
+	],
+	"ash-field": [
+		"sandshrew",
+		"sandslash",
+		"slugma",
+		"magcargo",
+		"skarmory",
+		"numel",
+		"camerupt",
+		"spinda"
+	],
+	"hot-springs": [
+		"psyduck",
+		"golduck",
+		"growlithe",
+		"arcanine",
+		"ponyta",
+		"rapidash",
+		"slowpoke",
+		"slowbro",
+		"magmar",
+		"houndour",
+		"houndoom",
+		"magby",
+		"numel",
+		"camerupt",
+		"torkoal",
+		"spoink",
+		"grumpig"
 	],
 	"metropolis": [
 		"rattata",
@@ -44826,6 +45678,49 @@ var ELENCO_DO_SUB_BIOMA = {
 		"hariyama",
 		"meditite",
 		"medicham"
+	],
+	"harbor": [
+		"meowth",
+		"persian",
+		"psyduck",
+		"golduck",
+		"machop",
+		"machoke",
+		"machamp",
+		"tentacool",
+		"tentacruel",
+		"grimer",
+		"muk",
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"staryu",
+		"starmie",
+		"magikarp",
+		"gyarados",
+		"wingull",
+		"pelipper",
+		"corphish",
+		"crawdaunt"
+	],
+	"underground": [
+		"rattata",
+		"raticate",
+		"ekans",
+		"arbok",
+		"zubat",
+		"golbat",
+		"grimer",
+		"muk",
+		"drowzee",
+		"hypno",
+		"koffing",
+		"weezing",
+		"ditto",
+		"crobat",
+		"gulpin",
+		"swalot"
 	],
 	"construction-site": [
 		"diglett",
@@ -44901,6 +45796,22 @@ var ELENCO_DO_SUB_BIOMA = {
 		"weezing",
 		"ditto"
 	],
+	"junkyard": [
+		"rattata",
+		"raticate",
+		"magnemite",
+		"magneton",
+		"grimer",
+		"muk",
+		"voltorb",
+		"electrode",
+		"koffing",
+		"weezing",
+		"ditto",
+		"nosepass",
+		"gulpin",
+		"swalot"
+	],
 	"ruins": [
 		"sandshrew",
 		"sandslash",
@@ -44966,6 +45877,61 @@ var ELENCO_DO_SUB_BIOMA = {
 		"azurill",
 		"mawile"
 	],
+	"sprout-tower": [
+		"rattata",
+		"raticate",
+		"abra",
+		"kadabra",
+		"alakazam",
+		"bellsprout",
+		"weepinbell",
+		"victreebel",
+		"gastly",
+		"haunter",
+		"gengar",
+		"drowzee",
+		"hypno",
+		"hoothoot",
+		"noctowl",
+		"natu",
+		"xatu"
+	],
+	"meditation-shrine": [
+		"abra",
+		"kadabra",
+		"alakazam",
+		"slowpoke",
+		"slowbro",
+		"jynx",
+		"natu",
+		"xatu",
+		"slowking",
+		"girafarig",
+		"smoochum",
+		"meditite",
+		"medicham",
+		"spoink",
+		"grumpig",
+		"chimecho"
+	],
+	"sky-pillar": [
+		"zubat",
+		"golbat",
+		"crobat",
+		"sableye",
+		"mawile",
+		"swablu",
+		"altaria",
+		"baltoy",
+		"claydol",
+		"shuppet",
+		"banette",
+		"duskull",
+		"dusclops",
+		"beldum",
+		"metang",
+		"metagross"
+	],
 	"graveyard": [
 		"rattata",
 		"raticate",
@@ -45021,6 +45987,53 @@ var ELENCO_DO_SUB_BIOMA = {
 		"beldum",
 		"metang",
 		"metagross"
+	],
+	"mt-pyre": [
+		"gastly",
+		"haunter",
+		"gengar",
+		"wingull",
+		"pelipper",
+		"meditite",
+		"medicham",
+		"shuppet",
+		"banette",
+		"duskull",
+		"dusclops",
+		"chimecho"
+	],
+	"burned-tower": [
+		"rattata",
+		"raticate",
+		"zubat",
+		"golbat",
+		"koffing",
+		"weezing",
+		"magmar",
+		"crobat",
+		"murkrow",
+		"misdreavus",
+		"houndour",
+		"houndoom",
+		"magby"
+	],
+	"abandoned-ship": [
+		"zubat",
+		"golbat",
+		"tentacool",
+		"tentacruel",
+		"grimer",
+		"muk",
+		"gastly",
+		"haunter",
+		"gengar",
+		"krabby",
+		"kingler",
+		"crobat",
+		"shuppet",
+		"banette",
+		"duskull",
+		"dusclops"
 	]
 };
 var ELENCO_POR_ESTAGIO = {
@@ -46081,6 +47094,240 @@ var ELENCO_POR_ESTAGIO = {
 			["ditto", .00169]
 		]
 	},
+	"farm": {
+		1: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		2: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		3: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		4: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		5: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		6: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		7: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		8: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		9: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		],
+		10: [
+			["rattata", .13043],
+			["tauros", .13043],
+			["mareep", .13043],
+			["miltank", .13043],
+			["ponyta", .08696],
+			["doduo", .08696],
+			["zigzagoon", .08696],
+			["skitty", .08696],
+			["growlithe", .04348],
+			["farfetch_d", .04348],
+			["snubbull", .04348]
+		]
+	},
+	"cycling-road": {
+		1: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		2: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		3: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		4: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		5: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		6: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		7: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		8: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		9: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		],
+		10: [
+			["rattata", .16666],
+			["spearow", .16667],
+			["doduo", .16667],
+			["grimer", .11111],
+			["koffing", .11111],
+			["poochyena", .11111],
+			["taillow", .11111],
+			["ponyta", .05556]
+		]
+	},
 	"forest": {
 		1: [
 			["weedle", .34792],
@@ -46741,6 +47988,342 @@ var ELENCO_POR_ESTAGIO = {
 			["seviper", .05]
 		]
 	},
+	"mushroom-glade": {
+		1: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		2: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		3: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		4: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		5: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		6: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		7: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		8: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		9: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		],
+		10: [
+			["paras", .20001],
+			["wurmple", .2],
+			["shroomish", .2],
+			["oddish", .13333],
+			["venonat", .13333],
+			["slakoth", .13333]
+		]
+	},
+	"ilex-forest": {
+		1: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		2: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		3: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		4: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		5: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		6: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		7: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		8: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		9: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		],
+		10: [
+			["caterpie", .14284],
+			["weedle", .14286],
+			["oddish", .14286],
+			["hoothoot", .14286],
+			["zubat", .09524],
+			["paras", .09524],
+			["psyduck", .09524],
+			["pineco", .09524],
+			["farfetch_d", .04762]
+		]
+	},
+	"treetops": {
+		1: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		2: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		3: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		4: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		5: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		6: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		7: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		8: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		9: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		],
+		10: [
+			["pidgey", .12],
+			["aipom", .12],
+			["pineco", .12],
+			["taillow", .12],
+			["spearow", .08],
+			["ekans", .08],
+			["hoothoot", .08],
+			["seedot", .08],
+			["slakoth", .08],
+			["exeggcute", .04],
+			["heracross", .04],
+			["tropius", .04]
+		]
+	},
 	"sea": {
 		1: [
 			["tentacool", .40868],
@@ -47193,6 +48776,250 @@ var ELENCO_POR_ESTAGIO = {
 			["relicanth", .02609]
 		]
 	},
+	"coral-reef": {
+		1: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		2: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		3: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		4: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		5: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		6: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		7: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		8: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		9: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		],
+		10: [
+			["staryu", .12245],
+			["corsola", .12245],
+			["wingull", .12245],
+			["luvdisc", .12245],
+			["shellder", .08163],
+			["horsea", .08163],
+			["chinchou", .08163],
+			["qwilfish", .08163],
+			["remoraid", .08163],
+			["mantine", .04082],
+			["clamperl", .04082],
+			["gorebyss", .02041]
+		]
+	},
+	"whirl-islands": {
+		1: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		2: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		3: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		4: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		5: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		6: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		7: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		8: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		9: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		],
+		10: [
+			["zubat", .15],
+			["tentacool", .15],
+			["shellder", .15],
+			["krabby", .15],
+			["slowpoke", .1],
+			["seel", .1],
+			["horsea", .1],
+			["magikarp", .1]
+		]
+	},
 	"lake": {
 		1: [
 			["magikarp", .29523],
@@ -47530,6 +49357,352 @@ var ELENCO_POR_ESTAGIO = {
 			["politoed", .02157],
 			["mudkip", .02157],
 			["wooper", .00167]
+		]
+	},
+	"lily-pond": {
+		1: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		2: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		3: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		4: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		5: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		6: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		7: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		8: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		9: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		],
+		10: [
+			["poliwag", .13639],
+			["wooper", .13636],
+			["lotad", .13636],
+			["surskit", .13636],
+			["azurill", .13636],
+			["oddish", .09091],
+			["psyduck", .09091],
+			["bellossom", .04545],
+			["politoed", .04545],
+			["yanma", .04545]
+		]
+	},
+	"river": {
+		1: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		2: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		3: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		4: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		5: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		6: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		7: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		8: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		9: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		],
+		10: [
+			["poliwag", .13956],
+			["goldeen", .13953],
+			["magikarp", .13953],
+			["azurill", .13953],
+			["barboach", .13953],
+			["psyduck", .09302],
+			["surskit", .09302],
+			["corphish", .09302],
+			["feebas", .02326]
+		]
+	},
+	"waterfall": {
+		1: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		2: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		3: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		4: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		5: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		6: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		7: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		8: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		9: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
+		],
+		10: [
+			["poliwag", .15],
+			["goldeen", .15],
+			["magikarp", .15],
+			["azurill", .15],
+			["zubat", .1],
+			["psyduck", .1],
+			["slowpoke", .1],
+			["politoed", .05],
+			["slowking", .05]
 		]
 	},
 	"badlands": {
@@ -47926,6 +50099,220 @@ var ELENCO_POR_ESTAGIO = {
 			["dratini", .04857],
 			["swablu", .04857],
 			["aerodactyl", .02429]
+		]
+	},
+	"canyon": {
+		1: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		2: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		3: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		4: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		5: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		6: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		7: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		8: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		9: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		],
+		10: [
+			["spearow", .15],
+			["sandshrew", .15],
+			["geodude", .15],
+			["phanpy", .15],
+			["cubone", .1],
+			["rhyhorn", .1],
+			["gligar", .1],
+			["onix", .05],
+			["skarmory", .05]
+		]
+	},
+	"oasis": {
+		1: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		2: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		3: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		4: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		5: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		6: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		7: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		8: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		9: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
+		],
+		10: [
+			["sandshrew", .14284],
+			["psyduck", .14286],
+			["azurill", .14286],
+			["trapinch", .14286],
+			["cacnea", .14286],
+			["doduo", .09524],
+			["numel", .09524],
+			["baltoy", .09524]
 		]
 	},
 	"cave": {
@@ -48337,6 +50724,414 @@ var ELENCO_POR_ESTAGIO = {
 			["larvitar", .00931]
 		]
 	},
+	"rock-tunnel": {
+		1: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		2: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		3: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		4: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		5: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		6: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		7: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		8: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		9: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		],
+		10: [
+			["zubat", .21427],
+			["machop", .21429],
+			["geodude", .21429],
+			["mankey", .14286],
+			["cubone", .14286],
+			["onix", .07143]
+		]
+	},
+	"dark-cave": {
+		1: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		2: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		3: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		4: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		5: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		6: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		7: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		8: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		9: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		],
+		10: [
+			["zubat", .21427],
+			["geodude", .21429],
+			["teddiursa", .21429],
+			["whismur", .14286],
+			["wynaut", .14286],
+			["dunsparce", .07143]
+		]
+	},
+	"meteor-falls": {
+		1: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		2: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		3: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		4: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		5: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		6: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		7: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		8: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		9: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		],
+		10: [
+			["zubat", .17647],
+			["goldeen", .17647],
+			["magikarp", .17647],
+			["barboach", .17647],
+			["lunatone", .11765],
+			["solrock", .11765],
+			["bagon", .05882]
+		]
+	},
+	"victory-road": {
+		1: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		2: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		3: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		4: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		5: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		6: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		7: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		8: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		9: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		],
+		10: [
+			["zubat", .11542],
+			["machop", .11538],
+			["geodude", .11538],
+			["onix", .11538],
+			["cubone", .07692],
+			["rhyhorn", .07692],
+			["teddiursa", .07692],
+			["makuhita", .07692],
+			["aron", .07692],
+			["phanpy", .03846],
+			["sableye", .03846],
+			["mawile", .03846],
+			["meditite", .03846]
+		]
+	},
 	"ice-cave": {
 		1: [
 			["zubat", .46252],
@@ -48566,6 +51361,282 @@ var ELENCO_POR_ESTAGIO = {
 			["delibird", .05882]
 		]
 	},
+	"seafoam-islands": {
+		1: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		2: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		3: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		4: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		5: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		6: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		7: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		8: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		9: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		],
+		10: [
+			["zubat", .15],
+			["psyduck", .15],
+			["seel", .15],
+			["shellder", .15],
+			["slowpoke", .1],
+			["krabby", .1],
+			["horsea", .1],
+			["staryu", .1]
+		]
+	},
+	"shoal-cave": {
+		1: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		2: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		3: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		4: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		5: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		6: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		7: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		8: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		9: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		],
+		10: [
+			["zubat", .23076],
+			["tentacool", .23077],
+			["spheal", .23077],
+			["shellder", .15385],
+			["snorunt", .15385]
+		]
+	},
+	"tundra": {
+		1: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		2: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		3: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		4: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		5: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		6: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		7: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		8: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		9: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		],
+		10: [
+			["teddiursa", .15],
+			["swinub", .15],
+			["snorunt", .15],
+			["spheal", .15],
+			["sneasel", .1],
+			["delibird", .1],
+			["stantler", .1],
+			["smoochum", .1]
+		]
+	},
 	"volcano": {
 		1: [
 			["numel", .48487],
@@ -48726,6 +51797,354 @@ var ELENCO_POR_ESTAGIO = {
 			["meditite", .00649],
 			["charmander", .00325],
 			["cyndaquil", .00325]
+		]
+	},
+	"fiery-path": {
+		1: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		2: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		3: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		4: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		5: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		6: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		7: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		8: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		9: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		],
+		10: [
+			["machop", .1875],
+			["koffing", .1875],
+			["slugma", .1875],
+			["numel", .1875],
+			["grimer", .125],
+			["torkoal", .125]
+		]
+	},
+	"mt-ember": {
+		1: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		2: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		3: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		4: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		5: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		6: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		7: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		8: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		9: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		],
+		10: [
+			["machop", .1875],
+			["geodude", .1875],
+			["ponyta", .1875],
+			["slugma", .1875],
+			["spearow", .125],
+			["magby", .125]
+		]
+	},
+	"ash-field": {
+		1: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		2: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		3: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		4: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		5: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		6: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		7: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		8: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		9: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		],
+		10: [
+			["sandshrew", .25],
+			["slugma", .25],
+			["spinda", .25],
+			["numel", .16667],
+			["skarmory", .08333]
+		]
+	},
+	"hot-springs": {
+		1: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		2: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		3: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		4: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		5: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		6: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		7: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		8: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		9: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
+		],
+		10: [
+			["psyduck", .13637],
+			["slowpoke", .13636],
+			["numel", .13636],
+			["spoink", .13636],
+			["growlithe", .09091],
+			["ponyta", .09091],
+			["houndour", .09091],
+			["magby", .09091],
+			["torkoal", .09091]
 		]
 	},
 	"metropolis": {
@@ -49002,6 +52421,240 @@ var ELENCO_POR_ESTAGIO = {
 			["tyrogue", .15385],
 			["hitmonchan", .07692],
 			["hitmontop", .07692]
+		]
+	},
+	"harbor": {
+		1: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		2: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		3: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		4: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		5: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		6: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		7: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		8: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		9: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		],
+		10: [
+			["tentacool", .12501],
+			["krabby", .125],
+			["magikarp", .125],
+			["wingull", .125],
+			["meowth", .08333],
+			["psyduck", .08333],
+			["machop", .08333],
+			["shellder", .08333],
+			["staryu", .08333],
+			["grimer", .04167],
+			["corphish", .04167]
+		]
+	},
+	"underground": {
+		1: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		2: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		3: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		4: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		5: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		6: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		7: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		8: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		9: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
+		],
+		10: [
+			["rattata", .16216],
+			["zubat", .16216],
+			["grimer", .16216],
+			["koffing", .16216],
+			["ekans", .10811],
+			["drowzee", .10811],
+			["gulpin", .10811],
+			["ditto", .02703]
 		]
 	},
 	"construction-site": {
@@ -49414,6 +53067,108 @@ var ELENCO_POR_ESTAGIO = {
 			["grimer", .01172]
 		]
 	},
+	"junkyard": {
+		1: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		2: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		3: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		4: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		5: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		6: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		7: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		8: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		9: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		],
+		10: [
+			["rattata", .17142],
+			["magnemite", .17143],
+			["grimer", .17143],
+			["koffing", .17143],
+			["voltorb", .11429],
+			["gulpin", .11429],
+			["nosepass", .05714],
+			["ditto", .02857]
+		]
+	},
 	"ruins": {
 		1: [
 			["unown", .90908],
@@ -49722,6 +53477,312 @@ var ELENCO_POR_ESTAGIO = {
 			["ralts", .11765]
 		]
 	},
+	"sprout-tower": {
+		1: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		2: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		3: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		4: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		5: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		6: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		7: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		8: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		9: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		],
+		10: [
+			["rattata", .1875],
+			["bellsprout", .1875],
+			["gastly", .1875],
+			["drowzee", .125],
+			["hoothoot", .125],
+			["natu", .125],
+			["abra", .0625]
+		]
+	},
+	"meditation-shrine": {
+		1: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		2: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		3: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		4: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		5: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		6: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		7: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		8: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		9: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		],
+		10: [
+			["slowpoke", .15],
+			["natu", .15],
+			["meditite", .15],
+			["spoink", .15],
+			["abra", .1],
+			["girafarig", .1],
+			["smoochum", .1],
+			["slowking", .05],
+			["chimecho", .05]
+		]
+	},
+	"sky-pillar": {
+		1: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		2: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		3: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		4: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		5: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		6: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		7: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		8: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		9: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		],
+		10: [
+			["zubat", .15],
+			["swablu", .15],
+			["baltoy", .15],
+			["shuppet", .15],
+			["duskull", .15],
+			["sableye", .1],
+			["mawile", .1],
+			["beldum", .05]
+		]
+	},
 	"graveyard": {
 		1: [
 			["koffing", .59],
@@ -50014,6 +54075,272 @@ var ELENCO_POR_ESTAGIO = {
 			["baltoy", .15385],
 			["staryu", .07692],
 			["beldum", .07692]
+		]
+	},
+	"mt-pyre": {
+		1: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		2: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		3: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		4: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		5: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		6: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		7: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		8: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		9: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		],
+		10: [
+			["wingull", .21427],
+			["shuppet", .21429],
+			["duskull", .21429],
+			["gastly", .14286],
+			["meditite", .14286],
+			["chimecho", .07143]
+		]
+	},
+	"burned-tower": {
+		1: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		2: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		3: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		4: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		5: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		6: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		7: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		8: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		9: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		],
+		10: [
+			["rattata", .1875],
+			["zubat", .1875],
+			["koffing", .1875],
+			["murkrow", .125],
+			["houndour", .125],
+			["magby", .125],
+			["misdreavus", .0625]
+		]
+	},
+	"abandoned-ship": {
+		1: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		2: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		3: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		4: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		5: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		6: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		7: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		8: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		9: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
+		],
+		10: [
+			["zubat", .16666],
+			["tentacool", .16667],
+			["krabby", .16667],
+			["shuppet", .16667],
+			["grimer", .11111],
+			["gastly", .11111],
+			["duskull", .11111]
 		]
 	}
 };
@@ -50833,7 +55160,13 @@ function quantidadeDeSalas(mapId) {
 	return estagio ? salasDoEstagio(estagio.estagio) : SALAS_POR_ESTAGIO[SALAS_POR_ESTAGIO.length - 1];
 }
 /**
-* Perfil de cada um dos 33 sub-biomas.
+* Perfil de cada um dos 65 sub-biomas.
+*
+* ONDA 1 (16/10/2026): os 32 sub-biomas novos entram com `alcance` CURTO
+* (0,3 a 0,5). Com 5 ou 6 sub-biomas por bioma e o alcance padrao, quase todo
+* estagio teria os seis ao mesmo tempo, cada um com uma fatia pequena, e a
+* identidade de cada lugar sumiria. Com o alcance curto o lugar novo e um
+* DEGRAU do bioma: manda em dois ou tres estagios e some fora deles.
 *
 * Escrito a mao, pelo mesmo motivo que os pesos de `biomas.ts` sao: "o que e
 * raso e o que e fundo neste lugar" e decisao tematica, nao dado derivavel.
@@ -50857,6 +55190,16 @@ var PERFIL_POR_SUB_BIOMA = {
 		profundidade: .85,
 		pico: 8
 	},
+	farm: {
+		profundidade: .2,
+		pico: 8,
+		alcance: .45
+	},
+	"cycling-road": {
+		profundidade: .65,
+		pico: 8,
+		alcance: .45
+	},
 	forest: {
 		profundidade: .15,
 		pico: 10
@@ -50868,6 +55211,21 @@ var PERFIL_POR_SUB_BIOMA = {
 	jungle: {
 		profundidade: .95,
 		pico: 10
+	},
+	"mushroom-glade": {
+		profundidade: .05,
+		pico: 8,
+		alcance: .4
+	},
+	"ilex-forest": {
+		profundidade: .35,
+		pico: 8,
+		alcance: .45
+	},
+	treetops: {
+		profundidade: .75,
+		pico: 8,
+		alcance: .45
 	},
 	beach: {
 		profundidade: 0,
@@ -50881,6 +55239,16 @@ var PERFIL_POR_SUB_BIOMA = {
 		profundidade: 1,
 		pico: 10
 	},
+	"coral-reef": {
+		profundidade: .55,
+		pico: 8,
+		alcance: .4
+	},
+	"whirl-islands": {
+		profundidade: .7,
+		pico: 8,
+		alcance: .35
+	},
 	lake: {
 		profundidade: .25,
 		pico: 10
@@ -50888,6 +55256,21 @@ var PERFIL_POR_SUB_BIOMA = {
 	swamp: {
 		profundidade: .9,
 		pico: 9
+	},
+	"lily-pond": {
+		profundidade: .05,
+		pico: 9,
+		alcance: .5
+	},
+	river: {
+		profundidade: .45,
+		pico: 10,
+		alcance: .5
+	},
+	waterfall: {
+		profundidade: .7,
+		pico: 8,
+		alcance: .45
 	},
 	badlands: {
 		profundidade: .1,
@@ -50901,6 +55284,16 @@ var PERFIL_POR_SUB_BIOMA = {
 		profundidade: 1,
 		pico: 10
 	},
+	canyon: {
+		profundidade: .35,
+		pico: 9,
+		alcance: .5
+	},
+	oasis: {
+		profundidade: .65,
+		pico: 5,
+		alcance: .33
+	},
 	mountain: {
 		profundidade: .15,
 		pico: 9
@@ -50908,6 +55301,26 @@ var PERFIL_POR_SUB_BIOMA = {
 	cave: {
 		profundidade: .85,
 		pico: 10
+	},
+	"rock-tunnel": {
+		profundidade: .3,
+		pico: 9,
+		alcance: .45
+	},
+	"dark-cave": {
+		profundidade: .5,
+		pico: 8,
+		alcance: .45
+	},
+	"meteor-falls": {
+		profundidade: .65,
+		pico: 8,
+		alcance: .45
+	},
+	"victory-road": {
+		profundidade: 1,
+		pico: 8,
+		alcance: .3
 	},
 	"snowy-forest": {
 		profundidade: .15,
@@ -50917,8 +55330,43 @@ var PERFIL_POR_SUB_BIOMA = {
 		profundidade: .85,
 		pico: 10
 	},
-	volcano: {
+	"seafoam-islands": {
+		profundidade: .35,
+		pico: 9,
+		alcance: .5
+	},
+	"shoal-cave": {
+		profundidade: .55,
+		pico: 8,
+		alcance: .4
+	},
+	tundra: {
+		profundidade: .7,
+		pico: 9,
+		alcance: .5
+	},
+	"fiery-path": {
+		profundidade: .05,
+		pico: 10,
+		alcance: .5
+	},
+	"mt-ember": {
+		profundidade: .3,
+		pico: 10,
+		alcance: .5
+	},
+	"ash-field": {
 		profundidade: .5,
+		pico: 7,
+		alcance: .45
+	},
+	"hot-springs": {
+		profundidade: .7,
+		pico: 8,
+		alcance: .45
+	},
+	volcano: {
+		profundidade: .9,
 		pico: 10
 	},
 	metropolis: {
@@ -50932,6 +55380,16 @@ var PERFIL_POR_SUB_BIOMA = {
 	dojo: {
 		profundidade: .95,
 		pico: 10
+	},
+	harbor: {
+		profundidade: .35,
+		pico: 9,
+		alcance: .5
+	},
+	underground: {
+		profundidade: .6,
+		pico: 8,
+		alcance: .3
 	},
 	"construction-site": {
 		profundidade: .05,
@@ -50949,6 +55407,11 @@ var PERFIL_POR_SUB_BIOMA = {
 		profundidade: 1,
 		pico: 10
 	},
+	junkyard: {
+		profundidade: .25,
+		pico: 9,
+		alcance: .45
+	},
 	ruins: {
 		profundidade: .15,
 		pico: 10
@@ -50961,6 +55424,21 @@ var PERFIL_POR_SUB_BIOMA = {
 		profundidade: 1,
 		pico: 10
 	},
+	"sprout-tower": {
+		profundidade: .45,
+		pico: 9,
+		alcance: .35
+	},
+	"meditation-shrine": {
+		profundidade: .6,
+		pico: 8,
+		alcance: .35
+	},
+	"sky-pillar": {
+		profundidade: .8,
+		pico: 7,
+		alcance: .18
+	},
 	graveyard: {
 		profundidade: .1,
 		pico: 10
@@ -50972,6 +55450,21 @@ var PERFIL_POR_SUB_BIOMA = {
 	space: {
 		profundidade: 1,
 		pico: 10
+	},
+	"mt-pyre": {
+		profundidade: .4,
+		pico: 9,
+		alcance: .35
+	},
+	"burned-tower": {
+		profundidade: .55,
+		pico: 8,
+		alcance: .3
+	},
+	"abandoned-ship": {
+		profundidade: .8,
+		pico: 6,
+		alcance: .35
 	}
 };
 /**
@@ -103873,6 +108366,39 @@ function tempoDoGolpe(speciesId, kind, abilityId) {
 * degrau (o proprio PokeRogue faz assim, ver arena.ts#randomSpecies).
 */
 var SUB_BIOMA_TIERS = {
+	"abandoned-ship": {
+		COMMON: [
+			"zubat",
+			"tentacool",
+			"krabby",
+			"shuppet"
+		],
+		UNCOMMON: [
+			"golbat",
+			"grimer",
+			"gastly",
+			"duskull"
+		],
+		RARE: [
+			"tentacruel",
+			"haunter",
+			"kingler",
+			"crobat",
+			"banette",
+			"dusclops"
+		],
+		SUPER_RARE: ["muk", "gengar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"kingler",
+			"banette",
+			"dusclops"
+		],
+		BOSS_RARE: ["muk", "gengar"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"abyss": {
 		COMMON: [
 			"zubat",
@@ -103906,6 +108432,29 @@ var SUB_BIOMA_TIERS = {
 			"sableye"
 		],
 		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"ash-field": {
+		COMMON: [
+			"sandshrew",
+			"slugma",
+			"spinda"
+		],
+		UNCOMMON: ["numel"],
+		RARE: [
+			"sandslash",
+			"magcargo",
+			"skarmory"
+		],
+		SUPER_RARE: ["camerupt"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"sandslash",
+			"magcargo",
+			"skarmory"
+		],
+		BOSS_RARE: ["camerupt", "spinda"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -103968,6 +108517,75 @@ var SUB_BIOMA_TIERS = {
 			"crawdaunt"
 		],
 		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"burned-tower": {
+		COMMON: [
+			"rattata",
+			"zubat",
+			"koffing"
+		],
+		UNCOMMON: [
+			"murkrow",
+			"houndour",
+			"magby"
+		],
+		RARE: [
+			"raticate",
+			"weezing",
+			"magmar",
+			"crobat",
+			"misdreavus",
+			"houndoom"
+		],
+		SUPER_RARE: ["golbat"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"raticate",
+			"weezing",
+			"magmar",
+			"houndoom"
+		],
+		BOSS_RARE: ["golbat", "misdreavus"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"canyon": {
+		COMMON: [
+			"spearow",
+			"sandshrew",
+			"geodude",
+			"phanpy"
+		],
+		UNCOMMON: [
+			"graveler",
+			"cubone",
+			"rhyhorn",
+			"gligar"
+		],
+		RARE: [
+			"fearow",
+			"sandslash",
+			"golem",
+			"onix",
+			"marowak",
+			"skarmory",
+			"donphan"
+		],
+		SUPER_RARE: ["rhydon", "steelix"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"fearow",
+			"sandslash",
+			"golem",
+			"donphan"
+		],
+		BOSS_RARE: [
+			"rhydon",
+			"steelix",
+			"skarmory"
+		],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -104042,6 +108660,108 @@ var SUB_BIOMA_TIERS = {
 		ULTRA_RARE: [],
 		BOSS: ["machamp"],
 		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"coral-reef": {
+		COMMON: [
+			"staryu",
+			"corsola",
+			"wingull",
+			"luvdisc"
+		],
+		UNCOMMON: [
+			"shellder",
+			"horsea",
+			"chinchou",
+			"qwilfish",
+			"remoraid",
+			"pelipper"
+		],
+		RARE: [
+			"cloyster",
+			"seadra",
+			"starmie",
+			"lanturn",
+			"octillery",
+			"mantine",
+			"clamperl"
+		],
+		SUPER_RARE: ["kingdra"],
+		ULTRA_RARE: ["huntail", "gorebyss"],
+		BOSS: [
+			"cloyster",
+			"starmie",
+			"lanturn",
+			"octillery"
+		],
+		BOSS_RARE: ["mantine", "kingdra"],
+		BOSS_SUPER_RARE: ["huntail", "gorebyss"],
+		BOSS_ULTRA_RARE: []
+	},
+	"cycling-road": {
+		COMMON: [
+			"rattata",
+			"spearow",
+			"doduo"
+		],
+		UNCOMMON: [
+			"raticate",
+			"grimer",
+			"koffing",
+			"poochyena",
+			"taillow"
+		],
+		RARE: [
+			"fearow",
+			"ponyta",
+			"dodrio",
+			"weezing",
+			"swellow"
+		],
+		SUPER_RARE: [
+			"rapidash",
+			"muk",
+			"mightyena"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"fearow",
+			"dodrio",
+			"weezing"
+		],
+		BOSS_RARE: ["muk", "mightyena"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"dark-cave": {
+		COMMON: [
+			"zubat",
+			"geodude",
+			"teddiursa"
+		],
+		UNCOMMON: [
+			"graveler",
+			"whismur",
+			"loudred",
+			"wynaut"
+		],
+		RARE: [
+			"golbat",
+			"golem",
+			"crobat",
+			"dunsparce",
+			"ursaring",
+			"exploud"
+		],
+		SUPER_RARE: ["wobbuffet"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golbat",
+			"ursaring",
+			"exploud"
+		],
+		BOSS_RARE: ["wobbuffet", "dunsparce"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -104157,6 +108877,71 @@ var SUB_BIOMA_TIERS = {
 		ULTRA_RARE: [],
 		BOSS: ["wigglytuff", "mawile"],
 		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"farm": {
+		COMMON: [
+			"rattata",
+			"tauros",
+			"mareep",
+			"miltank"
+		],
+		UNCOMMON: [
+			"raticate",
+			"ponyta",
+			"doduo",
+			"flaaffy",
+			"zigzagoon",
+			"skitty"
+		],
+		RARE: [
+			"growlithe",
+			"farfetch_d",
+			"dodrio",
+			"ampharos",
+			"snubbull",
+			"linoone",
+			"delcatty"
+		],
+		SUPER_RARE: [
+			"arcanine",
+			"rapidash",
+			"granbull"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tauros",
+			"ampharos",
+			"miltank"
+		],
+		BOSS_RARE: ["arcanine", "rapidash"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"fiery-path": {
+		COMMON: [
+			"machop",
+			"koffing",
+			"slugma",
+			"numel"
+		],
+		UNCOMMON: ["grimer", "torkoal"],
+		RARE: [
+			"machamp",
+			"weezing",
+			"magcargo",
+			"camerupt"
+		],
+		SUPER_RARE: ["machoke", "muk"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"weezing",
+			"magcargo",
+			"camerupt",
+			"torkoal"
+		],
+		BOSS_RARE: ["machoke", "muk"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -104300,6 +109085,94 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"harbor": {
+		COMMON: [
+			"tentacool",
+			"krabby",
+			"magikarp",
+			"wingull"
+		],
+		UNCOMMON: [
+			"meowth",
+			"psyduck",
+			"machop",
+			"shellder",
+			"staryu"
+		],
+		RARE: [
+			"golduck",
+			"machoke",
+			"tentacruel",
+			"grimer",
+			"cloyster",
+			"kingler",
+			"starmie",
+			"pelipper",
+			"corphish"
+		],
+		SUPER_RARE: [
+			"persian",
+			"machamp",
+			"muk",
+			"gyarados",
+			"crawdaunt"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"machoke",
+			"tentacruel",
+			"kingler",
+			"pelipper"
+		],
+		BOSS_RARE: [
+			"persian",
+			"machamp",
+			"gyarados"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"hot-springs": {
+		COMMON: [
+			"psyduck",
+			"slowpoke",
+			"numel",
+			"spoink"
+		],
+		UNCOMMON: [
+			"growlithe",
+			"ponyta",
+			"houndour",
+			"magby",
+			"torkoal"
+		],
+		RARE: [
+			"golduck",
+			"rapidash",
+			"slowbro",
+			"camerupt",
+			"grumpig"
+		],
+		SUPER_RARE: [
+			"arcanine",
+			"magmar",
+			"houndoom"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"slowbro",
+			"camerupt",
+			"grumpig"
+		],
+		BOSS_RARE: [
+			"arcanine",
+			"magmar",
+			"houndoom"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"ice-cave": {
 		COMMON: [
 			"seel",
@@ -104329,6 +109202,44 @@ var SUB_BIOMA_TIERS = {
 			"walrein"
 		],
 		BOSS_RARE: ["jynx", "lapras"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"ilex-forest": {
+		COMMON: [
+			"caterpie",
+			"weedle",
+			"oddish",
+			"hoothoot"
+		],
+		UNCOMMON: [
+			"metapod",
+			"kakuna",
+			"zubat",
+			"gloom",
+			"paras",
+			"psyduck",
+			"pineco"
+		],
+		RARE: [
+			"butterfree",
+			"beedrill",
+			"golbat",
+			"vileplume",
+			"parasect",
+			"farfetch_d",
+			"noctowl",
+			"forretress"
+		],
+		SUPER_RARE: ["golduck", "crobat"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"butterfree",
+			"beedrill",
+			"noctowl",
+			"forretress"
+		],
+		BOSS_RARE: ["golduck"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -104370,6 +109281,37 @@ var SUB_BIOMA_TIERS = {
 			"scizor",
 			"slaking"
 		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"junkyard": {
+		COMMON: [
+			"rattata",
+			"magnemite",
+			"grimer",
+			"koffing"
+		],
+		UNCOMMON: [
+			"raticate",
+			"voltorb",
+			"gulpin"
+		],
+		RARE: [
+			"magneton",
+			"muk",
+			"electrode",
+			"weezing",
+			"nosepass"
+		],
+		SUPER_RARE: ["ditto", "swalot"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"magneton",
+			"muk",
+			"electrode",
+			"weezing"
+		],
+		BOSS_RARE: ["nosepass", "swalot"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -104435,6 +109377,47 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"lily-pond": {
+		COMMON: [
+			"poliwag",
+			"wooper",
+			"lotad",
+			"surskit",
+			"azurill"
+		],
+		UNCOMMON: [
+			"oddish",
+			"psyduck",
+			"poliwhirl",
+			"marill",
+			"lombre"
+		],
+		RARE: [
+			"gloom",
+			"golduck",
+			"poliwrath",
+			"politoed",
+			"yanma",
+			"quagsire",
+			"ludicolo",
+			"masquerain"
+		],
+		SUPER_RARE: [
+			"vileplume",
+			"bellossom",
+			"azumarill"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"politoed",
+			"quagsire",
+			"ludicolo",
+			"masquerain"
+		],
+		BOSS_RARE: ["bellossom", "azumarill"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"meadow": {
 		COMMON: [
 			"ledyba",
@@ -104476,6 +109459,76 @@ var SUB_BIOMA_TIERS = {
 		],
 		BOSS_RARE: [],
 		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"meditation-shrine": {
+		COMMON: [
+			"slowpoke",
+			"natu",
+			"meditite",
+			"spoink"
+		],
+		UNCOMMON: [
+			"abra",
+			"slowbro",
+			"girafarig",
+			"smoochum"
+		],
+		RARE: [
+			"kadabra",
+			"jynx",
+			"xatu",
+			"medicham",
+			"grumpig",
+			"chimecho"
+		],
+		SUPER_RARE: ["alakazam", "slowking"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"jynx",
+			"xatu",
+			"medicham",
+			"grumpig"
+		],
+		BOSS_RARE: [
+			"alakazam",
+			"slowking",
+			"girafarig"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"meteor-falls": {
+		COMMON: [
+			"zubat",
+			"goldeen",
+			"magikarp",
+			"barboach"
+		],
+		UNCOMMON: [
+			"seaking",
+			"lunatone",
+			"solrock"
+		],
+		RARE: [
+			"golbat",
+			"crobat",
+			"whiscash"
+		],
+		SUPER_RARE: [
+			"gyarados",
+			"bagon",
+			"shelgon"
+		],
+		ULTRA_RARE: ["salamence"],
+		BOSS: [
+			"golbat",
+			"lunatone",
+			"solrock",
+			"whiscash"
+		],
+		BOSS_RARE: ["gyarados", "shelgon"],
+		BOSS_SUPER_RARE: ["salamence"],
 		BOSS_ULTRA_RARE: []
 	},
 	"metropolis": {
@@ -104557,6 +109610,135 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"mt-ember": {
+		COMMON: [
+			"machop",
+			"geodude",
+			"ponyta",
+			"slugma"
+		],
+		UNCOMMON: [
+			"spearow",
+			"machoke",
+			"graveler",
+			"magby"
+		],
+		RARE: [
+			"golem",
+			"rapidash",
+			"magmar",
+			"magcargo"
+		],
+		SUPER_RARE: ["fearow", "machamp"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golem",
+			"rapidash",
+			"magmar",
+			"magcargo"
+		],
+		BOSS_RARE: ["fearow", "machamp"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mt-pyre": {
+		COMMON: [
+			"wingull",
+			"shuppet",
+			"duskull"
+		],
+		UNCOMMON: [
+			"gastly",
+			"pelipper",
+			"meditite"
+		],
+		RARE: [
+			"haunter",
+			"medicham",
+			"banette",
+			"dusclops",
+			"chimecho"
+		],
+		SUPER_RARE: ["gengar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"haunter",
+			"medicham",
+			"banette",
+			"dusclops"
+		],
+		BOSS_RARE: ["gengar", "chimecho"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mushroom-glade": {
+		COMMON: [
+			"paras",
+			"wurmple",
+			"shroomish"
+		],
+		UNCOMMON: [
+			"oddish",
+			"gloom",
+			"venonat",
+			"silcoon",
+			"slakoth"
+		],
+		RARE: [
+			"vileplume",
+			"parasect",
+			"venomoth",
+			"beautifly",
+			"breloom",
+			"vigoroth"
+		],
+		SUPER_RARE: ["slaking"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"vileplume",
+			"parasect",
+			"breloom"
+		],
+		BOSS_RARE: ["slaking"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"oasis": {
+		COMMON: [
+			"sandshrew",
+			"psyduck",
+			"azurill",
+			"trapinch",
+			"cacnea"
+		],
+		UNCOMMON: [
+			"sandslash",
+			"doduo",
+			"marill",
+			"numel",
+			"vibrava",
+			"baltoy"
+		],
+		RARE: [
+			"golduck",
+			"dodrio",
+			"azumarill",
+			"camerupt",
+			"cacturne",
+			"claydol"
+		],
+		SUPER_RARE: ["flygon"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"camerupt",
+			"cacturne",
+			"claydol"
+		],
+		BOSS_RARE: ["flygon"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"plains": {
 		COMMON: [
 			"zubat",
@@ -104633,6 +109815,73 @@ var SUB_BIOMA_TIERS = {
 		ULTRA_RARE: [],
 		BOSS: ["raichu", "manectric"],
 		BOSS_RARE: ["ampharos"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"river": {
+		COMMON: [
+			"poliwag",
+			"goldeen",
+			"magikarp",
+			"azurill",
+			"barboach"
+		],
+		UNCOMMON: [
+			"psyduck",
+			"poliwhirl",
+			"marill",
+			"surskit",
+			"corphish"
+		],
+		RARE: [
+			"golduck",
+			"poliwrath",
+			"seaking",
+			"masquerain",
+			"whiscash",
+			"crawdaunt"
+		],
+		SUPER_RARE: ["gyarados", "azumarill"],
+		ULTRA_RARE: ["feebas", "milotic"],
+		BOSS: [
+			"golduck",
+			"seaking",
+			"whiscash",
+			"crawdaunt"
+		],
+		BOSS_RARE: ["gyarados", "azumarill"],
+		BOSS_SUPER_RARE: ["milotic"],
+		BOSS_ULTRA_RARE: []
+	},
+	"rock-tunnel": {
+		COMMON: [
+			"zubat",
+			"machop",
+			"geodude"
+		],
+		UNCOMMON: ["mankey", "cubone"],
+		RARE: [
+			"golbat",
+			"machoke",
+			"machamp",
+			"graveler",
+			"golem",
+			"onix",
+			"crobat"
+		],
+		SUPER_RARE: [
+			"primeape",
+			"marowak",
+			"steelix"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golbat",
+			"machoke",
+			"graveler",
+			"onix"
+		],
+		BOSS_RARE: ["primeape", "marowak"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -104770,6 +110019,107 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"seafoam-islands": {
+		COMMON: [
+			"zubat",
+			"psyduck",
+			"seel",
+			"shellder"
+		],
+		UNCOMMON: [
+			"golbat",
+			"slowpoke",
+			"krabby",
+			"horsea",
+			"staryu"
+		],
+		RARE: [
+			"golduck",
+			"slowbro",
+			"dewgong",
+			"cloyster",
+			"kingler",
+			"crobat"
+		],
+		SUPER_RARE: [
+			"seadra",
+			"starmie",
+			"kingdra"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"slowbro",
+			"dewgong",
+			"cloyster"
+		],
+		BOSS_RARE: ["seadra", "starmie"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"shoal-cave": {
+		COMMON: [
+			"zubat",
+			"tentacool",
+			"spheal"
+		],
+		UNCOMMON: [
+			"golbat",
+			"shellder",
+			"snorunt"
+		],
+		RARE: [
+			"tentacruel",
+			"cloyster",
+			"crobat",
+			"glalie",
+			"sealeo"
+		],
+		SUPER_RARE: ["walrein"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"cloyster",
+			"glalie",
+			"sealeo"
+		],
+		BOSS_RARE: ["walrein"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"sky-pillar": {
+		COMMON: [
+			"zubat",
+			"swablu",
+			"baltoy",
+			"shuppet",
+			"duskull"
+		],
+		UNCOMMON: [
+			"golbat",
+			"sableye",
+			"mawile"
+		],
+		RARE: [
+			"crobat",
+			"altaria",
+			"claydol",
+			"banette",
+			"dusclops",
+			"beldum"
+		],
+		SUPER_RARE: ["metang"],
+		ULTRA_RARE: ["metagross"],
+		BOSS: [
+			"altaria",
+			"claydol",
+			"banette",
+			"dusclops"
+		],
+		BOSS_RARE: ["sableye", "metang"],
+		BOSS_SUPER_RARE: ["metagross"],
+		BOSS_ULTRA_RARE: []
+	},
 	"slum": {
 		COMMON: [
 			"rattata",
@@ -104845,6 +110195,39 @@ var SUB_BIOMA_TIERS = {
 			"solrock"
 		],
 		BOSS_RARE: ["metagross"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"sprout-tower": {
+		COMMON: [
+			"rattata",
+			"bellsprout",
+			"gastly"
+		],
+		UNCOMMON: [
+			"raticate",
+			"weepinbell",
+			"drowzee",
+			"hoothoot",
+			"natu"
+		],
+		RARE: [
+			"abra",
+			"victreebel",
+			"gengar",
+			"hypno",
+			"noctowl",
+			"xatu"
+		],
+		SUPER_RARE: ["kadabra", "haunter"],
+		ULTRA_RARE: ["alakazam"],
+		BOSS: [
+			"victreebel",
+			"hypno",
+			"noctowl",
+			"xatu"
+		],
+		BOSS_RARE: ["kadabra", "haunter"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
@@ -105071,6 +110454,171 @@ var SUB_BIOMA_TIERS = {
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
 	},
+	"treetops": {
+		COMMON: [
+			"pidgey",
+			"aipom",
+			"pineco",
+			"taillow"
+		],
+		UNCOMMON: [
+			"pidgeotto",
+			"spearow",
+			"ekans",
+			"hoothoot",
+			"seedot",
+			"nuzleaf",
+			"swellow",
+			"slakoth"
+		],
+		RARE: [
+			"pidgeot",
+			"fearow",
+			"arbok",
+			"exeggcute",
+			"noctowl",
+			"forretress",
+			"heracross",
+			"shiftry",
+			"vigoroth"
+		],
+		SUPER_RARE: [
+			"exeggutor",
+			"slaking",
+			"tropius"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"pidgeot",
+			"forretress",
+			"heracross",
+			"shiftry"
+		],
+		BOSS_RARE: ["exeggutor", "tropius"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"tundra": {
+		COMMON: [
+			"teddiursa",
+			"swinub",
+			"snorunt",
+			"spheal"
+		],
+		UNCOMMON: [
+			"sneasel",
+			"delibird",
+			"stantler",
+			"smoochum",
+			"sealeo"
+		],
+		RARE: [
+			"jynx",
+			"ursaring",
+			"piloswine",
+			"glalie"
+		],
+		SUPER_RARE: ["walrein"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"jynx",
+			"ursaring",
+			"piloswine",
+			"glalie"
+		],
+		BOSS_RARE: ["sneasel", "walrein"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"underground": {
+		COMMON: [
+			"rattata",
+			"zubat",
+			"grimer",
+			"koffing"
+		],
+		UNCOMMON: [
+			"ekans",
+			"golbat",
+			"drowzee",
+			"gulpin"
+		],
+		RARE: [
+			"raticate",
+			"muk",
+			"weezing",
+			"crobat",
+			"swalot"
+		],
+		SUPER_RARE: [
+			"arbok",
+			"hypno",
+			"ditto"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"raticate",
+			"muk",
+			"weezing",
+			"swalot"
+		],
+		BOSS_RARE: ["arbok", "hypno"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"victory-road": {
+		COMMON: [
+			"zubat",
+			"machop",
+			"geodude",
+			"onix"
+		],
+		UNCOMMON: [
+			"golbat",
+			"machoke",
+			"graveler",
+			"cubone",
+			"rhyhorn",
+			"teddiursa",
+			"makuhita",
+			"aron",
+			"lairon"
+		],
+		RARE: [
+			"machamp",
+			"golem",
+			"marowak",
+			"crobat",
+			"steelix",
+			"ursaring",
+			"phanpy",
+			"sableye",
+			"mawile",
+			"aggron",
+			"meditite"
+		],
+		SUPER_RARE: [
+			"rhydon",
+			"donphan",
+			"hariyama",
+			"medicham"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"machamp",
+			"golem",
+			"steelix",
+			"aggron"
+		],
+		BOSS_RARE: [
+			"rhydon",
+			"donphan",
+			"hariyama",
+			"medicham"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
 	"volcano": {
 		COMMON: [
 			"growlithe",
@@ -105145,6 +110693,80 @@ var SUB_BIOMA_TIERS = {
 		BOSS_RARE: ["aerodactyl"],
 		BOSS_SUPER_RARE: [],
 		BOSS_ULTRA_RARE: []
+	},
+	"waterfall": {
+		COMMON: [
+			"poliwag",
+			"goldeen",
+			"magikarp",
+			"azurill"
+		],
+		UNCOMMON: [
+			"zubat",
+			"psyduck",
+			"poliwhirl",
+			"slowpoke",
+			"marill"
+		],
+		RARE: [
+			"golbat",
+			"golduck",
+			"poliwrath",
+			"slowbro",
+			"seaking",
+			"gyarados",
+			"azumarill"
+		],
+		SUPER_RARE: [
+			"crobat",
+			"politoed",
+			"slowking"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"poliwrath",
+			"seaking",
+			"gyarados"
+		],
+		BOSS_RARE: ["politoed", "slowking"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"whirl-islands": {
+		COMMON: [
+			"zubat",
+			"tentacool",
+			"shellder",
+			"krabby"
+		],
+		UNCOMMON: [
+			"golbat",
+			"slowpoke",
+			"seel",
+			"cloyster",
+			"horsea",
+			"magikarp"
+		],
+		RARE: [
+			"tentacruel",
+			"slowbro",
+			"dewgong",
+			"kingler",
+			"seadra",
+			"crobat"
+		],
+		SUPER_RARE: ["gyarados", "kingdra"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"slowbro",
+			"dewgong",
+			"kingler"
+		],
+		BOSS_RARE: ["gyarados", "kingdra"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
 	}
 };
 /**
@@ -105163,7 +110785,16 @@ var SUB_BIOMA_TIERS = {
 * fixam o clima por rota (Rota 119 sempre chove) e nunca sortearam nada.
 */
 var SUB_BIOMA_CLIMA = {
+	"abandoned-ship": {
+		limpo: 2,
+		nevoa: 4,
+		chuva: 3
+	},
 	"abyss": { limpo: 1 },
+	"ash-field": {
+		limpo: 5,
+		nevoa: 4
+	},
 	"badlands": {
 		limpo: 8,
 		areia: 2,
@@ -105174,8 +110805,26 @@ var SUB_BIOMA_CLIMA = {
 		chuva: 3,
 		sol: 5
 	},
+	"burned-tower": {
+		limpo: 4,
+		nevoa: 4
+	},
+	"canyon": {
+		limpo: 4,
+		sol: 4,
+		areia: 2
+	},
 	"cave": { limpo: 1 },
 	"construction-site": { limpo: 1 },
+	"coral-reef": {
+		limpo: 4,
+		sol: 6
+	},
+	"cycling-road": {
+		limpo: 8,
+		sol: 3
+	},
+	"dark-cave": { limpo: 1 },
 	"desert": {
 		limpo: 2,
 		areia: 8,
@@ -105184,6 +110833,14 @@ var SUB_BIOMA_CLIMA = {
 	"dojo": { limpo: 1 },
 	"factory": { limpo: 1 },
 	"fairy-cave": { limpo: 1 },
+	"farm": {
+		limpo: 6,
+		sol: 4
+	},
+	"fiery-path": {
+		limpo: 4,
+		sol: 6
+	},
 	"forest": {
 		limpo: 8,
 		chuva: 4
@@ -105197,15 +110854,32 @@ var SUB_BIOMA_CLIMA = {
 		limpo: 3,
 		nevoa: 1
 	},
+	"harbor": {
+		limpo: 7,
+		chuva: 3
+	},
+	"hot-springs": {
+		limpo: 4,
+		nevoa: 5,
+		sol: 2
+	},
 	"ice-cave": {
 		limpo: 3,
 		neve: 4,
 		granizo: 1
 	},
+	"ilex-forest": {
+		limpo: 5,
+		nevoa: 4
+	},
 	"jungle": {
 		limpo: 8,
 		chuva: 6,
 		nevoa: 1
+	},
+	"junkyard": {
+		limpo: 7,
+		chuva: 3
 	},
 	"laboratory": { limpo: 1 },
 	"lake": {
@@ -105213,26 +110887,69 @@ var SUB_BIOMA_CLIMA = {
 		chuva: 4,
 		nevoa: 1
 	},
+	"lily-pond": {
+		limpo: 5,
+		chuva: 4,
+		sol: 3
+	},
 	"meadow": {
 		limpo: 3,
 		sol: 5
 	},
+	"meditation-shrine": { limpo: 1 },
+	"meteor-falls": {
+		limpo: 4,
+		nevoa: 3
+	},
 	"metropolis": { limpo: 1 },
 	"mountain": { limpo: 1 },
+	"mt-ember": {
+		limpo: 3,
+		sol: 7
+	},
+	"mt-pyre": {
+		limpo: 3,
+		nevoa: 5
+	},
+	"mushroom-glade": {
+		limpo: 5,
+		chuva: 4,
+		nevoa: 2
+	},
+	"oasis": {
+		limpo: 3,
+		sol: 7
+	},
 	"plains": { limpo: 1 },
 	"power-plant": { limpo: 1 },
+	"river": {
+		limpo: 2,
+		chuva: 9
+	},
+	"rock-tunnel": { limpo: 1 },
 	"ruins": { limpo: 1 },
 	"sea": {
 		limpo: 3,
 		chuva: 12
 	},
 	"seabed": { chuva: 1 },
+	"seafoam-islands": {
+		limpo: 3,
+		neve: 6
+	},
+	"shoal-cave": {
+		limpo: 3,
+		neve: 5,
+		granizo: 2
+	},
+	"sky-pillar": { limpo: 1 },
 	"slum": { limpo: 1 },
 	"snowy-forest": {
 		neve: 7,
 		granizo: 1
 	},
 	"space": { limpo: 1 },
+	"sprout-tower": { limpo: 1 },
 	"swamp": {
 		limpo: 3,
 		chuva: 4,
@@ -105245,8 +110962,27 @@ var SUB_BIOMA_CLIMA = {
 	},
 	"temple": { limpo: 1 },
 	"town": { limpo: 1 },
+	"treetops": {
+		limpo: 7,
+		chuva: 3
+	},
+	"tundra": {
+		neve: 6,
+		granizo: 3
+	},
+	"underground": { limpo: 1 },
+	"victory-road": { limpo: 1 },
 	"volcano": { sol: 1 },
-	"wasteland": { limpo: 1 }
+	"wasteland": { limpo: 1 },
+	"waterfall": {
+		limpo: 4,
+		nevoa: 5
+	},
+	"whirl-islands": {
+		limpo: 3,
+		chuva: 5,
+		nevoa: 3
+	}
 };
 //#endregion
 //#region src/engine/systems/climaAmbiente.ts
