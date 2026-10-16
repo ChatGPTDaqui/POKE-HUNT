@@ -113,10 +113,17 @@ export function buildNightmareMirror(
   for (const map of Object.values(sourceMaps)) {
     const newId = `nightmare_${map.id}`
     const enemyPool: string[] = []
-    for (const encId of map.enemyPool) {
+    // O espelho de um encontro da origem. Existe separado do laco do
+    // `enemyPool` porque nem todo encontro de SALA esta no `enemyPool`: as salas
+    // especiais (onda 2) tem pool proprio e ficam fora dele de proposito (ver
+    // `huntSpawnOverrides#montarHunt`). Espelhar so o `enemyPool` deixava o
+    // Concurso de Insetos do Pesadelo sem nenhum encontro, e a Mansao Celadon do
+    // Pesadelo sem a Eevee.
+    const espelhar = (encId: string): string | null => {
       const enc = sourceEncounters[encId]
-      if (!enc) continue
+      if (!enc) return null
       const newEncId = `nightmare_${encId}`
+      if (encounters[newEncId]) return newEncId
       encounters[newEncId] = {
         ...enc,
         id: newEncId,
@@ -132,7 +139,11 @@ export function buildNightmareMirror(
           ? { levelWeights: enc.levelWeights.map((lw) => ({ ...lw, level: shiftLevel(lw.level) })) }
           : {}),
       }
-      enemyPool.push(newEncId)
+      return newEncId
+    }
+    for (const encId of map.enemyPool) {
+      const novo = espelhar(encId)
+      if (novo) enemyPool.push(novo)
     }
     maps[newId] = {
       ...map,
@@ -161,7 +172,7 @@ export function buildNightmareMirror(
         // Filtra pelo que o espelho de fato criou: encontro da origem sem par
         // (a fonte nao tinha a especie) nao pode virar id fantasma no pool, ou
         // o spawn pediria um encontro que nao existe.
-        salas[chave] = ids.map((id) => `nightmare_${id}`).filter((id) => encounters[id] != null)
+        salas[chave] = ids.map((id) => espelhar(id)).filter((id): id is string => id != null)
       }
       porSala[newId] = salas
     }
