@@ -13,6 +13,19 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.20',
+    date: '2026-10-16',
+    title: '32 lugares novos para caçar',
+    highlights: [
+      'Todo bioma agora tem 5 ou 6 lugares diferentes. São 32 novos, como Fazenda MuuMuu, Bosque de Ilex, Recife de Coral, Rio e Corredeira, Cataratas Meteoro, Estrada da Vitória, Fontes Termais, Torre Broto e Monte Pira.',
+      'Cada lugar tem os seus Pokémon e o seu clima. Alguns guardam achados raros: o Feebas no Rio e Corredeira, o Bagon nas Cataratas Meteoro.',
+      'O loot também muda com o lugar: Fontes Termais dão mais poções, o Cais do Porto é o único lugar com Premier Ball, e as curas de status aparecem onde o perigo mora (Antiqueimadura nos túneis de lava, Antigelo no gelo, Antídoto no esgoto).',
+      'O Ígneo deixou de ser só o Vulcão: começa no Caminho Ardente, sobe a Encosta do Monte Brasa, passa pelas cinzas e pelas termas e termina na cratera.',
+      'Os lugares novos ainda usam o cenário de um lugar parecido. O cenário próprio de cada um chega nas próximas atualizações.',
+      'As Especialidades de Fada, Sombrio, Fantasma, Veneno, Lutador, Inseto e Normal ficaram mais baratas em Pedras, para compensar o mundo maior.',
+    ],
+  },
+  {
     version: '8.19',
     date: '2026-10-15',
     title: 'Treinadores com contorno e Pokédex alinhada',
