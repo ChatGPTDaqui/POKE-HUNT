@@ -30,6 +30,7 @@
 // mesmo texto.
 import {
   BIOMAS, ABATES_POR_SALA, ABATES_COMUNS_POR_SALA, ESTAGIOS_PARA_O_LANCE,
+  CHANCE_DE_SALA_ESPECIAL, CHANCE_DA_PEDRA_TEMATICA,
 } from '@/data/biomas'
 import {
   ESTAGIOS_POR_BIOMA, NIVEIS_POR_ESTAGIO, TETO_DO_MODO_NORMAL,
@@ -48,6 +49,11 @@ const SALAS_NO_ULTIMO = SALAS_POR_ESTAGIO[ESTAGIOS_POR_BIOMA - 1]
 const ABATES_POR_BIOMA = SALAS_POR_BIOMA * ABATES_POR_SALA
 
 const fmt = new Intl.NumberFormat('pt-BR')
+const pct = (x: number) => `${Math.round(x * 100)}%`
+const TOTAL_SUB_BIOMAS = BIOMAS.reduce((a, b) => a + b.subBiomas.length, 0)
+const TOTAL_ESPECIAIS = BIOMAS.reduce((a, b) => a + (b.especiais ?? []).length, 0)
+const MENOR_BIOMA = Math.min(...BIOMAS.map((b) => b.subBiomas.length))
+const MAIOR_BIOMA = Math.max(...BIOMAS.map((b) => b.subBiomas.length))
 
 /** A regua do bioma, um degrau por linha. Dado, nao prosa. */
 function TabelaDeEstagios() {
@@ -127,10 +133,28 @@ export function MundoTab() {
           <ListaDeBiomas />
         </div>
         <div className="mt-[.5em]">
-          Dentro de cada bioma existem <b>sub-biomas</b> (Planície, Mato Alto, Leito Oceânico, Vulcão...), e é
-          o sub-bioma que decide o elenco de espécies e o clima do lugar. Quanto mais fundo você vai no bioma,
-          mais peso os sub-biomas raros ganham no sorteio.
+          Dentro de cada bioma existem de <b>{MENOR_BIOMA} a {MAIOR_BIOMA} sub-biomas</b> ({TOTAL_SUB_BIOMAS} no
+          total: Fazenda MuuMuu, Bosque de Ilex, Recife de Coral, Estrada da Vitória...). A cada sala o jogo
+          sorteia um deles, e é o sub-bioma que decide <b>quem aparece</b>, o <b>clima</b> e os{' '}
+          <b>itens</b> que caem. Cada sub-bioma manda numa parte da trilha: quanto mais fundo você vai no
+          bioma, mais aparecem os lugares do fundo. A aba <b>Biomas e sub-biomas</b> mostra todos, estágio por
+          estágio.
         </div>
+      </WikiCard>
+
+      <WikiCard title="Salas especiais">
+        Toda troca de sala tem <b>{pct(CHANCE_DE_SALA_ESPECIAL)}</b> de chance de cair numa{' '}
+        <b>sala especial</b> do bioma: {TOTAL_ESPECIAIS} lugares do anime e dos jogos, como a Zona Safári, o
+        Monte Lua e a Torre Pokémon. A troca de sala avisa quando acontece.
+        <ul className="mt-[.4em] flex flex-col gap-[.3em] pl-[1.1em]" style={{ listStyleType: 'disc' }}>
+          <li>Alguns Pokémon <b>só existem nelas</b>: Bulbasaur, Charmander, Squirtle, Eevee e Porygon.</li>
+          <li>
+            Cada abate pode soltar uma <b>Pedra extra</b> do tipo do lugar ({pct(CHANCE_DA_PEDRA_TEMATICA)} a
+            mais, além da Pedra comum).
+          </li>
+          <li>Algumas só aparecem a partir de certo estágio, e a primeira sala da caçada nunca é especial.</li>
+          <li>Ela conta como uma sala normal: tem chefe e vale pro progresso do estágio.</li>
+        </ul>
       </WikiCard>
 
       <WikiCard title={`Cada bioma tem ${ESTAGIOS_POR_BIOMA} estágios de ${NIVEIS_POR_ESTAGIO} níveis`}>
@@ -202,8 +226,7 @@ export function MundoTab() {
       <WikiCard title="O clima da sala">
         Cada sala tem um clima próprio, decidido pelo sub-bioma dela — e ele não é enfeite: dois dos seis{' '}
         <b>tiram vida por turno</b>, e todos mexem em dano ou precisão. O clima aparece no trilho de status,
-        no topo da tela, e a mesma sala tem sempre o mesmo clima (inclusive na simulação do servidor enquanto
-        você está fora).
+        no topo da tela, e a mesma sala tem sempre o mesmo clima.
         <div className="mt-[.55em]">
           <TabelaDeClima />
         </div>
@@ -247,15 +270,6 @@ export function MundoTab() {
         <b>as automações de poção e revive não agem lá</b>, qualquer que seja sua configuração.
       </WikiCard>
 
-      <WikiCard title="O jogo continua sem você">
-        Fechar a aba não pausa nada: o servidor continua simulando a caçada no lugar onde você parou e credita
-        o resultado — EXP, ouro, itens, capturas — quando você voltar, num relatório. É a razão pra escolher
-        bem <i>onde</i> deixar rodando antes de sair.
-        <br />
-        <br />
-        O combate ausente é um pouco mais lento que o ao vivo, de propósito: jogar acordado sempre rende mais
-        por minuto.
-      </WikiCard>
     </div>
   )
 }

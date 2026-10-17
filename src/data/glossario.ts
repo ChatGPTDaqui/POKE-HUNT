@@ -203,6 +203,24 @@ export const GLOSSARIO = {
     wiki: 'Hunts',
   },
 
+  subBioma: {
+    titulo: 'Sub-bioma',
+    corpo: [
+      'Cada bioma é feito de 5 a 6 sub-biomas, e cada sala cai num deles, sorteado.',
+      'É o sub-bioma que decide quem aparece, o clima e os itens. Os estágios fundos têm lugares diferentes dos rasos.',
+    ],
+    wiki: 'Mundo',
+  },
+
+  salaEspecial: {
+    titulo: 'Sala especial',
+    corpo: [
+      'Lugar raro do anime e dos jogos, como a Zona Safári e o Monte Lua. Toda troca de sala tem uma chance pequena de cair numa.',
+      'Alguns Pokémon só nascem nelas, e cada abate pode soltar uma Pedra extra do tipo do lugar.',
+    ],
+    wiki: 'Mundo',
+  },
+
   // PH-509: era "Lorde" aqui e "LORD" na tag em campo, pro MESMO chefe. Os dois
   // nomes valem em portugues, e e justamente por isso que a escolha tinha que
   // ser feita e travada — ver `vocabularioDoChefeDeSala.test.ts`.
