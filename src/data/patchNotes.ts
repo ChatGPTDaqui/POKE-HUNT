@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.24',
+    date: '2026-10-16',
+    title: 'Salas especiais completas e menu de Hunt mais claro',
+    highlights: [
+      'As salas especiais agora têm todos os Pokémon delas em qualquer estágio, no nível do estágio. O Jardim Misterioso tem Bulbasaur, Ivysaur e Venusaur desde o estágio 1, e o Cânion do Vovô tem todos os fósseis.',
+      'No menu de Hunt, ao abrir um sub-bioma, aparece também quem nasce naquele lugar em outros estágios do bioma, com os estágios de cada um.',
+      'A lista do estágio não repete mais o mesmo Pokémon quando ele aparece num sub-bioma e numa sala especial ao mesmo tempo.',
+      'A Wiki e a Pokédex passaram a mostrar só quem nasce de verdade em cada sala especial.',
+    ],
+  },
+  {
     version: '8.23',
     date: '2026-10-16',
     title: 'Menu de Hunt com as salas especiais',

@@ -30,6 +30,7 @@ import { createRng } from '@/core/rng'
 import { BIOMAS, BIOMA_POR_CHAVE } from '@/data/biomas'
 import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, quantidadeDeSalas } from '@/data/estagios'
 import { contextoDeSpawn, novaSala } from '@/engine/systems/salaSystem'
+import { getEncounter } from '@/data/enemies'
 import { elencoDoEstagio, subBiomasDoEstagio } from './elencoDoEstagio'
 
 /**
@@ -55,7 +56,10 @@ function amostrar(bioma: string, estagio: number, n: number): Map<string, number
     const ctx = contextoDeSpawn(mapId, faixa, sala, [])
     if (ctx.pool.length === 0) continue
     const id = weightedPick(rng, ctx.pool, ctx.peso)
-    conta.set(id, (conta.get(id) ?? 0) + 1)
+    // Por ESPECIE, como a tela agrega: a sala especial tem encontro proprio pra
+    // mesma especie de um sub-bioma comum, e a tela soma os dois numa linha.
+    const sp = getEncounter(id)?.speciesId ?? id
+    conta.set(sp, (conta.get(sp) ?? 0) + 1)
   }
   for (const [k, v] of conta) conta.set(k, (v / n) * 100)
   return conta
@@ -73,9 +77,9 @@ describe('a chance exibida e a que o sorteio produz', () => {
     for (const bioma of BIOMAS) {
       const daTela = elencoDoEstagio(BIOMA_POR_CHAVE[bioma.chave], 5)
       const observado = amostrar(bioma.chave, 5, 20000)
-      const chaves = new Set([...daTela.map((e) => e.encounterId), ...observado.keys()])
+      const chaves = new Set([...daTela.map((e) => e.species.id), ...observado.keys()])
       for (const id of chaves) {
-        const naTela = daTela.find((e) => e.encounterId === id)?.pct ?? 0
+        const naTela = daTela.find((e) => e.species.id === id)?.pct ?? 0
         const real = observado.get(id) ?? 0
         if (Math.abs(naTela - real) > 1.5) {
           errados.push(`${bioma.chave} e5 ${id}: tela ${naTela.toFixed(2)}% vs sorteio ${real.toFixed(2)}%`)
