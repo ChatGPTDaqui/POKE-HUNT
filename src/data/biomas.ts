@@ -434,6 +434,37 @@ const ARTE = {
   fundoMeteorFalls: 'assets/hunt-backgrounds/meteor-falls.jpg',
   fundoVictoryRoad: 'assets/hunt-backgrounds/victory-road.jpg',
   fundoSeafoamIslands: 'assets/hunt-backgrounds/seafoam-islands.jpg',
+
+  // Onda 2 dos fundos proprios (17/10/2026): sub-biomas que faltavam e as
+  // salas especiais; mesma colisao pelo chao andavel.
+  fundoAbandonedShip: 'assets/hunt-backgrounds/abandoned-ship.jpg',
+  fundoAshField: 'assets/hunt-backgrounds/ash-field.jpg',
+  fundoBurnedTower: 'assets/hunt-backgrounds/burned-tower.jpg',
+  fundoDiglettsCave: 'assets/hunt-backgrounds/digletts-cave.jpg',
+  fundoFieryPath: 'assets/hunt-backgrounds/fiery-path.jpg',
+  fundoGrampaCanyon: 'assets/hunt-backgrounds/grampa-canyon.jpg',
+  fundoHarbor: 'assets/hunt-backgrounds/harbor.jpg',
+  fundoHotSprings: 'assets/hunt-backgrounds/hot-springs.jpg',
+  fundoJunkyard: 'assets/hunt-backgrounds/junkyard.jpg',
+  fundoLakeOfRage: 'assets/hunt-backgrounds/lake-of-rage.jpg',
+  fundoMaidensPeak: 'assets/hunt-backgrounds/maidens-peak.jpg',
+  fundoMeditationShrine: 'assets/hunt-backgrounds/meditation-shrine.jpg',
+  fundoMtEmber: 'assets/hunt-backgrounds/mt-ember.jpg',
+  fundoMtMoon: 'assets/hunt-backgrounds/mt-moon.jpg',
+  fundoMtPyre: 'assets/hunt-backgrounds/mt-pyre.jpg',
+  fundoMtSilverSummit: 'assets/hunt-backgrounds/mt-silver-summit.jpg',
+  fundoMysteriousGarden: 'assets/hunt-backgrounds/mysterious-garden.jpg',
+  fundoOrangeArchipelago: 'assets/hunt-backgrounds/orange-archipelago.jpg',
+  fundoPikachuColony: 'assets/hunt-backgrounds/pikachu-colony.jpg',
+  fundoRocketHideout: 'assets/hunt-backgrounds/rocket-hideout.jpg',
+  fundoSafariZone: 'assets/hunt-backgrounds/safari-zone.jpg',
+  fundoShoalCave: 'assets/hunt-backgrounds/shoal-cave.jpg',
+  fundoSkyPillar: 'assets/hunt-backgrounds/sky-pillar.jpg',
+  fundoSproutTower: 'assets/hunt-backgrounds/sprout-tower.jpg',
+  fundoSquirtleSquad: 'assets/hunt-backgrounds/squirtle-squad.jpg',
+  fundoStrayCharmander: 'assets/hunt-backgrounds/stray-charmander.jpg',
+  fundoTundra: 'assets/hunt-backgrounds/tundra.jpg',
+  fundoUnderground: 'assets/hunt-backgrounds/underground.jpg',
 } as const
 
 export const BIOMAS: BiomaDef[] = [
@@ -455,8 +486,8 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'cycling-road', nome: 'Estrada de Ciclismo', peso: 6, loot: 'toxico', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.fundoCyclingRoad } },
     ],
     especiais: [
-      { chave: 'safari-zone', nome: 'Zona Safári', peso: 1, loot: 'safari', estagioMinimo: 4, pedra: 'NORMAL', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.matoAlto } },
-      { chave: 'stray-charmander', nome: 'Charmander na Chuva', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'FIRE', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.planicie } },
+      { chave: 'safari-zone', nome: 'Zona Safári', peso: 1, loot: 'safari', estagioMinimo: 4, pedra: 'NORMAL', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.fundoSafariZone } },
+      { chave: 'stray-charmander', nome: 'Charmander na Chuva', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'FIRE', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.fundoStrayCharmander } },
     ],
   },
   {
@@ -476,8 +507,8 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'treetops', nome: 'Copa das Árvores', peso: 6, loot: 'remoto', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.fundoTreetops } },
     ],
     especiais: [
-      { chave: 'mysterious-garden', nome: 'Jardim Misterioso', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'GRASS', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.campina } },
-      { chave: 'pikachu-colony', nome: 'Colônia de Pikachu', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'ELECTRIC' },
+      { chave: 'mysterious-garden', nome: 'Jardim Misterioso', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'GRASS', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.fundoMysteriousGarden } },
+      { chave: 'pikachu-colony', nome: 'Colônia de Pikachu', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'ELECTRIC', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.fundoPikachuColony } },
     ],
   },
   {
@@ -497,8 +528,8 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'whirl-islands', nome: 'Ilhas Redemoinho', peso: 6, loot: 'remoto', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.fundoWhirlIslands } },
     ],
     especiais: [
-      { chave: 'orange-archipelago', nome: 'Arquipélago Laranja', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'WATER', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.praia } },
-      { chave: 'maidens-peak', nome: 'Pico da Donzela', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'GHOST' },
+      { chave: 'orange-archipelago', nome: 'Arquipélago Laranja', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'WATER', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.fundoOrangeArchipelago } },
+      { chave: 'maidens-peak', nome: 'Pico da Donzela', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'GHOST', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.fundoMaidensPeak } },
     ],
   },
   {
@@ -517,8 +548,8 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'waterfall', nome: 'Cachoeira de Tohjo', peso: 6, loot: 'remoto', bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.fundoWaterfall } },
     ],
     especiais: [
-      { chave: 'lake-of-rage', nome: 'Lago da Fúria', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'WATER', shiny: { especie: 'gyarados', multiplicador: 10 } },
-      { chave: 'squirtle-squad', nome: 'Esquadrão Squirtle', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'WATER' },
+      { chave: 'lake-of-rage', nome: 'Lago da Fúria', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'WATER', shiny: { especie: 'gyarados', multiplicador: 10 }, bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.fundoLakeOfRage } },
+      { chave: 'squirtle-squad', nome: 'Esquadrão Squirtle', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'WATER', bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.fundoSquirtleSquad } },
     ],
   },
   {
@@ -537,7 +568,7 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'oasis', nome: 'Oásis', peso: 3, loot: 'remoto', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.fundoOasis } },
     ],
     especiais: [
-      { chave: 'grampa-canyon', nome: 'Cânion do Vovô', peso: 1, loot: 'profundo', estagioMinimo: 6, pedra: 'ROCK' },
+      { chave: 'grampa-canyon', nome: 'Cânion do Vovô', peso: 1, loot: 'profundo', estagioMinimo: 6, pedra: 'ROCK', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.fundoGrampaCanyon } },
     ],
   },
   {
@@ -557,8 +588,8 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'victory-road', nome: 'Estrada da Vitória', peso: 3, loot: 'vitoria', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.fundoVictoryRoad } },
     ],
     especiais: [
-      { chave: 'mt-moon', nome: 'Monte Lua', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'FAIRY', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.grutaFeerica } },
-      { chave: 'digletts-cave', nome: 'Caverna dos Diglett', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'GROUND', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
+      { chave: 'mt-moon', nome: 'Monte Lua', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'FAIRY', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.fundoMtMoon } },
+      { chave: 'digletts-cave', nome: 'Caverna dos Diglett', peso: 1, loot: 'basico', estagioMinimo: 1, pedra: 'GROUND', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.fundoDiglettsCave } },
     ],
   },
   {
@@ -574,12 +605,12 @@ export const BIOMAS: BiomaDef[] = [
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
       { chave: 'seafoam-islands', nome: 'Ilhas Espuma', peso: 10, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.fundoSeafoamIslands } },
-      { chave: 'shoal-cave', nome: 'Gruta da Maré', peso: 6, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.cavernaDeGelo } },
-      { chave: 'tundra', nome: 'Tundra', peso: 10, loot: 'gelado' },
+      { chave: 'shoal-cave', nome: 'Gruta da Maré', peso: 6, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.fundoShoalCave } },
+      { chave: 'tundra', nome: 'Tundra', peso: 10, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.fundoTundra } },
     ],
     especiais: [
       { chave: 'jynx-holiday', nome: 'Natal da Jynx', peso: 1, loot: 'gelado', estagioMinimo: 2, pedra: 'ICE' },
-      { chave: 'mt-silver-summit', nome: 'Cume do Monte Prata', peso: 1, loot: 'vitoria', estagioMinimo: 10, pedra: 'DARK' },
+      { chave: 'mt-silver-summit', nome: 'Cume do Monte Prata', peso: 1, loot: 'vitoria', estagioMinimo: 10, pedra: 'DARK', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.fundoMtSilverSummit } },
     ],
   },
   {
@@ -592,10 +623,10 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'fiery-path', nome: 'Caminho Ardente', peso: 10, loot: 'ardente', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.cavernaVulcanica } },
-      { chave: 'mt-ember', nome: 'Encosta do Monte Brasa', peso: 10, loot: 'remoto' },
-      { chave: 'ash-field', nome: 'Campo de Cinzas', peso: 6, loot: 'basico', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.florestaQueimada } },
-      { chave: 'hot-springs', nome: 'Fontes Termais', peso: 6, loot: 'termal' },
+      { chave: 'fiery-path', nome: 'Caminho Ardente', peso: 10, loot: 'ardente', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.fundoFieryPath } },
+      { chave: 'mt-ember', nome: 'Encosta do Monte Brasa', peso: 10, loot: 'remoto', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.fundoMtEmber } },
+      { chave: 'ash-field', nome: 'Campo de Cinzas', peso: 6, loot: 'basico', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.fundoAshField } },
+      { chave: 'hot-springs', nome: 'Fontes Termais', peso: 6, loot: 'termal', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.fundoHotSprings } },
     ],
     especiais: [
       { chave: 'pokemon-mansion', nome: 'Mansão Pokémon', peso: 1, loot: 'profundo', estagioMinimo: 5, pedra: 'FIRE', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.florestaQueimada } },
@@ -618,12 +649,12 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'harbor', nome: 'Cais do Porto', peso: 10, loot: 'portuario', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.metropole } },
-      { chave: 'underground', nome: 'Galerias Subterrâneas', peso: 6, loot: 'toxico', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.cortico } },
+      { chave: 'harbor', nome: 'Cais do Porto', peso: 10, loot: 'portuario', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.fundoHarbor } },
+      { chave: 'underground', nome: 'Galerias Subterrâneas', peso: 6, loot: 'toxico', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.fundoUnderground } },
     ],
     especiais: [
       { chave: 'bug-contest', nome: 'Concurso de Insetos', peso: 1, loot: 'civilizado', estagioMinimo: 1, pedra: 'BUG', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.campina } },
-      { chave: 'rocket-hideout', nome: 'Esconderijo Rocket', peso: 1, loot: 'cofre', estagioMinimo: 3, pedra: 'POISON', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.industrial } },
+      { chave: 'rocket-hideout', nome: 'Esconderijo Rocket', peso: 1, loot: 'cofre', estagioMinimo: 3, pedra: 'POISON', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.fundoRocketHideout } },
       { chave: 'celadon-mansion', nome: 'Mansão Celadon', peso: 1, loot: 'civilizado', estagioMinimo: 2, pedra: 'NORMAL', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.metropole } },
     ],
   },
@@ -641,7 +672,7 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'junkyard', nome: 'Ferro-Velho', peso: 10, loot: 'sucata', bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.obra } },
+      { chave: 'junkyard', nome: 'Ferro-Velho', peso: 10, loot: 'sucata', bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.fundoJunkyard } },
     ],
     especiais: [
       { chave: 'silph-co', nome: 'Silph S.A.', peso: 1, loot: 'profundo', estagioMinimo: 3, pedra: 'ELECTRIC' },
@@ -659,9 +690,9 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'sprout-tower', nome: 'Torre Broto', peso: 10, loot: 'sonolento' },
-      { chave: 'meditation-shrine', nome: 'Santuário de Meditação', peso: 6, loot: 'remoto' },
-      { chave: 'sky-pillar', nome: 'Pilar Celeste', peso: 3, loot: 'profundo', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.ruinas } },
+      { chave: 'sprout-tower', nome: 'Torre Broto', peso: 10, loot: 'sonolento', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.fundoSproutTower } },
+      { chave: 'meditation-shrine', nome: 'Santuário de Meditação', peso: 6, loot: 'remoto', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.fundoMeditationShrine } },
+      { chave: 'sky-pillar', nome: 'Pilar Celeste', peso: 3, loot: 'profundo', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.fundoSkyPillar } },
     ],
     especiais: [
       { chave: 'mirage-island', nome: 'Ilha Miragem', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'PSYCHIC', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.ilha } },
@@ -681,9 +712,9 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'mt-pyre', nome: 'Monte Pira', peso: 10, loot: 'remoto' },
-      { chave: 'burned-tower', nome: 'Torre Queimada', peso: 6, loot: 'ardente' },
-      { chave: 'abandoned-ship', nome: 'Navio Abandonado', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
+      { chave: 'mt-pyre', nome: 'Monte Pira', peso: 10, loot: 'remoto', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.fundoMtPyre } },
+      { chave: 'burned-tower', nome: 'Torre Queimada', peso: 6, loot: 'ardente', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.fundoBurnedTower } },
+      { chave: 'abandoned-ship', nome: 'Navio Abandonado', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.fundoAbandonedShip } },
     ],
     especiais: [
       { chave: 'pokemon-tower', nome: 'Torre Pokémon', peso: 1, loot: 'sonolento', estagioMinimo: 1, pedra: 'GHOST', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.temploMistico } },
