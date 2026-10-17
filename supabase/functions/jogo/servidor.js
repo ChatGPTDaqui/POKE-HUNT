@@ -66587,19 +66587,19 @@ function especialidadeNiveisDefault() {
 		defesa: 0
 	}]));
 }
-var ESPECIALIDADE_BONUS_POR_NIVEL = .01;
+var ESPECIALIDADE_BONUS_POR_NIVEL = .02;
 function nivelDe(niveis, tipo, trilha) {
 	return niveis?.[tipo]?.[trilha] ?? 0;
 }
 /**
-* Multiplicador de DANO CAUSADO (1.00 a 1.05) pro tipo do golpe, trilha
+* Multiplicador de DANO CAUSADO (1.00 a 1.20) pro tipo do golpe, trilha
 * "dano". So faz sentido aplicar no lado do ATACANTE.
 */
 function bonusDeAtaque(niveis, tipoDoGolpe) {
 	return 1 + nivelDe(niveis, tipoDoGolpe, "dano") * ESPECIALIDADE_BONUS_POR_NIVEL;
 }
 /**
-* Multiplicador de DANO RECEBIDO (1.00 a 0.95) pro tipo do golpe, trilha
+* Multiplicador de DANO RECEBIDO (1.00 a 0.80) pro tipo do golpe, trilha
 * "defesa". So faz sentido aplicar no lado do DEFENSOR — reduz, nunca
 * amplifica.
 */
@@ -123563,6 +123563,8 @@ function contadoresDaJanela(resumo, especieAtiva, clima) {
 	somar("ouro_caca", resumo.gold);
 	somar("hunt_seg", resumo.simulatedSeconds);
 	if (especieAtiva) somar(`ativo_seg:${especieAtiva}`, resumo.simulatedSeconds);
+	const sp = especieAtiva ? SPECIES[especieAtiva] : void 0;
+	if (sp) for (const tipo of new Set([sp.type, sp.type2].filter(Boolean))) somar(`ativo_tipo_seg:${tipo}`, resumo.simulatedSeconds);
 	if (clima) somar(`clima_seg:${clima}`, resumo.simulatedSeconds);
 	for (const [itemId, quantidade] of Object.entries(resumo.itemsConsumed)) somar(`item:${itemId}`, quantidade);
 	return contadores;

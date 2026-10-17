@@ -47,9 +47,10 @@ export function especialidadeNiveisDefault(): EspecialidadeNiveis {
   ) as EspecialidadeNiveis
 }
 
-// 5 niveis por trilha, dano e defesa com a mesma escala. O indice `i` e o
+// 10 niveis por trilha desde 17/10/2026 (eram 5): decisao do dono, junto da
+// Especialidade virar missao (`especialidadeMissoes.ts`). O indice `i` e o
 // custo pra SUBIR do nivel `i` pro nivel `i + 1` (indice 0 = alcancar nivel 1).
-export const ESPECIALIDADE_NIVEL_MAX = 5
+export const ESPECIALIDADE_NIVEL_MAX = 10
 
 export interface EspecialidadeCusto {
   stoneQtd: number
@@ -61,9 +62,10 @@ export function custosDoTipo(tipo: ElementType): EspecialidadeCusto[] {
   return ESPECIALIDADE_GOLD_POR_NIVEL.map((gold, i) => ({ stoneQtd: stones[i], gold }))
 }
 
-// +1% por nivel, ate +5% no nivel 5 — mesmo teto do pokedream.com.br (a forma
-// e referencia; o numero em si e simples e facil de rebalancear).
-export const ESPECIALIDADE_BONUS_POR_NIVEL = 0.01
+// +2% por nivel, ate +20% no nivel 10 (decisao do dono, 17/10/2026; era +1%
+// ate +5%). Quem ja estava no nivel 5 passa de +5% a +10% na hora — risco de
+// PvP aceito pelo dono.
+export const ESPECIALIDADE_BONUS_POR_NIVEL = 0.02
 
 export function custoDoProximoNivel(tipo: ElementType, nivelAtual: number): EspecialidadeCusto | null {
   if (nivelAtual < 0 || nivelAtual >= ESPECIALIDADE_NIVEL_MAX) return null
@@ -78,7 +80,7 @@ function nivelDe(niveis: EspecialidadeNiveis | null | undefined, tipo: ElementTy
 }
 
 /**
- * Multiplicador de DANO CAUSADO (1.00 a 1.05) pro tipo do golpe, trilha
+ * Multiplicador de DANO CAUSADO (1.00 a 1.20) pro tipo do golpe, trilha
  * "dano". So faz sentido aplicar no lado do ATACANTE.
  */
 export function bonusDeAtaque(niveis: EspecialidadeNiveis | null | undefined, tipoDoGolpe: ElementType): number {
@@ -86,7 +88,7 @@ export function bonusDeAtaque(niveis: EspecialidadeNiveis | null | undefined, ti
 }
 
 /**
- * Multiplicador de DANO RECEBIDO (1.00 a 0.95) pro tipo do golpe, trilha
+ * Multiplicador de DANO RECEBIDO (1.00 a 0.80) pro tipo do golpe, trilha
  * "defesa". So faz sentido aplicar no lado do DEFENSOR — reduz, nunca
  * amplifica.
  */
@@ -94,7 +96,7 @@ export function reducaoDeDefesa(niveis: EspecialidadeNiveis | null | undefined, 
   return 1 - nivelDe(niveis, tipoDoGolpe, 'defesa') * ESPECIALIDADE_BONUS_POR_NIVEL
 }
 
-/** Soma dos 180 niveis possiveis (18 tipos x 10), pro progresso global da tela. */
+/** Soma dos 360 niveis possiveis (18 tipos x 2 trilhas x 10), pro progresso global da tela. */
 export function progressoGlobal(niveis: EspecialidadeNiveis): { atual: number; max: number } {
   const atual = ESPECIALIDADE_TYPES.reduce(
     (soma, tipo) => soma + (niveis[tipo]?.dano ?? 0) + (niveis[tipo]?.defesa ?? 0),

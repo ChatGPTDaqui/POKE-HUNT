@@ -1118,7 +1118,7 @@ describe('golpe de multiplos acertos', () => {
 // `world.especialidadeNiveis` de verdade e aplica no dano que sai do combate,
 // nao so numa funcao pura desacompanhada do resto do pipeline.
 describe('Especialidades (PH-198) aplicam no dano real do combate', () => {
-  it('bonus de ataque FIRE nivel 5 aumenta em ~5% o dano causado pelo jogador', () => {
+  it('bonus de ataque FIRE nivel 5 aumenta em ~10% o dano causado pelo jogador (+2% por nivel)', () => {
     function cenarioOfensivo(especialidadeNiveis: ReturnType<typeof especialidadeNiveisDefault> | null) {
       const rng = createRng(7)
       const counters = { entity: 1, effect: 1, pendingHit: 1 }
@@ -1162,10 +1162,10 @@ describe('Especialidades (PH-198) aplicam no dano real do combate', () => {
     // do multiplicador de Especialidade.
     expect(danoSemBonus).toBeGreaterThan(0)
     expect(danoComBonus).toBeGreaterThan(danoSemBonus)
-    expect(danoComBonus / danoSemBonus).toBeCloseTo(1.05, 2)
+    expect(danoComBonus / danoSemBonus).toBeCloseTo(1.1, 1)
   })
 
-  it('reducao de defesa NORMAL nivel 5 diminui em ~5% o dano recebido pelo jogador', () => {
+  it('reducao de defesa NORMAL nivel 5 diminui em ~10% o dano recebido pelo jogador (+2% por nivel)', () => {
     function cenarioDefensivo(especialidadeNiveis: ReturnType<typeof especialidadeNiveisDefault> | null) {
       const rng = createRng(9)
       const counters = { entity: 1, effect: 1, pendingHit: 1 }
@@ -1215,6 +1215,6 @@ describe('Especialidades (PH-198) aplicam no dano real do combate', () => {
     // pequeno o bastante (Rattata nivel 50 batendo com Ataque Basico) pra o
     // arredondamento pra HP inteiro pesar no percentual — 5% de um numero
     // pequeno e menos de 1 HP.
-    expect(danoComReducao / danoSemReducao).toBeCloseTo(0.95, 1)
+    expect(danoComReducao / danoSemReducao).toBeCloseTo(0.9, 1)
   })
 })

@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.26',
+    date: '2026-10-17',
+    title: 'Especialidades viram missões, até o nível 10',
+    highlights: [
+      'Cada Especialidade agora vai até o nível 10, e cada nível dá +2% (até +20% de dano ou de defesa contra o tipo). Quem já tinha níveis ganhou o bônus novo na hora: o nível 5 passou de +5% para +10%.',
+      'Cada nível é uma missão do tipo. A trilha de dano pede abates, espécies do tipo capturadas por você, estágios do bioma do tipo e um POKE do tipo em nível alto. A de defesa pede tempo de caçada com um POKE do tipo em campo e tempo sob o clima dele.',
+      'A tela de Especialidades mostra cada requisito com a barra de progresso. O botão Subir libera quando a missão está completa.',
+      'Além da missão, cada nível custa Pedras e ouro, mas menos Pedra por nível do que antes: chegar ao topo pede o mesmo total de Pedras de antes, dividido em 10 níveis.',
+      'Níveis que você já tinha continuam seus: a missão vale só do próximo em diante.',
+    ],
+  },
+  {
     version: '8.25',
     date: '2026-10-17',
     title: 'Skins do treinador desbloqueáveis',
