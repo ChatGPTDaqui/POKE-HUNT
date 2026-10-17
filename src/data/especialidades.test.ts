@@ -65,11 +65,11 @@ describe('bonusDeAtaque / reducaoDeDefesa', () => {
     expect(reducaoDeDefesa(null, 'FIRE')).toBe(1)
   })
 
-  it('nivel maximo de dano da +5%, nivel maximo de defesa da -5%', () => {
+  it('nivel maximo de dano da +20%, nivel maximo de defesa da -20% (decisao de 17/10/2026)', () => {
     const niveis = especialidadeNiveisDefault()
     niveis.FIRE = { dano: ESPECIALIDADE_NIVEL_MAX, defesa: ESPECIALIDADE_NIVEL_MAX }
-    expect(bonusDeAtaque(niveis, 'FIRE')).toBeCloseTo(1.05)
-    expect(reducaoDeDefesa(niveis, 'FIRE')).toBeCloseTo(0.95)
+    expect(bonusDeAtaque(niveis, 'FIRE')).toBeCloseTo(1.2)
+    expect(reducaoDeDefesa(niveis, 'FIRE')).toBeCloseTo(0.8)
   })
 
   it('a trilha de defesa REDUZ dano recebido — nunca amplifica', () => {
@@ -91,10 +91,10 @@ describe('bonusDeAtaque / reducaoDeDefesa', () => {
 })
 
 describe('progressoGlobal', () => {
-  it('zero por padrao, maximo e 18 tipos x 10 niveis', () => {
+  it('zero por padrao, maximo e 18 tipos x 2 trilhas x 10 niveis', () => {
     const { atual, max } = progressoGlobal(especialidadeNiveisDefault())
     expect(atual).toBe(0)
-    expect(max).toBe(180)
+    expect(max).toBe(360)
   })
 
   it('soma dano e defesa de todos os tipos', () => {

@@ -40,6 +40,8 @@ import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ofertaDeStonePorTipo } from '@/data/ofertaDeStone'
+import { MISSOES_DE_ESPECIALIDADE } from '@/data/especialidadeMissoes'
+import { ESPECIALIDADE_NIVEL_MAX } from '@/data/especialidades'
 import { TYPE_COLORS } from '@/data/typeColors'
 import type { ElementType } from '@/data/generated/types'
 
@@ -89,15 +91,22 @@ function nomeDaMigration(schema: 'public' | 'dev') {
 const ABATES_ALVO_PRA_MAXAR = 20_000
 
 /**
- * A FORMA da progressao — quanto do custo total cai em cada um dos 5 niveis.
- * Sao os pesos do array antigo (15/35/70/130/220) preservados: o que muda nesta
- * issue e a ESCALA por tipo, nao a curva.
+ * A FORMA da progressao — quanto do custo total cai em cada um dos 10 niveis.
+ *
+ * 10 NIVEIS DESDE 17/10/2026 (eram 5, com os pesos 15/35/70/130/220). O TOTAL
+ * de Pedras pra maxar continua o mesmo alvo de abates (`ABATES_ALVO_PRA_MAXAR`)
+ * — so que espalhado em 10 degraus, entao cada nivel custa menos Pedra. E o
+ * "hibrido" que o dono escolheu: a missao do nivel e o esforco novo, e a Pedra
+ * continua no preco, menor.
  */
-const FORMA_DA_PROGRESSAO = [15, 35, 70, 130, 220]
+const FORMA_DA_PROGRESSAO = [5, 8, 12, 18, 26, 36, 48, 62, 80, 105]
+if (FORMA_DA_PROGRESSAO.length !== ESPECIALIDADE_NIVEL_MAX) {
+  throw new Error(`FORMA_DA_PROGRESSAO tem ${FORMA_DA_PROGRESSAO.length} degraus, e a Especialidade tem ${ESPECIALIDADE_NIVEL_MAX} niveis`)
+}
 const SOMA_DA_FORMA = FORMA_DA_PROGRESSAO.reduce((a, b) => a + b, 0)
 
 /** Ouro por nivel — nao escala por tipo: ouro nao tem oferta por tipo elemental. */
-const GOLD_POR_NIVEL = [500, 1500, 4000, 10000, 25000]
+const GOLD_POR_NIVEL = [500, 1000, 2000, 3500, 6000, 10000, 15000, 22000, 32000, 45000]
 
 const TIPOS = Object.keys(TYPE_COLORS) as ElementType[]
 
@@ -207,13 +216,80 @@ function corpo(schema: 'public' | 'dev') {
 -- sairam de sincronia em producao.
 `
 
+  const linhasDeMissao = MISSOES_DE_ESPECIALIDADE.map((m) =>
+    `  ('${m.tipo}'::text, '${m.trilha}', ${m.nivel}, '${JSON.stringify(m.requisitos).replace(/'/g, "''")}'::jsonb)`).join(',\n')
+
   return `${cabecalho}begin;
+
+-- ESPECIALIDADE COMO MISSAO (17/10/2026). Ate o nivel 10 (eram 5), e cada nivel
+-- pede os requisitos de \`especialidade_missao\`, conferidos pelo MESMO
+-- avaliador das conquistas (\`conquista_valor\` / \`conquista_alvo\`). A tabela
+-- e regerada inteira por esta migration a partir de
+-- src/data/especialidadeMissoes.ts — \`especialidadeMissoes.test.ts\` reprova
+-- se os dois divergirem.
+alter table ${q}.player_especialidades
+  drop constraint if exists player_especialidades_dano_nivel_check,
+  drop constraint if exists player_especialidades_defesa_nivel_check;
+alter table ${q}.player_especialidades
+  add constraint player_especialidades_dano_nivel_check check (dano_nivel between 0 and ${ESPECIALIDADE_NIVEL_MAX}),
+  add constraint player_especialidades_defesa_nivel_check check (defesa_nivel between 0 and ${ESPECIALIDADE_NIVEL_MAX});
+
+create table if not exists ${q}.especialidade_missao (
+  tipo text not null,
+  trilha text not null check (trilha in ('dano', 'defesa')),
+  nivel smallint not null check (nivel between 1 and ${ESPECIALIDADE_NIVEL_MAX}),
+  requisitos jsonb not null,
+  primary key (tipo, trilha, nivel)
+);
+alter table ${q}.especialidade_missao enable row level security;
+drop policy if exists "missao leitura publica" on ${q}.especialidade_missao;
+create policy "missao leitura publica" on ${q}.especialidade_missao for select to authenticated using (true);
+grant select on ${q}.especialidade_missao to authenticated;
+
+delete from ${q}.especialidade_missao;
+insert into ${q}.especialidade_missao (tipo, trilha, nivel, requisitos) values
+${linhasDeMissao};
+
+-- Os requisitos da proxima missao de cada (tipo, trilha), com valor e alvo, pra
+-- a tela mostrar a barra. Missao de quem ja esta no nivel maximo nao vem.
+create or replace function ${q}.minhas_missoes_especialidade()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ${q}
+as $$
+declare
+  v_user_id uuid := auth.uid();
+begin
+  if v_user_id is null then
+    raise exception 'nao autenticado' using errcode = '28000';
+  end if;
+  return coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'tipo', m.tipo, 'trilha', m.trilha, 'nivel', m.nivel,
+      'requisitos', (
+        select jsonb_agg(jsonb_build_object(
+          'valor', ${q}.conquista_valor(v_user_id, r->'regra'),
+          'alvo', ${q}.conquista_alvo(r->'regra')
+        ) order by ord)
+        from jsonb_array_elements(m.requisitos) with ordinality as x(r, ord)
+      )
+    ))
+    from ${q}.especialidade_missao m
+    left join ${q}.player_especialidades e on e.user_id = v_user_id and e.tipo = m.tipo
+    where m.nivel = coalesce(case m.trilha when 'dano' then e.dano_nivel else e.defesa_nivel end, 0) + 1
+  ), '[]'::jsonb);
+end;
+$$;
+revoke all on function ${q}.minhas_missoes_especialidade() from public;
+grant execute on function ${q}.minhas_missoes_especialidade() to authenticated;
 
 create or replace function ${q}.subir_nivel_especialidade(p_tipo text, p_trilha text)
 returns jsonb
 language plpgsql
 security definer
-set search_path = ${q}
+set search_path = ${q === 'dev' ? 'dev, public' : 'public'}
 as $$
 declare
   v_user_id uuid := auth.uid();
@@ -225,6 +301,8 @@ declare
   v_gold bigint;
   v_stone_id text;
   v_stone_atual int;
+  v_requisitos jsonb;
+  v_req jsonb;
 begin
   if v_user_id is null then
     raise exception 'nao autenticado' using errcode = '28000';
@@ -250,9 +328,22 @@ ${casos}
   select case p_trilha when 'dano' then dano_nivel else defesa_nivel end into v_nivel_atual
     from ${q}.player_especialidades where user_id = v_user_id and tipo = p_tipo;
 
-  if v_nivel_atual >= 5 then
+  if v_nivel_atual >= ${ESPECIALIDADE_NIVEL_MAX} then
     raise exception 'Especialidade ja esta no nivel maximo.' using errcode = 'P0001';
   end if;
+
+  -- A MISSAO DO NIVEL: todo requisito tem que ter chegado ao alvo. Nivel ja
+  -- pago antes da missao existir fica (so o PROXIMO pede missao).
+  select requisitos into v_requisitos from ${q}.especialidade_missao
+    where tipo = p_tipo and trilha = p_trilha and nivel = v_nivel_atual + 1;
+  if v_requisitos is null then
+    raise exception 'Missao da especialidade nao encontrada.' using errcode = 'P0001';
+  end if;
+  for v_req in select jsonb_array_elements(v_requisitos) loop
+    if ${q}.conquista_valor(v_user_id, v_req->'regra') < ${q}.conquista_alvo(v_req->'regra') then
+      raise exception 'Missao incompleta: %', v_req->>'texto' using errcode = 'P0001';
+    end if;
+  end loop;
 
   v_stone_qtd := v_stone_qtd_por_nivel[v_nivel_atual + 1];
   v_gold := v_gold_por_nivel[v_nivel_atual + 1];

@@ -225,7 +225,14 @@ export function ProgressoTab() {
           tipo que mais te machuca no bioma em que você está é uma decisão real.
         </div>
         <div className="mt-[.5em]">
-          O material são <b>Pedras</b> daquele tipo, mais ouro. Como a Pedra só cai de POKE daquele tipo, o
+          <b>Cada nível é uma missão do tipo.</b> A trilha de dano pede abates de POKEs do tipo, espécies do
+          tipo capturadas por você, estágios do bioma do tipo e um POKE do tipo em nível alto. A de defesa pede
+          tempo de caçada com um POKE do tipo em campo, tempo sob o clima do tipo e os mesmos marcos de bioma e
+          nível. A tela de Especialidades mostra cada requisito com a barra de progresso. Nível que você já
+          tinha fica: a missão vale só do próximo em diante.
+        </div>
+        <div className="mt-[.5em]">
+          Além da missão, o nível custa <b>Pedras</b> daquele tipo, mais ouro. Como a Pedra só cai de POKE daquele tipo, o
           custo é calibrado por tipo — tipo raro cobra menos pedras que tipo comum, pra o esforço real ficar
           parecido:
         </div>

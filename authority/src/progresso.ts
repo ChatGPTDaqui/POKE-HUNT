@@ -6,7 +6,7 @@ import {
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS,
   solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, protetorDaSala,
-  quotaDeAbatesDaSala,
+  quotaDeAbatesDaSala, SPECIES,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
   type ClimaTipo, type ProtetorPendente, type ProtetorDaAutoridade,
 } from '#engine'
@@ -62,6 +62,11 @@ export function contadoresDaJanela(
   somar('ouro_caca', resumo.gold)
   somar('hunt_seg', resumo.simulatedSeconds)
   if (especieAtiva) somar(`ativo_seg:${especieAtiva}`, resumo.simulatedSeconds)
+  // Especialidade como missao (17/10/2026): tempo com um POKE de cada TIPO em
+  // campo. Os dois tipos da especie contam — um Gyarados anda as missoes de
+  // WATER e de FLYING.
+  const sp = especieAtiva ? SPECIES[especieAtiva] : undefined
+  if (sp) for (const tipo of new Set([sp.type, sp.type2].filter(Boolean))) somar(`ativo_tipo_seg:${tipo}`, resumo.simulatedSeconds)
   if (clima) somar(`clima_seg:${clima}`, resumo.simulatedSeconds)
   for (const [itemId, quantidade] of Object.entries(resumo.itemsConsumed)) somar(`item:${itemId}`, quantidade)
   return contadores

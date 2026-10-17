@@ -30,6 +30,14 @@ describe('contadoresDaJanela', () => {
     expect(c.hunt_seg).toBe(30)
     expect(c['ativo_seg:pikachu']).toBe(30)
     expect(c['clima_seg:neve']).toBe(30)
+    // Especialidade como missao: o tempo conta pro TIPO do POKE em campo.
+    expect(c['ativo_tipo_seg:ELECTRIC']).toBe(30)
+  })
+
+  it('POKE de dois tipos anda as missoes dos dois', () => {
+    const c = contadoresDaJanela({ ...vazio, simulatedSeconds: 60 }, 'gyarados', null)
+    expect(c['ativo_tipo_seg:WATER']).toBe(60)
+    expect(c['ativo_tipo_seg:FLYING']).toBe(60)
   })
 
   it('ouro da caca e itens consumidos', () => {
