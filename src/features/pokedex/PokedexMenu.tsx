@@ -37,6 +37,7 @@ import { Palavra } from '@/components/shared/Explicacao'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
 import { GameButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { focusHunt } from '@/features/hunt/HuntMenu'
+import { salasEspeciaisDaEspecie } from '@/data/atlasDosBiomas'
 
 // Instancia so-pra-exibicao do botao "Ver perfil completo": uma especie sozinha
 // (sem poke possuido) nao alimenta o modal de perfil, que espera uma instancia
@@ -127,6 +128,7 @@ const BASE_STAT_ROWS = [
 
 function SpeciesDetail({ species }: { species: Species }) {
   const hunts = huntsForSpecies(species.id)
+  const especiais = salasEspeciaisDaEspecie(species.id)
   const openScreen = useUiStore((s) => s.openScreen)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const linha = linhaEvolutiva(species)
@@ -271,7 +273,9 @@ function SpeciesDetail({ species }: { species: Species }) {
       <div>
         <div className="mb-[.4em] font-medium">Onde encontrar</div>
         {hunts.length === 0 ? (
-          <span className="text-[.8em] text-menu-muted">Nenhuma hunt conhecida ainda.</span>
+          <span className="text-[.8em] text-menu-muted">
+            {especiais.length > 0 ? 'Não aparece nas salas comuns: só nas salas especiais abaixo.' : 'Nenhuma hunt conhecida ainda.'}
+          </span>
         ) : (
           <div className="flex flex-wrap gap-[.4em]">
             {hunts.map((map) => (
@@ -285,6 +289,24 @@ function SpeciesDetail({ species }: { species: Species }) {
               >
                 {map.name} (Lv {map.levelRange[0]}-{map.levelRange[1]})
               </GameButton>
+            ))}
+          </div>
+        )}
+        {/* SALAS ESPECIAIS (onda 2): elas nao estao no `enemyPool` das hunts
+            (de proposito, ver huntSpawnOverrides#montarHunt), entao a lista de
+            cima nunca as mostraria. Eevee, Porygon e os iniciais de Kanto so
+            nascem nelas. */}
+        {especiais.length > 0 && (
+          <div className="mt-[.5em] flex flex-col gap-[.25em] text-[.8em]">
+            <span className="font-medium text-amber-200">✨ Salas especiais</span>
+            {especiais.map(({ sala, bioma }) => (
+              <span key={sala.sala.chave}>
+                <b>{sala.sala.nome}</b>
+                <span className="text-menu-muted">
+                  {' '}— sala rara do bioma {bioma.nome}
+                  {sala.sala.estagioMinimo > 1 ? `, a partir do estágio ${sala.sala.estagioMinimo}` : ''}
+                </span>
+              </span>
             ))}
           </div>
         )}

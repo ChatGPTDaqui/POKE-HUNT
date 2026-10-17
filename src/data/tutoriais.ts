@@ -149,6 +149,14 @@ export const TUTORIAIS: Tutorial[] = [
           'estágio 7 do Marinho e no 2 do Ígneo ao mesmo tempo.',
       },
       {
+        titulo: 'Cada sala é um sub-bioma',
+        corpo:
+          'Todo bioma tem de 5 a 6 sub-biomas (a Mata, por exemplo, tem Floresta, Mato Alto, Bosque de Ilex, ' +
+          'Selva...). A cada sala o jogo sorteia um deles, e é ele que decide quem aparece, o clima e os itens. ' +
+          'Os estágios rasos e os fundos têm lugares diferentes. Às vezes a sala vira uma sala especial, como a ' +
+          'Zona Safári ou o Monte Lua, com Pokémon que só existem lá. A Wiki mostra todos os biomas, em Mundo.',
+      },
+      {
         titulo: 'Salas, e o chefe que fecha cada uma',
         corpo:
           'Um estágio é uma sequência de salas (3 no estágio 1, chegando a 8 no estágio 10). Cada sala pede ' +

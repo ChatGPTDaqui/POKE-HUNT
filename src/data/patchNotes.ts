@@ -13,6 +13,19 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.22',
+    date: '2026-10-16',
+    title: 'Wiki dos biomas e Pokédex com salas especiais',
+    highlights: [
+      'A Wiki ganhou a aba Mundo › Biomas e sub-biomas: escolha um bioma e veja de que lugares cada estágio é feito, numa barra por estágio, com o clima, os itens e os Pokémon mais comuns de cada sub-bioma.',
+      'A mesma aba lista as salas especiais de cada bioma: a partir de que estágio aparecem, a Pedra extra, e quem só existe lá (em dourado).',
+      'A Pokédex agora diz em quais salas especiais cada Pokémon pode aparecer. Eevee, Porygon, Bulbasaur, Charmander e Squirtle mostram onde nascem.',
+      'A trilha de estágios do menu de Hunt mostra quais salas especiais podem aparecer em cada estágio.',
+      'O tutorial dos estágios, o glossário e a Wiki explicam sub-biomas e salas especiais.',
+      'A Wiki deixou de dizer que a caçada continua com o jogo fechado: isso não acontece.',
+    ],
+  },
+  {
     version: '8.21',
     date: '2026-10-16',
     title: 'Salas especiais',
