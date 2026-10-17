@@ -31,6 +31,8 @@ import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
 import { SPECIES, type Species } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
 import { SegmentedTabs } from '@/components/game/controls'
+import { CHANCE_DE_SALA_ESPECIAL } from '@/data/biomas'
+import { salasEspeciaisPossiveis } from '@/engine/systems/salaSystem'
 import { BlocoAuto } from '@/components/auto/BlocoAuto'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useTutorialStore, TUTORIAL_ESTAGIOS } from '@/stores/tutorialStore'
@@ -747,6 +749,21 @@ function PainelDoEstagio({
           ]}
         />
       )}
+
+      {/* Salas especiais (onda 2): ficam fora das abas de composicao porque nao
+          entram na curva de sub-bioma — sao um sorteio a parte, por cima dela. */}
+      {(() => {
+        const especiais = salasEspeciaisPossiveis(mapId)
+        if (especiais.length === 0) return null
+        return (
+          <div className="text-[.72em] text-amber-200">
+            ✨ Salas especiais possíveis: {especiais.map((e) => e.nome).join(', ')}{' '}
+            <span className="text-menu-muted">
+              ({Math.round(CHANCE_DE_SALA_ESPECIAL * 100)}% por troca de sala, nunca a primeira)
+            </span>
+          </div>
+        )
+      })()}
 
       <div className="text-[.72em] text-menu-muted">
         {elenco.length} POKEs

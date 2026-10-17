@@ -33,10 +33,11 @@ import { useUiStore } from '@/stores/uiStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { TypeChip } from '@/components/shared/TypeChip'
-import { Palavra } from '@/components/shared/Explicacao'
+import { Explicacao, Palavra } from '@/components/shared/Explicacao'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
 import { GameButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { focusHunt } from '@/features/hunt/HuntMenu'
+import { salasEspeciaisDaEspecie } from '@/data/atlasDosBiomas'
 
 // Instancia so-pra-exibicao do botao "Ver perfil completo": uma especie sozinha
 // (sem poke possuido) nao alimenta o modal de perfil, que espera uma instancia
@@ -127,6 +128,7 @@ const BASE_STAT_ROWS = [
 
 function SpeciesDetail({ species }: { species: Species }) {
   const hunts = huntsForSpecies(species.id)
+  const especiais = salasEspeciaisDaEspecie(species.id)
   const openScreen = useUiStore((s) => s.openScreen)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const linha = linhaEvolutiva(species)
@@ -195,20 +197,37 @@ function SpeciesDetail({ species }: { species: Species }) {
           <div className="mb-[.4em] font-medium">
             <Palavra verbete="habilidade">Habilidades</Palavra> possíveis
           </div>
-          <div className="flex flex-col gap-[.3em] text-[.8em]">
+          {/* So o NOME fica na ficha (pedido do dono, 16/10/2026): a descricao
+              virou bolha, aberta com o mouse em cima ou com um toque. A ficha
+              ficava longa com tres paragrafos de habilidade antes dos status. */}
+          <div className="flex flex-wrap gap-[.35em] text-[.8em]">
             {[...traits.normais.map((k) => [k, false] as const), ...(traits.oculta ? [[traits.oculta, true] as const] : [])]
-              .map(([chave, oculta]) => (
-                <div key={chave} className="rounded-[.4em] border border-menu-line bg-menu-paper px-[.5em] py-[.35em]">
-                  <div className="flex items-center gap-[.35em]">
-                    <b className="font-medium">{nomeDaTrait(chave) ?? chave}</b>
-                    {oculta && <span className="text-[.85em] text-amber-400">oculta</span>}
-                  </div>
-                  <p className="leading-tight text-menu-muted">{descricaoDaTrait(chave)}</p>
-                  {motivoSemEfeito(chave) && (
-                    <p className="text-[.9em] leading-tight text-amber-500/80">Sem efeito neste jogo.</p>
-                  )}
-                </div>
-              ))}
+              .map(([chave, oculta]) => {
+                const nome = nomeDaTrait(chave) ?? chave
+                const semEfeito = Boolean(motivoSemEfeito(chave))
+                return (
+                  <Explicacao
+                    key={chave}
+                    rotulo={`${nome}: ver o que faz`}
+                    classeDoConteudo="max-w-[18em]"
+                    conteudo={
+                      <span className="flex flex-col gap-[.25em]">
+                        <b>{nome}{oculta ? ' (oculta)' : ''}</b>
+                        <span>{descricaoDaTrait(chave)}</span>
+                        {semEfeito && <span className="text-amber-500">Sem efeito neste jogo.</span>}
+                      </span>
+                    }
+                  >
+                    <span
+                      className={`inline-flex cursor-help items-center gap-[.3em] rounded-[.4em] border border-menu-line bg-menu-paper px-[.5em] py-[.25em] ${semEfeito ? 'opacity-60' : ''}`}
+                    >
+                      <b className="font-medium">{nome}</b>
+                      {oculta && <span className="text-[.85em] text-amber-400">oculta</span>}
+                      <span aria-hidden className="text-menu-muted">ⓘ</span>
+                    </span>
+                  </Explicacao>
+                )
+              })}
           </div>
         </div>
       )}
@@ -271,7 +290,9 @@ function SpeciesDetail({ species }: { species: Species }) {
       <div>
         <div className="mb-[.4em] font-medium">Onde encontrar</div>
         {hunts.length === 0 ? (
-          <span className="text-[.8em] text-menu-muted">Nenhuma hunt conhecida ainda.</span>
+          <span className="text-[.8em] text-menu-muted">
+            {especiais.length > 0 ? 'Não aparece nas salas comuns: só nas salas especiais abaixo.' : 'Nenhuma hunt conhecida ainda.'}
+          </span>
         ) : (
           <div className="flex flex-wrap gap-[.4em]">
             {hunts.map((map) => (
@@ -285,6 +306,24 @@ function SpeciesDetail({ species }: { species: Species }) {
               >
                 {map.name} (Lv {map.levelRange[0]}-{map.levelRange[1]})
               </GameButton>
+            ))}
+          </div>
+        )}
+        {/* SALAS ESPECIAIS (onda 2): elas nao estao no `enemyPool` das hunts
+            (de proposito, ver huntSpawnOverrides#montarHunt), entao a lista de
+            cima nunca as mostraria. Eevee, Porygon e os iniciais de Kanto so
+            nascem nelas. */}
+        {especiais.length > 0 && (
+          <div className="mt-[.5em] flex flex-col gap-[.25em] text-[.8em]">
+            <span className="font-medium text-amber-200">✨ Salas especiais</span>
+            {especiais.map(({ sala, bioma }) => (
+              <span key={sala.sala.chave}>
+                <b>{sala.sala.nome}</b>
+                <span className="text-menu-muted">
+                  {' '}— sala rara do bioma {bioma.nome}
+                  {sala.sala.estagioMinimo > 1 ? `, a partir do estágio ${sala.sala.estagioMinimo}` : ''}
+                </span>
+              </span>
             ))}
           </div>
         )}

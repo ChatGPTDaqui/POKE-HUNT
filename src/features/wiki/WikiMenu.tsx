@@ -30,6 +30,7 @@ import { MAX_TEAM_SIZE } from '@/stores/gameStateDefaults'
 import type { TraitId } from '@/data/traits'
 import { WikiCard } from './WikiCard'
 import { MundoTab } from './abaMundo'
+import { BiomasTab } from './abaBiomas'
 import { ProgressoTab } from './abaProgresso'
 import { JogadoresTab } from './abaJogadores'
 
@@ -1098,6 +1099,9 @@ function TracosTab() {
 type Grupo = 'comecando' | 'mundo' | 'combate' | 'progresso' | 'jogadores'
 type SubCombate = 'tipos' | 'campo' | 'numeros' | 'status' | 'tracos'
 type SubProgresso = 'geral' | 'raridade'
+// Mundo ganhou segunda fileira com o atlas dos biomas (16/10/2026): a lista de
+// sub-biomas e salas especiais e grande demais pra empilhar abaixo das regras.
+type SubMundo = 'regras' | 'biomas'
 
 const GRUPOS: { value: Grupo; label: string }[] = [
   { value: 'comecando', label: 'Começando' },
@@ -1115,6 +1119,11 @@ const SUB_COMBATE: { value: SubCombate; label: string }[] = [
   { value: 'tracos', label: 'Natureza' },
 ]
 
+const SUB_MUNDO: { value: SubMundo; label: string }[] = [
+  { value: 'regras', label: 'Como funciona' },
+  { value: 'biomas', label: 'Biomas e sub-biomas' },
+]
+
 const SUB_PROGRESSO: { value: SubProgresso; label: string }[] = [
   { value: 'geral', label: 'Progressão' },
   { value: 'raridade', label: 'Raridade e Shiny' },
@@ -1124,13 +1133,20 @@ export function WikiMenu() {
   const [grupo, setGrupo] = useState<Grupo>('comecando')
   const [subCombate, setSubCombate] = useState<SubCombate>('tipos')
   const [subProgresso, setSubProgresso] = useState<SubProgresso>('geral')
+  const [subMundo, setSubMundo] = useState<SubMundo>('regras')
 
   return (
     <div className="flex flex-col gap-[.55em]">
       <SegmentedTabs value={grupo} onChange={setGrupo} options={GRUPOS} />
 
       {grupo === 'comecando' && <ComecandoTab />}
-      {grupo === 'mundo' && <MundoTab />}
+      {grupo === 'mundo' && (
+        <>
+          <SegmentedTabs value={subMundo} onChange={setSubMundo} options={SUB_MUNDO} />
+          {subMundo === 'regras' && <MundoTab />}
+          {subMundo === 'biomas' && <BiomasTab />}
+        </>
+      )}
       {grupo === 'jogadores' && <JogadoresTab />}
 
       {grupo === 'combate' && (
