@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.27',
+    date: '2026-10-17',
+    title: 'Cenários novos para 17 lugares',
+    highlights: [
+      'Ganharam cenário próprio: Fazenda MuuMuu, Estrada de Ciclismo, Clareira dos Cogumelos, Bosque de Ilex, Copa das Árvores, Recife de Coral, Ilhas Redemoinho, Lagoa das Vitórias-Régias, Rio e Corredeira, Cachoeira de Tohjo, Cânion da Rota 45, Oásis, Túnel de Pedra, Caverna Escura, Cataratas Meteoro, Estrada da Vitória e Ilhas Espuma.',
+      'Nesses lugares os Pokémon só andam no chão: não atravessam árvores, pedras, cercas, paredes nem água. Pontes, escadas e passagens continuam abertas.',
+      'Você entra pela borda do mapa, como quem acabou de chegar, já olhando para dentro.',
+      'Os outros lugares novos ainda usam o cenário de um lugar parecido até ganharem o deles.',
+    ],
+  },
+  {
     version: '8.26',
     date: '2026-10-17',
     title: 'Especialidades viram missões, até o nível 10',

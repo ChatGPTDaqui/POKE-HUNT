@@ -159,6 +159,24 @@ export function arteParaSala(mapId: string, sala: { chave: string } | null): { e
  * tem referencia. Recebe `mapId` (e nao so a sala) pelo mesmo motivo acima:
  * hunt sem sala tambem tem arte, e tambem merece o spawn pintado dela.
  */
+/**
+ * Para onde olha quem acabou de ENTRAR no mapa por este ponto: para o centro
+ * do mundo da arte.
+ *
+ * Os fundos novos poem o spawn na entrada (pedido do dono: o jogador "chega de
+ * outro lugar"), quase sempre na borda de baixo. Nascer com o `facing` padrao
+ * (para baixo) deixava o treinador de costas pro mapa inteiro — e o cone de
+ * visao do spawn de inimigo, que segue o `facing`, punha a leva toda atras
+ * dele. Ponto ja perto do centro mantem o `facing` de antes (devolve null).
+ */
+export function olharParaDentro(mapDef: { bounds: { width: number; height: number } }, x: number, y: number): { x: number; y: number } | null {
+  const dx = mapDef.bounds.width / 2 - x
+  const dy = mapDef.bounds.height / 2 - y
+  const d = Math.hypot(dx, dy)
+  if (d < 80) return null
+  return { x: dx / d, y: dy / d }
+}
+
 export function spawnPointParaSala(mapId: string, sala: { chave: string } | null): { x: number; y: number } | null {
   const map = getMap(mapId)
   if (!map) return null
