@@ -190,20 +190,27 @@ export function elencoDoEstagio(
     }
   }
 
-  return [...acumulado.entries()]
-    .map(([encounterId, p]) => {
-      const encontro = getEncounter(encounterId)
-      const species = encontro ? SPECIES[encontro.speciesId] : null
-      return species
-        ? {
-          encounterId,
-          species,
-          pct: p * 100,
-          guardian: guardians.has(encounterId),
-          lord: lords.has(encounterId),
-        }
-        : null
-    })
-    .filter((x): x is EspecieDoEstagio => x != null)
+  // UMA LINHA POR ESPECIE. A sala especial tem encontro proprio
+  // (`<hunt>_esp_<especie>`, ver huntSpawnOverrides#montarHunt), entao o mesmo
+  // Tentacool do Mar Aberto e do Pico da Donzela sao dois encontros — e a aba
+  // Estagio listava o nome duas vezes. Soma as chances e junta as marcas.
+  const porEspecie = new Map<string, EspecieDoEstagio>()
+  for (const [encounterId, p] of acumulado) {
+    const encontro = getEncounter(encounterId)
+    const species = encontro ? SPECIES[encontro.speciesId] : null
+    if (!species) continue
+    const ja = porEspecie.get(species.id)
+    if (ja) {
+      ja.pct += p * 100
+      ja.guardian ||= guardians.has(encounterId)
+      ja.lord ||= lords.has(encounterId)
+    } else {
+      porEspecie.set(species.id, {
+        encounterId, species, pct: p * 100,
+        guardian: guardians.has(encounterId), lord: lords.has(encounterId),
+      })
+    }
+  }
+  return [...porEspecie.values()]
     .sort((a, b) => b.pct - a.pct || a.species.name.localeCompare(b.species.name))
 }

@@ -9,8 +9,10 @@
 import {
   BIOMAS, LOOT, type BiomaDef, type SalaEspecialDef, type SubBiomaDef,
 } from './biomas'
-import { ESTAGIOS_POR_BIOMA, pesosDoEstagio } from './estagios'
-import { ELENCO_DO_SUB_BIOMA, ELENCO_POR_ESTAGIO } from './generated/elencoPorEstagio.generated'
+import { ESTAGIOS_POR_BIOMA, estagioId, pesosDoEstagio } from './estagios'
+import { ELENCO_POR_ESTAGIO } from './generated/elencoPorEstagio.generated'
+import { POOL_POR_SALA } from './huntSpawnOverrides'
+import { getEncounter } from './enemies'
 import { SUB_BIOMA_CLIMA } from './generated/subBiomas.generated'
 import type { ClimaTipo } from '@/engine/types'
 
@@ -48,6 +50,39 @@ export interface FichaDoBioma {
   composicao: Record<string, number>[]
 }
 
+/**
+ * Em que estagios cada especie nasce DE VERDADE num lugar: a uniao do pool da
+ * sala (`POOL_POR_SALA`, o mesmo que o motor sorteia) nos estagios em que o
+ * lugar existe.
+ *
+ * NAO E `ELENCO_DO_SUB_BIOMA`. Aquele e o filtro de FORMA (a familia inteira
+ * das linhas do lugar), e a 8.22 usou ele pra dizer "quem aparece": o Canion do
+ * Vovo anunciava Kabuto e Omanyte, que nunca nascem la (a sala so existe a
+ * partir do estagio 6, onde so sobram as formas evoluidas). Medido: 48 lugares
+ * com especie anunciada a mais.
+ */
+export function estagiosPorEspecie(bioma: BiomaDef, chave: string, estagios: readonly number[]): Map<string, number[]> {
+  const mapa = new Map<string, number[]>()
+  for (const e of estagios) {
+    for (const id of POOL_POR_SALA[estagioId(bioma.chave, e)]?.[chave] ?? []) {
+      const sp = getEncounter(id)?.speciesId
+      if (!sp) continue
+      const lista = mapa.get(sp) ?? []
+      if (!lista.includes(e)) lista.push(e)
+      mapa.set(sp, lista)
+    }
+  }
+  return mapa
+}
+
+/** Os estagios em que um sub-bioma comum ou sala especial pode ser sorteado. */
+export function estagiosDoLugar(bioma: BiomaDef, chave: string): number[] {
+  const especial = (bioma.especiais ?? []).find((e) => e.chave === chave)
+  const todos = Array.from({ length: ESTAGIOS_POR_BIOMA }, (_, i) => i + 1)
+  if (especial) return todos.filter((e) => e >= especial.estagioMinimo)
+  return todos.filter((e) => (pesosDoEstagio(bioma, e)[chave] ?? 0) > 0)
+}
+
 function climasDe(chave: string): FichaDoSubBioma['climas'] {
   const pesos = SUB_BIOMA_CLIMA[chave] ?? {}
   const total: number = Object.values(pesos).reduce<number>((a, b) => a + (b ?? 0), 0)
@@ -59,9 +94,9 @@ function climasDe(chave: string): FichaDoSubBioma['climas'] {
 
 const itensDe = (sub: SubBiomaDef) => LOOT[sub.loot].map((d) => d.itemId)
 
-/** Especies que nascem em algum sub-bioma COMUM (nao sala especial). */
+/** Especies que nascem DE VERDADE em algum sub-bioma COMUM (nao sala especial). */
 const NO_MATO_COMUM = new Set(
-  BIOMAS.flatMap((b) => b.subBiomas.flatMap((s) => ELENCO_DO_SUB_BIOMA[s.chave] ?? [])),
+  BIOMAS.flatMap((b) => b.subBiomas.flatMap((s) => [...estagiosPorEspecie(b, s.chave, estagiosDoLugar(b, s.chave)).keys()])),
 )
 
 function fichaDoBioma(bioma: BiomaDef): FichaDoBioma {
@@ -81,7 +116,7 @@ function fichaDoBioma(bioma: BiomaDef): FichaDoBioma {
     return { sub, estagios, pico, fatiaNoPico, climas: climasDe(sub.chave), itens: itensDe(sub), destaques }
   })
   const especiais = (bioma.especiais ?? []).map((sala): FichaDaSalaEspecial => {
-    const especies = ELENCO_DO_SUB_BIOMA[sala.chave] ?? []
+    const especies = [...estagiosPorEspecie(bioma, sala.chave, estagiosDoLugar(bioma, sala.chave)).keys()]
     return {
       sala,
       climas: climasDe(sala.chave),
