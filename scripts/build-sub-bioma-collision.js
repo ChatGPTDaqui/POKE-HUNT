@@ -270,6 +270,27 @@ const MANIFESTO = {
   // escapavam de todo teste que itera `BIOMAS` — ver walkBlock.test.ts.
   'dojo.png': { bg: 'dojo.jpg', modo: 'rosa_anda' },
   'dragon.png': { bg: 'dragon.jpg', modo: 'rosa_anda' },
+
+  // Onda 1 dos sub-biomas novos (17/10/2026): fundos gerados pelo dono, colisao
+  // pintada por mim e revisada por ele. Spawn sempre na ENTRADA de baixo — o
+  // jogador "chega de outro lugar" (pedido do dono).
+  'farm.png': { bg: 'farm.jpg', modo: 'rosa_anda' },
+  'cycling-road.png': { bg: 'cycling-road.jpg', modo: 'rosa_anda' },
+  'mushroom-glade.png': { bg: 'mushroom-glade.jpg', modo: 'rosa_anda' },
+  'ilex-forest.png': { bg: 'ilex-forest.jpg', modo: 'rosa_anda' },
+  'treetops.png': { bg: 'treetops.jpg', modo: 'rosa_anda' },
+  'coral-reef.png': { bg: 'coral-reef.jpg', modo: 'rosa_anda' },
+  'whirl-islands.png': { bg: 'whirl-islands.jpg', modo: 'rosa_anda' },
+  'lily-pond.png': { bg: 'lily-pond.jpg', modo: 'rosa_anda' },
+  'river.png': { bg: 'river.jpg', modo: 'rosa_anda' },
+  'waterfall.png': { bg: 'waterfall.jpg', modo: 'rosa_anda' },
+  'canyon.png': { bg: 'canyon.jpg', modo: 'rosa_anda' },
+  'oasis.png': { bg: 'oasis.jpg', modo: 'rosa_anda' },
+  'rock-tunnel.png': { bg: 'rock-tunnel.jpg', modo: 'rosa_anda' },
+  'dark-cave.png': { bg: 'dark-cave.jpg', modo: 'rosa_anda' },
+  'meteor-falls.png': { bg: 'meteor-falls.jpg', modo: 'rosa_anda' },
+  'victory-road.png': { bg: 'victory-road.jpg', modo: 'rosa_anda' },
+  'seafoam-islands.png': { bg: 'seafoam-islands.jpg', modo: 'rosa_anda' },
 };
 
 /**

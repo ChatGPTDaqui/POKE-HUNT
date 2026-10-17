@@ -158,6 +158,25 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   'assets/hunt-backgrounds/fairy-cave.jpg': 'caverna',
   'assets/hunt-backgrounds/abyss.jpg': 'caverna',
 
+  // Fundos proprios da onda 1 dos sub-biomas novos (17/10/2026).
+  'assets/hunt-backgrounds/farm.jpg': 'folha',
+  'assets/hunt-backgrounds/cycling-road.jpg': 'cidade',
+  'assets/hunt-backgrounds/mushroom-glade.jpg': 'folha',
+  'assets/hunt-backgrounds/ilex-forest.jpg': 'folha',
+  'assets/hunt-backgrounds/treetops.jpg': 'selva',
+  'assets/hunt-backgrounds/coral-reef.jpg': 'agua',
+  'assets/hunt-backgrounds/whirl-islands.jpg': 'agua',
+  'assets/hunt-backgrounds/lily-pond.jpg': 'agua',
+  'assets/hunt-backgrounds/river.jpg': 'agua',
+  'assets/hunt-backgrounds/waterfall.jpg': 'agua',
+  'assets/hunt-backgrounds/canyon.jpg': 'areia',
+  'assets/hunt-backgrounds/oasis.jpg': 'areia',
+  'assets/hunt-backgrounds/rock-tunnel.jpg': 'caverna',
+  'assets/hunt-backgrounds/dark-cave.jpg': 'caverna',
+  'assets/hunt-backgrounds/meteor-falls.jpg': 'caverna',
+  'assets/hunt-backgrounds/victory-road.jpg': 'poeira',
+  'assets/hunt-backgrounds/seafoam-islands.jpg': 'neve',
+
   'assets/hunt-backgrounds/ice-cave.jpg': 'neve',
   'assets/hunt-backgrounds/ice-mountain.jpg': 'neve',
 
