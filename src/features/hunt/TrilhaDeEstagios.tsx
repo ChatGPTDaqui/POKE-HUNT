@@ -745,7 +745,14 @@ function PainelDoEstagio({
           onChange={(v) => setRecorte(v === DO_ESTAGIO ? null : v)}
           options={[
             { value: DO_ESTAGIO, label: 'Estágio' },
-            ...subBiomas.map((s) => ({ value: s.chave, label: `${s.nome} ${Math.round(s.pct)}%` })),
+            ...subBiomas.map((s) => ({
+              value: s.chave,
+              // Sala especial tem fatia pequena (5% repartido entre elas): uma
+              // casa decimal, senao a aba diria "0%" num lugar que existe.
+              label: s.especial
+                ? `✨ ${s.nome} ${s.pct < 10 ? s.pct.toFixed(1) : Math.round(s.pct)}%`
+                : `${s.nome} ${Math.round(s.pct)}%`,
+            })),
           ]}
         />
       )}
@@ -755,12 +762,21 @@ function PainelDoEstagio({
       {(() => {
         const especiais = salasEspeciaisPossiveis(mapId)
         if (especiais.length === 0) return null
+        const sel = recorte ? especiais.find((e) => e.chave === recorte) : null
         return (
           <div className="text-[.72em] text-amber-200">
-            ✨ Salas especiais possíveis: {especiais.map((e) => e.nome).join(', ')}{' '}
-            <span className="text-menu-muted">
-              ({Math.round(CHANCE_DE_SALA_ESPECIAL * 100)}% por troca de sala, nunca a primeira)
-            </span>
+            {sel ? (
+              <>
+                ✨ {sel.nome} é uma sala especial: aparece em {Math.round(CHANCE_DE_SALA_ESPECIAL * 100)}% das trocas
+                de sala (repartido entre as especiais do estágio), nunca na primeira sala da caçada.
+                {sel.pedra ? ' Cada abate pode soltar uma Pedra extra do tipo dela.' : ''}
+              </>
+            ) : (
+              <>
+                ✨ Salas especiais ({Math.round(CHANCE_DE_SALA_ESPECIAL * 100)}% das trocas, nunca a primeira):{' '}
+                {especiais.map((e) => e.nome).join(', ')}. Toque na aba dela pra ver quem aparece.
+              </>
+            )}
           </div>
         )
       })()}
