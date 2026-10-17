@@ -13,6 +13,19 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.29',
+    date: '2026-10-17',
+    title: 'Chefe da sala, combate mais legível e colisão revisada',
+    highlights: [
+      'O Guardião e o Lorde são o último Pokémon da sala: depois do 30º nada mais nasce, e ele aparece num ponto qualquer do mapa. A próxima sala só abre quando ele cai.',
+      'A troca de sala volta a entrar com fade-in também no PC.',
+      'Os números de dano saem colados no Pokémon atingido, e o nome do golpe fica junto da base de quem o usou.',
+      'Golpes por cima do corpo do Pokémon ficam mais visíveis (60% visível, 40% transparente).',
+      'A Pokébola de captura é lançada 3 segundos depois que o Pokémon desmaia.',
+      'Colisão revisada nos 45 cenários novos: barrancos, paredes, pedras, cercas, túmulos, lanternas e água deixam de ser atravessados (Cânion da Rota 45 incluso).',
+    ],
+  },
+  {
     version: '8.28',
     date: '2026-10-17',
     title: 'Cenários novos para mais 28 lugares',

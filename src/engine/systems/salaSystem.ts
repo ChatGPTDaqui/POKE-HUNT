@@ -783,11 +783,11 @@ export function quotaDeAbatesDaSala(
  * caminho sob autoridade, onde o protetor do servidor pode nao ter espelho
  * local. Nas duas o campo voltava a encher de bicho comum.
  *
- * DEPOIS QUE O PROTETOR CAI, O REPOVOAMENTO VOLTA — de proposito, e nao por
- * descuido. Sob autoridade a sala so troca quando o servidor manda, o que pode
- * levar minutos (ver `ESPERA_MAXIMA_PELA_AUTORIDADE`), e deixar o campo vazio
- * nesse intervalo tiraria o farm do jogador em troca de nada: a sala ja esta
- * decidida. Os abates extras nao contam — `registrarAbate` capa na quota.
+ * DEPOIS QUE O PROTETOR CAI, NADA MAIS NASCE (17/10/2026). Ate entao o
+ * repovoamento voltava pra nao deixar o campo vazio na espera pela autoridade;
+ * o dono pediu o contrario — o protetor e o ultimo POKE da sala. O corte mora
+ * no gate de respawn de `simulation.ts` (`protetorResolvido`), e nao aqui:
+ * esta funcao continua respondendo so pela QUOTA de comuns.
  */
 export function comunsEsgotados(world: WorldState, mapId: string): boolean {
   const sala = world.sala

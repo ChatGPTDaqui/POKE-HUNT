@@ -83,12 +83,19 @@ const CSS = `
   from { opacity: 0; transform: translateY(.5em); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* FADE-IN DA CENA INTEIRA (17/10/2026). Sem ele a cena surgia seca no PC: a
+   arte ja vem do cache (opacidade 1 no primeiro quadro) e a cor do bioma
+   pintava o retangulo de uma vez. E ele FICA sob reduced-motion — o Windows
+   liga essa preferencia quando "efeitos de animacao" esta desligado, e era
+   ali que o fade sumia. Opacidade pura nao e movimento. */
+.cutscene-cena { animation: cutscene-entra 450ms ease-out both; }
 .cutscene-arte { animation: cutscene-zoom 4500ms ease-out both; }
 .cutscene-veu { animation: cutscene-entra 220ms ease-out both; }
 .cutscene-titulo { animation: cutscene-titulo 420ms 120ms ease-out both; }
 @media (prefers-reduced-motion: reduce) {
   .cutscene-arte, .cutscene-veu, .cutscene-titulo { animation: none; }
   .cutscene-arte { transform: scale(1.07); }
+  .cutscene-cena { animation: cutscene-entra 450ms ease-out both; }
 }
 `
 
@@ -182,7 +189,7 @@ export function CutsceneDeArea({
       role="status"
       aria-live="polite"
       aria-label={`Entrando em ${titulo}`}
-      className="pointer-events-auto fixed right-0 left-0 z-[58] flex flex-col items-center justify-center overflow-hidden rounded-[.6em]"
+      className="cutscene-cena pointer-events-auto fixed right-0 left-0 z-[58] flex flex-col items-center justify-center overflow-hidden rounded-[.6em]"
       style={{ ...faixa, background: corDeFundo }}
     >
       <style>{CSS}</style>
