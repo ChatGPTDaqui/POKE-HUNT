@@ -21,6 +21,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'A mesma aba lista as salas especiais de cada bioma: a partir de que estágio aparecem, a Pedra extra, e quem só existe lá (em dourado).',
       'A Pokédex agora diz em quais salas especiais cada Pokémon pode aparecer. Eevee, Porygon, Bulbasaur, Charmander e Squirtle mostram onde nascem.',
       'A trilha de estágios do menu de Hunt mostra quais salas especiais podem aparecer em cada estágio.',
+      'Na Pokédex, as habilidades possíveis aparecem só pelo nome: passe o mouse ou toque no nome para ler o que cada uma faz.',
       'O tutorial dos estágios, o glossário e a Wiki explicam sub-biomas e salas especiais.',
       'A Wiki deixou de dizer que a caçada continua com o jogo fechado: isso não acontece.',
     ],
