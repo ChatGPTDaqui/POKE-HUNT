@@ -239,6 +239,27 @@ export type Database = {
         }
         Relationships: []
       }
+      especialidade_missao: {
+        Row: {
+          nivel: number
+          requisitos: Json
+          tipo: string
+          trilha: string
+        }
+        Insert: {
+          nivel: number
+          requisitos: Json
+          tipo: string
+          trilha: string
+        }
+        Update: {
+          nivel?: number
+          requisitos?: Json
+          tipo?: string
+          trilha?: string
+        }
+        Relationships: []
+      }
       especie_traco_oculto: {
         Row: {
           species_id: string
@@ -3384,6 +3405,7 @@ export type Database = {
         }
       }
       minhas_conquistas: { Args: never; Returns: Json }
+      minhas_missoes_especialidade: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
@@ -4003,6 +4025,27 @@ export type Database = {
           percent?: number
           slot?: number
           slot_count?: number
+        }
+        Relationships: []
+      }
+      especialidade_missao: {
+        Row: {
+          nivel: number
+          requisitos: Json
+          tipo: string
+          trilha: string
+        }
+        Insert: {
+          nivel: number
+          requisitos: Json
+          tipo: string
+          trilha: string
+        }
+        Update: {
+          nivel?: number
+          requisitos?: Json
+          tipo?: string
+          trilha?: string
         }
         Relationships: []
       }
@@ -7151,6 +7194,7 @@ export type Database = {
         }
       }
       minhas_conquistas: { Args: never; Returns: Json }
+      minhas_missoes_especialidade: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }

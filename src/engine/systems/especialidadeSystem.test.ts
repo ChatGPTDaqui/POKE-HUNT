@@ -110,7 +110,7 @@ describe('subirNivelEspecialidade', () => {
             .toEqual({ success: true })
         }
       }
-      expect(useGameStateStore.getState().especialidades[tipo]).toEqual({ dano: 5, defesa: 5 })
+      expect(useGameStateStore.getState().especialidades[tipo]).toEqual({ dano: ESPECIALIDADE_NIVEL_MAX, defesa: ESPECIALIDADE_NIVEL_MAX })
     }
   })
 })

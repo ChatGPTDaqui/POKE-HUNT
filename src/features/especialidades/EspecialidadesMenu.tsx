@@ -3,10 +3,13 @@
 // a esquerda, detalhe a direita/sheet no celular) — mesmo padrao de tela de
 // progresso que ja existe no jogo.
 import { useMemo, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  ESPECIALIDADE_TYPES, ESPECIALIDADE_NIVEL_MAX, custoDoProximoNivel, progressoGlobal, tituloDoProgresso,
-  type EspecialidadeTrilha,
+  ESPECIALIDADE_TYPES, ESPECIALIDADE_NIVEL_MAX, ESPECIALIDADE_BONUS_POR_NIVEL, custoDoProximoNivel, progressoGlobal,
+  tituloDoProgresso, type EspecialidadeTrilha,
 } from '@/data/especialidades'
+import { missaoDoNivel } from '@/data/especialidadeMissoes'
+import { minhasMissoesDeEspecialidade, type ProgressoDeMissao } from '@/data/remote/especialidadeRpc'
 import { stoneItemId, stoneName } from '@/data/stones'
 import type { ElementType } from '@/data/generated/types'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -25,6 +28,20 @@ const fmt = new Intl.NumberFormat('pt-BR')
 
 function toast(message: string, type: 'success' | 'error' = 'success') {
   useToastStore.getState().pushToast(message, type, 'trade')
+}
+
+const CHAVE_DAS_MISSOES = ['missoes-especialidade'] as const
+const BONUS_MAX = Math.round(ESPECIALIDADE_NIVEL_MAX * ESPECIALIDADE_BONUS_POR_NIVEL * 100)
+const BONUS_NIVEL = Math.round(ESPECIALIDADE_BONUS_POR_NIVEL * 100)
+
+/** O progresso das missoes, lido do servidor. Sem servidor (modo local) fica vazio. */
+function useMissoes() {
+  return useQuery({
+    queryKey: CHAVE_DAS_MISSOES,
+    queryFn: minhasMissoesDeEspecialidade,
+    staleTime: 30_000,
+    retry: false,
+  })
 }
 
 export function EspecialidadesMenu() {
@@ -118,8 +135,8 @@ function DetalheEspecialidade({ tipo, semTitulo }: { tipo: ElementType | null; s
         o dano RECEBIDO daquele tipo por 1 - 0,01 x nivel. "+5% de defesa" e
         outra coisa — o jogador estava pagando por uma leitura errada.
       */}
-      <Trilha tipo={tipo} trilha="dano" rotulo="DANO" descricao={`+1% a +5% de dano causado com golpes ${tipo}`} />
-      <Trilha tipo={tipo} trilha="defesa" rotulo="DEFESA" descricao={`-1% a -5% de dano recebido de golpes ${tipo}`} />
+      <Trilha tipo={tipo} trilha="dano" rotulo="DANO" descricao={`+${BONUS_NIVEL}% por nível (até +${BONUS_MAX}%) de dano causado com golpes ${tipo}`} />
+      <Trilha tipo={tipo} trilha="defesa" rotulo="DEFESA" descricao={`-${BONUS_NIVEL}% por nível (até -${BONUS_MAX}%) de dano recebido de golpes ${tipo}`} />
     </div>
   )
 }
@@ -136,8 +153,17 @@ function Trilha({
   const gold = useGameStateStore((s) => s.wallet.gold)
   const stoneQtd = useGameStateStore((s) => s.items[stoneItemId(tipo)] ?? 0)
   const acao = useAcaoPendente()
+  const queryClient = useQueryClient()
+  const missoes = useMissoes()
 
   const custo = custoDoProximoNivel(tipo, nivel)
+  const missao = missaoDoNivel(tipo, trilha, nivel + 1)
+  const progresso: ProgressoDeMissao | undefined = missoes.data?.find(
+    (m) => m.tipo === tipo && m.trilha === trilha && m.nivel === nivel + 1,
+  )
+  // Missao cumprida: todo requisito no alvo. Sem leitura do servidor (erro ou
+  // modo local) a tela nao trava o botao — quem confere de verdade e a RPC.
+  const missaoCumprida = !progresso || progresso.requisitos.every((r) => r.valor >= r.alvo)
   const noMax = custo == null
   const key = `${tipo}:${trilha}`
 
@@ -149,6 +175,7 @@ function Trilha({
         () => subirNivelEspecialidade(useGameStateStore.getState(), tipo, trilha),
       )
       if (!ok) return // pedirAcao ja avisou o erro do servidor
+      void queryClient.invalidateQueries({ queryKey: CHAVE_DAS_MISSOES })
       if (!local) return // caminho remoto: a mensagem certa vem do servidor
       if (local.success) toast(`Maestria ${tipo} (${trilha}) subiu para o nível ${nivel + 1}.`)
       else toast(
@@ -160,7 +187,7 @@ function Trilha({
     })
   }
 
-  const podeSubir = !noMax && !acao.isPending(key)
+  const podeSubir = !noMax && !acao.isPending(key) && missaoCumprida
     && custo != null && gold >= custo.gold && stoneQtd >= custo.stoneQtd
 
   return (
@@ -176,7 +203,29 @@ function Trilha({
         <div className="mt-[.4em] text-[.78em] text-gold">Nível máximo.</div>
       ) : (
         <>
-          <SectionLabel className="mt-[.45em]">PRÓXIMO NÍVEL {nivel + 1}</SectionLabel>
+          <SectionLabel className="mt-[.45em]">MISSÃO DO NÍVEL {nivel + 1}</SectionLabel>
+          {missao && (
+            <ul className="mt-[.2em] flex flex-col gap-[.3em] text-[.76em]">
+              {missao.requisitos.map((req, i) => {
+                const p = progresso?.requisitos[i]
+                const feito = p != null && p.valor >= p.alvo
+                return (
+                  <li key={i} className="flex flex-col gap-[.15em]">
+                    <span className={cn(feito ? 'text-ok' : 'text-menu-ink')}>
+                      {feito ? '✓ ' : ''}{req.texto}
+                      {p && !feito && (
+                        <span className="text-menu-muted"> — {fmt.format(Math.min(p.valor, p.alvo))}/{fmt.format(p.alvo)}</span>
+                      )}
+                    </span>
+                    {p && !feito && (
+                      <Meter pct={p.alvo > 0 ? Math.min(100, (p.valor / p.alvo) * 100) : 0} height=".22em" color="var(--color-primary)" />
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          <SectionLabel className="mt-[.45em]">CUSTO</SectionLabel>
           <div className="mt-[.2em] flex flex-wrap items-center gap-[.6em] text-[.78em]">
             <span className={cn('tabular-nums', stoneQtd >= custo!.stoneQtd ? 'text-menu-ink' : 'text-warn')}>
               {stoneName(tipo)} {fmt.format(stoneQtd)}/{fmt.format(custo!.stoneQtd)}

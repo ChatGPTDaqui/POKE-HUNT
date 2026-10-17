@@ -280,9 +280,9 @@ export const CONQUISTAS: ConquistaAutoral[] = [
   // --- Combate ----------------------------------------------------------------
   { id: 'primeiro_nivel_100', nome: 'Primeiro Nível 100', descricao: 'Tenha um POKE nível 100.', categoria: 'combate', nivel: 'prata', regra: ter({ nivel_min: 100 }) },
   { id: 'time_de_elite', nome: 'Time de Elite', descricao: 'Tenha 6 POKEs nível 100 na equipe.', categoria: 'combate', nivel: 'ouro', regra: { t: 'time', f: { nivel_min: 100 }, qtd: 6 } },
-  { id: 'mestre_do_tipo', nome: 'Mestre do Tipo', descricao: 'Leve uma Especialidade ao nível máximo de dano e defesa.', categoria: 'combate', nivel: 'prata', regra: metrica('especialidades_max', 1) },
+  { id: 'mestre_do_tipo', nome: 'Mestre do Tipo', descricao: 'Leve uma Especialidade ao nível 5 de dano e defesa.', categoria: 'combate', nivel: 'prata', regra: metrica('especialidades_max', 1) },
   { id: 'cem_niveis_de_especialidade', nome: 'Especialista', descricao: 'Some 100 níveis de Especialidade.', categoria: 'combate', nivel: 'ouro', regra: metrica('especialidade_niveis', 100) },
-  { id: 'mestre_de_todos_os_tipos', nome: 'Mestre de Todos os Tipos', descricao: 'Leve as 18 Especialidades ao nível máximo.', categoria: 'combate', nivel: 'impossivel', regra: metrica('especialidades_max', 18) },
+  { id: 'mestre_de_todos_os_tipos', nome: 'Mestre de Todos os Tipos', descricao: 'Leve as 18 Especialidades ao nível 5 de dano e defesa.', categoria: 'combate', nivel: 'impossivel', regra: metrica('especialidades_max', 18) },
   { id: 'professor_de_golpes', nome: 'Professor de Golpes', descricao: 'Ensine 50 máquinas aos seus POKEs.', categoria: 'combate', nivel: 'prata', regra: metrica('tms', 50) },
   { id: 'ressurreicao', nome: 'Ressurreição', descricao: 'Use 100 Revive ou Max Revive.', categoria: 'combate', nivel: 'prata', regra: { t: 'contadores', chaves: ['item:revive', 'item:max_revive'], alvo: 100 } },
   { id: 'pocao_na_veia', nome: 'Poção na Veia', descricao: 'Use 1.000 poções.', categoria: 'combate', nivel: 'prata', regra: { t: 'contadores', chaves: ['item:potion', 'item:super_potion', 'item:hyper_potion', 'item:max_potion'], alvo: 1000 } },
