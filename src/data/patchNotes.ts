@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.25',
+    date: '2026-10-17',
+    title: 'Skins do treinador desbloqueáveis',
+    highlights: [
+      'As skins do treinador agora se conquistam. Livres para todos: Mochileiro, Red, May e Dawn, os protagonistas da franquia.',
+      'Professor Carvalho: registre 100 espécies na Pokédex. Lance: vença o Campeão Lance. Cynthia: conquiste a platina (Mestre Pokémon). Jessie: uma conquista secreta da Equipe Rocket.',
+      'No Perfil, em Outfit, as skins trancadas aparecem em silhueta, com o que falta para liberar.',
+      'Quem usava uma skin que agora precisa de conquista e ainda não tem essa conquista voltou para o Mochileiro.',
+      'Novas skins vão chegar aos poucos, sempre liberadas por conquistas e missões, nunca vendidas.',
+    ],
+  },
+  {
     version: '8.24',
     date: '2026-10-16',
     title: 'Salas especiais completas e menu de Hunt mais claro',

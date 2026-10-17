@@ -13,7 +13,7 @@
 // NAO e o GameState: aquele estado e do servidor de autoridade, e a resposta
 // dele sobrescreve o local — uma escolha gravada la seria apagada no flush.
 import { create } from 'zustand'
-import { skinValida } from '@/data/skinsDoTreinador'
+import { SKINS_DO_TREINADOR, SKIN_PADRAO, skinValida } from '@/data/skinsDoTreinador'
 import { definirSkin, skinsDe } from '@/data/remote/skinRpc'
 
 const CHAVE = 'novo-poke-idle:skin-do-treinador'
@@ -95,9 +95,16 @@ export const useSkinDoTreinadorStore = create<SkinDoTreinadorStore>((set, get) =
       if (doServidor) {
         get().lembrar([[userId, doServidor]])
         gravarLocal(userId, skinValida(doServidor))
-      } else if (local) {
+      } else if (local && ehGratis(local)) {
         // Escolha feita na 7.88 (so local): leva pro servidor, pro rival ver.
         await definirSkin(skinValida(local))
+      } else if (local) {
+        // SKIN TRANCADA NA COPIA LOCAL (17/10/2026). O servidor nao tem skin
+        // (o reset da migration de skins desbloqueaveis devolveu ao padrao), e
+        // a copia local guarda uma que agora pede conquista. Reenviar seria
+        // recusado; manter mostraria no campo uma skin que o jogador nao tem.
+        get().lembrar([[userId, null]])
+        gravarLocal(userId, SKIN_PADRAO)
       }
     } catch {
       // Sem servidor agora: o campo segue com a copia local.
@@ -115,6 +122,11 @@ export const useSkinDoTreinadorStore = create<SkinDoTreinadorStore>((set, get) =
     set({ porUsuario: {} })
   },
 }))
+
+/** Skin gratis (livre pra qualquer jogador, sem conquista)? */
+function ehGratis(id: string): boolean {
+  return SKINS_DO_TREINADOR.find((s) => s.id === skinValida(id))?.desbloqueio.t === 'gratis'
+}
 
 /** Skin a desenhar pra uma conta: padrao sem conta, sem escolha ou com id desconhecido. */
 export function skinDe(porUsuario: Record<string, string | null>, userId: string | null | undefined): string {
