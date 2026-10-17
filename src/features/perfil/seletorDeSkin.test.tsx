@@ -10,6 +10,7 @@ const rpc = vi.hoisted(() => ({ definirSkin: vi.fn(), skinsDe: vi.fn() }))
 vi.mock('@/data/remote/skinRpc', () => rpc)
 import { SKINS_DO_TREINADOR, SKIN_PADRAO, folhaDaSkin, skinValida, quadroDaSkin } from '@/data/skinsDoTreinador'
 import { skinDe, useSkinDoTreinadorStore } from '@/stores/skinDoTreinadorStore'
+import { useConquistasStore } from '@/stores/conquistasStore'
 import { SeletorDeSkin } from './SeletorDeSkin'
 
 const EU = 'u-eu'
@@ -23,6 +24,12 @@ describe('skins do treinador em campo', () => {
     rpc.skinsDe.mockReset()
     rpc.definirSkin.mockImplementation(async (s: string) => s)
     rpc.skinsDe.mockResolvedValue(new Map())
+    // Conquistas ja carregadas, e com as que liberam as skins de merito: os
+    // testes de troca abaixo nao sao sobre o cadeado (ele tem teste proprio).
+    useConquistasStore.setState({
+      carregado: true,
+      desbloqueadas: { assistente_do_professor: 'x', decolando_de_novo: 'x', campeao: 'x', mestre_pokemon: 'x' },
+    })
   })
   afterEach(cleanup)
 
@@ -41,6 +48,28 @@ describe('skins do treinador em campo', () => {
       expect(button.querySelector('svg')!.getAttribute('viewBox')).toBe(`0 0 ${g.frameWidth} ${g.frameHeight}`)
       expect(button.querySelector('image')!.getAttribute('href')).toBe(folhaDaSkin(id, 'Idle'))
     }
+  })
+
+  it('skin de merito sem a conquista fica trancada: silhueta, requisito e sem troca', async () => {
+    useConquistasStore.setState({ carregado: true, desbloqueadas: {} })
+    render(<SeletorDeSkin userId={EU} />)
+    const lance = screen.getByRole('button', { name: /^Lance \(trancada/ })
+    expect(lance.hasAttribute('disabled')).toBe(true)
+    expect(lance.textContent).toContain('Vença o Campeão Lance.')
+    expect(lance.querySelector('svg')!.getAttribute('style')).toContain('brightness(0)')
+    await userEvent.click(lance)
+    expect(rpc.definirSkin).not.toHaveBeenCalled()
+    // As gratis da franquia continuam livres.
+    expect(screen.getByRole('button', { name: 'Red' }).hasAttribute('disabled')).toBe(false)
+  })
+
+  it('copia local com skin trancada e servidor sem skin: volta ao padrao, sem reenviar', async () => {
+    localStorage.setItem('novo-poke-idle:skin-do-treinador', JSON.stringify({ [EU]: 'lance' }))
+    useSkinDoTreinadorStore.setState({ porUsuario: { [EU]: 'lance' } })
+    await useSkinDoTreinadorStore.getState().sincronizarMinha(EU)
+    expect(rpc.definirSkin).not.toHaveBeenCalled()
+    expect(skinDe(useSkinDoTreinadorStore.getState().porUsuario, EU)).toBe(SKIN_PADRAO)
+    expect(JSON.parse(localStorage.getItem('novo-poke-idle:skin-do-treinador')!)).toEqual({ [EU]: SKIN_PADRAO })
   })
 
   it('id desconhecido cai na skin padrao', () => {
