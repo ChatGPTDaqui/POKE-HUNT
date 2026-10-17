@@ -146,6 +146,8 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'town.jpg', 'volcano.jpg',
       // Leva 2026-08-22, as duas arenas de duelo.
       'dojo.jpg', 'dragon.jpg',
+      // Onda 1 dos sub-biomas novos (17/10/2026): spawn na entrada de baixo.
+      'canyon.jpg', 'coral-reef.jpg', 'cycling-road.jpg', 'dark-cave.jpg', 'farm.jpg', 'ilex-forest.jpg', 'lily-pond.jpg', 'meteor-falls.jpg', 'mushroom-glade.jpg', 'oasis.jpg', 'river.jpg', 'rock-tunnel.jpg', 'seafoam-islands.jpg', 'treetops.jpg', 'victory-road.jpg', 'waterfall.jpg', 'whirl-islands.jpg',
     ]
 
     const semCirculo: string[] = []
@@ -173,9 +175,36 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       .map(([arte]) => arte.replace('assets/hunt-backgrounds/', ''))
       .sort()
     expect(inventados).toEqual([
-      'abyss.jpg', 'dojo.jpg', 'dragon.jpg', 'fairy-cave.jpg', 'ice-cave.jpg',
-      'island.jpg', 'lake.jpg', 'metropolis.jpg', 'slum.jpg', 'town-night.jpg',
-      'town.jpg', 'volcano.jpg', 'wasteland.jpg',
+      'abyss.jpg',
+      'canyon.jpg',
+      'coral-reef.jpg',
+      'cycling-road.jpg',
+      'dark-cave.jpg',
+      'dojo.jpg',
+      'dragon.jpg',
+      'fairy-cave.jpg',
+      'farm.jpg',
+      'ice-cave.jpg',
+      'ilex-forest.jpg',
+      'island.jpg',
+      'lake.jpg',
+      'lily-pond.jpg',
+      'meteor-falls.jpg',
+      'metropolis.jpg',
+      'mushroom-glade.jpg',
+      'oasis.jpg',
+      'river.jpg',
+      'rock-tunnel.jpg',
+      'seafoam-islands.jpg',
+      'slum.jpg',
+      'town-night.jpg',
+      'town.jpg',
+      'treetops.jpg',
+      'victory-road.jpg',
+      'volcano.jpg',
+      'wasteland.jpg',
+      'waterfall.jpg',
+      'whirl-islands.jpg',
     ])
   })
 

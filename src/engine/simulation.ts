@@ -19,7 +19,7 @@
 // Um comparador acusaria jogador honesto. E re-simular pra conferir custa a
 // MESMA CPU que simular; se vai gastar, gaste sendo a autoridade.
 import { SPECIES, createPokeInstance, rollIvsDoProtetor, type PokeInstance } from '@/data/pokes'
-import { mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, mapWalkRadius, isCellBlocked, nearestOpenPoint, type MapDef } from '@/data/maps'
+import { mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, mapWalkRadius, isCellBlocked, nearestOpenPoint, olharParaDentro, type MapDef } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
 import { isDamagingAbility } from '@/data/abilities'
@@ -901,6 +901,7 @@ function trocarPorDesmaio(world: WorldState, gameState: GameStateStore, dt: numb
   if (entrada) {
     player.x = entrada.x
     player.y = entrada.y
+    player.facing = olharParaDentro(world.mapDef, entrada.x, entrada.y) ?? player.facing
     player.pathWaypoints = null
     player.pathIndex = 0
     player.pathTargetX = null
@@ -1074,6 +1075,7 @@ export function buildMapWorld(
     ? nearestOpenPoint(mapDef, spawn.x, spawn.y) ?? spawn
     : spawn
   const player = createPlayerEntity(base.counters, { poke: activePoke, x: spawnFinal.x, y: spawnFinal.y })
+  player.facing = olharParaDentro(mapDef, spawnFinal.x, spawnFinal.y) ?? player.facing
   if (isDead(player)) player.fainted = true
 
   const sequenceIndex = progresso?.sequenceIndex ?? 0

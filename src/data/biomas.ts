@@ -414,6 +414,26 @@ const ARTE = {
   grutaFeerica: 'assets/hunt-backgrounds/fairy-cave.jpg',
   florestaQueimada: 'assets/hunt-backgrounds/burnt-forest.jpg',
   abismo: 'assets/hunt-backgrounds/abyss.jpg',
+
+  // Fundos proprios da onda 1 dos sub-biomas novos (17/10/2026), gerados pelo
+  // dono; colisao pintada pelo chao andavel (scripts/body-block-refs).
+  fundoFarm: 'assets/hunt-backgrounds/farm.jpg',
+  fundoCyclingRoad: 'assets/hunt-backgrounds/cycling-road.jpg',
+  fundoMushroomGlade: 'assets/hunt-backgrounds/mushroom-glade.jpg',
+  fundoIlexForest: 'assets/hunt-backgrounds/ilex-forest.jpg',
+  fundoTreetops: 'assets/hunt-backgrounds/treetops.jpg',
+  fundoCoralReef: 'assets/hunt-backgrounds/coral-reef.jpg',
+  fundoWhirlIslands: 'assets/hunt-backgrounds/whirl-islands.jpg',
+  fundoLilyPond: 'assets/hunt-backgrounds/lily-pond.jpg',
+  fundoRiver: 'assets/hunt-backgrounds/river.jpg',
+  fundoWaterfall: 'assets/hunt-backgrounds/waterfall.jpg',
+  fundoCanyon: 'assets/hunt-backgrounds/canyon.jpg',
+  fundoOasis: 'assets/hunt-backgrounds/oasis.jpg',
+  fundoRockTunnel: 'assets/hunt-backgrounds/rock-tunnel.jpg',
+  fundoDarkCave: 'assets/hunt-backgrounds/dark-cave.jpg',
+  fundoMeteorFalls: 'assets/hunt-backgrounds/meteor-falls.jpg',
+  fundoVictoryRoad: 'assets/hunt-backgrounds/victory-road.jpg',
+  fundoSeafoamIslands: 'assets/hunt-backgrounds/seafoam-islands.jpg',
 } as const
 
 export const BIOMAS: BiomaDef[] = [
@@ -431,8 +451,8 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'farm', nome: 'Fazenda MuuMuu', peso: 6, loot: 'civilizado' },
-      { chave: 'cycling-road', nome: 'Estrada de Ciclismo', peso: 6, loot: 'toxico' },
+      { chave: 'farm', nome: 'Fazenda MuuMuu', peso: 6, loot: 'civilizado', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.fundoFarm } },
+      { chave: 'cycling-road', nome: 'Estrada de Ciclismo', peso: 6, loot: 'toxico', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.fundoCyclingRoad } },
     ],
     especiais: [
       { chave: 'safari-zone', nome: 'Zona Safári', peso: 1, loot: 'safari', estagioMinimo: 4, pedra: 'NORMAL', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.matoAlto } },
@@ -451,9 +471,9 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'mushroom-glade', nome: 'Clareira dos Cogumelos', peso: 10, loot: 'toxico' },
-      { chave: 'ilex-forest', nome: 'Bosque de Ilex', peso: 6, loot: 'basico' },
-      { chave: 'treetops', nome: 'Copa das Árvores', peso: 6, loot: 'remoto', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.selva } },
+      { chave: 'mushroom-glade', nome: 'Clareira dos Cogumelos', peso: 10, loot: 'toxico', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.fundoMushroomGlade } },
+      { chave: 'ilex-forest', nome: 'Bosque de Ilex', peso: 6, loot: 'basico', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.fundoIlexForest } },
+      { chave: 'treetops', nome: 'Copa das Árvores', peso: 6, loot: 'remoto', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.fundoTreetops } },
     ],
     especiais: [
       { chave: 'mysterious-garden', nome: 'Jardim Misterioso', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'GRASS', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.campina } },
@@ -473,8 +493,8 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'coral-reef', nome: 'Recife de Coral', peso: 6, loot: 'remoto', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.praia } },
-      { chave: 'whirl-islands', nome: 'Ilhas Redemoinho', peso: 6, loot: 'remoto' },
+      { chave: 'coral-reef', nome: 'Recife de Coral', peso: 6, loot: 'remoto', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.fundoCoralReef } },
+      { chave: 'whirl-islands', nome: 'Ilhas Redemoinho', peso: 6, loot: 'remoto', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.fundoWhirlIslands } },
     ],
     especiais: [
       { chave: 'orange-archipelago', nome: 'Arquipélago Laranja', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'WATER', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.praia } },
@@ -492,9 +512,9 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'lily-pond', nome: 'Lagoa das Vitórias-Régias', peso: 10, loot: 'basico' },
-      { chave: 'river', nome: 'Rio e Corredeira', peso: 10, loot: 'basico' },
-      { chave: 'waterfall', nome: 'Cachoeira de Tohjo', peso: 6, loot: 'remoto' },
+      { chave: 'lily-pond', nome: 'Lagoa das Vitórias-Régias', peso: 10, loot: 'basico', bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.fundoLilyPond } },
+      { chave: 'river', nome: 'Rio e Corredeira', peso: 10, loot: 'basico', bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.fundoRiver } },
+      { chave: 'waterfall', nome: 'Cachoeira de Tohjo', peso: 6, loot: 'remoto', bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.fundoWaterfall } },
     ],
     especiais: [
       { chave: 'lake-of-rage', nome: 'Lago da Fúria', peso: 1, loot: 'remoto', estagioMinimo: 2, pedra: 'WATER', shiny: { especie: 'gyarados', multiplicador: 10 } },
@@ -513,8 +533,8 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'canyon', nome: 'Cânion da Rota 45', peso: 6, loot: 'remoto' },
-      { chave: 'oasis', nome: 'Oásis', peso: 3, loot: 'remoto', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.deserto } },
+      { chave: 'canyon', nome: 'Cânion da Rota 45', peso: 6, loot: 'remoto', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.fundoCanyon } },
+      { chave: 'oasis', nome: 'Oásis', peso: 3, loot: 'remoto', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.fundoOasis } },
     ],
     especiais: [
       { chave: 'grampa-canyon', nome: 'Cânion do Vovô', peso: 1, loot: 'profundo', estagioMinimo: 6, pedra: 'ROCK' },
@@ -531,10 +551,10 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'rock-tunnel', nome: 'Túnel de Pedra', peso: 10, loot: 'basico', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
-      { chave: 'dark-cave', nome: 'Caverna Escura', peso: 6, loot: 'basico', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
-      { chave: 'meteor-falls', nome: 'Cataratas Meteoro', peso: 6, loot: 'remoto', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
-      { chave: 'victory-road', nome: 'Estrada da Vitória', peso: 3, loot: 'vitoria', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
+      { chave: 'rock-tunnel', nome: 'Túnel de Pedra', peso: 10, loot: 'basico', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.fundoRockTunnel } },
+      { chave: 'dark-cave', nome: 'Caverna Escura', peso: 6, loot: 'basico', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.fundoDarkCave } },
+      { chave: 'meteor-falls', nome: 'Cataratas Meteoro', peso: 6, loot: 'remoto', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.fundoMeteorFalls } },
+      { chave: 'victory-road', nome: 'Estrada da Vitória', peso: 3, loot: 'vitoria', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.fundoVictoryRoad } },
     ],
     especiais: [
       { chave: 'mt-moon', nome: 'Monte Lua', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'FAIRY', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.grutaFeerica } },
@@ -553,7 +573,7 @@ export const BIOMAS: BiomaDef[] = [
       // Onda 1 (16/10/2026). Sem arte propria ainda: herdam o fundo do bioma ou
       // reaproveitam o fundo existente mais parecido (e a colisao dele, que e
       // propriedade da arte). Quando a arte propria chegar, troca so o `bg`.
-      { chave: 'seafoam-islands', nome: 'Ilhas Espuma', peso: 10, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.cavernaDeGelo } },
+      { chave: 'seafoam-islands', nome: 'Ilhas Espuma', peso: 10, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.fundoSeafoamIslands } },
       { chave: 'shoal-cave', nome: 'Gruta da Maré', peso: 6, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.cavernaDeGelo } },
       { chave: 'tundra', nome: 'Tundra', peso: 10, loot: 'gelado' },
     ],

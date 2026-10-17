@@ -54,7 +54,7 @@ import {
 import { SUB_BIOMA_TIERS } from '@/data/generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from '@/data/generated/spawnTiers.generated'
 import { getEncounter } from '@/data/enemies'
-import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
+import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint, olharParaDentro } from '@/data/maps'
 import type { MapItemDrop } from '@/data/generated/types'
 import type { ClimaTipo, SalaAtiva, WorldState } from '../types'
 
@@ -1403,6 +1403,7 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   if (ponto) {
     world.player.x = ponto.x
     world.player.y = ponto.y
+    world.player.facing = olharParaDentro(novoMapDef, ponto.x, ponto.y) ?? world.player.facing
     return
   }
   // Sala sem ponto de spawn proprio (sem body-block pintado): mantem a
