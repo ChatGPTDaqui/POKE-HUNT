@@ -258,6 +258,32 @@ export function sortearSalaEspecial(rng: Rng, mapId: string, indice: number, cic
   return weightedPick(rng, opcoes, (e) => e.peso).chave
 }
 
+/**
+ * A distribuicao COMPLETA do sorteio de sala, com as salas especiais junto.
+ *
+ * `distribuicaoDeSala` descreve so o sorteio normal pela curva, e continua
+ * existindo assim porque e ele que a trilha e os testes de curva comparam. Esta
+ * aqui e o que o JOGADOR encontra no longo prazo: cada troca tem
+ * `CHANCE_DE_SALA_ESPECIAL` de virar uma especial possivel (repartida pelo
+ * peso delas), e o resto segue a curva.
+ *
+ * A excecao da primeira sala da sessao (nunca especial) fica fora da conta de
+ * proposito: ela vale uma sala por sessao, e o ciclo do estagio se repete sem
+ * ela. Somar o desconto faria a porcentagem depender de quanto tempo a sessao
+ * dura.
+ */
+export function distribuicaoComEspeciais(mapId: string): Record<string, number> {
+  const normal = distribuicaoDeSala(mapId)
+  const especiais = salasEspeciaisPossiveis(mapId)
+  if (especiais.length === 0) return normal
+  const pesoTotal = especiais.reduce((s, e) => s + e.peso, 0)
+  if (!(pesoTotal > 0)) return normal
+  const saida: Record<string, number> = {}
+  for (const [chave, p] of Object.entries(normal)) saida[chave] = p * (1 - CHANCE_DE_SALA_ESPECIAL)
+  for (const e of especiais) saida[e.chave] = CHANCE_DE_SALA_ESPECIAL * (e.peso / pesoTotal)
+  return saida
+}
+
 /** A sala e uma sala especial? */
 export function ehSalaEspecial(sala: SalaAtiva | null | undefined): boolean {
   return sala != null && SALA_ESPECIAL_POR_CHAVE[sala.chave] != null

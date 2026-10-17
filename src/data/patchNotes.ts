@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.23',
+    date: '2026-10-16',
+    title: 'Menu de Hunt com as salas especiais',
+    highlights: [
+      'No menu de Hunt, cada estágio ganhou uma aba para cada sala especial possível, com a chance dela e a lista de Pokémon que aparecem lá.',
+      'A aba Estágio agora soma as salas especiais na conta: as porcentagens de cada Pokémon são as do sorteio completo, e quem só nasce numa sala especial (como Bulbasaur e Eevee) aparece na lista.',
+    ],
+  },
+  {
     version: '8.22',
     date: '2026-10-16',
     title: 'Wiki dos biomas e Pokédex com salas especiais',

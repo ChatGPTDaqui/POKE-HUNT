@@ -24,13 +24,13 @@
 //  3. QUEM DECIDE O SUB-BIOMA E `distribuicaoDeSala`, e nao o `peso` estatico
 //     de `data/biomas.ts`. Foi exatamente essa confusao que fez a curva de
 //     profundidade ficar dois meses na tela sem valer no jogo (PH-476).
-import { SUB_BIOMA_POR_CHAVE, type BiomaDef } from '@/data/biomas'
+import { SALA_ESPECIAL_POR_CHAVE, SUB_BIOMA_POR_CHAVE, type BiomaDef } from '@/data/biomas'
 import { estagioId, niveisDoEstagio, quantidadeDeSalas, PREFIXO_DO_PESADELO } from '@/data/estagios'
 import { MAPS } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { SPECIES, type Species } from '@/data/pokes'
 import {
-  contextoDeSpawn, contextoDoProtetor, distribuicaoDeSala, protetorDaSala,
+  contextoDeSpawn, contextoDoProtetor, distribuicaoComEspeciais, protetorDaSala,
   type ContextoDeSpawn, type TipoDeProtetor,
 } from '@/engine/systems/salaSystem'
 
@@ -51,6 +51,8 @@ export interface SubBiomaDoEstagio {
   nome: string
   /** Chance de uma sala deste estagio cair neste sub-bioma, em porcentagem. */
   pct: number
+  /** Sala especial (onda 2): sorteio a parte, por cima da curva. */
+  especial: boolean
 }
 
 /** Uma `SalaAtiva` de mentira, so pra alimentar as funcoes puras do motor. */
@@ -112,18 +114,28 @@ function mapIdDoEstagio(bioma: string, estagio: number, pesadelo: boolean): stri
   return pesadelo ? `${PREFIXO_DO_PESADELO}${id}` : id
 }
 
-/** Os sub-biomas que ESTE estagio sorteia, com a chance de cada um. */
+/**
+ * Os sub-biomas e as salas especiais que ESTE estagio sorteia, com a chance de
+ * cada um. Os comuns primeiro (do maior pro menor), as especiais no fim.
+ *
+ * A CHANCE E A DO SORTEIO COMPLETO (`distribuicaoComEspeciais`), e nao so a da
+ * curva. Ate a onda 2 as duas eram a mesma coisa; com as salas especiais
+ * tirando a sua fatia de cada troca, a aba "Estagio" anunciaria os comuns
+ * inflados e nunca mostraria Eevee, Porygon e os iniciais de Kanto, que so
+ * nascem nelas.
+ */
 export function subBiomasDoEstagio(
   bioma: BiomaDef, estagio: number, pesadelo = false,
 ): SubBiomaDoEstagio[] {
-  const distribuicao = distribuicaoDeSala(mapIdDoEstagio(bioma.chave, estagio, pesadelo))
+  const distribuicao = distribuicaoComEspeciais(mapIdDoEstagio(bioma.chave, estagio, pesadelo))
   return Object.entries(distribuicao)
     .map(([chave, p]) => ({
       chave,
       nome: SUB_BIOMA_POR_CHAVE[chave]?.sub.nome ?? chave,
       pct: p * 100,
+      especial: SALA_ESPECIAL_POR_CHAVE[chave] != null,
     }))
-    .sort((a, b) => b.pct - a.pct)
+    .sort((a, b) => Number(a.especial) - Number(b.especial) || b.pct - a.pct)
 }
 
 /**

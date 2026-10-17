@@ -29,7 +29,7 @@ import { weightedPick } from '@/core/random'
 import { createRng } from '@/core/rng'
 import { BIOMAS, BIOMA_POR_CHAVE } from '@/data/biomas'
 import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio, quantidadeDeSalas } from '@/data/estagios'
-import { contextoDeSpawn, sortearSala } from '@/engine/systems/salaSystem'
+import { contextoDeSpawn, novaSala } from '@/engine/systems/salaSystem'
 import { elencoDoEstagio, subBiomasDoEstagio } from './elencoDoEstagio'
 
 /**
@@ -44,7 +44,10 @@ function amostrar(bioma: string, estagio: number, n: number): Map<string, number
   const rng = createRng(20260903)
   const conta = new Map<string, number>()
   for (let i = 0; i < n; i++) {
-    const chave = sortearSala(rng, mapId)
+    // O SORTEIO COMPLETO, com as salas especiais (onda 2): `novaSala` e o que o
+    // jogo chama. `ciclos: 1` porque a primeira sala da sessao nunca e
+    // especial, e a tela descreve o ciclo que se repete, nao a abertura.
+    const chave = novaSala(rng, mapId, i % salas, 1)?.chave
     if (!chave) continue
     // O indice anda em ciclo porque o jogador percorre as salas em ordem — cada
     // indice acontece uma vez por volta, que e o peso igual que a agregacao usa.
