@@ -93,7 +93,14 @@ export function Explicacao({
           ponteiro.current = e.pointerType || 'mouse'
         }}
         onClick={(e: React.MouseEvent) => {
-          if (ponteiro.current === 'mouse') return
+          // MOUSE: o hover ja abre, mas o tooltip FECHA ao pressionar — e o
+          // jogador que clica na palavra pra ler (pedido do dono, 16/10/2026)
+          // via a bolha sumir no clique. Clicar passa a manter aberta. Sem
+          // preventDefault: o clique continua chegando no card de baixo.
+          if (ponteiro.current === 'mouse') {
+            setAberto(true)
+            return
+          }
           // No dedo o toque na palavra e SO pra bolha: sem isto, tocar a
           // Natureza dentro de um card abriria a bolha e o card junto.
           e.stopPropagation()
