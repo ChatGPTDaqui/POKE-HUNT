@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.28',
+    date: '2026-10-17',
+    title: 'Cenários novos para mais 28 lugares',
+    highlights: [
+      'Ganharam cenário próprio: Gruta da Maré, Tundra, Caminho Ardente, Encosta do Monte Brasa, Campo de Cinzas, Fontes Termais, Cais do Porto, Galerias Subterrâneas, Ferro-Velho, Torre Broto, Santuário de Meditação, Pilar Celeste, Monte Pira, Torre Queimada e Navio Abandonado.',
+      'Salas especiais com cenário próprio: Zona Safári, Charmander na Chuva, Jardim Misterioso, Colônia de Pikachu, Arquipélago Laranja, Pico da Donzela, Lago da Fúria, Esquadrão Squirtle, Cânion do Vovô, Monte Lua, Caverna dos Diglett, Cume do Monte Prata e Esconderijo Rocket.',
+      'Como nos anteriores, os Pokémon só andam no chão e você entra pela borda do mapa, já olhando para dentro.',
+    ],
+  },
+  {
     version: '8.27',
     date: '2026-10-17',
     title: 'Cenários novos para 17 lugares',

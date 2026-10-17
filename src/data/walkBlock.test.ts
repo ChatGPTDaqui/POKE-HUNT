@@ -54,7 +54,8 @@ function artesEmUso(): Map<string, string> {
   const usos = new Map<string, string>()
   for (const bioma of BIOMAS) {
     if (bioma.bg.image) usos.set(bioma.bg.image, `bioma ${bioma.chave}`)
-    for (const sub of bioma.subBiomas) {
+    // Sala especial tambem e sala: SUB_BIOMA_POR_CHAVE resolve o fundo dela igual.
+    for (const sub of [...bioma.subBiomas, ...(bioma.especiais ?? [])]) {
       if (sub.bg?.image) usos.set(sub.bg.image, `sub-bioma ${sub.chave}`)
     }
   }
@@ -68,7 +69,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
   it('toda sala mostra uma arte com grade pintada', () => {
     const semGrade: string[] = []
     for (const bioma of BIOMAS) {
-      for (const sub of bioma.subBiomas) {
+      for (const sub of [...bioma.subBiomas, ...(bioma.especiais ?? [])]) {
         const arte = sub.bg?.image ?? bioma.bg.image
         if (!arte) { semGrade.push(`${sub.chave} (sem arte nenhuma)`); continue }
         if (ARTES_SEM_PINTURA.has(arte)) continue
@@ -148,6 +149,8 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'dojo.jpg', 'dragon.jpg',
       // Onda 1 dos sub-biomas novos (17/10/2026): spawn na entrada de baixo.
       'canyon.jpg', 'coral-reef.jpg', 'cycling-road.jpg', 'dark-cave.jpg', 'farm.jpg', 'ilex-forest.jpg', 'lily-pond.jpg', 'meteor-falls.jpg', 'mushroom-glade.jpg', 'oasis.jpg', 'river.jpg', 'rock-tunnel.jpg', 'seafoam-islands.jpg', 'treetops.jpg', 'victory-road.jpg', 'waterfall.jpg', 'whirl-islands.jpg',
+      // Onda 2 (17/10/2026): sub-biomas restantes e salas especiais.
+      'abandoned-ship.jpg', 'ash-field.jpg', 'burned-tower.jpg', 'digletts-cave.jpg', 'fiery-path.jpg', 'grampa-canyon.jpg', 'harbor.jpg', 'hot-springs.jpg', 'junkyard.jpg', 'lake-of-rage.jpg', 'maidens-peak.jpg', 'meditation-shrine.jpg', 'mt-ember.jpg', 'mt-moon.jpg', 'mt-pyre.jpg', 'mt-silver-summit.jpg', 'mysterious-garden.jpg', 'orange-archipelago.jpg', 'pikachu-colony.jpg', 'rocket-hideout.jpg', 'safari-zone.jpg', 'shoal-cave.jpg', 'sky-pillar.jpg', 'sprout-tower.jpg', 'squirtle-squad.jpg', 'stray-charmander.jpg', 'tundra.jpg', 'underground.jpg',
     ]
 
     const semCirculo: string[] = []
@@ -175,31 +178,59 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       .map(([arte]) => arte.replace('assets/hunt-backgrounds/', ''))
       .sort()
     expect(inventados).toEqual([
+      'abandoned-ship.jpg',
       'abyss.jpg',
+      'ash-field.jpg',
+      'burned-tower.jpg',
       'canyon.jpg',
       'coral-reef.jpg',
       'cycling-road.jpg',
       'dark-cave.jpg',
+      'digletts-cave.jpg',
       'dojo.jpg',
       'dragon.jpg',
       'fairy-cave.jpg',
       'farm.jpg',
+      'fiery-path.jpg',
+      'grampa-canyon.jpg',
+      'harbor.jpg',
+      'hot-springs.jpg',
       'ice-cave.jpg',
       'ilex-forest.jpg',
       'island.jpg',
+      'junkyard.jpg',
+      'lake-of-rage.jpg',
       'lake.jpg',
       'lily-pond.jpg',
+      'maidens-peak.jpg',
+      'meditation-shrine.jpg',
       'meteor-falls.jpg',
       'metropolis.jpg',
+      'mt-ember.jpg',
+      'mt-moon.jpg',
+      'mt-pyre.jpg',
+      'mt-silver-summit.jpg',
       'mushroom-glade.jpg',
+      'mysterious-garden.jpg',
       'oasis.jpg',
+      'orange-archipelago.jpg',
+      'pikachu-colony.jpg',
       'river.jpg',
       'rock-tunnel.jpg',
+      'rocket-hideout.jpg',
+      'safari-zone.jpg',
       'seafoam-islands.jpg',
+      'shoal-cave.jpg',
+      'sky-pillar.jpg',
       'slum.jpg',
+      'sprout-tower.jpg',
+      'squirtle-squad.jpg',
+      'stray-charmander.jpg',
       'town-night.jpg',
       'town.jpg',
       'treetops.jpg',
+      'tundra.jpg',
+      'underground.jpg',
       'victory-road.jpg',
       'volcano.jpg',
       'wasteland.jpg',
