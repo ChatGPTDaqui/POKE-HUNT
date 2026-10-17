@@ -131,7 +131,7 @@ describe('arte de golpe acompanha o POKE num combate real (PH-103)', () => {
 // pra ninguem "consertar" o que esta certo:
 //
 // ela e criada em `simulation.ts` sobre o inimigo que acabou de ser derrotado,
-// com `delay: DEATH_ANIM_GRACE_PERIOD`. Inimigo abatido nao anda, e o corpo
+// com `delay: ESPERA_DA_BOLA_DE_CAPTURA` (3s). Inimigo abatido nao anda, e o corpo
 // dele fica em campo 4 segundos enquanto a animacao da bola dura ~1 — nao ha
 // deslocamento pra acompanhar. Dar `seguir` a ela seria custo sem efeito, e no
 // caminho em que o corpo e removido antes do fim (`keepCorpses` falso mais

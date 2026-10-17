@@ -81,6 +81,10 @@ export const STARTER_LEVEL = 1
 export const STARTER_RARITY = 'comum' as const
 export const STARTER_IVS = { hp: 23, atkFis: 23, atkEsp: 23, def: 23, defEsp: 23, speed: 23 }
 export const DEATH_ANIM_GRACE_PERIOD = 4.0 // segundos que um inimigo derrotado fica visivel tocando a pose Faint
+// Quando a Pokebola de captura e arremessada depois do desmaio (pedido do dono,
+// 17/10/2026: 3s). Antes ela esperava o corpo sumir inteiro (4s); agora a bola
+// chega com o corpo ainda caido, e ele some no meio do arremesso.
+export const ESPERA_DA_BOLA_DE_CAPTURA = 3.0
 
 /**
  * PH-301: quantas vezes o sorteio do protetor pode repetir procurando um que o
@@ -408,6 +412,37 @@ function pontoEmAlcanceDeCombate(
 // — o mesmo motivo pelo qual `garantirProtetorDaSala` e injetado de fora em
 // `garantirTransicaoDeQuotaFechada`.
 const MELEE_RANGE_PADDING_LOCAL = 10
+
+/**
+ * Onde o protetor (Guardian/Lord) aparece quando entra NOVO na sala: um ponto
+ * andavel qualquer do mapa, longe do POKE (pedido do dono, 17/10/2026: "ele
+ * nasce em algum lugar aleatorio do mapa"). Antes ele nascia no cone a frente
+ * do POKE e, sob autoridade, colado nele (o ramo de retomada abaixo).
+ *
+ * O sorteio sai de uma semente DERIVADA DO `uid`, e nao de `world.rng`, por
+ * dois motivos: a adocao do chefe do servidor promete zero RNG consumido
+ * (`adotarProtetorDaAutoridade`), e mexer na sequencia do servidor mudaria
+ * todo sorteio seguinte da janela. Mesmo uid, mesmo ponto — em qualquer ponta.
+ */
+function pontoAleatorioDoProtetor(mapDef: MapDef, uid: string, longeDe: Point | null): Point {
+  let h = 2166136261
+  for (let i = 0; i < uid.length; i++) h = Math.imul(h ^ uid.charCodeAt(i), 16777619)
+  const proximo = () => {
+    h = (h + 0x6d2b79f5) | 0
+    let t = Math.imul(h ^ (h >>> 15), 1 | h)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+  const { width, height } = mapDef.bounds
+  let reserva: Point | null = null
+  for (let i = 0; i < 80; i++) {
+    const x = proximo() * width, y = proximo() * height
+    if (isCellBlocked(mapDef, x, y)) continue
+    if (!longeDe || Math.hypot(x - longeDe.x, y - longeDe.y) >= SPAWN_MIN_DISTANCE) return { x, y }
+    reserva ??= { x, y }
+  }
+  return reserva ?? nearestOpenPoint(mapDef, width / 2, height / 2) ?? { x: width / 2, y: height / 2 }
+}
 const RAIO_PADRAO_DE_INIMIGO = 15
 
 /**
@@ -521,7 +556,9 @@ function criarEntidadeDoProtetor(
   }
   if (!escolhido) throw new Error('Sorteio de protetor não produziu candidato')
   const { encounterId, level, ivs, poke } = escolhido
-  const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
+  // Duelo (ponto de entrada pintado) mantem a entrada; sala de bioma sorteia.
+  const onde = entrada ?? pontoAleatorioDoProtetor(mapDef, poke.uid, player)
+  const enemy = createEnemyEntity(counters, { poke, x: onde.x, y: onde.y, encounterId })
   enemy.isProtetor = true
   const pendente: ProtetorPendente = {
     uid: poke.uid, speciesId: poke.speciesId, encounterId, level, ivs,
@@ -688,6 +725,15 @@ export function adotarProtetorDaAutoridade(
   const { enemy, pendente } = criarEntidadeDoProtetor(
     world, world.mapDef, ctx, tipo, vindo, world.player, entradaDoInimigo(world.mapDef, world.sala),
   )
+  // O ramo de retomada poe o chefe EM ALCANCE DE COMBATE (PH-423) — conserto
+  // do livelock do SERVIDOR, que reconstroi o mundo a cada janela. Aqui e a
+  // primeira vez que ESTE cliente ve esse chefe: ele aparece num ponto
+  // qualquer do mapa, como um protetor novo, e nao colado no POKE.
+  if (!entradaDoInimigo(world.mapDef, world.sala)) {
+    const onde = pontoAleatorioDoProtetor(world.mapDef, vindo.uid, world.player)
+    enemy.x = onde.x
+    enemy.y = onde.y
+  }
   aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
   world.enemies.push(enemy)
   world.protetorPendente = pendente
@@ -1183,7 +1229,9 @@ export function buildMapWorld(
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
         enemies.push(enemy)
       }
-    } else {
+    } else if (!chefeJaCaiu) {
+      // Chefe ja caiu: a sala esta decidida e nada mais nasce nela ate trocar
+      // (pedido do dono, 17/10/2026 — o protetor e o ultimo POKE da sala).
       for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
         const enemy = spawnEnemyAt(base, mapDef, ctx, player, entradaDoInimigo(mapDef, sala), enemies)
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
@@ -1396,10 +1444,10 @@ export function handleEnemyDefeated(
       world.effects.push(createWorldEffect(world.counters, {
         type: 'captureAnim', x: enemy.x, y: enemy.y, targetX: enemy.x, targetY: enemy.y,
         ballItemId: captureResult.ballItemId, success: captureResult.success,
-        delay: DEATH_ANIM_GRACE_PERIOD,
+        delay: ESPERA_DA_BOLA_DE_CAPTURA,
         duration: duracao,
       }))
-      atrasoDoToastMs = (DEATH_ANIM_GRACE_PERIOD + duracao) * 1000
+      atrasoDoToastMs = (ESPERA_DA_BOLA_DE_CAPTURA + duracao) * 1000
     }
 
     if (captureResult) {
@@ -1885,7 +1933,12 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // hoje dura um tick, e o harness nao a alcanca; ele e defesa em profundidade
   // para a PH-475, que torna a fresta (2) longa e observavel.
   if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn
-    && !world.protetorPendente && !comunsEsgotados(world, world.mapDef.id)) {
+    && !world.protetorPendente && !comunsEsgotados(world, world.mapDef.id)
+    // 17/10/2026: depois que o protetor cai, NADA mais nasce na sala — ela
+    // fica vazia ate a transicao. Antes o repovoamento voltava aqui de
+    // proposito (farm durante a espera pela autoridade); o dono pediu o
+    // contrario: "o 30 e o ultimo, nao nasce nenhum mob depois dele".
+    && !(world.sala && world.protetorResolvido)) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)

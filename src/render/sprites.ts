@@ -517,11 +517,12 @@ export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
 }
 
 /**
- * Quanto do corpo aparece sobre golpes: 80% opaco. Informações recebem uma
- * passada opaca antes dos golpes. Ver o call site em
- * renderer.ts#renderMap.
+ * Quanto do corpo aparece sobre golpes: 40% opaco, ou seja, onde o golpe cobre
+ * o POKE ele fica 60% visivel e 40% transparente (pedido do dono, 17/10/2026;
+ * era 0.8 — o golpe quase sumia em cima do corpo). Informações recebem uma
+ * passada opaca antes dos golpes. Ver o call site em renderer.ts#renderMap.
  */
-export const ALFA_DO_CORPO_POR_CIMA = 0.8
+export const ALFA_DO_CORPO_POR_CIMA = 0.4
 
 /**
  * Redesenha SO o sprite do POKE (sem sombra, aura ou marca) com alfa parcial,
@@ -1487,7 +1488,7 @@ function drawAoeRing(
  *   selo (era)    -23 a -10  <- em cima dos dois primeiros
  *
  * E NAO DAVA PRA CORRIGIR SO SUBINDO O SELO: entre o nome (-26) e a coluna de
- * numeros de dano (`EFFECT_BASE_GAP`, -44) sobram 14px, e o selo precisa de 19
+ * numeros de dano (entao a -44; hoje ela nasce no corpo, `NUMERO_NO_CORPO`) sobravam 14px, e o selo precisa de 19
  * com o deslocamento. A vertical acima da cabeca esta cheia.
  *
  * O flanco esta vazio, e os tres vizinhos provam: a coluna de numeros fica a
@@ -1816,18 +1817,26 @@ function resolveEffectOwner(effect: WorldEffect, world: WorldState): WorldEntity
 }
 
 const EFFECT_LANE_HEIGHT = 16
-const EFFECT_BASE_GAP = 44
 const EFFECT_COLUMN_X_OFFSET = -18
+/**
+ * Onde a coluna de numeros nasce, como FRACAO da altura visivel do corpo acima
+ * de `entity.y` (17/10/2026, pedido do dono: "numeros de dano mais proximos aos
+ * pokemons"). Ate entao ela nascia 44px ACIMA da cabeca, por cima da placa de
+ * nome/HP, e lia como texto solto no ar. Agora nasce na parte de cima do
+ * corpo e sobe pouco — o contorno preto do numero o mantem legivel sobre o
+ * sprite.
+ */
+const NUMERO_NO_CORPO = 0.45
 
 // Quanto o numero de dano sobe ao longo da vida dele.
-const SUBIDA_DO_NUMERO = 30
+const SUBIDA_DO_NUMERO = 16
 
 function effectAnchor(effect: WorldEffect, world: WorldState): { x: number; y: number } {
   const owner = resolveEffectOwner(effect, world)
   if (!owner) return { x: effect.targetX!, y: effect.targetY! }
   return {
     x: owner.x + EFFECT_COLUMN_X_OFFSET,
-    y: owner.y - visualTopOffset(owner) - EFFECT_BASE_GAP - effect.lane * EFFECT_LANE_HEIGHT,
+    y: owner.y - visualTopOffset(owner) * NUMERO_NO_CORPO - effect.lane * EFFECT_LANE_HEIGHT,
   }
 }
 
@@ -2036,14 +2045,16 @@ function drawDamageNumber(
  * A geometria, com `pe = entity.y + groundOffset(entity)` (o chao da sombra):
  *
  *   pe           sombra
- *   pe +  3      topo da placa do nome
- *   pe + 13      baseline do nome    <- NOME_ABAIXO_DOS_PES
+ *   pe +  0      topo da placa do nome (encosta na sombra)
+ *   pe + 10      baseline do nome    <- NOME_ABAIXO_DOS_PES
+ *
+ * (17/10/2026: subiu 3px, colado na base do POKE, a pedido do dono.)
  *
  * O `lane` continua separando dois textos do mesmo POKE, agora pra BAIXO: o
  * segundo golpe (ou "Ataque ↓" logo depois do golpe) cai na linha de baixo em
  * vez de escrever por cima do primeiro.
  */
-const NOME_ABAIXO_DOS_PES = 13
+const NOME_ABAIXO_DOS_PES = 10
 /** Altura de uma linha de nome com a placa (8px de fonte + 2px de folga em cima e embaixo). */
 const RAIA_DO_NOME = 12
 

@@ -42,7 +42,7 @@ describe('nome do golpe embaixo dos pes', () => {
     expect(moveis).toHaveLength(1)
     // `y` e o TOPO da caixa e cresce pra baixo.
     expect(moveis[0].y, 'o nome subiu pro corpo').toBeGreaterThanOrEqual(PE)
-    expect(moveis[0].y, 'o nome descolou do pe').toBeLessThanOrEqual(PE + 6)
+    expect(moveis[0].y, 'o nome descolou do pe').toBeLessThanOrEqual(PE + 3)
   })
 
   it('e fica centrado no POKE, nao na coluna de texto deslocada pra esquerda', () => {

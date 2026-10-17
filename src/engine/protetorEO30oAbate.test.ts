@@ -24,12 +24,13 @@ import { ABATES_COMUNS_POR_SALA, ABATES_POR_SALA } from '@/data/biomas'
 import { estagioId, quantidadeDeSalas } from '@/data/estagios'
 import { progressoPorBiomaDefault } from '@/data/progressoDeBioma'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { buildMapWorld, handleEnemyDefeated, stepWorld } from './simulation'
+import { adotarProtetorDaAutoridade, buildMapWorld, handleEnemyDefeated, stepWorld } from './simulation'
 import {
   comunsEsgotados, protetorDaSala, quotaDeAbatesDaSala, registrarAbate,
   salaDeveProtetor,
 } from './systems/salaSystem'
 import { STARTER_HUNT_ID } from '@/data/huntSpawnOverrides'
+import { isCellBlocked } from '@/data/maps'
 import type { WorldState } from './types'
 
 const HUNT = estagioId('mata', 1)
@@ -122,19 +123,58 @@ describe('a quota de comuns e 29, e o protetor e o 30o', () => {
     world.respawnTimer = 0
     for (let i = 0; i < 20; i++) stepWorld(world, 1, gameState, { silent: true })
     expect(comuns(world).length, 'nasceu selvagem comum depois da quota').toBe(0)
+  }, 20_000) // 20 s de jogo simulado: folga pra suite inteira em paralelo
+
+  it('depois do protetor resolvido NADA mais nasce na sala (17/10/2026)', () => {
+    // Pedido do dono: o protetor e o ultimo POKE da sala. Antes o farm voltava
+    // durante a espera pela autoridade; agora o campo fica vazio ate a troca.
+    const world = mundo(104)
+    const gameState = useGameStateStore.getState()
+    abaterComuns(world, ABATES_COMUNS_POR_SALA)
+    world.protetorResolvido = true
+    world.protetorPendente = null
+    world.salaSobAutoridade = true // a troca so viria do servidor
+    expect(comunsEsgotados(world, HUNT)).toBe(false)
+
+    world.enemies = []
+    world.respawnTimer = 0
+    for (let i = 0; i < 20; i++) stepWorld(world, 1, gameState, { silent: true })
+    expect(comuns(world).length, 'nasceu selvagem depois do protetor').toBe(0)
   })
 
-  it('depois do protetor resolvido o farm volta, e isso e de proposito', () => {
-    // Sob autoridade a sala so troca quando o servidor manda, o que pode levar
-    // minutos (ver ESPERA_MAXIMA_PELA_AUTORIDADE). Campo vazio nesse intervalo
-    // tiraria o farm do jogador em troca de nada: a sala ja esta decidida.
-    const world = mundo(104)
-    abaterComuns(world, ABATES_COMUNS_POR_SALA)
-    expect(comunsEsgotados(world, HUNT)).toBe(true)
+  it('o protetor nasce num ponto andavel do mapa, longe do POKE', () => {
+    for (const semente of [111, 112, 113, 114, 115]) {
+      const world = mundo(semente)
+      const gameState = useGameStateStore.getState()
+      abaterComuns(world, ABATES_COMUNS_POR_SALA)
+      stepWorld(world, 0.1, gameState, { silent: true })
+      const protetor = world.enemies.find((e) => e.isProtetor)
+      expect(protetor).toBeTruthy()
+      expect(isCellBlocked(world.mapDef!, protetor!.x, protetor!.y)).toBe(false)
+      const dist = Math.hypot(protetor!.x - world.player!.x, protetor!.y - world.player!.y)
+      expect(dist).toBeGreaterThanOrEqual(200)
+    }
+  })
 
-    world.protetorResolvido = true
-    expect(comunsEsgotados(world, HUNT)).toBe(false)
-    expect(quotaDeAbatesDaSala(world.sala, HUNT, world)).toBe(ABATES_POR_SALA)
+  it('o chefe adotado do servidor aparece longe do POKE, nao colado nele', () => {
+    // Em producao o cliente nao sorteia o chefe: adota o do flush. O ramo de
+    // retomada (PH-423) o punha em alcance de combate — o jogador via o Lord
+    // surgir grudado no POKE em vez de num ponto do mapa.
+    const base = mundo(116)
+    const gameState = useGameStateStore.getState()
+    abaterComuns(base, ABATES_COMUNS_POR_SALA)
+    stepWorld(base, 0.1, gameState, { silent: true })
+    const pendente = { ...base.protetorPendente! }
+
+    const world = mundo(117)
+    abaterComuns(world, ABATES_COMUNS_POR_SALA)
+    world.enemies = []
+    world.protetorPendente = null
+    adotarProtetorDaAutoridade(world, { pendente, resolvido: false })
+    const chefe = world.enemies.find((e) => e.isProtetor)
+    expect(chefe).toBeTruthy()
+    expect(isCellBlocked(world.mapDef!, chefe!.x, chefe!.y)).toBe(false)
+    expect(Math.hypot(chefe!.x - world.player!.x, chefe!.y - world.player!.y)).toBeGreaterThanOrEqual(200)
   })
 
   it('estagio JA LIMPO fica nos 30 comuns e nao espera chefe nenhum', () => {
