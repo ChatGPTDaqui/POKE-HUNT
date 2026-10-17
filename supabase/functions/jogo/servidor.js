@@ -56740,6 +56740,4998 @@ var ELENCO_POR_ESTAGIO = {
 	}
 };
 //#endregion
+//#region src/data/generated/subBiomas.generated.ts
+/** Especies do nosso catalogo que podem aparecer em cada sub-bioma. */
+var SUB_BIOMA_ESPECIES = {
+	"abandoned-ship": [
+		"zubat",
+		"golbat",
+		"tentacool",
+		"tentacruel",
+		"grimer",
+		"muk",
+		"gastly",
+		"haunter",
+		"gengar",
+		"krabby",
+		"kingler",
+		"crobat",
+		"shuppet",
+		"banette",
+		"duskull",
+		"dusclops"
+	],
+	"abyss": [
+		"zubat",
+		"golbat",
+		"paras",
+		"parasect",
+		"gastly",
+		"haunter",
+		"gengar",
+		"crobat",
+		"misdreavus",
+		"dunsparce",
+		"houndour",
+		"houndoom",
+		"whismur",
+		"loudred",
+		"exploud",
+		"sableye",
+		"mawile",
+		"absol"
+	],
+	"ash-field": [
+		"sandshrew",
+		"sandslash",
+		"slugma",
+		"magcargo",
+		"skarmory",
+		"numel",
+		"camerupt",
+		"spinda"
+	],
+	"badlands": [
+		"sandshrew",
+		"sandslash",
+		"diglett",
+		"dugtrio",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"cubone",
+		"marowak",
+		"rhyhorn",
+		"rhydon",
+		"gligar",
+		"steelix",
+		"phanpy",
+		"donphan",
+		"numel",
+		"camerupt"
+	],
+	"beach": [
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"staryu",
+		"starmie",
+		"corphish",
+		"crawdaunt"
+	],
+	"bug-contest": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"scyther",
+		"pinsir",
+		"ledyba",
+		"ledian",
+		"spinarak",
+		"ariados",
+		"scizor"
+	],
+	"burned-tower": [
+		"rattata",
+		"raticate",
+		"zubat",
+		"golbat",
+		"koffing",
+		"weezing",
+		"magmar",
+		"crobat",
+		"murkrow",
+		"misdreavus",
+		"houndour",
+		"houndoom",
+		"magby"
+	],
+	"canyon": [
+		"spearow",
+		"fearow",
+		"sandshrew",
+		"sandslash",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"cubone",
+		"marowak",
+		"rhyhorn",
+		"rhydon",
+		"gligar",
+		"steelix",
+		"skarmory",
+		"phanpy",
+		"donphan"
+	],
+	"cave": [
+		"zubat",
+		"golbat",
+		"paras",
+		"parasect",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"crobat",
+		"steelix",
+		"teddiursa",
+		"ursaring",
+		"whismur",
+		"loudred",
+		"exploud",
+		"makuhita",
+		"hariyama",
+		"nosepass"
+	],
+	"celadon-mansion": [
+		"pikachu",
+		"raichu",
+		"clefairy",
+		"clefable",
+		"jigglypuff",
+		"wigglytuff",
+		"meowth",
+		"persian",
+		"growlithe",
+		"arcanine",
+		"eevee",
+		"pichu",
+		"cleffa",
+		"igglybuff",
+		"snubbull",
+		"granbull",
+		"skitty",
+		"delcatty"
+	],
+	"construction-site": [
+		"diglett",
+		"dugtrio",
+		"machop",
+		"machoke",
+		"machamp",
+		"magnemite",
+		"magneton",
+		"grimer",
+		"muk",
+		"onix",
+		"hitmonlee",
+		"koffing",
+		"weezing",
+		"rhyhorn",
+		"rhydon",
+		"ditto",
+		"steelix",
+		"phanpy",
+		"donphan",
+		"tyrogue",
+		"makuhita",
+		"hariyama",
+		"nosepass"
+	],
+	"coral-reef": [
+		"shellder",
+		"cloyster",
+		"horsea",
+		"seadra",
+		"staryu",
+		"starmie",
+		"chinchou",
+		"lanturn",
+		"qwilfish",
+		"corsola",
+		"remoraid",
+		"octillery",
+		"mantine",
+		"kingdra",
+		"wingull",
+		"pelipper",
+		"clamperl",
+		"huntail",
+		"gorebyss",
+		"luvdisc"
+	],
+	"cycling-road": [
+		"rattata",
+		"raticate",
+		"spearow",
+		"fearow",
+		"ponyta",
+		"rapidash",
+		"doduo",
+		"dodrio",
+		"grimer",
+		"muk",
+		"koffing",
+		"weezing",
+		"poochyena",
+		"mightyena",
+		"taillow",
+		"swellow"
+	],
+	"dark-cave": [
+		"zubat",
+		"golbat",
+		"geodude",
+		"graveler",
+		"golem",
+		"crobat",
+		"wobbuffet",
+		"dunsparce",
+		"teddiursa",
+		"ursaring",
+		"whismur",
+		"loudred",
+		"exploud",
+		"wynaut"
+	],
+	"desert": [
+		"sandshrew",
+		"sandslash",
+		"doduo",
+		"dodrio",
+		"gligar",
+		"numel",
+		"camerupt",
+		"trapinch",
+		"vibrava",
+		"flygon",
+		"cacnea",
+		"cacturne",
+		"lileep",
+		"cradily",
+		"anorith",
+		"armaldo"
+	],
+	"digletts-cave": [
+		"zubat",
+		"golbat",
+		"diglett",
+		"dugtrio",
+		"geodude",
+		"graveler",
+		"golem",
+		"crobat"
+	],
+	"dojo": [
+		"mankey",
+		"primeape",
+		"hitmonlee",
+		"hitmonchan",
+		"tyrogue",
+		"hitmontop",
+		"makuhita",
+		"hariyama",
+		"meditite",
+		"medicham"
+	],
+	"factory": [
+		"machop",
+		"machoke",
+		"machamp",
+		"magnemite",
+		"magneton",
+		"voltorb",
+		"electrode",
+		"electabuzz",
+		"magmar",
+		"elekid",
+		"magby",
+		"beldum",
+		"metang",
+		"metagross"
+	],
+	"fairy-cave": [
+		"clefairy",
+		"clefable",
+		"jigglypuff",
+		"wigglytuff",
+		"cleffa",
+		"igglybuff",
+		"togepi",
+		"togetic",
+		"marill",
+		"azumarill",
+		"ralts",
+		"kirlia",
+		"gardevoir",
+		"azurill",
+		"mawile"
+	],
+	"farm": [
+		"rattata",
+		"raticate",
+		"growlithe",
+		"arcanine",
+		"ponyta",
+		"rapidash",
+		"farfetch_d",
+		"doduo",
+		"dodrio",
+		"tauros",
+		"mareep",
+		"flaaffy",
+		"ampharos",
+		"snubbull",
+		"granbull",
+		"miltank",
+		"zigzagoon",
+		"linoone",
+		"skitty",
+		"delcatty"
+	],
+	"fiery-path": [
+		"machop",
+		"machoke",
+		"machamp",
+		"grimer",
+		"muk",
+		"koffing",
+		"weezing",
+		"slugma",
+		"magcargo",
+		"numel",
+		"camerupt",
+		"torkoal"
+	],
+	"forest": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"ekans",
+		"arbok",
+		"venonat",
+		"venomoth",
+		"bellsprout",
+		"weepinbell",
+		"victreebel",
+		"exeggcute",
+		"exeggutor",
+		"scyther",
+		"hoothoot",
+		"noctowl",
+		"spinarak",
+		"ariados",
+		"pineco",
+		"forretress",
+		"scizor",
+		"heracross",
+		"teddiursa",
+		"ursaring",
+		"stantler",
+		"treecko",
+		"grovyle",
+		"sceptile",
+		"wurmple",
+		"silcoon",
+		"beautifly",
+		"cascoon",
+		"dustox",
+		"seedot",
+		"nuzleaf",
+		"shiftry",
+		"shroomish",
+		"breloom",
+		"roselia",
+		"tropius"
+	],
+	"grampa-canyon": [
+		"cubone",
+		"marowak",
+		"omanyte",
+		"omastar",
+		"kabuto",
+		"kabutops",
+		"aerodactyl",
+		"lileep",
+		"cradily",
+		"anorith",
+		"armaldo"
+	],
+	"grass": [
+		"ivysaur",
+		"venusaur",
+		"growlithe",
+		"arcanine",
+		"lickitung",
+		"sudowoodo",
+		"hoppip",
+		"skiploom",
+		"jumpluff",
+		"sunkern",
+		"sunflora",
+		"miltank",
+		"wurmple",
+		"silcoon",
+		"beautifly",
+		"cascoon",
+		"dustox",
+		"seedot",
+		"nuzleaf",
+		"shiftry",
+		"shroomish",
+		"breloom"
+	],
+	"graveyard": [
+		"gastly",
+		"haunter",
+		"gengar",
+		"cubone",
+		"marowak",
+		"misdreavus",
+		"shuppet",
+		"banette",
+		"duskull",
+		"dusclops"
+	],
+	"harbor": [
+		"meowth",
+		"persian",
+		"psyduck",
+		"golduck",
+		"machop",
+		"machoke",
+		"machamp",
+		"tentacool",
+		"tentacruel",
+		"grimer",
+		"muk",
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"staryu",
+		"starmie",
+		"magikarp",
+		"gyarados",
+		"wingull",
+		"pelipper",
+		"corphish",
+		"crawdaunt"
+	],
+	"hot-springs": [
+		"psyduck",
+		"golduck",
+		"growlithe",
+		"arcanine",
+		"ponyta",
+		"rapidash",
+		"slowpoke",
+		"slowbro",
+		"magmar",
+		"houndour",
+		"houndoom",
+		"magby",
+		"numel",
+		"camerupt",
+		"torkoal",
+		"spoink",
+		"grumpig"
+	],
+	"ice-cave": [
+		"seel",
+		"dewgong",
+		"jynx",
+		"lapras",
+		"slowking",
+		"sneasel",
+		"swinub",
+		"piloswine",
+		"delibird",
+		"smoochum",
+		"snorunt",
+		"glalie",
+		"spheal",
+		"sealeo",
+		"walrein"
+	],
+	"ilex-forest": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"zubat",
+		"golbat",
+		"oddish",
+		"gloom",
+		"vileplume",
+		"paras",
+		"parasect",
+		"psyduck",
+		"golduck",
+		"farfetch_d",
+		"hoothoot",
+		"noctowl",
+		"crobat",
+		"pineco",
+		"forretress"
+	],
+	"jungle": [
+		"exeggcute",
+		"exeggutor",
+		"tangela",
+		"kangaskhan",
+		"scyther",
+		"spinarak",
+		"ariados",
+		"aipom",
+		"yanma",
+		"scizor",
+		"shroomish",
+		"breloom",
+		"slakoth",
+		"vigoroth",
+		"slaking",
+		"seviper",
+		"tropius"
+	],
+	"junkyard": [
+		"rattata",
+		"raticate",
+		"magnemite",
+		"magneton",
+		"grimer",
+		"muk",
+		"voltorb",
+		"electrode",
+		"koffing",
+		"weezing",
+		"ditto",
+		"nosepass",
+		"gulpin",
+		"swalot"
+	],
+	"jynx-holiday": [
+		"jynx",
+		"sneasel",
+		"swinub",
+		"piloswine",
+		"delibird",
+		"stantler",
+		"smoochum",
+		"snorunt",
+		"glalie",
+		"spheal",
+		"sealeo",
+		"walrein"
+	],
+	"laboratory": [
+		"magnemite",
+		"magneton",
+		"grimer",
+		"muk",
+		"voltorb",
+		"electrode",
+		"ditto"
+	],
+	"lake": [
+		"wartortle",
+		"blastoise",
+		"psyduck",
+		"golduck",
+		"slowpoke",
+		"slowbro",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"marill",
+		"azumarill",
+		"wooper",
+		"quagsire",
+		"slowking",
+		"lotad",
+		"lombre",
+		"ludicolo",
+		"surskit",
+		"masquerain",
+		"azurill"
+	],
+	"lake-of-rage": [
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"slowpoke",
+		"slowbro",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"marill",
+		"azumarill",
+		"wooper",
+		"quagsire",
+		"azurill"
+	],
+	"lily-pond": [
+		"oddish",
+		"gloom",
+		"vileplume",
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"bellossom",
+		"marill",
+		"azumarill",
+		"politoed",
+		"yanma",
+		"wooper",
+		"quagsire",
+		"lotad",
+		"lombre",
+		"ludicolo",
+		"surskit",
+		"masquerain",
+		"azurill"
+	],
+	"maidens-peak": [
+		"tentacool",
+		"tentacruel",
+		"shellder",
+		"cloyster",
+		"gastly",
+		"haunter",
+		"gengar",
+		"krabby",
+		"kingler",
+		"staryu",
+		"starmie",
+		"wingull",
+		"pelipper"
+	],
+	"meadow": [
+		"jigglypuff",
+		"wigglytuff",
+		"ponyta",
+		"rapidash",
+		"tauros",
+		"ledyba",
+		"ledian",
+		"igglybuff",
+		"mareep",
+		"flaaffy",
+		"ampharos",
+		"snubbull",
+		"granbull",
+		"miltank",
+		"ralts",
+		"kirlia",
+		"gardevoir",
+		"skitty",
+		"delcatty",
+		"volbeat",
+		"illumise",
+		"roselia",
+		"spinda"
+	],
+	"meditation-shrine": [
+		"abra",
+		"kadabra",
+		"alakazam",
+		"slowpoke",
+		"slowbro",
+		"jynx",
+		"natu",
+		"xatu",
+		"slowking",
+		"girafarig",
+		"smoochum",
+		"meditite",
+		"medicham",
+		"spoink",
+		"grumpig",
+		"chimecho"
+	],
+	"meteor-falls": [
+		"zubat",
+		"golbat",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"crobat",
+		"lunatone",
+		"solrock",
+		"barboach",
+		"whiscash",
+		"bagon",
+		"shelgon",
+		"salamence"
+	],
+	"metropolis": [
+		"rattata",
+		"raticate",
+		"pikachu",
+		"raichu",
+		"ditto",
+		"pichu",
+		"houndour",
+		"houndoom",
+		"smeargle",
+		"zigzagoon",
+		"linoone",
+		"castform"
+	],
+	"mirage-island": [
+		"jynx",
+		"natu",
+		"xatu",
+		"wobbuffet",
+		"smoochum",
+		"wynaut"
+	],
+	"mountain": [
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"spearow",
+		"fearow",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"rhyhorn",
+		"rhydon",
+		"natu",
+		"xatu",
+		"murkrow",
+		"slugma",
+		"magcargo",
+		"skarmory",
+		"larvitar",
+		"pupitar",
+		"tyranitar",
+		"torchic",
+		"combusken",
+		"blaziken",
+		"taillow",
+		"swellow",
+		"aron",
+		"lairon",
+		"aggron",
+		"spoink",
+		"grumpig",
+		"swablu",
+		"altaria"
+	],
+	"mt-ember": [
+		"spearow",
+		"fearow",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"ponyta",
+		"rapidash",
+		"magmar",
+		"slugma",
+		"magcargo",
+		"magby"
+	],
+	"mt-moon": [
+		"sandshrew",
+		"sandslash",
+		"clefairy",
+		"clefable",
+		"zubat",
+		"golbat",
+		"paras",
+		"parasect",
+		"geodude",
+		"graveler",
+		"golem",
+		"crobat",
+		"cleffa"
+	],
+	"mt-pyre": [
+		"gastly",
+		"haunter",
+		"gengar",
+		"wingull",
+		"pelipper",
+		"meditite",
+		"medicham",
+		"shuppet",
+		"banette",
+		"duskull",
+		"dusclops",
+		"chimecho"
+	],
+	"mt-silver-summit": [
+		"zubat",
+		"golbat",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"crobat",
+		"misdreavus",
+		"steelix",
+		"sneasel",
+		"teddiursa",
+		"ursaring",
+		"phanpy",
+		"donphan",
+		"larvitar",
+		"pupitar",
+		"tyranitar"
+	],
+	"mushroom-glade": [
+		"oddish",
+		"gloom",
+		"vileplume",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"wurmple",
+		"silcoon",
+		"beautifly",
+		"shroomish",
+		"breloom",
+		"slakoth",
+		"vigoroth",
+		"slaking"
+	],
+	"mysterious-garden": [
+		"bulbasaur",
+		"ivysaur",
+		"venusaur",
+		"oddish",
+		"gloom",
+		"vileplume",
+		"bellsprout",
+		"weepinbell",
+		"victreebel",
+		"bellossom",
+		"hoppip",
+		"skiploom",
+		"jumpluff",
+		"sunkern",
+		"sunflora",
+		"roselia"
+	],
+	"oasis": [
+		"sandshrew",
+		"sandslash",
+		"psyduck",
+		"golduck",
+		"doduo",
+		"dodrio",
+		"marill",
+		"azumarill",
+		"azurill",
+		"numel",
+		"camerupt",
+		"trapinch",
+		"vibrava",
+		"flygon",
+		"cacnea",
+		"cacturne",
+		"baltoy",
+		"claydol"
+	],
+	"orange-archipelago": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"psyduck",
+		"golduck",
+		"tentacool",
+		"tentacruel",
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"exeggcute",
+		"exeggutor",
+		"horsea",
+		"seadra",
+		"staryu",
+		"starmie",
+		"magikarp",
+		"gyarados",
+		"lapras",
+		"marill",
+		"azumarill",
+		"kingdra",
+		"azurill"
+	],
+	"pikachu-colony": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"pikachu",
+		"raichu",
+		"pichu",
+		"plusle",
+		"minun"
+	],
+	"plains": [
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"spearow",
+		"fearow",
+		"pikachu",
+		"raichu",
+		"zubat",
+		"golbat",
+		"meowth",
+		"persian",
+		"mankey",
+		"primeape",
+		"abra",
+		"kadabra",
+		"alakazam",
+		"farfetch_d",
+		"doduo",
+		"dodrio",
+		"lickitung",
+		"ditto",
+		"snorlax",
+		"sentret",
+		"furret",
+		"crobat",
+		"pichu",
+		"dunsparce",
+		"poochyena",
+		"mightyena",
+		"zigzagoon",
+		"linoone"
+	],
+	"pokemon-mansion": [
+		"rattata",
+		"raticate",
+		"growlithe",
+		"arcanine",
+		"ponyta",
+		"rapidash",
+		"grimer",
+		"muk",
+		"koffing",
+		"weezing",
+		"magmar",
+		"ditto",
+		"magby"
+	],
+	"pokemon-tower": [
+		"gastly",
+		"haunter",
+		"gengar",
+		"cubone",
+		"marowak",
+		"misdreavus",
+		"duskull",
+		"dusclops"
+	],
+	"power-plant": [
+		"pikachu",
+		"raichu",
+		"magnemite",
+		"magneton",
+		"voltorb",
+		"electrode",
+		"electabuzz",
+		"pichu",
+		"mareep",
+		"flaaffy",
+		"ampharos",
+		"elekid",
+		"electrike",
+		"manectric",
+		"plusle",
+		"minun"
+	],
+	"river": [
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"marill",
+		"azumarill",
+		"surskit",
+		"masquerain",
+		"azurill",
+		"barboach",
+		"whiscash",
+		"corphish",
+		"crawdaunt",
+		"feebas",
+		"milotic"
+	],
+	"rock-tunnel": [
+		"zubat",
+		"golbat",
+		"mankey",
+		"primeape",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"cubone",
+		"marowak",
+		"crobat",
+		"steelix"
+	],
+	"rocket-hideout": [
+		"rattata",
+		"raticate",
+		"ekans",
+		"arbok",
+		"zubat",
+		"golbat",
+		"meowth",
+		"persian",
+		"grimer",
+		"muk",
+		"drowzee",
+		"hypno",
+		"koffing",
+		"weezing",
+		"crobat",
+		"murkrow",
+		"sneasel",
+		"houndour",
+		"houndoom"
+	],
+	"ruins": [
+		"abra",
+		"kadabra",
+		"alakazam",
+		"drowzee",
+		"hypno",
+		"natu",
+		"xatu",
+		"unown",
+		"wobbuffet",
+		"spoink",
+		"grumpig",
+		"baltoy",
+		"claydol",
+		"wynaut"
+	],
+	"safari-zone": [
+		"nidoran_f",
+		"nidorina",
+		"nidoqueen",
+		"nidoran_m",
+		"nidorino",
+		"nidoking",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"doduo",
+		"dodrio",
+		"exeggcute",
+		"exeggutor",
+		"cubone",
+		"marowak",
+		"rhyhorn",
+		"rhydon",
+		"kangaskhan",
+		"scyther",
+		"pinsir",
+		"tauros",
+		"dratini",
+		"dragonair",
+		"dragonite",
+		"girafarig",
+		"scizor",
+		"heracross",
+		"phanpy",
+		"donphan"
+	],
+	"sea": [
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"tentacool",
+		"tentacruel",
+		"slowpoke",
+		"slowbro",
+		"shellder",
+		"cloyster",
+		"horsea",
+		"seadra",
+		"goldeen",
+		"seaking",
+		"staryu",
+		"starmie",
+		"magikarp",
+		"gyarados",
+		"lapras",
+		"chinchou",
+		"lanturn",
+		"kingdra",
+		"wingull",
+		"pelipper",
+		"carvanha",
+		"sharpedo",
+		"wailmer",
+		"wailord"
+	],
+	"seabed": [
+		"tentacool",
+		"tentacruel",
+		"shellder",
+		"cloyster",
+		"omanyte",
+		"omastar",
+		"kabuto",
+		"kabutops",
+		"chinchou",
+		"lanturn",
+		"qwilfish",
+		"corsola",
+		"remoraid",
+		"octillery",
+		"mantine",
+		"wailmer",
+		"wailord",
+		"feebas",
+		"milotic",
+		"clamperl",
+		"huntail",
+		"gorebyss",
+		"relicanth",
+		"luvdisc"
+	],
+	"seafoam-islands": [
+		"zubat",
+		"golbat",
+		"psyduck",
+		"golduck",
+		"slowpoke",
+		"slowbro",
+		"seel",
+		"dewgong",
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"horsea",
+		"seadra",
+		"staryu",
+		"starmie",
+		"crobat",
+		"kingdra"
+	],
+	"shoal-cave": [
+		"zubat",
+		"golbat",
+		"tentacool",
+		"tentacruel",
+		"shellder",
+		"cloyster",
+		"crobat",
+		"snorunt",
+		"glalie",
+		"spheal",
+		"sealeo",
+		"walrein"
+	],
+	"silph-co": [
+		"magnemite",
+		"magneton",
+		"voltorb",
+		"electrode",
+		"ditto",
+		"porygon",
+		"porygon2"
+	],
+	"sky-pillar": [
+		"zubat",
+		"golbat",
+		"crobat",
+		"sableye",
+		"mawile",
+		"swablu",
+		"altaria",
+		"baltoy",
+		"claydol",
+		"shuppet",
+		"banette",
+		"duskull",
+		"dusclops",
+		"beldum",
+		"metang",
+		"metagross"
+	],
+	"slum": [
+		"rattata",
+		"raticate",
+		"grimer",
+		"muk",
+		"drowzee",
+		"hypno",
+		"koffing",
+		"weezing",
+		"murkrow",
+		"sneasel",
+		"houndour",
+		"houndoom",
+		"shuppet",
+		"banette"
+	],
+	"snowy-forest": [
+		"sentret",
+		"furret",
+		"sneasel",
+		"teddiursa",
+		"ursaring",
+		"swinub",
+		"piloswine",
+		"delibird",
+		"stantler",
+		"snorunt",
+		"glalie"
+	],
+	"space": [
+		"clefairy",
+		"clefable",
+		"staryu",
+		"starmie",
+		"cleffa",
+		"lunatone",
+		"solrock",
+		"baltoy",
+		"claydol",
+		"beldum",
+		"metang",
+		"metagross"
+	],
+	"sprout-tower": [
+		"rattata",
+		"raticate",
+		"abra",
+		"kadabra",
+		"alakazam",
+		"bellsprout",
+		"weepinbell",
+		"victreebel",
+		"gastly",
+		"haunter",
+		"gengar",
+		"drowzee",
+		"hypno",
+		"hoothoot",
+		"noctowl",
+		"natu",
+		"xatu"
+	],
+	"squirtle-squad": [
+		"squirtle",
+		"wartortle",
+		"blastoise",
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"marill",
+		"azumarill",
+		"wooper",
+		"quagsire",
+		"azurill"
+	],
+	"stray-charmander": [
+		"charmander",
+		"charmeleon",
+		"charizard",
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"rattata",
+		"raticate",
+		"spearow",
+		"fearow",
+		"oddish",
+		"gloom",
+		"vileplume"
+	],
+	"swamp": [
+		"ekans",
+		"arbok",
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"totodile",
+		"croconaw",
+		"feraligatr",
+		"politoed",
+		"wooper",
+		"quagsire",
+		"mudkip",
+		"marshtomp",
+		"swampert",
+		"lotad",
+		"lombre",
+		"ludicolo",
+		"gulpin",
+		"swalot",
+		"barboach",
+		"whiscash"
+	],
+	"tall-grass": [
+		"nidoran_f",
+		"nidorina",
+		"nidoqueen",
+		"nidoran_m",
+		"nidorino",
+		"nidoking",
+		"oddish",
+		"gloom",
+		"vileplume",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"scyther",
+		"pinsir",
+		"chikorita",
+		"bayleef",
+		"meganium",
+		"spinarak",
+		"ariados",
+		"bellossom",
+		"girafarig",
+		"scizor",
+		"nincada",
+		"ninjask",
+		"shedinja",
+		"zangoose",
+		"seviper",
+		"kecleon",
+		"tropius"
+	],
+	"temple": [
+		"gastly",
+		"haunter",
+		"gengar",
+		"cubone",
+		"marowak",
+		"natu",
+		"xatu",
+		"baltoy",
+		"claydol",
+		"duskull",
+		"dusclops",
+		"chimecho"
+	],
+	"town": [
+		"rattata",
+		"raticate",
+		"spearow",
+		"fearow",
+		"ekans",
+		"arbok",
+		"pikachu",
+		"raichu",
+		"nidoran_f",
+		"nidorina",
+		"nidoqueen",
+		"nidoran_m",
+		"nidorino",
+		"nidoking",
+		"clefairy",
+		"clefable",
+		"jigglypuff",
+		"wigglytuff",
+		"oddish",
+		"gloom",
+		"vileplume",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"meowth",
+		"persian",
+		"abra",
+		"kadabra",
+		"alakazam",
+		"bellsprout",
+		"weepinbell",
+		"victreebel",
+		"ditto",
+		"sentret",
+		"furret",
+		"hoothoot",
+		"noctowl",
+		"ledyba",
+		"ledian",
+		"spinarak",
+		"ariados",
+		"pichu",
+		"cleffa",
+		"igglybuff",
+		"togepi",
+		"togetic",
+		"hoppip",
+		"skiploom",
+		"jumpluff",
+		"sunkern",
+		"sunflora",
+		"lotad",
+		"lombre",
+		"ludicolo",
+		"seedot",
+		"nuzleaf",
+		"shiftry",
+		"taillow",
+		"swellow",
+		"ralts",
+		"kirlia",
+		"gardevoir",
+		"surskit",
+		"masquerain",
+		"shroomish",
+		"breloom",
+		"nincada",
+		"ninjask",
+		"whismur",
+		"loudred",
+		"exploud",
+		"skitty",
+		"delcatty"
+	],
+	"treetops": [
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"spearow",
+		"fearow",
+		"ekans",
+		"arbok",
+		"exeggcute",
+		"exeggutor",
+		"hoothoot",
+		"noctowl",
+		"aipom",
+		"pineco",
+		"forretress",
+		"heracross",
+		"seedot",
+		"nuzleaf",
+		"shiftry",
+		"taillow",
+		"swellow",
+		"slakoth",
+		"vigoroth",
+		"slaking",
+		"tropius"
+	],
+	"tundra": [
+		"jynx",
+		"sneasel",
+		"teddiursa",
+		"ursaring",
+		"swinub",
+		"piloswine",
+		"delibird",
+		"stantler",
+		"smoochum",
+		"snorunt",
+		"glalie",
+		"spheal",
+		"sealeo",
+		"walrein"
+	],
+	"underground": [
+		"rattata",
+		"raticate",
+		"ekans",
+		"arbok",
+		"zubat",
+		"golbat",
+		"grimer",
+		"muk",
+		"drowzee",
+		"hypno",
+		"koffing",
+		"weezing",
+		"ditto",
+		"crobat",
+		"gulpin",
+		"swalot"
+	],
+	"victory-road": [
+		"zubat",
+		"golbat",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"cubone",
+		"marowak",
+		"rhyhorn",
+		"rhydon",
+		"crobat",
+		"steelix",
+		"teddiursa",
+		"ursaring",
+		"phanpy",
+		"donphan",
+		"makuhita",
+		"hariyama",
+		"sableye",
+		"mawile",
+		"aron",
+		"lairon",
+		"aggron",
+		"meditite",
+		"medicham"
+	],
+	"volcano": [
+		"charmeleon",
+		"charizard",
+		"growlithe",
+		"arcanine",
+		"ponyta",
+		"rapidash",
+		"magmar",
+		"cyndaquil",
+		"quilava",
+		"typhlosion",
+		"slugma",
+		"magcargo",
+		"magby",
+		"poochyena",
+		"mightyena",
+		"meditite",
+		"medicham",
+		"numel",
+		"camerupt",
+		"torkoal",
+		"spoink",
+		"grumpig",
+		"swablu",
+		"altaria"
+	],
+	"wasteland": [
+		"aerodactyl",
+		"dratini",
+		"dragonair",
+		"dragonite",
+		"larvitar",
+		"pupitar",
+		"tyranitar",
+		"trapinch",
+		"vibrava",
+		"flygon",
+		"swablu",
+		"altaria",
+		"bagon",
+		"shelgon",
+		"salamence"
+	],
+	"waterfall": [
+		"zubat",
+		"golbat",
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"poliwrath",
+		"slowpoke",
+		"slowbro",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"crobat",
+		"marill",
+		"azumarill",
+		"politoed",
+		"slowking",
+		"azurill"
+	],
+	"whirl-islands": [
+		"zubat",
+		"golbat",
+		"tentacool",
+		"tentacruel",
+		"slowpoke",
+		"slowbro",
+		"seel",
+		"dewgong",
+		"shellder",
+		"cloyster",
+		"krabby",
+		"kingler",
+		"horsea",
+		"seadra",
+		"magikarp",
+		"gyarados",
+		"crobat",
+		"kingdra"
+	]
+};
+/**
+* As NOVE pools do PokeRogue por sub-bioma, que e de onde sai a chance de
+* aparicao (data/spawnPorTier.ts) e o elenco de Guardian/Lord da sala.
+*
+* As cinco selvagens sao o pool de spawn e cobrem TODA especie de
+* `SUB_BIOMA_ESPECIES` — as herdadas entram com o tier de um parente,
+* deslocado pela diferenca de estagio evolutivo, e o chefe puro entra num
+* degrau equivalente (ver o gerador).
+*
+* As quatro de chefe sao SO dado direto do PokeRogue, sem heranca: Guardian e
+* Lord tem que ser um chefe de verdade daquele lugar, nao um parente dele.
+* Por isso elas podem vir VAZIAS, e quem consome resolve o vazio descendo de
+* degrau (o proprio PokeRogue faz assim, ver arena.ts#randomSpecies).
+*/
+var SUB_BIOMA_TIERS = {
+	"abandoned-ship": {
+		COMMON: [
+			"zubat",
+			"tentacool",
+			"krabby",
+			"shuppet"
+		],
+		UNCOMMON: [
+			"golbat",
+			"grimer",
+			"gastly",
+			"duskull"
+		],
+		RARE: [
+			"tentacruel",
+			"haunter",
+			"kingler",
+			"crobat",
+			"banette",
+			"dusclops"
+		],
+		SUPER_RARE: ["muk", "gengar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"kingler",
+			"banette",
+			"dusclops"
+		],
+		BOSS_RARE: ["muk", "gengar"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"abyss": {
+		COMMON: [
+			"zubat",
+			"paras",
+			"misdreavus",
+			"sableye"
+		],
+		UNCOMMON: [
+			"golbat",
+			"parasect",
+			"gastly",
+			"haunter",
+			"dunsparce",
+			"houndour",
+			"whismur",
+			"mawile"
+		],
+		RARE: [
+			"gengar",
+			"crobat",
+			"houndoom",
+			"loudred",
+			"absol"
+		],
+		SUPER_RARE: ["exploud"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"gengar",
+			"crobat",
+			"houndoom",
+			"sableye"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"ash-field": {
+		COMMON: [
+			"sandshrew",
+			"slugma",
+			"spinda"
+		],
+		UNCOMMON: ["numel"],
+		RARE: [
+			"sandslash",
+			"magcargo",
+			"skarmory"
+		],
+		SUPER_RARE: ["camerupt"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"sandslash",
+			"magcargo",
+			"skarmory"
+		],
+		BOSS_RARE: ["camerupt", "spinda"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"badlands": {
+		COMMON: [
+			"diglett",
+			"geodude",
+			"cubone",
+			"rhyhorn",
+			"phanpy"
+		],
+		UNCOMMON: [
+			"sandshrew",
+			"graveler",
+			"rhydon",
+			"numel"
+		],
+		RARE: [
+			"sandslash",
+			"dugtrio",
+			"golem",
+			"onix",
+			"marowak",
+			"gligar",
+			"donphan",
+			"camerupt"
+		],
+		SUPER_RARE: ["steelix"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"dugtrio",
+			"golem",
+			"marowak",
+			"donphan"
+		],
+		BOSS_RARE: ["steelix"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"beach": {
+		COMMON: [
+			"shellder",
+			"krabby",
+			"staryu",
+			"corphish"
+		],
+		UNCOMMON: [],
+		RARE: [
+			"cloyster",
+			"kingler",
+			"starmie",
+			"crawdaunt"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"cloyster",
+			"kingler",
+			"starmie",
+			"crawdaunt"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"bug-contest": {
+		COMMON: [
+			"caterpie",
+			"weedle",
+			"paras",
+			"venonat"
+		],
+		UNCOMMON: [
+			"metapod",
+			"kakuna",
+			"ledyba",
+			"spinarak"
+		],
+		RARE: [
+			"butterfree",
+			"beedrill",
+			"parasect",
+			"venomoth",
+			"scyther",
+			"pinsir",
+			"ledian",
+			"ariados"
+		],
+		SUPER_RARE: ["scizor"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"butterfree",
+			"beedrill",
+			"parasect",
+			"venomoth"
+		],
+		BOSS_RARE: ["scyther", "pinsir"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"burned-tower": {
+		COMMON: [
+			"rattata",
+			"zubat",
+			"koffing"
+		],
+		UNCOMMON: [
+			"murkrow",
+			"houndour",
+			"magby"
+		],
+		RARE: [
+			"raticate",
+			"weezing",
+			"magmar",
+			"crobat",
+			"misdreavus",
+			"houndoom"
+		],
+		SUPER_RARE: ["golbat"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"raticate",
+			"weezing",
+			"magmar",
+			"houndoom"
+		],
+		BOSS_RARE: ["golbat", "misdreavus"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"canyon": {
+		COMMON: [
+			"spearow",
+			"sandshrew",
+			"geodude",
+			"phanpy"
+		],
+		UNCOMMON: [
+			"graveler",
+			"cubone",
+			"rhyhorn",
+			"gligar"
+		],
+		RARE: [
+			"fearow",
+			"sandslash",
+			"golem",
+			"onix",
+			"marowak",
+			"skarmory",
+			"donphan"
+		],
+		SUPER_RARE: ["rhydon", "steelix"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"fearow",
+			"sandslash",
+			"golem",
+			"donphan"
+		],
+		BOSS_RARE: [
+			"rhydon",
+			"steelix",
+			"skarmory"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"cave": {
+		COMMON: [
+			"zubat",
+			"paras",
+			"teddiursa",
+			"whismur"
+		],
+		UNCOMMON: [
+			"golbat",
+			"geodude",
+			"loudred",
+			"makuhita",
+			"nosepass"
+		],
+		RARE: [
+			"parasect",
+			"graveler",
+			"onix",
+			"crobat",
+			"ursaring",
+			"exploud",
+			"hariyama"
+		],
+		SUPER_RARE: ["golem", "steelix"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"parasect",
+			"onix",
+			"crobat",
+			"ursaring",
+			"exploud"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"celadon-mansion": {
+		COMMON: [
+			"clefairy",
+			"jigglypuff",
+			"meowth",
+			"pichu",
+			"cleffa",
+			"igglybuff",
+			"skitty"
+		],
+		UNCOMMON: [
+			"pikachu",
+			"clefable",
+			"growlithe",
+			"snubbull"
+		],
+		RARE: [
+			"raichu",
+			"wigglytuff",
+			"persian",
+			"eevee",
+			"granbull",
+			"delcatty"
+		],
+		SUPER_RARE: ["arcanine"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"wigglytuff",
+			"persian",
+			"granbull",
+			"delcatty"
+		],
+		BOSS_RARE: ["arcanine"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"construction-site": {
+		COMMON: [
+			"diglett",
+			"machop",
+			"grimer",
+			"phanpy",
+			"makuhita",
+			"nosepass"
+		],
+		UNCOMMON: [
+			"dugtrio",
+			"machoke",
+			"magnemite",
+			"muk",
+			"koffing",
+			"rhyhorn",
+			"donphan",
+			"hariyama"
+		],
+		RARE: [
+			"machamp",
+			"magneton",
+			"onix",
+			"weezing",
+			"rhydon",
+			"tyrogue"
+		],
+		SUPER_RARE: [
+			"hitmonlee",
+			"ditto",
+			"steelix"
+		],
+		ULTRA_RARE: [],
+		BOSS: ["machamp"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"coral-reef": {
+		COMMON: [
+			"staryu",
+			"corsola",
+			"wingull",
+			"luvdisc"
+		],
+		UNCOMMON: [
+			"shellder",
+			"horsea",
+			"chinchou",
+			"qwilfish",
+			"remoraid",
+			"pelipper"
+		],
+		RARE: [
+			"cloyster",
+			"seadra",
+			"starmie",
+			"lanturn",
+			"octillery",
+			"mantine",
+			"clamperl"
+		],
+		SUPER_RARE: ["kingdra"],
+		ULTRA_RARE: ["huntail", "gorebyss"],
+		BOSS: [
+			"cloyster",
+			"starmie",
+			"lanturn",
+			"octillery"
+		],
+		BOSS_RARE: ["mantine", "kingdra"],
+		BOSS_SUPER_RARE: ["huntail", "gorebyss"],
+		BOSS_ULTRA_RARE: []
+	},
+	"cycling-road": {
+		COMMON: [
+			"rattata",
+			"spearow",
+			"doduo"
+		],
+		UNCOMMON: [
+			"raticate",
+			"grimer",
+			"koffing",
+			"poochyena",
+			"taillow"
+		],
+		RARE: [
+			"fearow",
+			"ponyta",
+			"dodrio",
+			"weezing",
+			"swellow"
+		],
+		SUPER_RARE: [
+			"rapidash",
+			"muk",
+			"mightyena"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"fearow",
+			"dodrio",
+			"weezing"
+		],
+		BOSS_RARE: ["muk", "mightyena"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"dark-cave": {
+		COMMON: [
+			"zubat",
+			"geodude",
+			"teddiursa"
+		],
+		UNCOMMON: [
+			"graveler",
+			"whismur",
+			"loudred",
+			"wynaut"
+		],
+		RARE: [
+			"golbat",
+			"golem",
+			"crobat",
+			"dunsparce",
+			"ursaring",
+			"exploud"
+		],
+		SUPER_RARE: ["wobbuffet"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golbat",
+			"ursaring",
+			"exploud"
+		],
+		BOSS_RARE: ["wobbuffet", "dunsparce"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"desert": {
+		COMMON: [
+			"sandshrew",
+			"trapinch",
+			"cacnea"
+		],
+		UNCOMMON: [
+			"gligar",
+			"numel",
+			"vibrava"
+		],
+		RARE: [
+			"sandslash",
+			"doduo",
+			"camerupt",
+			"flygon",
+			"cacturne"
+		],
+		SUPER_RARE: [
+			"dodrio",
+			"lileep",
+			"cradily",
+			"anorith",
+			"armaldo"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"sandslash",
+			"flygon",
+			"cacturne"
+		],
+		BOSS_RARE: [
+			"dodrio",
+			"cradily",
+			"armaldo"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"digletts-cave": {
+		COMMON: ["zubat", "diglett"],
+		UNCOMMON: ["geodude"],
+		RARE: [
+			"golbat",
+			"dugtrio",
+			"graveler",
+			"crobat"
+		],
+		SUPER_RARE: ["golem"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golbat",
+			"dugtrio",
+			"graveler"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"dojo": {
+		COMMON: [
+			"mankey",
+			"makuhita",
+			"meditite"
+		],
+		UNCOMMON: ["primeape", "tyrogue"],
+		RARE: [
+			"hitmonlee",
+			"hitmonchan",
+			"hariyama",
+			"medicham"
+		],
+		SUPER_RARE: ["hitmontop"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"hitmonlee",
+			"hitmonchan",
+			"hariyama",
+			"medicham"
+		],
+		BOSS_RARE: ["hitmontop"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"factory": {
+		COMMON: ["machop", "voltorb"],
+		UNCOMMON: [
+			"machoke",
+			"magnemite",
+			"electrode",
+			"elekid",
+			"magby"
+		],
+		RARE: [
+			"machamp",
+			"magneton",
+			"electabuzz",
+			"magmar",
+			"metang"
+		],
+		SUPER_RARE: ["beldum", "metagross"],
+		ULTRA_RARE: [],
+		BOSS: [],
+		BOSS_RARE: ["metagross"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"fairy-cave": {
+		COMMON: [
+			"jigglypuff",
+			"cleffa",
+			"igglybuff",
+			"togepi",
+			"marill",
+			"azurill",
+			"mawile"
+		],
+		UNCOMMON: [
+			"clefairy",
+			"togetic",
+			"azumarill",
+			"ralts"
+		],
+		RARE: [
+			"clefable",
+			"wigglytuff",
+			"kirlia"
+		],
+		SUPER_RARE: ["gardevoir"],
+		ULTRA_RARE: [],
+		BOSS: ["wigglytuff", "mawile"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"farm": {
+		COMMON: [
+			"rattata",
+			"tauros",
+			"mareep",
+			"miltank"
+		],
+		UNCOMMON: [
+			"raticate",
+			"ponyta",
+			"doduo",
+			"flaaffy",
+			"zigzagoon",
+			"skitty"
+		],
+		RARE: [
+			"growlithe",
+			"farfetch_d",
+			"dodrio",
+			"ampharos",
+			"snubbull",
+			"linoone",
+			"delcatty"
+		],
+		SUPER_RARE: [
+			"arcanine",
+			"rapidash",
+			"granbull"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tauros",
+			"ampharos",
+			"miltank"
+		],
+		BOSS_RARE: ["arcanine", "rapidash"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"fiery-path": {
+		COMMON: [
+			"machop",
+			"koffing",
+			"slugma",
+			"numel"
+		],
+		UNCOMMON: ["grimer", "torkoal"],
+		RARE: [
+			"machamp",
+			"weezing",
+			"magcargo",
+			"camerupt"
+		],
+		SUPER_RARE: ["machoke", "muk"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"weezing",
+			"magcargo",
+			"camerupt",
+			"torkoal"
+		],
+		BOSS_RARE: ["machoke", "muk"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"forest": {
+		COMMON: [
+			"caterpie",
+			"metapod",
+			"butterfree",
+			"weedle",
+			"kakuna",
+			"beedrill",
+			"venonat",
+			"bellsprout",
+			"spinarak",
+			"pineco",
+			"wurmple",
+			"silcoon",
+			"beautifly",
+			"cascoon",
+			"dustox",
+			"seedot",
+			"shroomish"
+		],
+		UNCOMMON: [
+			"ekans",
+			"weepinbell",
+			"hoothoot",
+			"teddiursa",
+			"nuzleaf",
+			"roselia"
+		],
+		RARE: [
+			"arbok",
+			"venomoth",
+			"victreebel",
+			"exeggcute",
+			"scyther",
+			"noctowl",
+			"ariados",
+			"forretress",
+			"heracross",
+			"ursaring",
+			"stantler",
+			"treecko",
+			"grovyle",
+			"shiftry",
+			"breloom",
+			"tropius"
+		],
+		SUPER_RARE: [
+			"exeggutor",
+			"scizor",
+			"sceptile"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"venomoth",
+			"victreebel",
+			"noctowl",
+			"ariados",
+			"forretress",
+			"beautifly",
+			"dustox",
+			"shiftry",
+			"breloom"
+		],
+		BOSS_RARE: [
+			"heracross",
+			"stantler",
+			"sceptile"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"grampa-canyon": {
+		COMMON: [
+			"cubone",
+			"omanyte",
+			"kabuto"
+		],
+		UNCOMMON: ["lileep", "anorith"],
+		RARE: [
+			"marowak",
+			"omastar",
+			"kabutops",
+			"aerodactyl"
+		],
+		SUPER_RARE: ["cradily", "armaldo"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"marowak",
+			"omastar",
+			"kabutops"
+		],
+		BOSS_RARE: [
+			"aerodactyl",
+			"cradily",
+			"armaldo"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"grass": {
+		COMMON: [
+			"hoppip",
+			"wurmple",
+			"silcoon",
+			"cascoon",
+			"shroomish"
+		],
+		UNCOMMON: [
+			"lickitung",
+			"skiploom",
+			"sunkern",
+			"miltank",
+			"beautifly",
+			"dustox",
+			"seedot",
+			"breloom"
+		],
+		RARE: [
+			"ivysaur",
+			"growlithe",
+			"jumpluff",
+			"sunflora",
+			"nuzleaf"
+		],
+		SUPER_RARE: [
+			"venusaur",
+			"arcanine",
+			"sudowoodo",
+			"shiftry"
+		],
+		ULTRA_RARE: [],
+		BOSS: ["jumpluff", "miltank"],
+		BOSS_RARE: [
+			"venusaur",
+			"arcanine",
+			"sudowoodo"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"graveyard": {
+		COMMON: [
+			"gastly",
+			"shuppet",
+			"duskull"
+		],
+		UNCOMMON: [
+			"haunter",
+			"cubone",
+			"dusclops"
+		],
+		RARE: [
+			"gengar",
+			"marowak",
+			"misdreavus",
+			"banette"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"gengar",
+			"marowak",
+			"banette"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"harbor": {
+		COMMON: [
+			"tentacool",
+			"krabby",
+			"magikarp",
+			"wingull"
+		],
+		UNCOMMON: [
+			"meowth",
+			"psyduck",
+			"machop",
+			"shellder",
+			"staryu"
+		],
+		RARE: [
+			"golduck",
+			"machoke",
+			"tentacruel",
+			"grimer",
+			"cloyster",
+			"kingler",
+			"starmie",
+			"pelipper",
+			"corphish"
+		],
+		SUPER_RARE: [
+			"persian",
+			"machamp",
+			"muk",
+			"gyarados",
+			"crawdaunt"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"machoke",
+			"tentacruel",
+			"kingler",
+			"pelipper"
+		],
+		BOSS_RARE: [
+			"persian",
+			"machamp",
+			"gyarados"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"hot-springs": {
+		COMMON: [
+			"psyduck",
+			"slowpoke",
+			"numel",
+			"spoink"
+		],
+		UNCOMMON: [
+			"growlithe",
+			"ponyta",
+			"houndour",
+			"magby",
+			"torkoal"
+		],
+		RARE: [
+			"golduck",
+			"rapidash",
+			"slowbro",
+			"camerupt",
+			"grumpig"
+		],
+		SUPER_RARE: [
+			"arcanine",
+			"magmar",
+			"houndoom"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"slowbro",
+			"camerupt",
+			"grumpig"
+		],
+		BOSS_RARE: [
+			"arcanine",
+			"magmar",
+			"houndoom"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"ice-cave": {
+		COMMON: [
+			"seel",
+			"swinub",
+			"snorunt"
+		],
+		UNCOMMON: [
+			"slowking",
+			"sneasel",
+			"piloswine",
+			"smoochum",
+			"spheal",
+			"sealeo"
+		],
+		RARE: [
+			"dewgong",
+			"lapras",
+			"delibird",
+			"glalie",
+			"walrein"
+		],
+		SUPER_RARE: ["jynx"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"dewgong",
+			"glalie",
+			"walrein"
+		],
+		BOSS_RARE: ["jynx", "lapras"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"ilex-forest": {
+		COMMON: [
+			"caterpie",
+			"weedle",
+			"oddish",
+			"hoothoot"
+		],
+		UNCOMMON: [
+			"metapod",
+			"kakuna",
+			"zubat",
+			"gloom",
+			"paras",
+			"psyduck",
+			"pineco"
+		],
+		RARE: [
+			"butterfree",
+			"beedrill",
+			"golbat",
+			"vileplume",
+			"parasect",
+			"farfetch_d",
+			"noctowl",
+			"forretress"
+		],
+		SUPER_RARE: ["golduck", "crobat"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"butterfree",
+			"beedrill",
+			"noctowl",
+			"forretress"
+		],
+		BOSS_RARE: ["golduck"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"jungle": {
+		COMMON: [
+			"spinarak",
+			"aipom",
+			"shroomish"
+		],
+		UNCOMMON: [
+			"exeggcute",
+			"tangela",
+			"ariados",
+			"tropius"
+		],
+		RARE: [
+			"exeggutor",
+			"scyther",
+			"yanma",
+			"breloom",
+			"slakoth",
+			"vigoroth",
+			"seviper"
+		],
+		SUPER_RARE: [
+			"kangaskhan",
+			"scizor",
+			"slaking"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"exeggutor",
+			"breloom",
+			"seviper",
+			"tropius"
+		],
+		BOSS_RARE: [
+			"kangaskhan",
+			"scizor",
+			"slaking"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"junkyard": {
+		COMMON: [
+			"rattata",
+			"magnemite",
+			"grimer",
+			"koffing"
+		],
+		UNCOMMON: [
+			"raticate",
+			"voltorb",
+			"gulpin"
+		],
+		RARE: [
+			"magneton",
+			"muk",
+			"electrode",
+			"weezing",
+			"nosepass"
+		],
+		SUPER_RARE: ["ditto", "swalot"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"magneton",
+			"muk",
+			"electrode",
+			"weezing"
+		],
+		BOSS_RARE: ["nosepass", "swalot"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"jynx-holiday": {
+		COMMON: [
+			"swinub",
+			"delibird",
+			"smoochum",
+			"snorunt"
+		],
+		UNCOMMON: [
+			"sneasel",
+			"stantler",
+			"spheal"
+		],
+		RARE: [
+			"jynx",
+			"piloswine",
+			"glalie",
+			"sealeo"
+		],
+		SUPER_RARE: ["walrein"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"jynx",
+			"piloswine",
+			"delibird",
+			"glalie"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"laboratory": {
+		COMMON: ["grimer", "voltorb"],
+		UNCOMMON: ["magnemite"],
+		RARE: [
+			"magneton",
+			"muk",
+			"electrode",
+			"ditto"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: ["muk", "electrode"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"lake": {
+		COMMON: [
+			"psyduck",
+			"goldeen",
+			"marill",
+			"wooper",
+			"lotad",
+			"surskit",
+			"azurill"
+		],
+		UNCOMMON: [
+			"slowpoke",
+			"magikarp",
+			"quagsire",
+			"lombre"
+		],
+		RARE: [
+			"wartortle",
+			"golduck",
+			"slowbro",
+			"seaking",
+			"azumarill",
+			"ludicolo",
+			"masquerain"
+		],
+		SUPER_RARE: [
+			"blastoise",
+			"gyarados",
+			"slowking"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"slowbro",
+			"seaking",
+			"azumarill",
+			"masquerain"
+		],
+		BOSS_RARE: [
+			"blastoise",
+			"gyarados",
+			"slowking"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"lake-of-rage": {
+		COMMON: [
+			"goldeen",
+			"magikarp",
+			"azurill"
+		],
+		UNCOMMON: [
+			"psyduck",
+			"poliwag",
+			"slowpoke",
+			"marill",
+			"wooper"
+		],
+		RARE: [
+			"golduck",
+			"poliwhirl",
+			"slowbro",
+			"seaking",
+			"gyarados",
+			"azumarill",
+			"quagsire"
+		],
+		SUPER_RARE: ["poliwrath"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"seaking",
+			"gyarados",
+			"quagsire"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"lily-pond": {
+		COMMON: [
+			"poliwag",
+			"wooper",
+			"lotad",
+			"surskit",
+			"azurill"
+		],
+		UNCOMMON: [
+			"oddish",
+			"psyduck",
+			"poliwhirl",
+			"marill",
+			"lombre"
+		],
+		RARE: [
+			"gloom",
+			"golduck",
+			"poliwrath",
+			"politoed",
+			"yanma",
+			"quagsire",
+			"ludicolo",
+			"masquerain"
+		],
+		SUPER_RARE: [
+			"vileplume",
+			"bellossom",
+			"azumarill"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"politoed",
+			"quagsire",
+			"ludicolo",
+			"masquerain"
+		],
+		BOSS_RARE: ["bellossom", "azumarill"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"maidens-peak": {
+		COMMON: [
+			"shellder",
+			"gastly",
+			"krabby",
+			"staryu"
+		],
+		UNCOMMON: [
+			"tentacool",
+			"kingler",
+			"wingull"
+		],
+		RARE: [
+			"tentacruel",
+			"cloyster",
+			"haunter",
+			"starmie",
+			"pelipper"
+		],
+		SUPER_RARE: ["gengar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"cloyster",
+			"haunter",
+			"starmie"
+		],
+		BOSS_RARE: ["gengar"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"meadow": {
+		COMMON: [
+			"ledyba",
+			"igglybuff",
+			"roselia"
+		],
+		UNCOMMON: [
+			"jigglypuff",
+			"ponyta",
+			"mareep",
+			"snubbull",
+			"ralts",
+			"kirlia",
+			"skitty"
+		],
+		RARE: [
+			"wigglytuff",
+			"rapidash",
+			"tauros",
+			"ledian",
+			"flaaffy",
+			"granbull",
+			"miltank",
+			"gardevoir",
+			"delcatty",
+			"volbeat",
+			"illumise",
+			"spinda"
+		],
+		SUPER_RARE: ["ampharos"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tauros",
+			"ledian",
+			"granbull",
+			"miltank",
+			"gardevoir",
+			"delcatty"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"meditation-shrine": {
+		COMMON: [
+			"slowpoke",
+			"natu",
+			"meditite",
+			"spoink"
+		],
+		UNCOMMON: [
+			"abra",
+			"slowbro",
+			"girafarig",
+			"smoochum"
+		],
+		RARE: [
+			"kadabra",
+			"jynx",
+			"xatu",
+			"medicham",
+			"grumpig",
+			"chimecho"
+		],
+		SUPER_RARE: ["alakazam", "slowking"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"jynx",
+			"xatu",
+			"medicham",
+			"grumpig"
+		],
+		BOSS_RARE: [
+			"alakazam",
+			"slowking",
+			"girafarig"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"meteor-falls": {
+		COMMON: [
+			"zubat",
+			"goldeen",
+			"magikarp",
+			"barboach"
+		],
+		UNCOMMON: [
+			"seaking",
+			"lunatone",
+			"solrock"
+		],
+		RARE: [
+			"golbat",
+			"crobat",
+			"whiscash"
+		],
+		SUPER_RARE: [
+			"gyarados",
+			"bagon",
+			"shelgon"
+		],
+		ULTRA_RARE: ["salamence"],
+		BOSS: [
+			"golbat",
+			"lunatone",
+			"solrock",
+			"whiscash"
+		],
+		BOSS_RARE: ["gyarados", "shelgon"],
+		BOSS_SUPER_RARE: ["salamence"],
+		BOSS_ULTRA_RARE: []
+	},
+	"metropolis": {
+		COMMON: [
+			"rattata",
+			"pichu",
+			"houndour",
+			"zigzagoon"
+		],
+		UNCOMMON: [
+			"raticate",
+			"pikachu",
+			"houndoom",
+			"linoone"
+		],
+		RARE: [
+			"raichu",
+			"smeargle",
+			"castform"
+		],
+		SUPER_RARE: ["ditto"],
+		ULTRA_RARE: [],
+		BOSS: ["castform"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mirage-island": {
+		COMMON: ["natu", "wynaut"],
+		UNCOMMON: ["smoochum"],
+		RARE: [
+			"jynx",
+			"xatu",
+			"wobbuffet"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"jynx",
+			"xatu",
+			"wobbuffet"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mountain": {
+		COMMON: [
+			"pidgey",
+			"spearow",
+			"rhyhorn",
+			"taillow",
+			"aron",
+			"swablu"
+		],
+		UNCOMMON: [
+			"pidgeotto",
+			"machop",
+			"geodude",
+			"rhydon",
+			"natu",
+			"slugma",
+			"lairon"
+		],
+		RARE: [
+			"pidgeot",
+			"fearow",
+			"machoke",
+			"graveler",
+			"xatu",
+			"murkrow",
+			"magcargo",
+			"skarmory",
+			"torchic",
+			"combusken",
+			"swellow",
+			"aggron",
+			"spoink",
+			"altaria"
+		],
+		SUPER_RARE: [
+			"machamp",
+			"golem",
+			"larvitar",
+			"blaziken",
+			"grumpig"
+		],
+		ULTRA_RARE: ["pupitar", "tyranitar"],
+		BOSS: [
+			"pidgeot",
+			"fearow",
+			"skarmory",
+			"swellow",
+			"aggron",
+			"altaria"
+		],
+		BOSS_RARE: ["blaziken"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mt-ember": {
+		COMMON: [
+			"machop",
+			"geodude",
+			"ponyta",
+			"slugma"
+		],
+		UNCOMMON: [
+			"spearow",
+			"machoke",
+			"graveler",
+			"magby"
+		],
+		RARE: [
+			"golem",
+			"rapidash",
+			"magmar",
+			"magcargo"
+		],
+		SUPER_RARE: ["fearow", "machamp"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golem",
+			"rapidash",
+			"magmar",
+			"magcargo"
+		],
+		BOSS_RARE: ["fearow", "machamp"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mt-moon": {
+		COMMON: [
+			"clefairy",
+			"zubat",
+			"paras",
+			"geodude"
+		],
+		UNCOMMON: [
+			"sandshrew",
+			"parasect",
+			"cleffa"
+		],
+		RARE: [
+			"sandslash",
+			"clefable",
+			"golbat",
+			"graveler",
+			"golem",
+			"crobat"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"clefable",
+			"golbat",
+			"graveler"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mt-pyre": {
+		COMMON: [
+			"wingull",
+			"shuppet",
+			"duskull"
+		],
+		UNCOMMON: [
+			"gastly",
+			"pelipper",
+			"meditite"
+		],
+		RARE: [
+			"haunter",
+			"medicham",
+			"banette",
+			"dusclops",
+			"chimecho"
+		],
+		SUPER_RARE: ["gengar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"haunter",
+			"medicham",
+			"banette",
+			"dusclops"
+		],
+		BOSS_RARE: ["gengar", "chimecho"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mt-silver-summit": {
+		COMMON: [
+			"geodude",
+			"sneasel",
+			"teddiursa",
+			"phanpy"
+		],
+		UNCOMMON: [
+			"zubat",
+			"machop",
+			"machoke",
+			"graveler",
+			"onix",
+			"misdreavus"
+		],
+		RARE: [
+			"golbat",
+			"machamp",
+			"golem",
+			"ursaring",
+			"donphan",
+			"larvitar",
+			"pupitar"
+		],
+		SUPER_RARE: [
+			"crobat",
+			"steelix",
+			"tyranitar"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"machamp",
+			"golem",
+			"ursaring",
+			"donphan"
+		],
+		BOSS_RARE: ["steelix", "tyranitar"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mushroom-glade": {
+		COMMON: [
+			"paras",
+			"wurmple",
+			"shroomish"
+		],
+		UNCOMMON: [
+			"oddish",
+			"gloom",
+			"venonat",
+			"silcoon",
+			"slakoth"
+		],
+		RARE: [
+			"vileplume",
+			"parasect",
+			"venomoth",
+			"beautifly",
+			"breloom",
+			"vigoroth"
+		],
+		SUPER_RARE: ["slaking"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"vileplume",
+			"parasect",
+			"breloom"
+		],
+		BOSS_RARE: ["slaking"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"mysterious-garden": {
+		COMMON: [
+			"bulbasaur",
+			"oddish",
+			"hoppip",
+			"sunkern"
+		],
+		UNCOMMON: [
+			"gloom",
+			"bellsprout",
+			"skiploom",
+			"roselia"
+		],
+		RARE: [
+			"ivysaur",
+			"vileplume",
+			"weepinbell",
+			"jumpluff",
+			"sunflora"
+		],
+		SUPER_RARE: [
+			"venusaur",
+			"victreebel",
+			"bellossom"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"ivysaur",
+			"vileplume",
+			"jumpluff",
+			"sunflora"
+		],
+		BOSS_RARE: ["venusaur", "bellossom"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"oasis": {
+		COMMON: [
+			"sandshrew",
+			"psyduck",
+			"azurill",
+			"trapinch",
+			"cacnea"
+		],
+		UNCOMMON: [
+			"sandslash",
+			"doduo",
+			"marill",
+			"numel",
+			"vibrava",
+			"baltoy"
+		],
+		RARE: [
+			"golduck",
+			"dodrio",
+			"azumarill",
+			"camerupt",
+			"cacturne",
+			"claydol"
+		],
+		SUPER_RARE: ["flygon"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"camerupt",
+			"cacturne",
+			"claydol"
+		],
+		BOSS_RARE: ["flygon"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"orange-archipelago": {
+		COMMON: [
+			"tentacool",
+			"shellder",
+			"krabby",
+			"staryu",
+			"azurill"
+		],
+		UNCOMMON: [
+			"caterpie",
+			"psyduck",
+			"cloyster",
+			"exeggcute",
+			"horsea",
+			"magikarp",
+			"marill"
+		],
+		RARE: [
+			"metapod",
+			"golduck",
+			"tentacruel",
+			"kingler",
+			"exeggutor",
+			"seadra",
+			"starmie",
+			"lapras",
+			"azumarill"
+		],
+		SUPER_RARE: [
+			"butterfree",
+			"gyarados",
+			"kingdra"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"kingler",
+			"exeggutor",
+			"starmie"
+		],
+		BOSS_RARE: ["gyarados", "lapras"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"pikachu-colony": {
+		COMMON: [
+			"caterpie",
+			"weedle",
+			"pikachu",
+			"pichu"
+		],
+		UNCOMMON: [
+			"metapod",
+			"kakuna",
+			"pidgey",
+			"plusle",
+			"minun"
+		],
+		RARE: [
+			"butterfree",
+			"beedrill",
+			"pidgeotto",
+			"raichu"
+		],
+		SUPER_RARE: ["pidgeot"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"butterfree",
+			"beedrill",
+			"pidgeotto",
+			"raichu"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"plains": {
+		COMMON: [
+			"zubat",
+			"meowth",
+			"sentret",
+			"pichu",
+			"poochyena",
+			"zigzagoon"
+		],
+		UNCOMMON: [
+			"pidgey",
+			"spearow",
+			"pikachu",
+			"golbat",
+			"mankey",
+			"doduo"
+		],
+		RARE: [
+			"pidgeotto",
+			"fearow",
+			"raichu",
+			"persian",
+			"primeape",
+			"abra",
+			"dodrio",
+			"lickitung",
+			"furret",
+			"crobat",
+			"mightyena",
+			"linoone"
+		],
+		SUPER_RARE: [
+			"pidgeot",
+			"kadabra",
+			"farfetch_d",
+			"snorlax",
+			"dunsparce"
+		],
+		ULTRA_RARE: ["alakazam", "ditto"],
+		BOSS: [
+			"persian",
+			"dodrio",
+			"furret",
+			"mightyena",
+			"linoone"
+		],
+		BOSS_RARE: ["farfetch_d", "snorlax"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"pokemon-mansion": {
+		COMMON: [
+			"rattata",
+			"growlithe",
+			"ponyta",
+			"grimer",
+			"koffing"
+		],
+		UNCOMMON: ["raticate", "magby"],
+		RARE: [
+			"arcanine",
+			"rapidash",
+			"muk",
+			"weezing",
+			"ditto"
+		],
+		SUPER_RARE: ["magmar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"arcanine",
+			"rapidash",
+			"muk",
+			"weezing"
+		],
+		BOSS_RARE: ["magmar"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"pokemon-tower": {
+		COMMON: ["gastly", "cubone"],
+		UNCOMMON: ["misdreavus", "duskull"],
+		RARE: [
+			"haunter",
+			"marowak",
+			"dusclops"
+		],
+		SUPER_RARE: ["gengar"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"haunter",
+			"marowak",
+			"dusclops"
+		],
+		BOSS_RARE: ["gengar"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"power-plant": {
+		COMMON: [
+			"pikachu",
+			"voltorb",
+			"pichu",
+			"elekid",
+			"electrike"
+		],
+		UNCOMMON: [
+			"magnemite",
+			"electrode",
+			"electabuzz",
+			"plusle",
+			"minun"
+		],
+		RARE: [
+			"raichu",
+			"magneton",
+			"mareep",
+			"flaaffy",
+			"manectric"
+		],
+		SUPER_RARE: ["ampharos"],
+		ULTRA_RARE: [],
+		BOSS: ["raichu", "manectric"],
+		BOSS_RARE: ["ampharos"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"river": {
+		COMMON: [
+			"poliwag",
+			"goldeen",
+			"magikarp",
+			"azurill",
+			"barboach"
+		],
+		UNCOMMON: [
+			"psyduck",
+			"poliwhirl",
+			"marill",
+			"surskit",
+			"corphish"
+		],
+		RARE: [
+			"golduck",
+			"poliwrath",
+			"seaking",
+			"masquerain",
+			"whiscash",
+			"crawdaunt"
+		],
+		SUPER_RARE: ["gyarados", "azumarill"],
+		ULTRA_RARE: ["feebas", "milotic"],
+		BOSS: [
+			"golduck",
+			"seaking",
+			"whiscash",
+			"crawdaunt"
+		],
+		BOSS_RARE: ["gyarados", "azumarill"],
+		BOSS_SUPER_RARE: ["milotic"],
+		BOSS_ULTRA_RARE: []
+	},
+	"rock-tunnel": {
+		COMMON: [
+			"zubat",
+			"machop",
+			"geodude"
+		],
+		UNCOMMON: ["mankey", "cubone"],
+		RARE: [
+			"golbat",
+			"machoke",
+			"machamp",
+			"graveler",
+			"golem",
+			"onix",
+			"crobat"
+		],
+		SUPER_RARE: [
+			"primeape",
+			"marowak",
+			"steelix"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golbat",
+			"machoke",
+			"graveler",
+			"onix"
+		],
+		BOSS_RARE: ["primeape", "marowak"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"rocket-hideout": {
+		COMMON: [
+			"rattata",
+			"ekans",
+			"zubat",
+			"meowth",
+			"grimer",
+			"koffing"
+		],
+		UNCOMMON: [
+			"raticate",
+			"golbat",
+			"drowzee",
+			"murkrow",
+			"sneasel",
+			"houndour"
+		],
+		RARE: [
+			"arbok",
+			"persian",
+			"muk",
+			"weezing",
+			"crobat"
+		],
+		SUPER_RARE: ["hypno", "houndoom"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"arbok",
+			"persian",
+			"muk",
+			"weezing"
+		],
+		BOSS_RARE: ["hypno", "houndoom"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"ruins": {
+		COMMON: [
+			"drowzee",
+			"natu",
+			"unown",
+			"spoink",
+			"baltoy"
+		],
+		UNCOMMON: [
+			"abra",
+			"kadabra",
+			"wynaut"
+		],
+		RARE: [
+			"alakazam",
+			"hypno",
+			"xatu",
+			"wobbuffet",
+			"grumpig",
+			"claydol"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"alakazam",
+			"hypno",
+			"xatu",
+			"grumpig",
+			"claydol"
+		],
+		BOSS_RARE: ["wobbuffet"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"safari-zone": {
+		COMMON: [
+			"nidoran_f",
+			"nidoran_m",
+			"paras",
+			"venonat",
+			"doduo"
+		],
+		UNCOMMON: [
+			"nidorina",
+			"nidorino",
+			"parasect",
+			"venomoth",
+			"dodrio",
+			"exeggcute",
+			"cubone",
+			"rhyhorn",
+			"girafarig",
+			"phanpy"
+		],
+		RARE: [
+			"nidoqueen",
+			"nidoking",
+			"exeggutor",
+			"marowak",
+			"rhydon",
+			"kangaskhan",
+			"scyther",
+			"pinsir",
+			"tauros",
+			"heracross",
+			"donphan"
+		],
+		SUPER_RARE: [
+			"dratini",
+			"dragonair",
+			"scizor"
+		],
+		ULTRA_RARE: ["dragonite"],
+		BOSS: [
+			"exeggutor",
+			"rhydon",
+			"kangaskhan",
+			"tauros"
+		],
+		BOSS_RARE: [
+			"scyther",
+			"pinsir",
+			"dragonair"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"sea": {
+		COMMON: [
+			"tentacool",
+			"slowpoke",
+			"wingull",
+			"wailmer"
+		],
+		UNCOMMON: [
+			"poliwag",
+			"slowbro",
+			"shellder",
+			"horsea",
+			"goldeen",
+			"staryu",
+			"magikarp",
+			"chinchou",
+			"carvanha",
+			"wailord"
+		],
+		RARE: [
+			"poliwhirl",
+			"tentacruel",
+			"cloyster",
+			"seadra",
+			"seaking",
+			"starmie",
+			"lapras",
+			"lanturn",
+			"pelipper",
+			"sharpedo"
+		],
+		SUPER_RARE: [
+			"poliwrath",
+			"gyarados",
+			"kingdra"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"pelipper",
+			"sharpedo"
+		],
+		BOSS_RARE: ["gyarados", "kingdra"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"seabed": {
+		COMMON: [
+			"chinchou",
+			"remoraid",
+			"clamperl"
+		],
+		UNCOMMON: [
+			"tentacool",
+			"shellder",
+			"wailmer",
+			"luvdisc"
+		],
+		RARE: [
+			"tentacruel",
+			"cloyster",
+			"lanturn",
+			"qwilfish",
+			"corsola",
+			"octillery",
+			"mantine",
+			"wailord",
+			"feebas",
+			"huntail",
+			"gorebyss"
+		],
+		SUPER_RARE: [
+			"omanyte",
+			"omastar",
+			"kabuto",
+			"kabutops",
+			"milotic",
+			"relicanth"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"lanturn",
+			"qwilfish",
+			"corsola",
+			"octillery",
+			"mantine",
+			"wailord",
+			"huntail",
+			"gorebyss",
+			"luvdisc"
+		],
+		BOSS_RARE: [
+			"omastar",
+			"kabutops",
+			"milotic",
+			"relicanth"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"seafoam-islands": {
+		COMMON: [
+			"zubat",
+			"psyduck",
+			"seel",
+			"shellder"
+		],
+		UNCOMMON: [
+			"golbat",
+			"slowpoke",
+			"krabby",
+			"horsea",
+			"staryu"
+		],
+		RARE: [
+			"golduck",
+			"slowbro",
+			"dewgong",
+			"cloyster",
+			"kingler",
+			"crobat"
+		],
+		SUPER_RARE: [
+			"seadra",
+			"starmie",
+			"kingdra"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"slowbro",
+			"dewgong",
+			"cloyster"
+		],
+		BOSS_RARE: ["seadra", "starmie"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"shoal-cave": {
+		COMMON: [
+			"zubat",
+			"tentacool",
+			"spheal"
+		],
+		UNCOMMON: [
+			"golbat",
+			"shellder",
+			"snorunt"
+		],
+		RARE: [
+			"tentacruel",
+			"cloyster",
+			"crobat",
+			"glalie",
+			"sealeo"
+		],
+		SUPER_RARE: ["walrein"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"cloyster",
+			"glalie",
+			"sealeo"
+		],
+		BOSS_RARE: ["walrein"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"silph-co": {
+		COMMON: ["magnemite", "voltorb"],
+		UNCOMMON: ["porygon"],
+		RARE: [
+			"magneton",
+			"electrode",
+			"ditto",
+			"porygon2"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: [
+			"magneton",
+			"electrode",
+			"porygon2"
+		],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"sky-pillar": {
+		COMMON: [
+			"zubat",
+			"swablu",
+			"baltoy",
+			"shuppet",
+			"duskull"
+		],
+		UNCOMMON: [
+			"golbat",
+			"sableye",
+			"mawile"
+		],
+		RARE: [
+			"crobat",
+			"altaria",
+			"claydol",
+			"banette",
+			"dusclops",
+			"beldum"
+		],
+		SUPER_RARE: ["metang"],
+		ULTRA_RARE: ["metagross"],
+		BOSS: [
+			"altaria",
+			"claydol",
+			"banette",
+			"dusclops"
+		],
+		BOSS_RARE: ["sableye", "metang"],
+		BOSS_SUPER_RARE: ["metagross"],
+		BOSS_ULTRA_RARE: []
+	},
+	"slum": {
+		COMMON: [
+			"rattata",
+			"grimer",
+			"drowzee",
+			"koffing",
+			"murkrow",
+			"shuppet"
+		],
+		UNCOMMON: [
+			"raticate",
+			"hypno",
+			"houndour",
+			"banette"
+		],
+		RARE: [
+			"muk",
+			"weezing",
+			"sneasel",
+			"houndoom"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: ["muk", "weezing"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"snowy-forest": {
+		COMMON: [
+			"sentret",
+			"sneasel",
+			"swinub",
+			"snorunt",
+			"glalie"
+		],
+		UNCOMMON: [
+			"furret",
+			"teddiursa",
+			"piloswine",
+			"stantler"
+		],
+		RARE: ["ursaring", "delibird"],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: ["glalie"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"space": {
+		COMMON: [
+			"cleffa",
+			"lunatone",
+			"solrock"
+		],
+		UNCOMMON: ["clefairy", "baltoy"],
+		RARE: [
+			"clefable",
+			"staryu",
+			"claydol",
+			"metang"
+		],
+		SUPER_RARE: [
+			"starmie",
+			"beldum",
+			"metagross"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"clefable",
+			"lunatone",
+			"solrock"
+		],
+		BOSS_RARE: ["metagross"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"sprout-tower": {
+		COMMON: [
+			"rattata",
+			"bellsprout",
+			"gastly"
+		],
+		UNCOMMON: [
+			"raticate",
+			"weepinbell",
+			"drowzee",
+			"hoothoot",
+			"natu"
+		],
+		RARE: [
+			"abra",
+			"victreebel",
+			"gengar",
+			"hypno",
+			"noctowl",
+			"xatu"
+		],
+		SUPER_RARE: ["kadabra", "haunter"],
+		ULTRA_RARE: ["alakazam"],
+		BOSS: [
+			"victreebel",
+			"hypno",
+			"noctowl",
+			"xatu"
+		],
+		BOSS_RARE: ["kadabra", "haunter"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"squirtle-squad": {
+		COMMON: [
+			"squirtle",
+			"psyduck",
+			"poliwag",
+			"azurill"
+		],
+		UNCOMMON: [
+			"poliwhirl",
+			"marill",
+			"wooper"
+		],
+		RARE: [
+			"wartortle",
+			"golduck",
+			"poliwrath",
+			"quagsire"
+		],
+		SUPER_RARE: ["blastoise", "azumarill"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"wartortle",
+			"golduck",
+			"quagsire"
+		],
+		BOSS_RARE: ["blastoise", "azumarill"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"stray-charmander": {
+		COMMON: [
+			"charmander",
+			"pidgey",
+			"rattata"
+		],
+		UNCOMMON: ["spearow", "oddish"],
+		RARE: [
+			"charmeleon",
+			"pidgeotto",
+			"pidgeot",
+			"raticate",
+			"fearow",
+			"gloom"
+		],
+		SUPER_RARE: ["charizard", "vileplume"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"charmeleon",
+			"pidgeotto",
+			"raticate"
+		],
+		BOSS_RARE: ["charizard"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"swamp": {
+		COMMON: [
+			"ekans",
+			"poliwag",
+			"wooper",
+			"lotad",
+			"gulpin"
+		],
+		UNCOMMON: [
+			"psyduck",
+			"poliwhirl",
+			"lombre",
+			"barboach"
+		],
+		RARE: [
+			"arbok",
+			"golduck",
+			"poliwrath",
+			"totodile",
+			"croconaw",
+			"quagsire",
+			"mudkip",
+			"marshtomp",
+			"ludicolo",
+			"swalot",
+			"whiscash"
+		],
+		SUPER_RARE: [
+			"feraligatr",
+			"politoed",
+			"swampert"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"arbok",
+			"poliwrath",
+			"quagsire",
+			"ludicolo",
+			"swalot",
+			"whiscash"
+		],
+		BOSS_RARE: [
+			"feraligatr",
+			"politoed",
+			"swampert"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"tall-grass": {
+		COMMON: [
+			"nidoran_f",
+			"nidoran_m",
+			"oddish",
+			"paras",
+			"spinarak"
+		],
+		UNCOMMON: [
+			"nidorina",
+			"nidorino",
+			"gloom",
+			"parasect",
+			"venonat",
+			"nincada",
+			"zangoose",
+			"seviper"
+		],
+		RARE: [
+			"nidoqueen",
+			"nidoking",
+			"vileplume",
+			"venomoth",
+			"pinsir",
+			"chikorita",
+			"bayleef",
+			"ariados",
+			"girafarig",
+			"ninjask",
+			"kecleon",
+			"tropius"
+		],
+		SUPER_RARE: [
+			"scyther",
+			"meganium",
+			"bellossom",
+			"shedinja"
+		],
+		ULTRA_RARE: ["scizor"],
+		BOSS: [
+			"nidoqueen",
+			"nidoking",
+			"vileplume",
+			"ariados",
+			"ninjask",
+			"zangoose",
+			"seviper",
+			"kecleon"
+		],
+		BOSS_RARE: [
+			"scyther",
+			"pinsir",
+			"meganium",
+			"bellossom"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"temple": {
+		COMMON: [
+			"gastly",
+			"natu",
+			"duskull"
+		],
+		UNCOMMON: [
+			"haunter",
+			"cubone",
+			"xatu",
+			"baltoy",
+			"dusclops"
+		],
+		RARE: [
+			"gengar",
+			"marowak",
+			"claydol",
+			"chimecho"
+		],
+		SUPER_RARE: [],
+		ULTRA_RARE: [],
+		BOSS: ["chimecho"],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"town": {
+		COMMON: [
+			"rattata",
+			"spearow",
+			"sentret",
+			"hoothoot",
+			"ledyba",
+			"spinarak",
+			"hoppip",
+			"sunkern",
+			"taillow"
+		],
+		UNCOMMON: [
+			"raticate",
+			"fearow",
+			"ekans",
+			"nidoran_f",
+			"nidoran_m",
+			"oddish",
+			"paras",
+			"venonat",
+			"meowth",
+			"bellsprout",
+			"furret",
+			"noctowl",
+			"ledian",
+			"ariados",
+			"skiploom",
+			"sunflora",
+			"lotad",
+			"seedot",
+			"swellow",
+			"shroomish",
+			"whismur",
+			"skitty"
+		],
+		RARE: [
+			"arbok",
+			"nidorina",
+			"nidorino",
+			"gloom",
+			"parasect",
+			"venomoth",
+			"persian",
+			"abra",
+			"weepinbell",
+			"cleffa",
+			"igglybuff",
+			"jumpluff",
+			"lombre",
+			"nuzleaf",
+			"surskit",
+			"breloom",
+			"loudred",
+			"delcatty"
+		],
+		SUPER_RARE: [
+			"nidoqueen",
+			"nidoking",
+			"clefairy",
+			"jigglypuff",
+			"vileplume",
+			"kadabra",
+			"victreebel",
+			"pichu",
+			"togepi",
+			"ludicolo",
+			"shiftry",
+			"ralts",
+			"masquerain",
+			"nincada",
+			"exploud"
+		],
+		ULTRA_RARE: [
+			"pikachu",
+			"raichu",
+			"clefable",
+			"wigglytuff",
+			"alakazam",
+			"ditto",
+			"togetic",
+			"kirlia",
+			"gardevoir",
+			"ninjask"
+		],
+		BOSS: [],
+		BOSS_RARE: [],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"treetops": {
+		COMMON: [
+			"pidgey",
+			"aipom",
+			"pineco",
+			"taillow"
+		],
+		UNCOMMON: [
+			"pidgeotto",
+			"spearow",
+			"ekans",
+			"hoothoot",
+			"seedot",
+			"nuzleaf",
+			"swellow",
+			"slakoth"
+		],
+		RARE: [
+			"pidgeot",
+			"fearow",
+			"arbok",
+			"exeggcute",
+			"noctowl",
+			"forretress",
+			"heracross",
+			"shiftry",
+			"vigoroth"
+		],
+		SUPER_RARE: [
+			"exeggutor",
+			"slaking",
+			"tropius"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"pidgeot",
+			"forretress",
+			"heracross",
+			"shiftry"
+		],
+		BOSS_RARE: ["exeggutor", "tropius"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"tundra": {
+		COMMON: [
+			"teddiursa",
+			"swinub",
+			"snorunt",
+			"spheal"
+		],
+		UNCOMMON: [
+			"sneasel",
+			"delibird",
+			"stantler",
+			"smoochum",
+			"sealeo"
+		],
+		RARE: [
+			"jynx",
+			"ursaring",
+			"piloswine",
+			"glalie"
+		],
+		SUPER_RARE: ["walrein"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"jynx",
+			"ursaring",
+			"piloswine",
+			"glalie"
+		],
+		BOSS_RARE: ["sneasel", "walrein"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"underground": {
+		COMMON: [
+			"rattata",
+			"zubat",
+			"grimer",
+			"koffing"
+		],
+		UNCOMMON: [
+			"ekans",
+			"golbat",
+			"drowzee",
+			"gulpin"
+		],
+		RARE: [
+			"raticate",
+			"muk",
+			"weezing",
+			"crobat",
+			"swalot"
+		],
+		SUPER_RARE: [
+			"arbok",
+			"hypno",
+			"ditto"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"raticate",
+			"muk",
+			"weezing",
+			"swalot"
+		],
+		BOSS_RARE: ["arbok", "hypno"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"victory-road": {
+		COMMON: [
+			"zubat",
+			"machop",
+			"geodude",
+			"onix"
+		],
+		UNCOMMON: [
+			"golbat",
+			"machoke",
+			"graveler",
+			"cubone",
+			"rhyhorn",
+			"teddiursa",
+			"makuhita",
+			"aron",
+			"lairon"
+		],
+		RARE: [
+			"machamp",
+			"golem",
+			"marowak",
+			"crobat",
+			"steelix",
+			"ursaring",
+			"phanpy",
+			"sableye",
+			"mawile",
+			"aggron",
+			"meditite"
+		],
+		SUPER_RARE: [
+			"rhydon",
+			"donphan",
+			"hariyama",
+			"medicham"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"machamp",
+			"golem",
+			"steelix",
+			"aggron"
+		],
+		BOSS_RARE: [
+			"rhydon",
+			"donphan",
+			"hariyama",
+			"medicham"
+		],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"volcano": {
+		COMMON: [
+			"growlithe",
+			"ponyta",
+			"slugma",
+			"magby",
+			"poochyena",
+			"numel",
+			"spoink",
+			"swablu"
+		],
+		UNCOMMON: [
+			"magmar",
+			"mightyena",
+			"meditite",
+			"torkoal",
+			"grumpig",
+			"altaria"
+		],
+		RARE: [
+			"charmeleon",
+			"arcanine",
+			"rapidash",
+			"cyndaquil",
+			"quilava",
+			"magcargo",
+			"medicham",
+			"camerupt"
+		],
+		SUPER_RARE: ["charizard", "typhlosion"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"arcanine",
+			"rapidash",
+			"magcargo",
+			"camerupt",
+			"torkoal"
+		],
+		BOSS_RARE: ["charizard", "typhlosion"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"wasteland": {
+		COMMON: [
+			"larvitar",
+			"trapinch",
+			"vibrava",
+			"bagon"
+		],
+		UNCOMMON: [
+			"dragonair",
+			"pupitar",
+			"swablu",
+			"shelgon"
+		],
+		RARE: [
+			"dratini",
+			"dragonite",
+			"tyranitar",
+			"flygon",
+			"altaria",
+			"salamence"
+		],
+		SUPER_RARE: ["aerodactyl"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"dragonite",
+			"tyranitar",
+			"flygon",
+			"salamence"
+		],
+		BOSS_RARE: ["aerodactyl"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"waterfall": {
+		COMMON: [
+			"poliwag",
+			"goldeen",
+			"magikarp",
+			"azurill"
+		],
+		UNCOMMON: [
+			"zubat",
+			"psyduck",
+			"poliwhirl",
+			"slowpoke",
+			"marill"
+		],
+		RARE: [
+			"golbat",
+			"golduck",
+			"poliwrath",
+			"slowbro",
+			"seaking",
+			"gyarados",
+			"azumarill"
+		],
+		SUPER_RARE: [
+			"crobat",
+			"politoed",
+			"slowking"
+		],
+		ULTRA_RARE: [],
+		BOSS: [
+			"golduck",
+			"poliwrath",
+			"seaking",
+			"gyarados"
+		],
+		BOSS_RARE: ["politoed", "slowking"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	},
+	"whirl-islands": {
+		COMMON: [
+			"zubat",
+			"tentacool",
+			"shellder",
+			"krabby"
+		],
+		UNCOMMON: [
+			"golbat",
+			"slowpoke",
+			"seel",
+			"cloyster",
+			"horsea",
+			"magikarp"
+		],
+		RARE: [
+			"tentacruel",
+			"slowbro",
+			"dewgong",
+			"kingler",
+			"seadra",
+			"crobat"
+		],
+		SUPER_RARE: ["gyarados", "kingdra"],
+		ULTRA_RARE: [],
+		BOSS: [
+			"tentacruel",
+			"slowbro",
+			"dewgong",
+			"kingler"
+		],
+		BOSS_RARE: ["gyarados", "kingdra"],
+		BOSS_SUPER_RARE: [],
+		BOSS_ULTRA_RARE: []
+	}
+};
+/**
+* Grafo de vizinhanca do PokeRogue: peso `n` = 1/n de chance de o vizinho
+* APARECER como opcao (depois ele sorteia uniforme entre as que apareceram).
+*
+* NAO e usado pelo jogo hoje. Fica guardado porque e a fundacao do modo
+* Expedicao, e o parser que extrai isso ja esta escrito.
+*/
+/**
+* Pesos de clima de cada sub-bioma (PH-140), do `weatherPool` do PokeRogue.
+* Sorteado UMA vez ao entrar na sala; `limpo` e um resultado como outro
+* qualquer, nao a ausencia de tabela.
+*
+* E o unico dado de PROBABILIDADE de clima que existe: os jogos principais
+* fixam o clima por rota (Rota 119 sempre chove) e nunca sortearam nada.
+*/
+var SUB_BIOMA_CLIMA = {
+	"abandoned-ship": {
+		limpo: 2,
+		nevoa: 4,
+		chuva: 3
+	},
+	"abyss": { limpo: 1 },
+	"ash-field": {
+		limpo: 5,
+		nevoa: 4
+	},
+	"badlands": {
+		limpo: 8,
+		areia: 2,
+		sol: 5
+	},
+	"beach": {
+		limpo: 8,
+		chuva: 3,
+		sol: 5
+	},
+	"bug-contest": {
+		limpo: 7,
+		sol: 3
+	},
+	"burned-tower": {
+		limpo: 4,
+		nevoa: 4
+	},
+	"canyon": {
+		limpo: 4,
+		sol: 4,
+		areia: 2
+	},
+	"cave": { limpo: 1 },
+	"celadon-mansion": { limpo: 1 },
+	"construction-site": { limpo: 1 },
+	"coral-reef": {
+		limpo: 4,
+		sol: 6
+	},
+	"cycling-road": {
+		limpo: 8,
+		sol: 3
+	},
+	"dark-cave": { limpo: 1 },
+	"desert": {
+		limpo: 2,
+		areia: 8,
+		sol: 5
+	},
+	"digletts-cave": { limpo: 1 },
+	"dojo": { limpo: 1 },
+	"factory": { limpo: 1 },
+	"fairy-cave": { limpo: 1 },
+	"farm": {
+		limpo: 6,
+		sol: 4
+	},
+	"fiery-path": {
+		limpo: 4,
+		sol: 6
+	},
+	"forest": {
+		limpo: 8,
+		chuva: 4
+	},
+	"grampa-canyon": {
+		limpo: 5,
+		areia: 3
+	},
+	"grass": {
+		limpo: 8,
+		chuva: 4,
+		sol: 8
+	},
+	"graveyard": {
+		limpo: 3,
+		nevoa: 1
+	},
+	"harbor": {
+		limpo: 7,
+		chuva: 3
+	},
+	"hot-springs": {
+		limpo: 4,
+		nevoa: 5,
+		sol: 2
+	},
+	"ice-cave": {
+		limpo: 3,
+		neve: 4,
+		granizo: 1
+	},
+	"ilex-forest": {
+		limpo: 5,
+		nevoa: 4
+	},
+	"jungle": {
+		limpo: 8,
+		chuva: 6,
+		nevoa: 1
+	},
+	"junkyard": {
+		limpo: 7,
+		chuva: 3
+	},
+	"jynx-holiday": { neve: 1 },
+	"laboratory": { limpo: 1 },
+	"lake": {
+		limpo: 10,
+		chuva: 4,
+		nevoa: 1
+	},
+	"lake-of-rage": {
+		limpo: 3,
+		chuva: 6
+	},
+	"lily-pond": {
+		limpo: 5,
+		chuva: 4,
+		sol: 3
+	},
+	"maidens-peak": {
+		limpo: 3,
+		nevoa: 7
+	},
+	"meadow": {
+		limpo: 3,
+		sol: 5
+	},
+	"meditation-shrine": { limpo: 1 },
+	"meteor-falls": {
+		limpo: 4,
+		nevoa: 3
+	},
+	"metropolis": { limpo: 1 },
+	"mirage-island": {
+		limpo: 6,
+		sol: 4
+	},
+	"mountain": { limpo: 1 },
+	"mt-ember": {
+		limpo: 3,
+		sol: 7
+	},
+	"mt-moon": { limpo: 1 },
+	"mt-pyre": {
+		limpo: 3,
+		nevoa: 5
+	},
+	"mt-silver-summit": {
+		neve: 6,
+		granizo: 3
+	},
+	"mushroom-glade": {
+		limpo: 5,
+		chuva: 4,
+		nevoa: 2
+	},
+	"mysterious-garden": {
+		limpo: 4,
+		sol: 6
+	},
+	"oasis": {
+		limpo: 3,
+		sol: 7
+	},
+	"orange-archipelago": {
+		limpo: 4,
+		sol: 6
+	},
+	"pikachu-colony": {
+		limpo: 7,
+		sol: 3
+	},
+	"plains": { limpo: 1 },
+	"pokemon-mansion": {
+		limpo: 3,
+		sol: 2
+	},
+	"pokemon-tower": {
+		limpo: 2,
+		nevoa: 8
+	},
+	"power-plant": { limpo: 1 },
+	"river": {
+		limpo: 2,
+		chuva: 9
+	},
+	"rock-tunnel": { limpo: 1 },
+	"rocket-hideout": { limpo: 1 },
+	"ruins": { limpo: 1 },
+	"safari-zone": {
+		limpo: 6,
+		sol: 4
+	},
+	"sea": {
+		limpo: 3,
+		chuva: 12
+	},
+	"seabed": { chuva: 1 },
+	"seafoam-islands": {
+		limpo: 3,
+		neve: 6
+	},
+	"shoal-cave": {
+		limpo: 3,
+		neve: 5,
+		granizo: 2
+	},
+	"silph-co": { limpo: 1 },
+	"sky-pillar": { limpo: 1 },
+	"slum": { limpo: 1 },
+	"snowy-forest": {
+		neve: 7,
+		granizo: 1
+	},
+	"space": { limpo: 1 },
+	"sprout-tower": { limpo: 1 },
+	"squirtle-squad": {
+		limpo: 3,
+		sol: 7
+	},
+	"stray-charmander": { chuva: 1 },
+	"swamp": {
+		limpo: 3,
+		chuva: 4,
+		nevoa: 1
+	},
+	"tall-grass": {
+		limpo: 8,
+		chuva: 4,
+		sol: 4
+	},
+	"temple": { limpo: 1 },
+	"town": { limpo: 1 },
+	"treetops": {
+		limpo: 7,
+		chuva: 3
+	},
+	"tundra": {
+		neve: 6,
+		granizo: 3
+	},
+	"underground": { limpo: 1 },
+	"victory-road": { limpo: 1 },
+	"volcano": { sol: 1 },
+	"wasteland": { limpo: 1 },
+	"waterfall": {
+		limpo: 4,
+		nevoa: 5
+	},
+	"whirl-islands": {
+		limpo: 3,
+		chuva: 5,
+		nevoa: 3
+	}
+};
+//#endregion
 //#region src/data/generated/spawnTiers.generated.ts
 var SPAWN_WEIGHT_BY_SPECIES = {
 	"abra": 10,
@@ -58209,12 +63201,17 @@ function montarHunt(bioma, estagio) {
 	const id = estagioId(bioma.chave, estagio);
 	const [lo, hi] = niveisDoEstagio(estagio);
 	const porSala = {};
-	for (const sub of [...bioma.subBiomas, ...bioma.especiais ?? []]) {
+	for (const sub of bioma.subBiomas) {
 		const doSub = new Set(ELENCO_DO_SUB_BIOMA[sub.chave] ?? []);
 		const ids = [];
 		for (const [raiz] of ELENCO_POR_ESTAGIO[sub.chave]?.[estagio] ?? []) for (const trecho of trechosDaLinha(raiz, estagio, doSub)) ids.push(addEncounter(id, trecho));
 		porSala[sub.chave] = ids;
 	}
+	for (const sub of bioma.especiais ?? []) porSala[sub.chave] = (SUB_BIOMA_ESPECIES[sub.chave] ?? []).filter((sp) => SPECIES[sp]).map((speciesId) => addEncounter(`${id}_esp`, {
+		speciesId,
+		minLevel: lo,
+		maxLevel: hi
+	}));
 	const comuns = new Set(bioma.subBiomas.map((s) => s.chave));
 	const enemyPool = [...new Set(Object.entries(porSala).filter(([chave]) => comuns.has(chave)).flatMap(([, ids]) => ids))];
 	if (enemyPool.length === 0) throw new Error(`Hunt "${id}" nasceria sem nenhum encontro (estágio ${estagio}, Lv ${lo}-${hi}). Hunt vazia não da erro em runtime: ela só nunca spawna nada e o jogador fica num mapa morto.`);
@@ -110750,3326 +115747,6 @@ function tempoDoGolpe(speciesId, kind, abilityId) {
 		soltura: Math.max(pose, apice + derradeiro / 1e3 + FOLGA_DEPOIS_DO_IMPACTO)
 	};
 }
-//#endregion
-//#region src/data/generated/subBiomas.generated.ts
-/**
-* As NOVE pools do PokeRogue por sub-bioma, que e de onde sai a chance de
-* aparicao (data/spawnPorTier.ts) e o elenco de Guardian/Lord da sala.
-*
-* As cinco selvagens sao o pool de spawn e cobrem TODA especie de
-* `SUB_BIOMA_ESPECIES` — as herdadas entram com o tier de um parente,
-* deslocado pela diferenca de estagio evolutivo, e o chefe puro entra num
-* degrau equivalente (ver o gerador).
-*
-* As quatro de chefe sao SO dado direto do PokeRogue, sem heranca: Guardian e
-* Lord tem que ser um chefe de verdade daquele lugar, nao um parente dele.
-* Por isso elas podem vir VAZIAS, e quem consome resolve o vazio descendo de
-* degrau (o proprio PokeRogue faz assim, ver arena.ts#randomSpecies).
-*/
-var SUB_BIOMA_TIERS = {
-	"abandoned-ship": {
-		COMMON: [
-			"zubat",
-			"tentacool",
-			"krabby",
-			"shuppet"
-		],
-		UNCOMMON: [
-			"golbat",
-			"grimer",
-			"gastly",
-			"duskull"
-		],
-		RARE: [
-			"tentacruel",
-			"haunter",
-			"kingler",
-			"crobat",
-			"banette",
-			"dusclops"
-		],
-		SUPER_RARE: ["muk", "gengar"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"tentacruel",
-			"kingler",
-			"banette",
-			"dusclops"
-		],
-		BOSS_RARE: ["muk", "gengar"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"abyss": {
-		COMMON: [
-			"zubat",
-			"paras",
-			"misdreavus",
-			"sableye"
-		],
-		UNCOMMON: [
-			"golbat",
-			"parasect",
-			"gastly",
-			"haunter",
-			"dunsparce",
-			"houndour",
-			"whismur",
-			"mawile"
-		],
-		RARE: [
-			"gengar",
-			"crobat",
-			"houndoom",
-			"loudred",
-			"absol"
-		],
-		SUPER_RARE: ["exploud"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"gengar",
-			"crobat",
-			"houndoom",
-			"sableye"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"ash-field": {
-		COMMON: [
-			"sandshrew",
-			"slugma",
-			"spinda"
-		],
-		UNCOMMON: ["numel"],
-		RARE: [
-			"sandslash",
-			"magcargo",
-			"skarmory"
-		],
-		SUPER_RARE: ["camerupt"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"sandslash",
-			"magcargo",
-			"skarmory"
-		],
-		BOSS_RARE: ["camerupt", "spinda"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"badlands": {
-		COMMON: [
-			"diglett",
-			"geodude",
-			"cubone",
-			"rhyhorn",
-			"phanpy"
-		],
-		UNCOMMON: [
-			"sandshrew",
-			"graveler",
-			"rhydon",
-			"numel"
-		],
-		RARE: [
-			"sandslash",
-			"dugtrio",
-			"golem",
-			"onix",
-			"marowak",
-			"gligar",
-			"donphan",
-			"camerupt"
-		],
-		SUPER_RARE: ["steelix"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"dugtrio",
-			"golem",
-			"marowak",
-			"donphan"
-		],
-		BOSS_RARE: ["steelix"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"beach": {
-		COMMON: [
-			"shellder",
-			"krabby",
-			"staryu",
-			"corphish"
-		],
-		UNCOMMON: [],
-		RARE: [
-			"cloyster",
-			"kingler",
-			"starmie",
-			"crawdaunt"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: [
-			"cloyster",
-			"kingler",
-			"starmie",
-			"crawdaunt"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"bug-contest": {
-		COMMON: [
-			"caterpie",
-			"weedle",
-			"paras",
-			"venonat"
-		],
-		UNCOMMON: [
-			"metapod",
-			"kakuna",
-			"ledyba",
-			"spinarak"
-		],
-		RARE: [
-			"butterfree",
-			"beedrill",
-			"parasect",
-			"venomoth",
-			"scyther",
-			"pinsir",
-			"ledian",
-			"ariados"
-		],
-		SUPER_RARE: ["scizor"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"butterfree",
-			"beedrill",
-			"parasect",
-			"venomoth"
-		],
-		BOSS_RARE: ["scyther", "pinsir"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"burned-tower": {
-		COMMON: [
-			"rattata",
-			"zubat",
-			"koffing"
-		],
-		UNCOMMON: [
-			"murkrow",
-			"houndour",
-			"magby"
-		],
-		RARE: [
-			"raticate",
-			"weezing",
-			"magmar",
-			"crobat",
-			"misdreavus",
-			"houndoom"
-		],
-		SUPER_RARE: ["golbat"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"raticate",
-			"weezing",
-			"magmar",
-			"houndoom"
-		],
-		BOSS_RARE: ["golbat", "misdreavus"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"canyon": {
-		COMMON: [
-			"spearow",
-			"sandshrew",
-			"geodude",
-			"phanpy"
-		],
-		UNCOMMON: [
-			"graveler",
-			"cubone",
-			"rhyhorn",
-			"gligar"
-		],
-		RARE: [
-			"fearow",
-			"sandslash",
-			"golem",
-			"onix",
-			"marowak",
-			"skarmory",
-			"donphan"
-		],
-		SUPER_RARE: ["rhydon", "steelix"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"fearow",
-			"sandslash",
-			"golem",
-			"donphan"
-		],
-		BOSS_RARE: [
-			"rhydon",
-			"steelix",
-			"skarmory"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"cave": {
-		COMMON: [
-			"zubat",
-			"paras",
-			"teddiursa",
-			"whismur"
-		],
-		UNCOMMON: [
-			"golbat",
-			"geodude",
-			"loudred",
-			"makuhita",
-			"nosepass"
-		],
-		RARE: [
-			"parasect",
-			"graveler",
-			"onix",
-			"crobat",
-			"ursaring",
-			"exploud",
-			"hariyama"
-		],
-		SUPER_RARE: ["golem", "steelix"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"parasect",
-			"onix",
-			"crobat",
-			"ursaring",
-			"exploud"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"celadon-mansion": {
-		COMMON: [
-			"clefairy",
-			"jigglypuff",
-			"meowth",
-			"pichu",
-			"cleffa",
-			"igglybuff",
-			"skitty"
-		],
-		UNCOMMON: [
-			"pikachu",
-			"clefable",
-			"growlithe",
-			"snubbull"
-		],
-		RARE: [
-			"raichu",
-			"wigglytuff",
-			"persian",
-			"eevee",
-			"granbull",
-			"delcatty"
-		],
-		SUPER_RARE: ["arcanine"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"wigglytuff",
-			"persian",
-			"granbull",
-			"delcatty"
-		],
-		BOSS_RARE: ["arcanine"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"construction-site": {
-		COMMON: [
-			"diglett",
-			"machop",
-			"grimer",
-			"phanpy",
-			"makuhita",
-			"nosepass"
-		],
-		UNCOMMON: [
-			"dugtrio",
-			"machoke",
-			"magnemite",
-			"muk",
-			"koffing",
-			"rhyhorn",
-			"donphan",
-			"hariyama"
-		],
-		RARE: [
-			"machamp",
-			"magneton",
-			"onix",
-			"weezing",
-			"rhydon",
-			"tyrogue"
-		],
-		SUPER_RARE: [
-			"hitmonlee",
-			"ditto",
-			"steelix"
-		],
-		ULTRA_RARE: [],
-		BOSS: ["machamp"],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"coral-reef": {
-		COMMON: [
-			"staryu",
-			"corsola",
-			"wingull",
-			"luvdisc"
-		],
-		UNCOMMON: [
-			"shellder",
-			"horsea",
-			"chinchou",
-			"qwilfish",
-			"remoraid",
-			"pelipper"
-		],
-		RARE: [
-			"cloyster",
-			"seadra",
-			"starmie",
-			"lanturn",
-			"octillery",
-			"mantine",
-			"clamperl"
-		],
-		SUPER_RARE: ["kingdra"],
-		ULTRA_RARE: ["huntail", "gorebyss"],
-		BOSS: [
-			"cloyster",
-			"starmie",
-			"lanturn",
-			"octillery"
-		],
-		BOSS_RARE: ["mantine", "kingdra"],
-		BOSS_SUPER_RARE: ["huntail", "gorebyss"],
-		BOSS_ULTRA_RARE: []
-	},
-	"cycling-road": {
-		COMMON: [
-			"rattata",
-			"spearow",
-			"doduo"
-		],
-		UNCOMMON: [
-			"raticate",
-			"grimer",
-			"koffing",
-			"poochyena",
-			"taillow"
-		],
-		RARE: [
-			"fearow",
-			"ponyta",
-			"dodrio",
-			"weezing",
-			"swellow"
-		],
-		SUPER_RARE: [
-			"rapidash",
-			"muk",
-			"mightyena"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"fearow",
-			"dodrio",
-			"weezing"
-		],
-		BOSS_RARE: ["muk", "mightyena"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"dark-cave": {
-		COMMON: [
-			"zubat",
-			"geodude",
-			"teddiursa"
-		],
-		UNCOMMON: [
-			"graveler",
-			"whismur",
-			"loudred",
-			"wynaut"
-		],
-		RARE: [
-			"golbat",
-			"golem",
-			"crobat",
-			"dunsparce",
-			"ursaring",
-			"exploud"
-		],
-		SUPER_RARE: ["wobbuffet"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golbat",
-			"ursaring",
-			"exploud"
-		],
-		BOSS_RARE: ["wobbuffet", "dunsparce"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"desert": {
-		COMMON: [
-			"sandshrew",
-			"trapinch",
-			"cacnea"
-		],
-		UNCOMMON: [
-			"gligar",
-			"numel",
-			"vibrava"
-		],
-		RARE: [
-			"sandslash",
-			"doduo",
-			"camerupt",
-			"flygon",
-			"cacturne"
-		],
-		SUPER_RARE: [
-			"dodrio",
-			"lileep",
-			"cradily",
-			"anorith",
-			"armaldo"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"sandslash",
-			"flygon",
-			"cacturne"
-		],
-		BOSS_RARE: [
-			"dodrio",
-			"cradily",
-			"armaldo"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"digletts-cave": {
-		COMMON: ["zubat", "diglett"],
-		UNCOMMON: ["geodude"],
-		RARE: [
-			"golbat",
-			"dugtrio",
-			"graveler",
-			"crobat"
-		],
-		SUPER_RARE: ["golem"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golbat",
-			"dugtrio",
-			"graveler"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"dojo": {
-		COMMON: [
-			"mankey",
-			"makuhita",
-			"meditite"
-		],
-		UNCOMMON: ["primeape", "tyrogue"],
-		RARE: [
-			"hitmonlee",
-			"hitmonchan",
-			"hariyama",
-			"medicham"
-		],
-		SUPER_RARE: ["hitmontop"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"hitmonlee",
-			"hitmonchan",
-			"hariyama",
-			"medicham"
-		],
-		BOSS_RARE: ["hitmontop"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"factory": {
-		COMMON: ["machop", "voltorb"],
-		UNCOMMON: [
-			"machoke",
-			"magnemite",
-			"electrode",
-			"elekid",
-			"magby"
-		],
-		RARE: [
-			"machamp",
-			"magneton",
-			"electabuzz",
-			"magmar",
-			"metang"
-		],
-		SUPER_RARE: ["beldum", "metagross"],
-		ULTRA_RARE: [],
-		BOSS: [],
-		BOSS_RARE: ["metagross"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"fairy-cave": {
-		COMMON: [
-			"jigglypuff",
-			"cleffa",
-			"igglybuff",
-			"togepi",
-			"marill",
-			"azurill",
-			"mawile"
-		],
-		UNCOMMON: [
-			"clefairy",
-			"togetic",
-			"azumarill",
-			"ralts"
-		],
-		RARE: [
-			"clefable",
-			"wigglytuff",
-			"kirlia"
-		],
-		SUPER_RARE: ["gardevoir"],
-		ULTRA_RARE: [],
-		BOSS: ["wigglytuff", "mawile"],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"farm": {
-		COMMON: [
-			"rattata",
-			"tauros",
-			"mareep",
-			"miltank"
-		],
-		UNCOMMON: [
-			"raticate",
-			"ponyta",
-			"doduo",
-			"flaaffy",
-			"zigzagoon",
-			"skitty"
-		],
-		RARE: [
-			"growlithe",
-			"farfetch_d",
-			"dodrio",
-			"ampharos",
-			"snubbull",
-			"linoone",
-			"delcatty"
-		],
-		SUPER_RARE: [
-			"arcanine",
-			"rapidash",
-			"granbull"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"tauros",
-			"ampharos",
-			"miltank"
-		],
-		BOSS_RARE: ["arcanine", "rapidash"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"fiery-path": {
-		COMMON: [
-			"machop",
-			"koffing",
-			"slugma",
-			"numel"
-		],
-		UNCOMMON: ["grimer", "torkoal"],
-		RARE: [
-			"machamp",
-			"weezing",
-			"magcargo",
-			"camerupt"
-		],
-		SUPER_RARE: ["machoke", "muk"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"weezing",
-			"magcargo",
-			"camerupt",
-			"torkoal"
-		],
-		BOSS_RARE: ["machoke", "muk"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"forest": {
-		COMMON: [
-			"caterpie",
-			"metapod",
-			"butterfree",
-			"weedle",
-			"kakuna",
-			"beedrill",
-			"venonat",
-			"bellsprout",
-			"spinarak",
-			"pineco",
-			"wurmple",
-			"silcoon",
-			"beautifly",
-			"cascoon",
-			"dustox",
-			"seedot",
-			"shroomish"
-		],
-		UNCOMMON: [
-			"ekans",
-			"weepinbell",
-			"hoothoot",
-			"teddiursa",
-			"nuzleaf",
-			"roselia"
-		],
-		RARE: [
-			"arbok",
-			"venomoth",
-			"victreebel",
-			"exeggcute",
-			"scyther",
-			"noctowl",
-			"ariados",
-			"forretress",
-			"heracross",
-			"ursaring",
-			"stantler",
-			"treecko",
-			"grovyle",
-			"shiftry",
-			"breloom",
-			"tropius"
-		],
-		SUPER_RARE: [
-			"exeggutor",
-			"scizor",
-			"sceptile"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"venomoth",
-			"victreebel",
-			"noctowl",
-			"ariados",
-			"forretress",
-			"beautifly",
-			"dustox",
-			"shiftry",
-			"breloom"
-		],
-		BOSS_RARE: [
-			"heracross",
-			"stantler",
-			"sceptile"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"grampa-canyon": {
-		COMMON: [
-			"cubone",
-			"omanyte",
-			"kabuto"
-		],
-		UNCOMMON: ["lileep", "anorith"],
-		RARE: [
-			"marowak",
-			"omastar",
-			"kabutops",
-			"aerodactyl"
-		],
-		SUPER_RARE: ["cradily", "armaldo"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"marowak",
-			"omastar",
-			"kabutops"
-		],
-		BOSS_RARE: [
-			"aerodactyl",
-			"cradily",
-			"armaldo"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"grass": {
-		COMMON: [
-			"hoppip",
-			"wurmple",
-			"silcoon",
-			"cascoon",
-			"shroomish"
-		],
-		UNCOMMON: [
-			"lickitung",
-			"skiploom",
-			"sunkern",
-			"miltank",
-			"beautifly",
-			"dustox",
-			"seedot",
-			"breloom"
-		],
-		RARE: [
-			"ivysaur",
-			"growlithe",
-			"jumpluff",
-			"sunflora",
-			"nuzleaf"
-		],
-		SUPER_RARE: [
-			"venusaur",
-			"arcanine",
-			"sudowoodo",
-			"shiftry"
-		],
-		ULTRA_RARE: [],
-		BOSS: ["jumpluff", "miltank"],
-		BOSS_RARE: [
-			"venusaur",
-			"arcanine",
-			"sudowoodo"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"graveyard": {
-		COMMON: [
-			"gastly",
-			"shuppet",
-			"duskull"
-		],
-		UNCOMMON: [
-			"haunter",
-			"cubone",
-			"dusclops"
-		],
-		RARE: [
-			"gengar",
-			"marowak",
-			"misdreavus",
-			"banette"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: [
-			"gengar",
-			"marowak",
-			"banette"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"harbor": {
-		COMMON: [
-			"tentacool",
-			"krabby",
-			"magikarp",
-			"wingull"
-		],
-		UNCOMMON: [
-			"meowth",
-			"psyduck",
-			"machop",
-			"shellder",
-			"staryu"
-		],
-		RARE: [
-			"golduck",
-			"machoke",
-			"tentacruel",
-			"grimer",
-			"cloyster",
-			"kingler",
-			"starmie",
-			"pelipper",
-			"corphish"
-		],
-		SUPER_RARE: [
-			"persian",
-			"machamp",
-			"muk",
-			"gyarados",
-			"crawdaunt"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"machoke",
-			"tentacruel",
-			"kingler",
-			"pelipper"
-		],
-		BOSS_RARE: [
-			"persian",
-			"machamp",
-			"gyarados"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"hot-springs": {
-		COMMON: [
-			"psyduck",
-			"slowpoke",
-			"numel",
-			"spoink"
-		],
-		UNCOMMON: [
-			"growlithe",
-			"ponyta",
-			"houndour",
-			"magby",
-			"torkoal"
-		],
-		RARE: [
-			"golduck",
-			"rapidash",
-			"slowbro",
-			"camerupt",
-			"grumpig"
-		],
-		SUPER_RARE: [
-			"arcanine",
-			"magmar",
-			"houndoom"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golduck",
-			"slowbro",
-			"camerupt",
-			"grumpig"
-		],
-		BOSS_RARE: [
-			"arcanine",
-			"magmar",
-			"houndoom"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"ice-cave": {
-		COMMON: [
-			"seel",
-			"swinub",
-			"snorunt"
-		],
-		UNCOMMON: [
-			"slowking",
-			"sneasel",
-			"piloswine",
-			"smoochum",
-			"spheal",
-			"sealeo"
-		],
-		RARE: [
-			"dewgong",
-			"lapras",
-			"delibird",
-			"glalie",
-			"walrein"
-		],
-		SUPER_RARE: ["jynx"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"dewgong",
-			"glalie",
-			"walrein"
-		],
-		BOSS_RARE: ["jynx", "lapras"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"ilex-forest": {
-		COMMON: [
-			"caterpie",
-			"weedle",
-			"oddish",
-			"hoothoot"
-		],
-		UNCOMMON: [
-			"metapod",
-			"kakuna",
-			"zubat",
-			"gloom",
-			"paras",
-			"psyduck",
-			"pineco"
-		],
-		RARE: [
-			"butterfree",
-			"beedrill",
-			"golbat",
-			"vileplume",
-			"parasect",
-			"farfetch_d",
-			"noctowl",
-			"forretress"
-		],
-		SUPER_RARE: ["golduck", "crobat"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"butterfree",
-			"beedrill",
-			"noctowl",
-			"forretress"
-		],
-		BOSS_RARE: ["golduck"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"jungle": {
-		COMMON: [
-			"spinarak",
-			"aipom",
-			"shroomish"
-		],
-		UNCOMMON: [
-			"exeggcute",
-			"tangela",
-			"ariados",
-			"tropius"
-		],
-		RARE: [
-			"exeggutor",
-			"scyther",
-			"yanma",
-			"breloom",
-			"slakoth",
-			"vigoroth",
-			"seviper"
-		],
-		SUPER_RARE: [
-			"kangaskhan",
-			"scizor",
-			"slaking"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"exeggutor",
-			"breloom",
-			"seviper",
-			"tropius"
-		],
-		BOSS_RARE: [
-			"kangaskhan",
-			"scizor",
-			"slaking"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"junkyard": {
-		COMMON: [
-			"rattata",
-			"magnemite",
-			"grimer",
-			"koffing"
-		],
-		UNCOMMON: [
-			"raticate",
-			"voltorb",
-			"gulpin"
-		],
-		RARE: [
-			"magneton",
-			"muk",
-			"electrode",
-			"weezing",
-			"nosepass"
-		],
-		SUPER_RARE: ["ditto", "swalot"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"magneton",
-			"muk",
-			"electrode",
-			"weezing"
-		],
-		BOSS_RARE: ["nosepass", "swalot"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"jynx-holiday": {
-		COMMON: [
-			"swinub",
-			"delibird",
-			"smoochum",
-			"snorunt"
-		],
-		UNCOMMON: [
-			"sneasel",
-			"stantler",
-			"spheal"
-		],
-		RARE: [
-			"jynx",
-			"piloswine",
-			"glalie",
-			"sealeo"
-		],
-		SUPER_RARE: ["walrein"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"jynx",
-			"piloswine",
-			"delibird",
-			"glalie"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"laboratory": {
-		COMMON: ["grimer", "voltorb"],
-		UNCOMMON: ["magnemite"],
-		RARE: [
-			"magneton",
-			"muk",
-			"electrode",
-			"ditto"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: ["muk", "electrode"],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"lake": {
-		COMMON: [
-			"psyduck",
-			"goldeen",
-			"marill",
-			"wooper",
-			"lotad",
-			"surskit",
-			"azurill"
-		],
-		UNCOMMON: [
-			"slowpoke",
-			"magikarp",
-			"quagsire",
-			"lombre"
-		],
-		RARE: [
-			"wartortle",
-			"golduck",
-			"slowbro",
-			"seaking",
-			"azumarill",
-			"ludicolo",
-			"masquerain"
-		],
-		SUPER_RARE: [
-			"blastoise",
-			"gyarados",
-			"slowking"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golduck",
-			"slowbro",
-			"seaking",
-			"azumarill",
-			"masquerain"
-		],
-		BOSS_RARE: [
-			"blastoise",
-			"gyarados",
-			"slowking"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"lake-of-rage": {
-		COMMON: [
-			"goldeen",
-			"magikarp",
-			"azurill"
-		],
-		UNCOMMON: [
-			"psyduck",
-			"poliwag",
-			"slowpoke",
-			"marill",
-			"wooper"
-		],
-		RARE: [
-			"golduck",
-			"poliwhirl",
-			"slowbro",
-			"seaking",
-			"gyarados",
-			"azumarill",
-			"quagsire"
-		],
-		SUPER_RARE: ["poliwrath"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golduck",
-			"seaking",
-			"gyarados",
-			"quagsire"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"lily-pond": {
-		COMMON: [
-			"poliwag",
-			"wooper",
-			"lotad",
-			"surskit",
-			"azurill"
-		],
-		UNCOMMON: [
-			"oddish",
-			"psyduck",
-			"poliwhirl",
-			"marill",
-			"lombre"
-		],
-		RARE: [
-			"gloom",
-			"golduck",
-			"poliwrath",
-			"politoed",
-			"yanma",
-			"quagsire",
-			"ludicolo",
-			"masquerain"
-		],
-		SUPER_RARE: [
-			"vileplume",
-			"bellossom",
-			"azumarill"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"politoed",
-			"quagsire",
-			"ludicolo",
-			"masquerain"
-		],
-		BOSS_RARE: ["bellossom", "azumarill"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"maidens-peak": {
-		COMMON: [
-			"shellder",
-			"gastly",
-			"krabby",
-			"staryu"
-		],
-		UNCOMMON: [
-			"tentacool",
-			"kingler",
-			"wingull"
-		],
-		RARE: [
-			"tentacruel",
-			"cloyster",
-			"haunter",
-			"starmie",
-			"pelipper"
-		],
-		SUPER_RARE: ["gengar"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"cloyster",
-			"haunter",
-			"starmie"
-		],
-		BOSS_RARE: ["gengar"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"meadow": {
-		COMMON: [
-			"ledyba",
-			"igglybuff",
-			"roselia"
-		],
-		UNCOMMON: [
-			"jigglypuff",
-			"ponyta",
-			"mareep",
-			"snubbull",
-			"ralts",
-			"kirlia",
-			"skitty"
-		],
-		RARE: [
-			"wigglytuff",
-			"rapidash",
-			"tauros",
-			"ledian",
-			"flaaffy",
-			"granbull",
-			"miltank",
-			"gardevoir",
-			"delcatty",
-			"volbeat",
-			"illumise",
-			"spinda"
-		],
-		SUPER_RARE: ["ampharos"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"tauros",
-			"ledian",
-			"granbull",
-			"miltank",
-			"gardevoir",
-			"delcatty"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"meditation-shrine": {
-		COMMON: [
-			"slowpoke",
-			"natu",
-			"meditite",
-			"spoink"
-		],
-		UNCOMMON: [
-			"abra",
-			"slowbro",
-			"girafarig",
-			"smoochum"
-		],
-		RARE: [
-			"kadabra",
-			"jynx",
-			"xatu",
-			"medicham",
-			"grumpig",
-			"chimecho"
-		],
-		SUPER_RARE: ["alakazam", "slowking"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"jynx",
-			"xatu",
-			"medicham",
-			"grumpig"
-		],
-		BOSS_RARE: [
-			"alakazam",
-			"slowking",
-			"girafarig"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"meteor-falls": {
-		COMMON: [
-			"zubat",
-			"goldeen",
-			"magikarp",
-			"barboach"
-		],
-		UNCOMMON: [
-			"seaking",
-			"lunatone",
-			"solrock"
-		],
-		RARE: [
-			"golbat",
-			"crobat",
-			"whiscash"
-		],
-		SUPER_RARE: [
-			"gyarados",
-			"bagon",
-			"shelgon"
-		],
-		ULTRA_RARE: ["salamence"],
-		BOSS: [
-			"golbat",
-			"lunatone",
-			"solrock",
-			"whiscash"
-		],
-		BOSS_RARE: ["gyarados", "shelgon"],
-		BOSS_SUPER_RARE: ["salamence"],
-		BOSS_ULTRA_RARE: []
-	},
-	"metropolis": {
-		COMMON: [
-			"rattata",
-			"pichu",
-			"houndour",
-			"zigzagoon"
-		],
-		UNCOMMON: [
-			"raticate",
-			"pikachu",
-			"houndoom",
-			"linoone"
-		],
-		RARE: [
-			"raichu",
-			"smeargle",
-			"castform"
-		],
-		SUPER_RARE: ["ditto"],
-		ULTRA_RARE: [],
-		BOSS: ["castform"],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"mirage-island": {
-		COMMON: ["natu", "wynaut"],
-		UNCOMMON: ["smoochum"],
-		RARE: [
-			"jynx",
-			"xatu",
-			"wobbuffet"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: [
-			"jynx",
-			"xatu",
-			"wobbuffet"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"mountain": {
-		COMMON: [
-			"pidgey",
-			"spearow",
-			"rhyhorn",
-			"taillow",
-			"aron",
-			"swablu"
-		],
-		UNCOMMON: [
-			"pidgeotto",
-			"machop",
-			"geodude",
-			"rhydon",
-			"natu",
-			"slugma",
-			"lairon"
-		],
-		RARE: [
-			"pidgeot",
-			"fearow",
-			"machoke",
-			"graveler",
-			"xatu",
-			"murkrow",
-			"magcargo",
-			"skarmory",
-			"torchic",
-			"combusken",
-			"swellow",
-			"aggron",
-			"spoink",
-			"altaria"
-		],
-		SUPER_RARE: [
-			"machamp",
-			"golem",
-			"larvitar",
-			"blaziken",
-			"grumpig"
-		],
-		ULTRA_RARE: ["pupitar", "tyranitar"],
-		BOSS: [
-			"pidgeot",
-			"fearow",
-			"skarmory",
-			"swellow",
-			"aggron",
-			"altaria"
-		],
-		BOSS_RARE: ["blaziken"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"mt-ember": {
-		COMMON: [
-			"machop",
-			"geodude",
-			"ponyta",
-			"slugma"
-		],
-		UNCOMMON: [
-			"spearow",
-			"machoke",
-			"graveler",
-			"magby"
-		],
-		RARE: [
-			"golem",
-			"rapidash",
-			"magmar",
-			"magcargo"
-		],
-		SUPER_RARE: ["fearow", "machamp"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golem",
-			"rapidash",
-			"magmar",
-			"magcargo"
-		],
-		BOSS_RARE: ["fearow", "machamp"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"mt-moon": {
-		COMMON: [
-			"clefairy",
-			"zubat",
-			"paras",
-			"geodude"
-		],
-		UNCOMMON: [
-			"sandshrew",
-			"parasect",
-			"cleffa"
-		],
-		RARE: [
-			"sandslash",
-			"clefable",
-			"golbat",
-			"graveler",
-			"golem",
-			"crobat"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: [
-			"clefable",
-			"golbat",
-			"graveler"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"mt-pyre": {
-		COMMON: [
-			"wingull",
-			"shuppet",
-			"duskull"
-		],
-		UNCOMMON: [
-			"gastly",
-			"pelipper",
-			"meditite"
-		],
-		RARE: [
-			"haunter",
-			"medicham",
-			"banette",
-			"dusclops",
-			"chimecho"
-		],
-		SUPER_RARE: ["gengar"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"haunter",
-			"medicham",
-			"banette",
-			"dusclops"
-		],
-		BOSS_RARE: ["gengar", "chimecho"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"mt-silver-summit": {
-		COMMON: [
-			"geodude",
-			"sneasel",
-			"teddiursa",
-			"phanpy"
-		],
-		UNCOMMON: [
-			"zubat",
-			"machop",
-			"machoke",
-			"graveler",
-			"onix",
-			"misdreavus"
-		],
-		RARE: [
-			"golbat",
-			"machamp",
-			"golem",
-			"ursaring",
-			"donphan",
-			"larvitar",
-			"pupitar"
-		],
-		SUPER_RARE: [
-			"crobat",
-			"steelix",
-			"tyranitar"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"machamp",
-			"golem",
-			"ursaring",
-			"donphan"
-		],
-		BOSS_RARE: ["steelix", "tyranitar"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"mushroom-glade": {
-		COMMON: [
-			"paras",
-			"wurmple",
-			"shroomish"
-		],
-		UNCOMMON: [
-			"oddish",
-			"gloom",
-			"venonat",
-			"silcoon",
-			"slakoth"
-		],
-		RARE: [
-			"vileplume",
-			"parasect",
-			"venomoth",
-			"beautifly",
-			"breloom",
-			"vigoroth"
-		],
-		SUPER_RARE: ["slaking"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"vileplume",
-			"parasect",
-			"breloom"
-		],
-		BOSS_RARE: ["slaking"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"mysterious-garden": {
-		COMMON: [
-			"bulbasaur",
-			"oddish",
-			"hoppip",
-			"sunkern"
-		],
-		UNCOMMON: [
-			"gloom",
-			"bellsprout",
-			"skiploom",
-			"roselia"
-		],
-		RARE: [
-			"ivysaur",
-			"vileplume",
-			"weepinbell",
-			"jumpluff",
-			"sunflora"
-		],
-		SUPER_RARE: [
-			"venusaur",
-			"victreebel",
-			"bellossom"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"ivysaur",
-			"vileplume",
-			"jumpluff",
-			"sunflora"
-		],
-		BOSS_RARE: ["venusaur", "bellossom"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"oasis": {
-		COMMON: [
-			"sandshrew",
-			"psyduck",
-			"azurill",
-			"trapinch",
-			"cacnea"
-		],
-		UNCOMMON: [
-			"sandslash",
-			"doduo",
-			"marill",
-			"numel",
-			"vibrava",
-			"baltoy"
-		],
-		RARE: [
-			"golduck",
-			"dodrio",
-			"azumarill",
-			"camerupt",
-			"cacturne",
-			"claydol"
-		],
-		SUPER_RARE: ["flygon"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golduck",
-			"camerupt",
-			"cacturne",
-			"claydol"
-		],
-		BOSS_RARE: ["flygon"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"orange-archipelago": {
-		COMMON: [
-			"tentacool",
-			"shellder",
-			"krabby",
-			"staryu",
-			"azurill"
-		],
-		UNCOMMON: [
-			"caterpie",
-			"psyduck",
-			"cloyster",
-			"exeggcute",
-			"horsea",
-			"magikarp",
-			"marill"
-		],
-		RARE: [
-			"metapod",
-			"golduck",
-			"tentacruel",
-			"kingler",
-			"exeggutor",
-			"seadra",
-			"starmie",
-			"lapras",
-			"azumarill"
-		],
-		SUPER_RARE: [
-			"butterfree",
-			"gyarados",
-			"kingdra"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"tentacruel",
-			"kingler",
-			"exeggutor",
-			"starmie"
-		],
-		BOSS_RARE: ["gyarados", "lapras"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"pikachu-colony": {
-		COMMON: [
-			"caterpie",
-			"weedle",
-			"pikachu",
-			"pichu"
-		],
-		UNCOMMON: [
-			"metapod",
-			"kakuna",
-			"pidgey",
-			"plusle",
-			"minun"
-		],
-		RARE: [
-			"butterfree",
-			"beedrill",
-			"pidgeotto",
-			"raichu"
-		],
-		SUPER_RARE: ["pidgeot"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"butterfree",
-			"beedrill",
-			"pidgeotto",
-			"raichu"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"plains": {
-		COMMON: [
-			"zubat",
-			"meowth",
-			"sentret",
-			"pichu",
-			"poochyena",
-			"zigzagoon"
-		],
-		UNCOMMON: [
-			"pidgey",
-			"spearow",
-			"pikachu",
-			"golbat",
-			"mankey",
-			"doduo"
-		],
-		RARE: [
-			"pidgeotto",
-			"fearow",
-			"raichu",
-			"persian",
-			"primeape",
-			"abra",
-			"dodrio",
-			"lickitung",
-			"furret",
-			"crobat",
-			"mightyena",
-			"linoone"
-		],
-		SUPER_RARE: [
-			"pidgeot",
-			"kadabra",
-			"farfetch_d",
-			"snorlax",
-			"dunsparce"
-		],
-		ULTRA_RARE: ["alakazam", "ditto"],
-		BOSS: [
-			"persian",
-			"dodrio",
-			"furret",
-			"mightyena",
-			"linoone"
-		],
-		BOSS_RARE: ["farfetch_d", "snorlax"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"pokemon-mansion": {
-		COMMON: [
-			"rattata",
-			"growlithe",
-			"ponyta",
-			"grimer",
-			"koffing"
-		],
-		UNCOMMON: ["raticate", "magby"],
-		RARE: [
-			"arcanine",
-			"rapidash",
-			"muk",
-			"weezing",
-			"ditto"
-		],
-		SUPER_RARE: ["magmar"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"arcanine",
-			"rapidash",
-			"muk",
-			"weezing"
-		],
-		BOSS_RARE: ["magmar"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"pokemon-tower": {
-		COMMON: ["gastly", "cubone"],
-		UNCOMMON: ["misdreavus", "duskull"],
-		RARE: [
-			"haunter",
-			"marowak",
-			"dusclops"
-		],
-		SUPER_RARE: ["gengar"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"haunter",
-			"marowak",
-			"dusclops"
-		],
-		BOSS_RARE: ["gengar"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"power-plant": {
-		COMMON: [
-			"pikachu",
-			"voltorb",
-			"pichu",
-			"elekid",
-			"electrike"
-		],
-		UNCOMMON: [
-			"magnemite",
-			"electrode",
-			"electabuzz",
-			"plusle",
-			"minun"
-		],
-		RARE: [
-			"raichu",
-			"magneton",
-			"mareep",
-			"flaaffy",
-			"manectric"
-		],
-		SUPER_RARE: ["ampharos"],
-		ULTRA_RARE: [],
-		BOSS: ["raichu", "manectric"],
-		BOSS_RARE: ["ampharos"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"river": {
-		COMMON: [
-			"poliwag",
-			"goldeen",
-			"magikarp",
-			"azurill",
-			"barboach"
-		],
-		UNCOMMON: [
-			"psyduck",
-			"poliwhirl",
-			"marill",
-			"surskit",
-			"corphish"
-		],
-		RARE: [
-			"golduck",
-			"poliwrath",
-			"seaking",
-			"masquerain",
-			"whiscash",
-			"crawdaunt"
-		],
-		SUPER_RARE: ["gyarados", "azumarill"],
-		ULTRA_RARE: ["feebas", "milotic"],
-		BOSS: [
-			"golduck",
-			"seaking",
-			"whiscash",
-			"crawdaunt"
-		],
-		BOSS_RARE: ["gyarados", "azumarill"],
-		BOSS_SUPER_RARE: ["milotic"],
-		BOSS_ULTRA_RARE: []
-	},
-	"rock-tunnel": {
-		COMMON: [
-			"zubat",
-			"machop",
-			"geodude"
-		],
-		UNCOMMON: ["mankey", "cubone"],
-		RARE: [
-			"golbat",
-			"machoke",
-			"machamp",
-			"graveler",
-			"golem",
-			"onix",
-			"crobat"
-		],
-		SUPER_RARE: [
-			"primeape",
-			"marowak",
-			"steelix"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golbat",
-			"machoke",
-			"graveler",
-			"onix"
-		],
-		BOSS_RARE: ["primeape", "marowak"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"rocket-hideout": {
-		COMMON: [
-			"rattata",
-			"ekans",
-			"zubat",
-			"meowth",
-			"grimer",
-			"koffing"
-		],
-		UNCOMMON: [
-			"raticate",
-			"golbat",
-			"drowzee",
-			"murkrow",
-			"sneasel",
-			"houndour"
-		],
-		RARE: [
-			"arbok",
-			"persian",
-			"muk",
-			"weezing",
-			"crobat"
-		],
-		SUPER_RARE: ["hypno", "houndoom"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"arbok",
-			"persian",
-			"muk",
-			"weezing"
-		],
-		BOSS_RARE: ["hypno", "houndoom"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"ruins": {
-		COMMON: [
-			"drowzee",
-			"natu",
-			"unown",
-			"spoink",
-			"baltoy"
-		],
-		UNCOMMON: [
-			"abra",
-			"kadabra",
-			"wynaut"
-		],
-		RARE: [
-			"alakazam",
-			"hypno",
-			"xatu",
-			"wobbuffet",
-			"grumpig",
-			"claydol"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: [
-			"alakazam",
-			"hypno",
-			"xatu",
-			"grumpig",
-			"claydol"
-		],
-		BOSS_RARE: ["wobbuffet"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"safari-zone": {
-		COMMON: [
-			"nidoran_f",
-			"nidoran_m",
-			"paras",
-			"venonat",
-			"doduo"
-		],
-		UNCOMMON: [
-			"nidorina",
-			"nidorino",
-			"parasect",
-			"venomoth",
-			"dodrio",
-			"exeggcute",
-			"cubone",
-			"rhyhorn",
-			"girafarig",
-			"phanpy"
-		],
-		RARE: [
-			"nidoqueen",
-			"nidoking",
-			"exeggutor",
-			"marowak",
-			"rhydon",
-			"kangaskhan",
-			"scyther",
-			"pinsir",
-			"tauros",
-			"heracross",
-			"donphan"
-		],
-		SUPER_RARE: [
-			"dratini",
-			"dragonair",
-			"scizor"
-		],
-		ULTRA_RARE: ["dragonite"],
-		BOSS: [
-			"exeggutor",
-			"rhydon",
-			"kangaskhan",
-			"tauros"
-		],
-		BOSS_RARE: [
-			"scyther",
-			"pinsir",
-			"dragonair"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"sea": {
-		COMMON: [
-			"tentacool",
-			"slowpoke",
-			"wingull",
-			"wailmer"
-		],
-		UNCOMMON: [
-			"poliwag",
-			"slowbro",
-			"shellder",
-			"horsea",
-			"goldeen",
-			"staryu",
-			"magikarp",
-			"chinchou",
-			"carvanha",
-			"wailord"
-		],
-		RARE: [
-			"poliwhirl",
-			"tentacruel",
-			"cloyster",
-			"seadra",
-			"seaking",
-			"starmie",
-			"lapras",
-			"lanturn",
-			"pelipper",
-			"sharpedo"
-		],
-		SUPER_RARE: [
-			"poliwrath",
-			"gyarados",
-			"kingdra"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"tentacruel",
-			"pelipper",
-			"sharpedo"
-		],
-		BOSS_RARE: ["gyarados", "kingdra"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"seabed": {
-		COMMON: [
-			"chinchou",
-			"remoraid",
-			"clamperl"
-		],
-		UNCOMMON: [
-			"tentacool",
-			"shellder",
-			"wailmer",
-			"luvdisc"
-		],
-		RARE: [
-			"tentacruel",
-			"cloyster",
-			"lanturn",
-			"qwilfish",
-			"corsola",
-			"octillery",
-			"mantine",
-			"wailord",
-			"feebas",
-			"huntail",
-			"gorebyss"
-		],
-		SUPER_RARE: [
-			"omanyte",
-			"omastar",
-			"kabuto",
-			"kabutops",
-			"milotic",
-			"relicanth"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"lanturn",
-			"qwilfish",
-			"corsola",
-			"octillery",
-			"mantine",
-			"wailord",
-			"huntail",
-			"gorebyss",
-			"luvdisc"
-		],
-		BOSS_RARE: [
-			"omastar",
-			"kabutops",
-			"milotic",
-			"relicanth"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"seafoam-islands": {
-		COMMON: [
-			"zubat",
-			"psyduck",
-			"seel",
-			"shellder"
-		],
-		UNCOMMON: [
-			"golbat",
-			"slowpoke",
-			"krabby",
-			"horsea",
-			"staryu"
-		],
-		RARE: [
-			"golduck",
-			"slowbro",
-			"dewgong",
-			"cloyster",
-			"kingler",
-			"crobat"
-		],
-		SUPER_RARE: [
-			"seadra",
-			"starmie",
-			"kingdra"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golduck",
-			"slowbro",
-			"dewgong",
-			"cloyster"
-		],
-		BOSS_RARE: ["seadra", "starmie"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"shoal-cave": {
-		COMMON: [
-			"zubat",
-			"tentacool",
-			"spheal"
-		],
-		UNCOMMON: [
-			"golbat",
-			"shellder",
-			"snorunt"
-		],
-		RARE: [
-			"tentacruel",
-			"cloyster",
-			"crobat",
-			"glalie",
-			"sealeo"
-		],
-		SUPER_RARE: ["walrein"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"tentacruel",
-			"cloyster",
-			"glalie",
-			"sealeo"
-		],
-		BOSS_RARE: ["walrein"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"silph-co": {
-		COMMON: ["magnemite", "voltorb"],
-		UNCOMMON: ["porygon"],
-		RARE: [
-			"magneton",
-			"electrode",
-			"ditto",
-			"porygon2"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: [
-			"magneton",
-			"electrode",
-			"porygon2"
-		],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"sky-pillar": {
-		COMMON: [
-			"zubat",
-			"swablu",
-			"baltoy",
-			"shuppet",
-			"duskull"
-		],
-		UNCOMMON: [
-			"golbat",
-			"sableye",
-			"mawile"
-		],
-		RARE: [
-			"crobat",
-			"altaria",
-			"claydol",
-			"banette",
-			"dusclops",
-			"beldum"
-		],
-		SUPER_RARE: ["metang"],
-		ULTRA_RARE: ["metagross"],
-		BOSS: [
-			"altaria",
-			"claydol",
-			"banette",
-			"dusclops"
-		],
-		BOSS_RARE: ["sableye", "metang"],
-		BOSS_SUPER_RARE: ["metagross"],
-		BOSS_ULTRA_RARE: []
-	},
-	"slum": {
-		COMMON: [
-			"rattata",
-			"grimer",
-			"drowzee",
-			"koffing",
-			"murkrow",
-			"shuppet"
-		],
-		UNCOMMON: [
-			"raticate",
-			"hypno",
-			"houndour",
-			"banette"
-		],
-		RARE: [
-			"muk",
-			"weezing",
-			"sneasel",
-			"houndoom"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: ["muk", "weezing"],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"snowy-forest": {
-		COMMON: [
-			"sentret",
-			"sneasel",
-			"swinub",
-			"snorunt",
-			"glalie"
-		],
-		UNCOMMON: [
-			"furret",
-			"teddiursa",
-			"piloswine",
-			"stantler"
-		],
-		RARE: ["ursaring", "delibird"],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: ["glalie"],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"space": {
-		COMMON: [
-			"cleffa",
-			"lunatone",
-			"solrock"
-		],
-		UNCOMMON: ["clefairy", "baltoy"],
-		RARE: [
-			"clefable",
-			"staryu",
-			"claydol",
-			"metang"
-		],
-		SUPER_RARE: [
-			"starmie",
-			"beldum",
-			"metagross"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"clefable",
-			"lunatone",
-			"solrock"
-		],
-		BOSS_RARE: ["metagross"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"sprout-tower": {
-		COMMON: [
-			"rattata",
-			"bellsprout",
-			"gastly"
-		],
-		UNCOMMON: [
-			"raticate",
-			"weepinbell",
-			"drowzee",
-			"hoothoot",
-			"natu"
-		],
-		RARE: [
-			"abra",
-			"victreebel",
-			"gengar",
-			"hypno",
-			"noctowl",
-			"xatu"
-		],
-		SUPER_RARE: ["kadabra", "haunter"],
-		ULTRA_RARE: ["alakazam"],
-		BOSS: [
-			"victreebel",
-			"hypno",
-			"noctowl",
-			"xatu"
-		],
-		BOSS_RARE: ["kadabra", "haunter"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"squirtle-squad": {
-		COMMON: [
-			"squirtle",
-			"psyduck",
-			"poliwag",
-			"azurill"
-		],
-		UNCOMMON: [
-			"poliwhirl",
-			"marill",
-			"wooper"
-		],
-		RARE: [
-			"wartortle",
-			"golduck",
-			"poliwrath",
-			"quagsire"
-		],
-		SUPER_RARE: ["blastoise", "azumarill"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"wartortle",
-			"golduck",
-			"quagsire"
-		],
-		BOSS_RARE: ["blastoise", "azumarill"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"stray-charmander": {
-		COMMON: [
-			"charmander",
-			"pidgey",
-			"rattata"
-		],
-		UNCOMMON: ["spearow", "oddish"],
-		RARE: [
-			"charmeleon",
-			"pidgeotto",
-			"pidgeot",
-			"raticate",
-			"fearow",
-			"gloom"
-		],
-		SUPER_RARE: ["charizard", "vileplume"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"charmeleon",
-			"pidgeotto",
-			"raticate"
-		],
-		BOSS_RARE: ["charizard"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"swamp": {
-		COMMON: [
-			"ekans",
-			"poliwag",
-			"wooper",
-			"lotad",
-			"gulpin"
-		],
-		UNCOMMON: [
-			"psyduck",
-			"poliwhirl",
-			"lombre",
-			"barboach"
-		],
-		RARE: [
-			"arbok",
-			"golduck",
-			"poliwrath",
-			"totodile",
-			"croconaw",
-			"quagsire",
-			"mudkip",
-			"marshtomp",
-			"ludicolo",
-			"swalot",
-			"whiscash"
-		],
-		SUPER_RARE: [
-			"feraligatr",
-			"politoed",
-			"swampert"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"arbok",
-			"poliwrath",
-			"quagsire",
-			"ludicolo",
-			"swalot",
-			"whiscash"
-		],
-		BOSS_RARE: [
-			"feraligatr",
-			"politoed",
-			"swampert"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"tall-grass": {
-		COMMON: [
-			"nidoran_f",
-			"nidoran_m",
-			"oddish",
-			"paras",
-			"spinarak"
-		],
-		UNCOMMON: [
-			"nidorina",
-			"nidorino",
-			"gloom",
-			"parasect",
-			"venonat",
-			"nincada",
-			"zangoose",
-			"seviper"
-		],
-		RARE: [
-			"nidoqueen",
-			"nidoking",
-			"vileplume",
-			"venomoth",
-			"pinsir",
-			"chikorita",
-			"bayleef",
-			"ariados",
-			"girafarig",
-			"ninjask",
-			"kecleon",
-			"tropius"
-		],
-		SUPER_RARE: [
-			"scyther",
-			"meganium",
-			"bellossom",
-			"shedinja"
-		],
-		ULTRA_RARE: ["scizor"],
-		BOSS: [
-			"nidoqueen",
-			"nidoking",
-			"vileplume",
-			"ariados",
-			"ninjask",
-			"zangoose",
-			"seviper",
-			"kecleon"
-		],
-		BOSS_RARE: [
-			"scyther",
-			"pinsir",
-			"meganium",
-			"bellossom"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"temple": {
-		COMMON: [
-			"gastly",
-			"natu",
-			"duskull"
-		],
-		UNCOMMON: [
-			"haunter",
-			"cubone",
-			"xatu",
-			"baltoy",
-			"dusclops"
-		],
-		RARE: [
-			"gengar",
-			"marowak",
-			"claydol",
-			"chimecho"
-		],
-		SUPER_RARE: [],
-		ULTRA_RARE: [],
-		BOSS: ["chimecho"],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"town": {
-		COMMON: [
-			"rattata",
-			"spearow",
-			"sentret",
-			"hoothoot",
-			"ledyba",
-			"spinarak",
-			"hoppip",
-			"sunkern",
-			"taillow"
-		],
-		UNCOMMON: [
-			"raticate",
-			"fearow",
-			"ekans",
-			"nidoran_f",
-			"nidoran_m",
-			"oddish",
-			"paras",
-			"venonat",
-			"meowth",
-			"bellsprout",
-			"furret",
-			"noctowl",
-			"ledian",
-			"ariados",
-			"skiploom",
-			"sunflora",
-			"lotad",
-			"seedot",
-			"swellow",
-			"shroomish",
-			"whismur",
-			"skitty"
-		],
-		RARE: [
-			"arbok",
-			"nidorina",
-			"nidorino",
-			"gloom",
-			"parasect",
-			"venomoth",
-			"persian",
-			"abra",
-			"weepinbell",
-			"cleffa",
-			"igglybuff",
-			"jumpluff",
-			"lombre",
-			"nuzleaf",
-			"surskit",
-			"breloom",
-			"loudred",
-			"delcatty"
-		],
-		SUPER_RARE: [
-			"nidoqueen",
-			"nidoking",
-			"clefairy",
-			"jigglypuff",
-			"vileplume",
-			"kadabra",
-			"victreebel",
-			"pichu",
-			"togepi",
-			"ludicolo",
-			"shiftry",
-			"ralts",
-			"masquerain",
-			"nincada",
-			"exploud"
-		],
-		ULTRA_RARE: [
-			"pikachu",
-			"raichu",
-			"clefable",
-			"wigglytuff",
-			"alakazam",
-			"ditto",
-			"togetic",
-			"kirlia",
-			"gardevoir",
-			"ninjask"
-		],
-		BOSS: [],
-		BOSS_RARE: [],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"treetops": {
-		COMMON: [
-			"pidgey",
-			"aipom",
-			"pineco",
-			"taillow"
-		],
-		UNCOMMON: [
-			"pidgeotto",
-			"spearow",
-			"ekans",
-			"hoothoot",
-			"seedot",
-			"nuzleaf",
-			"swellow",
-			"slakoth"
-		],
-		RARE: [
-			"pidgeot",
-			"fearow",
-			"arbok",
-			"exeggcute",
-			"noctowl",
-			"forretress",
-			"heracross",
-			"shiftry",
-			"vigoroth"
-		],
-		SUPER_RARE: [
-			"exeggutor",
-			"slaking",
-			"tropius"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"pidgeot",
-			"forretress",
-			"heracross",
-			"shiftry"
-		],
-		BOSS_RARE: ["exeggutor", "tropius"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"tundra": {
-		COMMON: [
-			"teddiursa",
-			"swinub",
-			"snorunt",
-			"spheal"
-		],
-		UNCOMMON: [
-			"sneasel",
-			"delibird",
-			"stantler",
-			"smoochum",
-			"sealeo"
-		],
-		RARE: [
-			"jynx",
-			"ursaring",
-			"piloswine",
-			"glalie"
-		],
-		SUPER_RARE: ["walrein"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"jynx",
-			"ursaring",
-			"piloswine",
-			"glalie"
-		],
-		BOSS_RARE: ["sneasel", "walrein"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"underground": {
-		COMMON: [
-			"rattata",
-			"zubat",
-			"grimer",
-			"koffing"
-		],
-		UNCOMMON: [
-			"ekans",
-			"golbat",
-			"drowzee",
-			"gulpin"
-		],
-		RARE: [
-			"raticate",
-			"muk",
-			"weezing",
-			"crobat",
-			"swalot"
-		],
-		SUPER_RARE: [
-			"arbok",
-			"hypno",
-			"ditto"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"raticate",
-			"muk",
-			"weezing",
-			"swalot"
-		],
-		BOSS_RARE: ["arbok", "hypno"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"victory-road": {
-		COMMON: [
-			"zubat",
-			"machop",
-			"geodude",
-			"onix"
-		],
-		UNCOMMON: [
-			"golbat",
-			"machoke",
-			"graveler",
-			"cubone",
-			"rhyhorn",
-			"teddiursa",
-			"makuhita",
-			"aron",
-			"lairon"
-		],
-		RARE: [
-			"machamp",
-			"golem",
-			"marowak",
-			"crobat",
-			"steelix",
-			"ursaring",
-			"phanpy",
-			"sableye",
-			"mawile",
-			"aggron",
-			"meditite"
-		],
-		SUPER_RARE: [
-			"rhydon",
-			"donphan",
-			"hariyama",
-			"medicham"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"machamp",
-			"golem",
-			"steelix",
-			"aggron"
-		],
-		BOSS_RARE: [
-			"rhydon",
-			"donphan",
-			"hariyama",
-			"medicham"
-		],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"volcano": {
-		COMMON: [
-			"growlithe",
-			"ponyta",
-			"slugma",
-			"magby",
-			"poochyena",
-			"numel",
-			"spoink",
-			"swablu"
-		],
-		UNCOMMON: [
-			"magmar",
-			"mightyena",
-			"meditite",
-			"torkoal",
-			"grumpig",
-			"altaria"
-		],
-		RARE: [
-			"charmeleon",
-			"arcanine",
-			"rapidash",
-			"cyndaquil",
-			"quilava",
-			"magcargo",
-			"medicham",
-			"camerupt"
-		],
-		SUPER_RARE: ["charizard", "typhlosion"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"arcanine",
-			"rapidash",
-			"magcargo",
-			"camerupt",
-			"torkoal"
-		],
-		BOSS_RARE: ["charizard", "typhlosion"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"wasteland": {
-		COMMON: [
-			"larvitar",
-			"trapinch",
-			"vibrava",
-			"bagon"
-		],
-		UNCOMMON: [
-			"dragonair",
-			"pupitar",
-			"swablu",
-			"shelgon"
-		],
-		RARE: [
-			"dratini",
-			"dragonite",
-			"tyranitar",
-			"flygon",
-			"altaria",
-			"salamence"
-		],
-		SUPER_RARE: ["aerodactyl"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"dragonite",
-			"tyranitar",
-			"flygon",
-			"salamence"
-		],
-		BOSS_RARE: ["aerodactyl"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"waterfall": {
-		COMMON: [
-			"poliwag",
-			"goldeen",
-			"magikarp",
-			"azurill"
-		],
-		UNCOMMON: [
-			"zubat",
-			"psyduck",
-			"poliwhirl",
-			"slowpoke",
-			"marill"
-		],
-		RARE: [
-			"golbat",
-			"golduck",
-			"poliwrath",
-			"slowbro",
-			"seaking",
-			"gyarados",
-			"azumarill"
-		],
-		SUPER_RARE: [
-			"crobat",
-			"politoed",
-			"slowking"
-		],
-		ULTRA_RARE: [],
-		BOSS: [
-			"golduck",
-			"poliwrath",
-			"seaking",
-			"gyarados"
-		],
-		BOSS_RARE: ["politoed", "slowking"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	},
-	"whirl-islands": {
-		COMMON: [
-			"zubat",
-			"tentacool",
-			"shellder",
-			"krabby"
-		],
-		UNCOMMON: [
-			"golbat",
-			"slowpoke",
-			"seel",
-			"cloyster",
-			"horsea",
-			"magikarp"
-		],
-		RARE: [
-			"tentacruel",
-			"slowbro",
-			"dewgong",
-			"kingler",
-			"seadra",
-			"crobat"
-		],
-		SUPER_RARE: ["gyarados", "kingdra"],
-		ULTRA_RARE: [],
-		BOSS: [
-			"tentacruel",
-			"slowbro",
-			"dewgong",
-			"kingler"
-		],
-		BOSS_RARE: ["gyarados", "kingdra"],
-		BOSS_SUPER_RARE: [],
-		BOSS_ULTRA_RARE: []
-	}
-};
-/**
-* Grafo de vizinhanca do PokeRogue: peso `n` = 1/n de chance de o vizinho
-* APARECER como opcao (depois ele sorteia uniforme entre as que apareceram).
-*
-* NAO e usado pelo jogo hoje. Fica guardado porque e a fundacao do modo
-* Expedicao, e o parser que extrai isso ja esta escrito.
-*/
-/**
-* Pesos de clima de cada sub-bioma (PH-140), do `weatherPool` do PokeRogue.
-* Sorteado UMA vez ao entrar na sala; `limpo` e um resultado como outro
-* qualquer, nao a ausencia de tabela.
-*
-* E o unico dado de PROBABILIDADE de clima que existe: os jogos principais
-* fixam o clima por rota (Rota 119 sempre chove) e nunca sortearam nada.
-*/
-var SUB_BIOMA_CLIMA = {
-	"abandoned-ship": {
-		limpo: 2,
-		nevoa: 4,
-		chuva: 3
-	},
-	"abyss": { limpo: 1 },
-	"ash-field": {
-		limpo: 5,
-		nevoa: 4
-	},
-	"badlands": {
-		limpo: 8,
-		areia: 2,
-		sol: 5
-	},
-	"beach": {
-		limpo: 8,
-		chuva: 3,
-		sol: 5
-	},
-	"bug-contest": {
-		limpo: 7,
-		sol: 3
-	},
-	"burned-tower": {
-		limpo: 4,
-		nevoa: 4
-	},
-	"canyon": {
-		limpo: 4,
-		sol: 4,
-		areia: 2
-	},
-	"cave": { limpo: 1 },
-	"celadon-mansion": { limpo: 1 },
-	"construction-site": { limpo: 1 },
-	"coral-reef": {
-		limpo: 4,
-		sol: 6
-	},
-	"cycling-road": {
-		limpo: 8,
-		sol: 3
-	},
-	"dark-cave": { limpo: 1 },
-	"desert": {
-		limpo: 2,
-		areia: 8,
-		sol: 5
-	},
-	"digletts-cave": { limpo: 1 },
-	"dojo": { limpo: 1 },
-	"factory": { limpo: 1 },
-	"fairy-cave": { limpo: 1 },
-	"farm": {
-		limpo: 6,
-		sol: 4
-	},
-	"fiery-path": {
-		limpo: 4,
-		sol: 6
-	},
-	"forest": {
-		limpo: 8,
-		chuva: 4
-	},
-	"grampa-canyon": {
-		limpo: 5,
-		areia: 3
-	},
-	"grass": {
-		limpo: 8,
-		chuva: 4,
-		sol: 8
-	},
-	"graveyard": {
-		limpo: 3,
-		nevoa: 1
-	},
-	"harbor": {
-		limpo: 7,
-		chuva: 3
-	},
-	"hot-springs": {
-		limpo: 4,
-		nevoa: 5,
-		sol: 2
-	},
-	"ice-cave": {
-		limpo: 3,
-		neve: 4,
-		granizo: 1
-	},
-	"ilex-forest": {
-		limpo: 5,
-		nevoa: 4
-	},
-	"jungle": {
-		limpo: 8,
-		chuva: 6,
-		nevoa: 1
-	},
-	"junkyard": {
-		limpo: 7,
-		chuva: 3
-	},
-	"jynx-holiday": { neve: 1 },
-	"laboratory": { limpo: 1 },
-	"lake": {
-		limpo: 10,
-		chuva: 4,
-		nevoa: 1
-	},
-	"lake-of-rage": {
-		limpo: 3,
-		chuva: 6
-	},
-	"lily-pond": {
-		limpo: 5,
-		chuva: 4,
-		sol: 3
-	},
-	"maidens-peak": {
-		limpo: 3,
-		nevoa: 7
-	},
-	"meadow": {
-		limpo: 3,
-		sol: 5
-	},
-	"meditation-shrine": { limpo: 1 },
-	"meteor-falls": {
-		limpo: 4,
-		nevoa: 3
-	},
-	"metropolis": { limpo: 1 },
-	"mirage-island": {
-		limpo: 6,
-		sol: 4
-	},
-	"mountain": { limpo: 1 },
-	"mt-ember": {
-		limpo: 3,
-		sol: 7
-	},
-	"mt-moon": { limpo: 1 },
-	"mt-pyre": {
-		limpo: 3,
-		nevoa: 5
-	},
-	"mt-silver-summit": {
-		neve: 6,
-		granizo: 3
-	},
-	"mushroom-glade": {
-		limpo: 5,
-		chuva: 4,
-		nevoa: 2
-	},
-	"mysterious-garden": {
-		limpo: 4,
-		sol: 6
-	},
-	"oasis": {
-		limpo: 3,
-		sol: 7
-	},
-	"orange-archipelago": {
-		limpo: 4,
-		sol: 6
-	},
-	"pikachu-colony": {
-		limpo: 7,
-		sol: 3
-	},
-	"plains": { limpo: 1 },
-	"pokemon-mansion": {
-		limpo: 3,
-		sol: 2
-	},
-	"pokemon-tower": {
-		limpo: 2,
-		nevoa: 8
-	},
-	"power-plant": { limpo: 1 },
-	"river": {
-		limpo: 2,
-		chuva: 9
-	},
-	"rock-tunnel": { limpo: 1 },
-	"rocket-hideout": { limpo: 1 },
-	"ruins": { limpo: 1 },
-	"safari-zone": {
-		limpo: 6,
-		sol: 4
-	},
-	"sea": {
-		limpo: 3,
-		chuva: 12
-	},
-	"seabed": { chuva: 1 },
-	"seafoam-islands": {
-		limpo: 3,
-		neve: 6
-	},
-	"shoal-cave": {
-		limpo: 3,
-		neve: 5,
-		granizo: 2
-	},
-	"silph-co": { limpo: 1 },
-	"sky-pillar": { limpo: 1 },
-	"slum": { limpo: 1 },
-	"snowy-forest": {
-		neve: 7,
-		granizo: 1
-	},
-	"space": { limpo: 1 },
-	"sprout-tower": { limpo: 1 },
-	"squirtle-squad": {
-		limpo: 3,
-		sol: 7
-	},
-	"stray-charmander": { chuva: 1 },
-	"swamp": {
-		limpo: 3,
-		chuva: 4,
-		nevoa: 1
-	},
-	"tall-grass": {
-		limpo: 8,
-		chuva: 4,
-		sol: 4
-	},
-	"temple": { limpo: 1 },
-	"town": { limpo: 1 },
-	"treetops": {
-		limpo: 7,
-		chuva: 3
-	},
-	"tundra": {
-		neve: 6,
-		granizo: 3
-	},
-	"underground": { limpo: 1 },
-	"victory-road": { limpo: 1 },
-	"volcano": { sol: 1 },
-	"wasteland": { limpo: 1 },
-	"waterfall": {
-		limpo: 4,
-		nevoa: 5
-	},
-	"whirl-islands": {
-		limpo: 3,
-		chuva: 5,
-		nevoa: 3
-	}
-};
 //#endregion
 //#region src/engine/systems/climaAmbiente.ts
 /**

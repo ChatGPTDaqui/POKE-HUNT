@@ -38,6 +38,62 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useTutorialStore, TUTORIAL_ESTAGIOS } from '@/stores/tutorialStore'
 import { LinhaDeEspecie } from './LinhaDeEspecie'
 import { elencoDoEstagio, subBiomasDoEstagio } from './elencoDoEstagio'
+import { estagiosDoLugar, estagiosPorEspecie } from '@/data/atlasDosBiomas'
+import { PokeSwatch } from '@/components/shared/PokeSwatch'
+
+/** "6", "6–8" ou "2, 5–7": os estagios em faixas, pra caber num rotulo curto. */
+function faixasDeEstagio(estagios: readonly number[]): string {
+  const ordenados = [...estagios].sort((a, b) => a - b)
+  const partes: string[] = []
+  for (let i = 0; i < ordenados.length; i++) {
+    const inicio = ordenados[i]
+    while (i + 1 < ordenados.length && ordenados[i + 1] === ordenados[i] + 1) i++
+    partes.push(inicio === ordenados[i] ? `${inicio}` : `${inicio}–${ordenados[i]}`)
+  }
+  return partes.join(', ')
+}
+
+/**
+ * Quem tambem nasce NESTE lugar, mas em OUTRO estagio do bioma.
+ *
+ * A lista de cima e a do estagio selecionado, e ela e a verdade do sorteio: o
+ * mesmo sub-bioma troca de elenco conforme o bioma afunda (forma base nos rasos,
+ * evoluida e forte nos fundos). Sem esta parte, quem clicava num sub-bioma lia
+ * a fatia do estagio como se fosse o lugar inteiro (relato do dono,
+ * 16/10/2026). Os estagios vem do pool que o motor sorteia, e nao da familia
+ * das linhas.
+ */
+function OutrosEstagiosDoLugar({
+  bioma, chave, estagio, noEstagio,
+}: { bioma: BiomaDef; chave: string; estagio: number; noEstagio: ReadonlySet<string> }) {
+  const outros = useMemo(() => {
+    const porEspecie = estagiosPorEspecie(bioma, chave, estagiosDoLugar(bioma, chave))
+    return [...porEspecie.entries()]
+      .filter(([sp, estagios]) => !noEstagio.has(sp) && !estagios.includes(estagio) && SPECIES[sp])
+      .map(([sp, estagios]) => ({ species: SPECIES[sp], estagios }))
+      .sort((a, b) => Math.min(...a.estagios) - Math.min(...b.estagios) || a.species.name.localeCompare(b.species.name))
+  }, [bioma, chave, estagio, noEstagio])
+  if (outros.length === 0) return null
+  return (
+    <div className="mt-[.3em] flex flex-col gap-[.3em] border-t border-menu-line pt-[.4em]">
+      <div className="text-[.72em] text-menu-muted">
+        Também aparecem neste lugar, em outros estágios do bioma:
+      </div>
+      <div className="flex flex-wrap gap-[.35em]">
+        {outros.map(({ species, estagios }) => (
+          <span
+            key={species.id}
+            className="flex items-center gap-[.3em] rounded-[.4em] border border-menu-line bg-menu-paper px-[.35em] py-[.15em] text-[.75em]"
+          >
+            <PokeSwatch species={species} size={1.6} />
+            <span>{species.name}</span>
+            <span className="text-menu-muted">est. {faixasDeEstagio(estagios)}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
 import { cn } from '@/lib/utils'
 
 /**
@@ -807,6 +863,14 @@ function PainelDoEstagio({
           />
         ))}
       </div>
+      {recorte && (
+        <OutrosEstagiosDoLugar
+          bioma={bioma}
+          chave={recorte}
+          estagio={estagio}
+          noEstagio={new Set(elenco.map((e) => e.species.id))}
+        />
+      )}
     </div>
   )
 }

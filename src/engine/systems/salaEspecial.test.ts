@@ -18,6 +18,7 @@ import {
 } from '@/data/biomas'
 import { ESTAGIOS_POR_BIOMA, estagioId, niveisDoEstagio } from '@/data/estagios'
 import { ELENCO_POR_ESTAGIO } from '@/data/generated/elencoPorEstagio.generated'
+import { SUB_BIOMA_ESPECIES } from '@/data/generated/subBiomas.generated'
 import { STONE_TYPES } from '@/data/stones'
 import { createPokeInstance } from '@/data/pokes'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
@@ -100,6 +101,26 @@ describe('sorteio da sala especial', () => {
       expect(pool.length, `${espelho}/${e.chave}`).toBeGreaterThan(0)
       for (const id of pool) expect(getEncounter(id), id).toBeDefined()
       expect(salasEspeciaisPossiveis(espelho).map((x) => x.chave)).toContain(e.chave)
+    }
+  })
+
+  it('a sala especial e COMPLETA: todo POKE dela nasce em qualquer estagio', () => {
+    // Pedido do dono (16/10/2026): sem diferenca entre estagios. O Jardim
+    // Misterioso tem Bulbasaur no estagio 10, e o Canion do Vovo tem Kabuto.
+    for (const { bioma, e } of TODAS) {
+      const esperado = [...(SUB_BIOMA_ESPECIES[e.chave] ?? [])].sort()
+      expect(esperado.length, e.chave).toBeGreaterThan(0)
+      for (let estagio = 1; estagio <= ESTAGIOS_POR_BIOMA; estagio++) {
+        const mapId = estagioId(bioma.chave, estagio)
+        const [lo, hi] = niveisDoEstagio(estagio)
+        const pool = POOL_POR_SALA[mapId]?.[e.chave] ?? []
+        const especies = [...new Set(pool.map((id) => getEncounter(id)!.speciesId))].sort()
+        expect(especies, `${mapId}/${e.chave}`).toEqual(esperado)
+        for (const id of pool) {
+          expect(getEncounter(id)!.minLevel, id).toBe(lo)
+          expect(getEncounter(id)!.maxLevel, id).toBe(hi)
+        }
+      }
     }
   })
 

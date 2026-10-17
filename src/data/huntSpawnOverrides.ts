@@ -49,6 +49,7 @@
 //     mais bem fundamentado do projeto destruido em silencio.
 import { SPECIES } from './pokes'
 import { ELENCO_DO_SUB_BIOMA, ELENCO_POR_ESTAGIO } from './generated/elencoPorEstagio.generated'
+import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
 import { TRAINING_MAP, TRAINING_MAP_ID, TRAINING_ENCOUNTER } from './trainingDummy'
@@ -457,7 +458,7 @@ function montarHunt(bioma: BiomaDef, estagio: number): void {
   // As SALAS ESPECIAIS (onda 2) ganham pool aqui tambem, em todo estagio: quem
   // decide se ela pode sair neste estagio e o sorteio (`estagioMinimo`), e um
   // pool que nao existisse faria a sala especial nascer vazia.
-  for (const sub of [...bioma.subBiomas, ...(bioma.especiais ?? [])]) {
+  for (const sub of bioma.subBiomas) {
     // QUEM MORA AQUI NESTE ESTAGIO SAI DA TABELA DE ELENCO (PH-502), e nao mais
     // da lista inteira do sub-bioma.
     //
@@ -476,6 +477,26 @@ function montarHunt(bioma: BiomaDef, estagio: number): void {
       for (const trecho of trechosDaLinha(raiz, estagio, doSub)) ids.push(addEncounter(id, trecho))
     }
     porSala[sub.chave] = ids
+  }
+
+  // SALA ESPECIAL COMPLETA (pedido do dono, 16/10/2026): todo POKE da sala
+  // nasce em QUALQUER estagio, na faixa de nivel do estagio. Nao passa por
+  // `trechosDaLinha` (a forma pelo nivel e a zona minima de forca), que e o que
+  // fazia o Jardim Misterioso so ter Bulbasaur no estagio 1 e o Canion do Vovo
+  // nunca ter Kabuto: a sala especial e uma raridade, e ela entrega o elenco
+  // inteiro dela sempre que sai.
+  //
+  // Encontro com chave PROPRIA (`<hunt>_esp_<especie>`): o mesmo Pikachu pode
+  // existir num sub-bioma comum do estagio com uma faixa recortada pela
+  // evolucao, e a chave compartilhada faria um dos dois herdar a faixa do outro.
+  //
+  // A fatia continua saindo da tabela de elenco por LINHA; com todas as formas
+  // cobrindo a faixa inteira, `pesosDaSala` reparte a fatia da linha igual
+  // entre as formas dela.
+  for (const sub of bioma.especiais ?? []) {
+    porSala[sub.chave] = (SUB_BIOMA_ESPECIES[sub.chave] ?? [])
+      .filter((sp) => SPECIES[sp])
+      .map((speciesId) => addEncounter(`${id}_esp`, { speciesId, minLevel: lo, maxLevel: hi }))
   }
 
   // O `enemyPool` da hunt e so dos sub-biomas COMUNS. Ele e o recuo de quando
