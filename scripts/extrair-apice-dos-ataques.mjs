@@ -24,7 +24,11 @@ const SPRITE_ROOT = join(ACERVO, 'sprite')
 const ANIMS_TS_PATH = join(ROOT, 'src', 'data', 'battleSpriteAnims.ts')
 const POKES_GENERATED_PATH = join(ROOT, 'src', 'data', 'generated', 'pokes.generated.ts')
 const SAIDA = join(ROOT, 'src', 'data', 'generated', 'apiceDoAtaque.generated.ts')
-const POSES = ['Shoot', 'Charge', 'Attack']
+// 18/10/2026: toda pose que um golpe pode tocar (engine/poseDoGolpe.ts), nao
+// so as tres de antes.
+const POSES = ['Shoot', 'Charge', 'Attack', 'Swing', 'Strike', 'SpAttack', 'Double', 'Rotate', 'Head', 'HitGround', 'Stomp', 'Kick',
+  'Punch', 'Jab', 'Uppercut', 'Chop', 'Slice', 'Bite', 'Scratch', 'MultiScratch', 'MultiStrike', 'QuickStrike', 'Slam', 'Lick',
+  'Sing', 'Sound', 'Gas', 'Shock', 'Dance', 'Twirl', 'Withdraw', 'Rumble']
 
 if (!existsSync(SPRITE_ROOT)) throw new Error(`acervo nao encontrado: ${SPRITE_ROOT}`)
 
@@ -89,9 +93,11 @@ function main() {
 
   const corpo = JSON.stringify(saida).replace(/\},"/g, '},\n  "').replace(/^\{/, '{\n  ').replace(/\}$/, '\n}')
   writeFileSync(SAIDA, `// GERADO por scripts/extrair-apice-dos-ataques.mjs — nao editar a mao.
+import type { AnimName } from '@/data/battleSpriteAnims'
+
 // Indice (0-based) do quadro de APICE (<HitFrame> do PMD) de cada pose de ataque.
 // Especie/pose ausente: o motor estima (ver engine/tempoDoGolpe.ts).
-export const APICE_DO_ATAQUE: Record<string, Partial<Record<'Shoot' | 'Charge' | 'Attack', number>>> = ${corpo}
+export const APICE_DO_ATAQUE: Record<string, Partial<Record<AnimName, number>>> = ${corpo}
 `)
   const total = Object.values(saida).reduce((s, p) => s + Object.keys(p).length, 0)
   console.log(`apices: ${total} (especies: ${Object.keys(saida).length}); faltas: ${faltas.length}`)

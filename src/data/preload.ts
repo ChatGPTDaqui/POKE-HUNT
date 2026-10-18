@@ -17,6 +17,9 @@
 // `simulation.ts`/`headless.ts`, que rodam em Node no servidor de autoridade.
 import { BATTLE_SPRITE_ANIMS, type AnimName } from './battleSpriteAnims'
 import { battleSpriteUrl } from './battleSprites'
+import { POSES_SO_DE_GOLPE, posesDeGolpeDaEspecie } from './poseDoGolpe'
+import type { Ability } from './abilities'
+import { TM_ITEMS, aceitaTm } from './maquinas'
 import { getMap } from './maps'
 import { getEncounter } from './enemies'
 import { faceIconUrl, spriteUrl } from './sprites'
@@ -94,15 +97,30 @@ export function preloadHospital(): Promise<void> {
   return primeImage(CENA_HOSPITAL.imagem)
 }
 
+/** Golpes que a especie pode usar: learnset por nivel + TMs compativeis. */
+function golpesPossiveisDaEspecie(speciesId: string): Ability[] {
+  const ids = new Set<string>()
+  for (const { key } of SPECIES[speciesId]?.abilities ?? []) ids.add(key)
+  for (const tm of Object.values(TM_ITEMS)) if (aceitaTm(speciesId, tm.id)) ids.add(tm.golpe)
+  return [...ids].map((id) => getAbility(id)).filter((a): a is Ability => a != null)
+}
+
 /** Toda URL de spritesheet de batalha que esta especie pode desenhar. */
 export function battleSpriteUrlsFor(speciesId: string, isShiny: boolean): string[] {
   const anims = BATTLE_SPRITE_ANIMS[speciesId]
   if (!anims) return []
-  // Todas as animacoes que a especie tem, e nao so a atual: 'Faint' e
+  // Todas as animacoes de ESTADO que a especie tem, e nao so a atual: 'Faint' e
   // 'Shoot'/'Charge' sao exatamente as que aparecem em momento critico (o POKE
   // morrendo, o primeiro golpe) e seriam as ultimas a serem carregadas de forma
   // lazy.
-  return (Object.keys(anims) as AnimName[]).map((name) => battleSpriteUrl(speciesId, name, isShiny))
+  //
+  // Poses de GOLPE (18/10/2026) so as que os golpes dela usam — por nivel e por
+  // TM. Sem o filtro, uma especie com o acervo cheio baixaria ~25 folhas a mais.
+  const golpes = golpesPossiveisDaEspecie(speciesId)
+  const deGolpe = new Set(posesDeGolpeDaEspecie(speciesId, golpes))
+  return (Object.keys(anims) as AnimName[])
+    .filter((name) => !POSES_SO_DE_GOLPE.has(name) || deGolpe.has(name))
+    .map((name) => battleSpriteUrl(speciesId, name, isShiny))
 }
 
 /** Icones de lista/HUD da especie (mochila, loja, equipe, card do POKE ativo). */
