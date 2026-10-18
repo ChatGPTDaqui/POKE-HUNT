@@ -27,8 +27,9 @@ import type { StatusAtivo, EstagiosDeStat, EstagiosFonte, StatDeEstagio } from '
 import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
-// 'Attack' (PH-543) e a pose do COMBATE DUELO; Shoot/Charge sao as do livre.
-export type AttackAnimKind = 'Shoot' | 'Charge' | 'Attack'
+// Qualquer pose do acervo: a do golpe sai de engine/poseDoGolpe.ts (18/10/2026).
+// Sem pose propria, Attack no duelo e Shoot/Charge no livre.
+export type AttackAnimKind = AnimName
 
 // Escudos ("Screens"): Reflect/Light Screen/Safeguard/Mist/Lucky Chant/Wide
 // Guard. Cada valor e segundos restantes (mesmo padrao de `imunidadeDeStatus`

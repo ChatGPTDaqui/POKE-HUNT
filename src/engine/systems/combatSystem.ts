@@ -55,7 +55,8 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange, clamp } from '@/core/random'
-import { poseDeAtaque, registrarDanoParaHurt, triggerAttackAnim } from './animationSystem'
+import { registrarDanoParaHurt, triggerAttackAnim } from './animationSystem'
+import { poseDoGolpe } from '@/data/poseDoGolpe'
 import { tempoDoGolpe, type TempoDoGolpe } from '../tempoDoGolpe'
 // Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
 // turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
@@ -2047,8 +2048,11 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
 function iniciarPoseDoGolpe(world: WorldState, atacante: PlayerEntity | EnemyEntity, ability: Ability, alvo?: WorldEntity): TempoDoGolpe {
   const duelo = world.mapDef?.encarada === true
   const area = ability.target === 'aoe'
-  const tempo = tempoDoGolpe(atacante.poke.speciesId, poseDeAtaque(area, duelo), ability.id)
-  triggerAttackAnim(atacante, area, alvo, duelo, tempo.pose)
+  // A pose combina com o golpe (chute, soco, mordida...) quando a especie tem
+  // a arte; senao e a de sempre do modo. Ver engine/poseDoGolpe.ts.
+  const pose = poseDoGolpe(atacante.poke.speciesId, ability, duelo)
+  const tempo = tempoDoGolpe(atacante.poke.speciesId, pose, ability.id)
+  triggerAttackAnim(atacante, area, alvo, duelo, tempo.pose, pose)
   return tempo
 }
 

@@ -22,14 +22,15 @@ import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
 import { tempoDoGolpe } from '../tempoDoGolpe'
-import { poseDeAtaque } from './animationSystem'
+import { poseDoGolpe } from '@/data/poseDoGolpe'
+import { getAbility } from '@/data/abilities'
 import { updateCombat } from './combatSystem'
 
 const QUADRO = 1 / 60
 
 interface Caso { nome: string; especie: string; golpe: (especie: string) => string }
 const CASOS: Caso[] = [
-  { nome: 'Shoot propria (Pikachu, Thunder Shock)', especie: 'pikachu', golpe: () => 'thunder_shock' },
+  { nome: 'pose propria do golpe (Pikachu, Thunder Shock)', especie: 'pikachu', golpe: () => 'thunder_shock' },
   { nome: 'Charge em loop (Charmander, Ember)', especie: 'charmander', golpe: () => 'ember' },
   { nome: 'area (Pikachu, golpe de area do tipo)', especie: 'pikachu', golpe: (e) => typedAoeMoveKey(SPECIES[e].type) },
 ]
@@ -60,8 +61,9 @@ function cenario(caso: Caso) {
   enemy.state = 'engaged'
   enemy.targetId = player.id
   world.enemies = [enemy]
-  const area = golpe.startsWith('aoe')
-  const tempo = tempoDoGolpe(caso.especie, poseDeAtaque(area, false), golpe)
+  // A pose que o motor escolhe pra ESTE golpe (18/10/2026: Thunder Shock no
+  // Pikachu toca Shock, a pose de choque do acervo).
+  const tempo = tempoDoGolpe(caso.especie, poseDoGolpe(caso.especie, getAbility(golpe)!, false), golpe)
   return { world, player, enemy, golpe, tempo }
 }
 
