@@ -71791,6 +71791,94 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Kick": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"squirtle": {
@@ -71926,6 +72014,91 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 16,
+			"durations": [
+				20,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2
+			]
 		}
 	},
 	"bulbasaur": {
@@ -72056,6 +72229,91 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Dance": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
 		}
 	},
 	"geodude": {
@@ -72182,6 +72440,73 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"spearow": {
@@ -72301,6 +72626,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -72422,6 +72804,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -72560,6 +72995,83 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				2,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"sentret": {
@@ -72695,6 +73207,82 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
 			]
 		}
 	},
@@ -72840,6 +73428,90 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
 		}
 	},
 	"zubat": {
@@ -72964,6 +73636,60 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				3,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -73095,6 +73821,92 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				2,
+				6,
+				2,
+				6,
+				2,
+				6
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"caterpie": {
@@ -73210,6 +74022,75 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"weedle": {
@@ -73323,6 +74204,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Jab": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
 			]
 		}
 	},
@@ -73462,6 +74414,99 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"wartortle": {
@@ -73573,6 +74618,56 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 16,
+			"durations": [
+				20,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2
+			]
 		}
 	},
 	"ivysaur": {
@@ -73678,6 +74773,70 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
 			]
 		}
 	},
@@ -73801,6 +74960,95 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				1,
+				2,
+				4,
+				4,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -73929,6 +75177,64 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"raticate": {
@@ -74051,6 +75357,62 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"pidgeotto": {
@@ -74166,6 +75528,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -74285,6 +75704,62 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -74412,6 +75887,90 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
 		}
 	},
 	"golbat": {
@@ -74533,6 +76092,60 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				3,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"metapod": {
@@ -74653,6 +76266,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"kakuna": {
@@ -74754,6 +76439,86 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				3,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				4,
+				4,
+				2,
+				2
 			]
 		}
 	},
@@ -74881,6 +76646,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"blastoise": {
@@ -74995,6 +76833,56 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				20,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2
+			]
 		}
 	},
 	"venusaur": {
@@ -75102,6 +76990,72 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
 			]
 		}
 	},
@@ -75218,6 +77172,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -75351,6 +77362,67 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"butterfree": {
@@ -75479,6 +77551,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -75610,6 +77739,63 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Jab": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"bellsprout": {
@@ -75717,6 +77903,74 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"unown": {
@@ -75822,6 +78076,74 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -75938,6 +78260,100 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"sandshrew": {
@@ -76053,6 +78469,92 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				16,
+				2,
+				2,
+				2,
+				6
+			]
 		}
 	},
 	"onix": {
@@ -76164,6 +78666,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 96,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 64,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 128,
+			"frameHeight": 152,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 64,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -76283,6 +78854,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -76417,6 +79059,98 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				2,
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"slowpoke": {
@@ -76529,6 +79263,74 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -76647,6 +79449,83 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				3,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				3
 			]
 		}
 	},
@@ -76788,6 +79667,108 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Jab": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"jigglypuff": {
@@ -76925,6 +79906,97 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Slam": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"ditto": {
@@ -77015,6 +80087,74 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -77134,6 +80274,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"nidoran_m": {
@@ -77250,6 +80460,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				3,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -77377,6 +80658,111 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Chop": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -77513,6 +80899,74 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"machop": {
@@ -77642,6 +81096,94 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Kick": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
 			]
 		}
 	},
@@ -77780,6 +81322,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Gas": {
+			"frameWidth": 80,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"weezing": {
@@ -77912,6 +81527,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Gas": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				6,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"magnemite": {
@@ -78038,6 +81728,85 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"tauros": {
@@ -78138,6 +81907,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Stomp": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				3,
+				3,
+				3,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -78257,6 +82097,90 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Stomp": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				5,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				6,
+				2
+			]
 		}
 	},
 	"arbok": {
@@ -78368,6 +82292,74 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				4,
+				6,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"farfetch_d": {
@@ -78462,6 +82454,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -78581,6 +82644,82 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Jab": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2
 			]
 		}
 	},
@@ -78709,6 +82848,94 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"swinub": {
@@ -78824,6 +83051,59 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"jynx": {
@@ -78936,6 +83216,58 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -79051,6 +83383,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"seel": {
@@ -79163,6 +83565,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"tangela": {
@@ -79272,6 +83744,60 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -79384,6 +83910,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Lick": {
+			"frameWidth": 96,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				2,
+				1,
+				1,
+				1,
+				2,
+				6,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2
 			]
 		}
 	},
@@ -79504,6 +84103,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -79628,6 +84298,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				4,
+				2,
+				2,
+				4,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -79774,6 +84515,100 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 88,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"donphan": {
@@ -79885,6 +84720,93 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -80010,6 +84932,77 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"machoke": {
@@ -80108,6 +85101,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Kick": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
 			]
 		}
 	},
@@ -80248,6 +85311,93 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"pupitar": {
@@ -80373,6 +85523,60 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"magmar": {
@@ -80485,6 +85689,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -80609,6 +85884,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -80752,6 +86098,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				2,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"rapidash": {
@@ -80875,6 +86294,59 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"doduo": {
@@ -80973,6 +86445,86 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Jab": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -81074,6 +86626,86 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Jab": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -81189,6 +86821,92 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				16,
+				2,
+				2,
+				2,
+				6
 			]
 		}
 	},
@@ -81307,6 +87025,67 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				6,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"granbull": {
@@ -81414,6 +87193,83 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				3,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				3
 			]
 		}
 	},
@@ -81534,6 +87390,77 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"nidorina": {
@@ -81647,6 +87574,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -81767,6 +87767,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				1,
+				3,
+				1,
+				1,
+				4,
+				3,
+				3,
+				2,
+				2,
+				3,
+				3
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"magneton": {
@@ -81886,6 +87958,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"xatu": {
@@ -81994,6 +88136,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -82112,6 +88323,74 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"kingler": {
@@ -82225,6 +88504,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -82345,6 +88694,74 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"tyranitar": {
@@ -82459,6 +88876,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -82580,6 +89066,113 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sing": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4
+			]
+		},
+		"Shock": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
 		}
 	},
 	"cleffa": {
@@ -82689,6 +89282,86 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sing": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				6,
+				5,
+				6,
+				5,
+				6,
+				4
+			]
 		}
 	},
 	"igglybuff": {
@@ -82796,6 +89469,92 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sing": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"togepi": {
@@ -82892,6 +89651,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3
 			]
 		}
 	},
@@ -83026,6 +89856,97 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 136,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shock": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
 		}
 	},
 	"hoothoot": {
@@ -83137,6 +90058,74 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -83252,6 +90241,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				2,
+				2,
+				6,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -83400,6 +90459,82 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				1,
+				2,
+				6,
+				1,
+				1,
+				1,
+				1,
+				2,
+				6,
+				2,
+				2,
+				2,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"pineco": {
@@ -83514,6 +90649,43 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -83636,6 +90808,89 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2
+			]
 		}
 	},
 	"poliwag": {
@@ -83756,6 +91011,60 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"diglett": {
@@ -83866,6 +91175,73 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -84008,6 +91384,111 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				6,
+				1,
+				1,
+				3,
+				1,
+				1,
+				1,
+				1
+			]
 		}
 	},
 	"meowth": {
@@ -84139,6 +91620,96 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -84274,6 +91845,80 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				3
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Lick": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				5,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"drowzee": {
@@ -84387,6 +92032,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -84511,6 +92227,85 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				1,
+				3,
+				3,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -84647,6 +92442,59 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"horsea": {
@@ -84766,6 +92614,74 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"tentacool": {
@@ -84881,6 +92797,95 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"exeggcute": {
@@ -84994,6 +92999,83 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2
 			]
 		}
 	},
@@ -85130,6 +93212,93 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"cyndaquil": {
@@ -85254,6 +93423,93 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -85387,6 +93643,110 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				5,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				2,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Slam": {
+			"frameWidth": 64,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
 			]
 		}
 	},
@@ -85525,6 +93885,97 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"mankey": {
@@ -85645,6 +94096,107 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Chop": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				1,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				4,
+				2
 			]
 		}
 	},
@@ -85778,6 +94330,89 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				4,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				5
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"chinchou": {
@@ -85904,6 +94539,75 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"shellder": {
@@ -86027,6 +94731,71 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				20,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"staryu": {
@@ -86141,6 +94910,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -86259,6 +95101,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -86386,6 +95299,102 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				1,
+				1,
+				2,
+				3,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				4,
+				2
+			]
 		}
 	},
 	"psyduck": {
@@ -86506,6 +95515,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				1,
+				1,
+				6,
+				2,
+				6,
+				2,
+				4,
+				2,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -86638,6 +95717,94 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				2,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3
+			]
 		}
 	},
 	"slugma": {
@@ -86751,6 +95918,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3
 			]
 		}
 	},
@@ -86896,6 +96133,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"teddiursa": {
@@ -87008,6 +96317,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -87146,6 +96512,115 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				3,
+				3,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"remoraid": {
@@ -87269,6 +96744,59 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"tyrogue": {
@@ -87385,6 +96913,82 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"Punch": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"elekid": {
@@ -87495,6 +97099,82 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shock": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				1,
+				4
 			]
 		}
 	},
@@ -87628,6 +97308,97 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -87763,6 +97534,114 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Sing": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				1,
+				2,
+				4,
+				2,
+				1,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				1,
+				2,
+				4,
+				2,
+				1,
+				4
+			]
 		}
 	},
 	"marill": {
@@ -87890,6 +97769,98 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				3,
+				3,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"sudowoodo": {
@@ -87996,6 +97967,80 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				8,
+				4
 			]
 		}
 	},
@@ -88133,6 +98178,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"aipom": {
@@ -88262,6 +98379,96 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Dance": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				3,
+				2,
+				1,
+				6,
+				1,
+				2,
+				3,
+				2,
+				1,
+				6
+			]
 		}
 	},
 	"qwilfish": {
@@ -88389,6 +98596,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"corsola": {
@@ -88499,6 +98778,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -88633,6 +98965,98 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				1,
+				2,
+				4,
+				1,
+				1,
+				2,
+				4,
+				1,
+				2,
+				4,
+				1,
+				2,
+				4,
+				1,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -88775,6 +99199,99 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				2,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Stomp": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Bite": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				2,
+				2
+			]
 		}
 	},
 	"stantler": {
@@ -88900,6 +99417,60 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -89051,6 +99622,104 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				10
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				10,
+				10,
+				10
+			]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"delibird": {
@@ -89181,6 +99850,94 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
 			]
 		}
 	},
@@ -89318,6 +100075,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				1,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				4,
+				1,
+				2,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"wobbuffet": {
@@ -89433,6 +100262,85 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				8,
+				16,
+				12
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				8,
+				16,
+				12
 			]
 		}
 	},
@@ -89571,6 +100479,64 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 88,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"rhyhorn": {
@@ -89681,6 +100647,77 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Stomp": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"hitmonlee": {
@@ -89786,6 +100823,81 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Kick": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				8,
+				1,
+				1,
+				2,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -89898,6 +101010,83 @@ var BATTLE_SPRITE_ANIMS = {
 				3,
 				2,
 				2,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Uppercut": {
+			"frameWidth": 80,
+			"frameHeight": 144,
+			"durations": [
+				1,
+				2,
+				4,
+				3,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
 				1,
 				1
 			]
@@ -90022,6 +101211,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				4,
+				1,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"lapras": {
@@ -90136,6 +101395,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 88,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sound": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -90257,6 +101588,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				6,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -90387,6 +101787,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				4,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"scyther": {
@@ -90497,6 +101970,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slice": {
+			"frameWidth": 88,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -90609,6 +102153,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slice": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -90725,6 +102340,77 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				2,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"omanyte": {
@@ -90827,6 +102513,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				2,
 				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				6,
 				2,
 				2,
 				2,
@@ -90965,6 +102724,95 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				2,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"aerodactyl": {
@@ -91085,6 +102933,61 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"snorlax": {
@@ -91199,6 +103102,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Stomp": {
+			"frameWidth": 80,
+			"frameHeight": 104,
+			"durations": [
+				6,
+				2,
+				2,
+				3,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -91317,6 +103292,82 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				3,
+				3,
+				3,
+				3,
+				3,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"alakazam": {
@@ -91433,6 +103484,74 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				4,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -91572,6 +103691,111 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Lick": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"machamp": {
@@ -91691,6 +103915,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Kick": {
+			"frameWidth": 72,
+			"frameHeight": 96,
+			"durations": [
+				4,
+				4,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
 			]
 		}
 	},
@@ -91812,6 +104109,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"arcanine": {
@@ -91922,6 +104291,100 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 136,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -92036,6 +104499,102 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sound": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				4,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				4,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -92152,6 +104711,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"steelix": {
@@ -92265,6 +104894,72 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 120,
+			"frameHeight": 152,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 80,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 64,
+			"frameHeight": 112,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 64,
+			"frameHeight": 112,
+			"durations": [
+				8,
+				2,
+				8,
+				2,
+				8,
+				2
 			]
 		}
 	},
@@ -92386,6 +105081,77 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 104,
+			"frameHeight": 136,
+			"durations": [
+				4,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 80,
+			"frameHeight": 152,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 72,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 88,
+			"frameHeight": 160,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"articuno": {
@@ -92506,6 +105272,82 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 88,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 80,
+			"frameHeight": 96,
+			"durations": [
+				2,
+				1,
+				2,
+				1,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 96,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 88,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"zapdos": {
@@ -92621,6 +105463,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 80,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 80,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 56,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -92742,6 +105656,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 104,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 96,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -92865,6 +105836,81 @@ var BATTLE_SPRITE_ANIMS = {
 				3,
 				2,
 				2,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shock": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
 				1,
 				1
 			]
@@ -92993,6 +106039,100 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				3,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3
+			]
 		}
 	},
 	"suicune": {
@@ -93116,6 +106256,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				4,
+				1,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"lugia": {
@@ -93217,6 +106429,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 104,
+			"frameHeight": 112,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 96,
+			"frameHeight": 112,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 72,
+			"frameHeight": 96,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -93343,6 +106608,64 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 96,
+			"frameHeight": 136,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 64,
+			"frameHeight": 112,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Jab": {
+			"frameWidth": 88,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -93496,6 +106819,106 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"mewtwo": {
@@ -93635,6 +107058,102 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				6,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Punch": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -93781,6 +107300,98 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				1,
+				3,
+				1,
+				3,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				6,
+				2
+			]
 		}
 	},
 	"noctowl": {
@@ -93910,6 +107521,72 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"ariados": {
@@ -94030,6 +107707,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -94156,6 +107902,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 96,
+			"durations": [
+				1,
+				2,
+				6,
+				1,
+				1,
+				1,
+				1,
+				2,
+				6,
+				2,
+				2,
+				2,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -94292,6 +108095,58 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"gloom": {
@@ -94409,6 +108264,88 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2
+			]
 		}
 	},
 	"poliwhirl": {
@@ -94525,6 +108462,59 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"dugtrio": {
@@ -94635,6 +108625,74 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -94753,6 +108811,91 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				6,
+				1,
+				1,
+				3,
+				1,
+				1,
+				1,
+				1
+			]
 		}
 	},
 	"persian": {
@@ -94865,6 +109008,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -94994,6 +109209,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Lick": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				4,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"hypno": {
@@ -95112,6 +109402,91 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -95244,6 +109619,59 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"seadra": {
@@ -95368,6 +109796,74 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"tentacruel": {
@@ -95488,6 +109984,94 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -95622,6 +110206,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
 			]
 		}
 	},
@@ -95760,6 +110416,97 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 96,
+			"durations": [
+				2,
+				2,
+				3,
+				3,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"bayleef": {
@@ -95872,6 +110619,73 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"croconaw": {
@@ -95979,6 +110793,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -96099,6 +110983,82 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"marowak": {
@@ -96204,6 +111164,73 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -96349,6 +111376,93 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"muk": {
@@ -96464,6 +111578,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -96609,6 +111793,63 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"golduck": {
@@ -96722,6 +111963,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				4,
+				2,
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -96838,6 +112148,75 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 88,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3
+			]
 		}
 	},
 	"magcargo": {
@@ -96946,6 +112325,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3,
+				2,
+				3
 			]
 		}
 	},
@@ -97070,6 +112519,59 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"octillery": {
@@ -97174,6 +112676,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -97286,6 +112857,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -97401,6 +113043,102 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"rhydon": {
@@ -97510,6 +113248,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Stomp": {
+			"frameWidth": 72,
+			"frameHeight": 96,
+			"durations": [
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -97631,6 +113440,61 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 96,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"omastar": {
@@ -97739,6 +113603,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -97854,6 +113791,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				2,
+				4,
+				4,
+				2,
+				2,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -97972,6 +113978,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -98107,6 +114186,96 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"meganium": {
@@ -98223,6 +114392,62 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 96,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"feraligatr": {
@@ -98338,6 +114563,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -98457,6 +114753,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 40,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				4,
+				2,
+				4,
+				2
 			]
 		}
 	},
@@ -98586,6 +114954,59 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"politoed": {
@@ -98707,6 +115128,61 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 104,
+			"durations": [
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"golem": {
@@ -98820,6 +115296,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				16,
+				2,
+				2,
+				2,
+				6
 			]
 		}
 	},
@@ -98942,6 +115487,75 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"scizor": {
@@ -99056,6 +115670,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				1,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -99181,6 +115868,88 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2
+			]
 		}
 	},
 	"bellossom": {
@@ -99291,6 +116060,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -99406,6 +116247,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 88,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2
+			]
 		}
 	},
 	"poliwrath": {
@@ -99520,6 +116431,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -99638,6 +116602,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -99768,6 +116785,74 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				20,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"starmie": {
@@ -99890,6 +116975,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"wigglytuff": {
@@ -100004,6 +117162,80 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"vaporeon": {
@@ -100111,6 +117343,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -100236,6 +117538,96 @@ var BATTLE_SPRITE_ANIMS = {
 				3,
 				2,
 				2,
+				1,
+				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				8
+			]
+		},
+		"Shock": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				8,
+				3,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
 				1,
 				1
 			]
@@ -100370,6 +117762,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"espeon": {
@@ -100483,6 +117948,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -100627,6 +118161,92 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"raichu": {
@@ -100760,6 +118380,97 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 128,
+			"frameHeight": 136,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shock": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
 		}
 	},
 	"crobat": {
@@ -100882,6 +118593,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				1,
+				2,
+				1,
+				2,
+				1,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -101007,6 +118790,86 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 144,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"clefairy": {
@@ -101107,6 +118970,88 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				4,
+				6,
+				4,
+				6,
+				4
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -101224,6 +119169,91 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Dance": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				4,
+				6,
+				4,
+				6,
+				4,
+				6
+			]
 		}
 	},
 	"clefable": {
@@ -101322,6 +119352,99 @@ var BATTLE_SPRITE_ANIMS = {
 				3,
 				2,
 				2,
+				1,
+				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				6,
+				4,
+				6,
+				4,
+				6,
+				4
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				1,
+				1,
+				4,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
 				1,
 				1
 			]
@@ -101454,6 +119577,95 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				3,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				3,
+				4,
+				1,
+				1,
+				4,
+				3,
+				3,
+				3,
+				3,
+				3,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"grovyle": {
@@ -101581,6 +119793,92 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"sceptile": {
@@ -101687,6 +119985,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 112,
+			"durations": [
+				4,
+				1,
+				2,
+				6,
+				2,
+				3,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -101828,6 +120196,91 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Dance": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
 		}
 	},
 	"combusken": {
@@ -101941,6 +120394,77 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 112,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				6,
+				1,
+				1,
+				3,
+				3,
+				3,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"blaziken": {
@@ -102046,6 +120570,109 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				1,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Kick": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				1,
+				2,
+				4,
+				2,
+				2
+			]
+		},
+		"Slam": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				1,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2
 			]
 		}
 	},
@@ -102185,6 +120812,99 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"marshtomp": {
@@ -102296,6 +121016,113 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -102433,6 +121260,114 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				2,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -102572,6 +121507,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"mightyena": {
@@ -102710,6 +121718,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"zigzagoon": {
@@ -102828,6 +121909,61 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -102954,6 +122090,60 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"wurmple": {
@@ -103072,6 +122262,75 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"silcoon": {
@@ -103185,6 +122444,81 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -103316,6 +122650,65 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"cascoon": {
@@ -103426,6 +122819,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -103554,6 +123019,63 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"lotad": {
@@ -103664,6 +123186,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3
 			]
 		}
 	},
@@ -103783,6 +123374,77 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				2,
+				3,
+				4,
+				2,
+				3,
+				4,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				4,
+				1,
+				2,
+				3,
+				4,
+				2,
+				3,
+				4,
+				2,
+				2
+			]
 		}
 	},
 	"ludicolo": {
@@ -103889,6 +123551,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -104000,6 +123715,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -104143,6 +123929,95 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"SpAttack": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				4,
+				3,
+				3,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"shiftry": {
@@ -104266,6 +124141,77 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				4,
+				1,
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				4,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 136,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"taillow": {
@@ -104384,6 +124330,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 112,
+			"frameHeight": 112,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -104511,6 +124514,63 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 112,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -104647,6 +124707,63 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 112,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"pelipper": {
@@ -104757,6 +124874,80 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				3,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 120,
+			"durations": [
+				3,
+				3,
+				3,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -104882,6 +125073,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
 			]
 		}
 	},
@@ -105030,6 +125293,115 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				3,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				6,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				6,
+				4
+			]
 		}
 	},
 	"gardevoir": {
@@ -105140,6 +125512,73 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				1,
+				6,
+				1,
+				4,
+				5,
+				4,
+				5,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -105260,6 +125699,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 120,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"masquerain": {
@@ -105379,6 +125888,61 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 128,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"shroomish": {
@@ -105491,6 +126055,80 @@ var BATTLE_SPRITE_ANIMS = {
 				3,
 				2,
 				2,
+				1,
+				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				1,
 				1,
 				1
 			]
@@ -105633,6 +126271,119 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Punch": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"slakoth": {
@@ -105738,6 +126489,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				4,
+				6,
+				2,
+				2,
+				2,
+				2,
+				4,
+				4
 			]
 		}
 	},
@@ -105852,6 +126656,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Scratch": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 40,
+			"frameHeight": 72,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				1,
+				2,
+				4,
+				2,
+				1,
+				4
 			]
 		}
 	},
@@ -105968,6 +126845,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				4,
+				1,
+				2,
+				4,
+				2,
+				1,
+				4
+			]
 		}
 	},
 	"nincada": {
@@ -106081,6 +127031,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -106200,6 +127220,61 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -106340,6 +127415,107 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"SpAttack": {
+			"frameWidth": 24,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Scratch": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"whismur": {
@@ -106456,6 +127632,81 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				1,
+				2,
+				2,
+				1,
+				2,
+				1,
+				2,
+				2,
+				1,
+				2,
+				1,
+				2,
+				2,
+				1,
+				2
 			]
 		}
 	},
@@ -106582,6 +127833,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				1,
+				2,
+				2,
+				1,
+				2,
+				1,
+				2,
+				2,
+				1,
+				2,
+				1,
+				2,
+				2,
+				1,
+				2
+			]
 		}
 	},
 	"exploud": {
@@ -106694,6 +128020,73 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				3,
+				2,
+				8,
+				2,
+				3,
+				2,
+				8
 			]
 		}
 	},
@@ -106842,6 +128235,95 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				1,
+				4,
+				1,
+				4,
+				1,
+				4,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"hariyama": {
@@ -106966,6 +128448,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				1,
+				4,
+				1,
+				4,
+				1,
+				4,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"azurill": {
@@ -107080,6 +128632,60 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -107196,6 +128802,97 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -107331,6 +129028,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
 			]
 		}
 	},
@@ -107472,6 +129242,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"sableye": {
@@ -107577,6 +129419,85 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				4,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiStrike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -107702,6 +129623,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Bite": {
+			"frameWidth": 88,
+			"frameHeight": 104,
+			"durations": [
+				1,
+				1,
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -107836,6 +129830,110 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Dance": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2
+			]
 		}
 	},
 	"lairon": {
@@ -107947,6 +130045,91 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2
 			]
 		}
 	},
@@ -108061,6 +130244,91 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 80,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2,
+				4,
+				2
 			]
 		}
 	},
@@ -108179,6 +130447,85 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				4,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -108299,6 +130646,84 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				8,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -108446,6 +130871,107 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				2,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 112,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shock": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				5,
+				1,
+				1,
+				4,
+				2,
+				1,
+				4,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
 		}
 	},
 	"manectric": {
@@ -108568,6 +131094,84 @@ var BATTLE_SPRITE_ANIMS = {
 				3,
 				2,
 				2,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 112,
+			"frameHeight": 136,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shock": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				8,
+				1,
+				1,
+				8,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
 				1,
 				1
 			]
@@ -108711,6 +131315,98 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shock": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
 		}
 	},
 	"minun": {
@@ -108851,6 +131547,98 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Shock": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
 		}
 	},
 	"volbeat": {
@@ -108975,6 +131763,64 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"illumise": {
@@ -109090,6 +131936,84 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -109227,6 +132151,125 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				3,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				3,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				4
+			]
 		}
 	},
 	"gulpin": {
@@ -109342,6 +132385,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sound": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"swalot": {
@@ -109452,6 +132570,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sound": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -109572,6 +132760,61 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Bite": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -109696,6 +132939,61 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Bite": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -109822,6 +133120,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				3,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -109955,6 +133324,79 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 88,
+			"frameHeight": 112,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 96,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 72,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 72,
+			"frameHeight": 112,
+			"durations": [
+				4,
+				3,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"numel": {
@@ -110068,6 +133510,75 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				3,
+				2
+			]
 		}
 	},
 	"camerupt": {
@@ -110179,6 +133690,77 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -110300,6 +133882,87 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				3,
+				3,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				3,
+				3
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				3,
+				3,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				3,
+				3
 			]
 		}
 	},
@@ -110430,6 +134093,90 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				4,
+				2,
+				2
+			]
 		}
 	},
 	"grumpig": {
@@ -110542,6 +134289,81 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				3,
+				1,
+				3,
+				1,
+				3,
+				1,
+				3,
+				1,
+				3,
+				1,
+				3,
+				1,
+				3,
+				2
 			]
 		}
 	},
@@ -110687,6 +134509,95 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Slam": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				3,
+				2,
+				4,
+				2,
+				3,
+				3,
+				2,
+				3
+			]
 		}
 	},
 	"trapinch": {
@@ -110825,6 +134736,96 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Bite": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"vibrava": {
@@ -110949,6 +134950,75 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -111076,6 +135146,60 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"cacnea": {
@@ -111187,6 +135311,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				4,
+				2,
+				4,
+				6,
+				1,
+				1,
+				1,
+				1,
+				4,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -111305,6 +135499,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				6,
+				1,
+				1,
+				1,
+				1,
+				4,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -111445,6 +135709,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
 			]
 		}
 	},
@@ -111589,6 +135925,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"zangoose": {
@@ -111726,6 +136134,102 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 48,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				4,
+				4,
+				1,
+				1,
+				1,
+				2,
+				4,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"seviper": {
@@ -111837,6 +136341,61 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 80,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Bite": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				1,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -111964,6 +136523,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -112093,6 +136724,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"barboach": {
@@ -112215,6 +136918,89 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				4,
+				4,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				4,
+				4,
+				2
 			]
 		}
 	},
@@ -112346,6 +137132,89 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				4,
+				4,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				4,
+				4,
+				2
+			]
 		}
 	},
 	"corphish": {
@@ -112474,6 +137343,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Bite": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"crawdaunt": {
@@ -112585,6 +137529,62 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Bite": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -112729,6 +137729,85 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				3,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"claydol": {
@@ -112854,6 +137933,85 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				3,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"lileep": {
@@ -112967,6 +138125,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				8,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				2,
+				4,
+				2,
+				6,
+				1,
+				1,
+				1,
+				1,
+				4,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -113105,6 +138335,97 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				8,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				4,
+				2,
+				6,
+				1,
+				1,
+				1,
+				1,
+				4,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"anorith": {
@@ -113230,6 +138551,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Scratch": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"armaldo": {
@@ -113351,6 +138742,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Scratch": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -113479,6 +138942,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Dance": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				4,
+				4,
+				2,
+				2,
+				2,
+				2,
+				4,
+				4,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"milotic": {
@@ -113593,6 +139131,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 88,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 88,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -113711,6 +139302,83 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2
 			]
 		}
 	},
@@ -113842,6 +139510,82 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
 			]
 		}
 	},
@@ -113989,6 +139733,113 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1,
+				1,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"banette": {
@@ -114104,6 +139955,87 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				3,
+				3,
+				2,
+				2,
+				1,
+				1,
+				1,
+				6,
+				3,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -114241,6 +140173,80 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				2,
+				4,
+				2,
+				4,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				4,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"dusclops": {
@@ -114351,6 +140357,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				4,
+				2,
+				4,
+				6,
+				1,
+				1,
+				1,
+				1,
+				4,
+				4
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Punch": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				8,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -114471,6 +140550,59 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -114612,6 +140744,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				3,
+				2,
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				3,
+				3
+			]
 		}
 	},
 	"absol": {
@@ -114740,6 +140947,98 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"SpAttack": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 136,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1
+			]
 		}
 	},
 	"wynaut": {
@@ -114859,6 +141158,98 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				3,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				2,
+				3,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -114991,6 +141382,97 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				1,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"glalie": {
@@ -115111,6 +141593,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Bite": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				1,
+				1,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"spheal": {
@@ -115227,6 +141781,91 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				3,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				3,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"sealeo": {
@@ -115339,6 +141978,91 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				3,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				3,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -115459,6 +142183,91 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				3,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				3,
+				8,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"clamperl": {
@@ -115573,6 +142382,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				4,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -115690,6 +142569,60 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -115813,6 +142746,104 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				2,
 				1,
+				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 112,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
 				1
 			]
 		}
@@ -115940,6 +142971,76 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				4,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -116073,6 +143174,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 120,
+			"frameHeight": 128,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"bagon": {
@@ -116204,6 +143380,94 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Bite": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				6,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"shelgon": {
@@ -116316,6 +143580,78 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				2,
+				4,
+				2,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -116464,6 +143800,95 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				4,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 56,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Rumble": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				4,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"beldum": {
@@ -116597,6 +144022,81 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				4,
+				2,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"metang": {
@@ -116729,6 +144229,76 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"MultiScratch": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				4,
+				2,
+				1,
+				1
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"metagross": {
@@ -116839,6 +144409,58 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Twirl": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -116953,6 +144575,99 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				3,
+				4,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				1,
+				3,
+				4,
+				1,
+				1,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"regice": {
@@ -117065,6 +144780,97 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				4,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"registeel": {
@@ -117169,6 +144975,101 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Withdraw": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -117317,6 +145218,115 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 96,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
+		},
+		"Rumble": {
+			"frameWidth": 48,
+			"frameHeight": 96,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	},
 	"latios": {
@@ -117440,6 +145450,96 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 80,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 64,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 80,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 64,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -117572,6 +145672,60 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Double": {
+			"frameWidth": 96,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Stomp": {
+			"frameWidth": 96,
+			"frameHeight": 96,
+			"durations": [
+				2,
+				4,
+				3,
+				1,
+				2,
+				4,
+				3,
+				4,
+				3,
+				2,
+				2
+			]
 		}
 	},
 	"groudon": {
@@ -117694,6 +145848,79 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"Strike": {
+			"frameWidth": 88,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 80,
+			"frameHeight": 104,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 64,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rumble": {
+			"frameWidth": 64,
+			"frameHeight": 104,
+			"durations": [
+				1,
+				2,
+				6,
+				2,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -117823,6 +146050,98 @@ var BATTLE_SPRITE_ANIMS = {
 				2,
 				1,
 				1
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 80,
+			"frameHeight": 144,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 96,
+			"frameHeight": 144,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 80,
+			"frameHeight": 120,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"QuickStrike": {
+			"frameWidth": 152,
+			"frameHeight": 168,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				1
+			]
+		},
+		"Rumble": {
+			"frameWidth": 80,
+			"frameHeight": 144,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
 			]
 		}
 	},
@@ -117973,6 +146292,83 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 64,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Head": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [4]
+		},
+		"HitGround": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				6,
+				4,
+				4
+			]
 		}
 	},
 	"deoxys": {
@@ -118094,6 +146490,78 @@ var BATTLE_SPRITE_ANIMS = {
 				1,
 				1
 			]
+		},
+		"Strike": {
+			"frameWidth": 72,
+			"frameHeight": 80,
+			"durations": [
+				2,
+				6,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"SpAttack": {
+			"frameWidth": 48,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Double": {
+			"frameWidth": 72,
+			"frameHeight": 88,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				3,
+				3,
+				3,
+				2,
+				3,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Rotate": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
 		}
 	}
 };
@@ -118143,6 +146611,174 @@ var ANIM_FALLBACKS = {
 		"Charge",
 		"Idle",
 		"Walk"
+	],
+	Strike: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	SpAttack: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Double: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Rotate: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Head: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	HitGround: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Stomp: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Kick: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Punch: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Jab: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Uppercut: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Chop: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Slice: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Bite: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Scratch: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	MultiScratch: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	MultiStrike: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	QuickStrike: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Slam: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Lick: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Sing: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Sound: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Gas: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Shock: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Dance: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Twirl: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Withdraw: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Rumble: [
+		"Shoot",
+		"Charge",
+		"Idle",
+		"Walk"
 	]
 };
 function resolveBattleAnim(speciesId, animName, isShiny = false) {
@@ -118161,6 +146797,146 @@ function resolveBattleAnim(speciesId, animName, isShiny = false) {
 function battleSpriteUrl(speciesId, animName, isShiny = false) {
 	return `assets/battle-sprites/${speciesId}/${animName}${isShiny ? "-Shiny" : ""}-Anim.png`;
 }
+//#endregion
+//#region src/data/poseDoGolpe.ts
+/** Da mais fiel pra mais generica. `null` no fim = a pose de sempre do modo. */
+var POSES_DA_FAMILIA = {
+	chute: [
+		"Kick",
+		"Stomp",
+		"Strike"
+	],
+	soco: [
+		"Punch",
+		"Jab",
+		"Uppercut",
+		"Strike"
+	],
+	golpe_de_mao: [
+		"Chop",
+		"Slice",
+		"Strike"
+	],
+	mordida: ["Bite", "Strike"],
+	garra: [
+		"Scratch",
+		"MultiScratch",
+		"Slice",
+		"Strike"
+	],
+	varios_golpes: [
+		"MultiStrike",
+		"Double",
+		"Strike"
+	],
+	investida_rapida: ["QuickStrike", "Strike"],
+	esmagar: ["Slam", "Strike"],
+	cabecada: ["Head", "Strike"],
+	cauda_ou_asa: ["Swing"],
+	lambida: ["Lick", "Strike"],
+	canto: ["Sing", "Sound"],
+	som: ["Sound"],
+	gas: ["Gas", "SpAttack"],
+	choque: ["Shock", "SpAttack"],
+	chao: ["HitGround", "Stomp"],
+	giro: ["Rotate", "Twirl"],
+	danca: ["Dance", "Twirl"],
+	defesa: ["Withdraw"],
+	furia: ["Rumble", "Strike"],
+	contato: ["Strike"],
+	especial: ["SpAttack"],
+	padrao: []
+};
+var REGRAS = [
+	["chute", /kick|^stomp$|^trample$/],
+	["soco", /punch|^sky_uppercut$/],
+	["golpe_de_mao", /chop|^brick_break$/],
+	["mordida", /bite|fang|^crunch$/],
+	["garra", /scratch|claw|slash|^fury_swipes$|^cut$|^false_swipe$|^leaf_blade$|^x_scissor$|^fury_cutter$|^aerial_ace$/],
+	["varios_golpes", /^fury_attack$|^double_slap$|^twineedle$|^double_hit$|^arm_thrust$/],
+	["investida_rapida", /^quick_attack$|^extreme_speed$|^feint$|^feint_attack$|^aqua_jet$|^shadow_sneak$|^vacuum_wave$|^ice_shard$/],
+	["esmagar", /slam$|^body_press$|^heat_crash$/],
+	["cabecada", /^headbutt$|^head_smash$|^zen_headbutt$|^skull_bash$|^iron_head$|^horn_attack$|^horn_drill$|^megahorn$/],
+	["cauda_ou_asa", /tail|^wing_attack$|^steel_wing$|^drill_peck$|^peck$|^pluck$/],
+	["lambida", /lick/],
+	["canto", /^sing$|^perish_song$|^grass_whistle$/],
+	["som", /^growl$|^roar$|^screech$|^hyper_voice$|^uproar$|^snore$|^metal_sound$|^supersonic$|^echoed_voice$|^round$|^bug_buzz$|^boomburst$/],
+	["gas", /^smog$|^poison_gas$|^sludge|^toxic$|^poison_powder$|^spore$|^sleep_powder$|^stun_spore$|^sweet_scent$/],
+	["choque", /^thunder_shock$|^thunderbolt$|^thunder$|^spark$|^discharge$|^zap_cannon$|^shock_wave$|^charge_beam$/],
+	["chao", /^earthquake$|^magnitude$|^bulldoze$|^fissure$|^stomping_tantrum$|^earth_power$/],
+	["giro", /^rapid_spin$|^rollout$|^gyro_ball$|^ice_ball$|^twister$|^whirlwind$|^teeter_dance$|^leaf_tornado$/],
+	["danca", /dance$|^agility$|^double_team$|^minimize$/],
+	["defesa", /^withdraw$|^defense_curl$|^harden$|^iron_defense$|^protect$|^detect$|^endure$|^barrier$|^acid_armor$/],
+	["furia", /^outrage$|^thrash$|^rage$/]
+];
+/**
+* Golpe FISICO que nao encosta: arremesso, projetil, pedra caindo. Strike e uma
+* estocada de contato — num Razor Leaf ela leria como o POKE correndo ate o
+* alvo. Estes ficam na pose de sempre (Shoot no livre).
+*/
+var FISICO_A_DISTANCIA = /* @__PURE__ */ new Set([
+	"razor_leaf",
+	"rock_throw",
+	"rock_slide",
+	"rock_tomb",
+	"rock_blast",
+	"stone_edge",
+	"seed_bomb",
+	"bullet_seed",
+	"icicle_spear",
+	"icicle_crash",
+	"pin_missile",
+	"poison_sting",
+	"egg_bomb",
+	"barrage",
+	"bone_club",
+	"bonemerang",
+	"bone_rush",
+	"gunk_shot",
+	"avalanche",
+	"sand_tomb",
+	"spike_cannon",
+	"leaf_storm",
+	"sky_attack",
+	"present",
+	"mud_slap",
+	"dig",
+	"bulldoze",
+	"magnitude",
+	"earthquake",
+	"fissure",
+	"ancient_power",
+	"rock_wrecker",
+	"seismic_toss",
+	"self_destruct",
+	"explosion",
+	"fling",
+	"natural_gift",
+	"beat_up",
+	"magnet_bomb",
+	"gyro_ball",
+	"ice_ball",
+	"rollout"
+]);
+function familiaDoGolpe(ability) {
+	for (const [familia, re] of REGRAS) if (re.test(ability.id)) return familia;
+	if (ability.category === "physical") return FISICO_A_DISTANCIA.has(ability.id) ? "padrao" : "contato";
+	if (ability.category === "special" && ability.target !== "aoe") return "especial";
+	return "padrao";
+}
+/** A pose de sempre do modo: Attack no duelo, Charge em area, Shoot no resto. */
+function poseBaseDoModo(isAoe, duelo) {
+	return duelo ? "Attack" : isAoe ? "Charge" : "Shoot";
+}
+/** A pose que esta especie toca com este golpe. Deterministica (ver o topo). */
+function poseDoGolpe(speciesId, ability, duelo) {
+	const arte = BATTLE_SPRITE_ANIMS[speciesId];
+	if (arte) {
+		for (const pose of POSES_DA_FAMILIA[familiaDoGolpe(ability)]) if (arte[pose]) return pose;
+	}
+	return poseBaseDoModo(ability.target === "aoe", duelo);
+}
+new Set(Object.values(POSES_DA_FAMILIA).flat().filter((p) => p !== "Swing"));
 //#endregion
 //#region src/engine/systems/animationSystem.ts
 var ATTACK_ANIM_DURATION = .5;
@@ -118241,10 +147017,10 @@ function faceToward(entity, target) {
 	};
 }
 function poseDeAtaque(isAoe, duelo = false) {
-	return duelo ? "Attack" : isAoe ? "Charge" : "Shoot";
+	return poseBaseDoModo(isAoe, duelo);
 }
-function triggerAttackAnim(entity, isAoe, target, duelo = false, duracao = ATTACK_ANIM_DURATION) {
-	entity.attackAnim = poseDeAtaque(isAoe, duelo);
+function triggerAttackAnim(entity, isAoe, target, duelo = false, duracao = ATTACK_ANIM_DURATION, pose) {
+	entity.attackAnim = pose ?? poseDeAtaque(isAoe, duelo);
 	entity.attackAnimTimer = duracao;
 	if (target) faceToward(entity, target);
 }
@@ -118266,1885 +147042,3364 @@ var APICE_DO_ATAQUE = {
 	"abra": {
 		"Shoot": 7,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8,
+		"Jab": 3
 	},
 	"absol": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 2,
+		"Rotate": 8,
+		"QuickStrike": 3
 	},
 	"aerodactyl": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"aggron": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 4,
+		"Rumble": 4
 	},
 	"aipom": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 7
 	},
 	"alakazam": {
 		"Shoot": 6,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"SpAttack": 2,
+		"Rotate": 8
 	},
 	"altaria": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"ampharos": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"SpAttack": 1,
+		"Rotate": 8
 	},
 	"anorith": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Scratch": 3,
+		"Twirl": 8
 	},
 	"arbok": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"arcanine": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"SpAttack": 4,
+		"Rotate": 8,
+		"QuickStrike": 5,
+		"Rumble": 4
 	},
 	"ariados": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"armaldo": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Scratch": 3,
+		"Twirl": 8
 	},
 	"aron": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 6,
+		"Rumble": 6
 	},
 	"articuno": {
 		"Shoot": 12,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"SpAttack": 10,
+		"Rotate": 8
 	},
 	"azumarill": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 12,
+		"Rotate": 8,
+		"Twirl": 12
 	},
 	"azurill": {
 		"Shoot": 0,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8
 	},
 	"bagon": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 3,
+		"Rumble": 1
 	},
 	"baltoy": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"SpAttack": 4,
+		"Rotate": 8,
+		"QuickStrike": 4
 	},
 	"banette": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 10,
+		"Rotate": 8
 	},
 	"barboach": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 6,
+		"Rumble": 6
 	},
 	"bayleef": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"beautifly": {
 		"Shoot": 6,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 7,
+		"Rotate": 8
 	},
 	"beedrill": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 10
+		"Attack": 10,
+		"Swing": 5,
+		"Rotate": 8,
+		"Jab": 3
 	},
 	"beldum": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 9
+		"Attack": 9,
+		"Swing": 5,
+		"Strike": 9,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"bellossom": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 11
 	},
 	"bellsprout": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"blastoise": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Rotate": 8,
+		"Withdraw": 1
 	},
 	"blaziken": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8,
+		"Kick": 3,
+		"Slam": 6
 	},
 	"breloom": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Punch": 4,
+		"MultiStrike": 4,
+		"Twirl": 8
 	},
 	"bulbasaur": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Dance": 0
 	},
 	"butterfree": {
 		"Shoot": 10,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8
 	},
 	"cacnea": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 9,
+		"Rotate": 8
 	},
 	"cacturne": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 8,
+		"Rotate": 8
 	},
 	"camerupt": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Rumble": 5
 	},
 	"carvanha": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 4
 	},
 	"cascoon": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 7
 	},
 	"castform": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 5
 	},
 	"caterpie": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"celebi": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 9
+		"Attack": 9,
+		"Swing": 5,
+		"Strike": 9,
+		"Rotate": 8,
+		"Twirl": 7
 	},
 	"charizard": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 2,
+		"Rotate": 8
 	},
 	"charmander": {
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Kick": 3
 	},
 	"charmeleon": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 2,
+		"Rotate": 8
 	},
 	"chikorita": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 2,
+		"Rotate": 8,
+		"Slam": 3
 	},
 	"chimecho": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 10
 	},
 	"chinchou": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"clamperl": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 2
 	},
 	"claydol": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"SpAttack": 4,
+		"Rotate": 8,
+		"QuickStrike": 4
 	},
 	"clefable": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 3,
+		"Withdraw": 15
 	},
 	"clefairy": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 3,
+		"Withdraw": 2
 	},
 	"cleffa": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Sing": 3,
+		"Dance": 1
 	},
 	"cloyster": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 2
 	},
 	"combusken": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"corphish": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 4
 	},
 	"corsola": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"cradily": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"SpAttack": 4,
+		"Rotate": 8
 	},
 	"crawdaunt": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 4
 	},
 	"crobat": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"croconaw": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"cubone": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 1,
+		"Rotate": 8
 	},
 	"cyndaquil": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"delcatty": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"delibird": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"deoxys": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 3,
+		"Rotate": 8
 	},
 	"dewgong": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"diglett": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"ditto": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"dodrio": {
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Rotate": 8,
+		"Jab": 2,
+		"MultiStrike": 6
 	},
 	"doduo": {
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Rotate": 8,
+		"Jab": 2,
+		"MultiStrike": 6
 	},
 	"donphan": {
 		"Shoot": 0,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 2,
+		"Rumble": 2
 	},
 	"dragonair": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiStrike": 3
 	},
 	"dragonite": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 5
 	},
 	"dratini": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 1,
+		"Rotate": 8
 	},
 	"drowzee": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slam": 5,
+		"Twirl": 8
 	},
 	"dugtrio": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"dunsparce": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 2,
+		"Rotate": 8
 	},
 	"dusclops": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 4,
+		"Rotate": 8,
+		"Punch": 3
 	},
 	"duskull": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"dustox": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"eevee": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"ekans": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"electabuzz": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Punch": 4,
+		"Twirl": 8
 	},
 	"electrike": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 5,
+		"Shock": 9
 	},
 	"electrode": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 15
 	},
 	"elekid": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Punch": 3,
+		"Shock": 8
 	},
 	"entei": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 3,
+		"Rotate": 8,
+		"Rumble": 3
 	},
 	"espeon": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"exeggcute": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 5
 	},
 	"exeggutor": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Dance": 6
 	},
 	"exploud": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 3
 	},
 	"farfetch_d": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"fearow": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8
 	},
 	"feebas": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 7,
+		"Rotate": 8,
+		"Dance": 3
 	},
 	"feraligatr": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"flaaffy": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"flareon": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8
 	},
 	"flygon": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"forretress": {
 		"Shoot": 7,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"furret": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8
 	},
 	"gardevoir": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 4,
+		"Rotate": 8
 	},
 	"gastly": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8,
+		"Lick": 8
 	},
 	"gengar": {
 		"Shoot": 6,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Lick": 6,
+		"Twirl": 8
 	},
 	"geodude": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"Punch": 2,
+		"Twirl": 8
 	},
 	"girafarig": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 8
+		"Attack": 8,
+		"Swing": 5,
+		"Rotate": 8,
+		"Stomp": 1,
+		"Bite": 7
 	},
 	"glalie": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 5,
+		"Twirl": 8
 	},
 	"gligar": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"MultiStrike": 4
 	},
 	"gloom": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 7,
+		"Rotate": 8,
+		"Twirl": 5
 	},
 	"golbat": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"goldeen": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"golduck": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 1,
+		"Twirl": 8
 	},
 	"golem": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8,
+		"Withdraw": 1
 	},
 	"gorebyss": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 8,
+		"Rotate": 8,
+		"QuickStrike": 3,
+		"Twirl": 8
 	},
 	"granbull": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 5
 	},
 	"graveler": {
 		"Shoot": 8,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 5,
+		"Rotate": 8,
+		"Slam": 2,
+		"Rumble": 8
 	},
 	"grimer": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"groudon": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Rumble": 6
 	},
 	"grovyle": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"growlithe": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 4,
+		"Rotate": 8,
+		"Rumble": 4
 	},
 	"grumpig": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 3
 	},
 	"gulpin": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8,
+		"Sound": 5
 	},
 	"gyarados": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Rumble": 3
 	},
 	"hariyama": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"haunter": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiStrike": 3,
+		"Lick": 7
 	},
 	"heracross": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Slam": 5
 	},
 	"hitmonchan": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Punch": 3,
+		"Uppercut": 3
 	},
 	"hitmonlee": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Kick": 2,
+		"Withdraw": 8
 	},
 	"hitmontop": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 7,
+		"Twirl": 7
 	},
 	"ho_oh": {
 		"Shoot": 8,
 		"Charge": 5,
-		"Attack": 8
+		"Attack": 8,
+		"Swing": 5,
+		"Rotate": 8,
+		"Jab": 8
 	},
 	"hoothoot": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"hoppip": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 8
+		"Attack": 8,
+		"Swing": 5,
+		"Strike": 8,
+		"Rotate": 8,
+		"Twirl": 9
 	},
 	"horsea": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"houndoom": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"houndour": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"huntail": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"hypno": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 6,
+		"Rotate": 8,
+		"Punch": 4
 	},
 	"igglybuff": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Sing": 3,
+		"Withdraw": 2
 	},
 	"illumise": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"SpAttack": 7,
+		"Rotate": 8,
+		"QuickStrike": 5
 	},
 	"ivysaur": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 2
 	},
 	"jigglypuff": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slam": 4,
+		"Withdraw": 2
 	},
 	"jirachi": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"jolteon": {
 		"Shoot": 0,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Shock": 3
 	},
 	"jumpluff": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 8
+		"Attack": 8,
+		"Swing": 5,
+		"Strike": 8,
+		"Rotate": 8
 	},
 	"jynx": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"kabuto": {
 		"Shoot": 6,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"kabutops": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiStrike": 3,
+		"Twirl": 8
 	},
 	"kadabra": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 4,
+		"Rotate": 8
 	},
 	"kakuna": {
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 7,
+		"Rotate": 8,
+		"Twirl": 4
 	},
 	"kangaskhan": {
 		"Shoot": 8,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 8,
+		"Rotate": 8
 	},
 	"kecleon": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"kingdra": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"kingler": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"kirlia": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"SpAttack": 8,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"koffing": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Rotate": 8,
+		"Gas": 6,
+		"Twirl": 8
 	},
 	"krabby": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slam": 6,
+		"Twirl": 8
 	},
 	"kyogre": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"Stomp": 2
 	},
 	"lairon": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 6,
+		"Rumble": 6
 	},
 	"lanturn": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"lapras": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Sound": 3
 	},
 	"larvitar": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"latias": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 3,
+		"Rotate": 8,
+		"Rumble": 3
 	},
 	"latios": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 5,
+		"Rotate": 8,
+		"Rumble": 5
 	},
 	"ledian": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"ledyba": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"lickitung": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Lick": 7
 	},
 	"lileep": {
 		"Shoot": 0,
 		"Charge": 5,
-		"Attack": 1
+		"Attack": 1,
+		"Swing": 5,
+		"Strike": 1,
+		"SpAttack": 4,
+		"Rotate": 8
 	},
 	"linoone": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"lombre": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 3,
+		"QuickStrike": 3
 	},
 	"lotad": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 6
 	},
 	"loudred": {
 		"Shoot": 7,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 7
 	},
 	"ludicolo": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 3
 	},
 	"lugia": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"lunatone": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 2,
+		"Rotate": 8
 	},
 	"luvdisc": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 4,
+		"Twirl": 7
 	},
 	"machamp": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Rotate": 8,
+		"Kick": 3,
+		"Punch": 3
 	},
 	"machoke": {
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Rotate": 8,
+		"Kick": 6,
+		"Punch": 2
 	},
 	"machop": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Kick": 5
 	},
 	"magby": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"magcargo": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Rumble": 7
 	},
 	"magikarp": {
 		"Shoot": 11,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 7,
+		"SpAttack": 11,
+		"Rotate": 8
 	},
 	"magmar": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"magnemite": {
 		"Shoot": 0,
 		"Charge": 5,
-		"Attack": 12
+		"Attack": 12,
+		"Swing": 5,
+		"Strike": 12,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"magneton": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"makuhita": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"manectric": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 5,
+		"Shock": 6
 	},
 	"mankey": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Rotate": 8,
+		"Chop": 5,
+		"MultiStrike": 5,
+		"Twirl": 10
 	},
 	"mantine": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8
 	},
 	"mareep": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Rumble": 3
 	},
 	"marill": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 8
 	},
 	"marowak": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Punch": 3
 	},
 	"marshtomp": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 6,
+		"Rotate": 8,
+		"Withdraw": 6,
+		"Rumble": 6
 	},
 	"masquerain": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 3
 	},
 	"mawile": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 5,
+		"Twirl": 8
 	},
 	"medicham": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"SpAttack": 8,
+		"Rotate": 8,
+		"Punch": 2
 	},
 	"meditite": {
 		"Shoot": 6,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 15,
+		"Rotate": 8
 	},
 	"meganium": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"meowth": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"MultiStrike": 1
 	},
 	"metagross": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"metang": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 3,
+		"Twirl": 8
 	},
 	"metapod": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 4,
+		"Rotate": 8
 	},
 	"mew": {
 		"Shoot": 7,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 7,
+		"Rotate": 8,
+		"Twirl": 5
 	},
 	"mewtwo": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"SpAttack": 4,
+		"Rotate": 8,
+		"Punch": 7
 	},
 	"mightyena": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8
 	},
 	"milotic": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"miltank": {
 		"Shoot": 6,
 		"Charge": 5,
-		"Attack": 8
+		"Attack": 8,
+		"Swing": 5,
+		"Rotate": 8,
+		"Stomp": 7,
+		"Twirl": 9
 	},
 	"minun": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 4,
+		"Shock": 6
 	},
 	"misdreavus": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 4,
+		"Rotate": 8
 	},
 	"moltres": {
 		"Shoot": 6,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8
 	},
 	"mudkip": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 10
 	},
 	"muk": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"murkrow": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"natu": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Jab": 5
 	},
 	"nidoking": {
 		"Shoot": 6,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Sound": 11,
+		"Rumble": 11
 	},
 	"nidoqueen": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 3,
+		"Twirl": 8
 	},
 	"nidoran_f": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 2,
+		"Twirl": 8
 	},
 	"nidoran_m": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 3,
+		"Rotate": 8
 	},
 	"nidorina": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 3,
+		"Twirl": 8
 	},
 	"nidorino": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 8,
+		"Rotate": 8
 	},
 	"nincada": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 2,
+		"Twirl": 8
 	},
 	"ninjask": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 2
 	},
 	"noctowl": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 1,
+		"Rotate": 8
 	},
 	"nosepass": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 6,
+		"Rotate": 8,
+		"Rumble": 6
 	},
 	"numel": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Rumble": 0
 	},
 	"nuzleaf": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"SpAttack": 3,
+		"Rotate": 8,
+		"QuickStrike": 3
 	},
 	"octillery": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 7
 	},
 	"oddish": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 7,
+		"Rotate": 8,
+		"Twirl": 10
 	},
 	"omanyte": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 9
 	},
 	"omastar": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 9
 	},
 	"onix": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slam": 3,
+		"Twirl": 8
 	},
 	"paras": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"parasect": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"pelipper": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"SpAttack": 3,
+		"Rotate": 8,
+		"QuickStrike": 5
 	},
 	"persian": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"phanpy": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8,
+		"Withdraw": 2,
+		"Rumble": 2
 	},
 	"pichu": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 3,
+		"Sing": 2,
+		"Shock": 2
 	},
 	"pidgeot": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"pidgeotto": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"pidgey": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"pikachu": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 3,
+		"Shock": 6
 	},
 	"piloswine": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"pineco": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8
 	},
 	"pinsir": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slice": 4,
+		"Twirl": 8
 	},
 	"plusle": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 4,
+		"Shock": 6
 	},
 	"politoed": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8
 	},
 	"poliwag": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"poliwhirl": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"poliwrath": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8
 	},
 	"ponyta": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"poochyena": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"porygon": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"porygon2": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 3,
+		"Rotate": 8
 	},
 	"primeape": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"MultiStrike": 3
 	},
 	"psyduck": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 2,
+		"Twirl": 8
 	},
 	"pupitar": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"quagsire": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 1
 	},
 	"quilava": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"qwilfish": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Withdraw": 7
 	},
 	"raichu": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 3,
+		"Shock": 6
 	},
 	"raikou": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 5,
+		"Shock": 3
 	},
 	"ralts": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"rapidash": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"raticate": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8
 	},
 	"rattata": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"rayquaza": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 5,
+		"Rotate": 8,
+		"QuickStrike": 3,
+		"Rumble": 5
 	},
 	"regice": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 3,
+		"Rotate": 8,
+		"Withdraw": 3
 	},
 	"regirock": {
 		"Shoot": 0,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8,
+		"Withdraw": 5
 	},
 	"registeel": {
 		"Shoot": 0,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8,
+		"Withdraw": 5
 	},
 	"relicanth": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"remoraid": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"rhydon": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Stomp": 5,
+		"Twirl": 8
 	},
 	"rhyhorn": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Stomp": 4,
+		"Twirl": 8
 	},
 	"roselia": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"SpAttack": 11,
+		"Rotate": 8,
+		"Twirl": 11
 	},
 	"sableye": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 8,
+		"Rotate": 8,
+		"MultiStrike": 3
 	},
 	"salamence": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Rumble": 4
 	},
 	"sandshrew": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 1
 	},
 	"sandslash": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 1
 	},
 	"sceptile": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 1,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"scizor": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 5,
+		"Rotate": 8,
+		"MultiScratch": 4
 	},
 	"scyther": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slice": 3,
+		"Twirl": 8
 	},
 	"seadra": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"seaking": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"sealeo": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 1,
+		"Rotate": 8,
+		"Rumble": 1
 	},
 	"seedot": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 2
 	},
 	"seel": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"sentret": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"seviper": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 2
 	},
 	"sharpedo": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 2
 	},
 	"shedinja": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 8,
+		"Rotate": 8,
+		"Scratch": 3,
+		"Twirl": 8
 	},
 	"shelgon": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Rumble": 7
 	},
 	"shellder": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 2
 	},
 	"shiftry": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiStrike": 4,
+		"QuickStrike": 3
 	},
 	"shroomish": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 6
 	},
 	"shuppet": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"silcoon": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"Withdraw": 7
 	},
 	"skarmory": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"skiploom": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 8
+		"Attack": 8,
+		"Swing": 5,
+		"Strike": 8,
+		"Rotate": 8,
+		"Twirl": 9
 	},
 	"skitty": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8
 	},
 	"slaking": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Punch": 3,
+		"Dance": 5
 	},
 	"slakoth": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"Rumble": 4
 	},
 	"slowbro": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 11
+		"Attack": 11,
+		"Swing": 5,
+		"Strike": 11,
+		"Rotate": 8
 	},
 	"slowking": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"slowpoke": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"slugma": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Rumble": 7
 	},
 	"smeargle": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 5,
+		"Rotate": 8
 	},
 	"smoochum": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Sing": 7,
+		"Twirl": 7
 	},
 	"sneasel": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 3,
+		"Twirl": 8
 	},
 	"snorlax": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Stomp": 4,
+		"Twirl": 8
 	},
 	"snorunt": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"snubbull": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 5
 	},
 	"solrock": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 2,
+		"Rotate": 8
 	},
 	"spearow": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"spheal": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 1,
+		"Rotate": 8,
+		"Rumble": 1
 	},
 	"spinarak": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"spinda": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slam": 5,
+		"Twirl": 6
 	},
 	"spoink": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Twirl": 14
 	},
 	"squirtle": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Withdraw": 1
 	},
 	"stantler": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	},
 	"starmie": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"staryu": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"steelix": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 2
 	},
 	"sudowoodo": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slam": 4,
+		"Twirl": 7
 	},
 	"suicune": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"SpAttack": 4,
+		"Rotate": 8
 	},
 	"sunflora": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiStrike": 3,
+		"Twirl": 8
 	},
 	"sunkern": {
 		"Shoot": 10,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Chop": 5,
+		"Twirl": 8
 	},
 	"surskit": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 4,
+		"Twirl": 8
 	},
 	"swablu": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"swalot": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Sound": 5
 	},
 	"swampert": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"SpAttack": 2,
+		"Rotate": 8,
+		"Rumble": 2
 	},
 	"swellow": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 4
 	},
 	"swinub": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"taillow": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 4
 	},
 	"tangela": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8
 	},
 	"tauros": {
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Rotate": 8,
+		"Stomp": 2,
+		"Twirl": 8
 	},
 	"teddiursa": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiScratch": 4
 	},
 	"tentacool": {
 		"Shoot": 0,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Slam": 3,
+		"Twirl": 6
 	},
 	"tentacruel": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Slam": 3,
+		"Twirl": 8
 	},
 	"togepi": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 7
 	},
 	"togetic": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 4
 	},
 	"torchic": {
 		"Shoot": 7,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Dance": 3
 	},
 	"torkoal": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"Twirl": 10,
+		"Withdraw": 10
 	},
 	"totodile": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 4,
+		"Rotate": 8
 	},
 	"trapinch": {
 		"Shoot": 7,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Bite": 3,
+		"Twirl": 8
 	},
 	"treecko": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 6,
+		"Rotate": 8
 	},
 	"tropius": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8
 	},
 	"typhlosion": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"tyranitar": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"tyrogue": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Punch": 3,
+		"Twirl": 8
 	},
 	"umbreon": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 2
+		"Attack": 2,
+		"Swing": 5,
+		"Strike": 2,
+		"Rotate": 8,
+		"Withdraw": 2
 	},
 	"unown": {
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"ursaring": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiStrike": 3,
+		"Twirl": 8
 	},
 	"vaporeon": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 3,
+		"Rotate": 8
 	},
 	"venomoth": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8
 	},
 	"venonat": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 6
 	},
 	"venusaur": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Dance": 2
 	},
 	"vibrava": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"victreebel": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"vigoroth": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Scratch": 3,
+		"Dance": 5
 	},
 	"vileplume": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 7
+		"Attack": 7,
+		"Swing": 5,
+		"Strike": 7,
+		"Rotate": 8,
+		"Twirl": 5
 	},
 	"volbeat": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 5
 	},
 	"voltorb": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8,
+		"Twirl": 15
 	},
 	"wailmer": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Rumble": 5
 	},
 	"wailord": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8,
+		"Rumble": 3
 	},
 	"walrein": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 1,
+		"Rotate": 8,
+		"Rumble": 1
 	},
 	"wartortle": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"Withdraw": 1
 	},
 	"weedle": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Jab": 5
 	},
 	"weepinbell": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"MultiStrike": 4,
+		"Twirl": 8
 	},
 	"weezing": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Gas": 7
 	},
 	"whiscash": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 6,
+		"Rumble": 6
 	},
 	"whismur": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Dance": 13
 	},
 	"wigglytuff": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Rotate": 8,
+		"Slam": 5,
+		"Withdraw": 2
 	},
 	"wingull": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Rotate": 8,
+		"QuickStrike": 5
 	},
 	"wobbuffet": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 6,
+		"Rotate": 8,
+		"Withdraw": 6
 	},
 	"wooper": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 1
 	},
 	"wurmple": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"wynaut": {
 		"Shoot": 7,
 		"Charge": 5,
-		"Attack": 5
+		"Attack": 5,
+		"Swing": 5,
+		"Strike": 5,
+		"SpAttack": 6,
+		"Rotate": 8,
+		"Withdraw": 6
 	},
 	"xatu": {
 		"Shoot": 2,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"SpAttack": 8,
+		"Rotate": 8
 	},
 	"yanma": {
 		"Shoot": 4,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"Strike": 3,
+		"Rotate": 8,
+		"Twirl": 8
 	},
 	"zangoose": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 3
+		"Attack": 3,
+		"Swing": 5,
+		"SpAttack": 6,
+		"Rotate": 8,
+		"MultiScratch": 4
 	},
 	"zapdos": {
 		"Shoot": 3,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"SpAttack": 3,
+		"Rotate": 8
 	},
 	"zigzagoon": {
 		"Shoot": 1,
 		"Charge": 5,
-		"Attack": 6
+		"Attack": 6,
+		"Swing": 5,
+		"Strike": 6,
+		"Rotate": 8
 	},
 	"zubat": {
 		"Shoot": 5,
 		"Charge": 5,
-		"Attack": 4
+		"Attack": 4,
+		"Swing": 5,
+		"Strike": 4,
+		"Rotate": 8
 	}
 };
 //#endregion
@@ -123112,8 +153367,9 @@ function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 function iniciarPoseDoGolpe(world, atacante, ability, alvo) {
 	const duelo = world.mapDef?.encarada === true;
 	const area = ability.target === "aoe";
-	const tempo = tempoDoGolpe(atacante.poke.speciesId, poseDeAtaque(area, duelo), ability.id);
-	triggerAttackAnim(atacante, area, alvo, duelo, tempo.pose);
+	const pose = poseDoGolpe(atacante.poke.speciesId, ability, duelo);
+	const tempo = tempoDoGolpe(atacante.poke.speciesId, pose, ability.id);
+	triggerAttackAnim(atacante, area, alvo, duelo, tempo.pose, pose);
 	return tempo;
 }
 /**

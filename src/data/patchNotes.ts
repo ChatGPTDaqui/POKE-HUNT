@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.31',
+    date: '2026-10-18',
+    title: 'Cada golpe com a pose certa',
+    highlights: [
+      'Os Pokémon passam a usar a animação que combina com o golpe: chute nos golpes de chute, soco nos de soco, mordida, garra, cabeçada, cauda, choque, canto, dança, defesa e mais.',
+      'Quem não tem a pose específica usa uma genérica de golpe físico ou especial; quem não tem nenhuma continua com a pose de sempre.',
+      'Vale no combate livre e no duelo.',
+    ],
+  },
+  {
     version: '8.30',
     date: '2026-10-17',
     title: 'Todas as salas especiais com cenário próprio',
