@@ -320,6 +320,14 @@ const MANIFESTO = {
   'stray-charmander.png': { bg: 'stray-charmander.jpg', modo: 'rosa_anda' },
   'tundra.png': { bg: 'tundra.jpg', modo: 'rosa_anda' },
   'underground.png': { bg: 'underground.jpg', modo: 'rosa_anda' },
+  // Onda 3 (17/10/2026).
+  'bug-contest.png': { bg: 'bug-contest.jpg', modo: 'rosa_anda' },
+  'celadon-mansion.png': { bg: 'celadon-mansion.jpg', modo: 'rosa_anda' },
+  'jynx-holiday.png': { bg: 'jynx-holiday.jpg', modo: 'rosa_anda' },
+  'mirage-island.png': { bg: 'mirage-island.jpg', modo: 'rosa_anda' },
+  'pokemon-mansion.png': { bg: 'pokemon-mansion.jpg', modo: 'rosa_anda' },
+  'pokemon-tower.png': { bg: 'pokemon-tower.jpg', modo: 'rosa_anda' },
+  'silph-co.png': { bg: 'silph-co.jpg', modo: 'rosa_anda' },
 };
 
 /**

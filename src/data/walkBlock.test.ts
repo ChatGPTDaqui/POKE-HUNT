@@ -151,6 +151,8 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'canyon.jpg', 'coral-reef.jpg', 'cycling-road.jpg', 'dark-cave.jpg', 'farm.jpg', 'ilex-forest.jpg', 'lily-pond.jpg', 'meteor-falls.jpg', 'mushroom-glade.jpg', 'oasis.jpg', 'river.jpg', 'rock-tunnel.jpg', 'seafoam-islands.jpg', 'treetops.jpg', 'victory-road.jpg', 'waterfall.jpg', 'whirl-islands.jpg',
       // Onda 2 (17/10/2026): sub-biomas restantes e salas especiais.
       'abandoned-ship.jpg', 'ash-field.jpg', 'burned-tower.jpg', 'digletts-cave.jpg', 'fiery-path.jpg', 'grampa-canyon.jpg', 'harbor.jpg', 'hot-springs.jpg', 'junkyard.jpg', 'lake-of-rage.jpg', 'maidens-peak.jpg', 'meditation-shrine.jpg', 'mt-ember.jpg', 'mt-moon.jpg', 'mt-pyre.jpg', 'mt-silver-summit.jpg', 'mysterious-garden.jpg', 'orange-archipelago.jpg', 'pikachu-colony.jpg', 'rocket-hideout.jpg', 'safari-zone.jpg', 'shoal-cave.jpg', 'sky-pillar.jpg', 'sprout-tower.jpg', 'squirtle-squad.jpg', 'stray-charmander.jpg', 'tundra.jpg', 'underground.jpg',
+      // Onda 3 (17/10/2026): ultimas salas especiais.
+      'bug-contest.jpg', 'celadon-mansion.jpg', 'jynx-holiday.jpg', 'mirage-island.jpg', 'pokemon-mansion.jpg', 'pokemon-tower.jpg', 'silph-co.jpg',
     ]
 
     const semCirculo: string[] = []
@@ -181,8 +183,10 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'abandoned-ship.jpg',
       'abyss.jpg',
       'ash-field.jpg',
+      'bug-contest.jpg',
       'burned-tower.jpg',
       'canyon.jpg',
+      'celadon-mansion.jpg',
       'coral-reef.jpg',
       'cycling-road.jpg',
       'dark-cave.jpg',
@@ -199,6 +203,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'ilex-forest.jpg',
       'island.jpg',
       'junkyard.jpg',
+      'jynx-holiday.jpg',
       'lake-of-rage.jpg',
       'lake.jpg',
       'lily-pond.jpg',
@@ -206,6 +211,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'meditation-shrine.jpg',
       'meteor-falls.jpg',
       'metropolis.jpg',
+      'mirage-island.jpg',
       'mt-ember.jpg',
       'mt-moon.jpg',
       'mt-pyre.jpg',
@@ -215,12 +221,15 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'oasis.jpg',
       'orange-archipelago.jpg',
       'pikachu-colony.jpg',
+      'pokemon-mansion.jpg',
+      'pokemon-tower.jpg',
       'river.jpg',
       'rock-tunnel.jpg',
       'rocket-hideout.jpg',
       'safari-zone.jpg',
       'seafoam-islands.jpg',
       'shoal-cave.jpg',
+      'silph-co.jpg',
       'sky-pillar.jpg',
       'slum.jpg',
       'sprout-tower.jpg',
