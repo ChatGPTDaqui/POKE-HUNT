@@ -465,6 +465,15 @@ const ARTE = {
   fundoStrayCharmander: 'assets/hunt-backgrounds/stray-charmander.jpg',
   fundoTundra: 'assets/hunt-backgrounds/tundra.jpg',
   fundoUnderground: 'assets/hunt-backgrounds/underground.jpg',
+
+  // Onda 3 (17/10/2026): as 7 ultimas salas especiais.
+  fundoBugContest: 'assets/hunt-backgrounds/bug-contest.jpg',
+  fundoCeladonMansion: 'assets/hunt-backgrounds/celadon-mansion.jpg',
+  fundoJynxHoliday: 'assets/hunt-backgrounds/jynx-holiday.jpg',
+  fundoMirageIsland: 'assets/hunt-backgrounds/mirage-island.jpg',
+  fundoPokemonMansion: 'assets/hunt-backgrounds/pokemon-mansion.jpg',
+  fundoPokemonTower: 'assets/hunt-backgrounds/pokemon-tower.jpg',
+  fundoSilphCo: 'assets/hunt-backgrounds/silph-co.jpg',
 } as const
 
 export const BIOMAS: BiomaDef[] = [
@@ -609,7 +618,7 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'tundra', nome: 'Tundra', peso: 10, loot: 'gelado', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.fundoTundra } },
     ],
     especiais: [
-      { chave: 'jynx-holiday', nome: 'Natal da Jynx', peso: 1, loot: 'gelado', estagioMinimo: 2, pedra: 'ICE' },
+      { chave: 'jynx-holiday', nome: 'Natal da Jynx', peso: 1, loot: 'gelado', estagioMinimo: 2, pedra: 'ICE', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.fundoJynxHoliday } },
       { chave: 'mt-silver-summit', nome: 'Cume do Monte Prata', peso: 1, loot: 'vitoria', estagioMinimo: 10, pedra: 'DARK', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.fundoMtSilverSummit } },
     ],
   },
@@ -629,7 +638,7 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'hot-springs', nome: 'Fontes Termais', peso: 6, loot: 'termal', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.fundoHotSprings } },
     ],
     especiais: [
-      { chave: 'pokemon-mansion', nome: 'Mansão Pokémon', peso: 1, loot: 'profundo', estagioMinimo: 5, pedra: 'FIRE', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.florestaQueimada } },
+      { chave: 'pokemon-mansion', nome: 'Mansão Pokémon', peso: 1, loot: 'profundo', estagioMinimo: 5, pedra: 'FIRE', bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.fundoPokemonMansion } },
     ],
   },
   {
@@ -653,9 +662,9 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'underground', nome: 'Galerias Subterrâneas', peso: 6, loot: 'toxico', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.fundoUnderground } },
     ],
     especiais: [
-      { chave: 'bug-contest', nome: 'Concurso de Insetos', peso: 1, loot: 'civilizado', estagioMinimo: 1, pedra: 'BUG', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.campina } },
+      { chave: 'bug-contest', nome: 'Concurso de Insetos', peso: 1, loot: 'civilizado', estagioMinimo: 1, pedra: 'BUG', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.fundoBugContest } },
       { chave: 'rocket-hideout', nome: 'Esconderijo Rocket', peso: 1, loot: 'cofre', estagioMinimo: 3, pedra: 'POISON', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.fundoRocketHideout } },
-      { chave: 'celadon-mansion', nome: 'Mansão Celadon', peso: 1, loot: 'civilizado', estagioMinimo: 2, pedra: 'NORMAL', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.metropole } },
+      { chave: 'celadon-mansion', nome: 'Mansão Celadon', peso: 1, loot: 'civilizado', estagioMinimo: 2, pedra: 'NORMAL', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.fundoCeladonMansion } },
     ],
   },
   {
@@ -675,7 +684,7 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'junkyard', nome: 'Ferro-Velho', peso: 10, loot: 'sucata', bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.fundoJunkyard } },
     ],
     especiais: [
-      { chave: 'silph-co', nome: 'Silph S.A.', peso: 1, loot: 'profundo', estagioMinimo: 3, pedra: 'ELECTRIC' },
+      { chave: 'silph-co', nome: 'Silph S.A.', peso: 1, loot: 'profundo', estagioMinimo: 3, pedra: 'ELECTRIC', bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.fundoSilphCo } },
     ],
   },
   {
@@ -695,7 +704,7 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'sky-pillar', nome: 'Pilar Celeste', peso: 3, loot: 'profundo', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.fundoSkyPillar } },
     ],
     especiais: [
-      { chave: 'mirage-island', nome: 'Ilha Miragem', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'PSYCHIC', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.ilha } },
+      { chave: 'mirage-island', nome: 'Ilha Miragem', peso: 1, loot: 'remoto', estagioMinimo: 1, pedra: 'PSYCHIC', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.fundoMirageIsland } },
     ],
   },
   {
@@ -717,7 +726,7 @@ export const BIOMAS: BiomaDef[] = [
       { chave: 'abandoned-ship', nome: 'Navio Abandonado', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.fundoAbandonedShip } },
     ],
     especiais: [
-      { chave: 'pokemon-tower', nome: 'Torre Pokémon', peso: 1, loot: 'sonolento', estagioMinimo: 1, pedra: 'GHOST', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.temploMistico } },
+      { chave: 'pokemon-tower', nome: 'Torre Pokémon', peso: 1, loot: 'sonolento', estagioMinimo: 1, pedra: 'GHOST', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.fundoPokemonTower } },
     ],
   },
 ]
