@@ -121,8 +121,16 @@ describe('a quota de comuns e 29, e o protetor e o 30o', () => {
     world.enemies = []
     world.protetorPendente = null
     world.respawnTimer = 0
-    for (let i = 0; i < 20; i++) stepWorld(world, 1, gameState, { silent: true })
-    expect(comuns(world).length, 'nasceu selvagem comum depois da quota').toBe(0)
+    // Mede so enquanto a sala e a mesma e o protetor nao caiu. O POKE luta com o
+    // protetor nesses 20 s; se vencer, a sala troca e a sala NOVA repovoa de
+    // direito — era isso que deixava o caso intermitente (6 comuns da sala
+    // seguinte), conforme a sorte e o tempo da pose do golpe.
+    const salaInicial = world.sala!.indice
+    for (let i = 0; i < 20; i++) {
+      stepWorld(world, 1, gameState, { silent: true })
+      if (world.protetorResolvido || world.sala!.indice !== salaInicial || world.salaPendente) break
+      expect(comuns(world).length, 'nasceu selvagem comum depois da quota').toBe(0)
+    }
   }, 20_000) // 20 s de jogo simulado: folga pra suite inteira em paralelo
 
   it('depois do protetor resolvido NADA mais nasce na sala (17/10/2026)', () => {
