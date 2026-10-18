@@ -15,7 +15,6 @@ import { useToastStore } from '@/stores/toastStore'
 import { pedirAcao, liquidar } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
 import { Meter } from '@/components/game/controls'
-import { Sheet } from '@/components/game/Sheet'
 import { cn } from '@/lib/utils'
 import { textoDaRecompensa } from './CartaoDoPasso'
 
@@ -137,22 +136,16 @@ export function usePremiosProntosDoDiario(): number {
 }
 
 /**
- * O painel do Diário, montado pela HUD e não pela faixa: a faixa some quando não
- * há nada para coletar durante os Primeiros Passos, e o painel precisa abrir
- * também pelo menu Mais nesse momento.
+ * O conteúdo do Diário, sem moldura: vive na aba Diário da janela Missões
+ * (18/10/2026). Era um `Sheet` próprio ao lado do campo.
  */
-export function PainelDoDiario() {
-  const aberto = useDiarioStore(s => s.painelAberto)
+export function ConteudoDoDiario() {
   const carregado = useDiarioStore(s => s.carregado)
-  if (!aberto) return null
-  if (!carregado) return <Sheet winKey="diario" snap="conteudo" zIndex={33}
-    title="Diário" onClose={() => useDiarioStore.getState().fecharPainel()}>
-    <p role="status" className="text-menu-muted">Aguardando os dados do Diário. Se a conexão falhou, reconecte o jogo.</p>
-  </Sheet>
-  return <SheetDoDiario onClose={() => useDiarioStore.getState().fecharPainel()} />
+  if (!carregado) return <p role="status" className="text-menu-muted">Aguardando os dados do Diário. Se a conexão falhou, reconecte o jogo.</p>
+  return <CorpoDoDiario />
 }
 
-function SheetDoDiario({ onClose }: { onClose: () => void }) {
+function CorpoDoDiario() {
   const coletados = useDiarioStore(s => s.coletados)
   const loginsNoMes = useDiarioStore(s => s.loginsNoMes)
   const nivel = useGameStateStore(s => s.trainer.level)
@@ -166,7 +159,7 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Sheet appearance="journey" winKey="diario" snap="conteudo" zIndex={33} onClose={onClose} title="Diário">
+    <div>
       <h3 className="mb-[.3em] text-[.85em] font-medium text-menu-ink">Login do mês · {loginsNoMes} dia(s) coletado(s)</h3>
       <p className="mb-[.5em] text-[.75em] text-menu-muted">Um prêmio por dia em que você entra. Perder um dia não zera: o próximo prêmio te espera. Recomeça no dia 1 de cada mês.</p>
       <div className="grid grid-cols-7 gap-[.3em]">
@@ -223,6 +216,6 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
           )
         })}
       </div>
-    </Sheet>
+    </div>
   )
 }

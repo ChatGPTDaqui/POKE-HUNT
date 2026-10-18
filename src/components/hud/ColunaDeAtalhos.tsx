@@ -1,9 +1,10 @@
-// Atalhos permanentes abaixo do treinador: Diário, Especialidades, Tasks,
+// Atalhos permanentes abaixo do treinador: Missões (Diário, Objetivos, Tasks,
+// Especialidades, Conquistas e Bestiário numa janela só),
 // Calculadora e PvP. Ícones com nomes acessíveis em todos os regimes e bolha no PC.
 // O topo medido e a rolagem local evitam colisões com a HUD em telas baixas.
-import { CalendarCheck, Calculator, CheckSquare, Sparkle, Sword, type Icon } from '@phosphor-icons/react'
-import { useDiarioStore } from '@/stores/diarioStore'
-import { usePremiosProntosDoDiario } from '@/features/primeirosPassos/Diario'
+import { Calculator, Flag, Sword, type Icon } from '@phosphor-icons/react'
+import { usePendenciasDeMissoes } from '@/features/missoes/pendenciasDeMissoes'
+import { abaInicial, totalDePendencias } from '@/data/abasDeMissoes'
 import { NotificationBadge } from '@/components/game/NotificationBadge'
 import { Explicacao } from '@/components/shared/Explicacao'
 import type { ReactNode } from 'react'
@@ -19,9 +20,10 @@ import { useDestaqueDoPasso } from '@/features/primeirosPassos/useDestaqueDoPass
  * badge duas vezes, e o jogador leria "2 pendencias" onde ha uma — a mesma regra
  * que `TELAS_NA_BARRA` ja aplica pros slots da doca.
  */
+//
+// 18/10/2026: Diario, Especialidades e Tasks sairam daqui — viraram abas da
+// janela Missoes, que tem um atalho unico logo acima desta lista.
 export const TELAS_NA_COLUNA: { screen: ScreenName; label: string; Icon: Icon }[] = [
-  { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
-  { screen: 'tasks', label: 'Tasks', Icon: CheckSquare },
   { screen: 'calc', label: 'Calculadora', Icon: Calculator },
   { screen: 'pvp', label: 'PvP', Icon: Sword },
 ]
@@ -30,11 +32,22 @@ export function ColunaDeAtalhos() {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const toggleScreen = useUiStore((s) => s.toggleScreen)
   const tranca = useTrancas()
-  const destaques = { tasks: useDestaqueDoPasso('tasks'), especialidades: useDestaqueDoPasso('especialidades') } as Record<string, ReturnType<typeof useDestaqueDoPasso> | undefined>
+  // O passo atual que aponta pra uma aba de Missoes acende o atalho unico.
+  const destaqueTasks = useDestaqueDoPasso('tasks')
+  const destaqueEspecialidades = useDestaqueDoPasso('especialidades')
+  const destaqueMissoes = destaqueTasks.classe ? destaqueTasks : destaqueEspecialidades
+  const destaques: Record<string, ReturnType<typeof useDestaqueDoPasso> | undefined> = {}
   const trilhoHeight = useUiStore((s) => s.trilhoHeight)
-  const premios = usePremiosProntosDoDiario()
+  const pendencias = usePendenciasDeMissoes()
+  const totalMissoes = totalDePendencias(pendencias)
+  const missoesAbertas = currentScreen === 'missoes'
+  const abrirMissoes = () => {
+    destaqueMissoes.aoTocar()
+    if (missoesAbertas) return useUiStore.getState().closeScreen()
+    const ui = useUiStore.getState()
+    ui.abrirMissoes(abaInicial(pendencias, ui.abaDeMissoes, (a) => tranca(a) != null))
+  }
   const navHeight = useUiStore((s) => s.navHeight)
-  const diarioAberto = useDiarioStore((s) => s.painelAberto)
 
   return (
     // `top` vem da medida do trilho, e nao de um `em` fixo: a altura dele muda
@@ -51,12 +64,12 @@ export function ColunaDeAtalhos() {
       style={{ top: `calc(${trilhoHeight}px + .5em)`,
         maxHeight: `calc(100% - ${trilhoHeight + navHeight}px - 1em)`, overflowY: 'auto' }}
     >
-      <ShortcutHint label="Diário"><button type="button" data-keep-open aria-label="Diário"
-        aria-pressed={diarioAberto}
-        onClick={() => useDiarioStore.getState().abrirPainel()}
-        className="journey-shortcut vidro pointer-events-auto relative">
-        <CalendarCheck aria-hidden weight={diarioAberto ? 'fill' : 'regular'} />
-        <NotificationBadge count={premios} titulo={`${premios} prêmios no Diário`} />
+      <ShortcutHint label="Missões"><button type="button" data-keep-open aria-label="Missões"
+        aria-pressed={missoesAbertas}
+        onClick={abrirMissoes}
+        className={cn('journey-shortcut vidro pointer-events-auto relative', destaqueMissoes.classe)}>
+        <Flag aria-hidden weight={missoesAbertas ? 'fill' : 'regular'} />
+        <NotificationBadge count={totalMissoes} titulo={`${totalMissoes} prêmio(s) para coletar em Missões`} />
       </button></ShortcutHint>
       {TELAS_NA_COLUNA.map(({ screen, label, Icon }) => (
         <ShortcutHint key={screen} label={label}><button
@@ -71,7 +84,6 @@ export function ColunaDeAtalhos() {
           onClick={() => {
             const passo = tranca(screen)
             if (passo) return avisarTrancado(passo)
-            useDiarioStore.getState().fecharPainel()
             destaques[screen]?.aoTocar()
             toggleScreen(screen)
           }}

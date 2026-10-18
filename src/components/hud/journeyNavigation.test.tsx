@@ -88,16 +88,16 @@ describe('navegação Jornada', () => {
     expect(useDiarioStore.getState().painelAberto).toBe(false)
     expect(useUiStore.getState().currentScreen).toBe('mochila')
   })
-  it('coloca Diário antes dos quatro atalhos, com nomes acessíveis e sem textos visíveis', () => {
+  it('coloca Missões antes dos atalhos, com nomes acessíveis e sem textos visíveis', () => {
     render(<ColunaDeAtalhos />)
-    expect(TELAS_NA_COLUNA.map(d => d.screen)).toEqual(['especialidades', 'tasks', 'calc', 'pvp'])
+    expect(TELAS_NA_COLUNA.map(d => d.screen)).toEqual(['calc', 'pvp'])
     const coluna = document.querySelector<HTMLElement>('[data-journey-shortcuts]')!
     expect(within(coluna).getAllByRole('button').map(b => b.getAttribute('aria-label')))
-      .toEqual(['Diário', 'Especialidades', 'Tasks', 'Calculadora', 'PvP'])
+      .toEqual(['Missões', 'Calculadora', 'PvP'])
     expect(within(coluna).queryByRole('button', { name: /Perfil do treinador/ })).toBeNull()
-    expect(coluna.textContent).not.toContain('Especialidades')
-    fireEvent.click(screen.getByRole('button', { name: 'Diário' }))
-    expect(useDiarioStore.getState().painelAberto).toBe(true)
+    expect(coluna.textContent).not.toContain('Missões')
+    fireEvent.click(screen.getByRole('button', { name: 'Missões' }))
+    expect(useUiStore.getState().currentScreen).toBe('missoes')
   })
   it('agrupa o guia sem perder destinos ou repetir os atalhos fixos', () => {
     useUiStore.setState({ moreOpen: true })
@@ -105,7 +105,7 @@ describe('navegação Jornada', () => {
     const social = screen.getByRole('region', { name: 'Encontrar outros treinadores' })
     expect(within(social).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Troca', 'Ranking'])
     const tools = screen.getByRole('region', { name: 'Consultar e ajustar' })
-    expect(within(tools).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Conquistas', 'Bestiário', 'Wiki', 'Tutoriais', 'Ajustes'])
+    expect(within(tools).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Wiki', 'Tutoriais', 'Ajustes'])
     fireEvent.click(within(tools).getByRole('button', { name: 'Wiki' }))
     expect(useUiStore.getState().currentScreen).toBe('wiki')
     expect(useUiStore.getState().moreOpen).toBe(false)

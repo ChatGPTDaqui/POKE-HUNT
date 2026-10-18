@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.32',
+    date: '2026-10-18',
+    title: 'Janela Missões e Rota do Treinador',
+    highlights: [
+      'Diário, Objetivos, Tasks, Especialidades, Conquistas e Bestiário agora ficam numa janela só, Missões, com abas Hoje e Progresso. Um único atalho (a bandeira, no canto direito) abre tudo.',
+      'O número no atalho soma o que está pronto para coletar, e a janela abre direto na aba que tem prêmio.',
+      'Na aba Objetivos, a nova Rota do Treinador mostra o que alcançar no início, no meio e no fim do jogo, com o seu progresso em cada marco.',
+    ],
+  },
+  {
     version: '8.31',
     date: '2026-10-18',
     title: 'Cada golpe com a pose certa',
