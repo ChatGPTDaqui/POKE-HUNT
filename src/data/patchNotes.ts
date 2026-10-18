@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.30',
+    date: '2026-10-17',
+    title: 'Todas as salas especiais com cenário próprio',
+    highlights: [
+      'Ganharam cenário próprio: Concurso de Insetos, Mansão Celadon, Natal da Jynx, Ilha Miragem, Mansão Pokémon, Torre Pokémon e Silph S.A. Agora todos os sub-biomas e salas especiais novos têm arte própria.',
+      'Como nos outros, os Pokémon só andam no chão (sem atravessar túmulos, móveis, casas, árvores, buracos ou água) e você entra pela porta, escada ou trilha.',
+    ],
+  },
+  {
     version: '8.29',
     date: '2026-10-17',
     title: 'Chefe da sala, combate mais legível e colisão revisada',

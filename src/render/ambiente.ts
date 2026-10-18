@@ -207,6 +207,15 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   'assets/hunt-backgrounds/tundra.jpg': 'neve',
   'assets/hunt-backgrounds/underground.jpg': 'caverna',
 
+  // Onda 3 (17/10/2026).
+  'assets/hunt-backgrounds/bug-contest.jpg': 'folha',
+  'assets/hunt-backgrounds/celadon-mansion.jpg': 'cidade',
+  'assets/hunt-backgrounds/jynx-holiday.jpg': 'neve',
+  'assets/hunt-backgrounds/mirage-island.jpg': 'agua',
+  'assets/hunt-backgrounds/pokemon-mansion.jpg': 'poeira',
+  'assets/hunt-backgrounds/pokemon-tower.jpg': 'poeira',
+  'assets/hunt-backgrounds/silph-co.jpg': 'cidade',
+
   'assets/hunt-backgrounds/ice-cave.jpg': 'neve',
   'assets/hunt-backgrounds/ice-mountain.jpg': 'neve',
 
