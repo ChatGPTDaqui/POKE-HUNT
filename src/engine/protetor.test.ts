@@ -177,10 +177,12 @@ describe('protetor bloqueia o avanco de sala (PH-202)', () => {
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
 
-    for (let i = 0; i < 60; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    // Para no tick em que o Lord nasce: seguir simulando deixava o POKE
+    // derruba-lo as vezes, e o caso falhava conforme a sorte (visto no CI).
+    for (let i = 0; i < 60 && !world.protetorPendente; i++) stepWorld(world, 0.1, gameState, { silent: true })
 
     expect(world.protetorPendente).not.toBeNull()
-    expect(world.enemies[0].poke.level).toBe(world.mapDef!.levelRange[1])
+    expect(world.enemies.find((e) => e.isProtetor)!.poke.level).toBe(world.mapDef!.levelRange[1])
   })
 
   it('matar o protetor libera o avanco de sala de novo', () => {
