@@ -36,8 +36,6 @@
 import { useRef, useState, type CSSProperties } from 'react'
 import { PlacarDoDuelo } from '@/features/arena/PlacarDoDuelo'
 import { StatusRail, ContextoDaHunt } from '@/components/hud/StatusRail'
-import { JornadaNaHud } from '@/components/hud/JornadaNaHud'
-import { PainelDoDiario } from '@/features/primeirosPassos/Diario'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { TaxasNoCanto } from '@/components/hud/TaxasNoCanto'
@@ -49,6 +47,7 @@ import { useDeviceMode, useUiStore } from '@/stores/uiStore'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { useGestaoAberta } from '@/hooks/useGestaoAberta'
 import { cn } from '@/lib/utils'
+import { useCarregarDiario } from '@/features/primeirosPassos/Diario'
 
 // Acima disto o chat volta a ser janela flutuante no canto: e a largura em que
 // ela cabe ao lado da doca sem encostar nela. Abaixo, ticker de uma linha —
@@ -56,6 +55,7 @@ import { cn } from '@/lib/utils'
 const LARGURA_CHAT_FLUTUANTE = 1200
 
 export function HudLayer() {
+  useCarregarDiario()
   const { mode, width } = useDeviceMode()
   const setFooterHeight = useUiStore((s) => s.setFooterHeight)
   const chatFlutuante = mode === 'amplo' && width >= LARGURA_CHAT_FLUTUANTE
@@ -124,19 +124,16 @@ export function HudLayer() {
             </div>
           </div>
           {/* Reservas encostam no ativo e compartilham o material da moldura.
-              Objetivos ficam ao lado no mobile, abaixo da sala centralizada.
+              (O botao Objetivos do campo saiu em 18/10/2026: virou aba da
+              janela Missoes.)
               A medida dos atalhos continua sendo somente a do status acima. */}
           <div className={cn('journey-companions flex min-w-0 items-start gap-[4px]', mode !== 'amplo' ? 'flex-row pr-[120px]' : 'flex-col pr-[60px]')}>
             <div ref={reservasRef} className={mode === 'amplo' ? 'w-full' : 'shrink-0'}><ReservasRail /></div>
-            <div className="relative z-20 flex min-w-0 flex-col items-start gap-[4px]"
-              style={{ paddingTop: mode !== 'amplo' ? salaHeight + 4 : 4 }}>
-              {!painelAberto && <JornadaNaHud />}
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Coluna de atalhos: Diário, Especialidades, Tasks, Calculadora e PvP no canto
+      {/* Coluna de atalhos: Missões, Calculadora e PvP no canto
           superior direito, logo abaixo do card do treinador. Irma do bloco do
           topo, e nao filha: ela ancora na DIREITA e aquele container e uma
           coluna alinhada a esquerda. */}
@@ -175,7 +172,6 @@ export function HudLayer() {
           organizacao — a janela do Auto e que precisa mesmo ficar fora da doca,
           porque ela SIM posiciona contra o ancestral. */}
       <SheetMais />
-      <PainelDoDiario />
       <AutoWindow />
       {chatFlutuante && <ChatLog />}
     </>

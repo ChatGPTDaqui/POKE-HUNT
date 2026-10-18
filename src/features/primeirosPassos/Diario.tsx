@@ -15,8 +15,8 @@ import { useToastStore } from '@/stores/toastStore'
 import { pedirAcao, liquidar } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
 import { Meter } from '@/components/game/controls'
-import { Sheet } from '@/components/game/Sheet'
 import { cn } from '@/lib/utils'
+import { itemIconUrl } from '@/data/sprites'
 import { textoDaRecompensa } from './CartaoDoPasso'
 
 const DIAS_DO_CALENDARIO = 28
@@ -73,21 +73,31 @@ function useOferta() {
 }
 
 /** `esconder`: a faixa some mas o efeito do dia (abrir, virar à meia-noite) continua. */
-export function FaixaDoDiario({ esconder = false }: { esconder?: boolean }) {
+/**
+ * Abre o dia no boot e de novo quando vira a meia-noite de Brasília com o jogo
+ * aberto — senão o jogador ficaria preso no diário de ontem.
+ *
+ * Montado pela HUD, sempre (18/10/2026). Antes morava na `FaixaDoDiario`, que
+ * vivia dentro do botão "Objetivos" do campo; com ele virando aba da janela
+ * Missões, o Diário deixava de carregar até alguém abrir a aba — e o selo do
+ * atalho não contava os prêmios dele.
+ */
+export function useCarregarDiario(): void {
   const carregado = useDiarioStore(s => s.carregado)
   const dia = useDiarioStore(s => s.dia)
-  const passosFeitos = usePassosStore(s => s.reivindicados.size >= PRIMEIROS_PASSOS.length)
-  const oferta = useOferta()
-  const [coletando, setColetando] = useState(false)
-
-  // Abre o dia no boot e de novo quando vira a meia-noite de Brasília com o
-  // jogo aberto — senão o jogador ficaria preso no diário de ontem.
   useEffect(() => {
     if (!servidorAtivo()) return
     if (!carregado) { void useDiarioStore.getState().abrir(); return }
     const id = setInterval(() => { if (diaDeBrasilia() !== useDiarioStore.getState().dia) void useDiarioStore.getState().abrir() }, 60_000)
     return () => clearInterval(id)
   }, [carregado, dia])
+}
+
+export function FaixaDoDiario({ esconder = false }: { esconder?: boolean }) {
+  const carregado = useDiarioStore(s => s.carregado)
+  const passosFeitos = usePassosStore(s => s.reivindicados.size >= PRIMEIROS_PASSOS.length)
+  const oferta = useOferta()
+  const [coletando, setColetando] = useState(false)
 
   if (esconder || !carregado || !oferta) return null
   if (oferta.tipo === 'andando' && !passosFeitos) return null
@@ -137,22 +147,16 @@ export function usePremiosProntosDoDiario(): number {
 }
 
 /**
- * O painel do Diário, montado pela HUD e não pela faixa: a faixa some quando não
- * há nada para coletar durante os Primeiros Passos, e o painel precisa abrir
- * também pelo menu Mais nesse momento.
+ * O conteúdo do Diário, sem moldura: vive na aba Diário da janela Missões
+ * (18/10/2026). Era um `Sheet` próprio ao lado do campo.
  */
-export function PainelDoDiario() {
-  const aberto = useDiarioStore(s => s.painelAberto)
+export function ConteudoDoDiario() {
   const carregado = useDiarioStore(s => s.carregado)
-  if (!aberto) return null
-  if (!carregado) return <Sheet winKey="diario" snap="conteudo" zIndex={33}
-    title="Diário" onClose={() => useDiarioStore.getState().fecharPainel()}>
-    <p role="status" className="text-menu-muted">Aguardando os dados do Diário. Se a conexão falhou, reconecte o jogo.</p>
-  </Sheet>
-  return <SheetDoDiario onClose={() => useDiarioStore.getState().fecharPainel()} />
+  if (!carregado) return <p role="status" className="text-menu-muted">Aguardando os dados do Diário. Se a conexão falhou, reconecte o jogo.</p>
+  return <CorpoDoDiario />
 }
 
-function SheetDoDiario({ onClose }: { onClose: () => void }) {
+function CorpoDoDiario() {
   const coletados = useDiarioStore(s => s.coletados)
   const loginsNoMes = useDiarioStore(s => s.loginsNoMes)
   const nivel = useGameStateStore(s => s.trainer.level)
@@ -166,23 +170,36 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Sheet appearance="journey" winKey="diario" snap="conteudo" zIndex={33} onClose={onClose} title="Diário">
+    <div>
       <h3 className="mb-[.3em] text-[.85em] font-medium text-menu-ink">Login do mês · {loginsNoMes} dia(s) coletado(s)</h3>
       <p className="mb-[.5em] text-[.75em] text-menu-muted">Um prêmio por dia em que você entra. Perder um dia não zera: o próximo prêmio te espera. Recomeça no dia 1 de cada mês.</p>
-      <div className="grid grid-cols-7 gap-[.3em]">
+      {/* Celulas compactas com o icone do premio de cada dia (pedido do dono,
+          18/10/2026): o quadrado ocupava a largura toda da janela sem motivo. */}
+      <div className="grid grid-cols-[repeat(7,minmax(0,2.9em))] justify-center gap-[.25em]">
         {Array.from({ length: DIAS_DO_CALENDARIO }, (_, i) => {
           const k = i + 1
           const feito = k <= loginsNoMes
           const hoje = !logouHoje && k === loginsNoMes + 1
           const especial = (DIAS_ESPECIAIS as readonly number[]).includes(k)
+          const premio = recompensaDoLogin(k, nivel)
+          const icones = premio.itens.slice(0, especial ? 2 : 1)
           return (
-            <div key={k} className={cn(
-              'flex aspect-square flex-col items-center justify-center rounded-[.4em] border text-[.7em]',
-              feito ? 'border-ok/50 bg-ok/15 text-ok' : hoje ? 'border-ok bg-menu-wash text-menu-ink' : 'border-menu-line bg-menu-card text-menu-muted',
-              especial && !feito && 'border-warn/60 text-warn',
+            <div key={k} aria-label={`Dia ${k}${feito ? ', coletado' : ''}: ${textoDaRecompensa(premio)}`} className={cn(
+              'relative flex aspect-square flex-col items-center justify-center rounded-[.35em] border',
+              feito ? 'border-ok/50 bg-ok/15' : hoje ? 'border-ok bg-menu-wash' : 'border-menu-line bg-menu-card',
+              especial && !feito && 'border-warn/60 bg-warn/10',
             )}>
-              {feito ? <Check weight="bold" aria-label={`Dia ${k} coletado`} /> : especial ? <Gift weight="fill" aria-hidden /> : null}
-              <span>{k}</span>
+              <span className={cn('absolute top-[.1em] left-[.25em] text-[.55em] leading-none tabular-nums',
+                feito ? 'text-ok' : especial ? 'text-warn' : 'text-menu-muted')}>{k}</span>
+              <span className={cn('flex items-center justify-center', feito && 'opacity-40')}>
+                {icones.map(({ itemId }) => {
+                  const url = itemIconUrl(itemId)
+                  return url
+                    ? <img key={itemId} src={url} alt="" aria-hidden className="h-[1.45em] w-[1.45em] [image-rendering:pixelated]" />
+                    : null
+                })}
+              </span>
+              {feito && <Check weight="bold" aria-hidden className="absolute right-[.15em] bottom-[.1em] text-[.7em] text-ok" />}
             </div>
           )
         })}
@@ -223,6 +240,6 @@ function SheetDoDiario({ onClose }: { onClose: () => void }) {
           )
         })}
       </div>
-    </Sheet>
+    </div>
   )
 }

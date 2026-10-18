@@ -31,6 +31,7 @@ import { EspecialidadesMenu } from '@/features/especialidades/EspecialidadesMenu
 import { TrocaMenu } from '@/features/troca/TrocaMenu'
 import { PvpMenu } from '@/features/pvp/PvpMenu'
 import { ConquistasMenu } from '@/features/conquistas/ConquistasMenu'
+import { MissoesMenu } from '@/features/missoes/MissoesMenu'
 
 const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   equipe: TeamMenu,
@@ -51,6 +52,7 @@ const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   troca: TrocaMenu,
   pvp: PvpMenu,
   conquistas: ConquistasMenu,
+  missoes: MissoesMenu,
 }
 
 const TITLES: Record<ScreenName, string> = {
@@ -72,6 +74,7 @@ const TITLES: Record<ScreenName, string> = {
   troca: 'Troca',
   pvp: 'PvP',
   conquistas: 'Conquistas',
+  missoes: 'Missões',
 }
 
 // Largura padrao por tela, em `em`. Nao e capricho: a aba Itens da Loja tem
@@ -82,7 +85,7 @@ const DEFAULT_WIDTH = 36
 const ART: Partial<Record<ScreenName, ArtKind>> = {
   equipe: 'team', mochila: 'bag', loja: 'shop', hunts: 'map', pokedex: 'dex', bestiario: 'dex',
   especialidades: 'dex', tasks: 'guide', wiki: 'guide', tutoriais: 'guide', calc: 'guide',
-  social: 'guide', troca: 'team', mercado: 'market', ranking: 'team', pvp: 'team', config: 'guide', conquistas: 'guide',
+  social: 'guide', troca: 'team', mercado: 'market', ranking: 'team', pvp: 'team', config: 'guide', conquistas: 'guide', missoes: 'guide',
 }
 const WIDTHS: Partial<Record<ScreenName, number>> = {
   mochila: 48,
@@ -99,6 +102,8 @@ const WIDTHS: Partial<Record<ScreenName, number>> = {
   // Grade de 18 tipos + painel de detalhe lado a lado, mesmo raciocinio do Bestiario.
   especialidades: 56,
   conquistas: 44,
+  // Abriga Especialidades e Bestiario (grade + detalhe), os mais largos das abas.
+  missoes: 56,
 }
 
 export function ScreenOverlay() {
