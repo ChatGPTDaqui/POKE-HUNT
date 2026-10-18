@@ -117,7 +117,7 @@ export const PRIMEIROS_PASSOS: PassoDef[] = [
   {
     id: 'primeira_missao',
     titulo: 'Reivindique uma missão',
-    dica: 'Abra Tasks: cada missão pede abates de uma espécie e paga ouro.',
+    dica: 'Abra Missões › Tasks: cada missão pede abates de uma espécie e paga ouro.',
     alvo: 1,
     atual: s => Object.values(s.missoesReivindicadas).filter(Boolean).length,
     recompensa: { ouro: 0, itens: [{ itemId: 'revive', quantidade: 3 }, { itemId: 'great_ball', quantidade: 25 }] },

@@ -10,6 +10,7 @@
 // aberto.
 import { create } from 'zustand'
 import type { ChatTab } from '@/stores/toastStore'
+import { TELA_VIROU_ABA, type AbaDeMissoes } from '@/data/abasDeMissoes'
 
 /**
  * Anúncio levado do Mercado pra dentro da conversa (PH-435).
@@ -45,6 +46,9 @@ export type ScreenName =
   | 'equipe' | 'mochila' | 'loja' | 'hunts' | 'pokedex'
   | 'wiki' | 'config' | 'social' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
   | 'ranking' | 'tutoriais' | 'especialidades' | 'troca' | 'pvp' | 'conquistas'
+  // Janela Missoes (18/10/2026). 'tasks', 'especialidades', 'conquistas' e
+  // 'bestiario' continuam aceitos e viram ABA dela (ver `openScreen`).
+  | 'missoes'
 
 // Reexportado do toastStore em vez de redeclarado: as duas listas ja
 // divergiram uma vez (a aba "Mundo" mudou de dono e esta copia continuaria
@@ -181,6 +185,10 @@ interface UiState {
   openScreen: (screen: ScreenName) => void
   toggleScreen: (screen: ScreenName) => void
   closeScreen: () => void
+  /** Aba atual da janela Missoes; sobrevive a fechar e reabrir. */
+  abaDeMissoes: AbaDeMissoes
+  abrirMissoes: (aba?: AbaDeMissoes) => void
+  setAbaDeMissoes: (aba: AbaDeMissoes) => void
 
   moreOpen: boolean
   setMoreOpen: (open: boolean) => void
@@ -359,12 +367,30 @@ export const useUiStore = create<UiState>((set, get) => ({
   // outra e o botao "Fechar" mais proximo do topo do DOM fecha a errada —
   // reproduzido ao vivo: com o Analyzer aberto, clicar em "Mercado" abria o
   // Mercado por baixo dele.
-  openScreen: (currentScreen) =>
-    set((s) => ({ currentScreen, moreOpen: false, analyzerOpen: false, winPos: { ...s.winPos, panel: undefined } })),
+  //
+  // Tela que virou aba da janela Missoes (18/10/2026) abre a janela NA ABA:
+  // assim o destino de um Primeiro Passo, o card da Jornada e qualquer chamada
+  // antiga chegam no lugar certo sem saber da mudanca.
+  openScreen: (pedida) => {
+    const aba = TELA_VIROU_ABA[pedida]
+    const currentScreen: ScreenName = aba ? 'missoes' : pedida
+    set((s) => ({
+      currentScreen, moreOpen: false, analyzerOpen: false, winPos: { ...s.winPos, panel: undefined },
+      ...(aba ? { abaDeMissoes: aba } : {}),
+    }))
+  },
   toggleScreen: (screen) => {
-    if (get().currentScreen === screen) set({ currentScreen: null, moreOpen: false })
+    const aba = TELA_VIROU_ABA[screen]
+    const aberta = aba ? get().currentScreen === 'missoes' && get().abaDeMissoes === aba : get().currentScreen === screen
+    if (aberta) set({ currentScreen: null, moreOpen: false })
     else get().openScreen(screen)
   },
+  abaDeMissoes: 'objetivos',
+  abrirMissoes: (aba) => {
+    get().openScreen('missoes')
+    if (aba) set({ abaDeMissoes: aba })
+  },
+  setAbaDeMissoes: (abaDeMissoes) => set({ abaDeMissoes }),
   closeScreen: () => set({ currentScreen: null }),
 
   moreOpen: false,

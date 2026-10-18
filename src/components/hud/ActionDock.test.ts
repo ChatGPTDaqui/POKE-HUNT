@@ -43,7 +43,8 @@ describe('destinos da barra e da grade', () => {
     // sair. PvP (PH-512) entrou logo apos, mesmo grupo de "duelo com outro
     // jogador".
     expect(telas).toEqual(
-      ['troca', 'ranking', 'conquistas', 'bestiario', 'wiki', 'tutoriais', 'config'],
+      // Conquistas e Bestiario viraram abas da janela Missoes (18/10/2026).
+      ['troca', 'ranking', 'wiki', 'tutoriais', 'config'],
     )
   })
 })

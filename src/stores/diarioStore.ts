@@ -5,6 +5,7 @@
 // o servidor de sessão não conhece.
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
+import { useUiStore } from '@/stores/uiStore'
 
 interface RespostaDoDia {
   dia: string
@@ -34,7 +35,9 @@ export const useDiarioStore = create<DiarioState>((set) => ({
   coletados: new Set(),
   loginsNoMes: 0,
   painelAberto: false,
-  abrirPainel: () => set({ painelAberto: true }),
+  // O Diario virou aba da janela Missoes (18/10/2026): abrir o "painel" e
+  // abrir a janela na aba Diario. O nome ficou pros chamadores antigos.
+  abrirPainel: () => useUiStore.getState().abrirMissoes('diario'),
   fecharPainel: () => set({ painelAberto: false }),
 
   abrir: async () => {

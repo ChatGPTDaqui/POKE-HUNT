@@ -27,6 +27,7 @@ import { EquipmentArt, type ArtKind } from '@/components/game/JourneyArtwork'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { useGestaoAberta } from '@/hooks/useGestaoAberta'
 import { TELAS_NA_COLUNA } from '@/components/hud/ColunaDeAtalhos'
+import { TELA_VIROU_ABA } from '@/data/abasDeMissoes'
 import { cn } from '@/lib/utils'
 import { MarcaDeCadeado } from '@/features/primeirosPassos/MarcaDeCadeado'
 import { avisarTrancado, useTrancas } from '@/features/primeirosPassos/useDesbloqueio'
@@ -99,7 +100,9 @@ export const TELAS_NA_BARRA: ReadonlySet<ScreenName> = new Set<ScreenName>(
  */
 export function destinosDaGrade(): DestinoDeTela[] {
   return SECUNDARIOS.filter(
-    (d) => !TELAS_NA_BARRA.has(d.screen) && !TELAS_NA_COLUNA.some((c) => c.screen === d.screen),
+    (d) => !TELAS_NA_BARRA.has(d.screen) && !TELAS_NA_COLUNA.some((c) => c.screen === d.screen)
+      // 18/10/2026: viraram abas da janela Missoes (atalho unico na coluna).
+      && !(d.screen in TELA_VIROU_ABA),
   )
 }
 
@@ -376,11 +379,12 @@ export function SheetMais() {
         <div className="journey-guide-intro"><EquipmentArt kind="guide" /><p>Seu guia de jornada<span>Encontre treinadores e consulte suas ferramentas.</span></p></div>
         {[
           { title: 'Encontrar outros treinadores', screens: ['social', 'troca', 'ranking'] },
-          { title: 'Consultar e ajustar', screens: ['conquistas', 'bestiario', 'wiki', 'tutoriais', 'config'] },
+          { title: 'Consultar e ajustar', screens: ['wiki', 'tutoriais', 'config'] },
         ].map((group) => <section key={group.title} aria-label={group.title}>
         <h3 className="journey-guide-heading">{group.title}</h3>
         <div className="journey-destinations">
-        {/* Atalhos permanentes, incluindo Diário, ficam na coluna direita. */}
+        {/* Missões (Diário, Objetivos, Tasks, Especialidades, Conquistas e
+            Bestiário) tem atalho único na coluna direita. */}
         {destinos.filter((d) => group.screens.includes(d.screen)).map(({ screen, label, Icon }) => (
           <JourneyDestination
             key={screen}
