@@ -95,6 +95,11 @@ export class Renderer {
   handleResize(): void {
     this.width = this.canvas.width
     this.height = this.canvas.height
+    // Mudar canvas.width/height ZERA o estado do contexto, inclusive
+    // `imageSmoothingEnabled` (volta pra true). O <GameCanvas> redimensiona no
+    // mount, depois do construtor — entao a pixel art de batalha era desenhada
+    // com suavizacao bilinear (borrada) desde sempre (achado 18/10/2026).
+    this.ctx.imageSmoothingEnabled = false
   }
 
   adjustZoom(deltaY: number): void {

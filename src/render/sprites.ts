@@ -311,6 +311,10 @@ function drawBattleSprite(ctx: CanvasRenderingContext2D, entity: WorldEntity): b
   const bounds = spriteBounds(entity)!
 
   ctx.save()
+  // Pixel art: vizinho mais proximo, sempre. Nao confiar no estado herdado do
+  // contexto — um redimensionamento ou outro desenho pode ter religado a
+  // suavizacao, e a folha original sairia borrada.
+  ctx.imageSmoothingEnabled = false
   if (entity.flashTimer > 0) ctx.filter = 'brightness(2.2)'
   ctx.drawImage(frame.img, frame.sx, frame.sy, frame.sw, frame.sh, bounds.x, bounds.y, bounds.w, bounds.h)
   ctx.restore()
