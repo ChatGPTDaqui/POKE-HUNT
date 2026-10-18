@@ -20,6 +20,8 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'Os Pokémon passam a usar a animação que combina com o golpe: chute nos golpes de chute, soco nos de soco, mordida, garra, cabeçada, cauda, choque, canto, dança, defesa e mais.',
       'Quem não tem a pose específica usa uma genérica de golpe físico ou especial; quem não tem nenhuma continua com a pose de sempre.',
       'Vale no combate livre e no duelo.',
+      'Correção: os sprites de batalha eram desenhados levemente borrados depois que a tela era dimensionada; agora saem nítidos, pixel a pixel como a arte original.',
+      'Correção: Pokémon shiny passam a mostrar as cores shiny também nas poses de golpe.',
     ],
   },
   {
