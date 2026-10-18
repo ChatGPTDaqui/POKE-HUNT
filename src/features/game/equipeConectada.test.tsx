@@ -18,8 +18,7 @@ vi.mock('@/components/hud/TaxasNoCanto', () => ({ TaxasNoCanto: () => null }))
 vi.mock('@/components/toasts/ChatLog', () => ({ ChatLog: () => null }))
 vi.mock('@/components/toasts/ChatMobile', () => ({ ChatMobile: () => null }))
 vi.mock('@/components/auto/AutoFloatingPanel', () => ({ AutoWindow: () => null }))
-vi.mock('@/features/primeirosPassos/Diario', () => ({ PainelDoDiario: () => null }))
-vi.mock('@/components/hud/JornadaNaHud', () => ({ JornadaNaHud: () => <div>Objetivos contextuais</div> }))
+vi.mock('@/features/primeirosPassos/Diario', () => ({ useCarregarDiario: () => {}, usePremiosProntosDoDiario: () => 0 }))
 
 beforeEach(() => {
   useGameStateStore.getState().resetToDefaults()
