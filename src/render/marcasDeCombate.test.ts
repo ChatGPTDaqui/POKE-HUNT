@@ -55,7 +55,7 @@ function entidade(id: string, over: Partial<WorldEntity> = {}): WorldEntity {
 }
 
 describe('marca do meu POKE e do alvo (PH-189)', () => {
-  it('desenha a sprite a 100% ou 80% e restaura o alfa do contexto', () => {
+  it('desenha a sprite a 100% ou 40% e restaura o alfa do contexto', () => {
     vi.stubGlobal('Image', class {
       complete = true
       naturalWidth = 32
@@ -75,7 +75,7 @@ describe('marca do meu POKE e do alvo (PH-189)', () => {
     try {
       sprites.drawCorpoPorCima(ctx, e, 1)
       sprites.drawCorpoPorCima(ctx, e)
-      expect(alfas).toEqual([1, .8])
+      expect(alfas).toEqual([1, .4])
       expect(ctx.globalAlpha).toBe(.3)
     } finally { vi.unstubAllGlobals() }
   })
@@ -211,7 +211,7 @@ function renderizar(world: WorldState) {
 }
 
 describe('quem recebe marca e porcentagem, no quadro de verdade (PH-189)', () => {
-  it.each([false, true])('corpo opaco cobre informações; só golpes recebem 80%% (golpe: %s)', temGolpe => {
+  it.each([false, true])('corpo opaco cobre informações; só golpes recebem 40%% (golpe: %s)', temGolpe => {
     const ordem: string[] = []
     const corpo = vi.spyOn(sprites, 'drawCorpoPorCima').mockImplementation((_ctx, e, alpha = sprites.ALFA_DO_CORPO_POR_CIMA) => {
       ordem.push(`corpo:${e.id}:${alpha}`)
@@ -229,7 +229,7 @@ describe('quem recebe marca e porcentagem, no quadro de verdade (PH-189)', () =>
       expect(ordem[0]).toBe('damageNumber')
       expect(ordem.slice(1, 4)).toEqual(['corpo:enemy-1:1', 'corpo:enemy-2:1', 'corpo:player-1:1'])
       expect(ordem.slice(4)).toEqual([
-        ...(temGolpe ? ['abilityEffect', 'corpo:enemy-1:0.8', 'corpo:enemy-2:0.8', 'corpo:player-1:0.8'] : []),
+        ...(temGolpe ? ['abilityEffect', 'corpo:enemy-1:0.4', 'corpo:enemy-2:0.4', 'corpo:player-1:0.4'] : []),
         'cura:enemy-1', 'cura:enemy-2', 'cura:player-1',
       ])
     } finally {

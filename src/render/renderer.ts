@@ -404,7 +404,7 @@ export class Renderer {
 
     // Informações de campo nunca encobrem o corpo: passada totalmente opaca.
     // Os golpes são a exceção: ficam depois dela e recebem uma segunda passada
-    // a 80%. Não reduzimos a opacidade de todos os Pokémon quando um golpe
+    // a 40% (ALFA_DO_CORPO_POR_CIMA). Não reduzimos a opacidade de todos os Pokémon quando um golpe
     // qualquer está ativo; a composição só revela o corpo onde há sobreposição.
     for (const enemy of world.enemies) {
       if (!enemy.nascendo) drawCorpoPorCima(ctx, enemy, 1)
