@@ -72,21 +72,31 @@ function useOferta() {
 }
 
 /** `esconder`: a faixa some mas o efeito do dia (abrir, virar à meia-noite) continua. */
-export function FaixaDoDiario({ esconder = false }: { esconder?: boolean }) {
+/**
+ * Abre o dia no boot e de novo quando vira a meia-noite de Brasília com o jogo
+ * aberto — senão o jogador ficaria preso no diário de ontem.
+ *
+ * Montado pela HUD, sempre (18/10/2026). Antes morava na `FaixaDoDiario`, que
+ * vivia dentro do botão "Objetivos" do campo; com ele virando aba da janela
+ * Missões, o Diário deixava de carregar até alguém abrir a aba — e o selo do
+ * atalho não contava os prêmios dele.
+ */
+export function useCarregarDiario(): void {
   const carregado = useDiarioStore(s => s.carregado)
   const dia = useDiarioStore(s => s.dia)
-  const passosFeitos = usePassosStore(s => s.reivindicados.size >= PRIMEIROS_PASSOS.length)
-  const oferta = useOferta()
-  const [coletando, setColetando] = useState(false)
-
-  // Abre o dia no boot e de novo quando vira a meia-noite de Brasília com o
-  // jogo aberto — senão o jogador ficaria preso no diário de ontem.
   useEffect(() => {
     if (!servidorAtivo()) return
     if (!carregado) { void useDiarioStore.getState().abrir(); return }
     const id = setInterval(() => { if (diaDeBrasilia() !== useDiarioStore.getState().dia) void useDiarioStore.getState().abrir() }, 60_000)
     return () => clearInterval(id)
   }, [carregado, dia])
+}
+
+export function FaixaDoDiario({ esconder = false }: { esconder?: boolean }) {
+  const carregado = useDiarioStore(s => s.carregado)
+  const passosFeitos = usePassosStore(s => s.reivindicados.size >= PRIMEIROS_PASSOS.length)
+  const oferta = useOferta()
+  const [coletando, setColetando] = useState(false)
 
   if (esconder || !carregado || !oferta) return null
   if (oferta.tipo === 'andando' && !passosFeitos) return null
