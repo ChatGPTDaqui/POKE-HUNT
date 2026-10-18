@@ -118,9 +118,16 @@ function main() {
     const destNormal = join(BATTLE_SPRITES_DIR, id, `${ANIM}-Anim.png`)
     copyFile(resolved.file, destNormal)
 
-    const shinyFile = join(shinySpriteDir, `${ANIM}-Anim.png`)
+    // A forma shiny tem AnimData proprio e tambem usa <CopyOf>: `Jab` da shiny
+    // aponta pra `Strike` da shiny. Olhar so `<ANIM>-Anim.png` na pasta shiny
+    // (como era ate 18/10/2026) copiava a NORMAL por cima em 435 folhas — o
+    // shiny tocava a pose com a paleta comum. Sem a pose na forma shiny, cai na
+    // normal e o aviso sai no fim (recolorir: ver a PR das poses de golpe).
+    const shinyXml = join(shinySpriteDir, 'AnimData.xml')
+    const shinyResolved = existsSync(shinyXml) ? resolveAnim(ANIM, parseAnimData(shinyXml), shinySpriteDir) : null
     const destShiny = join(BATTLE_SPRITES_DIR, id, `${ANIM}-Shiny-Anim.png`)
-    copyFile(existsSync(shinyFile) ? shinyFile : resolved.file, destShiny)
+    if (!shinyResolved) puladas.push(`${id} (shiny sem ${ANIM} no acervo: copiada a normal)`)
+    copyFile(shinyResolved ? shinyResolved.file : resolved.file, destShiny)
 
     novasEntradas[id] = {
       frameWidth: resolved.node.frameWidth,
