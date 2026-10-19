@@ -18,7 +18,7 @@ já existem.
 |---|---|
 | Quais abas | Diário, Objetivos, Tasks, Especialidades, Conquistas e Bestiário |
 | Como se entra | **Um único atalho**, "Missões". Os outros caminhos saem dos menus |
-| Organização | Abas em 2 grupos (mesmo padrão da Wiki): **Hoje** com Diário e Objetivos; **Progresso** com Tasks, Especialidades, Conquistas e Bestiário |
+| Organização | Nível de cima **Diário | Objetivos | Progresso**. Só Progresso tem submenu (Tasks, Especialidades, Conquistas, Bestiário). Revisado depois da 8.32 — a primeira versão tinha os grupos Hoje e Progresso |
 | Rota do Treinador | 3 fases com marcos medidos no progresso real, cada um com barra e com o que libera; a fase atual aberta e as outras recolhidas |
 
 ## Interface
@@ -27,8 +27,7 @@ já existem.
 
 - Uma `ScreenName` nova, `missoes`, aberta como `GameWindow` no `ScreenOverlay`,
   com o título "Missões".
-- Abas com `SegmentedTabs` em dois níveis, como em `WikiMenu`: grupo (Hoje ou
-  Progresso) e, dentro dele, a aba.
+- Nível de cima com `SegmentedTabs`: Diário, Objetivos e Progresso. Progresso abre um submenu encaixado embaixo da aba, com a trilha "Progresso › Tasks" e uma borda lateral que liga o submenu ao conteúdo (`grupoTemSubmenu`).
 - A aba atual fica no `uiStore` (`abaDeMissoes`). Fechar e reabrir volta nela.
 - Cada aba **reusa o componente que já existe**, sem reescrever o conteúdo:
   - Tasks: `TasksMenu`
@@ -141,3 +140,13 @@ servidor.
 3. O selo do atalho soma Diário, Primeiros Passos e Tasks. Especialidades ficou
    de fora porque a missão de cada nível vem do servidor
    (`minhas_missoes_especialidade`); contá-la exigiria buscar isso no boot.
+
+## Revisão depois da 8.32 (#1005, 18/10/2026)
+
+- Objetivos saiu do grupo "Hoje". O nível de cima ficou Diário | Objetivos |
+  Progresso.
+- O submenu de Progresso ganhou identificação visual: um bloco encaixado com a
+  trilha e uma borda lateral.
+- Os cartões do passo atual e de prêmios ganharam borda inteira. Antes eles
+  eram desenhados para ficar pendurados no botão do campo.
+- O Diário carrega por `useCarregarDiario`, montado na HUD (#1002).
