@@ -105,7 +105,7 @@ export function FaixaDoDiario({ esconder = false }: { esconder?: boolean }) {
   return (
     <>
       <div className={cn(
-        'pointer-events-auto flex w-[min(100%,24em)] items-center gap-[.4em] rounded-b border-x border-b bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]',
+        'pointer-events-auto flex w-full items-center gap-[.4em] rounded-[.5em] border bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]',
         oferta.tipo === 'pronto' ? 'border-ok/60' : 'border-menu-line',
       )}>
         <button type="button" onClick={() => useDiarioStore.getState().abrirPainel()} className="flex min-w-0 flex-1 items-center gap-[.4em] text-left" aria-label={`Abrir o Diário: ${oferta.titulo}`}>

@@ -98,7 +98,7 @@ export function CartaoDoPasso() {
   return (
     <div
       className={cn(
-        'pointer-events-auto flex w-[min(100%,24em)] items-stretch gap-[.4em] rounded-b border-x border-b bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]',
+        'pointer-events-auto flex w-full items-stretch gap-[.4em] rounded-[.5em] border bg-menu-card/92 px-[.55em] py-[.3em] text-[.78em]',
         pronto ? 'border-ok/60' : 'border-menu-line',
       )}
     >

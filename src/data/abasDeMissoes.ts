@@ -3,11 +3,13 @@
 // docs/planos/2026-10-18-janela-de-missoes-design.md.
 
 export type AbaDeMissoes = 'diario' | 'objetivos' | 'tasks' | 'especialidades' | 'conquistas' | 'bestiario'
-export type GrupoDeMissoes = 'hoje' | 'progresso'
+// Nivel de cima: Diario, Objetivos e Progresso (pedido do dono, 18/10/2026).
+// So Progresso tem submenu.
+export type GrupoDeMissoes = 'diario' | 'objetivos' | 'progresso'
 
 export const ABAS_DE_MISSOES: readonly { aba: AbaDeMissoes; rotulo: string; grupo: GrupoDeMissoes }[] = [
-  { aba: 'diario', rotulo: 'Diário', grupo: 'hoje' },
-  { aba: 'objetivos', rotulo: 'Objetivos', grupo: 'hoje' },
+  { aba: 'diario', rotulo: 'Diário', grupo: 'diario' },
+  { aba: 'objetivos', rotulo: 'Objetivos', grupo: 'objetivos' },
   { aba: 'tasks', rotulo: 'Tasks', grupo: 'progresso' },
   { aba: 'especialidades', rotulo: 'Especialidades', grupo: 'progresso' },
   { aba: 'conquistas', rotulo: 'Conquistas', grupo: 'progresso' },
@@ -15,9 +17,15 @@ export const ABAS_DE_MISSOES: readonly { aba: AbaDeMissoes; rotulo: string; grup
 ]
 
 export const GRUPOS_DE_MISSOES: readonly { value: GrupoDeMissoes; label: string }[] = [
-  { value: 'hoje', label: 'Hoje' },
+  { value: 'diario', label: 'Diário' },
+  { value: 'objetivos', label: 'Objetivos' },
   { value: 'progresso', label: 'Progresso' },
 ]
+
+/** O grupo tem submenu (mais de uma aba dentro)? */
+export function grupoTemSubmenu(g: GrupoDeMissoes): boolean {
+  return ABAS_DE_MISSOES.filter((a) => a.grupo === g).length > 1
+}
 
 export function grupoDaAba(aba: AbaDeMissoes): GrupoDeMissoes {
   return ABAS_DE_MISSOES.find((a) => a.aba === aba)!.grupo
