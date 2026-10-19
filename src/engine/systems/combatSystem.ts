@@ -57,6 +57,7 @@ import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange, clamp } from '@/core/random'
 import { registrarDanoParaHurt, triggerAttackAnim } from './animationSystem'
 import { poseDoGolpe } from '@/data/poseDoGolpe'
+import { gastarPpDeCura, sincronizarAlvoDaCura, temPpDeCura } from '../ppDeCura'
 import { tempoDoGolpe, type TempoDoGolpe } from '../tempoDoGolpe'
 // Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
 // turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
@@ -1967,8 +1968,12 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
   // No maximo 4 golpes (+ o AOE de nivel 50 pro POKE do jogador). Selvagem usa
   // os 4 ultimos que a especie aprenderia naquele nivel, sem AOE — ver
   // data/activeAbilities.ts.
+  // Cura pura gasta PP contado por alvo (19/10/2026): sem PP contra ESTE alvo,
+  // sai dos candidatos. Ver engine/ppDeCura.ts.
+  sincronizarAlvoDaCura(entity, defenderEntity.id)
   const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, usaKitDeSelvagem(entity))
     .filter((id) => !disabled[id])
+    .filter((id) => { const a = getAbility(id); return !a || temPpDeCura(entity, a) })
     // Disable: golpe especifico temporariamente fora dos candidatos enquanto
     // o timer nao zera -- mesmo ponto de filtro do "desligado pelo jogador"
     // acima, so que temporario (ver types.ts#disabledAbilityId).
@@ -2448,6 +2453,9 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
 
   const primaryTarget = engagedEnemies[0]
   const allEnemies = nearbyAliveEnemies(world)
+  // Golpe escolhido na mao (atalho da HUD) tambem respeita o PP de cura.
+  sincronizarAlvoDaCura(player, primaryTarget?.id)
+  if (golpeEscolhido && !temPpDeCura(player, golpeEscolhido)) return
   const ability = golpeEscolhido ?? pickAbility(world, player, primaryTarget, (a) =>
     allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length,
   )
@@ -2460,6 +2468,8 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id
 
   registrarUsoParaProtecao(player, ability)
+  sincronizarAlvoDaCura(player, primaryTarget?.id)
+  gastarPpDeCura(player, ability)
   // PH-176: cooldown NAO arma aqui mais — so no erro/AOE-sem-alvo abaixo, ou
   // em `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`).
   startGlobalCooldown(player, MIN_ACTION_GAP)
@@ -2522,6 +2532,8 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id
 
   registrarUsoParaProtecao(enemy, ability)
+  sincronizarAlvoDaCura(enemy, player.id)
+  gastarPpDeCura(enemy, ability)
   // PH-176: cooldown NAO arma aqui mais — so no erro abaixo, ou em
   // `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`). Inimigo
   // sempre mira o jogador unico, entao nao existe caso "AOE sem alvo".

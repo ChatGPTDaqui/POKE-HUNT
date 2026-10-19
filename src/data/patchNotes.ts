@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.33',
+    date: '2026-10-19',
+    title: 'Golpes de cura com PP',
+    highlights: [
+      'Golpes que só curam (Recover, Roost, Synthesis, Moonlight e afins) agora têm limite de usos por alvo, igual ao PP do jogo original. Acabou o selvagem que se curava para sempre e travava a luta.',
+      'O PP volta quando o alvo muda. Vale para os selvagens e para o seu POKE.',
+      'O slot do golpe de cura mostra os usos restantes (ex.: 3/5) e fica apagado quando eles acabam.',
+    ],
+  },
+  {
     version: '8.32',
     date: '2026-10-18',
     title: 'Janela Missões e Rota do Treinador',

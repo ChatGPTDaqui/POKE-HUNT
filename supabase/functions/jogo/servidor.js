@@ -147037,6 +147037,34 @@ function registrarDanoParaHurt(world, alvo, dano) {
 	alvo.hurtAnimTimer = HURT_ANIM_DURATION;
 }
 //#endregion
+//#region src/engine/ppDeCura.ts
+/** Cura pura: cura e não causa dano. Dreno (Giga Drain) não entra. */
+function ehCuraPura(ability) {
+	return Boolean(ability.healPercent) && !ability.power;
+}
+/** Trocou de alvo: zera a contagem. Chamar antes de escolher o golpe. */
+function sincronizarAlvoDaCura(entity, alvoId) {
+	const alvo = alvoId ?? null;
+	if (entity.alvoDaCura === alvo) return;
+	entity.alvoDaCura = alvo;
+	entity.usosDeCura = {};
+}
+function ppDeCuraRestante(entity, ability) {
+	if (!ehCuraPura(ability)) return null;
+	return Math.max(0, ability.pp - (entity.usosDeCura?.[ability.id] ?? 0));
+}
+/** O golpe de cura ainda tem PP contra o alvo atual? (Golpe que não é cura: sempre.) */
+function temPpDeCura(entity, ability) {
+	const restante = ppDeCuraRestante(entity, ability);
+	return restante === null || restante > 0;
+}
+/** Gasta 1 PP se for cura pura. Chamar no disparo do golpe. */
+function gastarPpDeCura(entity, ability) {
+	if (!ehCuraPura(ability)) return;
+	const usos = entity.usosDeCura ??= {};
+	usos[ability.id] = (usos[ability.id] ?? 0) + 1;
+}
+//#endregion
 //#region src/data/generated/apiceDoAtaque.generated.ts
 var APICE_DO_ATAQUE = {
 	"abra": {
@@ -153354,7 +153382,11 @@ function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 	const clima = world.clima?.tipo ?? null;
 	const attackerSpecies = SPECIES[entity.poke.speciesId];
 	const disabled = entity.poke.disabledAbilities || {};
-	const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, usaKitDeSelvagem(entity)).filter((id) => !disabled[id]).filter((id) => !(entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0 && id === entity.disabledAbilityId)).filter((id) => !(entity.tormentedUntil && entity.tormentedUntil > 0 && id === entity.lastUsedAbilityId)).filter((id) => id !== "curse" || attackerSpecies.type === "GHOST" || attackerSpecies.type2 === "GHOST");
+	sincronizarAlvoDaCura(entity, defenderEntity.id);
+	const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, usaKitDeSelvagem(entity)).filter((id) => !disabled[id]).filter((id) => {
+		const a = getAbility(id);
+		return !a || temPpDeCura(entity, a);
+	}).filter((id) => !(entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0 && id === entity.disabledAbilityId)).filter((id) => !(entity.tormentedUntil && entity.tormentedUntil > 0 && id === entity.lastUsedAbilityId)).filter((id) => id !== "curse" || attackerSpecies.type === "GHOST" || attackerSpecies.type2 === "GHOST");
 	const candidatosFinais = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId) ? candidateIds.filter((id) => id === entity.forcedAbilityId) : candidateIds;
 	if (entity.poke.status?.tipo === "sleep") return candidatosFinais.includes("sleep_talk") && isAbilityReady(entity, "sleep_talk") && !(entity.silenciadoAte > 0) ? getAbility("sleep_talk") : null;
 	const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0);
@@ -153676,10 +153708,14 @@ function executePlayerAction(world, player, engagedEnemies, silent, golpeEscolhi
 	if (truantImpedeAcao(world, player, silent)) return;
 	const primaryTarget = engagedEnemies[0];
 	const allEnemies = nearbyAliveEnemies(world);
+	sincronizarAlvoDaCura(player, primaryTarget?.id);
+	if (golpeEscolhido && !temPpDeCura(player, golpeEscolhido)) return;
 	const ability = golpeEscolhido ?? pickAbility(world, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(player, ability);
+	sincronizarAlvoDaCura(player, primaryTarget?.id);
+	gastarPpDeCura(player, ability);
 	startGlobalCooldown(player, MIN_ACTION_GAP);
 	const tempo = iniciarPoseDoGolpe(world, player, ability, primaryTarget);
 	announceAbility(world, player, ability);
@@ -153708,6 +153744,8 @@ function executeEnemyAction(world, enemy, player, silent, golpeEscolhido = null)
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(enemy, ability);
+	sincronizarAlvoDaCura(enemy, player.id);
+	gastarPpDeCura(enemy, ability);
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
 	const tempo = iniciarPoseDoGolpe(world, enemy, ability, player);
 	announceAbility(world, enemy, ability);
