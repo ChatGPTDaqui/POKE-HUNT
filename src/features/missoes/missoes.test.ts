@@ -1,7 +1,7 @@
 // Janela Missões (18/10/2026): entrada única, aba inicial, telas antigas viram
 // aba, e a Rota do Treinador lendo as constantes do jogo.
 import { beforeEach, describe, expect, it } from 'vitest'
-import { abaInicial, totalDePendencias, ABAS_DE_MISSOES } from '@/data/abasDeMissoes'
+import { abaInicial, totalDePendencias, ABAS_DE_MISSOES, GRUPOS_DE_MISSOES, grupoTemSubmenu } from '@/data/abasDeMissoes'
 import { useUiStore } from '@/stores/uiStore'
 import { faseAtual, rotaDoTreinador, CONQUISTAS_DA_GS_BALL, type EntradaDaRota } from '@/data/rotaDoTreinador'
 import { BIOMAS, ESTAGIOS_PARA_O_LANCE } from '@/data/biomas'
@@ -42,8 +42,9 @@ describe('janela Missões', () => {
     expect(totalDePendencias({})).toBe(0)
   })
 
-  it('as abas ficam em dois grupos: Hoje e Progresso', () => {
-    expect(ABAS_DE_MISSOES.filter((a) => a.grupo === 'hoje').map((a) => a.aba)).toEqual(['diario', 'objetivos'])
+  it('nivel de cima: Diario, Objetivos e Progresso; so Progresso tem submenu', () => {
+    expect(GRUPOS_DE_MISSOES.map((g) => g.label)).toEqual(['Diário', 'Objetivos', 'Progresso'])
+    expect(GRUPOS_DE_MISSOES.filter((g) => grupoTemSubmenu(g.value)).map((g) => g.value)).toEqual(['progresso'])
     expect(ABAS_DE_MISSOES.filter((a) => a.grupo === 'progresso').map((a) => a.aba))
       .toEqual(['tasks', 'especialidades', 'conquistas', 'bestiario'])
   })
