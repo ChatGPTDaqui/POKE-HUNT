@@ -29,12 +29,10 @@ function pokeFragil(uid: string): PokeInstance {
     ivs: { hp: 10, atkFis: 10, atkEsp: 10, def: 10, defEsp: 10, speed: 10 },
     stats: { hp: 20, atkFis: 10, atkEsp: 10, def: 5, defEsp: 5, speed: 10 },
     hp: 20,
-    unlockedAbilities: [],
-    // Precisa gastar um slot no Ataque Basico desde 2026-08-18: antes ele era
-    // injetado de graca como posicao fixa da rotacao, e estas fixtures nao
-    // conhecem golpe NENHUM. Sem isto o POKE fica sem nada pra usar e os testes
-    // de sequencia falham por um motivo que nao tem a ver com a sequencia.
-    activeAbilities: ['basic_attack'],
+    // Um golpe de dano qualquer: sem o Ataque Basico (19/10/2026) a fixture
+    // precisa conhecer algum, senao o POKE nao ataca.
+    unlockedAbilities: ['tackle'],
+    activeAbilities: ['tackle'],
   }
 }
 
@@ -51,12 +49,10 @@ function pokeAbsurdo(): PokeInstance {
     ivs: { hp: 31, atkFis: 31, atkEsp: 31, def: 31, defEsp: 31, speed: 31 },
     stats: { hp: 99999, atkFis: 99999, atkEsp: 99999, def: 99999, defEsp: 99999, speed: 500 },
     hp: 99999,
-    unlockedAbilities: [],
-    // Precisa gastar um slot no Ataque Basico desde 2026-08-18: antes ele era
-    // injetado de graca como posicao fixa da rotacao, e estas fixtures nao
-    // conhecem golpe NENHUM. Sem isto o POKE fica sem nada pra usar e os testes
-    // de sequencia falham por um motivo que nao tem a ver com a sequencia.
-    activeAbilities: ['basic_attack'],
+    // Um golpe de dano qualquer: sem o Ataque Basico (19/10/2026) a fixture
+    // precisa conhecer algum, senao o POKE nao ataca.
+    unlockedAbilities: ['tackle'],
+    activeAbilities: ['tackle'],
   }
 }
 

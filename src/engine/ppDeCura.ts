@@ -30,20 +30,29 @@ export function sincronizarAlvoDaCura(entity: ComPpDeCura, alvoId: string | null
   entity.usosDeCura = {}
 }
 
-export function ppDeCuraRestante(entity: ComPpDeCura, ability: Pick<Ability, 'id' | 'pp' | 'healPercent' | 'power'>): number | null {
-  if (!ehCuraPura(ability)) return null
+/**
+ * Este golpe gasta PP por alvo? A cura pura sempre. E, desde o fim do Ataque
+ * Basico (19/10/2026), QUALQUER golpe de um POKE sem golpe de dano: ele usa o
+ * que tem ate acabar o PP e so entao parte pro Struggle — como no jogo original.
+ */
+export function gastaPpPorAlvo(ability: Pick<Ability, 'healPercent' | 'power'>, semGolpeDeDano = false): boolean {
+  return semGolpeDeDano || ehCuraPura(ability)
+}
+
+export function ppDeCuraRestante(entity: ComPpDeCura, ability: Pick<Ability, 'id' | 'pp' | 'healPercent' | 'power'>, semGolpeDeDano = false): number | null {
+  if (!gastaPpPorAlvo(ability, semGolpeDeDano)) return null
   return Math.max(0, ability.pp - (entity.usosDeCura?.[ability.id] ?? 0))
 }
 
 /** O golpe de cura ainda tem PP contra o alvo atual? (Golpe que não é cura: sempre.) */
-export function temPpDeCura(entity: ComPpDeCura, ability: Pick<Ability, 'id' | 'pp' | 'healPercent' | 'power'>): boolean {
-  const restante = ppDeCuraRestante(entity, ability)
+export function temPpDeCura(entity: ComPpDeCura, ability: Pick<Ability, 'id' | 'pp' | 'healPercent' | 'power'>, semGolpeDeDano = false): boolean {
+  const restante = ppDeCuraRestante(entity, ability, semGolpeDeDano)
   return restante === null || restante > 0
 }
 
 /** Gasta 1 PP se for cura pura. Chamar no disparo do golpe. */
-export function gastarPpDeCura(entity: ComPpDeCura, ability: Pick<Ability, 'id' | 'healPercent' | 'power'>): void {
-  if (!ehCuraPura(ability)) return
+export function gastarPpDeCura(entity: ComPpDeCura, ability: Pick<Ability, 'id' | 'healPercent' | 'power'>, semGolpeDeDano = false): void {
+  if (!gastaPpPorAlvo(ability, semGolpeDeDano)) return
   const usos = (entity.usosDeCura ??= {})
   usos[ability.id] = (usos[ability.id] ?? 0) + 1
 }

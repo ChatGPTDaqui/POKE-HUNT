@@ -19,9 +19,10 @@
 // EXATO que o defeito produz, e é sobre eles que a correção age.
 import { describe, expect, it, vi } from 'vitest'
 
-import { BASIC_ATTACK } from '@/data/abilities'
 import { updateCombat } from './systems/combatSystem'
 import type { WorldState } from './types'
+import { getAbility as getAbilityDoCatalogo } from '@/data/abilities'
+const TACKLE = getAbilityDoCatalogo('tackle')!
 
 vi.mock('@/stores/toastStore', () => ({
   useToastStore: { getState: () => ({ pushToast() {} }) },
@@ -60,7 +61,7 @@ function duelo(velocidadeDoJogador: number, velocidadeDoInimigo: number) {
     poke: {
       uid: `${id}-uid`, speciesId: 'rattata', level: 50, isShiny: false,
       hp: 1, exp: 0, ivs: {}, stats: stats(speed),
-      activeAbilities: [BASIC_ATTACK.id], unlockedAbilities: [], disabledAbilities: [],
+      activeAbilities: ['basic_attack'], unlockedAbilities: [], disabledAbilities: [],
     },
   })
 
@@ -78,8 +79,8 @@ function duelo(velocidadeDoJogador: number, velocidadeDoInimigo: number) {
     // inimigo empurra primeiro. É o que faz a Velocidade ser a ÚNICA variável —
     // sem isso, um teste que passasse poderia estar só lendo a ordem do array.
     pendingHits: [
-      { id: 'hit-1', timer: 0, attackerId: 'enemy-1', targetId: 'player-1', ability: BASIC_ATTACK },
-      { id: 'hit-2', timer: 0, attackerId: 'player-1', targetId: 'enemy-1', ability: BASIC_ATTACK },
+      { id: 'hit-1', timer: 0, attackerId: 'enemy-1', targetId: 'player-1', ability: TACKLE },
+      { id: 'hit-2', timer: 0, attackerId: 'player-1', targetId: 'enemy-1', ability: TACKLE },
     ],
     pendingWishes: [],
     counters: { effect: 0, pendingHit: 3, enemy: 0 },
@@ -142,8 +143,8 @@ describe('ordem de resolucao por Velocidade (PH-493)', () => {
     // Mesmo instante de disparo (pouso - timer = 0 nos dois), pousos diferentes:
     // o lento (inimigo) bate em 0,1 s, o rapido (jogador) em 0,4 s.
     world.pendingHits = [
-      { id: 'hit-1', timer: 0.1, pouso: 0.1, attackerId: 'enemy-1', targetId: 'player-1', ability: BASIC_ATTACK },
-      { id: 'hit-2', timer: 0.4, pouso: 0.4, attackerId: 'player-1', targetId: 'enemy-1', ability: BASIC_ATTACK },
+      { id: 'hit-1', timer: 0.1, pouso: 0.1, attackerId: 'enemy-1', targetId: 'player-1', ability: TACKLE },
+      { id: 'hit-2', timer: 0.4, pouso: 0.4, attackerId: 'player-1', targetId: 'enemy-1', ability: TACKLE },
     ]
     for (let i = 0; i < 40; i++) updateCombat(world, 0.016, { silent: true })
     expect(world.enemies[0].poke.hp, 'o lento tinha que cair').toBe(0)
@@ -154,8 +155,8 @@ describe('ordem de resolucao por Velocidade (PH-493)', () => {
     const world = duelo(300, 50)
     // O inimigo disparou 0,2 s depois do jogador (pouso - timer diferente).
     world.pendingHits = [
-      { id: 'hit-1', timer: 0.1, pouso: 0.1, attackerId: 'enemy-1', targetId: 'player-1', ability: BASIC_ATTACK },
-      { id: 'hit-2', timer: 0.4, pouso: 0.6, attackerId: 'player-1', targetId: 'enemy-1', ability: BASIC_ATTACK },
+      { id: 'hit-1', timer: 0.1, pouso: 0.1, attackerId: 'enemy-1', targetId: 'player-1', ability: TACKLE },
+      { id: 'hit-2', timer: 0.4, pouso: 0.6, attackerId: 'player-1', targetId: 'enemy-1', ability: TACKLE },
     ]
     for (let i = 0; i < 12; i++) updateCombat(world, 0.016, { silent: true })
     expect(world.player!.poke.hp, 'o golpe do lento tinha que pousar no proprio tempo').toBe(0)

@@ -34,7 +34,7 @@ import { todasAsTirasDeCaptura } from './captureAnim'
 import { SUB_BIOMA_POR_CHAVE } from './biomas'
 import { SPECIES } from './pokes'
 import { nivelDeAprendizado } from './activeAbilities'
-import { BASIC_ATTACK, getAbility } from './abilities'
+import { getAbility } from './abilities'
 import { vfxDoGolpe } from './moveVfx'
 import { TETO_DE_CARREGAMENTO_MS } from './tetoDeCarregamento'
 
@@ -161,7 +161,7 @@ export async function preloadEspecies(
  * sempre: todo POKE tem.
  */
 export function tiposDeGolpe(especies: string[], golpesAvulsos: string[] = []): Set<string> {
-  const tipos = new Set<string>([BASIC_ATTACK.type])
+  const tipos = new Set<string>(['NORMAL']) // Struggle (sem tipo, desenhado como NORMAL)
   const somar = (abilityId: string) => {
     const tipo = getAbility(abilityId)?.type
     if (tipo) tipos.add(tipo)

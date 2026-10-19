@@ -29,7 +29,10 @@
 //    Togepi) nao nascer com slot vazio e lutando menos do que antes.
 //  - A RPC `definir_golpes_ativos` recusava as duas chaves com "esse golpe nao
 //    ocupa slot"; liberado na migration 20260818120000.
-import { getAbility, isDamagingAbility, BASIC_ATTACK, type Ability } from './abilities'
+import { getAbility, isDamagingAbility, type Ability } from './abilities'
+
+/** Id do antigo Ataque Basico (removido em 19/10/2026). Save antigo ainda o traz: e descartado. */
+const ATAQUE_BASICO_LEGADO = 'basic_attack'
 import { typedAoeMoveKey, TYPED_AOE_MOVES } from './typedAoeMoves'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
@@ -150,15 +153,8 @@ export function activeAbilitiesPadrao(species: Species, level: number): string[]
   const status = learnset.filter((key) => !isDamagingAbility(getAbility(key))).reverse()
   const escolha = [...dano, ...status].slice(0, MAX_ACTIVE_ABILITIES)
 
-  // AINDA sobrou slot: entra o Ataque Basico. Desde que ele passou a ocupar
-  // slot (ver o topo do arquivo) ele deixou de ser gratuito, e um POKE de
-  // learnset curto — nivel baixo, ou Igglybuff/Togepi/Unown, que tem 1 ou 2
-  // golpes de dano no moveset inteiro — nasceria com slot VAZIO e atacando
-  // menos do que atacava antes desta leva. Preenchendo aqui, o default
-  // continua sendo a melhor jogada possivel; o jogador tira se quiser.
-  while (escolha.length < MAX_ACTIVE_ABILITIES && !escolha.includes(BASIC_ATTACK.id)) {
-    escolha.push(BASIC_ATTACK.id)
-  }
+  // Sem Ataque Basico desde 19/10/2026: slot que sobra fica vago. POKE sem
+  // golpe de dano usa o que tem ate o PP acabar e depois o Struggle.
   return escolha
 }
 
@@ -204,7 +200,7 @@ export function encaixarNovosGolpes(atuais: string[], novos: string[]): string[]
     // O Ataque Basico fica de fora: ele nao e "aprendido" em nivel nenhum,
     // entao nunca chega como novidade — quem o coloca e o default
     // (`activeAbilitiesPadrao`) ou o proprio jogador.
-    if (saida.includes(key) || key === BASIC_ATTACK.id) continue
+    if (saida.includes(key) || key === ATAQUE_BASICO_LEGADO) continue
     if (!getAbility(key)) continue
     saida.push(key)
   }
@@ -251,7 +247,7 @@ export function sanearEscolhaDeGolpes(
   species: Species,
   level: number,
 ): string[] {
-  const validos = new Set([...conhecidos, BASIC_ATTACK.id])
+  const validos = new Set(conhecidos.filter((k) => k !== ATAQUE_BASICO_LEGADO))
   // Duplicata aqui vira `key` React duplicada em toda UI que mapeia por
   // `ability.id` (`AbilityHud`), e key duplicada corrompe a reconciliacao: o
   // node extra fica orfao e sobrevive a troca de POKE seguinte mostrando o

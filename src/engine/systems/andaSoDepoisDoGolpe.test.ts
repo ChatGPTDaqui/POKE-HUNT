@@ -15,7 +15,6 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { BASIC_ATTACK } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { createEnemyEntity } from '../entity'
@@ -30,7 +29,7 @@ const GOLPE = 'ember'
 function calado(especie: string, nivel: number, rng: ReturnType<typeof createRng>) {
   const poke = createPokeInstance(rng, especie, nivel)
   poke.disabledAbilities = Object.fromEntries(
-    [...golpesUtilizaveis(poke, SPECIES[poke.speciesId], true), BASIC_ATTACK.id].map((id) => [id, true]),
+    [...golpesUtilizaveis(poke, SPECIES[poke.speciesId], true), 'basic_attack'].map((id) => [id, true]),
   )
   return poke
 }
@@ -43,7 +42,7 @@ function cenario() {
   // Um golpe so: o teste mede UM uso.
   jogador.unlockedAbilities = [...jogador.unlockedAbilities, GOLPE]
   jogador.activeAbilities = [GOLPE]
-  jogador.disabledAbilities = { [BASIC_ATTACK.id]: true }
+  jogador.disabledAbilities = { ['basic_attack']: true }
   gs.addPokeToTeam(jogador)
   gs.setActiveIndex(0)
   const world = buildMapWorld('route_46', useGameStateStore.getState().team[0], {

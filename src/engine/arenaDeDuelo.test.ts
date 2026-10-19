@@ -38,8 +38,8 @@ function poke(uid: string, hp: number): PokeInstance {
     ivs: { hp: 10, atkFis: 10, atkEsp: 10, def: 10, defEsp: 10, speed: 10 },
     stats: { hp: 20, atkFis: 10, atkEsp: 10, def: 5, defEsp: 5, speed: 10 },
     hp,
-    unlockedAbilities: [],
-    activeAbilities: ['basic_attack'],
+    unlockedAbilities: ['tackle'],
+    activeAbilities: ['tackle'],
   }
 }
 

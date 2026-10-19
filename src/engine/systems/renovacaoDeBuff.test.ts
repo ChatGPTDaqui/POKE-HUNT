@@ -48,7 +48,10 @@ function cenario() {
   const rng = createRng(31)
   const counters = { entity: 1, effect: 1, pendingHit: 1 }
   const jogadorPoke = createPokeInstance(rng, 'spearow', 25)
-  jogadorPoke.activeAbilities = ['agility']
+  // Com um golpe de dano junto: so quem TEM dano decide se vale renovar o buff;
+  // POKE so de status gasta o PP do que tem (19/10/2026, fim do Ataque Basico).
+  jogadorPoke.unlockedAbilities = [...new Set([...jogadorPoke.unlockedAbilities, 'peck'])]
+  jogadorPoke.activeAbilities = ['agility', 'peck']
 
   const world = buildMapWorld('campo_aberto_e1', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
@@ -80,7 +83,8 @@ function cenarioBellyDrum() {
   const rng = createRng(31)
   const counters = { entity: 1, effect: 1, pendingHit: 1 }
   const jogadorPoke = createPokeInstance(rng, 'makuhita', 25)
-  jogadorPoke.activeAbilities = ['belly_drum']
+  jogadorPoke.unlockedAbilities = [...new Set([...jogadorPoke.unlockedAbilities, 'arm_thrust'])]
+  jogadorPoke.activeAbilities = ['belly_drum', 'arm_thrust']
 
   const world = buildMapWorld('campo_aberto_e1', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!

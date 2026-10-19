@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { BASIC_ATTACK, getAbility, TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
+import { getAbility, TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { especialidadeNiveisDefault } from '@/data/especialidades'
@@ -89,7 +89,7 @@ describe('Explosao/Autodestruicao com atacante em HP baixo (PH-10)', () => {
     // golpe e o teste nao mediria mais so o auto-dano.
     const enemySpecies = SPECIES[enemy.poke.speciesId]
     enemy.poke.disabledAbilities = Object.fromEntries(
-      [...golpesUtilizaveis(enemy.poke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+      [...golpesUtilizaveis(enemy.poke, enemySpecies, true), 'basic_attack'].map((id) => [id, true]),
     )
 
     updateCombat(world, 0)
@@ -201,17 +201,17 @@ describe('AOE elemental e Ataque Basico sao opcionais', () => {
     const mundo = cenario(3)
     // Unico golpe escolhido: se o desligamento nao valesse, ele seria usado a
     // forca — e o caso mais apertado do contrato.
-    mundo.player.poke.activeAbilities = [BASIC_ATTACK.id]
-    mundo.player.poke.disabledAbilities = { [BASIC_ATTACK.id]: true }
+    mundo.player.poke.activeAbilities = ['basic_attack']
+    mundo.player.poke.disabledAbilities = { ['basic_attack']: true }
 
-    expect(golpesUsados(mundo, 40).has(BASIC_ATTACK.id)).toBe(false)
+    expect(golpesUsados(mundo, 40).has('basic_attack')).toBe(false)
   })
 
   it('...e continua sendo usado quando NAO esta desligado (prova que o teste acima vale)', () => {
     const mundo = cenario(3)
-    mundo.player.poke.activeAbilities = [BASIC_ATTACK.id]
+    mundo.player.poke.activeAbilities = ['basic_attack']
 
-    expect(golpesUsados(mundo, 40).has(BASIC_ATTACK.id)).toBe(true)
+    expect(golpesUsados(mundo, 40).has('basic_attack')).toBe(true)
   })
 
   // O outro lado da mesma regra, e a mudanca de comportamento mais facil de
@@ -291,7 +291,7 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
     // abaixo.
     jogadorPoke.disabledAbilities = {
       [typedAoeMoveKey(SPECIES.charmander.type)]: true,
-      [BASIC_ATTACK.id]: true,
+      ['basic_attack']: true,
     }
     const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
@@ -360,7 +360,7 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
 // pronto — custa DPS, e agora isso e escolha do jogador.
 //
 // Ele NAO atualiza `lastUsedAbilityId` (ver executePlayerAction), entao o
-// sinal de que foi escolhido e o proprio `cooldowns[BASIC_ATTACK.id]`.
+// sinal de que foi escolhido e o proprio `cooldowns['basic_attack']`.
 describe('Ataque Basico na fila do jogador', () => {
   function cenarioFilaComBasico() {
     const rng = createRng(3)
@@ -369,7 +369,7 @@ describe('Ataque Basico na fila do jogador', () => {
     jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, 'flamethrower']
     // Basico na PRIMEIRA posicao: e a mesma ordem que o describe testava
     // quando o motor o injetava sozinho, agora escrita como escolha.
-    jogadorPoke.activeAbilities = [BASIC_ATTACK.id, 'scratch', 'ember', 'flamethrower']
+    jogadorPoke.activeAbilities = ['basic_attack', 'scratch', 'ember', 'flamethrower']
     jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
     const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
@@ -397,7 +397,7 @@ describe('Ataque Basico na fila do jogador', () => {
     // no disparo — sem resetar globalCooldown, este 2o tick so deixa o hit ja
     // enfileirado pousar, nao dispara acao nova.
     updateCombat(world, 1, { silent: true })
-    expect(player.cooldowns[BASIC_ATTACK.id]).toBeGreaterThan(0)
+    expect(player.cooldowns['basic_attack']).toBeGreaterThan(0)
     expect(player.lastUsedAbilityId).toBeUndefined()
 
     // Fila avancou pra posicao 1 (scratch), que atualiza lastUsedAbilityId.
@@ -408,7 +408,7 @@ describe('Ataque Basico na fila do jogador', () => {
 
   it('pula Ataque Basico quando ele esta em cooldown, sem travar o turno', () => {
     const { world, player } = cenarioFilaComBasico()
-    player.cooldowns[BASIC_ATTACK.id] = 999
+    player.cooldowns['basic_attack'] = 999
     updateCombat(world, 1, { silent: true })
     expect(player.lastUsedAbilityId).toBe('scratch')
   })
@@ -426,17 +426,17 @@ describe('Ataque Basico na fila do jogador', () => {
       // como sinal de "foi escolhido" — sem resetar globalCooldown, nao
       // dispara acao nova.
       updateCombat(world, 1, { silent: true })
-      usouBasico.push((player.cooldowns[BASIC_ATTACK.id] ?? 0) > 0)
+      usouBasico.push((player.cooldowns['basic_attack'] ?? 0) > 0)
     }
     expect(usouBasico).toEqual([true, false, false, false, true])
   })
 
   it('desligado pelo jogador, sai completamente da rotacao', () => {
     const { world, player } = cenarioFilaComBasico()
-    player.poke.disabledAbilities = { ...player.poke.disabledAbilities, [BASIC_ATTACK.id]: true }
+    player.poke.disabledAbilities = { ...player.poke.disabledAbilities, ['basic_attack']: true }
     updateCombat(world, 1, { silent: true })
     expect(player.lastUsedAbilityId).toBe('scratch')
-    expect(player.cooldowns[BASIC_ATTACK.id]).toBeUndefined()
+    expect(player.cooldowns['basic_attack']).toBeUndefined()
   })
 })
 
@@ -459,7 +459,7 @@ describe('golpes novos de tick volatil', () => {
     // rouba o primeiro turno do golpe sob teste.
     jogadorPoke.disabledAbilities = {
       [typedAoeMoveKey(SPECIES[especieJogador].type)]: true,
-      [BASIC_ATTACK.id]: true,
+      ['basic_attack']: true,
     }
     const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
@@ -476,7 +476,7 @@ describe('golpes novos de tick volatil', () => {
     // executeEnemyAction nunca enfileira nada.
     const enemySpecies = SPECIES[enemyPoke.speciesId]
     enemyPoke.disabledAbilities = Object.fromEntries(
-      [...golpesUtilizaveis(enemyPoke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+      [...golpesUtilizaveis(enemyPoke, enemySpecies, true), 'basic_attack'].map((id) => [id, true]),
     )
     const enemy = createEnemyEntity(world.counters, {
       poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
@@ -1043,7 +1043,7 @@ describe('golpe de multiplos acertos', () => {
     jogadorPoke.activeAbilities = [golpeId]
     jogadorPoke.disabledAbilities = {
       [typedAoeMoveKey(SPECIES.charmander.type)]: true,
-      [BASIC_ATTACK.id]: true,
+      ['basic_attack']: true,
     }
     const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
@@ -1055,7 +1055,7 @@ describe('golpe de multiplos acertos', () => {
     // Inimigo silenciado: um contra-ataque dele somaria numeros de dano no
     // mesmo `world.effects` que este teste conta.
     enemyPoke.disabledAbilities = Object.fromEntries(
-      [...golpesUtilizaveis(enemyPoke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+      [...golpesUtilizaveis(enemyPoke, enemySpecies, true), 'basic_attack'].map((id) => [id, true]),
     )
     const enemy = createEnemyEntity(world.counters, {
       poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',

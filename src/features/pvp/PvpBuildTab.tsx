@@ -10,7 +10,7 @@ import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { SPECIES, averageIvPercent, type PokeInstance, type Species } from '@/data/pokes'
 import { MAX_ACTIVE_ABILITIES, golpesAprendidosAte } from '@/data/activeAbilities'
-import { BASIC_ATTACK, getAbility } from '@/data/abilities'
+import { getAbility } from '@/data/abilities'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useMochilaStore } from '@/stores/mochilaStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
@@ -35,7 +35,7 @@ function nomeDoPreset(p: PresetPvp): string {
 }
 
 function golpesConhecidos(poke: PokeInstance, species: Species): string[] {
-  return [...new Set([BASIC_ATTACK.id, ...golpesAprendidosAte(species, poke.level), ...(poke.golpesDeMaquina ?? [])])]
+  return [...new Set([...golpesAprendidosAte(species, poke.level), ...(poke.golpesDeMaquina ?? [])])]
 }
 
 export function PvpBuildTab() {

@@ -5,7 +5,7 @@
 // fosse remontado a cada clique de aba, a animacao do GIF reiniciaria do zero.
 import type { ReactNode } from 'react'
 import { expProgressForInstance } from '@/engine/systems/progressionSystem'
-import { getAbility, BASIC_ATTACK } from '@/data/abilities'
+import { getAbility } from '@/data/abilities'
 import { golpesUtilizaveis, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { controller } from '@/engine/controller'
@@ -472,33 +472,6 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           cabecalho de cima (que nunca rola). Reservando o gutter sempre nos
           dois, a largura util fica igual com ou sem overflow. */}
       <div className="max-h-[18em] overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
-        {meu && (
-          <div className={`${MOVE_GRID} border-b border-menu-line bg-menu-card px-[.5em] py-[.3em] text-menu-ink`}>
-            <span className="text-menu-muted">—</span>
-            <AbilityTooltip ability={BASIC_ATTACK} poke={poke}>
-              <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
-                {BASIC_ATTACK.name}
-              </span>
-            </AbilityTooltip>
-            <span><TypeChip type={BASIC_ATTACK.type} /></span>
-            <span className="text-menu-muted">{ROTULO_CATEGORIA[resolveAbilityCategory(BASIC_ATTACK, poke)]}</span>
-            <span>{BASIC_ATTACK.power > 0 ? BASIC_ATTACK.power : '—'}</span>
-            <span className="text-menu-muted">{textoDePrecisao(BASIC_ATTACK)}</span>
-            <span className="text-menu-muted">—</span>
-            <span>
-              {/* Golpe comum desde 2026-08-18: ocupa um dos 4 slots como
-                  qualquer outro, com a mesma celula de ORDEM. Todo POKE
-                  "conhece" o Ataque Basico, entao `aprendido` e sempre true. */}
-              <CelulaOrdem
-                aprendido
-                ordem={ativos.indexOf(BASIC_ATTACK.id) === -1 ? null : ativos.indexOf(BASIC_ATTACK.id) + 1}
-                habilitado={podeEscolher}
-                desligado={Boolean(desabilitados[BASIC_ATTACK.id])}
-                onClick={() => alternar(BASIC_ATTACK.id)}
-              />
-            </span>
-          </div>
-        )}
         {rows.map(({ entry, ability }, index) => {
           const porTm = poke.golpesDeMaquina?.includes(entry.key) ?? false
           const learned = porTm || entry.levelReq <= poke.level
