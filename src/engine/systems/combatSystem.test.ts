@@ -136,7 +136,7 @@ describe('silent pula criacao de WorldEffect sem afetar dano (PH-11)', () => {
 // na tela de Equipes — o jeito de recusar cada um e o duplo-clique na barra de
 // golpes, que grava em `disabledAbilities` (RPC `alternar_habilidade`). Estes
 // testes travam o outro lado do contrato: que o combate REALMENTE obedece.
-describe('AOE elemental e Ataque Basico sao opcionais', () => {
+describe('AOE elemental e opcional', () => {
   function cenario(nivel: number) {
     const rng = createRng(7)
     const counters = { entity: 1, effect: 1, pendingHit: 1 }
@@ -197,38 +197,13 @@ describe('AOE elemental e Ataque Basico sao opcionais', () => {
     expect(golpesUsados(desligado, 40).has(aoe)).toBe(false)
   })
 
-  it('o Ataque Basico some da rotacao quando desligado, mesmo sendo o unico slot', () => {
-    const mundo = cenario(3)
-    // Unico golpe escolhido: se o desligamento nao valesse, ele seria usado a
-    // forca — e o caso mais apertado do contrato.
-    mundo.player.poke.activeAbilities = ['basic_attack']
-    mundo.player.poke.disabledAbilities = { ['basic_attack']: true }
-
-    expect(golpesUsados(mundo, 40).has('basic_attack')).toBe(false)
-  })
-
   it('...e continua sendo usado quando NAO esta desligado (prova que o teste acima vale)', () => {
-    const mundo = cenario(3)
-    mundo.player.poke.activeAbilities = ['basic_attack']
-
-    expect(golpesUsados(mundo, 40).has('basic_attack')).toBe(true)
+    const aoe = typedAoeMoveKey(SPECIES.charmander.type)
+    const mundo = cenario(60)
+    mundo.player.poke.activeAbilities = [aoe]
+    expect(golpesUsados(mundo, 40).has(aoe)).toBe(true)
   })
 
-  // O outro lado da mesma regra, e a mudanca de comportamento mais facil de
-  // confundir com bug: SEM o Ataque Basico num slot, o POKE do jogador nao
-  // recebe nenhum golpe de graca. Ate 2026-08-18 ele era injetado na rotacao
-  // pelo motor; agora quem nao o escolhe simplesmente nao o usa.
-  it('sem nenhum slot escolhido, o jogador NAO ganha o Ataque Basico de graca', () => {
-    const mundo = cenario(3)
-    mundo.player.poke.activeAbilities = []
-
-    expect(golpesUsados(mundo, 40).size).toBe(0)
-  })
-
-  // A precisao de cada golpe bate com o Ultra Sun — 501 golpes conferidos contra
-  // a Bulbapedia por `npm run usum:learnsets`. Este teste cobre o outro lado: que
-  // o numero e USADO, e nao so guardado. Ele ja foi dado como implementado uma
-  // vez sem nunca ter sido ligado.
   it('a precisao do golpe muda quantas vezes ele pousa', () => {
     // Inferno: 100 de poder, 50% de precisao. Flamethrower: 90 de poder, 100%.
     function pousos(golpe: string, turnos: number): number {
@@ -294,6 +269,9 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
       ['basic_attack']: true,
     }
     const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
+    // Este cenario mede a FILA: rotacao de golpes ligada (19/10/2026; desligada
+    // a IA escolhe o golpe de mais dano).
+    world.rotacaoDeGolpes = true
     const player = world.player!
     player.cooldowns = {}
     player.globalCooldown = 0
@@ -349,94 +327,6 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
     player.globalCooldown = 0
     updateCombat(world, 1, { silent: true })
     expect(player.lastUsedAbilityId).toBe('scratch')
-  })
-})
-
-// O Ataque Basico participa da fila como QUALQUER outro golpe, na posicao em
-// que o jogador o colocou. Ate 2026-08-18 ele era injetado pelo motor como
-// posicao fixa e gratuita antes dos 4 slots; agora ele gasta um dos 4 (pedido
-// explicito do usuario). O que NAO mudou: quando esta na fila, ele executa
-// toda vez que a vez dele chega e nao esta em cooldown, mesmo com golpe forte
-// pronto — custa DPS, e agora isso e escolha do jogador.
-//
-// Ele NAO atualiza `lastUsedAbilityId` (ver executePlayerAction), entao o
-// sinal de que foi escolhido e o proprio `cooldowns['basic_attack']`.
-describe('Ataque Basico na fila do jogador', () => {
-  function cenarioFilaComBasico() {
-    const rng = createRng(3)
-    const counters = { entity: 1, effect: 1, pendingHit: 1 }
-    const jogadorPoke = createPokeInstance(rng, 'charmander', 60)
-    jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, 'flamethrower']
-    // Basico na PRIMEIRA posicao: e a mesma ordem que o describe testava
-    // quando o motor o injetava sozinho, agora escrita como escolha.
-    jogadorPoke.activeAbilities = ['basic_attack', 'scratch', 'ember', 'flamethrower']
-    jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
-    const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
-    const player = world.player!
-    player.cooldowns = {}
-    player.globalCooldown = 0
-    player.poke.stats = { ...player.poke.stats, hp: 999999 }
-    player.poke.hp = 999999
-
-    const enemyPoke = createPokeInstance(rng, 'rattata', 60)
-    enemyPoke.stats = { ...enemyPoke.stats, hp: 999999, atkFis: 1, atkEsp: 1 }
-    enemyPoke.hp = 999999
-    const enemy = createEnemyEntity(world.counters, {
-      poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
-    })
-    enemy.state = 'engaged'
-    enemy.targetId = player.id
-    world.enemies = [enemy]
-    return { world, player, enemy }
-  }
-
-  it('executa na 1a posicao da fila mesmo com golpe de verdade pronto', () => {
-    const { world, player } = cenarioFilaComBasico()
-    updateCombat(world, 1, { silent: true })
-    // PH-176: cooldown so arma quando o hit pousa (HIT_LAND_DELAY), nao mais
-    // no disparo — sem resetar globalCooldown, este 2o tick so deixa o hit ja
-    // enfileirado pousar, nao dispara acao nova.
-    updateCombat(world, 1, { silent: true })
-    expect(player.cooldowns['basic_attack']).toBeGreaterThan(0)
-    expect(player.lastUsedAbilityId).toBeUndefined()
-
-    // Fila avancou pra posicao 1 (scratch), que atualiza lastUsedAbilityId.
-    player.globalCooldown = 0
-    updateCombat(world, 1, { silent: true })
-    expect(player.lastUsedAbilityId).toBe('scratch')
-  })
-
-  it('pula Ataque Basico quando ele esta em cooldown, sem travar o turno', () => {
-    const { world, player } = cenarioFilaComBasico()
-    player.cooldowns['basic_attack'] = 999
-    updateCombat(world, 1, { silent: true })
-    expect(player.lastUsedAbilityId).toBe('scratch')
-  })
-
-  it('loop e ciclico: volta pro Ataque Basico depois do ultimo slot', () => {
-    const { world, player } = cenarioFilaComBasico()
-    const usouBasico: boolean[] = []
-    // 4 posicoes: basico, scratch, ember, flamethrower. 5 voltas cobre um
-    // ciclo completo + a volta seguinte, provando que nao para no ultimo.
-    for (let i = 0; i < 5; i++) {
-      player.cooldowns = {}
-      player.globalCooldown = 0
-      updateCombat(world, 1, { silent: true })
-      // PH-176: deixa o hit pousar (HIT_LAND_DELAY) antes de ler o cooldown
-      // como sinal de "foi escolhido" — sem resetar globalCooldown, nao
-      // dispara acao nova.
-      updateCombat(world, 1, { silent: true })
-      usouBasico.push((player.cooldowns['basic_attack'] ?? 0) > 0)
-    }
-    expect(usouBasico).toEqual([true, false, false, false, true])
-  })
-
-  it('desligado pelo jogador, sai completamente da rotacao', () => {
-    const { world, player } = cenarioFilaComBasico()
-    player.poke.disabledAbilities = { ...player.poke.disabledAbilities, ['basic_attack']: true }
-    updateCombat(world, 1, { silent: true })
-    expect(player.lastUsedAbilityId).toBe('scratch')
-    expect(player.cooldowns['basic_attack']).toBeUndefined()
   })
 })
 
@@ -1178,12 +1068,11 @@ describe('Especialidades (PH-198) aplicam no dano real do combate', () => {
 
       const enemyPoke = createPokeInstance(rng, 'rattata', 50)
       const enemySpecies = SPECIES.rattata
-      // Toda a lista selvagem desligada -> cai no Ataque Basico, que herda o
-      // tipo da especie (NORMAL pro Rattata, STAB) — mesmo golpe previsivel
-      // dos dois lados.
-      enemyPoke.disabledAbilities = Object.fromEntries(
-        golpesUtilizaveis(enemyPoke, enemySpecies, true).map((id) => [id, true]),
-      )
+      // So UM golpe NORMAL de dano ligado: mesmo golpe previsivel dos dois
+      // lados. Era o Ataque Basico, removido em 19/10/2026.
+      const kit = golpesUtilizaveis(enemyPoke, enemySpecies, true)
+      const unico = kit.find((id) => { const a = getAbility(id); return a && a.power > 0 && a.type === 'NORMAL' })!
+      enemyPoke.disabledAbilities = Object.fromEntries(kit.filter((id) => id !== unico).map((id) => [id, true]))
       const enemy = createEnemyEntity(world.counters, {
         poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
       })

@@ -103,9 +103,10 @@ describe('rowToPoke: escolha de golpes', () => {
     expect(poke.activeAbilities?.length).toBeGreaterThan(0)
   })
 
-  it('o Ataque Basico sobrevive ao saneamento (nunca esta em unlocked_abilities)', () => {
+  it('o antigo Ataque Basico sai no saneamento (removido em 19/10/2026)', () => {
     const validos = golpesAprendidosAte(SPECIES[ESPECIE], NIVEL)
     const poke = rowToPoke(linha(['basic_attack', validos[0]]))
-    expect(poke.activeAbilities).toEqual(['basic_attack', validos[0]])
+    expect(poke.activeAbilities).not.toContain('basic_attack')
+    expect(poke.activeAbilities).toContain(validos[0])
   })
 })

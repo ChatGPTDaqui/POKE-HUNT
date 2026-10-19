@@ -149,13 +149,12 @@ describe('golpesUtilizaveis', () => {
     expect(golpesUtilizaveis(poke, species, false)).toEqual([aoe, 'ember'])
   })
 
-  it('o Ataque Basico entra quando o jogador gasta um slot nele', () => {
-    // Ele NAO esta em `unlockedAbilities` — nao e aprendido em nivel nenhum —,
-    // entao o filtro de "golpe que o POKE conhece" o descartaria em silencio
-    // sem a isencao explicita em `golpesUtilizaveis`.
+  it('o antigo Ataque Basico gravado num save velho e descartado (removido em 19/10/2026)', () => {
     const species = SPECIES.charizard
     const poke = pokeFalso('charizard', 80, { activeAbilities: ['basic_attack', 'ember'] })
-    expect(golpesUtilizaveis(poke, species, false)).toEqual(['basic_attack', 'ember'])
+    const usaveis = golpesUtilizaveis(poke, species, false)
+    expect(usaveis).not.toContain('basic_attack')
+    expect(usaveis).toContain('ember')
   })
 
   it('selvagem ignora a escolha gravada — ele deriva da especie', () => {

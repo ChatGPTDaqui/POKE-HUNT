@@ -171,6 +171,11 @@ export interface GameStateData {
   autoToggles: {
     autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean
     avancarDeEstagio: boolean; recuarSePerder: boolean
+    /**
+     * Rotacao de golpes (19/10/2026). Ligada: a IA segue a ORDEM que o jogador
+     * montou. Desligada (padrao): escolhe o golpe de mais dano contra cada inimigo.
+     */
+    rotacaoDeGolpes: boolean
   }
   autoPotRules: AutoPotRule[]
   autoCatchConfig: AutoCatchConfig
@@ -234,7 +239,7 @@ export function defaultGameStateData(): GameStateData {
     // descobrir o interruptor.
     autoToggles: {
       autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true,
-      avancarDeEstagio: false, recuarSePerder: false,
+      avancarDeEstagio: false, recuarSePerder: false, rotacaoDeGolpes: false,
     },
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },

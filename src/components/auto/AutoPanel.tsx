@@ -186,6 +186,18 @@ function AbaDeAutomacoes() {
     <div className="flex flex-col gap-[.45em]">
       <PrevisaoDeRecursos />
 
+      {/* Rotacao de golpes (19/10/2026): desligada, a IA escolhe o golpe de mais
+          dano contra cada inimigo; ligada, segue a ordem montada na Equipe. Em
+          qualquer caso, golpe de status so sai quando o alvo aguenta mais de
+          dois golpes. */}
+      <BlocoAuto
+        titulo="Rotação de golpes"
+        resumo={autoToggles.rotacaoDeGolpes ? 'Segue a ordem da Equipe' : 'Golpe de mais dano em cada inimigo'}
+        dica="Ligada: os golpes saem na ordem que você montou na Equipe. Desligada: o bot escolhe o golpe que mais machuca cada inimigo."
+        ligado={autoToggles.rotacaoDeGolpes}
+        aoLigar={(v) => setAutoToggle('rotacaoDeGolpes', v)}
+      />
+
       <BlocoAuto
         titulo="Auto-catch"
         alerta={opcoesBola.find(o => o.id === autoCatchConfig.ballId)?.alerta || opcoesBolaShiny.find(o => o.id === autoCatchConfig.shinyBallId)?.alerta || autoCatchRules.some(r => opcoesBola.find(o => o.id === r.ballItemId)?.alerta)}

@@ -1828,13 +1828,29 @@ function tentarStruggle(entity: WorldEntity): Ability | null {
 // significado pra respeitar, mantem a heuristica antiga: golpe de maior dano
 // esperado entre os prontos, com golpe de status entrando so quando vale a
 // pena (ver golpeDeApoioUtil) e preferencia por AOE que atinge 2+ alvos.
+/**
+ * Golpe de status so vale se o alvo aguentar MAIS que isto de golpes do melhor
+ * golpe de dano pronto (19/10/2026). Era 1 (so pulava contra quem morre num
+ * golpe): Growl gastava metade dos turnos de um POKE de nivel baixo contra
+ * selvagem que cai em dois Scratches.
+ */
+export const GOLPES_PRA_STATUS_VALER = 2
+
 function pickAbilityGreedy(
   world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity,
   prontos: Ability[], estaSilenciado: boolean, clima: ClimaTipo | null,
   aoeTargetCounter: (a: Ability) => number,
+  /**
+   * Jogador com a rotacao DESLIGADA (19/10/2026): "o golpe que mais causa dano
+   * naquele inimigo" — golpe de status nunca entra (o POKE espera o golpe de
+   * dano recarregar). Quem NAO tem golpe de dano nem chega aqui: cai no ramo
+   * do PP/Struggle em `pickAbility`. O selvagem segue com a regra antiga.
+   */
+  soDano = false,
 ): Ability | null {
   const rng = world.rng
   const ready = prontos.filter((ability) => isDamagingAbility(ability))
+  if (soDano) estaSilenciado = true
 
   // ...MAS SO SE O ALVO FOR SOBREVIVER AO MELHOR GOLPE DE DANO.
   //
@@ -1858,7 +1874,7 @@ function pickAbilityGreedy(
       (max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)),
       0,
     )
-    if (maiorDano < defenderEntity.poke.hp) {
+    if (maiorDano * GOLPES_PRA_STATUS_VALER < defenderEntity.poke.hp) {
       return statusPronto.reduce((melhor, a) => (
         (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor
       ))
@@ -1961,7 +1977,7 @@ function pickAbilityDaFila(
       if (!statusVale) continue
       // Mesmo overkill-guard do caminho selvagem: se um golpe de dano pronto
       // ja mata o alvo, nao abre com status na frente dele.
-      if (maiorDanoSePronto() >= defenderEntity.poke.hp) continue
+      if (maiorDanoSePronto() * GOLPES_PRA_STATUS_VALER >= defenderEntity.poke.hp) continue
     }
     entity.filaGolpeIndex = (idx + 1) % n
     return ability
@@ -2041,11 +2057,15 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
   }
   const rotacaoDoJogador = abilidadesFinais
 
-  const escolhido = entity.kind === 'enemy'
+  // Rotacao DESLIGADA (padrao, 19/10/2026): o jogador tambem cai no "melhor
+  // dano contra este inimigo", igual ao selvagem. Ligada: segue a fila dele.
+  const segueFila = entity.kind === 'player' && world.rotacaoDeGolpes === true
+  const escolhido = !segueFila
     ? pickAbilityGreedy(
       world, entity, defenderEntity,
       abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)),
       estaSilenciado, clima, aoeTargetCounter,
+      entity.kind === 'player',
     )
     : pickAbilityDaFila(
       world, entity, defenderEntity,

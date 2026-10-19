@@ -54,6 +54,8 @@ function cenario() {
   jogadorPoke.activeAbilities = ['agility', 'peck']
 
   const world = buildMapWorld('campo_aberto_e1', jogadorPoke, { seed: 0, rng, counters })
+  // Renovacao de buff e coisa da FILA do jogador: rotacao ligada.
+  world.rotacaoDeGolpes = true
   const player = world.player!
 
   // HP alto de proposito: tira o overkill-guard do caminho (ver o topo). Sem
@@ -87,6 +89,8 @@ function cenarioBellyDrum() {
   jogadorPoke.activeAbilities = ['belly_drum', 'arm_thrust']
 
   const world = buildMapWorld('campo_aberto_e1', jogadorPoke, { seed: 0, rng, counters })
+  // Renovacao de buff e coisa da FILA do jogador: rotacao ligada.
+  world.rotacaoDeGolpes = true
   const player = world.player!
 
   const enemy = criarInimigoDeTeste(world, 'rattata', 25, { x: player.x, y: player.y })

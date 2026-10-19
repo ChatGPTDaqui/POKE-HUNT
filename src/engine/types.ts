@@ -865,6 +865,8 @@ export interface EstadoDeLure {
 }
 
 export interface WorldState {
+  /** Rotacao de golpes do jogador ligada (Automacoes). Ausente/false = melhor dano. */
+  rotacaoDeGolpes?: boolean
   /** Trick Room inverte a ordem dos hits simultâneos por cinco turnos. */
   trickRoomRestante?: number
   mapDef: MapDef | null
