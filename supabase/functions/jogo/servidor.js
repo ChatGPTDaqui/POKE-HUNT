@@ -158928,13 +158928,15 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 	const comBag = opcoes.comBag !== false;
 	const filtroDeLocal = comBag ? "" : "&location=eq.team";
 	const comDex = opcoes.comDex !== false;
-	const [player, pokemon, items, pokedex, autoCatchRules, especialidades] = await Promise.all([
+	const comMissoes = opcoes.comMissoes === true;
+	const [player, pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
 		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=${COLUNAS_ITENS}`),
 		comDex ? selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=${COLUNAS_POKEDEX}`) : Promise.resolve([]),
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`),
-		selecionarTudo(cfg, `player_especialidades?user_id=eq.${userId}&select=user_id,tipo,dano_nivel,defesa_nivel`)
+		selecionarTudo(cfg, `player_especialidades?user_id=eq.${userId}&select=user_id,tipo,dano_nivel,defesa_nivel`),
+		comMissoes ? selecionarTudo(cfg, `player_missoes_reivindicadas?user_id=eq.${userId}&select=user_id,tipo,species_id`) : Promise.resolve([])
 	]);
 	if (!player[0]) throw new ErroHttp(404, "jogador sem linha em `players`");
 	const linhasNoLoad = {
@@ -158944,7 +158946,7 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 		pokedex,
 		autoCatchRules,
 		especialidades,
-		missoesReivindicadas: []
+		missoesReivindicadas
 	};
 	return {
 		estado: snapshotToGameState(linhasNoLoad, defaultGameStateData()),
@@ -159403,7 +159405,10 @@ async function rotear(cfg, req, url) {
 				estado,
 				estadoParcial: parcial
 			});
-		}, { comBag: !parcial });
+		}, {
+			comBag: !parcial,
+			comMissoes: true
+		});
 	}
 	return json({ erro: "rota desconhecida" }, 404);
 }
