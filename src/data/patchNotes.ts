@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.35',
+    date: '2026-10-20',
+    title: 'Mural de contratos e ovos',
+    highlights: [
+      'As cadeias de Tasks deram lugar ao Mural de Contratos (Missões › Contratos): 5 contratos por dia, renovados à meia-noite.',
+      'Cada contrato pede abates de uma espécie, ou derrotar um shiny dela, e paga um ovo daquele POKE. Dá para trocar os contratos por diamantes.',
+      'Quanto mais raro o contrato, mais raro o ovo e maior a chance de nascer um POKE Lendário ou Mítico. O ovo de contrato shiny tem 25% de chance de nascer shiny.',
+      'O ovo fica na Mochila e só choca na equipe, com os abates da caçada (ocupa uma vaga). Pronto, é só tocar em Chocar e assistir a revelação.',
+      'Tasks reivindicadas não voltam mais a aparecer como disponíveis depois de recarregar a página.',
+    ],
+  },
+  {
     version: '8.34',
     date: '2026-10-19',
     title: 'Fim do Ataque Básico',

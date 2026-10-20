@@ -3,7 +3,6 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
 import { marcosDaJornada, proximoBioma, MARCOS_BESTIARIO, type MarcoDaJornada } from '@/data/jornada'
 import { maiorEstagioLimpo } from '@/data/progressoDeBioma'
-import { cadeiaDoTipo, chaveDaMissao, MISSAO_TYPES } from '@/data/missoes'
 import { ESPECIALIDADE_TYPES, ESPECIALIDADE_NIVEL_MAX } from '@/data/especialidades'
 import { SPECIES } from '@/data/pokes'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
@@ -36,7 +35,6 @@ export function JornadaDoTreinador({ onBioma, onLance }: {
   const marcos = useJornada()
   const progresso = useGameStateStore(s => s.biomaProgress)
   const kills = useGameStateStore(s => s.pokedexKills)
-  const missoes = useGameStateStore(s => s.missoesReivindicadas)
   const especialidades = useGameStateStore(s => s.especialidades)
   const ativo = useGameStateStore(s => s.team[s.activeIndex]?.speciesId)
   const especieAtiva = ativo ? SPECIES[ativo] : null
@@ -49,12 +47,8 @@ export function JornadaDoTreinador({ onBioma, onLance }: {
     if (passo) avisarTrancado(passo)
     else useUiStore.getState().openScreen(screen)
   }
-  const missao = MISSAO_TYPES.flatMap(tipo => {
-    const m = cadeiaDoTipo(tipo).find(m => !missoes[chaveDaMissao(tipo, m.speciesId)])
-    if (!m) return []
-    const k = kills[m.speciesId]
-    return [{ ...m, tipo, total: (k?.normal ?? 0) + (k?.shiny ?? 0) }]
-  }).sort((a, b) => Math.min(1, b.total / b.alvo) - Math.min(1, a.total / a.alvo))[0]
+  const ovos = useGameStateStore(s => s.ovos)
+  const ovosProntos = ovos.filter(o => o.abatesRestantes <= 0).length
   const pesquisa = Object.keys(SPECIES).flatMap(id => {
     if (LEGENDARY_SPECIES_IDS.includes(id)) return []
     const k = kills[id]
@@ -89,7 +83,7 @@ export function JornadaDoTreinador({ onBioma, onLance }: {
       </section>)}
     </div>
     <div className="mt-[.6em] grid gap-[.5em] text-[.8em] [grid-template-columns:repeat(auto-fit,minmax(min(100%,14em),1fr))]">
-      <section><h3 className="font-medium">Missões · ouro para sua equipe</h3><p className="my-[.4em] text-menu-muted">{missao ? `${SPECIES[missao.speciesId]?.name ?? missao.speciesId}: ${Math.min(missao.total, missao.alvo)}/${missao.alvo} abates · ${missao.recompensa.toLocaleString('pt-BR')} ouro. ${missao.total >= missao.alvo ? 'Recompensa pronta para reivindicar.' : 'Conclua e reivindique para liberar a próxima missão do tipo.'}` : 'Todas as cadeias foram reivindicadas.'}</p><GameButton onClick={() => abrir('tasks')}>Ver missões</GameButton></section>
+      <section><h3 className="font-medium">Contratos · ovos para sua equipe</h3><p className="my-[.4em] text-menu-muted">{ovosProntos > 0 ? `${ovosProntos} ovo(s) pronto(s) para chocar.` : ovos.length > 0 ? `${ovos.length} ovo(s) guardado(s). Leve na equipe para chocar com os abates.` : 'Cumpra contratos do mural para ganhar ovos de POKE, com chance de raridade alta.'}</p><GameButton onClick={() => abrir('tasks')}>Ver contratos</GameButton></section>
       <section><h3 className="font-medium">Bestiário · pesquisa de espécies</h3><p className="my-[.4em] text-menu-muted">{pesquisa ? `${SPECIES[pesquisa.id]?.name}: ${pesquisa.total.toLocaleString('pt-BR')}/${pesquisa.alvo.toLocaleString('pt-BR')} abates para o próximo estágio.` : 'Consulte as espécies pesquisadas ou escolha uma nova espécie para estudar.'}</p><GameButton onClick={() => abrir('bestiario')}>Ver Bestiário</GameButton></section>
       <section><h3 className="font-medium">Especialidades · fortaleça seus tipos</h3><p className="my-[.4em] text-menu-muted">{tipo ? `${tipo}: dano ${especialidades[tipo]?.dano ?? 0}/${ESPECIALIDADE_NIVEL_MAX}, defesa ${especialidades[tipo]?.defesa ?? 0}/${ESPECIALIDADE_NIVEL_MAX}. Invista ouro e Stones em um tipo usado pela sua equipe.` : 'Todas as especialidades estão no máximo.'}</p><GameButton onClick={() => abrir('especialidades')}>Ver especialidades</GameButton></section>
     </div>

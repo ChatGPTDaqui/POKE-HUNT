@@ -8,9 +8,9 @@ import { BIOMAS, ESTAGIOS_PARA_O_LANCE } from '@/data/biomas'
 import { ESTAGIOS_POR_BIOMA } from '@/data/estagios'
 import { ESPECIALIDADE_NIVEL_MAX } from '@/data/especialidades'
 import { PRIMEIROS_PASSOS } from '@/data/primeirosPassos'
-import { cadeiaDoTipo, chaveDaMissao, MISSAO_TYPES } from '@/data/missoes'
+import type { Contrato, Ovo } from '@/data/ovos'
 import type { ProgressoPorBioma } from '@/data/progressoDeBioma'
-import { tasksProntas } from './pendenciasDeMissoes'
+import { contratosProntos } from './pendenciasDeMissoes'
 
 describe('janela Missões', () => {
   beforeEach(() => { useUiStore.setState({ currentScreen: null, abaDeMissoes: 'objetivos' }) })
@@ -49,13 +49,13 @@ describe('janela Missões', () => {
       .toEqual(['tasks', 'especialidades', 'conquistas', 'bestiario'])
   })
 
-  it('Task pronta conta so quando a missao atual da cadeia bateu o alvo', () => {
-    const tipo = MISSAO_TYPES[0]
-    const m = cadeiaDoTipo(tipo)[0]
-    expect(tasksProntas({}, {})).toBe(0)
-    expect(tasksProntas({ [m.speciesId]: { normal: m.alvo } }, {})).toBeGreaterThanOrEqual(1)
-    expect(tasksProntas({ [m.speciesId]: { normal: m.alvo } }, { [chaveDaMissao(tipo, m.speciesId)]: true }))
-      .toBeLessThan(tasksProntas({ [m.speciesId]: { normal: m.alvo } }, {}))
+  it('conta contrato cumprido nao entregue e ovo pronto pra chocar', () => {
+    const c: Contrato = { slot: 0, speciesId: 'zubat', baseId: 'zubat', raridade: 'comum', tipo: 'abates', alvo: 50, base: 10, reivindicado: false }
+    const ovo: Ovo = { id: 'o1', speciesId: 'zubat', raridade: 'comum', shiny: false, abatesRestantes: 0, naEquipe: true }
+    expect(contratosProntos({}, [c], [])).toBe(0)
+    expect(contratosProntos({ zubat: { normal: 60 } }, [c], [])).toBe(1)
+    expect(contratosProntos({ zubat: { normal: 60 } }, [{ ...c, reivindicado: true }], [])).toBe(0)
+    expect(contratosProntos({}, [], [ovo, { ...ovo, id: 'o2', abatesRestantes: 5 }])).toBe(1)
   })
 })
 

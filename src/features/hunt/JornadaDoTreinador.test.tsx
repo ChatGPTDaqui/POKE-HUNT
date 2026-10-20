@@ -9,7 +9,7 @@ import { especialidadeNiveisDefault } from '@/data/especialidades'
 
 afterEach(cleanup)
 beforeEach(() => {
-  useGameStateStore.setState({ biomaProgress: {}, unlockedContinents: ['biomas'], pokedexKills: {}, missoesReivindicadas: {}, especialidades: especialidadeNiveisDefault() })
+  useGameStateStore.setState({ biomaProgress: {}, unlockedContinents: ['biomas'], pokedexKills: {}, missoesReivindicadas: {}, ovos: [], especialidades: especialidadeNiveisDefault() })
   useUiStore.setState({ currentScreen: null })
 })
 describe('jornada na interface', () => {
@@ -33,7 +33,7 @@ describe('jornada na interface', () => {
     expect(screen.queryByRole('region', { name: 'Explorador do Pesadelo' })).toBeNull()
     fireEvent.click(screen.getAllByRole('button', { name: `${BIOMAS[0].nome} · estágio 1` })[0])
     expect(onBioma).toHaveBeenCalledWith(BIOMAS[0].chave, false)
-    fireEvent.click(screen.getByRole('button', { name: 'Ver missões' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ver contratos' }))
     expect(useUiStore.getState()).toMatchObject({ currentScreen: 'missoes', abaDeMissoes: 'tasks' })
     fireEvent.click(screen.getByRole('button', { name: 'Ver Bestiário' }))
     expect(useUiStore.getState()).toMatchObject({ currentScreen: 'missoes', abaDeMissoes: 'bestiario' })

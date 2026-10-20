@@ -10,7 +10,9 @@ export type GrupoDeMissoes = 'diario' | 'objetivos' | 'progresso'
 export const ABAS_DE_MISSOES: readonly { aba: AbaDeMissoes; rotulo: string; grupo: GrupoDeMissoes }[] = [
   { aba: 'diario', rotulo: 'Diário', grupo: 'diario' },
   { aba: 'objetivos', rotulo: 'Objetivos', grupo: 'objetivos' },
-  { aba: 'tasks', rotulo: 'Tasks', grupo: 'progresso' },
+  // A chave continua 'tasks' (atalhos, Primeiros Passos e telas antigas
+  // apontam pra ela); desde 20/10/2026 o conteudo e o mural de contratos.
+  { aba: 'tasks', rotulo: 'Contratos', grupo: 'progresso' },
   { aba: 'especialidades', rotulo: 'Especialidades', grupo: 'progresso' },
   { aba: 'conquistas', rotulo: 'Conquistas', grupo: 'progresso' },
   { aba: 'bestiario', rotulo: 'Bestiário', grupo: 'progresso' },
