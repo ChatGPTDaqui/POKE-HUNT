@@ -74,7 +74,7 @@ import type {
   ProtetorDaAutoridade,
 } from './types'
 
-export const STARTER_LEVEL = 1
+export const STARTER_LEVEL = 5 // 19/10/2026: era 1; ver migration 20261019130000_inicial_nivel_5
 // Starters sempre saem previsiveis — raridade Comum, IV 75% (23/31) em toda
 // stat — em vez do roll aleatorio por-instancia normal, pra a primeira
 // POKE de uma run nova nao ser um outlier de sorte.
