@@ -69,6 +69,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get pokedexKills() { return s.pokedexKills },
     get unlockedContinents() { return s.unlockedContinents },
     get missoesReivindicadas() { return s.missoesReivindicadas },
+    get ovos() { return s.ovos ?? [] },
     get especialidades() { return s.especialidades },
     // PH-224/236: leitura pro gate de bioma (PH-227). A simulacao nunca
     // chama isto — avancar o indice e side-effect de vencer o Lord
@@ -156,7 +157,8 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
       // levava um 502 "falha ao falar com o banco" no 7o POKE, e (antes do
       // `comEstadoParaEscrita`) esse mesmo erro ainda engolia as entregas do
       // Mercado ja reivindicadas naquele request.
-      if (s.team.length >= MAX_TEAM_SIZE) return null
+      // Ovo na equipe ocupa vaga (mural de contratos, 20/10/2026).
+      if (s.team.length + (s.ovos ?? []).filter((o) => o.naEquipe).length >= MAX_TEAM_SIZE) return null
       const i = s.bagPokes.findIndex((p) => p.uid === uid)
       if (i < 0) return null
       const [p] = s.bagPokes.splice(i, 1)

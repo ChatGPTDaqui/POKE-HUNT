@@ -1246,6 +1246,171 @@ export type Database = {
           },
         ]
       }
+      ovo_catalogo: {
+        Row: {
+          base_id: string
+          bioma: string
+          peso: number
+          species_id: string
+          trait_oculta: string | null
+          traits: string[]
+        }
+        Insert: {
+          base_id: string
+          bioma: string
+          peso: number
+          species_id: string
+          trait_oculta?: string | null
+          traits?: string[]
+        }
+        Update: {
+          base_id?: string
+          bioma?: string
+          peso?: number
+          species_id?: string
+          trait_oculta?: string | null
+          traits?: string[]
+        }
+        Relationships: []
+      }
+      player_contratos: {
+        Row: {
+          alvo: number
+          base: number
+          base_id: string
+          criado_em: string
+          dia: string
+          raridade: string
+          reivindicado: boolean
+          slot: number
+          species_id: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          alvo: number
+          base?: number
+          base_id: string
+          criado_em?: string
+          dia: string
+          raridade: string
+          reivindicado?: boolean
+          slot: number
+          species_id: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          alvo?: number
+          base?: number
+          base_id?: string
+          criado_em?: string
+          dia?: string
+          raridade?: string
+          reivindicado?: boolean
+          slot?: number
+          species_id?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_contratos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_contratos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_mural: {
+        Row: {
+          dia: string
+          refreshes: number
+          user_id: string
+        }
+        Insert: {
+          dia: string
+          refreshes?: number
+          user_id: string
+        }
+        Update: {
+          dia?: string
+          refreshes?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_mural_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_mural_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_ovos: {
+        Row: {
+          abates_restantes: number
+          criado_em: string
+          id: string
+          na_equipe: boolean
+          raridade: string
+          shiny: boolean
+          species_id: string
+          user_id: string
+        }
+        Insert: {
+          abates_restantes: number
+          criado_em?: string
+          id?: string
+          na_equipe?: boolean
+          raridade: string
+          shiny?: boolean
+          species_id: string
+          user_id: string
+        }
+        Update: {
+          abates_restantes?: number
+          criado_em?: string
+          id?: string
+          na_equipe?: boolean
+          raridade?: string
+          shiny?: boolean
+          species_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_ovos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_ovos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       player_especialidades: {
         Row: {
           dano_nivel: number
@@ -3572,6 +3737,11 @@ export type Database = {
         }
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
+      chocar_ovo: { Args: { p_ovo: string }; Returns: Json }
+      mover_ovo: { Args: { p_ovo: string; p_para_equipe: boolean }; Returns: Json }
+      mural_de_contratos: { Args: never; Returns: Json }
+      refresh_mural: { Args: never; Returns: Json }
+      reivindicar_contrato: { Args: { p_slot: number }; Returns: Json }
       reivindicar_missao: {
         Args: { p_species_id: string; p_tipo: string }
         Returns: Json
@@ -5028,6 +5198,171 @@ export type Database = {
           },
           {
             foreignKeyName: "player_diario_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      ovo_catalogo: {
+        Row: {
+          base_id: string
+          bioma: string
+          peso: number
+          species_id: string
+          trait_oculta: string | null
+          traits: string[]
+        }
+        Insert: {
+          base_id: string
+          bioma: string
+          peso: number
+          species_id: string
+          trait_oculta?: string | null
+          traits?: string[]
+        }
+        Update: {
+          base_id?: string
+          bioma?: string
+          peso?: number
+          species_id?: string
+          trait_oculta?: string | null
+          traits?: string[]
+        }
+        Relationships: []
+      }
+      player_contratos: {
+        Row: {
+          alvo: number
+          base: number
+          base_id: string
+          criado_em: string
+          dia: string
+          raridade: string
+          reivindicado: boolean
+          slot: number
+          species_id: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          alvo: number
+          base?: number
+          base_id: string
+          criado_em?: string
+          dia: string
+          raridade: string
+          reivindicado?: boolean
+          slot: number
+          species_id: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          alvo?: number
+          base?: number
+          base_id?: string
+          criado_em?: string
+          dia?: string
+          raridade?: string
+          reivindicado?: boolean
+          slot?: number
+          species_id?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_contratos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_contratos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_mural: {
+        Row: {
+          dia: string
+          refreshes: number
+          user_id: string
+        }
+        Insert: {
+          dia: string
+          refreshes?: number
+          user_id: string
+        }
+        Update: {
+          dia?: string
+          refreshes?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_mural_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_mural_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_ovos: {
+        Row: {
+          abates_restantes: number
+          criado_em: string
+          id: string
+          na_equipe: boolean
+          raridade: string
+          shiny: boolean
+          species_id: string
+          user_id: string
+        }
+        Insert: {
+          abates_restantes: number
+          criado_em?: string
+          id?: string
+          na_equipe?: boolean
+          raridade: string
+          shiny?: boolean
+          species_id: string
+          user_id: string
+        }
+        Update: {
+          abates_restantes?: number
+          criado_em?: string
+          id?: string
+          na_equipe?: boolean
+          raridade?: string
+          shiny?: boolean
+          species_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_ovos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_ovos_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "treinadores_publico"
@@ -7361,6 +7696,11 @@ export type Database = {
         }
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
+      chocar_ovo: { Args: { p_ovo: string }; Returns: Json }
+      mover_ovo: { Args: { p_ovo: string; p_para_equipe: boolean }; Returns: Json }
+      mural_de_contratos: { Args: never; Returns: Json }
+      refresh_mural: { Args: never; Returns: Json }
+      reivindicar_contrato: { Args: { p_slot: number }; Returns: Json }
       reivindicar_missao: {
         Args: { p_species_id: string; p_tipo: string }
         Returns: Json

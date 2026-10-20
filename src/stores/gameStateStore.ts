@@ -22,6 +22,7 @@ import { useToastStore } from '@/stores/toastStore'
 // arquivo (`import type`, apagado na compilacao).
 import { postgresStorage, flushAgora, ultimoSavedAt, aoFalharSave } from '@/data/remote/gameStatePersistence'
 import { registrarCapturaPredita } from '@/data/remote/predicoesDeCaptura'
+import { vagasOcupadas } from '@/data/ovos'
 // Tipos/defaults puros do save, sem import de `data/remote/*` — extraidos pro
 // `#engine` (edge/server) poder reexportar sem trazer o client Supabase de
 // browser pro bundle da Edge Function (PH-6, incidente de boot). Ver
@@ -451,7 +452,7 @@ export const useGameStateStore = create<GameStateStore>()(
       moveBagToTeam: (uid) => {
         let moved: PokeInstance | null = null
         set((state) => {
-          if (state.team.length >= MAX_TEAM_SIZE) return state
+          if (vagasOcupadas(state.team, state.ovos) >= MAX_TEAM_SIZE) return state
           const idx = state.bagPokes.findIndex((p) => p.uid === uid)
           if (idx === -1) return state
           const bagPokes = [...state.bagPokes]
