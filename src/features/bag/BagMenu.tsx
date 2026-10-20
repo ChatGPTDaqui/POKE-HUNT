@@ -18,6 +18,7 @@ import type { ElementType } from '@/data/generated/types'
 import { rarityRank } from '@/data/rarity'
 import { controller } from '@/engine/controller'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
+import { ListaDeOvos } from '@/features/ovos/CartaoDoOvo'
 import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useDeviceMode } from '@/stores/uiStore'
@@ -73,6 +74,7 @@ export function PokemonsTab() {
   const { carregada } = useMochila()
   const bagPokes = useGameStateStore((s) => s.bagPokes)
   const teamLength = useGameStateStore((s) => s.team.length)
+  const ovosNaEquipe = useGameStateStore((s) => s.ovos.filter((o) => o.naEquipe).length)
   const moveBagToTeam = useGameStateStore((s) => s.moveBagToTeam)
   const updatePokeInstance = useGameStateStore((s) => s.updatePokeInstance)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
@@ -117,7 +119,8 @@ export function PokemonsTab() {
   if (!carregada) return <EstadoDaMochila />
   if (bagPokes.length === 0) return <p className="text-menu-muted">Nenhum POKE na mochila.</p>
 
-  const canMove = teamLength < MAX_TEAM_SIZE
+  // Ovo na equipe ocupa vaga (20/10/2026).
+  const canMove = teamLength + ovosNaEquipe < MAX_TEAM_SIZE
   // Da lista FILTRADA e nao da pagina: trocar de pagina ou de filtro nao pode
   // apagar a ficha do POKE escolhido, mas mover um POKE pra equipe (que o tira
   // de `bagPokes`) tem que apagar.
@@ -584,8 +587,17 @@ export function TmsTab() {
   )
 }
 
+// Ovos do mural de contratos (20/10/2026): ficam aqui ate o jogador levar pra
+// equipe, onde chocam com os abates.
+function OvosTab() {
+  const n = useGameStateStore((s) => s.ovos.length)
+  if (n === 0) return <p className="text-menu-muted">Nenhum ovo. Cumpra contratos em Missões › Contratos para ganhar ovos.</p>
+  return <ListaDeOvos onde="todos" />
+}
+
 export function BagMenu() {
-  const [tab, setTab] = useState<'pokemons' | 'itens' | 'tms'>('pokemons')
+  const [tab, setTab] = useState<'pokemons' | 'itens' | 'tms' | 'ovos'>('pokemons')
+  const nOvos = useGameStateStore((s) => s.ovos.length)
   const [autoVendaAberta, setAutoVendaAberta] = useState(false)
   return (
     <MenuScene>
@@ -602,6 +614,7 @@ export function BagMenu() {
               { value: 'pokemons', label: 'Pokemons' },
               { value: 'itens', label: 'Itens' },
               { value: 'tms', label: 'TMs' },
+              { value: 'ovos', label: nOvos > 0 ? `Ovos (${nOvos})` : 'Ovos' },
             ]}
           />
           {tab === 'pokemons' && (
@@ -615,7 +628,7 @@ export function BagMenu() {
         </div>
         {tab === 'pokemons' && autoVendaAberta && <AutoVendaPanel />}
       </StickyHeader>
-      {tab === 'pokemons' ? <PokemonsTab /> : tab === 'itens' ? <ItensTab /> : <TmsTab />}
+      {tab === 'pokemons' ? <PokemonsTab /> : tab === 'itens' ? <ItensTab /> : tab === 'tms' ? <TmsTab /> : <OvosTab />}
     </MenuScene>
   )
 }

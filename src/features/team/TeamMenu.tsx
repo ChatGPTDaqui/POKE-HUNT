@@ -14,6 +14,7 @@ import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { GameButton, GameCard, Meter } from '@/components/game/controls'
 import { useDeviceMode } from '@/stores/uiStore'
 import { semGolpeDeDano } from '@/data/activeAbilities'
+import { ListaDeOvos } from '@/features/ovos/CartaoDoOvo'
 import { cn } from '@/lib/utils'
 import { MenuScene } from '@/components/game/MenuScene'
 import { TypeChip } from '@/components/shared/TypeChip'
@@ -53,6 +54,7 @@ export function TeamMenu() {
     <MenuScene tone="team">
       <div className="journey-team-workspace">
       <div className="journey-team-list" role="group" aria-label="Integrantes da equipe">
+        <ListaDeOvos onde="equipe" titulo="Ovos chocando" />
         {team.map((poke, index) => {
           const species = SPECIES[poke.speciesId]
           if (!species) return null

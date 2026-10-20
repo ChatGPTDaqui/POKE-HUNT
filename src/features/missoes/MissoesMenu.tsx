@@ -10,7 +10,7 @@ import {
   ABAS_DE_MISSOES, GRUPOS_DE_MISSOES, grupoDaAba, grupoTemSubmenu, type AbaDeMissoes, type GrupoDeMissoes,
 } from '@/data/abasDeMissoes'
 import { ConteudoDoDiario } from '@/features/primeirosPassos/Diario'
-import { TasksMenu } from '@/features/tasks/TasksMenu'
+import { ContratosMenu } from '@/features/contratos/ContratosMenu'
 import { EspecialidadesMenu } from '@/features/especialidades/EspecialidadesMenu'
 import { ConquistasMenu } from '@/features/conquistas/ConquistasMenu'
 import { BestiarioMenu } from '@/features/bestiario/BestiarioMenu'
@@ -24,7 +24,7 @@ import { AbaObjetivos } from './AbaObjetivos'
 const CONTEUDO: Record<AbaDeMissoes, () => React.ReactElement | null> = {
   diario: ConteudoDoDiario,
   objetivos: AbaObjetivos,
-  tasks: TasksMenu,
+  tasks: ContratosMenu,
   especialidades: EspecialidadesMenu,
   conquistas: ConquistasMenu,
   bestiario: BestiarioMenu,

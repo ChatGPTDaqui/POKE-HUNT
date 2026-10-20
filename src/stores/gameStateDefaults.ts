@@ -11,6 +11,7 @@ import type { RarityKey } from '@/data/rarity'
 import { MAPS } from '@/data/maps'
 import { GRUPOS_INICIAIS } from '@/data/biomas'
 import { progressoPorBiomaDefault, type ProgressoPorBioma } from '@/data/progressoDeBioma'
+import type { Ovo } from '@/data/ovos'
 import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 
 // Limite de POKEs em campo — no vanilla so aparecia como comentario em
@@ -210,6 +211,10 @@ export interface GameStateData {
   // presente e `true` = reivindicada. A mesma especie pode estar em DUAS
   // cadeias (dual-type), e reivindicar numa nao reivindica a outra.
   missoesReivindicadas: Record<string, boolean>
+  /** Ovos do mural de contratos (servidor e dono: `player_ovos`). */
+  ovos: Ovo[]
+  /** Contratos do mural ja entregues (0 ou mais; so importa se e > 0 — Primeiro Passo). */
+  contratosEntregues: number
   especialidades: EspecialidadeNiveis
   /**
    * PH-429: um numero por BIOMA ("maior estagio ja limpo", 0 a 10), e nao mais
@@ -252,6 +257,8 @@ export function defaultGameStateData(): GameStateData {
     pokedexKills: {},
     unlockedContinents: [...GRUPOS_INICIAIS],
     missoesReivindicadas: {},
+    ovos: [],
+    contratosEntregues: 0,
     especialidades: especialidadeNiveisDefault(),
     biomaProgress: progressoPorBiomaDefault(),
   }

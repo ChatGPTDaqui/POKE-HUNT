@@ -72,7 +72,7 @@ const SECUNDARIOS: DestinoDeTela[] = [
   { screen: 'pvp', label: 'PvP', Icon: Sword },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
   { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
-  { screen: 'tasks', label: 'Tasks', Icon: CheckSquare },
+  { screen: 'tasks', label: 'Contratos', Icon: CheckSquare },
   { screen: 'calc', label: 'Calculadora', Icon: Calculator },
   { screen: 'wiki', label: 'Wiki', Icon: Books },
   { screen: 'tutoriais', label: 'Tutoriais', Icon: GraduationCap },

@@ -152238,6 +152238,8 @@ function defaultGameStateData() {
 		pokedexKills: {},
 		unlockedContinents: [...GRUPOS_INICIAIS],
 		missoesReivindicadas: {},
+		ovos: [],
+		contratosEntregues: 0,
 		especialidades: especialidadeNiveisDefault(),
 		biomaProgress: progressoPorBiomaDefault()
 	};
@@ -157922,6 +157924,17 @@ function fromJson(value, fallback) {
 function toJson(value) {
 	return value;
 }
+var COLUNAS_DE_OVO = "id,species_id,raridade,shiny,abates_restantes,na_equipe";
+function rowToOvo(r) {
+	return {
+		id: r.id,
+		speciesId: r.species_id,
+		raridade: r.raridade,
+		shiny: Boolean(r.shiny),
+		abatesRestantes: Number(r.abates_restantes),
+		naEquipe: Boolean(r.na_equipe)
+	};
+}
 /**
 * Especies desconhecidas ja avisadas — o aviso e por ESPECIE, nao por POKE.
 *
@@ -158058,6 +158071,8 @@ function snapshotToGameState(snap, defaults) {
 		},
 		pokedexKills,
 		missoesReivindicadas,
+		ovos: (snap.ovos ?? []).map(rowToOvo),
+		contratosEntregues: 0,
 		especialidades,
 		biomaProgress: lerProgressoPorBioma(p.bioma_progress)
 	};
@@ -158157,6 +158172,16 @@ function gameStateToAutoCatchRuleRows(userId, s) {
 		species_id: r.speciesId,
 		ball_item_id: r.ballItemId
 	}));
+}
+//#endregion
+//#region src/data/ovos.ts
+/** Cada abate desconta 1 de todo ovo NA EQUIPE (espelho de `_descontar_abates_dos_ovos`). */
+function descontarAbatesDosOvos(ovos, abates) {
+	if (abates <= 0) return ovos;
+	return ovos.map((o) => o.naEquipe && o.abatesRestantes > 0 ? {
+		...o,
+		abatesRestantes: Math.max(0, o.abatesRestantes - abates)
+	} : o);
 }
 //#endregion
 //#region authority/src/pvpElo.ts
@@ -158403,6 +158428,12 @@ function criarEstadoDoJogador(dados) {
 			get missoesReivindicadas() {
 				return s.missoesReivindicadas;
 			},
+			get ovos() {
+				return s.ovos ?? [];
+			},
+			get contratosEntregues() {
+				return s.contratosEntregues ?? 0;
+			},
 			get especialidades() {
 				return s.especialidades;
 			},
@@ -158490,7 +158521,7 @@ function criarEstadoDoJogador(dados) {
 				return p;
 			},
 			moveBagToTeam: (uid) => {
-				if (s.team.length >= 6) return null;
+				if (s.team.length + (s.ovos ?? []).filter((o) => o.naEquipe).length >= 6) return null;
 				const i = s.bagPokes.findIndex((p) => p.uid === uid);
 				if (i < 0) return null;
 				const [p] = s.bagPokes.splice(i, 1);
@@ -158928,13 +158959,17 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 	const comBag = opcoes.comBag !== false;
 	const filtroDeLocal = comBag ? "" : "&location=eq.team";
 	const comDex = opcoes.comDex !== false;
-	const [player, pokemon, items, pokedex, autoCatchRules, especialidades] = await Promise.all([
+	const comMissoes = opcoes.comMissoes === true;
+	const [player, pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas, ovos, contratosEntregues] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
 		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=${COLUNAS_ITENS}`),
 		comDex ? selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=${COLUNAS_POKEDEX}`) : Promise.resolve([]),
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`),
-		selecionarTudo(cfg, `player_especialidades?user_id=eq.${userId}&select=user_id,tipo,dano_nivel,defesa_nivel`)
+		selecionarTudo(cfg, `player_especialidades?user_id=eq.${userId}&select=user_id,tipo,dano_nivel,defesa_nivel`),
+		comMissoes ? selecionarTudo(cfg, `player_missoes_reivindicadas?user_id=eq.${userId}&select=user_id,tipo,species_id`) : Promise.resolve([]),
+		selecionarTudo(cfg, `player_ovos?user_id=eq.${userId}&select=${COLUNAS_DE_OVO}`).catch(() => []),
+		comMissoes ? selecionar(cfg, `player_contratos?user_id=eq.${userId}&reivindicado=is.true&select=dia&limit=1`).catch(() => []) : Promise.resolve([])
 	]);
 	if (!player[0]) throw new ErroHttp(404, "jogador sem linha em `players`");
 	const linhasNoLoad = {
@@ -158944,10 +158979,13 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 		pokedex,
 		autoCatchRules,
 		especialidades,
-		missoesReivindicadas: []
+		missoesReivindicadas,
+		ovos
 	};
+	const estado = snapshotToGameState(linhasNoLoad, defaultGameStateData());
+	estado.contratosEntregues = contratosEntregues.length;
 	return {
-		estado: snapshotToGameState(linhasNoLoad, defaultGameStateData()),
+		estado,
 		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
 		entregas: [],
 		playerUpdatedAt: player[0].updated_at,
@@ -159307,6 +159345,13 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		p_ciclos: world.sala?.ciclos ?? 0,
 		p_protetor: payloadDoProtetorOuDoCaido(world, tipoDeProtetor)
 	});
+	if (resumo.kills > 0 && estado.ovos.some((o) => o.naEquipe && o.abatesRestantes > 0)) {
+		await chamarRpc(cfg, "_descontar_abates_dos_ovos", {
+			p_user: userId,
+			p_abates: resumo.kills
+		});
+		estado.ovos = descontarAbatesDosOvos(estado.ovos, resumo.kills);
+	}
 	const conquistasNovas = await registrarConquistasDaJanela(cfg, userId, contadoresDaJanela(resumo, world.player?.poke.speciesId ?? null, world.climaAmbiente?.tipo ?? null));
 	return {
 		segundosCreditados: segundos,
@@ -159403,7 +159448,10 @@ async function rotear(cfg, req, url) {
 				estado,
 				estadoParcial: parcial
 			});
-		}, { comBag: !parcial });
+		}, {
+			comBag: !parcial,
+			comMissoes: true
+		});
 	}
 	return json({ erro: "rota desconhecida" }, 404);
 }

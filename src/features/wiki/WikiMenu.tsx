@@ -143,7 +143,7 @@ function ComecandoTab() {
 
       <WikiCard title="4. Navegando pelos menus">
         A barra de baixo tem os atalhos principais: <b>Equipe</b>, <b>Mochila</b>, <b>Hunt</b> (o botão do
-        meio) e <b>Loja</b>. Tudo que é missão — Diário, Objetivos, Tasks, Especialidades, Conquistas e
+        meio) e <b>Loja</b>. Tudo que é missão — Diário, Objetivos, Contratos, Especialidades, Conquistas e
         Bestiário — fica numa janela só, <b>Missões</b>, aberta pelo atalho da bandeira no canto direito (ao
         lado da Calculadora e do PvP). O resto — Pokedex, Mercado, Social, Ranking, Wiki, Tutoriais,
         Configurações e o Hospital, quando você está numa caçada — vive atrás do botão <b>Mais</b>, no fim
@@ -172,8 +172,8 @@ function ComecandoTab() {
           </LinhaDeMenu>
           <LinhaDeMenu Icon={Flag} nome="Missões">
             uma janela com abas: <b>Diário</b> (login e metas do dia), <b>Objetivos</b> (o passo atual e a
-            Rota do Treinador, com o que alcançar no início, meio e fim do jogo), <b>Tasks</b> (cadeias de
-            abate por tipo, pagando ouro), <b>Especialidades</b> (dano e defesa por tipo, para a conta
+            Rota do Treinador, com o que alcançar no início, meio e fim do jogo), <b>Contratos</b> (mural
+            diário que paga ovos de POKE), <b>Especialidades</b> (dano e defesa por tipo, para a conta
             inteira), <b>Conquistas</b> e <b>Bestiário</b>. O número no atalho soma o que está pronto para
             coletar.
           </LinhaDeMenu>

@@ -123,4 +123,6 @@ export {
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   rowToPoke,
 } from '@/data/remote/playerMapper'
-export type { PlayerSnapshot, PokemonRow } from '@/data/remote/playerMapper'
+export type { PlayerSnapshot, PokemonRow, OvoRow } from '@/data/remote/playerMapper'
+export { COLUNAS_DE_OVO } from '@/data/remote/playerMapper'
+export { descontarAbatesDosOvos } from '@/data/ovos'
