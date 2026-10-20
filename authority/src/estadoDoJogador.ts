@@ -70,6 +70,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get unlockedContinents() { return s.unlockedContinents },
     get missoesReivindicadas() { return s.missoesReivindicadas },
     get ovos() { return s.ovos ?? [] },
+    get contratosEntregues() { return s.contratosEntregues ?? 0 },
     get especialidades() { return s.especialidades },
     // PH-224/236: leitura pro gate de bioma (PH-227). A simulacao nunca
     // chama isto — avancar o indice e side-effect de vencer o Lord

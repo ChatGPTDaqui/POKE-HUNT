@@ -99,6 +99,7 @@ export const useMuralStore = create<MuralState>((set, get) => ({
     set((s) => s.mural ? {
       mural: { ...s.mural, contratos: s.mural.contratos.map((c) => (c.slot === slot ? { ...c, reivindicado: true } : c)) },
     } : s)
+    useGameStateStore.setState((s) => ({ contratosEntregues: (s.contratosEntregues ?? 0) + 1 }))
     await refetchOvos()
     return r?.mensagem ?? 'Você ganhou um ovo!'
   },

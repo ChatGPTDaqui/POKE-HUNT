@@ -445,6 +445,8 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     pokedexKills,
     missoesReivindicadas,
     ovos: (snap.ovos ?? []).map(rowToOvo),
+    // So `/estado` e o boot direto conhecem este numero; quem le snapshot sem ele recebe 0.
+    contratosEntregues: 0,
     especialidades,
     // PH-429: `lerProgressoPorBioma` cobre os tres casos numa funcao — formato
     // novo, formato de faixa antigo (traduzido) e entrada podre (default). O

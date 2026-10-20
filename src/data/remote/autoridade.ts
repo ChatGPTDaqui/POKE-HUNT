@@ -300,6 +300,7 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
     // cima da lista de missoes reivindicadas.
     useGameStateStore.setState((local) => ({
       ...doServidor, missoesReivindicadas: mesclarMissoes(local, doServidor),
+      contratosEntregues: Math.max(local.contratosEntregues ?? 0, doServidor.contratosEntregues ?? 0),
     }))
     return
   }
@@ -313,6 +314,7 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
     useGameStateStore.setState((local) => ({
       ...doServidor, bagPokes: [], pokedexKills: mesclarPokedex(local, doServidor),
       missoesReivindicadas: mesclarMissoes(local, doServidor),
+      contratosEntregues: Math.max(local.contratosEntregues ?? 0, doServidor.contratosEntregues ?? 0),
     }))
     limparCapturasPreditas()
     return
@@ -322,6 +324,7 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
     ...doServidor,
     pokedexKills: mesclarPokedex(local, doServidor),
     missoesReivindicadas: mesclarMissoes(local, doServidor),
+      contratosEntregues: Math.max(local.contratosEntregues ?? 0, doServidor.contratosEntregues ?? 0),
     bagPokes: [
       // Fora: o que era predicao (a linha real dela esta em `novos`) e qualquer
       // uid que o servidor esteja mandando agora — sem o segundo filtro, um

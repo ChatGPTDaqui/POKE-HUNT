@@ -213,6 +213,8 @@ export interface GameStateData {
   missoesReivindicadas: Record<string, boolean>
   /** Ovos do mural de contratos (servidor e dono: `player_ovos`). */
   ovos: Ovo[]
+  /** Contratos do mural ja entregues (0 ou mais; so importa se e > 0 — Primeiro Passo). */
+  contratosEntregues: number
   especialidades: EspecialidadeNiveis
   /**
    * PH-429: um numero por BIOMA ("maior estagio ja limpo", 0 a 10), e nao mais
@@ -256,6 +258,7 @@ export function defaultGameStateData(): GameStateData {
     unlockedContinents: [...GRUPOS_INICIAIS],
     missoesReivindicadas: {},
     ovos: [],
+    contratosEntregues: 0,
     especialidades: especialidadeNiveisDefault(),
     biomaProgress: progressoPorBiomaDefault(),
   }
