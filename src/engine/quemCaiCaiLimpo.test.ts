@@ -19,12 +19,13 @@ import { describe, expect, it, beforeEach, vi } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
-import { BASIC_ATTACK } from '@/data/abilities'
 import { buildMapWorld, stepWorld, DERROTAS_PARA_RECUAR, JANELA_DE_RECUO_SEGUNDOS } from './simulation'
 import { limparEfeitosAoDesmaiar } from './systems/statusSystem'
 import { estagioAnterior } from './systems/salaSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState, WorldEntity } from './types'
+import { getAbility as getAbilityDoCatalogo } from '@/data/abilities'
+const TACKLE = getAbilityDoCatalogo('tackle')!
 
 vi.mock('@/stores/toastStore', () => ({
   useToastStore: { getState: () => ({ pushToast() {} }) },
@@ -63,7 +64,7 @@ function derrubarEmCampo(world: WorldState, dt = 0.1) {
     timer: 0,
     attackerId: inimigo.id,
     targetId: world.player!.id,
-    ability: BASIC_ATTACK,
+    ability: TACKLE,
   })
   stepWorld(world, dt, useGameStateStore.getState(), { silent: true })
 }

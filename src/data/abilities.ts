@@ -10,13 +10,11 @@
 // same move learned at different levels by different species) — see
 // data/pokes.js's `species.abilities` list of {key, levelReq}.
 //
-// BASIC_ATTACK is the one hand-authored exception: a universal fallback
-// (not in the spreadsheet) so a species whose only learned moves so far are
-// all 0-power status moves (e.g. a low-level Hoppip only knows Splash/
-// Synthesis/Tail Whip until level 10) is never completely unable to fight —
-// the same role "Struggle" plays in the real games. Being the one move every
-// single POKE always has, its cooldown is a fixed BASE_ATTACK_INTERVAL (see
-// CombatSystem.js) — not PP-based, and not Speed-scaled like the rest.
+// STRUGGLE is the one hand-authored exception (19/10/2026: substituiu o antigo
+// "Ataque Basico", removido a pedido do dono). Ele NAO e escolhivel: so entra
+// quando o POKE nao tem nenhum golpe de dano e ja gastou o PP dos que tem
+// contra o alvo atual — como no jogo original. Sem tipo (efetividade sempre 1)
+// e com recuo de 1/4 do HP maximo de quem usa. Cooldown fixo (BASE_ATTACK_INTERVAL).
 //
 // Status/0-power moves are excluded from `isDamagingAbility` specifically —
 // that function means "usable as a DAMAGE move", not "does nothing here".
@@ -88,24 +86,32 @@ const formulaEngine = createFormulaEngine(FORMULAS)
 // agir antes de 2s, entao golpe com cooldown calculado em 1.4s so exibia um
 // numero que o combate ignorava.
 export const TURNO_SEGUNDOS = formulaEngine.eval('TURNO_SEGUNDOS')
-const PP_REFERENCE = 20 // PP que recarrega em exatamente um turno
+/**
+ * PP que recarrega em EXATAMENTE um turno (decisao do dono, 19/10/2026, junto
+ * com o fim do Ataque Basico): golpe com o PP do Scratch (35) ou mais sai a
+ * cada turno; golpe com menos PP espera proporcionalmente mais. A Velocidade
+ * so mexe nessa PARTE A MAIS (ver combatSystem#scaledCooldown) — o turno e
+ * igual pra todos.
+ */
+export const PP_DO_TURNO = 35
 
 function cooldownFromPp(pp: number): number {
-  return TURNO_SEGUNDOS * (PP_REFERENCE / Math.max(1, pp))
+  return TURNO_SEGUNDOS * Math.max(1, PP_DO_TURNO / Math.max(1, pp))
 }
 
-export const BASIC_ATTACK: Ability = {
-  id: 'basic_attack',
-  name: 'Ataque Básico',
+export const STRUGGLE: Ability = {
+  id: 'struggle',
+  name: 'Struggle',
   category: 'physical',
   type: 'NORMAL',
   target: 'single',
-  power: 40,
-  pp: 35,
-  // Sempre acerta. E o Struggle deste jogo — o golpe que sobra quando nenhum
-  // outro esta pronto; errar com ele deixaria o POKE sem NADA a fazer no turno.
+  power: 50,
+  pp: 1,
   accuracy: 100,
 }
+
+/** Fração do HP máximo que o Struggle tira de quem usa (geração 4 em diante). */
+export const RECUO_DO_STRUGGLE = 1 / 4
 
 // Golpe em area agora vem do DADO (`ability.target`, alvo real do golpe nos
 // jogos — ver AbilityDataEntry), nao de uma lista de chaves escrita a mao.
@@ -258,7 +264,7 @@ export const ABILITIES: Record<string, Ability> = Object.fromEntries(
 )
 
 export function getAbility(id: string): Ability | null {
-  if (id === BASIC_ATTACK.id) return BASIC_ATTACK
+  if (id === STRUGGLE.id) return STRUGGLE
   return ABILITIES[id] || null
 }
 

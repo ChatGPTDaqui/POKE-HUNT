@@ -39681,20 +39681,21 @@ var GOLPES_TM = {
 	}
 };
 var TURNO_SEGUNDOS = createFormulaEngine(FORMULAS).eval("TURNO_SEGUNDOS");
-var PP_REFERENCE = 20;
 function cooldownFromPp(pp) {
-	return TURNO_SEGUNDOS * (PP_REFERENCE / Math.max(1, pp));
+	return TURNO_SEGUNDOS * Math.max(1, 35 / Math.max(1, pp));
 }
-var BASIC_ATTACK = {
-	id: "basic_attack",
-	name: "Ataque Básico",
+var STRUGGLE = {
+	id: "struggle",
+	name: "Struggle",
 	category: "physical",
 	type: "NORMAL",
 	target: "single",
-	power: 40,
-	pp: 35,
+	power: 50,
+	pp: 1,
 	accuracy: 100
 };
+/** Fração do HP máximo que o Struggle tira de quem usa (geração 4 em diante). */
+var RECUO_DO_STRUGGLE = 1 / 4;
 var AOE_ABILITY_KEYS = new Set(Object.keys(TYPED_AOE_MOVES));
 var AOE_RADIUS = 175;
 var ALL_ABILITIES_SOURCE = {
@@ -39880,7 +39881,7 @@ var ABILITIES = Object.fromEntries(Object.entries(ALL_ABILITIES_SOURCE).map(([ke
 	}];
 }));
 function getAbility(id) {
-	if (id === BASIC_ATTACK.id) return BASIC_ATTACK;
+	if (id === STRUGGLE.id) return STRUGGLE;
 	return ABILITIES[id] || null;
 }
 var DANO_SEM_PODER_BASE = /* @__PURE__ */ new Set([
@@ -39986,6 +39987,10 @@ var WEATHER_BALL_POR_CLIMA = {
 var CURA_SENSIVEL_AO_CLIMA = /* @__PURE__ */ new Set(["moonlight", "synthesis"]);
 var CURA_NO_SOL = 4 / 3;
 var CURA_EM_CLIMA_RUIM = .5;
+//#endregion
+//#region src/data/activeAbilities.ts
+/** Id do antigo Ataque Basico (removido em 19/10/2026). Save antigo ainda o traz: e descartado. */
+var ATAQUE_BASICO_LEGADO = "basic_attack";
 var STAB_MULTIPLIER$1 = createFormulaEngine(FORMULAS).eval("STAB_MULTIPLIER");
 /**
 * O nivel em que o POKE passa a poder usar cada golpe.
@@ -40044,9 +40049,7 @@ function activeAbilitiesPadrao(species, level) {
 	})).filter((r) => isDamagingAbility(r.ability)).sort((a, b) => danoEfetivo(b.ability, species) - danoEfetivo(a.ability, species) || b.i - a.i).slice(0, 4).map((r) => r.key);
 	if (dano.length >= 4) return dano;
 	const status = learnset.filter((key) => !isDamagingAbility(getAbility(key))).reverse();
-	const escolha = [...dano, ...status].slice(0, 4);
-	while (escolha.length < 4 && !escolha.includes(BASIC_ATTACK.id)) escolha.push(BASIC_ATTACK.id);
-	return escolha;
+	return [...dano, ...status].slice(0, 4);
 }
 function danoEfetivo(ability, species) {
 	const temStab = ability.type === species.type || ability.type === species.type2;
@@ -40058,7 +40061,7 @@ function encaixarNovosGolpes(atuais, novos) {
 	const saida = [...atuais];
 	for (const key of novos) {
 		if (saida.length >= 4) break;
-		if (saida.includes(key) || key === BASIC_ATTACK.id) continue;
+		if (saida.includes(key) || key === ATAQUE_BASICO_LEGADO) continue;
 		if (!getAbility(key)) continue;
 		saida.push(key);
 	}
@@ -40095,7 +40098,7 @@ function encaixarNovosGolpes(atuais, novos) {
 * coluna do banco.
 */
 function sanearEscolhaDeGolpes(escolha, conhecidos, species, level) {
-	const validos = /* @__PURE__ */ new Set([...conhecidos, BASIC_ATTACK.id]);
+	const validos = new Set(conhecidos.filter((k) => k !== ATAQUE_BASICO_LEGADO));
 	const escolhidos = [...new Set(escolha.filter((key) => validos.has(key)))].slice(0, 4);
 	const alvo = Math.min(escolha.length, 4);
 	if (escolha.length > 0 && escolhidos.length < alvo) for (const key of activeAbilitiesPadrao(species, level)) {
@@ -40107,6 +40110,19 @@ function sanearEscolhaDeGolpes(escolha, conhecidos, species, level) {
 function golpesUtilizaveis(poke, species, selvagem) {
 	if (selvagem) return activeAbilitiesSelvagem(species, poke.level);
 	return sanearEscolhaDeGolpes(poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level), poke.unlockedAbilities, species, poke.level);
+}
+/**
+* O arsenal deste POKE nao tem golpe de dano (19/10/2026, fim do Ataque
+* Basico)? Golpe desligado pelo jogador nao conta. E o MESMO recorte que o
+* combate usa pra mandar o POKE gastar PP e partir pro Struggle, e o que a
+* interface usa pra avisar que ele precisa de um TM.
+*/
+function semGolpeDeDano$1(poke, species, selvagem) {
+	const desligados = poke.disabledAbilities || {};
+	return !golpesUtilizaveis(poke, species, selvagem).some((id) => {
+		const a = getAbility(id);
+		return !desligados[id] && a != null && isDamagingAbility(a);
+	});
 }
 //#endregion
 //#region src/data/pokes.ts
@@ -147049,18 +147065,26 @@ function sincronizarAlvoDaCura(entity, alvoId) {
 	entity.alvoDaCura = alvo;
 	entity.usosDeCura = {};
 }
-function ppDeCuraRestante(entity, ability) {
-	if (!ehCuraPura(ability)) return null;
+/**
+* Este golpe gasta PP por alvo? A cura pura sempre. E, desde o fim do Ataque
+* Basico (19/10/2026), QUALQUER golpe de um POKE sem golpe de dano: ele usa o
+* que tem ate acabar o PP e so entao parte pro Struggle — como no jogo original.
+*/
+function gastaPpPorAlvo(ability, semGolpeDeDano = false) {
+	return semGolpeDeDano || ehCuraPura(ability);
+}
+function ppDeCuraRestante(entity, ability, semGolpeDeDano = false) {
+	if (!gastaPpPorAlvo(ability, semGolpeDeDano)) return null;
 	return Math.max(0, ability.pp - (entity.usosDeCura?.[ability.id] ?? 0));
 }
 /** O golpe de cura ainda tem PP contra o alvo atual? (Golpe que não é cura: sempre.) */
-function temPpDeCura(entity, ability) {
-	const restante = ppDeCuraRestante(entity, ability);
+function temPpDeCura(entity, ability, semGolpeDeDano = false) {
+	const restante = ppDeCuraRestante(entity, ability, semGolpeDeDano);
 	return restante === null || restante > 0;
 }
 /** Gasta 1 PP se for cura pura. Chamar no disparo do golpe. */
-function gastarPpDeCura(entity, ability) {
-	if (!ehCuraPura(ability)) return;
+function gastarPpDeCura(entity, ability, semGolpeDeDano = false) {
+	if (!gastaPpPorAlvo(ability, semGolpeDeDano)) return;
 	const usos = entity.usosDeCura ??= {};
 	usos[ability.id] = (usos[ability.id] ?? 0) + 1;
 }
@@ -152187,7 +152211,8 @@ function defaultGameStateData() {
 			autoRevive: false,
 			autoStatus: true,
 			avancarDeEstagio: false,
-			recuarSePerder: false
+			recuarSePerder: false,
+			rotacaoDeGolpes: false
 		},
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
@@ -152537,7 +152562,7 @@ function resolverImunidadeDeTipo(rng, tipoDoGolpe, defensor, aplicarEfeitos, tra
 	const stat = ESTAGIO_DE_ABSORCAO[trait];
 	if (stat) {
 		if (aplicarEfeitos) aplicarMudancasDeStat(rng, defensor, defensor, {
-			...BASIC_ATTACK,
+			...STRUGGLE,
 			statChanges: [{
 				stat,
 				estagios: 1
@@ -152735,9 +152760,19 @@ function engageRangeFor(attacker, defender) {
 function armarCooldown(entity, ability, world) {
 	startCooldown(entity, ability.id, scaledCooldown(ability, velocidadeEfetiva(entity, world.clima?.tipo ?? null)));
 }
+/**
+* Quanto a Velocidade pode encurtar ou alongar a parte da recarga que passa do
+* turno (19/10/2026). Sem limite, um POKE de Velocidade 6 (nivel 1) esperava
+* ~16x: um golpe de PP 25 levaria mais de 20 s. Rapido no maximo corta pela
+* metade; lento no maximo dobra.
+*/
+var FATOR_DE_VELOCIDADE_MIN = .5;
 function scaledCooldown(ability, speed) {
-	if (ability.id === BASIC_ATTACK.id) return BASE_ATTACK_INTERVAL;
-	return (ability.cooldown ?? 0) * (SPEED_REFERENCE / Math.max(1, speed));
+	if (ability.id === STRUGGLE.id) return BASE_ATTACK_INTERVAL;
+	const nominal = ability.cooldown ?? 0;
+	const alemDoTurno = Math.max(0, nominal - TURNO_SEGUNDOS);
+	const fator = Math.min(2, Math.max(FATOR_DE_VELOCIDADE_MIN, SPEED_REFERENCE / Math.max(1, speed)));
+	return Math.min(nominal, TURNO_SEGUNDOS) + alemDoTurno * fator;
 }
 function velocidadeEfetiva(entity, clima = null) {
 	const trait = traitDoPoke(entity.poke);
@@ -153001,7 +153036,7 @@ function usaKitDeSelvagem(entity) {
 function podeDanificar(rng, attackerEntity, defenderEntity) {
 	const especie = SPECIES[attackerEntity.poke.speciesId];
 	if (!especie) return true;
-	const comDano = golpesUtilizaveis(attackerEntity.poke, especie, usaKitDeSelvagem(attackerEntity)).map((id) => getAbility(id)).filter((a) => a != null).map((a) => a.id === BASIC_ATTACK.id ? basicAttackFor(especie) : a).filter((a) => isDamagingAbility(a));
+	const comDano = golpesUtilizaveis(attackerEntity.poke, especie, usaKitDeSelvagem(attackerEntity)).map((id) => getAbility(id)).filter((a) => a != null).filter((a) => isDamagingAbility(a));
 	if (comDano.length === 0) return true;
 	return comDano.some((a) => !golpeAnuladoPorImunidade(rng, attackerEntity, defenderEntity, a));
 }
@@ -153226,6 +153261,7 @@ function computeDamage(rng, attackerEntity, defenderEntity, abilityBase, pessimi
 	if (attackerTrait === "scrappy" && effectivenessMultiplier === 0 && (ability.type === "NORMAL" || ability.type === "FIGHTING")) {
 		if (defType1 === "GHOST" || defType2 === "GHOST") effectivenessMultiplier = getEffectiveness(ability.type, defType1 === "GHOST" ? "NORMAL" : defType1, defType2 === "GHOST" ? null : defType2);
 	}
+	if (ability.id === STRUGGLE.id) effectivenessMultiplier = 1;
 	const special = specialDamageFor(rng, ability, attackerEntity, defenderEntity);
 	let dmg;
 	let isCrit = false;
@@ -153330,22 +153366,17 @@ function spawnDamageNumber(world, target, result, abilityId) {
 		abilityId
 	}));
 }
-function basicAttackFor(attackerSpecies) {
-	return {
-		...BASIC_ATTACK,
-		type: attackerSpecies.type
-	};
+/** Struggle pronto? So e chamado quando o POKE nao tem golpe de dano e esgotou o PP. */
+function tentarStruggle(entity) {
+	return isAbilityReady(entity, STRUGGLE.id) ? STRUGGLE : null;
 }
-function tentarAtaqueBasico(entity, attackerSpecies, disabled) {
-	if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null;
-	return basicAttackFor(attackerSpecies);
-}
-function pickAbilityGreedy(world, entity, defenderEntity, prontos, estaSilenciado, clima, aoeTargetCounter) {
+function pickAbilityGreedy(world, entity, defenderEntity, prontos, estaSilenciado, clima, aoeTargetCounter, soDano = false) {
 	const rng = world.rng;
 	const ready = prontos.filter((ability) => isDamagingAbility(ability));
+	if (soDano) estaSilenciado = true;
 	const statusPronto = estaSilenciado ? [] : prontos.filter((a) => !isDamagingAbility(a) && (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id) || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)));
 	if (statusPronto.length > 0) {
-		if (ready.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0) < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
+		if (ready.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0) * 2 < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
 	}
 	if (ready.length === 0) return null;
 	const aoeReady = ready.filter((a) => a.target === "aoe" && aoeTargetCounter(a) >= 2);
@@ -153356,7 +153387,7 @@ function pickAbilityDaFila(world, entity, defenderEntity, candidatos, estaSilenc
 	const n = candidatos.length;
 	if (n === 0) return null;
 	const inicio = ((entity.filaGolpeIndex ?? 0) % n + n) % n;
-	const prontosDeDano = candidatos.filter((a) => a.id !== BASIC_ATTACK.id && isDamagingAbility(a) && isAbilityReady(entity, a.id));
+	const prontosDeDano = candidatos.filter((a) => isDamagingAbility(a) && isAbilityReady(entity, a.id));
 	const temGolpeQueFunciona = candidatos.some((a) => isDamagingAbility(a) && !golpeAnuladoPorImunidade(rng, entity, defenderEntity, a));
 	let maiorDanoCache = null;
 	const maiorDanoSePronto = () => {
@@ -153371,12 +153402,17 @@ function pickAbilityDaFila(world, entity, defenderEntity, candidatos, estaSilenc
 		if (!isDamagingAbility(ability)) {
 			if (estaSilenciado) continue;
 			if (!(ability.status != null && statusVaiPegar(defenderEntity, ability.status, ability.id) || golpeDeApoioUtil(world, entity, defenderEntity, ability, prontosDeDano, clima))) continue;
-			if (maiorDanoSePronto() >= defenderEntity.poke.hp) continue;
+			if (maiorDanoSePronto() * 2 >= defenderEntity.poke.hp) continue;
 		}
 		entity.filaGolpeIndex = (idx + 1) % n;
 		return ability;
 	}
 	return null;
+}
+/** O arsenal desta entidade nao tem nenhum golpe de dano (so status)? */
+function semGolpeDeDano(entity) {
+	const especie = SPECIES[entity.poke.speciesId];
+	return especie ? semGolpeDeDano$1(entity.poke, especie, usaKitDeSelvagem(entity)) : false;
 }
 function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 	const clima = world.clima?.tipo ?? null;
@@ -153391,10 +153427,14 @@ function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 	if (entity.poke.status?.tipo === "sleep") return candidatosFinais.includes("sleep_talk") && isAbilityReady(entity, "sleep_talk") && !(entity.silenciadoAte > 0) ? getAbility("sleep_talk") : null;
 	const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0);
 	const abilidadesFinais = candidatosFinais.map((id) => getAbility(id)).filter((a) => a != null);
-	const rotacaoDoJogador = abilidadesFinais.map((a) => a.id === BASIC_ATTACK.id ? basicAttackFor(attackerSpecies) : a);
-	const escolhido = entity.kind === "enemy" ? pickAbilityGreedy(world, entity, defenderEntity, abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter) : pickAbilityDaFila(world, entity, defenderEntity, rotacaoDoJogador, estaSilenciado, clima);
-	if (escolhido) return escolhido;
-	return entity.kind === "enemy" ? tentarAtaqueBasico(entity, attackerSpecies, disabled) : null;
+	if (abilidadesFinais.length === 0) return null;
+	if (!abilidadesFinais.some((a) => isDamagingAbility(a))) {
+		const comPp = abilidadesFinais.filter((a) => temPpDeCura(entity, a, true));
+		if (comPp.length === 0) return tentarStruggle(entity);
+		return comPp.find((a) => isAbilityReady(entity, a.id)) ?? null;
+	}
+	const rotacaoDoJogador = abilidadesFinais;
+	return !(entity.kind === "player" && world.rotacaoDeGolpes === true) ? pickAbilityGreedy(world, entity, defenderEntity, abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter, entity.kind === "player") : pickAbilityDaFila(world, entity, defenderEntity, rotacaoDoJogador, estaSilenciado, clima);
 }
 function iniciarPoseDoGolpe(world, atacante, ability, alvo) {
 	const duelo = world.mapDef?.encarada === true;
@@ -153712,10 +153752,10 @@ function executePlayerAction(world, player, engagedEnemies, silent, golpeEscolhi
 	if (golpeEscolhido && !temPpDeCura(player, golpeEscolhido)) return;
 	const ability = golpeEscolhido ?? pickAbility(world, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
 	if (!ability) return;
-	if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id;
+	if (ability.id !== STRUGGLE.id) player.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(player, ability);
 	sincronizarAlvoDaCura(player, primaryTarget?.id);
-	gastarPpDeCura(player, ability);
+	gastarPpDeCura(player, ability, semGolpeDeDano(player));
 	startGlobalCooldown(player, MIN_ACTION_GAP);
 	const tempo = iniciarPoseDoGolpe(world, player, ability, primaryTarget);
 	announceAbility(world, player, ability);
@@ -153742,10 +153782,10 @@ function executeEnemyAction(world, enemy, player, silent, golpeEscolhido = null)
 	if (truantImpedeAcao(world, enemy, silent)) return;
 	const ability = golpeEscolhido ?? pickAbility(world, enemy, player, () => 1);
 	if (!ability) return;
-	if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id;
+	if (ability.id !== STRUGGLE.id) enemy.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(enemy, ability);
 	sincronizarAlvoDaCura(enemy, player.id);
-	gastarPpDeCura(enemy, ability);
+	gastarPpDeCura(enemy, ability, semGolpeDeDano(enemy));
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
 	const tempo = iniciarPoseDoGolpe(world, enemy, ability, player);
 	announceAbility(world, enemy, ability);
@@ -154396,6 +154436,17 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			});
 			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 		}
+	}
+	if (ability.id === STRUGGLE.id && !isDead(attacker)) {
+		const recuo = Math.max(1, Math.round(attacker.poke.stats.hp * RECUO_DO_STRUGGLE));
+		takeDamage(attacker, recuo);
+		if (!silent) spawnDamageNumber(world, attacker, {
+			amount: recuo,
+			effectiveness: "normal",
+			effectivenessLabel: null,
+			isCrit: false
+		});
+		creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 	}
 	if (ability.id === "final_gambit" && danoCausado > 0 && !isDead(attacker)) {
 		const custo = Math.max(1, Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT));
@@ -157543,6 +157594,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		stepArena(world, dt, { silent });
 		return [];
 	}
+	world.rotacaoDeGolpes = gameState.autoToggles?.rotacaoDeGolpes === true;
 	if (!world.mapDef) {
 		if (world.player) tickCuraTimers(world.player, dt);
 		if (!silent) updateAnimations(world, dt);

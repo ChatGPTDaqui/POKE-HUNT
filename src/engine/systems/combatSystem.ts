@@ -7,12 +7,12 @@
 // forma permitida no port (risco de referencia obsoleta sob Immer).
 import { deriveRng, nextFloat, type Rng } from '@/core/rng'
 import {
-  getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_GOLPE,
+  getAbility, STRUGGLE, RECUO_DO_STRUGGLE, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_GOLPE,
   GOLPE_NUNCA_ERRA_NO_CLIMA, PRECISAO_DO_GOLPE_NO_CLIMA, WEATHER_BALL_POR_CLIMA,
   CURA_SENSIVEL_AO_CLIMA, CURA_NO_SOL, CURA_EM_CLIMA_RUIM, GROWTH_NO_SOL,
   type Ability,
 } from '@/data/abilities'
-import { golpesUtilizaveis } from '@/data/activeAbilities'
+import { golpesUtilizaveis, semGolpeDeDano as semGolpeDeDanoNoArsenal } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
   multiplicadorDeAccuracyOuEvasion, nomeDoStatus, ESTAGIO_MAXIMO,
@@ -254,10 +254,10 @@ function resolverImunidadeDeTipo(
     if (aplicarEfeitos) {
       // Reaproveita aplicarMudancasDeStat (clamp de -6/+6 incluso) em vez de
       // duplicar a matematica de estagio — so precisa de um `Ability` valido
-      // pro formato, daí o spread de BASIC_ATTACK com os 3 campos que
+      // pro formato, daí o spread de STRUGGLE com os 3 campos que
       // importam sobrescritos.
       aplicarMudancasDeStat(rng, defensor, defensor, {
-        ...BASIC_ATTACK,
+        ...STRUGGLE,
         statChanges: [{ stat, estagios: 1 }],
         statChance: 100,
         statTarget: 'self',
@@ -597,9 +597,9 @@ export function engageRangeFor(attacker: WorldEntity, defender: WorldEntity): nu
   return attacker.radius + defender.radius + MELEE_RANGE_PADDING
 }
 
-// Cooldown de BASIC_ATTACK e um flat 1.5s pra todo POKE, sem escala por
-// Velocidade (e o golpe que todo POKE sempre tem); todo outro golpe mantem
-// seu proprio cooldown individual derivado de PP, escalado por Velocidade.
+// Cooldown do STRUGGLE e fixo, sem escala por Velocidade. Todo outro golpe:
+// o turno (fixo) mais a parte que o PP baixo acrescenta, escalada pela
+// Velocidade com limite (ver scaledCooldown).
 /**
  * Recarga CHEIA deste golpe para ESTE POKE, ja escalada pela Velocidade.
  *
@@ -664,9 +664,22 @@ function armarCooldown(entity: WorldEntity, ability: Ability, world: WorldState)
   startCooldown(entity, ability.id, scaledCooldown(ability, velocidadeEfetiva(entity, world.clima?.tipo ?? null)))
 }
 
+/**
+ * Quanto a Velocidade pode encurtar ou alongar a parte da recarga que passa do
+ * turno (19/10/2026). Sem limite, um POKE de Velocidade 6 (nivel 1) esperava
+ * ~16x: um golpe de PP 25 levaria mais de 20 s. Rapido no maximo corta pela
+ * metade; lento no maximo dobra.
+ */
+export const FATOR_DE_VELOCIDADE_MIN = 0.5
+export const FATOR_DE_VELOCIDADE_MAX = 2
+
 function scaledCooldown(ability: Ability, speed: number): number {
-  if (ability.id === BASIC_ATTACK.id) return BASE_ATTACK_INTERVAL
-  return (ability.cooldown ?? 0) * (SPEED_REFERENCE / Math.max(1, speed))
+  if (ability.id === STRUGGLE.id) return BASE_ATTACK_INTERVAL
+  // O turno e fixo; a Velocidade so escala o que passa dele (golpe de PP baixo).
+  const nominal = ability.cooldown ?? 0
+  const alemDoTurno = Math.max(0, nominal - TURNO_SEGUNDOS)
+  const fator = Math.min(FATOR_DE_VELOCIDADE_MAX, Math.max(FATOR_DE_VELOCIDADE_MIN, SPEED_REFERENCE / Math.max(1, speed)))
+  return Math.min(nominal, TURNO_SEGUNDOS) + alemDoTurno * fator
 }
 
 // A Velocidade que conta pro cooldown, ja com o efeito de status. Paralisia
@@ -1069,10 +1082,6 @@ export function podeDanificar(rng: Rng, attackerEntity: WorldEntity, defenderEnt
   const golpes = golpesUtilizaveis(attackerEntity.poke, especie, usaKitDeSelvagem(attackerEntity))
     .map((id) => getAbility(id))
     .filter((a): a is Ability => a != null)
-    // O Ataque Basico assume o tipo primario do atacante (`basicAttackFor`),
-    // entao ele NAO e escape de imunidade: a versao NORMAL do catalogo mentiria
-    // aqui. Avaliado com o tipo que ele de fato teria.
-    .map((a) => (a.id === BASIC_ATTACK.id ? basicAttackFor(especie) : a))
   const comDano = golpes.filter((a) => isDamagingAbility(a))
   // Arsenal sem nenhum golpe de dano nao e caso de imunidade — nao ha o que
   // filtrar, e responder `false` aqui faria o sorteio do protetor girar em
@@ -1527,6 +1536,8 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
       )
     }
   }
+  // Struggle nao tem tipo: acerta tudo com efetividade 1 (inclusive Fantasma).
+  if (ability.id === STRUGGLE.id) effectivenessMultiplier = 1
   const special = specialDamageFor(rng, ability, attackerEntity, defenderEntity)
 
   let dmg: number
@@ -1789,9 +1800,6 @@ function spawnDamageNumber(world: WorldState, target: WorldEntity, result: Damag
 // `.type` direto corromperia pra qualquer outra entidade usando ele no meio
 // de outra luta. Isso monta um override por-ataque tipado pro tipo primario
 // do atacante.
-function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
-  return { ...BASIC_ATTACK, type: attackerSpecies.type }
-}
 
 // Escolhe o golpe pronto (fora de cooldown) que causa mais dano no
 // `defenderEntity`. Golpes de status/nao-dano (power 0) sao excluidos da
@@ -1810,9 +1818,9 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 // SO PRO SELVAGEM desde 2026-08-18. O POKE do jogador escolhe os 4 golpes, e
 // o Ataque Basico e um deles se ele quiser — dar de graca aqui devolveria por
 // baixo o slot gratis que a leva tirou.
-function tentarAtaqueBasico(entity: WorldEntity, attackerSpecies: { type: Ability['type'] }, disabled: Record<string, boolean>): Ability | null {
-  if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null
-  return basicAttackFor(attackerSpecies)
+/** Struggle pronto? So e chamado quando o POKE nao tem golpe de dano e esgotou o PP. */
+function tentarStruggle(entity: WorldEntity): Ability | null {
+  return isAbilityReady(entity, STRUGGLE.id) ? STRUGGLE : null
 }
 
 // Selvagem nao tem `activeAbilities` escolhido por ninguem (ver
@@ -1820,13 +1828,29 @@ function tentarAtaqueBasico(entity: WorldEntity, attackerSpecies: { type: Abilit
 // significado pra respeitar, mantem a heuristica antiga: golpe de maior dano
 // esperado entre os prontos, com golpe de status entrando so quando vale a
 // pena (ver golpeDeApoioUtil) e preferencia por AOE que atinge 2+ alvos.
+/**
+ * Golpe de status so vale se o alvo aguentar MAIS que isto de golpes do melhor
+ * golpe de dano pronto (19/10/2026). Era 1 (so pulava contra quem morre num
+ * golpe): Growl gastava metade dos turnos de um POKE de nivel baixo contra
+ * selvagem que cai em dois Scratches.
+ */
+export const GOLPES_PRA_STATUS_VALER = 2
+
 function pickAbilityGreedy(
   world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity,
   prontos: Ability[], estaSilenciado: boolean, clima: ClimaTipo | null,
   aoeTargetCounter: (a: Ability) => number,
+  /**
+   * Jogador com a rotacao DESLIGADA (19/10/2026): "o golpe que mais causa dano
+   * naquele inimigo" — golpe de status nunca entra (o POKE espera o golpe de
+   * dano recarregar). Quem NAO tem golpe de dano nem chega aqui: cai no ramo
+   * do PP/Struggle em `pickAbility`. O selvagem segue com a regra antiga.
+   */
+  soDano = false,
 ): Ability | null {
   const rng = world.rng
   const ready = prontos.filter((ability) => isDamagingAbility(ability))
+  if (soDano) estaSilenciado = true
 
   // ...MAS SO SE O ALVO FOR SOBREVIVER AO MELHOR GOLPE DE DANO.
   //
@@ -1850,7 +1874,7 @@ function pickAbilityGreedy(
       (max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)),
       0,
     )
-    if (maiorDano < defenderEntity.poke.hp) {
+    if (maiorDano * GOLPES_PRA_STATUS_VALER < defenderEntity.poke.hp) {
       return statusPronto.reduce((melhor, a) => (
         (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor
       ))
@@ -1899,7 +1923,7 @@ function pickAbilityDaFila(
   // "o alvo sobrevive ao meu melhor golpe?", e o Basico nao e resposta pra
   // isso em POKE nenhum.
   const prontosDeDano = candidatos.filter((a) => (
-    a.id !== BASIC_ATTACK.id && isDamagingAbility(a) && isAbilityReady(entity, a.id)
+    isDamagingAbility(a) && isAbilityReady(entity, a.id)
   ))
 
   // PH-301: ha ALTERNATIVA a um golpe anulado por imunidade? A pergunta olha a
@@ -1953,12 +1977,18 @@ function pickAbilityDaFila(
       if (!statusVale) continue
       // Mesmo overkill-guard do caminho selvagem: se um golpe de dano pronto
       // ja mata o alvo, nao abre com status na frente dele.
-      if (maiorDanoSePronto() >= defenderEntity.poke.hp) continue
+      if (maiorDanoSePronto() * GOLPES_PRA_STATUS_VALER >= defenderEntity.poke.hp) continue
     }
     entity.filaGolpeIndex = (idx + 1) % n
     return ability
   }
   return null
+}
+
+/** O arsenal desta entidade nao tem nenhum golpe de dano (so status)? */
+function semGolpeDeDano(entity: WorldEntity): boolean {
+  const especie = SPECIES[entity.poke.speciesId]
+  return especie ? semGolpeDeDanoNoArsenal(entity.poke, especie, usaKitDeSelvagem(entity)) : false
 }
 
 function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
@@ -1991,8 +2021,7 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
     .filter((id) => id !== 'curse' || attackerSpecies.type === 'GHOST' || attackerSpecies.type2 === 'GHOST')
 
   // Encore: enquanto o timer nao zera, SO o golpe forcado entra na escolha.
-  // Se ele estiver em cooldown, o fallback pro Ataque Basico (mais abaixo) ja
-  // cobre o caso, sem logica nova.
+  // Se ele estiver em recarga, o POKE espera.
   const encoreAtivo = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId)
   const candidatosFinais = encoreAtivo
     ? candidateIds.filter((id) => id === entity.forcedAbilityId)
@@ -2009,25 +2038,28 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
 
   const abilidadesFinais = candidatosFinais.map((id) => getAbility(id)).filter((a): a is Ability => a != null)
 
-  // O Ataque Basico do JOGADOR nao e mais injetado aqui. Ate 2026-08-18 ele
-  // entrava como primeira posicao fixa da fila, de graca, alem dos 4 slots —
-  // o POKE lutava com 5 (6 com a Explosao Elemental) enquanto a tela dizia
-  // "4/4". Agora ele so luta se o jogador o tiver escolhido, e ai ja chega em
-  // `abilidadesFinais` como qualquer outro golpe, na posicao que o jogador
-  // deu a ele. Ver data/activeAbilities.ts.
-  //
-  // `basicAttackFor` continua sendo a fonte do objeto: o Ataque Basico assume
-  // o tipo primario do atacante, e o `getAbility` que montou `abilidadesFinais`
-  // devolve a versao NORMAL, module-level.
-  const rotacaoDoJogador = abilidadesFinais.map(
-    (a) => (a.id === BASIC_ATTACK.id ? basicAttackFor(attackerSpecies) : a),
-  )
+  // SEM GOLPE DE DANO (19/10/2026, fim do Ataque Basico): o POKE usa o que tem,
+  // gastando PP contra o alvo atual, e so quando tudo esgota parte pro
+  // Struggle — como no jogo original. Ver engine/ppDeCura.ts.
+  // Lista VAZIA (tudo desligado de proposito) continua sendo "nao ataca":
+  // Struggle e pra quem tem golpes e gastou o PP deles, nao pra quem nao tem.
+  if (abilidadesFinais.length === 0) return null
+  if (!abilidadesFinais.some((a) => isDamagingAbility(a))) {
+    const comPp = abilidadesFinais.filter((a) => temPpDeCura(entity, a, true))
+    if (comPp.length === 0) return tentarStruggle(entity)
+    return comPp.find((a) => isAbilityReady(entity, a.id)) ?? null
+  }
+  const rotacaoDoJogador = abilidadesFinais
 
-  const escolhido = entity.kind === 'enemy'
+  // Rotacao DESLIGADA (padrao, 19/10/2026): o jogador tambem cai no "melhor
+  // dano contra este inimigo", igual ao selvagem. Ligada: segue a fila dele.
+  const segueFila = entity.kind === 'player' && world.rotacaoDeGolpes === true
+  const escolhido = !segueFila
     ? pickAbilityGreedy(
       world, entity, defenderEntity,
       abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)),
       estaSilenciado, clima, aoeTargetCounter,
+      entity.kind === 'player',
     )
     : pickAbilityDaFila(
       world, entity, defenderEntity,
@@ -2035,14 +2067,8 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
       estaSilenciado, clima,
     )
 
-  // Fallback SO pro selvagem. E o Struggle dele: o moveset selvagem e derivado
-  // (4 ultimos aprendidos, sem escolha de ninguem), entao uma especie com 1
-  // golpe de dano passaria metade dos turnos parada. O jogador nao tem esse
-  // problema — ele escolhe os 4, e se quiser a rede de seguranca basta por o
-  // Ataque Basico num slot. Dar a ele um golpe que ele NAO escolheu seria
-  // desfazer o pedido desta leva por outro caminho.
-  if (escolhido) return escolhido
-  return entity.kind === 'enemy' ? tentarAtaqueBasico(entity, attackerSpecies, disabled) : null
+  // Com golpe de dano, ninguem usa Struggle: golpe em recarga e esperar.
+  return escolhido
 }
 
 // Contador no WorldState, nao em modulo — ver a nota em types.ts#WorldCounters.
@@ -2465,11 +2491,11 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   // golpe usado" (o que Spite/Disable/Encore leem) e fixado quando o golpe e
   // usado, PP gasto ou nao, golpe acertando ou nao. Ataque Basico fica de
   // fora -- e o Struggle deste jogo, nao um golpe de moveset de verdade.
-  if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id
+  if (ability.id !== STRUGGLE.id) player.lastUsedAbilityId = ability.id
 
   registrarUsoParaProtecao(player, ability)
   sincronizarAlvoDaCura(player, primaryTarget?.id)
-  gastarPpDeCura(player, ability)
+  gastarPpDeCura(player, ability, semGolpeDeDano(player))
   // PH-176: cooldown NAO arma aqui mais — so no erro/AOE-sem-alvo abaixo, ou
   // em `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`).
   startGlobalCooldown(player, MIN_ACTION_GAP)
@@ -2529,11 +2555,11 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
 
   // Mesma logica de executePlayerAction acima -- registrado na escolha, nao
   // no acerto.
-  if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id
+  if (ability.id !== STRUGGLE.id) enemy.lastUsedAbilityId = ability.id
 
   registrarUsoParaProtecao(enemy, ability)
   sincronizarAlvoDaCura(enemy, player.id)
-  gastarPpDeCura(enemy, ability)
+  gastarPpDeCura(enemy, ability, semGolpeDeDano(enemy))
   // PH-176: cooldown NAO arma aqui mais — so no erro abaixo, ou em
   // `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`). Inimigo
   // sempre mira o jogador unico, entao nao existe caso "AOE sem alvo".
@@ -3505,6 +3531,16 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       if (!silent) spawnDamageNumber(world, attacker, { amount: quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
       creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted)
     }
+  }
+
+  // STRUGGLE (19/10/2026): recuo de 1/4 do HP MAXIMO de quem usa, acertando ou
+  // nao o alvo forte — regra da geracao 4 em diante. Rock Head nao protege
+  // (no jogo original tambem nao). So existe pra quem nao tem golpe de dano.
+  if (ability.id === STRUGGLE.id && !isDead(attacker)) {
+    const recuo = Math.max(1, Math.round(attacker.poke.stats.hp * RECUO_DO_STRUGGLE))
+    takeDamage(attacker, recuo)
+    if (!silent) spawnDamageNumber(world, attacker, { amount: recuo, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+    creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted)
   }
 
   // FINAL GAMBIT (PH-69): o dano sai em FIXED_DAMAGE_ABILITIES (HP atual do

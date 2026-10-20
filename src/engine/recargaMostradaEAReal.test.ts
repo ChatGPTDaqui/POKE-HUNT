@@ -41,14 +41,16 @@ describe('a recarga mostrada e a recarga real (PH-493)', () => {
     expect(recargaEfetivaDoGolpe(ability, VELOCIDADE_DE_REFERENCIA)).toBeCloseTo(12, 5)
   })
 
-  it('Velocidade DOBRADA corta a recarga pela metade', () => {
+  // Desde 19/10/2026 a Velocidade so mexe na parte da recarga ACIMA do turno, e
+  // o fator fica entre 0,5x e 2x: 12s = 3s de turno + 9s que a Velocidade escala.
+  it('Velocidade DOBRADA corta pela metade a parte acima do turno', () => {
     const ability = golpeLento(12)
-    expect(recargaEfetivaDoGolpe(ability, VELOCIDADE_DE_REFERENCIA * 2)).toBeCloseTo(6, 5)
+    expect(recargaEfetivaDoGolpe(ability, VELOCIDADE_DE_REFERENCIA * 2)).toBeCloseTo(3 + 4.5, 5)
   })
 
-  it('Velocidade pela METADE dobra a recarga', () => {
+  it('Velocidade pela METADE dobra a parte acima do turno', () => {
     const ability = golpeLento(12)
-    expect(recargaEfetivaDoGolpe(ability, VELOCIDADE_DE_REFERENCIA / 2)).toBeCloseTo(24, 5)
+    expect(recargaEfetivaDoGolpe(ability, VELOCIDADE_DE_REFERENCIA / 2)).toBeCloseTo(3 + 18, 5)
   })
 
   it('nenhum golpe desce abaixo do TURNO, por mais rapido que seja', () => {
@@ -75,6 +77,7 @@ describe('a recarga mostrada e a recarga real (PH-493)', () => {
     const ability = golpeLento(12)
     const deUmPokeLento = recargaEfetivaDoGolpe(ability, VELOCIDADE_DE_REFERENCIA / 4)
     expect(deUmPokeLento).not.toBeCloseTo(ability.cooldown!, 5)
-    expect(deUmPokeLento).toBeCloseTo(48, 5)
+    // Velocidade 1/4 bate no teto do fator (2x).
+    expect(deUmPokeLento).toBeCloseTo(3 + 18, 5)
   })
 })

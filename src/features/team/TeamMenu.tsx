@@ -13,6 +13,7 @@ import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { GameButton, GameCard, Meter } from '@/components/game/controls'
 import { useDeviceMode } from '@/stores/uiStore'
+import { semGolpeDeDano } from '@/data/activeAbilities'
 import { cn } from '@/lib/utils'
 import { MenuScene } from '@/components/game/MenuScene'
 import { TypeChip } from '@/components/shared/TypeChip'
@@ -111,6 +112,14 @@ export function TeamMenu() {
                 {isActive && (
                   <span className="rounded-full bg-menu-brand px-[.5em] py-[.05em] text-[.7em] font-medium text-primary-foreground">
                     Em campo
+                  </span>
+                )}
+                {semGolpeDeDano(poke, species, false) && (
+                  // Fim do Ataque Basico (19/10/2026): sem golpe de dano ele gasta
+                  // o PP do que tem e parte pro Struggle, que machuca a si mesmo.
+                  <span role="note" title="Ensine um golpe de dano com um TM: sem ele, o POKE usa o que tem até acabar o PP e depois luta com Struggle, que machuca a si mesmo."
+                    className="rounded-full border border-destructive/60 px-[.5em] py-[.05em] text-[.7em] font-medium text-destructive">
+                    Sem golpe de dano
                   </span>
                 )}
                 {canEvolve(poke, species) && (

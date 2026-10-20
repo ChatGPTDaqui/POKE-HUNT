@@ -109,7 +109,7 @@ function ComecandoTab() {
         <br />
         <br />
         Comece pela <b>Rota 46 (Inicial)</b>: ela fica no topo da lista de hunts, acima do mapa dos biomas, e é
-        a única feita pro nível 1 — só aparecem POKEs de nível 1 e 2, então não existe risco de cruzar com algo
+        a única feita pro começo — seu primeiro POKE chega no nível 5, e só aparecem POKEs de nível 1 e 2, então não existe risco de cruzar com algo
         forte logo de cara. Os biomas vêm depois, quando seu POKE tiver nível pra eles.
       </WikiCard>
 
@@ -117,8 +117,8 @@ function ComecandoTab() {
         Ao entrar numa caçada, seu POKE começa a andar pelo mapa procurando o selvagem vivo mais próximo. Ao
         chegar perto ele engaja e escolhe os golpes sozinho: entre os que estão fora de recarga, o de maior
         dano estimado contra aquele alvo — com preferência por golpe em área sempre que ele acertaria 2 ou mais
-        inimigos ao mesmo tempo. Derrotado o inimigo, ele escolhe outro imediatamente. Seu POKE nunca fica
-        parado esperando ordem.
+        inimigos ao mesmo tempo. Se preferir uma ordem sua, ligue a <b>Rotação de golpes</b> em Automações.
+        Derrotado o inimigo, ele escolhe outro imediatamente. Seu POKE nunca fica parado esperando ordem.
         <br />
         <br />
         Se houver um <b>shiny</b> vivo na caçada, ele passa a ser o alvo prioritário automaticamente.
@@ -446,18 +446,17 @@ function MecanicasDeCampoTab() {
       </WikiCard>
 
       <WikiCard title="Recarga — por que alguns golpes demoram tanto">
-        Cada golpe tem a própria recarga, e a regra é simples: <b>golpe forte volta mais devagar</b>. Um
-        golpe pesado pode levar três vezes o tempo de um golpe leve. É a tradução do "usos limitados" dos
-        jogos originais para um jogo que roda sozinho — aqui nenhum golpe se esgota, ele só demora a voltar.
+        Cada golpe tem a própria recarga, que vem dos usos que ele tem nos jogos originais: <b>quanto menos usos, mais devagar ele volta</b>.
+        Golpe de 35 usos (como {nomeDoGolpe('scratch')}) volta em um turno ({TURNO_SEGUNDOS}s); um de 5 usos leva
+        sete vezes isso. É a tradução do "usos limitados" dos jogos originais para um jogo que roda sozinho —
+        golpe de dano nunca se esgota, ele só demora a voltar.
         <br />
         <br />
-        Em cima disso entra a <b>Velocidade</b> do seu POKE: quanto maior, mais rápido <i>todos</i> os golpes
-        recarregam. É o que faz Velocidade valer mesmo num jogo sem ordem de turno.
+        Em cima disso entra a <b>Velocidade</b> do seu POKE: ela mexe só no tempo que passa do turno — o POKE
+        rápido corta essa parte até pela metade, o lento chega ao dobro. Nenhum golpe sai antes de um turno.
         <br />
         <br />
-        O <b>Ataque Básico</b> — o golpe de reserva que todo POKE sempre tem — é a única exceção: a recarga
-        dele é fixa e não muda com a Velocidade. E enquanto um golpe está em execução o POKE fica{' '}
-        <b>parado</b>: ele só volta a andar quando a ação termina.
+        Enquanto um golpe está em execução o POKE fica <b>parado</b>: ele só volta a andar quando a ação termina.
       </WikiCard>
     </div>
   )
@@ -649,8 +648,7 @@ function StatusTab() {
 }
 
 // Mesmo motor de formula que o combate real usa (combatSystem.ts) — os
-// numeros abaixo (STAB, critico, velocidade de referencia, cooldown do
-// Ataque Basico) sao editaveis pela planilha, entao a Wiki le o valor AO VIVO
+// numeros abaixo (STAB, critico, velocidade de referencia) sao editaveis pela planilha, entao a Wiki le o valor AO VIVO
 // em vez de copiar um numero que pode ficar desatualizado no primeiro ajuste
 // de balanceamento.
 const formulaEngineDaWiki = createFormulaEngine(FORMULAS)
@@ -658,7 +656,6 @@ const STAB_MULTIPLIER_WIKI = formulaEngineDaWiki.eval('STAB_MULTIPLIER')
 const CRIT_CHANCE_WIKI = formulaEngineDaWiki.eval('CRIT_CHANCE')
 const CRIT_MULTIPLIER_WIKI = formulaEngineDaWiki.eval('CRIT_MULTIPLIER')
 const SPEED_REFERENCE_WIKI = formulaEngineDaWiki.evalOrDefault('ATTACK_SPEED_REFERENCE', 100)
-const BASIC_ATTACK_COOLDOWN_WIKI = formulaEngineDaWiki.evalOrDefault('BASIC_ATTACK_COOLDOWN', 2)
 
 // Nome do golpe pelo id real do catalogo (`data/abilities.ts`), com o
 // proprio id cru como fallback honesto se um dia um id mudar de nome — igual
@@ -756,10 +753,10 @@ function CombateTab() {
         continuo, e cada POKE age assim que estiver pronto (golpe fora de cooldown), sem esperar a "vez" de
         ninguem. A unidade de tempo usada nas contas abaixo (duracao de status/escudo/trava, etc.) e o{' '}
         <b>turno</b>, que aqui equivale a <b>{TURNO_SEGUNDOS} segundos</b> reais — o mesmo intervalo mínimo entre
-        duas ações de um POKE (o <b>cooldown global</b>, ver Recarga/Velocidade na aba Mecânicas) — na prática, um
-        golpe so recarrega mais rapido que isso se a Velocidade do POKE for maior que a referencia de{' '}
-        {SPEED_REFERENCE_WIKI}. O Ataque Basico foge dessa regra: seu cooldown e sempre fixo em{' '}
-        {BASIC_ATTACK_COOLDOWN_WIKI}s, sem depender da Velocidade. Por causa disso,{' '}
+        duas ações de um POKE (o <b>cooldown global</b>, ver Recarga/Velocidade na aba Mecânicas). Golpe com tantos
+        usos quanto {nomeDoGolpe('scratch')} (35) recarrega em um turno; golpe com menos usos demora mais, e só essa
+        parte além do turno muda com a Velocidade (referência {SPEED_REFERENCE_WIKI}): o POKE mais rápido corta
+        até pela metade, o mais lento chega ao dobro. Por causa disso,{' '}
         <b>não existe sistema de prioridade de golpe</b> (o que faria um golpe como {nomeDoGolpe('quick_attack')}{' '}
         agir sempre primeiro, independente de Velocidade): todo golpe passa pelo mesmo cano de resolucao, sem
         fila nem ordem especial — {nomeDoGolpe('wide_guard')} e {nomeDoGolpe('quick_guard')} existem no catalogo
@@ -781,18 +778,24 @@ function CombateTab() {
         usam o de apoio. Caso contrario escolhem golpe de dano: se algum golpe em AREA (AOE) pronto atingiria 2
         ou mais alvos, a escolha fica restrita aos golpes de AOE; dentro do que sobrou, escolhem o de maior{' '}
         <b>dano esperado</b> (dano estimado multiplicado pela própria chance de acerto — um golpe forte mas
-        impreciso pode perder pra um mais fraco e mais confiavel). Sem nada pronto, cai no Ataque Basico.
+        impreciso pode perder pra um mais fraco e mais confiavel). Sem nada pronto, espera o próximo golpe recarregar.
         <br />
         <br />
-        Seu <b>próprio POKE</b> segue uma lógica diferente: ele usa os até <b>{MAX_ACTIVE_ABILITIES} golpes</b>{' '}
-        que voce escolheu deixar ativos (aba Golpes do perfil do POKE), numa fila fixa — tenta o proximo da fila
-        assim que ele estiver pronto, pulando (sem gastar a vez) um golpe de status que nao faria nada agora
-        (alvo imune, ja no teto de estagio, etc.). Ele NAO prioriza AOE sozinho — a ordem e inteiramente a que
-        voce escolheu.
+        <b>Não existe Ataque Básico.</b> Um POKE sem nenhum golpe de dano usa o que tem até acabar os usos contra o
+        alvo atual (trocar de alvo devolve os usos) e então luta com <b>Struggle</b>, que machuca o próprio POKE em
+        1/4 do HP máximo a cada uso — ensine um golpe de dano com um TM. Golpes de cura pura (como{' '}
+        {nomeDoGolpe('recover')}) também têm usos contados contra cada alvo.
+        <br />
+        <br />
+        Seu <b>próprio POKE</b> usa só os até <b>{MAX_ACTIVE_ABILITIES} golpes</b> que você deixou ativos (aba
+        Golpes do perfil do POKE). Com a <b>Rotação de golpes</b> desligada (padrão, em Automações), ele escolhe
+        sempre o golpe pronto que mais causa dano naquele inimigo. Ligada, ele segue a sua fila: tenta o próximo
+        assim que estiver pronto, pulando (sem gastar a vez) um golpe de status que não faria nada agora (alvo
+        imune, já no teto de estágio, etc.), e não prioriza AOE sozinho.
       </WikiCard>
 
       <WikiCard title="Acerto ou erro">
-        Todo golpe (exceto os de precisao 100, que nunca erram — o Ataque Basico e um deles) rola uma chance de
+        Todo golpe (exceto os de precisao 100, que nunca erram — o Struggle e um deles) rola uma chance de
         acerto: <code>precisão do golpe × multiplicador de Precisão do atacante ÷ multiplicador de Evasão do
         defensor</code>. Os estágios de <b>Precisão</b> e <b>Evasão</b> são um eixo separado dos estágios normais
         de Ataque/Defesa/Velocidade (formula propria, base 3 em vez de base 2): +1 da 1.33x, −1 da 0.75x. A rolagem

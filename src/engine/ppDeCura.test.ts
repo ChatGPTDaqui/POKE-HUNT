@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { BASIC_ATTACK, getAbility } from '@/data/abilities'
+import { getAbility } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { createEnemyEntity } from './entity'
 import { buildMapWorld } from './simulation'
@@ -36,12 +36,12 @@ describe('PP de cura', () => {
     const poke = createPokeInstance(rng, 'slowpoke', 40)
     poke.unlockedAbilities = [...poke.unlockedAbilities, 'recover']
     poke.activeAbilities = ['recover']
-    poke.disabledAbilities = { [BASIC_ATTACK.id]: true }
+    poke.disabledAbilities = { ['basic_attack']: true }
     const world = buildMapWorld('route_46', poke, { seed: 0, rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
     const player = world.player!
     const inimigo = createPokeInstance(rng, 'rattata', 40)
     inimigo.disabledAbilities = Object.fromEntries(
-      [...golpesUtilizaveis(inimigo, SPECIES.rattata, true), BASIC_ATTACK.id].map((id) => [id, true]),
+      [...golpesUtilizaveis(inimigo, SPECIES.rattata, true), 'basic_attack'].map((id) => [id, true]),
     )
     const enemy = createEnemyEntity(world.counters, { poke: inimigo, x: player.x, y: player.y, encounterId: 'route_46_rattata' })
     enemy.state = 'engaged'

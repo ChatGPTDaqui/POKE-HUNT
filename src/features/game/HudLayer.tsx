@@ -48,6 +48,7 @@ import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { useGestaoAberta } from '@/hooks/useGestaoAberta'
 import { cn } from '@/lib/utils'
 import { useCarregarDiario } from '@/features/primeirosPassos/Diario'
+import { useAvisoSemGolpeDeDano } from './useAvisoSemGolpeDeDano'
 
 // Acima disto o chat volta a ser janela flutuante no canto: e a largura em que
 // ela cabe ao lado da doca sem encostar nela. Abaixo, ticker de uma linha —
@@ -56,6 +57,7 @@ const LARGURA_CHAT_FLUTUANTE = 1200
 
 export function HudLayer() {
   useCarregarDiario()
+  useAvisoSemGolpeDeDano()
   const { mode, width } = useDeviceMode()
   const setFooterHeight = useUiStore((s) => s.setFooterHeight)
   const chatFlutuante = mode === 'amplo' && width >= LARGURA_CHAT_FLUTUANTE

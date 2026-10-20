@@ -19,7 +19,6 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { BASIC_ATTACK } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
@@ -37,7 +36,7 @@ function cenario() {
   const enemyPoke = createPokeInstance(rng, 'rattata', 40)
   const enemySpecies = SPECIES[enemyPoke.speciesId]
   enemyPoke.disabledAbilities = Object.fromEntries(
-    [...golpesUtilizaveis(enemyPoke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+    [...golpesUtilizaveis(enemyPoke, enemySpecies, true), 'basic_attack'].map((id) => [id, true]),
   )
   enemyPoke.stats = { ...enemyPoke.stats, hp: 99999 }
   enemyPoke.hp = 99999

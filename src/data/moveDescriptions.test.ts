@@ -12,7 +12,7 @@ import { ABILITIES_DATA as POR_NIVEL } from './generated/abilities.generated'
 import { GOLPES_TM } from './generated/golpesTm.generated'
 const ABILITIES_DATA = { ...POR_NIVEL, ...GOLPES_TM }
 import { TYPED_AOE_MOVES } from './typedAoeMoves'
-import { ABILITIES, BASIC_ATTACK, DANO_SEM_PODER_BASE, isDamagingAbility } from './abilities'
+import { ABILITIES, DANO_SEM_PODER_BASE, isDamagingAbility } from './abilities'
 
 describe('descricoes de golpe', () => {
   it('todo golpe do catalogo tem descricao', () => {
@@ -24,7 +24,7 @@ describe('descricoes de golpe', () => {
     // Golpes proprios do jogo (Ataque Basico e os 18 de nivel 50) sao descritos
     // por `descricaoDoGolpe` em AbilityTooltip, nao por esta tabela — entao
     // aparecer aqui tambem nao e erro, so redundancia.
-    const proprios = new Set([BASIC_ATTACK.id, ...Object.keys(TYPED_AOE_MOVES)])
+    const proprios = new Set(['basic_attack', ...Object.keys(TYPED_AOE_MOVES)])
     const orfas = Object.keys(MOVE_DESCRIPTIONS).filter((id) => !ABILITIES_DATA[id] && !proprios.has(id))
     expect(orfas).toEqual([])
   })

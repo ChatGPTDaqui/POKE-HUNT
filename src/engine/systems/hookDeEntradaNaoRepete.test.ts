@@ -19,7 +19,6 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { BASIC_ATTACK } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
@@ -32,7 +31,7 @@ const PASSO = 1 / 60
 function desarmar(poke: ReturnType<typeof createPokeInstance>) {
   const species = SPECIES[poke.speciesId]
   poke.disabledAbilities = Object.fromEntries(
-    [...golpesUtilizaveis(poke, species, true), BASIC_ATTACK.id].map((id) => [id, true]),
+    [...golpesUtilizaveis(poke, species, true), 'basic_attack'].map((id) => [id, true]),
   )
   poke.stats = { ...poke.stats, hp: 99999 }
   poke.hp = 99999
