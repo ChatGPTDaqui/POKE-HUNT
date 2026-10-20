@@ -21,7 +21,7 @@ import { PokedexMenu } from '@/features/pokedex/PokedexMenu'
 import { WikiMenu } from '@/features/wiki/WikiMenu'
 import { SettingsScreen } from '@/features/settings/SettingsScreen'
 import { BestiarioMenu } from '@/features/bestiario/BestiarioMenu'
-import { TasksMenu } from '@/features/tasks/TasksMenu'
+import { ContratosMenu } from '@/features/contratos/ContratosMenu'
 import { SocialMenu } from '@/features/social/SocialMenu'
 import { CalculadoraMenu } from '@/features/calc/CalculadoraMenu'
 import { MercadoMenu } from '@/features/mercado/MercadoMenu'
@@ -42,7 +42,7 @@ const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   wiki: WikiMenu,
   config: SettingsScreen,
   bestiario: BestiarioMenu,
-  tasks: TasksMenu,
+  tasks: ContratosMenu,
   social: SocialMenu,
   calc: CalculadoraMenu,
   mercado: MercadoMenu,
@@ -64,7 +64,7 @@ const TITLES: Record<ScreenName, string> = {
   wiki: 'Wiki',
   config: 'Configurações',
   bestiario: 'Bestiário',
-  tasks: 'Tasks & Missões',
+  tasks: 'Contratos',
   social: 'Social',
   calc: 'Calculadora de Força',
   mercado: 'Mercado',
@@ -109,7 +109,8 @@ const WIDTHS: Partial<Record<ScreenName, number>> = {
 export function ScreenOverlay() {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const closeScreen = useUiStore((s) => s.closeScreen)
-  const teamSize = useGameStateStore((s) => s.team.length)
+  // Ovo na equipe ocupa vaga (20/10/2026).
+  const teamSize = useGameStateStore((s) => s.team.length + s.ovos.filter((ovo) => ovo.naEquipe).length)
 
   if (!currentScreen) return null
   const Panel = PANELS[currentScreen]

@@ -21,7 +21,6 @@ import {
   ESPECIALIDADE_TYPES, ESPECIALIDADE_NIVEL_MAX, ESPECIALIDADE_BONUS_POR_NIVEL,
   custosDoTipo,
 } from '@/data/especialidades'
-import { cadeiaDoTipo } from '@/data/missoes'
 import { SPECIES, SPECIAL_EVOLUTION_LEVEL, SPECIAL_EVOLUTION_STONE_COUNT } from '@/data/pokes'
 import { MAX_TEAM_SIZE } from '@/stores/gameStateDefaults'
 import { MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
@@ -29,6 +28,8 @@ import { GameSelect } from '@/components/game/controls'
 import { TypeChip as SharedTypeChip } from '@/components/shared/TypeChip'
 import type { ElementType } from '@/data/generated/types'
 import { WikiCard } from './WikiCard'
+import { ABATES_PARA_CHOCAR, CONTRATOS_POR_DIA, IV_MINIMO_DO_OVO, RARIDADE_AO_CHOCAR, RARIDADES_DO_OVO } from '@/data/ovos'
+import { RARITIES } from '@/data/rarity'
 
 const fmt = new Intl.NumberFormat('pt-BR')
 const BONUS_MAX_PCT = Math.round(ESPECIALIDADE_BONUS_POR_NIVEL * ESPECIALIDADE_NIVEL_MAX * 100)
@@ -83,38 +84,6 @@ function CustoDaEspecialidade() {
         Esse é o custo de UMA trilha. Dano e defesa são separadas e cobram o mesmo — fechar as duas neste tipo
         custa {fmt.format(totalStones * 2)} pedras e {fmt.format(totalGold * 2)} de ouro.
       </div>
-    </div>
-  )
-}
-
-/** O tamanho da cadeia de missoes de um tipo, e o primeiro alvo dela. */
-function CadeiaDeMissoes() {
-  const [tipo, setTipo] = useState<ElementType>('FIRE')
-  const cadeia = cadeiaDoTipo(tipo)
-  const primeira = cadeia[0]
-  const nomeDaEspecie = (id: string) => SPECIES[id]?.name ?? id
-
-  return (
-    <div>
-      <div className="mb-[.45em] flex items-center gap-[.4em]">
-        <span className="text-[.8em] text-menu-muted">Cadeia de</span>
-        <GameSelect value={tipo} onChange={(e) => setTipo(e.target.value as ElementType)} className="w-[9em]">
-          {ESPECIALIDADE_TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </GameSelect>
-        <SharedTypeChip type={tipo} full />
-      </div>
-      {cadeia.length === 0 ? (
-        <div className="text-[.8em] text-menu-muted">Este tipo não tem cadeia no elenco atual.</div>
-      ) : (
-        <div className="text-[.8em] text-menu-muted">
-          <b>{cadeia.length} missões</b> nesta cadeia. A primeira pede{' '}
-          <b>{fmt.format(primeira.alvo)} abates de {nomeDaEspecie(primeira.speciesId)}</b> e paga{' '}
-          {fmt.format(primeira.recompensa)} de ouro. A última é{' '}
-          <b>{nomeDaEspecie(cadeia[cadeia.length - 1].speciesId)}</b>.
-        </div>
-      )}
     </div>
   )
 }
@@ -241,18 +210,26 @@ export function ProgressoTab() {
         </div>
       </WikiCard>
 
-      <WikiCard title="Missões — a cadeia de abates por tipo">
-        Na tela <b>Tasks</b>, cada tipo elemental tem uma <b>cadeia sequencial</b> de missões de abate: mate N
-        de uma espécie, receba ouro, e a missão seguinte da cadeia abre. As espécies vêm em ordem de
-        dificuldade real de farm — quão fácil ela é de encontrar, depois quão avançada na linha de evolução ela
-        é — e não por número de Pokédex.
-        <div className="mt-[.55em]">
-          <CadeiaDeMissoes />
-        </div>
-        <div className="mt-[.5em]">
-          É a forma mais direta de transformar farm que você ia fazer de qualquer jeito em ouro extra: você
-          escolhe o bioma pela espécie da missão atual em vez de caçar no vazio.
-        </div>
+      <WikiCard title="Contratos e ovos">
+        Em <b>Missões › Contratos</b>, um mural traz <b>{CONTRATOS_POR_DIA} contratos por dia</b>, renovados à
+        meia-noite (horário de Brasília). Cada contrato pede abates de uma espécie dos biomas que você já
+        liberou — ou, nos contratos <b>shiny</b>, derrotar um shiny dela — e paga um <b>ovo</b> da forma base
+        dessa espécie. Só contam os abates feitos depois que o contrato aparece. Dá para trocar os contratos
+        ainda não entregues por diamantes; o preço dobra a cada troca no mesmo dia.
+        <br />
+        <br />
+        A raridade do contrato é a do ovo, e ovo mais raro tem mais chance de chocar um POKE de raridade
+        alta, até Lendário e Mítico. O ovo só choca <b>na equipe</b> (ocupa uma das {MAX_TEAM_SIZE} vagas),
+        com os abates da caçada; na Mochila ele espera. O POKE nasce no nível 1 com IVs de pelo menos
+        {' '}{IV_MINIMO_DO_OVO}, e o ovo de contrato shiny tem 25% de chance de nascer shiny.
+        <ul className="mt-[.4em] flex flex-col gap-[.2em] pl-[1.1em]" style={{ listStyleType: 'disc' }}>
+          {RARIDADES_DO_OVO.map((r) => (
+            <li key={r}>
+              <b>{RARITIES[r].label}</b>: {ABATES_PARA_CHOCAR[r].toLocaleString('pt-BR')} abates para chocar ·
+              {' '}{RARIDADE_AO_CHOCAR[r].legendary}% Lendário · {RARIDADE_AO_CHOCAR[r].mythic}% Mítico
+            </li>
+          ))}
+        </ul>
       </WikiCard>
 
       <WikiCard title="Bestiário, Pokedex e Calculadora">

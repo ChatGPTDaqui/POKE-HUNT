@@ -21,6 +21,7 @@ import type { StatusCondition } from '@/data/statusEffects'
 // `reivindicar_missao`, consultando a tabela `missao_cadeia` no Postgres.
 import { chaveDaMissao, missaoDaChave } from '@/data/missaoChave'
 import { lerProgressoPorBioma, traduzirMapIdLegado } from '@/data/progressoDeBioma'
+import type { Ovo } from '@/data/ovos'
 import { traduzirGruposLiberados } from '@/data/biomas'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
@@ -45,6 +46,15 @@ export type PokedexRow = Tables['player_pokedex']['Row']
 export type AutoCatchRuleRow = Tables['player_auto_catch_rules']['Row']
 export type MissaoReivindicadaRow = Tables['player_missoes_reivindicadas']['Row']
 export type EspecialidadeRow = Tables['player_especialidades']['Row']
+/** Linha de `player_ovos` (mural de contratos, 20/10/2026). */
+export interface OvoRow {
+  id: string
+  species_id: string
+  raridade: string
+  shiny: boolean
+  abates_restantes: number
+  na_equipe: boolean
+}
 
 export interface PlayerSnapshot {
   player: PlayerRow
@@ -55,6 +65,21 @@ export interface PlayerSnapshot {
   autoCatchRules: AutoCatchRuleRow[]
   missoesReivindicadas: MissaoReivindicadaRow[]
   especialidades: EspecialidadeRow[]
+  /** Ausente em snapshot antigo/teste: conta como sem ovos. */
+  ovos?: OvoRow[]
+}
+
+export const COLUNAS_DE_OVO = 'id,species_id,raridade,shiny,abates_restantes,na_equipe'
+
+export function rowToOvo(r: OvoRow): Ovo {
+  return {
+    id: r.id,
+    speciesId: r.species_id,
+    raridade: r.raridade as Ovo['raridade'],
+    shiny: Boolean(r.shiny),
+    abatesRestantes: Number(r.abates_restantes),
+    naEquipe: Boolean(r.na_equipe),
+  }
 }
 
 // --- DB -> jogo -------------------------------------------------------------
@@ -419,6 +444,9 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     trainer: { name: p.trainer_name, level: p.trainer_level, exp: p.trainer_exp } satisfies TrainerInfo,
     pokedexKills,
     missoesReivindicadas,
+    ovos: (snap.ovos ?? []).map(rowToOvo),
+    // So `/estado` e o boot direto conhecem este numero; quem le snapshot sem ele recebe 0.
+    contratosEntregues: 0,
     especialidades,
     // PH-429: `lerProgressoPorBioma` cobre os tres casos numa funcao — formato
     // novo, formato de faixa antigo (traduzido) e entrada podre (default). O

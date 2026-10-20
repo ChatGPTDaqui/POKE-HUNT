@@ -6,8 +6,8 @@ import {
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS,
   solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, protetorDaSala,
-  quotaDeAbatesDaSala, SPECIES,
-  type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
+  quotaDeAbatesDaSala, SPECIES, COLUNAS_DE_OVO, descontarAbatesDosOvos,
+  type GameStateData, type PlayerSnapshot, type OvoRow, type OfflineSimSummary, type SalaAtiva,
   type ClimaTipo, type ProtetorPendente, type ProtetorDaAutoridade,
 } from '#engine'
 import {
@@ -621,7 +621,7 @@ export async function lerSnapshot(
   // (PH-186). `gravarEstado` cobre o buraco lendo so as especies que mudaram.
   const comDex = opcoes.comDex !== false
   const comMissoes = opcoes.comMissoes === true
-  const [player, pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas] = await Promise.all([
+  const [player, pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas, ovos, contratosEntregues] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
     // `order=id` fixa a ordem entre as paginas de `selecionarTudo` (Range em
     // lotes de 1000). Sem isso o PostgREST nao garante posicao estavel entre
@@ -643,6 +643,15 @@ export async function lerSnapshot(
     comMissoes
       ? selecionarTudo<PlayerSnapshot['missoesReivindicadas'][number]>(cfg, `player_missoes_reivindicadas?user_id=eq.${userId}&select=user_id,tipo,species_id`)
       : Promise.resolve([] as PlayerSnapshot['missoesReivindicadas']),
+    // Ovos do mural (20/10/2026): poucas linhas por jogador, e o flush precisa
+    // deles pra descontar os abates dos que estao na equipe. Tabela ausente
+    // (servidor novo antes da migration) nao derruba o flush.
+    selecionarTudo<OvoRow>(cfg, `player_ovos?user_id=eq.${userId}&select=${COLUNAS_DE_OVO}`).catch(() => [] as OvoRow[]),
+    // Primeiro Passo "Reivindique uma missao" conta contrato entregue: basta
+    // saber se existe UM. So no `/estado` (mesma regra das missoes).
+    comMissoes
+      ? selecionar<{ dia: string }>(cfg, `player_contratos?user_id=eq.${userId}&reivindicado=is.true&select=dia&limit=1`).catch(() => [])
+      : Promise.resolve([] as { dia: string }[]),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
   // `missoesReivindicadas` fica vazio de proposito (fora de `/estado`, ver
@@ -660,9 +669,10 @@ export async function lerSnapshot(
   // lista de missoes e UNIAO, nunca substituicao. Se um dia esta rota passar a
   // ler a tabela, aquela uniao continua correta — a chave so entra.
   const linhasNoLoad: PlayerSnapshot = {
-    player: player[0], pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas,
+    player: player[0], pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas, ovos,
   }
   const estado = snapshotToGameState(linhasNoLoad, defaultGameStateData())
+  estado.contratosEntregues = contratosEntregues.length
   return {
     estado,
     pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
@@ -1612,6 +1622,14 @@ async function simularSessao(
     // coisa — a sala nao pede protetor, ou trocou.
     p_protetor: payloadDoProtetorOuDoCaido(world, tipoDeProtetor),
   })
+
+  // OVOS (20/10/2026): cada abate desta janela desconta 1 de todo ovo NA
+  // EQUIPE. Relativo no banco (`_descontar_abates_dos_ovos`), entao nao briga
+  // com mover/chocar no meio do caminho; o estado devolvido ja sai descontado.
+  if (resumo.kills > 0 && estado.ovos.some((o) => o.naEquipe && o.abatesRestantes > 0)) {
+    await chamarRpc(cfg, '_descontar_abates_dos_ovos', { p_user: userId, p_abates: resumo.kills })
+    estado.ovos = descontarAbatesDosOvos(estado.ovos, resumo.kills)
+  }
 
   // Depois de TUDO gravado: as conquistas leem o estado ja creditado (abates na
   // Pokedex, POKEs novos com origem captura, nivel de treinador).

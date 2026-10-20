@@ -32,6 +32,7 @@ export interface EstadoDosPassos {
   bagPokes: PokeInstance[]
   biomaProgress: ProgressoPorBioma
   missoesReivindicadas: Record<string, boolean>
+  contratosEntregues?: number
   especialidades: EspecialidadeNiveis
   trainer: TrainerInfo
 }
@@ -116,10 +117,11 @@ export const PRIMEIROS_PASSOS: PassoDef[] = [
   },
   {
     id: 'primeira_missao',
-    titulo: 'Reivindique uma missão',
-    dica: 'Abra Missões › Tasks: cada missão pede abates de uma espécie e paga ouro.',
+    titulo: 'Cumpra um contrato',
+    dica: 'Abra Missões › Contratos: cada contrato pede abates de uma espécie e paga um ovo dela.',
     alvo: 1,
-    atual: s => Object.values(s.missoesReivindicadas).filter(Boolean).length,
+    // Task antiga reivindicada continua valendo (veteranos).
+    atual: s => Object.values(s.missoesReivindicadas).filter(Boolean).length + (s.contratosEntregues ?? 0),
     recompensa: { ouro: 0, itens: [{ itemId: 'revive', quantidade: 3 }, { itemId: 'great_ball', quantidade: 25 }] },
     destino: 'tasks',
   },

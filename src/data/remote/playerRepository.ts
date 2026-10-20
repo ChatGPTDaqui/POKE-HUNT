@@ -14,6 +14,8 @@ import {
   gameStateToMissaoRows,
   gameStateToEspecialidadeRows,
   COLUNAS_DE_POKE,
+  COLUNAS_DE_OVO,
+  type OvoRow,
   type PlayerSnapshot,
 } from './playerMapper'
 
@@ -36,7 +38,7 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
   // tudo numa request so, mas devolveria o progresso inteiro embutido na linha
   // de `players`, o que complica o mapeamento sem ganho real: sao 5 requests
   // pequenas, disparadas juntas, uma unica vez no login.
-  const [player, pokemon, items, pokedex, autoCatchRules, missoesReivindicadas, especialidades] = await Promise.all([
+  const [player, pokemon, items, pokedex, autoCatchRules, missoesReivindicadas, especialidades, ovos] = await Promise.all([
     supabase.from('players').select('*').eq('user_id', userId).maybeSingle(),
     // SO A EQUIPE (PH-182). O boot trazia `pokemon_instances` inteira: medido em
     // producao no jogador mais pesado, 922 POKEs pra jogar com 2 — 76.855 B
@@ -63,6 +65,7 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
     supabase.from('player_auto_catch_rules').select('*').eq('user_id', userId),
     supabase.from('player_missoes_reivindicadas').select('*').eq('user_id', userId),
     supabase.from('player_especialidades').select('*').eq('user_id', userId),
+    supabase.from('player_ovos').select(COLUNAS_DE_OVO).eq('user_id', userId),
   ])
 
   const erro = player.error ?? pokemon.error ?? items.error ?? pokedex.error ?? autoCatchRules.error
@@ -83,6 +86,8 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
     autoCatchRules: autoCatchRules.data ?? [],
     missoesReivindicadas: missoesReivindicadas.data ?? [],
     especialidades: especialidades.data ?? [],
+    // Sem a tabela (deploy do cliente antes da migration): segue sem ovos.
+    ovos: ovos.error ? [] : ((ovos.data ?? []) as unknown as OvoRow[]),
   }
 
   // Ancora o diff de exclusao do proximo save (ver `definirIdsConhecidos`).
