@@ -158,15 +158,16 @@
 /* Lacre de cera com a raridade. */
 .contrato-lacre {
   position: absolute;
-  right: -.5em;
-  bottom: 2.6em;
+  top: 2.3em;
+  right: .5em;
   display: grid;
   place-items: center;
-  width: 2.6em;
-  height: 2.6em;
+  width: 4.2em;
+  height: 4.2em;
+  padding: .2em;
   border-radius: 50%;
   color: #fff;
-  font-size: .62em;
+  font-size: .5em;
   font-weight: 800;
   letter-spacing: .02em;
   text-align: center;

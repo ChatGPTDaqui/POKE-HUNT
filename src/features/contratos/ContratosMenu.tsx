@@ -141,7 +141,7 @@ function CartaoDeContrato({ contrato: c, indice }: { contrato: Contrato; indice:
         <OvoArte raridade={c.raridade} shiny={shiny} tamanho={2} />
         <span>Ovo de <b>{base?.name ?? c.baseId}</b>{shiny && <> · 25% de nascer shiny</>}</span>
       </div>
-      <span className="contrato-lacre" aria-label={`Raridade ${raridade.label}`}>{raridade.label.slice(0, 4)}</span>
+      <span className="contrato-lacre" aria-label={`Raridade ${raridade.label}`}>{raridade.label}</span>
       {c.reivindicado
         ? <span className="contrato-carimbo contrato-carimbo-feito">Entregue</span>
         : cumprido && <span className="contrato-carimbo contrato-carimbo-cumprido">Cumprido</span>}

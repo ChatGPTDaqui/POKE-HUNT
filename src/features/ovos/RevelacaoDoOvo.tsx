@@ -39,11 +39,17 @@ export function RevelacaoDoOvo({ ovo, promessa, onFechar }: {
   }, [promessa])
 
   useEffect(() => {
-    if (!tremeu || !resultado || fase !== 'tremer') return
-    setFase('abrir')
+    if (tremeu && resultado && fase === 'tremer') setFase('abrir')
+  }, [tremeu, resultado, fase])
+
+  // Efeito proprio, so com `fase`: no mesmo efeito de cima a troca pra 'abrir'
+  // refazia o efeito e o cleanup cancelava este timer — a revelacao parava sem
+  // o texto e sem o Fechar.
+  useEffect(() => {
+    if (fase !== 'abrir') return
     const t = setTimeout(() => setFase('final'), ABERTURA_MS)
     return () => clearTimeout(t)
-  }, [tremeu, resultado, fase])
+  }, [fase])
 
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape' && (fase === 'final' || erro)) onFechar() }
