@@ -16,7 +16,6 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { BASIC_ATTACK } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { createEnemyEntity } from '../entity'
@@ -42,7 +41,7 @@ function cenario(caso: Caso) {
   // Um golpe so: o teste mede UM uso. Ataque Basico fora (competiria pelo turno).
   jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, golpe]
   jogadorPoke.activeAbilities = [golpe]
-  jogadorPoke.disabledAbilities = { [BASIC_ATTACK.id]: true }
+  jogadorPoke.disabledAbilities = { ['basic_attack']: true }
 
   const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
   const player = world.player!
@@ -53,7 +52,7 @@ function cenario(caso: Caso) {
   // alto (alvo que desmaia some e a medicao viraria cena vazia).
   const inimigoPoke = createPokeInstance(rng, 'rattata', 30)
   inimigoPoke.disabledAbilities = Object.fromEntries(
-    [...golpesUtilizaveis(inimigoPoke, SPECIES[inimigoPoke.speciesId], true), BASIC_ATTACK.id].map((id) => [id, true]),
+    [...golpesUtilizaveis(inimigoPoke, SPECIES[inimigoPoke.speciesId], true), 'basic_attack'].map((id) => [id, true]),
   )
   inimigoPoke.stats = { ...inimigoPoke.stats, hp: 9999 }
   inimigoPoke.hp = 9999

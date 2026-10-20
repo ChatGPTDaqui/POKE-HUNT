@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
 import {
-  BASIC_ATTACK, DANO_POR_REGRA_NAO_IMPLEMENTADA, DANO_SEM_PODER_BASE, getAbility,
+  DANO_POR_REGRA_NAO_IMPLEMENTADA, DANO_SEM_PODER_BASE, getAbility,
   isDamagingAbility,
 } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
@@ -56,7 +56,7 @@ function cenario(golpeId: string, {
   // roubariam o unico uso que o teste mede.
   jogadorPoke.disabledAbilities = {
     [typedAoeMoveKey(SPECIES[especieJogador].type)]: true,
-    [BASIC_ATTACK.id]: true,
+    ['basic_attack']: true,
   }
   const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
   // SEQUENCIA DE COMBATE PROPRIA (PH-259).
@@ -89,7 +89,7 @@ function cenario(golpeId: string, {
   // Inimigo calado: contra-ataque dele mexeria no HP dos dois lados e nenhuma
   // das medicoes abaixo sobreviveria a isso.
   enemyPoke.disabledAbilities = Object.fromEntries(
-    [...golpesUtilizaveis(enemyPoke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+    [...golpesUtilizaveis(enemyPoke, enemySpecies, true), 'basic_attack'].map((id) => [id, true]),
   )
   const enemy = createEnemyEntity(world.counters, {
     poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',

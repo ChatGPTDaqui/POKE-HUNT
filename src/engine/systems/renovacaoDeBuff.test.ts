@@ -48,9 +48,14 @@ function cenario() {
   const rng = createRng(31)
   const counters = { entity: 1, effect: 1, pendingHit: 1 }
   const jogadorPoke = createPokeInstance(rng, 'spearow', 25)
-  jogadorPoke.activeAbilities = ['agility']
+  // Com um golpe de dano junto: so quem TEM dano decide se vale renovar o buff;
+  // POKE so de status gasta o PP do que tem (19/10/2026, fim do Ataque Basico).
+  jogadorPoke.unlockedAbilities = [...new Set([...jogadorPoke.unlockedAbilities, 'peck'])]
+  jogadorPoke.activeAbilities = ['agility', 'peck']
 
   const world = buildMapWorld('campo_aberto_e1', jogadorPoke, { seed: 0, rng, counters })
+  // Renovacao de buff e coisa da FILA do jogador: rotacao ligada.
+  world.rotacaoDeGolpes = true
   const player = world.player!
 
   // HP alto de proposito: tira o overkill-guard do caminho (ver o topo). Sem
@@ -80,9 +85,12 @@ function cenarioBellyDrum() {
   const rng = createRng(31)
   const counters = { entity: 1, effect: 1, pendingHit: 1 }
   const jogadorPoke = createPokeInstance(rng, 'makuhita', 25)
-  jogadorPoke.activeAbilities = ['belly_drum']
+  jogadorPoke.unlockedAbilities = [...new Set([...jogadorPoke.unlockedAbilities, 'arm_thrust'])]
+  jogadorPoke.activeAbilities = ['belly_drum', 'arm_thrust']
 
   const world = buildMapWorld('campo_aberto_e1', jogadorPoke, { seed: 0, rng, counters })
+  // Renovacao de buff e coisa da FILA do jogador: rotacao ligada.
+  world.rotacaoDeGolpes = true
   const player = world.player!
 
   const enemy = criarInimigoDeTeste(world, 'rattata', 25, { x: player.x, y: player.y })

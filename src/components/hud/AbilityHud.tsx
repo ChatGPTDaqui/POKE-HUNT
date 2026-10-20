@@ -30,6 +30,7 @@ import { abilityIconUrl } from '@/data/abilityIcons'
 import { colorForType } from '@/data/typeColors'
 import { controller } from '@/engine/controller'
 import { segundosAtePoderUsar, cooldownProprio } from '@/engine/entity'
+import { ppDeCuraRestante } from '@/engine/ppDeCura'
 import { cooldownTotalDoGolpe, recargaEfetivaDoGolpe } from '@/engine/systems/combatSystem'
 import { useWorldStore } from '@/stores/worldStore'
 import { useDeviceMode } from '@/stores/uiStore'
@@ -231,7 +232,8 @@ export function AbilityHud() {
         const cdProprio = player ? cooldownProprio(player, ability.id) : 0
         const cd = player ? segundosAtePoderUsar(player, ability.id) : 0
         const cdTotal = player ? cooldownTotalDoGolpe(player, ability, clima) : 0
-        const ready = cd <= 0 && !isOff
+        const ppCura = player ? ppDeCuraRestante(player, ability) : null
+        const semPp = ppCura === 0
         // Fracao JA RECARREGADA deste golpe. 1 = pronto. `cdTotal` pode ser 0
         // (golpe sem cooldown no catalogo) — nesse caso a barra fica cheia em
         // vez de dividir por zero.
@@ -318,7 +320,7 @@ export function AbilityHud() {
                 draggable={false}
                 className={cn(
                   'pointer-events-none h-full w-full object-cover',
-                  isOff && 'grayscale opacity-40',
+                  (isOff || semPp) && 'grayscale opacity-40',
                 )}
                 style={{ imageRendering: 'pixelated', mixBlendMode: 'screen' }}
               />
@@ -346,7 +348,7 @@ export function AbilityHud() {
               />
             )}
 
-            {!ready && !isOff && (
+            {cd > 0 && !isOff && (
               // O numero e o cooldown DO GOLPE quando ele existe; so cai pro
               // relogio global (que e igual nos quatro slots) quando o golpe ja
               // esta recarregado e o que falta e a vez de agir. Fonte acompanha
@@ -393,7 +395,8 @@ export function AbilityHud() {
             {/* z-[2] pra faixa de dano continuar legivel POR CIMA do overlay de
                 cooldown, que cobre o slot inteiro. */}
             <span className="absolute inset-x-0 bottom-0 z-[2] rounded-b-[.32em] bg-black/70 text-center text-[.72em] leading-[1.1] text-[#e5e5e5]">
-              {ability.power > 0 ? ability.power : '—'}
+              {/* Golpe de cura mostra o PP que resta contra o alvo atual (19/10/2026). */}
+              {ppCura != null ? `${ppCura}/${ability.pp}` : ability.power > 0 ? ability.power : '—'}
             </span>
           </div>
           </EnvolucroSlot>

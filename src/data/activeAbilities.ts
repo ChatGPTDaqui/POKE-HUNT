@@ -29,7 +29,10 @@
 //    Togepi) nao nascer com slot vazio e lutando menos do que antes.
 //  - A RPC `definir_golpes_ativos` recusava as duas chaves com "esse golpe nao
 //    ocupa slot"; liberado na migration 20260818120000.
-import { getAbility, isDamagingAbility, BASIC_ATTACK, type Ability } from './abilities'
+import { getAbility, isDamagingAbility, type Ability } from './abilities'
+
+/** Id do antigo Ataque Basico (removido em 19/10/2026). Save antigo ainda o traz: e descartado. */
+const ATAQUE_BASICO_LEGADO = 'basic_attack'
 import { typedAoeMoveKey, TYPED_AOE_MOVES } from './typedAoeMoves'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
@@ -150,15 +153,8 @@ export function activeAbilitiesPadrao(species: Species, level: number): string[]
   const status = learnset.filter((key) => !isDamagingAbility(getAbility(key))).reverse()
   const escolha = [...dano, ...status].slice(0, MAX_ACTIVE_ABILITIES)
 
-  // AINDA sobrou slot: entra o Ataque Basico. Desde que ele passou a ocupar
-  // slot (ver o topo do arquivo) ele deixou de ser gratuito, e um POKE de
-  // learnset curto — nivel baixo, ou Igglybuff/Togepi/Unown, que tem 1 ou 2
-  // golpes de dano no moveset inteiro — nasceria com slot VAZIO e atacando
-  // menos do que atacava antes desta leva. Preenchendo aqui, o default
-  // continua sendo a melhor jogada possivel; o jogador tira se quiser.
-  while (escolha.length < MAX_ACTIVE_ABILITIES && !escolha.includes(BASIC_ATTACK.id)) {
-    escolha.push(BASIC_ATTACK.id)
-  }
+  // Sem Ataque Basico desde 19/10/2026: slot que sobra fica vago. POKE sem
+  // golpe de dano usa o que tem ate o PP acabar e depois o Struggle.
   return escolha
 }
 
@@ -204,7 +200,7 @@ export function encaixarNovosGolpes(atuais: string[], novos: string[]): string[]
     // O Ataque Basico fica de fora: ele nao e "aprendido" em nivel nenhum,
     // entao nunca chega como novidade — quem o coloca e o default
     // (`activeAbilitiesPadrao`) ou o proprio jogador.
-    if (saida.includes(key) || key === BASIC_ATTACK.id) continue
+    if (saida.includes(key) || key === ATAQUE_BASICO_LEGADO) continue
     if (!getAbility(key)) continue
     saida.push(key)
   }
@@ -251,7 +247,7 @@ export function sanearEscolhaDeGolpes(
   species: Species,
   level: number,
 ): string[] {
-  const validos = new Set([...conhecidos, BASIC_ATTACK.id])
+  const validos = new Set(conhecidos.filter((k) => k !== ATAQUE_BASICO_LEGADO))
   // Duplicata aqui vira `key` React duplicada em toda UI que mapeia por
   // `ability.id` (`AbilityHud`), e key duplicada corrompe a reconciliacao: o
   // node extra fica orfao e sobrevive a troca de POKE seguinte mostrando o
@@ -292,10 +288,6 @@ export function sanearEscolhaDeGolpes(
 export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem: boolean): string[] {
   if (selvagem) return activeAbilitiesSelvagem(species, poke.level)
 
-  // O Ataque Basico entra em `conhecidos` dentro de `sanearEscolhaDeGolpes`:
-  // ele nao e aprendido em nivel nenhum (nunca esta em `unlockedAbilities`),
-  // todo POKE simplesmente tem.
-  //
   // NAO ha mais anexo depois dos slots. A Explosao Elemental costumava entrar
   // aqui, fora da conta dos 4 — desde 2026-08-18 ela e um golpe comum e so
   // luta se estiver entre os escolhidos (ver o topo do arquivo).
@@ -305,4 +297,16 @@ export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem
     species,
     poke.level,
   )
+}
+
+/**
+ * O arsenal deste POKE nao tem golpe de dano (19/10/2026, fim do Ataque
+ * Basico)? Golpe desligado pelo jogador nao conta. E o MESMO recorte que o
+ * combate usa pra mandar o POKE gastar PP e partir pro Struggle, e o que a
+ * interface usa pra avisar que ele precisa de um TM.
+ */
+export function semGolpeDeDano(poke: PokeInstance, species: Species, selvagem: boolean): boolean {
+  const desligados = poke.disabledAbilities || {}
+  return !golpesUtilizaveis(poke, species, selvagem)
+    .some((id) => { const a = getAbility(id); return !desligados[id] && a != null && isDamagingAbility(a) })
 }

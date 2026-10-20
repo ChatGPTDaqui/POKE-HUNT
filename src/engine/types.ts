@@ -71,6 +71,10 @@ export interface BaseEntity {
   radius: number
   state: EntityState
   cooldowns: Record<string, number>
+  /** Usos de cada golpe de cura contra o alvo atual (engine/ppDeCura.ts). */
+  usosDeCura?: Record<string, number>
+  /** O alvo contra o qual `usosDeCura` foi contado; trocar de alvo zera. */
+  alvoDaCura?: string | null
   globalCooldown: number
   targetId: string | null // era `target` (referencia direta), ver nota do topo
   deathHandled: boolean
@@ -861,6 +865,8 @@ export interface EstadoDeLure {
 }
 
 export interface WorldState {
+  /** Rotacao de golpes do jogador ligada (Automacoes). Ausente/false = melhor dano. */
+  rotacaoDeGolpes?: boolean
   /** Trick Room inverte a ordem dos hits simultâneos por cinco turnos. */
   trickRoomRestante?: number
   mapDef: MapDef | null

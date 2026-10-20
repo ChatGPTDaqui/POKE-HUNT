@@ -13,6 +13,29 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.34',
+    date: '2026-10-19',
+    title: 'Fim do Ataque Básico',
+    highlights: [
+      'O Ataque Básico saiu do jogo. Agora o POKE luta só com os golpes que aprendeu.',
+      'POKE sem golpe de dano usa o que tem até acabar o PP e depois luta com Struggle, que machuca a ele mesmo. A Equipe marca quem está assim: ensine um golpe com um TM.',
+      'Nova recarga: golpe com 35 PP (como Scratch) volta em um turno, 3 segundos. Golpe com menos PP demora mais, e a Velocidade encurta ou alonga só essa parte extra.',
+      'Nova opção Rotação de golpes, em Automações. Desligada (padrão), o POKE usa sempre o golpe que mais causa dano naquele inimigo. Ligada, ele segue a ordem que você escolheu.',
+      'O POKE não gasta mais a vez com golpe de status que não faria nada.',
+      'O primeiro POKE agora começa no nível 5. Os capturados continuam no nível em que foram encontrados.',
+    ],
+  },
+  {
+    version: '8.33',
+    date: '2026-10-19',
+    title: 'Golpes de cura com PP',
+    highlights: [
+      'Golpes que só curam (Recover, Roost, Synthesis, Moonlight e afins) agora têm limite de usos por alvo, igual ao PP do jogo original. Acabou o selvagem que se curava para sempre e travava a luta.',
+      'O PP volta quando o alvo muda. Vale para os selvagens e para o seu POKE.',
+      'O slot do golpe de cura mostra os usos restantes (ex.: 3/5) e fica apagado quando eles acabam.',
+    ],
+  },
+  {
     version: '8.32',
     date: '2026-10-18',
     title: 'Janela Missões e Rota do Treinador',

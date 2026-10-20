@@ -86,3 +86,18 @@ describe('TeamMenu — atalho pros golpes', () => {
     expect(screen.queryByRole('button', { name: /retirar/i })).toBeNull()
   })
 })
+
+// Fim do Ataque Basico (19/10/2026): POKE sem golpe de dano ganha selo na
+// Equipe pedindo um TM.
+describe('TeamMenu — sem golpe de dano', () => {
+  it('marca o POKE que so tem golpe de status', () => {
+    useGameStateStore.setState({ team: [{ ...poke(), unlockedAbilities: ['growl'], activeAbilities: ['growl'] }], activeIndex: 0 })
+    render(<TeamMenu />)
+    expect(screen.getByText('Sem golpe de dano')).toBeTruthy()
+  })
+
+  it('nao marca quem tem golpe de dano', () => {
+    render(<TeamMenu />)
+    expect(screen.queryByText('Sem golpe de dano')).toBeNull()
+  })
+})

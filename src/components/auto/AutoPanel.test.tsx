@@ -11,9 +11,9 @@ vi.mock('@/stores/tutorialStore', () => ({
 beforeEach(() => useGameStateStore.getState().resetToDefaults())
 afterEach(cleanup)
 
-it('oferece as quatro rotinas sem empilhar suas configurações', () => {
+it('oferece a rotação de golpes e as quatro rotinas sem empilhar suas configurações', () => {
   render(<AutoPanel />)
-  expect(screen.getAllByRole('switch')).toHaveLength(4)
+  expect(screen.getAllByRole('switch')).toHaveLength(5)
   expect(screen.getAllByRole('button', { name: /^Configurar Auto-/ })).toHaveLength(4)
   expect(screen.queryByRole('button', { name: 'Bola padrão' })).toBeNull()
 })

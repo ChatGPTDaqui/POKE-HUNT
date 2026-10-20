@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { BASIC_ATTACK, getAbility } from '@/data/abilities'
+import { getAbility } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { createEnemyEntity } from '../entity'
@@ -33,7 +33,7 @@ function cenario(golpeId: string, { nivel = 40 } = {}) {
   jogadorPoke.activeAbilities = [golpeId]
   jogadorPoke.disabledAbilities = {
     [typedAoeMoveKey(SPECIES.charmander.type)]: true,
-    [BASIC_ATTACK.id]: true,
+    ['basic_attack']: true,
   }
   const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
@@ -43,7 +43,7 @@ function cenario(golpeId: string, { nivel = 40 } = {}) {
   const enemyPoke = createPokeInstance(rng, 'rattata', nivel)
   const enemySpecies = SPECIES[enemyPoke.speciesId]
   enemyPoke.disabledAbilities = Object.fromEntries(
-    [...golpesUtilizaveis(enemyPoke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+    [...golpesUtilizaveis(enemyPoke, enemySpecies, true), 'basic_attack'].map((id) => [id, true]),
   )
   // HP alto pro alvo sobreviver aos varios usos que alguns testes precisam.
   enemyPoke.stats = { ...enemyPoke.stats, hp: 99999 }

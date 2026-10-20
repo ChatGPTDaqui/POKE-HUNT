@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
-import { getAbility, BASIC_ATTACK } from '@/data/abilities'
+import { getAbility } from '@/data/abilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { activeAbilitiesPadrao } from '@/data/activeAbilities'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -220,35 +220,9 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(botaoUsar(nomeDoGolpe(naoAprendido.key))).toBeNull()
   })
 
-  describe('Ataque Basico — golpe comum, ocupa um dos 4 slots', () => {
-    it('aparece so pro POKE que e seu', () => {
-      render(<MovesetTable poke={pokeDoJogador()} species={ESPECIE} />)
-      expect(screen.queryByText(BASIC_ATTACK.name)).toBeNull()
-    })
-
-    it('clicar poe/tira da fila via setActiveAbilities (nunca toggleAbility)', async () => {
-      const poke = pokeDoJogador({ activeAbilities: ['ember'] })
-      useGameStateStore.setState({ team: [poke] })
-      render(<MovesetTable poke={poke} species={ESPECIE} />)
-
-      const botao = botaoUsar(BASIC_ATTACK.name)!
-      // Fora da escolha, entao a celula comeca vazia.
-      expect(botao.className).not.toContain('bg-primary')
-      await userEvent.click(botao)
-      expect(toggleAbility).not.toHaveBeenCalled()
-      expect(setActiveAbilities).toHaveBeenCalled()
-    })
-
-    it('tambem bloqueia dentro de hunt (mesma trava dos outros golpes)', async () => {
-      const poke = pokeDoJogador()
-      useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
-      render(<MovesetTable poke={poke} species={ESPECIE} />)
-
-      const botao = botaoUsar(BASIC_ATTACK.name)!
-      expect(botao.disabled).toBe(true)
-      await userEvent.click(botao)
-      expect(toggleAbility).not.toHaveBeenCalled()
-    })
+  it('o antigo Ataque Basico nao aparece mais na lista (removido em 19/10/2026)', () => {
+    render(<MovesetTable poke={pokeDoJogador()} species={ESPECIE} />)
+    expect(screen.queryByText('Ataque Básico')).toBeNull()
   })
 })
 
@@ -396,7 +370,7 @@ describe('MovesetTable — escolha gravada com golpe orfao', () => {
     const [, lista] = setActiveAbilities.mock.calls[0]
     expect(lista).not.toContain(orfao)
     for (const key of lista as string[]) {
-      expect(poke.unlockedAbilities.includes(key) || key === BASIC_ATTACK.id).toBe(true)
+      expect(poke.unlockedAbilities.includes(key) || key === 'basic_attack').toBe(true)
     }
   })
 

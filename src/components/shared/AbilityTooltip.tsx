@@ -106,11 +106,10 @@ export function efeitosDoGolpe(ability: Ability): string[] {
 export function descricaoDoGolpe(ability: Ability): string {
   const pronta = MOVE_DESCRIPTIONS[ability.id]
   if (pronta) return pronta
-  // Golpes que nao vem da planilha: o Ataque Basico e os 17 de nivel 50, todos
-  // conteudo proprio deste jogo. Descrever pelo que eles fazem AQUI e mais
-  // correto que inventar texto de um golpe que nao existe no original.
-  if (ability.id === 'basic_attack') {
-    return 'Golpe universal: todo POKE sempre tem este, mesmo sem nenhum outro golpe de dano aprendido.'
+  // Golpes que nao vem da planilha: o Struggle e os 17 de nivel 50. Descrever
+  // pelo que eles fazem AQUI e mais correto que inventar texto.
+  if (ability.id === 'struggle') {
+    return 'Último recurso de quem não tem golpe de dano e gastou o PP dos outros. Machuca o próprio POKE em 1/4 do HP máximo.'
   }
   if (ability.id.startsWith('aoe50_')) {
     return `Golpe de área aprendido no Nível 50, tematico do tipo ${ability.type}. A categoria acompanha o maior atributo de ataque do POKE no Nível 50.`
