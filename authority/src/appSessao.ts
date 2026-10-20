@@ -130,7 +130,7 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas, linhasNoLoad }) => {
       if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad)
       return json({ estado, estadoParcial: parcial })
-    }, { comBag: !parcial })
+    }, { comBag: !parcial, comMissoes: true })
   }
   return json({ erro: 'rota desconhecida' }, 404)
 }

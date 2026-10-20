@@ -564,6 +564,15 @@ export interface OpcoesDeLeitura {
    * e qualquer caminho que va decidir algo olhando contagem de abate.
    */
   comDex?: boolean
+  /**
+   * `comMissoes: true` le `player_missoes_reivindicadas` (20/10/2026).
+   *
+   * Desligado por padrao: o flush nao usa (ver o comentario em `lerSnapshot`).
+   * So `/estado` liga — e o estado com que a pagina ABRE, e la nao existe lista
+   * local pra `mesclarMissoes` unir. Sem isto toda Task reivindicada voltava a
+   * aparecer como disponivel a cada recarga da pagina.
+   */
+  comMissoes?: boolean
 }
 
 // COLUNAS DO SNAPSHOT — pedidas uma a uma, e nao com `select=*` (PH-185).
@@ -611,7 +620,8 @@ export async function lerSnapshot(
   // `comDex: false` devolve `[]` sem ir ao banco — a Pokedex inteira nao e lida
   // (PH-186). `gravarEstado` cobre o buraco lendo so as especies que mudaram.
   const comDex = opcoes.comDex !== false
-  const [player, pokemon, items, pokedex, autoCatchRules, especialidades] = await Promise.all([
+  const comMissoes = opcoes.comMissoes === true
+  const [player, pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
     // `order=id` fixa a ordem entre as paginas de `selecionarTudo` (Range em
     // lotes de 1000). Sem isso o PostgREST nao garante posicao estavel entre
@@ -630,9 +640,13 @@ export async function lerSnapshot(
     // combate inteiro SEM o bonus que a tela do jogador mostrou, e a
     // simulacao autoritativa desfaria em silencio um upgrade que ele comprou.
     selecionarTudo<PlayerSnapshot['especialidades'][number]>(cfg, `player_especialidades?user_id=eq.${userId}&select=user_id,tipo,dano_nivel,defesa_nivel`),
+    comMissoes
+      ? selecionarTudo<PlayerSnapshot['missoesReivindicadas'][number]>(cfg, `player_missoes_reivindicadas?user_id=eq.${userId}&select=user_id,tipo,species_id`)
+      : Promise.resolve([] as PlayerSnapshot['missoesReivindicadas']),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
-  // `missoesReivindicadas` fica vazio de proposito, ao contrario de
+  // `missoesReivindicadas` fica vazio de proposito (fora de `/estado`, ver
+  // `comMissoes`), ao contrario de
   // `especialidades` (PH-198): missao nunca muda calculo de combate, so paga
   // gold via `reivindicar_missao` (RPC de menu, fora da resimulacao) — a
   // resimulacao de sessao nunca le nem escreve este campo, so precisa dele
@@ -646,7 +660,7 @@ export async function lerSnapshot(
   // lista de missoes e UNIAO, nunca substituicao. Se um dia esta rota passar a
   // ler a tabela, aquela uniao continua correta — a chave so entra.
   const linhasNoLoad: PlayerSnapshot = {
-    player: player[0], pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas: [],
+    player: player[0], pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas,
   }
   const estado = snapshotToGameState(linhasNoLoad, defaultGameStateData())
   return {
