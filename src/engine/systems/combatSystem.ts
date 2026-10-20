@@ -12,7 +12,7 @@ import {
   CURA_SENSIVEL_AO_CLIMA, CURA_NO_SOL, CURA_EM_CLIMA_RUIM, GROWTH_NO_SOL,
   type Ability,
 } from '@/data/abilities'
-import { golpesUtilizaveis } from '@/data/activeAbilities'
+import { golpesUtilizaveis, semGolpeDeDano as semGolpeDeDanoNoArsenal } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
   multiplicadorDeAccuracyOuEvasion, nomeDoStatus, ESTAGIO_MAXIMO,
@@ -1988,12 +1988,7 @@ function pickAbilityDaFila(
 /** O arsenal desta entidade nao tem nenhum golpe de dano (so status)? */
 function semGolpeDeDano(entity: WorldEntity): boolean {
   const especie = SPECIES[entity.poke.speciesId]
-  if (!especie) return false
-  const desligados = entity.poke.disabledAbilities || {}
-  // Mesmo recorte da escolha (golpe desligado nao conta), senao a escolha e o
-  // gasto de PP discordariam sobre "este POKE tem golpe de dano".
-  return !golpesUtilizaveis(entity.poke, especie, usaKitDeSelvagem(entity))
-    .some((id) => { const a = getAbility(id); return !desligados[id] && a != null && isDamagingAbility(a) })
+  return especie ? semGolpeDeDanoNoArsenal(entity.poke, especie, usaKitDeSelvagem(entity)) : false
 }
 
 function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
@@ -2026,8 +2021,7 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
     .filter((id) => id !== 'curse' || attackerSpecies.type === 'GHOST' || attackerSpecies.type2 === 'GHOST')
 
   // Encore: enquanto o timer nao zera, SO o golpe forcado entra na escolha.
-  // Se ele estiver em cooldown, o fallback pro Ataque Basico (mais abaixo) ja
-  // cobre o caso, sem logica nova.
+  // Se ele estiver em recarga, o POKE espera.
   const encoreAtivo = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId)
   const candidatosFinais = encoreAtivo
     ? candidateIds.filter((id) => id === entity.forcedAbilityId)

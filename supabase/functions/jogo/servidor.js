@@ -40111,6 +40111,19 @@ function golpesUtilizaveis(poke, species, selvagem) {
 	if (selvagem) return activeAbilitiesSelvagem(species, poke.level);
 	return sanearEscolhaDeGolpes(poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level), poke.unlockedAbilities, species, poke.level);
 }
+/**
+* O arsenal deste POKE nao tem golpe de dano (19/10/2026, fim do Ataque
+* Basico)? Golpe desligado pelo jogador nao conta. E o MESMO recorte que o
+* combate usa pra mandar o POKE gastar PP e partir pro Struggle, e o que a
+* interface usa pra avisar que ele precisa de um TM.
+*/
+function semGolpeDeDano$1(poke, species, selvagem) {
+	const desligados = poke.disabledAbilities || {};
+	return !golpesUtilizaveis(poke, species, selvagem).some((id) => {
+		const a = getAbility(id);
+		return !desligados[id] && a != null && isDamagingAbility(a);
+	});
+}
 //#endregion
 //#region src/data/pokes.ts
 var MAX_CATCH_RATE = 255;
@@ -153399,12 +153412,7 @@ function pickAbilityDaFila(world, entity, defenderEntity, candidatos, estaSilenc
 /** O arsenal desta entidade nao tem nenhum golpe de dano (so status)? */
 function semGolpeDeDano(entity) {
 	const especie = SPECIES[entity.poke.speciesId];
-	if (!especie) return false;
-	const desligados = entity.poke.disabledAbilities || {};
-	return !golpesUtilizaveis(entity.poke, especie, usaKitDeSelvagem(entity)).some((id) => {
-		const a = getAbility(id);
-		return !desligados[id] && a != null && isDamagingAbility(a);
-	});
+	return especie ? semGolpeDeDano$1(entity.poke, especie, usaKitDeSelvagem(entity)) : false;
 }
 function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 	const clima = world.clima?.tipo ?? null;
@@ -157580,13 +157588,13 @@ function registrarDesmaioParaRecuo(world, gameState) {
 }
 function stepWorld(world, dt, gameState, opts = {}) {
 	const silent = opts.silent ?? false;
-	world.rotacaoDeGolpes = gameState.autoToggles?.rotacaoDeGolpes === true;
 	const manualAdvance = false;
 	if (!world.player) return [];
 	if (world.arena) {
 		stepArena(world, dt, { silent });
 		return [];
 	}
+	world.rotacaoDeGolpes = gameState.autoToggles?.rotacaoDeGolpes === true;
 	if (!world.mapDef) {
 		if (world.player) tickCuraTimers(world.player, dt);
 		if (!silent) updateAnimations(world, dt);

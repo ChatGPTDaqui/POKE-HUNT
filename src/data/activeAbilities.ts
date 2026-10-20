@@ -288,10 +288,6 @@ export function sanearEscolhaDeGolpes(
 export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem: boolean): string[] {
   if (selvagem) return activeAbilitiesSelvagem(species, poke.level)
 
-  // O Ataque Basico entra em `conhecidos` dentro de `sanearEscolhaDeGolpes`:
-  // ele nao e aprendido em nivel nenhum (nunca esta em `unlockedAbilities`),
-  // todo POKE simplesmente tem.
-  //
   // NAO ha mais anexo depois dos slots. A Explosao Elemental costumava entrar
   // aqui, fora da conta dos 4 — desde 2026-08-18 ela e um golpe comum e so
   // luta se estiver entre os escolhidos (ver o topo do arquivo).
@@ -301,4 +297,16 @@ export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem
     species,
     poke.level,
   )
+}
+
+/**
+ * O arsenal deste POKE nao tem golpe de dano (19/10/2026, fim do Ataque
+ * Basico)? Golpe desligado pelo jogador nao conta. E o MESMO recorte que o
+ * combate usa pra mandar o POKE gastar PP e partir pro Struggle, e o que a
+ * interface usa pra avisar que ele precisa de um TM.
+ */
+export function semGolpeDeDano(poke: PokeInstance, species: Species, selvagem: boolean): boolean {
+  const desligados = poke.disabledAbilities || {}
+  return !golpesUtilizaveis(poke, species, selvagem)
+    .some((id) => { const a = getAbility(id); return !desligados[id] && a != null && isDamagingAbility(a) })
 }

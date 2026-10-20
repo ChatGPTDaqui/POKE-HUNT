@@ -13,7 +13,7 @@
 import { describe, expect, it } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
-import { buildMapWorld, stepWorld, LIVE_SIM_STEP_SECONDS, OFFLINE_SIM_STEP_SECONDS } from './simulation'
+import { buildMapWorld, stepWorld, LIVE_SIM_STEP_SECONDS, OFFLINE_SIM_STEP_SECONDS, STARTER_LEVEL } from './simulation'
 import { simulateWorldSeconds } from './systems/offlineSimSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from './types'
@@ -28,7 +28,7 @@ const SEGUNDOS = 90
 
 function mundoInicial(): WorldState {
   const rng = createRng(SEMENTE)
-  const poke = createPokeInstance(rng, 'charmander', 1)
+  const poke = createPokeInstance(rng, 'charmander', STARTER_LEVEL)
   return buildMapWorld(MAPA, poke, { seed: 0, rng: createRng(SEMENTE), counters: { entity: 1, effect: 1, pendingHit: 1 } })
 }
 

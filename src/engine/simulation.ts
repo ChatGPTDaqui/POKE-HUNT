@@ -1596,8 +1596,6 @@ function registrarDesmaioParaRecuo(world: WorldState, gameState: GameStateStore)
 // auto-heal/respawn avancam. Devolve a lista de resumos por-kill.
 export function stepWorld(world: WorldState, dt: number, gameState: GameStateStore, opts: { silent?: boolean; offline?: boolean } = {}): KillResult[] {
   const silent = opts.silent ?? false
-  // Toggle de Automacoes lido a cada passo: o combate decide fila x melhor dano.
-  world.rotacaoDeGolpes = gameState.autoToggles?.rotacaoDeGolpes === true
   // Janela longa (farm offline de verdade) ignora o toggle — mesmo eixo que
   // ja liga `world.pessimista` no servidor (ver LIMIAR_OFFLINE_SEGUNDOS em
   // authority/progresso.ts). Calculado uma vez e repassado pros dois pontos
@@ -1622,6 +1620,9 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     stepArena(world, dt, { silent })
     return []
   }
+  // Toggle de Automacoes lido a cada passo: o combate decide fila x melhor dano.
+  // Depois da arena de proposito: ela nao toca no gameState (PH-540).
+  world.rotacaoDeGolpes = gameState.autoToggles?.rotacaoDeGolpes === true
 
   if (!world.mapDef) {
     // Poção no Hospital também termina; só timers visuais, sem cooldown/combate.
