@@ -1248,7 +1248,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = dev, public
-as $
+as $$
 declare
   v_user_id uuid := auth.uid();
   v_ordem text[] := array[
@@ -1371,6 +1371,6 @@ begin
 
   return jsonb_build_object('ok', true, 'mensagem', 'Recompensa do passo coletada!');
 end;
-$;
+$$;
 
 commit;
