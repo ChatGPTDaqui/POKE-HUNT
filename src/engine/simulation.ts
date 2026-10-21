@@ -28,7 +28,7 @@ import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { randInt, randRange, weightedPick } from '@/core/random'
-import type { Rng } from '@/core/rng'
+import { createRng, type Rng } from '@/core/rng'
 import { captureAnimFrameDuration, captureAnimFrameCount } from '@/data/captureAnim'
 import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
@@ -59,7 +59,7 @@ import {
   aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
   encurtarTransicaoDeSala, contextoDoProtetor, type ContextoDeSpawn,
   estagioJaLimpo, proximoEstagioLiberado, estagioAnterior,
-  comunsEsgotados, quotaDeAbatesDaSala, salaDeveProtetor, ESPERA_MAXIMA_PELA_AUTORIDADE,
+  comunsEsgotados, vagasDeComunsNaSala, quotaDeAbatesDaSala, salaDeveProtetor,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -69,6 +69,7 @@ import { emptyWorldState } from './worldState'
 import { toastStore } from '@/stores/toastStoreVanilla'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { splashDeSalaStore } from '@/stores/splashDeSalaVanilla'
+import { anuncioDoChefeStore } from '@/stores/anuncioDoChefeVanilla'
 import type {
   ClimaTipo, EnemyEntity, EnemyHazards, Point, PlayerEntity, SalaAtiva, WorldState, ProtetorPendente,
   ProtetorDaAutoridade,
@@ -453,6 +454,36 @@ const RAIO_PADRAO_DE_INIMIGO = 15
  * fixos em `createPokeInstance`, entao a reconstrucao consome ZERO `rng` —
  * sortear de novo trocaria a aparencia/stats do protetor a cada flush (~30s).
  */
+/**
+ * Semente do chefe a partir da IDENTIDADE da sala (21/10/2026).
+ *
+ * O chefe nasce na hora em que o 29o comum cai, no cliente — sem esperar o
+ * servidor. Pra isso os dois lados precisam sortear o MESMO chefe; com o rng de
+ * cada mundo eles divergiam, e o chefe "trocava" quando chegava o do servidor.
+ * Mapa + sub-bioma + indice + ciclo e o que as duas pontas concordam (a sala e
+ * reconciliada pela autoridade).
+ */
+function sementeDoChefe(mapId: string, sala: SalaAtiva | null, trocas = 0): number {
+  const texto = `${mapId}|${sala?.chave ?? ''}|${sala?.indice ?? 0}|${sala?.ciclos ?? 0}|${trocas}`
+  let h = 2166136261
+  for (let i = 0; i < texto.length; i++) h = Math.imul(h ^ texto.charCodeAt(i), 16777619)
+  return h | 0
+}
+
+/** uid (formato uuid, a coluna e `uuid`) deterministico pro chefe da sala. */
+function uidDoChefe(semente: number, encounterId: string): string {
+  let a = semente >>> 0
+  const hex: string[] = []
+  const texto = encounterId + '#chefe'
+  for (let i = 0; i < 32; i++) {
+    a = Math.imul(a ^ texto.charCodeAt(i % texto.length), 16777619) >>> 0
+    a = (a + 0x9e3779b9) >>> 0
+    hex.push((a >>> 28).toString(16))
+  }
+  const s = hex.join('')
+  return `${s.slice(0, 8)}-${s.slice(8, 12)}-4${s.slice(13, 16)}-a${s.slice(17, 20)}-${s.slice(20, 32)}`
+}
+
 function criarEntidadeDoProtetor(
   world: SequenciaDeSorteio,
   mapDef: MapDef,
@@ -461,6 +492,7 @@ function criarEntidadeDoProtetor(
   protetorSalvo: ProtetorPendente | null | undefined,
   player: PlayerEntity | null,
   entrada: Point | null,
+  sala: SalaAtiva | null = null,
 ): { enemy: EnemyEntity; pendente: ProtetorPendente } {
   // PH-301: quem vai ter que derrubar este protetor. `null` fora do jogo
   // normal (mundo sem jogador em campo) — ali o sorteio segue como antes.
@@ -535,6 +567,10 @@ function criarEntidadeDoProtetor(
   // O teto existe porque o pool da sala PODE ser todo imune. Nesse caso o
   // ultimo candidato vale: entregar um protetor duro e melhor que nao entregar
   // protetor nenhum, e o cao de guarda de `stepWorld` cobre o resto.
+  // Sorteio do chefe NOVO com rng proprio, semeado pela sala (ver
+  // `sementeDoChefe`). Nao consome o rng do mundo.
+  const semente = sementeDoChefe(mapDef.id, sala, (world as Partial<WorldState>).protetorTrocas ?? 0)
+  const rngDoChefe = createRng(semente)
   let escolhido: {
     encounterId: string
     level: number
@@ -542,17 +578,17 @@ function criarEntidadeDoProtetor(
     poke: PokeInstance
   } | null = null
   for (let tentativa = 0; tentativa < TENTATIVAS_DE_PROTETOR_DANIFICAVEL; tentativa++) {
-    const encounterId = weightedPick(rng, ctx.pool, ctx.peso)
+    const encounterId = weightedPick(rngDoChefe, ctx.pool, ctx.peso)
     const encounter = getEncounter(encounterId)
     if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
     const level = tipo === 'lord' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
-    const ivs = rollIvsDoProtetor(rng)
+    const ivs = rollIvsDoProtetor(rngDoChefe)
     const multiplicadorDeShiny = ctx.multiplicadorDeShiny?.(encounter.speciesId)
-    const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs, ...(multiplicadorDeShiny ? { multiplicadorDeShiny } : {}) })
+    const poke = createPokeInstance(rngDoChefe, encounter.speciesId, level, { ivs, uid: uidDoChefe(semente, encounterId), ...(multiplicadorDeShiny ? { multiplicadorDeShiny } : {}) })
     escolhido = { encounterId, level, ivs, poke }
     if (!atacante) break
     const candidato = createEnemyEntity({ ...counters }, { poke, x: point.x, y: point.y, encounterId })
-    if (podeDanificar(rng, atacante, candidato)) break
+    if (podeDanificar(rngDoChefe, atacante, candidato)) break
   }
   if (!escolhido) throw new Error('Sorteio de protetor não produziu candidato')
   const { encounterId, level, ivs, poke } = escolhido
@@ -629,9 +665,10 @@ function garantirProtetorDaSala(
   // `garantirTransicaoDeQuotaFechada`, e toda resposta o zera), o cliente volta
   // a sortear o proprio: contra uma Edge fora do ar, a alternativa e a hunt
   // travada pra sempre com a barra em 29/30, que e pior que a divergencia.
-  if (world.salaSobAutoridade && world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) {
-    return true
-  }
+  // NAO ESPERA MAIS O CHEFE DO SERVIDOR (21/10/2026): o sorteio do chefe e
+  // semeado pela sala (`sementeDoChefe`), entao o cliente cria o MESMO chefe
+  // que o servidor vai criar, na hora em que o 29o comum cai. Antes ele
+  // esperava ate a autoridade mandar o dela — de 0 a ~30s de campo parado.
 
   const ctx = contextoDoProtetor(
     mapDef.id,
@@ -639,7 +676,7 @@ function garantirProtetorDaSala(
     world.sala,
     tipo,
   )
-  const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada)
+  const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada, world.sala)
   world.enemies.push(enemy)
   world.protetorPendente = pendente
   return true
@@ -697,18 +734,24 @@ export function adotarProtetorDaAutoridade(
 
   const vindo = daAutoridade.pendente
   if (!vindo) {
-    // O servidor ainda nao chegou na quota dele. O cliente nao inventa chefe —
-    // `garantirProtetorDaSala` ja se recusa a sortear sob autoridade — e
-    // tambem nao apaga o que ja adotou: um `pendente` ausente numa resposta
-    // atrasada nao e "o chefe morreu".
+    // O servidor ainda nao chegou na quota dele. O cliente nao apaga o chefe
+    // que ja criou (desde 21/10/2026 ele cria na hora, com a mesma semente do
+    // servidor): um `pendente` ausente numa resposta atrasada nao e "o chefe
+    // morreu".
     return
   }
+  // O cliente ja derrotou ESTE chefe e a resposta do servidor ainda nao viu:
+  // nao ressuscita. O servidor termina a luta dele e a sala troca no flush.
+  if (world.protetorResolvido && world.protetorCaido?.uid === vindo.uid) return
 
   if (world.protetorPendente?.uid === vindo.uid) {
-    // Mesmo chefe: so o HP anda. E o caso comum, uma vez por flush.
-    world.protetorPendente.hpAtual = vindo.hpAtual
+    // Mesmo chefe: so o HP anda. Pelo MENOR dos dois (21/10/2026): o cliente
+    // cria o chefe na hora e costuma estar a frente da luta do servidor; copiar
+    // o HP de la "curava" o chefe na tela a cada flush.
     const emCampo = world.enemies.find((e) => e.isProtetor && e.poke.uid === vindo.uid)
-    if (emCampo) emCampo.poke.hp = vindo.hpAtual
+    const hp = Math.min(vindo.hpAtual, emCampo?.poke.hp ?? vindo.hpAtual)
+    world.protetorPendente.hpAtual = hp
+    if (emCampo) emCampo.poke.hp = hp
     return
   }
 
@@ -723,7 +766,7 @@ export function adotarProtetorDaAutoridade(
     tipo,
   )
   const { enemy, pendente } = criarEntidadeDoProtetor(
-    world, world.mapDef, ctx, tipo, vindo, world.player, entradaDoInimigo(world.mapDef, world.sala),
+    world, world.mapDef, ctx, tipo, vindo, world.player, entradaDoInimigo(world.mapDef, world.sala), world.sala,
   )
   // O ramo de retomada poe o chefe EM ALCANCE DE COMBATE (PH-423) — conserto
   // do livelock do SERVIDOR, que reconstroi o mundo a cada janela. Aqui e a
@@ -737,6 +780,15 @@ export function adotarProtetorDaAutoridade(
   aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
   world.enemies.push(enemy)
   world.protetorPendente = pendente
+  // Primeira vez que este cliente ve este chefe (ele nasceu no servidor).
+  anunciarChefe(world)
+}
+
+/** Vinheta do chefe recem-nascido (21/10/2026). So o cliente assina a store. */
+function anunciarChefe(world: WorldState): void {
+  const chefe = world.enemies.find((e) => e.isProtetor && e.poke.uid === world.protetorPendente?.uid)
+  const tipo = world.sala && world.mapDef ? protetorDaSala(world.sala, world.mapDef.id) : null
+  if (chefe && tipo) anuncioDoChefeStore.getState().anunciar(tipo, chefe.poke.speciesId, Boolean(chefe.poke.isShiny))
 }
 
 /**
@@ -1198,7 +1250,7 @@ export function buildMapWorld(
       // `aplicarTransicaoDeSala` quem o limpa.
       base.protetorCaido = progresso?.protetorPendente ?? null
     }
-    const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo && !chefeJaCaiu
+    const tipoDeProtetor = sala && sala.abates >= quota && !chefeJaCaiu
       ? protetorDaSala(sala, mapId)
       : null
     if (tipoDeProtetor) {
@@ -1208,7 +1260,7 @@ export function buildMapWorld(
       // protetor), sorteia na primeira vez que a sala pede protetor senao.
       const { enemy, pendente } = criarEntidadeDoProtetor(
         base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor,
-        progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala),
+        progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala), sala,
       )
       aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
       enemies.push(enemy)
@@ -1232,7 +1284,10 @@ export function buildMapWorld(
     } else if (!chefeJaCaiu) {
       // Chefe ja caiu: a sala esta decidida e nada mais nasce nela ate trocar
       // (pedido do dono, 17/10/2026 — o protetor e o ultimo POKE da sala).
-      for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
+      // Teto de 29 comuns por sala (21/10/2026): ao retomar com 27 abatidos so
+      // nascem 2.
+      const vagas = vagasDeComunsNaSala(base, mapId, 0)
+      for (let i = 0; i < Math.min(vagas, limiteDeInimigos(mapDef, player?.poke)); i++) {
         const enemy = spawnEnemyAt(base, mapDef, ctx, player, entradaDoInimigo(mapDef, sala), enemies)
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
         enemies.push(enemy)
@@ -1684,8 +1739,11 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // atravessa a reconstrucao de mundo do servidor): arma a transicao agora, sem
   // esperar um abate novo. Ver o livelock em
   // salaSystem.ts#garantirTransicaoDeQuotaFechada.
+  const chefeAntes = world.protetorPendente?.uid ?? null
   garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () =>
     garantirProtetorDaSala(world, world.mapDef!, undefined, world.player, null))
+  // Chefe acabou de nascer neste tick (o 29o comum caiu): vinheta.
+  if (!silent && world.protetorPendente && world.protetorPendente.uid !== chefeAntes) anunciarChefe(world)
 
   // SIMULACAO SILENCIOSA NAO ESPERA A CONTAGEM DE "ENTRANDO EM NOVA AREA" (PH-331).
   //
@@ -1937,6 +1995,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // para a PH-475, que torna a fresta (2) longa e observavel.
   if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn
     && !world.protetorPendente && !comunsEsgotados(world, world.mapDef.id)
+    // 21/10/2026: teto de 29 comuns nascidos por sala (abatidos + vivos).
+    && vagasDeComunsNaSala(world, world.mapDef.id, world.enemies.filter((e) => !isDead(e) && !e.isProtetor).length) > 0
     // 17/10/2026: depois que o protetor cai, NADA mais nasce na sala — ela
     // fica vazia ate a transicao. Antes o repovoamento voltava aqui de
     // proposito (farm durante a espera pela autoridade); o dono pediu o
@@ -2003,6 +2063,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
         world.enemies = world.enemies.filter((e) => e.id !== protetorVivo.id)
         world.protetorPendente = null
         world.protetorSemDanoSegundos = 0
+        // O proximo sorteio usa outra semente — senao sairia o mesmo chefe.
+        world.protetorTrocas = (world.protetorTrocas ?? 0) + 1
         if (!silent) {
           toastStore.getState().pushToast(
             'O protetor da sala fugiu do combate. Outro tomou o lugar dele.', 'info', 'world',

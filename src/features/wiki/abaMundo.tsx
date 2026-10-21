@@ -212,9 +212,9 @@ export function MundoTab() {
         trilha — não existe atalho por nível nem por ouro.
         <br />
         <br />
-        Estágio já limpo você pode repetir quando quiser, e ele <b>não repõe chefe</b>: a sala avança direto ao
-        fechar a cota, o que torna estágio antigo o lugar certo pra farmar uma espécie específica sem parar num
-        chefe a cada sala.
+        Estágio já limpo você pode repetir quando quiser. Toda sala, limpa ou não, tem <b>29 POKEs comuns e o
+        chefe como 30º</b>: ao cair o 29º, o Guardião (ou o Lord, na última sala) aparece num ponto do mapa, e a
+        sala só avança depois que ele cai.
         <br />
         <br />
         Por padrão o jogo <b>repete</b> o estágio em que você está em vez de avançar sozinho ao vencer o Lord.

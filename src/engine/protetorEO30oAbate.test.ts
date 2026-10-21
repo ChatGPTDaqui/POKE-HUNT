@@ -185,22 +185,26 @@ describe('a quota de comuns e 29, e o protetor e o 30o', () => {
     expect(Math.hypot(chefe!.x - world.player!.x, chefe!.y - world.player!.y)).toBeGreaterThanOrEqual(200)
   })
 
-  it('estagio JA LIMPO fica nos 30 comuns e nao espera chefe nenhum', () => {
-    // PH-428: estagio limpo nao repoe protetor, entao nao ha 30o abate de chefe
-    // — a quota volta a ser 30 comuns e a sala avanca sozinha.
+  it('estagio JA LIMPO tambem tem chefe como 30o (21/10/2026)', () => {
     const limpo = { ...progressoPorBiomaDefault(), mata: 3 }
     const world = mundo(105, limpo)
     expect(world.estagioJaLimpo).toBe(true)
-    expect(salaDeveProtetor(world.sala, HUNT, world)).toBe(false)
-    expect(quotaDeAbatesDaSala(world.sala, HUNT, world)).toBe(ABATES_POR_SALA)
-
+    expect(salaDeveProtetor(world.sala, HUNT, world)).toBe(true)
+    expect(quotaDeAbatesDaSala(world.sala, HUNT, world)).toBe(ABATES_COMUNS_POR_SALA)
     abaterComuns(world, ABATES_COMUNS_POR_SALA)
-    expect(world.salaPendente, 'avancou com 29 num estagio sem chefe').toBeNull()
-    registrarAbate(world, world.mapDef!.id)
-    expect(world.sala!.abates).toBe(ABATES_POR_SALA)
-    expect(world.salaPendente, 'nao avancou com 30 num estagio sem chefe').not.toBeNull()
-    // E o campo continua repovoando: sem chefe, nao ha o que esgotar.
-    expect(comunsEsgotados(world, HUNT)).toBe(false)
+    expect(world.salaPendente, 'avancou sem o chefe').toBeNull()
+    expect(comunsEsgotados(world, HUNT)).toBe(true)
+  })
+
+  it('nunca nascem mais de 29 comuns na sala: abatidos + vivos <= 29', () => {
+    const world = mundo(106)
+    const gameState = useGameStateStore.getState()
+    world.sala = { ...world.sala!, abates: 27 }
+    world.enemies = []
+    world.respawnTimer = 0
+    for (let i = 0; i < 400; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    const vivosComuns = world.enemies.filter((e) => !e.isProtetor && e.poke.hp > 0).length
+    expect(world.sala!.abates + vivosComuns).toBeLessThanOrEqual(ABATES_COMUNS_POR_SALA)
   })
 
   it('a ultima sala do estagio pede LORD, e ele tambem e o 30o', () => {

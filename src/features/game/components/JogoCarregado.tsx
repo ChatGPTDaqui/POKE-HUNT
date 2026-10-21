@@ -11,6 +11,7 @@ import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
 import { SalaCountdownModal } from '@/components/modals/SalaCountdownModal'
 import { CutsceneDeEntrada } from '@/components/modals/CutsceneDeEntrada'
 import { SplashDeSala } from '@/components/modals/SplashDeSala'
+import { AnuncioDoChefe } from '@/components/modals/AnuncioDoChefe'
 import { ViagemAoHospitalOverlay } from '@/components/modals/ViagemAoHospitalOverlay'
 import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
 import { HudLayer } from '../HudLayer'
@@ -139,6 +140,7 @@ export function JogoCarregado() {
           ordem aqui é a segunda linha de defesa — z-[46] fica abaixo do
           ConfirmDialog (60) e do perfil (45/46). */}
       <SplashDeSala />
+      <AnuncioDoChefe />
       {summary && <OfflineFarmModal summary={summary} onClose={dismiss} />}
     </div>
   )

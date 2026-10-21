@@ -1063,6 +1063,8 @@ export interface WorldState {
    * flush: ele precisa caber inteiro dentro de uma.
    */
   protetorSemDanoSegundos: number
+  /** Quantas vezes o chefe desta sala fugiu do impasse (PH-301) — entra na semente do proximo. */
+  protetorTrocas?: number
   /**
    * Contagem regressiva "Entrando em nova area" (ver
    * engine/systems/salaSystem.ts#registrarAbate/aplicarTransicaoDeSala).
