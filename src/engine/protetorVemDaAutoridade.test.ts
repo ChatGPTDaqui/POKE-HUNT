@@ -116,6 +116,18 @@ describe('o cliente nao sorteia o chefe sob autoridade (PH-475)', () => {
     expect(world.enemies.some((e) => e.isProtetor), 'o chefe da sala anterior voltou').toBe(false)
   })
 
+  it('chefe adotado do servidor tira de campo os comuns que o cliente ainda tinha vivos', () => {
+    const world = esperandoOChefe(211)
+    world.salaSobAutoridade = true
+    // Cliente atrasado: ainda com comuns vivos quando o chefe do servidor chega.
+    const outro = mundo(211)
+    world.enemies = outro.enemies.filter((e) => !e.isProtetor).slice(0, 3)
+    expect(world.enemies.length).toBeGreaterThan(0)
+    adotarProtetorDaAutoridade(world, { pendente: protetorDoServidor(211, 'srv-adotado'), resolvido: false })
+    expect(world.enemies.filter((e) => !e.isProtetor && e.poke.hp > 0)).toHaveLength(0)
+    expect(world.enemies.some((e) => e.isProtetor)).toBe(true)
+  })
+
   it('sem o campo na resposta (servidor mais velho) nada muda', () => {
     const world = esperandoOChefe(202)
     adotarProtetorDaAutoridade(world, undefined)

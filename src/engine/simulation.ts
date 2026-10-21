@@ -785,6 +785,9 @@ export function adotarProtetorDaAutoridade(
     enemy.y = onde.y
   }
   aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
+  // Mesmo corte do chefe local: o servidor ja fechou os 29 dele, entao comum
+  // que o cliente ainda tinha vivo nao existe mais la — sai de campo.
+  world.enemies = world.enemies.filter((e) => isDead(e) || e.isProtetor)
   world.enemies.push(enemy)
   world.protetorPendente = pendente
   // Primeira vez que este cliente ve este chefe (ele nasceu no servidor).
