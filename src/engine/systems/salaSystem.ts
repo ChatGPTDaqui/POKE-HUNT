@@ -745,9 +745,11 @@ export interface EstadoDoProtetorDaSala {
 export function salaDeveProtetor(
   sala: SalaAtiva | null, mapId: string, estado: EstadoDoProtetorDaSala,
 ): boolean {
-  // PH-428: estagio ja limpo nao repoe protetor — Guardian e Lord existem pra
-  // travar a PRIMEIRA limpeza, e num estagio fechado seriam so pedagio.
-  if (estado.estagioJaLimpo) return false
+  // ESTAGIO JA LIMPO NAO DISPENSA MAIS O CHEFE (21/10/2026, pedido do dono,
+  // repetido varias vezes): o 30o POKE de toda sala e o Guardian/Lord, inclusive
+  // ao repetir um estagio. A dispensa da PH-428 fazia quem farma estagio limpo
+  // nunca ver chefe e caçar 30 comuns com o repovoamento ligado.
+  // `estado.estagioJaLimpo` continua no tipo porque outros leitores o usam.
   // PH-230: ja caiu nesta sala. `protetorDaSala` e pura e continua respondendo
   // "esta sala pede protetor" pra sempre; sem este corte a sala pediria outro a
   // cada tick.
@@ -789,6 +791,22 @@ export function quotaDeAbatesDaSala(
  * no gate de respawn de `simulation.ts` (`protetorResolvido`), e nao aqui:
  * esta funcao continua respondendo so pela QUOTA de comuns.
  */
+/**
+ * Quantos selvagens COMUNS ainda podem nascer nesta sala (21/10/2026).
+ *
+ * So nascem ate o 29o: abatidos + vivos nunca passam de
+ * `ABATES_COMUNS_POR_SALA`. Sem este teto o campo tinha 3-6 vivos quando o 29o
+ * caia, e o jogador seguia caçando comum depois da quota. Sala sem chefe
+ * (hunt sem estagio, chefe ja resolvido) nao tem teto: Infinity.
+ */
+export function vagasDeComunsNaSala(
+  world: Pick<WorldState, 'sala' | 'estagioJaLimpo' | 'protetorResolvido'>, mapId: string, vivosComuns: number,
+): number {
+  const sala = world.sala
+  if (!sala || !salaDeveProtetor(sala, mapId, world)) return Infinity
+  return Math.max(0, ABATES_COMUNS_POR_SALA - sala.abates - vivosComuns)
+}
+
 export function comunsEsgotados(world: WorldState, mapId: string): boolean {
   const sala = world.sala
   if (!sala) return false
@@ -993,6 +1011,9 @@ export function resolverProtetorDaSala(
   // ja encontra `protetorPendente` nulo e nao pode apagar o que a primeira
   // guardou.
   world.protetorCaido = world.protetorPendente ?? world.protetorCaido
+  if (world.protetorCaido) {
+    world.chefesDerrotados = [...(world.chefesDerrotados ?? []).slice(-9), world.protetorCaido.uid]
+  }
   world.protetorPendente = null
   // PH-230: marcar ANTES do corte de autoridade abaixo. Sem esta linha, sob
   // `salaSobAutoridade` a sala nao avanca (por design) e nada registra que o
@@ -1359,6 +1380,7 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   // caido da sala nova — seria o mesmo defeito de `protetorPendente` pendurado
   // que a PH-258 corrigiu, so que pelo lado da persistencia.
   world.protetorCaido = null
+  world.protetorTrocas = 0
   // O PROTETOR FICA NA SALA QUE PASSOU (PH-258), e esquecer esta linha matava a
   // hunt inteira em silencio.
   //

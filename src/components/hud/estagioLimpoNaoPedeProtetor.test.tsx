@@ -65,9 +65,9 @@ describe('estagio limpo nao pede protetor na tela (PH-474)', () => {
     expect(montar({ estagioJaLimpo: false })).toContain('Derrote o')
   })
 
-  it('estagio JA LIMPO nao manda derrotar protetor nenhum', () => {
-    const texto = montar({ estagioJaLimpo: true })
-    expect(texto, 'pede pra derrotar um protetor que nao vai nascer').not.toContain('Derrote o')
+  // 21/10/2026: estagio limpo TAMBEM tem chefe (pedido do dono).
+  it('estagio JA LIMPO tambem manda derrotar o protetor', () => {
+    expect(montar({ estagioJaLimpo: true })).toContain('Derrote o')
   })
 
   // OS TRES CASOS DO BOTAO "Próximo Nível" SAIRAM NA PH-493, junto com o

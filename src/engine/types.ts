@@ -1004,6 +1004,13 @@ export interface WorldState {
    */
   protetorCaido: ProtetorPendente | null
   /**
+   * uids dos chefes ja derrotados NESTA sessao do cliente (21/10/2026). Uma
+   * resposta atrasada do servidor pode trazer como `pendente` o chefe de uma
+   * sala que o cliente ja passou; sem esta lista ele era recriado na sala nova.
+   * Nao zera na troca de sala de proposito.
+   */
+  chefesDerrotados?: string[]
+  /**
    * O jogador ja fechou este estagio alguma vez? (PH-428)
    *
    * Calculado UMA VEZ em `buildMapWorld`, a partir do progresso do jogador, e
@@ -1063,6 +1070,8 @@ export interface WorldState {
    * flush: ele precisa caber inteiro dentro de uma.
    */
   protetorSemDanoSegundos: number
+  /** Quantas vezes o chefe desta sala fugiu do impasse (PH-301) — entra na semente do proximo. */
+  protetorTrocas?: number
   /**
    * Contagem regressiva "Entrando em nova area" (ver
    * engine/systems/salaSystem.ts#registrarAbate/aplicarTransicaoDeSala).

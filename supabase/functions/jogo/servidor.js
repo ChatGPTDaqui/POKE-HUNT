@@ -156301,7 +156301,6 @@ function estagioJaLimpo(mapId, progresso) {
 * `buildMapWorld` precisa dela ANTES de o mundo existir.
 */
 function salaDeveProtetor(sala, mapId, estado) {
-	if (estado.estagioJaLimpo) return false;
 	if (estado.protetorResolvido) return false;
 	return protetorDaSala(sala, mapId) != null;
 }
@@ -156336,6 +156335,19 @@ function quotaDeAbatesDaSala(sala, mapId, estado) {
 * no gate de respawn de `simulation.ts` (`protetorResolvido`), e nao aqui:
 * esta funcao continua respondendo so pela QUOTA de comuns.
 */
+/**
+* Quantos selvagens COMUNS ainda podem nascer nesta sala (21/10/2026).
+*
+* So nascem ate o 29o: abatidos + vivos nunca passam de
+* `ABATES_COMUNS_POR_SALA`. Sem este teto o campo tinha 3-6 vivos quando o 29o
+* caia, e o jogador seguia caçando comum depois da quota. Sala sem chefe
+* (hunt sem estagio, chefe ja resolvido) nao tem teto: Infinity.
+*/
+function vagasDeComunsNaSala(world, mapId, vivosComuns) {
+	const sala = world.sala;
+	if (!sala || !salaDeveProtetor(sala, mapId, world)) return Infinity;
+	return Math.max(0, 29 - sala.abates - vivosComuns);
+}
 function comunsEsgotados(world, mapId) {
 	const sala = world.sala;
 	if (!sala) return false;
@@ -156478,6 +156490,7 @@ function armarTransicaoDeSala(world, mapId) {
 */
 function resolverProtetorDaSala(world, mapId, opts = {}) {
 	world.protetorCaido = world.protetorPendente ?? world.protetorCaido;
+	if (world.protetorCaido) world.chefesDerrotados = [...(world.chefesDerrotados ?? []).slice(-9), world.protetorCaido.uid];
 	world.protetorPendente = null;
 	world.protetorResolvido = true;
 	if (world.salaSobAutoridade) return;
@@ -156560,6 +156573,7 @@ function aplicarTransicaoDeSala(world, mapId) {
 	world.salaPendente = null;
 	world.protetorResolvido = false;
 	world.protetorCaido = null;
+	world.protetorTrocas = 0;
 	world.protetorPendente = null;
 	world.clima = null;
 	definirClimaDeAmbiente(world, world.salaSobAutoridade ? null : climaAmbienteDaSala(world.seed, world.sala));
@@ -156796,7 +156810,7 @@ function juntar(a, b) {
 * POKE ja esta em 35, e informacao desatualizada na tela e pior que cartao
 * repetido.
 */
-var proximoId$1 = 1;
+var proximoId$2 = 1;
 var celebracaoStore = createStore()((set) => ({
 	fila: [],
 	celebrar: (c) => set((estado) => {
@@ -156814,7 +156828,7 @@ var celebracaoStore = createStore()((set) => ({
 			return { fila: [...fila.slice(0, -1), junta] };
 		}
 		const comNova = [...fila, {
-			id: proximoId$1++,
+			id: proximoId$2++,
 			celebracao: c
 		}];
 		if (comNova.length > 4) return { fila: [comNova[0], ...comNova.slice(2)] };
@@ -156825,16 +156839,29 @@ var celebracaoStore = createStore()((set) => ({
 }));
 //#endregion
 //#region src/stores/splashDeSalaVanilla.ts
-var proximoId = 1;
+var proximoId$1 = 1;
 var splashDeSalaStore = createStore()((set) => ({
 	atual: null,
 	anunciarSala: (sala, fechouEstagio) => set({ atual: {
-		id: proximoId++,
+		id: proximoId$1++,
 		sala: { ...sala },
 		fechouEstagio
 	} }),
 	encerrar: (id) => set((estado) => estado.atual?.id === id ? { atual: null } : estado),
 	limpar: () => set({ atual: null })
+}));
+//#endregion
+//#region src/stores/anuncioDoChefeVanilla.ts
+var proximoId = 1;
+var anuncioDoChefeStore = createStore()((set) => ({
+	atual: null,
+	anunciar: (tipo, speciesId, isShiny) => set({ atual: {
+		id: proximoId++,
+		tipo,
+		speciesId,
+		isShiny
+	} }),
+	encerrar: (id) => set((s) => s.atual?.id === id ? { atual: null } : s)
 }));
 var formulaEngine = createFormulaEngine(FORMULAS);
 formulaEngine.evalOrDefault("OFFLINE_FARM_MAX_HOURS", 6);
@@ -157071,7 +157098,35 @@ var RAIO_PADRAO_DE_INIMIGO = 15;
 * fixos em `createPokeInstance`, entao a reconstrucao consome ZERO `rng` —
 * sortear de novo trocaria a aparencia/stats do protetor a cada flush (~30s).
 */
-function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada) {
+/**
+* Semente do chefe a partir da IDENTIDADE da sala (21/10/2026).
+*
+* O chefe nasce na hora em que o 29o comum cai, no cliente — sem esperar o
+* servidor. Pra isso os dois lados precisam sortear o MESMO chefe; com o rng de
+* cada mundo eles divergiam, e o chefe "trocava" quando chegava o do servidor.
+* Mapa + sub-bioma + indice + ciclo e o que as duas pontas concordam (a sala e
+* reconciliada pela autoridade).
+*/
+function sementeDoChefe(mapId, sala, trocas = 0) {
+	const texto = `${mapId}|${sala?.chave ?? ""}|${sala?.indice ?? 0}|${sala?.ciclos ?? 0}|${trocas}`;
+	let h = 2166136261;
+	for (let i = 0; i < texto.length; i++) h = Math.imul(h ^ texto.charCodeAt(i), 16777619);
+	return h | 0;
+}
+/** uid (formato uuid, a coluna e `uuid`) deterministico pro chefe da sala. */
+function uidDoChefe(semente, encounterId) {
+	let a = semente >>> 0;
+	const hex = [];
+	const texto = encounterId + "#chefe";
+	for (let i = 0; i < 32; i++) {
+		a = Math.imul(a ^ texto.charCodeAt(i % texto.length), 16777619) >>> 0;
+		a = a + 2654435769 >>> 0;
+		hex.push((a >>> 28).toString(16));
+	}
+	const s = hex.join("");
+	return `${s.slice(0, 8)}-${s.slice(8, 12)}-4${s.slice(13, 16)}-a${s.slice(17, 20)}-${s.slice(20, 32)}`;
+}
+function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada, sala = null) {
 	const atacante = player;
 	const { rng, counters } = world;
 	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, []);
@@ -157098,16 +157153,19 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 			pendente: protetorSalvo
 		};
 	}
+	const semente = sementeDoChefe(mapDef.id, sala, world.protetorTrocas ?? 0);
+	const rngDoChefe = createRng(semente);
 	let escolhido = null;
 	for (let tentativa = 0; tentativa < 6; tentativa++) {
-		const encounterId = weightedPick(rng, ctx.pool, ctx.peso);
+		const encounterId = weightedPick(rngDoChefe, ctx.pool, ctx.peso);
 		const encounter = getEncounter(encounterId);
 		if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
 		const level = tipo === "lord" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
-		const ivs = rollIvsDoProtetor(rng);
+		const ivs = rollIvsDoProtetor(rngDoChefe);
 		const multiplicadorDeShiny = ctx.multiplicadorDeShiny?.(encounter.speciesId);
-		const poke = createPokeInstance(rng, encounter.speciesId, level, {
+		const poke = createPokeInstance(rngDoChefe, encounter.speciesId, level, {
 			ivs,
+			uid: uidDoChefe(semente, encounterId),
 			...multiplicadorDeShiny ? { multiplicadorDeShiny } : {}
 		});
 		escolhido = {
@@ -157117,7 +157175,7 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 			poke
 		};
 		if (!atacante) break;
-		if (podeDanificar(rng, atacante, createEnemyEntity({ ...counters }, {
+		if (podeDanificar(rngDoChefe, atacante, createEnemyEntity({ ...counters }, {
 			poke,
 			x: point.x,
 			y: point.y,
@@ -157170,11 +157228,17 @@ function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
 		return false;
 	}
 	if (world.protetorPendente) return true;
-	if (world.salaSobAutoridade && world.salaEsperaDaAutoridade < 120) return true;
-	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDoProtetor(mapDef.id, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), world.sala, tipo), tipo, protetorSalvo, player, entrada);
+	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDoProtetor(mapDef.id, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), world.sala, tipo), tipo, protetorSalvo, player, entrada, world.sala);
+	world.enemies = world.enemies.filter((e) => isDead(e) || e.isProtetor);
 	world.enemies.push(enemy);
 	world.protetorPendente = pendente;
 	return true;
+}
+/** Vinheta do chefe recem-nascido (21/10/2026). So o cliente assina a store. */
+function anunciarChefe(world) {
+	const chefe = world.enemies.find((e) => e.isProtetor && e.poke.uid === world.protetorPendente?.uid);
+	const tipo = world.sala && world.mapDef ? protetorDaSala(world.sala, world.mapDef.id) : null;
+	if (chefe && tipo) anuncioDoChefeStore.getState().anunciar(tipo, chefe.poke.speciesId, Boolean(chefe.poke.isShiny));
 }
 /**
 * Vencer (matar OU capturar) o LORD marca o ESTAGIO como limpo (PH-429/430).
@@ -157360,9 +157424,9 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis,
 			base.protetorResolvido = true;
 			base.protetorCaido = progresso?.protetorPendente ?? null;
 		}
-		const tipoDeProtetor = sala && sala.abates >= quota && !base.estagioJaLimpo && !chefeJaCaiu ? protetorDaSala(sala, mapId) : null;
+		const tipoDeProtetor = sala && sala.abates >= quota && !chefeJaCaiu ? protetorDaSala(sala, mapId) : null;
 		if (tipoDeProtetor) {
-			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
+			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, contextoDoProtetor(mapId, ctx, sala, tipoDeProtetor), tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala), sala);
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 			protetorPendente = pendente;
@@ -157374,10 +157438,13 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis,
 				aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 				enemies.push(enemy);
 			}
-		} else if (!chefeJaCaiu) for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
-			const enemy = spawnEnemyAt(base, mapDef, ctx, player, entradaDoInimigo(mapDef, sala), enemies);
-			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
-			enemies.push(enemy);
+		} else if (!chefeJaCaiu) {
+			const vagas = vagasDeComunsNaSala(base, mapId, 0);
+			for (let i = 0; i < Math.min(vagas, limiteDeInimigos(mapDef, player?.poke)); i++) {
+				const enemy = spawnEnemyAt(base, mapDef, ctx, player, entradaDoInimigo(mapDef, sala), enemies);
+				aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
+				enemies.push(enemy);
+			}
 		}
 	}
 	const world = {
@@ -157630,7 +157697,9 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
+	const chefeAntes = world.protetorPendente?.uid ?? null;
 	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () => garantirProtetorDaSala(world, world.mapDef, void 0, world.player, null));
+	if (!silent && world.protetorPendente && world.protetorPendente.uid !== chefeAntes) anunciarChefe(world);
 	if (silent) encurtarTransicaoDeSala(world);
 	if (world.salaCountdownRemaining != null) {
 		world.salaCountdownRemaining -= dt;
@@ -157713,7 +157782,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
 		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Você derrotou o Campeão Lance! O Modo Pesadelo foi liberado.", "success", "world");
 	}
-	if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente && !comunsEsgotados(world, world.mapDef.id) && !(world.sala && world.protetorResolvido)) {
+	if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente && !comunsEsgotados(world, world.mapDef.id) && vagasDeComunsNaSala(world, world.mapDef.id, world.enemies.filter((e) => !isDead(e) && !e.isProtetor).length) > 0 && !(world.sala && world.protetorResolvido)) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
@@ -157745,6 +157814,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 				world.enemies = world.enemies.filter((e) => e.id !== protetorVivo.id);
 				world.protetorPendente = null;
 				world.protetorSemDanoSegundos = 0;
+				world.protetorTrocas = (world.protetorTrocas ?? 0) + 1;
 				if (!silent) toastStore.getState().pushToast("O protetor da sala fugiu do combate. Outro tomou o lugar dele.", "info", "world");
 			}
 		}

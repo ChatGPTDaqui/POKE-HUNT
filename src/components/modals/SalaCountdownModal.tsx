@@ -34,6 +34,24 @@ export function SalaCountdownModal() {
   const remaining = useWorldStore((s) => s.salaCountdownRemaining)
   const pendente = useWorldStore((s) => s.salaPendente)
   const mapDef = useWorldStore((s) => s.mapDef)
+  // CHEFE CAIU, A SALA TROCA (21/10/2026): sob autoridade a sala nova vem do
+  // servidor, que ainda esta terminando a luta dele. A cutscene entra JA, em vez
+  // de deixar a sala vazia esperando; quando a sala do servidor chega, a
+  // contagem normal assume (o `return` de baixo).
+  const esperandoSala = useWorldStore((s) => Boolean(
+    s.salaSobAutoridade && s.sala && s.protetorResolvido && !s.salaPendente && s.salaCountdownRemaining == null,
+  ))
+  if (esperandoSala && (remaining == null || remaining <= 0)) {
+    return (
+      <CutsceneDeArea
+        arte={mapDef?.bg?.image ?? null}
+        corDeFundo={mapDef?.bg?.primary ?? '#0b0b12'}
+        titulo="Chefe derrotado!"
+        subtitulo="Abrindo a próxima área…"
+        rodape={<div className="h-[1.6em] w-[1.6em] animate-spin rounded-full border-[.2em] border-sky-300 border-t-transparent" aria-hidden />}
+      />
+    )
+  }
   if (remaining == null || remaining <= 0) return null
 
   // `salaPendente` ausente com a contagem armada e estado que o motor nao

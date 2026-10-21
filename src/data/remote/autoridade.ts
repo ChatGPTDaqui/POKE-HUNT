@@ -597,7 +597,21 @@ function tratarEncerramento(motivo: string | null | undefined): void {
   aoEncerrarSessao?.()
 }
 
-export async function liquidar(): Promise<void> {
+/**
+ * Flush em andamento (21/10/2026). Com o pedido repetido do chefe, dois flushes
+ * podiam voar juntos e a resposta do mais velho chegar DEPOIS — trazendo a sala
+ * e o chefe anteriores pra cima da sala nova. Um por vez: quem chega com um em
+ * voo espera o mesmo.
+ */
+let liquidacaoEmVoo: Promise<void> | null = null
+
+export function liquidar(): Promise<void> {
+  if (liquidacaoEmVoo) return liquidacaoEmVoo
+  liquidacaoEmVoo = liquidarAgora().finally(() => { liquidacaoEmVoo = null })
+  return liquidacaoEmVoo
+}
+
+async function liquidarAgora(): Promise<void> {
   if (!servidorAtivo()) return
   try {
     const r = await servidor.flush()
@@ -812,6 +826,22 @@ const ESPERA_DO_PEDIDO_EXTRA_MS = 15000
  */
 const LIMIAR_DE_QUOTA_QUASE_FECHADA = 26
 
+/**
+ * CHEFE CAIU, A SALA TROCA (21/10/2026, pedido do dono: "matou o chefe a sala
+ * troca"). O cliente derruba o chefe antes do servidor (ele cria o chefe na
+ * hora, com a mesma semente), e a sala so troca quando o SERVIDOR derruba o
+ * dele. Em vez de esperar o flush de 30s, pede um flush na hora e repete a cada
+ * `REPETIR_PEDIDO_DO_CHEFE_MS`, no maximo `MAXIMO_DE_PEDIDOS_DO_CHEFE` vezes.
+ *
+ * Por que janela curta aqui NAO e o livelock do PH-273: aquele era o POKE
+ * reconstruido no ponto de entrada sem tempo de andar ate o alvo. O chefe
+ * retomado nasce EM ALCANCE DE COMBATE (PH-423), entao cada janela curta
+ * continua a luta de onde parou.
+ */
+const REPETIR_PEDIDO_DO_CHEFE_MS = 3000
+const MAXIMO_DE_PEDIDOS_DO_CHEFE = 8
+let pedidosDoChefe: { sala: string; n: number; ultimo: number } | null = null
+
 let pararObservadorDeSala: (() => void) | null = null
 let salaJaPedida: string | null = null
 let ultimoPedidoDeSala = 0
@@ -834,6 +864,18 @@ function observarQuotaDeSala(): void {
     // Transicao ja em andamento (a sala do servidor chegou e o aviso esta na
     // tela): nao ha o que pedir.
     if (estado.salaPendente || estado.salaCountdownRemaining != null) return
+    if (estado.protetorResolvido) {
+      const chaveDoChefe = `${sala.ciclos}:${sala.indice}:${sala.chave}`
+      const agoraChefe = Date.now()
+      if (pedidosDoChefe?.sala !== chaveDoChefe) pedidosDoChefe = { sala: chaveDoChefe, n: 0, ultimo: 0 }
+      if (pedidosDoChefe.n >= MAXIMO_DE_PEDIDOS_DO_CHEFE) return
+      if (agoraChefe - pedidosDoChefe.ultimo < REPETIR_PEDIDO_DO_CHEFE_MS) return
+      pedidosDoChefe.n += 1
+      pedidosDoChefe.ultimo = agoraChefe
+      intervaloAtual = INTERVALO_FLUSH_MS
+      void liquidar()
+      return
+    }
     if (sala.abates < ABATES_POR_SALA) return
     // PH-177/179 tinha um corte aqui: com o "Avanço manual de sala" ligado, a
     // quota fechada FICAVA fechada ate o jogador clicar "Proximo Nivel", e sem

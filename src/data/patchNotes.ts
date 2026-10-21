@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.36',
+    date: '2026-10-21',
+    title: 'Chefe em toda sala',
+    highlights: [
+      'Toda sala agora tem 29 POKEs comuns e o Guardião (ou o Lord, na última sala) como 30º, inclusive em estágio já limpo.',
+      'Depois do 29º não nasce mais nenhum POKE comum. Uma vinheta anuncia o chefe, ele aparece num ponto do mapa e o seu POKE vai até ele.',
+      'O chefe aparece na hora, sem esperar a sincronização com o servidor, e a sala só avança depois que ele cai.',
+    ],
+  },
+  {
     version: '8.35',
     date: '2026-10-20',
     title: 'Mural de contratos e ovos',

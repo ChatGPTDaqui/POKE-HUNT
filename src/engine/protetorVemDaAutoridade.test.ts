@@ -23,8 +23,7 @@ import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { ABATES_COMUNS_POR_SALA } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { adotarProtetorDaAutoridade, buildMapWorld, stepWorld } from './simulation'
-import { ESPERA_MAXIMA_PELA_AUTORIDADE } from './systems/salaSystem'
+import { adotarProtetorDaAutoridade, buildMapWorld, handleEnemyDefeated, stepWorld } from './simulation'
 import type { ProtetorPendente, WorldState } from './types'
 
 const HUNT = 'mata_e1'
@@ -68,36 +67,65 @@ function protetorDoServidor(semente: number, uid: string, hpAtual?: number): Pro
 describe('o cliente nao sorteia o chefe sob autoridade (PH-475)', () => {
   beforeEach(() => { useGameStateStore.getState().resetToDefaults() })
 
-  it('quota fechada e nenhum chefe em campo: o cliente espera, e a sala nao avanca', () => {
-    const world = esperandoOChefe(201)
+  // 21/10/2026: o cliente NAO espera mais o chefe do servidor. O sorteio e
+  // semeado pela sala, entao os dois lados criam o MESMO chefe na hora.
+  it('sob autoridade o cliente cria na hora o MESMO chefe que o servidor cria', () => {
     const gameState = useGameStateStore.getState()
+    const cliente = esperandoOChefe(201)
+    stepWorld(cliente, 0.1, gameState, { silent: true })
+    expect(cliente.protetorPendente, 'o cliente esperou o servidor').not.toBeNull()
+    expect(cliente.salaPendente).toBeNull()
 
-    // MEDE TODOS OS TICKS, e nao o estado final — a diferenca reprova ou nao
-    // reprova. Sabotar o gate e olhar so o fim deste laco passa VERDE: o chefe
-    // nasce no tick 0 e o cao de guarda do impasse (PH-301) o remove alguns
-    // segundos depois, entao o estado final volta a ser "sem chefe" por outro
-    // caminho. Medido por sabotagem antes de escrever isto assim.
-    //
-    // 60 ticks (6s de jogo) — longe dos 120s de silencio que liberam a
-    // escapatoria, e mais que suficiente pro caminho antigo ter sorteado.
-    let ticksComChefe = 0
-    for (let i = 0; i < 60; i++) {
-      stepWorld(world, 0.1, gameState, { silent: true })
-      if (world.protetorPendente || world.enemies.some((e) => e.isProtetor)) ticksComChefe += 1
-    }
+    // "Servidor": outro rng de mundo, sem autoridade, mesma sala.
+    const servidor = esperandoOChefe(999)
+    servidor.salaSobAutoridade = false
+    stepWorld(servidor, 0.1, gameState, { silent: true })
+    expect(servidor.protetorPendente?.uid).toBe(cliente.protetorPendente!.uid)
+    expect(servidor.protetorPendente?.speciesId).toBe(cliente.protetorPendente!.speciesId)
+    expect(servidor.protetorPendente?.level).toBe(cliente.protetorPendente!.level)
+  })
 
-    expect(ticksComChefe, 'o cliente sorteou um chefe proprio').toBe(0)
-    // E a sala continua travada: o `true` de `garantirProtetorDaSala` e o que
-    // impede o palpite de sala enquanto o chefe nao chega.
-    expect(world.salaPendente).toBeNull()
-    expect(world.sala!.indice).toBe(0)
+  it('chefe ja derrotado no cliente nao ressuscita com a resposta atrasada do servidor', () => {
+    const gameState = useGameStateStore.getState()
+    const world = esperandoOChefe(205)
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const chefe = world.enemies.find((e) => e.isProtetor)!
+    const pendente = { ...world.protetorPendente! }
+    handleEnemyDefeated(world, chefe, gameState, { silent: true })
+    world.enemies = world.enemies.filter((e) => !e.isProtetor)
+    expect(world.protetorResolvido).toBe(true)
 
-    // Guarda anti-vacuo: sem autoridade, o MESMO cenario sorteia o chefe. Sem
-    // esta metade, o caso acima passaria com o motor inteiro desligado.
-    const local = esperandoOChefe(201)
-    local.salaSobAutoridade = false
-    stepWorld(local, 0.1, gameState, { silent: true })
-    expect(local.protetorPendente, 'o caminho local deixou de sortear').not.toBeNull()
+    adotarProtetorDaAutoridade(world, { pendente, resolvido: false })
+    expect(world.enemies.some((e) => e.isProtetor), 'o chefe voltou').toBe(false)
+  })
+
+  it('resposta atrasada com o chefe da sala ANTERIOR nao o recria na sala nova', () => {
+    const gameState = useGameStateStore.getState()
+    const world = esperandoOChefe(207)
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const chefe = world.enemies.find((e) => e.isProtetor)!
+    const pendente = { ...world.protetorPendente! }
+    handleEnemyDefeated(world, chefe, gameState, { silent: true })
+    world.enemies = world.enemies.filter((e) => !e.isProtetor)
+    // A sala trocou (o que `aplicarTransicaoDeSala` zera).
+    world.sala = { ...world.sala!, indice: 1, abates: 0 }
+    world.protetorResolvido = false
+    world.protetorCaido = null
+
+    adotarProtetorDaAutoridade(world, { pendente, resolvido: false })
+    expect(world.enemies.some((e) => e.isProtetor), 'o chefe da sala anterior voltou').toBe(false)
+  })
+
+  it('chefe adotado do servidor tira de campo os comuns que o cliente ainda tinha vivos', () => {
+    const world = esperandoOChefe(211)
+    world.salaSobAutoridade = true
+    // Cliente atrasado: ainda com comuns vivos quando o chefe do servidor chega.
+    const outro = mundo(211)
+    world.enemies = outro.enemies.filter((e) => !e.isProtetor).slice(0, 3)
+    expect(world.enemies.length).toBeGreaterThan(0)
+    adotarProtetorDaAutoridade(world, { pendente: protetorDoServidor(211, 'srv-adotado'), resolvido: false })
+    expect(world.enemies.filter((e) => !e.isProtetor && e.poke.hp > 0)).toHaveLength(0)
+    expect(world.enemies.some((e) => e.isProtetor)).toBe(true)
   })
 
   it('sem o campo na resposta (servidor mais velho) nada muda', () => {
@@ -198,20 +226,5 @@ describe('o cliente nao sorteia o chefe sob autoridade (PH-475)', () => {
     expect(world.protetorResolvido).toBe(false)
   })
 
-  it('servidor MUDO: passado o tempo de silencio o cliente volta a sortear', () => {
-    // A escapatoria. Contra uma Edge fora do ar, a alternativa e a hunt travada
-    // pra sempre com a barra em 29/30 — pior que a divergencia.
-    //
-    // O relogio de silencio SO ANDA se ele estiver antes do gate do protetor em
-    // `garantirTransicaoDeQuotaFechada`. Ele estava depois, e este caso e o que
-    // trava essa ordem: com o `+= dt` no lugar antigo, o gate cortava o tick e
-    // o relogio ficava em zero pra sempre.
-    const world = esperandoOChefe(209)
-    const gameState = useGameStateStore.getState()
-    const ticks = Math.ceil((ESPERA_MAXIMA_PELA_AUTORIDADE + 1) / 0.1)
-    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
 
-    expect(world.protetorPendente, 'o cliente nunca voltou a sortear').not.toBeNull()
-    expect(world.enemies.some((e) => e.isProtetor)).toBe(true)
-  })
 })
