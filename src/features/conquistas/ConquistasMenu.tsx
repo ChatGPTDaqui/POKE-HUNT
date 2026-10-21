@@ -8,9 +8,10 @@ import { Medal, LockSimple, Star, Trophy } from '@phosphor-icons/react'
 import { CATALOGO_DE_CONQUISTAS } from '@/data/generated/conquistas.generated'
 import { NOME_DA_CATEGORIA, type CategoriaDeConquista, type ConquistaDaTela } from '@/data/conquistas'
 import { TAMANHO_DA_VITRINE, useConquistasStore } from '@/stores/conquistasStore'
-import { GameSelect, Meter, SegmentedTabs } from '@/components/game/controls'
+import { Meter, SegmentedTabs } from '@/components/game/controls'
+import { SeletorDeTitulo } from '@/features/titulos/SeletorDeTitulo'
 import { cn } from '@/lib/utils'
-import { COR_DO_NIVEL_DE_CONQUISTA, NOME_DO_NIVEL_DE_CONQUISTA, ordenarPorNivel } from './nivelDeConquista'
+import { COR_DO_NIVEL_DE_CONQUISTA, NOME_DO_NIVEL_DE_CONQUISTA } from './nivelDeConquista'
 import { resumoDaPlatina, textoDoProgresso } from './resumoDeConquistas'
 
 type Filtro = 'todas' | 'faltando' | 'desbloqueadas'
@@ -134,30 +135,14 @@ function Cabecalho({ resumo, platina, platinado }: {
   )
 }
 
-/** Niveis que dao titulo (o SQL de `definir_titulo` aceita os mesmos). */
-const NIVEIS_DE_TITULO = new Set(['ouro', 'impossivel', 'platina'])
-
-function TituloEVitrine({ desbloqueadas }: { desbloqueadas: Record<string, string> }) {
-  const titulo = useConquistasStore((s) => s.titulo)
+// Titulo: seletor unico (conquistas + Especialidades), com o visual da gema
+// (21/10/2026). Ver features/titulos/SeletorDeTitulo.
+function TituloEVitrine(_props: { desbloqueadas: Record<string, string> }) {
   const vitrine = useConquistasStore((s) => s.vitrine)
-  const escolherTitulo = useConquistasStore((s) => s.escolherTitulo)
-  const opcoes = ordenarPorNivel(
-    CATALOGO_DE_CONQUISTAS.filter((c) => NIVEIS_DE_TITULO.has(c.nivel) && desbloqueadas[c.id]),
-  )
   return (
     <div className="flex flex-col gap-[.35em] rounded-[.6em] border border-menu-line p-[.55em] text-[.8em]">
-      <label className="flex flex-wrap items-center gap-[.5em]">
-        <span className="text-menu-muted">Título no perfil</span>
-        <GameSelect
-          value={titulo ?? ''}
-          onChange={(e) => void escolherTitulo(e.target.value || null)}
-          disabled={opcoes.length === 0}
-          className="min-w-0 flex-1"
-        >
-          <option value="">{opcoes.length ? 'Sem título' : 'Desbloqueie uma Ouro para ter título'}</option>
-          {opcoes.map((c) => <option key={c.id} value={c.id}>{c.nome} ({NOME_DO_NIVEL_DE_CONQUISTA[c.nivel]})</option>)}
-        </GameSelect>
-      </label>
+      <span className="text-menu-muted">Título no perfil</span>
+      <SeletorDeTitulo />
       <span className="text-menu-muted">
         Vitrine: {vitrine.length}/{TAMANHO_DA_VITRINE} — toque na estrela de uma conquista desbloqueada para exibi-la no seu perfil.
       </span>

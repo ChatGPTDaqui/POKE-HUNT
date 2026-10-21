@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.37',
+    date: '2026-10-21',
+    title: 'Títulos com gemas',
+    highlights: [
+      'O título escolhido agora aparece acima do nome do treinador no campo de batalha, no seu perfil e no perfil público. No duelo PvP, o do adversário também.',
+      'Cada título tem uma gema que mostra a raridade: Âmbar, Jade, Safira, Rubi e Diamante, com brilho, reflexo, ornamentos e partículas nas mais raras.',
+      '54 títulos novos de Especialidade: Aprendiz no nível 3, Especialista no 7 e Mestre no 10, um para cada tipo (ex.: Mestre das Chamas).',
+      'Escolha o título tocando nele no seu perfil, ou na aba Conquistas.',
+    ],
+  },
+  {
     version: '8.36',
     date: '2026-10-21',
     title: 'Chefe em toda sala',

@@ -81,7 +81,7 @@ export function PerfilPublico() {
       onClose={fechar}
       title="Perfil do Treinador"
       header={
-        <div className="flex items-center gap-[.6em] border-b border-menu-line px-[.65em] pb-[.6em]">
+        <div className="flex items-center gap-[.6em] border-b border-menu-line px-[.65em] pt-[.5em] pb-[.6em]">
           <div
             className={cn(
               'flex h-[3.8em] w-[3.8em] shrink-0 items-center justify-center rounded-[.7em] bg-menu-card',
@@ -95,8 +95,9 @@ export function PerfilPublico() {
           <div className="flex min-w-0 flex-1 flex-col gap-[.25em]">
             {/* O nome vem do anúncio, então o título aparece antes da RPC
                 responder — a janela nunca abre sem dizer de quem ela é. */}
+            {/* Titulo ACIMA do nome (21/10/2026), como no campo. */}
+            <TituloDoTreinador id={conquistas?.titulo ?? null} className="truncate text-[.8em]" />
             <div className="truncate text-[1.1em] font-semibold">{data?.nome ?? alvo.nome}</div>
-            <TituloDoTreinador id={conquistas?.titulo ?? null} className="truncate text-[.75em] font-medium" />
             <div className="flex items-center gap-[.5em] text-[.8em] text-menu-ink">
               {data && <span>Nível {data.nivel}</span>}
               {data && data.rank > 0 && (
