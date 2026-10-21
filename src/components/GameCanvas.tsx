@@ -27,6 +27,9 @@ import { useRendererStore } from '@/stores/rendererStore'
 import { controller } from '@/engine/controller'
 import { buildHospitalWorld, syncActivePokeToGameState } from '@/engine/simulation'
 import { preloadHospital } from '@/data/preload'
+import { tituloPorId } from '@/data/titulos'
+import { useConquistasStore } from '@/stores/conquistasStore'
+import { useTitulosPublicosStore } from '@/stores/titulosPublicosStore'
 
 // Sincronia periodica de baixa frequencia: copia o HP/EXP ao vivo do POKE em
 // campo (worldStore, muda a cada tick de combate) de volta pra
@@ -181,6 +184,8 @@ export function GameCanvas() {
       const world = useWorldStore.getState()
       // Nome do treinador em cima do boneco que anda atras do POKE (08/10).
       renderer.treinador.nome = useGameStateStore.getState().trainer.name
+      // Titulo escolhido (21/10/2026), numa linha acima do nome.
+      renderer.treinador.titulo = tituloPorId(useConquistasStore.getState().titulo)
       const skins = useSkinDoTreinadorStore.getState()
       renderer.treinador.skin = skinDe(skins.porUsuario, useAuthStore.getState().user?.id)
       // Duelo de PvP (09/10): o treinador do rival, parado do lado dele. Bot
@@ -189,6 +194,9 @@ export function GameCanvas() {
         const { rivalId, nomeDoRival } = useArenaStore.getState()
         if (rivalId) skins.pedir(rivalId)
         renderer.treinadorRival.nome = nomeDoRival || world.arena.nomeDoRival
+        // Bot nao tem conta: sem rivalId, sem titulo.
+        if (rivalId) useTitulosPublicosStore.getState().pedir(rivalId)
+        renderer.treinadorRival.titulo = rivalId ? tituloPorId(useTitulosPublicosStore.getState().porUsuario[rivalId]) : null
         renderer.treinadorRival.skin = skinDe(skins.porUsuario, rivalId)
       }
       if (world.mapDef) renderer.renderMap(world.mapDef, world)

@@ -296,7 +296,7 @@ function AbaConquistas() {
               </span>
               <span className="flex min-w-0 flex-1 flex-col leading-tight">
                 <span className="journey-ranking-name truncate">{e.nome}</span>
-                <TituloDoTreinador id={e.titulo} className="truncate text-[.68em]" />
+                <TituloDoTreinador id={e.titulo} className="truncate text-[.68em]" animado={false} />
               </span>
               <span className="shrink-0 text-[.75em] text-menu-muted tabular-nums">{e.feitas}/{TOTAL_DA_PLATINA}</span>
               <span className="shrink-0 font-mono text-[.85em] font-bold tabular-nums">{e.pontos.toLocaleString('pt-BR')} pts</span>

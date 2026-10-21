@@ -10,7 +10,7 @@
 // recurso futuro (mesma decisao ja tomada em Tasks/Social/Mercado).
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Coins, Diamond, Trophy, Sword, Clock, BookOpen, Sparkle, TShirt, Star, SignOut } from '@phosphor-icons/react'
+import { Coins, Diamond, Trophy, Sword, Clock, BookOpen, Sparkle, TShirt, Star, SignOut, PencilSimple } from '@phosphor-icons/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -28,6 +28,9 @@ import { AvatarDoTreinador } from '@/components/shared/AvatarDoTreinador'
 import { useAvatarStore } from '@/stores/avatarStore'
 import { SeletorDeAvatar } from './SeletorDeAvatar'
 import { SeletorDeSkin } from './SeletorDeSkin'
+import { useConquistasStore } from '@/stores/conquistasStore'
+import { TituloComGema } from '@/features/titulos/TituloComGema'
+import { SeletorDeTitulo } from '@/features/titulos/SeletorDeTitulo'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
 const CAPTURAS_NO_LOG = 12
@@ -59,6 +62,8 @@ export function PerfilTreinador() {
   const meuId = useAuthStore((s) => s.user?.id ?? null)
   const meuAvatar = useAvatarStore((s) => (meuId ? s.porUsuario[meuId] ?? null : null))
   const [escolhendoFoto, setEscolhendoFoto] = useState(false)
+  const [escolhendoTitulo, setEscolhendoTitulo] = useState(false)
+  const meuTitulo = useConquistasStore((s) => s.titulo)
 
   const trainer = useGameStateStore((s) => s.trainer)
   const wallet = useGameStateStore((s) => s.wallet)
@@ -111,7 +116,7 @@ export function PerfilTreinador() {
       onClose={() => setAberto(false)}
       title="Perfil do Treinador"
       header={
-        <div className="flex items-center gap-[.6em] border-b border-menu-line px-[.65em] pb-[.6em]">
+        <div className="flex items-center gap-[.6em] border-b border-menu-line px-[.65em] pt-[.5em] pb-[.6em]">
           {/* PH-548: o retrato abre o seletor de foto. */}
           <button
             type="button"
@@ -123,6 +128,12 @@ export function PerfilTreinador() {
             <AvatarDoTreinador userId={meuId} tamanho={4.2} />
           </button>
           <div className="flex min-w-0 flex-1 flex-col gap-[.25em]">
+            {/* Titulo acima do nome (21/10/2026); tocar abre o seletor. */}
+            <button type="button" onClick={() => setEscolhendoTitulo((v) => !v)} aria-expanded={escolhendoTitulo}
+              className="flex min-w-0 items-center gap-[.35em] self-start text-[.8em] text-menu-muted hover:text-menu-ink">
+              {meuTitulo ? <TituloComGema id={meuTitulo} className="min-w-0" /> : <span>Escolher título</span>}
+              <PencilSimple aria-hidden className="shrink-0" />
+            </button>
             <div className="truncate text-[1.15em] font-semibold">{trainer.name}</div>
             <div className="flex items-center gap-[.5em] text-[.8em] text-menu-ink">
               <span>Nível {trainer.level}</span>
@@ -142,6 +153,7 @@ export function PerfilTreinador() {
       }
       subheader={(
         <div className="flex flex-col gap-[.5em] px-[.65em] py-[.5em]">
+          {escolhendoTitulo && <SeletorDeTitulo />}
           {escolhendoFoto && meuId && (
             <SeletorDeAvatar userId={meuId} atual={meuAvatar} aoFechar={() => setEscolhendoFoto(false)} />
           )}
