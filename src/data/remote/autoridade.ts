@@ -597,7 +597,21 @@ function tratarEncerramento(motivo: string | null | undefined): void {
   aoEncerrarSessao?.()
 }
 
-export async function liquidar(): Promise<void> {
+/**
+ * Flush em andamento (21/10/2026). Com o pedido repetido do chefe, dois flushes
+ * podiam voar juntos e a resposta do mais velho chegar DEPOIS — trazendo a sala
+ * e o chefe anteriores pra cima da sala nova. Um por vez: quem chega com um em
+ * voo espera o mesmo.
+ */
+let liquidacaoEmVoo: Promise<void> | null = null
+
+export function liquidar(): Promise<void> {
+  if (liquidacaoEmVoo) return liquidacaoEmVoo
+  liquidacaoEmVoo = liquidarAgora().finally(() => { liquidacaoEmVoo = null })
+  return liquidacaoEmVoo
+}
+
+async function liquidarAgora(): Promise<void> {
   if (!servidorAtivo()) return
   try {
     const r = await servidor.flush()

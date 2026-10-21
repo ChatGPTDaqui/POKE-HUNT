@@ -99,6 +99,23 @@ describe('o cliente nao sorteia o chefe sob autoridade (PH-475)', () => {
     expect(world.enemies.some((e) => e.isProtetor), 'o chefe voltou').toBe(false)
   })
 
+  it('resposta atrasada com o chefe da sala ANTERIOR nao o recria na sala nova', () => {
+    const gameState = useGameStateStore.getState()
+    const world = esperandoOChefe(207)
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const chefe = world.enemies.find((e) => e.isProtetor)!
+    const pendente = { ...world.protetorPendente! }
+    handleEnemyDefeated(world, chefe, gameState, { silent: true })
+    world.enemies = world.enemies.filter((e) => !e.isProtetor)
+    // A sala trocou (o que `aplicarTransicaoDeSala` zera).
+    world.sala = { ...world.sala!, indice: 1, abates: 0 }
+    world.protetorResolvido = false
+    world.protetorCaido = null
+
+    adotarProtetorDaAutoridade(world, { pendente, resolvido: false })
+    expect(world.enemies.some((e) => e.isProtetor), 'o chefe da sala anterior voltou').toBe(false)
+  })
+
   it('sem o campo na resposta (servidor mais velho) nada muda', () => {
     const world = esperandoOChefe(202)
     adotarProtetorDaAutoridade(world, undefined)

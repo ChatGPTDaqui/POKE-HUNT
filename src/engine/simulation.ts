@@ -677,6 +677,10 @@ function garantirProtetorDaSala(
     tipo,
   )
   const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada, world.sala)
+  // O chefe e o ULTIMO da sala (21/10/2026): comum que sobrou vivo (a contagem
+  // subiu pela reconciliacao com o servidor, que estava um abate a frente) sai
+  // de campo em vez de continuar sendo caçado junto do chefe.
+  world.enemies = world.enemies.filter((e) => isDead(e) || e.isProtetor)
   world.enemies.push(enemy)
   world.protetorPendente = pendente
   return true
@@ -743,6 +747,9 @@ export function adotarProtetorDaAutoridade(
   // O cliente ja derrotou ESTE chefe e a resposta do servidor ainda nao viu:
   // nao ressuscita. O servidor termina a luta dele e a sala troca no flush.
   if (world.protetorResolvido && world.protetorCaido?.uid === vindo.uid) return
+  // Resposta ATRASADA (flushes sobrepostos) trazendo o chefe de uma sala que o
+  // cliente ja passou: nao recria.
+  if (world.chefesDerrotados?.includes(vindo.uid)) return
 
   if (world.protetorPendente?.uid === vindo.uid) {
     // Mesmo chefe: so o HP anda. Pelo MENOR dos dois (21/10/2026): o cliente

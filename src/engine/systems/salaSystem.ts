@@ -1011,6 +1011,9 @@ export function resolverProtetorDaSala(
   // ja encontra `protetorPendente` nulo e nao pode apagar o que a primeira
   // guardou.
   world.protetorCaido = world.protetorPendente ?? world.protetorCaido
+  if (world.protetorCaido) {
+    world.chefesDerrotados = [...(world.chefesDerrotados ?? []).slice(-9), world.protetorCaido.uid]
+  }
   world.protetorPendente = null
   // PH-230: marcar ANTES do corte de autoridade abaixo. Sem esta linha, sob
   // `salaSobAutoridade` a sala nao avanca (por design) e nada registra que o
