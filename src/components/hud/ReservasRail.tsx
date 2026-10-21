@@ -345,7 +345,7 @@ function OvoNoTrilho({ ovo, compacto, tamanho }: { ovo: Ovo; compacto: boolean; 
   const rotulo = `Ovo de ${especie?.name ?? ovo.speciesId}: ${pronto ? 'pronto para chocar' : `faltam ${ovo.abatesRestantes} abates`}`
   return (
     <div className="min-w-0">
-      <button type="button" aria-label={rotulo} title={rotulo}
+      <button type="button" aria-label={rotulo}
         onClick={() => useUiStore.getState().openScreen('equipe')}
         className={cn(
           'journey-reserve relative flex min-h-[44px] w-full min-w-[44px] cursor-pointer select-none flex-col items-center justify-center gap-[.15em] rounded-[.5em] border p-[.2em] backdrop-blur-[2px]',
