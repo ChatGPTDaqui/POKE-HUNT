@@ -156490,6 +156490,7 @@ function armarTransicaoDeSala(world, mapId) {
 */
 function resolverProtetorDaSala(world, mapId, opts = {}) {
 	world.protetorCaido = world.protetorPendente ?? world.protetorCaido;
+	if (world.protetorCaido) world.chefesDerrotados = [...(world.chefesDerrotados ?? []).slice(-9), world.protetorCaido.uid];
 	world.protetorPendente = null;
 	world.protetorResolvido = true;
 	if (world.salaSobAutoridade) return;
@@ -157228,6 +157229,7 @@ function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
 	}
 	if (world.protetorPendente) return true;
 	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDoProtetor(mapDef.id, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), world.sala, tipo), tipo, protetorSalvo, player, entrada, world.sala);
+	world.enemies = world.enemies.filter((e) => isDead(e) || e.isProtetor);
 	world.enemies.push(enemy);
 	world.protetorPendente = pendente;
 	return true;
