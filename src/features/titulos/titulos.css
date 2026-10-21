@@ -1,0 +1,13 @@
+/* Titulos do treinador por gema (21/10/2026). Cores em src/data/titulos.ts. */
+.titulo-gema { display: inline-flex; align-items: center; gap: .3em; max-width: 100%; font-weight: 600; letter-spacing: .03em; white-space: nowrap; }
+.titulo-texto { overflow: hidden; text-overflow: ellipsis; }
+.titulo-degrade .titulo-texto { -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 250% 100%; }
+.titulo-moldura { padding: .05em .55em; border: 1px solid rgba(255,255,255,.45); border-radius: .35em; }
+.titulo-ornamento { font-size: .8em; }
+@media (prefers-reduced-motion: no-preference) {
+  .titulo-animado .titulo-texto { animation: titulo-varre 3s linear infinite; }
+  .titulo-rapido .titulo-texto { animation-duration: 2.2s; }
+  .titulo-pisca .titulo-ornamento { animation: titulo-pisca 1.4s ease-in-out infinite; }
+}
+@keyframes titulo-varre { from { background-position: 0 0; } to { background-position: 250% 0; } }
+@keyframes titulo-pisca { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }

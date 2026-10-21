@@ -19,6 +19,8 @@ import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
 import { FONTE } from './textoDeCombate'
 import { SKIN_PADRAO, folhaDaSkin, quadroDaSkin } from '@/data/skinsDoTreinador'
+import type { Titulo } from '@/data/titulos'
+import { ALTURA_DA_LINHA_DO_TITULO, desenharTituloNoCampo } from './tituloNoCampo'
 
 type Ponto = { x: number; y: number }
 
@@ -213,6 +215,8 @@ export function lugarNoDuelo(bola: Ponto, rival: Ponto): { pe: Ponto; olhando: P
 export class TreinadorEmCampo {
   /** Nome mostrado em cima do boneco; `null`/vazio nao desenha nada. Quem monta a cena atualiza. */
   nome: string | null = null
+  /** Titulo escolhido (21/10/2026), desenhado numa linha acima do nome. */
+  titulo: Titulo | null = null
   /** Skin (pasta em `assets/treinadores/campo/`); id desconhecido cai na padrao. Quem monta a cena atualiza. */
   skin: string = SKIN_PADRAO
 
@@ -497,6 +501,7 @@ export class TreinadorEmCampo {
     ctx.strokeText(nome, x, y)
     ctx.fillStyle = COR_DO_NOME
     ctx.fillText(nome, x, y)
+    if (this.titulo) desenharTituloNoCampo(ctx, this.titulo, x, y - ALTURA_DA_LINHA_DO_TITULO, performance.now())
     ctx.restore()
   }
 }

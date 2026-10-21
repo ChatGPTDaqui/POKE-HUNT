@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Medal } from '@phosphor-icons/react'
 import { CATALOGO_DE_CONQUISTAS } from '@/data/generated/conquistas.generated'
 import { conquistasPublicas } from '@/data/remote/conquistasRpc'
+import { TituloComGema } from '@/features/titulos/TituloComGema'
 import { COR_DO_NIVEL_DE_CONQUISTA, NOME_DO_NIVEL_DE_CONQUISTA } from './nivelDeConquista'
 import { nivelDaMoldura, resumoDaPlatina } from './resumoDeConquistas'
 
@@ -32,14 +33,9 @@ export function useCorDaMoldura(userId: string | null): string | undefined {
 }
 
 /** O titulo exibido, com a cor do nivel da conquista que o deu. */
-export function TituloDoTreinador({ id, className }: { id: string | null; className?: string }) {
-  const c = id ? POR_ID.get(id) : undefined
-  if (!c) return null
-  return (
-    <span className={className} style={{ color: COR_DO_NIVEL_DE_CONQUISTA[c.nivel] }}>
-      {c.nome}
-    </span>
-  )
+/** Titulo com o visual da gema (21/10/2026): conquista ou Especialidade. */
+export function TituloDoTreinador({ id, className, animado = true }: { id: string | null; className?: string; animado?: boolean }) {
+  return <TituloComGema id={id} className={className} animado={animado} />
 }
 
 export function ConquistasDoTreinador({ userId }: { userId: string }) {
