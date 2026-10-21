@@ -168,7 +168,7 @@ export const TUTORIAIS: Tutorial[] = [
         titulo: 'O Lord é a chave do estágio seguinte',
         corpo:
           'Vencer o Lord fecha o estágio e libera o próximo daquele bioma. Você pode voltar e repetir um ' +
-          'estágio já limpo quando quiser (estágio limpo não repõe chefe — a sala avança direto), e por padrão ' +
+          'estágio já limpo quando quiser (toda sala tem o chefe como 30º POKE, limpa ou não), e por padrão ' +
           'o jogo REPETE o estágio em que você está em vez de avançar sozinho: é um jogo idle, e sair do lugar ' +
           'que você escolheu tiraria você da espécie que foi caçar. O interruptor pra mudar isso está nas ' +
           'Automações.',

@@ -75,43 +75,33 @@ describe('estagioJaLimpo (a pergunta pura)', () => {
   })
 })
 
-describe('estagio JA LIMPO nao repoe protetor', () => {
-  it('o mundo nasce marcado, e a sala nao trava', () => {
+// 21/10/2026, pedido do dono (repetido varias vezes): estagio JA LIMPO tambem
+// tem Guardian/Lord como 30o POKE. A dispensa da PH-428 saiu.
+describe('estagio JA LIMPO tambem tem chefe', () => {
+  it('o mundo nasce marcado, e a sala continua travada pelo chefe', () => {
     const world = mundo(E1, { ...progressoPorBiomaDefault(), mata: 1 })
     expect(world.estagioJaLimpo).toBe(true)
-
     world.sala = { indice: SALAS_DO_E1 - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
-    // A FORMA da sala continua pedindo Lord — `protetorDaSala` e pura e nao
-    // sabe do progresso. Quem responde a verdade do jogador e o mundo.
     expect(protetorDaSala(world.sala, E1)).toBe('lord')
-    expect(salaTravadaPeloProtetor(world)).toBe(false)
+    expect(salaTravadaPeloProtetor(world)).toBe(true)
   })
 
-  it('nenhum protetor nasce, nem no tick nem na reconstrucao do mundo', () => {
+  it('o chefe nasce no tick e na reconstrucao do mundo', () => {
     const world = mundo(E1, { ...progressoPorBiomaDefault(), mata: 1 })
-    world.sala = { indice: SALAS_DO_E1 - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.sala = { indice: SALAS_DO_E1 - 1, chave: 'jungle', abates: ABATES_POR_SALA - 1, ciclos: 0 }
     world.enemies = []
     world.respawnTimer = 999
     stepWorld(world, 0.1, useGameStateStore.getState(), { silent: true })
-    expect(world.protetorPendente).toBeNull()
-    expect(world.enemies.some((e) => e.isProtetor)).toBe(false)
-
-    // E a reconstrucao por janela (o que o servidor faz a cada flush) tambem
-    // nao o traz de volta — era o caminho pelo qual o protetor reaparecia
-    // sozinho antes da PH-225.
-    const reconstruido = mundo(E1, { ...progressoPorBiomaDefault(), mata: 1 })
-    reconstruido.sala = { indice: SALAS_DO_E1 - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
-    stepWorld(reconstruido, 0.1, useGameStateStore.getState(), { silent: true })
-    expect(reconstruido.protetorPendente).toBeNull()
+    expect(world.protetorPendente).not.toBeNull()
+    expect(world.enemies.some((e) => e.isProtetor)).toBe(true)
   })
 
-  it('a sala avanca direto na quota, sem esperar protetor nenhum', () => {
+  it('o 29o abate nao avanca a sala: falta o chefe', () => {
     const world = mundo(E1, { ...progressoPorBiomaDefault(), mata: 1 })
-    world.sala = { indice: 0, chave: 'jungle', abates: ABATES_POR_SALA - 1, ciclos: 0 }
+    world.sala = { indice: 0, chave: 'jungle', abates: ABATES_POR_SALA - 2, ciclos: 0 }
     const evento = registrarAbate(world, E1)
-    // Num estagio NAO limpo este mesmo abate seria recusado ate o Guardian cair.
-    expect(evento.avancou).toBe(true)
-    expect(world.salaPendente?.indice).toBe(1)
+    expect(evento.avancou).toBe(false)
+    expect(salaTravadaPeloProtetor(world)).toBe(true)
   })
 
   it('estagio NAO limpo continua exigindo o protetor', () => {
@@ -165,15 +155,11 @@ describe('o toggle de fim de estagio', () => {
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
-    // Num estagio nao limpo, quem arma a transicao e o abate do protetor.
-    if (!world.estagioJaLimpo) {
-      stepWorld(world, 0.1, gameState, { silent: true })
-      const protetor = world.enemies.find((e) => e.isProtetor)
-      if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
-      world.enemies = world.enemies.filter((e) => !e.isProtetor)
-    } else {
-      registrarAbate(world, mapId)
-    }
+    // Quem arma a transicao e o abate do protetor (limpo ou nao, desde 21/10/2026).
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const protetor = world.enemies.find((e) => e.isProtetor)
+    if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
+    world.enemies = world.enemies.filter((e) => !e.isProtetor)
     // Zera a contagem regressiva pra a transicao ser aplicada neste tick.
     stepWorld(world, 5, gameState, { silent: true })
     return world
