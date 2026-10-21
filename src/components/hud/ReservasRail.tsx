@@ -27,9 +27,13 @@ import { rarityOf } from '@/data/rarity'
 import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
-import { useDeviceMode } from '@/stores/uiStore'
+import { useDeviceMode, useUiStore } from '@/stores/uiStore'
 import { PokeTooltipContent } from '@/components/shared/PokeTooltipContent'
 import { cn } from '@/lib/utils'
+import { ABATES_PARA_CHOCAR, type Ovo } from '@/data/ovos'
+import { RARITIES } from '@/data/rarity'
+import { OvoArte } from '@/features/ovos/OvoArte'
+import '@/features/ovos/ovos.css'
 
 /** Retratos representativos; o botão preserva no mínimo 44×44 px. */
 const TAMANHO_AMPLO = 1.8
@@ -55,6 +59,9 @@ interface Arrasto {
 export function ReservasRail() {
   const team = useGameStateStore((s) => s.team)
   const activeIndex = useGameStateStore((s) => s.activeIndex)
+  // Ovos na equipe (21/10/2026, pedido do dono): ocupam vaga, entao aparecem
+  // no trilho junto das reservas, com o progresso de chocar no lugar do HP.
+  const todosOsOvos = useGameStateStore((s) => s.ovos)
   const { compacto, coarse } = useDeviceMode()
   const showProfile = usePokeProfileStore((s) => s.showProfile)
 
@@ -99,7 +106,9 @@ export function ReservasRail() {
 
   // Equipe sem reserva nenhuma nao desenha nada — nem um bloco vazio ocupando
   // altura no topo da tela.
-  if (reservas.length === 0) return null
+  const ovosNaEquipe = todosOsOvos.filter((o) => o.naEquipe)
+  const colunas = reservas.length + ovosNaEquipe.length
+  if (colunas === 0) return null
 
   function aoDescer(e: React.PointerEvent<HTMLButtonElement>, indiceNaEquipe: number) {
     // So o botao principal arrasta; o direito e do menu de contexto do browser.
@@ -159,7 +168,7 @@ export function ReservasRail() {
       <div className="journey-reserves-row vidro pointer-events-auto grid gap-[2px]"
         role="group" aria-label="Companheiros da equipe"
         data-orientation={compacto ? 'vertical' : 'horizontal'}
-        style={{ gridTemplateColumns: compacto ? '44px' : `repeat(${reservas.length}, minmax(44px, 1fr))`, maxWidth: compacto ? '44px' : `min(${reservas.length * 3.4}em, 30vw)` }}>
+        style={{ gridTemplateColumns: compacto ? '44px' : `repeat(${colunas}, minmax(44px, 1fr))`, maxWidth: compacto ? '44px' : `min(${colunas * 3.4}em, 30vw)` }}>
         {reservas.map(({ poke, indice: indiceNaEquipe }) => {
           const especie = SPECIES[poke.speciesId]
           if (!especie) return null
@@ -317,7 +326,40 @@ export function ReservasRail() {
             </div>
           )
         })}
+        {ovosNaEquipe.map((ovo) => <OvoNoTrilho key={ovo.id} ovo={ovo} compacto={compacto} tamanho={tamanho} />)}
       </div>
+    </div>
+  )
+}
+
+/**
+ * Ovo na equipe, no trilho (21/10/2026). Barra = abates ja feitos pra chocar;
+ * pronto, o ovo balanca. Tocar abre a Equipe, onde fica o botao Chocar.
+ */
+function OvoNoTrilho({ ovo, compacto, tamanho }: { ovo: Ovo; compacto: boolean; tamanho: number }) {
+  const especie = SPECIES[ovo.speciesId]
+  const total = ABATES_PARA_CHOCAR[ovo.raridade]
+  const pronto = ovo.abatesRestantes <= 0
+  const pct = Math.max(0, Math.min(100, ((total - ovo.abatesRestantes) / total) * 100))
+  const lado = compacto ? `min(${tamanho}em, 32px)` : `${tamanho}em`
+  const rotulo = `Ovo de ${especie?.name ?? ovo.speciesId}: ${pronto ? 'pronto para chocar' : `faltam ${ovo.abatesRestantes} abates`}`
+  return (
+    <div className="min-w-0">
+      <button type="button" aria-label={rotulo} title={rotulo}
+        onClick={() => useUiStore.getState().openScreen('equipe')}
+        className={cn(
+          'journey-reserve relative flex min-h-[44px] w-full min-w-[44px] cursor-pointer select-none flex-col items-center justify-center gap-[.15em] rounded-[.5em] border p-[.2em] backdrop-blur-[2px]',
+          pronto ? 'ovo-pronto border-gold' : 'border-n800 hover:border-n600',
+        )}>
+        <span className="relative grid shrink-0 place-items-center rounded-[.4em] border-2"
+          style={{ width: lado, height: lado, borderColor: RARITIES[ovo.raridade].color, background: 'rgba(0,0,0,.25)' }}>
+          <OvoArte raridade={ovo.raridade} shiny={ovo.shiny} tamanho={tamanho * 0.8} />
+        </span>
+        {pronto && <span className="absolute right-0 top-0 rounded-[.25em] bg-gold px-[.25em] text-[.55em] font-bold text-[#1a1206]">!</span>}
+        <span className="mt-[.15em] block h-[.22em] w-[2.6em] max-w-full overflow-hidden rounded-full bg-n800">
+          <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: RARITIES[ovo.raridade].color }} />
+        </span>
+      </button>
     </div>
   )
 }
