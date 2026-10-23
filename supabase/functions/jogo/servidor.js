@@ -71692,6 +71692,27 @@ function estagioDoGolpe(statChanges) {
 	};
 }
 //#endregion
+//#region src/engine/feitos.ts
+function contarFeito(world, chave, n = 1) {
+	if (n <= 0) return;
+	const feitos = world.feitos ??= {};
+	feitos[chave] = (feitos[chave] ?? 0) + n;
+}
+function tiposDaEspecie(speciesId) {
+	const s = SPECIES[speciesId];
+	if (!s) return [];
+	return [...new Set([s.type, s.type2].filter(Boolean))];
+}
+function contarParaOsTipos(world, prefixo, speciesId) {
+	for (const t of tiposDaEspecie(speciesId)) contarFeito(world, `${prefixo}:${t}`);
+}
+/** O atacante tem vantagem de tipo sobre o defensor (algum tipo dele e super-efetivo)? */
+function temVantagemDeTipo(atacanteId, defensorId) {
+	const def = SPECIES[defensorId];
+	if (!def) return false;
+	return tiposDaEspecie(atacanteId).some((t) => getEffectiveness(t, def.type, def.type2 ?? null) > 1);
+}
+//#endregion
 //#region src/data/battleSpriteAnims.ts
 var BATTLE_SPRITE_ANIMS = {
 	"charmander": {
@@ -154115,6 +154136,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		if (acerto > 0 && isDead(target)) break;
 		const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null, world.especialidadeNiveis);
 		acertosVisuais++;
+		if (attacker.kind === "player" && (result.effectiveness === "super" || result.effectiveness === "effective")) contarFeito(world, `supereficaz_tipo:${ability.type}`);
+		else if (target.kind === "player" && result.effectiveness === "weak") contarParaOsTipos(world, "resistido_tipo", target.poke.speciesId);
 		if (result.isCrit) houveCritico = true;
 		let danoDoAcerto = result.amount;
 		if ((target.substitutoHp ?? 0) > 0 && protegidoPorSubstituto) {
@@ -157609,9 +157632,18 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			else dispararToastDeCaptura();
 		}
 	}
+	contarParaOsTipos(world, "abate_tipo", poke.speciesId);
+	if (enemy.isProtetor) contarParaOsTipos(world, "protetor_tipo", poke.speciesId);
+	if (temVantagemDeTipo(enemy.poke.speciesId, poke.speciesId)) contarParaOsTipos(world, "vantagem_tipo", poke.speciesId);
+	if (poke.hp > 0 && poke.hp < poke.stats.hp * .25) contarParaOsTipos(world, "critico_tipo", poke.speciesId);
 	if (enemy.isProtetor) {
 		const ultimaDoEstagio = quantidadeDeSalas(world.mapDef?.id ?? "") - 1;
-		if (world.sala?.indice === ultimaDoEstagio) avancarBiomaProgressSeForOProximo(world, gameState);
+		if (world.sala?.indice === ultimaDoEstagio) {
+			avancarBiomaProgressSeForOProximo(world, gameState);
+			const equipe = gameState.team.map((p) => tiposDaEspecie(p.speciesId));
+			const comuns = equipe.length ? equipe.reduce((acc, tipos) => acc.filter((t) => tipos.includes(t))) : [];
+			for (const t of comuns) contarFeito(world, `estagio_equipe:${t}`);
+		}
 		resolverProtetorDaSala(world, world.mapDef.id, { manualAdvance: opts.manualAdvance ?? false });
 	}
 	return {
@@ -158830,7 +158862,7 @@ var CONQUISTA_LANCE = "boss_lance";
 * cada especie em campo, tempo sob cada clima de ambiente e itens consumidos.
 * Abates nao entram: ja moram em `player_pokedex`, e o SQL le de la.
 */
-function contadoresDaJanela(resumo, especieAtiva, clima) {
+function contadoresDaJanela(resumo, especieAtiva, clima, feitos = {}) {
 	const contadores = {};
 	const somar = (chave, valor) => {
 		const inteiro = Math.floor(valor);
@@ -158845,6 +158877,11 @@ function contadoresDaJanela(resumo, especieAtiva, clima) {
 	if (sp) for (const tipo of new Set([sp.type, sp.type2].filter(Boolean))) somar(`ativo_tipo_seg:${tipo}`, resumo.simulatedSeconds);
 	if (clima) somar(`clima_seg:${clima}`, resumo.simulatedSeconds);
 	for (const [itemId, quantidade] of Object.entries(resumo.itemsConsumed)) somar(`item:${itemId}`, quantidade);
+	for (const captura of resumo.captures) {
+		const c = SPECIES[captura.speciesId];
+		if (c) for (const tipo of new Set([c.type, c.type2].filter(Boolean))) somar(`captura_tipo:${tipo}`, 1);
+	}
+	for (const [chave, n] of Object.entries(feitos)) somar(chave, n);
 	return contadores;
 }
 /**
@@ -159422,7 +159459,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		});
 		estado.ovos = descontarAbatesDosOvos(estado.ovos, resumo.kills);
 	}
-	const conquistasNovas = await registrarConquistasDaJanela(cfg, userId, contadoresDaJanela(resumo, world.player?.poke.speciesId ?? null, world.climaAmbiente?.tipo ?? null));
+	const conquistasNovas = await registrarConquistasDaJanela(cfg, userId, contadoresDaJanela(resumo, world.player?.poke.speciesId ?? null, world.climaAmbiente?.tipo ?? null, world.feitos ?? {}));
 	return {
 		segundosCreditados: segundos,
 		truncado,
