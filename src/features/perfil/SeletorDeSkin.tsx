@@ -81,6 +81,11 @@ function PreviaDaSkin({ id, trancada = false }: { id: string; trancada?: boolean
     // Silhueta: o mesmo quadro, so que preto e meio apagado — mostra QUEM e,
     // sem entregar a roupa.
     style={trancada ? { filter: 'brightness(0) opacity(.45)' } : undefined}>
-    <image href={folhaDaSkin(id, 'Idle')} width={frameWidth * 2} height={frameHeight * 8} />
+    {/* SVG interno = recorte de verdade. So o viewBox do externo nao corta:
+        com a caixa mais larga que o quadro, o "meet" sobra espaco dos lados e
+        o quadro vizinho da folha aparecia ali (skins "cortadas", 23/10). */}
+    <svg width={frameWidth} height={frameHeight} viewBox={`0 0 ${frameWidth} ${frameHeight}`} overflow="hidden">
+      <image href={folhaDaSkin(id, 'Idle')} width={frameWidth * 2} height={frameHeight * 8} />
+    </svg>
   </svg>
 }
