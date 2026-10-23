@@ -1,0 +1,57 @@
+/* Ginasios: abas de metal e comemoracao da insignia (23/10/2026). */
+
+.liga-aba {
+  border: 1px solid var(--liga-cor);
+  color: var(--liga-cor);
+  border-radius: 999px;
+  padding: .25em .7em;
+  white-space: nowrap;
+  font-size: .78em;
+}
+.liga-aba[aria-pressed='true'] {
+  background: var(--liga-fundo);
+  color: #160f08;
+  font-weight: 700;
+}
+
+.ginasio-painel {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tipo-cor) 22%, transparent), transparent 70%);
+  border: 1px solid color-mix(in srgb, var(--tipo-cor) 70%, transparent);
+}
+
+/* Comemoracao: brasao entra grande, gira uma vez e voa pro contador. */
+.insignia-comemoracao {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .4em;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(10, 12, 20, .78), rgba(10, 12, 20, .35) 70%);
+}
+.insignia-comemoracao svg {
+  width: 7.5em;
+  filter: drop-shadow(0 0 .6em var(--liga-cor));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .insignia-comemoracao { animation: insignia-fundo 1.6s ease-out forwards; }
+  .insignia-comemoracao svg { animation: insignia-gira 1.6s cubic-bezier(.2, .8, .3, 1) forwards; }
+  .insignia-comemoracao p { animation: insignia-fundo 1.6s ease-out forwards; }
+}
+
+@keyframes insignia-gira {
+  0% { transform: scale(.2) rotateY(0); opacity: 0; }
+  25% { transform: scale(1.15) rotateY(180deg); opacity: 1; }
+  45% { transform: scale(1) rotateY(360deg); }
+  75% { transform: scale(1) rotateY(360deg); opacity: 1; }
+  100% { transform: translate(40vw, -40vh) scale(.15) rotateY(360deg); opacity: 0; }
+}
+
+@keyframes insignia-fundo {
+  0%, 75% { opacity: 1; }
+  100% { opacity: 0; }
+}

@@ -3,10 +3,10 @@
 // antes de pagar), taxa, mandato, melhor tempo de destronar e os dois duelos.
 // Desafiar cobra a taxa e congela as equipes; o servidor roda a luta e o
 // jogador assiste a mesma luta ao vivo na arena.
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Crown, Medal, Sword, Users } from '@phosphor-icons/react'
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { Check, Crown, Medal, Sword, Users } from '@phosphor-icons/react'
 import {
-  DESAFIOS_POR_DIA, FAIXAS_DE_GINASIO, REPASSE_DO_LIDER, equipeDoGinasio, motivoDeEquipeInvalida,
+  DESAFIOS_POR_DIA, FAIXAS_DE_GINASIO, REPASSE_DO_LIDER, equipeDoGinasio, motivoDeEquipeInvalida, partesDoGinasio,
   type TipoDeDuelo,
 } from '@/data/ginasios'
 import type { ElementType } from '@/data/generated/types'
@@ -24,7 +24,9 @@ import {
   type EstadoDosGinasios, type GinasioNoEstado,
 } from '@/data/remote/ginasiosRpc'
 import { entrarNaArena } from '@/features/arena/arena'
-import { GameButton, SegmentedTabs } from '@/components/game/controls'
+import { GameButton } from '@/components/game/controls'
+import { create } from 'zustand'
+import { BrasaoDeGinasio, METAL_DA_LIGA, nomeDoGinasio } from './BrasaoDeGinasio'
 import { cn } from '@/lib/utils'
 
 const fmt = new Intl.NumberFormat('pt-BR')
@@ -36,6 +38,10 @@ function tempoRestante(iso: string): string {
   const h = Math.floor(ms / 3_600_000)
   return h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : `${h}h ${Math.floor((ms % 3_600_000) / 60_000)}min`
 }
+/** Insignia nova: a tela de Ginasios reabre depois da arena e comemora. */
+const useComemoracao = create<{ id: string | null }>(() => ({ id: null }))
+export const comemorarInsignia = (id: string) => useComemoracao.setState({ id })
+
 const segundosDeLuta = (ticks: number | null) => (ticks == null ? null : Math.round(ticks / 60))
 
 export function GinasiosMenu() {
@@ -65,33 +71,54 @@ export function GinasiosMenu() {
   const daFaixa = useMemo(() => (estado?.ginasios ?? []).filter((g) => g.faixa === faixa), [estado, faixa])
   const atual = estado?.ginasios.find((g) => g.id === selecionado) ?? null
   const insignias = useMemo(() => new Set(estado?.insignias ?? []), [estado])
+  const comemorando = useComemoracao((s) => s.id)
+  useEffect(() => {
+    if (!comemorando) return
+    const t = setTimeout(() => useComemoracao.setState({ id: null }), 1700)
+    return () => clearTimeout(t)
+  }, [comemorando])
 
   if (erro && !estado) return <p className="text-menu-muted">Não foi possível abrir os ginásios: {erro}</p>
   if (!estado) return <p className="text-menu-muted">Carregando ginásios…</p>
 
   return (
-    <div className="flex flex-col gap-[.6em]">
+    <div className="relative flex flex-col gap-[.6em]">
       <div className="flex flex-wrap items-center justify-between gap-[.4em] text-[.8em] text-menu-muted">
         <span>Desafios hoje: <b className="text-menu-ink">{estado.desafiosHoje}/{DESAFIOS_POR_DIA}</b></span>
-        <span><Medal className="inline" aria-hidden /> Insígnias: <b className="text-menu-ink">{estado.insignias.length}/90</b></span>
+        <span style={{ color: METAL_DA_LIGA[faixa].cor }}><Medal className="inline" weight="fill" aria-hidden /> Insígnias: <b>{estado.insignias.length}/90</b></span>
       </div>
-      <SegmentedTabs value={String(faixa)} onChange={(v) => { setFaixa(Number(v)); setSelecionado(null) }}
-        options={FAIXAS_DE_GINASIO.map((f) => ({ value: String(f.nivel), label: `${f.liga} · ${f.nivel}` }))} />
+      <div className="flex gap-[.35em] overflow-x-auto [scrollbar-width:none]" role="group" aria-label="Ligas">
+        {FAIXAS_DE_GINASIO.map((f) => {
+          const metal = METAL_DA_LIGA[f.nivel]
+          return (
+            <button key={f.nivel} type="button" className="liga-aba" aria-pressed={faixa === f.nivel}
+              style={{ '--liga-cor': metal.cor, '--liga-fundo': `linear-gradient(135deg, ${metal.degrade.join(', ')})` } as CSSProperties}
+              onClick={() => { setFaixa(f.nivel); setSelecionado(null) }}>
+              {f.liga} · {f.nivel}
+            </button>
+          )
+        })}
+      </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(6.2em,1fr))] gap-[.35em]">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(4.6em,1fr))] gap-[.3em]">
         {daFaixa.map((g) => {
-          const cor = colorForType(g.tipo as ElementType)
+          const tipoG = g.tipo as ElementType
           const meu = g.liderId != null && g.liderId === meuId
+          const tem = insignias.has(g.id)
+          const rotulo = meu ? 'Você lidera' : g.liderId ? g.liderNome : tipoG
           return (
             <button key={g.id} type="button" onClick={() => setSelecionado(g.id)} aria-pressed={selecionado === g.id}
-              className={cn('relative flex flex-col items-center gap-[.15em] rounded-[.55em] border p-[.35em] text-[.75em]',
-                selecionado === g.id ? 'border-menu-brand bg-menu-wash' : 'border-menu-line hover:bg-menu-wash')}>
-              <span className="flex h-[2.2em] w-[2.2em] items-center justify-center rounded-full text-[.8em] font-bold text-[#0b0e18]" style={{ background: cor }}>
-                {g.tipo.slice(0, 3)}
-              </span>
-              <span className="w-full truncate text-center">{g.liderNome}</span>
-              {insignias.has(g.id) && <Medal className="absolute top-[.2em] right-[.25em] text-gold" weight="fill" aria-label="Insígnia conquistada" />}
-              {meu && <Crown className="absolute top-[.2em] left-[.25em] text-gold" weight="fill" aria-label="Você é o líder" />}
+              aria-label={`${nomeDoGinasio(tipoG)}, líder ${g.liderNome}${tem ? ', insígnia conquistada' : ''}${meu ? ', você é o líder' : ''}`}
+              className={cn('relative flex flex-col items-center gap-[.1em] rounded-[.55em] border p-[.25em] text-[.68em]',
+                selecionado === g.id ? 'border-menu-brand bg-menu-wash' : 'border-transparent hover:bg-menu-wash')}>
+              <BrasaoDeGinasio tipo={tipoG} faixa={g.faixa} aceso={tem || meu} className="w-[3.4em]" />
+              <span className={cn('w-full truncate text-center', meu ? 'text-gold' : tem ? 'text-menu-ink' : 'text-menu-muted')}>{rotulo}</span>
+              {tem && (
+                <span className="absolute top-[.15em] right-[.15em] flex h-[1.3em] w-[1.3em] items-center justify-center rounded-full bg-[#3fae5a] text-white">
+                  <Check weight="bold" aria-hidden />
+                </span>
+              )}
+              {meu && <Crown className="absolute top-[.1em] left-[.2em] text-gold" weight="fill" aria-hidden />}
             </button>
           )
         })}
@@ -100,6 +127,7 @@ export function GinasiosMenu() {
       {atual
         ? <DetalheDoGinasio g={atual} meuId={meuId} desafiosHoje={estado.desafiosHoje} temInsignia={insignias.has(atual.id)} aoMudar={recarregar} />
         : <p className="text-[.8em] text-menu-muted">Escolha um ginásio para ver o líder, a equipe e desafiar.</p>}
+      {comemorando && <Comemoracao id={comemorando} />}
     </div>
   )
 }
@@ -146,6 +174,7 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
               : `Vitória em ${segundosDeLuta(r.ticks)}s! Você está na disputa do próximo mandato.`)
             : r.resultado === 'derrota' ? 'Derrota. A taxa não volta.' : 'Empate.'
           toast(msg, r.resultado === 'vitoria' ? 'success' : 'info')
+          if (r.resultado === 'vitoria' && duelo === 'insignia' && r.insigniaNova) comemorarInsignia(g.id)
           useUiStore.getState().openScreen('ginasios')
         },
       })
@@ -182,11 +211,15 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
   const bloqDestronar = bloqueio(motivoDestronar)
 
   return (
-    <section className="flex flex-col gap-[.5em] rounded-[.7em] border border-menu-line p-[.6em]" aria-label={`Ginásio ${tipo} ${g.faixa}`}>
-      <div className="flex flex-wrap items-center gap-[.5em]">
-        <span className="rounded-full px-[.6em] py-[.1em] text-[.8em] font-bold text-[#0b0e18]" style={{ background: colorForType(tipo) }}>{tipo}</span>
-        <b>{faixa.liga} · nível {g.faixa}</b>
-        {temInsignia && <span className="flex items-center gap-[.2em] text-[.8em] text-gold"><Medal weight="fill" aria-hidden /> Insígnia sua</span>}
+    <section className="ginasio-painel flex flex-col gap-[.5em] rounded-[.7em] p-[.6em]" aria-label={`${nomeDoGinasio(tipo)} ${g.faixa}`}
+      style={{ '--tipo-cor': colorForType(tipo) } as CSSProperties}>
+      <div className="flex items-center gap-[.6em]">
+        <BrasaoDeGinasio tipo={tipo} faixa={g.faixa} className="w-[4.2em] shrink-0" />
+        <div className="flex min-w-0 flex-col">
+          <b className="text-[1.05em]">{nomeDoGinasio(tipo)}</b>
+          <span className="text-[.8em]" style={{ color: METAL_DA_LIGA[g.faixa].cor }}>{faixa.liga} · nível {g.faixa}</span>
+          {temInsignia && <span className="flex items-center gap-[.2em] text-[.8em] text-gold"><Medal weight="fill" aria-hidden /> Insígnia sua</span>}
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-[.3em] text-[.8em]">
         <span className="text-menu-muted"><Users className="inline" aria-hidden /> Líder</span>
@@ -230,5 +263,19 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
         )}
       </div>
     </section>
+  )
+}
+
+function Comemoracao({ id }: { id: string }) {
+  const partes = partesDoGinasio(id)
+  if (!partes) return null
+  const metal = METAL_DA_LIGA[partes.faixa.nivel]
+  return (
+    <div className="insignia-comemoracao" role="status" style={{ '--liga-cor': metal.cor } as CSSProperties}>
+      <BrasaoDeGinasio tipo={partes.tipo} faixa={partes.faixa.nivel} />
+      <p className="text-center font-bold" style={{ color: metal.cor }}>
+        Insígnia conquistada<br /><span className="text-[.8em]">{nomeDoGinasio(partes.tipo)} · {partes.faixa.liga}</span>
+      </p>
+    </div>
   )
 }
