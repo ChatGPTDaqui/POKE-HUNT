@@ -73,7 +73,7 @@ returns void
 language sql
 security definer
 set search_path = dev, public
-as $
+as $$
   -- Quem assume: POKEs da defesa nova ficam trancados (cadeado da mochila).
   update dev.pokemon_instances pi set locked = true
   from dev.ginasio_lider l, jsonb_array_elements(l.candidato_equipe) e

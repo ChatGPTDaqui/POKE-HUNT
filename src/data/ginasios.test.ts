@@ -70,6 +70,14 @@ describe('ginasios: catalogo e SQL', () => {
     expect(readFileSync(DEFESA_DEV, 'utf8')).toBe(defesaDev())
   })
 
+  // `$$` vira `$` num String.replace de JS (ja derrubou duas migrations).
+  it('todo corpo de funcao abre e fecha com $$', () => {
+    for (const sql of [SQL, readFileSync(DEFESA, 'utf8')]) {
+      expect((sql.match(/^as \$\$$/gm) ?? []).length).toBe((sql.match(/^(end;?\n)?\$\$;$/gm) ?? []).length)
+      expect(sql).not.toMatch(/^as \$$/m)
+    }
+  })
+
   it('90 ginasios, 18 tipos x 5 faixas', () => {
     expect(TIPOS_DE_GINASIO).toHaveLength(18)
     expect(FAIXAS_DE_GINASIO.map((f) => f.nivel)).toEqual([100, 200, 300, 400, 500])
