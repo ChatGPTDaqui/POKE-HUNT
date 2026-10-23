@@ -103,7 +103,7 @@ describe('navegação Jornada', () => {
     useUiStore.setState({ moreOpen: true })
     render(<div id="camada-hud"><SheetMais /></div>)
     const social = screen.getByRole('region', { name: 'Encontrar outros treinadores' })
-    expect(within(social).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Troca', 'Ranking', 'Ginásios'])
+    expect(within(social).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Troca', 'Ranking'])
     const tools = screen.getByRole('region', { name: 'Consultar e ajustar' })
     expect(within(tools).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Wiki', 'Tutoriais', 'Ajustes'])
     // Destino novo na grade sem grupo aqui some do celular (Ginasios, 23/10/2026).

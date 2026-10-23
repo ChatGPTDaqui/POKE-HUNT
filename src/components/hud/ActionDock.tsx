@@ -70,7 +70,6 @@ const SECUNDARIOS: DestinoDeTela[] = [
   { screen: 'ranking', label: 'Ranking', Icon: Trophy },
   { screen: 'conquistas', label: 'Conquistas', Icon: Medal },
   { screen: 'pvp', label: 'PvP', Icon: Sword },
-  { screen: 'ginasios', label: 'Ginásios', Icon: Medal },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
   { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
   { screen: 'tasks', label: 'Contratos', Icon: CheckSquare },
@@ -379,7 +378,7 @@ export function SheetMais() {
       <div className="journey-guide">
         <div className="journey-guide-intro"><EquipmentArt kind="guide" /><p>Seu guia de jornada<span>Encontre treinadores e consulte suas ferramentas.</span></p></div>
         {[
-          { title: 'Encontrar outros treinadores', screens: ['social', 'troca', 'ranking', 'ginasios'] },
+          { title: 'Encontrar outros treinadores', screens: ['social', 'troca', 'ranking'] },
           { title: 'Consultar e ajustar', screens: ['wiki', 'tutoriais', 'config'] },
         ].map((group) => <section key={group.title} aria-label={group.title}>
         <h3 className="journey-guide-heading">{group.title}</h3>
@@ -415,7 +414,6 @@ export function SheetMais() {
 
 const DESCRICOES_DO_GUIA: Partial<Record<ScreenName, string>> = {
   social: 'Amigos e mensagens', troca: 'Troque com outros treinadores', ranking: 'Acompanhe suas conquistas',
-  ginasios: 'Insígnias e liderança',
   bestiario: 'Encontros e descobertas', wiki: 'Conhecimento da jornada', tutoriais: 'Aprenda a jogar', config: 'Preferências do jogo',
 }
 
