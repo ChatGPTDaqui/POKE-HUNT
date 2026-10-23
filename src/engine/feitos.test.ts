@@ -7,7 +7,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { buildMapWorld, stepWorld, LIVE_SIM_STEP_SECONDS } from './simulation'
 import { contarParaOsTipos, temVantagemDeTipo } from './feitos'
 
-const PREFIXOS = ['abate_tipo', 'supereficaz_tipo', 'protetor_tipo', 'resistido_tipo', 'critico_tipo',
+const PREFIXOS = ['insignia', 'abate_tipo', 'supereficaz_tipo', 'protetor_tipo', 'resistido_tipo', 'critico_tipo',
   'vantagem_tipo', 'captura_tipo', 'evolucao_tipo', 'estagio_equipe']
 
 describe('feitos contados pela simulacao', () => {
@@ -49,6 +49,12 @@ describe('molde das missoes de Especialidade', () => {
           expect(r.regra.alvo).toBeGreaterThan(0)
         }
       }
+    }
+  })
+
+  it('nivel 10 das duas trilhas pede a insignia do tipo', () => {
+    for (const m of MISSOES_DE_ESPECIALIDADE.filter((x) => x.nivel === 10)) {
+      expect(m.requisitos.map((r) => r.regra)).toContainEqual({ t: 'contador', chave: `insignia:${m.tipo}`, alvo: 1 })
     }
   })
 

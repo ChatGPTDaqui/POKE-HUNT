@@ -22,6 +22,7 @@ import { WikiMenu } from '@/features/wiki/WikiMenu'
 import { SettingsScreen } from '@/features/settings/SettingsScreen'
 import { BestiarioMenu } from '@/features/bestiario/BestiarioMenu'
 import { ContratosMenu } from '@/features/contratos/ContratosMenu'
+import { GinasiosMenu } from '@/features/ginasios/GinasiosMenu'
 import { SocialMenu } from '@/features/social/SocialMenu'
 import { CalculadoraMenu } from '@/features/calc/CalculadoraMenu'
 import { MercadoMenu } from '@/features/mercado/MercadoMenu'
@@ -52,6 +53,7 @@ const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   troca: TrocaMenu,
   pvp: PvpMenu,
   conquistas: ConquistasMenu,
+  ginasios: GinasiosMenu,
   missoes: MissoesMenu,
 }
 
@@ -74,6 +76,7 @@ const TITLES: Record<ScreenName, string> = {
   troca: 'Troca',
   pvp: 'PvP',
   conquistas: 'Conquistas',
+  ginasios: 'Ginásios',
   missoes: 'Missões',
 }
 
@@ -85,7 +88,7 @@ const DEFAULT_WIDTH = 36
 const ART: Partial<Record<ScreenName, ArtKind>> = {
   equipe: 'team', mochila: 'bag', loja: 'shop', hunts: 'map', pokedex: 'dex', bestiario: 'dex',
   especialidades: 'dex', tasks: 'guide', wiki: 'guide', tutoriais: 'guide', calc: 'guide',
-  social: 'guide', troca: 'team', mercado: 'market', ranking: 'team', pvp: 'team', config: 'guide', conquistas: 'guide', missoes: 'guide',
+  social: 'guide', troca: 'team', mercado: 'market', ranking: 'team', pvp: 'team', ginasios: 'team', config: 'guide', conquistas: 'guide', missoes: 'guide',
 }
 const WIDTHS: Partial<Record<ScreenName, number>> = {
   mochila: 48,
@@ -102,6 +105,7 @@ const WIDTHS: Partial<Record<ScreenName, number>> = {
   // Grade de 18 tipos + painel de detalhe lado a lado, mesmo raciocinio do Bestiario.
   especialidades: 56,
   conquistas: 44,
+  ginasios: 46,
   // Abriga Especialidades e Bestiario (grade + detalhe), os mais largos das abas.
   missoes: 56,
 }

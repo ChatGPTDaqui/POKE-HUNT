@@ -70,6 +70,7 @@ const SECUNDARIOS: DestinoDeTela[] = [
   { screen: 'ranking', label: 'Ranking', Icon: Trophy },
   { screen: 'conquistas', label: 'Conquistas', Icon: Medal },
   { screen: 'pvp', label: 'PvP', Icon: Sword },
+  { screen: 'ginasios', label: 'Ginásios', Icon: Medal },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
   { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
   { screen: 'tasks', label: 'Contratos', Icon: CheckSquare },

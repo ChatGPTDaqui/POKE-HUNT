@@ -266,6 +266,13 @@ export interface RespostaFlush extends RespostaComEstado {
  */
 // PH-540: o servidor devolve so o veredito e a semente; o cliente monta a
 // mesma arena (engine/arena.ts) com os snapshots da sessao e luta ao vivo.
+export interface RespostaResolverGinasio {
+  resultado: 'vitoria' | 'derrota' | 'empate'
+  ticks: number | null
+  insigniaNova?: boolean
+  jaResolvido?: boolean
+}
+
 export interface RespostaResolverPvp {
   jaResolvido?: boolean
   vencedorId?: string | null
@@ -663,6 +670,12 @@ export const servidor = {
   // já disparou primeiro).
   resolverPvp: (sessaoId: string) => pedir<RespostaResolverPvp>('/pvp/resolver', {
     method: 'POST', body: JSON.stringify({ sessaoId }),
+  }),
+
+  // Ginasios (23/10/2026): o servidor roda a luta do desafio e aplica o
+  // resultado; o cliente assiste a mesma luta com a semente do desafio.
+  resolverGinasio: (desafioId: string) => pedir<RespostaResolverGinasio>('/ginasio/resolver', {
+    method: 'POST', body: JSON.stringify({ desafioId }),
   }),
 
 }

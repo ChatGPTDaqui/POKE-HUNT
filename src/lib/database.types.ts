@@ -440,6 +440,181 @@ export type Database = {
           },
         ]
       }
+      ginasio: {
+        Row: {
+          faixa: number
+          id: string
+          taxa: number
+          tipo: string
+        }
+        Insert: {
+          faixa: number
+          id: string
+          taxa: number
+          tipo: string
+        }
+        Update: {
+          faixa?: number
+          id?: string
+          taxa?: number
+          tipo?: string
+        }
+        Relationships: []
+      }
+      ginasio_desafio: {
+        Row: {
+          criado_em: string
+          desafiante_nome: string
+          dia: string
+          equipe_desafiante: Json
+          equipe_lider: Json
+          estado: string
+          ginasio_id: string
+          id: string
+          lider_id: string | null
+          lider_nome: string
+          resolvido_em: string | null
+          taxa: number
+          ticks: number | null
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string
+          desafiante_nome: string
+          dia: string
+          equipe_desafiante: Json
+          equipe_lider: Json
+          estado?: string
+          ginasio_id: string
+          id?: string
+          lider_id?: string | null
+          lider_nome: string
+          resolvido_em?: string | null
+          taxa: number
+          ticks?: number | null
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          criado_em?: string
+          desafiante_nome?: string
+          dia?: string
+          equipe_desafiante?: Json
+          equipe_lider?: Json
+          estado?: string
+          ginasio_id?: string
+          id?: string
+          lider_id?: string | null
+          lider_nome?: string
+          resolvido_em?: string | null
+          taxa?: number
+          ticks?: number | null
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ginasio_desafio_ginasio_id_fkey"
+            columns: ["ginasio_id"]
+            isOneToOne: false
+            referencedRelation: "ginasio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ginasio_desafio_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ginasio_desafio_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      ginasio_lider: {
+        Row: {
+          candidato_em: string | null
+          candidato_equipe: Json | null
+          candidato_id: string | null
+          candidato_nome: string | null
+          candidato_ticks: number | null
+          equipe: Json
+          ganhos_mandato: number
+          ginasio_id: string
+          lider_id: string | null
+          lider_nome: string
+          mandato_ate: string
+        }
+        Insert: {
+          candidato_em?: string | null
+          candidato_equipe?: Json | null
+          candidato_id?: string | null
+          candidato_nome?: string | null
+          candidato_ticks?: number | null
+          equipe: Json
+          ganhos_mandato?: number
+          ginasio_id: string
+          lider_id?: string | null
+          lider_nome: string
+          mandato_ate: string
+        }
+        Update: {
+          candidato_em?: string | null
+          candidato_equipe?: Json | null
+          candidato_id?: string | null
+          candidato_nome?: string | null
+          candidato_ticks?: number | null
+          equipe?: Json
+          ganhos_mandato?: number
+          ginasio_id?: string
+          lider_id?: string | null
+          lider_nome?: string
+          mandato_ate?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ginasio_lider_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ginasio_lider_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ginasio_lider_ginasio_id_fkey"
+            columns: ["ginasio_id"]
+            isOneToOne: true
+            referencedRelation: "ginasio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ginasio_lider_lider_id_fkey"
+            columns: ["lider_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ginasio_lider_lider_id_fkey"
+            columns: ["lider_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       hall_da_fama: {
         Row: {
           conquista: string
@@ -1362,6 +1537,46 @@ export type Database = {
           },
           {
             foreignKeyName: "player_especialidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_insignias: {
+        Row: {
+          ginasio_id: string
+          obtida_em: string
+          user_id: string
+        }
+        Insert: {
+          ginasio_id: string
+          obtida_em?: string
+          user_id: string
+        }
+        Update: {
+          ginasio_id?: string
+          obtida_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_insignias_ginasio_id_fkey"
+            columns: ["ginasio_id"]
+            isOneToOne: false
+            referencedRelation: "ginasio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_insignias_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_insignias_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "treinadores_publico"
@@ -2921,6 +3136,10 @@ export type Database = {
       }
     }
     Functions: {
+      _aplicar_resultado_ginasio: {
+        Args: { p_desafio: string; p_resultado: string; p_ticks: number }
+        Returns: Json
+      }
       _calcular_stat: {
         Args: {
           p_base: number
@@ -2986,6 +3205,7 @@ export type Database = {
       }
       _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
       _dia_do_diario: { Args: never; Returns: string }
+      _equipe_de_ginasio: { Args: { p_user: string }; Returns: Json }
       _executar_troca: {
         Args: { p_sessao_id: string }
         Returns: {
@@ -3032,11 +3252,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      _motivo_de_equipe_invalida: {
+        Args: { p_equipe: Json; p_tipo: string }
+        Returns: string
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
       }
       _mural_json: { Args: { p_dia: string; p_user: string }; Returns: Json }
+      _rotacionar_mandatos: { Args: never; Returns: undefined }
       _sortear_contrato: {
         Args: { p_dia: string; p_slot: number; p_user: string }
         Returns: undefined
@@ -3400,6 +3625,7 @@ export type Database = {
       }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
       definir_avatar: { Args: { p_avatar: string }; Returns: Json }
+      definir_equipe_do_ginasio: { Args: { p_ginasio: string }; Returns: Json }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
         Returns: Json
@@ -3408,6 +3634,10 @@ export type Database = {
       definir_skin_treinador: { Args: { p_skin: string }; Returns: Json }
       definir_titulo: { Args: { p_conquista: string }; Returns: Json }
       definir_vitrine: { Args: { p_conquistas: string[] }; Returns: Json }
+      desafiar_ginasio: {
+        Args: { p_ginasio: string; p_tipo: string }
+        Returns: Json
+      }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       desconfirmar_troca: {
@@ -3509,6 +3739,7 @@ export type Database = {
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       expirar_trocas: { Args: never; Returns: number }
       fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
+      ginasios_estado: { Args: never; Returns: Json }
       gravar_flush_de_sessao: {
         Args: {
           p_ciclos: number
@@ -4408,6 +4639,181 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ranking_pokemon"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      ginasio: {
+        Row: {
+          faixa: number
+          id: string
+          taxa: number
+          tipo: string
+        }
+        Insert: {
+          faixa: number
+          id: string
+          taxa: number
+          tipo: string
+        }
+        Update: {
+          faixa?: number
+          id?: string
+          taxa?: number
+          tipo?: string
+        }
+        Relationships: []
+      }
+      ginasio_desafio: {
+        Row: {
+          criado_em: string
+          desafiante_nome: string
+          dia: string
+          equipe_desafiante: Json
+          equipe_lider: Json
+          estado: string
+          ginasio_id: string
+          id: string
+          lider_id: string | null
+          lider_nome: string
+          resolvido_em: string | null
+          taxa: number
+          ticks: number | null
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string
+          desafiante_nome: string
+          dia: string
+          equipe_desafiante: Json
+          equipe_lider: Json
+          estado?: string
+          ginasio_id: string
+          id?: string
+          lider_id?: string | null
+          lider_nome: string
+          resolvido_em?: string | null
+          taxa: number
+          ticks?: number | null
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          criado_em?: string
+          desafiante_nome?: string
+          dia?: string
+          equipe_desafiante?: Json
+          equipe_lider?: Json
+          estado?: string
+          ginasio_id?: string
+          id?: string
+          lider_id?: string | null
+          lider_nome?: string
+          resolvido_em?: string | null
+          taxa?: number
+          ticks?: number | null
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ginasio_desafio_ginasio_id_fkey"
+            columns: ["ginasio_id"]
+            isOneToOne: false
+            referencedRelation: "ginasio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ginasio_desafio_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ginasio_desafio_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      ginasio_lider: {
+        Row: {
+          candidato_em: string | null
+          candidato_equipe: Json | null
+          candidato_id: string | null
+          candidato_nome: string | null
+          candidato_ticks: number | null
+          equipe: Json
+          ganhos_mandato: number
+          ginasio_id: string
+          lider_id: string | null
+          lider_nome: string
+          mandato_ate: string
+        }
+        Insert: {
+          candidato_em?: string | null
+          candidato_equipe?: Json | null
+          candidato_id?: string | null
+          candidato_nome?: string | null
+          candidato_ticks?: number | null
+          equipe: Json
+          ganhos_mandato?: number
+          ginasio_id: string
+          lider_id?: string | null
+          lider_nome: string
+          mandato_ate: string
+        }
+        Update: {
+          candidato_em?: string | null
+          candidato_equipe?: Json | null
+          candidato_id?: string | null
+          candidato_nome?: string | null
+          candidato_ticks?: number | null
+          equipe?: Json
+          ganhos_mandato?: number
+          ginasio_id?: string
+          lider_id?: string | null
+          lider_nome?: string
+          mandato_ate?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ginasio_lider_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ginasio_lider_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ginasio_lider_ginasio_id_fkey"
+            columns: ["ginasio_id"]
+            isOneToOne: true
+            referencedRelation: "ginasio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ginasio_lider_lider_id_fkey"
+            columns: ["lider_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ginasio_lider_lider_id_fkey"
+            columns: ["lider_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -5333,6 +5739,46 @@ export type Database = {
           },
           {
             foreignKeyName: "player_especialidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_insignias: {
+        Row: {
+          ginasio_id: string
+          obtida_em: string
+          user_id: string
+        }
+        Insert: {
+          ginasio_id: string
+          obtida_em?: string
+          user_id: string
+        }
+        Update: {
+          ginasio_id?: string
+          obtida_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_insignias_ginasio_id_fkey"
+            columns: ["ginasio_id"]
+            isOneToOne: false
+            referencedRelation: "ginasio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_insignias_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_insignias_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "treinadores_publico"
@@ -6892,6 +7338,10 @@ export type Database = {
       }
     }
     Functions: {
+      _aplicar_resultado_ginasio: {
+        Args: { p_desafio: string; p_resultado: string; p_ticks: number }
+        Returns: Json
+      }
       _calcular_stat: {
         Args: {
           p_base: number
@@ -6957,6 +7407,7 @@ export type Database = {
       }
       _devolver_oferta: { Args: { p_sessao_id: string }; Returns: undefined }
       _dia_do_diario: { Args: never; Returns: string }
+      _equipe_de_ginasio: { Args: { p_user: string }; Returns: Json }
       _executar_troca: {
         Args: { p_sessao_id: string }
         Returns: {
@@ -7003,11 +7454,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      _motivo_de_equipe_invalida: {
+        Args: { p_equipe: Json; p_tipo: string }
+        Returns: string
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
       }
       _mural_json: { Args: { p_dia: string; p_user: string }; Returns: Json }
+      _rotacionar_mandatos: { Args: never; Returns: undefined }
       _sortear_contrato: {
         Args: { p_dia: string; p_slot: number; p_user: string }
         Returns: undefined
@@ -7371,6 +7827,7 @@ export type Database = {
       }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
       definir_avatar: { Args: { p_avatar: string }; Returns: Json }
+      definir_equipe_do_ginasio: { Args: { p_ginasio: string }; Returns: Json }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
         Returns: Json
@@ -7379,6 +7836,10 @@ export type Database = {
       definir_skin_treinador: { Args: { p_skin: string }; Returns: Json }
       definir_titulo: { Args: { p_conquista: string }; Returns: Json }
       definir_vitrine: { Args: { p_conquistas: string[] }; Returns: Json }
+      desafiar_ginasio: {
+        Args: { p_ginasio: string; p_tipo: string }
+        Returns: Json
+      }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
       desconfirmar_troca: {
@@ -7480,6 +7941,7 @@ export type Database = {
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       expirar_trocas: { Args: never; Returns: number }
       fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
+      ginasios_estado: { Args: never; Returns: Json }
       gravar_flush_de_sessao: {
         Args: {
           p_ciclos: number

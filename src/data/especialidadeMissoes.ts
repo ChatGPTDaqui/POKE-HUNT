@@ -12,8 +12,7 @@
 // la. Desde 23/10/2026 os requisitos sao FEITOS com POKEs do tipo (ver o bloco
 // das familias abaixo), contados por engine/feitos.ts e somados no flush.
 //
-// O NIVEL 10 E PROVISORIO. O topo e o duelo com o Lider de Ginasio do tipo,
-// que entra numa entrega propria; ate la ele pede o maior degrau do molde.
+// O NIVEL 10 PEDE A INSIGNIA DO GINASIO DO TIPO (desde 23/10/2026).
 //
 // Requisito nunca depende do jogo fechado: farm offline nao existe, e o tempo
 // de caçada so anda com o jogador jogando.
@@ -104,6 +103,14 @@ const EVOLUCOES = [0, 0, 0, 1, 0, 0, 3, 0, 0, 5]
 const ESTAGIO_DA_CASA = [0, 0, 3, 0, 0, 6, 0, 0, 9, 10]
 const ESTAGIO_COM_A_EQUIPE = [0, 0, 0, 0, 0, 0, 0, 1, 0, 2]
 
+/**
+ * NIVEL 10 = INSIGNIA DO TIPO (23/10/2026, entrega 4): vencer o ginasio do tipo
+ * pela insignia, em qualquer faixa. `_aplicar_resultado_ginasio` soma
+ * `insignia:<TIPO>` na primeira insignia de cada ginasio.
+ */
+const insignia = (tipo: ElementType): RequisitoDeMissao =>
+  ({ regra: { t: 'contador', chave: `insignia:${tipo}`, alvo: 1 }, texto: `Conquistar uma insígnia de ginásio ${tipo}` })
+
 /** Teto de feitos por nivel: 1 no nivel 1, 2 do 2 ao 4, 3 do 5 em diante. */
 export const FEITOS_POR_NIVEL = (i: number) => (i === 0 ? 1 : i < 4 ? 2 : 3)
 
@@ -136,7 +143,7 @@ function missaoDeDano(tipo: ElementType, i: number): RequisitoDeMissao[] {
   ]
   if (CHEFES[i] > 0) req.push(contador(`protetor_tipo:${tipo}`, CHEFES[i], `Derrotar ${CHEFES[i]} Guardiões ou Lordes com um POKE ${tipo}`))
   if (SUPEREFICAZES[i] > 0) req.push(contador(`supereficaz_tipo:${tipo}`, SUPEREFICAZES[i], `Acertar ${fmt.format(SUPEREFICAZES[i])} golpes ${tipo} super-efetivos`))
-  return [...req, ...conhecerEDominio(tipo, i)].slice(0, FEITOS_POR_NIVEL(i))
+  return [req[0], ...(i === 9 ? [insignia(tipo)] : []), ...req.slice(1), ...conhecerEDominio(tipo, i)].slice(0, FEITOS_POR_NIVEL(i))
 }
 
 function missaoDeDefesa(tipo: ElementType, i: number): RequisitoDeMissao[] {
@@ -145,7 +152,7 @@ function missaoDeDefesa(tipo: ElementType, i: number): RequisitoDeMissao[] {
   ]
   if (VANTAGEM[i] > 0) req.push(contador(`vantagem_tipo:${tipo}`, VANTAGEM[i], `Vencer ${VANTAGEM[i]} selvagens com vantagem de tipo sobre o seu POKE ${tipo}`))
   if (NO_LIMITE[i] > 0) req.push(contador(`critico_tipo:${tipo}`, NO_LIMITE[i], `Vencer ${NO_LIMITE[i]} luta${NO_LIMITE[i] > 1 ? 's' : ''} com o POKE ${tipo} abaixo de 25% de HP`))
-  return [...req, ...conhecerEDominio(tipo, i)].slice(0, FEITOS_POR_NIVEL(i))
+  return [req[0], ...(i === 9 ? [insignia(tipo)] : []), ...req.slice(1), ...conhecerEDominio(tipo, i)].slice(0, FEITOS_POR_NIVEL(i))
 }
 
 export const MISSOES_DE_ESPECIALIDADE: readonly MissaoDeEspecialidade[] = ESPECIALIDADE_TYPES.flatMap((tipo) =>
