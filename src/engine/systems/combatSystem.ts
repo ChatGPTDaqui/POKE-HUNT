@@ -2054,7 +2054,10 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
 
   // Rotacao DESLIGADA (padrao, 19/10/2026): o jogador tambem cai no "melhor
   // dano contra este inimigo", igual ao selvagem. Ligada: segue a fila dele.
-  const segueFila = entity.kind === 'player' && world.rotacaoDeGolpes === true
+  // Na arena (ginasio/PvP) cada POKE traz a escolha do slot, dos DOIS lados;
+  // sem ela, vale a chave global do jogador no modo livre.
+  const doPoke = 'poke' in entity ? entity.poke.rotacaoDeGolpes : undefined
+  const segueFila = doPoke ?? (entity.kind === 'player' && world.rotacaoDeGolpes === true)
   const escolhido = !segueFila
     ? pickAbilityGreedy(
       world, entity, defenderEntity,

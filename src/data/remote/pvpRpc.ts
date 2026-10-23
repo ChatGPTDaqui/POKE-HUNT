@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import type { SlotDeEquipe } from '@/components/montador/MontadorDeEquipe'
 import type { PokeInstance } from '@/data/pokes'
 import { pvpRowToPoke, type LinhaTimePvp } from '@/engine/pokeDoSnapshotDePvp'
 import { assinarTopico, topico } from './aoVivo'
@@ -217,11 +218,7 @@ export interface RankPvp {
 
 export type TipoPresetPvp = 'ataque' | 'defesa'
 
-export interface SlotPresetPvp {
-  pokemonId: string
-  /** Vazio = usa os golpes ativos do POKE. */
-  golpes: string[]
-}
+export type SlotPresetPvp = SlotDeEquipe
 
 export interface PresetPvp {
   tipo: TipoPresetPvp
@@ -236,7 +233,7 @@ interface LinhaPreset {
   tipo: TipoPresetPvp
   posicao: number
   nome: string
-  slots: { pokemon_id: string; golpes?: string[] | null }[] | null
+  slots: { pokemon_id: string; golpes?: string[] | null; rotacao?: boolean | null }[] | null
   ativo: boolean
   atualizado_em: string
 }
@@ -246,7 +243,7 @@ function presetDaLinha(l: LinhaPreset): PresetPvp {
     tipo: l.tipo,
     posicao: l.posicao,
     nome: l.nome ?? '',
-    slots: (l.slots ?? []).map((s) => ({ pokemonId: s.pokemon_id, golpes: s.golpes ?? [] })),
+    slots: (l.slots ?? []).map((s) => ({ pokemonId: s.pokemon_id, golpes: s.golpes ?? [], rotacao: s.rotacao === true })),
     ativo: l.ativo,
     atualizadoEm: l.atualizado_em,
   }
@@ -263,7 +260,7 @@ export async function salvarPresetPvp(preset: Pick<PresetPvp, 'tipo' | 'posicao'
     p_tipo: preset.tipo,
     p_posicao: preset.posicao,
     p_nome: preset.nome,
-    p_slots: preset.slots.map((s) => ({ pokemon_id: s.pokemonId, golpes: s.golpes })),
+    p_slots: preset.slots.map((s) => ({ pokemon_id: s.pokemonId, golpes: s.golpes, rotacao: s.rotacao })),
   })
   falhou(error)
   return presetDaLinha(data as LinhaPreset)

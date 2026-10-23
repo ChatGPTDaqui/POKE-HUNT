@@ -26,6 +26,8 @@ export interface LinhaTimePvp {
   golpes_de_maquina?: string[] | null
   /** Golpes do slot do preset (PH-563); vazio/ausente = kit do POKE. */
   golpes_escolhidos?: string[] | null
+  /** Rotacao do slot do preset (23/10/2026); ausente = Inteligente. */
+  rotacao?: boolean | null
 }
 
 export function pvpRowToPoke(row: LinhaTimePvp): PokeInstance | null {
@@ -58,6 +60,7 @@ export function pvpRowToPoke(row: LinhaTimePvp): PokeInstance | null {
     golpesDeMaquina,
     disabledAbilities: {},
     activeAbilities: sanearEscolhaDeGolpes(escolha, conhecidos, species, row.level),
+    rotacaoDeGolpes: row.rotacao === true,
     status: null,
     locked: false,
     capturedAt: new Date(0).toISOString(),

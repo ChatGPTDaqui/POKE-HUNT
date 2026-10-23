@@ -20,13 +20,14 @@ import { useToastStore } from '@/stores/toastStore'
 import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
 import { useUiStore } from '@/stores/uiStore'
 import {
-  definirEquipeDoGinasio, desafiarGinasio, lerEstadoDosGinasios, resolverDesafio,
+  desafiarGinasio, lerEstadoDosGinasios, resolverDesafio,
   type EstadoDosGinasios, type GinasioNoEstado,
 } from '@/data/remote/ginasiosRpc'
 import { entrarNaArena } from '@/features/arena/arena'
 import { GameButton } from '@/components/game/controls'
 import { create } from 'zustand'
 import { BrasaoDeGinasio, METAL_DA_LIGA, nomeDoGinasio } from './BrasaoDeGinasio'
+import { DefesaDoGinasio } from './DefesaDoGinasio'
 import { cn } from '@/lib/utils'
 
 const fmt = new Intl.NumberFormat('pt-BR')
@@ -195,18 +196,6 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
     })
   }
 
-  async function usarMinhaEquipe() {
-    setOcupado(true)
-    try {
-      toast((await definirEquipeDoGinasio(g.id)).mensagem, 'success')
-      await aoMudar()
-    } catch (err) {
-      toast(err instanceof Error ? err.message : String(err), 'error')
-    } finally {
-      setOcupado(false)
-    }
-  }
-
   const bloqInsignia = bloqueio(motivoInsignia)
   const bloqDestronar = bloqueio(motivoDestronar)
 
@@ -231,7 +220,7 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
         {souLider && <><span className="text-menu-muted">Ganhos do mandato</span><span className="text-right text-gold">{fmt.format(g.ganhos ?? 0)}</span></>}
       </div>
       <div>
-        <div className="mb-[.25em] text-[.75em] text-menu-muted">Equipe do líder (POKEs acima de {g.faixa} lutam com os atributos do nível {g.faixa})</div>
+        <div className="mb-[.25em] text-[.75em] text-menu-muted">{souLider ? 'Sua defesa salva' : 'Equipe do líder'} (POKEs acima de {g.faixa} lutam com os atributos do nível {g.faixa})</div>
         <div className="flex flex-wrap gap-[.3em]">
           {g.equipe.map((p, i) => {
             const url = faceIconUrl(p.species_id, p.is_shiny)
@@ -245,6 +234,7 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
           })}
         </div>
       </div>
+      {souLider ? <DefesaDoGinasio g={g} aoSalvar={aoMudar} /> : (
       <div className="flex flex-col gap-[.3em]">
         <GameButton variant="primary" disabled={ocupado || bloqInsignia != null} carregando={ocupado} onClick={() => confirmar('insignia')}>
           <Medal aria-hidden /> Desafiar pela insígnia
@@ -256,12 +246,8 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
         <span className="text-[.72em] text-menu-muted">
           {bloqDestronar ?? `Só com a equipe toda ${tipo}. No fim do mandato, assume quem venceu no menor tempo.`}
         </span>
-        {souLider && (
-          <GameButton variant="ghost" disabled={ocupado} onClick={() => void usarMinhaEquipe()}>
-            <Crown aria-hidden /> Usar minha equipe atual neste ginásio
-          </GameButton>
-        )}
       </div>
+      )}
     </section>
   )
 }
