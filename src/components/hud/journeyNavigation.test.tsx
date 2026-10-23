@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { ActionDock, SheetMais } from './ActionDock'
+import { ActionDock, SheetMais, destinosDaGrade } from './ActionDock'
 import { ColunaDeAtalhos, TELAS_NA_COLUNA } from './ColunaDeAtalhos'
 import { useUiStore } from '@/stores/uiStore'
 import { useWorldStore } from '@/stores/worldStore'
@@ -103,9 +103,12 @@ describe('navegação Jornada', () => {
     useUiStore.setState({ moreOpen: true })
     render(<div id="camada-hud"><SheetMais /></div>)
     const social = screen.getByRole('region', { name: 'Encontrar outros treinadores' })
-    expect(within(social).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Troca', 'Ranking'])
+    expect(within(social).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Troca', 'Ranking', 'Ginásios'])
     const tools = screen.getByRole('region', { name: 'Consultar e ajustar' })
     expect(within(tools).getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Wiki', 'Tutoriais', 'Ajustes'])
+    // Destino novo na grade sem grupo aqui some do celular (Ginasios, 23/10/2026).
+    const noGuia = [...social.querySelectorAll('button'), ...tools.querySelectorAll('button')].map(b => b.getAttribute('aria-label'))
+    expect(noGuia.sort()).toEqual(destinosDaGrade().map(d => d.label).sort())
     fireEvent.click(within(tools).getByRole('button', { name: 'Wiki' }))
     expect(useUiStore.getState().currentScreen).toBe('wiki')
     expect(useUiStore.getState().moreOpen).toBe(false)
