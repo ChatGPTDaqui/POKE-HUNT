@@ -128,7 +128,7 @@ export const PRIMEIROS_PASSOS: PassoDef[] = [
   {
     id: 'primeira_especialidade',
     titulo: 'Invista numa Especialidade',
-    dica: 'Especialidades dão dano ou defesa a um tipo inteiro. Cada nível pede uma missão do tipo (abates ou tempo de caçada) e custa ouro e Stones.',
+    dica: 'Especialidades dão dano ou defesa a um tipo inteiro. Cada nível pede feitos com POKEs do tipo e custa ouro e Stones.',
     alvo: 1,
     atual: s => Object.values(s.especialidades).reduce((n, e) => n + (e?.dano ?? 0) + (e?.defesa ?? 0), 0),
     recompensa: { ouro: 2000, itens: [{ itemId: 'great_ball', quantidade: 50 }] },

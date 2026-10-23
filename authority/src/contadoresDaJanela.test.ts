@@ -51,4 +51,13 @@ describe('contadoresDaJanela', () => {
     const c = contadoresDaJanela({ ...vazio, gold: 0.4, itemsConsumed: { potion: 0 } }, null, null)
     expect(c).toEqual({})
   })
+
+  it('feitos de Especialidade: soma os da simulacao e as capturas por tipo (23/10/2026)', () => {
+    const c = contadoresDaJanela(
+      { ...vazio, captures: [{ speciesId: 'geodude', level: 5, isShiny: false, rarity: 'comum' }] },
+      null, null, { 'abate_tipo:FIRE': 3, 'resistido_tipo:FIRE': 0 },
+    )
+    expect(c).toMatchObject({ 'captura_tipo:ROCK': 1, 'captura_tipo:GROUND': 1, 'abate_tipo:FIRE': 3 })
+    expect(c['resistido_tipo:FIRE']).toBeUndefined()
+  })
 })

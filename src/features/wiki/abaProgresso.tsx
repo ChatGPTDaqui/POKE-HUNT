@@ -194,11 +194,13 @@ export function ProgressoTab() {
           tipo que mais te machuca no bioma em que você está é uma decisão real.
         </div>
         <div className="mt-[.5em]">
-          <b>Cada nível é uma missão do tipo.</b> A trilha de dano pede abates de POKEs do tipo, espécies do
-          tipo capturadas por você, estágios do bioma do tipo e um POKE do tipo em nível alto. A de defesa pede
-          tempo de caçada com um POKE do tipo em campo, tempo sob o clima do tipo e os mesmos marcos de bioma e
-          nível. A tela de Especialidades mostra cada requisito com a barra de progresso. Nível que você já
-          tinha fica: a missão vale só do próximo em diante.
+          <b>Cada nível pede feitos com POKEs do tipo</b> (de 1 a 3, crescendo com o nível). A trilha de dano
+          pede vitórias com um POKE do tipo em campo, golpes do tipo super-efetivos e Guardiões ou Lordes
+          derrotados. A de defesa pede golpes "pouco efetivos" aguentados, vitórias contra quem tem vantagem de
+          tipo e lutas vencidas abaixo de 25% de HP. As duas pedem também capturas e evoluções do tipo, estágios
+          do bioma do tipo e, no alto, estágios limpos com a equipe toda do tipo. A tela de Especialidades mostra
+          cada feito com a barra de progresso. Nível que você já tinha fica: os feitos valem só do próximo em
+          diante.
         </div>
         <div className="mt-[.5em]">
           Além da missão, o nível custa <b>Pedras</b> daquele tipo, mais ouro. Como a Pedra só cai de POKE daquele tipo, o
