@@ -176,7 +176,9 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
             : r.resultado === 'derrota' ? 'Derrota. A taxa não volta.' : 'Empate.'
           toast(msg, r.resultado === 'vitoria' ? 'success' : 'info')
           if (r.resultado === 'vitoria' && duelo === 'insignia' && r.insigniaNova) comemorarInsignia(g.id)
-          useUiStore.getState().openScreen('ginasios')
+          const ui = useUiStore.getState()
+          ui.setHuntContinent('ginasios')
+          ui.openScreen('hunts')
         },
       })
     } catch (err) {
