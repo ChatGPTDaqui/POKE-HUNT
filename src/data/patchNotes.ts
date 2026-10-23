@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.38',
+    date: '2026-10-23',
+    title: 'Especialidades por feitos',
+    highlights: [
+      'Os próximos níveis de Especialidade pedem feitos com POKEs do tipo, de 1 a 3 por nível.',
+      'Dano: vencer selvagens com um POKE do tipo em campo, acertar golpes do tipo super-efetivos e derrotar Guardiões e Lordes.',
+      'Defesa: aguentar golpes "pouco efetivos", vencer quem tem vantagem de tipo e vencer lutas abaixo de 25% de HP.',
+      'Nas duas: capturar e evoluir POKEs do tipo, limpar estágios do bioma do tipo e, no alto, limpar estágios com a equipe toda do tipo.',
+      'Os níveis que você já tem continuam seus. Os feitos contam a partir de agora.',
+    ],
+  },
+  {
     version: '8.37',
     date: '2026-10-21',
     title: 'Títulos com gemas',

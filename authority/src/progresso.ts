@@ -51,6 +51,8 @@ export function contadoresDaJanela(
   resumo: Pick<OfflineSimSummary, 'captures' | 'autoVendidos' | 'gold' | 'simulatedSeconds' | 'itemsConsumed'>,
   especieAtiva: string | null,
   clima: ClimaTipo | null,
+  /** Feitos de Especialidade que a simulacao contou (engine/feitos.ts). */
+  feitos: Record<string, number> = {},
 ): Record<string, number> {
   const contadores: Record<string, number> = {}
   const somar = (chave: string, valor: number) => {
@@ -69,6 +71,12 @@ export function contadoresDaJanela(
   if (sp) for (const tipo of new Set([sp.type, sp.type2].filter(Boolean))) somar(`ativo_tipo_seg:${tipo}`, resumo.simulatedSeconds)
   if (clima) somar(`clima_seg:${clima}`, resumo.simulatedSeconds)
   for (const [itemId, quantidade] of Object.entries(resumo.itemsConsumed)) somar(`item:${itemId}`, quantidade)
+  // Especialidade (23/10/2026): capturas por tipo + os feitos do combate.
+  for (const captura of resumo.captures) {
+    const c = SPECIES[captura.speciesId]
+    if (c) for (const tipo of new Set([c.type, c.type2].filter(Boolean))) somar(`captura_tipo:${tipo}`, 1)
+  }
+  for (const [chave, n] of Object.entries(feitos)) somar(chave, n)
   return contadores
 }
 
@@ -1635,7 +1643,7 @@ async function simularSessao(
   // Pokedex, POKEs novos com origem captura, nivel de treinador).
   const conquistasNovas = await registrarConquistasDaJanela(
     cfg, userId,
-    contadoresDaJanela(resumo, world.player?.poke.speciesId ?? null, world.climaAmbiente?.tipo ?? null),
+    contadoresDaJanela(resumo, world.player?.poke.speciesId ?? null, world.climaAmbiente?.tipo ?? null, world.feitos ?? {}),
   )
 
   return {

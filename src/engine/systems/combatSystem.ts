@@ -50,6 +50,7 @@ import { colorForType } from '@/data/typeColors'
 import { bonusDeAtaque, reducaoDeDefesa } from '@/data/especialidades'
 import { ehDirecional } from '@/data/moveVfx'
 import { estagioDoGolpe } from '@/data/estagioVfx'
+import { contarFeito, contarParaOsTipos } from '../feitos'
 
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
@@ -2982,6 +2983,13 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     if (acerto > 0 && isDead(target)) break
     const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null, world.especialidadeNiveis)
     acertosVisuais++
+    // Feitos de Especialidade (23/10/2026): acerto super-efetivo com golpe do
+    // tipo, e golpe "pouco efetivo" aguentado pelo POKE do jogador.
+    if (attacker.kind === 'player' && (result.effectiveness === 'super' || result.effectiveness === 'effective')) {
+      contarFeito(world, `supereficaz_tipo:${ability.type}`)
+    } else if (target.kind === 'player' && result.effectiveness === 'weak') {
+      contarParaOsTipos(world, 'resistido_tipo', target.poke.speciesId)
+    }
     if (result.isCrit) houveCritico = true
 
     // ENDURE / STURDY (Fase 12): sobrevive com 1 HP num golpe que mataria.

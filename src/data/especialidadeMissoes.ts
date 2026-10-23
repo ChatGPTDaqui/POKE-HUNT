@@ -9,8 +9,8 @@
 // O REQUISITO E UMA REGRA NO FORMATO DAS CONQUISTAS, de proposito. Quem confere
 // no servidor e o MESMO avaliador (`conquista_valor` / `conquista_alvo`), entao
 // nao nasce um segundo motor de regras. Todo tipo de regra usado aqui ja existe
-// la — so o contador `ativo_tipo_seg:<TIPO>` e novo (tempo de caçada com um
-// POKE do tipo em campo), somado em `authority/src/progresso.ts`.
+// la. Desde 23/10/2026 os requisitos sao FEITOS com POKEs do tipo (ver o bloco
+// das familias abaixo), contados por engine/feitos.ts e somados no flush.
 //
 // O NIVEL 10 E PROVISORIO. O topo e o duelo com o Lider de Ginasio do tipo,
 // que entra numa entrega propria; ate la ele pede o maior degrau do molde.
@@ -68,12 +68,6 @@ const CASA: Record<ElementType, { bioma: string; nomeDoBioma: string; clima?: Cl
   FAIRY: { bioma: 'sagrado', nomeDoBioma: 'Sagrado' },
 }
 
-const NOME_DO_CLIMA: Record<Clima, string> = {
-  sol: 'sol forte', chuva: 'chuva', neve: 'neve', areia: 'tempestade de areia', nevoa: 'névoa',
-}
-
-const HORA = 3600
-
 /**
  * Quantas especies do tipo um jogador consegue capturar no jogo: as que nascem
  * em algum sub-bioma ou sala especial. A coleção pedida nunca passa de 80%
@@ -88,70 +82,70 @@ export function especiesCapturaveisDoTipo(tipo: ElementType): number {
 }
 
 // Degraus do molde, por nivel (indice 0 = nivel 1).
-const ABATES = [100, 300, 600, 1000, 1600, 2400, 3500, 5000, 7000, 10000]
-const HORAS_ATIVO = [0.5, 1, 2, 4, 6, 10, 15, 20, 30, 40]
-const COLECAO = [0, 3, 0, 5, 0, 0, 8, 0, 0, 0]
-const NIVEL_DO_POKE = [0, 0, 0, 0, 40, 0, 0, 60, 0, 80]
-const ESTAGIO = [0, 0, 3, 0, 0, 6, 0, 0, 9, 10]
-const HORAS_CLIMA = [0, 0.5, 0, 2, 0, 0, 5, 0, 0, 0]
+// FEITOS COM POKES DO TIPO (23/10/2026, entrega 3 do design de 19/10). Cada
+// nivel pede de 1 a 3 feitos, crescendo com o nivel. Quatro familias:
+//   Combate (Dano)  — derrotar selvagens, acertos super-efetivos, chefes;
+//   Defesa (Defesa) — golpes resistidos, sobreviver no limite, vencer quem tem
+//                     vantagem de tipo;
+//   Conhecer (as duas) — capturas e evolucoes do tipo, colecao de especies;
+//   Dominio (niveis altos) — estagio do bioma de casa e estagio com a equipe
+//                     toda do tipo.
+// Os contadores `*_tipo:<T>` sao contados pela simulacao (engine/feitos.ts) e
+// somados no flush; `evolucao_tipo` vem do gatilho de evolucao no banco.
+// Quem ja tem nivel o mantem: so os PROXIMOS niveis leem estas missoes.
+const ABATES_COM_O_TIPO = [60, 150, 300, 500, 800, 1200, 1700, 2400, 3300, 4500]
+const SUPEREFICAZES = [0, 40, 0, 120, 200, 0, 450, 650, 0, 1200]
+const CHEFES = [0, 0, 2, 0, 0, 8, 0, 0, 20, 0]
+const RESISTIDOS = [10, 25, 50, 90, 140, 200, 280, 380, 500, 650]
+const NO_LIMITE = [0, 1, 0, 2, 0, 3, 0, 5, 0, 8]
+const VANTAGEM = [0, 0, 5, 0, 15, 0, 35, 0, 60, 0]
+const CAPTURAS = [0, 3, 0, 0, 10, 0, 0, 25, 0, 0]
+const EVOLUCOES = [0, 0, 0, 1, 0, 0, 3, 0, 0, 5]
+const ESTAGIO_DA_CASA = [0, 0, 3, 0, 0, 6, 0, 0, 9, 10]
+const ESTAGIO_COM_A_EQUIPE = [0, 0, 0, 0, 0, 0, 0, 1, 0, 2]
+
+/** Teto de feitos por nivel: 1 no nivel 1, 2 do 2 ao 4, 3 do 5 em diante. */
+export const FEITOS_POR_NIVEL = (i: number) => (i === 0 ? 1 : i < 4 ? 2 : 3)
 
 const fmt = new Intl.NumberFormat('pt-BR')
-function horas(h: number): string {
-  return h < 1 ? `${Math.round(h * 60)} min` : `${fmt.format(h)} h`
-}
+const contador = (chave: string, alvo: number, texto: string): RequisitoDeMissao =>
+  ({ regra: { t: 'contador', chave, alvo }, texto })
 
-function requisitosComuns(tipo: ElementType, i: number): RequisitoDeMissao[] {
+/** Feitos das familias Conhecer e Dominio, comuns as duas trilhas. Em ordem de prioridade. */
+function conhecerEDominio(tipo: ElementType, i: number): RequisitoDeMissao[] {
   const casa = CASA[tipo]
   const req: RequisitoDeMissao[] = []
-  if (ESTAGIO[i] > 0) {
+  if (ESTAGIO_COM_A_EQUIPE[i] > 0) {
+    req.push(contador(`estagio_equipe:${tipo}`, ESTAGIO_COM_A_EQUIPE[i],
+      `Limpar ${ESTAGIO_COM_A_EQUIPE[i] > 1 ? `${ESTAGIO_COM_A_EQUIPE[i]} estágios` : 'um estágio'} com a equipe toda ${tipo}`))
+  }
+  if (ESTAGIO_DA_CASA[i] > 0) {
     req.push({
-      regra: { t: 'metrica', m: 'estagio_do_bioma', arg: casa.bioma, alvo: ESTAGIO[i] },
-      texto: `Limpar o estágio ${ESTAGIO[i]} do ${casa.nomeDoBioma}`,
+      regra: { t: 'metrica', m: 'estagio_do_bioma', arg: casa.bioma, alvo: ESTAGIO_DA_CASA[i] },
+      texto: `Limpar o estágio ${ESTAGIO_DA_CASA[i]} do ${casa.nomeDoBioma}`,
     })
   }
-  if (NIVEL_DO_POKE[i] > 0) {
-    req.push({
-      regra: { t: 'posse', f: { tipo, nivel_min: NIVEL_DO_POKE[i] }, alvo: 1 },
-      texto: `Ter um POKE ${tipo} capturado por você no Lv ${NIVEL_DO_POKE[i]}`,
-    })
-  }
+  if (EVOLUCOES[i] > 0) req.push(contador(`evolucao_tipo:${tipo}`, EVOLUCOES[i], `Evoluir ${EVOLUCOES[i]} POKE${EVOLUCOES[i] > 1 ? 's' : ''} ${tipo}`))
+  if (CAPTURAS[i] > 0) req.push(contador(`captura_tipo:${tipo}`, CAPTURAS[i], `Capturar ${CAPTURAS[i]} POKEs ${tipo}`))
   return req
 }
 
-function colecao(tipo: ElementType, alvo: number): RequisitoDeMissao {
-  const teto = Math.max(1, Math.floor(especiesCapturaveisDoTipo(tipo) * 0.8))
-  const n = Math.min(alvo, teto)
-  return {
-    regra: { t: 'colecao', de: 'possuidas', f: { tipo }, alvo: n },
-    texto: `Ter ${n} espécies ${tipo} diferentes capturadas por você`,
-  }
-}
-
 function missaoDeDano(tipo: ElementType, i: number): RequisitoDeMissao[] {
-  const req: RequisitoDeMissao[] = [{
-    regra: { t: 'abates', tipo, alvo: ABATES[i] },
-    texto: `Derrotar ${fmt.format(ABATES[i])} POKEs ${tipo}`,
-  }]
-  if (COLECAO[i] > 0) req.push(colecao(tipo, COLECAO[i]))
-  return [...req, ...requisitosComuns(tipo, i)]
+  const req: RequisitoDeMissao[] = [
+    contador(`abate_tipo:${tipo}`, ABATES_COM_O_TIPO[i], `Vencer ${fmt.format(ABATES_COM_O_TIPO[i])} selvagens com um POKE ${tipo} em campo`),
+  ]
+  if (CHEFES[i] > 0) req.push(contador(`protetor_tipo:${tipo}`, CHEFES[i], `Derrotar ${CHEFES[i]} Guardiões ou Lordes com um POKE ${tipo}`))
+  if (SUPEREFICAZES[i] > 0) req.push(contador(`supereficaz_tipo:${tipo}`, SUPEREFICAZES[i], `Acertar ${fmt.format(SUPEREFICAZES[i])} golpes ${tipo} super-efetivos`))
+  return [...req, ...conhecerEDominio(tipo, i)].slice(0, FEITOS_POR_NIVEL(i))
 }
 
 function missaoDeDefesa(tipo: ElementType, i: number): RequisitoDeMissao[] {
-  const casa = CASA[tipo]
-  const req: RequisitoDeMissao[] = [{
-    regra: { t: 'contador', chave: `ativo_tipo_seg:${tipo}`, alvo: HORAS_ATIVO[i] * HORA },
-    texto: `Caçar ${horas(HORAS_ATIVO[i])} com um POKE ${tipo} em campo`,
-  }]
-  if (HORAS_CLIMA[i] > 0) {
-    // Tipo sem clima proprio troca o degrau de clima por colecao.
-    req.push(casa.clima
-      ? {
-        regra: { t: 'contador', chave: `clima_seg:${casa.clima}`, alvo: HORAS_CLIMA[i] * HORA },
-        texto: `Caçar ${horas(HORAS_CLIMA[i])} sob ${NOME_DO_CLIMA[casa.clima]}`,
-      }
-      : colecao(tipo, COLECAO[i] || 3 + i))
-  }
-  return [...req, ...requisitosComuns(tipo, i)]
+  const req: RequisitoDeMissao[] = [
+    contador(`resistido_tipo:${tipo}`, RESISTIDOS[i], `Aguentar ${fmt.format(RESISTIDOS[i])} golpes "pouco efetivos" com um POKE ${tipo}`),
+  ]
+  if (VANTAGEM[i] > 0) req.push(contador(`vantagem_tipo:${tipo}`, VANTAGEM[i], `Vencer ${VANTAGEM[i]} selvagens com vantagem de tipo sobre o seu POKE ${tipo}`))
+  if (NO_LIMITE[i] > 0) req.push(contador(`critico_tipo:${tipo}`, NO_LIMITE[i], `Vencer ${NO_LIMITE[i]} luta${NO_LIMITE[i] > 1 ? 's' : ''} com o POKE ${tipo} abaixo de 25% de HP`))
+  return [...req, ...conhecerEDominio(tipo, i)].slice(0, FEITOS_POR_NIVEL(i))
 }
 
 export const MISSOES_DE_ESPECIALIDADE: readonly MissaoDeEspecialidade[] = ESPECIALIDADE_TYPES.flatMap((tipo) =>

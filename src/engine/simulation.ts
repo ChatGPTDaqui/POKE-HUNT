@@ -70,6 +70,7 @@ import { toastStore } from '@/stores/toastStoreVanilla'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { splashDeSalaStore } from '@/stores/splashDeSalaVanilla'
 import { anuncioDoChefeStore } from '@/stores/anuncioDoChefeVanilla'
+import { contarFeito, contarParaOsTipos, HP_CRITICO, temVantagemDeTipo, tiposDaEspecie } from './feitos'
 import type {
   ClimaTipo, EnemyEntity, EnemyHazards, Point, PlayerEntity, SalaAtiva, WorldState, ProtetorPendente,
   ProtetorDaAutoridade,
@@ -1577,6 +1578,12 @@ export function handleEnemyDefeated(
   // de sala de bioma que nao olhava o toggle, e desde que TODA sala ganhou
   // protetor (PH-202/225) ele virou o unico caminho que resta — o que deixava
   // o "avanco manual de sala" inerte no jogo inteiro sem nada quebrar.
+  // Feitos de Especialidade (23/10/2026), com o POKE em campo no abate.
+  contarParaOsTipos(world, 'abate_tipo', poke.speciesId)
+  if (enemy.isProtetor) contarParaOsTipos(world, 'protetor_tipo', poke.speciesId)
+  if (temVantagemDeTipo(enemy.poke.speciesId, poke.speciesId)) contarParaOsTipos(world, 'vantagem_tipo', poke.speciesId)
+  if (poke.hp > 0 && poke.hp < poke.stats.hp * HP_CRITICO) contarParaOsTipos(world, 'critico_tipo', poke.speciesId)
+
   if (enemy.isProtetor) {
     // PH-427: "a ultima sala" deixou de ser o indice 9. O estagio 1 tem 3
     // salas e o Lord dele mora no indice 2 — com a constante antiga o credito
@@ -1585,7 +1592,13 @@ export function handleEnemyDefeated(
     // nada estoura, o Lord morre normalmente, o progresso simplesmente nao e
     // escrito.
     const ultimaDoEstagio = quantidadeDeSalas(world.mapDef?.id ?? '') - 1
-    if (world.sala?.indice === ultimaDoEstagio) avancarBiomaProgressSeForOProximo(world, gameState)
+    if (world.sala?.indice === ultimaDoEstagio) {
+      avancarBiomaProgressSeForOProximo(world, gameState)
+      // Estagio limpo com a equipe TODA de um tipo (feito de Dominio).
+      const equipe = gameState.team.map((p) => tiposDaEspecie(p.speciesId))
+      const comuns = equipe.length ? equipe.reduce((acc, tipos) => acc.filter((t) => tipos.includes(t))) : []
+      for (const t of comuns) contarFeito(world, `estagio_equipe:${t}`)
+    }
     resolverProtetorDaSala(world, world.mapDef!.id, { manualAdvance: opts.manualAdvance ?? false })
   }
 

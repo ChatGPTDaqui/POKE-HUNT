@@ -1180,6 +1180,8 @@ export interface WorldState {
    * flush/entrada de mapa), nunca no meio dela.
    */
   especialidadeNiveis: EspecialidadeNiveis | null
+  /** Feitos de Especialidade contados nesta simulacao (engine/feitos.ts). */
+  feitos?: Record<string, number>
   /**
    * O clima do LUGAR — o que a sala tem quando nenhum golpe esta em campo
    * (PH-140).
