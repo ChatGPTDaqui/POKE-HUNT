@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Medal } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { FAIXAS_DE_GINASIO, TIPOS_DE_GINASIO, idDoGinasio } from '@/data/ginasios'
-import { colorForType } from '@/data/typeColors'
+import { BrasaoDeGinasio, METAL_DA_LIGA } from './BrasaoDeGinasio'
 
 const db = supabase as unknown as { from: (t: string) => any }
 
@@ -30,14 +30,13 @@ export function EstojoDeInsignias({ userId }: { userId: string | null }) {
       </div>
       {FAIXAS_DE_GINASIO.map((f) => (
         <div key={f.nivel} className="flex items-center gap-[.35em]">
-          <span className="w-[5.5em] shrink-0 truncate text-[.65em] text-menu-muted">{f.liga}</span>
-          <div className="grid flex-1 grid-cols-[repeat(18,minmax(0,1fr))] gap-[2px]">
+          <span className="w-[4.6em] shrink-0 truncate text-[.65em]" style={{ color: METAL_DA_LIGA[f.nivel].cor }}>{f.liga.replace('Liga ', '')}</span>
+          <div className="grid flex-1 grid-cols-[repeat(18,minmax(0,1fr))] gap-0">
             {TIPOS_DE_GINASIO.map((t) => {
               const tem = data.has(idDoGinasio(t, f.nivel))
               return (
-                <span key={t} aria-label={`${t} ${f.nivel}${tem ? ' (conquistada)' : ''}`} role="img"
-                  className="aspect-square rounded-full border"
-                  style={{ background: tem ? colorForType(t) : 'transparent', borderColor: colorForType(t), opacity: tem ? 1 : 0.35 }} />
+                <BrasaoDeGinasio key={t} tipo={t} faixa={f.nivel} aceso={tem} className="w-full"
+                  rotulo={`${t} ${f.nivel}${tem ? ' (conquistada)' : ''}`} />
               )
             })}
           </div>

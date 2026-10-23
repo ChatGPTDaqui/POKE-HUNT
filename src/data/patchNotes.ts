@@ -23,6 +23,9 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'Cada desafio custa a taxa da liga (de 50 mil a 2,5 milhões de ouro). Se o líder for um jogador e vencer, ele recebe 30%; o resto sai do jogo. São 2 desafios por dia.',
       'O mandato do líder dura 7 dias. No fim, assume quem venceu o duelo para destronar no menor tempo; sem vencedor, o líder continua. Todo ginásio começa com um líder NPC.',
       'As insígnias ficam num estojo no seu perfil, e o nível 10 de cada Especialidade agora pede a insígnia do tipo (qualquer liga).',
+      'Cada ginásio tem um brasão próprio: símbolo do tipo e moldura de metal da liga.',
+      'O líder monta a equipe de defesa no painel do ginásio: escolhe os 6 POKEs, os golpes de cada um e se ele luta em Rotação ou Inteligente. Os POKEs que defendem ficam trancados.',
+      'Times de PvP ganham a mesma escolha por POKE: Rotação (golpes na ordem 1, 2, 3, 4) ou Inteligente (analisa o oponente e usa o golpe de mais dano).',
     ],
   },
   {

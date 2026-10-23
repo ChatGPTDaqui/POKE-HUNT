@@ -544,6 +544,7 @@ export type Database = {
           candidato_id: string | null
           candidato_nome: string | null
           candidato_ticks: number | null
+          defesa: Json | null
           equipe: Json
           ganhos_mandato: number
           ginasio_id: string
@@ -557,6 +558,7 @@ export type Database = {
           candidato_id?: string | null
           candidato_nome?: string | null
           candidato_ticks?: number | null
+          defesa?: Json | null
           equipe: Json
           ganhos_mandato?: number
           ginasio_id: string
@@ -570,6 +572,7 @@ export type Database = {
           candidato_id?: string | null
           candidato_nome?: string | null
           candidato_ticks?: number | null
+          defesa?: Json | null
           equipe?: Json
           ganhos_mandato?: number
           ginasio_id?: string
@@ -3199,6 +3202,7 @@ export type Database = {
         Args: { p_substitui_poke_uid?: string; p_user_id: string }
         Returns: boolean
       }
+      _defesa_viva: { Args: { p_defesa: Json; p_user: string }; Returns: Json }
       _descontar_abates_dos_ovos: {
         Args: { p_abates: number; p_user: string }
         Returns: undefined
@@ -3625,7 +3629,10 @@ export type Database = {
       }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
       definir_avatar: { Args: { p_avatar: string }; Returns: Json }
-      definir_equipe_do_ginasio: { Args: { p_ginasio: string }; Returns: Json }
+      definir_defesa_do_ginasio: {
+        Args: { p_ginasio: string; p_slots: Json }
+        Returns: Json
+      }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
         Returns: Json
@@ -4746,6 +4753,7 @@ export type Database = {
           candidato_id: string | null
           candidato_nome: string | null
           candidato_ticks: number | null
+          defesa: Json | null
           equipe: Json
           ganhos_mandato: number
           ginasio_id: string
@@ -4759,6 +4767,7 @@ export type Database = {
           candidato_id?: string | null
           candidato_nome?: string | null
           candidato_ticks?: number | null
+          defesa?: Json | null
           equipe: Json
           ganhos_mandato?: number
           ginasio_id: string
@@ -4772,6 +4781,7 @@ export type Database = {
           candidato_id?: string | null
           candidato_nome?: string | null
           candidato_ticks?: number | null
+          defesa?: Json | null
           equipe?: Json
           ganhos_mandato?: number
           ginasio_id?: string
@@ -7401,6 +7411,7 @@ export type Database = {
         Args: { p_substitui_poke_uid?: string; p_user_id: string }
         Returns: boolean
       }
+      _defesa_viva: { Args: { p_defesa: Json; p_user: string }; Returns: Json }
       _descontar_abates_dos_ovos: {
         Args: { p_abates: number; p_user: string }
         Returns: undefined
@@ -7827,7 +7838,10 @@ export type Database = {
       }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
       definir_avatar: { Args: { p_avatar: string }; Returns: Json }
-      definir_equipe_do_ginasio: { Args: { p_ginasio: string }; Returns: Json }
+      definir_defesa_do_ginasio: {
+        Args: { p_ginasio: string; p_slots: Json }
+        Returns: Json
+      }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
         Returns: Json

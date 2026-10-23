@@ -40,8 +40,13 @@ function blocoDoCatalogo(): string {
   ].join('\n')
 }
 
-function paraDev(sql: string): string {
-  return '-- Espelho de 20261023140000_ginasios_public.sql no schema `dev`. GERADO por src/data/ginasios.test.ts.\n'
+// Defesa do ginasio + rotacao (23/10/2026): public escrito a mao, dev derivado daqui.
+const DEFESA = 'supabase/migrations/20261023160000_defesa_de_ginasio_e_rotacao_public.sql'
+const DEFESA_DEV = 'supabase/migrations/20261023160001_defesa_de_ginasio_e_rotacao_dev.sql'
+const defesaDev = () => paraDev(readFileSync(DEFESA, 'utf8'), '20261023160000_defesa_de_ginasio_e_rotacao_public.sql')
+
+function paraDev(sql: string, origem = '20261023140000_ginasios_public.sql'): string {
+  return `-- Espelho de ${origem} no schema \`dev\`. GERADO por src/data/ginasios.test.ts.\n`
     + sql.replace(/public\./g, 'dev.').replace(/set search_path = public/g, 'set search_path = dev, public')
 }
 
@@ -54,6 +59,7 @@ if (process.env.GERAR_GINASIOS === '1') {
   const novo = sqlAtualizado()
   writeFileSync(PUBLIC, novo, 'utf8')
   writeFileSync(DEV, paraDev(novo), 'utf8')
+  writeFileSync(DEFESA_DEV, defesaDev(), 'utf8')
 }
 const SQL = readFileSync(PUBLIC, 'utf8')
 
@@ -61,6 +67,15 @@ describe('ginasios: catalogo e SQL', () => {
   it('o catalogo gravado e o que o jogo gera (rode GERAR_GINASIOS=1)', () => {
     expect(SQL).toBe(sqlAtualizado())
     expect(readFileSync(DEV, 'utf8')).toBe(paraDev(SQL))
+    expect(readFileSync(DEFESA_DEV, 'utf8')).toBe(defesaDev())
+  })
+
+  // `$$` vira `$` num String.replace de JS (ja derrubou duas migrations).
+  it('todo corpo de funcao abre e fecha com $$', () => {
+    for (const sql of [SQL, readFileSync(DEFESA, 'utf8')]) {
+      expect((sql.match(/^as \$\$$/gm) ?? []).length).toBe((sql.match(/^(end;?\n)?\$\$;$/gm) ?? []).length)
+      expect(sql).not.toMatch(/^as \$$/m)
+    }
   })
 
   it('90 ginasios, 18 tipos x 5 faixas', () => {
@@ -108,6 +123,15 @@ describe('ginasios: regras', () => {
     expect(noTeto.level).toBe(100)
     expect(noTeto.stats).toEqual(semTeto.stats)
     expect(noTeto.unlockedAbilities.length).toBeGreaterThanOrEqual(semTeto.unlockedAbilities.length)
+  })
+
+  it('a vaga da defesa leva Rotacao/Inteligente pro POKE da arena', () => {
+    const base: PokeDeGinasio = {
+      species_id: 'charizard', level: 100, iv: [20, 20, 20, 20, 20, 20], rarity: 'comum',
+      is_shiny: false, nature: null, active_abilities: null, golpes_de_maquina: null,
+    }
+    expect(pokeDoGinasio({ ...base, rotacao: true }, 100, 'a')!.rotacaoDeGolpes).toBe(true)
+    expect(pokeDoGinasio(base, 100, 'b')!.rotacaoDeGolpes).toBe(false)
   })
 
   it('id do ginasio ida e volta', () => {

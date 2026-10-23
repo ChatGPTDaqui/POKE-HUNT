@@ -2,6 +2,7 @@
 // e resolver (rota do servidor do jogo). Quem valida tudo e o banco/servidor.
 import { supabase } from '@/lib/supabase'
 import type { PokeDeGinasio, TipoDeDuelo } from '@/data/ginasios'
+import type { SlotDeEquipe } from '@/components/montador/MontadorDeEquipe'
 import { ErroServidor, servidor, type RespostaResolverGinasio } from './servidor'
 
 const db = supabase as unknown as {
@@ -25,6 +26,8 @@ export interface GinasioNoEstado {
   mandatoAte: string
   /** So vem pro proprio lider. */
   ganhos: number | null
+  /** Defesa (referencias) — so vem pro proprio lider. */
+  defesa: { pokemon_id: string; golpes?: string[] | null; rotacao?: boolean | null }[] | null
   candidatoNome: string | null
   candidatoTicks: number | null
 }
@@ -50,6 +53,12 @@ export interface DesafioCriado {
 export const lerEstadoDosGinasios = () => chamar<EstadoDosGinasios>('ginasios_estado')
 export const desafiarGinasio = (ginasioId: string, tipo: TipoDeDuelo) =>
   chamar<DesafioCriado>('desafiar_ginasio', { p_ginasio: ginasioId, p_tipo: tipo })
-export const definirEquipeDoGinasio = (ginasioId: string) =>
-  chamar<{ mensagem: string }>('definir_equipe_do_ginasio', { p_ginasio: ginasioId })
+export const definirDefesaDoGinasio = (ginasioId: string, slots: SlotDeEquipe[]) =>
+  chamar<{ mensagem: string }>('definir_defesa_do_ginasio', {
+    p_ginasio: ginasioId,
+    p_slots: slots.map((s) => ({ pokemon_id: s.pokemonId, golpes: s.golpes, rotacao: s.rotacao })),
+  })
+
+export const slotsDaDefesa = (d: GinasioNoEstado['defesa']): SlotDeEquipe[] =>
+  (d ?? []).map((s) => ({ pokemonId: s.pokemon_id, golpes: s.golpes ?? [], rotacao: s.rotacao === true }))
 export const resolverDesafio = (desafioId: string): Promise<RespostaResolverGinasio> => servidor.resolverGinasio(desafioId)

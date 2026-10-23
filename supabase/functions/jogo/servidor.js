@@ -153457,7 +153457,7 @@ function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 		return comPp.find((a) => isAbilityReady(entity, a.id)) ?? null;
 	}
 	const rotacaoDoJogador = abilidadesFinais;
-	return !(entity.kind === "player" && world.rotacaoDeGolpes === true) ? pickAbilityGreedy(world, entity, defenderEntity, abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter, entity.kind === "player") : pickAbilityDaFila(world, entity, defenderEntity, rotacaoDoJogador, estaSilenciado, clima);
+	return !(("poke" in entity ? entity.poke.rotacaoDeGolpes : void 0) ?? (entity.kind === "player" && world.rotacaoDeGolpes === true)) ? pickAbilityGreedy(world, entity, defenderEntity, abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter, entity.kind === "player") : pickAbilityDaFila(world, entity, defenderEntity, rotacaoDoJogador, estaSilenciado, clima);
 }
 function iniciarPoseDoGolpe(world, atacante, ability, alvo) {
 	const duelo = world.mapDef?.encarada === true;
@@ -157891,6 +157891,7 @@ function pvpRowToPoke(row) {
 		golpesDeMaquina,
 		disabledAbilities: {},
 		activeAbilities: sanearEscolhaDeGolpes(escolha, conhecidos, species, row.level),
+		rotacaoDeGolpes: row.rotacao === true,
 		status: null,
 		locked: false,
 		capturedAt: (/* @__PURE__ */ new Date(0)).toISOString()
@@ -157934,6 +157935,7 @@ function pokeDoGinasio(p, teto, uid) {
 		golpesDeMaquina,
 		disabledAbilities: {},
 		activeAbilities: sanearEscolhaDeGolpes(escolha, conhecidos, species, p.level),
+		rotacaoDeGolpes: p.rotacao === true,
 		status: null,
 		locked: false,
 		capturedAt: (/* @__PURE__ */ new Date(0)).toISOString()

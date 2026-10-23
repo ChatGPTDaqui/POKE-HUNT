@@ -59,6 +59,10 @@ export interface PokeDeGinasio {
   nature: string | null
   active_abilities: string[] | null
   golpes_de_maquina: string[] | null
+  /** Defesa do lider humano: id do POKE (referencia viva). */
+  pokemon_id?: string
+  /** Rotacao do slot; ausente = Inteligente. */
+  rotacao?: boolean
 }
 
 const temOTipo = (speciesId: string, tipo: ElementType) => {
@@ -113,6 +117,7 @@ export function pokeDoGinasio(p: PokeDeGinasio, teto: number, uid: string): Poke
     golpesDeMaquina,
     disabledAbilities: {},
     activeAbilities: sanearEscolhaDeGolpes(escolha, conhecidos, species, p.level),
+    rotacaoDeGolpes: p.rotacao === true,
     status: null,
     locked: false,
     capturedAt: new Date(0).toISOString(),

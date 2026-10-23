@@ -310,6 +310,37 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
     expect(escolhas.slice(3, 6)).toEqual(['scratch', 'ember', 'flamethrower'])
   })
 
+  // Arena (23/10/2026): a escolha do slot (Rotacao/Inteligente) vem no POKE e
+  // vence a chave global do modo livre — nos dois sentidos.
+  function seisEscolhas(world: ReturnType<typeof cenarioFila>['world'], player: ReturnType<typeof cenarioFila>['player']) {
+    const escolhas: string[] = []
+    for (let i = 0; i < 6; i++) {
+      player.cooldowns = {}
+      player.globalCooldown = 0
+      updateCombat(world, 1, { silent: true })
+      if (player.lastUsedAbilityId) escolhas.push(player.lastUsedAbilityId)
+    }
+    return escolhas
+  }
+
+  it('POKE com Rotacao no slot segue a fila mesmo com a chave global desligada', () => {
+    const { world, player } = cenarioFila()
+    world.rotacaoDeGolpes = false
+    player.poke.rotacaoDeGolpes = true
+    expect(seisEscolhas(world, player).slice(0, 3)).toEqual(['scratch', 'ember', 'flamethrower'])
+  })
+
+  it('POKE com Inteligente no slot ignora a chave global e usa o golpe de mais dano', () => {
+    const { world, player } = cenarioFila()
+    world.rotacaoDeGolpes = true
+    player.poke.rotacaoDeGolpes = false
+    const escolhas = seisEscolhas(world, player)
+    expect(escolhas.length).toBeGreaterThan(0)
+    // A fila daria scratch logo no 1o turno; a IA nunca escolhe o mais fraco.
+    expect(escolhas).toContain('flamethrower')
+    expect(escolhas).not.toContain('scratch')
+  })
+
   it('golpe da vez em cooldown nao trava o turno — pula pro proximo pronto sem perder a ordem', () => {
     const { world, player } = cenarioFila()
     // scratch (1o da fila) fica preso em cooldown por varios turnos —
