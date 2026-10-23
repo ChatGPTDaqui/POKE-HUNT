@@ -99,6 +99,11 @@ export interface PokeInstance {
   // escolha valida (desligar tudo e cair no Ataque Basico) e NAO e o mesmo que
   // ausente.
   activeAbilities?: string[]
+  // Como este POKE escolhe o golpe NA ARENA (ginasio e PvP, 23/10/2026):
+  // true = Rotacao (segue a ordem de activeAbilities), false = Inteligente.
+  // Ausente = segue a chave global do modo livre (autoToggles.rotacaoDeGolpes).
+  // Vem do slot da equipe; nao e gravado no POKE.
+  rotacaoDeGolpes?: boolean
   // Status NAO-VOLATIL (veneno, queimadura, paralisia, sono, congelamento).
   // Mora no POKE, e nao na entidade de combate, porque sobrevive a hunt e e
   // gravado — nos jogos ele so sai por item ou pelo Centro Pokemon. A

@@ -24,6 +24,7 @@
 // é o caso aqui.
 import { useQuery } from '@tanstack/react-query'
 import { ChatCircle, Clock, Package, Storefront, Trophy, User } from '@phosphor-icons/react'
+import { EstojoDeInsignias } from '@/features/ginasios/EstojoDeInsignias'
 
 import { Painel } from '@/components/game/Painel'
 import { Carregando, GameButton } from '@/components/game/controls'
@@ -143,6 +144,7 @@ export function PerfilPublico() {
           </div>
 
           <ConquistasDoTreinador userId={data.userId} />
+          <EstojoDeInsignias userId={data.userId} />
 
           {data.noHallDaFama && (
             <div className="flex items-center gap-[.5em] rounded-[.45em] border border-gold/40 bg-gold/10 px-[.55em] py-[.45em] text-[.8em]">

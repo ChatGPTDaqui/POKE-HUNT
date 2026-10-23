@@ -23,7 +23,7 @@ vi.mock('./arenaDaSessao', () => ({ arenaDaSessao: vi.fn() }))
 
 const EU = 'eu'
 const rank: rpc.RankPvp = { mmr: 1000, partidas: 0, pdl: 0, divisao: 'bronze_1', vitorias: 0, derrotas: 0, partidasHoje: 0, resetEm: '' }
-const preset = (tipo: rpc.TipoPresetPvp, ativo: boolean): rpc.PresetPvp => ({ tipo, posicao: 1, nome: '', slots: [{ pokemonId: 'p1', golpes: [] }], ativo, atualizadoEm: '' })
+const preset = (tipo: rpc.TipoPresetPvp, ativo: boolean): rpc.PresetPvp => ({ tipo, posicao: 1, nome: '', slots: [{ pokemonId: 'p1', golpes: [], rotacao: false }], ativo, atualizadoEm: '' })
 const hist = (extra: Partial<rpc.HistoricoPvp>): rpc.HistoricoPvp => ({
   id: 'h', sessaoId: 's', anfitriaoId: 'x', convidadoId: 'y', vencedorId: null, encerradaEm: '', modo: 'ranqueado',
   pdlDeltaAnfitriao: null, pdlDeltaConvidado: null, ...extra,

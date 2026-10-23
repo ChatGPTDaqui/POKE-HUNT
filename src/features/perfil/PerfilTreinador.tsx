@@ -31,6 +31,7 @@ import { SeletorDeSkin } from './SeletorDeSkin'
 import { useConquistasStore } from '@/stores/conquistasStore'
 import { TituloComGema } from '@/features/titulos/TituloComGema'
 import { SeletorDeTitulo } from '@/features/titulos/SeletorDeTitulo'
+import { EstojoDeInsignias } from '@/features/ginasios/EstojoDeInsignias'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
 const CAPTURAS_NO_LOG = 12
@@ -163,6 +164,7 @@ export function PerfilTreinador() {
     >
       {aba === 'resumo' && (
         <div className="flex flex-col gap-[.5em]">
+          <EstojoDeInsignias userId={meuId} />
           <div className="grid grid-cols-2 gap-[.45em]">
             <Estatistica icon={<Coins />} rotulo="Ouro" valor={wallet.gold.toLocaleString('pt-BR')} cor="text-gold" />
             <Estatistica icon={<Diamond />} rotulo="Diamantes" valor={wallet.diamonds.toLocaleString('pt-BR')} cor="text-diamond" />

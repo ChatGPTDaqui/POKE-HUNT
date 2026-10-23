@@ -153457,7 +153457,7 @@ function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 		return comPp.find((a) => isAbilityReady(entity, a.id)) ?? null;
 	}
 	const rotacaoDoJogador = abilidadesFinais;
-	return !(entity.kind === "player" && world.rotacaoDeGolpes === true) ? pickAbilityGreedy(world, entity, defenderEntity, abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter, entity.kind === "player") : pickAbilityDaFila(world, entity, defenderEntity, rotacaoDoJogador, estaSilenciado, clima);
+	return !(("poke" in entity ? entity.poke.rotacaoDeGolpes : void 0) ?? (entity.kind === "player" && world.rotacaoDeGolpes === true)) ? pickAbilityGreedy(world, entity, defenderEntity, abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter, entity.kind === "player") : pickAbilityDaFila(world, entity, defenderEntity, rotacaoDoJogador, estaSilenciado, clima);
 }
 function iniciarPoseDoGolpe(world, atacante, ability, alvo) {
 	const duelo = world.mapDef?.encarada === true;
@@ -157891,10 +157891,58 @@ function pvpRowToPoke(row) {
 		golpesDeMaquina,
 		disabledAbilities: {},
 		activeAbilities: sanearEscolhaDeGolpes(escolha, conhecidos, species, row.level),
+		rotacaoDeGolpes: row.rotacao === true,
 		status: null,
 		locked: false,
 		capturedAt: (/* @__PURE__ */ new Date(0)).toISOString()
 	};
+}
+Object.keys(TYPE_COLORS);
+var ivs = (iv) => ({
+	hp: iv[0],
+	atkFis: iv[1],
+	atkEsp: iv[2],
+	def: iv[3],
+	defEsp: iv[4],
+	speed: iv[5]
+});
+/**
+* O POKE que luta no ginasio. Acima do teto da faixa, os ATRIBUTOS saem do
+* nivel do teto; golpes e IVs continuam os dele (design de 19/10).
+*/
+function pokeDoGinasio(p, teto, uid) {
+	const species = SPECIES[p.species_id];
+	if (!species) return null;
+	const nivel = Math.min(p.level, teto);
+	const nature = p.nature ?? null;
+	const iv = ivs(p.iv);
+	const stats = computeStatsAtLevel(species, nivel, iv, p.rarity, p.is_shiny, nature);
+	const golpesDeMaquina = [...new Set(p.golpes_de_maquina ?? [])];
+	const conhecidos = [.../* @__PURE__ */ new Set([...golpesAprendidosAte(species, p.level), ...golpesDeMaquina])];
+	const escolha = p.active_abilities ?? activeAbilitiesPadrao(species, p.level);
+	return {
+		uid,
+		speciesId: p.species_id,
+		level: nivel,
+		exp: 0,
+		hp: stats.hp,
+		isShiny: p.is_shiny,
+		rarity: p.rarity,
+		ivs: iv,
+		nature: nature ?? void 0,
+		stats,
+		unlockedAbilities: conhecidos,
+		golpesDeMaquina,
+		disabledAbilities: {},
+		activeAbilities: sanearEscolhaDeGolpes(escolha, conhecidos, species, p.level),
+		rotacaoDeGolpes: p.rotacao === true,
+		status: null,
+		locked: false,
+		capturedAt: (/* @__PURE__ */ new Date(0)).toISOString()
+	};
+}
+function equipeDoGinasio(equipe, teto, prefixo) {
+	return equipe.map((p, i) => pokeDoGinasio(p, teto, `${prefixo}-${i}`)).filter((p) => p != null);
 }
 //#endregion
 //#region src/engine/systems/offlineSimSystem.ts
@@ -158374,7 +158422,7 @@ function calcularResultadoRanqueado(anfitriao, convidado, resultadoAnfitriao, fa
 }
 //#endregion
 //#region authority/src/appPvp.ts
-function json$1(dado, status = 200) {
+function json$2(dado, status = 200) {
 	return new Response(JSON.stringify(dado), {
 		status,
 		headers: { "content-type": "application/json; charset=utf-8" }
@@ -158390,7 +158438,7 @@ async function resolverPvp(cfg, jogadorId, req) {
 	if (!sessao) throw new ErroHttp(404, "PvP nao encontrado.");
 	if (sessao.anfitriao_id !== jogadorId && sessao.convidado_id !== jogadorId) throw new ErroHttp(403, "Este PvP nao e seu.");
 	const semente = sementeDaSessao(sessao.id);
-	if (sessao.estado !== "aberta") return json$1({
+	if (sessao.estado !== "aberta") return json$2({
 		jaResolvido: true,
 		vencedorId: sessao.vencedor_id,
 		semente
@@ -158421,7 +158469,7 @@ async function resolverPvp(cfg, jogadorId, req) {
 			p_pdl_delta_anfitriao: null,
 			p_pdl_delta_convidado: null
 		});
-		return json$1({
+		return json$2({
 			vencedorId,
 			semente
 		});
@@ -158444,11 +158492,72 @@ async function resolverPvp(cfg, jogadorId, req) {
 		p_pdl_delta_anfitriao: calculo.anfitriao.pdlDelta,
 		p_pdl_delta_convidado: calculo.convidado.pdlDelta
 	});
-	return json$1({
+	return json$2({
 		vencedorId,
 		semente,
 		pdlDeltaAnfitriao: calculo.anfitriao.pdlDelta,
 		pdlDeltaConvidado: calculo.convidado.pdlDelta
+	});
+}
+//#endregion
+//#region authority/src/appGinasio.ts
+function json$1(dado, status = 200) {
+	return new Response(JSON.stringify(dado), {
+		status,
+		headers: { "content-type": "application/json; charset=utf-8" }
+	});
+}
+/** Teto de nivel da faixa, pelo id do ginasio (`FIRE_300` -> 300). */
+function tetoDoGinasio(ginasioId) {
+	const n = Number(ginasioId.split("_")[1]);
+	if (![
+		100,
+		200,
+		300,
+		400,
+		500
+	].includes(n)) throw new ErroHttp(409, "Ginasio invalido.");
+	return n;
+}
+/** A luta de um desafio, pura. Desafiante e o "meu time"; o lider e a casa. */
+function lutaDoDesafio(d) {
+	const teto = tetoDoGinasio(d.ginasio_id);
+	const meuTime = equipeDoGinasio(d.equipe_desafiante, teto, `d-${d.id}`);
+	const rivalTime = equipeDoGinasio(d.equipe_lider, teto, `l-${d.id}`);
+	if (meuTime.length === 0 || rivalTime.length === 0) throw new ErroHttp(409, "Uma das equipes deste desafio esta vazia.");
+	const { resultado, ticks } = rodarArena({
+		semente: sementeDaSessao(d.id),
+		meuTime,
+		rivalTime,
+		nomeDoRival: "",
+		casaEhOJogador: false
+	}, LIVE_SIM_STEP_SECONDS);
+	return {
+		resultado: resultado === "lutando" ? "empate" : resultado,
+		ticks
+	};
+}
+async function resolverGinasio(cfg, jogadorId, req) {
+	const desafioId = (await req.json().catch(() => null))?.desafioId;
+	if (!desafioId) throw new ErroHttp(400, "desafioId e obrigatorio");
+	const [d] = await selecionar(cfg, `ginasio_desafio?id=eq.${desafioId}&select=*`);
+	if (!d) throw new ErroHttp(404, "Desafio nao encontrado.");
+	if (d.user_id !== jogadorId) throw new ErroHttp(403, "Este desafio nao e seu.");
+	if (d.estado !== "aberto") return json$1({
+		resultado: d.estado,
+		ticks: d.ticks,
+		jaResolvido: true
+	});
+	const { resultado, ticks } = lutaDoDesafio(d);
+	const aplicado = await chamarRpc(cfg, "_aplicar_resultado_ginasio", {
+		p_desafio: d.id,
+		p_resultado: resultado,
+		p_ticks: ticks
+	});
+	return json$1({
+		resultado: aplicado?.estado ?? resultado,
+		ticks: aplicado?.ticks ?? ticks,
+		insigniaNova: aplicado?.insigniaNova ?? false
 	});
 }
 //#endregion
@@ -159547,6 +159656,7 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/sessao/avancar-sala" && req.method === "POST") return avancarSala(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/pvp/resolver" && req.method === "POST") return resolverPvp(cfg, jogador.id, req);
+	if (url.pathname === "/ginasio/resolver" && req.method === "POST") return resolverGinasio(cfg, jogador.id, req);
 	if (url.pathname === "/estado" && req.method === "GET") {
 		const parcial = url.searchParams.get("parcial") === "1";
 		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas, linhasNoLoad }) => {

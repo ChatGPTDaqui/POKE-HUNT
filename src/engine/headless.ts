@@ -17,6 +17,7 @@ export type { SequenciaDeSorteio } from './simulation'
 export { criarMundoArena, rodarArena, stepArena, sementeDaSessao, ARENA_MAP_ID } from './arena'
 export type { EstadoDaArena, OpcoesDaArena, ResultadoDaArena } from './arena'
 export { pvpRowToPoke } from './pokeDoSnapshotDePvp'
+export { equipeDoGinasio, type PokeDeGinasio } from '@/data/ginasios'
 export type { LinhaTimePvp } from './pokeDoSnapshotDePvp'
 
 export { simulateWorldSeconds, createEmptySummary } from './systems/offlineSimSystem'
