@@ -46,6 +46,8 @@ export type ScreenName =
   | 'equipe' | 'mochila' | 'loja' | 'hunts' | 'pokedex'
   | 'wiki' | 'config' | 'social' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
   | 'ranking' | 'tutoriais' | 'especialidades' | 'troca' | 'pvp' | 'conquistas'
+  // Ginasios (23/10/2026).
+  | 'ginasios'
   // Janela Missoes (18/10/2026). 'tasks', 'especialidades', 'conquistas' e
   // 'bestiario' continuam aceitos e viram ABA dela (ver `openScreen`).
   | 'missoes'
