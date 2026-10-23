@@ -44,8 +44,8 @@ describe('destinos da barra e da grade', () => {
     // jogador".
     expect(telas).toEqual(
       // Conquistas e Bestiario viraram abas da janela Missoes (18/10/2026).
-      // Ginasios (23/10/2026) depois do Ranking: disputa entre jogadores.
-      ['troca', 'ranking', 'ginasios', 'wiki', 'tutoriais', 'config'],
+      // Ginasios viraram aba da Hunt (23/10/2026).
+      ['troca', 'ranking', 'wiki', 'tutoriais', 'config'],
     )
   })
 })

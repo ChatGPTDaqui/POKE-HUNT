@@ -239,7 +239,7 @@ export function SegmentedTabs<T extends string>({
   value, options, onChange, className,
 }: {
   value: T
-  options: { value: T; label: string }[]
+  options: { value: T; label: string; icone?: ReactNode }[]
   onChange: (value: T) => void
   className?: string
 }) {
@@ -266,7 +266,7 @@ export function SegmentedTabs<T extends string>({
           className={compacto ? 'shrink-0' : undefined}
           onClick={() => onChange(option.value)}
         >
-          {option.label}
+          {option.icone}{option.label}
         </GameButton>
       ))}
     </div>

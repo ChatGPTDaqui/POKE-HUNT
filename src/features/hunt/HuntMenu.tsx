@@ -40,6 +40,8 @@ import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { LinhaDeEspecie } from './LinhaDeEspecie'
 import { GameButton, GameCard, GameInput, GameSelect, SectionLabel, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { Explicacao } from '@/components/shared/Explicacao'
+import { GinasiosMenu } from '@/features/ginasios/GinasiosMenu'
+import { IconeDeGinasio } from '@/features/ginasios/IconeDeGinasio'
 import { cn } from '@/lib/utils'
 // As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo de
 // gate; com a PH-432 sobraram DOIS (ver data/biomas.ts): o que nasce aberto e o
@@ -48,6 +50,8 @@ const CONTINENT_LABELS: Record<string, string> = {
   biomas: "Mundo",
   nightmare: "Modo Pesadelo",
 }
+// Ginasios (23/10/2026, pedido do dono): aba da Hunt, depois dos grupos de mapa.
+const ABA_GINASIOS = 'ginasios'
 const TYPE_LIST = (Object.keys(TYPE_COLORS) as ElementType[]).sort()
 const fmt = new Intl.NumberFormat('pt-BR')
 
@@ -383,8 +387,17 @@ export function HuntMenu() {
   const mapaAtivo = mapaAtivoId ? MAPS[mapaAtivoId] : null
 
   const continents = useMemo(
-    () => [...new Set(Object.values(MAPS).map((m) => m.continent ?? GRUPOS_INICIAIS[0]))],
+    () => [...new Set(Object.values(MAPS).map((m) => m.continent ?? GRUPOS_INICIAIS[0])), ABA_GINASIOS],
     [],
+  )
+  const abas = (
+    <SegmentedTabs
+      value={continent}
+      onChange={setContinent}
+      options={continents.map((c) => (c === ABA_GINASIOS
+        ? { value: c, label: 'Ginásios', icone: <IconeDeGinasio className="mr-[.3em] inline align-[-.3em]" /> }
+        : { value: c, label: CONTINENT_LABELS[c] || c }))}
+    />
   )
 
   const activePoke = team[activeIndex] ?? null
@@ -437,6 +450,15 @@ export function HuntMenu() {
     () => visibleMaps.filter((m) => m.id !== STARTER_HUNT_ID),
     [visibleMaps],
   )
+
+  if (continent === ABA_GINASIOS) {
+    return (
+      <div className="flex flex-col gap-[.5em]">
+        <StickyHeader>{abas}</StickyHeader>
+        <GinasiosMenu />
+      </div>
+    )
+  }
 
   if (team.length === 0) {
     return (
@@ -661,13 +683,7 @@ export function HuntMenu() {
   return (
     <div className="flex flex-col gap-[.5em]">
       <StickyHeader>
-        {continents.length > 1 && (
-          <SegmentedTabs
-            value={continent}
-            onChange={setContinent}
-            options={continents.map((c) => ({ value: c, label: CONTINENT_LABELS[c] || c }))}
-          />
-        )}
+        {abas}
 
         <div className="flex flex-wrap gap-[.5em]">
           <GameInput

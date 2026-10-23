@@ -17,7 +17,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
     date: '2026-10-23',
     title: 'Ginásios',
     highlights: [
-      '90 ginásios: 18 tipos em 5 ligas (Regional 100, Elite 200, Campeã 300, Lendária 400, Mestra 500). Abra em Mais › Ginásios.',
+      '90 ginásios: 18 tipos em 5 ligas (Regional 100, Elite 200, Campeã 300, Lendária 400, Mestra 500). Abra em Hunt › Ginásios.',
       'Desafie pela insígnia com qualquer equipe de 6, ou para destronar com a equipe toda do tipo do ginásio. A luta é 6 contra 6, ao vivo, com o combate do jogo.',
       'POKE acima do nível da liga luta com os atributos do nível da liga. A mesma espécie pode aparecer no máximo 2 vezes na equipe.',
       'Cada desafio custa a taxa da liga (de 50 mil a 2,5 milhões de ouro). Se o líder for um jogador e vencer, ele recebe 30%; o resto sai do jogo. São 2 desafios por dia.',
