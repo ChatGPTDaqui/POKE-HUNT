@@ -3277,6 +3277,7 @@ export type Database = {
       }
       _sortear_eevee_do_lance: { Args: never; Returns: Json }
       _troca_teto_por_lado: { Args: never; Returns: number }
+      _vagas_validas: { Args: { p_slots: Json; p_user: string }; Returns: Json }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
@@ -3647,7 +3648,7 @@ export type Database = {
       definir_titulo: { Args: { p_conquista: string }; Returns: Json }
       definir_vitrine: { Args: { p_conquistas: string[] }; Returns: Json }
       desafiar_ginasio: {
-        Args: { p_ginasio: string; p_tipo: string }
+        Args: { p_ginasio: string; p_slots?: Json; p_tipo: string }
         Returns: Json
       }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
@@ -7491,6 +7492,7 @@ export type Database = {
       }
       _sortear_eevee_do_lance: { Args: never; Returns: Json }
       _troca_teto_por_lado: { Args: never; Returns: number }
+      _vagas_validas: { Args: { p_slots: Json; p_user: string }; Returns: Json }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
         Returns: number
@@ -7861,7 +7863,7 @@ export type Database = {
       definir_titulo: { Args: { p_conquista: string }; Returns: Json }
       definir_vitrine: { Args: { p_conquistas: string[] }; Returns: Json }
       desafiar_ginasio: {
-        Args: { p_ginasio: string; p_tipo: string }
+        Args: { p_ginasio: string; p_slots?: Json; p_tipo: string }
         Returns: Json
       }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
