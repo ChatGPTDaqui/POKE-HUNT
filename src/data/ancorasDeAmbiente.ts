@@ -482,4 +482,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.470, v: 0.140, tipo: 'vagalume', cor: '#d8f08a' },
     { u: 0.780, v: 0.860, tipo: 'vagalume', cor: '#d8f08a' },
   ],
+
+  // -------------------------------------------------------------------------
+  // CAMPINA (24/10/2026, vida nos mapas — mapa 2). Rio e lago ondulam pela
+  // mascara de agua (scripts/pintar-ref-agua.js); aqui so o que e ponto: a
+  // queda d'agua do canto e as borboletas nos canteiros de flor.
+  // -------------------------------------------------------------------------
+  'assets/hunt-backgrounds/meadow.jpg': [
+    { u: 0.888, v: 0.150, tipo: 'cascata', escala: 0.8 },
+    { u: 0.435, v: 0.340, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.560, v: 0.610, tipo: 'borboleta', cor: '#ffb0d0', fase: 2 },
+    { u: 0.270, v: 0.780, tipo: 'borboleta', cor: '#7fd3ff', fase: 4 },
+    { u: 0.860, v: 0.800, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
+  ],
 }

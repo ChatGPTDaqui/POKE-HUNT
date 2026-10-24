@@ -23,6 +23,8 @@ const RAIZ = path.join(__dirname, '..')
 const ARTES = {
   // Rio azul vivo. O ceu do canto superior direito tem o mesmo matiz: fora.
   forest: { h: [195, 225], s: 0.55, l: [0.35, 0.75], ignorar: [[0.55, 0, 1, 0.045]] },
+  // Rio azul claro e lago mais escuro; nada mais da arte cai nesse azul.
+  meadow: { h: [185, 222], s: 0.35, l: [0.28, 0.80] },
 }
 
 function hsl(r, g, b) {
