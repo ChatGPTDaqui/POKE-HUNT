@@ -51,8 +51,12 @@ export interface DesafioCriado {
 }
 
 export const lerEstadoDosGinasios = () => chamar<EstadoDosGinasios>('ginasios_estado')
-export const desafiarGinasio = (ginasioId: string, tipo: TipoDeDuelo) =>
-  chamar<DesafioCriado>('desafiar_ginasio', { p_ginasio: ginasioId, p_tipo: tipo })
+export const desafiarGinasio = (ginasioId: string, tipo: TipoDeDuelo, slots: SlotDeEquipe[]) =>
+  chamar<DesafioCriado>('desafiar_ginasio', {
+    p_ginasio: ginasioId,
+    p_tipo: tipo,
+    p_slots: slots.map((s) => ({ pokemon_id: s.pokemonId, golpes: s.golpes, rotacao: s.rotacao })),
+  })
 export const definirDefesaDoGinasio = (ginasioId: string, slots: SlotDeEquipe[]) =>
   chamar<{ mensagem: string }>('definir_defesa_do_ginasio', {
     p_ginasio: ginasioId,
