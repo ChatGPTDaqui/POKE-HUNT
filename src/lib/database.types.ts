@@ -3831,6 +3831,7 @@ export type Database = {
         Returns: Json
       }
       mural_de_contratos: { Args: never; Returns: Json }
+      mural_de_lideres: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
@@ -8047,6 +8048,7 @@ export type Database = {
         Returns: Json
       }
       mural_de_contratos: { Args: never; Returns: Json }
+      mural_de_lideres: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
         Args: { p_anuncio_id: string; p_valor: number }
