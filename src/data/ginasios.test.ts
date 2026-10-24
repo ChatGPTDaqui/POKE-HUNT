@@ -58,6 +58,10 @@ const desafianteDev = () => paraDev(readFileSync(DESAFIANTE, 'utf8'), '202610241
 const HISTORICO = 'supabase/migrations/20261024160000_historico_do_ginasio_public.sql'
 const HISTORICO_DEV = 'supabase/migrations/20261024160001_historico_do_ginasio_dev.sql'
 const historicoDev = () => paraDev(readFileSync(HISTORICO, 'utf8'), '20261024160000_historico_do_ginasio_public.sql')
+// Mural de lideres (24/10/2026): mesmo esquema.
+const MURAL = 'supabase/migrations/20261024180000_mural_de_lideres_public.sql'
+const MURAL_DEV = 'supabase/migrations/20261024180001_mural_de_lideres_dev.sql'
+const muralDev = () => paraDev(readFileSync(MURAL, 'utf8'), '20261024180000_mural_de_lideres_public.sql')
 
 function paraDev(sql: string, origem = '20261023140000_ginasios_public.sql'): string {
   return `-- Espelho de ${origem} no schema \`dev\`. GERADO por src/data/ginasios.test.ts.\n`
@@ -77,6 +81,7 @@ if (process.env.GERAR_GINASIOS === '1') {
   writeFileSync(AVISOS_DEV, avisosDev(), 'utf8')
   writeFileSync(DESAFIANTE_DEV, desafianteDev(), 'utf8')
   writeFileSync(HISTORICO_DEV, historicoDev(), 'utf8')
+  writeFileSync(MURAL_DEV, muralDev(), 'utf8')
 }
 const SQL = readFileSync(PUBLIC, 'utf8')
 
@@ -88,11 +93,12 @@ describe('ginasios: catalogo e SQL', () => {
     expect(readFileSync(AVISOS_DEV, 'utf8')).toBe(avisosDev())
     expect(readFileSync(DESAFIANTE_DEV, 'utf8')).toBe(desafianteDev())
     expect(readFileSync(HISTORICO_DEV, 'utf8')).toBe(historicoDev())
+    expect(readFileSync(MURAL_DEV, 'utf8')).toBe(muralDev())
   })
 
   // `$$` vira `$` num String.replace de JS (ja derrubou duas migrations).
   it('todo corpo de funcao abre e fecha com $$', () => {
-    for (const sql of [SQL, readFileSync(DEFESA, 'utf8'), readFileSync(AVISOS, 'utf8'), readFileSync(DESAFIANTE, 'utf8'), readFileSync(HISTORICO, 'utf8')]) {
+    for (const sql of [SQL, readFileSync(DEFESA, 'utf8'), readFileSync(AVISOS, 'utf8'), readFileSync(DESAFIANTE, 'utf8'), readFileSync(HISTORICO, 'utf8'), readFileSync(MURAL, 'utf8')]) {
       expect((sql.match(/^as \$\$$/gm) ?? []).length).toBe((sql.match(/^(end;?\n)?\$\$;$/gm) ?? []).length)
       expect(sql).not.toMatch(/^as \$$/m)
     }
