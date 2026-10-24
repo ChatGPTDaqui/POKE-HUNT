@@ -504,4 +504,16 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.220, v: 0.760, tipo: 'borboleta', cor: '#7fd3ff', fase: 4 },
     { u: 0.770, v: 0.710, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
   ],
+
+  // FAZENDA (mapa 4). Escala propria 0,5 (o desenho era o dobro do resto:
+  // ver ESCALA_POR_ARTE em scripts/build-sub-bioma-collision.js). Palha
+  // soltando dos montes de feno, agua mexendo no cocho e borboletas no pasto.
+  'assets/hunt-backgrounds/farm.jpg': [
+    { u: 0.310, v: 0.130, tipo: 'petala', cor: '#f2d36b', escala: 0.7 },
+    { u: 0.665, v: 0.130, tipo: 'petala', cor: '#f2d36b', escala: 0.7, fase: 3 },
+    { u: 0.190, v: 0.565, tipo: 'correnteza', escala: 0.5 },
+    { u: 0.250, v: 0.720, tipo: 'borboleta', cor: '#ffffff' },
+    { u: 0.500, v: 0.470, tipo: 'borboleta', cor: '#ffb0d0', fase: 3 },
+    { u: 0.800, v: 0.760, tipo: 'borboleta', cor: '#fff3b0', fase: 5 },
+  ],
 }

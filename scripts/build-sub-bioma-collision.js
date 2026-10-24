@@ -64,6 +64,18 @@ const { decodePng } = require('./lib/png');
 // imagem pra cobrir e nao ha mais o que esticar.
 const HUNT_BG_TILE_SCALE = 0.8;
 
+// ESCALA PROPRIA POR ARTE (24/10/2026, vida nos mapas — pedido do dono:
+// "analise a proporcao dos elementos do mapa com o tamanho das sprites").
+// O acervo nao foi desenhado na mesma escala: em `farm` um latao de leite
+// saia com 1,7x a altura do treinador e a porta do celeiro com 4x. Arte aqui
+// desenha MENOR (e o mundo dela encolhe junto — bounds, grade e spawn saem
+// todos desta escala). O treinador tem 30 u de corpo, o POKE ~40 u de quadro.
+// Mudou um numero? Rode este script, `build-agua-mask.js`, `build-lava-mask.js`
+// e `npm run build:edge` (a grade e usada pelo servidor).
+const ESCALA_POR_ARTE = {
+  'farm.jpg': 0.5,
+};
+
 /**
  * Tamanho da celula, LIDO de `src/data/collisionConstants.ts` em vez de
  * repetido aqui.
@@ -364,8 +376,7 @@ const MANIFESTO = {
  * caixa da tinta, que so quem le os pixels conhece. Entao o gerador EMITE
  * `arte: { escala, x, y }` e o renderer so consome.
  */
-function enquadrar(width, height, rgba, modo) {
-  const escala = HUNT_BG_TILE_SCALE;
+function enquadrar(width, height, rgba, modo, escala = HUNT_BG_TILE_SCALE) {
   // Caixa do que e andavel, em pixels de imagem. Marcador conta: ele e pintado
   // sobre a area andavel e o POKE nasce nele.
   const andavelNoPixel = (r, g, b, a) => (modo === 'rosa_anda'
@@ -482,7 +493,7 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   if (!fs.existsSync(bgPath)) { console.warn(`Pulando ${refFile}: arte real ${bg} nao encontrada`); continue; }
 
   const { width, height, rgba } = decodePng(fs.readFileSync(refPath));
-  const quadro = enquadrar(width, height, rgba, modo);
+  const quadro = enquadrar(width, height, rgba, modo, ESCALA_POR_ARTE[bg] ?? HUNT_BG_TILE_SCALE);
   if (!quadro) throw new Error(`${refFile}: nada andavel na referencia — nem tinta rosa, nem area fora do vermelho.`);
   const { escala, originX, originY, bounds: MAP_BOUNDS, cols, rows } = quadro;
   const paraMundo = (ix, iy) => ({ x: originX + ix * escala, y: originY + iy * escala });
