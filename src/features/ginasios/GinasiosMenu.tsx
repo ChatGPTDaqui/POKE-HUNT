@@ -4,7 +4,7 @@
 // Desafiar cobra a taxa e congela as equipes; o servidor roda a luta e o
 // jogador assiste a mesma luta ao vivo na arena.
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { Check, Crown, Medal, Users } from '@phosphor-icons/react'
+import { Check, Crown, Medal, Trophy, Users } from '@phosphor-icons/react'
 import {
   DESAFIOS_POR_DIA, FAIXAS_DE_GINASIO, REPASSE_DO_LIDER, equipeDoGinasio, partesDoGinasio,
   type TipoDeDuelo,
@@ -29,6 +29,7 @@ import { BrasaoDeGinasio, METAL_DA_LIGA, nomeDoGinasio } from './BrasaoDeGinasio
 import { DefesaDoGinasio } from './DefesaDoGinasio'
 import { EquipeDoDesafio } from './EquipeDoDesafio'
 import { HistoricoDoGinasio } from './HistoricoDoGinasio'
+import { MuralDeLideres } from './MuralDeLideres'
 import { queryClient } from '@/lib/query-client'
 import type { SlotDeEquipe } from '@/components/montador/MontadorDeEquipe'
 import { cn } from '@/lib/utils'
@@ -53,6 +54,7 @@ export function GinasiosMenu() {
   const [erro, setErro] = useState<string | null>(null)
   const [faixa, setFaixa] = useState<number>(100)
   const [selecionado, setSelecionado] = useState<string | null>(null)
+  const [mural, setMural] = useState(false)
   const meuId = useAuthStore((s) => s.user?.id ?? null)
 
   const recarregar = useCallback(async () => {
@@ -95,15 +97,20 @@ export function GinasiosMenu() {
         {FAIXAS_DE_GINASIO.map((f) => {
           const metal = METAL_DA_LIGA[f.nivel]
           return (
-            <button key={f.nivel} type="button" className="liga-aba" aria-pressed={faixa === f.nivel}
+            <button key={f.nivel} type="button" className="liga-aba" aria-pressed={!mural && faixa === f.nivel}
               style={{ '--liga-cor': metal.cor, '--liga-fundo': `linear-gradient(135deg, ${metal.degrade.join(', ')})` } as CSSProperties}
-              onClick={() => { setFaixa(f.nivel); setSelecionado(null) }}>
+              onClick={() => { setFaixa(f.nivel); setSelecionado(null); setMural(false) }}>
               {f.liga} · {f.nivel}
             </button>
           )
         })}
+        <button type="button" className="liga-aba" aria-pressed={mural} onClick={() => { setMural(true); setSelecionado(null) }}
+          style={{ '--liga-cor': '#f5c542', '--liga-fundo': 'linear-gradient(135deg, #fff1a8, #c98f12, #fff1a8)' } as CSSProperties}>
+          <Trophy className="mr-[.25em] inline" weight="fill" aria-hidden />Mural
+        </button>
       </div>
 
+      {mural ? <MuralDeLideres /> : <>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(4.6em,1fr))] gap-[.3em]">
         {daFaixa.map((g) => {
           const tipoG = g.tipo as ElementType
@@ -131,6 +138,7 @@ export function GinasiosMenu() {
       {atual
         ? <DetalheDoGinasio g={atual} meuId={meuId} desafiosHoje={estado.desafiosHoje} temInsignia={insignias.has(atual.id)} aoMudar={recarregar} />
         : <p className="text-[.8em] text-menu-muted">Escolha um ginásio para ver o líder, a equipe e desafiar.</p>}
+      </>}
       {comemorando && <Comemoracao id={comemorando} />}
     </div>
   )
