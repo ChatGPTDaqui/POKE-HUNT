@@ -82,3 +82,10 @@ export interface DesafioNoHistorico {
 
 export const historicoDoGinasio = (ginasioId: string) =>
   chamar<DesafioNoHistorico[]>('historico_do_ginasio', { p_ginasio: ginasioId })
+
+export interface MuralDeLideres {
+  atuais: { ginasioId: string; liderId: string; liderNome: string; mandatoAte: string }[]
+  hall: { userId: string; nome: string; defesas: number; mandatos: number; ginasiosAtuais: number }[]
+}
+
+export const muralDeLideres = () => chamar<MuralDeLideres>('mural_de_lideres')
