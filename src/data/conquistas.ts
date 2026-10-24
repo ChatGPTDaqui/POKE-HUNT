@@ -308,6 +308,16 @@ export const CONQUISTAS: ConquistaAutoral[] = [
   { id: 'cem_vitorias_pvp', nome: 'Cem Vitórias', descricao: 'Vença 100 duelos PvP.', categoria: 'social', nivel: 'ouro', regra: metrica('pvp_vitorias', 100) },
   { id: 'divisao_ouro', nome: 'Divisão Ouro', descricao: 'Chegue à divisão Ouro do PvP ranqueado.', categoria: 'social', nivel: 'ouro', regra: metrica('pvp_divisao', DIVISAO.ouro_1) },
   { id: 'mestre_do_pvp', nome: 'Mestre do PvP', descricao: 'Chegue à divisão Mestre do PvP ranqueado.', categoria: 'social', nivel: 'ouro', regra: metrica('pvp_divisao', DIVISAO.mestre) },
+  // Ginasios (24/10/2026): contadores somados em `_aplicar_resultado_ginasio`
+  // e `_rotacionar_mandatos`. As 90 e a Liga Mestra sao impossiveis de
+  // proposito: 45 mi de ouro so na Mestra nao pode travar a platina.
+  { id: 'primeira_insignia', nome: 'Primeira Insígnia', descricao: 'Conquiste uma insígnia de ginásio.', categoria: 'social', nivel: 'bronze', regra: { t: 'contador', chave: 'insignia_total', alvo: 1 }, ref: 'EP005' },
+  { id: 'liga_regional_completa', nome: 'Liga Regional Completa', descricao: 'Conquiste as 18 insígnias da Liga Regional.', categoria: 'social', nivel: 'prata', regra: { t: 'contador', chave: 'insignia_liga:100', alvo: 18 } },
+  { id: 'liga_elite_completa', nome: 'Liga Elite Completa', descricao: 'Conquiste as 18 insígnias da Liga Elite.', categoria: 'social', nivel: 'ouro', regra: { t: 'contador', chave: 'insignia_liga:200', alvo: 18 } },
+  { id: 'liga_mestra_completa', nome: 'Liga Mestra Completa', descricao: 'Conquiste as 18 insígnias da Liga Mestra.', categoria: 'social', nivel: 'impossivel', regra: { t: 'contador', chave: 'insignia_liga:500', alvo: 18 } },
+  { id: 'todas_as_insignias', nome: 'Estojo Completo', descricao: 'Conquiste as 90 insígnias de ginásio.', categoria: 'social', nivel: 'impossivel', regra: { t: 'contador', chave: 'insignia_total', alvo: 90 } },
+  { id: 'lider_de_ginasio', nome: 'Líder de Ginásio', descricao: 'Assuma a liderança de um ginásio.', categoria: 'social', nivel: 'prata', regra: { t: 'contador', chave: 'ginasio_mandatos', alvo: 1 } },
+  { id: 'muralha', nome: 'Muralha', descricao: 'Vença 10 desafios defendendo um ginásio.', categoria: 'social', nivel: 'prata', regra: { t: 'contador', chave: 'ginasio_defesas', alvo: 10 } },
   { id: 'decolando_de_novo', nome: 'Equipe Rocket Decolando de Novo', descricao: 'Perca 100 duelos PvP.', categoria: 'social', nivel: 'prata', regra: metrica('pvp_derrotas', 100), secreta: true, ref: 'Equipe Rocket' },
 
   // --- Universo Pokémon -----------------------------------------------------------

@@ -3143,6 +3143,10 @@ export type Database = {
         Args: { p_desafio: string; p_resultado: string; p_ticks: number }
         Returns: Json
       }
+      _aviso_de_ginasio: {
+        Args: { p_assunto: string; p_corpo: string; p_para: string }
+        Returns: undefined
+      }
       _calcular_stat: {
         Args: {
           p_base: number
@@ -3265,6 +3269,7 @@ export type Database = {
         Returns: number
       }
       _mural_json: { Args: { p_dia: string; p_user: string }; Returns: Json }
+      _nome_do_ginasio: { Args: { p_id: string }; Returns: string }
       _rotacionar_mandatos: { Args: never; Returns: undefined }
       _sortear_contrato: {
         Args: { p_dia: string; p_slot: number; p_user: string }
@@ -7352,6 +7357,10 @@ export type Database = {
         Args: { p_desafio: string; p_resultado: string; p_ticks: number }
         Returns: Json
       }
+      _aviso_de_ginasio: {
+        Args: { p_assunto: string; p_corpo: string; p_para: string }
+        Returns: undefined
+      }
       _calcular_stat: {
         Args: {
           p_base: number
@@ -7474,6 +7483,7 @@ export type Database = {
         Returns: number
       }
       _mural_json: { Args: { p_dia: string; p_user: string }; Returns: Json }
+      _nome_do_ginasio: { Args: { p_id: string }; Returns: string }
       _rotacionar_mandatos: { Args: never; Returns: undefined }
       _sortear_contrato: {
         Args: { p_dia: string; p_slot: number; p_user: string }
