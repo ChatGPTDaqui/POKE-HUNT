@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.42',
+    date: '2026-10-24',
+    title: 'Histórico do ginásio',
+    highlights: [
+      'O painel de cada ginásio mostra os últimos 10 desafios: quem desafiou, pela insígnia ou para destronar, quem venceu, em quanto tempo e quanto o líder ganhou.',
+    ],
+  },
+  {
     version: '8.41',
     date: '2026-10-24',
     title: 'Equipe do desafio de ginásio',

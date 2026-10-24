@@ -28,6 +28,8 @@ import { create } from 'zustand'
 import { BrasaoDeGinasio, METAL_DA_LIGA, nomeDoGinasio } from './BrasaoDeGinasio'
 import { DefesaDoGinasio } from './DefesaDoGinasio'
 import { EquipeDoDesafio } from './EquipeDoDesafio'
+import { HistoricoDoGinasio } from './HistoricoDoGinasio'
+import { queryClient } from '@/lib/query-client'
 import type { SlotDeEquipe } from '@/components/montador/MontadorDeEquipe'
 import { cn } from '@/lib/utils'
 
@@ -156,6 +158,7 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
       // A taxa ja saiu no servidor: o ouro de la vale antes mesmo da luta resolver.
       useGameStateStore.setState((s) => ({ wallet: { ...s.wallet, gold: Number(d.gold) } }))
       const r = await resolverDesafio(d.desafioId)
+      void queryClient.invalidateQueries({ queryKey: ['historico-do-ginasio', g.id] })
       entrarNaArena({
         semente: sementeDaSessao(d.desafioId),
         meuTime: equipeDoGinasio(d.equipeDesafiante, d.teto, `d-${d.desafioId}`),
@@ -228,6 +231,7 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
           })}
         </div>
       </div>
+      <HistoricoDoGinasio ginasioId={g.id} />
       {souLider
         ? <DefesaDoGinasio g={g} aoSalvar={aoMudar} />
         : <EquipeDoDesafio tipo={tipo} bloqueio={bloqueio} ocupado={ocupado} aoDesafiar={confirmar} />}
