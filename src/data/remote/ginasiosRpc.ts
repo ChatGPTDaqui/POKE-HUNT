@@ -66,3 +66,19 @@ export const definirDefesaDoGinasio = (ginasioId: string, slots: SlotDeEquipe[])
 export const slotsDaDefesa = (d: GinasioNoEstado['defesa']): SlotDeEquipe[] =>
   (d ?? []).map((s) => ({ pokemonId: s.pokemon_id, golpes: s.golpes ?? [], rotacao: s.rotacao === true }))
 export const resolverDesafio = (desafioId: string): Promise<RespostaResolverGinasio> => servidor.resolverGinasio(desafioId)
+
+export interface DesafioNoHistorico {
+  desafiante: string
+  lider: string
+  liderHumano: boolean
+  duelo: TipoDeDuelo
+  /** Do ponto de vista de quem desafiou. */
+  resultado: 'vitoria' | 'derrota' | 'empate'
+  ticks: number | null
+  /** Ouro que o lider humano recebeu (so quando venceu). */
+  repasse: number
+  quando: string
+}
+
+export const historicoDoGinasio = (ginasioId: string) =>
+  chamar<DesafioNoHistorico[]>('historico_do_ginasio', { p_ginasio: ginasioId })
