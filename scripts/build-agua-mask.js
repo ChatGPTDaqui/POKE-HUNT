@@ -219,6 +219,13 @@ function lerArtesDeAgua() {
   const fim = bloco.indexOf('\n}')
   const artes = new Set()
   for (const m of bloco.slice(0, fim).matchAll(/'([^']+)':\s*'agua'/g)) artes.add(m[1])
+  // Arte de OUTRO preset com agua desenhada (rio da floresta) entra quando tem
+  // referencia: a camada `desenharAguaDaArte` ondula ali sem mexer no preset.
+  if (fs.existsSync(DIR_REFS)) {
+    for (const f of fs.readdirSync(DIR_REFS)) {
+      if (f.endsWith('.png') && !f.includes('.rascunho')) artes.add(`assets/hunt-backgrounds/${f.replace(/\.png$/, '.jpg')}`)
+    }
+  }
   // Guarda contra o parser silenciosamente vazio: sem isto, mudar o formato
   // daquele objeto geraria mascara VAZIA e o efeito sumiria sem erro nenhum.
   if (artes.size === 0) throw new Error('nenhuma arte com preset agua — o parser de PRESET_POR_ARTE quebrou')

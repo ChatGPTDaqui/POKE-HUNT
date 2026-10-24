@@ -77,6 +77,7 @@ export type TipoDeProp =
   // — enxame procedural
   | 'vagalume' // pontos que sobem e flutuam
   | 'petala' // pontos que caem girando
+  | 'borboleta' // 2-3 borboletas batendo asa em volta da ancora (canteiro de flor)
 
 export interface AncoraDeAmbiente {
   /** Fracao da LARGURA da arte de fundo, 0..1. */
@@ -88,7 +89,7 @@ export interface AncoraDeAmbiente {
   escala?: number
   /**
    * Cor do prop, quando o tipo aceita uma (`orbe`, `gas`, `petala`,
-   * `vagalume`). Ausente = a cor padrao do tipo em `ambienteProps.ts`.
+   * `vagalume`, `borboleta`). Ausente = a cor padrao do tipo em `ambienteProps.ts`.
    */
   cor?: string
   /**
@@ -304,6 +305,11 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.535, v: 0.300, tipo: 'tocha', escala: 0.8 },
     { u: 0.655, v: 0.375, tipo: 'tocha', escala: 0.8 },
     { u: 0.375, v: 0.775, tipo: 'tocha', escala: 0.8 },
+    // Borboletas nos canteiros de flor (24/10/2026): campina de cima (lilas),
+    // capim florido do meio (azul, contraste com a flor amarela) e a moita florida da direita.
+    { u: 0.650, v: 0.150, tipo: 'borboleta', cor: '#c9a7ff' },
+    { u: 0.520, v: 0.590, tipo: 'borboleta', cor: '#7fd3ff', fase: 3 },
+    { u: 0.890, v: 0.490, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
   ],
 
   // -------------------------------------------------------------------------
