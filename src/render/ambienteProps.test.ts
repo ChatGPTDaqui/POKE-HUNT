@@ -20,6 +20,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { COLISAO_POR_ARTE } from '@/data/generated/subBiomaCollision.generated'
 import { LAVA_POR_ARTE } from '@/data/generated/lavaMask.generated'
+import { AGUA_POR_ARTE } from '@/data/generated/aguaMask.generated'
 import { ANCORAS_POR_ARTE } from '@/data/ancorasDeAmbiente'
 // `?raw` do Vite, e nao `readFileSync`: `src/` nao tem os types de node, e
 // adicionar era o remedio errado. Ver o cabecalho de `ambiente.test.ts`.
@@ -126,10 +127,13 @@ describe('a tabela de ancoras aponta pra artes que existem (PH-254)', () => {
 
 describe('prop so aparece onde foi cadastrado (PH-254)', () => {
   it('arte sem ancora e sem mascara nao desenha nada', () => {
-    // `plains` tem preset de ambiente (particula), e NAO tem ancora: o
-    // contrato e que ela continue exatamente como estava.
-    expect(ANCORAS_POR_ARTE['assets/hunt-backgrounds/plains.jpg']).toBeUndefined()
-    expect(rodar('assets/hunt-backgrounds/plains.jpg', 6)).toEqual([])
+    // Uma arte com preset de ambiente (particula) e SEM ancora nem mascara: o
+    // contrato e que ela continue exatamente como estava. Escolhida em vez de
+    // fixa porque a cascata "vida nos mapas" (24/10/2026) vai dando ancora a
+    // cada arte, uma por vez.
+    const arte = Object.keys(COLISAO_POR_ARTE).find((a) => !ANCORAS_POR_ARTE[a] && !LAVA_POR_ARTE[a] && !AGUA_POR_ARTE[a])
+    if (!arte) return
+    expect(rodar(arte, 6)).toEqual([])
     expect(quantidadeDePropsDeAmbiente()).toBe(0)
   })
 
