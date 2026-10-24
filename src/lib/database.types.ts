@@ -3779,6 +3779,7 @@ export type Database = {
         }
         Returns: Json
       }
+      historico_do_ginasio: { Args: { p_ginasio: string }; Returns: Json }
       hunts_iniciais: { Args: never; Returns: string[] }
       id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
@@ -7994,6 +7995,7 @@ export type Database = {
         }
         Returns: Json
       }
+      historico_do_ginasio: { Args: { p_ginasio: string }; Returns: Json }
       hunts_iniciais: { Args: never; Returns: string[] }
       id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
