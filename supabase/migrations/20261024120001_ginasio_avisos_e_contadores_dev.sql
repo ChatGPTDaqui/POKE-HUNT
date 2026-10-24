@@ -1,8 +1,8 @@
--- Espelho de 20261024120000_ginasio_correio_e_contadores_public.sql no schema `dev`. GERADO por src/data/ginasios.test.ts.
--- Ginasios: aviso ao lider pelo correio + contadores das conquistas de
+-- Espelho de 20261024120000_ginasio_avisos_e_contadores_public.sql no schema `dev`. GERADO por src/data/ginasios.test.ts.
+-- Ginasios: aviso ao lider (mensagem de sistema) + contadores das conquistas de
 -- insignia e lideranca (24/10/2026, pedido do dono).
 --
--- Correio (`mail_messages`, tipo 'sistema', de "Ginásios"):
+-- Aviso (`mail_messages`, tipo 'sistema', de "Ginásios"):
 --   * lider humano: venceu uma defesa (+ouro), perdeu uma defesa, alguem entrou
 --     na disputa do mandato (destronar);
 --   * troca de mandato: quem assume, quem perdeu o ginasio, mandato renovado.

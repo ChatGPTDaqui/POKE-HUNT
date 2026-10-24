@@ -47,9 +47,9 @@ const DEFESA = 'supabase/migrations/20261023160000_defesa_de_ginasio_e_rotacao_p
 const DEFESA_DEV = 'supabase/migrations/20261023160001_defesa_de_ginasio_e_rotacao_dev.sql'
 const defesaDev = () => paraDev(readFileSync(DEFESA, 'utf8'), '20261023160000_defesa_de_ginasio_e_rotacao_public.sql')
 // Aviso ao lider (Social) + contadores das conquistas (24/10/2026): mesmo esquema.
-const CORREIO = 'supabase/migrations/20261024120000_ginasio_correio_e_contadores_public.sql'
-const CORREIO_DEV = 'supabase/migrations/20261024120001_ginasio_correio_e_contadores_dev.sql'
-const correioDev = () => paraDev(readFileSync(CORREIO, 'utf8'), '20261024120000_ginasio_correio_e_contadores_public.sql')
+const AVISOS = 'supabase/migrations/20261024120000_ginasio_avisos_e_contadores_public.sql'
+const AVISOS_DEV = 'supabase/migrations/20261024120001_ginasio_avisos_e_contadores_dev.sql'
+const avisosDev = () => paraDev(readFileSync(AVISOS, 'utf8'), '20261024120000_ginasio_avisos_e_contadores_public.sql')
 
 function paraDev(sql: string, origem = '20261023140000_ginasios_public.sql'): string {
   return `-- Espelho de ${origem} no schema \`dev\`. GERADO por src/data/ginasios.test.ts.\n`
@@ -66,7 +66,7 @@ if (process.env.GERAR_GINASIOS === '1') {
   writeFileSync(PUBLIC, novo, 'utf8')
   writeFileSync(DEV, paraDev(novo), 'utf8')
   writeFileSync(DEFESA_DEV, defesaDev(), 'utf8')
-  writeFileSync(CORREIO_DEV, correioDev(), 'utf8')
+  writeFileSync(AVISOS_DEV, avisosDev(), 'utf8')
 }
 const SQL = readFileSync(PUBLIC, 'utf8')
 
@@ -75,19 +75,19 @@ describe('ginasios: catalogo e SQL', () => {
     expect(SQL).toBe(sqlAtualizado())
     expect(readFileSync(DEV, 'utf8')).toBe(paraDev(SQL))
     expect(readFileSync(DEFESA_DEV, 'utf8')).toBe(defesaDev())
-    expect(readFileSync(CORREIO_DEV, 'utf8')).toBe(correioDev())
+    expect(readFileSync(AVISOS_DEV, 'utf8')).toBe(avisosDev())
   })
 
   // `$$` vira `$` num String.replace de JS (ja derrubou duas migrations).
   it('todo corpo de funcao abre e fecha com $$', () => {
-    for (const sql of [SQL, readFileSync(DEFESA, 'utf8'), readFileSync(CORREIO, 'utf8')]) {
+    for (const sql of [SQL, readFileSync(DEFESA, 'utf8'), readFileSync(AVISOS, 'utf8')]) {
       expect((sql.match(/^as \$\$$/gm) ?? []).length).toBe((sql.match(/^(end;?\n)?\$\$;$/gm) ?? []).length)
       expect(sql).not.toMatch(/^as \$$/m)
     }
   })
 
-  it('o nome do ginasio no correio e o mesmo da tela', () => {
-    const sql = readFileSync(CORREIO, 'utf8')
+  it('o nome do ginasio no aviso e o mesmo da tela', () => {
+    const sql = readFileSync(AVISOS, 'utf8')
     for (const t of TIPOS_DE_GINASIO) expect(sql, t).toContain(`when '${t}' then '${SUFIXO_DO_TIPO[t]}'`)
     for (const f of FAIXAS_DE_GINASIO) expect(sql, f.liga).toContain(`when '${f.nivel}' then '${f.liga}'`)
     expect(nomeDoGinasio('FIRE')).toBe(`Ginásio ${SUFIXO_DO_TIPO.FIRE}`)

@@ -1,7 +1,7 @@
--- Ginasios: aviso ao lider pelo correio + contadores das conquistas de
+-- Ginasios: aviso ao lider (mensagem de sistema) + contadores das conquistas de
 -- insignia e lideranca (24/10/2026, pedido do dono).
 --
--- Correio (`mail_messages`, tipo 'sistema', de "Ginásios"):
+-- Aviso (`mail_messages`, tipo 'sistema', de "Ginásios"):
 --   * lider humano: venceu uma defesa (+ouro), perdeu uma defesa, alguem entrou
 --     na disputa do mandato (destronar);
 --   * troca de mandato: quem assume, quem perdeu o ginasio, mandato renovado.
