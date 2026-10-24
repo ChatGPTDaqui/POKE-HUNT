@@ -94,6 +94,11 @@ export function GinasiosMenu() {
         <span style={{ color: METAL_DA_LIGA[faixa].cor }}><Medal className="inline" weight="fill" aria-hidden /> Insígnias: <b>{estado.insignias.length}/90</b></span>
       </div>
       <div className="flex gap-[.35em] overflow-x-auto [scrollbar-width:none]" role="group" aria-label="Ligas">
+        {/* Mural primeiro: no fim da fileira ficava fora da tela no celular. */}
+        <button type="button" className="liga-aba" aria-pressed={mural} onClick={() => { setMural(true); setSelecionado(null) }}
+          style={{ '--liga-cor': '#f5c542', '--liga-fundo': 'linear-gradient(135deg, #fff1a8, #c98f12, #fff1a8)' } as CSSProperties}>
+          <Trophy className="mr-[.25em] inline" weight="fill" aria-hidden />Mural
+        </button>
         {FAIXAS_DE_GINASIO.map((f) => {
           const metal = METAL_DA_LIGA[f.nivel]
           return (
@@ -104,10 +109,6 @@ export function GinasiosMenu() {
             </button>
           )
         })}
-        <button type="button" className="liga-aba" aria-pressed={mural} onClick={() => { setMural(true); setSelecionado(null) }}
-          style={{ '--liga-cor': '#f5c542', '--liga-fundo': 'linear-gradient(135deg, #fff1a8, #c98f12, #fff1a8)' } as CSSProperties}>
-          <Trophy className="mr-[.25em] inline" weight="fill" aria-hidden />Mural
-        </button>
       </div>
 
       {mural ? <MuralDeLideres /> : <>
