@@ -46,7 +46,7 @@ function blocoDoCatalogo(): string {
 const DEFESA = 'supabase/migrations/20261023160000_defesa_de_ginasio_e_rotacao_public.sql'
 const DEFESA_DEV = 'supabase/migrations/20261023160001_defesa_de_ginasio_e_rotacao_dev.sql'
 const defesaDev = () => paraDev(readFileSync(DEFESA, 'utf8'), '20261023160000_defesa_de_ginasio_e_rotacao_public.sql')
-// Correio do lider + contadores das conquistas (24/10/2026): mesmo esquema.
+// Aviso ao lider (Social) + contadores das conquistas (24/10/2026): mesmo esquema.
 const CORREIO = 'supabase/migrations/20261024120000_ginasio_correio_e_contadores_public.sql'
 const CORREIO_DEV = 'supabase/migrations/20261024120001_ginasio_correio_e_contadores_dev.sql'
 const correioDev = () => paraDev(readFileSync(CORREIO, 'utf8'), '20261024120000_ginasio_correio_e_contadores_public.sql')
