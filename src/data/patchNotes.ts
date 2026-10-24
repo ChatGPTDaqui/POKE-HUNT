@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.41',
+    date: '2026-10-24',
+    title: 'Equipe do desafio de ginásio',
+    highlights: [
+      'Ao desafiar um ginásio, escolha o duelo e monte a equipe do desafio: 6 POKEs, os golpes de cada um e Rotação ou Inteligente — sem mexer na sua equipe de caça.',
+      'A equipe começa com a sua equipe atual e o jogo lembra a última usada (pela insígnia, e para destronar em cada tipo).',
+      'Quem vence o duelo para destronar assume o ginásio defendendo com a mesma equipe, golpes e rotação.',
+    ],
+  },
+  {
     version: '8.40',
     date: '2026-10-24',
     title: 'Avisos de ginásio e conquistas de insígnia',

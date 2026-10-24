@@ -4,9 +4,9 @@
 // Desafiar cobra a taxa e congela as equipes; o servidor roda a luta e o
 // jogador assiste a mesma luta ao vivo na arena.
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { Check, Crown, Medal, Sword, Users } from '@phosphor-icons/react'
+import { Check, Crown, Medal, Users } from '@phosphor-icons/react'
 import {
-  DESAFIOS_POR_DIA, FAIXAS_DE_GINASIO, REPASSE_DO_LIDER, equipeDoGinasio, motivoDeEquipeInvalida, partesDoGinasio,
+  DESAFIOS_POR_DIA, FAIXAS_DE_GINASIO, REPASSE_DO_LIDER, equipeDoGinasio, partesDoGinasio,
   type TipoDeDuelo,
 } from '@/data/ginasios'
 import type { ElementType } from '@/data/generated/types'
@@ -24,10 +24,11 @@ import {
   type EstadoDosGinasios, type GinasioNoEstado,
 } from '@/data/remote/ginasiosRpc'
 import { entrarNaArena } from '@/features/arena/arena'
-import { GameButton } from '@/components/game/controls'
 import { create } from 'zustand'
 import { BrasaoDeGinasio, METAL_DA_LIGA, nomeDoGinasio } from './BrasaoDeGinasio'
 import { DefesaDoGinasio } from './DefesaDoGinasio'
+import { EquipeDoDesafio } from './EquipeDoDesafio'
+import type { SlotDeEquipe } from '@/components/montador/MontadorDeEquipe'
 import { cn } from '@/lib/utils'
 
 const fmt = new Intl.NumberFormat('pt-BR')
@@ -136,29 +137,22 @@ export function GinasiosMenu() {
 function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
   g: GinasioNoEstado; meuId: string | null; desafiosHoje: number; temInsignia: boolean; aoMudar: () => Promise<void>
 }) {
-  const team = useGameStateStore((s) => s.team)
   const ouro = useGameStateStore((s) => s.wallet.gold)
   const [ocupado, setOcupado] = useState(false)
   const faixa = FAIXAS_DE_GINASIO.find((f) => f.nivel === g.faixa)!
   const tipo = g.tipo as ElementType
   const souLider = g.liderId != null && g.liderId === meuId
-  const especies = team.map((p) => p.speciesId)
-  const motivoInsignia = motivoDeEquipeInvalida(especies, null)
-  const motivoDestronar = motivoDeEquipeInvalida(especies, tipo)
   const semDesafio = desafiosHoje >= DESAFIOS_POR_DIA
   const semOuro = ouro < g.taxa
 
-  function bloqueio(motivo: string | null): string | null {
-    if (souLider) return 'Você é o líder deste ginásio.'
-    if (semDesafio) return 'Você já fez os desafios de hoje.'
-    if (semOuro) return `Precisa de ${fmt.format(g.taxa)} de ouro.`
-    return motivo
-  }
+  const bloqueio = souLider ? 'Você é o líder deste ginásio.'
+    : semDesafio ? 'Você já fez os desafios de hoje.'
+      : semOuro ? `Precisa de ${fmt.format(g.taxa)} de ouro.` : null
 
-  async function desafiar(duelo: TipoDeDuelo) {
+  async function desafiar(duelo: TipoDeDuelo, slots: SlotDeEquipe[]) {
     setOcupado(true)
     try {
-      const d = await desafiarGinasio(g.id, duelo)
+      const d = await desafiarGinasio(g.id, duelo, slots)
       // A taxa ja saiu no servidor: o ouro de la vale antes mesmo da luta resolver.
       useGameStateStore.setState((s) => ({ wallet: { ...s.wallet, gold: Number(d.gold) } }))
       const r = await resolverDesafio(d.desafioId)
@@ -189,17 +183,15 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
     }
   }
 
-  function confirmar(duelo: TipoDeDuelo) {
+  function confirmar(duelo: TipoDeDuelo, slots: SlotDeEquipe[]) {
     useConfirmDialogStore.getState().confirm({
       title: duelo === 'insignia' ? 'Desafiar pela insígnia?' : 'Desafiar para destronar?',
       message: `Taxa de ${fmt.format(g.taxa)} de ouro, que não volta. Se você perder${g.liderId ? `, ${Math.round(REPASSE_DO_LIDER * 100)}% vão para o líder` : ''}. Conta 1 dos ${DESAFIOS_POR_DIA} desafios de hoje.`,
       confirmLabel: 'Desafiar',
-      onConfirm: () => void desafiar(duelo),
+      onConfirm: () => void desafiar(duelo, slots),
     })
   }
 
-  const bloqInsignia = bloqueio(motivoInsignia)
-  const bloqDestronar = bloqueio(motivoDestronar)
 
   return (
     <section className="ginasio-painel flex flex-col gap-[.5em] rounded-[.7em] p-[.6em]" aria-label={`${nomeDoGinasio(tipo)} ${g.faixa}`}
@@ -236,20 +228,9 @@ function DetalheDoGinasio({ g, meuId, desafiosHoje, temInsignia, aoMudar }: {
           })}
         </div>
       </div>
-      {souLider ? <DefesaDoGinasio g={g} aoSalvar={aoMudar} /> : (
-      <div className="flex flex-col gap-[.3em]">
-        <GameButton variant="primary" disabled={ocupado || bloqInsignia != null} carregando={ocupado} onClick={() => confirmar('insignia')}>
-          <Medal aria-hidden /> Desafiar pela insígnia
-        </GameButton>
-        {bloqInsignia && <span className="text-[.72em] text-menu-muted">{bloqInsignia}</span>}
-        <GameButton variant="secondary" disabled={ocupado || bloqDestronar != null} onClick={() => confirmar('destronar')}>
-          <Sword aria-hidden /> Desafiar para destronar
-        </GameButton>
-        <span className="text-[.72em] text-menu-muted">
-          {bloqDestronar ?? `Só com a equipe toda ${tipo}. No fim do mandato, assume quem venceu no menor tempo.`}
-        </span>
-      </div>
-      )}
+      {souLider
+        ? <DefesaDoGinasio g={g} aoSalvar={aoMudar} />
+        : <EquipeDoDesafio tipo={tipo} bloqueio={bloqueio} ocupado={ocupado} aoDesafiar={confirmar} />}
     </section>
   )
 }
