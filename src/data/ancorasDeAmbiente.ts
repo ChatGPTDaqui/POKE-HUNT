@@ -495,4 +495,13 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.270, v: 0.780, tipo: 'borboleta', cor: '#7fd3ff', fase: 4 },
     { u: 0.860, v: 0.800, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
   ],
+
+  // PLANICIE (mapa 3). Rio e laguinho ondulam pela mascara; sem fogo nem luz
+  // no desenho, o que sobra e vida de campo: borboletas nos canteiros.
+  'assets/hunt-backgrounds/plains.jpg': [
+    { u: 0.265, v: 0.210, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.310, v: 0.410, tipo: 'borboleta', cor: '#fff3b0', fase: 2 },
+    { u: 0.220, v: 0.760, tipo: 'borboleta', cor: '#7fd3ff', fase: 4 },
+    { u: 0.770, v: 0.710, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
+  ],
 }
