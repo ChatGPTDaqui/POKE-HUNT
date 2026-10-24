@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.40',
+    date: '2026-10-24',
+    title: 'Avisos de ginásio e conquistas de insígnia',
+    highlights: [
+      'O líder de ginásio recebe aviso no Correio: defesa vencida (com o ouro recebido), defesa derrotada e desafiante na disputa do mandato.',
+      'Fim de mandato também avisa: quem assume, quem perdeu o ginásio e quando o mandato é renovado.',
+      'Sete conquistas novas de ginásio em Social e PvP: Primeira Insígnia, Liga Regional e Liga Elite completas, Líder de Ginásio, Muralha (10 defesas vencidas) e duas impossíveis — Liga Mestra completa e as 90 insígnias.',
+      'Insígnias que você já tinha contam. As conquistas desbloqueiam no próximo salvamento da caçada.',
+    ],
+  },
+  {
     version: '8.39',
     date: '2026-10-23',
     title: 'Ginásios',
