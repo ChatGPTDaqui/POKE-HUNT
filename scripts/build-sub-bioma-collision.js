@@ -100,6 +100,14 @@ const ESCALA_POR_ARTE = {
   'pokemon-mansion.jpg': 0.6,
   // Treno ~2,5x o treinador.
   'tundra.jpg': 0.65,
+  // Vagonete ~2,5x o treinador.
+  'rock-tunnel.jpg': 0.6,
+  // Toca de Diglett ~2x o treinador.
+  'digletts-cave.jpg': 0.6,
+  // Flor de lotus ~1,5x o treinador.
+  'lily-pond.jpg': 0.6,
+  // Lanterna de papel ~2x o treinador.
+  'maidens-peak.jpg': 0.55,
 };
 
 /**

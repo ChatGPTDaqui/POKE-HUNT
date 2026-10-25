@@ -1065,4 +1065,173 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.436, v: 0.919, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 6 },
     { u: 0.562, v: 0.919, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 7 },
   ],
+
+  // MONTE LUA (lote 11, Subterraneo). Ja pinga pelo preset; Pedra da Lua pulsando no
+  // facho de luz, poeira brilhando no facho e cristais das paredes cintilando.
+  'assets/hunt-backgrounds/mt-moon.jpg': [
+    { u: 0.499, v: 0.481, tipo: 'orbe', cor: '#dce6ff', escala: 1.1 },
+    { u: 0.497, v: 0.259, tipo: 'vagalume', cor: '#eef2ff' },
+    { u: 0.481, v: 0.388, tipo: 'vagalume', cor: '#eef2ff', fase: 3 },
+    { u: 0.274, v: 0.274, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 1 },
+    { u: 0.725, v: 0.269, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 2 },
+    { u: 0.771, v: 0.321, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 3 },
+    { u: 0.272, v: 0.611, tipo: 'orbe', cor: '#c8b8ff', escala: 0.45, fase: 4 },
+    { u: 0.223, v: 0.818, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 5 },
+    { u: 0.823, v: 0.818, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 6 },
+    { u: 0.135, v: 0.859, tipo: 'orbe', cor: '#c8b8ff', escala: 0.55, fase: 7 },
+  ],
+
+  // TUNEL DE PEDRA (lote 11, Subterraneo). Ja pinga pelo preset; lampioes da mina
+  // pulsando e poeira brilhando na luz que entra pela saida.
+  'assets/hunt-backgrounds/rock-tunnel.jpg': [
+    { u: 0.379, v: 0.184, tipo: 'orbe', cor: '#ffa040', escala: 0.6 },
+    { u: 0.177, v: 0.256, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 1 },
+    { u: 0.625, v: 0.197, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 2 },
+    { u: 0.621, v: 0.409, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 3 },
+    { u: 0.857, v: 0.619, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 4 },
+    { u: 0.140, v: 0.660, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 5 },
+    { u: 0.393, v: 0.137, tipo: 'orbe', cor: '#ffa040', escala: 0.4, fase: 6 },
+    { u: 0.497, v: 0.911, tipo: 'vagalume', cor: '#fff6dc' },
+  ],
+
+  // CAVERNA ESCURA (lote 11, Subterraneo). Ja pinga pelo preset; cristais azuis
+  // pulsando no breu, respingo nas pocas e poeira brilhando na luz da entrada.
+  'assets/hunt-backgrounds/dark-cave.jpg': [
+    { u: 0.163, v: 0.137, tipo: 'orbe', cor: '#8fa8ff', escala: 0.7 },
+    { u: 0.261, v: 0.300, tipo: 'orbe', cor: '#8fa8ff', escala: 0.7, fase: 2 },
+    { u: 0.836, v: 0.111, tipo: 'orbe', cor: '#8fa8ff', escala: 0.6, fase: 4 },
+    { u: 0.836, v: 0.362, tipo: 'orbe', cor: '#8fa8ff', escala: 0.8, fase: 6 },
+    { u: 0.136, v: 0.712, tipo: 'orbe', cor: '#8fa8ff', escala: 0.7, fase: 8 },
+    { u: 0.613, v: 0.326, tipo: 'correnteza' },
+    { u: 0.388, v: 0.637, tipo: 'correnteza', fase: 2 },
+    { u: 0.613, v: 0.668, tipo: 'correnteza', fase: 4 },
+    { u: 0.199, v: 0.833, tipo: 'correnteza', fase: 6 },
+    { u: 0.587, v: 0.756, tipo: 'correnteza', fase: 8 },
+    { u: 0.499, v: 0.942, tipo: 'vagalume', cor: '#eef2ff' },
+  ],
+
+  // CACHOEIRA METEORO (lote 11, Subterraneo). Lago e pocas ondulam pela mascara;
+  // queda batendo no lago com bruma, e os cristais violeta pulsando.
+  'assets/hunt-backgrounds/meteor-falls.jpg': [
+    { u: 0.637, v: 0.484, tipo: 'cascata', escala: 0.9 },
+    { u: 0.652, v: 0.466, tipo: 'nevoa', cor: '#ffffff', escala: 0.4 },
+    { u: 0.336, v: 0.145, tipo: 'orbe', cor: '#c080ff', escala: 0.7 },
+    { u: 0.626, v: 0.150, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 1 },
+    { u: 0.171, v: 0.223, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 2 },
+    { u: 0.813, v: 0.192, tipo: 'orbe', cor: '#c080ff', escala: 0.5, fase: 3 },
+    { u: 0.471, v: 0.318, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 4 },
+    { u: 0.373, v: 0.448, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 5 },
+    { u: 0.311, v: 0.621, tipo: 'orbe', cor: '#c080ff', escala: 0.5, fase: 6 },
+    { u: 0.173, v: 0.823, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 7 },
+    { u: 0.826, v: 0.823, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 8 },
+  ],
+
+  // CAVERNA DIGLETT (lote 11, Subterraneo). Ja pinga pelo preset; poeira subindo das
+  // tocas cavadas (como se algo tivesse acabado de entrar) e ar saindo da boca do tunel.
+  'assets/hunt-backgrounds/digletts-cave.jpg': [
+    { u: 0.323, v: 0.179, tipo: 'nevoa', cor: '#a08060', escala: 0.22 },
+    { u: 0.624, v: 0.228, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 6 },
+    { u: 0.223, v: 0.326, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 12 },
+    { u: 0.823, v: 0.378, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 18 },
+    { u: 0.124, v: 0.471, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 24 },
+    { u: 0.875, v: 0.569, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 30 },
+    { u: 0.274, v: 0.621, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 36 },
+    { u: 0.673, v: 0.673, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 42 },
+    { u: 0.323, v: 0.828, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 48 },
+    { u: 0.499, v: 0.890, tipo: 'nevoa', cor: '#5a4030', escala: 0.3, fase: 4 },
+  ],
+
+  // CAVERNA BAIXIO (lote 11, Subterraneo). Pocas de mare ondulam pela mascara;
+  // respingo nos buracos do gelo e bafo frio sobre a placa de gelo.
+  'assets/hunt-backgrounds/shoal-cave.jpg': [
+    { u: 0.331, v: 0.171, tipo: 'correnteza' },
+    { u: 0.745, v: 0.233, tipo: 'correnteza', fase: 3 },
+    { u: 0.466, v: 0.197, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.45 },
+    { u: 0.699, v: 0.290, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.4, fase: 15 },
+    { u: 0.233, v: 0.269, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.4, fase: 30 },
+  ],
+
+  // RIO (lote 12, Aguas Interiores). Ja chove pelo preset; leito e pocas ondulam pela
+  // mascara, e as tres corredeiras espumam.
+  'assets/hunt-backgrounds/river.jpg': [
+    { u: 0.647, v: 0.280, tipo: 'cascata', escala: 0.55 },
+    { u: 0.409, v: 0.523, tipo: 'cascata', escala: 0.55, fase: 2 },
+    { u: 0.290, v: 0.652, tipo: 'cascata', escala: 0.55, fase: 4 },
+    { u: 0.776, v: 0.248, tipo: 'correnteza' },
+    { u: 0.155, v: 0.647, tipo: 'correnteza', fase: 3 },
+    { u: 0.362, v: 0.559, tipo: 'correnteza', fase: 6 },
+  ],
+
+  // CACHOEIRA (lote 12, Aguas Interiores). Lago e poca ondulam pela mascara; queda
+  // batendo forte com bruma subindo, e borboletas no gramado.
+  'assets/hunt-backgrounds/waterfall.jpg': [
+    { u: 0.450, v: 0.186, tipo: 'cascata', escala: 1.1 },
+    { u: 0.549, v: 0.186, tipo: 'cascata', escala: 1.1, fase: 2 },
+    { u: 0.455, v: 0.248, tipo: 'nevoa', cor: '#ffffff', escala: 0.55 },
+    { u: 0.559, v: 0.259, tipo: 'nevoa', cor: '#ffffff', escala: 0.55, fase: 12 },
+    { u: 0.518, v: 0.455, tipo: 'correnteza' },
+    { u: 0.093, v: 0.414, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.906, v: 0.388, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.854, v: 0.776, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.362, v: 0.802, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+  ],
+
+  // LAGOA DAS NINFEIAS (lote 12, Aguas Interiores). Agua ondula pela mascara entre
+  // as folhas; borboletas sobre a lagoa e petala de lotus soltando.
+  'assets/hunt-backgrounds/lily-pond.jpg': [
+    { u: 0.280, v: 0.217, tipo: 'borboleta', cor: '#bfe8ff' },
+    { u: 0.864, v: 0.367, tipo: 'borboleta', cor: '#bfe8ff', fase: 3 },
+    { u: 0.362, v: 0.688, tipo: 'borboleta', cor: '#bfe8ff', fase: 5 },
+    { u: 0.673, v: 0.668, tipo: 'borboleta', cor: '#fff3b0', fase: 7 },
+    { u: 0.217, v: 0.197, tipo: 'petala', cor: '#ffb0d0', escala: 0.5 },
+    { u: 0.756, v: 0.192, tipo: 'petala', cor: '#ffb0d0', escala: 0.5, fase: 3 },
+    { u: 0.176, v: 0.668, tipo: 'petala', cor: '#ffb0d0', escala: 0.5, fase: 5 },
+    { u: 0.818, v: 0.823, tipo: 'petala', cor: '#ffb0d0', escala: 0.5, fase: 7 },
+  ],
+
+  // LAGO DA FURIA (lote 12, Aguas Interiores). Agua escura ondula pela mascara;
+  // relampago estalando no reflexo da tempestade, nuvem pesada rolando e luz palida.
+  'assets/hunt-backgrounds/lake-of-rage.jpg': [
+    { u: 0.668, v: 0.362, tipo: 'eletrica', cor: '#ff9a8a' },
+    { u: 0.719, v: 0.399, tipo: 'eletrica', cor: '#ff9a8a', fase: 4 },
+    { u: 0.414, v: 0.290, tipo: 'nevoa', cor: '#5a7a70', escala: 0.55 },
+    { u: 0.647, v: 0.300, tipo: 'nevoa', cor: '#5a7a70', escala: 0.55, fase: 15 },
+    { u: 0.238, v: 0.238, tipo: 'orbe', cor: '#e8f0c0', escala: 1 },
+  ],
+
+  // PICO DA DONZELA (lote 12, Aguas Interiores). Ja ondula pelo preset; as oito
+  // lanternas de papel pulsando e neblina do mar subindo pelas bordas do penhasco.
+  'assets/hunt-backgrounds/maidens-peak.jpg': [
+    { u: 0.424, v: 0.217, tipo: 'orbe', cor: '#ffc890', escala: 0.6 },
+    { u: 0.274, v: 0.316, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 1 },
+    { u: 0.725, v: 0.362, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 2 },
+    { u: 0.274, v: 0.668, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 3 },
+    { u: 0.725, v: 0.668, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 4 },
+    { u: 0.424, v: 0.766, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 5 },
+    { u: 0.575, v: 0.766, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 6 },
+    { u: 0.171, v: 0.466, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.6 },
+    { u: 0.828, v: 0.569, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.6, fase: 15 },
+    { u: 0.207, v: 0.854, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.5, fase: 30 },
+    { u: 0.776, v: 0.880, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.5, fase: 45 },
+  ],
+
+  // FONTES TERMAIS (lote 12, Aguas Interiores). Piscinas ondulam pela mascara; vapor
+  // subindo das seis piscinas e as lanternas de pedra acesas.
+  'assets/hunt-backgrounds/hot-springs.jpg': [
+    { u: 0.171, v: 0.171, tipo: 'nevoa', cor: '#ffffff', escala: 0.4 },
+    { u: 0.155, v: 0.455, tipo: 'nevoa', cor: '#ffffff', escala: 0.4, fase: 8 },
+    { u: 0.171, v: 0.756, tipo: 'nevoa', cor: '#ffffff', escala: 0.4, fase: 16 },
+    { u: 0.802, v: 0.171, tipo: 'nevoa', cor: '#ffffff', escala: 0.4, fase: 24 },
+    { u: 0.828, v: 0.445, tipo: 'nevoa', cor: '#ffffff', escala: 0.35, fase: 32 },
+    { u: 0.807, v: 0.725, tipo: 'nevoa', cor: '#ffffff', escala: 0.45, fase: 40 },
+    { u: 0.424, v: 0.168, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45 },
+    { u: 0.572, v: 0.168, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 1 },
+    { u: 0.122, v: 0.347, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 2 },
+    { u: 0.877, v: 0.347, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 3 },
+    { u: 0.424, v: 0.396, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 4 },
+    { u: 0.572, v: 0.396, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 5 },
+    { u: 0.675, v: 0.556, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 6 },
+    { u: 0.422, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 7 },
+    { u: 0.572, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 8 },
+  ],
 }
