@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.44',
+    date: '2026-10-24',
+    title: 'Vida nos mapas (lote 1)',
+    highlights: [
+      'Rota 46, Campina, Planície e Vilarejo: rios, lagos e riachos agora ondulam de verdade, e borboletas voam nos canteiros de flor.',
+      'Fazenda MuuMuu e Estrada de Ciclismo foram redimensionadas para combinar com o tamanho do treinador e dos POKEs.',
+    ],
+  },
+  {
     version: '8.43',
     date: '2026-10-24',
     title: 'Mural de líderes',

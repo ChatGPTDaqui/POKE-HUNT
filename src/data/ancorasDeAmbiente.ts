@@ -516,4 +516,24 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.500, v: 0.470, tipo: 'borboleta', cor: '#ffb0d0', fase: 3 },
     { u: 0.800, v: 0.760, tipo: 'borboleta', cor: '#fff3b0', fase: 5 },
   ],
+
+  // FLORESTA QUEIMADA (lote 2, Sombrio). A arte ja pinta fio de fumaca e
+  // brasa laranja nos tocos: aqui eles passam a subir e piscar. O rio e cinza
+  // de cinza — mesma cor do chao de cinzas, sem mascara possivel.
+  'assets/hunt-backgrounds/burnt-forest.jpg': [
+    { u: 0.155, v: 0.045, tipo: 'chamine', escala: 0.7 },
+    { u: 0.717, v: 0.025, tipo: 'chamine', escala: 0.5, fase: 1 },
+    { u: 0.474, v: 0.190, tipo: 'chamine', escala: 0.5, fase: 2 },
+    { u: 0.474, v: 0.195, tipo: 'tocha', escala: 0.45 },
+    { u: 0.530, v: 0.190, tipo: 'chamine', escala: 0.45, fase: 3 },
+    { u: 0.572, v: 0.215, tipo: 'tocha', escala: 0.4, fase: 1 },
+    { u: 0.735, v: 0.335, tipo: 'chamine', escala: 0.5, fase: 4 },
+    { u: 0.815, v: 0.370, tipo: 'tocha', escala: 0.6, fase: 2 },
+    { u: 0.022, v: 0.335, tipo: 'tocha', escala: 0.45, fase: 3 },
+    { u: 0.223, v: 0.745, tipo: 'chamine', escala: 0.45, fase: 5 },
+    { u: 0.223, v: 0.755, tipo: 'tocha', escala: 0.4, fase: 4 },
+    { u: 0.523, v: 0.785, tipo: 'chamine', escala: 0.5, fase: 6 },
+    { u: 0.556, v: 0.835, tipo: 'tocha', escala: 0.4, fase: 5 },
+    { u: 0.223, v: 0.822, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5 },
+  ],
 }
