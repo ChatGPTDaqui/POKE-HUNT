@@ -1109,4 +1109,20 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.587, v: 0.756, tipo: 'correnteza', fase: 8 },
     { u: 0.499, v: 0.942, tipo: 'vagalume', cor: '#eef2ff' },
   ],
+
+  // CACHOEIRA METEORO (lote 11, Subterraneo). Lago e pocas ondulam pela mascara;
+  // queda batendo no lago com bruma, e os cristais violeta pulsando.
+  'assets/hunt-backgrounds/meteor-falls.jpg': [
+    { u: 0.637, v: 0.484, tipo: 'cascata', escala: 0.9 },
+    { u: 0.652, v: 0.466, tipo: 'nevoa', cor: '#ffffff', escala: 0.4 },
+    { u: 0.336, v: 0.145, tipo: 'orbe', cor: '#c080ff', escala: 0.7 },
+    { u: 0.626, v: 0.150, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 1 },
+    { u: 0.171, v: 0.223, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 2 },
+    { u: 0.813, v: 0.192, tipo: 'orbe', cor: '#c080ff', escala: 0.5, fase: 3 },
+    { u: 0.471, v: 0.318, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 4 },
+    { u: 0.373, v: 0.448, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 5 },
+    { u: 0.311, v: 0.621, tipo: 'orbe', cor: '#c080ff', escala: 0.5, fase: 6 },
+    { u: 0.173, v: 0.823, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 7 },
+    { u: 0.826, v: 0.823, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 8 },
+  ],
 }
