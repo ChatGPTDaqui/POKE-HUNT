@@ -733,4 +733,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.300, v: 0.640, tipo: 'nevoa', cor: '#ffffff', fase: 20 },
     { u: 0.640, v: 0.720, tipo: 'nevoa', cor: '#ffffff', fase: 30 },
   ],
+
+  // OBRA (lote 5, Industrial). Proporcao boa. Fumaca de escape das tres
+  // maquinas, poeira levantando do monte de terra e faisca de solda no
+  // portico de canos.
+  'assets/hunt-backgrounds/construction-site.jpg': [
+    { u: 0.632, v: 0.425, tipo: 'chamine', escala: 0.4 },
+    { u: 0.160, v: 0.305, tipo: 'chamine', escala: 0.35, fase: 2 },
+    { u: 0.640, v: 0.745, tipo: 'chamine', escala: 0.35, fase: 4 },
+    { u: 0.560, v: 0.370, tipo: 'nevoa', cor: '#c9a77a', escala: 0.45 },
+    { u: 0.500, v: 0.490, tipo: 'nevoa', cor: '#c9a77a', escala: 0.4, fase: 12 },
+    { u: 0.855, v: 0.375, tipo: 'eletrica', escala: 0.6 },
+    { u: 0.855, v: 0.555, tipo: 'eletrica', escala: 0.6, fase: 3 },
+  ],
 }
