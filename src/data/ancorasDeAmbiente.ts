@@ -853,4 +853,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.362, v: 0.455, tipo: 'nevoa', cor: '#c9d4e6', escala: 0.6 },
     { u: 0.595, v: 0.569, tipo: 'nevoa', cor: '#c9d4e6', escala: 0.6, fase: 15 },
   ],
+
+  // ARQUIPELAGO LARANJA (lote 7, Marinho). Mar do cais ondula pela mascara;
+  // onda batendo na areia e borboletas nos canteiros floridos.
+  'assets/hunt-backgrounds/orange-archipelago.jpg': [
+    { u: 0.207, v: 0.849, tipo: 'quebraMar', escala: 0.6 },
+    { u: 0.725, v: 0.844, tipo: 'quebraMar', escala: 0.6, fase: 3 },
+    { u: 0.098, v: 0.414, tipo: 'quebraMar', escala: 0.5, fase: 5 },
+    { u: 0.911, v: 0.569, tipo: 'quebraMar', escala: 0.5, fase: 7 },
+    { u: 0.445, v: 0.331, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.668, v: 0.362, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.362, v: 0.678, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+    { u: 0.688, v: 0.688, tipo: 'borboleta', cor: '#ffffff', fase: 7 },
+  ],
 }
