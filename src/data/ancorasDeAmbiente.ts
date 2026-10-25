@@ -938,4 +938,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.136, v: 0.484, tipo: 'nevoa', cor: '#8a7466', escala: 0.25, fase: 16 },
     { u: 0.462, v: 0.766, tipo: 'nevoa', cor: '#8a7466', escala: 0.25, fase: 24 },
   ],
+
+  // TERRAS ARIDAS (lote 9, Arido). Poeira levantando do leito seco do rio, areia
+  // soprando da crista das dunas e brisa saindo das duas cavernas.
+  'assets/hunt-backgrounds/badlands.jpg': [
+    { u: 0.233, v: 0.207, tipo: 'nevoa', cor: '#b49a7a', escala: 0.45 },
+    { u: 0.595, v: 0.362, tipo: 'nevoa', cor: '#b49a7a', escala: 0.45, fase: 12 },
+    { u: 0.362, v: 0.699, tipo: 'nevoa', cor: '#b49a7a', escala: 0.45, fase: 24 },
+    { u: 0.155, v: 0.880, tipo: 'nevoa', cor: '#b49a7a', escala: 0.45, fase: 36 },
+    { u: 0.880, v: 0.331, tipo: 'nevoa', cor: '#e8c88e', escala: 0.4, fase: 6 },
+    { u: 0.673, v: 0.880, tipo: 'nevoa', cor: '#e8c88e', escala: 0.4, fase: 18 },
+    { u: 0.823, v: 0.104, tipo: 'nevoa', cor: '#7a5a4a', escala: 0.25 },
+    { u: 0.098, v: 0.647, tipo: 'nevoa', cor: '#7a5a4a', escala: 0.25, fase: 10 },
+  ],
 }
