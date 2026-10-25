@@ -1214,4 +1214,24 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.207, v: 0.854, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.5, fase: 30 },
     { u: 0.776, v: 0.880, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.5, fase: 45 },
   ],
+
+  // FONTES TERMAIS (lote 12, Aguas Interiores). Piscinas ondulam pela mascara; vapor
+  // subindo das seis piscinas e as lanternas de pedra acesas.
+  'assets/hunt-backgrounds/hot-springs.jpg': [
+    { u: 0.171, v: 0.171, tipo: 'nevoa', cor: '#ffffff', escala: 0.4 },
+    { u: 0.155, v: 0.455, tipo: 'nevoa', cor: '#ffffff', escala: 0.4, fase: 8 },
+    { u: 0.171, v: 0.756, tipo: 'nevoa', cor: '#ffffff', escala: 0.4, fase: 16 },
+    { u: 0.802, v: 0.171, tipo: 'nevoa', cor: '#ffffff', escala: 0.4, fase: 24 },
+    { u: 0.828, v: 0.445, tipo: 'nevoa', cor: '#ffffff', escala: 0.35, fase: 32 },
+    { u: 0.807, v: 0.725, tipo: 'nevoa', cor: '#ffffff', escala: 0.45, fase: 40 },
+    { u: 0.424, v: 0.168, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45 },
+    { u: 0.572, v: 0.168, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 1 },
+    { u: 0.122, v: 0.347, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 2 },
+    { u: 0.877, v: 0.347, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 3 },
+    { u: 0.424, v: 0.396, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 4 },
+    { u: 0.572, v: 0.396, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 5 },
+    { u: 0.675, v: 0.556, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 6 },
+    { u: 0.422, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 7 },
+    { u: 0.572, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 8 },
+  ],
 }

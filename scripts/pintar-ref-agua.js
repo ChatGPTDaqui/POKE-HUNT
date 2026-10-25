@@ -57,6 +57,8 @@ const ARTES = {
   'lily-pond': { h: [160, 205], s: 0.4, l: [0.5, 0.9] },
   // Lago da Furia: metade de baixo azul-marinho (o reflexo da tempestade fica fora).
   'lake-of-rage': { h: [205, 235], s: 0.3, l: [0.12, 0.4] },
+  // Fontes Termais: as seis piscinas verde-azuladas.
+  'hot-springs': { h: [160, 195], s: 0.25, l: [0.2, 0.45] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }
