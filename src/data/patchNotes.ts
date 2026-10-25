@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.51',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (Subterrâneo e Águas Interiores)',
+    highlights: [
+      'Monte Lua: Pedra da Lua pulsando e cristais. Túnel de Pedra: lampiões da mina. Caverna Escura: cristais azuis e respingo nas poças. Cachoeira Meteoro: lago ondulando e queda com bruma. Caverna Diglett: poeira nas tocas. Caverna Baixio: poças de maré e bafo frio.',
+      'Rio, Cachoeira, Lagoa das Ninfeias, Lago da Fúria e Fontes Termais: água ondulando de verdade, corredeiras, bruma, relâmpago, vapor e lanternas. Pico da Donzela: lanternas e neblina do mar.',
+      'Túnel de Pedra, Caverna Diglett, Lagoa das Ninfeias e Pico da Donzela foram redimensionados para combinar com o treinador e os POKEs.',
+    ],
+  },
+  {
     version: '8.50',
     date: '2026-10-25',
     title: 'Vida nos mapas (Árido e Gélido)',
