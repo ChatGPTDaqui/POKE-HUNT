@@ -884,4 +884,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.173, v: 0.815, tipo: 'orbe', cor: '#ffc06a', escala: 0.7, fase: 4 },
     { u: 0.673, v: 0.870, tipo: 'orbe', cor: '#ffc06a', escala: 0.7, fase: 6 },
   ],
+
+  // PILAR DO CEU (lote 8, Sagrado). Nuvem passando pelos buracos do piso e
+  // pelas bordas, e as runas turquesa pulsando.
+  'assets/hunt-backgrounds/sky-pillar.jpg': [
+    { u: 0.331, v: 0.321, tipo: 'nevoa', cor: '#ffffff', escala: 0.5 },
+    { u: 0.704, v: 0.440, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 10 },
+    { u: 0.342, v: 0.647, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 20 },
+    { u: 0.642, v: 0.626, tipo: 'nevoa', cor: '#ffffff', escala: 0.55, fase: 30 },
+    { u: 0.725, v: 0.280, tipo: 'orbe', cor: '#5fe0c8', escala: 0.9 },
+    { u: 0.549, v: 0.290, tipo: 'orbe', cor: '#5fe0c8', escala: 0.6, fase: 2 },
+    { u: 0.745, v: 0.678, tipo: 'orbe', cor: '#5fe0c8', escala: 0.8, fase: 4 },
+    { u: 0.217, v: 0.647, tipo: 'orbe', cor: '#5fe0c8', escala: 0.5, fase: 6 },
+  ],
 }
