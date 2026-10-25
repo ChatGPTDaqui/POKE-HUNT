@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.50',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (Árido e Gélido)',
+    highlights: [
+      'Deserto, Terras Áridas, Terra Devastada, Cânion e Cânion do Vovô: redemoinhos de poeira e brisa saindo das cavernas. Oásis: lagoa ondulando e borboletas.',
+      'Montanha de Gelo: cascata e mar de nuvens. Tundra e Cume Prateado: rajadas de neve. Ilhas Espuma: canais correndo e cristais pulsando. Vila Natalina: chaminés, estrela e postes acesos.',
+      'Tundra foi redimensionada para combinar com o treinador e os POKEs.',
+    ],
+  },
+  {
     version: '8.49',
     date: '2026-10-25',
     title: 'Vida nos mapas (Marinho e Sagrado)',

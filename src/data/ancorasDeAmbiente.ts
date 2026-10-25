@@ -925,4 +925,144 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.714, v: 0.611, tipo: 'chamine', escala: 0.25, fase: 3 },
     { u: 0.259, v: 0.792, tipo: 'chamine', escala: 0.25, fase: 6 },
   ],
+
+  // DESERTO (lote 9, Arido). Ja tem areia soprando pelo preset; aqui redemoinhos de
+  // poeira nas trilhas abertas e brisa fria saindo das bocas de caverna.
+  'assets/hunt-backgrounds/desert.jpg': [
+    { u: 0.321, v: 0.569, tipo: 'nevoa', cor: '#e2c48a', escala: 0.45 },
+    { u: 0.699, v: 0.518, tipo: 'nevoa', cor: '#e2c48a', escala: 0.45, fase: 12 },
+    { u: 0.290, v: 0.880, tipo: 'nevoa', cor: '#e2c48a', escala: 0.45, fase: 24 },
+    { u: 0.673, v: 0.217, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 36 },
+    { u: 0.161, v: 0.096, tipo: 'nevoa', cor: '#8a7466', escala: 0.25 },
+    { u: 0.886, v: 0.362, tipo: 'nevoa', cor: '#8a7466', escala: 0.25, fase: 8 },
+    { u: 0.136, v: 0.484, tipo: 'nevoa', cor: '#8a7466', escala: 0.25, fase: 16 },
+    { u: 0.462, v: 0.766, tipo: 'nevoa', cor: '#8a7466', escala: 0.25, fase: 24 },
+  ],
+
+  // TERRAS ARIDAS (lote 9, Arido). Poeira levantando do leito seco do rio, areia
+  // soprando da crista das dunas e brisa saindo das duas cavernas.
+  'assets/hunt-backgrounds/badlands.jpg': [
+    { u: 0.233, v: 0.207, tipo: 'nevoa', cor: '#b49a7a', escala: 0.45 },
+    { u: 0.595, v: 0.362, tipo: 'nevoa', cor: '#b49a7a', escala: 0.45, fase: 12 },
+    { u: 0.362, v: 0.699, tipo: 'nevoa', cor: '#b49a7a', escala: 0.45, fase: 24 },
+    { u: 0.155, v: 0.880, tipo: 'nevoa', cor: '#b49a7a', escala: 0.45, fase: 36 },
+    { u: 0.880, v: 0.331, tipo: 'nevoa', cor: '#e8c88e', escala: 0.4, fase: 6 },
+    { u: 0.673, v: 0.880, tipo: 'nevoa', cor: '#e8c88e', escala: 0.4, fase: 18 },
+    { u: 0.823, v: 0.104, tipo: 'nevoa', cor: '#7a5a4a', escala: 0.25 },
+    { u: 0.098, v: 0.647, tipo: 'nevoa', cor: '#7a5a4a', escala: 0.25, fase: 10 },
+  ],
+
+  // TERRA DEVASTADA (lote 9, Arido). Poeira rodando pela praca em ruinas e pela
+  // estrada de pedra, brisa saindo do templo e da passagem sob a ponte.
+  'assets/hunt-backgrounds/wasteland.jpg': [
+    { u: 0.543, v: 0.466, tipo: 'nevoa', cor: '#e2c48a', escala: 0.5 },
+    { u: 0.699, v: 0.569, tipo: 'nevoa', cor: '#e2c48a', escala: 0.45, fase: 12 },
+    { u: 0.259, v: 0.673, tipo: 'nevoa', cor: '#c8b08a', escala: 0.45, fase: 24 },
+    { u: 0.414, v: 0.233, tipo: 'nevoa', cor: '#c8b08a', escala: 0.4, fase: 36 },
+    { u: 0.880, v: 0.854, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 18 },
+    { u: 0.802, v: 0.342, tipo: 'nevoa', cor: '#6a4e3e', escala: 0.25 },
+    { u: 0.678, v: 0.849, tipo: 'nevoa', cor: '#6a4e3e', escala: 0.25, fase: 10 },
+    { u: 0.678, v: 0.455, tipo: 'fogoFatuo', cor: '#ffe6a0', fase: 2 },
+  ],
+
+  // CANION (lote 9, Arido). Poeira rodando pela trilha clara do fundo do canion e
+  // brisa saindo das tocas nas paredes de rocha.
+  'assets/hunt-backgrounds/canyon.jpg': [
+    { u: 0.497, v: 0.155, tipo: 'nevoa', cor: '#f0c898', escala: 0.4 },
+    { u: 0.414, v: 0.492, tipo: 'nevoa', cor: '#f0c898', escala: 0.45, fase: 12 },
+    { u: 0.595, v: 0.647, tipo: 'nevoa', cor: '#f0c898', escala: 0.45, fase: 24 },
+    { u: 0.497, v: 0.906, tipo: 'nevoa', cor: '#f0c898', escala: 0.4, fase: 36 },
+    { u: 0.173, v: 0.179, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22 },
+    { u: 0.132, v: 0.471, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22, fase: 8 },
+    { u: 0.916, v: 0.523, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22, fase: 16 },
+    { u: 0.722, v: 0.137, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.2, fase: 24 },
+  ],
+
+  // CANION DO VOVO (lote 9, Arido). Sitio de escavacao: poeira subindo das quatro
+  // valas de fossil e redemoinho na estrada central.
+  'assets/hunt-backgrounds/grampa-canyon.jpg': [
+    { u: 0.243, v: 0.280, tipo: 'nevoa', cor: '#a07850', escala: 0.3 },
+    { u: 0.735, v: 0.321, tipo: 'nevoa', cor: '#a07850', escala: 0.35, fase: 10 },
+    { u: 0.274, v: 0.745, tipo: 'nevoa', cor: '#a07850', escala: 0.35, fase: 20 },
+    { u: 0.714, v: 0.683, tipo: 'nevoa', cor: '#a07850', escala: 0.3, fase: 30 },
+    { u: 0.497, v: 0.466, tipo: 'nevoa', cor: '#e8b878', escala: 0.45, fase: 6 },
+    { u: 0.497, v: 0.828, tipo: 'nevoa', cor: '#e8b878', escala: 0.4, fase: 18 },
+    { u: 0.497, v: 0.129, tipo: 'nevoa', cor: '#e8b878', escala: 0.35, fase: 28 },
+  ],
+
+  // OASIS (lote 9, Arido). Lagoa turquesa ondula pela mascara; borboletas no verde
+  // em volta da agua e poeira rodando no areal e na trilha de entrada.
+  'assets/hunt-backgrounds/oasis.jpg': [
+    { u: 0.362, v: 0.466, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.663, v: 0.647, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.217, v: 0.269, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.699, v: 0.362, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+    { u: 0.248, v: 0.699, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4 },
+    { u: 0.751, v: 0.725, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 12 },
+    { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#e2c48a', escala: 0.35, fase: 24 },
+  ],
+
+  // MONTANHA DE GELO (lote 10, Gelido). Ja neva pelo preset; aqui a cascata batendo
+  // nos dois patamares, respingo na poca funda e mar de nuvens passando pelas bordas.
+  'assets/hunt-backgrounds/ice-mountain.jpg': [
+    { u: 0.833, v: 0.530, tipo: 'cascata', escala: 0.7 },
+    { u: 0.841, v: 0.754, tipo: 'cascata', escala: 0.8 },
+    { u: 0.789, v: 0.829, tipo: 'correnteza' },
+    { u: 0.861, v: 0.909, tipo: 'correnteza', fase: 3 },
+    { u: 0.781, v: 0.949, tipo: 'correnteza', fase: 6 },
+    { u: 0.072, v: 0.702, tipo: 'nevoa', cor: '#ffffff', escala: 0.6 },
+    { u: 0.949, v: 0.239, tipo: 'nevoa', cor: '#ffffff', escala: 0.6, fase: 15 },
+    { u: 0.096, v: 0.199, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 30 },
+    { u: 0.957, v: 0.797, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 45 },
+  ],
+
+  // TUNDRA (lote 10, Gelido). Ja neva pelo preset; cenario quase todo branco, entao
+  // so rajada de neve azulada varrendo os lagos congelados e a trilha.
+  'assets/hunt-backgrounds/tundra.jpg': [
+    { u: 0.761, v: 0.259, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45 },
+    { u: 0.259, v: 0.714, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45, fase: 12 },
+    { u: 0.725, v: 0.714, tipo: 'nevoa', cor: '#b8cce8', escala: 0.5, fase: 24 },
+    { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#b8cce8', escala: 0.4, fase: 36 },
+    { u: 0.466, v: 0.466, tipo: 'nevoa', cor: '#c8d8f0', escala: 0.5, fase: 6 },
+  ],
+
+  // CUME DO MONTE PRATEADO (lote 10, Gelido). Ja neva pelo preset; nuvem passando
+  // sobre os penhascos das bordas e rajada azulada no plato do cume.
+  'assets/hunt-backgrounds/mt-silver-summit.jpg': [
+    { u: 0.119, v: 0.155, tipo: 'nevoa', cor: '#ffffff', escala: 0.6 },
+    { u: 0.880, v: 0.388, tipo: 'nevoa', cor: '#ffffff', escala: 0.6, fase: 15 },
+    { u: 0.093, v: 0.621, tipo: 'nevoa', cor: '#ffffff', escala: 0.6, fase: 30 },
+    { u: 0.828, v: 0.854, tipo: 'nevoa', cor: '#ffffff', escala: 0.6, fase: 45 },
+    { u: 0.290, v: 0.336, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45, fase: 8 },
+    { u: 0.673, v: 0.647, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45, fase: 20 },
+    { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#b8cce8', escala: 0.4, fase: 32 },
+  ],
+
+  // ILHAS ESPUMA (lote 10, Gelido). Canais correm pela mascara; lanternas da parede e
+  // os dois cristais grandes pulsando, e ar gelado saindo das bocas de caverna.
+  'assets/hunt-backgrounds/seafoam-islands.jpg': [
+    { u: 0.241, v: 0.067, tipo: 'orbe', cor: '#d8f0a0', escala: 0.7 },
+    { u: 0.789, v: 0.072, tipo: 'orbe', cor: '#d8f0a0', escala: 0.7, fase: 3 },
+    { u: 0.124, v: 0.145, tipo: 'orbe', cor: '#7ff0e0', escala: 0.8, fase: 1 },
+    { u: 0.810, v: 0.782, tipo: 'orbe', cor: '#7ff0e0', escala: 0.8, fase: 4 },
+    { u: 0.497, v: 0.088, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.3 },
+    { u: 0.497, v: 0.968, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.3, fase: 10 },
+    { u: 0.111, v: 0.642, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.2, fase: 20 },
+  ],
+
+  // VILA NATALINA DA JYNX (lote 10, Gelido). Ja neva pelo preset; fumaca nas tres
+  // chamines, estrela da arvore central pulsando e postes de luz acesos.
+  'assets/hunt-backgrounds/jynx-holiday.jpg': [
+    { u: 0.489, v: 0.150, tipo: 'chamine', escala: 0.5 },
+    { u: 0.254, v: 0.567, tipo: 'chamine', escala: 0.5, fase: 2 },
+    { u: 0.841, v: 0.562, tipo: 'chamine', escala: 0.5, fase: 4 },
+    { u: 0.499, v: 0.393, tipo: 'orbe', cor: '#ffe066', escala: 0.8 },
+    { u: 0.559, v: 0.256, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 1 },
+    { u: 0.300, v: 0.432, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 2 },
+    { u: 0.732, v: 0.411, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 3 },
+    { u: 0.436, v: 0.655, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 4 },
+    { u: 0.562, v: 0.652, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 5 },
+    { u: 0.436, v: 0.919, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 6 },
+    { u: 0.562, v: 0.919, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 7 },
+  ],
 }

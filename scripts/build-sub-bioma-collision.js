@@ -98,6 +98,8 @@ const ESCALA_POR_ARTE = {
   'sprout-tower.jpg': 0.55,
   // Mesa do laboratorio ~3x a largura do treinador.
   'pokemon-mansion.jpg': 0.6,
+  // Treno ~2,5x o treinador.
+  'tundra.jpg': 0.65,
 };
 
 /**
