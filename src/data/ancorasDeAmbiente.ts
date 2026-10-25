@@ -964,4 +964,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.678, v: 0.849, tipo: 'nevoa', cor: '#6a4e3e', escala: 0.25, fase: 10 },
     { u: 0.678, v: 0.455, tipo: 'fogoFatuo', cor: '#ffe6a0', fase: 2 },
   ],
+
+  // CANION (lote 9, Arido). Poeira rodando pela trilha clara do fundo do canion e
+  // brisa saindo das tocas nas paredes de rocha.
+  'assets/hunt-backgrounds/canyon.jpg': [
+    { u: 0.497, v: 0.155, tipo: 'nevoa', cor: '#f0c898', escala: 0.4 },
+    { u: 0.414, v: 0.492, tipo: 'nevoa', cor: '#f0c898', escala: 0.45, fase: 12 },
+    { u: 0.595, v: 0.647, tipo: 'nevoa', cor: '#f0c898', escala: 0.45, fase: 24 },
+    { u: 0.497, v: 0.906, tipo: 'nevoa', cor: '#f0c898', escala: 0.4, fase: 36 },
+    { u: 0.173, v: 0.179, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22 },
+    { u: 0.132, v: 0.471, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22, fase: 8 },
+    { u: 0.916, v: 0.523, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22, fase: 16 },
+    { u: 0.722, v: 0.137, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.2, fase: 24 },
+  ],
 }
