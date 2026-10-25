@@ -228,10 +228,12 @@ describe('gotejo de ambiente so onde faz sentido (PH-232)', () => {
   })
 
   it('floresta temperada, deserto e cidade nao pingam', () => {
+    // Artes SEM mascara de agua: o espiao conta elipse, e o anel de agua da
+    // camada de agua (forest/town ganharam rio em 24/10/2026) tambem e elipse.
     for (const arte of [
-      'assets/hunt-backgrounds/forest.jpg',
+      'assets/hunt-backgrounds/tall-grass.jpg',
       'assets/hunt-backgrounds/desert.jpg',
-      'assets/hunt-backgrounds/town.jpg',
+      'assets/hunt-backgrounds/metropolis.jpg',
       'assets/hunt-backgrounds/ruins.jpg',
     ]) {
       expect(rodarAmbiente(arte, 120).length, `${arte} pingou e nao deveria`).toBe(0)

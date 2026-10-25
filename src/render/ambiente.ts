@@ -930,6 +930,7 @@ export function desenharAmbiente(
     // Desligado no ajuste: solta o estado pra a camada nao voltar com
     // particulas velhas (e pra ela nao custar memoria enquanto esta off).
     if (particulas.length) { particulas = []; arteAtual = null; gotejo = null }
+    aguaExtra = null
     reiniciarPropsDeAmbiente()
     return
   }
@@ -952,6 +953,9 @@ export function desenharAmbiente(
   // esta nevando, nao neve de novo", e nao "a fogueira apagou porque nevou".
   // Passar os props pra depois deles apagaria a fogueira no primeiro floco.
   desenharPropsDeAmbiente(ctx, imagem, janela, compacto, agora)
+  // Agua da arte (rio da floresta etc.) tambem antes dos `return`: preset e
+  // clima falam da particula principal, nao do rio.
+  if (imagem) desenharAguaDaArte(ctx, imagem, janela, compacto, agora)
 
   const preset = presetDaArte(imagem)
   if (preset === 'nenhum' || !imagem) {
@@ -1255,6 +1259,88 @@ function desenharBrilhoDoChao(ctx: CanvasRenderingContext2D): void {
   ctx.restore()
 }
 
+// ---------------------------------------------------------------------------
+// AGUA DA ARTE, INDEPENDENTE DO PRESET (24/10/2026, vida nos mapas)
+// ---------------------------------------------------------------------------
+// A ondulacao nascia so no preset 'agua'. Mas arte de floresta tambem tem rio
+// (`forest`, a Rota 46), e o preset dela e 'folha': a folha continua caindo e
+// o rio ficava parado. Agora QUALQUER arte com mascara de agua ganha uma
+// segunda populacao so de agua — mesma receita e mesmo anel do preset de agua,
+// populacao e gerador proprios (semeado pela arte + '#agua'), pra nao mexer na
+// sequencia da camada principal.
+//
+// Arte cujo preset JA e 'agua' nao entra aqui: a camada principal ja ondula.
+interface AguaExtra {
+  chave: string
+  particulas: Particula[]
+  rand: () => number
+  ultimo: number
+}
+let aguaExtra: AguaExtra | null = null
+
+function desenharAguaDaArte(
+  ctx: CanvasRenderingContext2D, imagem: string, janela: JanelaDeAmbiente, compacto: boolean, agora: number,
+): void {
+  const mascara = AGUA_POR_ARTE[imagem]
+  if (!mascara || presetDaArte(imagem) === 'agua') { aguaExtra = null; return }
+  const r = receitaDe('agua', mascara)
+  // `nascer` usa o gerador do modulo; troca pelo desta camada e devolve no fim.
+  const salvo = rand
+  try {
+    if (!aguaExtra || aguaExtra.chave !== imagem) {
+      rand = sorteioLocal(semeteDaArte(`${imagem}#agua`))
+      const n = Math.max(1, Math.round(r.quantidade * (compacto ? 0.5 : 1)))
+      const lista: Particula[] = []
+      for (let i = 0; i < n; i++) {
+        const p: Particula = { x: 0, y: 0, vx: 0, vy: 0, raio: 0, alphaMax: 0, fase: 0, bamboleio: 0, idade: 0, vida: 0, anel: false, giro: 0 }
+        nascer(p, r, janela, false, mascara)
+        lista.push(p)
+      }
+      aguaExtra = { chave: imagem, particulas: lista, rand, ultimo: 0 }
+    } else {
+      rand = aguaExtra.rand
+    }
+    const delta = aguaExtra.ultimo === 0 ? 0 : Math.min(DELTA_MAXIMO, (agora - aguaExtra.ultimo) / 1000)
+    aguaExtra.ultimo = agora
+    const raioMaximoDoAnel = mascara.celula * ANEL_RAIO_MAXIMO_EM_CELULAS
+    ctx.save()
+    if (r.aditivo) ctx.globalCompositeOperation = 'lighter'
+    ctx.fillStyle = r.cor
+    ctx.strokeStyle = r.cor
+    for (const p of aguaExtra.particulas) {
+      p.x += p.vx * delta
+      p.y += p.vy * delta
+      p.fase += delta * 1.7
+      p.idade += delta
+      const desvio = Math.sin(p.fase) * p.bamboleio * delta
+      p.x += -p.vy * desvio * 0.02
+      p.y += p.vx * desvio * 0.02
+      const fora = p.x < janela.x - FOLGA * 2 || p.x > janela.x + janela.w + FOLGA * 2
+        || p.y < janela.y - FOLGA * 2 || p.y > janela.y + janela.h + FOLGA * 2
+      if (fora || (p.anel && p.idade >= p.vida) || !dentroDaMascara(mascara, p.x, p.y)) {
+        nascer(p, r, janela, true, mascara)
+        continue
+      }
+      if (p.anel) {
+        const t = p.idade / p.vida
+        const raio = Math.min(raioMaximoDoAnel, p.raio * (1 + t * ANEL_CRESCIMENTO))
+        const restante = 1 - t
+        ctx.globalAlpha = p.alphaMax * restante * restante
+        ctx.lineWidth = ANEL_TRACO
+        ctx.beginPath()
+        ctx.ellipse(p.x, p.y, raio, raio * ANEL_ACHATAMENTO, 0, 0, Math.PI * 2)
+        ctx.stroke()
+        continue
+      }
+      desenharParticula(ctx, p, r)
+    }
+    ctx.restore()
+    aguaExtra.rand = rand
+  } finally {
+    rand = salvo
+  }
+}
+
 /** Solta o estado. Chamado ao sair da hunt, pra a proxima entrada nao herdar
  *  particulas posicionadas na janela de outro mapa. */
 export function reiniciarAmbiente(): void {
@@ -1263,6 +1349,7 @@ export function reiniciarAmbiente(): void {
   ultimoInstante = 0
   focosDeBrilho = []
   gotejo = null
+  aguaExtra = null
   // Os props sao desenhados por esta funcao, entao soltar o ambiente sem soltar
   // eles deixaria um caso de teste medindo a arte anterior.
   reiniciarPropsDeAmbiente()

@@ -129,13 +129,14 @@ const TAMANHO: Record<TipoDeProp, number> = {
   eletrica: emPoke(0.50),
   vagalume: emPoke(1.15), // raio do enxame
   petala: emPoke(1.50),
+  borboleta: emPoke(1.6), // raio do voo em volta das flores
 }
 
 /** Cor de quem nao declara `cor` na ancora. */
 const COR_PADRAO: Record<TipoDeProp, string> = {
   fogueira: '#ffb057', tocha: '#ffc06a', chamine: '#8d8b86', fumarola: '#e8f0f4',
   gas: '#a9d06a', orbe: '#ffd58a', cascata: '#f2fbff', correnteza: '#eaf8ff',
-  quebraMar: '#ffffff', eletrica: '#fff2a8', vagalume: '#ffe27a', petala: '#ffc2dd',
+  quebraMar: '#ffffff', eletrica: '#fff2a8', vagalume: '#ffe27a', petala: '#ffc2dd', borboleta: '#fff3b0',
 }
 
 // ---------------------------------------------------------------------------
@@ -536,6 +537,42 @@ function desenharEnxame(ctx: CanvasRenderingContext2D, p: PropVivo, t: number, c
 }
 
 /**
+ * Borboletas (24/10/2026, vida nos mapas): duas ou tres voando em volta do
+ * canteiro, batendo asa. Procedural pelo mesmo motivo da espuma e da faisca
+ * (ver o cabecalho): forma simples em codigo nao briga com o pixel art do
+ * fundo. Asa de ~16% de um POKE (envergadura ~1/3): menor some no capim.
+ */
+function desenharBorboletas(ctx: CanvasRenderingContext2D, p: PropVivo, t: number, compacto: boolean): void {
+  const n = compacto ? 2 : 3
+  const asa = emPoke(0.16)
+  ctx.save()
+  for (let i = 0; i < n; i++) {
+    const s = ((i + 1) * 2654435761) >>> 0
+    const a = (s % 1000) / 1000
+    const b = ((s >>> 10) % 1000) / 1000
+    const tt = t + p.fase + a * 7
+    // Voo em laco (duas frequencias) com subida e descida curta: le como
+    // borboleta indo de flor em flor, e nao como orbita de vaga-lume.
+    const x = p.x + Math.sin(tt * (0.31 + a * 0.2)) * p.tamanho * (0.5 + b * 0.5)
+      + Math.sin(tt * (0.83 + b * 0.3)) * p.tamanho * 0.18 + ventoAgora() * 6
+    const y = p.y + Math.cos(tt * (0.27 + b * 0.18)) * p.tamanho * 0.32
+      - Math.abs(Math.sin(tt * 1.7 + a * 6.28)) * emPoke(0.18)
+    const bate = Math.abs(Math.sin(tt * (9 + a * 4)))
+    const cor = i % 2 === 1 && !p.cor.startsWith('#fff') ? '#fff3b0' : p.cor
+    ctx.globalAlpha = 0.95
+    ctx.fillStyle = cor
+    for (const lado of [-1, 1]) {
+      ctx.beginPath()
+      ctx.ellipse(x + lado * asa * 0.55 * (0.35 + bate * 0.65), y, asa * (0.25 + bate * 0.75) * 0.6, asa * 0.7, lado * 0.35, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    ctx.fillStyle = '#3a2a1a'
+    ctx.fillRect(x - 0.5, y - asa * 0.5, 1, asa)
+  }
+  ctx.restore()
+}
+
+/**
  * Cintilancia de superficie: a peca de chao animada desenhada GRANDE e com
  * alpha baixo, somando luz.
  *
@@ -657,6 +694,9 @@ export function desenharPropsDeAmbiente(
       case 'vagalume':
       case 'petala':
         desenharEnxame(ctx, p, t, compacto)
+        break
+      case 'borboleta':
+        desenharBorboletas(ctx, p, t, compacto)
         break
     }
   }

@@ -132,13 +132,21 @@ const COBERTURA_MINIMA = 0.35
 const MIN_CELULAS = 25
 
 /**
+ * Referencias GERADAS POR COR (scripts/pintar-ref-agua.js, 24/10/2026) nao tem
+ * a sujeira de pincel que o corte acima existe pra limpar, e nelas o que cai
+ * abaixo de 25 e riacho de verdade cortado por ponte (os quatro trechos de
+ * `town`). Corte menor so pra elas.
+ */
+const MIN_CELULAS_POR_ARTE = { town: 6 }
+
+/**
  * Apaga os componentes conexos menores que `MIN_CELULAS`.
  *
  * Devolve quantas celulas e quantas ilhas cairam porque o numero tem que
  * aparecer no relatorio: um filtro que comesse 30% da agua em silencio seria
  * pior que a sujeira que ele tira.
  */
-function limparIlhas(grade) {
+function limparIlhas(grade, minimo = MIN_CELULAS) {
   const linhas = grade.length
   const cols = linhas > 0 ? grade[0].length : 0
   const celulas = grade.map((l) => l.split(''))
@@ -166,7 +174,7 @@ function limparIlhas(grade) {
           pilha.push([nx, ny])
         }
       }
-      if (componente.length < MIN_CELULAS) {
+      if (componente.length < minimo) {
         for (const [cx, cy] of componente) celulas[cy][cx] = '0'
         removidas += componente.length
         cortados.push(componente.length)
@@ -219,6 +227,13 @@ function lerArtesDeAgua() {
   const fim = bloco.indexOf('\n}')
   const artes = new Set()
   for (const m of bloco.slice(0, fim).matchAll(/'([^']+)':\s*'agua'/g)) artes.add(m[1])
+  // Arte de OUTRO preset com agua desenhada (rio da floresta) entra quando tem
+  // referencia: a camada `desenharAguaDaArte` ondula ali sem mexer no preset.
+  if (fs.existsSync(DIR_REFS)) {
+    for (const f of fs.readdirSync(DIR_REFS)) {
+      if (f.endsWith('.png') && !f.includes('.rascunho')) artes.add(`assets/hunt-backgrounds/${f.replace(/\.png$/, '.jpg')}`)
+    }
+  }
   // Guarda contra o parser silenciosamente vazio: sem isto, mudar o formato
   // daquele objeto geraria mascara VAZIA e o efeito sumiria sem erro nenhum.
   if (artes.size === 0) throw new Error('nenhuma arte com preset agua — o parser de PRESET_POR_ARTE quebrou')
@@ -245,7 +260,7 @@ function nomeBase(arte) {
  * caminhos separados — se divergissem, a mascara seria de uma imagem e o pixel
  * na tela de outra.
  */
-function gradeDaRef(ref, pintada) {
+function gradeDaRef(ref, pintada, minimo = MIN_CELULAS) {
   const { escala, x: ax, y: ay } = pintada.arte
   const larguraMundo = ref.width * escala
   const alturaMundo = ref.height * escala
@@ -284,7 +299,7 @@ function gradeDaRef(ref, pintada) {
   }
   // Contagem DEPOIS do filtro, nao antes: o relatorio precisa dizer o que
   // sobrou na mascara, e nao o que a tinta marcou.
-  const limpo = limparIlhas(grade)
+  const limpo = limparIlhas(grade, minimo)
   return {
     grade: limpo.grade,
     marcadas: marcadas - limpo.removidas,
@@ -404,7 +419,7 @@ function main() {
       linhas.push([arte, 'sem referencia pintada — nao ondula'])
       continue
     }
-    const { grade, marcadas, total, cols, linhas: nl, removidas, cortados } = gradeDaRef(decodificar(ref), pintada)
+    const { grade, marcadas, total, cols, linhas: nl, removidas, cortados } = gradeDaRef(decodificar(ref), pintada, MIN_CELULAS_POR_ARTE[nomeBase(arte)] ?? MIN_CELULAS)
     // Os TAMANHOS, e nao so o total: e o que permite ver que o corte pegou
     // sujeira de 1-20 celulas e nao mordeu um corpo de agua inteiro.
     const sujeira = cortados.length > 0
