@@ -830,4 +830,99 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.362, v: 0.673, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.55, fase: 24 },
     { u: 0.725, v: 0.647, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.5, fase: 36 },
   ],
+
+  // RECIFE DE CORAL (lote 7, Marinho). Lagoa ondula pela mascara; bolhas
+  // subindo das anemonas.
+  'assets/hunt-backgrounds/coral-reef.jpg': [
+    { u: 0.424, v: 0.269, tipo: 'gas', cor: '#e8fbff', escala: 0.35 },
+    { u: 0.626, v: 0.179, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 2 },
+    { u: 0.875, v: 0.267, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 4 },
+    { u: 0.173, v: 0.619, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 6 },
+    { u: 0.624, v: 0.621, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 8 },
+    { u: 0.223, v: 0.854, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 10 },
+    { u: 0.875, v: 0.619, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 12 },
+  ],
+
+  // ILHAS REDEMOINHO (lote 7, Marinho). Pocas ondulam pela mascara; onda
+  // arrebentando na espuma das bordas e nevoa de maresia.
+  'assets/hunt-backgrounds/whirl-islands.jpg': [
+    { u: 0.129, v: 0.523, tipo: 'quebraMar', escala: 0.6 },
+    { u: 0.854, v: 0.518, tipo: 'quebraMar', escala: 0.6, fase: 2 },
+    { u: 0.248, v: 0.807, tipo: 'quebraMar', escala: 0.6, fase: 4 },
+    { u: 0.673, v: 0.813, tipo: 'quebraMar', escala: 0.6, fase: 6 },
+    { u: 0.362, v: 0.455, tipo: 'nevoa', cor: '#c9d4e6', escala: 0.6 },
+    { u: 0.595, v: 0.569, tipo: 'nevoa', cor: '#c9d4e6', escala: 0.6, fase: 15 },
+  ],
+
+  // ARQUIPELAGO LARANJA (lote 7, Marinho). Mar do cais ondula pela mascara;
+  // onda batendo na areia e borboletas nos canteiros floridos.
+  'assets/hunt-backgrounds/orange-archipelago.jpg': [
+    { u: 0.207, v: 0.849, tipo: 'quebraMar', escala: 0.6 },
+    { u: 0.725, v: 0.844, tipo: 'quebraMar', escala: 0.6, fase: 3 },
+    { u: 0.098, v: 0.414, tipo: 'quebraMar', escala: 0.5, fase: 5 },
+    { u: 0.911, v: 0.569, tipo: 'quebraMar', escala: 0.5, fase: 7 },
+    { u: 0.445, v: 0.331, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.668, v: 0.362, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.362, v: 0.678, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+    { u: 0.688, v: 0.688, tipo: 'borboleta', cor: '#ffffff', fase: 7 },
+  ],
+
+  // TORRE SPROUT (lote 8, Sagrado). Interior a luz de lampiao: incenso subindo
+  // dos dez queimadores e luz pulsando nas quatro lanternas.
+  'assets/hunt-backgrounds/sprout-tower.jpg': [
+    { u: 0.575, v: 0.160, tipo: 'chamine', escala: 0.35 },
+    { u: 0.228, v: 0.259, tipo: 'chamine', escala: 0.35, fase: 1 },
+    { u: 0.774, v: 0.259, tipo: 'chamine', escala: 0.35, fase: 2 },
+    { u: 0.127, v: 0.414, tipo: 'chamine', escala: 0.35, fase: 3 },
+    { u: 0.875, v: 0.414, tipo: 'chamine', escala: 0.35, fase: 4 },
+    { u: 0.127, v: 0.559, tipo: 'chamine', escala: 0.35, fase: 5 },
+    { u: 0.875, v: 0.559, tipo: 'chamine', escala: 0.35, fase: 6 },
+    { u: 0.228, v: 0.756, tipo: 'chamine', escala: 0.35, fase: 7 },
+    { u: 0.774, v: 0.756, tipo: 'chamine', escala: 0.35, fase: 8 },
+    { u: 0.355, v: 0.106, tipo: 'orbe', cor: '#ffc06a', escala: 0.7 },
+    { u: 0.637, v: 0.106, tipo: 'orbe', cor: '#ffc06a', escala: 0.7, fase: 2 },
+    { u: 0.173, v: 0.815, tipo: 'orbe', cor: '#ffc06a', escala: 0.7, fase: 4 },
+    { u: 0.673, v: 0.870, tipo: 'orbe', cor: '#ffc06a', escala: 0.7, fase: 6 },
+  ],
+
+  // PILAR DO CEU (lote 8, Sagrado). Nuvem passando pelos buracos do piso e
+  // pelas bordas, e as runas turquesa pulsando.
+  'assets/hunt-backgrounds/sky-pillar.jpg': [
+    { u: 0.331, v: 0.321, tipo: 'nevoa', cor: '#ffffff', escala: 0.5 },
+    { u: 0.704, v: 0.440, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 10 },
+    { u: 0.342, v: 0.647, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 20 },
+    { u: 0.642, v: 0.626, tipo: 'nevoa', cor: '#ffffff', escala: 0.55, fase: 30 },
+    { u: 0.725, v: 0.280, tipo: 'orbe', cor: '#5fe0c8', escala: 0.9 },
+    { u: 0.549, v: 0.290, tipo: 'orbe', cor: '#5fe0c8', escala: 0.6, fase: 2 },
+    { u: 0.745, v: 0.678, tipo: 'orbe', cor: '#5fe0c8', escala: 0.8, fase: 4 },
+    { u: 0.217, v: 0.647, tipo: 'orbe', cor: '#5fe0c8', escala: 0.5, fase: 6 },
+  ],
+
+  // SANTUARIO DE MEDITACAO (lote 8, Sagrado). Lago das carpas ondula pela mascara;
+  // petalas de glicinia caindo e borboletas nos canteiros de flor.
+  'assets/hunt-backgrounds/meditation-shrine.jpg': [
+    { u: 0.373, v: 0.166, tipo: 'petala', cor: '#c9a6f0', escala: 0.6 },
+    { u: 0.921, v: 0.259, tipo: 'petala', cor: '#c9a6f0', escala: 0.6, fase: 3 },
+    { u: 0.127, v: 0.523, tipo: 'petala', cor: '#c9a6f0', escala: 0.6, fase: 5 },
+    { u: 0.688, v: 0.818, tipo: 'petala', cor: '#c9a6f0', escala: 0.6, fase: 7 },
+    { u: 0.466, v: 0.362, tipo: 'borboleta', cor: '#ffffff' },
+    { u: 0.776, v: 0.776, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.259, v: 0.751, tipo: 'borboleta', cor: '#c9a6f0', fase: 5 },
+    { u: 0.569, v: 0.921, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
+  ],
+
+  // MANSAO POKEMON (lote 8, Sagrado). Ruina assombrada: poeira subindo dos buracos
+  // do assoalho, fogo-fatuo rondando as estatuas e fumaca dos frascos do laboratorio.
+  'assets/hunt-backgrounds/pokemon-mansion.jpg': [
+    { u: 0.248, v: 0.352, tipo: 'nevoa', cor: '#8a7a70', escala: 0.45 },
+    { u: 0.751, v: 0.290, tipo: 'nevoa', cor: '#8a7a70', escala: 0.5, fase: 12 },
+    { u: 0.751, v: 0.735, tipo: 'nevoa', cor: '#8a7a70', escala: 0.5, fase: 24 },
+    { u: 0.155, v: 0.171, tipo: 'fogoFatuo', cor: '#a8c8ff' },
+    { u: 0.652, v: 0.171, tipo: 'fogoFatuo', cor: '#a8c8ff', fase: 3 },
+    { u: 0.901, v: 0.414, tipo: 'fogoFatuo', cor: '#c0a8ff', fase: 5 },
+    { u: 0.098, v: 0.430, tipo: 'fogoFatuo', cor: '#c0a8ff', fase: 7 },
+    { u: 0.409, v: 0.373, tipo: 'chamine', escala: 0.25 },
+    { u: 0.714, v: 0.611, tipo: 'chamine', escala: 0.25, fase: 3 },
+    { u: 0.259, v: 0.792, tipo: 'chamine', escala: 0.25, fase: 6 },
+  ],
 }
