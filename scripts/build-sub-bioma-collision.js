@@ -88,6 +88,8 @@ const ESCALA_POR_ARTE = {
   'treetops.jpg': 0.6,
   // Cone 1,5x o treinador, escavadeira 5x.
   'construction-site.jpg': 0.6,
+  // Carro ~8x o treinador.
+  'junkyard.jpg': 0.5,
 };
 
 /**

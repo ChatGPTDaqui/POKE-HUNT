@@ -746,4 +746,15 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.855, v: 0.375, tipo: 'eletrica', escala: 0.6 },
     { u: 0.855, v: 0.555, tipo: 'eletrica', escala: 0.6, fase: 3 },
   ],
+
+  // FERRO-VELHO (lote 5, Industrial). Escala propria 0,5 (carro ~8x o
+  // treinador; 0,5 e o menor que nao aperta a caca). Fumaca do guindaste,
+  // faisca no cabo da garra e poeira rodando nas duas ruas de terra.
+  'assets/hunt-backgrounds/junkyard.jpg': [
+    { u: 0.875, v: 0.165, tipo: 'chamine', escala: 0.5 },
+    { u: 0.700, v: 0.200, tipo: 'eletrica', escala: 0.6 },
+    { u: 0.300, v: 0.500, tipo: 'nevoa', cor: '#b58a5a', escala: 0.45 },
+    { u: 0.520, v: 0.700, tipo: 'nevoa', cor: '#b58a5a', escala: 0.45, fase: 14 },
+    { u: 0.780, v: 0.500, tipo: 'nevoa', cor: '#b58a5a', escala: 0.4, fase: 25 },
+  ],
 }
