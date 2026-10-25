@@ -977,4 +977,16 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.916, v: 0.523, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22, fase: 16 },
     { u: 0.722, v: 0.137, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.2, fase: 24 },
   ],
+
+  // CANION DO VOVO (lote 9, Arido). Sitio de escavacao: poeira subindo das quatro
+  // valas de fossil e redemoinho na estrada central.
+  'assets/hunt-backgrounds/grampa-canyon.jpg': [
+    { u: 0.243, v: 0.280, tipo: 'nevoa', cor: '#a07850', escala: 0.3 },
+    { u: 0.735, v: 0.321, tipo: 'nevoa', cor: '#a07850', escala: 0.35, fase: 10 },
+    { u: 0.274, v: 0.745, tipo: 'nevoa', cor: '#a07850', escala: 0.35, fase: 20 },
+    { u: 0.714, v: 0.683, tipo: 'nevoa', cor: '#a07850', escala: 0.3, fase: 30 },
+    { u: 0.497, v: 0.466, tipo: 'nevoa', cor: '#e8b878', escala: 0.45, fase: 6 },
+    { u: 0.497, v: 0.828, tipo: 'nevoa', cor: '#e8b878', escala: 0.4, fase: 18 },
+    { u: 0.497, v: 0.129, tipo: 'nevoa', cor: '#e8b878', escala: 0.35, fase: 28 },
+  ],
 }
