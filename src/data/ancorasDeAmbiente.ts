@@ -1093,4 +1093,20 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.393, v: 0.137, tipo: 'orbe', cor: '#ffa040', escala: 0.4, fase: 6 },
     { u: 0.497, v: 0.911, tipo: 'vagalume', cor: '#fff6dc' },
   ],
+
+  // CAVERNA ESCURA (lote 11, Subterraneo). Ja pinga pelo preset; cristais azuis
+  // pulsando no breu, respingo nas pocas e poeira brilhando na luz da entrada.
+  'assets/hunt-backgrounds/dark-cave.jpg': [
+    { u: 0.163, v: 0.137, tipo: 'orbe', cor: '#8fa8ff', escala: 0.7 },
+    { u: 0.261, v: 0.300, tipo: 'orbe', cor: '#8fa8ff', escala: 0.7, fase: 2 },
+    { u: 0.836, v: 0.111, tipo: 'orbe', cor: '#8fa8ff', escala: 0.6, fase: 4 },
+    { u: 0.836, v: 0.362, tipo: 'orbe', cor: '#8fa8ff', escala: 0.8, fase: 6 },
+    { u: 0.136, v: 0.712, tipo: 'orbe', cor: '#8fa8ff', escala: 0.7, fase: 8 },
+    { u: 0.613, v: 0.326, tipo: 'correnteza' },
+    { u: 0.388, v: 0.637, tipo: 'correnteza', fase: 2 },
+    { u: 0.613, v: 0.668, tipo: 'correnteza', fase: 4 },
+    { u: 0.199, v: 0.833, tipo: 'correnteza', fase: 6 },
+    { u: 0.587, v: 0.756, tipo: 'correnteza', fase: 8 },
+    { u: 0.499, v: 0.942, tipo: 'vagalume', cor: '#eef2ff' },
+  ],
 }
