@@ -33,6 +33,8 @@ const ARTES = {
   harbor: { h: [188, 206], s: 0.50, l: [0.25, 0.60] },
   // Esgoto: agua verde (h~136), unica coisa da arte nesse verde.
   underground: { h: [120, 160], s: 0.15, l: [0.15, 0.36] },
+  // Recife: lagoa turquesa (h~167, l~0,7); coral e moita teal ficam em l~0,43.
+  'coral-reef': { h: [155, 178], s: 0.45, l: [0.58, 0.80] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }

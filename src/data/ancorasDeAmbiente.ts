@@ -830,4 +830,16 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.362, v: 0.673, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.55, fase: 24 },
     { u: 0.725, v: 0.647, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.5, fase: 36 },
   ],
+
+  // RECIFE DE CORAL (lote 7, Marinho). Lagoa ondula pela mascara; bolhas
+  // subindo das anemonas.
+  'assets/hunt-backgrounds/coral-reef.jpg': [
+    { u: 0.424, v: 0.269, tipo: 'gas', cor: '#e8fbff', escala: 0.35 },
+    { u: 0.626, v: 0.179, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 2 },
+    { u: 0.875, v: 0.267, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 4 },
+    { u: 0.173, v: 0.619, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 6 },
+    { u: 0.624, v: 0.621, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 8 },
+    { u: 0.223, v: 0.854, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 10 },
+    { u: 0.875, v: 0.619, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 12 },
+  ],
 }
