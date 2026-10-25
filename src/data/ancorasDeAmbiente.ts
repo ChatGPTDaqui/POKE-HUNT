@@ -77,6 +77,7 @@ export type TipoDeProp =
   // — enxame procedural
   | 'vagalume' // pontos que sobem e flutuam
   | 'petala' // pontos que caem girando
+  | 'borboleta' // 2-3 borboletas batendo asa em volta da ancora (canteiro de flor)
 
 export interface AncoraDeAmbiente {
   /** Fracao da LARGURA da arte de fundo, 0..1. */
@@ -88,7 +89,7 @@ export interface AncoraDeAmbiente {
   escala?: number
   /**
    * Cor do prop, quando o tipo aceita uma (`orbe`, `gas`, `petala`,
-   * `vagalume`). Ausente = a cor padrao do tipo em `ambienteProps.ts`.
+   * `vagalume`, `borboleta`). Ausente = a cor padrao do tipo em `ambienteProps.ts`.
    */
   cor?: string
   /**
@@ -304,6 +305,11 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.535, v: 0.300, tipo: 'tocha', escala: 0.8 },
     { u: 0.655, v: 0.375, tipo: 'tocha', escala: 0.8 },
     { u: 0.375, v: 0.775, tipo: 'tocha', escala: 0.8 },
+    // Borboletas nos canteiros de flor (24/10/2026): campina de cima (lilas),
+    // capim florido do meio (azul, contraste com a flor amarela) e a moita florida da direita.
+    { u: 0.650, v: 0.150, tipo: 'borboleta', cor: '#c9a7ff' },
+    { u: 0.520, v: 0.590, tipo: 'borboleta', cor: '#7fd3ff', fase: 3 },
+    { u: 0.890, v: 0.490, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
   ],
 
   // -------------------------------------------------------------------------
@@ -475,5 +481,39 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.840, v: 0.572, tipo: 'gas', cor: '#a9d06a' },
     { u: 0.470, v: 0.140, tipo: 'vagalume', cor: '#d8f08a' },
     { u: 0.780, v: 0.860, tipo: 'vagalume', cor: '#d8f08a' },
+  ],
+
+  // -------------------------------------------------------------------------
+  // CAMPINA (24/10/2026, vida nos mapas — mapa 2). Rio e lago ondulam pela
+  // mascara de agua (scripts/pintar-ref-agua.js); aqui so o que e ponto: a
+  // queda d'agua do canto e as borboletas nos canteiros de flor.
+  // -------------------------------------------------------------------------
+  'assets/hunt-backgrounds/meadow.jpg': [
+    { u: 0.888, v: 0.150, tipo: 'cascata', escala: 0.8 },
+    { u: 0.435, v: 0.340, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.560, v: 0.610, tipo: 'borboleta', cor: '#ffb0d0', fase: 2 },
+    { u: 0.270, v: 0.780, tipo: 'borboleta', cor: '#7fd3ff', fase: 4 },
+    { u: 0.860, v: 0.800, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
+  ],
+
+  // PLANICIE (mapa 3). Rio e laguinho ondulam pela mascara; sem fogo nem luz
+  // no desenho, o que sobra e vida de campo: borboletas nos canteiros.
+  'assets/hunt-backgrounds/plains.jpg': [
+    { u: 0.265, v: 0.210, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.310, v: 0.410, tipo: 'borboleta', cor: '#fff3b0', fase: 2 },
+    { u: 0.220, v: 0.760, tipo: 'borboleta', cor: '#7fd3ff', fase: 4 },
+    { u: 0.770, v: 0.710, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
+  ],
+
+  // FAZENDA (mapa 4). Escala propria 0,5 (o desenho era o dobro do resto:
+  // ver ESCALA_POR_ARTE em scripts/build-sub-bioma-collision.js). Palha
+  // soltando dos montes de feno, agua mexendo no cocho e borboletas no pasto.
+  'assets/hunt-backgrounds/farm.jpg': [
+    { u: 0.310, v: 0.130, tipo: 'petala', cor: '#f2d36b', escala: 0.7 },
+    { u: 0.665, v: 0.130, tipo: 'petala', cor: '#f2d36b', escala: 0.7, fase: 3 },
+    { u: 0.190, v: 0.565, tipo: 'correnteza', escala: 0.5 },
+    { u: 0.250, v: 0.720, tipo: 'borboleta', cor: '#ffffff' },
+    { u: 0.500, v: 0.470, tipo: 'borboleta', cor: '#ffb0d0', fase: 3 },
+    { u: 0.800, v: 0.760, tipo: 'borboleta', cor: '#fff3b0', fase: 5 },
   ],
 }
