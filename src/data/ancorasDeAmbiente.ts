@@ -617,4 +617,10 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.470, v: 0.500, tipo: 'fogoFatuo' },
     { u: 0.700, v: 0.450, tipo: 'fogoFatuo', fase: 6 },
   ],
+
+  // PORTO (lote 3, Urbano). A doca ondula pela mascara (a agua satura acima
+  // de 0,5, o conteiner azul nao). Aqui so a chamine do cargueiro.
+  'assets/hunt-backgrounds/harbor.jpg': [
+    { u: 0.652, v: 0.072, tipo: 'chamine', escala: 0.7 },
+  ],
 }
