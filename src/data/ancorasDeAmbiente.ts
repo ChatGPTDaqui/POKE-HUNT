@@ -1150,4 +1150,15 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.699, v: 0.290, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.4, fase: 15 },
     { u: 0.233, v: 0.269, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.4, fase: 30 },
   ],
+
+  // RIO (lote 12, Aguas Interiores). Ja chove pelo preset; leito e pocas ondulam pela
+  // mascara, e as tres corredeiras espumam.
+  'assets/hunt-backgrounds/river.jpg': [
+    { u: 0.647, v: 0.280, tipo: 'cascata', escala: 0.55 },
+    { u: 0.409, v: 0.523, tipo: 'cascata', escala: 0.55, fase: 2 },
+    { u: 0.290, v: 0.652, tipo: 'cascata', escala: 0.55, fase: 4 },
+    { u: 0.776, v: 0.248, tipo: 'correnteza' },
+    { u: 0.155, v: 0.647, tipo: 'correnteza', fase: 3 },
+    { u: 0.362, v: 0.559, tipo: 'correnteza', fase: 6 },
+  ],
 }
