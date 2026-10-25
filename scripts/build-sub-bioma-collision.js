@@ -108,6 +108,8 @@ const ESCALA_POR_ARTE = {
   'lily-pond.jpg': 0.6,
   // Lanterna de papel ~2x o treinador.
   'maidens-peak.jpg': 0.55,
+  // Toca de Pikachu ~1,6x o treinador.
+  'pikachu-colony.jpg': 0.65,
 };
 
 /**

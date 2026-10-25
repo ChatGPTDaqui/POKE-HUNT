@@ -1325,4 +1325,22 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.600, v: 0.600, tipo: 'vagalume', cor: '#e0c8ff' },
     { u: 0.792, v: 0.807, tipo: 'vagalume', cor: '#ffd0f0' },
   ],
+
+  // COLONIA PIKACHU (lote 13, final). Faisca amarela estalando na boca de algumas
+  // tocas (moradores la dentro), respingo no riacho e borboletas no pomar.
+  'assets/hunt-backgrounds/pikachu-colony.jpg': [
+    { u: 0.223, v: 0.179, tipo: 'eletrica', cor: '#ffe040' },
+    { u: 0.575, v: 0.228, tipo: 'eletrica', cor: '#ffe040', fase: 3 },
+    { u: 0.176, v: 0.476, tipo: 'eletrica', cor: '#ffe040', fase: 6 },
+    { u: 0.771, v: 0.422, tipo: 'eletrica', cor: '#ffe040', fase: 9 },
+    { u: 0.575, v: 0.624, tipo: 'eletrica', cor: '#ffe040', fase: 12 },
+    { u: 0.176, v: 0.776, tipo: 'eletrica', cor: '#ffe040', fase: 15 },
+    { u: 0.823, v: 0.776, tipo: 'eletrica', cor: '#ffe040', fase: 18 },
+    { u: 0.626, v: 0.207, tipo: 'correnteza' },
+    { u: 0.673, v: 0.414, tipo: 'correnteza', fase: 3 },
+    { u: 0.751, v: 0.476, tipo: 'correnteza', fase: 6 },
+    { u: 0.300, v: 0.155, tipo: 'borboleta', cor: '#ffffff' },
+    { u: 0.342, v: 0.569, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.699, v: 0.166, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+  ],
 }
