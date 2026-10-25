@@ -793,4 +793,27 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.828, v: 0.929, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 9 },
     { u: 0.823, v: 0.973, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 10 },
   ],
+
+  // MONTE EMBER (lote 6, Igneo). Fumaca nas fendas que a arte pinta, chama
+  // baixa nos rios de lava dos cantos e brilho nas rochas rachadas.
+  'assets/hunt-backgrounds/mt-ember.jpg': [
+    { u: 0.326, v: 0.129, tipo: 'fumarola', escala: 0.4 },
+    { u: 0.673, v: 0.166, tipo: 'fumarola', escala: 0.45, fase: 2 },
+    { u: 0.124, v: 0.357, tipo: 'fumarola', escala: 0.4, fase: 4 },
+    { u: 0.181, v: 0.373, tipo: 'fumarola', escala: 0.4, fase: 6 },
+    { u: 0.272, v: 0.378, tipo: 'fumarola', escala: 0.4, fase: 8 },
+    { u: 0.626, v: 0.559, tipo: 'fumarola', escala: 0.4, fase: 10 },
+    { u: 0.771, v: 0.792, tipo: 'fumarola', escala: 0.4, fase: 12 },
+    { u: 0.251, v: 0.052, tipo: 'fogueira', escala: 0.6 },
+    { u: 0.031, v: 0.699, tipo: 'fogueira', escala: 0.55, fase: 1 },
+    { u: 0.129, v: 0.942, tipo: 'fogueira', escala: 0.55, fase: 2 },
+    { u: 0.714, v: 0.947, tipo: 'fogueira', escala: 0.6, fase: 3 },
+    { u: 0.947, v: 0.818, tipo: 'fogueira', escala: 0.55, fase: 4 },
+    { u: 0.823, v: 0.150, tipo: 'fogueira', escala: 0.45, fase: 5 },
+    { u: 0.228, v: 0.414, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5 },
+    { u: 0.911, v: 0.523, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 2 },
+    { u: 0.202, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5, fase: 4 },
+    { u: 0.797, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5, fase: 6 },
+    { u: 0.973, v: 0.233, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 8 },
+  ],
 }
