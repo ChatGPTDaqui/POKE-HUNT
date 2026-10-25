@@ -767,4 +767,67 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.065, v: 0.470, tipo: 'eletrica', escala: 0.35, fase: 6 },
     { u: 0.910, v: 0.510, tipo: 'eletrica', escala: 0.35, fase: 8 },
   ],
+
+  // TRILHA DE FOGO (lote 6, Igneo). Vapor saindo das dez chamines de pedra e
+  // brilho pulsando nas rachaduras de lava.
+  'assets/hunt-backgrounds/fiery-path.jpg': [
+    { u: 0.474, v: 0.171, tipo: 'fumarola', escala: 0.45 },
+    { u: 0.880, v: 0.176, tipo: 'fumarola', escala: 0.45, fase: 1 },
+    { u: 0.274, v: 0.274, tipo: 'fumarola', escala: 0.45, fase: 2 },
+    { u: 0.725, v: 0.274, tipo: 'fumarola', escala: 0.45, fase: 3 },
+    { u: 0.626, v: 0.318, tipo: 'fumarola', escala: 0.45, fase: 4 },
+    { u: 0.124, v: 0.313, tipo: 'fumarola', escala: 0.45, fase: 5 },
+    { u: 0.875, v: 0.533, tipo: 'fumarola', escala: 0.45, fase: 6 },
+    { u: 0.124, v: 0.569, tipo: 'fumarola', escala: 0.45, fase: 7 },
+    { u: 0.323, v: 0.668, tipo: 'fumarola', escala: 0.45, fase: 8 },
+    { u: 0.673, v: 0.668, tipo: 'fumarola', escala: 0.45, fase: 9 },
+    { u: 0.176, v: 0.228, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45 },
+    { u: 0.171, v: 0.274, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 1 },
+    { u: 0.626, v: 0.225, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 2 },
+    { u: 0.826, v: 0.220, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 3 },
+    { u: 0.176, v: 0.523, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 4 },
+    { u: 0.124, v: 0.875, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 5 },
+    { u: 0.176, v: 0.875, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 6 },
+    { u: 0.176, v: 0.927, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 7 },
+    { u: 0.176, v: 0.976, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 8 },
+    { u: 0.828, v: 0.929, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 9 },
+    { u: 0.823, v: 0.973, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 10 },
+  ],
+
+  // MONTE EMBER (lote 6, Igneo). Fumaca nas fendas que a arte pinta, chama
+  // baixa nos rios de lava dos cantos e brilho nas rochas rachadas.
+  'assets/hunt-backgrounds/mt-ember.jpg': [
+    { u: 0.326, v: 0.129, tipo: 'fumarola', escala: 0.4 },
+    { u: 0.673, v: 0.166, tipo: 'fumarola', escala: 0.45, fase: 2 },
+    { u: 0.124, v: 0.357, tipo: 'fumarola', escala: 0.4, fase: 4 },
+    { u: 0.181, v: 0.373, tipo: 'fumarola', escala: 0.4, fase: 6 },
+    { u: 0.272, v: 0.378, tipo: 'fumarola', escala: 0.4, fase: 8 },
+    { u: 0.626, v: 0.559, tipo: 'fumarola', escala: 0.4, fase: 10 },
+    { u: 0.771, v: 0.792, tipo: 'fumarola', escala: 0.4, fase: 12 },
+    { u: 0.251, v: 0.052, tipo: 'fogueira', escala: 0.6 },
+    { u: 0.031, v: 0.699, tipo: 'fogueira', escala: 0.55, fase: 1 },
+    { u: 0.129, v: 0.942, tipo: 'fogueira', escala: 0.55, fase: 2 },
+    { u: 0.714, v: 0.947, tipo: 'fogueira', escala: 0.6, fase: 3 },
+    { u: 0.947, v: 0.818, tipo: 'fogueira', escala: 0.55, fase: 4 },
+    { u: 0.823, v: 0.150, tipo: 'fogueira', escala: 0.45, fase: 5 },
+    { u: 0.228, v: 0.414, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5 },
+    { u: 0.911, v: 0.523, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 2 },
+    { u: 0.202, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5, fase: 4 },
+    { u: 0.797, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5, fase: 6 },
+    { u: 0.973, v: 0.233, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 8 },
+  ],
+
+  // CAMPO DE CINZAS (lote 6, Igneo). Fumaca da chamine da casa, cinza caindo
+  // das arvores e poeira de cinza rolando nas trilhas.
+  'assets/hunt-backgrounds/ash-field.jpg': [
+    { u: 0.805, v: 0.150, tipo: 'chamine', escala: 0.6 },
+    { u: 0.259, v: 0.129, tipo: 'petala', cor: '#bdbab2', escala: 0.7 },
+    { u: 0.569, v: 0.129, tipo: 'petala', cor: '#bdbab2', escala: 0.7, fase: 3 },
+    { u: 0.031, v: 0.311, tipo: 'petala', cor: '#bdbab2', escala: 0.7, fase: 5 },
+    { u: 0.963, v: 0.414, tipo: 'petala', cor: '#bdbab2', escala: 0.7, fase: 7 },
+    { u: 0.217, v: 0.362, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.5 },
+    { u: 0.621, v: 0.404, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.5, fase: 12 },
+    { u: 0.362, v: 0.673, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.55, fase: 24 },
+    { u: 0.725, v: 0.647, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.5, fase: 36 },
+  ],
 }
