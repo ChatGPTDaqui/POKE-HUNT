@@ -27,6 +27,8 @@ const ARTES = {
   meadow: { h: [185, 222], s: 0.35, l: [0.28, 0.80] },
   // Rio azul forte e os dois laguinhos.
   plains: { h: [200, 228], s: 0.45, l: [0.28, 0.75] },
+  // Lago do vilarejo (ja tinha props; faltava a agua mexer).
+  town: { h: [195, 225], s: 0.35, l: [0.30, 0.72] },
 }
 
 function hsl(r, g, b) {
