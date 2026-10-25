@@ -61,6 +61,8 @@ const ARTES = {
   'hot-springs': { h: [160, 195], s: 0.25, l: [0.2, 0.45] },
   // Zona Safari: a lagoa azul-escura.
   'safari-zone': { h: [200, 230], s: 0.3, l: [0.2, 0.5] },
+  // Charmander Perdido: pocas de chuva no gramado escuro.
+  'stray-charmander': { h: [200, 225], s: 0.25, l: [0.3, 0.6] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }

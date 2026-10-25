@@ -1297,4 +1297,15 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.481, v: 0.595, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 15 },
     { u: 0.673, v: 0.828, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 30 },
   ],
+
+  // CHARMANDER PERDIDO (lote 13, final). Pocas de chuva ondulam pela mascara; brasa
+  // da cauda tremulando junto da pedra onde ele se abriga e neblina umida no capim.
+  'assets/hunt-backgrounds/stray-charmander.jpg': [
+    { u: 0.538, v: 0.497, tipo: 'fogueira', escala: 0.35 },
+    { u: 0.497, v: 0.476, tipo: 'orbe', cor: '#ffa040', escala: 0.9 },
+    { u: 0.259, v: 0.259, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45 },
+    { u: 0.751, v: 0.269, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45, fase: 15 },
+    { u: 0.233, v: 0.673, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45, fase: 30 },
+    { u: 0.776, v: 0.699, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45, fase: 45 },
+  ],
 }
