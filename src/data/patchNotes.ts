@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.45',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (lotes 2 e 3)',
+    highlights: [
+      'Sombrio: fumaça e brasas na Floresta Queimada e na Torre Queimada, névoa e fogo-fátuo no Monte Pyre, no Navio Abandonado e na Torre Pokémon.',
+      'Urbano: água mexendo no Porto e no Esgoto, sirenes e telas no Esconderijo Rocket, fontes e borboletas na Mansão Celadon e no Concurso de Insetos.',
+      'Torre Pokémon, Esconderijo Rocket e Mansão Celadon foram redimensionados para combinar com o treinador e os POKEs.',
+    ],
+  },
+  {
     version: '8.44',
     date: '2026-10-24',
     title: 'Vida nos mapas (lote 1)',
