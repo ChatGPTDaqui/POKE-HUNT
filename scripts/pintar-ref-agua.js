@@ -45,6 +45,20 @@ const ARTES = {
   oasis: { h: [168, 200], s: 0.4, l: [0.35, 0.75] },
   // Ilhas Espuma: canais azul-escuro (chao de gelo e ciano claro).
   'seafoam-islands': { h: [200, 225], s: 0.5, l: [0.25, 0.55] },
+  // Cachoeira Meteoro: lago e pocas azuis; a queda em si fica de fora.
+  'meteor-falls': { h: [200, 225], s: 0.3, l: [0.35, 0.78], ignorar: [[0.595, 0.28, 0.685, 0.49]] },
+  // Caverna Baixio: pocas de mare verdes e buracos no gelo azul-escuro.
+  'shoal-cave': { h: [145, 215], s: 0.22, l: [0.25, 0.55] },
+  // Rio: leito azul e pocas de chuva no gramado.
+  river: { h: [205, 228], s: 0.4, l: [0.35, 0.8] },
+  // Cachoeira: lago e poca abaixo da queda (pedra do caminho tem s<0,2).
+  waterfall: { h: [195, 212], s: 0.21, l: [0.4, 0.62] },
+  // Lagoa das Ninfeias: agua azul-clara entre as folhas.
+  'lily-pond': { h: [160, 205], s: 0.4, l: [0.5, 0.9] },
+  // Lago da Furia: metade de baixo azul-marinho (o reflexo da tempestade fica fora).
+  'lake-of-rage': { h: [205, 235], s: 0.3, l: [0.12, 0.4] },
+  // Fontes Termais: as seis piscinas verde-azuladas.
+  'hot-springs': { h: [160, 195], s: 0.25, l: [0.2, 0.45] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }
