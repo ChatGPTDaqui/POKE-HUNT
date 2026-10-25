@@ -989,4 +989,16 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.497, v: 0.828, tipo: 'nevoa', cor: '#e8b878', escala: 0.4, fase: 18 },
     { u: 0.497, v: 0.129, tipo: 'nevoa', cor: '#e8b878', escala: 0.35, fase: 28 },
   ],
+
+  // OASIS (lote 9, Arido). Lagoa turquesa ondula pela mascara; borboletas no verde
+  // em volta da agua e poeira rodando no areal e na trilha de entrada.
+  'assets/hunt-backgrounds/oasis.jpg': [
+    { u: 0.362, v: 0.466, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.663, v: 0.647, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.217, v: 0.269, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.699, v: 0.362, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+    { u: 0.248, v: 0.699, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4 },
+    { u: 0.751, v: 0.725, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 12 },
+    { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#e2c48a', escala: 0.35, fase: 24 },
+  ],
 }

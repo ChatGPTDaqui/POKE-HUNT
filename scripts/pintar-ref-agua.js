@@ -41,6 +41,8 @@ const ARTES = {
   'orange-archipelago': { h: [175, 200], s: 0.55, l: [0.38, 0.72] },
   // Santuario: lago das carpas (pedra cinza tem saturacao baixa).
   'meditation-shrine': { h: [180, 212], s: 0.15, l: [0.2, 0.42] },
+  // Oasis: lagoa turquesa no centro.
+  oasis: { h: [168, 200], s: 0.4, l: [0.35, 0.75] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }
