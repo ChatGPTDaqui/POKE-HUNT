@@ -100,6 +100,8 @@ const ESCALA_POR_ARTE = {
   'pokemon-mansion.jpg': 0.6,
   // Treno ~2,5x o treinador.
   'tundra.jpg': 0.65,
+  // Vagonete ~2,5x o treinador.
+  'rock-tunnel.jpg': 0.6,
 };
 
 /**

@@ -1080,4 +1080,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.823, v: 0.818, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 6 },
     { u: 0.135, v: 0.859, tipo: 'orbe', cor: '#c8b8ff', escala: 0.55, fase: 7 },
   ],
+
+  // TUNEL DE PEDRA (lote 11, Subterraneo). Ja pinga pelo preset; lampioes da mina
+  // pulsando e poeira brilhando na luz que entra pela saida.
+  'assets/hunt-backgrounds/rock-tunnel.jpg': [
+    { u: 0.379, v: 0.184, tipo: 'orbe', cor: '#ffa040', escala: 0.6 },
+    { u: 0.177, v: 0.256, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 1 },
+    { u: 0.625, v: 0.197, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 2 },
+    { u: 0.621, v: 0.409, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 3 },
+    { u: 0.857, v: 0.619, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 4 },
+    { u: 0.140, v: 0.660, tipo: 'orbe', cor: '#ffa040', escala: 0.6, fase: 5 },
+    { u: 0.393, v: 0.137, tipo: 'orbe', cor: '#ffa040', escala: 0.4, fase: 6 },
+    { u: 0.497, v: 0.911, tipo: 'vagalume', cor: '#fff6dc' },
+  ],
 }
