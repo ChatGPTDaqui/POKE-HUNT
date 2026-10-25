@@ -681,4 +681,56 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.230, v: 0.760, tipo: 'borboleta', cor: '#c9a7ff', fase: 4 },
     { u: 0.770, v: 0.760, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
   ],
+
+  // MATO ALTO (lote 4, Mata). Mata escura com brejo roxo: bolha verde subindo
+  // dos tres pocos, cogumelo luminoso pulsando e vaga-lume verde.
+  'assets/hunt-backgrounds/tall-grass.jpg': [
+    { u: 0.200, v: 0.215, tipo: 'gas', cor: '#7dff7a', escala: 0.7 },
+    { u: 0.720, v: 0.590, tipo: 'gas', cor: '#7dff7a', escala: 0.7, fase: 3 },
+    { u: 0.560, v: 0.880, tipo: 'gas', cor: '#7dff7a', escala: 0.7, fase: 6 },
+    { u: 0.645, v: 0.160, tipo: 'orbe', cor: '#7dff9a', escala: 0.5 },
+    { u: 0.820, v: 0.245, tipo: 'orbe', cor: '#7dff9a', escala: 0.5, fase: 2 },
+    { u: 0.535, v: 0.430, tipo: 'orbe', cor: '#7dff9a', escala: 0.4, fase: 4 },
+    { u: 0.690, v: 0.800, tipo: 'orbe', cor: '#7dff9a', escala: 0.5, fase: 6 },
+    { u: 0.300, v: 0.450, tipo: 'vagalume', cor: '#c8f07a' },
+    { u: 0.780, v: 0.380, tipo: 'vagalume', cor: '#c8f07a', fase: 5 },
+  ],
+
+  // CLAREIRA DOS COGUMELOS (lote 4, Mata). Escala propria 0,55 (cogumelo grande
+  // ~3x o treinador). Esporo caindo dos cogumelos grandes e borboletas nos
+  // circulos de fada.
+  'assets/hunt-backgrounds/mushroom-glade.jpg': [
+    { u: 0.730, v: 0.160, tipo: 'petala', cor: '#e6c75a', escala: 0.5 },
+    { u: 0.435, v: 0.440, tipo: 'petala', cor: '#e6c75a', escala: 0.5, fase: 3 },
+    { u: 0.570, v: 0.400, tipo: 'petala', cor: '#e6c75a', escala: 0.4, fase: 5 },
+    { u: 0.255, v: 0.270, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.760, v: 0.640, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.230, v: 0.680, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+  ],
+
+  // BOSQUE DE ILEX (lote 4, Mata). Noite de mata fechada: nevoa andando por
+  // cima da que a arte pinta, vaga-lumes, luz no santuario e respingo nas pocas.
+  'assets/hunt-backgrounds/ilex-forest.jpg': [
+    { u: 0.250, v: 0.470, tipo: 'nevoa', cor: '#cfe8dc' },
+    { u: 0.720, v: 0.460, tipo: 'nevoa', cor: '#cfe8dc', fase: 9 },
+    { u: 0.300, v: 0.700, tipo: 'nevoa', cor: '#cfe8dc', fase: 18 },
+    { u: 0.680, v: 0.640, tipo: 'nevoa', cor: '#cfe8dc', fase: 27 },
+    { u: 0.350, v: 0.350, tipo: 'vagalume', cor: '#d8f08a' },
+    { u: 0.600, v: 0.560, tipo: 'vagalume', cor: '#d8f08a', fase: 4 },
+    { u: 0.780, v: 0.720, tipo: 'vagalume', cor: '#d8f08a', fase: 8 },
+    { u: 0.700, v: 0.295, tipo: 'orbe', cor: '#ffd58a', escala: 0.6 },
+    { u: 0.455, v: 0.495, tipo: 'correnteza', escala: 0.5 },
+    { u: 0.520, v: 0.605, tipo: 'correnteza', escala: 0.5, fase: 2 },
+    { u: 0.760, v: 0.715, tipo: 'correnteza', escala: 0.5, fase: 4 },
+  ],
+
+  // COPA DAS ARVORES (lote 4, Mata). Escala propria 0,6 (barril e porta grandes
+  // demais). O vao azul entre as copas e ceu: nuvem passando por ele. A folha
+  // caindo e o pingo ja vem do preset 'selva'.
+  'assets/hunt-backgrounds/treetops.jpg': [
+    { u: 0.170, v: 0.300, tipo: 'nevoa', cor: '#ffffff' },
+    { u: 0.720, v: 0.400, tipo: 'nevoa', cor: '#ffffff', fase: 10 },
+    { u: 0.300, v: 0.640, tipo: 'nevoa', cor: '#ffffff', fase: 20 },
+    { u: 0.640, v: 0.720, tipo: 'nevoa', cor: '#ffffff', fase: 30 },
+  ],
 }
