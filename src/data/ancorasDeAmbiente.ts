@@ -681,4 +681,18 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.230, v: 0.760, tipo: 'borboleta', cor: '#c9a7ff', fase: 4 },
     { u: 0.770, v: 0.760, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
   ],
+
+  // MATO ALTO (lote 4, Mata). Mata escura com brejo roxo: bolha verde subindo
+  // dos tres pocos, cogumelo luminoso pulsando e vaga-lume verde.
+  'assets/hunt-backgrounds/tall-grass.jpg': [
+    { u: 0.200, v: 0.215, tipo: 'gas', cor: '#7dff7a', escala: 0.7 },
+    { u: 0.720, v: 0.590, tipo: 'gas', cor: '#7dff7a', escala: 0.7, fase: 3 },
+    { u: 0.560, v: 0.880, tipo: 'gas', cor: '#7dff7a', escala: 0.7, fase: 6 },
+    { u: 0.645, v: 0.160, tipo: 'orbe', cor: '#7dff9a', escala: 0.5 },
+    { u: 0.820, v: 0.245, tipo: 'orbe', cor: '#7dff9a', escala: 0.5, fase: 2 },
+    { u: 0.535, v: 0.430, tipo: 'orbe', cor: '#7dff9a', escala: 0.4, fase: 4 },
+    { u: 0.690, v: 0.800, tipo: 'orbe', cor: '#7dff9a', escala: 0.5, fase: 6 },
+    { u: 0.300, v: 0.450, tipo: 'vagalume', cor: '#c8f07a' },
+    { u: 0.780, v: 0.380, tipo: 'vagalume', cor: '#c8f07a', fase: 5 },
+  ],
 }
