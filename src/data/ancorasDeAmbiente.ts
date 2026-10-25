@@ -78,6 +78,9 @@ export type TipoDeProp =
   | 'vagalume' // pontos que sobem e flutuam
   | 'petala' // pontos que caem girando
   | 'borboleta' // 2-3 borboletas batendo asa em volta da ancora (canteiro de flor)
+  // — corpo OPACO procedural (le em cena clara, onde brilho somado some)
+  | 'nevoa' // mancha de nevoa grande e suave derivando devagar
+  | 'fogoFatuo' // duas chamas fantasmas flutuando (cemiterio, torre assombrada)
 
 export interface AncoraDeAmbiente {
   /** Fracao da LARGURA da arte de fundo, 0..1. */
@@ -89,7 +92,7 @@ export interface AncoraDeAmbiente {
   escala?: number
   /**
    * Cor do prop, quando o tipo aceita uma (`orbe`, `gas`, `petala`,
-   * `vagalume`, `borboleta`). Ausente = a cor padrao do tipo em `ambienteProps.ts`.
+   * `vagalume`, `borboleta`, `nevoa`, `fogoFatuo`). Ausente = a cor padrao do tipo em `ambienteProps.ts`.
    */
   cor?: string
   /**
@@ -535,5 +538,22 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.523, v: 0.785, tipo: 'chamine', escala: 0.5, fase: 6 },
     { u: 0.556, v: 0.835, tipo: 'tocha', escala: 0.4, fase: 5 },
     { u: 0.223, v: 0.822, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5 },
+  ],
+
+  // MONTE PYRE (lote 2, Sombrio). Cemiterio na nevoa, cena CLARA: brilho
+  // somado some, entao vida aqui e corpo opaco — nevoa derivando nos
+  // patamares, fogo-fatuo entre as lapides e incenso nas lanternas/altar.
+  'assets/hunt-backgrounds/mt-pyre.jpg': [
+    { u: 0.300, v: 0.300, tipo: 'nevoa' },
+    { u: 0.700, v: 0.450, tipo: 'nevoa', fase: 7 },
+    { u: 0.350, v: 0.620, tipo: 'nevoa', fase: 13 },
+    { u: 0.750, v: 0.780, tipo: 'nevoa', fase: 21 },
+    { u: 0.500, v: 0.900, tipo: 'nevoa', fase: 30 },
+    { u: 0.250, v: 0.470, tipo: 'fogoFatuo' },
+    { u: 0.800, v: 0.580, tipo: 'fogoFatuo', cor: '#7fc8ff', fase: 4 },
+    { u: 0.450, v: 0.700, tipo: 'fogoFatuo', fase: 8 },
+    { u: 0.448, v: 0.185, tipo: 'chamine', escala: 0.35 },
+    { u: 0.551, v: 0.185, tipo: 'chamine', escala: 0.35, fase: 2 },
+    { u: 0.730, v: 0.360, tipo: 'chamine', escala: 0.35, fase: 4 },
   ],
 }

@@ -130,13 +130,15 @@ const TAMANHO: Record<TipoDeProp, number> = {
   vagalume: emPoke(1.15), // raio do enxame
   petala: emPoke(1.50),
   borboleta: emPoke(1.6), // raio do voo em volta das flores
+  nevoa: emPoke(3.2), // raio da mancha
+  fogoFatuo: emPoke(1.2), // raio da flutuacao
 }
 
 /** Cor de quem nao declara `cor` na ancora. */
 const COR_PADRAO: Record<TipoDeProp, string> = {
   fogueira: '#ffb057', tocha: '#ffc06a', chamine: '#8d8b86', fumarola: '#e8f0f4',
   gas: '#a9d06a', orbe: '#ffd58a', cascata: '#f2fbff', correnteza: '#eaf8ff',
-  quebraMar: '#ffffff', eletrica: '#fff2a8', vagalume: '#ffe27a', petala: '#ffc2dd', borboleta: '#fff3b0',
+  quebraMar: '#ffffff', eletrica: '#fff2a8', vagalume: '#ffe27a', petala: '#ffc2dd', borboleta: '#fff3b0', nevoa: '#f4f1f8', fogoFatuo: '#9b7bff',
 }
 
 // ---------------------------------------------------------------------------
@@ -542,6 +544,56 @@ function desenharEnxame(ctx: CanvasRenderingContext2D, p: PropVivo, t: number, c
  * (ver o cabecalho): forma simples em codigo nao briga com o pixel art do
  * fundo. Asa de ~16% de um POKE (envergadura ~1/3): menor some no capim.
  */
+function desenharNevoa(ctx: CanvasRenderingContext2D, p: PropVivo, t: number): void {
+  // Nevoa (24/10/2026): tres manchas sobrepostas que vao e voltam devagar e
+  // respiram em alpha. Opaca de alpha baixo (source-over), e nao 'lighter':
+  // em cena clara (Monte Pyre) luz somada nao aparece.
+  const tt = t + p.fase
+  ctx.save()
+  for (let i = 0; i < 3; i++) {
+    const a = p.ruido[i % 4]
+    const dx = Math.sin(tt * (0.05 + a * 0.04) + i * 2.1) * p.tamanho * 0.6 + ventoAgora() * 20
+    const dy = Math.cos(tt * (0.04 + a * 0.03) + i) * p.tamanho * 0.12
+    const r = p.tamanho * (0.55 + a * 0.35)
+    const alpha = 0.22 + 0.1 * Math.sin(tt * (0.21 + a * 0.1) + i)
+    const g = ctx.createRadialGradient(p.x + dx, p.y + dy, 0, p.x + dx, p.y + dy, r)
+    g.addColorStop(0, p.cor)
+    g.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.globalAlpha = Math.max(0, alpha)
+    ctx.fillStyle = g
+    ctx.beginPath()
+    ctx.ellipse(p.x + dx, p.y + dy, r, r * 0.45, 0, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+function desenharFogoFatuo(ctx: CanvasRenderingContext2D, p: PropVivo, t: number): void {
+  // Duas chamas fantasmas: nucleo claro e halo da cor, corpo opaco (le em
+  // cena clara), flutuando em laco lento e tremendo de alpha.
+  ctx.save()
+  for (let i = 0; i < 2; i++) {
+    const a = p.ruido[i]
+    const tt = t + p.fase + a * 9
+    const x = p.x + Math.sin(tt * (0.35 + a * 0.2)) * p.tamanho * (0.5 + a * 0.4)
+    const y = p.y + Math.cos(tt * (0.27 + a * 0.15)) * p.tamanho * 0.3 - Math.abs(Math.sin(tt * 0.9)) * emPoke(0.25)
+    const r = emPoke(0.22) * (0.85 + 0.15 * Math.sin(tt * 7 + i))
+    ctx.globalAlpha = 0.7 + 0.3 * Math.abs(Math.sin(tt * 2.3 + i))
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r * 2.4)
+    g.addColorStop(0, '#ffffff')
+    g.addColorStop(0.3, p.cor)
+    g.addColorStop(1, 'rgba(155,123,255,0)')
+    ctx.fillStyle = g
+    ctx.beginPath()
+    // Gota de chama: ponta pra cima.
+    ctx.moveTo(x, y - r * 2.2)
+    ctx.quadraticCurveTo(x + r * 1.4, y, x, y + r)
+    ctx.quadraticCurveTo(x - r * 1.4, y, x, y - r * 2.2)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
 function desenharBorboletas(ctx: CanvasRenderingContext2D, p: PropVivo, t: number, compacto: boolean): void {
   const n = compacto ? 2 : 3
   const asa = emPoke(0.16)
@@ -697,6 +749,12 @@ export function desenharPropsDeAmbiente(
         break
       case 'borboleta':
         desenharBorboletas(ctx, p, t, compacto)
+        break
+      case 'nevoa':
+        desenharNevoa(ctx, p, t)
+        break
+      case 'fogoFatuo':
+        desenharFogoFatuo(ctx, p, t)
         break
     }
   }
