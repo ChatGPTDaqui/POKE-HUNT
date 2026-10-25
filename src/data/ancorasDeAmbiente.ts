@@ -623,4 +623,18 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   'assets/hunt-backgrounds/harbor.jpg': [
     { u: 0.652, v: 0.072, tipo: 'chamine', escala: 0.7 },
   ],
+
+  // ESGOTO (lote 3, Urbano). Escuro: as seis lampadas pulsam, a agua verde
+  // ondula pela mascara e os canos soltam vapor.
+  'assets/hunt-backgrounds/underground.jpg': [
+    { u: 0.175, v: 0.100, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 0 },
+    { u: 0.618, v: 0.100, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 1 },
+    { u: 0.836, v: 0.100, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 2 },
+    { u: 0.108, v: 0.370, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 3 },
+    { u: 0.108, v: 0.635, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 4 },
+    { u: 0.892, v: 0.627, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 5 },
+    { u: 0.260, v: 0.150, tipo: 'fumarola', escala: 0.4 },
+    { u: 0.680, v: 0.140, tipo: 'fumarola', escala: 0.4, fase: 3 },
+    { u: 0.940, v: 0.760, tipo: 'fumarola', escala: 0.35, fase: 5 },
+  ],
 }
