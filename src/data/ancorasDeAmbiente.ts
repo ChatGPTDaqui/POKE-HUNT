@@ -1343,4 +1343,15 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.342, v: 0.569, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
     { u: 0.699, v: 0.166, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
   ],
+
+  // ESQUADRAO SQUIRTLE (lote 13, final). Rio corre pela mascara; agua batendo nos
+  // pilares da ponte, fogueira do acampamento na frente da caverna e borboletas.
+  'assets/hunt-backgrounds/squirtle-squad.jpg': [
+    { u: 0.409, v: 0.481, tipo: 'cascata', escala: 0.6 },
+    { u: 0.606, v: 0.518, tipo: 'cascata', escala: 0.6, fase: 2 },
+    { u: 0.499, v: 0.217, tipo: 'fogueira', escala: 0.5 },
+    { u: 0.155, v: 0.233, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.828, v: 0.751, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.207, v: 0.751, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+  ],
 }
