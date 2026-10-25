@@ -1065,4 +1065,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.436, v: 0.919, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 6 },
     { u: 0.562, v: 0.919, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 7 },
   ],
+
+  // MONTE LUA (lote 11, Subterraneo). Ja pinga pelo preset; Pedra da Lua pulsando no
+  // facho de luz, poeira brilhando no facho e cristais das paredes cintilando.
+  'assets/hunt-backgrounds/mt-moon.jpg': [
+    { u: 0.499, v: 0.481, tipo: 'orbe', cor: '#dce6ff', escala: 1.1 },
+    { u: 0.497, v: 0.259, tipo: 'vagalume', cor: '#eef2ff' },
+    { u: 0.481, v: 0.388, tipo: 'vagalume', cor: '#eef2ff', fase: 3 },
+    { u: 0.274, v: 0.274, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 1 },
+    { u: 0.725, v: 0.269, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 2 },
+    { u: 0.771, v: 0.321, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 3 },
+    { u: 0.272, v: 0.611, tipo: 'orbe', cor: '#c8b8ff', escala: 0.45, fase: 4 },
+    { u: 0.223, v: 0.818, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 5 },
+    { u: 0.823, v: 0.818, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 6 },
+    { u: 0.135, v: 0.859, tipo: 'orbe', cor: '#c8b8ff', escala: 0.55, fase: 7 },
+  ],
 }
