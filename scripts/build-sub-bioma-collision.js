@@ -92,6 +92,8 @@ const ESCALA_POR_ARTE = {
   'junkyard.jpg': 0.5,
   // Monitor ~2x o treinador.
   'silph-co.jpg': 0.6,
+  // Porta da casa ~2,7x o treinador.
+  'ash-field.jpg': 0.55,
 };
 
 /**

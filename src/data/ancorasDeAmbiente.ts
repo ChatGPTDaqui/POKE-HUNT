@@ -816,4 +816,18 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.797, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5, fase: 6 },
     { u: 0.973, v: 0.233, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 8 },
   ],
+
+  // CAMPO DE CINZAS (lote 6, Igneo). Fumaca da chamine da casa, cinza caindo
+  // das arvores e poeira de cinza rolando nas trilhas.
+  'assets/hunt-backgrounds/ash-field.jpg': [
+    { u: 0.805, v: 0.150, tipo: 'chamine', escala: 0.6 },
+    { u: 0.259, v: 0.129, tipo: 'petala', cor: '#bdbab2', escala: 0.7 },
+    { u: 0.569, v: 0.129, tipo: 'petala', cor: '#bdbab2', escala: 0.7, fase: 3 },
+    { u: 0.031, v: 0.311, tipo: 'petala', cor: '#bdbab2', escala: 0.7, fase: 5 },
+    { u: 0.963, v: 0.414, tipo: 'petala', cor: '#bdbab2', escala: 0.7, fase: 7 },
+    { u: 0.217, v: 0.362, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.5 },
+    { u: 0.621, v: 0.404, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.5, fase: 12 },
+    { u: 0.362, v: 0.673, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.55, fase: 24 },
+    { u: 0.725, v: 0.647, tipo: 'nevoa', cor: '#d6d2c8', escala: 0.5, fase: 36 },
+  ],
 }

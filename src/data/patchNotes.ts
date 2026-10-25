@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.48',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (Ígneo)',
+    highlights: [
+      'Trilha de Fogo: vapor nas chaminés de pedra e lava pulsando. Monte Ember: fumaça nas fendas, chamas nos rios de lava e rochas em brasa. Campo de Cinzas: cinza caindo das árvores, poeira nas trilhas e chaminé fumegando.',
+      'Campo de Cinzas foi redimensionado para combinar com o treinador e os POKEs.',
+    ],
+  },
+  {
     version: '8.47',
     date: '2026-10-25',
     title: 'Vida nos mapas (Industrial)',
