@@ -1198,4 +1198,20 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.647, v: 0.300, tipo: 'nevoa', cor: '#5a7a70', escala: 0.55, fase: 15 },
     { u: 0.238, v: 0.238, tipo: 'orbe', cor: '#e8f0c0', escala: 1 },
   ],
+
+  // PICO DA DONZELA (lote 12, Aguas Interiores). Ja ondula pelo preset; as oito
+  // lanternas de papel pulsando e neblina do mar subindo pelas bordas do penhasco.
+  'assets/hunt-backgrounds/maidens-peak.jpg': [
+    { u: 0.424, v: 0.217, tipo: 'orbe', cor: '#ffc890', escala: 0.6 },
+    { u: 0.274, v: 0.316, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 1 },
+    { u: 0.725, v: 0.362, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 2 },
+    { u: 0.274, v: 0.668, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 3 },
+    { u: 0.725, v: 0.668, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 4 },
+    { u: 0.424, v: 0.766, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 5 },
+    { u: 0.575, v: 0.766, tipo: 'orbe', cor: '#ffc890', escala: 0.6, fase: 6 },
+    { u: 0.171, v: 0.466, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.6 },
+    { u: 0.828, v: 0.569, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.6, fase: 15 },
+    { u: 0.207, v: 0.854, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.5, fase: 30 },
+    { u: 0.776, v: 0.880, tipo: 'nevoa', cor: '#dfe8f0', escala: 0.5, fase: 45 },
+  ],
 }

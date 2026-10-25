@@ -106,6 +106,8 @@ const ESCALA_POR_ARTE = {
   'digletts-cave.jpg': 0.6,
   // Flor de lotus ~1,5x o treinador.
   'lily-pond.jpg': 0.6,
+  // Lanterna de papel ~2x o treinador.
+  'maidens-peak.jpg': 0.55,
 };
 
 /**
