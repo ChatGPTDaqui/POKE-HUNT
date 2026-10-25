@@ -695,4 +695,16 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.300, v: 0.450, tipo: 'vagalume', cor: '#c8f07a' },
     { u: 0.780, v: 0.380, tipo: 'vagalume', cor: '#c8f07a', fase: 5 },
   ],
+
+  // CLAREIRA DOS COGUMELOS (lote 4, Mata). Escala propria 0,55 (cogumelo grande
+  // ~3x o treinador). Esporo caindo dos cogumelos grandes e borboletas nos
+  // circulos de fada.
+  'assets/hunt-backgrounds/mushroom-glade.jpg': [
+    { u: 0.730, v: 0.160, tipo: 'petala', cor: '#e6c75a', escala: 0.5 },
+    { u: 0.435, v: 0.440, tipo: 'petala', cor: '#e6c75a', escala: 0.5, fase: 3 },
+    { u: 0.570, v: 0.400, tipo: 'petala', cor: '#e6c75a', escala: 0.4, fase: 5 },
+    { u: 0.255, v: 0.270, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.760, v: 0.640, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.230, v: 0.680, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+  ],
 }

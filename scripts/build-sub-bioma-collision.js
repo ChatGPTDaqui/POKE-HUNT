@@ -82,6 +82,8 @@ const ESCALA_POR_ARTE = {
   'rocket-hideout.jpg': 0.65,
   // Banco 3,5x e casinha de cachorro 2,5x o treinador.
   'celadon-mansion.jpg': 0.5,
+  // Cogumelo grande ~3x o treinador.
+  'mushroom-glade.jpg': 0.55,
 };
 
 /**
