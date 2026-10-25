@@ -1175,4 +1175,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.854, v: 0.776, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
     { u: 0.362, v: 0.802, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
   ],
+
+  // LAGOA DAS NINFEIAS (lote 12, Aguas Interiores). Agua ondula pela mascara entre
+  // as folhas; borboletas sobre a lagoa e petala de lotus soltando.
+  'assets/hunt-backgrounds/lily-pond.jpg': [
+    { u: 0.280, v: 0.217, tipo: 'borboleta', cor: '#bfe8ff' },
+    { u: 0.864, v: 0.367, tipo: 'borboleta', cor: '#bfe8ff', fase: 3 },
+    { u: 0.362, v: 0.688, tipo: 'borboleta', cor: '#bfe8ff', fase: 5 },
+    { u: 0.673, v: 0.668, tipo: 'borboleta', cor: '#fff3b0', fase: 7 },
+    { u: 0.217, v: 0.197, tipo: 'petala', cor: '#ffb0d0', escala: 0.5 },
+    { u: 0.756, v: 0.192, tipo: 'petala', cor: '#ffb0d0', escala: 0.5, fase: 3 },
+    { u: 0.176, v: 0.668, tipo: 'petala', cor: '#ffb0d0', escala: 0.5, fase: 5 },
+    { u: 0.818, v: 0.823, tipo: 'petala', cor: '#ffb0d0', escala: 0.5, fase: 7 },
+  ],
 }

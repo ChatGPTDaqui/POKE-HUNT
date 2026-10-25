@@ -53,6 +53,8 @@ const ARTES = {
   river: { h: [205, 228], s: 0.4, l: [0.35, 0.8] },
   // Cachoeira: lago e poca abaixo da queda (pedra do caminho tem s<0,2).
   waterfall: { h: [195, 212], s: 0.21, l: [0.4, 0.62] },
+  // Lagoa das Ninfeias: agua azul-clara entre as folhas.
+  'lily-pond': { h: [160, 205], s: 0.4, l: [0.5, 0.9] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }

@@ -104,6 +104,8 @@ const ESCALA_POR_ARTE = {
   'rock-tunnel.jpg': 0.6,
   // Toca de Diglett ~2x o treinador.
   'digletts-cave.jpg': 0.6,
+  // Flor de lotus ~1,5x o treinador.
+  'lily-pond.jpg': 0.6,
 };
 
 /**
