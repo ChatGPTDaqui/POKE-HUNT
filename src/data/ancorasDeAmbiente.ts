@@ -1001,4 +1001,18 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.751, v: 0.725, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 12 },
     { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#e2c48a', escala: 0.35, fase: 24 },
   ],
+
+  // MONTANHA DE GELO (lote 10, Gelido). Ja neva pelo preset; aqui a cascata batendo
+  // nos dois patamares, respingo na poca funda e mar de nuvens passando pelas bordas.
+  'assets/hunt-backgrounds/ice-mountain.jpg': [
+    { u: 0.833, v: 0.530, tipo: 'cascata', escala: 0.7 },
+    { u: 0.841, v: 0.754, tipo: 'cascata', escala: 0.8 },
+    { u: 0.789, v: 0.829, tipo: 'correnteza' },
+    { u: 0.861, v: 0.909, tipo: 'correnteza', fase: 3 },
+    { u: 0.781, v: 0.949, tipo: 'correnteza', fase: 6 },
+    { u: 0.072, v: 0.702, tipo: 'nevoa', cor: '#ffffff', escala: 0.6 },
+    { u: 0.949, v: 0.239, tipo: 'nevoa', cor: '#ffffff', escala: 0.6, fase: 15 },
+    { u: 0.096, v: 0.199, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 30 },
+    { u: 0.957, v: 0.797, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 45 },
+  ],
 }
