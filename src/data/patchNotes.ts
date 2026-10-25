@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.46',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (Mata)',
+    highlights: [
+      'Mato Alto: bolhas no brejo, cogumelos luminosos e vaga-lumes. Bosque de Ilex: névoa, vaga-lumes, luz no santuário e respingos nas poças.',
+      'Clareira dos Cogumelos: esporos caindo e borboletas. Copa das Árvores: nuvens passando entre as copas.',
+      'Clareira dos Cogumelos e Copa das Árvores foram redimensionadas para combinar com o treinador e os POKEs.',
+    ],
+  },
+  {
     version: '8.45',
     date: '2026-10-25',
     title: 'Vida nos mapas (lotes 2 e 3)',

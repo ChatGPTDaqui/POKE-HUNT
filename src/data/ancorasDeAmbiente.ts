@@ -723,4 +723,14 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.520, v: 0.605, tipo: 'correnteza', escala: 0.5, fase: 2 },
     { u: 0.760, v: 0.715, tipo: 'correnteza', escala: 0.5, fase: 4 },
   ],
+
+  // COPA DAS ARVORES (lote 4, Mata). Escala propria 0,6 (barril e porta grandes
+  // demais). O vao azul entre as copas e ceu: nuvem passando por ele. A folha
+  // caindo e o pingo ja vem do preset 'selva'.
+  'assets/hunt-backgrounds/treetops.jpg': [
+    { u: 0.170, v: 0.300, tipo: 'nevoa', cor: '#ffffff' },
+    { u: 0.720, v: 0.400, tipo: 'nevoa', cor: '#ffffff', fase: 10 },
+    { u: 0.300, v: 0.640, tipo: 'nevoa', cor: '#ffffff', fase: 20 },
+    { u: 0.640, v: 0.720, tipo: 'nevoa', cor: '#ffffff', fase: 30 },
+  ],
 }

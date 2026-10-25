@@ -84,6 +84,8 @@ const ESCALA_POR_ARTE = {
   'celadon-mansion.jpg': 0.5,
   // Cogumelo grande ~3x o treinador.
   'mushroom-glade.jpg': 0.55,
+  // Barril e porta grandes demais.
+  'treetops.jpg': 0.6,
 };
 
 /**
