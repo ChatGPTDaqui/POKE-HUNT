@@ -47,6 +47,8 @@ const ARTES = {
   'seafoam-islands': { h: [200, 225], s: 0.5, l: [0.25, 0.55] },
   // Cachoeira Meteoro: lago e pocas azuis; a queda em si fica de fora.
   'meteor-falls': { h: [200, 225], s: 0.3, l: [0.35, 0.78], ignorar: [[0.595, 0.28, 0.685, 0.49]] },
+  // Caverna Baixio: pocas de mare verdes e buracos no gelo azul-escuro.
+  'shoal-cave': { h: [145, 215], s: 0.22, l: [0.25, 0.55] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }

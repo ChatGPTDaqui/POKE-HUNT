@@ -1140,4 +1140,14 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.323, v: 0.828, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 48 },
     { u: 0.499, v: 0.890, tipo: 'nevoa', cor: '#5a4030', escala: 0.3, fase: 4 },
   ],
+
+  // CAVERNA BAIXIO (lote 11, Subterraneo). Pocas de mare ondulam pela mascara;
+  // respingo nos buracos do gelo e bafo frio sobre a placa de gelo.
+  'assets/hunt-backgrounds/shoal-cave.jpg': [
+    { u: 0.331, v: 0.171, tipo: 'correnteza' },
+    { u: 0.745, v: 0.233, tipo: 'correnteza', fase: 3 },
+    { u: 0.466, v: 0.197, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.45 },
+    { u: 0.699, v: 0.290, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.4, fase: 15 },
+    { u: 0.233, v: 0.269, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.4, fase: 30 },
+  ],
 }
