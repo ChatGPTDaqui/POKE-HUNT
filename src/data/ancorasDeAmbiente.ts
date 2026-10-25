@@ -1270,4 +1270,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.528, v: 0.699, tipo: 'nevoa', cor: '#5a5650', escala: 0.5 },
     { u: 0.647, v: 0.373, tipo: 'nevoa', cor: '#5a5650', escala: 0.4, fase: 15 },
   ],
+
+  // ILHA MIRAGEM (lote 13, final). Ja ondula pelo preset; onda batendo na beira da
+  // ilha e da trilha de areia, borboletas nas frutinhas e o ar tremulando como miragem.
+  'assets/hunt-backgrounds/mirage-island.jpg': [
+    { u: 0.155, v: 0.362, tipo: 'quebraMar', escala: 0.5 },
+    { u: 0.859, v: 0.259, tipo: 'quebraMar', escala: 0.5, fase: 3 },
+    { u: 0.393, v: 0.880, tipo: 'quebraMar', escala: 0.5, fase: 5 },
+    { u: 0.611, v: 0.880, tipo: 'quebraMar', escala: 0.5, fase: 7 },
+    { u: 0.311, v: 0.233, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.559, v: 0.217, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.259, v: 0.699, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.725, v: 0.699, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+    { u: 0.492, v: 0.440, tipo: 'nevoa', cor: '#f4fff0', escala: 0.6 },
+    { u: 0.362, v: 0.569, tipo: 'nevoa', cor: '#f4fff0', escala: 0.5, fase: 20 },
+  ],
 }
