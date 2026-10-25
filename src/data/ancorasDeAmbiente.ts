@@ -910,4 +910,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.259, v: 0.751, tipo: 'borboleta', cor: '#c9a6f0', fase: 5 },
     { u: 0.569, v: 0.921, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
   ],
+
+  // MANSAO POKEMON (lote 8, Sagrado). Ruina assombrada: poeira subindo dos buracos
+  // do assoalho, fogo-fatuo rondando as estatuas e fumaca dos frascos do laboratorio.
+  'assets/hunt-backgrounds/pokemon-mansion.jpg': [
+    { u: 0.248, v: 0.352, tipo: 'nevoa', cor: '#8a7a70', escala: 0.45 },
+    { u: 0.751, v: 0.290, tipo: 'nevoa', cor: '#8a7a70', escala: 0.5, fase: 12 },
+    { u: 0.751, v: 0.735, tipo: 'nevoa', cor: '#8a7a70', escala: 0.5, fase: 24 },
+    { u: 0.155, v: 0.171, tipo: 'fogoFatuo', cor: '#a8c8ff' },
+    { u: 0.652, v: 0.171, tipo: 'fogoFatuo', cor: '#a8c8ff', fase: 3 },
+    { u: 0.901, v: 0.414, tipo: 'fogoFatuo', cor: '#c0a8ff', fase: 5 },
+    { u: 0.098, v: 0.430, tipo: 'fogoFatuo', cor: '#c0a8ff', fase: 7 },
+    { u: 0.409, v: 0.373, tipo: 'chamine', escala: 0.25 },
+    { u: 0.714, v: 0.611, tipo: 'chamine', escala: 0.25, fase: 3 },
+    { u: 0.259, v: 0.792, tipo: 'chamine', escala: 0.25, fase: 6 },
+  ],
 }

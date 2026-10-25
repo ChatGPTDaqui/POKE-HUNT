@@ -96,6 +96,8 @@ const ESCALA_POR_ARTE = {
   'ash-field.jpg': 0.55,
   // Queimador de incenso ~2,3x o treinador.
   'sprout-tower.jpg': 0.55,
+  // Mesa do laboratorio ~3x a largura do treinador.
+  'pokemon-mansion.jpg': 0.6,
 };
 
 /**
