@@ -1250,4 +1250,24 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.595, v: 0.559, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
     { u: 0.751, v: 0.647, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
   ],
+
+  // ESTRADA VITORIA (lote 13, final). Ja tem poeira pelo preset; as treze tochas de
+  // parede tremulando e bafo frio subindo dos abismos.
+  'assets/hunt-backgrounds/victory-road.jpg': [
+    { u: 0.139, v: 0.106, tipo: 'tocha' },
+    { u: 0.234, v: 0.109, tipo: 'tocha', fase: 1 },
+    { u: 0.483, v: 0.109, tipo: 'tocha', fase: 2 },
+    { u: 0.551, v: 0.109, tipo: 'tocha', fase: 3 },
+    { u: 0.796, v: 0.109, tipo: 'tocha', fase: 4 },
+    { u: 0.862, v: 0.109, tipo: 'tocha', fase: 5 },
+    { u: 0.170, v: 0.357, tipo: 'tocha', fase: 6 },
+    { u: 0.296, v: 0.357, tipo: 'tocha', fase: 7 },
+    { u: 0.488, v: 0.357, tipo: 'tocha', fase: 8 },
+    { u: 0.952, v: 0.388, tipo: 'tocha', fase: 9 },
+    { u: 0.762, v: 0.587, tipo: 'tocha', fase: 10 },
+    { u: 0.863, v: 0.587, tipo: 'tocha', fase: 11 },
+    { u: 0.299, v: 0.619, tipo: 'tocha', fase: 12 },
+    { u: 0.528, v: 0.699, tipo: 'nevoa', cor: '#5a5650', escala: 0.5 },
+    { u: 0.647, v: 0.373, tipo: 'nevoa', cor: '#5a5650', escala: 0.4, fase: 15 },
+  ],
 }
