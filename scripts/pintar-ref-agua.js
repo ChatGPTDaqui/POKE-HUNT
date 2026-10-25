@@ -55,6 +55,8 @@ const ARTES = {
   waterfall: { h: [195, 212], s: 0.21, l: [0.4, 0.62] },
   // Lagoa das Ninfeias: agua azul-clara entre as folhas.
   'lily-pond': { h: [160, 205], s: 0.4, l: [0.5, 0.9] },
+  // Lago da Furia: metade de baixo azul-marinho (o reflexo da tempestade fica fora).
+  'lake-of-rage': { h: [205, 235], s: 0.3, l: [0.12, 0.4] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }

@@ -1188,4 +1188,14 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.176, v: 0.668, tipo: 'petala', cor: '#ffb0d0', escala: 0.5, fase: 5 },
     { u: 0.818, v: 0.823, tipo: 'petala', cor: '#ffb0d0', escala: 0.5, fase: 7 },
   ],
+
+  // LAGO DA FURIA (lote 12, Aguas Interiores). Agua escura ondula pela mascara;
+  // relampago estalando no reflexo da tempestade, nuvem pesada rolando e luz palida.
+  'assets/hunt-backgrounds/lake-of-rage.jpg': [
+    { u: 0.668, v: 0.362, tipo: 'eletrica', cor: '#ff9a8a' },
+    { u: 0.719, v: 0.399, tipo: 'eletrica', cor: '#ff9a8a', fase: 4 },
+    { u: 0.414, v: 0.290, tipo: 'nevoa', cor: '#5a7a70', escala: 0.55 },
+    { u: 0.647, v: 0.300, tipo: 'nevoa', cor: '#5a7a70', escala: 0.55, fase: 15 },
+    { u: 0.238, v: 0.238, tipo: 'orbe', cor: '#e8f0c0', escala: 1 },
+  ],
 }
