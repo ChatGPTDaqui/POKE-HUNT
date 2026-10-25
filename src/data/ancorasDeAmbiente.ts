@@ -1025,4 +1025,16 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#b8cce8', escala: 0.4, fase: 36 },
     { u: 0.466, v: 0.466, tipo: 'nevoa', cor: '#c8d8f0', escala: 0.5, fase: 6 },
   ],
+
+  // CUME DO MONTE PRATEADO (lote 10, Gelido). Ja neva pelo preset; nuvem passando
+  // sobre os penhascos das bordas e rajada azulada no plato do cume.
+  'assets/hunt-backgrounds/mt-silver-summit.jpg': [
+    { u: 0.119, v: 0.155, tipo: 'nevoa', cor: '#ffffff', escala: 0.6 },
+    { u: 0.880, v: 0.388, tipo: 'nevoa', cor: '#ffffff', escala: 0.6, fase: 15 },
+    { u: 0.093, v: 0.621, tipo: 'nevoa', cor: '#ffffff', escala: 0.6, fase: 30 },
+    { u: 0.828, v: 0.854, tipo: 'nevoa', cor: '#ffffff', escala: 0.6, fase: 45 },
+    { u: 0.290, v: 0.336, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45, fase: 8 },
+    { u: 0.673, v: 0.647, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45, fase: 20 },
+    { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#b8cce8', escala: 0.4, fase: 32 },
+  ],
 }
