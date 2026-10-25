@@ -78,6 +78,8 @@ const ESCALA_POR_ARTE = {
   'cycling-road.jpg': 0.6,
   // Vela quase da altura do treinador; lapide 1,9x.
   'pokemon-tower.jpg': 0.6,
+  // Terminal 2x o treinador.
+  'rocket-hideout.jpg': 0.65,
 };
 
 /**

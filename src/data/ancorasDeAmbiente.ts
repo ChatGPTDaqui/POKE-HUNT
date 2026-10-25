@@ -637,4 +637,27 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.680, v: 0.140, tipo: 'fumarola', escala: 0.4, fase: 3 },
     { u: 0.940, v: 0.760, tipo: 'fumarola', escala: 0.35, fase: 5 },
   ],
+
+  // ESCONDERIJO ROCKET (lote 3, Urbano). Escuro: sirenes vermelhas girando
+  // (orbe vermelho pulsando) e telas de terminal com brilho verde.
+  'assets/hunt-backgrounds/rocket-hideout.jpg': [
+    { u: 0.124, v: 0.067, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0 },
+    { u: 0.425, v: 0.067, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.3 },
+    { u: 0.874, v: 0.067, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.6 },
+    { u: 0.274, v: 0.110, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.8999999999999999 },
+    { u: 0.575, v: 0.105, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.2 },
+    { u: 0.725, v: 0.110, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.5 },
+    { u: 0.224, v: 0.383, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.7999999999999998 },
+    { u: 0.874, v: 0.383, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.1 },
+    { u: 0.174, v: 0.660, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.4 },
+    { u: 0.874, v: 0.660, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.6999999999999997 },
+    { u: 0.924, v: 0.920, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 3 },
+    { u: 0.174, v: 0.090, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 5 },
+    { u: 0.124, v: 0.375, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 6 },
+    { u: 0.174, v: 0.370, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 7 },
+    { u: 0.824, v: 0.415, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 8 },
+    { u: 0.074, v: 0.710, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 9 },
+    { u: 0.124, v: 0.705, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 10 },
+    { u: 0.824, v: 0.795, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 11 },
+  ],
 }
