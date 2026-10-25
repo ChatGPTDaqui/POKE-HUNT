@@ -80,6 +80,8 @@ const ESCALA_POR_ARTE = {
   'pokemon-tower.jpg': 0.6,
   // Terminal 2x o treinador.
   'rocket-hideout.jpg': 0.65,
+  // Banco 3,5x e casinha de cachorro 2,5x o treinador.
+  'celadon-mansion.jpg': 0.5,
 };
 
 /**

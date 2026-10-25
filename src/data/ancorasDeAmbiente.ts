@@ -660,4 +660,14 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.124, v: 0.705, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 10 },
     { u: 0.824, v: 0.795, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 11 },
   ],
+
+  // MANSAO CELADON (lote 3, Urbano). Escala propria 0,5 (banco 3,5x o
+  // treinador). Fonte jorrando e borboletas no jardim.
+  'assets/hunt-backgrounds/celadon-mansion.jpg': [
+    { u: 0.710, v: 0.445, tipo: 'cascata', escala: 0.5 },
+    { u: 0.700, v: 0.495, tipo: 'correnteza', escala: 0.6 },
+    { u: 0.600, v: 0.360, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.850, v: 0.270, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.790, v: 0.760, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+  ],
 }
