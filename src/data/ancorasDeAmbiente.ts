@@ -1354,4 +1354,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.828, v: 0.751, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
     { u: 0.207, v: 0.751, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
   ],
+
+  // CICLOVIA (sobra do lote 1). Ponte de dia: luz de poste nao aparece em arte clara,
+  // entao onda batendo nos pilares das duas bordas, maresia e borboletas nos canteiros.
+  'assets/hunt-backgrounds/cycling-road.jpg': [
+    { u: 0.274, v: 0.207, tipo: 'quebraMar', escala: 0.5 },
+    { u: 0.725, v: 0.362, tipo: 'quebraMar', escala: 0.5, fase: 3 },
+    { u: 0.274, v: 0.569, tipo: 'quebraMar', escala: 0.5, fase: 5 },
+    { u: 0.725, v: 0.725, tipo: 'quebraMar', escala: 0.5, fase: 7 },
+    { u: 0.155, v: 0.466, tipo: 'nevoa', cor: '#e8f4ff', escala: 0.5 },
+    { u: 0.854, v: 0.259, tipo: 'nevoa', cor: '#e8f4ff', escala: 0.5, fase: 20 },
+    { u: 0.336, v: 0.104, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.663, v: 0.466, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.336, v: 0.518, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.668, v: 0.751, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+  ],
 }
