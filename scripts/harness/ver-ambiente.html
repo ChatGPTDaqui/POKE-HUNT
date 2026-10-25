@@ -10,6 +10,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
+  <!-- A camada carrega a arte por caminho RELATIVO (assets/...): sem base, ia pra
+       /scripts/harness/assets/... e o servidor devolvia HTML, sem prop nenhum. -->
+  <base href="/" />
   <title>ver ambiente</title>
   <style>body { margin: 0; background: #111; color: #ddd; font: 12px monospace } canvas { display: block }</style>
 </head>

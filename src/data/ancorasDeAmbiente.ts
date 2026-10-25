@@ -78,6 +78,9 @@ export type TipoDeProp =
   | 'vagalume' // pontos que sobem e flutuam
   | 'petala' // pontos que caem girando
   | 'borboleta' // 2-3 borboletas batendo asa em volta da ancora (canteiro de flor)
+  // — corpo OPACO procedural (le em cena clara, onde brilho somado some)
+  | 'nevoa' // mancha de nevoa grande e suave derivando devagar
+  | 'fogoFatuo' // duas chamas fantasmas flutuando (cemiterio, torre assombrada)
 
 export interface AncoraDeAmbiente {
   /** Fracao da LARGURA da arte de fundo, 0..1. */
@@ -89,7 +92,7 @@ export interface AncoraDeAmbiente {
   escala?: number
   /**
    * Cor do prop, quando o tipo aceita uma (`orbe`, `gas`, `petala`,
-   * `vagalume`, `borboleta`). Ausente = a cor padrao do tipo em `ambienteProps.ts`.
+   * `vagalume`, `borboleta`, `nevoa`, `fogoFatuo`). Ausente = a cor padrao do tipo em `ambienteProps.ts`.
    */
   cor?: string
   /**
@@ -515,5 +518,167 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.250, v: 0.720, tipo: 'borboleta', cor: '#ffffff' },
     { u: 0.500, v: 0.470, tipo: 'borboleta', cor: '#ffb0d0', fase: 3 },
     { u: 0.800, v: 0.760, tipo: 'borboleta', cor: '#fff3b0', fase: 5 },
+  ],
+
+  // FLORESTA QUEIMADA (lote 2, Sombrio). A arte ja pinta fio de fumaca e
+  // brasa laranja nos tocos: aqui eles passam a subir e piscar. O rio e cinza
+  // de cinza — mesma cor do chao de cinzas, sem mascara possivel.
+  'assets/hunt-backgrounds/burnt-forest.jpg': [
+    { u: 0.155, v: 0.045, tipo: 'chamine', escala: 0.7 },
+    { u: 0.717, v: 0.025, tipo: 'chamine', escala: 0.5, fase: 1 },
+    { u: 0.474, v: 0.190, tipo: 'chamine', escala: 0.5, fase: 2 },
+    { u: 0.474, v: 0.195, tipo: 'tocha', escala: 0.45 },
+    { u: 0.530, v: 0.190, tipo: 'chamine', escala: 0.45, fase: 3 },
+    { u: 0.572, v: 0.215, tipo: 'tocha', escala: 0.4, fase: 1 },
+    { u: 0.735, v: 0.335, tipo: 'chamine', escala: 0.5, fase: 4 },
+    { u: 0.815, v: 0.370, tipo: 'tocha', escala: 0.6, fase: 2 },
+    { u: 0.022, v: 0.335, tipo: 'tocha', escala: 0.45, fase: 3 },
+    { u: 0.223, v: 0.745, tipo: 'chamine', escala: 0.45, fase: 5 },
+    { u: 0.223, v: 0.755, tipo: 'tocha', escala: 0.4, fase: 4 },
+    { u: 0.523, v: 0.785, tipo: 'chamine', escala: 0.5, fase: 6 },
+    { u: 0.556, v: 0.835, tipo: 'tocha', escala: 0.4, fase: 5 },
+    { u: 0.223, v: 0.822, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5 },
+  ],
+
+  // MONTE PYRE (lote 2, Sombrio). Cemiterio na nevoa, cena CLARA: brilho
+  // somado some, entao vida aqui e corpo opaco — nevoa derivando nos
+  // patamares, fogo-fatuo entre as lapides e incenso nas lanternas/altar.
+  'assets/hunt-backgrounds/mt-pyre.jpg': [
+    { u: 0.300, v: 0.300, tipo: 'nevoa' },
+    { u: 0.700, v: 0.450, tipo: 'nevoa', fase: 7 },
+    { u: 0.350, v: 0.620, tipo: 'nevoa', fase: 13 },
+    { u: 0.750, v: 0.780, tipo: 'nevoa', fase: 21 },
+    { u: 0.500, v: 0.900, tipo: 'nevoa', fase: 30 },
+    { u: 0.250, v: 0.470, tipo: 'fogoFatuo' },
+    { u: 0.800, v: 0.580, tipo: 'fogoFatuo', cor: '#7fc8ff', fase: 4 },
+    { u: 0.450, v: 0.700, tipo: 'fogoFatuo', fase: 8 },
+    { u: 0.448, v: 0.185, tipo: 'chamine', escala: 0.35 },
+    { u: 0.551, v: 0.185, tipo: 'chamine', escala: 0.35, fase: 2 },
+    { u: 0.730, v: 0.360, tipo: 'chamine', escala: 0.35, fase: 4 },
+  ],
+
+  // TORRE QUEIMADA (lote 2, Sombrio). Escura: brasa nos pontos que a arte
+  // pinta de laranja, fumaca fina do toco e do monte de cinza, e brilho nos
+  // dois montes de brasa (rocha da esquerda e cinza da direita/baixo).
+  'assets/hunt-backgrounds/burned-tower.jpg': [
+    { u: 0.129, v: 0.176, tipo: 'tocha', escala: 0.35 },
+    { u: 0.280, v: 0.205, tipo: 'tocha', escala: 0.35, fase: 1 },
+    { u: 0.199, v: 0.223, tipo: 'tocha', escala: 0.35, fase: 2 },
+    { u: 0.088, v: 0.230, tipo: 'tocha', escala: 0.3, fase: 3 },
+    { u: 0.916, v: 0.264, tipo: 'tocha', escala: 0.35, fase: 4 },
+    { u: 0.919, v: 0.331, tipo: 'tocha', escala: 0.35, fase: 5 },
+    { u: 0.875, v: 0.362, tipo: 'tocha', escala: 0.3, fase: 6 },
+    { u: 0.862, v: 0.484, tipo: 'tocha', escala: 0.3, fase: 7 },
+    { u: 0.180, v: 0.160, tipo: 'chamine', escala: 0.45 },
+    { u: 0.575, v: 0.165, tipo: 'chamine', escala: 0.4, fase: 3 },
+    { u: 0.104, v: 0.556, tipo: 'orbe', cor: '#ff7a3c', escala: 0.6 },
+    { u: 0.906, v: 0.688, tipo: 'orbe', cor: '#ff7a3c', escala: 0.6, fase: 2 },
+    { u: 0.285, v: 0.862, tipo: 'orbe', cor: '#ff7a3c', escala: 0.7, fase: 4 },
+  ],
+
+  // NAVIO ABANDONADO (lote 2, Sombrio). Sem mascara: tabua esverdeada do
+  // conves tem a cor do mar. Nevoa rolando nas bordas do casco e fogo-fatuo
+  // azulado vagando pelo conves.
+  'assets/hunt-backgrounds/abandoned-ship.jpg': [
+    { u: 0.060, v: 0.500, tipo: 'nevoa', cor: '#d8eef0' },
+    { u: 0.940, v: 0.450, tipo: 'nevoa', cor: '#d8eef0', fase: 9 },
+    { u: 0.300, v: 0.950, tipo: 'nevoa', cor: '#d8eef0', fase: 17 },
+    { u: 0.720, v: 0.950, tipo: 'nevoa', cor: '#d8eef0', fase: 25 },
+    { u: 0.450, v: 0.550, tipo: 'fogoFatuo', cor: '#7fe0ff' },
+    { u: 0.250, v: 0.760, tipo: 'fogoFatuo', cor: '#7fe0ff', fase: 5 },
+    { u: 0.760, v: 0.330, tipo: 'fogoFatuo', cor: '#7fe0ff', fase: 10 },
+  ],
+
+  // TORRE POKEMON (lote 2, Sombrio). Escala propria 0,6 (vela quase da altura
+  // do treinador). As quatro tochas da parede, chama pequena em cada monte de
+  // vela, nevoa roxa andando por cima da que a arte ja pinta e dois fogos-fatuos.
+  'assets/hunt-backgrounds/pokemon-tower.jpg': [
+    { u: 0.176, v: 0.100, tipo: 'tocha', escala: 0.6 },
+    { u: 0.373, v: 0.103, tipo: 'tocha', escala: 0.6, fase: 1 },
+    { u: 0.624, v: 0.103, tipo: 'tocha', escala: 0.6, fase: 2 },
+    { u: 0.823, v: 0.100, tipo: 'tocha', escala: 0.6, fase: 3 },
+    { u: 0.130, v: 0.220, tipo: 'tocha', escala: 0.28, fase: 0 },
+    { u: 0.435, v: 0.165, tipo: 'tocha', escala: 0.28, fase: 1 },
+    { u: 0.870, v: 0.210, tipo: 'tocha', escala: 0.28, fase: 2 },
+    { u: 0.122, v: 0.360, tipo: 'tocha', escala: 0.28, fase: 3 },
+    { u: 0.872, v: 0.360, tipo: 'tocha', escala: 0.28, fase: 4 },
+    { u: 0.124, v: 0.510, tipo: 'tocha', escala: 0.28, fase: 5 },
+    { u: 0.877, v: 0.565, tipo: 'tocha', escala: 0.28, fase: 6 },
+    { u: 0.124, v: 0.670, tipo: 'tocha', escala: 0.28, fase: 7 },
+    { u: 0.875, v: 0.715, tipo: 'tocha', escala: 0.28, fase: 8 },
+    { u: 0.140, v: 0.870, tipo: 'tocha', escala: 0.28, fase: 9 },
+    { u: 0.373, v: 0.865, tipo: 'tocha', escala: 0.28, fase: 10 },
+    { u: 0.626, v: 0.865, tipo: 'tocha', escala: 0.28, fase: 11 },
+    { u: 0.828, v: 0.870, tipo: 'tocha', escala: 0.28, fase: 12 },
+    { u: 0.250, v: 0.420, tipo: 'nevoa', cor: '#b9a0e0' },
+    { u: 0.600, v: 0.250, tipo: 'nevoa', cor: '#b9a0e0', fase: 11 },
+    { u: 0.400, v: 0.650, tipo: 'nevoa', cor: '#b9a0e0', fase: 19 },
+    { u: 0.800, v: 0.780, tipo: 'nevoa', cor: '#b9a0e0', fase: 27 },
+    { u: 0.470, v: 0.500, tipo: 'fogoFatuo' },
+    { u: 0.700, v: 0.450, tipo: 'fogoFatuo', fase: 6 },
+  ],
+
+  // PORTO (lote 3, Urbano). A doca ondula pela mascara (a agua satura acima
+  // de 0,5, o conteiner azul nao). Aqui so a chamine do cargueiro.
+  'assets/hunt-backgrounds/harbor.jpg': [
+    { u: 0.652, v: 0.072, tipo: 'chamine', escala: 0.7 },
+  ],
+
+  // ESGOTO (lote 3, Urbano). Escuro: as seis lampadas pulsam, a agua verde
+  // ondula pela mascara e os canos soltam vapor.
+  'assets/hunt-backgrounds/underground.jpg': [
+    { u: 0.175, v: 0.100, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 0 },
+    { u: 0.618, v: 0.100, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 1 },
+    { u: 0.836, v: 0.100, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 2 },
+    { u: 0.108, v: 0.370, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 3 },
+    { u: 0.108, v: 0.635, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 4 },
+    { u: 0.892, v: 0.627, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 5 },
+    { u: 0.260, v: 0.150, tipo: 'fumarola', escala: 0.4 },
+    { u: 0.680, v: 0.140, tipo: 'fumarola', escala: 0.4, fase: 3 },
+    { u: 0.940, v: 0.760, tipo: 'fumarola', escala: 0.35, fase: 5 },
+  ],
+
+  // ESCONDERIJO ROCKET (lote 3, Urbano). Escuro: sirenes vermelhas girando
+  // (orbe vermelho pulsando) e telas de terminal com brilho verde.
+  'assets/hunt-backgrounds/rocket-hideout.jpg': [
+    { u: 0.124, v: 0.067, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0 },
+    { u: 0.425, v: 0.067, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.3 },
+    { u: 0.874, v: 0.067, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.6 },
+    { u: 0.274, v: 0.110, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.8999999999999999 },
+    { u: 0.575, v: 0.105, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.2 },
+    { u: 0.725, v: 0.110, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.5 },
+    { u: 0.224, v: 0.383, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.7999999999999998 },
+    { u: 0.874, v: 0.383, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.1 },
+    { u: 0.174, v: 0.660, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.4 },
+    { u: 0.874, v: 0.660, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.6999999999999997 },
+    { u: 0.924, v: 0.920, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 3 },
+    { u: 0.174, v: 0.090, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 5 },
+    { u: 0.124, v: 0.375, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 6 },
+    { u: 0.174, v: 0.370, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 7 },
+    { u: 0.824, v: 0.415, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 8 },
+    { u: 0.074, v: 0.710, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 9 },
+    { u: 0.124, v: 0.705, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 10 },
+    { u: 0.824, v: 0.795, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 11 },
+  ],
+
+  // MANSAO CELADON (lote 3, Urbano). Escala propria 0,5 (banco 3,5x o
+  // treinador). Fonte jorrando e borboletas no jardim.
+  'assets/hunt-backgrounds/celadon-mansion.jpg': [
+    { u: 0.710, v: 0.445, tipo: 'cascata', escala: 0.5 },
+    { u: 0.700, v: 0.495, tipo: 'correnteza', escala: 0.6 },
+    { u: 0.600, v: 0.360, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.850, v: 0.270, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.790, v: 0.760, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+  ],
+
+  // CONCURSO DE INSETOS (lote 3). Proporcao boa. Fonte jorrando no centro e
+  // borboletas nos cantos floridos dos quatro canteiros.
+  'assets/hunt-backgrounds/bug-contest.jpg': [
+    { u: 0.500, v: 0.470, tipo: 'cascata', escala: 0.45 },
+    { u: 0.500, v: 0.495, tipo: 'correnteza', escala: 0.5 },
+    { u: 0.230, v: 0.230, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.770, v: 0.230, tipo: 'borboleta', cor: '#fff3b0', fase: 2 },
+    { u: 0.230, v: 0.760, tipo: 'borboleta', cor: '#c9a7ff', fase: 4 },
+    { u: 0.770, v: 0.760, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
   ],
 }
