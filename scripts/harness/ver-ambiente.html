@@ -1,0 +1,50 @@
+<!doctype html>
+<!--
+  Conferencia da vida nos mapas (24/10/2026). Abre no dev server:
+    http://localhost:4173/scripts/harness/ver-ambiente.html?arte=forest&u=0.5&v=0.6&zoom=2
+  Desenha a arte de fundo na escala do jogo, a camada de ambiente
+  (particulas, agua, props) e um treinador de referencia (30 u de corpo) no
+  centro, pra conferir efeito E proporcao sem entrar na hunt.
+  u,v = centro da janela em fracao da arte; zoom = pixels por unidade de mundo.
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>ver ambiente</title>
+  <style>body { margin: 0; background: #111; color: #ddd; font: 12px monospace } canvas { display: block }</style>
+</head>
+<body>
+  <canvas id="c" width="480" height="480"></canvas>
+  <div id="info"></div>
+  <script type="module">
+    import { desenharAmbiente, reiniciarAmbiente } from '/src/render/ambiente.ts'
+    import { COLISAO_POR_ARTE } from '/src/data/generated/subBiomaCollision.generated.ts'
+    import quadros from '/src/data/quadrosDoTreinador.json'
+
+    const q = new URLSearchParams(location.search)
+    const arte = `assets/hunt-backgrounds/${q.get('arte') ?? 'forest'}.jpg`
+    const u = Number(q.get('u') ?? 0.5), v = Number(q.get('v') ?? 0.5), zoom = Number(q.get('zoom') ?? 1)
+    const { escala, x: ax, y: ay } = COLISAO_POR_ARTE[arte].arte
+    const carregar = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.src = src })
+    const img = await carregar('/' + arte)
+    const tr = await carregar('/assets/treinadores/campo/mochila/Idle-Anim.png')
+    const t = quadros.mochila
+    const cv = document.getElementById('c'), ctx = cv.getContext('2d')
+    const lado = cv.width / zoom
+    const cx = ax + u * img.naturalWidth * escala, cy = ay + v * img.naturalHeight * escala
+    const janela = { x: cx - lado / 2, y: cy - lado / 2, w: lado, h: lado }
+    document.getElementById('info').textContent = `${arte} escala=${escala} janela=${Math.round(lado)}u`
+    reiniciarAmbiente()
+    const sc = 30 / t.bodyHeight
+    const quadro = () => {
+      ctx.setTransform(zoom, 0, 0, zoom, -janela.x * zoom, -janela.y * zoom)
+      ctx.fillStyle = '#000'; ctx.fillRect(janela.x, janela.y, janela.w, janela.h)
+      ctx.drawImage(img, ax, ay, img.naturalWidth * escala, img.naturalHeight * escala)
+      desenharAmbiente(ctx, arte, janela)
+      ctx.drawImage(tr, 0, 0, t.frameWidth, t.frameHeight, cx - t.footX * sc, cy - t.footY * sc, t.frameWidth * sc, t.frameHeight * sc)
+      requestAnimationFrame(quadro)
+    }
+    quadro()
+  </script>
+</body>
+</html>

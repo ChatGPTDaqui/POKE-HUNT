@@ -74,6 +74,8 @@ const HUNT_BG_TILE_SCALE = 0.8;
 // e `npm run build:edge` (a grade e usada pelo servidor).
 const ESCALA_POR_ARTE = {
   'farm.jpg': 0.5,
+  // Maquina de bebida 2,7x o treinador; 0,5 deixaria a pista com ~300 u de largura.
+  'cycling-road.jpg': 0.6,
 };
 
 /**
