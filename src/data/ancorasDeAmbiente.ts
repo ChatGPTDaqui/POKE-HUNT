@@ -1015,4 +1015,14 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.096, v: 0.199, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 30 },
     { u: 0.957, v: 0.797, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 45 },
   ],
+
+  // TUNDRA (lote 10, Gelido). Ja neva pelo preset; cenario quase todo branco, entao
+  // so rajada de neve azulada varrendo os lagos congelados e a trilha.
+  'assets/hunt-backgrounds/tundra.jpg': [
+    { u: 0.761, v: 0.259, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45 },
+    { u: 0.259, v: 0.714, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45, fase: 12 },
+    { u: 0.725, v: 0.714, tipo: 'nevoa', cor: '#b8cce8', escala: 0.5, fase: 24 },
+    { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#b8cce8', escala: 0.4, fase: 36 },
+    { u: 0.466, v: 0.466, tipo: 'nevoa', cor: '#c8d8f0', escala: 0.5, fase: 6 },
+  ],
 }
