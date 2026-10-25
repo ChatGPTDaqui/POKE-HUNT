@@ -1049,4 +1049,20 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.497, v: 0.968, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.3, fase: 10 },
     { u: 0.111, v: 0.642, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.2, fase: 20 },
   ],
+
+  // VILA NATALINA DA JYNX (lote 10, Gelido). Ja neva pelo preset; fumaca nas tres
+  // chamines, estrela da arvore central pulsando e postes de luz acesos.
+  'assets/hunt-backgrounds/jynx-holiday.jpg': [
+    { u: 0.489, v: 0.150, tipo: 'chamine', escala: 0.5 },
+    { u: 0.254, v: 0.567, tipo: 'chamine', escala: 0.5, fase: 2 },
+    { u: 0.841, v: 0.562, tipo: 'chamine', escala: 0.5, fase: 4 },
+    { u: 0.499, v: 0.393, tipo: 'orbe', cor: '#ffe066', escala: 0.8 },
+    { u: 0.559, v: 0.256, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 1 },
+    { u: 0.300, v: 0.432, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 2 },
+    { u: 0.732, v: 0.411, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 3 },
+    { u: 0.436, v: 0.655, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 4 },
+    { u: 0.562, v: 0.652, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 5 },
+    { u: 0.436, v: 0.919, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 6 },
+    { u: 0.562, v: 0.919, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 7 },
+  ],
 }
