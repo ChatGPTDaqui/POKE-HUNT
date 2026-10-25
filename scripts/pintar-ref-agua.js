@@ -29,6 +29,12 @@ const ARTES = {
   plains: { h: [200, 228], s: 0.45, l: [0.28, 0.75] },
   // Lago do vilarejo (ja tinha props; faltava a agua mexer).
   town: { h: [195, 225], s: 0.35, l: [0.30, 0.72] },
+  // Porto: agua tem saturacao >= 0,5; conteiner azul fica em ~0,39.
+  harbor: { h: [188, 206], s: 0.50, l: [0.25, 0.60] },
+  // Esgoto: agua verde (h~136), unica coisa da arte nesse verde.
+  underground: { h: [120, 160], s: 0.15, l: [0.15, 0.36] },
+  // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
+  // mar (conferido no overlay, 24/10/2026).
 }
 
 function hsl(r, g, b) {
