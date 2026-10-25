@@ -1125,4 +1125,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.173, v: 0.823, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 7 },
     { u: 0.826, v: 0.823, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 8 },
   ],
+
+  // CAVERNA DIGLETT (lote 11, Subterraneo). Ja pinga pelo preset; poeira subindo das
+  // tocas cavadas (como se algo tivesse acabado de entrar) e ar saindo da boca do tunel.
+  'assets/hunt-backgrounds/digletts-cave.jpg': [
+    { u: 0.323, v: 0.179, tipo: 'nevoa', cor: '#a08060', escala: 0.22 },
+    { u: 0.624, v: 0.228, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 6 },
+    { u: 0.223, v: 0.326, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 12 },
+    { u: 0.823, v: 0.378, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 18 },
+    { u: 0.124, v: 0.471, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 24 },
+    { u: 0.875, v: 0.569, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 30 },
+    { u: 0.274, v: 0.621, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 36 },
+    { u: 0.673, v: 0.673, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 42 },
+    { u: 0.323, v: 0.828, tipo: 'nevoa', cor: '#a08060', escala: 0.22, fase: 48 },
+    { u: 0.499, v: 0.890, tipo: 'nevoa', cor: '#5a4030', escala: 0.3, fase: 4 },
+  ],
 }

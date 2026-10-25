@@ -102,6 +102,8 @@ const ESCALA_POR_ARTE = {
   'tundra.jpg': 0.65,
   // Vagonete ~2,5x o treinador.
   'rock-tunnel.jpg': 0.6,
+  // Toca de Diglett ~2x o treinador.
+  'digletts-cave.jpg': 0.6,
 };
 
 /**
