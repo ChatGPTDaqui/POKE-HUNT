@@ -866,4 +866,22 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.362, v: 0.678, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
     { u: 0.688, v: 0.688, tipo: 'borboleta', cor: '#ffffff', fase: 7 },
   ],
+
+  // TORRE SPROUT (lote 8, Sagrado). Interior a luz de lampiao: incenso subindo
+  // dos dez queimadores e luz pulsando nas quatro lanternas.
+  'assets/hunt-backgrounds/sprout-tower.jpg': [
+    { u: 0.575, v: 0.160, tipo: 'chamine', escala: 0.35 },
+    { u: 0.228, v: 0.259, tipo: 'chamine', escala: 0.35, fase: 1 },
+    { u: 0.774, v: 0.259, tipo: 'chamine', escala: 0.35, fase: 2 },
+    { u: 0.127, v: 0.414, tipo: 'chamine', escala: 0.35, fase: 3 },
+    { u: 0.875, v: 0.414, tipo: 'chamine', escala: 0.35, fase: 4 },
+    { u: 0.127, v: 0.559, tipo: 'chamine', escala: 0.35, fase: 5 },
+    { u: 0.875, v: 0.559, tipo: 'chamine', escala: 0.35, fase: 6 },
+    { u: 0.228, v: 0.756, tipo: 'chamine', escala: 0.35, fase: 7 },
+    { u: 0.774, v: 0.756, tipo: 'chamine', escala: 0.35, fase: 8 },
+    { u: 0.355, v: 0.106, tipo: 'orbe', cor: '#ffc06a', escala: 0.7 },
+    { u: 0.637, v: 0.106, tipo: 'orbe', cor: '#ffc06a', escala: 0.7, fase: 2 },
+    { u: 0.173, v: 0.815, tipo: 'orbe', cor: '#ffc06a', escala: 0.7, fase: 4 },
+    { u: 0.673, v: 0.870, tipo: 'orbe', cor: '#ffc06a', escala: 0.7, fase: 6 },
+  ],
 }

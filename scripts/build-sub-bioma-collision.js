@@ -94,6 +94,8 @@ const ESCALA_POR_ARTE = {
   'silph-co.jpg': 0.6,
   // Porta da casa ~2,7x o treinador.
   'ash-field.jpg': 0.55,
+  // Queimador de incenso ~2,3x o treinador.
+  'sprout-tower.jpg': 0.55,
 };
 
 /**
