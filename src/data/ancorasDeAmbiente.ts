@@ -733,4 +733,38 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.300, v: 0.640, tipo: 'nevoa', cor: '#ffffff', fase: 20 },
     { u: 0.640, v: 0.720, tipo: 'nevoa', cor: '#ffffff', fase: 30 },
   ],
+
+  // OBRA (lote 5, Industrial). Proporcao boa. Fumaca de escape das tres
+  // maquinas, poeira levantando do monte de terra e faisca de solda no
+  // portico de canos.
+  'assets/hunt-backgrounds/construction-site.jpg': [
+    { u: 0.632, v: 0.425, tipo: 'chamine', escala: 0.4 },
+    { u: 0.160, v: 0.305, tipo: 'chamine', escala: 0.35, fase: 2 },
+    { u: 0.640, v: 0.745, tipo: 'chamine', escala: 0.35, fase: 4 },
+    { u: 0.560, v: 0.370, tipo: 'nevoa', cor: '#c9a77a', escala: 0.45 },
+    { u: 0.500, v: 0.490, tipo: 'nevoa', cor: '#c9a77a', escala: 0.4, fase: 12 },
+    { u: 0.855, v: 0.375, tipo: 'eletrica', escala: 0.6 },
+    { u: 0.855, v: 0.555, tipo: 'eletrica', escala: 0.6, fase: 3 },
+  ],
+
+  // FERRO-VELHO (lote 5, Industrial). Escala propria 0,5 (carro ~8x o
+  // treinador; 0,5 e o menor que nao aperta a caca). Fumaca do guindaste,
+  // faisca no cabo da garra e poeira rodando nas duas ruas de terra.
+  'assets/hunt-backgrounds/junkyard.jpg': [
+    { u: 0.875, v: 0.165, tipo: 'chamine', escala: 0.5 },
+    { u: 0.700, v: 0.200, tipo: 'eletrica', escala: 0.6 },
+    { u: 0.300, v: 0.500, tipo: 'nevoa', cor: '#b58a5a', escala: 0.45 },
+    { u: 0.520, v: 0.700, tipo: 'nevoa', cor: '#b58a5a', escala: 0.45, fase: 14 },
+    { u: 0.780, v: 0.500, tipo: 'nevoa', cor: '#b58a5a', escala: 0.4, fase: 25 },
+  ],
+
+  // SILPH CO. (lote 5, Industrial). Laboratorio claro: brilho somado some, entao
+  // vida aqui e faisca nos racks de servidor (vapor claro sumiu no piso branco).
+  'assets/hunt-backgrounds/silph-co.jpg': [
+    { u: 0.200, v: 0.115, tipo: 'eletrica', escala: 0.35 },
+    { u: 0.510, v: 0.115, tipo: 'eletrica', escala: 0.35, fase: 2 },
+    { u: 0.830, v: 0.115, tipo: 'eletrica', escala: 0.35, fase: 4 },
+    { u: 0.065, v: 0.470, tipo: 'eletrica', escala: 0.35, fase: 6 },
+    { u: 0.910, v: 0.510, tipo: 'eletrica', escala: 0.35, fase: 8 },
+  ],
 }

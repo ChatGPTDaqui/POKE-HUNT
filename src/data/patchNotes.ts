@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.47',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (Industrial)',
+    highlights: [
+      'Obra: fumaça das máquinas, poeira e solda. Ferro-velho: fumaça do guindaste, faísca na garra e poeira nas ruas. Silph Co.: faíscas nos servidores.',
+      'Obra, Ferro-velho e Silph Co. foram redimensionados para combinar com o treinador e os POKEs.',
+    ],
+  },
+  {
     version: '8.46',
     date: '2026-10-25',
     title: 'Vida nos mapas (Mata)',

@@ -86,6 +86,12 @@ const ESCALA_POR_ARTE = {
   'mushroom-glade.jpg': 0.55,
   // Barril e porta grandes demais.
   'treetops.jpg': 0.6,
+  // Cone 1,5x o treinador, escavadeira 5x.
+  'construction-site.jpg': 0.6,
+  // Carro ~8x o treinador.
+  'junkyard.jpg': 0.5,
+  // Monitor ~2x o treinador.
+  'silph-co.jpg': 0.6,
 };
 
 /**
