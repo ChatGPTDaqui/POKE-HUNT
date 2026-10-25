@@ -1308,4 +1308,21 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.233, v: 0.673, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45, fase: 30 },
     { u: 0.776, v: 0.699, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45, fase: 45 },
   ],
+
+  // JARDIM MISTERIOSO (lote 13, final). Petalas caindo da arvore ancia e das sebes
+  // floridas, borboletas nos canteiros e luzinhas encantadas perto das flores gigantes.
+  'assets/hunt-backgrounds/mysterious-garden.jpg': [
+    { u: 0.311, v: 0.155, tipo: 'petala', cor: '#ffc0d0', escala: 0.6 },
+    { u: 0.647, v: 0.171, tipo: 'petala', cor: '#ffc0d0', escala: 0.6, fase: 3 },
+    { u: 0.880, v: 0.129, tipo: 'petala', cor: '#ffc0d0', escala: 0.5, fase: 5 },
+    { u: 0.104, v: 0.362, tipo: 'petala', cor: '#ffc0d0', escala: 0.5, fase: 7 },
+    { u: 0.362, v: 0.466, tipo: 'borboleta', cor: '#ffffff' },
+    { u: 0.699, v: 0.414, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.414, v: 0.673, tipo: 'borboleta', cor: '#c9a6f0', fase: 5 },
+    { u: 0.751, v: 0.673, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
+    { u: 0.223, v: 0.233, tipo: 'vagalume', cor: '#fff6a0' },
+    { u: 0.776, v: 0.233, tipo: 'vagalume', cor: '#ffd0f0' },
+    { u: 0.600, v: 0.600, tipo: 'vagalume', cor: '#e0c8ff' },
+    { u: 0.792, v: 0.807, tipo: 'vagalume', cor: '#ffd0f0' },
+  ],
 }
