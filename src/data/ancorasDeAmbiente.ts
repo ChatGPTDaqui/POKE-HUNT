@@ -1234,4 +1234,20 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.422, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 7 },
     { u: 0.572, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 8 },
   ],
+
+  // MONTANHA (lote 13, final). Riacho estreito demais pra mascara: queda batendo nos
+  // dois degraus, respingo ao longo do leito e borboletas nos canteiros floridos.
+  'assets/hunt-backgrounds/mountain.jpg': [
+    { u: 0.280, v: 0.352, tipo: 'cascata', escala: 0.6 },
+    { u: 0.347, v: 0.637, tipo: 'cascata', escala: 0.6, fase: 2 },
+    { u: 0.269, v: 0.083, tipo: 'correnteza' },
+    { u: 0.331, v: 0.186, tipo: 'correnteza', fase: 2 },
+    { u: 0.290, v: 0.435, tipo: 'correnteza', fase: 4 },
+    { u: 0.290, v: 0.714, tipo: 'correnteza', fase: 6 },
+    { u: 0.078, v: 0.839, tipo: 'correnteza', fase: 8 },
+    { u: 0.119, v: 0.088, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.549, v: 0.362, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.595, v: 0.559, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+    { u: 0.751, v: 0.647, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
+  ],
 }
