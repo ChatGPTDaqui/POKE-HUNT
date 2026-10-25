@@ -39,6 +39,8 @@ const ARTES = {
   'whirl-islands': { h: [205, 228], s: 0.35, l: [0.25, 0.52] },
   // Arquipelago Laranja: mar turquesa; palmeira e verde (h~100).
   'orange-archipelago': { h: [175, 200], s: 0.55, l: [0.38, 0.72] },
+  // Santuario: lago das carpas (pedra cinza tem saturacao baixa).
+  'meditation-shrine': { h: [180, 212], s: 0.15, l: [0.2, 0.42] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }

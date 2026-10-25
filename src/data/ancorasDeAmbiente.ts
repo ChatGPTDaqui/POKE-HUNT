@@ -897,4 +897,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.745, v: 0.678, tipo: 'orbe', cor: '#5fe0c8', escala: 0.8, fase: 4 },
     { u: 0.217, v: 0.647, tipo: 'orbe', cor: '#5fe0c8', escala: 0.5, fase: 6 },
   ],
+
+  // SANTUARIO DE MEDITACAO (lote 8, Sagrado). Lago das carpas ondula pela mascara;
+  // petalas de glicinia caindo e borboletas nos canteiros de flor.
+  'assets/hunt-backgrounds/meditation-shrine.jpg': [
+    { u: 0.373, v: 0.166, tipo: 'petala', cor: '#c9a6f0', escala: 0.6 },
+    { u: 0.921, v: 0.259, tipo: 'petala', cor: '#c9a6f0', escala: 0.6, fase: 3 },
+    { u: 0.127, v: 0.523, tipo: 'petala', cor: '#c9a6f0', escala: 0.6, fase: 5 },
+    { u: 0.688, v: 0.818, tipo: 'petala', cor: '#c9a6f0', escala: 0.6, fase: 7 },
+    { u: 0.466, v: 0.362, tipo: 'borboleta', cor: '#ffffff' },
+    { u: 0.776, v: 0.776, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.259, v: 0.751, tipo: 'borboleta', cor: '#c9a6f0', fase: 5 },
+    { u: 0.569, v: 0.921, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
+  ],
 }
