@@ -149,8 +149,8 @@ describe('prop so aparece onde foi cadastrado (PH-254)', () => {
 
   it('arte com ancora monta um prop por ancora', () => {
     // Arte SEM mascara de agua/lava: com mascara entram tambem os props de
-    // regiao (forest ganhou mascara do rio em 24/10/2026).
-    const arte = 'assets/hunt-backgrounds/town.jpg'
+    // regiao (a cascata de 24/10/2026 vai dando mascara a cada arte).
+    const arte = Object.keys(ANCORAS_POR_ARTE).find((a) => !AGUA_POR_ARTE[a] && !LAVA_POR_ARTE[a])!
     rodar(arte, 1)
     expect(quantidadeDePropsDeAmbiente()).toBe(ANCORAS_POR_ARTE[arte].length)
   })
