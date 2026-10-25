@@ -670,4 +670,15 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.850, v: 0.270, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
     { u: 0.790, v: 0.760, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
   ],
+
+  // CONCURSO DE INSETOS (lote 3). Proporcao boa. Fonte jorrando no centro e
+  // borboletas nos cantos floridos dos quatro canteiros.
+  'assets/hunt-backgrounds/bug-contest.jpg': [
+    { u: 0.500, v: 0.470, tipo: 'cascata', escala: 0.45 },
+    { u: 0.500, v: 0.495, tipo: 'correnteza', escala: 0.5 },
+    { u: 0.230, v: 0.230, tipo: 'borboleta', cor: '#ffb0d0' },
+    { u: 0.770, v: 0.230, tipo: 'borboleta', cor: '#fff3b0', fase: 2 },
+    { u: 0.230, v: 0.760, tipo: 'borboleta', cor: '#c9a7ff', fase: 4 },
+    { u: 0.770, v: 0.760, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
+  ],
 }
