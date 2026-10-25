@@ -1369,4 +1369,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.336, v: 0.518, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
     { u: 0.668, v: 0.751, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
   ],
+
+  // ILHA (sobra). Mar e lagoa ja ondulam pela mascara; fogueira do acampamento, as
+  // duas tochas do farol, onda batendo na praia e borboletas na mata das palmeiras.
+  'assets/hunt-backgrounds/island.jpg': [
+    { u: 0.629, v: 0.709, tipo: 'fogueira', escala: 0.5 },
+    { u: 0.600, v: 0.248, tipo: 'tocha' },
+    { u: 0.795, v: 0.331, tipo: 'tocha', fase: 3 },
+    { u: 0.207, v: 0.828, tipo: 'quebraMar', escala: 0.6 },
+    { u: 0.518, v: 0.875, tipo: 'quebraMar', escala: 0.6, fase: 3 },
+    { u: 0.880, v: 0.751, tipo: 'quebraMar', escala: 0.6, fase: 5 },
+    { u: 0.129, v: 0.466, tipo: 'quebraMar', escala: 0.6, fase: 7 },
+    { u: 0.362, v: 0.233, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.217, v: 0.388, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.828, v: 0.466, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+  ],
 }
