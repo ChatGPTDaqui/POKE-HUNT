@@ -59,6 +59,12 @@ const ARTES = {
   'lake-of-rage': { h: [205, 235], s: 0.3, l: [0.12, 0.4] },
   // Fontes Termais: as seis piscinas verde-azuladas.
   'hot-springs': { h: [160, 195], s: 0.25, l: [0.2, 0.45] },
+  // Zona Safari: a lagoa azul-escura.
+  'safari-zone': { h: [200, 230], s: 0.3, l: [0.2, 0.5] },
+  // Charmander Perdido: pocas de chuva no gramado escuro.
+  'stray-charmander': { h: [200, 225], s: 0.25, l: [0.3, 0.6] },
+  // Esquadrao Squirtle: o rio sob a ponte.
+  'squirtle-squad': { h: [205, 225], s: 0.5, l: [0.4, 0.75] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }

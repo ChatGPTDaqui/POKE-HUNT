@@ -1234,4 +1234,124 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.422, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 7 },
     { u: 0.572, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 8 },
   ],
+
+  // MONTANHA (lote 13, final). Riacho estreito demais pra mascara: queda batendo nos
+  // dois degraus, respingo ao longo do leito e borboletas nos canteiros floridos.
+  'assets/hunt-backgrounds/mountain.jpg': [
+    { u: 0.280, v: 0.352, tipo: 'cascata', escala: 0.6 },
+    { u: 0.347, v: 0.637, tipo: 'cascata', escala: 0.6, fase: 2 },
+    { u: 0.269, v: 0.083, tipo: 'correnteza' },
+    { u: 0.331, v: 0.186, tipo: 'correnteza', fase: 2 },
+    { u: 0.290, v: 0.435, tipo: 'correnteza', fase: 4 },
+    { u: 0.290, v: 0.714, tipo: 'correnteza', fase: 6 },
+    { u: 0.078, v: 0.839, tipo: 'correnteza', fase: 8 },
+    { u: 0.119, v: 0.088, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.549, v: 0.362, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.595, v: 0.559, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+    { u: 0.751, v: 0.647, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
+  ],
+
+  // ESTRADA VITORIA (lote 13, final). Ja tem poeira pelo preset; as treze tochas de
+  // parede tremulando e bafo frio subindo dos abismos.
+  'assets/hunt-backgrounds/victory-road.jpg': [
+    { u: 0.139, v: 0.106, tipo: 'tocha' },
+    { u: 0.234, v: 0.109, tipo: 'tocha', fase: 1 },
+    { u: 0.483, v: 0.109, tipo: 'tocha', fase: 2 },
+    { u: 0.551, v: 0.109, tipo: 'tocha', fase: 3 },
+    { u: 0.796, v: 0.109, tipo: 'tocha', fase: 4 },
+    { u: 0.862, v: 0.109, tipo: 'tocha', fase: 5 },
+    { u: 0.170, v: 0.357, tipo: 'tocha', fase: 6 },
+    { u: 0.296, v: 0.357, tipo: 'tocha', fase: 7 },
+    { u: 0.488, v: 0.357, tipo: 'tocha', fase: 8 },
+    { u: 0.952, v: 0.388, tipo: 'tocha', fase: 9 },
+    { u: 0.762, v: 0.587, tipo: 'tocha', fase: 10 },
+    { u: 0.863, v: 0.587, tipo: 'tocha', fase: 11 },
+    { u: 0.299, v: 0.619, tipo: 'tocha', fase: 12 },
+    { u: 0.528, v: 0.699, tipo: 'nevoa', cor: '#5a5650', escala: 0.5 },
+    { u: 0.647, v: 0.373, tipo: 'nevoa', cor: '#5a5650', escala: 0.4, fase: 15 },
+  ],
+
+  // ILHA MIRAGEM (lote 13, final). Ja ondula pelo preset; onda batendo na beira da
+  // ilha e da trilha de areia, borboletas nas frutinhas e o ar tremulando como miragem.
+  'assets/hunt-backgrounds/mirage-island.jpg': [
+    { u: 0.155, v: 0.362, tipo: 'quebraMar', escala: 0.5 },
+    { u: 0.859, v: 0.259, tipo: 'quebraMar', escala: 0.5, fase: 3 },
+    { u: 0.393, v: 0.880, tipo: 'quebraMar', escala: 0.5, fase: 5 },
+    { u: 0.611, v: 0.880, tipo: 'quebraMar', escala: 0.5, fase: 7 },
+    { u: 0.311, v: 0.233, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.559, v: 0.217, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.259, v: 0.699, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.725, v: 0.699, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+    { u: 0.492, v: 0.440, tipo: 'nevoa', cor: '#f4fff0', escala: 0.6 },
+    { u: 0.362, v: 0.569, tipo: 'nevoa', cor: '#f4fff0', escala: 0.5, fase: 20 },
+  ],
+
+  // ZONA SAFARI (lote 13, final). Lagoa ondula pela mascara; borboletas no capim alto
+  // e poeira levantando nas trilhas de terra.
+  'assets/hunt-backgrounds/safari-zone.jpg': [
+    { u: 0.518, v: 0.311, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.362, v: 0.569, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.776, v: 0.466, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.207, v: 0.492, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+    { u: 0.336, v: 0.233, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4 },
+    { u: 0.481, v: 0.595, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 15 },
+    { u: 0.673, v: 0.828, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 30 },
+  ],
+
+  // CHARMANDER PERDIDO (lote 13, final). Pocas de chuva ondulam pela mascara; brasa
+  // da cauda tremulando junto da pedra onde ele se abriga e neblina umida no capim.
+  'assets/hunt-backgrounds/stray-charmander.jpg': [
+    { u: 0.538, v: 0.497, tipo: 'fogueira', escala: 0.35 },
+    { u: 0.497, v: 0.476, tipo: 'orbe', cor: '#ffa040', escala: 0.9 },
+    { u: 0.259, v: 0.259, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45 },
+    { u: 0.751, v: 0.269, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45, fase: 15 },
+    { u: 0.233, v: 0.673, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45, fase: 30 },
+    { u: 0.776, v: 0.699, tipo: 'nevoa', cor: '#7a9a8a', escala: 0.45, fase: 45 },
+  ],
+
+  // JARDIM MISTERIOSO (lote 13, final). Petalas caindo da arvore ancia e das sebes
+  // floridas, borboletas nos canteiros e luzinhas encantadas perto das flores gigantes.
+  'assets/hunt-backgrounds/mysterious-garden.jpg': [
+    { u: 0.311, v: 0.155, tipo: 'petala', cor: '#ffc0d0', escala: 0.6 },
+    { u: 0.647, v: 0.171, tipo: 'petala', cor: '#ffc0d0', escala: 0.6, fase: 3 },
+    { u: 0.880, v: 0.129, tipo: 'petala', cor: '#ffc0d0', escala: 0.5, fase: 5 },
+    { u: 0.104, v: 0.362, tipo: 'petala', cor: '#ffc0d0', escala: 0.5, fase: 7 },
+    { u: 0.362, v: 0.466, tipo: 'borboleta', cor: '#ffffff' },
+    { u: 0.699, v: 0.414, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.414, v: 0.673, tipo: 'borboleta', cor: '#c9a6f0', fase: 5 },
+    { u: 0.751, v: 0.673, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
+    { u: 0.223, v: 0.233, tipo: 'vagalume', cor: '#fff6a0' },
+    { u: 0.776, v: 0.233, tipo: 'vagalume', cor: '#ffd0f0' },
+    { u: 0.600, v: 0.600, tipo: 'vagalume', cor: '#e0c8ff' },
+    { u: 0.792, v: 0.807, tipo: 'vagalume', cor: '#ffd0f0' },
+  ],
+
+  // COLONIA PIKACHU (lote 13, final). Faisca amarela estalando na boca de algumas
+  // tocas (moradores la dentro), respingo no riacho e borboletas no pomar.
+  'assets/hunt-backgrounds/pikachu-colony.jpg': [
+    { u: 0.223, v: 0.179, tipo: 'eletrica', cor: '#ffe040' },
+    { u: 0.575, v: 0.228, tipo: 'eletrica', cor: '#ffe040', fase: 3 },
+    { u: 0.176, v: 0.476, tipo: 'eletrica', cor: '#ffe040', fase: 6 },
+    { u: 0.771, v: 0.422, tipo: 'eletrica', cor: '#ffe040', fase: 9 },
+    { u: 0.575, v: 0.624, tipo: 'eletrica', cor: '#ffe040', fase: 12 },
+    { u: 0.176, v: 0.776, tipo: 'eletrica', cor: '#ffe040', fase: 15 },
+    { u: 0.823, v: 0.776, tipo: 'eletrica', cor: '#ffe040', fase: 18 },
+    { u: 0.626, v: 0.207, tipo: 'correnteza' },
+    { u: 0.673, v: 0.414, tipo: 'correnteza', fase: 3 },
+    { u: 0.751, v: 0.476, tipo: 'correnteza', fase: 6 },
+    { u: 0.300, v: 0.155, tipo: 'borboleta', cor: '#ffffff' },
+    { u: 0.342, v: 0.569, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.699, v: 0.166, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+  ],
+
+  // ESQUADRAO SQUIRTLE (lote 13, final). Rio corre pela mascara; agua batendo nos
+  // pilares da ponte, fogueira do acampamento na frente da caverna e borboletas.
+  'assets/hunt-backgrounds/squirtle-squad.jpg': [
+    { u: 0.409, v: 0.481, tipo: 'cascata', escala: 0.6 },
+    { u: 0.606, v: 0.518, tipo: 'cascata', escala: 0.6, fase: 2 },
+    { u: 0.499, v: 0.217, tipo: 'fogueira', escala: 0.5 },
+    { u: 0.155, v: 0.233, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.828, v: 0.751, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.207, v: 0.751, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
+  ],
 }
