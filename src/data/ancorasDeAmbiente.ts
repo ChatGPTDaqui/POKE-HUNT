@@ -1285,4 +1285,16 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.492, v: 0.440, tipo: 'nevoa', cor: '#f4fff0', escala: 0.6 },
     { u: 0.362, v: 0.569, tipo: 'nevoa', cor: '#f4fff0', escala: 0.5, fase: 20 },
   ],
+
+  // ZONA SAFARI (lote 13, final). Lagoa ondula pela mascara; borboletas no capim alto
+  // e poeira levantando nas trilhas de terra.
+  'assets/hunt-backgrounds/safari-zone.jpg': [
+    { u: 0.518, v: 0.311, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.362, v: 0.569, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.776, v: 0.466, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.207, v: 0.492, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+    { u: 0.336, v: 0.233, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4 },
+    { u: 0.481, v: 0.595, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 15 },
+    { u: 0.673, v: 0.828, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 30 },
+  ],
 }

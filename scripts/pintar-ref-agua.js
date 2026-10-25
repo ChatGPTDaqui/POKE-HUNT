@@ -59,6 +59,8 @@ const ARTES = {
   'lake-of-rage': { h: [205, 235], s: 0.3, l: [0.12, 0.4] },
   // Fontes Termais: as seis piscinas verde-azuladas.
   'hot-springs': { h: [160, 195], s: 0.25, l: [0.2, 0.45] },
+  // Zona Safari: a lagoa azul-escura.
+  'safari-zone': { h: [200, 230], s: 0.3, l: [0.2, 0.5] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }
