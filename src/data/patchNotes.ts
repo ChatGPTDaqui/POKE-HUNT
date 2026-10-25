@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.49',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (Marinho e Sagrado)',
+    highlights: [
+      'Recife de Coral, Ilhas Redemoinho e Arquipélago Laranja: água ondulando, ondas arrebentando, bolhas, maresia e borboletas.',
+      'Torre Sprout: incenso e lanternas. Pilar do Céu: nuvem nos buracos e runas pulsando. Santuário: lago das carpas, pétalas e borboletas. Mansão: poeira, fogo-fátuo e fumaça dos frascos.',
+      'Torre Sprout e Mansão foram redimensionadas para combinar com o treinador e os POKEs.',
+    ],
+  },
+  {
     version: '8.48',
     date: '2026-10-25',
     title: 'Vida nos mapas (Ígneo)',
