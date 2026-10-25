@@ -842,4 +842,15 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.223, v: 0.854, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 10 },
     { u: 0.875, v: 0.619, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 12 },
   ],
+
+  // ILHAS REDEMOINHO (lote 7, Marinho). Pocas ondulam pela mascara; onda
+  // arrebentando na espuma das bordas e nevoa de maresia.
+  'assets/hunt-backgrounds/whirl-islands.jpg': [
+    { u: 0.129, v: 0.523, tipo: 'quebraMar', escala: 0.6 },
+    { u: 0.854, v: 0.518, tipo: 'quebraMar', escala: 0.6, fase: 2 },
+    { u: 0.248, v: 0.807, tipo: 'quebraMar', escala: 0.6, fase: 4 },
+    { u: 0.673, v: 0.813, tipo: 'quebraMar', escala: 0.6, fase: 6 },
+    { u: 0.362, v: 0.455, tipo: 'nevoa', cor: '#c9d4e6', escala: 0.6 },
+    { u: 0.595, v: 0.569, tipo: 'nevoa', cor: '#c9d4e6', escala: 0.6, fase: 15 },
+  ],
 }
