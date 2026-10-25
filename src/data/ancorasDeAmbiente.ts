@@ -1037,4 +1037,16 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.673, v: 0.647, tipo: 'nevoa', cor: '#b8cce8', escala: 0.45, fase: 20 },
     { u: 0.497, v: 0.880, tipo: 'nevoa', cor: '#b8cce8', escala: 0.4, fase: 32 },
   ],
+
+  // ILHAS ESPUMA (lote 10, Gelido). Canais correm pela mascara; lanternas da parede e
+  // os dois cristais grandes pulsando, e ar gelado saindo das bocas de caverna.
+  'assets/hunt-backgrounds/seafoam-islands.jpg': [
+    { u: 0.241, v: 0.067, tipo: 'orbe', cor: '#d8f0a0', escala: 0.7 },
+    { u: 0.789, v: 0.072, tipo: 'orbe', cor: '#d8f0a0', escala: 0.7, fase: 3 },
+    { u: 0.124, v: 0.145, tipo: 'orbe', cor: '#7ff0e0', escala: 0.8, fase: 1 },
+    { u: 0.810, v: 0.782, tipo: 'orbe', cor: '#7ff0e0', escala: 0.8, fase: 4 },
+    { u: 0.497, v: 0.088, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.3 },
+    { u: 0.497, v: 0.968, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.3, fase: 10 },
+    { u: 0.111, v: 0.642, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.2, fase: 20 },
+  ],
 }

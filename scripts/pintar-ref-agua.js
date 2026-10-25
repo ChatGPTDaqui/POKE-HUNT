@@ -43,6 +43,8 @@ const ARTES = {
   'meditation-shrine': { h: [180, 212], s: 0.15, l: [0.2, 0.42] },
   // Oasis: lagoa turquesa no centro.
   oasis: { h: [168, 200], s: 0.4, l: [0.35, 0.75] },
+  // Ilhas Espuma: canais azul-escuro (chao de gelo e ciano claro).
+  'seafoam-islands': { h: [200, 225], s: 0.5, l: [0.25, 0.55] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }
