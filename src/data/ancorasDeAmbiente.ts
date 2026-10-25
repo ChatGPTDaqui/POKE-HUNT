@@ -1384,4 +1384,20 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.217, v: 0.388, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
     { u: 0.828, v: 0.466, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
   ],
+
+  // LAGO (sobra). Agua ja ondula pela mascara; respingo entre as taboas e pedras da
+  // margem, petala dos lirios e borboletas nos canteiros floridos da mata.
+  'assets/hunt-backgrounds/lake.jpg': [
+    { u: 0.331, v: 0.347, tipo: 'correnteza' },
+    { u: 0.554, v: 0.202, tipo: 'correnteza', fase: 2 },
+    { u: 0.719, v: 0.611, tipo: 'correnteza', fase: 4 },
+    { u: 0.362, v: 0.621, tipo: 'correnteza', fase: 6 },
+    { u: 0.663, v: 0.543, tipo: 'correnteza', fase: 8 },
+    { u: 0.331, v: 0.481, tipo: 'petala', cor: '#ffd8e8', escala: 0.5 },
+    { u: 0.761, v: 0.212, tipo: 'petala', cor: '#ffd8e8', escala: 0.5, fase: 4 },
+    { u: 0.259, v: 0.166, tipo: 'borboleta', cor: '#7fd3ff' },
+    { u: 0.569, v: 0.135, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.751, v: 0.492, tipo: 'borboleta', cor: '#ffffff', fase: 5 },
+    { u: 0.155, v: 0.818, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
+  ],
 }
