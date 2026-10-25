@@ -707,4 +707,20 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.760, v: 0.640, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
     { u: 0.230, v: 0.680, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
   ],
+
+  // BOSQUE DE ILEX (lote 4, Mata). Noite de mata fechada: nevoa andando por
+  // cima da que a arte pinta, vaga-lumes, luz no santuario e respingo nas pocas.
+  'assets/hunt-backgrounds/ilex-forest.jpg': [
+    { u: 0.250, v: 0.470, tipo: 'nevoa', cor: '#cfe8dc' },
+    { u: 0.720, v: 0.460, tipo: 'nevoa', cor: '#cfe8dc', fase: 9 },
+    { u: 0.300, v: 0.700, tipo: 'nevoa', cor: '#cfe8dc', fase: 18 },
+    { u: 0.680, v: 0.640, tipo: 'nevoa', cor: '#cfe8dc', fase: 27 },
+    { u: 0.350, v: 0.350, tipo: 'vagalume', cor: '#d8f08a' },
+    { u: 0.600, v: 0.560, tipo: 'vagalume', cor: '#d8f08a', fase: 4 },
+    { u: 0.780, v: 0.720, tipo: 'vagalume', cor: '#d8f08a', fase: 8 },
+    { u: 0.700, v: 0.295, tipo: 'orbe', cor: '#ffd58a', escala: 0.6 },
+    { u: 0.455, v: 0.495, tipo: 'correnteza', escala: 0.5 },
+    { u: 0.520, v: 0.605, tipo: 'correnteza', escala: 0.5, fase: 2 },
+    { u: 0.760, v: 0.715, tipo: 'correnteza', escala: 0.5, fase: 4 },
+  ],
 }
