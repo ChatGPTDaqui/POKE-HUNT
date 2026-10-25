@@ -51,6 +51,8 @@ const ARTES = {
   'shoal-cave': { h: [145, 215], s: 0.22, l: [0.25, 0.55] },
   // Rio: leito azul e pocas de chuva no gramado.
   river: { h: [205, 228], s: 0.4, l: [0.35, 0.8] },
+  // Cachoeira: lago e poca abaixo da queda (pedra do caminho tem s<0,2).
+  waterfall: { h: [195, 212], s: 0.21, l: [0.4, 0.62] },
   // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
   // mar (conferido no overlay, 24/10/2026).
 }

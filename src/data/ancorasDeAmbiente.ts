@@ -1161,4 +1161,18 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.155, v: 0.647, tipo: 'correnteza', fase: 3 },
     { u: 0.362, v: 0.559, tipo: 'correnteza', fase: 6 },
   ],
+
+  // CACHOEIRA (lote 12, Aguas Interiores). Lago e poca ondulam pela mascara; queda
+  // batendo forte com bruma subindo, e borboletas no gramado.
+  'assets/hunt-backgrounds/waterfall.jpg': [
+    { u: 0.450, v: 0.186, tipo: 'cascata', escala: 1.1 },
+    { u: 0.549, v: 0.186, tipo: 'cascata', escala: 1.1, fase: 2 },
+    { u: 0.455, v: 0.248, tipo: 'nevoa', cor: '#ffffff', escala: 0.55 },
+    { u: 0.559, v: 0.259, tipo: 'nevoa', cor: '#ffffff', escala: 0.55, fase: 12 },
+    { u: 0.518, v: 0.455, tipo: 'correnteza' },
+    { u: 0.093, v: 0.414, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.906, v: 0.388, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.854, v: 0.776, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.362, v: 0.802, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+  ],
 }
