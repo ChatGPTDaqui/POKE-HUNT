@@ -588,4 +588,33 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.250, v: 0.760, tipo: 'fogoFatuo', cor: '#7fe0ff', fase: 5 },
     { u: 0.760, v: 0.330, tipo: 'fogoFatuo', cor: '#7fe0ff', fase: 10 },
   ],
+
+  // TORRE POKEMON (lote 2, Sombrio). Escala propria 0,6 (vela quase da altura
+  // do treinador). As quatro tochas da parede, chama pequena em cada monte de
+  // vela, nevoa roxa andando por cima da que a arte ja pinta e dois fogos-fatuos.
+  'assets/hunt-backgrounds/pokemon-tower.jpg': [
+    { u: 0.176, v: 0.100, tipo: 'tocha', escala: 0.6 },
+    { u: 0.373, v: 0.103, tipo: 'tocha', escala: 0.6, fase: 1 },
+    { u: 0.624, v: 0.103, tipo: 'tocha', escala: 0.6, fase: 2 },
+    { u: 0.823, v: 0.100, tipo: 'tocha', escala: 0.6, fase: 3 },
+    { u: 0.130, v: 0.220, tipo: 'tocha', escala: 0.28, fase: 0 },
+    { u: 0.435, v: 0.165, tipo: 'tocha', escala: 0.28, fase: 1 },
+    { u: 0.870, v: 0.210, tipo: 'tocha', escala: 0.28, fase: 2 },
+    { u: 0.122, v: 0.360, tipo: 'tocha', escala: 0.28, fase: 3 },
+    { u: 0.872, v: 0.360, tipo: 'tocha', escala: 0.28, fase: 4 },
+    { u: 0.124, v: 0.510, tipo: 'tocha', escala: 0.28, fase: 5 },
+    { u: 0.877, v: 0.565, tipo: 'tocha', escala: 0.28, fase: 6 },
+    { u: 0.124, v: 0.670, tipo: 'tocha', escala: 0.28, fase: 7 },
+    { u: 0.875, v: 0.715, tipo: 'tocha', escala: 0.28, fase: 8 },
+    { u: 0.140, v: 0.870, tipo: 'tocha', escala: 0.28, fase: 9 },
+    { u: 0.373, v: 0.865, tipo: 'tocha', escala: 0.28, fase: 10 },
+    { u: 0.626, v: 0.865, tipo: 'tocha', escala: 0.28, fase: 11 },
+    { u: 0.828, v: 0.870, tipo: 'tocha', escala: 0.28, fase: 12 },
+    { u: 0.250, v: 0.420, tipo: 'nevoa', cor: '#b9a0e0' },
+    { u: 0.600, v: 0.250, tipo: 'nevoa', cor: '#b9a0e0', fase: 11 },
+    { u: 0.400, v: 0.650, tipo: 'nevoa', cor: '#b9a0e0', fase: 19 },
+    { u: 0.800, v: 0.780, tipo: 'nevoa', cor: '#b9a0e0', fase: 27 },
+    { u: 0.470, v: 0.500, tipo: 'fogoFatuo' },
+    { u: 0.700, v: 0.450, tipo: 'fogoFatuo', fase: 6 },
+  ],
 }

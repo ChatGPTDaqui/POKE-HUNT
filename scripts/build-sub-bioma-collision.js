@@ -76,6 +76,8 @@ const ESCALA_POR_ARTE = {
   'farm.jpg': 0.5,
   // Maquina de bebida 2,7x o treinador; 0,5 deixaria a pista com ~300 u de largura.
   'cycling-road.jpg': 0.6,
+  // Vela quase da altura do treinador; lapide 1,9x.
+  'pokemon-tower.jpg': 0.6,
 };
 
 /**
