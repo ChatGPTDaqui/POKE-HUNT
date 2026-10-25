@@ -575,4 +575,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.906, v: 0.688, tipo: 'orbe', cor: '#ff7a3c', escala: 0.6, fase: 2 },
     { u: 0.285, v: 0.862, tipo: 'orbe', cor: '#ff7a3c', escala: 0.7, fase: 4 },
   ],
+
+  // NAVIO ABANDONADO (lote 2, Sombrio). Sem mascara: tabua esverdeada do
+  // conves tem a cor do mar. Nevoa rolando nas bordas do casco e fogo-fatuo
+  // azulado vagando pelo conves.
+  'assets/hunt-backgrounds/abandoned-ship.jpg': [
+    { u: 0.060, v: 0.500, tipo: 'nevoa', cor: '#d8eef0' },
+    { u: 0.940, v: 0.450, tipo: 'nevoa', cor: '#d8eef0', fase: 9 },
+    { u: 0.300, v: 0.950, tipo: 'nevoa', cor: '#d8eef0', fase: 17 },
+    { u: 0.720, v: 0.950, tipo: 'nevoa', cor: '#d8eef0', fase: 25 },
+    { u: 0.450, v: 0.550, tipo: 'fogoFatuo', cor: '#7fe0ff' },
+    { u: 0.250, v: 0.760, tipo: 'fogoFatuo', cor: '#7fe0ff', fase: 5 },
+    { u: 0.760, v: 0.330, tipo: 'fogoFatuo', cor: '#7fe0ff', fase: 10 },
+  ],
 }

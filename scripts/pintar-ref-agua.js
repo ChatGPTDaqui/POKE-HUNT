@@ -29,6 +29,8 @@ const ARTES = {
   plains: { h: [200, 228], s: 0.45, l: [0.28, 0.75] },
   // Lago do vilarejo (ja tinha props; faltava a agua mexer).
   town: { h: [195, 225], s: 0.35, l: [0.30, 0.72] },
+  // abandoned-ship NAO entra: tabua esverdeada do conves cai na mesma cor do
+  // mar (conferido no overlay, 24/10/2026).
 }
 
 function hsl(r, g, b) {
