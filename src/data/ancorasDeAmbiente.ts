@@ -951,4 +951,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.823, v: 0.104, tipo: 'nevoa', cor: '#7a5a4a', escala: 0.25 },
     { u: 0.098, v: 0.647, tipo: 'nevoa', cor: '#7a5a4a', escala: 0.25, fase: 10 },
   ],
+
+  // TERRA DEVASTADA (lote 9, Arido). Poeira rodando pela praca em ruinas e pela
+  // estrada de pedra, brisa saindo do templo e da passagem sob a ponte.
+  'assets/hunt-backgrounds/wasteland.jpg': [
+    { u: 0.543, v: 0.466, tipo: 'nevoa', cor: '#e2c48a', escala: 0.5 },
+    { u: 0.699, v: 0.569, tipo: 'nevoa', cor: '#e2c48a', escala: 0.45, fase: 12 },
+    { u: 0.259, v: 0.673, tipo: 'nevoa', cor: '#c8b08a', escala: 0.45, fase: 24 },
+    { u: 0.414, v: 0.233, tipo: 'nevoa', cor: '#c8b08a', escala: 0.4, fase: 36 },
+    { u: 0.880, v: 0.854, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 18 },
+    { u: 0.802, v: 0.342, tipo: 'nevoa', cor: '#6a4e3e', escala: 0.25 },
+    { u: 0.678, v: 0.849, tipo: 'nevoa', cor: '#6a4e3e', escala: 0.25, fase: 10 },
+    { u: 0.678, v: 0.455, tipo: 'fogoFatuo', cor: '#ffe6a0', fase: 2 },
+  ],
 }
