@@ -1354,4 +1354,64 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.828, v: 0.751, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
     { u: 0.207, v: 0.751, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
   ],
+
+  // CICLOVIA (sobra do lote 1). Ponte de dia: luz de poste nao aparece em arte clara,
+  // entao onda batendo nos pilares das duas bordas, maresia e borboletas nos canteiros.
+  'assets/hunt-backgrounds/cycling-road.jpg': [
+    { u: 0.274, v: 0.207, tipo: 'quebraMar', escala: 0.5 },
+    { u: 0.725, v: 0.362, tipo: 'quebraMar', escala: 0.5, fase: 3 },
+    { u: 0.274, v: 0.569, tipo: 'quebraMar', escala: 0.5, fase: 5 },
+    { u: 0.725, v: 0.725, tipo: 'quebraMar', escala: 0.5, fase: 7 },
+    { u: 0.155, v: 0.466, tipo: 'nevoa', cor: '#e8f4ff', escala: 0.5 },
+    { u: 0.854, v: 0.259, tipo: 'nevoa', cor: '#e8f4ff', escala: 0.5, fase: 20 },
+    { u: 0.336, v: 0.104, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.663, v: 0.466, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.336, v: 0.518, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+    { u: 0.668, v: 0.751, tipo: 'borboleta', cor: '#7fd3ff', fase: 7 },
+  ],
+
+  // ILHA (sobra). Mar e lagoa ja ondulam pela mascara; fogueira do acampamento, as
+  // duas tochas do farol, onda batendo na praia e borboletas na mata das palmeiras.
+  'assets/hunt-backgrounds/island.jpg': [
+    { u: 0.629, v: 0.709, tipo: 'fogueira', escala: 0.5 },
+    { u: 0.600, v: 0.248, tipo: 'tocha' },
+    { u: 0.795, v: 0.331, tipo: 'tocha', fase: 3 },
+    { u: 0.207, v: 0.828, tipo: 'quebraMar', escala: 0.6 },
+    { u: 0.518, v: 0.875, tipo: 'quebraMar', escala: 0.6, fase: 3 },
+    { u: 0.880, v: 0.751, tipo: 'quebraMar', escala: 0.6, fase: 5 },
+    { u: 0.129, v: 0.466, tipo: 'quebraMar', escala: 0.6, fase: 7 },
+    { u: 0.362, v: 0.233, tipo: 'borboleta', cor: '#fff3b0' },
+    { u: 0.217, v: 0.388, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
+    { u: 0.828, v: 0.466, tipo: 'borboleta', cor: '#ffb0d0', fase: 5 },
+  ],
+
+  // LAGO (sobra). Agua ja ondula pela mascara; respingo entre as taboas e pedras da
+  // margem, petala dos lirios e borboletas nos canteiros floridos da mata.
+  'assets/hunt-backgrounds/lake.jpg': [
+    { u: 0.331, v: 0.347, tipo: 'correnteza' },
+    { u: 0.554, v: 0.202, tipo: 'correnteza', fase: 2 },
+    { u: 0.719, v: 0.611, tipo: 'correnteza', fase: 4 },
+    { u: 0.362, v: 0.621, tipo: 'correnteza', fase: 6 },
+    { u: 0.663, v: 0.543, tipo: 'correnteza', fase: 8 },
+    { u: 0.331, v: 0.481, tipo: 'petala', cor: '#ffd8e8', escala: 0.5 },
+    { u: 0.761, v: 0.212, tipo: 'petala', cor: '#ffd8e8', escala: 0.5, fase: 4 },
+    { u: 0.259, v: 0.166, tipo: 'borboleta', cor: '#7fd3ff' },
+    { u: 0.569, v: 0.135, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
+    { u: 0.751, v: 0.492, tipo: 'borboleta', cor: '#ffffff', fase: 5 },
+    { u: 0.155, v: 0.818, tipo: 'borboleta', cor: '#ffb0d0', fase: 7 },
+  ],
+
+  // MAR (sobra). Agua ja ondula pela mascara; bolhas subindo dos corais e das duas
+  // grutas, e onda batendo nas ilhotas de areia.
+  'assets/hunt-backgrounds/sea.jpg': [
+    { u: 0.248, v: 0.243, tipo: 'gas', cor: '#e8fbff', escala: 0.35 },
+    { u: 0.647, v: 0.336, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 2 },
+    { u: 0.336, v: 0.595, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 4 },
+    { u: 0.694, v: 0.751, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 6 },
+    { u: 0.725, v: 0.854, tipo: 'gas', cor: '#e8fbff', escala: 0.3, fase: 8 },
+    { u: 0.870, v: 0.145, tipo: 'quebraMar', escala: 0.5 },
+    { u: 0.492, v: 0.497, tipo: 'quebraMar', escala: 0.4, fase: 3 },
+    { u: 0.714, v: 0.575, tipo: 'quebraMar', escala: 0.4, fase: 5 },
+    { u: 0.181, v: 0.833, tipo: 'quebraMar', escala: 0.5, fase: 7 },
+  ],
 }

@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.53',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (acabamento)',
+    highlights: [
+      'Ciclovia: onda batendo nos pilares da ponte, maresia e borboletas. Ilha: fogueira do acampamento, tochas do farol e ondas na praia.',
+      'Lago: respingo entre as taboas, pétalas de lírio e borboletas. Mar: bolhas subindo dos corais e das grutas e ondas nas ilhotas.',
+    ],
+  },
+  {
     version: '8.52',
     date: '2026-10-25',
     title: 'Vida nos mapas (os últimos)',
