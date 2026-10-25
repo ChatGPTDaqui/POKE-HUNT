@@ -90,6 +90,8 @@ const ESCALA_POR_ARTE = {
   'construction-site.jpg': 0.6,
   // Carro ~8x o treinador.
   'junkyard.jpg': 0.5,
+  // Monitor ~2x o treinador.
+  'silph-co.jpg': 0.6,
 };
 
 /**

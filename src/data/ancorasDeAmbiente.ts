@@ -757,4 +757,14 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.520, v: 0.700, tipo: 'nevoa', cor: '#b58a5a', escala: 0.45, fase: 14 },
     { u: 0.780, v: 0.500, tipo: 'nevoa', cor: '#b58a5a', escala: 0.4, fase: 25 },
   ],
+
+  // SILPH CO. (lote 5, Industrial). Laboratorio claro: brilho somado some, entao
+  // vida aqui e faisca nos racks de servidor (vapor claro sumiu no piso branco).
+  'assets/hunt-backgrounds/silph-co.jpg': [
+    { u: 0.200, v: 0.115, tipo: 'eletrica', escala: 0.35 },
+    { u: 0.510, v: 0.115, tipo: 'eletrica', escala: 0.35, fase: 2 },
+    { u: 0.830, v: 0.115, tipo: 'eletrica', escala: 0.35, fase: 4 },
+    { u: 0.065, v: 0.470, tipo: 'eletrica', escala: 0.35, fase: 6 },
+    { u: 0.910, v: 0.510, tipo: 'eletrica', escala: 0.35, fase: 8 },
+  ],
 }
