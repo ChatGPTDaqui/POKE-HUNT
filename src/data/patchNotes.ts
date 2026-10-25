@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.52',
+    date: '2026-10-25',
+    title: 'Vida nos mapas (os últimos)',
+    highlights: [
+      'Montanha: quedas do riacho. Estrada Vitória: tochas de parede tremulando. Ilha Miragem: ondas na beira e ar tremulando. Zona Safári: lagoa ondulando e poeira nas trilhas.',
+      'Charmander Perdido: poças de chuva e a brasa da cauda junto da pedra. Jardim Misterioso: pétalas e luzinhas encantadas. Colônia Pikachu: faíscas saindo das tocas. Esquadrão Squirtle: rio correndo e fogueira do acampamento.',
+      'Com isso todos os mapas de caça ganharam vida. A Colônia Pikachu foi redimensionada para combinar com o treinador e os POKEs.',
+    ],
+  },
+  {
     version: '8.51',
     date: '2026-10-25',
     title: 'Vida nos mapas (Subterrâneo e Águas Interiores)',

@@ -137,7 +137,7 @@ const MIN_CELULAS = 25
  * abaixo de 25 e riacho de verdade cortado por ponte (os quatro trechos de
  * `town`). Corte menor so pra elas.
  */
-const MIN_CELULAS_POR_ARTE = { town: 6, 'whirl-islands': 6, 'meteor-falls': 15, river: 10 }
+const MIN_CELULAS_POR_ARTE = { town: 6, 'whirl-islands': 6, 'meteor-falls': 15, river: 10, 'stray-charmander': 4 }
 
 /**
  * Apaga os componentes conexos menores que `MIN_CELULAS`.
