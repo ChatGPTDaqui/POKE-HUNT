@@ -925,4 +925,17 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.714, v: 0.611, tipo: 'chamine', escala: 0.25, fase: 3 },
     { u: 0.259, v: 0.792, tipo: 'chamine', escala: 0.25, fase: 6 },
   ],
+
+  // DESERTO (lote 9, Arido). Ja tem areia soprando pelo preset; aqui redemoinhos de
+  // poeira nas trilhas abertas e brisa fria saindo das bocas de caverna.
+  'assets/hunt-backgrounds/desert.jpg': [
+    { u: 0.321, v: 0.569, tipo: 'nevoa', cor: '#e2c48a', escala: 0.45 },
+    { u: 0.699, v: 0.518, tipo: 'nevoa', cor: '#e2c48a', escala: 0.45, fase: 12 },
+    { u: 0.290, v: 0.880, tipo: 'nevoa', cor: '#e2c48a', escala: 0.45, fase: 24 },
+    { u: 0.673, v: 0.217, tipo: 'nevoa', cor: '#e2c48a', escala: 0.4, fase: 36 },
+    { u: 0.161, v: 0.096, tipo: 'nevoa', cor: '#8a7466', escala: 0.25 },
+    { u: 0.886, v: 0.362, tipo: 'nevoa', cor: '#8a7466', escala: 0.25, fase: 8 },
+    { u: 0.136, v: 0.484, tipo: 'nevoa', cor: '#8a7466', escala: 0.25, fase: 16 },
+    { u: 0.462, v: 0.766, tipo: 'nevoa', cor: '#8a7466', escala: 0.25, fase: 24 },
+  ],
 }
