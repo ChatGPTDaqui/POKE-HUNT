@@ -767,4 +767,30 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.065, v: 0.470, tipo: 'eletrica', escala: 0.35, fase: 6 },
     { u: 0.910, v: 0.510, tipo: 'eletrica', escala: 0.35, fase: 8 },
   ],
+
+  // TRILHA DE FOGO (lote 6, Igneo). Vapor saindo das dez chamines de pedra e
+  // brilho pulsando nas rachaduras de lava.
+  'assets/hunt-backgrounds/fiery-path.jpg': [
+    { u: 0.474, v: 0.171, tipo: 'fumarola', escala: 0.45 },
+    { u: 0.880, v: 0.176, tipo: 'fumarola', escala: 0.45, fase: 1 },
+    { u: 0.274, v: 0.274, tipo: 'fumarola', escala: 0.45, fase: 2 },
+    { u: 0.725, v: 0.274, tipo: 'fumarola', escala: 0.45, fase: 3 },
+    { u: 0.626, v: 0.318, tipo: 'fumarola', escala: 0.45, fase: 4 },
+    { u: 0.124, v: 0.313, tipo: 'fumarola', escala: 0.45, fase: 5 },
+    { u: 0.875, v: 0.533, tipo: 'fumarola', escala: 0.45, fase: 6 },
+    { u: 0.124, v: 0.569, tipo: 'fumarola', escala: 0.45, fase: 7 },
+    { u: 0.323, v: 0.668, tipo: 'fumarola', escala: 0.45, fase: 8 },
+    { u: 0.673, v: 0.668, tipo: 'fumarola', escala: 0.45, fase: 9 },
+    { u: 0.176, v: 0.228, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45 },
+    { u: 0.171, v: 0.274, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 1 },
+    { u: 0.626, v: 0.225, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 2 },
+    { u: 0.826, v: 0.220, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 3 },
+    { u: 0.176, v: 0.523, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 4 },
+    { u: 0.124, v: 0.875, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 5 },
+    { u: 0.176, v: 0.875, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 6 },
+    { u: 0.176, v: 0.927, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 7 },
+    { u: 0.176, v: 0.976, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 8 },
+    { u: 0.828, v: 0.929, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 9 },
+    { u: 0.823, v: 0.973, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 10 },
+  ],
 }
