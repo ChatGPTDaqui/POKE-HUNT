@@ -556,4 +556,23 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.551, v: 0.185, tipo: 'chamine', escala: 0.35, fase: 2 },
     { u: 0.730, v: 0.360, tipo: 'chamine', escala: 0.35, fase: 4 },
   ],
+
+  // TORRE QUEIMADA (lote 2, Sombrio). Escura: brasa nos pontos que a arte
+  // pinta de laranja, fumaca fina do toco e do monte de cinza, e brilho nos
+  // dois montes de brasa (rocha da esquerda e cinza da direita/baixo).
+  'assets/hunt-backgrounds/burned-tower.jpg': [
+    { u: 0.129, v: 0.176, tipo: 'tocha', escala: 0.35 },
+    { u: 0.280, v: 0.205, tipo: 'tocha', escala: 0.35, fase: 1 },
+    { u: 0.199, v: 0.223, tipo: 'tocha', escala: 0.35, fase: 2 },
+    { u: 0.088, v: 0.230, tipo: 'tocha', escala: 0.3, fase: 3 },
+    { u: 0.916, v: 0.264, tipo: 'tocha', escala: 0.35, fase: 4 },
+    { u: 0.919, v: 0.331, tipo: 'tocha', escala: 0.35, fase: 5 },
+    { u: 0.875, v: 0.362, tipo: 'tocha', escala: 0.3, fase: 6 },
+    { u: 0.862, v: 0.484, tipo: 'tocha', escala: 0.3, fase: 7 },
+    { u: 0.180, v: 0.160, tipo: 'chamine', escala: 0.45 },
+    { u: 0.575, v: 0.165, tipo: 'chamine', escala: 0.4, fase: 3 },
+    { u: 0.104, v: 0.556, tipo: 'orbe', cor: '#ff7a3c', escala: 0.6 },
+    { u: 0.906, v: 0.688, tipo: 'orbe', cor: '#ff7a3c', escala: 0.6, fase: 2 },
+    { u: 0.285, v: 0.862, tipo: 'orbe', cor: '#ff7a3c', escala: 0.7, fase: 4 },
+  ],
 }
