@@ -419,7 +419,12 @@ function main() {
       linhas.push([arte, 'sem referencia pintada — nao ondula'])
       continue
     }
-    const { grade, marcadas, total, cols, linhas: nl, removidas, cortados } = gradeDaRef(decodificar(ref), pintada, MIN_CELULAS_POR_ARTE[nomeBase(arte)] ?? MIN_CELULAS)
+    // O corte e em CELULAS de mundo, e a arte encolhida pela escala propria
+    // (ESCALA_POR_ARTE, 26/10/2026) tem menos celulas pro mesmo lago: o minimo
+    // acompanha a AREA, senao a escala nova apagava corpo de agua inteiro.
+    const fatorDeArea = (pintada.arte.escala / 0.8) ** 2
+    const minimo = Math.max(2, Math.round((MIN_CELULAS_POR_ARTE[nomeBase(arte)] ?? MIN_CELULAS) * fatorDeArea))
+    const { grade, marcadas, total, cols, linhas: nl, removidas, cortados } = gradeDaRef(decodificar(ref), pintada, minimo)
     // Os TAMANHOS, e nao so o total: e o que permite ver que o corte pegou
     // sujeira de 1-20 celulas e nao mordeu um corpo de agua inteiro.
     const sujeira = cortados.length > 0

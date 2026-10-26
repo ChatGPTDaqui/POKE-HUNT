@@ -25,6 +25,10 @@ function cenario(golpeId: string) {
   const jogadorPoke = createPokeInstance(rng, 'charmander', 40)
   jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, golpeId]
   jogadorPoke.activeAbilities = [golpeId]
+  // No Guard: o que se mede aqui e o PRENDER, nao a precisao. Sem isto o
+  // acerto dependia de quantos sorteios a montagem do mapa consumiu antes, e
+  // mudar a escala da arte (26/10/2026) fez Wrap (90%) errar com esta semente.
+  jogadorPoke.trait = 'no_guard'
   jogadorPoke.disabledAbilities = {
     [typedAoeMoveKey(SPECIES.charmander.type)]: true,
     ['basic_attack']: true,

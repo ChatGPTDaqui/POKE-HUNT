@@ -73,43 +73,164 @@ const HUNT_BG_TILE_SCALE = 0.8;
 // Mudou um numero? Rode este script, `build-agua-mask.js`, `build-lava-mask.js`
 // e `npm run build:edge` (a grade e usada pelo servidor).
 const ESCALA_POR_ARTE = {
-  'farm.jpg': 0.5,
-  // Maquina de bebida 2,7x o treinador; 0,5 deixaria a pista com ~300 u de largura.
-  'cycling-road.jpg': 0.6,
-  // Vela quase da altura do treinador; lapide 1,9x.
-  'pokemon-tower.jpg': 0.6,
-  // Terminal 2x o treinador.
-  'rocket-hideout.jpg': 0.65,
-  // Banco 3,5x e casinha de cachorro 2,5x o treinador.
-  'celadon-mansion.jpg': 0.5,
-  // Cogumelo grande ~3x o treinador.
-  'mushroom-glade.jpg': 0.55,
-  // Barril e porta grandes demais.
-  'treetops.jpg': 0.6,
-  // Cone 1,5x o treinador, escavadeira 5x.
-  'construction-site.jpg': 0.6,
-  // Carro ~8x o treinador.
-  'junkyard.jpg': 0.5,
-  // Monitor ~2x o treinador.
-  'silph-co.jpg': 0.6,
-  // Porta da casa ~2,7x o treinador.
-  'ash-field.jpg': 0.55,
-  // Queimador de incenso ~2,3x o treinador.
-  'sprout-tower.jpg': 0.55,
-  // Mesa do laboratorio ~3x a largura do treinador.
-  'pokemon-mansion.jpg': 0.6,
-  // Treno ~2,5x o treinador.
-  'tundra.jpg': 0.65,
-  // Vagonete ~2,5x o treinador.
-  'rock-tunnel.jpg': 0.6,
-  // Toca de Diglett ~2x o treinador.
-  'digletts-cave.jpg': 0.6,
-  // Flor de lotus ~1,5x o treinador.
-  'lily-pond.jpg': 0.6,
-  // Lanterna de papel ~2x o treinador.
-  'maidens-peak.jpg': 0.55,
-  // Toca de Pikachu ~1,6x o treinador.
-  'pikachu-colony.jpg': 0.65,
+  // barril ~55px, porta de cabine ~60px
+  'abandoned-ship.jpg': 0.42,
+  // boca de caverna ~100px, runa ~80px
+  'abyss.jpg': 0.4,
+  // porta ~75px, moita ~65px
+  'ash-field.jpg': 0.45,
+  // caverna ~110px, cacto ~130px, tumbleweed ~80px
+  'badlands.jpg': 0.35,
+  // ladrilho de grade ~48px
+  'beach.jpg': 0.43,
+  // ladrilho ~48px, banco ~90px
+  'bug-contest.jpg': 0.42,
+  // tabuas, monte de cinza ~100px
+  'burned-tower.jpg': 0.35,
+  // boca de caverna ~70px, escada ~130px larg
+  'burnt-forest.jpg': 0.42,
+  // pedra ~90px, moita ~90px, escada ~190px
+  'canyon.jpg': 0.3,
+  // tocha de pe ~90px, porta ~120px
+  'cave-volcanic.jpg': 0.38,
+  // piso ~97px, banco ~170px, casinha ~110px
+  'celadon-mansion.jpg': 0.22,
+  // grade ~48px, cone ~45px
+  'construction-site.jpg': 0.45,
+  // coral ~90px, estrela ~60px
+  'coral-reef.jpg': 0.26,
+  // maquina de bebida ~110px, cone ~45px, moto ~90px
+  'cycling-road.jpg': 0.38,
+  // grade ~48px
+  'dark-cave.jpg': 0.43,
+  // grade ~48px
+  'desert.jpg': 0.43,
+  // toca ~100px
+  'digletts-cave.jpg': 0.5,
+  // cogumelo/pedra ~74px
+  'fairy-cave.jpg': 0.4,
+  // porta do celeiro ~105px alt, latao ~75px, cerca ~70px (arte inconsistente; meio-termo)
+  'farm.jpg': 0.32,
+  // rocha/ladrilho ~95px, fumarola ~85px
+  'fiery-path.jpg': 0.32,
+  // copa ~74px (~2 ladrilhos), toco ~37px
+  'forest.jpg': 0.45,
+  // tenda ~200px, pedra ~70px
+  'grampa-canyon.jpg': 0.34,
+  // caixote ~70px, porta do galpao ~140px
+  'harbor.jpg': 0.3,
+  // lanterna ~150px alt, banco ~140px
+  'hot-springs.jpg': 0.55,
+  // grade ~51px
+  'ice-cave.jpg': 0.43,
+  // moita ~60px, santuario ~200px larg
+  'ilex-forest.jpg': 0.4,
+  // grade ~51px
+  'industrial.jpg': 0.43,
+  // caixote ~45px, porta do farol ~55px, tocha ~70px
+  'island.jpg': 0.45,
+  // grade ~51px
+  'jungle.jpg': 0.43,
+  // carro ~250px, maquina de lavar ~70px
+  'junkyard.jpg': 0.32,
+  // porta ~75px, boneco de neve ~110px
+  'jynx-holiday.jpg': 0.5,
+  // moita ~60px, pedra ~50px
+  'lake.jpg': 0.42,
+  // tufo ~55px
+  'lake-of-rage.jpg': 0.4,
+  // tabua da passarela ~90px, taboa ~90px
+  'lily-pond.jpg': 0.3,
+  // lanterna ~90px, cerca ~50px
+  'maidens-peak.jpg': 0.28,
+  // grade de ladrilho visivel ~51px
+  'meadow.jpg': 0.43,
+  // lanterna de pedra ~85px, bonsai ~100px
+  'meditation-shrine.jpg': 0.4,
+  // cristal ~90px, pedra ~45px
+  'meteor-falls.jpg': 0.38,
+  // porta ~48px, maquina de bebida ~64px, poste ~112px
+  'metropolis.jpg': 0.55,
+  // moita ~70px, pedra ~65px, palmeira ~150px
+  'mirage-island.jpg': 0.35,
+  // pinheiro ~110px, pedra ~60px
+  'mountain.jpg': 0.45,
+  // pedra/arbusto ~70px
+  'mt-ember.jpg': 0.42,
+  // pedra da lua ~190px, cristal ~70px
+  'mt-moon.jpg': 0.35,
+  // lapide ~70px
+  'mt-pyre.jpg': 0.42,
+  // pedra ~80px
+  'mt-silver-summit.jpg': 0.4,
+  // moita ~80px, cogumelo ~50px
+  'mushroom-glade.jpg': 0.4,
+  // canteiro ~75px
+  'mysterious-garden.jpg': 0.38,
+  // pedra ~75px, cacto ~110px
+  'oasis.jpg': 0.38,
+  // moita ~50px, palmeira ~140px
+  'orange-archipelago.jpg': 0.42,
+  // toca ~85px, moita ~80px
+  'pikachu-colony.jpg': 0.38,
+  // moita/ladrilho ~51px
+  'plains.jpg': 0.43,
+  // cadeira ~80px, mesa ~250px, estatua ~200px
+  'pokemon-mansion.jpg': 0.35,
+  // lapide ~80px
+  'pokemon-tower.jpg': 0.38,
+  // taboa ~90px, pedra ~70px
+  'river.jpg': 0.4,
+  // vagonete ~95px, lampiao ~45px, porta ~160px
+  'rock-tunnel.jpg': 0.35,
+  // ladrilho ~100px, porta do elevador ~170px, terminal ~150px
+  'rocket-hideout.jpg': 0.22,
+  // grade ~51px, pilar ~80px
+  'ruins.jpg': 0.42,
+  // moita ~60px, placa ~55px
+  'safari-zone.jpg': 0.42,
+  // pedra ~70px
+  'sea.jpg': 0.4,
+  // pedra ~55px, ponte ~95px
+  'seafoam-islands.jpg': 0.4,
+  // pedra ~75px, concha ~40px
+  'shoal-cave.jpg': 0.4,
+  // ladrilho ~97px, servidor ~170px alt, porta do elevador ~280px
+  'silph-co.jpg': 0.22,
+  // ladrilho ~97px, pilar ~90px
+  'sky-pillar.jpg': 0.3,
+  // porta ~85px, barril ~48px
+  'slum.jpg': 0.4,
+  // queimador ~80px, tapete ~140px
+  'sprout-tower.jpg': 0.4,
+  // barril ~60px, moita ~80px
+  'squirtle-squad.jpg': 0.4,
+  // moita ~80px
+  'stray-charmander.jpg': 0.4,
+  // moita ~65px, ponte ~110px
+  'swamp.jpg': 0.42,
+  // cogumelo ~40px, moita ~60px
+  'tall-grass.jpg': 0.45,
+  // poste ~106px, lapide ~48px, copa de arvore ~95px
+  'town.jpg': 0.45,
+  // pedra ~50px, moita ~55px
+  'town-night.jpg': 0.6,
+  // barril ~45px, porta ~110px, tabua ~70px
+  'treetops.jpg': 0.38,
+  // pinheiro ~110px, treno ~130px
+  'tundra.jpg': 0.42,
+  // ladrilho ~95px, lampada ~60px, grade ~95px
+  'underground.jpg': 0.45,
+  // pedra ~75px, pilar ~65px larg
+  'victory-road.jpg': 0.38,
+  // ladrilho ~51px
+  'volcano.jpg': 0.43,
+  // cacto ~110px, pilar ~110px
+  'wasteland.jpg': 0.38,
+  // pedra ~150px, moita ~70px
+  'waterfall.jpg': 0.35,
+  // pedra ~65px, caverna ~100px
+  'whirl-islands.jpg': 0.38,
 };
 
 /**
