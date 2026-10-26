@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.54',
+    date: '2026-10-26',
+    title: 'Mapas na proporção certa',
+    highlights: [
+      'Todos os mapas de caça foram medidos contra o tamanho do treinador e dos POKEs e redimensionados: portas, móveis, lampiões e árvores agora têm o tamanho certo. O Esconderijo Rocket, a Silph Co. e a Mansão Celadon foram os que mais encolheram. Alguns mapas ficaram menores para andar.',
+      'Chamas, fumaça de chaminé e lampiões foram realinhados com o desenho do cenário (Cortiço, Industrial, Floresta Queimada, Vulcão, Covil do Dragão e outros).',
+      'O zoom de entrada ao trocar de sala volta a funcionar no PC, mesmo com as animações do Windows desligadas.',
+    ],
+  },
+  {
     version: '8.53',
     date: '2026-10-25',
     title: 'Vida nos mapas (acabamento)',

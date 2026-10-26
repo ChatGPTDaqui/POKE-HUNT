@@ -92,7 +92,8 @@ describe('corpos vivos nao se sobrepoem (PH-384)', () => {
 
     rodar(world, 2)
 
-    expect(distancia(a, b), 'os dois continuaram colados').toBeGreaterThanOrEqual(a.radius + b.radius)
+    // Tolerancia de ponto flutuante: a separacao chega em 29,999999999999996.
+    expect(distancia(a, b), 'os dois continuaram colados').toBeGreaterThanOrEqual(a.radius + b.radius - 1e-9)
   })
 
   it('o jogador e o inimigo se separam sem sair do alcance de combate', () => {
