@@ -55,8 +55,8 @@ import { cn } from '@/lib/utils'
  *     dentro da animacao fez o splash da celebracao descolar do centro sob
  *     `prefers-reduced-motion`. Quem centra e o wrapper; a animacao so mexe em
  *     `scale` e `opacity`.
- *  2. `prefers-reduced-motion` E OBRIGATORIO. Sob ele a arte entra parada, no
- *     tamanho final — a informacao (que area e esta) continua toda na tela.
+ *  2. `prefers-reduced-motion` E OBRIGATORIO. Sob ele o letreiro e o veu entram
+ *     parados; o zoom lento da arte e o fade ficam (pedido do dono, ver o CSS).
  *
  * O zoom vai de 1 a 1.14 em 4,5s com `ease-out`: lento o bastante pra nao ler
  * como sacudida e curto o bastante pra caber na espera mais curta (a troca de
@@ -92,9 +92,15 @@ const CSS = `
 .cutscene-arte { animation: cutscene-zoom 4500ms ease-out both; }
 .cutscene-veu { animation: cutscene-entra 220ms ease-out both; }
 .cutscene-titulo { animation: cutscene-titulo 420ms 120ms ease-out both; }
+/* O ZOOM DA ARTE TAMBEM FICA sob reduced-motion (26/10/2026), pelo mesmo motivo
+   do fade: o Windows liga a preferencia quando "efeitos de animacao" esta
+   desligado, e o dono via a troca de sala sem zoom nenhum no PC. E um zoom
+   lento (1 a 1.14 em 4,5s), sem sacudida — o mesmo criterio que o
+   SplashDeSala ja usa pra manter o zoom dele. Sai so o que e enfeite: o titulo
+   subindo e o veu. */
 @media (prefers-reduced-motion: reduce) {
-  .cutscene-arte, .cutscene-veu, .cutscene-titulo { animation: none; }
-  .cutscene-arte { transform: scale(1.07); }
+  .cutscene-veu, .cutscene-titulo { animation: none; }
+  .cutscene-arte { animation: cutscene-zoom 4500ms ease-out both !important; }
   .cutscene-cena { animation: cutscene-entra 450ms ease-out both; }
 }
 `
