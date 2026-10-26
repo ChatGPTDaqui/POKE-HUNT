@@ -9,7 +9,10 @@ import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { useUiStore } from '@/stores/uiStore'
 import { desenharAmbiente, reiniciarAmbiente } from './ambiente'
 
-const FLORESTA = 'assets/hunt-backgrounds/forest.jpg' // folha — faixaOrigemY
+// Mato Alto e nao a Rota 46: a Rota 46 tem lagoa com mascara de agua, e na
+// escala propria (26/10/2026) a lagoa entra na janela — a ondulacao dela e
+// elipse e seria contada como folha.
+const FLORESTA = 'assets/hunt-backgrounds/tall-grass.jpg' // folha — faixaOrigemY
 // PH-255: era `mountain.jpg`, que saiu de `neve` (a arte e um vale verde).
 const MONTANHA = 'assets/hunt-backgrounds/ice-mountain.jpg' // neve — controle, sem faixa
 

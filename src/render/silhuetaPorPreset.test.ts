@@ -39,7 +39,8 @@ import { desenharAmbiente, presetDaArte, reiniciarAmbiente, type PresetAmbiente 
  * nao tem mascara mede a particula limpa.
  */
 const ARTE_POR_PRESET: Record<Exclude<PresetAmbiente, 'nenhum'>, string> = {
-  folha: 'assets/hunt-backgrounds/forest.jpg',
+  // Mato Alto: a Rota 46 tem lagoa com mascara, e a ondulacao respinga.
+  folha: 'assets/hunt-backgrounds/tall-grass.jpg',
   selva: 'assets/hunt-backgrounds/jungle.jpg',
   agua: 'assets/hunt-backgrounds/lake.jpg',
   brasa: 'assets/hunt-backgrounds/cave-volcanic.jpg',
