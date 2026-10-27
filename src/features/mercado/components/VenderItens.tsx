@@ -13,6 +13,9 @@ import { FiltroDeItens } from './FiltroDaVenda'
 import {
   filtrarItens, categoriasPresentes, FILTRO_DE_ITEM_VAZIO, type FiltroDeItem,
 } from '../filtrosDaVenda'
+import { chaveDeItem } from '../faixaDeIv'
+import { AvisoDaReferencia } from './ReferenciaDePreco'
+import { useReferenciaNaVenda } from '../precoDeReferencia'
 
 export function VenderItens() {
   const items = useGameStateStore((s) => s.items)
@@ -30,6 +33,8 @@ export function VenderItens() {
   // O selecionado sai dos VISÍVEIS, pelo mesmo motivo da tela de POKE.
   const escolhido = visiveis.includes(itemId) ? itemId : visiveis[0] || ''
   const maximo = items[escolhido] ?? 0
+  // Livro de item e sempre em ouro.
+  const ref = useReferenciaNaVenda(escolhido ? chaveDeItem(escolhido) : null, 'gold', preco, setPreco)
 
   // Livro de item e sempre em ouro, entao a taxa sempre incide aqui.
   const bruto = preco * Math.min(qtd, maximo)
@@ -76,7 +81,7 @@ export function VenderItens() {
           Preco/un.
           <GameInput
             type="number" min={1} className="w-[7em]" value={preco}
-            onChange={(e) => setPreco(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+            onChange={(e) => { ref.marcarEditado(); setPreco(Math.max(1, Math.floor(Number(e.target.value) || 1))) }}
           />
         </label>
         <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
@@ -87,6 +92,9 @@ export function VenderItens() {
           />
         </label>
       </div>
+      {escolhido && (
+        <AvisoDaReferencia referencia={ref.referencia} aviso={ref.aviso} moeda="gold" confirmandoBaixo={ref.confirmandoBaixo} />
+      )}
       <div className="text-[.8em] text-menu-muted">
         Você recebe até <b className="text-gold">{fmt.format(bruto - taxa)}</b> de ouro.
         {/* A taxa aparece ANTES de confirmar (PH-98). Descobrir depois de vender
@@ -102,7 +110,7 @@ export function VenderItens() {
         variant="primary"
         carregando={acao.isPending('criar-ordem')}
         disabled={maximo === 0}
-        onClick={() => void acao.run('criar-ordem', () => criar.mutateAsync({ itemId: escolhido, side: 'venda', unitPrice: preco, quantity: Math.min(qtd, maximo) }).catch(() => {}))}
+        onClick={() => ref.podeConfirmar() && void acao.run('criar-ordem', () => criar.mutateAsync({ itemId: escolhido, side: 'venda', unitPrice: preco, quantity: Math.min(qtd, maximo) }).catch(() => {}))}
       >
         Colocar a venda
       </GameButton>

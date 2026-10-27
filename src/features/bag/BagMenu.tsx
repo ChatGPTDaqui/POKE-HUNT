@@ -37,6 +37,8 @@ import { cn } from '@/lib/utils'
 import { AutoVendaPanel, ChipAutoVenda } from './AutoVendaPanel'
 import { useMochila } from './useMochila'
 import { EstadoDaMochila } from './EstadoDaMochila'
+import { LinhaDePrecoNoMercado } from '@/features/mercado/components/ReferenciaDePreco'
+import { chaveDeItem, chaveDePoke, ivPercentDoPoke } from '@/features/mercado/faixaDeIv'
 import { EnsinarTm } from './EnsinarTm'
 
 type SortKey = 'rarity' | 'iv' | 'level'
@@ -227,6 +229,8 @@ export function PokemonsTab() {
                 <div className="mt-[.4em] flex flex-wrap gap-[.25em]">
                   {[SPECIES[pokeEmFoco.speciesId].type, SPECIES[pokeEmFoco.speciesId].type2].map((type) => type && <TypeChip key={type} type={type} />)}
                 </div>
+                {/* Preco medio do grupo (espécie + shiny + faixa de IV) — 27/10/2026. */}
+                <LinhaDePrecoNoMercado chave={chaveDePoke(pokeEmFoco.speciesId, !!pokeEmFoco.isShiny, ivPercentDoPoke(pokeEmFoco.ivs))} />
               </div>
               <div className="detail-actions">
               <GameButton onClick={(e) => { e.stopPropagation(); showProfile(pokeEmFoco, SPECIES[pokeEmFoco.speciesId]) }}>Ver perfil</GameButton>
@@ -387,6 +391,7 @@ export function ItensTab() {
               <div className="text-[.75em] text-menu-muted">{itemEmFoco.description}</div>
             </div>
           </ItemTooltip>
+          <LinhaDePrecoNoMercado chave={chaveDeItem(itemEmFoco.id)} />
           <div className="detail-actions">
           <LockButton
             locked={Boolean(lockedItems[itemEmFoco.id])}
