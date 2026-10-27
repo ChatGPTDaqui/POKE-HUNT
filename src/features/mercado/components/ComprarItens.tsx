@@ -11,6 +11,8 @@ import { GameButton, GameCard, GameInput, SectionLabel } from '@/components/game
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { fmt, STALE_MS } from '../utils'
 import { Carregando, IconeItem } from './shared'
+import { PrecoMedioCurto } from './ReferenciaDePreco'
+import { chaveDeItem } from '../faixaDeIv'
 import { HistoricoDePreco } from './HistoricoDePreco'
 
 function LivroDoItem({ itemId }: { itemId: string }) {
@@ -204,6 +206,7 @@ export function ComprarItens() {
                 <b className="font-medium">{item.name}</b>
               </span>
             </ItemTooltip>
+            <PrecoMedioCurto chave={chaveDeItem(item.id)} />
             <span className="flex-1" />
             {/* A lista so traz item com ordem ativa, mas a ordem pode ser de
                 COMPRA — e ai nao ha nada a venda. Dizer "sem oferta" seria

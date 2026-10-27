@@ -2958,6 +2958,21 @@ export type Database = {
           },
         ]
       }
+      mercado_historico_grupos: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          is_shiny: boolean | null
+          iv_faixa: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          species_id: string | null
+          volume: number | null
+        }
+        Relationships: []
+      }
       mercado_historico_itens: {
         Row: {
           currency: string | null
@@ -4130,6 +4145,31 @@ export type Database = {
       vender_poke: { Args: { p_poke_id: string }; Returns: Json }
       vender_pokes: { Args: { p_poke_ids: string[] }; Returns: Json }
       vender_todos_itens: { Args: never; Returns: Json }
+      vitrine_de_pokes: {
+        Args: {
+          p_iv_min?: number
+          p_moedas?: string[]
+          p_nivel_min?: number
+          p_ordem?: string
+          p_pagina?: number
+          p_por_pagina?: number
+          p_raridades?: string[]
+          p_shiny?: boolean
+          p_so_lance?: boolean
+          p_termo?: string
+        }
+        Returns: {
+          a_partir_de: number
+          anuncios: number
+          currency: string
+          is_shiny: boolean
+          iv_faixa: string
+          maior_nivel: number
+          recente: string
+          species_id: string
+          total: number
+        }[]
+      }
       wipe_inventario_e_economia: {
         Args: never
         Returns: {
@@ -7193,6 +7233,21 @@ export type Database = {
           },
         ]
       }
+      mercado_historico_grupos: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          is_shiny: boolean | null
+          iv_faixa: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          species_id: string | null
+          volume: number | null
+        }
+        Relationships: []
+      }
       mercado_historico_itens: {
         Row: {
           currency: string | null
@@ -8365,6 +8420,31 @@ export type Database = {
       vender_poke: { Args: { p_poke_id: string }; Returns: Json }
       vender_pokes: { Args: { p_poke_ids: string[] }; Returns: Json }
       vender_todos_itens: { Args: never; Returns: Json }
+      vitrine_de_pokes: {
+        Args: {
+          p_iv_min?: number
+          p_moedas?: string[]
+          p_nivel_min?: number
+          p_ordem?: string
+          p_pagina?: number
+          p_por_pagina?: number
+          p_raridades?: string[]
+          p_shiny?: boolean
+          p_so_lance?: boolean
+          p_termo?: string
+        }
+        Returns: {
+          a_partir_de: number
+          anuncios: number
+          currency: string
+          is_shiny: boolean
+          iv_faixa: string
+          maior_nivel: number
+          recente: string
+          species_id: string
+          total: number
+        }[]
+      }
       wipe_inventario_e_economia: {
         Args: never
         Returns: {
