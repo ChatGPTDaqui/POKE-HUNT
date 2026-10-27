@@ -170,6 +170,9 @@ interface PropVivo {
 
 let arteAtual: string | null = null
 let compactoAtual = false
+// Colocacao da arte usada na ultima reconstrucao: a mesma arte em outra escala
+// (Dojo de duelo x Dojo de cacada) tem que reconstruir os props.
+let colocacaoAtual = ''
 let props: PropVivo[] = []
 
 /** LCG minusculo — nao precisa de qualidade estatistica, precisa NAO ser o
@@ -232,18 +235,20 @@ function pontoDaAncora(
   }
 }
 
-function reconstruir(imagem: string, compacto: boolean): void {
+function reconstruir(imagem: string, compacto: boolean, colocacao: { escala: number; x: number; y: number } | null): void {
   props = []
   arteAtual = imagem
   compactoAtual = compacto
+  colocacaoAtual = JSON.stringify(colocacao)
   const rand = sorteioLocal(sementeDaArte(imagem))
   const col = COLISAO_POR_ARTE[imagem]
   const img = readyImage(imagem)
 
   const ancoras = ANCORAS_POR_ARTE[imagem] ?? []
-  if (col?.arte && img && img.naturalWidth > 0) {
+  const arte = colocacao ?? col?.arte
+  if (arte && img && img.naturalWidth > 0) {
     for (const a of ancoras) {
-      const p = pontoDaAncora(a, col.arte, img)
+      const p = pontoDaAncora(a, arte, img)
       props.push({
         x: p.x,
         y: p.y,
@@ -672,6 +677,8 @@ export function desenharPropsDeAmbiente(
    * vizinhas, sem nada apontando pra ca.
    */
   agora: number,
+  /** Colocacao da arte na cena (ver `desenharAmbiente`). */
+  colocacao: { escala: number; x: number; y: number } | null = null,
 ): void {
   if (!imagem) {
     if (props.length) reiniciarPropsDeAmbiente()
@@ -688,7 +695,7 @@ export function desenharPropsDeAmbiente(
   // `compacto` entra na conta porque ele decide QUANTOS props de regiao a
   // mascara rende: sem reconstruir na virada, girar o celular deixaria a
   // contagem do modo anterior.
-  if (arteAtual !== imagem || compactoAtual !== compacto || props.length === 0) reconstruir(imagem, compacto)
+  if (arteAtual !== imagem || compactoAtual !== compacto || colocacaoAtual !== JSON.stringify(colocacao) || props.length === 0) reconstruir(imagem, compacto, colocacao)
   if (props.length === 0) return
 
   // Relogio ABSOLUTO, do mesmo jeito que `vento.ts` faz (PH-233): atribuido,

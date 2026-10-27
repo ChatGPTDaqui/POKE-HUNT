@@ -23,8 +23,8 @@ import { describe, expect, it } from 'vitest'
 
 import { BIOMAS } from './biomas'
 import { COLLISION_GRID_CELL_SIZE } from './collisionConstants'
-import { COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
-import { MAPS, getMap, mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, isCellBlocked, type MapDef } from './maps'
+import { COLISAO_DE_DUELO_POR_ARTE, COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
+import { MAPS, getMap, colisaoDaCena, mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, isCellBlocked, type MapDef } from './maps'
 import { LANCE_MAP_ID } from './nightmareMaps'
 
 // A MESMA constante do gerador e de `isCellBlocked` — IMPORTADA, nunca
@@ -258,13 +258,34 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
     expect(arena!.colisaoDefineLimite).toBe(true)
   })
 
+  // Pedido do dono (27/10/2026): o Dojo tem a arena de duelo e o mapa inteiro.
+  describe('dojo: arena no duelo, mapa inteiro na cacada', () => {
+    const DOJO = 'assets/hunt-backgrounds/dojo.jpg'
+    it('as duas colisoes existem e sao diferentes', () => {
+      expect(COLISAO_DE_DUELO_POR_ARTE[DOJO], 'colisao de duelo do dojo').toBeDefined()
+      expect(COLISAO_POR_ARTE[DOJO].grid).not.toEqual(COLISAO_DE_DUELO_POR_ARTE[DOJO].grid)
+      const andaveis = (g: string[]) => g.join('').split('').filter((c) => c === '0').length
+      expect(andaveis(COLISAO_POR_ARTE[DOJO].grid), 'cacada anda mais que a arena').toBeGreaterThan(andaveis(COLISAO_DE_DUELO_POR_ARTE[DOJO].grid))
+    })
+    it('duelo e treino usam a arena; cacada usa o mapa inteiro', () => {
+      expect(colisaoDaCena({ encarada: true }, DOJO)).toBe(COLISAO_DE_DUELO_POR_ARTE[DOJO])
+      expect(colisaoDaCena({ arenaDeDuelo: true }, DOJO)).toBe(COLISAO_DE_DUELO_POR_ARTE[DOJO])
+      expect(colisaoDaCena({}, DOJO)).toBe(COLISAO_POR_ARTE[DOJO])
+      // Arte sem colisao de duelo propria: a mesma nos dois.
+      const DRAGAO = 'assets/hunt-backgrounds/dragon.jpg'
+      expect(colisaoDaCena({ encarada: true }, DRAGAO)).toBe(COLISAO_POR_ARTE[DRAGAO])
+    })
+  })
+
   describe('bola verde: por onde entra o POKE do lado inimigo', () => {
     const ARENAS = ['assets/hunt-backgrounds/dojo.jpg', 'assets/hunt-backgrounds/dragon.jpg']
+    // A colisao do DUELO: o Dojo tem uma propria (27/10/2026), o Covil usa a unica.
+    const daArena = (arte: string) => COLISAO_DE_DUELO_POR_ARTE[arte] ?? COLISAO_POR_ARTE[arte]
 
     it('so as duas arenas de duelo tem bola verde', () => {
-      const comVerde = Object.entries(COLISAO_POR_ARTE)
+      const comVerde = [...new Set([...Object.entries(COLISAO_POR_ARTE), ...Object.entries(COLISAO_DE_DUELO_POR_ARTE)]
         .filter(([, c]) => c.spawnInimigo)
-        .map(([arte]) => arte)
+        .map(([arte]) => arte))]
         .sort()
       // As outras 29 nao podem ganhar o campo por acidente: verde e a cor mais
       // comum da arte deste jogo, e um teste de cor frouxo poria "entrada do
@@ -274,7 +295,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
 
     it('a bola verde cai em celula andavel, igual a amarela', () => {
       for (const arte of ARENAS) {
-        const pintada = COLISAO_POR_ARTE[arte]
+        const pintada = daArena(arte)
         const mapDef = { collisionGrid: pintada.grid, colisaoDefineLimite: true } as MapDef
         expect(isCellBlocked(mapDef, pintada.spawnInimigo!.x, pintada.spawnInimigo!.y), `${arte}: inimigo nasce na parede`).toBe(false)
       }
@@ -284,7 +305,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       // Se caissem, jogador e inimigo nasceriam um dentro do outro e o duelo
       // comecaria com os dois em cima do mesmo pixel.
       for (const arte of ARENAS) {
-        const { spawnPoint, spawnInimigo } = COLISAO_POR_ARTE[arte]
+        const { spawnPoint, spawnInimigo } = daArena(arte)
         expect(`${spawnInimigo!.x},${spawnInimigo!.y}`, arte).not.toBe(`${spawnPoint.x},${spawnPoint.y}`)
       }
     })
