@@ -305,7 +305,7 @@ export class Renderer {
     // mundo porque e ela que decide onde a particula nasce e onde ela recicla.
     // A familia e resolvida AQUI, e nao dentro de `desenharAmbiente`: aquele
     // arquivo nao pode importar do motor (ver o guard em ambiente.test.ts).
-    desenharAmbiente(ctx, fundo.image, janela, familiaDoClima(world.clima?.tipo ?? null))
+    desenharAmbiente(ctx, fundo.image, janela, familiaDoClima(world.clima?.tipo ?? null), arteParaSala(mapDef.id, world.sala))
 
     // Clima ATRAS das entidades (PH-141): o grosso da precipitacao. Depois do
     // ambiente porque a chuva passa por cima da folha que cai, nao por baixo.

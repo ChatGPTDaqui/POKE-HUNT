@@ -1366,7 +1366,7 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // duas tochas do farol, onda batendo na praia e borboletas na mata das palmeiras.
   'assets/hunt-backgrounds/island.jpg': [
     { u: 0.616, v: 0.721, tipo: 'fogueira', escala: 0.5 },
-    { u: 0.613, v: 0.273, tipo: 'tocha' },
+    { u: 0.601, v: 0.262, tipo: 'tocha' },
     { u: 0.796, v: 0.339, tipo: 'tocha', fase: 3 },
     { u: 0.207, v: 0.828, tipo: 'quebraMar', escala: 0.6 },
     { u: 0.518, v: 0.875, tipo: 'quebraMar', escala: 0.6, fase: 3 },

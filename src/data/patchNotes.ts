@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.55',
+    date: '2026-10-27',
+    title: 'Dojo inteiro na caçada',
+    highlights: [
+      'Na caçada, o Dojo agora é o mapa inteiro: pátios de treino, ringue, jardim, pontes e a praça do salão, na proporção certa com o treinador. No duelo contra o lendário de Luta e no Treinamento continua a arena de sempre.',
+      'Fumaça, vapor e chamas conferidos nos mapas restantes; ajuste fino na tocha do farol da Ilha.',
+    ],
+  },
+  {
     version: '8.54',
     date: '2026-10-26',
     title: 'Mapas na proporção certa',

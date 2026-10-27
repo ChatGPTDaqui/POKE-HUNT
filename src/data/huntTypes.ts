@@ -50,6 +50,12 @@ export interface HuntMapDef extends MapDataEntry {
    * existir — sem tocar no sistema.
    */
   encarada?: boolean
+  /**
+   * Usa a colisao de ARENA DE DUELO da arte mesmo sem `encarada` (27/10/2026).
+   * Hoje so o Treinamento: o boneco nasce num ponto fixo pensado pra arena do
+   * Dojo. Ver data/maps.ts#usaArenaDeDuelo.
+   */
+  arenaDeDuelo?: boolean
   // Hunt-alvo de teste (ver data/trainingDummy.ts): abate nao concede EXP,
   // ouro, item nem captura. `handleEnemyDefeated` sai cedo com um resumo
   // zerado antes de tocar em qualquer uma dessas quatro coisas.
