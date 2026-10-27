@@ -9,7 +9,7 @@
 // Nada aqui calcula preco, taxa ou quem recebe o que: o cliente manda
 // intencao, o servidor responde com o estado novo. Mesmo contrato do resto do
 // jogo sob autoridade.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Tag } from '@phosphor-icons/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useDeviceMode } from '@/stores/uiStore'
@@ -22,6 +22,7 @@ import { Ativos } from './components/Ativos'
 import { Historico } from './components/Historico'
 import { Moeda } from './components/shared'
 import { ABAS, ABAS_CURTAS, type Aba } from './utils'
+import { useMercadoStore } from './mercadoStore'
 
 export function MercadoMenu() {
   const [aba, setAba] = useState<Aba>('comprar')
@@ -29,6 +30,24 @@ export function MercadoMenu() {
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
   const { compacto } = useDeviceMode()
+  // "Ver no mercado" (Mochila) e "Anunciar o meu" (pagina do grupo) mandam o
+  // menu pra aba certa. O contador e o gatilho: pedir de novo o mesmo grupo
+  // precisa funcionar. O pedido e CONSUMIDO (volta a 0): reabrir o Mercado
+  // depois nao arrasta o jogador de novo pra aba do pedido antigo.
+  const pedido = useMercadoStore((s) => s.pedido)
+  const pedidoDeVenda = useMercadoStore((s) => s.pedidoDeVenda)
+  useEffect(() => {
+    if (pedido === 0) return
+    setAba('comprar')
+    setTipo('pokes')
+    useMercadoStore.setState({ pedido: 0 })
+  }, [pedido])
+  useEffect(() => {
+    if (pedidoDeVenda === 0) return
+    setAba('vender')
+    setTipo('pokes')
+    useMercadoStore.setState({ pedidoDeVenda: 0 })
+  }, [pedidoDeVenda])
 
   return (
     <div className="flex flex-col gap-[.5em]">

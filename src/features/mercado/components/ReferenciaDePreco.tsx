@@ -48,3 +48,19 @@ export function AvisoDaReferencia({ referencia, aviso, moeda, confirmandoBaixo }
     </div>
   )
 }
+
+/**
+ * So o numero do preco medio, pra uma linha que ja tem o "a partir de" ao lado
+ * (lista de itens do Comprar). Sem venda em 7 dias nao desenha nada: a linha
+ * vizinha ja diz o que esta a venda.
+ */
+export function PrecoMedioCurto({ chave }: { chave: string }) {
+  const { data } = usePrecoDeReferencia(chave)
+  const p = precoNaMoeda(data, 'gold')
+  if (p?.medianaDe7Dias == null) return null
+  return (
+    <span className="text-[.75em] text-menu-muted tabular-nums">
+      preço médio <b className="text-gold">{fmt.format(p.medianaDe7Dias)}</b>
+    </span>
+  )
+}

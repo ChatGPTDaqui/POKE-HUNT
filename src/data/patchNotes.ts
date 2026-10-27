@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.57',
+    date: '2026-10-28',
+    title: 'Mercado novo: vitrine agrupada e página de cada Pokémon',
+    highlights: [
+      'A vitrine de Pokémon mostra um card por grupo (espécie, shiny e faixa de IV) com o preço médio e "N à venda a partir de X", em vez de uma lista solta de anúncios.',
+      'Clicar num card abre a página do grupo, no estilo do Steam: preço médio em destaque, gráfico de 30 dias, todos os anúncios do mais barato ao mais caro e o botão "Comprar o mais barato".',
+      'Na Mochila, a ficha do Pokémon ganhou "Ver no mercado", que abre direto a página dos Pokémon iguais ao seu. Na página, "Anunciar o meu" leva para a venda já com ele escolhido.',
+      'A lista de itens do Mercado também mostra o preço médio.',
+    ],
+  },
+  {
     version: '8.56',
     date: '2026-10-27',
     title: 'Preço médio no Mercado',

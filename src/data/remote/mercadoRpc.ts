@@ -621,3 +621,94 @@ export async function precoDeReferencia(chaves: string[]): Promise<PrecoDeRefere
   estourarSeErro(error)
   return (Array.isArray(data) ? data : []).map(mapearPrecoDeReferencia)
 }
+
+// --- vitrine agrupada (28/10/2026) ---------------------------------------------
+
+/** Um card da vitrine: um GRUPO (espécie + shiny + faixa de IV + moeda). */
+export interface GrupoDaVitrine {
+  speciesId: string
+  isShiny: boolean
+  ivFaixa: 'f0' | 'f60' | 'f80' | 'f95'
+  currency: 'gold' | 'diamond'
+  anuncios: number
+  aPartirDe: number | null
+  maiorNivel: number
+}
+
+export type OrdemDaVitrine = 'preco' | 'anunciados' | 'recente' | 'nivel' | 'iv'
+
+export interface FiltroDosGrupos {
+  pagina: number
+  porPagina: number
+  termo?: string
+  moedas?: ('gold' | 'diamond')[]
+  raridades?: string[]
+  shinyOnly?: boolean
+  nivelMin?: number
+  ivMin?: number
+  soLance?: boolean
+  ordem?: OrdemDaVitrine
+}
+
+/**
+ * Pagina de grupos. O TOTAL vem na propria linha (`count(*) over ()`), nunca de
+ * `.length` — ver a nota de `mercadoPokes`.
+ */
+export async function vitrineDePokes(f: FiltroDosGrupos): Promise<{ grupos: GrupoDaVitrine[]; total: number }> {
+  const { data, error } = await db.rpc('vitrine_de_pokes', {
+    p_termo: f.termo?.trim() || null,
+    p_moedas: f.moedas && f.moedas.length > 0 && f.moedas.length < 2 ? f.moedas : null,
+    p_raridades: f.raridades && f.raridades.length > 0 ? f.raridades : null,
+    p_shiny: f.shinyOnly ? true : null,
+    p_nivel_min: f.nivelMin || null,
+    p_iv_min: f.ivMin || null,
+    p_so_lance: f.soLance ? true : null,
+    p_ordem: f.ordem ?? 'preco',
+    p_pagina: f.pagina,
+    p_por_pagina: f.porPagina,
+  })
+  estourarSeErro(error)
+  const linhas: Linha[] = Array.isArray(data) ? data : []
+  return {
+    grupos: linhas.map((r) => ({
+      speciesId: String(r.species_id),
+      isShiny: !!r.is_shiny,
+      ivFaixa: r.iv_faixa,
+      currency: r.currency === 'diamond' ? 'diamond' : 'gold',
+      anuncios: Number(r.anuncios ?? 0),
+      aPartirDe: r.a_partir_de == null ? null : Number(r.a_partir_de),
+      maiorNivel: Number(r.maior_nivel ?? 0),
+    })),
+    total: Number(linhas[0]?.total ?? 0),
+  }
+}
+
+/** Faixa de IV como intervalo de `iv_percent` (limites de faixa_de_iv). */
+const INTERVALO_DA_FAIXA = { f0: [0, 59], f60: [60, 79], f80: [80, 94], f95: [95, 100] } as const
+
+/**
+ * Anuncios de UM grupo, do mais barato pro mais caro (a pagina do grupo).
+ * Mesma view da vitrine, entao a regra de reserva vale igual.
+ */
+export async function anunciosDoGrupo(g: { speciesId: string; isShiny: boolean; ivFaixa: GrupoDaVitrine['ivFaixa'] }): Promise<AnuncioMercado[]> {
+  const [min, max] = INTERVALO_DA_FAIXA[g.ivFaixa]
+  const { data, error } = await db.from('mercado_anuncios_ativos').select('*')
+    .eq('species_id', g.speciesId).eq('is_shiny', g.isShiny)
+    .gte('iv_percent', min).lte('iv_percent', max)
+    .order('price', { ascending: true, nullsFirst: false })
+    .order('expira_em', { ascending: true, nullsFirst: false })
+    .limit(200)
+  estourarSeErro(error)
+  return (data ?? []).map((r: Linha) => ({ ...r, melhorOferta: r.melhor_oferta ?? null }))
+}
+
+/** Serie de 30 dias do grupo (so vendas com faixa gravada, 8.56+). */
+export async function historicoDoGrupo(
+  g: { speciesId: string; isShiny: boolean; ivFaixa: GrupoDaVitrine['ivFaixa'] }, currency: 'gold' | 'diamond',
+): Promise<HistoricoDePreco> {
+  const { data, error } = await db.from('mercado_historico_grupos').select('*')
+    .eq('species_id', g.speciesId).eq('is_shiny', g.isShiny).eq('iv_faixa', g.ivFaixa).eq('currency', currency)
+    .order('dia', { ascending: true })
+  estourarSeErro(error)
+  return { serie: pontos(data ?? []), resumo: null }
+}

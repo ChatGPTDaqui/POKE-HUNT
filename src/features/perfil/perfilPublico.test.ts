@@ -169,7 +169,8 @@ describe('a tela de perfil público não alcança dado privado (PH-119)', () => 
 })
 
 describe('o anúncio do próprio jogador não vira link (PH-119)', () => {
-  const FONTE = import.meta.glob('/src/features/mercado/components/ComprarPokes.tsx', {
+  // O cartao do anuncio saiu de ComprarPokes pra CartaoDeAnuncio (28/10/2026).
+  const FONTE = import.meta.glob('/src/features/mercado/components/CartaoDeAnuncio.tsx', {
     query: '?raw', import: 'default', eager: true,
   }) as Record<string, string>
 
