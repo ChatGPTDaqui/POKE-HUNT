@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.56',
+    date: '2026-10-27',
+    title: 'Preço médio no Mercado',
+    highlights: [
+      'O Mercado agora tem preço médio: a mediana do que os jogadores pagaram nos últimos 7 dias. Para Pokémon, o preço é por espécie, shiny e faixa de IV (comum, bom, ótimo, perfeito) — um shiny de IV alto não se mistura com um comum.',
+      'Sem vendas recentes, o jogo diz isso com todas as letras e mostra o mais barato à venda agora. Nunca inventa um preço que ninguém pagou.',
+      'Ao vender, o preço já vem sugerido pelo preço médio, e o Mercado avisa se o valor estiver muito abaixo (pede confirmação) ou muito acima.',
+      'Na Mochila, a ficha do item e do Pokémon mostra quanto ele vale no Mercado.',
+    ],
+  },
+  {
     version: '8.55',
     date: '2026-10-27',
     title: 'Dojo inteiro na caçada',
