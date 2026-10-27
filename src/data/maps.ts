@@ -5,7 +5,7 @@
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { COLLISION_GRID_CELL_SIZE } from './collisionConstants'
-import { COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
+import { COLISAO_DE_DUELO_POR_ARTE, COLISAO_POR_ARTE, type ColisaoPintada } from './generated/subBiomaCollision.generated'
 import { SUB_BIOMA_POR_CHAVE } from './biomas'
 import type { HuntMapDef } from './huntTypes'
 
@@ -121,11 +121,29 @@ export function backgroundParaSala(map: MapDef, sala: { chave: string } | null):
  * seguro em TS (apagado na compilacao), mas a interface estrutural evita
  * depender disso.
  */
+/**
+ * A cena usa a ARENA DE DUELO da arte, e nao o mapa inteiro? (27/10/2026)
+ *
+ * Pedido do dono: o Dojo tem duas colisoes. No duelo (`encarada`: covil do
+ * lendario de Luta) e no Treinamento (`arenaDeDuelo`: o boneco tem ponto fixo
+ * pensado pra arena) vale o retangulo da arena; na cacada normal, o mapa todo.
+ * Arte sem colisao de duelo propria usa a mesma nos dois casos.
+ */
+export function usaArenaDeDuelo(map: Pick<HuntMapDef, 'encarada' | 'arenaDeDuelo'>): boolean {
+  return !!(map.encarada || map.arenaDeDuelo)
+}
+
+/** A colisao pintada que esta cena usa — a de duelo quando a arte tem e o mapa e duelo. */
+export function colisaoDaCena(map: Pick<HuntMapDef, 'encarada' | 'arenaDeDuelo'>, arte: string | null | undefined): ColisaoPintada | undefined {
+  if (!arte) return undefined
+  return (usaArenaDeDuelo(map) ? COLISAO_DE_DUELO_POR_ARTE[arte] : undefined) ?? COLISAO_POR_ARTE[arte]
+}
+
 export function mapDefParaSala(mapId: string, sala: { chave: string } | null): MapDef | null {
   const map = getMap(mapId)
   if (!map) return null
   const arte = backgroundParaSala(map, sala).image
-  const pintada = arte ? COLISAO_POR_ARTE[arte] : undefined
+  const pintada = colisaoDaCena(map, arte)
   if (!pintada) return map
   // `bounds` vem da ARTE desde PH-80: o mundo e a caixa da area pintada, nao
   // mais 1400x900 pra todos. O `bounds` que veio do catalogo (planilha, ou
@@ -151,7 +169,7 @@ export function arteParaSala(mapId: string, sala: { chave: string } | null): { e
   const map = getMap(mapId)
   if (!map) return null
   const arte = backgroundParaSala(map, sala).image
-  return (arte ? COLISAO_POR_ARTE[arte]?.arte : undefined) ?? null
+  return colisaoDaCena(map, arte)?.arte ?? null
 }
 
 /**
@@ -181,7 +199,7 @@ export function spawnPointParaSala(mapId: string, sala: { chave: string } | null
   const map = getMap(mapId)
   if (!map) return null
   const arte = backgroundParaSala(map, sala).image
-  return (arte ? COLISAO_POR_ARTE[arte]?.spawnPoint : undefined) ?? null
+  return colisaoDaCena(map, arte)?.spawnPoint ?? null
 }
 
 /**
@@ -199,7 +217,7 @@ export function spawnInimigoParaSala(mapId: string, sala: { chave: string } | nu
   const map = getMap(mapId)
   if (!map) return null
   const arte = backgroundParaSala(map, sala).image
-  return (arte ? COLISAO_POR_ARTE[arte]?.spawnInimigo : undefined) ?? null
+  return colisaoDaCena(map, arte)?.spawnInimigo ?? null
 }
 
 export function isCellBlocked(mapDef: MapDef, x: number, y: number): boolean {

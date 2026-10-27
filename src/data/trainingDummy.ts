@@ -71,5 +71,6 @@ export const TRAINING_MAP: HuntMapDef = {
   itemDrops: [],
   noCatch: true, // e um fixture de teste, nao um spawn de verdade
   noRewards: true,
+  arenaDeDuelo: true, // a arena do Dojo, nao o mapa inteiro — o ponto do boneco e dela
   passiveEnemies: true, // nunca revida — ver a nota no topo do arquivo
 }

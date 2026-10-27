@@ -923,6 +923,13 @@ export function desenharAmbiente(
   // arquivo NAO pode importar do motor — `ambiente.test.ts` reprova qualquer
   // import de `@/engine` aqui, e o guard esta certo. Ver o cabecalho.
   familiaDeClima: 'neve' | 'areia' | null = null,
+  /**
+   * Onde a arte esta desenhada no mundo (`arteParaSala`). Os props ancorados
+   * convertem u,v por ela; sem ela caem na colisao padrao da arte. Precisa vir
+   * do chamador porque a MESMA arte pode estar em duas escalas (Dojo: arena de
+   * duelo e mapa de cacada, 27/10/2026).
+   */
+  arte: { escala: number; x: number; y: number } | null = null,
 ): void {
   const ui = useUiStore.getState()
   const compacto = ui.viewportWidth > 0 && ui.viewportWidth < 760
@@ -952,7 +959,7 @@ export function desenharAmbiente(
   // nao "esta arte nao tem chamine"; e clima calando o preset significa "ja
   // esta nevando, nao neve de novo", e nao "a fogueira apagou porque nevou".
   // Passar os props pra depois deles apagaria a fogueira no primeiro floco.
-  desenharPropsDeAmbiente(ctx, imagem, janela, compacto, agora)
+  desenharPropsDeAmbiente(ctx, imagem, janela, compacto, agora, arte)
   // Agua da arte (rio da floresta etc.) tambem antes dos `return`: preset e
   // clima falam da particula principal, nao do rio.
   if (imagem) desenharAguaDaArte(ctx, imagem, janela, compacto, agora)

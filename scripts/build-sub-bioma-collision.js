@@ -107,6 +107,8 @@ const ESCALA_POR_ARTE = {
   'desert.jpg': 0.43,
   // toca ~100px
   'digletts-cave.jpg': 0.5,
+  // (3072px) boneco de treino ~140px, lanterna ~110px
+  'dojo.jpg': 0.33,
   // cogumelo/pedra ~74px
   'fairy-cave.jpg': 0.4,
   // porta do celeiro ~105px alt, latao ~75px, cerca ~70px (arte inconsistente; meio-termo)
@@ -437,7 +439,12 @@ const MANIFESTO = {
   // Treinamento; `dragon.png` e a arena do Campeao Lance e o espelho DRAGON do
   // Modo Pesadelo. Nenhuma das duas e arte de bioma, entao ate aqui elas
   // escapavam de todo teste que itera `BIOMAS` — ver walkBlock.test.ts.
-  'dojo.png': { bg: 'dojo.jpg', modo: 'rosa_anda' },
+  // DOJO TEM DUAS COLISOES (27/10/2026, pedido do dono): o duelo (lendario de
+  // Luta do Modo Pesadelo, Treinamento) segue na arena pintada de sempre, na
+  // escala antiga; a cacada normal anda pelo mapa inteiro, na escala propria.
+  // Ver data/maps.ts#usaArenaDeDuelo.
+  'dojo.png': { bg: 'dojo.jpg', modo: 'rosa_anda', duelo: true },
+  'dojo-cacada.png': { bg: 'dojo.jpg', modo: 'rosa_anda' },
   'dragon.png': { bg: 'dragon.jpg', modo: 'rosa_anda' },
 
   // Onda 1 dos sub-biomas novos (17/10/2026): fundos gerados pelo dono, colisao
@@ -641,16 +648,19 @@ function centroide(width, height, rgba, testeDeCor) {
 const MIN_PIXELS_DO_MARCADOR = 1200;
 
 const resultados = {};
+const resultadosDeDuelo = {};
 const avisos = [];
 
-for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
+for (const [refFile, { bg, modo, duelo }] of Object.entries(MANIFESTO)) {
   const refPath = path.join(refDir, refFile);
   const bgPath = path.join(bgDir, bg);
   if (!fs.existsSync(refPath)) { console.warn(`Pulando ${refFile}: referencia nao encontrada`); continue; }
   if (!fs.existsSync(bgPath)) { console.warn(`Pulando ${refFile}: arte real ${bg} nao encontrada`); continue; }
 
   const { width, height, rgba } = decodePng(fs.readFileSync(refPath));
-  const quadro = enquadrar(width, height, rgba, modo, ESCALA_POR_ARTE[bg] ?? HUNT_BG_TILE_SCALE);
+  // A arena de duelo fica na escala antiga: a geometria do duelo (bolas, alcance)
+  // foi medida nela.
+  const quadro = enquadrar(width, height, rgba, modo, duelo ? HUNT_BG_TILE_SCALE : (ESCALA_POR_ARTE[bg] ?? HUNT_BG_TILE_SCALE));
   if (!quadro) throw new Error(`${refFile}: nada andavel na referencia — nem tinta rosa, nem area fora do vermelho.`);
   const { escala, originX, originY, bounds: MAP_BOUNDS, cols, rows } = quadro;
   const paraMundo = (ix, iy) => ({ x: originX + ix * escala, y: originY + iy * escala });
@@ -937,7 +947,7 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   // silencio — o mapa continua jogavel, o spawn so muda de lugar, e ninguem
   // olha. Com o campo, `data/walkBlock.test.ts` compara contra a lista de quem
   // tem circulo pintado, e a regressao vira teste vermelho.
-  resultados[`assets/hunt-backgrounds/${bg}`] = {
+  (duelo ? resultadosDeDuelo : resultados)[`assets/hunt-backgrounds/${bg}`] = {
     grid: rowStrings,
     bounds: MAP_BOUNDS,
     arte: { escala, x: Math.round(originX * 100) / 100, y: Math.round(originY * 100) / 100 },
@@ -1020,6 +1030,13 @@ export interface ColisaoPintada {
 }
 
 export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = ${JSON.stringify(resultados, null, 2)};
+
+/**
+ * Colisao da ARENA DE DUELO, quando a arte tem uma diferente da cacada (dojo).
+ * Consumida por data/maps.ts so pra mapas de duelo; arte fora daqui usa a
+ * mesma colisao nos dois casos.
+ */
+export const COLISAO_DE_DUELO_POR_ARTE: Record<string, ColisaoPintada> = ${JSON.stringify(resultadosDeDuelo, null, 2)};
 `;
 // `MEDIR=1` roda a analise inteira e NAO escreve o arquivo gerado. Existe pra
 // varrer combinacoes de CELL/PINK_RATIO sem sujar a arvore de trabalho — a
