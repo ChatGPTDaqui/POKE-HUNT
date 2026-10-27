@@ -122,7 +122,7 @@ as $$
       split_part(k, ':', 2) as alvo,
       split_part(k, ':', 3) = '1' as shiny,
       nullif(split_part(k, ':', 4), '') as faixa
-    from unnest(coalesce(p_chaves, '{}')[1:200]) as k
+    from unnest((coalesce(p_chaves, '{}'::text[]))[1:200]) as k
     where k ~ '^item:[a-z0-9_-]+$'
        or k ~ '^poke:[a-z0-9_-]+:[01]:f(0|60|80|95)$'
   ),
