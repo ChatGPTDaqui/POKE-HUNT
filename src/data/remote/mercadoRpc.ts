@@ -586,3 +586,38 @@ export async function comprarAnuncio(anuncioId: string) {
   await refetchAposAnuncio(pokeUid)
   return { mensagem: data?.mensagem as string | undefined }
 }
+
+// --- preco de referencia (27/10/2026) -------------------------------------------
+
+/**
+ * Preco de referencia de UM grupo numa moeda. `medianaDe7Dias` so existe com
+ * venda na janela — `null` e "sem vendas recentes", nunca zero (zero seria um
+ * preco em que da pra clicar; ver `mapearResumoDeHistorico`).
+ */
+export interface PrecoDeReferencia {
+  chave: string
+  currency: 'gold' | 'diamond'
+  medianaDe7Dias: number | null
+  vendasDe7Dias: number
+  aPartirDe: number | null
+  anuncios: number
+}
+
+export function mapearPrecoDeReferencia(linha: Linha): PrecoDeReferencia {
+  return {
+    chave: String(linha.chave),
+    currency: linha.currency === 'diamond' ? 'diamond' : 'gold',
+    medianaDe7Dias: linha.mediana_7d == null ? null : Number(linha.mediana_7d),
+    vendasDe7Dias: Number(linha.vendas_7d ?? 0),
+    aPartirDe: linha.a_partir_de == null ? null : Number(linha.a_partir_de),
+    anuncios: Number(linha.anuncios ?? 0),
+  }
+}
+
+/** Ate 200 chaves por chamada (o servidor corta o resto). */
+export async function precoDeReferencia(chaves: string[]): Promise<PrecoDeReferencia[]> {
+  if (chaves.length === 0) return []
+  const { data, error } = await db.rpc('preco_de_referencia', { p_chaves: chaves.slice(0, 200) })
+  estourarSeErro(error)
+  return (Array.isArray(data) ? data : []).map(mapearPrecoDeReferencia)
+}

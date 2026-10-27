@@ -13,6 +13,9 @@ import { useMochila } from '@/features/bag/useMochila'
 import { FiltroDePokes } from './FiltroDaVenda'
 import { filtrarPokes, FILTRO_DE_POKE_VAZIO, type FiltroDePoke } from '../filtrosDaVenda'
 import { EstadoDaMochila } from '@/features/bag/EstadoDaMochila'
+import { chaveDePoke, ivPercentDoPoke } from '../faixaDeIv'
+import { AvisoDaReferencia } from './ReferenciaDePreco'
+import { useReferenciaNaVenda } from '../precoDeReferencia'
 
 /** Os tres jeitos de anunciar um POKE. Excludentes por construcao — ver a nota
  *  no `GameSelect` de "Como vender". */
@@ -48,6 +51,11 @@ export function VenderPokes() {
   // O selecionado sai dos VISÍVEIS: manter escolhido um POKE que o filtro
   // escondeu deixaria a tela anunciando um e mostrando outro.
   const escolhido = visiveis.find((p) => p.uid === uid) ?? visiveis[0]
+  // Preco medio do GRUPO do escolhido (espécie + shiny + faixa de IV). Em
+  // leilao a sugestao vai pro lance minimo; em 'somente lance' nao ha campo.
+  const chave = escolhido ? chaveDePoke(escolhido.speciesId, !!escolhido.isShiny, ivPercentDoPoke(escolhido.ivs)) : null
+  const valorComparado = modo === 'leilao' ? lanceMinimo : modo === 'preco_fixo' ? preco : null
+  const ref = useReferenciaNaVenda(chave, moeda, valorComparado, modo === 'leilao' ? setLanceMinimo : setPreco, modo)
 
   if (!carregada) return <EstadoDaMochila />
 
@@ -119,7 +127,7 @@ export function VenderPokes() {
             Preco
             <GameInput
               type="number" min={1} className="w-[8em]" value={preco}
-              onChange={(e) => setPreco(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+              onChange={(e) => { ref.marcarEditado(); setPreco(Math.max(1, Math.floor(Number(e.target.value) || 1))) }}
             />
           </label>
         )}
@@ -137,7 +145,7 @@ export function VenderPokes() {
               Lance mínimo
               <GameInput
                 type="number" min={1} className="w-[8em]" value={lanceMinimo}
-                onChange={(e) => setLanceMinimo(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                onChange={(e) => { ref.marcarEditado(); setLanceMinimo(Math.max(1, Math.floor(Number(e.target.value) || 1))) }}
               />
             </label>
             <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
@@ -173,6 +181,10 @@ export function VenderPokes() {
         </div>
       </div>
 
+      {escolhido && (
+        <AvisoDaReferencia referencia={ref.referencia} aviso={modo === 'lance' ? null : ref.aviso} moeda={moeda} confirmandoBaixo={ref.confirmandoBaixo} />
+      )}
+
       {modo === 'lance' && (
         <p className="text-[.78em] text-menu-muted">
           O anúncio sai sem preço: outros jogadores enviam ofertas em {moeda === 'gold' ? 'ouro' : 'diamante'} e
@@ -194,6 +206,7 @@ export function VenderPokes() {
         disabled={!escolhido}
         onClick={() => {
           if (!escolhido) return
+          if (modo !== 'lance' && !ref.podeConfirmar()) return
           if (modo === 'leilao') {
             leiloar.mutate({
               pokeUid: escolhido.uid,

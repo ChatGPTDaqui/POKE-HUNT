@@ -1148,7 +1148,9 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          is_shiny: boolean | null
           item_id: string | null
+          iv_faixa: string | null
           kind: string
           quantity: number
           seller_id: string | null
@@ -1161,7 +1163,9 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_shiny?: boolean | null
           item_id?: string | null
+          iv_faixa?: string | null
           kind: string
           quantity?: number
           seller_id?: string | null
@@ -1174,7 +1178,9 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_shiny?: boolean | null
           item_id?: string | null
+          iv_faixa?: string | null
           kind?: string
           quantity?: number
           seller_id?: string | null
@@ -3751,6 +3757,7 @@ export type Database = {
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       expirar_trocas: { Args: never; Returns: number }
+      faixa_de_iv: { Args: { p: number }; Returns: string }
       fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
       ginasios_estado: { Args: never; Returns: Json }
       gravar_flush_de_sessao: {
@@ -3898,6 +3905,17 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      preco_de_referencia: {
+        Args: { p_chaves: string[] }
+        Returns: {
+          a_partir_de: number
+          anuncios: number
+          chave: string
+          currency: string
+          mediana_7d: number
+          vendas_7d: number
+        }[]
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
       pvp_garantir_presets: { Args: { p_user: string }; Returns: undefined }
@@ -5365,7 +5383,9 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          is_shiny: boolean | null
           item_id: string | null
+          iv_faixa: string | null
           kind: string
           quantity: number
           seller_id: string | null
@@ -5378,7 +5398,9 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_shiny?: boolean | null
           item_id?: string | null
+          iv_faixa?: string | null
           kind: string
           quantity?: number
           seller_id?: string | null
@@ -5391,7 +5413,9 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_shiny?: boolean | null
           item_id?: string | null
+          iv_faixa?: string | null
           kind?: string
           quantity?: number
           seller_id?: string | null
@@ -7968,6 +7992,7 @@ export type Database = {
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       expirar_trocas: { Args: never; Returns: number }
+      faixa_de_iv: { Args: { p: number }; Returns: string }
       fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
       ginasios_estado: { Args: never; Returns: Json }
       gravar_flush_de_sessao: {
@@ -8115,6 +8140,17 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      preco_de_referencia: {
+        Args: { p_chaves: string[] }
+        Returns: {
+          a_partir_de: number
+          anuncios: number
+          chave: string
+          currency: string
+          mediana_7d: number
+          vendas_7d: number
+        }[]
       }
       purgar_sala_protetor: { Args: { p_limite?: string }; Returns: number }
       pvp_garantir_presets: { Args: { p_user: string }; Returns: undefined }

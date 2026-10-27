@@ -21,7 +21,16 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { ITEMS } from '@/data/items'
 import { LOTE_INCREMENTAL } from '@/components/game/Paginacao'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ItensTab } from './BagMenu'
+
+// A ficha do item mostra o preco medio do Mercado (27/10/2026), que e uma
+// query: o teste precisa do provider e de uma RPC que nao vai a rede.
+vi.mock('@/data/remote/mercadoRpc', async (orig) => ({ ...(await orig<object>()), precoDeReferencia: async () => [] }))
+function renderizar() {
+  const cliente = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={cliente}><ItensTab /></QueryClientProvider>)
+}
 
 // A ficha tem cadeado e "Usar", e os dois falam com o servidor. O que este
 // teste mede e a TELA, entao as duas pontas viram espiao.
@@ -45,7 +54,7 @@ afterEach(cleanup)
 
 describe('Mochila em grade (PH-118)', () => {
   it('filtra categorias reais e não mantém ficha de um item fora do filtro', () => {
-    render(<ItensTab />)
+    renderizar()
     fireEvent.click(screen.getByRole('radio', { name: `${ITEMS[BALL].name} (x30)` }))
     const category = screen.getByRole('combobox', { name: 'Categoria dos itens' })
     fireEvent.change(category, { target: { value: 'consumiveis' } })
@@ -56,7 +65,7 @@ describe('Mochila em grade (PH-118)', () => {
     expect(screen.getByRole('radio', { name: `${ITEMS[BALL].name} (x30)` })).toBeTruthy()
   })
   it('cada item e um slot com nome acessivel e contador', () => {
-    render(<ItensTab />)
+    renderizar()
     expect(screen.getByRole('radiogroup', { name: 'Itens da mochila' })).toBeTruthy()
     expect(screen.getByRole('radio', { name: `${ITEMS[BALL].name} (x30)` })).toBeTruthy()
     expect(screen.getByText('30')).toBeTruthy()
@@ -65,12 +74,12 @@ describe('Mochila em grade (PH-118)', () => {
   it('item trancado se anuncia no proprio slot', () => {
     // Pelo ROTULO: e ele que o leitor de tela le, e a marca visual (cadeado no
     // canto) nao existe pra quem nao ve a tela.
-    render(<ItensTab />)
+    renderizar()
     expect(screen.getByRole('radio', { name: `${ITEMS[POCAO].name} (x4) — trancado` })).toBeTruthy()
   })
 
   it('sem escolher nada, nao ha ficha — e escolher abre a do item certo', () => {
-    render(<ItensTab />)
+    renderizar()
     // Antes de escolher: nenhuma descricao na tela. Se a ficha aparecesse
     // sozinha com o primeiro item, o jogador acharia que escolheu algo.
     expect(screen.queryByText(ITEMS[BALL].description)).toBeNull()
@@ -82,7 +91,7 @@ describe('Mochila em grade (PH-118)', () => {
   })
 
   it('a ficha traz o cadeado, que era a acao da linha', () => {
-    render(<ItensTab />)
+    renderizar()
     // Nenhum cadeado antes de escolher: ele mora na ficha.
     expect(screen.queryByRole('button', { name: 'Trancar' })).toBeNull()
 
@@ -93,7 +102,7 @@ describe('Mochila em grade (PH-118)', () => {
   })
 
   it('escolher o item trancado mostra a ficha com o botao de DESTRANCAR', () => {
-    render(<ItensTab />)
+    renderizar()
     fireEvent.click(screen.getByRole('radio', { name: `${ITEMS[POCAO].name} (x4) — trancado` }))
     expect(screen.getByRole('button', { name: 'Destrancar' })).toBeTruthy()
   })
@@ -102,7 +111,7 @@ describe('Mochila em grade (PH-118)', () => {
     // A ficha e derivada da lista de ids, e nao guardada em estado proprio.
     // Guardar o objeto do item deixaria uma ficha de "x0" na tela depois de usar
     // a ultima pocao — e o botao "Usar" continuaria ali.
-    render(<ItensTab />)
+    renderizar()
     fireEvent.click(screen.getByRole('radio', { name: `${ITEMS[BALL].name} (x30)` }))
     expect(screen.getByText(ITEMS[BALL].description)).toBeTruthy()
 
@@ -124,7 +133,7 @@ describe('Mochila em grade (PH-118)', () => {
     const scrollHeightSpy = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(1000)
     const clientHeightSpy = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(200)
     try {
-      render(<ItensTab />)
+      renderizar()
       expect(screen.getAllByRole('radio')).toHaveLength(LOTE_INCREMENTAL)
 
       const grade = screen.getByRole('radiogroup', { name: 'Itens da mochila' })
