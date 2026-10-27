@@ -32,9 +32,10 @@ const ALTURA_VOLUME = 14
 const LARGURA = 300
 
 interface Props {
-  /** Item ou especie: um dos dois, nunca os dois. */
+  /** Item, especie ou GRUPO (espécie + shiny + faixa, 28/10/2026): um so. */
   itemId?: string
   speciesId?: string
+  grupo?: { speciesId: string; isShiny: boolean; ivFaixa: 'f0' | 'f60' | 'f80' | 'f95' }
   currency?: 'gold' | 'diamond'
 }
 
@@ -164,14 +165,17 @@ function Grafico({ serie, currency }: { serie: PontoDeHistorico[]; currency: str
   )
 }
 
-export function HistoricoDePreco({ itemId, speciesId, currency = 'gold' }: Props) {
-  const chave = itemId ? ['mercado', 'hist-item', itemId, currency] : ['mercado', 'hist-poke', speciesId, currency]
+export function HistoricoDePreco({ itemId, speciesId, grupo, currency = 'gold' }: Props) {
+  const chave = itemId ? ['mercado', 'hist-item', itemId, currency]
+    : grupo ? ['mercado', 'hist-grupo', grupo.speciesId, grupo.isShiny, grupo.ivFaixa, currency]
+    : ['mercado', 'hist-poke', speciesId, currency]
   const { data, isLoading } = useQuery({
     queryKey: chave,
     queryFn: () => (itemId
       ? mercadoRpc.historicoDoItem(itemId, currency)
+      : grupo ? mercadoRpc.historicoDoGrupo(grupo, currency)
       : mercadoRpc.historicoDaEspecie(speciesId!, currency)),
-    enabled: Boolean(itemId || speciesId),
+    enabled: Boolean(itemId || speciesId || grupo),
     // Historico de 30 dias nao muda a cada segundo; vale um cache mais longo
     // que a vitrine (que reflete o que os outros estao fazendo AGORA).
     staleTime: STALE_MS * 6,
@@ -183,9 +187,11 @@ export function HistoricoDePreco({ itemId, speciesId, currency = 'gold' }: Props
       {isLoading && <Vazio motivo="Carregando histórico..." />}
       {!isLoading && data && (
         <>
+          {/* O grupo nao tem resumo proprio: o preco medio dele ja esta no
+              cabecalho da pagina (preco_de_referencia). */}
           {data.resumo
             ? <LinhaDeResumo resumo={data.resumo} currency={currency} />
-            : <Vazio motivo="Sem histórico: ninguém negociou isso nos últimos 30 dias." />}
+            : data.serie.length === 0 && <Vazio motivo="Sem histórico: ninguém negociou isso nos últimos 30 dias." />}
           {data.serie.length > 0 && <Grafico serie={data.serie} currency={currency} />}
         </>
       )}

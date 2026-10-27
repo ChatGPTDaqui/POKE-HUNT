@@ -38,7 +38,9 @@ import { AutoVendaPanel, ChipAutoVenda } from './AutoVendaPanel'
 import { useMochila } from './useMochila'
 import { EstadoDaMochila } from './EstadoDaMochila'
 import { LinhaDePrecoNoMercado } from '@/features/mercado/components/ReferenciaDePreco'
-import { chaveDeItem, chaveDePoke, ivPercentDoPoke } from '@/features/mercado/faixaDeIv'
+import { chaveDeItem, chaveDePoke, faixaDeIv, ivPercentDoPoke } from '@/features/mercado/faixaDeIv'
+import { useMercadoStore } from '@/features/mercado/mercadoStore'
+import { useUiStore } from '@/stores/uiStore'
 import { EnsinarTm } from './EnsinarTm'
 
 type SortKey = 'rarity' | 'iv' | 'level'
@@ -234,6 +236,24 @@ export function PokemonsTab() {
               </div>
               <div className="detail-actions">
               <GameButton onClick={(e) => { e.stopPropagation(); showProfile(pokeEmFoco, SPECIES[pokeEmFoco.speciesId]) }}>Ver perfil</GameButton>
+              {/* "Ver no mercado" (28/10/2026): abre o Mercado na pagina do grupo
+                  deste POKE (espécie + shiny + faixa de IV). Vale tambem pro
+                  travado — ver o preco nao e anunciar. */}
+              <GameButton
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  useMercadoStore.getState().verNoMercado({
+                    speciesId: pokeEmFoco.speciesId,
+                    isShiny: !!pokeEmFoco.isShiny,
+                    ivFaixa: faixaDeIv(ivPercentDoPoke(pokeEmFoco.ivs)),
+                    currency: 'gold',
+                  })
+                  useUiStore.getState().openScreen('mercado')
+                }}
+              >
+                Ver no mercado
+              </GameButton>
               <LockButton
                 locked={Boolean(pokeEmFoco.locked)}
                 carregando={acao.isPending(`lock:${pokeEmFoco.uid}`)}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { SPECIES, averageIvPercent } from '@/data/pokes'
 import { rarityOf } from '@/data/rarity'
@@ -13,7 +13,8 @@ import { useMochila } from '@/features/bag/useMochila'
 import { FiltroDePokes } from './FiltroDaVenda'
 import { filtrarPokes, FILTRO_DE_POKE_VAZIO, type FiltroDePoke } from '../filtrosDaVenda'
 import { EstadoDaMochila } from '@/features/bag/EstadoDaMochila'
-import { chaveDePoke, ivPercentDoPoke } from '../faixaDeIv'
+import { chaveDePoke, faixaDeIv, ivPercentDoPoke } from '../faixaDeIv'
+import { useMercadoStore } from '../mercadoStore'
 import { AvisoDaReferencia } from './ReferenciaDePreco'
 import { useReferenciaNaVenda } from '../precoDeReferencia'
 
@@ -51,6 +52,19 @@ export function VenderPokes() {
   // O selecionado sai dos VISÍVEIS: manter escolhido um POKE que o filtro
   // escondeu deixaria a tela anunciando um e mostrando outro.
   const escolhido = visiveis.find((p) => p.uid === uid) ?? visiveis[0]
+  // "Anunciar o meu" na pagina do grupo: escolhe o primeiro desse grupo.
+  // Consumido assim que a mochila chega (ela carrega sob demanda), pra nao
+  // re-escolher toda vez que a lista mudar.
+  const vendaPedida = useMercadoStore((s) => s.vendaPedida)
+  const temElegiveis = elegiveis.length > 0
+  useEffect(() => {
+    if (!vendaPedida || !temElegiveis) return
+    const doGrupo = elegiveis.find((p) => p.speciesId === vendaPedida.speciesId && !!p.isShiny === vendaPedida.isShiny
+      && faixaDeIv(ivPercentDoPoke(p.ivs)) === vendaPedida.ivFaixa)
+    if (doGrupo) { setUid(doGrupo.uid); setMoeda(vendaPedida.currency); setFiltro(FILTRO_DE_POKE_VAZIO) }
+    useMercadoStore.setState({ vendaPedida: null })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vendaPedida, temElegiveis])
   // Preco medio do GRUPO do escolhido (espécie + shiny + faixa de IV). Em
   // leilao a sugestao vai pro lance minimo; em 'somente lance' nao ha campo.
   const chave = escolhido ? chaveDePoke(escolhido.speciesId, !!escolhido.isShiny, ivPercentDoPoke(escolhido.ivs)) : null
