@@ -95,9 +95,17 @@ function recortar(source, rows, map, columns = 4, comContorno = true) {
       // reta vertical (Carvalho, quadros 1 e 4 — 87 a 134 px de corte). O corpo
       // so e limitado pela imagem; o que pertence a OUTRO boneco e filtrado na
       // copia (`meus`), nao pelo retangulo.
+      // Centro de massa vertical do corpo (29/10/2026): referencia pra
+      // estabilizar o quadro — ver ESTABILIZACAO abaixo.
+      let sumY = 0, nY = 0
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+        const lab = labels[y * W + x]
+        if (lab >= 0 && meus.has(lab) && D[(y * W + x) * 4 + 3] > 128) { sumY += y; nY++ }
+      }
       frames[row][q] = { x0: Math.max(0, x0 - 3), x1: Math.min(W - 1, x1 + 3),
         y0: Math.max(bounds[row], y0 - 3), y1: Math.min(bounds[row + 1] - 1, y1 + 3),
-        foot: y1, center: Math.round(sumX / count), bodyHeight: y1 - y0 + 1, meus }
+        foot: y1, top: y0, center: Math.round(sumX / count), bodyHeight: y1 - y0 + 1, meus,
+        massa: y1 - sumY / nY }
     }
   }
   if (map.some(([row, mirror]) => !frames[row] || ![0, 1].includes(mirror))) throw new Error('Mapa inválido')
@@ -112,27 +120,66 @@ function recortar(source, rows, map, columns = 4, comContorno = true) {
   const contorno = comContorno ? Math.max(2, Math.round(bodyHeight / ALTURA_DE_CAMPO)) : 0
   const halfWidth = Math.max(...all.map(f => Math.max(f.center - f.x0, f.x1 - f.center))) + 2 + contorno
   const frameWidth = 2 * halfWidth + 1
-  const footY = Math.max(...all.map(f => f.foot - f.y0)) + 2 + contorno
-  const frameHeight = footY + 6 + contorno
-  const idle = frames.map(row => {
-    // Sem idle original: selecionar o passo de pés menos afastados.
-    // Não fabricar pernas nem uma falsa respiração.
-    const widths = row.map(f => {
-      let left = W, right = -1
-      for (let y = f.foot - Math.ceil(f.bodyHeight * .22); y <= f.foot; y++) for (let x = f.x0; x <= f.x1; x++) {
-        if (D[(y * W + x) * 4 + 3] > 128) { left = Math.min(left, x); right = Math.max(right, x) }
-      }
-      return right - left
-    })
-    return widths.indexOf(Math.min(...widths))
+  const subida = Math.max(0, ...all.map(f => -f.ajuste || 0))
+  const descida = Math.max(0, ...all.map(f => f.ajuste || 0))
+  const footY = Math.max(...all.map(f => f.foot - f.y0)) + 2 + contorno + subida
+  const frameHeight = footY + 6 + contorno + descida
+  // Abertura das pernas: largura do corpo no quinto de baixo.
+  const abertura = (f) => {
+    let left = W, right = -1
+    for (let y = f.foot - Math.ceil(f.bodyHeight * .2); y <= f.foot; y++) for (let x = f.x0; x <= f.x1; x++) {
+      const lab = labels[y * W + x]
+      if (lab >= 0 && f.meus.has(lab) && D[(y * W + x) * 4 + 3] > 128) { left = Math.min(left, x); right = Math.max(right, x) }
+    }
+    return right - left
+  }
+  for (const row of frames) for (const f of row) f.abertura = abertura(f)
+
+  // ORDEM DO CICLO (29/10/2026, "sensacao de movimento"). A arte de origem
+  // nem sempre vem na ordem passo aberto -> pernas cruzadas -> aberto ->
+  // cruzadas; fora dela o boneco parece arrastar o pe. Com 4 quadros, os dois
+  // de maior abertura viram os tempos 0 e 2 e os outros dois os tempos 1 e 3,
+  // cada par na ordem original. So reordena quando a alternancia melhora de
+  // fato (25%) e a linha tem pernas que mexem (8% da altura) — numa linha de
+  // quadros quase iguais, trocar a ordem nao muda nada e so arrisca.
+  const ordem = frames.map(row => {
+    const base = row.map((_, i) => i)
+    if (row.length !== 4) return base
+    const ab = row.map(f => f.abertura)
+    const nota = (o) => o.reduce((t, q, i) => t + Math.abs(ab[q] - ab[o[(i + 1) % o.length]]), 0)
+    const largos = [...base].sort((a, b) => ab[b] - ab[a]).slice(0, 2).sort((a, b) => a - b)
+    const estreitos = base.filter(q => !largos.includes(q))
+    const alternada = [largos[0], estreitos[0], largos[1], estreitos[1]]
+    const mexe = Math.max(...ab) - Math.min(...ab) > row[0].bodyHeight * .08
+    return mexe && nota(alternada) > nota(base) * 1.25 ? alternada : base
   })
-  function atlas(columns, choose) {
+
+  // ESTABILIZACAO (29/10/2026). Os quadros da arte original nao tem a mesma
+  // altura: alinhados so pelo pe, a cabeca pulava 5 a 13 px de um quadro pro
+  // outro (o "soluco" do passo). Cada quadro desce/sobe ate o centro de massa
+  // ficar 60% do caminho na mediana da linha; os outros 40% ficam no pe, que
+  // continua quase no chao. Nenhum pixel e reamostrado: so a posicao muda.
+  const ESTABILIZACAO = 0.6
+  for (const row of frames) {
+    const ms = row.map(f => f.massa).sort((a, b) => a - b)
+    const mediana = (ms[Math.floor((ms.length - 1) / 2)] + ms[Math.floor(ms.length / 2)]) / 2
+    for (const f of row) f.ajuste = Math.round((f.massa - mediana) * ESTABILIZACAO)
+  }
+
+  // IDLE ERETO (29/10/2026): o quadro de pes mais juntos E corpo mais alto
+  // (menos curvado no passo). A respiracao e feita no desenho, nao na arte.
+  const idle = frames.map(row => {
+    const nota = row.map(f => f.abertura - f.bodyHeight * 0.6)
+    return nota.indexOf(Math.min(...nota))
+  })
+  function atlas(columns, choose, estabilizar) {
     const out = new PNG({ width: frameWidth * columns, height: frameHeight * 8 })
     out.data.fill(0)
     for (let row = 0; row < 8; row++) for (let q = 0; q < columns; q++) {
       const [originalRow, mirror] = map[row], f = frames[originalRow][choose(originalRow, q)]
+      const dy = estabilizar ? f.ajuste : 0
       for (let y = f.y0; y <= f.y1; y++) for (let x = f.x0; x <= f.x1; x++) {
-        const tx = halfWidth + (mirror ? f.center - x : x - f.center), ty = footY + y - f.foot
+        const tx = halfWidth + (mirror ? f.center - x : x - f.center), ty = footY + y - f.foot + dy
         if (tx < 0 || tx >= frameWidth || ty < 0 || ty >= frameHeight) throw new Error('Recorte ultrapassa o quadro')
         // Pixel forte de outro boneco (a borda da vizinha entrando no retangulo)
         // fica de fora; franja semitransparente (sem corpo) segue como sempre.
@@ -144,10 +191,10 @@ function recortar(source, rows, map, columns = 4, comContorno = true) {
     }
     return out
   }
-  const walk = atlas(columns, (_r, q) => q), idleAtlas = atlas(2, r => idle[r])
+  const walk = atlas(columns, (r, q) => ordem[r][q], true), idleAtlas = atlas(2, r => idle[r], false)
   if (contorno > 0) { aplicarContorno(walk, frameWidth, frameHeight, contorno); aplicarContorno(idleAtlas, frameWidth, frameHeight, contorno) }
   return { walk, idle: idleAtlas,
-    geometry: { frameWidth, frameHeight, footX: halfWidth, footY, bodyHeight, walkFrames: columns }, frames, idleFrames: idle }
+    geometry: { frameWidth, frameHeight, footX: halfWidth, footY, bodyHeight, walkFrames: columns }, frames, idleFrames: idle, ordem }
 }
 
 function main() {
@@ -162,7 +209,7 @@ function main() {
     fs.writeFileSync(path.join(target, 'Walk-Anim.png'), PNG.sync.write(result.walk))
     fs.writeFileSync(path.join(target, 'Idle-Anim.png'), PNG.sync.write(result.idle))
     geometry[skin] = result.geometry
-    console.log(skin, JSON.stringify(result.geometry), 'idle', result.idleFrames.join(','))
+    console.log(skin, JSON.stringify(result.geometry), 'idle', result.idleFrames.join(','), 'ordem', result.ordem.map(o => o.join('')).join(' '))
   }
   fs.writeFileSync(path.join(root, 'src/data/quadrosDoTreinador.json'), JSON.stringify(geometry, null, 2) + '\n')
 }
