@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.59',
+    date: '2026-10-29',
+    title: 'Treinador com mais vida',
+    highlights: [
+      'A caminhada das skins ficou mais firme: a cabeça não "soluça" mais entre os passos, os passos alternam na ordem certa e o corpo sobe e desce de leve a cada passada.',
+      'Parado, o treinador fica na pose mais ereta da skin e respira.',
+      'Na captura, o treinador arremessa a Pokébola: recua, joga o corpo pra frente e a bola voa em arco até o Pokémon.',
+      'Tudo sem redesenhar a arte: a qualidade original das skins continua intacta.',
+    ],
+  },
+  {
     version: '8.58',
     date: '2026-10-29',
     title: 'Efeitos dos mapas revisados',

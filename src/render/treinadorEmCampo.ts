@@ -13,8 +13,17 @@
 // Skins (12/10): recortes RGBA em resolução original, passos originais
 // por direção, sem paleta reduzida ou pernas redesenhadas. Geometria por skin.
 // O porte continua ~30 px de mundo; a redução acontece só ao desenhar.
-// Idle usa um passo pouco aberto da fonte, estático: não há idle dedicado na
-// arte recebida. Vistas ausentes continuam reutilizadas/espelhadas pelo mapa.
+// Idle usa o quadro mais ereto da fonte (pes juntos, corpo alto): nao ha idle
+// dedicado na arte recebida. Vistas ausentes continuam reutilizadas/espelhadas.
+//
+// MOVIMENTO SEM PIXEL NOVO (29/10/2026, pedido do dono: "sensacao de
+// movimento"). A arte nao tem respiracao nem arremesso, e redesenhar quebraria
+// a qualidade da fonte. Entao o movimento e de TRANSFORMACAO, ancorada no pe:
+//   - parado: respira (estica 1,8% e afina 0,8% num ciclo de 2,8 s);
+//   - andando: sobe ~2% da altura no meio de cada passo (pernas cruzadas) e
+//     volta ao chao no passo aberto, como o corpo de quem anda;
+//   - arremesso: recua, joga o corpo pra frente e assenta, com a Pokebola
+//     saindo da mao em arco ate o alvo (ver `arremessar`).
 import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
 import { FONTE } from './textoDeCombate'
@@ -86,7 +95,7 @@ const SUAVIZA_DIRECAO = 0.25
 /** Duração do Idle; Walk conserva o ciclo de 40px com 4 ou 5 poses por skin. */
 const DURACOES: Record<'Walk' | 'Idle', number[]> = {
   Walk: [8, 10, 8, 10],
-  // Dois quadros iguais: pose disponível na fonte, sem respiração inventada.
+  // Dois quadros iguais (o mais ereto da fonte); a respiracao e do desenho.
   Idle: [50, 50],
 }
 
@@ -96,6 +105,54 @@ function imagem(url: string): HTMLImageElement | null {
   let img = imagens.get(url)
   if (!img) { img = new Image(); img.src = url; imagens.set(url, img) }
   return img
+}
+
+/** Arremesso da Pokebola (29/10/2026): duracao total e o instante em que a bola sai da mao. */
+export const DURACAO_DO_ARREMESSO = 0.62
+const SOLTA_A_BOLA = 0.24
+/** Periodo da respiracao parado (s) e quanto o corpo estica. */
+const RESPIRACAO_PERIODO = 2.8
+const RESPIRACAO_ESTICA = 0.018
+/** Quanto o corpo sobe no meio do passo, em fracao da altura do boneco. */
+const BALANCO_DO_PASSO = 0.02
+
+interface Arremesso {
+  t: number
+  de: Ponto
+  alvo: Ponto
+  bola: string | null
+}
+
+/**
+ * Pose do treinador num instante: escala horizontal/vertical e giro, todos
+ * ancorados no PE, e quanto o corpo sobe (fracao da altura). Pura, exportada
+ * pra teste. `lado` e +1 quando o alvo do arremesso esta a direita.
+ */
+export function poseDoTreinador(
+  anim: 'Walk' | 'Idle', relogio: number, progressoDoPasso: number, arremesso: { t: number; lado: number } | null,
+): { sx: number; sy: number; giro: number; sobe: number } {
+  if (arremesso) {
+    const { t, lado } = arremesso
+    // Recua (0 -> SOLTA), joga pra frente (+0,1 s) e assenta no resto.
+    if (t < SOLTA_A_BOLA) {
+      const k = Math.sin((t / SOLTA_A_BOLA) * Math.PI / 2)
+      return { sx: 1 + 0.03 * k, sy: 1 - 0.04 * k, giro: -lado * 0.16 * k, sobe: 0 }
+    }
+    if (t < SOLTA_A_BOLA + 0.1) {
+      const k = (t - SOLTA_A_BOLA) / 0.1
+      return { sx: 1 - 0.02 * k, sy: 1 + 0.04 * k, giro: lado * (-0.16 + 0.36 * k), sobe: 0.03 * k }
+    }
+    const k = Math.min(1, (t - SOLTA_A_BOLA - 0.1) / (DURACAO_DO_ARREMESSO - SOLTA_A_BOLA - 0.1))
+    const resta = (1 - k) ** 2
+    return { sx: 1 - 0.02 * resta, sy: 1 + 0.04 * resta, giro: lado * 0.2 * resta, sobe: 0.03 * resta }
+  }
+  if (anim === 'Idle') {
+    const f = Math.sin((relogio / RESPIRACAO_PERIODO) * Math.PI * 2)
+    return { sx: 1 - RESPIRACAO_ESTICA * 0.45 * f, sy: 1 + RESPIRACAO_ESTICA * f, giro: 0, sobe: 0 }
+  }
+  // Dois passos por ciclo: no chao no passo aberto (0 e 0,5), no alto nas pernas cruzadas.
+  const sobe = BALANCO_DO_PASSO * (0.5 - 0.5 * Math.cos(progressoDoPasso * Math.PI * 4))
+  return { sx: 1, sy: 1, giro: 0, sobe }
 }
 
 interface Estado {
@@ -220,6 +277,42 @@ export class TreinadorEmCampo {
   /** Skin (pasta em `assets/treinadores/campo/`); id desconhecido cai na padrao. Quem monta a cena atualiza. */
   skin: string = SKIN_PADRAO
 
+  /** Segundos de relogio local (respiracao). */
+  private relogio = 0
+  private arremesso: Arremesso | null = null
+
+  /**
+   * Arremessa a Pokebola em `alvo` (pixel de mundo). `bola` e a imagem da bola
+   * (icone do item); sem ela, um circulo vermelho e branco. O treinador vira pro
+   * alvo e faz o gesto; a bola chega em `DURACAO_DO_ARREMESSO` segundos.
+   */
+  arremessar(alvo: Ponto, bola: string | null): void {
+    const pos = this.e.pos
+    if (!pos) return
+    const dx = alvo.x - pos.x, dy = alvo.y - pos.y
+    const d = Math.hypot(dx, dy) || 1
+    this.e.facing = { x: dx / d, y: dy / d }
+    this.arremesso = { t: 0, de: { x: pos.x, y: pos.y }, alvo: { x: alvo.x, y: alvo.y }, bola }
+  }
+
+  get arremessando(): boolean {
+    return this.arremesso != null
+  }
+
+  private passarTempo(dt: number): void {
+    this.relogio += dt
+    const a = this.arremesso
+    if (!a) return
+    a.t += dt
+    if (a.t >= DURACAO_DO_ARREMESSO) { this.arremesso = null; return }
+    // De frente pro alvo durante todo o gesto (seguir o POKE nao vira o corpo).
+    if (this.e.pos) {
+      const dx = a.alvo.x - this.e.pos.x, dy = a.alvo.y - this.e.pos.y
+      const d = Math.hypot(dx, dy)
+      if (d > 1) this.e.facing = { x: dx / d, y: dy / d }
+    }
+  }
+
   private e: Estado = { rastro: [], pos: null, facing: { x: 0, y: 1 }, anim: 'Idle', quadro: 0, ticks: 0, parado: 0, seguindo: false, vel: 0, travado: 0 }
 
   /** Pe do treinador agora (px de mundo), ou `null` se ele nao esta em campo. */
@@ -271,6 +364,7 @@ export class TreinadorEmCampo {
     e.facing = { x: olhando.x, y: olhando.y }
     e.anim = 'Idle'
     e.parado += dt
+    this.passarTempo(dt)
     const duracoes = DURACOES.Idle
     e.ticks += dt * 60
     while (e.ticks >= duracoes[e.quadro]) {
@@ -286,7 +380,8 @@ export class TreinadorEmCampo {
    */
   atualizar(poke: PokeEmCampo | null, dt: number, bloqueado?: (x: number, y: number) => boolean): void {
     const e = this.e
-    if (!poke) { e.rastro = []; e.pos = null; return }
+    if (!poke) { e.rastro = []; e.pos = null; this.arremesso = null; return }
+    this.passarTempo(dt)
     const ultimo = e.rastro[e.rastro.length - 1]
     if (!e.pos || !ultimo || Math.hypot(poke.x - ultimo.x, poke.y - ultimo.y) > SALTO
       || Math.hypot(poke.x - e.pos.x, poke.y - (e.pos.y - DO_CENTRO_AO_CHAO)) > LONGE_DEMAIS) {
@@ -471,15 +566,55 @@ export class TreinadorEmCampo {
     // Resolução da fonte independente do tamanho de mundo: não destruir a
     // arte na importação. Filtragem de redução só aqui, na apresentação.
     const scale = altura / bodyHeight
+    const passo = anim === 'Walk' ? walkFrames : 2
+    const distancia = walkFrames === 4 ? PX_POR_QUADRO_DE_PASSO[quadro % 4] : 40 / walkFrames
+    const progresso = ((quadro % passo) + Math.min(1, this.e.ticks / distancia)) / passo
+    const a = this.arremesso
+    const lado = a ? (Math.sign(a.alvo.x - pos.x) || 1) : 0
+    const pose = poseDoTreinador(anim, this.relogio, progresso, a ? { t: a.t, lado } : null)
     const suave = ctx.imageSmoothingEnabled, qualidade = ctx.imageSmoothingQuality
+    ctx.save()
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
+    // Tudo ancorado no PE: respirar e arremessar nao tiram o boneco do chao.
+    ctx.translate(pos.x, pos.y - pose.sobe * altura)
+    if (pose.giro) ctx.rotate(pose.giro)
+    ctx.scale(pose.sx, pose.sy)
     ctx.drawImage(
-      img, (quadro % (anim === 'Walk' ? walkFrames : 2)) * frameWidth, linha * frameHeight, frameWidth, frameHeight,
-      pos.x - footX * scale, pos.y - footY * scale, frameWidth * scale, frameHeight * scale,
+      img, (quadro % passo) * frameWidth, linha * frameHeight, frameWidth, frameHeight,
+      -footX * scale, -footY * scale, frameWidth * scale, frameHeight * scale,
     )
+    ctx.restore()
     ctx.imageSmoothingEnabled = suave
     ctx.imageSmoothingQuality = qualidade
+    if (a && a.t >= SOLTA_A_BOLA) this.desenharBola(ctx, a, altura)
+  }
+
+  /** A Pokebola em voo, da mao (altura do ombro) ate o alvo, em arco. */
+  private desenharBola(ctx: CanvasRenderingContext2D, a: Arremesso, altura: number): void {
+    const k = Math.min(1, (a.t - SOLTA_A_BOLA) / (DURACAO_DO_ARREMESSO - SOLTA_A_BOLA))
+    const de = { x: a.de.x, y: a.de.y - altura * 0.7 }
+    const x = de.x + (a.alvo.x - de.x) * k
+    const arco = Math.max(18, Math.hypot(a.alvo.x - de.x, a.alvo.y - de.y) * 0.35)
+    const y = de.y + (a.alvo.y - de.y) * k - arco * 4 * k * (1 - k)
+    const r = altura * 0.13
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(k * Math.PI * 4)
+    const img = a.bola ? imagem(a.bola) : null
+    if (img && img.complete && img.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false
+      ctx.drawImage(img, -r, -r, r * 2, r * 2)
+    } else {
+      ctx.lineWidth = Math.max(0.6, r * 0.25)
+      ctx.strokeStyle = '#111111'
+      ctx.fillStyle = '#e53935'
+      ctx.beginPath(); ctx.arc(0, 0, r, Math.PI, 0); ctx.fill()
+      ctx.fillStyle = '#ffffff'
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI); ctx.fill()
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.moveTo(-r, 0); ctx.lineTo(r, 0); ctx.stroke()
+    }
+    ctx.restore()
   }
 
   /** Nome em cima do bone, no mesmo estilo da placa dos POKE (contorno preto). */

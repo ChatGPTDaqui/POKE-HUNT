@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  Conferencia das animacoes do treinador (29/10/2026). Abre no dev server:
+    http://localhost:4173/scripts/harness/ver-treinador.html?modo=andar&zoom=4
+  modo = andar | parado | arremesso. Desenha as 8 skins lado a lado com o
+  TreinadorEmCampo de verdade (o mesmo do jogo), seguindo um POKE falso.
+  ?pausa=1&t=1.3 congela no instante t (segundos) pra captura de tela.
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <base href="/" />
+  <title>ver treinador</title>
+  <style>body { margin: 0; background: #6a8f4e; color: #fff; font: 12px monospace } canvas { display: block }</style>
+</head>
+<body>
+  <canvas id="c" width="960" height="600"></canvas>
+  <div id="info"></div>
+  <script type="module">
+    import { TreinadorEmCampo } from '/src/render/treinadorEmCampo.ts'
+    import { SKINS_DO_TREINADOR } from '/src/data/skinsDoTreinador.ts'
+
+    const q = new URLSearchParams(location.search)
+    const modo = q.get('modo') ?? 'andar'
+    const zoom = Number(q.get('zoom') ?? 4)
+    const pausa = q.get('pausa') === '1'
+    const tFixo = Number(q.get('t') ?? 0)
+    const dir = q.get('dir') ?? 'baixo'
+    const cv = document.getElementById('c'), ctx = cv.getContext('2d')
+    const largura = cv.width / zoom, altura = cv.height / zoom
+    const skins = SKINS_DO_TREINADOR.map((s) => s.id)
+    const passoX = largura / skins.length
+    const ts = skins.map((id, i) => {
+      const t = new TreinadorEmCampo()
+      t.skin = id
+      return { t, x0: passoX * (i + 0.5) }
+    })
+    const vetor = { baixo: [0, 1], cima: [0, -1], direita: [1, 0], esquerda: [-1, 0] }[dir] ?? [0, 1]
+    let tempo = 0
+    const passo = (dt) => {
+      tempo += dt
+      for (const { t, x0 } of ts) {
+        // POKE falso: em 'andar' anda pra frente e volta (o treinador segue); nos
+        // outros fica parado na frente do treinador.
+        const yBase = modo === 'andar' ? altura * 0.5 : altura * 0.3
+        let px = x0, py = yBase
+        if (modo === 'andar') {
+          // Circulo de raio 30 a ~60 u/s: o seguidor passa pelas 8 direcoes.
+          const a = tempo * 2
+          px = x0 + Math.cos(a) * 30; py = yBase + Math.sin(a) * 30
+        }
+        const olha = modo === 'andar' ? { x: -Math.sin(tempo * 2), y: Math.cos(tempo * 2) } : { x: 0, y: -1 }
+        t.atualizar({ x: px, y: py, radius: 10, facing: olha }, dt)
+        if (modo === 'arremesso' && !t.arremessando && (tempo % 1.5) < dt * 1.5) {
+          t.arremessar({ x: px + 30, y: py - 6 }, 'assets/item-icons/poke_ball.png')
+        }
+      }
+    }
+    // Aquece o seguidor ate ele chegar na posicao.
+    for (let i = 0; i < 120; i++) passo(1 / 60)
+    if (pausa) { const n = Math.round(tFixo * 60); for (let i = 0; i < n; i++) passo(1 / 60) }
+    const quadro = () => {
+      if (!pausa) passo(1 / 60)
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.fillStyle = '#6a8f4e'; ctx.fillRect(0, 0, cv.width, cv.height)
+      ctx.setTransform(zoom, 0, 0, zoom, 0, 0)
+      for (const { t } of ts) t.desenhar(ctx)
+      document.getElementById('info').textContent = `${modo} t=${tempo.toFixed(2)}`
+      requestAnimationFrame(quadro)
+    }
+    quadro()
+  </script>
+</body>
+</html>
