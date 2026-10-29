@@ -121,15 +121,15 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // de vapor pintadas no chao e a fileira de lampioes do caminho.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/volcano.jpg': [
-    { u: 0.515, v: 0.045, tipo: 'fumarola', escala: 1.5 }, // cratera do cone
+    { u: 0.496, v: 0.041, tipo: 'fumarola', escala: 1.5 },
     { u: 0.620, v: 0.470, tipo: 'fumarola' },
     { u: 0.700, v: 0.680, tipo: 'fumarola' },
-    // Lampioes de ferro: brilho no vidro, e nao chama por cima (26/10/2026).
     { u: 0.637, v: 0.098, tipo: 'orbe', cor: '#ffc06a', escala: 0.6, fase: 0 },
     { u: 0.721, v: 0.337, tipo: 'orbe', cor: '#ffc06a', escala: 0.6, fase: 2 },
     { u: 0.864, v: 0.435, tipo: 'orbe', cor: '#ffc06a', escala: 0.6, fase: 4 },
     { u: 0.511, v: 0.771, tipo: 'orbe', cor: '#ffc06a', escala: 0.6, fase: 6 },
     { u: 0.886, v: 0.752, tipo: 'orbe', cor: '#ffc06a', escala: 0.6, fase: 8 },
+    { u: 0.080, v: 0.035, tipo: 'chamine', escala: 0.5 },
   ],
 
   // -------------------------------------------------------------------------
@@ -139,20 +139,20 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/cave-volcanic.jpg': [
     { u: 0.655, v: 0.060, tipo: 'fogueira', escala: 0.8 },
-    { u: 0.755, v: 0.280, tipo: 'fogueira', escala: 0.8 },
-    { u: 0.740, v: 0.450, tipo: 'fogueira', escala: 0.8 },
+    { u: 0.803, v: 0.285, tipo: 'fogueira', escala: 0.8 },
+    { u: 0.771, v: 0.479, tipo: 'fogueira', escala: 0.8 },
     { u: 0.700, v: 0.600, tipo: 'fogueira', escala: 0.8 },
-    { u: 0.600, v: 0.720, tipo: 'fogueira', escala: 0.8 },
+    { u: 0.586, v: 0.796, tipo: 'fogueira', escala: 0.8 },
     { u: 0.620, v: 0.880, tipo: 'fogueira' },
-    { u: 0.530, v: 0.055, tipo: 'tocha' },
-    { u: 0.475, v: 0.150, tipo: 'tocha' },
-    { u: 0.460, v: 0.365, tipo: 'tocha' },
-    { u: 0.645, v: 0.365, tipo: 'tocha' },
-    { u: 0.665, v: 0.425, tipo: 'tocha' },
-    { u: 0.865, v: 0.470, tipo: 'tocha' },
-    { u: 0.350, v: 0.690, tipo: 'tocha' },
-    { u: 0.360, v: 0.775, tipo: 'tocha' },
-    { u: 0.685, v: 0.660, tipo: 'tocha' },
+    { u: 0.526, v: 0.086, tipo: 'tocha' },
+    { u: 0.477, v: 0.171, tipo: 'tocha' },
+    { u: 0.454, v: 0.381, tipo: 'tocha' },
+    { u: 0.650, v: 0.380, tipo: 'tocha' },
+    { u: 0.670, v: 0.452, tipo: 'tocha' },
+    { u: 0.864, v: 0.494, tipo: 'tocha' },
+    { u: 0.357, v: 0.709, tipo: 'tocha' },
+    { u: 0.375, v: 0.781, tipo: 'tocha' },
+    { u: 0.690, v: 0.674, tipo: 'tocha' },
   ],
 
   // -------------------------------------------------------------------------
@@ -166,17 +166,21 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.640, v: 0.640, tipo: 'fogueira', escala: 0.8 },
     { u: 0.580, v: 0.720, tipo: 'fogueira', escala: 0.8 },
     { u: 0.540, v: 0.850, tipo: 'fogueira' },
-    { u: 0.755, v: 0.755, tipo: 'fumarola' },
-    { u: 0.830, v: 0.775, tipo: 'fumarola' },
-    { u: 0.820, v: 0.865, tipo: 'fumarola' },
+    { u: 0.739, v: 0.808, tipo: 'fumarola' },
+    { u: 0.822, v: 0.803, tipo: 'fumarola' },
+    { u: 0.840, v: 0.877, tipo: 'fumarola' },
+    { u: 0.891, v: 0.835, tipo: 'fumarola', fase: 2 },
+    { u: 0.779, v: 0.838, tipo: 'fumarola', escala: 0.6, fase: 4 },
     { u: 0.945, v: 0.030, tipo: 'fumarola', escala: 1.3 },
     { u: 0.705, v: 0.290, tipo: 'orbe', cor: '#ff7a3c', escala: 1.6 },
     { u: 0.258, v: 0.118, tipo: 'tocha' },
-    { u: 0.135, v: 0.155, tipo: 'tocha' },
+    { u: 0.138, v: 0.167, tipo: 'tocha' },
     { u: 0.176, v: 0.326, tipo: 'tocha' },
     { u: 0.469, v: 0.281, tipo: 'tocha' },
-    { u: 0.543, v: 0.339, tipo: 'tocha' },
+    { u: 0.462, v: 0.374, tipo: 'tocha' },
     { u: 0.663, v: 0.375, tipo: 'tocha' },
+    { u: 0.740, v: 0.376, tipo: 'tocha', fase: 2 },
+    { u: 0.951, v: 0.278, tipo: 'tocha', fase: 4 },
     { u: 0.876, v: 0.492, tipo: 'tocha' },
     { u: 0.538, v: 0.711, tipo: 'tocha' },
     { u: 0.380, v: 0.740, tipo: 'tocha' },
@@ -190,7 +194,7 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // luz que pulsa e o que separa noite de "imagem escura".
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/slum.jpg': [
-    { u: 0.426, v: 0.107, tipo: 'chamine' },
+    { u: 0.426, v: 0.118, tipo: 'chamine' },
     { u: 0.681, v: 0.093, tipo: 'chamine' },
     { u: 0.931, v: 0.133, tipo: 'chamine' },
     { u: 0.936, v: 0.295, tipo: 'chamine' },
@@ -199,7 +203,7 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.366, v: 0.662, tipo: 'chamine' },
     { u: 0.674, v: 0.623, tipo: 'chamine' },
     { u: 0.344, v: 0.895, tipo: 'chamine' },
-    { u: 0.257, v: 0.212, tipo: 'fogueira', escala: 0.7 },
+    { u: 0.257, v: 0.208, tipo: 'tocha' },
     { u: 0.575, v: 0.235, tipo: 'tocha' },
     { u: 0.842, v: 0.269, tipo: 'tocha' },
     { u: 0.157, v: 0.391, tipo: 'tocha' },
@@ -213,6 +217,9 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.161, v: 0.759, tipo: 'tocha' },
     { u: 0.459, v: 0.757, tipo: 'tocha' },
     { u: 0.539, v: 0.897, tipo: 'tocha' },
+    { u: 0.525, v: 0.682, tipo: 'orbe', cor: '#ffc06a', escala: 0.5 },
+    { u: 0.830, v: 0.211, tipo: 'orbe', cor: '#ffc06a', escala: 0.4, fase: 2 },
+    { u: 0.649, v: 0.451, tipo: 'orbe', cor: '#ffc06a', escala: 0.4, fase: 4 },
   ],
 
   // -------------------------------------------------------------------------
@@ -221,17 +228,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // correnteza dele e ancorada.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/town.jpg': [
-    { u: 0.300, v: 0.465, tipo: 'cascata' },
-    { u: 0.665, v: 0.455, tipo: 'cascata' },
+    { u: 0.311, v: 0.484, tipo: 'cascata' },
+    { u: 0.681, v: 0.457, tipo: 'cascata' },
+    { u: 0.301, v: 0.403, tipo: 'cascata', escala: 0.7, fase: 2 },
     { u: 0.805, v: 0.545, tipo: 'chamine' },
     { u: 0.310, v: 0.575, tipo: 'correnteza' },
     { u: 0.380, v: 0.620, tipo: 'correnteza' },
     { u: 0.560, v: 0.780, tipo: 'correnteza' },
-    { u: 0.232, v: 0.290, tipo: 'tocha', escala: 0.8 },
-    { u: 0.077, v: 0.510, tipo: 'tocha', escala: 0.8 },
-    { u: 0.652, v: 0.680, tipo: 'tocha', escala: 0.8 },
-    { u: 0.437, v: 0.742, tipo: 'tocha', escala: 0.8 },
-    { u: 0.470, v: 0.900, tipo: 'tocha', escala: 0.8 },
+    { u: 0.228, v: 0.289, tipo: 'tocha', escala: 0.8, fase: 0 },
+    { u: 0.083, v: 0.518, tipo: 'tocha', escala: 0.8, fase: 2 },
+    { u: 0.651, v: 0.686, tipo: 'tocha', escala: 0.8, fase: 4 },
+    { u: 0.433, v: 0.748, tipo: 'tocha', escala: 0.8, fase: 6 },
+    { u: 0.474, v: 0.896, tipo: 'tocha', escala: 0.8, fase: 8 },
+    { u: 0.532, v: 0.897, tipo: 'tocha', escala: 0.8, fase: 10 },
   ],
 
   // -------------------------------------------------------------------------
@@ -253,7 +262,10 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.755, v: 0.185, tipo: 'orbe', cor: '#7bf5c4' },
     { u: 0.830, v: 0.235, tipo: 'orbe', cor: '#7bf5c4' },
     { u: 0.900, v: 0.500, tipo: 'orbe', cor: '#7bf5c4' },
-    { u: 0.060, v: 0.440, tipo: 'orbe', cor: '#7bf5c4' },
+    { u: 0.084, v: 0.459, tipo: 'orbe', cor: '#7bf5c4' },
+    { u: 0.636, v: 0.205, tipo: 'orbe', cor: '#7bf5c4', fase: 2 },
+    { u: 0.967, v: 0.577, tipo: 'orbe', cor: '#7bf5c4', fase: 4 },
+    { u: 0.889, v: 0.809, tipo: 'orbe', cor: '#7bf5c4', fase: 6 },
   ],
 
   // -------------------------------------------------------------------------
@@ -270,7 +282,8 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.062, v: 0.610, tipo: 'orbe', cor: '#ffd58a', escala: 0.8 },
     { u: 0.190, v: 0.775, tipo: 'orbe', cor: '#ffd58a', escala: 0.8 },
     { u: 0.619, v: 0.782, tipo: 'orbe', cor: '#ffd58a', escala: 0.8 },
-    { u: 0.735, v: 0.790, tipo: 'orbe', cor: '#ffd58a', escala: 0.8 },
+    { u: 0.771, v: 0.783, tipo: 'orbe', cor: '#ffd58a', escala: 0.8 },
+    { u: 0.039, v: 0.609, tipo: 'orbe', cor: '#ffd58a', escala: 0.8, fase: 2 },
   ],
 
   // -------------------------------------------------------------------------
@@ -295,29 +308,34 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // inteiro: e a unica coisa na arte que o jogador espera ver se mexendo.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/forest.jpg': [
-    { u: 0.350, v: 0.400, tipo: 'fogueira' },
-    { u: 0.350, v: 0.382, tipo: 'chamine', escala: 0.7 },
-    { u: 0.720, v: 0.200, tipo: 'correnteza' },
+    { u: 0.363, v: 0.415, tipo: 'fogueira' },
+    { u: 0.365, v: 0.395, tipo: 'chamine', escala: 0.7 },
+    { u: 0.781, v: 0.200, tipo: 'correnteza' },
     { u: 0.755, v: 0.350, tipo: 'correnteza' },
     { u: 0.700, v: 0.620, tipo: 'correnteza' },
-    { u: 0.660, v: 0.720, tipo: 'correnteza' },
-    { u: 0.780, v: 0.850, tipo: 'correnteza' },
+    { u: 0.586, v: 0.811, tipo: 'correnteza' },
+    { u: 0.669, v: 0.884, tipo: 'correnteza' },
     { u: 0.475, v: 0.160, tipo: 'tocha', escala: 0.8 },
     { u: 0.531, v: 0.294, tipo: 'tocha', escala: 0.8 },
     { u: 0.655, v: 0.375, tipo: 'tocha', escala: 0.8 },
     { u: 0.375, v: 0.775, tipo: 'tocha', escala: 0.8 },
-    // Borboletas nos canteiros de flor (24/10/2026): campina de cima (lilas),
-    // capim florido do meio (azul, contraste com a flor amarela) e a moita florida da direita.
     { u: 0.650, v: 0.150, tipo: 'borboleta', cor: '#c9a7ff' },
     { u: 0.520, v: 0.590, tipo: 'borboleta', cor: '#7fd3ff', fase: 3 },
     { u: 0.890, v: 0.490, tipo: 'borboleta', cor: '#ffffff', fase: 6 },
+    { u: 0.527, v: 0.086, tipo: 'tocha', escala: 0.8, fase: 2 },
+    { u: 0.670, v: 0.383, tipo: 'tocha', escala: 0.8, fase: 4 },
+    { u: 0.670, v: 0.451, tipo: 'tocha', escala: 0.8, fase: 6 },
+    { u: 0.356, v: 0.703, tipo: 'tocha', escala: 0.8, fase: 8 },
+    { u: 0.492, v: 0.762, tipo: 'tocha', escala: 0.8, fase: 10 },
+    { u: 0.958, v: 0.132, tipo: 'tocha', escala: 0.8, fase: 12 },
+    { u: 0.924, v: 0.512, tipo: 'tocha', escala: 0.8, fase: 14 },
   ],
 
   // -------------------------------------------------------------------------
   // SELVA — uma queda d'agua e o rio que corta a arte de cima a baixo.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/jungle.jpg': [
-    { u: 0.265, v: 0.395, tipo: 'cascata' },
+    { u: 0.268, v: 0.383, tipo: 'cascata' },
     { u: 0.100, v: 0.270, tipo: 'correnteza' },
     { u: 0.400, v: 0.470, tipo: 'correnteza' },
     { u: 0.580, v: 0.600, tipo: 'correnteza' },
@@ -333,19 +351,24 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // entao ate o que e brasa aqui entra como orbe colorido.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/temple.jpg': [
-    { u: 0.085, v: 0.135, tipo: 'orbe', cor: '#e0a6ff', escala: 2.0 },
+    { u: 0.112, v: 0.137, tipo: 'orbe', cor: '#e0a6ff', escala: 2 },
     { u: 0.455, v: 0.215, tipo: 'orbe', cor: '#e0a6ff', escala: 1.8 },
     { u: 0.790, v: 0.315, tipo: 'orbe', cor: '#e0a6ff', escala: 1.6 },
-    { u: 0.165, v: 0.880, tipo: 'orbe', cor: '#e0a6ff', escala: 1.8 },
-    { u: 0.440, v: 0.065, tipo: 'orbe', cor: '#c77bff', escala: 1.4 },
-    { u: 0.390, v: 0.150, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
-    { u: 0.510, v: 0.150, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
+    { u: 0.184, v: 0.877, tipo: 'orbe', cor: '#e0a6ff', escala: 1.8 },
+    { u: 0.461, v: 0.032, tipo: 'orbe', cor: '#c77bff', escala: 1.4 },
+    { u: 0.405, v: 0.156, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
+    { u: 0.518, v: 0.156, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
     { u: 0.420, v: 0.440, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
     { u: 0.300, v: 0.720, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
     { u: 0.855, v: 0.790, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
-    { u: 0.700, v: 0.890, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
-    { u: 0.900, v: 0.630, tipo: 'cascata' },
-    { u: 0.320, v: 0.345, tipo: 'cascata', escala: 0.7 },
+    { u: 0.708, v: 0.913, tipo: 'orbe', cor: '#b98cff', escala: 0.8 },
+    { u: 0.388, v: 0.227, tipo: 'orbe', cor: '#b98cff', escala: 0.8, fase: 2 },
+    { u: 0.514, v: 0.361, tipo: 'orbe', cor: '#b98cff', escala: 0.8, fase: 4 },
+    { u: 0.472, v: 0.728, tipo: 'orbe', cor: '#b98cff', escala: 0.8, fase: 6 },
+    { u: 0.332, v: 0.820, tipo: 'orbe', cor: '#e0a6ff', escala: 0.6, fase: 3 },
+    { u: 0.190, v: 0.650, tipo: 'orbe', cor: '#e0a6ff', escala: 0.6, fase: 5 },
+    { u: 0.918, v: 0.645, tipo: 'cascata' },
+    { u: 0.334, v: 0.340, tipo: 'cascata', escala: 0.7 },
   ],
 
   // -------------------------------------------------------------------------
@@ -355,19 +378,29 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/ruins.jpg': [
     { u: 0.500, v: 0.480, tipo: 'orbe', cor: '#c9a4ff', escala: 2.2 },
-    { u: 0.700, v: 0.140, tipo: 'orbe', cor: '#9a7bff', escala: 1.4 },
+    { u: 0.674, v: 0.093, tipo: 'orbe', cor: '#9a7bff', escala: 1.4 },
     { u: 0.760, v: 0.330, tipo: 'orbe', cor: '#9a7bff', escala: 1.4 },
     { u: 0.820, v: 0.560, tipo: 'orbe', cor: '#9a7bff', escala: 1.4 },
     { u: 0.790, v: 0.780, tipo: 'orbe', cor: '#9a7bff', escala: 1.4 },
     { u: 0.110, v: 0.250, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
     { u: 0.240, v: 0.250, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
-    { u: 0.200, v: 0.510, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
-    { u: 0.310, v: 0.640, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
-    { u: 0.420, v: 0.550, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
-    { u: 0.620, v: 0.530, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
-    { u: 0.550, v: 0.750, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
-    { u: 0.430, v: 0.900, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
-    { u: 0.605, v: 0.080, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
+    { u: 0.212, v: 0.513, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
+    { u: 0.212, v: 0.639, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
+    { u: 0.412, v: 0.557, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
+    { u: 0.586, v: 0.559, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
+    { u: 0.561, v: 0.762, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
+    { u: 0.437, v: 0.886, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
+    { u: 0.612, v: 0.085, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7 },
+    { u: 0.437, v: 0.107, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7, fase: 2 },
+    { u: 0.562, v: 0.107, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7, fase: 4 },
+    { u: 0.610, v: 0.163, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7, fase: 6 },
+    { u: 0.762, v: 0.163, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7, fase: 8 },
+    { u: 0.786, v: 0.439, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7, fase: 10 },
+    { u: 0.786, v: 0.640, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7, fase: 12 },
+    { u: 0.437, v: 0.762, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7, fase: 14 },
+    { u: 0.562, v: 0.886, tipo: 'orbe', cor: '#f0c7ff', escala: 0.7, fase: 16 },
+    { u: 0.436, v: 0.476, tipo: 'orbe', cor: '#f0c7ff', escala: 0.5, fase: 3 },
+    { u: 0.562, v: 0.476, tipo: 'orbe', cor: '#f0c7ff', escala: 0.5, fase: 7 },
   ],
 
   // -------------------------------------------------------------------------
@@ -375,7 +408,8 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // brilho pintado. O enxame aqui e o prop principal.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/fairy-cave.jpg': [
-    { u: 0.685, v: 0.350, tipo: 'cascata' },
+    { u: 0.656, v: 0.350, tipo: 'cascata' },
+    { u: 0.710, v: 0.217, tipo: 'cascata', escala: 0.6, fase: 2 },
     { u: 0.660, v: 0.400, tipo: 'correnteza' },
     { u: 0.330, v: 0.680, tipo: 'correnteza' },
     { u: 0.600, v: 0.700, tipo: 'correnteza' },
@@ -392,12 +426,14 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // acampamento no canto superior direito e o unico calor dela.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/ice-cave.jpg': [
-    { u: 0.375, v: 0.340, tipo: 'orbe', cor: '#9fe8ff', escala: 2.0 },
-    { u: 0.840, v: 0.246, tipo: 'fogueira', escala: 0.7 },
-    { u: 0.185, v: 0.055, tipo: 'tocha', escala: 0.7 },
-    { u: 0.140, v: 0.410, tipo: 'tocha', escala: 0.7 },
-    { u: 0.660, v: 0.185, tipo: 'tocha', escala: 0.7 },
-    { u: 0.930, v: 0.310, tipo: 'tocha', escala: 0.7 },
+    { u: 0.375, v: 0.313, tipo: 'orbe', cor: '#9fe8ff', escala: 2 },
+    { u: 0.842, v: 0.244, tipo: 'tocha', escala: 0.5, fase: 1 },
+    { u: 0.190, v: 0.080, tipo: 'tocha', escala: 0.5, fase: 0 },
+    { u: 0.171, v: 0.435, tipo: 'tocha', escala: 0.5, fase: 2 },
+    { u: 0.664, v: 0.202, tipo: 'tocha', escala: 0.5, fase: 4 },
+    { u: 0.928, v: 0.327, tipo: 'tocha', escala: 0.5, fase: 6 },
+    { u: 0.819, v: 0.218, tipo: 'tocha', escala: 0.5, fase: 3 },
+    { u: 0.954, v: 0.306, tipo: 'tocha', escala: 0.5, fase: 5 },
   ],
 
   // -------------------------------------------------------------------------
@@ -411,11 +447,14 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.190, v: 0.650, tipo: 'orbe', cor: '#b98cff', escala: 0.9 },
     { u: 0.270, v: 0.600, tipo: 'orbe', cor: '#b98cff', escala: 0.9 },
     { u: 0.420, v: 0.800, tipo: 'orbe', cor: '#b98cff', escala: 0.9 },
-    { u: 0.680, v: 0.100, tipo: 'orbe', cor: '#ffcf8a', escala: 1.6 },
-    { u: 0.900, v: 0.250, tipo: 'orbe', cor: '#ffcf8a', escala: 1.6 },
-    { u: 0.850, v: 0.720, tipo: 'orbe', cor: '#ffcf8a', escala: 1.6 },
-    { u: 0.080, v: 0.850, tipo: 'fogueira', escala: 0.6 },
-    { u: 0.130, v: 0.780, tipo: 'fogueira', escala: 0.5 },
+    { u: 0.695, v: 0.125, tipo: 'orbe', cor: '#ffcf8a', escala: 1.6 },
+    { u: 0.935, v: 0.256, tipo: 'orbe', cor: '#ffcf8a', escala: 1.6 },
+    { u: 0.874, v: 0.776, tipo: 'orbe', cor: '#ffcf8a', escala: 1.6 },
+    { u: 0.103, v: 0.767, tipo: 'orbe', cor: '#ff6a3c', escala: 0.5 },
+    { u: 0.098, v: 0.908, tipo: 'orbe', cor: '#ff6a3c', escala: 0.5, fase: 2 },
+    { u: 0.388, v: 0.679, tipo: 'orbe', cor: '#8ad6ff', escala: 0.5 },
+    { u: 0.424, v: 0.689, tipo: 'orbe', cor: '#8ad6ff', escala: 0.5, fase: 2 },
+    { u: 0.918, v: 0.566, tipo: 'orbe', cor: '#8ad6ff', escala: 0.5, fase: 4 },
   ],
 
   // -------------------------------------------------------------------------
@@ -427,15 +466,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.290, v: 0.580, tipo: 'petala' },
     { u: 0.520, v: 0.335, tipo: 'petala' },
     { u: 0.915, v: 0.135, tipo: 'petala' },
-    { u: 0.470, v: 0.115, tipo: 'tocha', escala: 0.6 },
-    { u: 0.460, v: 0.370, tipo: 'tocha', escala: 0.6 },
-    { u: 0.650, v: 0.370, tipo: 'tocha', escala: 0.6 },
+    { u: 0.478, v: 0.115, tipo: 'tocha', escala: 0.6 },
+    { u: 0.462, v: 0.375, tipo: 'tocha', escala: 0.6 },
+    { u: 0.664, v: 0.375, tipo: 'tocha', escala: 0.6 },
     { u: 0.530, v: 0.700, tipo: 'tocha', escala: 0.6 },
-    { u: 0.860, v: 0.490, tipo: 'tocha', escala: 0.6 },
-    { u: 0.755, v: 0.360, tipo: 'correnteza' },
-    { u: 0.700, v: 0.500, tipo: 'correnteza' },
+    { u: 0.877, v: 0.497, tipo: 'tocha', escala: 0.6 },
+    { u: 0.781, v: 0.381, tipo: 'correnteza' },
+    { u: 0.781, v: 0.493, tipo: 'correnteza' },
     { u: 0.640, v: 0.620, tipo: 'correnteza' },
     { u: 0.600, v: 0.800, tipo: 'correnteza' },
+    { u: 0.742, v: 0.377, tipo: 'tocha', escala: 0.6, fase: 2 },
+    { u: 0.140, v: 0.168, tipo: 'tocha', escala: 0.6, fase: 4 },
+    { u: 0.178, v: 0.796, tipo: 'tocha', escala: 0.6, fase: 6 },
+    { u: 0.381, v: 0.755, tipo: 'tocha', escala: 0.6, fase: 8 },
   ],
 
   // -------------------------------------------------------------------------
@@ -470,14 +513,10 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // entra aqui e o gas: brejo que borbulha e a razao de o lugar cheirar mal.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/swamp.jpg': [
-    // As seis foram CONFERIDAS contra `AGUA_POR_ARTE` (a mascara pintada do
-    // PH-113): gas de brejo tem que sair da agua, e tres delas estavam em
-    // cima de raiz, tronco e salgueiro — o tipo de erro que so aparece na
-    // arte, porque nenhum numero aqui esta errado.
-    { u: 0.208, v: 0.218, tipo: 'gas', cor: '#a9d06a' },
+    { u: 0.173, v: 0.192, tipo: 'gas', cor: '#a9d06a' },
     { u: 0.560, v: 0.260, tipo: 'gas', cor: '#a9d06a' },
     { u: 0.140, v: 0.450, tipo: 'gas', cor: '#a9d06a' },
-    { u: 0.724, v: 0.462, tipo: 'gas', cor: '#a9d06a' },
+    { u: 0.768, v: 0.472, tipo: 'gas', cor: '#a9d06a' },
     { u: 0.330, v: 0.790, tipo: 'gas', cor: '#a9d06a' },
     { u: 0.840, v: 0.572, tipo: 'gas', cor: '#a9d06a' },
     { u: 0.470, v: 0.140, tipo: 'vagalume', cor: '#d8f08a' },
@@ -490,7 +529,7 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // queda d'agua do canto e as borboletas nos canteiros de flor.
   // -------------------------------------------------------------------------
   'assets/hunt-backgrounds/meadow.jpg': [
-    { u: 0.888, v: 0.150, tipo: 'cascata', escala: 0.8 },
+    { u: 0.887, v: 0.144, tipo: 'cascata', escala: 0.8 },
     { u: 0.435, v: 0.340, tipo: 'borboleta', cor: '#fff3b0' },
     { u: 0.560, v: 0.610, tipo: 'borboleta', cor: '#ffb0d0', fase: 2 },
     { u: 0.270, v: 0.780, tipo: 'borboleta', cor: '#7fd3ff', fase: 4 },
@@ -523,18 +562,21 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // de cinza — mesma cor do chao de cinzas, sem mascara possivel.
   'assets/hunt-backgrounds/burnt-forest.jpg': [
     { u: 0.155, v: 0.045, tipo: 'chamine', escala: 0.7 },
-    { u: 0.717, v: 0.025, tipo: 'chamine', escala: 0.5, fase: 1 },
-    { u: 0.474, v: 0.190, tipo: 'chamine', escala: 0.5, fase: 2 },
-    { u: 0.474, v: 0.195, tipo: 'tocha', escala: 0.45 },
-    { u: 0.478, v: 0.165, tipo: 'chamine', escala: 0.45, fase: 3 },
-    { u: 0.572, v: 0.215, tipo: 'tocha', escala: 0.4, fase: 1 },
-    { u: 0.735, v: 0.335, tipo: 'chamine', escala: 0.5, fase: 4 },
+    { u: 0.720, v: 0.032, tipo: 'chamine', escala: 0.5, fase: 1 },
+    { u: 0.476, v: 0.180, tipo: 'chamine', escala: 0.5, fase: 2 },
+    { u: 0.476, v: 0.185, tipo: 'tocha', escala: 0.45 },
+    { u: 0.527, v: 0.205, tipo: 'chamine', escala: 0.4, fase: 3 },
+    { u: 0.525, v: 0.220, tipo: 'tocha', escala: 0.4, fase: 1 },
+    { u: 0.571, v: 0.207, tipo: 'chamine', escala: 0.4, fase: 7 },
+    { u: 0.735, v: 0.340, tipo: 'chamine', escala: 0.5, fase: 4 },
     { u: 0.815, v: 0.370, tipo: 'tocha', escala: 0.6, fase: 2 },
+    { u: 0.820, v: 0.360, tipo: 'chamine', escala: 0.5, fase: 8 },
     { u: 0.022, v: 0.335, tipo: 'tocha', escala: 0.45, fase: 3 },
-    { u: 0.223, v: 0.745, tipo: 'chamine', escala: 0.45, fase: 5 },
-    { u: 0.223, v: 0.755, tipo: 'tocha', escala: 0.4, fase: 4 },
-    { u: 0.535, v: 0.905, tipo: 'chamine', escala: 0.5, fase: 6 },
-    { u: 0.557, v: 0.930, tipo: 'tocha', escala: 0.4, fase: 5 },
+    { u: 0.224, v: 0.713, tipo: 'chamine', escala: 0.45, fase: 5 },
+    { u: 0.224, v: 0.720, tipo: 'tocha', escala: 0.4, fase: 4 },
+    { u: 0.535, v: 0.895, tipo: 'chamine', escala: 0.5, fase: 6 },
+    { u: 0.529, v: 0.903, tipo: 'tocha', escala: 0.4, fase: 5 },
+    { u: 0.557, v: 0.923, tipo: 'chamine', escala: 0.45, fase: 9 },
     { u: 0.223, v: 0.822, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5 },
   ],
 
@@ -595,19 +637,19 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.375, v: 0.112, tipo: 'tocha', escala: 0.6, fase: 1 },
     { u: 0.624, v: 0.110, tipo: 'tocha', escala: 0.6, fase: 2 },
     { u: 0.824, v: 0.113, tipo: 'tocha', escala: 0.6, fase: 3 },
-    { u: 0.132, v: 0.240, tipo: 'tocha', escala: 0.28, fase: 0 },
-    { u: 0.438, v: 0.161, tipo: 'tocha', escala: 0.28, fase: 1 },
-    { u: 0.887, v: 0.225, tipo: 'tocha', escala: 0.28, fase: 2 },
-    { u: 0.117, v: 0.365, tipo: 'tocha', escala: 0.28, fase: 3 },
-    { u: 0.868, v: 0.382, tipo: 'tocha', escala: 0.28, fase: 4 },
-    { u: 0.119, v: 0.510, tipo: 'tocha', escala: 0.28, fase: 5 },
-    { u: 0.888, v: 0.565, tipo: 'tocha', escala: 0.28, fase: 6 },
-    { u: 0.129, v: 0.670, tipo: 'tocha', escala: 0.28, fase: 7 },
-    { u: 0.881, v: 0.718, tipo: 'tocha', escala: 0.28, fase: 8 },
-    { u: 0.141, v: 0.876, tipo: 'tocha', escala: 0.28, fase: 9 },
-    { u: 0.387, v: 0.873, tipo: 'tocha', escala: 0.28, fase: 10 },
-    { u: 0.616, v: 0.868, tipo: 'tocha', escala: 0.28, fase: 11 },
-    { u: 0.836, v: 0.871, tipo: 'tocha', escala: 0.28, fase: 12 },
+    { u: 0.132, v: 0.229, tipo: 'tocha', escala: 0.28, fase: 0 },
+    { u: 0.438, v: 0.150, tipo: 'tocha', escala: 0.28, fase: 1 },
+    { u: 0.887, v: 0.214, tipo: 'tocha', escala: 0.28, fase: 2 },
+    { u: 0.117, v: 0.354, tipo: 'tocha', escala: 0.28, fase: 3 },
+    { u: 0.868, v: 0.371, tipo: 'tocha', escala: 0.28, fase: 4 },
+    { u: 0.119, v: 0.499, tipo: 'tocha', escala: 0.28, fase: 5 },
+    { u: 0.888, v: 0.554, tipo: 'tocha', escala: 0.28, fase: 6 },
+    { u: 0.129, v: 0.659, tipo: 'tocha', escala: 0.28, fase: 7 },
+    { u: 0.881, v: 0.707, tipo: 'tocha', escala: 0.28, fase: 8 },
+    { u: 0.141, v: 0.865, tipo: 'tocha', escala: 0.28, fase: 9 },
+    { u: 0.387, v: 0.862, tipo: 'tocha', escala: 0.28, fase: 10 },
+    { u: 0.616, v: 0.857, tipo: 'tocha', escala: 0.28, fase: 11 },
+    { u: 0.836, v: 0.860, tipo: 'tocha', escala: 0.28, fase: 12 },
     { u: 0.250, v: 0.420, tipo: 'nevoa', cor: '#b9a0e0' },
     { u: 0.600, v: 0.250, tipo: 'nevoa', cor: '#b9a0e0', fase: 11 },
     { u: 0.400, v: 0.650, tipo: 'nevoa', cor: '#b9a0e0', fase: 19 },
@@ -619,7 +661,7 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // PORTO (lote 3, Urbano). A doca ondula pela mascara (a agua satura acima
   // de 0,5, o conteiner azul nao). Aqui so a chamine do cargueiro.
   'assets/hunt-backgrounds/harbor.jpg': [
-    { u: 0.652, v: 0.072, tipo: 'chamine', escala: 0.7 },
+    { u: 0.652, v: 0.062, tipo: 'chamine', escala: 0.7 },
   ],
 
   // ESGOTO (lote 3, Urbano). Escuro: as seis lampadas pulsam, a agua verde
@@ -631,9 +673,12 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.108, v: 0.379, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 3 },
     { u: 0.109, v: 0.638, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 4 },
     { u: 0.892, v: 0.627, tipo: 'orbe', cor: '#ffe28a', escala: 0.8, fase: 5 },
-    { u: 0.260, v: 0.150, tipo: 'fumarola', escala: 0.4 },
-    { u: 0.680, v: 0.140, tipo: 'fumarola', escala: 0.4, fase: 3 },
+    { u: 0.261, v: 0.137, tipo: 'fumarola', escala: 0.4 },
+    { u: 0.684, v: 0.127, tipo: 'fumarola', escala: 0.4, fase: 3 },
     { u: 0.940, v: 0.760, tipo: 'fumarola', escala: 0.35, fase: 5 },
+    { u: 0.330, v: 0.270, tipo: 'cascata', escala: 0.4 },
+    { u: 0.669, v: 0.269, tipo: 'cascata', escala: 0.4, fase: 2 },
+    { u: 0.733, v: 0.478, tipo: 'cascata', escala: 0.4, fase: 4 },
   ],
 
   // ESCONDERIJO ROCKET (lote 3, Urbano). Escuro: sirenes vermelhas girando
@@ -642,27 +687,28 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.124, v: 0.067, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0 },
     { u: 0.425, v: 0.067, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.3 },
     { u: 0.873, v: 0.072, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.6 },
-    { u: 0.274, v: 0.108, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.8999999999999999 },
+    { u: 0.274, v: 0.108, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 0.9 },
     { u: 0.575, v: 0.105, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.2 },
     { u: 0.721, v: 0.106, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.5 },
-    { u: 0.224, v: 0.383, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.7999999999999998 },
+    { u: 0.224, v: 0.383, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 1.8 },
     { u: 0.871, v: 0.386, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.1 },
     { u: 0.174, v: 0.660, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.4 },
-    { u: 0.872, v: 0.661, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.6999999999999997 },
+    { u: 0.872, v: 0.661, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 2.7 },
     { u: 0.924, v: 0.920, tipo: 'orbe', cor: '#ff3b3b', escala: 0.6, fase: 3 },
     { u: 0.174, v: 0.090, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 5 },
-    { u: 0.124, v: 0.375, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 6 },
+    { u: 0.173, v: 0.410, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 6 },
     { u: 0.174, v: 0.370, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 7 },
     { u: 0.824, v: 0.415, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 8 },
     { u: 0.074, v: 0.710, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 9 },
     { u: 0.124, v: 0.705, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 10 },
     { u: 0.824, v: 0.795, tipo: 'orbe', cor: '#7dffb0', escala: 0.4, fase: 11 },
+    { u: 0.124, v: 0.422, tipo: 'orbe', cor: '#ff3b3b', escala: 0.4, fase: 4 },
   ],
 
   // MANSAO CELADON (lote 3, Urbano). Escala propria 0,5 (banco 3,5x o
   // treinador). Fonte jorrando e borboletas no jardim.
   'assets/hunt-backgrounds/celadon-mansion.jpg': [
-    { u: 0.710, v: 0.445, tipo: 'cascata', escala: 0.5 },
+    { u: 0.728, v: 0.490, tipo: 'cascata', escala: 0.5 },
     { u: 0.700, v: 0.495, tipo: 'correnteza', escala: 0.6 },
     { u: 0.600, v: 0.360, tipo: 'borboleta', cor: '#ffb0d0' },
     { u: 0.850, v: 0.270, tipo: 'borboleta', cor: '#fff3b0', fase: 3 },
@@ -672,8 +718,9 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // CONCURSO DE INSETOS (lote 3). Proporcao boa. Fonte jorrando no centro e
   // borboletas nos cantos floridos dos quatro canteiros.
   'assets/hunt-backgrounds/bug-contest.jpg': [
-    { u: 0.500, v: 0.470, tipo: 'cascata', escala: 0.45 },
-    { u: 0.500, v: 0.495, tipo: 'correnteza', escala: 0.5 },
+    { u: 0.475, v: 0.508, tipo: 'cascata', escala: 0.35 },
+    { u: 0.525, v: 0.508, tipo: 'cascata', escala: 0.35, fase: 2 },
+    { u: 0.500, v: 0.517, tipo: 'correnteza', escala: 0.5 },
     { u: 0.230, v: 0.230, tipo: 'borboleta', cor: '#ffb0d0' },
     { u: 0.770, v: 0.230, tipo: 'borboleta', cor: '#fff3b0', fase: 2 },
     { u: 0.230, v: 0.760, tipo: 'borboleta', cor: '#c9a7ff', fase: 4 },
@@ -741,15 +788,13 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.640, v: 0.745, tipo: 'chamine', escala: 0.35, fase: 4 },
     { u: 0.560, v: 0.370, tipo: 'nevoa', cor: '#c9a77a', escala: 0.45 },
     { u: 0.500, v: 0.490, tipo: 'nevoa', cor: '#c9a77a', escala: 0.4, fase: 12 },
-    { u: 0.855, v: 0.375, tipo: 'eletrica', escala: 0.6 },
-    { u: 0.855, v: 0.555, tipo: 'eletrica', escala: 0.6, fase: 3 },
   ],
 
   // FERRO-VELHO (lote 5, Industrial). Escala propria 0,5 (carro ~8x o
   // treinador; 0,5 e o menor que nao aperta a caca). Fumaca do guindaste,
   // faisca no cabo da garra e poeira rodando nas duas ruas de terra.
   'assets/hunt-backgrounds/junkyard.jpg': [
-    { u: 0.875, v: 0.165, tipo: 'chamine', escala: 0.5 },
+    { u: 0.918, v: 0.145, tipo: 'chamine', escala: 0.5 },
     { u: 0.700, v: 0.200, tipo: 'eletrica', escala: 0.6 },
     { u: 0.300, v: 0.500, tipo: 'nevoa', cor: '#b58a5a', escala: 0.45 },
     { u: 0.520, v: 0.700, tipo: 'nevoa', cor: '#b58a5a', escala: 0.45, fase: 14 },
@@ -779,21 +824,27 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.124, v: 0.569, tipo: 'fumarola', escala: 0.45, fase: 7 },
     { u: 0.323, v: 0.668, tipo: 'fumarola', escala: 0.45, fase: 8 },
     { u: 0.673, v: 0.668, tipo: 'fumarola', escala: 0.45, fase: 9 },
+    { u: 0.124, v: 0.864, tipo: 'fumarola', escala: 0.45, fase: 10 },
+    { u: 0.875, v: 0.864, tipo: 'fumarola', escala: 0.45, fase: 11 },
     { u: 0.176, v: 0.228, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45 },
     { u: 0.171, v: 0.274, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 1 },
     { u: 0.626, v: 0.225, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 2 },
     { u: 0.826, v: 0.220, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 3 },
     { u: 0.176, v: 0.523, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 4 },
+    { u: 0.125, v: 0.723, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 5 },
+    { u: 0.174, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 6 },
+    { u: 0.828, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 7 },
+    { u: 0.823, v: 0.823, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 8 },
   ],
 
   // MONTE EMBER (lote 6, Igneo). Fumaca nas fendas que a arte pinta, chama
   // baixa nos rios de lava dos cantos e brilho nas rochas rachadas.
   'assets/hunt-backgrounds/mt-ember.jpg': [
-    { u: 0.326, v: 0.129, tipo: 'fumarola', escala: 0.4 },
-    { u: 0.673, v: 0.166, tipo: 'fumarola', escala: 0.45, fase: 2 },
+    { u: 0.330, v: 0.156, tipo: 'fumarola', escala: 0.4 },
+    { u: 0.672, v: 0.200, tipo: 'fumarola', escala: 0.45, fase: 2 },
     { u: 0.124, v: 0.357, tipo: 'fumarola', escala: 0.4, fase: 4 },
-    { u: 0.181, v: 0.373, tipo: 'fumarola', escala: 0.4, fase: 6 },
-    { u: 0.272, v: 0.378, tipo: 'fumarola', escala: 0.4, fase: 8 },
+    { u: 0.178, v: 0.425, tipo: 'fumarola', escala: 0.4, fase: 6 },
+    { u: 0.273, v: 0.412, tipo: 'fumarola', escala: 0.4, fase: 8 },
     { u: 0.626, v: 0.559, tipo: 'fumarola', escala: 0.4, fase: 10 },
     { u: 0.771, v: 0.792, tipo: 'fumarola', escala: 0.4, fase: 12 },
     { u: 0.251, v: 0.052, tipo: 'fogueira', escala: 0.6 },
@@ -807,6 +858,9 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.202, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5, fase: 4 },
     { u: 0.797, v: 0.776, tipo: 'orbe', cor: '#ff7a3c', escala: 0.5, fase: 6 },
     { u: 0.973, v: 0.233, tipo: 'orbe', cor: '#ff7a3c', escala: 0.45, fase: 8 },
+    { u: 0.376, v: 0.120, tipo: 'fumarola', escala: 0.4, fase: 14 },
+    { u: 0.122, v: 0.437, tipo: 'fumarola', escala: 0.4, fase: 16 },
+    { u: 0.776, v: 0.679, tipo: 'fumarola', escala: 0.4, fase: 18 },
   ],
 
   // CAMPO DE CINZAS (lote 6, Igneo). Fumaca da chamine da casa, cinza caindo
@@ -884,10 +938,6 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.704, v: 0.440, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 10 },
     { u: 0.342, v: 0.647, tipo: 'nevoa', cor: '#ffffff', escala: 0.5, fase: 20 },
     { u: 0.642, v: 0.626, tipo: 'nevoa', cor: '#ffffff', escala: 0.55, fase: 30 },
-    { u: 0.725, v: 0.280, tipo: 'orbe', cor: '#5fe0c8', escala: 0.9 },
-    { u: 0.549, v: 0.290, tipo: 'orbe', cor: '#5fe0c8', escala: 0.6, fase: 2 },
-    { u: 0.745, v: 0.678, tipo: 'orbe', cor: '#5fe0c8', escala: 0.8, fase: 4 },
-    { u: 0.217, v: 0.647, tipo: 'orbe', cor: '#5fe0c8', escala: 0.5, fase: 6 },
   ],
 
   // SANTUARIO DE MEDITACAO (lote 8, Sagrado). Lago das carpas ondula pela mascara;
@@ -913,8 +963,8 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.652, v: 0.171, tipo: 'fogoFatuo', cor: '#a8c8ff', fase: 3 },
     { u: 0.901, v: 0.414, tipo: 'fogoFatuo', cor: '#c0a8ff', fase: 5 },
     { u: 0.098, v: 0.430, tipo: 'fogoFatuo', cor: '#c0a8ff', fase: 7 },
-    { u: 0.409, v: 0.373, tipo: 'chamine', escala: 0.25 },
-    { u: 0.714, v: 0.611, tipo: 'chamine', escala: 0.25, fase: 3 },
+    { u: 0.409, v: 0.362, tipo: 'chamine', escala: 0.25 },
+    { u: 0.718, v: 0.578, tipo: 'chamine', escala: 0.25, fase: 3 },
     { u: 0.259, v: 0.792, tipo: 'chamine', escala: 0.25, fase: 6 },
   ],
 
@@ -967,7 +1017,6 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.173, v: 0.179, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22 },
     { u: 0.132, v: 0.471, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22, fase: 8 },
     { u: 0.916, v: 0.523, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.22, fase: 16 },
-    { u: 0.722, v: 0.137, tipo: 'nevoa', cor: '#6a3a2e', escala: 0.2, fase: 24 },
   ],
 
   // CANION DO VOVO (lote 9, Arido). Sitio de escavacao: poeira subindo das quatro
@@ -1036,25 +1085,27 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.241, v: 0.067, tipo: 'orbe', cor: '#d8f0a0', escala: 0.7 },
     { u: 0.789, v: 0.072, tipo: 'orbe', cor: '#d8f0a0', escala: 0.7, fase: 3 },
     { u: 0.124, v: 0.145, tipo: 'orbe', cor: '#7ff0e0', escala: 0.8, fase: 1 },
-    { u: 0.810, v: 0.782, tipo: 'orbe', cor: '#7ff0e0', escala: 0.8, fase: 4 },
+    { u: 0.816, v: 0.832, tipo: 'orbe', cor: '#7ff0e0', escala: 0.8, fase: 4 },
     { u: 0.497, v: 0.088, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.3 },
     { u: 0.497, v: 0.968, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.3, fase: 10 },
     { u: 0.111, v: 0.642, tipo: 'nevoa', cor: '#e8f6ff', escala: 0.2, fase: 20 },
+    { u: 0.400, v: 0.467, tipo: 'correnteza', escala: 0.6 },
+    { u: 0.400, v: 0.535, tipo: 'correnteza', escala: 0.6, fase: 3 },
   ],
 
   // VILA NATALINA DA JYNX (lote 10, Gelido). Ja neva pelo preset; fumaca nas tres
   // chamines, estrela da arvore central pulsando e postes de luz acesos.
   'assets/hunt-backgrounds/jynx-holiday.jpg': [
-    { u: 0.489, v: 0.150, tipo: 'chamine', escala: 0.5 },
-    { u: 0.254, v: 0.567, tipo: 'chamine', escala: 0.5, fase: 2 },
-    { u: 0.841, v: 0.562, tipo: 'chamine', escala: 0.5, fase: 4 },
+    { u: 0.489, v: 0.143, tipo: 'chamine', escala: 0.5 },
+    { u: 0.254, v: 0.555, tipo: 'chamine', escala: 0.5, fase: 2 },
+    { u: 0.841, v: 0.540, tipo: 'chamine', escala: 0.5, fase: 4 },
     { u: 0.499, v: 0.396, tipo: 'orbe', cor: '#ffe066', escala: 0.8 },
     { u: 0.561, v: 0.273, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 1 },
-    { u: 0.312, v: 0.447, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 2 },
-    { u: 0.742, v: 0.423, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 3 },
-    { u: 0.449, v: 0.663, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 4 },
+    { u: 0.300, v: 0.445, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 2 },
+    { u: 0.732, v: 0.418, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 3 },
+    { u: 0.438, v: 0.662, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 4 },
     { u: 0.564, v: 0.660, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 5 },
-    { u: 0.426, v: 0.940, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 6 },
+    { u: 0.437, v: 0.940, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 6 },
     { u: 0.561, v: 0.939, tipo: 'orbe', cor: '#ffc06a', escala: 0.45, fase: 7 },
   ],
 
@@ -1071,6 +1122,9 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.223, v: 0.818, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 5 },
     { u: 0.823, v: 0.818, tipo: 'orbe', cor: '#c8b8ff', escala: 0.5, fase: 6 },
     { u: 0.135, v: 0.859, tipo: 'orbe', cor: '#c8b8ff', escala: 0.55, fase: 7 },
+    { u: 0.220, v: 0.330, tipo: 'orbe', cor: '#c8b8ff', escala: 0.4, fase: 8 },
+    { u: 0.828, v: 0.330, tipo: 'orbe', cor: '#c8b8ff', escala: 0.4, fase: 9 },
+    { u: 0.923, v: 0.640, tipo: 'orbe', cor: '#c8b8ff', escala: 0.4, fase: 10 },
   ],
 
   // TUNEL DE PEDRA (lote 11, Subterraneo). Ja pinga pelo preset; lampioes da mina
@@ -1116,6 +1170,7 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.311, v: 0.621, tipo: 'orbe', cor: '#c080ff', escala: 0.5, fase: 6 },
     { u: 0.173, v: 0.823, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 7 },
     { u: 0.826, v: 0.823, tipo: 'orbe', cor: '#c080ff', escala: 0.6, fase: 8 },
+    { u: 0.713, v: 0.396, tipo: 'orbe', cor: '#c080ff', escala: 0.5, fase: 9 },
   ],
 
   // CAVERNA DIGLETT (lote 11, Subterraneo). Ja pinga pelo preset; poeira subindo das
@@ -1149,9 +1204,9 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.647, v: 0.280, tipo: 'cascata', escala: 0.55 },
     { u: 0.409, v: 0.523, tipo: 'cascata', escala: 0.55, fase: 2 },
     { u: 0.290, v: 0.652, tipo: 'cascata', escala: 0.55, fase: 4 },
-    { u: 0.776, v: 0.248, tipo: 'correnteza' },
+    { u: 0.748, v: 0.249, tipo: 'correnteza' },
     { u: 0.155, v: 0.647, tipo: 'correnteza', fase: 3 },
-    { u: 0.362, v: 0.559, tipo: 'correnteza', fase: 6 },
+    { u: 0.368, v: 0.578, tipo: 'correnteza', fase: 6 },
   ],
 
   // CACHOEIRA (lote 12, Aguas Interiores). Lago e poca ondulam pela mascara; queda
@@ -1216,15 +1271,15 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.802, v: 0.171, tipo: 'nevoa', cor: '#ffffff', escala: 0.4, fase: 24 },
     { u: 0.828, v: 0.445, tipo: 'nevoa', cor: '#ffffff', escala: 0.35, fase: 32 },
     { u: 0.807, v: 0.725, tipo: 'nevoa', cor: '#ffffff', escala: 0.45, fase: 40 },
-    { u: 0.424, v: 0.168, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45 },
-    { u: 0.572, v: 0.168, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 1 },
-    { u: 0.122, v: 0.347, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 2 },
-    { u: 0.877, v: 0.344, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 3 },
-    { u: 0.426, v: 0.398, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 4 },
-    { u: 0.575, v: 0.394, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 5 },
-    { u: 0.675, v: 0.556, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 6 },
-    { u: 0.422, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 7 },
-    { u: 0.577, v: 0.652, tipo: 'orbe', cor: '#ff6a4a', escala: 0.45, fase: 8 },
+    { u: 0.425, v: 0.174, tipo: 'tocha', escala: 0.3, fase: 0 },
+    { u: 0.573, v: 0.174, tipo: 'tocha', escala: 0.3, fase: 2 },
+    { u: 0.122, v: 0.352, tipo: 'tocha', escala: 0.3, fase: 4 },
+    { u: 0.877, v: 0.352, tipo: 'tocha', escala: 0.3, fase: 6 },
+    { u: 0.425, v: 0.402, tipo: 'tocha', escala: 0.3, fase: 8 },
+    { u: 0.573, v: 0.402, tipo: 'tocha', escala: 0.3, fase: 10 },
+    { u: 0.681, v: 0.564, tipo: 'tocha', escala: 0.3, fase: 12 },
+    { u: 0.423, v: 0.656, tipo: 'tocha', escala: 0.3, fase: 14 },
+    { u: 0.577, v: 0.656, tipo: 'tocha', escala: 0.3, fase: 16 },
   ],
 
   // MONTANHA (lote 13, final). Riacho estreito demais pra mascara: queda batendo nos
@@ -1266,7 +1321,7 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // ILHA MIRAGEM (lote 13, final). Ja ondula pelo preset; onda batendo na beira da
   // ilha e da trilha de areia, borboletas nas frutinhas e o ar tremulando como miragem.
   'assets/hunt-backgrounds/mirage-island.jpg': [
-    { u: 0.155, v: 0.362, tipo: 'quebraMar', escala: 0.5 },
+    { u: 0.122, v: 0.362, tipo: 'quebraMar', escala: 0.5 },
     { u: 0.859, v: 0.259, tipo: 'quebraMar', escala: 0.5, fase: 3 },
     { u: 0.393, v: 0.880, tipo: 'quebraMar', escala: 0.5, fase: 5 },
     { u: 0.611, v: 0.880, tipo: 'quebraMar', escala: 0.5, fase: 7 },
@@ -1339,9 +1394,9 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // ESQUADRAO SQUIRTLE (lote 13, final). Rio corre pela mascara; agua batendo nos
   // pilares da ponte, fogueira do acampamento na frente da caverna e borboletas.
   'assets/hunt-backgrounds/squirtle-squad.jpg': [
-    { u: 0.409, v: 0.481, tipo: 'cascata', escala: 0.6 },
+    { u: 0.394, v: 0.481, tipo: 'cascata', escala: 0.6 },
     { u: 0.606, v: 0.518, tipo: 'cascata', escala: 0.6, fase: 2 },
-    { u: 0.506, v: 0.225, tipo: 'fogueira', escala: 0.5 },
+    { u: 0.502, v: 0.222, tipo: 'fogueira', escala: 0.5 },
     { u: 0.155, v: 0.233, tipo: 'borboleta', cor: '#fff3b0' },
     { u: 0.828, v: 0.751, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
     { u: 0.207, v: 0.751, tipo: 'borboleta', cor: '#7fd3ff', fase: 5 },
@@ -1365,12 +1420,12 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
   // ILHA (sobra). Mar e lagoa ja ondulam pela mascara; fogueira do acampamento, as
   // duas tochas do farol, onda batendo na praia e borboletas na mata das palmeiras.
   'assets/hunt-backgrounds/island.jpg': [
-    { u: 0.616, v: 0.721, tipo: 'fogueira', escala: 0.5 },
+    { u: 0.630, v: 0.720, tipo: 'fogueira', escala: 0.5 },
     { u: 0.601, v: 0.262, tipo: 'tocha' },
     { u: 0.796, v: 0.339, tipo: 'tocha', fase: 3 },
-    { u: 0.207, v: 0.828, tipo: 'quebraMar', escala: 0.6 },
-    { u: 0.518, v: 0.875, tipo: 'quebraMar', escala: 0.6, fase: 3 },
-    { u: 0.880, v: 0.751, tipo: 'quebraMar', escala: 0.6, fase: 5 },
+    { u: 0.220, v: 0.786, tipo: 'quebraMar', escala: 0.6 },
+    { u: 0.518, v: 0.837, tipo: 'quebraMar', escala: 0.6, fase: 3 },
+    { u: 0.830, v: 0.752, tipo: 'quebraMar', escala: 0.6, fase: 5 },
     { u: 0.129, v: 0.466, tipo: 'quebraMar', escala: 0.6, fase: 7 },
     { u: 0.362, v: 0.233, tipo: 'borboleta', cor: '#fff3b0' },
     { u: 0.217, v: 0.388, tipo: 'borboleta', cor: '#ffffff', fase: 3 },
@@ -1401,9 +1456,9 @@ export const ANCORAS_POR_ARTE: Record<string, AncoraDeAmbiente[]> = {
     { u: 0.336, v: 0.595, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 4 },
     { u: 0.694, v: 0.751, tipo: 'gas', cor: '#e8fbff', escala: 0.35, fase: 6 },
     { u: 0.725, v: 0.854, tipo: 'gas', cor: '#e8fbff', escala: 0.3, fase: 8 },
-    { u: 0.870, v: 0.145, tipo: 'quebraMar', escala: 0.5 },
-    { u: 0.492, v: 0.497, tipo: 'quebraMar', escala: 0.4, fase: 3 },
-    { u: 0.714, v: 0.575, tipo: 'quebraMar', escala: 0.4, fase: 5 },
-    { u: 0.181, v: 0.833, tipo: 'quebraMar', escala: 0.5, fase: 7 },
+    { u: 0.871, v: 0.168, tipo: 'quebraMar', escala: 0.5 },
+    { u: 0.498, v: 0.516, tipo: 'quebraMar', escala: 0.4, fase: 3 },
+    { u: 0.716, v: 0.598, tipo: 'quebraMar', escala: 0.4, fase: 5 },
+    { u: 0.184, v: 0.860, tipo: 'quebraMar', escala: 0.5, fase: 7 },
   ],
 }

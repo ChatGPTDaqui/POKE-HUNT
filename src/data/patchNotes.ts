@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.58',
+    date: '2026-10-29',
+    title: 'Efeitos dos mapas revisados',
+    highlights: [
+      'Todos os 83 mapas de caça foram revistos um por um: espuma das cascatas no pé da queda, fumaça saindo da boca das chaminés e incensários, chamas em cima dos lampiões e velas, ondas na beira da areia.',
+      'Efeitos novos onde o cenário pedia: lampiões da Rota 46, do Dojo e da Caverna de Gelo, quedas d\'água da Caverna das Fadas e do Templo, canos despejando no Subterrâneo, chaminé da casa do Vulcão, cristais do Monte Lua, runas do Abismo e mais.',
+      'Efeitos sem objeto por baixo foram removidos (faíscas da Obra, brilhos invisíveis no Pilar do Céu).',
+    ],
+  },
+  {
     version: '8.57',
     date: '2026-10-28',
     title: 'Mercado novo: vitrine agrupada e página de cada Pokémon',
