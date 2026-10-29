@@ -62,17 +62,26 @@ describe('TreinadorEmCampo: seguidor de gente (09/10)', () => {
     try {
       for (const skin of SKINS_DO_TREINADOR) {
         const drawImage = vi.fn()
-        const ctx = { save() {}, restore() {}, beginPath() {}, ellipse() {}, fill() {},
+        // O desenho e ancorado no PE por translate/scale (respiracao, passo e
+        // arremesso — 29/10/2026); a conta do retangulo vai no ponto de pe.
+        const translate = vi.fn(), scale = vi.fn()
+        const ctx = { save() {}, restore() {}, beginPath() {}, ellipse() {}, fill() {}, rotate() {},
+          translate, scale,
           drawImage, imageSmoothingEnabled: false, imageSmoothingQuality: 'low' } as unknown as CanvasRenderingContext2D
         const t = new TreinadorEmCampo()
         t.skin = skin.id
         t.parado({ x: 200, y: 200 }, { x: 0, y: 1 }, DT)
         t.desenhar(ctx)
-        const g = quadroDaSkin(skin.id), scale = 30 / g.bodyHeight
+        const g = quadroDaSkin(skin.id)
         expect(drawImage).toHaveBeenCalledOnce()
         const args = drawImage.mock.calls[0]
         expect(args.slice(3, 5)).toEqual([g.frameWidth, g.frameHeight])
-        expect(args.slice(5)).toEqual([200 - g.footX * scale, 200 - g.footY * scale, g.frameWidth * scale, g.frameHeight * scale])
+        const k = 30 / g.bodyHeight
+        expect(translate).toHaveBeenCalledWith(200, 200)
+        const [sx, sy] = scale.mock.calls[0]
+        expect(Math.abs(sx - 1)).toBeLessThan(0.03)
+        expect(Math.abs(sy - 1)).toBeLessThan(0.03)
+        expect(args.slice(5)).toEqual([-g.footX * k, -g.footY * k, g.frameWidth * k, g.frameHeight * k])
         expect(ctx.imageSmoothingEnabled).toBe(false)
         expect(ctx.imageSmoothingQuality).toBe('low')
       }

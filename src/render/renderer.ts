@@ -20,7 +20,8 @@ import { iniciarQuadroDeVfx } from './vfx/orcamento'
 import { novoQuadroDoPixelizador } from './vfx/pixelizador'
 import { desenharMoedasNoChao } from './vooDeRecompensa'
 import { desenharItensNoChao } from './itemNoChao'
-import { TreinadorEmCampo, lugarNoDuelo } from './treinadorEmCampo'
+import { DURACAO_DO_ARREMESSO, TreinadorEmCampo, lugarNoDuelo } from './treinadorEmCampo'
+import { itemIconUrl } from '@/data/sprites'
 import { desenharCura, desenharCuraNoCentro, DURACAO_CURA_CENTRO_MS } from './cura'
 import { VFX_CURA_DURACAO } from '@/engine/entity'
 
@@ -76,6 +77,8 @@ export class Renderer {
   zoom: number
   /** Relogio do quadro anterior (ms), pra animacao do treinador em campo. */
   private ultimoQuadro = 0
+  /** Efeitos de captura cujo arremesso ja foi feito pelo treinador (29/10/2026). */
+  private arremessosFeitos = new Set<string>()
   /** O boneco do treinador que anda atras do POKE (08/10). Um por cena. */
   readonly treinador = new TreinadorEmCampo()
   /** Treinador do RIVAL no duelo de PvP (09/10); fora da arena nao aparece. */
@@ -365,6 +368,23 @@ export class Renderer {
     } else {
       const mapa = world.mapDef
       this.treinador.atualizar(world.player, dtDoTreinador, mapa ? (x, y) => isCellBlocked(mapa, x, y) : undefined)
+      // ARREMESSO (29/10/2026): o treinador joga a Pokebola de captura. O efeito
+      // da captura espera `delay` segundos antes de aparecer; o gesto comeca
+      // DURACAO_DO_ARREMESSO antes disso, pra a bola chegar no POKE quando a
+      // animacao de captura comeca. Um arremesso por efeito.
+      for (const ef of world.effects) {
+        if (ef.type !== 'captureAnim' || this.arremessosFeitos.has(ef.id)) continue
+        if (ef.age < ef.delay - DURACAO_DO_ARREMESSO || ef.age >= ef.delay) continue
+        this.arremessosFeitos.add(ef.id)
+        this.treinador.arremessar(
+          { x: ef.targetX ?? ef.x, y: (ef.targetY ?? ef.y) - 10 },
+          ef.ballItemId ? itemIconUrl(ef.ballItemId) : null,
+        )
+      }
+      if (this.arremessosFeitos.size > 50) {
+        const vivos = new Set(world.effects.map((ef) => ef.id))
+        for (const id of this.arremessosFeitos) if (!vivos.has(id)) this.arremessosFeitos.delete(id)
+      }
     }
     const peDoTreinadorAgora = arena ? null : this.treinador.pe
     const treinadorAtras = !!peDoTreinadorAgora && (!jogadorVivo || peDoTreinadorAgora.y <= jogadorVivo.y + 8)
