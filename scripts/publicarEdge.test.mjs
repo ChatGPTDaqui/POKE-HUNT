@@ -15,7 +15,7 @@
 // Por isso o caso "sem fonte nenhuma RECUSA" e o mais importante daqui: o
 // default de um comando que publica nao pode ser "onde estiver linkado".
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { refDaUrl, resolverProjeto, resolverFuncao, listaDeProjetos, VERSAO_DO_CLI } from './publicar-edge.mjs'
 
@@ -48,6 +48,13 @@ describe('o alvo do deploy da Edge (PH-187)', () => {
     }
     expect(FONTE).toContain("`supabase@${VERSAO_DO_CLI}`")
     expect(FONTE).toMatch(/'--project-ref',\s*ref,\s*'--yes'/)
+  })
+
+  it('nenhum workflow chama `npx supabase` (versao solta)', () => {
+    for (const wf of readdirSync(join(RAIZ, '.github/workflows'))) {
+      const texto = readFileSync(join(RAIZ, '.github/workflows', wf), 'utf8')
+      expect(texto, wf).not.toMatch(/npx\s+supabase\s/)
+    }
   })
 
   it('extrai o ref do host de uma URL do Supabase, e so dela', () => {
