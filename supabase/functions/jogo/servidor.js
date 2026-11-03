@@ -153551,8 +153551,13 @@ function contextoDoProtetor(mapId, ctx, sala, tipo) {
 	for (let i = inicio - 1; i >= 0 && escolhidos.length < 3; i--) juntar(i);
 	for (let i = inicio + 1; i < doTier.length && escolhidos.length < 3; i++) juntar(i);
 	if (escolhidos.length === 0) {
-		cacheDeProtetor.set(chaveCache, ctx);
-		return ctx;
+		const copia = {
+			...ctx,
+			pool: [...ctx.pool],
+			...ctx.janela ? { janela: [ctx.janela[0], ctx.janela[1]] } : {}
+		};
+		cacheDeProtetor.set(chaveCache, copia);
+		return copia;
 	}
 	if (escolhidos.length < 3) {
 		const sobra = ctx.pool.filter((id) => !tierDoEncontro.has(id)).sort((a, b) => ctx.peso(a) - ctx.peso(b) || a.localeCompare(b));
@@ -156635,91 +156640,102 @@ async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtE
 		p_patch: gameStateToPlayerRow(userId, estado),
 		p_updated_at_esperado: playerUpdatedAtEsperado
 	})).ok) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR);
-	const linhasPoke = gameStateToPokemonRows(userId, estado);
-	if (!tabelaIntacta(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))) {
-		const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id) => id != null));
-		const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
-		const atuais = [];
-		for (const lote of porLotesDeId(idsDeInteresse)) atuais.push(...await selecionarTudo(cfg, `pokemon_instances?id=in.(${lote.join(",")})&select=id,user_id,location`));
-		const porId = new Map(atuais.map((l) => [l.id, l]));
-		const aindaMeu = (l) => l != null && l.user_id === userId && (l.location === "team" || l.location === "bag");
-		const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)));
-		for (const lote of porLotesDeId(remover)) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(",")})`);
-		const gravarPoke = linhasQueMudaram(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id)).filter((l) => {
-			const atual = porId.get(String(l.id));
-			return atual == null || aindaMeu(atual);
-		});
-		if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke.map((l) => ({
-			...l,
-			origem: "captura"
-		})), { upsert: "id" });
-	}
-	const todosItens = gameStateToItemRows(userId, estado);
-	for (const item of todosItens.filter((l) => l.item_id?.startsWith("tm_"))) {
-		const anterior = linhasNoLoad?.items.find((l) => l.item_id === item.item_id)?.quantity ?? 0;
-		const delta = Number(item.quantity) - anterior;
-		if (delta > 0) {
-			if (!linhasNoLoad) throw new Error("Crédito de TM exige baseline do snapshot");
-			await chamarRpc(cfg, "creditar_drop_tm", {
-				p_user_id: userId,
-				p_item_id: item.item_id,
-				p_qtd: delta,
-				p_origem: playerUpdatedAtEsperado
+	const tarefas = [];
+	tarefas.push((async () => {
+		const linhasPoke = gameStateToPokemonRows(userId, estado);
+		if (!tabelaIntacta(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))) {
+			const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id) => id != null));
+			const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
+			const atuais = [];
+			for (const lote of porLotesDeId(idsDeInteresse)) atuais.push(...await selecionarTudo(cfg, `pokemon_instances?id=in.(${lote.join(",")})&select=id,user_id,location`));
+			const porId = new Map(atuais.map((l) => [l.id, l]));
+			const aindaMeu = (l) => l != null && l.user_id === userId && (l.location === "team" || l.location === "bag");
+			const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)));
+			for (const lote of porLotesDeId(remover)) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(",")})`);
+			const gravarPoke = linhasQueMudaram(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id)).filter((l) => {
+				const atual = porId.get(String(l.id));
+				return atual == null || aindaMeu(atual);
 			});
+			if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke.map((l) => ({
+				...l,
+				origem: "captura"
+			})), { upsert: "id" });
 		}
-	}
-	const linhasItens = todosItens.filter((l) => !l.item_id?.startsWith("tm_"));
-	const itensComunsNoLoad = linhasNoLoad?.items.filter((l) => !l.item_id.startsWith("tm_"));
-	if (!tabelaIntacta(linhasItens, itensComunsNoLoad, (l) => String(l.item_id))) {
-		const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
-		const removerItens = (await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !id.startsWith("tm_") && !itemIdsAgora.has(id));
-		for (const lote of porLotesDeId(removerItens)) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(",")})`);
-		const itensMudados = linhasQueMudaram(linhasItens, itensComunsNoLoad, (l) => String(l.item_id));
-		if (itensMudados.length) await inserir(cfg, "player_items", itensMudados, { upsert: "user_id,item_id" });
-	}
-	const linhasDex = gameStateToPokedexRows(userId, estado);
-	if (!dexCarregada) {
-		if (linhasDex.length > 0) {
-			const base = /* @__PURE__ */ new Map();
-			for (const lote of porLotesDeId(linhasDex.map((l) => String(l.species_id)))) {
-				const atuais = await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})&select=species_id,normal_kills,shiny_kills`);
-				for (const l of atuais) base.set(l.species_id, {
-					normal: Number(l.normal_kills),
-					shiny: Number(l.shiny_kills)
+	})());
+	tarefas.push((async () => {
+		const todosItens = gameStateToItemRows(userId, estado);
+		for (const item of todosItens.filter((l) => l.item_id?.startsWith("tm_"))) {
+			const anterior = linhasNoLoad?.items.find((l) => l.item_id === item.item_id)?.quantity ?? 0;
+			const delta = Number(item.quantity) - anterior;
+			if (delta > 0) {
+				if (!linhasNoLoad) throw new Error("Crédito de TM exige baseline do snapshot");
+				await chamarRpc(cfg, "creditar_drop_tm", {
+					p_user_id: userId,
+					p_item_id: item.item_id,
+					p_qtd: delta,
+					p_origem: playerUpdatedAtEsperado
 				});
 			}
-			const somadas = linhasDex.map((l) => {
-				const anterior = base.get(String(l.species_id)) ?? {
-					normal: 0,
-					shiny: 0
-				};
-				return {
-					...l,
-					normal_kills: anterior.normal + Number(l.normal_kills),
-					shiny_kills: anterior.shiny + Number(l.shiny_kills)
-				};
-			});
-			await inserir(cfg, "player_pokedex", somadas, { upsert: "user_id,species_id" });
-			for (const l of somadas) estado.pokedexKills[String(l.species_id)] = {
-				normal: l.normal_kills,
-				shiny: l.shiny_kills
-			};
 		}
-	} else if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
-		const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
-		const removerDex = (await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
-		for (const lote of porLotesDeId(removerDex)) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
-		const dexMudada = linhasQueMudaram(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id));
-		if (dexMudada.length) await inserir(cfg, "player_pokedex", dexMudada, { upsert: "user_id,species_id" });
-	}
-	const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado);
-	if (!tabelaIntacta(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))) {
-		const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
-		const removerAuto = (await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
-		for (const lote of porLotesDeId(removerAuto)) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
-		const autoMudadas = linhasQueMudaram(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id));
-		if (autoMudadas.length) await inserir(cfg, "player_auto_catch_rules", autoMudadas, { upsert: "user_id,species_id" });
-	}
+		const linhasItens = todosItens.filter((l) => !l.item_id?.startsWith("tm_"));
+		const itensComunsNoLoad = linhasNoLoad?.items.filter((l) => !l.item_id.startsWith("tm_"));
+		if (!tabelaIntacta(linhasItens, itensComunsNoLoad, (l) => String(l.item_id))) {
+			const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
+			const removerItens = (linhasNoLoad?.items ?? await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !id.startsWith("tm_") && !itemIdsAgora.has(id));
+			for (const lote of porLotesDeId(removerItens)) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(",")})`);
+			const itensMudados = linhasQueMudaram(linhasItens, itensComunsNoLoad, (l) => String(l.item_id));
+			if (itensMudados.length) await inserir(cfg, "player_items", itensMudados, { upsert: "user_id,item_id" });
+		}
+	})());
+	tarefas.push((async () => {
+		const linhasDex = gameStateToPokedexRows(userId, estado);
+		if (!dexCarregada) {
+			if (linhasDex.length > 0) {
+				const base = /* @__PURE__ */ new Map();
+				for (const lote of porLotesDeId(linhasDex.map((l) => String(l.species_id)))) {
+					const atuais = await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})&select=species_id,normal_kills,shiny_kills`);
+					for (const l of atuais) base.set(l.species_id, {
+						normal: Number(l.normal_kills),
+						shiny: Number(l.shiny_kills)
+					});
+				}
+				const somadas = linhasDex.map((l) => {
+					const anterior = base.get(String(l.species_id)) ?? {
+						normal: 0,
+						shiny: 0
+					};
+					return {
+						...l,
+						normal_kills: anterior.normal + Number(l.normal_kills),
+						shiny_kills: anterior.shiny + Number(l.shiny_kills)
+					};
+				});
+				await inserir(cfg, "player_pokedex", somadas, { upsert: "user_id,species_id" });
+				for (const l of somadas) estado.pokedexKills[String(l.species_id)] = {
+					normal: l.normal_kills,
+					shiny: l.shiny_kills
+				};
+			}
+		} else if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
+			const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
+			const removerDex = (linhasNoLoad?.pokedex ?? await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
+			for (const lote of porLotesDeId(removerDex)) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
+			const dexMudada = linhasQueMudaram(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id));
+			if (dexMudada.length) await inserir(cfg, "player_pokedex", dexMudada, { upsert: "user_id,species_id" });
+		}
+	})());
+	tarefas.push((async () => {
+		const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado);
+		if (!tabelaIntacta(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))) {
+			const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
+			const removerAuto = (linhasNoLoad?.autoCatchRules ?? await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
+			for (const lote of porLotesDeId(removerAuto)) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
+			const autoMudadas = linhasQueMudaram(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id));
+			if (autoMudadas.length) await inserir(cfg, "player_auto_catch_rules", autoMudadas, { upsert: "user_id,species_id" });
+		}
+	})());
+	const falha = (await Promise.allSettled(tarefas)).find((r) => r.status === "rejected");
+	if (falha) throw falha.reason;
 }
 /**
 * Outro request do mesmo jogador ja esta creditando este intervalo.
