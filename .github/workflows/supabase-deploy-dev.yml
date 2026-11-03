@@ -81,9 +81,12 @@ jobs:
       - name: Publicar Edge Function jogo-dev (mesmo bundle de authority/)
         id: edge
         if: steps.equivalente.outputs.reutilizar != 'true'
+        # O binario do setup-cli (versao fixa), nunca `npx supabase`: sem versao
+        # o npx baixa a CLI mais nova, e em 03/11/2026 ela passou a pedir
+        # confirmacao no deploy e recusar sem terminal. `--yes` pelo mesmo motivo.
         run: |
           npm run build:edge
-          npx supabase functions deploy jogo-dev --project-ref "$SUPABASE_PROJECT_REF"
+          supabase functions deploy jogo-dev --project-ref "$SUPABASE_PROJECT_REF" --yes
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
