@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { refDaUrl, resolverProjeto, resolverFuncao, listaDeProjetos } from './publicar-edge.mjs'
+import { refDaUrl, resolverProjeto, resolverFuncao, listaDeProjetos, VERSAO_DO_CLI } from './publicar-edge.mjs'
 
 const RAIZ = join(import.meta.dirname, '..')
 const PKG = JSON.parse(readFileSync(join(RAIZ, 'package.json'), 'utf8'))
@@ -37,6 +37,17 @@ describe('o alvo do deploy da Edge (PH-187)', () => {
     // A linha inteira desta issue. Um `functions deploy` sem ela publica no que
     // estiver linkado.
     expect(FONTE).toMatch(/'functions',\s*'deploy',\s*funcao,\s*'--project-ref',\s*ref/)
+  })
+
+  it('o CLI do deploy tem versao fixa, a mesma dos workflows, e nao pede confirmacao', () => {
+    // 03/11/2026: `npx supabase` sem versao pegou uma CLI nova que exige
+    // confirmacao, e o CI sem terminal recusou o deploy da Edge.
+    for (const wf of ['supabase-deploy.yml', 'supabase-deploy-dev.yml']) {
+      const texto = readFileSync(join(RAIZ, '.github/workflows', wf), 'utf8')
+      expect(texto, wf).toContain(`version: ${VERSAO_DO_CLI}`)
+    }
+    expect(FONTE).toContain("`supabase@${VERSAO_DO_CLI}`")
+    expect(FONTE).toMatch(/'--project-ref',\s*ref,\s*'--yes'/)
   })
 
   it('extrai o ref do host de uma URL do Supabase, e so dela', () => {
