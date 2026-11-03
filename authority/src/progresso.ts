@@ -903,145 +903,166 @@ export async function gravarEstado(
   )
   if (!resultado.ok) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
 
-  const linhasPoke = gameStateToPokemonRows(userId, estado)
-  // JANELA SEM NADA PRA GRAVAR: sai antes dos dois round-trips (o select do
-  // diff de remocao e o upsert). Isto e o caso COMUM num jogo idle — POKE
-  // desmaiado, inimigo ainda nascendo, jogador parado no Hospital — e antes
-  // custava exatamente o mesmo que uma janela cheia de abates.
-  const pokeIntacto = tabelaIntacta(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))
-  if (!pokeIntacto) {
-    // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
-    // sempre vem preenchido, o proprio POKE que o gerou.
-    const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id): id is string => id != null))
-    // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
-    const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
-    const atuais: LinhaLocalizacao[] = []
-    for (const lote of porLotesDeId(idsDeInteresse)) {
-      atuais.push(
-        ...(await selecionarTudo<LinhaLocalizacao>(
-          cfg,
-          `pokemon_instances?id=in.(${lote.join(',')})&select=id,user_id,location`,
-        )),
-      )
-    }
-    const porId = new Map(atuais.map((l) => [l.id, l]))
-    const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
-      l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
+  // DEPOIS do CAS as quatro tabelas sao independentes — cada bloco abaixo so
+  // toca a propria tabela (e o unico trigger cruzado, `contar_evolucao`, escreve
+  // em `player_contador`, que nenhum outro bloco toca). Rodavam em serie: ~8
+  // round-trips de 45-155 ms cada pelo gateway, a maior fatia do flush
+  // (p50 1,66 s medido em 02/11/2026). Em paralelo o tempo e o do bloco mais
+  // lento. `allSettled` e nao `all`: a resposta so sai depois que TODA escrita
+  // terminou, mesmo quando uma falha — responder com escrita ainda em voo
+  // deixaria o cliente reler um estado pela metade.
+  const tarefas: Promise<void>[] = []
 
-    const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
-    for (const lote of porLotesDeId(remover)) {
-      await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
-    }
-    // Duas condicoes, e as duas importam. "Mudou" (PH-90) evita reescrever os
-    // outros POKE da equipe porque um deles ganhou EXP. "Ainda e meu" evita
-    // ressuscitar POKE que ja foi vendido/transferido entre a leitura e agora.
-    // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
-    const gravarPoke = linhasQueMudaram(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))
-      .filter((l) => {
-        const atual = porId.get(String(l.id))
-        return atual == null || aindaMeu(atual)
-      })
-    // `origem: 'captura'` em TODA linha, e nao so nas novas: o servidor de
-    // sessoes so CRIA POKE por captura (entregas do Mercado sao ouro/item), e
-    // numa linha que ja existe o trigger `origem_do_poke` mantem a origem que
-    // ela tinha — migration 20261014120000. Fica FORA de `linhasQueMudaram` de
-    // proposito: o load traz a origem do banco, e comparar contra ela faria toda
-    // linha parecer mudada a cada flush.
-    if (gravarPoke.length) {
-      await inserir(cfg, 'pokemon_instances', gravarPoke.map((l) => ({ ...l, origem: 'captura' })), { upsert: 'id' })
-    }
-  }
+  tarefas.push((async () => {
+    const linhasPoke = gameStateToPokemonRows(userId, estado)
+    // JANELA SEM NADA PRA GRAVAR: sai antes dos dois round-trips (o select do
+    // diff de remocao e o upsert). Isto e o caso COMUM num jogo idle — POKE
+    // desmaiado, inimigo ainda nascendo, jogador parado no Hospital — e antes
+    // custava exatamente o mesmo que uma janela cheia de abates.
+    const pokeIntacto = tabelaIntacta(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))
+    if (!pokeIntacto) {
+      // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
+      // sempre vem preenchido, o proprio POKE que o gerou.
+      const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id): id is string => id != null))
+      // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
+      const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
+      const atuais: LinhaLocalizacao[] = []
+      for (const lote of porLotesDeId(idsDeInteresse)) {
+        atuais.push(
+          ...(await selecionarTudo<LinhaLocalizacao>(
+            cfg,
+            `pokemon_instances?id=in.(${lote.join(',')})&select=id,user_id,location`,
+          )),
+        )
+      }
+      const porId = new Map(atuais.map((l) => [l.id, l]))
+      const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
+        l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
 
-  const todosItens = gameStateToItemRows(userId, estado)
-  // TM só entra pela simulação como drop. Consumo/venda/negociação são RPCs.
-  // Somar o delta evita apagar ou sobrescrever uma compra concorrente (PH-513).
-  for (const item of todosItens.filter(l => l.item_id?.startsWith('tm_'))) {
-    const anterior = linhasNoLoad?.items.find(l => l.item_id === item.item_id)?.quantity ?? 0
-    const delta = Number(item.quantity) - anterior
-    if (delta > 0) {
-      if (!linhasNoLoad) throw new Error('Crédito de TM exige baseline do snapshot')
-      await chamarRpc(cfg, 'creditar_drop_tm', {
-        p_user_id: userId, p_item_id: item.item_id, p_qtd: delta,
-        p_origem: playerUpdatedAtEsperado,
-      })
+      const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
+      for (const lote of porLotesDeId(remover)) {
+        await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
+      }
+      // Duas condicoes, e as duas importam. "Mudou" (PH-90) evita reescrever os
+      // outros POKE da equipe porque um deles ganhou EXP. "Ainda e meu" evita
+      // ressuscitar POKE que ja foi vendido/transferido entre a leitura e agora.
+      // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
+      const gravarPoke = linhasQueMudaram(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))
+        .filter((l) => {
+          const atual = porId.get(String(l.id))
+          return atual == null || aindaMeu(atual)
+        })
+      // `origem: 'captura'` em TODA linha, e nao so nas novas: o servidor de
+      // sessoes so CRIA POKE por captura (entregas do Mercado sao ouro/item), e
+      // numa linha que ja existe o trigger `origem_do_poke` mantem a origem que
+      // ela tinha — migration 20261014120000. Fica FORA de `linhasQueMudaram` de
+      // proposito: o load traz a origem do banco, e comparar contra ela faria toda
+      // linha parecer mudada a cada flush.
+      if (gravarPoke.length) {
+        await inserir(cfg, 'pokemon_instances', gravarPoke.map((l) => ({ ...l, origem: 'captura' })), { upsert: 'id' })
+      }
     }
-  }
-  const linhasItens = todosItens.filter(l => !l.item_id?.startsWith('tm_'))
-  const itensComunsNoLoad = linhasNoLoad?.items.filter(l => !l.item_id.startsWith('tm_'))
-  // Mesmo diff de remocao que `pokemon_instances` acima. Sem ele, um item
-  // consumido ate exatamente 0 (e nao travado) some de `estado.items` mas a
-  // linha velha continua no banco — o upsert so toca as chaves presentes, nunca
-  // apaga. Efeito real: 20 Stones gastas numa evolucao especial voltavam a 20 no
-  // reload (evolucao especial de graca), e qualquer pocao/bola zerada
-  // ressuscitava. `gameStateToItemRows` ja preserva itens travados com
-  // quantidade 0, entao esses continuam na lista e nao sao removidos.
-  if (!tabelaIntacta(linhasItens, itensComunsNoLoad, (l) => String(l.item_id))) {
-    const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
-    const itensNoBanco = await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
-    const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !id.startsWith('tm_') && !itemIdsAgora.has(id))
-    for (const lote of porLotesDeId(removerItens)) {
-      await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
+  })())
+
+  tarefas.push((async () => {
+    const todosItens = gameStateToItemRows(userId, estado)
+    // TM só entra pela simulação como drop. Consumo/venda/negociação são RPCs.
+    // Somar o delta evita apagar ou sobrescrever uma compra concorrente (PH-513).
+    for (const item of todosItens.filter(l => l.item_id?.startsWith('tm_'))) {
+      const anterior = linhasNoLoad?.items.find(l => l.item_id === item.item_id)?.quantity ?? 0
+      const delta = Number(item.quantity) - anterior
+      if (delta > 0) {
+        if (!linhasNoLoad) throw new Error('Crédito de TM exige baseline do snapshot')
+        await chamarRpc(cfg, 'creditar_drop_tm', {
+          p_user_id: userId, p_item_id: item.item_id, p_qtd: delta,
+          p_origem: playerUpdatedAtEsperado,
+        })
+      }
     }
-    const itensMudados = linhasQueMudaram(linhasItens, itensComunsNoLoad, (l) => String(l.item_id))
-    if (itensMudados.length) await inserir(cfg, 'player_items', itensMudados, { upsert: 'user_id,item_id' })
-  }
+    const linhasItens = todosItens.filter(l => !l.item_id?.startsWith('tm_'))
+    const itensComunsNoLoad = linhasNoLoad?.items.filter(l => !l.item_id.startsWith('tm_'))
+    // Mesmo diff de remocao que `pokemon_instances` acima. Sem ele, um item
+    // consumido ate exatamente 0 (e nao travado) some de `estado.items` mas a
+    // linha velha continua no banco — o upsert so toca as chaves presentes, nunca
+    // apaga. Efeito real: 20 Stones gastas numa evolucao especial voltavam a 20 no
+    // reload (evolucao especial de graca), e qualquer pocao/bola zerada
+    // ressuscitava. `gameStateToItemRows` ja preserva itens travados com
+    // quantidade 0, entao esses continuam na lista e nao sao removidos.
+    if (!tabelaIntacta(linhasItens, itensComunsNoLoad, (l) => String(l.item_id))) {
+      const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
+      // A BASELINE DO LOAD, quando existe, e nao uma releitura: `lerSnapshot` ja
+      // leu a tabela inteira (o mesmo vale pra Pokedex completa e auto-catch
+      // abaixo). Reler custava um GET por tabela a cada flush e ainda apagava
+      // linha criada por RPC concorrente depois do load, que o estado desta
+      // janela nunca viu.
+      const itensNoBanco = linhasNoLoad?.items ?? await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
+      const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !id.startsWith('tm_') && !itemIdsAgora.has(id))
+      for (const lote of porLotesDeId(removerItens)) {
+        await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
+      }
+      const itensMudados = linhasQueMudaram(linhasItens, itensComunsNoLoad, (l) => String(l.item_id))
+      if (itensMudados.length) await inserir(cfg, 'player_items', itensMudados, { upsert: 'user_id,item_id' })
+    }
+  })())
 
   // Mesmo diff de remocao das duas tabelas acima. Sem ele, `reiniciarJogo`
   // apagava POKEs e itens mas a Pokedex sobrevivia inteira — a conta "zerada"
   // voltava com todos os abates registrados.
-  const linhasDex = gameStateToPokedexRows(userId, estado)
-  if (!dexCarregada) {
-    // POKEDEX PARCIAL (PH-186) — `estado.pokedexKills` tem SO os abates desta
-    // janela, porque `lerSnapshot` nao leu a tabela. Dois desvios obrigatorios,
-    // e os dois falham em silencio se forem esquecidos:
-    //
-    //  1. NADA de diff de remocao. `removerDex` apaga toda especie que o estado
-    //     nao tem — com estado parcial isso e a colecao inteira do jogador. Nao
-    //     da 502, nao loga: some. Mesma razao pela qual `pokeIdsNoLoad` escopa o
-    //     diff dos POKE quando a mochila nao veio.
-    //  2. SOMAR sobre o banco, nao sobrescrever. Escrita absoluta com o valor da
-    //     janela transformaria 400 abates em 3.
-    //
-    // A leitura aqui e proporcional ao que MUDOU (2 a 5 especies numa janela
-    // tipica), nao ao tamanho da colecao — e uma janela sem abate nenhum nao le
-    // nada, porque `linhasDex` vem vazia. E esse o ganho inteiro da issue.
-    if (linhasDex.length > 0) {
-      const base = new Map<string, { normal: number; shiny: number }>()
-      for (const lote of porLotesDeId(linhasDex.map((l) => String(l.species_id)))) {
-        const atuais = await selecionarTudo<{ species_id: string; normal_kills: number; shiny_kills: number }>(
-          cfg,
-          `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})&select=species_id,normal_kills,shiny_kills`,
-        )
-        for (const l of atuais) base.set(l.species_id, { normal: Number(l.normal_kills), shiny: Number(l.shiny_kills) })
-      }
-      const somadas = linhasDex.map((l) => {
-        const anterior = base.get(String(l.species_id)) ?? { normal: 0, shiny: 0 }
-        return {
-          ...l,
-          normal_kills: anterior.normal + Number(l.normal_kills),
-          shiny_kills: anterior.shiny + Number(l.shiny_kills),
+  tarefas.push((async () => {
+    const linhasDex = gameStateToPokedexRows(userId, estado)
+    if (!dexCarregada) {
+      // POKEDEX PARCIAL (PH-186) — `estado.pokedexKills` tem SO os abates desta
+      // janela, porque `lerSnapshot` nao leu a tabela. Dois desvios obrigatorios,
+      // e os dois falham em silencio se forem esquecidos:
+      //
+      //  1. NADA de diff de remocao. `removerDex` apaga toda especie que o estado
+      //     nao tem — com estado parcial isso e a colecao inteira do jogador. Nao
+      //     da 502, nao loga: some. Mesma razao pela qual `pokeIdsNoLoad` escopa o
+      //     diff dos POKE quando a mochila nao veio.
+      //  2. SOMAR sobre o banco, nao sobrescrever. Escrita absoluta com o valor da
+      //     janela transformaria 400 abates em 3.
+      //
+      // A leitura aqui e proporcional ao que MUDOU (2 a 5 especies numa janela
+      // tipica), nao ao tamanho da colecao — e uma janela sem abate nenhum nao le
+      // nada, porque `linhasDex` vem vazia. E esse o ganho inteiro da issue.
+      if (linhasDex.length > 0) {
+        const base = new Map<string, { normal: number; shiny: number }>()
+        for (const lote of porLotesDeId(linhasDex.map((l) => String(l.species_id)))) {
+          const atuais = await selecionarTudo<{ species_id: string; normal_kills: number; shiny_kills: number }>(
+            cfg,
+            `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})&select=species_id,normal_kills,shiny_kills`,
+          )
+          for (const l of atuais) base.set(l.species_id, { normal: Number(l.normal_kills), shiny: Number(l.shiny_kills) })
         }
-      })
-      await inserir(cfg, 'player_pokedex', somadas, { upsert: 'user_id,species_id' })
-      // O estado devolvido ao cliente passa a levar o TOTAL, nao o incremento.
-      // E o que torna a resposta idempotente: a camada de retry do cliente ja
-      // reaplicou payload e duplicou captura uma vez neste projeto (ver o filtro
-      // de `idsNovos` em `aplicarEstadoDoServidor`). Total absoluto reaplicado
-      // duas vezes da o mesmo numero; incremento dobraria.
-      for (const l of somadas) {
-        estado.pokedexKills[String(l.species_id)] = { normal: l.normal_kills, shiny: l.shiny_kills }
+        const somadas = linhasDex.map((l) => {
+          const anterior = base.get(String(l.species_id)) ?? { normal: 0, shiny: 0 }
+          return {
+            ...l,
+            normal_kills: anterior.normal + Number(l.normal_kills),
+            shiny_kills: anterior.shiny + Number(l.shiny_kills),
+          }
+        })
+        await inserir(cfg, 'player_pokedex', somadas, { upsert: 'user_id,species_id' })
+        // O estado devolvido ao cliente passa a levar o TOTAL, nao o incremento.
+        // E o que torna a resposta idempotente: a camada de retry do cliente ja
+        // reaplicou payload e duplicou captura uma vez neste projeto (ver o filtro
+        // de `idsNovos` em `aplicarEstadoDoServidor`). Total absoluto reaplicado
+        // duas vezes da o mesmo numero; incremento dobraria.
+        for (const l of somadas) {
+          estado.pokedexKills[String(l.species_id)] = { normal: l.normal_kills, shiny: l.shiny_kills }
+        }
       }
+    } else if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
+      const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
+      const dexNoBanco = linhasNoLoad?.pokedex ?? await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
+      const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
+      for (const lote of porLotesDeId(removerDex)) {
+        await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+      }
+      const dexMudada = linhasQueMudaram(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))
+      if (dexMudada.length) await inserir(cfg, 'player_pokedex', dexMudada, { upsert: 'user_id,species_id' })
     }
-  } else if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
-    const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
-    const dexNoBanco = await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
-    const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
-    for (const lote of porLotesDeId(removerDex)) {
-      await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
-    }
-    const dexMudada = linhasQueMudaram(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))
-    if (dexMudada.length) await inserir(cfg, 'player_pokedex', dexMudada, { upsert: 'user_id,species_id' })
-  }
+  })())
 
   // `player_auto_catch_rules` NUNCA era gravada: `carregarEstado` a lia,
   // `gameStateToAutoCatchRuleRows` existia sem nenhum call site, e o mapper de
@@ -1060,21 +1081,26 @@ export async function gravarEstado(
   // "player_auto_catch_rules_user_id_species_id_key"'). A identidade da regra
   // e o proprio par (especie, bola) — a chave estavel que faltava era
   // exatamente a constraint.
-  const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado)
-  if (!tabelaIntacta(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))) {
-    const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
-    const autoNoBanco = await selecionarTudo<{ species_id: string }>(
-      cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
-    )
-    const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
-    for (const lote of porLotesDeId(removerAuto)) {
-      await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+  tarefas.push((async () => {
+    const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado)
+    if (!tabelaIntacta(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))) {
+      const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
+      const autoNoBanco = linhasNoLoad?.autoCatchRules ?? await selecionarTudo<{ species_id: string }>(
+        cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
+      )
+      const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
+      for (const lote of porLotesDeId(removerAuto)) {
+        await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+      }
+      const autoMudadas = linhasQueMudaram(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))
+      if (autoMudadas.length) {
+        await inserir(cfg, 'player_auto_catch_rules', autoMudadas, { upsert: 'user_id,species_id' })
+      }
     }
-    const autoMudadas = linhasQueMudaram(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))
-    if (autoMudadas.length) {
-      await inserir(cfg, 'player_auto_catch_rules', autoMudadas, { upsert: 'user_id,species_id' })
-    }
-  }
+  })())
+
+  const falha = (await Promise.allSettled(tarefas)).find((r): r is PromiseRejectedResult => r.status === 'rejected')
+  if (falha) throw falha.reason
 }
 
 export interface ResultadoFlush {

@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.60',
+    date: '2026-11-03',
+    title: 'Jogo mais leve e salvamento mais rápido',
+    highlights: [
+      'Corrigido um erro que se repetia em silêncio durante a caçada quando o chefe de certas salas nascia.',
+      'O progresso da caçada é salvo mais rápido: o servidor grava Pokémon, itens, Pokédex e regras de captura ao mesmo tempo, em vez de um depois do outro.',
+      'Menos tráfego a cada salvamento: o servidor deixou de reler do banco o que já tinha acabado de ler.',
+    ],
+  },
+  {
     version: '8.59',
     date: '2026-10-29',
     title: 'Treinador com mais vida',
