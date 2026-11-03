@@ -636,9 +636,14 @@ export function contextoDoProtetor(
   for (let i = inicio + 1; i < doTier.length && escolhidos.length < MINIMO_DE_CANDIDATOS_A_PROTETOR; i++) juntar(i)
 
   // Sem chefe nenhum: o pool da sala inteiro, com o peso normal de spawn.
+  // COPIA o pool antes de guardar: sala sem pool proprio usa o `enemyPool` da
+  // hunt, que dentro do tick e um draft do immer. Guardado cru, ele e revogado
+  // no fim do `set` e o proximo chefe desta sala estoura com "proxy that has
+  // been revoked" (2.774 erros em 20 dias, 02/11/2026).
   if (escolhidos.length === 0) {
-    cacheDeProtetor.set(chaveCache, ctx)
-    return ctx
+    const copia: ContextoDeSpawn = { ...ctx, pool: [...ctx.pool], ...(ctx.janela ? { janela: [ctx.janela[0], ctx.janela[1]] } : {}) }
+    cacheDeProtetor.set(chaveCache, copia)
+    return copia
   }
 
   // Completa com os mais RAROS da sala, e a ordem do desempate e estavel
