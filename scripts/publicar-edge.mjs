@@ -90,8 +90,15 @@ export function resolverFuncao(argv = process.argv.slice(2)) {
   return arg ? arg.slice('--funcao='.length).trim() : 'jogo'
 }
 
+// VERSAO FIXA, a mesma do `supabase/setup-cli` nos workflows. `npx supabase`
+// sem versao baixava a ultima do npm, e em 03/11/2026 ela passou a pedir
+// confirmacao interativa no deploy ("Re-run with --yes"): o CI, sem terminal,
+// recusou publicar a Edge da 8.60 em dev e em producao. `--yes` vai junto no
+// deploy pelo mesmo motivo, caso a versao fixa um dia suba.
+export const VERSAO_DO_CLI = '2.116.0'
+
 function supabase(args, opcoes = {}) {
-  return execFileSync('npx', ['supabase', ...args], {
+  return execFileSync('npx', ['--yes', `supabase@${VERSAO_DO_CLI}`, ...args], {
     cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...opcoes,
   })
 }
@@ -187,7 +194,7 @@ export function publicar({ argv = process.argv.slice(2) } = {}) {
 
   // `--project-ref` SEMPRE. E a linha inteira desta issue: sem ela o alvo sai do
   // link local, que ninguem verifica.
-  supabase(['functions', 'deploy', funcao, '--project-ref', ref], { stdio: 'inherit' })
+  supabase(['functions', 'deploy', funcao, '--project-ref', ref, '--yes'], { stdio: 'inherit' })
   console.log(`\n${funcao} publicada em ${ref}.`)
 }
 
