@@ -12,6 +12,7 @@ import { desenharAmbiente } from './ambiente'
 import { drawBalaoDaAbertura } from './balaoDaAbertura'
 import { desenharClimaFundo, desenharClimaFrente, familiaDoClima } from './climaVisual'
 import { CENA_HOSPITAL, ZOOM_DA_CENA } from '@/data/hospital'
+import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM } from './zoom'
 import type { WorldEntity, WorldState } from '@/engine/types'
 import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { arteParaSala, backgroundParaSala, isCellBlocked } from '@/data/maps'
@@ -44,11 +45,8 @@ const HOSPITAL_FALLBACK = '#0d0d10'
 // ali a mesma legibilidade que tem no combate.
 const ESCALA_ROTULO_HOSPITAL = 1.5
 
-const MIN_ZOOM = 0.5
-const MAX_ZOOM = 2.5
 const ZOOM_SENSITIVITY = 0.0015
 const ZOOM_STEP = 0.1
-const DEFAULT_ZOOM = 1.5
 const PLAYER_ANCHOR_Y = 0.58
 
 export interface ScreenPoint {

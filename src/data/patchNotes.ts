@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.61',
+    date: '2026-11-07',
+    title: 'Câmera mais perto',
+    highlights: [
+      'O zoom padrão agora começa no máximo (250%), bem mais perto dos Pokémon. Para ver mais do mapa, é só afastar pelo controle +/- ou pela roda do mouse.',
+    ],
+  },
+  {
     version: '8.60',
     date: '2026-11-03',
     title: 'Jogo mais leve e salvamento mais rápido',
