@@ -11,6 +11,7 @@
 // nos dois: chama o metodo imperativo E publica o novo valor pra UI.
 import { create } from 'zustand'
 import type { Renderer } from '@/render/renderer'
+import { DEFAULT_ZOOM } from '@/render/zoom'
 
 interface RendererState {
   renderer: Renderer | null
@@ -22,10 +23,10 @@ interface RendererState {
 
 export const useRendererStore = create<RendererState>((set, get) => ({
   renderer: null,
-  zoomPercent: 150, // DEFAULT_ZOOM (1.5) do Renderer, ate o canvas montar
+  zoomPercent: Math.round(DEFAULT_ZOOM * 100), // ate o canvas montar
 
   setRenderer: (renderer) => {
-    set({ renderer, zoomPercent: renderer ? Math.round(renderer.zoom * 100) : 150 })
+    set({ renderer, zoomPercent: renderer ? Math.round(renderer.zoom * 100) : Math.round(DEFAULT_ZOOM * 100) })
   },
 
   setZoomPercent: (zoomPercent) => set({ zoomPercent }),
