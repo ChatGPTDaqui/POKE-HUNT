@@ -1,3 +1,4 @@
+import { CamadaDeCena } from '@/features/cenas/CamadaDeCena'
 import { GameCanvas } from '@/components/GameCanvas'
 import { ToastStack } from '@/components/toasts/ToastStack'
 import { CamadaVfx } from '@/components/CamadaVfx'
@@ -91,6 +92,10 @@ export function JogoCarregado() {
                 e irmao desta camada e continua sangrando ate a borda fisica —
                 cortar o cenario pra caber no retangulo seguro deixaria duas
                 tarjas pretas em vez de imagem. */}
+            {/* Cenas de evolucao e de ovo (08/11/2026): ANTES da HUD e sem
+                z-index, entao a HUD e os menus pintam por cima e o palco
+                ocupa so o campo da cacada. */}
+            <CamadaDeCena />
             <div id="camada-hud" className="hud-safe">
               <HudLayer />
             </div>

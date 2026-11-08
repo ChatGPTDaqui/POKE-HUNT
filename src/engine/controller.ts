@@ -3,6 +3,7 @@
 // Tudo aqui toca as stores do navegador. O nucleo de simulacao vive em
 // simulation.ts justamente pra poder rodar headless no servidor sem arrastar
 // isto junto — ver a nota de topo de la.
+import { useCenaStore } from '@/stores/cenaStore'
 import { SPECIES, createPokeInstance, type PokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
 import { evolvePokeInstance } from './systems/progressionSystem'
@@ -17,7 +18,6 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useCutsceneStore } from '@/stores/cutsceneStore'
 import { useRendererStore } from '@/stores/rendererStore'
-import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { preloadEspecies, preloadHunt, preloadArteDeCena, aquecerHuntEmSegundoPlano, pararAquecimento } from '@/data/preload'
 import { getMap } from '@/data/maps'
 import type { Point } from './types'
@@ -621,10 +621,23 @@ export const controller = {
     // pra guarda de reentrancia de quem chama (useAcaoPendente.run so libera
     // depois que a Promise retornada resolve) — sem isso a janela de duplo
     // clique durava um microtask (PH-13).
-    const ok = await pedirAcao({ tipo: 'evoluirPoke', pokeUid, alvo }, () => {
+    const pedido = pedirAcao({ tipo: 'evoluirPoke', pokeUid, alvo }, () => {
       if (result.stoneReq) gameState.removeItem(result.stoneReq.itemId, result.stoneReq.count)
       gameState.updatePokeInstance(pokeUid, () => result.updatedPoke)
     })
+    // A cena de evolucao (08/11/2026) comeca JUNTO com o pedido: o suspense
+    // cobre o round-trip, e a revelacao so acontece quando o servidor decidiu.
+    // Ela substitui o cartao "antes -> depois" e o toast que avisavam isto.
+    useCenaStore.getState().iniciar({
+      tipo: 'evolucao',
+      deId: poke.speciesId,
+      deNome: previousName,
+      paraId: result.updatedPoke.speciesId,
+      paraNome: result.species.name,
+      isShiny: Boolean(poke.isShiny),
+      resultado: pedido.then((ok) => ({ ok })),
+    })
+    const ok = await pedido
     if (!ok) return
     // Se a POKE evoluida esta em campo agora, o world tambem precisa refletir a
     // nova especie/stats IMEDIATAMENTE — o HUD le `worldStore.player.poke`
@@ -638,21 +651,6 @@ export const controller = {
     void preloadEspecies([{ speciesId: result.updatedPoke.speciesId, isShiny: result.updatedPoke.isShiny }])
     useWorldStore.getState().update((draft) => {
       if (draft.player && draft.player.poke.uid === pokeUid) draft.player.poke = result.updatedPoke
-    })
-    useToastStore.getState().pushToast(
-      `${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`,
-      'levelup', 'world',
-    )
-    // O OUTRO ponto que disparava o splash no vanilla (js/main.js:658) e que se
-    // perdeu na migracao pra React — ver PH-192. `poke.speciesId` e a especie
-    // ANTES da troca: `result.updatedPoke` ja e a nova, e o cartao mostra o par.
-    celebracaoStore.getState().celebrar({
-      tipo: 'evolucao',
-      deId: poke.speciesId,
-      paraId: result.updatedPoke.speciesId,
-      deNome: previousName,
-      paraNome: result.species.name,
-      isShiny: Boolean(poke.isShiny),
     })
   },
 

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<base href="/" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cenas de evolucao e de ovo</title>
+<!--
+  AS CENAS DE EVOLUCAO E DE OVO, DESENHADAS PELO COMPONENTE REAL (08/11/2026)
+
+  Fundo de cacada atras, relogio controlado por ?t= (segundos) e ?revela= (o
+  segundo em que o servidor "respondeu"). Serve pra conferir quadro a quadro.
+
+     npm run dev
+     /scripts/harness/cenas-de-evolucao-e-ovo.html?cena=evolucao&t=2.5
+     /scripts/harness/cenas-de-evolucao-e-ovo.html?cena=ovo&t=6&shiny=1
+     &falha=1 mostra a recusa do servidor
+-->
+<style>html,body{margin:0;height:100%;background:#000}#raiz{position:fixed;inset:0;background:url(/assets/hunt-backgrounds/forest.jpg) center/cover}</style>
+</head>
+<body>
+<div id="raiz" class="hud-root"></div>
+<script type="module">
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import '/src/index.css'
+import { CamadaDeCena } from '/src/features/cenas/CamadaDeCena.tsx'
+import { useCenaStore } from '/src/stores/cenaStore.ts'
+const q = new URLSearchParams(location.search)
+const falha = q.has('falha')
+const shiny = q.has('shiny')
+let t = 0
+const alvo = Number(q.get('t') ?? 3)
+if (q.get('cena') === 'ovo') {
+  useCenaStore.getState().iniciar({
+    tipo: 'ovo', ovo: { id: 'o', speciesId: 'charmander', raridade: q.get('raridade') ?? 'raro', shiny, naEquipe: true, abatesRestantes: 0 },
+    resultado: falha ? Promise.reject(new Error('Ovo nao encontrado.')) : Promise.resolve({ pokeId: 'p', speciesId: 'charmander', rarity: 'ultra', isShiny: shiny, local: 'team' }),
+  })
+} else {
+  useCenaStore.getState().iniciar({
+    tipo: 'evolucao', deId: q.get('de') ?? 'charmander', deNome: 'Charmander', paraId: q.get('para') ?? 'charmeleon', paraNome: 'Charmeleon', isShiny: shiny,
+    resultado: Promise.resolve({ ok: !falha }),
+  })
+}
+createRoot(document.getElementById('raiz')).render(React.createElement(CamadaDeCena, { relogio: () => t }))
+// Anda o relogio ate o alvo em passos, pra a revelacao acontecer no tempo certo.
+window.__pronto = new Promise((ok) => { const passo = () => { if (t >= alvo) return ok(true); t = Math.min(alvo, t + 0.05); setTimeout(passo, 8) }; setTimeout(passo, 300) })
+</script>
+</body>
+</html>
