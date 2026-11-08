@@ -6,11 +6,11 @@ import { RARITIES } from '@/data/rarity'
 import { ABATES_PARA_CHOCAR, vagasOcupadas, type Ovo } from '@/data/ovos'
 import { MAX_TEAM_SIZE, useGameStateStore } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
-import { chocarOvo, moverOvo, type Nascimento } from '@/data/remote/muralRpc'
+import { chocarOvo, moverOvo } from '@/data/remote/muralRpc'
+import { useCenaStore } from '@/stores/cenaStore'
 import { GameButton, Meter } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 import { OvoArte } from './OvoArte'
-import { RevelacaoDoOvo } from './RevelacaoDoOvo'
 import './ovos.css'
 
 const fmt = new Intl.NumberFormat('pt-BR')
@@ -19,7 +19,6 @@ export function CartaoDoOvo({ ovo }: { ovo: Ovo }) {
   const especie = SPECIES[ovo.speciesId]
   const cheia = useGameStateStore((s) => vagasOcupadas(s.team, s.ovos) >= MAX_TEAM_SIZE)
   const [ocupado, setOcupado] = useState(false)
-  const [chocando, setChocando] = useState<Promise<Nascimento> | null>(null)
   const total = ABATES_PARA_CHOCAR[ovo.raridade]
   const pronto = ovo.abatesRestantes <= 0
   const feitos = total - ovo.abatesRestantes
@@ -56,7 +55,7 @@ export function CartaoDoOvo({ ovo }: { ovo: Ovo }) {
       </div>
       <div className="flex shrink-0 flex-col gap-[.3em]">
         {pronto ? (
-          <GameButton variant="accent" onClick={() => setChocando(chocarOvo(ovo.id))}>Chocar</GameButton>
+          <GameButton variant="accent" onClick={() => useCenaStore.getState().iniciar({ tipo: 'ovo', ovo, resultado: chocarOvo(ovo.id) })}>Chocar</GameButton>
         ) : ovo.naEquipe ? (
           <GameButton variant="ghost" disabled={ocupado} onClick={() => mover(false)}>Guardar</GameButton>
         ) : (
@@ -66,7 +65,6 @@ export function CartaoDoOvo({ ovo }: { ovo: Ovo }) {
           </GameButton>
         )}
       </div>
-      {chocando && <RevelacaoDoOvo ovo={ovo} promessa={chocando} onFechar={() => setChocando(null)} />}
     </div>
   )
 }
