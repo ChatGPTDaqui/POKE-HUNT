@@ -40,8 +40,10 @@ describe('todo marco tem disparo de celebracao (PH-192)', () => {
   })
 
   it('EVOLUCAO celebra', () => {
-    // O outro caso do vanilla.
-    expect(ctrl, 'controller.ts nao empurra celebracao de evolucao').toContain("tipo: 'evolucao'")
+    // O outro caso do vanilla. Desde 08/11/2026 a celebracao da evolucao e a
+    // CENA (cenaStore), que substituiu o cartao: o fio continua sendo o mesmo.
+    expect(ctrl, 'controller.ts nao dispara a cena de evolucao').toContain("tipo: 'evolucao'")
+    expect(ctrl).toContain('useCenaStore')
   })
 
   it('SHINY capturado celebra', () => {

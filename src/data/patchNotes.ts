@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.62',
+    date: '2026-11-08',
+    title: 'Evolução e ovos ganham cena própria',
+    highlights: [
+      'Evoluir agora tem uma cena no campo da caçada, no ritmo dos jogos clássicos: o Pokémon vira uma silhueta brilhante, alterna entre as duas formas cada vez mais rápido e, num clarão, aparece evoluído.',
+      'Chocar ovo também: o ovo balança com pausas cada vez mais curtas, vai trincando e estoura revelando o filhote, com raios na cor da raridade e brilho se for shiny.',
+      'A HUD e os menus continuam por cima e a caçada segue rodando. Toque na cena para pular.',
+    ],
+  },
+  {
     version: '8.61',
     date: '2026-11-07',
     title: 'Câmera mais perto',

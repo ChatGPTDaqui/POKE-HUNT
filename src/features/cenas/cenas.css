@@ -1,0 +1,40 @@
+/* Palco das cenas de evolucao e de ovo. Tudo que se mexe vem do roteiro em JS
+   (roteiroDaCena.ts); aqui so ha forma, cor e uma animacao decorativa (raios). */
+.cena { cursor: pointer; user-select: none; }
+
+.cena-fundo {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 44%, rgba(40, 32, 70, .92), rgba(6, 6, 14, .97) 75%);
+}
+.cena-raios {
+  position: absolute; left: 50%; top: 44%; width: 160vmax; height: 160vmax; transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(from 0deg, var(--cor) 0deg 8deg, transparent 8deg 22deg);
+  -webkit-mask-image: radial-gradient(circle, black 6%, transparent 42%);
+  mask-image: radial-gradient(circle, black 6%, transparent 42%);
+  mix-blend-mode: screen; animation: cena-gira 16s linear infinite;
+}
+.cena-halo { position: absolute; left: 50%; top: 44%; width: 70vmin; height: 70vmin; transform: translate(-50%, -50%); }
+.cena-centro { position: absolute; left: 50%; top: 44%; width: min(44vmin, 22em); height: min(44vmin, 22em); transform: translate(-50%, -50%); }
+.cena-sprite { position: absolute; inset: 0; display: block; }
+.cena-sprite img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+/* Silhueta: o mesmo sprite animado, todo branco. */
+.cena-silhueta { filter: brightness(0) invert(1); }
+.cena-bebe { left: 50%; top: 50%; width: 100%; height: 100%; inset: auto; }
+.cena-ovo { position: absolute; left: 14%; top: 4%; width: 72%; height: auto; overflow: visible; transform-origin: 50% 92%; }
+.cena-brilho { position: absolute; width: .45em; height: .45em; box-shadow: 0 0 .6em #fff; transform: translate(-50%, -50%) rotate(45deg); }
+.cena-clarao { position: absolute; inset: 0; background: #fff; pointer-events: none; }
+
+/* Texto da cena: faixa no terco de baixo do campo, acima da barra de golpes. */
+.cena-texto {
+  position: absolute; left: 50%; top: 70%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: .3em;
+  max-width: min(92vw, 30em); padding: .55em 1.1em; border-radius: .7em;
+  background: rgba(8, 8, 18, .82); border: 1px solid rgba(255, 255, 255, .18);
+  color: #fff; font-size: 1.15em; text-align: center; line-height: 1.25;
+}
+.cena-destaque { color: var(--color-gold, #ffc83d); }
+.cena-detalhe { font-size: .72em; opacity: .8; }
+.cena-etiqueta { font-size: .65em; font-weight: 700; color: #0b0e18; padding: .1em .6em; border-radius: 999px; }
+
+@keyframes cena-gira { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .cena-raios { animation: none; } }
