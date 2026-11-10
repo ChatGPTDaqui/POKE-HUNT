@@ -159,7 +159,7 @@ export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: 
 
         {disponiveis.length === 0 && anexos.length === 0 && (
           <p className="text-[.75em] text-menu-muted">
-            Nenhum item disponivel. Itens travados nao podem ser anexados.
+            Nenhum item disponível. Itens travados não podem ser anexados.
           </p>
         )}
       </div>

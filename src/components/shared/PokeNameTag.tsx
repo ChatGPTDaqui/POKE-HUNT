@@ -20,7 +20,7 @@ export function PokeNameTag({ poke, species }: { poke: PokeNameTagTarget; specie
       {/* Badge CONTORNADO, nao preenchido: um chip solido aqui competiria
           visualmente com os chips de tipo, que ficam na mesma linha. */}
       <span
-        className="rounded-full border px-[.45em] py-[.1em] text-[.68em] leading-tight tracking-[.05em]"
+        className="rounded-full border px-[.45em] py-[.1em] text-[length:max(.68em,10px)] leading-tight tracking-[.05em]"
         style={{ color: rarity.color, borderColor: rarity.color, background: 'var(--journey-data-ground, transparent)' }}
       >
         {rarity.label}

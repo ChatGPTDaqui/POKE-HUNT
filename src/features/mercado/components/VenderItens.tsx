@@ -104,7 +104,7 @@ export function VenderItens() {
             {' '}(bruto {fmt.format(bruto)} − taxa de {regra.percentual}%: {fmt.format(taxa)})
           </span>
         )}
-        {' '}Os itens saem da mochila assim que a ordem e criada e voltam se voce cancelar.
+        {' '}Os itens saem da mochila assim que a ordem é criada e voltam se você cancelar.
       </div>
       <GameButton
         variant="primary"

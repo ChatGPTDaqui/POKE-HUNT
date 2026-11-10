@@ -100,7 +100,7 @@ export const controller = {
     if (activePoke.hp <= 0) {
       if (avisar) {
         useToastStore.getState().pushToast(
-          'Seu POKE esta desmaiado. Cure na Enfermeira antes de caçar.', 'error', 'world',
+          'Seu POKE está desmaiado. Cure na Enfermeira antes de caçar.', 'error', 'world',
         )
       }
       return false
@@ -430,7 +430,7 @@ export const controller = {
     const jogador = useWorldStore.getState().player
     if (jogador && (jogador.presoAte ?? 0) > 0 && !isDead(jogador)) {
       useToastStore.getState().pushToast(
-        `${SPECIES[jogador.poke.speciesId].name} esta preso e não pode sair de campo agora.`,
+        `${SPECIES[jogador.poke.speciesId].name} está preso e não pode sair de campo agora.`,
         'error', 'combat',
       )
       return
@@ -507,7 +507,7 @@ export const controller = {
     const jogadorEmCampo = useWorldStore.getState().player
     if (wasActive && jogadorEmCampo && (jogadorEmCampo.presoAte ?? 0) > 0 && !isDead(jogadorEmCampo)) {
       useToastStore.getState().pushToast(
-        `${SPECIES[jogadorEmCampo.poke.speciesId].name} esta preso e não pode sair de campo agora.`,
+        `${SPECIES[jogadorEmCampo.poke.speciesId].name} está preso e não pode sair de campo agora.`,
         'error', 'combat',
       )
       return
@@ -566,7 +566,7 @@ export const controller = {
       }
     } else if (item.kind === 'revive' && item.reviveHpPercent != null) {
       if (!world.player.fainted) {
-        useToastStore.getState().pushToast('O POKE já esta consciente.', 'error', 'world')
+        useToastStore.getState().pushToast('O POKE já está consciente.', 'error', 'world')
       } else if (gameState.hasItem(itemId, 1)) {
         void pedirAcao({ tipo: 'usarItem', itemId }, () => { gameState.removeItem(itemId, 1) })
         const revivePercent = item.reviveHpPercent

@@ -232,7 +232,7 @@ export function TrocaMenu() {
         <ArrowsLeftRight className="text-[1.8em] text-menu-muted" />
         <span className="text-[.9em] text-menu-ink">Você não está em nenhuma troca.</span>
         <span className="text-[.8em] text-menu-muted">
-          Convide alguem pelo Ranking ou pelo Social — o icone de troca aparece ao lado do nome.
+          Convide alguém pelo Ranking ou pelo Social — o ícone de troca aparece ao lado do nome.
         </span>
       </div>
     )
@@ -305,10 +305,10 @@ export function TrocaMenu() {
         {troca.euConfirmei ? (
           <>
             <span className="text-[.8em] text-menu-muted">
-              Voce confirmou. Mexer na mesa desfaz isto — e desfaz a confirmacao dele tambem.
+              Você confirmou. Mexer na mesa desfaz isto — e desfaz a confirmação dele também.
             </span>
             <GameButton block carregando={troca.ocupado} onClick={() => { void troca.desconfirmar() }}>
-              Desfazer minha confirmacao
+              Desfazer minha confirmação
             </GameButton>
           </>
         ) : (

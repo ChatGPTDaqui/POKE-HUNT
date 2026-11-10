@@ -24,7 +24,7 @@ import { EquipmentArt } from '@/components/game/JourneyArtwork'
 // PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
 // enquanto duram. O guard de verdade esta em controller.setActiveTeamIndex; aqui
 // e so pra o botao nao parecer quebrado.
-const MOTIVO_PRESO = 'O POKE em campo esta preso e não pode sair agora.'
+const MOTIVO_PRESO = 'O POKE em campo está preso e não pode sair agora.'
 
 export function TeamMenu() {
   const team = useGameStateStore((s) => s.team)

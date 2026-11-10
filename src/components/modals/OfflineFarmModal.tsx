@@ -136,7 +136,7 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
         <div className="border-b border-menu-line p-[.7em]">
           <div className="text-[1.05em] font-medium">Bem-vindo de volta!</div>
           <div className="text-[.8em] text-menu-muted">
-            Voce ficou fora por {formatDuration(summary.requestedSeconds)}.
+            Você ficou fora por {formatDuration(summary.requestedSeconds)}.
           </div>
         </div>
       }
@@ -159,7 +159,7 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
             mostrar menos progresso do que o tempo fora sugeria. */}
         {summary.truncated && (
           <div className="text-warn">
-            A simulacao foi interrompida para nao travar o dispositivo — parte do tempo fora nao foi processada.
+            A simulação foi interrompida para não travar o dispositivo — parte do tempo fora não foi processada.
           </div>
         )}
 

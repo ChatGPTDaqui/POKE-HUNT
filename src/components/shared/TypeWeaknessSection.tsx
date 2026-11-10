@@ -31,14 +31,16 @@ export function TypeWeaknessSection({ species }: { species: Species }) {
 
   return (
     <div className="flex flex-col gap-[.4em]">
-      <Bloco label="Vantagem contra (2x)" color="var(--journey-leaf, #4ade80)" types={advantage2x} />
+      {/* Rótulos dizem a direção do dano: "Vantagem contra" e "Fraco contra"
+          lado a lado, ambos com (2x), confundiam ataque com defesa. */}
+      <Bloco label="Golpes do tipo dele são fortes contra (2x)" color="var(--journey-leaf, #4ade80)" types={advantage2x} />
       {/* 4x so aparece quando existe: uma linha "Nenhum" pra um caso raro so
           alonga o bloco sem informar nada. */}
-      {weak4x.length > 0 && <Bloco label="⚠ Fraqueza dupla (4x)" color="var(--color-bad)" types={weak4x} />}
-      <Bloco label="Fraco contra (2x)" color="var(--color-warn)" types={weak2x} />
-      <Bloco label="Resiste (0.5x)" types={resist2x} />
-      {resist4x.length > 0 && <Bloco label="Resiste em dobro (0.25x)" types={resist4x} />}
-      <Bloco label="Imune a" types={immune} />
+      {weak4x.length > 0 && <Bloco label="⚠ Recebe dano quádruplo de (4x)" color="var(--color-bad)" types={weak4x} />}
+      <Bloco label="Recebe dano dobrado de (2x)" color="var(--color-warn)" types={weak2x} />
+      <Bloco label="Recebe metade do dano de (0,5x)" types={resist2x} />
+      {resist4x.length > 0 && <Bloco label="Recebe um quarto do dano de (0,25x)" types={resist4x} />}
+      {immune.length > 0 && <Bloco label="Imune a" types={immune} />}
     </div>
   )
 }

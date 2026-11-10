@@ -42,10 +42,10 @@ export function formatStatGains(gains: StatBlock | null | undefined): string {
  * mais lenta a curva, mais EXP o POKE precisa por nivel.
  */
 export const GROWTH_LABEL: Record<string, string> = {
-  ERRATIC: 'Erratica',
-  FAST: 'Rapida',
-  MEDIUM_FAST: 'Media-rapida',
-  MEDIUM_SLOW: 'Media-lenta',
+  ERRATIC: 'Errática',
+  FAST: 'Rápida',
+  MEDIUM_FAST: 'Média-rápida',
+  MEDIUM_SLOW: 'Média-lenta',
   SLOW: 'Lenta',
   FLUCTUATING: 'Flutuante',
 }

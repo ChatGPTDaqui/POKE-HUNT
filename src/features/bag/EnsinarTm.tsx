@@ -19,7 +19,7 @@ import { recargaEfetivaDoGolpe, VELOCIDADE_DE_REFERENCIA } from '@/engine/system
 import { useMochila } from './useMochila'
 
 const ROTULO_CATEGORIA: Record<string, string> = {
-  physical: 'Fisico',
+  physical: 'Físico',
   special: 'Especial',
   status: 'Status',
 }

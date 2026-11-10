@@ -64,13 +64,13 @@ export function Paginacao({ estado, rotulo }: { estado: Paginado<unknown>; rotul
   return (
     <div className="flex flex-wrap items-center justify-between gap-[.5em] border-t border-n800 pt-[.5em]">
       <span className="text-[.75em] text-n500">
-        {total} {rotulo} · pagina {paginaAtual}/{totalPaginas}
+        {total} {rotulo} · página {paginaAtual}/{totalPaginas}
       </span>
       <div className="flex items-center gap-[.35em]">
-        <GameButton disabled={paginaAtual <= 1} onClick={() => irPara(paginaAtual - 1)} aria-label="Página anterior">
+        <GameButton className="min-w-[44px] justify-center" disabled={paginaAtual <= 1} onClick={() => irPara(paginaAtual - 1)} aria-label="Página anterior">
           <CaretLeft />
         </GameButton>
-        <GameButton disabled={paginaAtual >= totalPaginas} onClick={() => irPara(paginaAtual + 1)} aria-label="Próxima página">
+        <GameButton className="min-w-[44px] justify-center" disabled={paginaAtual >= totalPaginas} onClick={() => irPara(paginaAtual + 1)} aria-label="Próxima página">
           <CaretRight />
         </GameButton>
       </div>

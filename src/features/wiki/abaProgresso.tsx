@@ -234,11 +234,11 @@ export function ProgressoTab() {
         </ul>
       </WikiCard>
 
-      <WikiCard title="Bestiário, Pokedex e Calculadora">
+      <WikiCard title="Bestiário, Pokédex e Calculadora">
         Três telas de consulta, no menu <b>Mais</b>, e cada uma responde uma pergunta diferente:
         <ul className="mt-[.4em] flex flex-col gap-[.3em] pl-[1.1em]" style={{ listStyleType: 'disc' }}>
           <li>
-            <b>Pokedex</b> — toda espécie do jogo, inclusive as que você nunca viu, com fraquezas,
+            <b>Pokédex</b> — toda espécie do jogo, inclusive as que você nunca viu, com fraquezas,
             resistências e <b>onde encontrar cada uma</b>. É por aqui que se decide para qual bioma ir.
           </li>
           <li>

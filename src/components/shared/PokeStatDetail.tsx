@@ -40,7 +40,7 @@ import type { AbilityCategory } from '@/data/generated/types'
 // que passou a mentir quando 'status' virou categoria de verdade com os dados
 // do Ultra Sun: todo golpe de status apareceria como "Especial".
 const ROTULO_CATEGORIA: Record<AbilityCategory, string> = {
-  physical: 'Fisico',
+  physical: 'Físico',
   special: 'Especial',
   status: 'Status',
 }
@@ -163,7 +163,7 @@ function TracosIndividuais({ poke }: { poke: PokeInstance }) {
 
       {caracteristica && (
         <div className="flex items-baseline justify-between gap-[.5em]">
-          <Palavra verbete="caracteristica" className="shrink-0 text-menu-muted">Caracteristica</Palavra>
+          <Palavra verbete="caracteristica" className="shrink-0 text-menu-muted">Característica</Palavra>
           <Palavra
             verbete={verbeteDaCaracteristica(caracteristica)}
             className="min-w-0 truncate text-right font-medium"

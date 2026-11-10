@@ -120,7 +120,7 @@ export const TUTORIAIS: Tutorial[] = [
         corpo:
           'Com ele ligado, todo selvagem derrotado consome uma bola numa tentativa de captura. Nasce desligado ' +
           'de propósito: a bola é gasta mesmo quando a captura falha, e sua conta começa com 500 Poke Balls — ' +
-          'o que acaba rápido com ele ligado. Ligue quando quiser encher a Pokedex ou vender captura na Loja.',
+          'o que acaba rápido com ele ligado. Ligue quando quiser encher a Pokédex ou vender captura na Loja.',
       },
       {
         titulo: 'Auto-Revive nasce DESLIGADO',

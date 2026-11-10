@@ -14,7 +14,7 @@ export function TypeChip({ type, full, className }: { type: ElementType; full?: 
     <span
       title={type}
       className={cn(
-        'inline-block shrink-0 rounded-full px-[.5em] py-[.1em] text-[.68em] font-semibold text-[#0b0e18]',
+        'inline-block shrink-0 rounded-full px-[.5em] py-[.1em] text-[length:max(.68em,10px)] font-semibold text-[#0b0e18]',
         className,
       )}
       style={{ background: colorForType(type) }}
