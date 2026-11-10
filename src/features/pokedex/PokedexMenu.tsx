@@ -146,14 +146,14 @@ function SpeciesDetail({ species }: { species: Species }) {
         <div className="mb-[.4em] font-medium">Ficha</div>
         <div className="grid grid-cols-2 gap-[.4em] sm:grid-cols-3">
           {([
-            ['Pokedex', `#${dexNumber(species)}`],
+            ['Pokédex', `#${dexNumber(species)}`],
             ['Total base', String(bst)],
             ['EXP base', String(species.baseExp)],
             ['Curva de EXP', GROWTH_LABEL[species.growthCurve] ?? species.growthCurve],
             // `catchRate` e 0-255 e nao significa nada pro jogador nessa escala.
             // Convertido pra rotulo, que e o que ele usa pra decidir bola.
             ['Captura', `${species.catchRate}/255`],
-            ['Regiao', REGION_LABEL[regionOfSpecies(species.id)] ?? '—'],
+            ['Região', REGION_LABEL[regionOfSpecies(species.id)] ?? '—'],
           ] as const).map(([label, valor]) => (
             <div key={label} className="flex justify-between rounded-[.4em] border border-menu-line bg-menu-paper px-[.5em] py-[.35em] text-[.8em]">
               <span className="text-menu-muted">{label}</span>
@@ -272,7 +272,7 @@ function SpeciesDetail({ species }: { species: Species }) {
                   <span className="text-menu-muted">{entry.levelReq}</span>
                   <span className="truncate">{ability.name}</span>
                   <span><TypeChip type={ability.type} /></span>
-                  <span className="text-menu-muted">{category === 'physical' ? 'Fisico' : 'Especial'}</span>
+                  <span className="text-menu-muted">{category === 'physical' ? 'Físico' : 'Especial'}</span>
                   <span>{ability.power > 0 ? ability.power : '—'}</span>
                   {/* Mesma regra da ficha do POKE: precisao so pra golpe de
                       dano, e em amarelo quando erra. */}
@@ -437,7 +437,7 @@ export function PokedexMenu() {
         <div className="flex gap-[.5em]">
           <GameInput
             className="flex-1"
-            placeholder="Buscar Pokemon..."
+            placeholder="Buscar Pokémon..."
             aria-label="Buscar Pokémon"
             value={search}
             onChange={(e) => aoDigitarBusca(e.target.value)}
@@ -462,7 +462,7 @@ export function PokedexMenu() {
         </div>
       </StickyHeader>
 
-      {visible.length === 0 && <p className="text-menu-muted">Nenhum Pokemon encontrado.</p>}
+      {visible.length === 0 && <p className="text-menu-muted">Nenhum Pokémon encontrado.</p>}
 
       <div className="journey-dex-workspace">
       <div className="journey-dex-grid" role="group" aria-label="Espécies da Pokédex">

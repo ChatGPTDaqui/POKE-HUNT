@@ -177,7 +177,7 @@ export function ComprarPokes() {
 
       <div className="flex flex-wrap items-center gap-[.5em] text-[.8em] text-menu-muted">
         <label className="flex items-center gap-[.3em]">
-          Nivel min
+          Nível min
           <GameInput
             type="number" min={0} className="w-[4em] text-center" value={nivelMin}
             onChange={(e) => setNivelMin(Math.max(0, Number(e.target.value) || 0))}

@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.63',
+    date: '2026-11-10',
+    title: 'Textos e telas mais claros',
+    highlights: [
+      'Dezenas de textos que apareciam sem acento foram corrigidos, da criação do personagem à Wiki.',
+      'Na Pokédex e na ficha, fraquezas e resistências agora dizem a direção do dano: contra quem os golpes do tipo dele são fortes e de quem ele recebe dano dobrado, metade ou um quarto.',
+      'Etiquetas de tipo e de raridade ficaram maiores no celular, e os botões de página, de ordenar a Mochila e de convidar para troca ficaram mais fáceis de tocar.',
+      'A página inicial mostra os iniciais e o que dá para fazer no jogo; login e cadastro ganharam um atalho de volta.',
+    ],
+  },
+  {
     version: '8.62',
     date: '2026-11-08',
     title: 'Evolução e ovos ganham cena própria',

@@ -86,7 +86,7 @@ export function AuthForm({
       // aparecendo do nada.
       const { data, error } = await supabase.rpc('nome_de_treinador_disponivel', { nome: nickLimpo })
       if (!error && data === false) {
-        return setErro(`O nome "${nickLimpo}" já esta em uso. Escolha outro.`)
+        return setErro(`O nome "${nickLimpo}" já está em uso. Escolha outro.`)
       }
     }
 
@@ -100,6 +100,9 @@ export function AuthForm({
   return (
     <div data-appearance="journey" className="journey-entry flex min-h-svh items-center justify-center bg-background p-6">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-6">
+        <Link to="/" className="inline-block text-sm text-muted-foreground underline-offset-4 hover:underline">
+          ← Início
+        </Link>
         <div className="space-y-1">
           <h1 className="font-heading text-xl font-semibold">{titulo}</h1>
           <p className="text-sm text-muted-foreground">{descricao}</p>
@@ -122,7 +125,7 @@ export function AuthForm({
               value={nick} onChange={(e) => setNick(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              {MIN_NICK} a {MAX_NICK} caracteres, letras/numeros/_ . Aparece no chat, no ranking e no Mercado.
+              {MIN_NICK} a {MAX_NICK} caracteres, letras/números/_ . Aparece no chat, no ranking e no Mercado.
             </p>
           </div>
         )}

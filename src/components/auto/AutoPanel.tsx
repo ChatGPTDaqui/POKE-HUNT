@@ -233,7 +233,7 @@ function AbaDeAutomacoes() {
         </div>
 
         <div className="flex items-center gap-[.4em] font-medium">
-          Regras por especie
+          Regras por espécie
           <InfoIcon text="Define uma bola especifica pra uma espécie da hunt atual. Tem prioridade sobre a bola padrão/shiny. Se a bola da regra acabar, o bot só mata aquela espécie em vez de gastar outra bola nela." />
         </div>
 

@@ -34,7 +34,7 @@ export function LanceVictoryReturn() {
       <div data-appearance="journey" className="journey-surface rounded-lg border border-amber-500 bg-menu-paper/95 px-[1em] py-[.7em] text-center shadow-xl">
         <div className="mb-[.5em] font-semibold text-amber-300">Você derrotou o Campeão Lance!</div>
         <GameButton onClick={() => controller.returnToHospital({ x: 0, y: 0 })}>
-          Retornar ao Centro Pokemon
+          Retornar ao Centro Pokémon
         </GameButton>
       </div>
     </div>

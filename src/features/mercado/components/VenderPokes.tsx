@@ -138,7 +138,7 @@ export function VenderPokes() {
             ficar desabilitado com um numero que nao vale nada. */}
         {modo === 'preco_fixo' && (
           <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
-            Preco
+            Preço
             <GameInput
               type="number" min={1} className="w-[8em]" value={preco}
               onChange={(e) => { ref.marcarEditado(); setPreco(Math.max(1, Math.floor(Number(e.target.value) || 1))) }}

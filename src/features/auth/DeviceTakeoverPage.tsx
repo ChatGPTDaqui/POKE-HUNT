@@ -31,8 +31,8 @@ export function DeviceTakeoverPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold">Jogar por aqui?</h1>
           <p className="text-sm text-muted-foreground">
-            Sua conta ja esta conectada em outro aparelho. Continuar aqui vai desconectar
-            o outro — so um aparelho joga por vez.
+            Sua conta já está conectada em outro aparelho. Continuar aqui vai desconectar
+            o outro — só um aparelho joga por vez.
           </p>
         </div>
 

@@ -108,7 +108,7 @@ export function BestiarioMenu() {
       <div className="journey-research-filters">
         <GameInput
           className="min-w-[9em] flex-1"
-          placeholder="Buscar Pokemon..."
+          placeholder="Buscar Pokémon..."
           aria-label="Buscar Pokémon no Bestiário"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -151,7 +151,7 @@ export function BestiarioMenu() {
               </button>
             )
           })}
-          {visiveis.length === 0 && <p className="text-menu-muted">Nenhum Pokemon corresponde aos filtros.</p>}
+          {visiveis.length === 0 && <p className="text-menu-muted">Nenhum Pokémon corresponde aos filtros.</p>}
         </div>
 
         {/* No celular o detalhe NAO fica embaixo da grade: com 226 especies em
@@ -187,7 +187,7 @@ function DetalheEspecie({
   if (!species) {
     return (
       <div className="self-start rounded-[.7em] border border-dashed border-menu-line p-[.7em] text-[.85em] text-menu-muted">
-        Escolha um Pokemon na grade para ver o progresso dele.
+        Escolha um Pokémon na grade para ver o progresso dele.
       </div>
     )
   }
@@ -207,14 +207,14 @@ function DetalheEspecie({
         <Caixa label="Abates normais" valor={fmt.format(p.normal)} />
         <Caixa label="Abates shiny" valor={fmt.format(p.shiny)} />
         <Caixa label="Total" valor={fmt.format(p.total)} />
-        <Caixa label="Estagio" valor={`${p.stage}/${STAGE_THRESHOLDS.length}`} />
+        <Caixa label="Estágio" valor={`${p.stage}/${STAGE_THRESHOLDS.length}`} />
       </div>
 
       {proximoLimiar != null ? (
         <div className="text-[.78em] text-menu-muted">
-          Proximo: faltam{' '}
+          Próximo: faltam{' '}
           <b className="font-medium text-warn">{fmt.format(proximoLimiar - p.total)}</b>{' '}
-          derrotas para o Estagio {p.stage + 1}
+          derrotas para o Estágio {p.stage + 1}
         </div>
       ) : (
         <div className="text-[.78em] text-gold">Todos os estágios concluidos.</div>
@@ -241,7 +241,7 @@ function DetalheEspecie({
               </span>
               <b className="flex-1 font-medium">Estágio {i + 1}</b>
               <span className="text-[.8em] text-menu-muted">
-                {concluido ? 'CONCLUIDO' : atual ? 'ATUAL' : 'BLOQUEADO'}
+                {concluido ? 'CONCLUÍDO' : atual ? 'ATUAL' : 'BLOQUEADO'}
               </span>
             </div>
             <Meter pct={pct} height=".3em" color="var(--color-primary)" className="mt-[.4em]" />
@@ -257,7 +257,7 @@ function DetalheEspecie({
           — nenhum sistema concede nem consome. Mostrar um saldo aqui seria um
           numero que nao faz nada. */}
       <p className="text-[.75em] text-menu-muted">
-        As recompensas de estagio (tokens e Runas) ainda nao existem no jogo — por enquanto o Bestiario so
+        As recompensas de estágio (tokens e Runas) ainda não existem no jogo — por enquanto o Bestiário só
         acompanha o progresso real de abates.
       </p>
     </div>

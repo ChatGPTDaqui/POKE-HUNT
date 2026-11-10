@@ -104,7 +104,7 @@ describe('o selo de confirmacao segue a VERSAO (PH-314)', () => {
     // sem entender por que — mexer na mesa derruba as duas confirmacoes.
     sessao = { ...SESSAO_BASE, versao: 7, versaoConfirmadaAnfitriao: 7 }
     render(<TrocaMenu />)
-    expect(await screen.findByText('Desfazer minha confirmacao')).toBeTruthy()
+    expect(await screen.findByText('Desfazer minha confirmação')).toBeTruthy()
     expect(screen.queryByText('Confirmar minha parte')).toBeNull()
   })
 

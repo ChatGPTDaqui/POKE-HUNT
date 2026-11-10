@@ -44,7 +44,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { EnsinarTm } from './EnsinarTm'
 
 type SortKey = 'rarity' | 'iv' | 'level'
-const SORT_LABELS: Record<SortKey, string> = { rarity: 'Raridade', iv: 'IV', level: 'Nivel' }
+const SORT_LABELS: Record<SortKey, string> = { rarity: 'Raridade', iv: 'IV', level: 'Nível' }
 
 function sortValue(poke: PokeInstance, key: SortKey): number {
   if (key === 'rarity') return rarityRank(poke.rarity)
@@ -150,6 +150,7 @@ export function PokemonsTab() {
           ))}
         </GameSelect>
         <GameButton
+          className="min-w-[44px] justify-center"
           onClick={() => setSortDesc((d) => !d)}
           aria-label={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}
           title={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}
@@ -636,7 +637,7 @@ export function BagMenu() {
             value={tab}
             onChange={setTab}
             options={[
-              { value: 'pokemons', label: 'Pokemons' },
+              { value: 'pokemons', label: 'Pokémon' },
               { value: 'itens', label: 'Itens' },
               { value: 'tms', label: 'TMs' },
               { value: 'ovos', label: nOvos > 0 ? `Ovos (${nOvos})` : 'Ovos' },

@@ -156,7 +156,7 @@ async function pedir<T>(caminho: string, { retentavel = false, timeoutMs = TIMEO
 function mensagemPorStatus(status: number): string {
   if (status === 401 || status === 403) return 'sua sessão expirou — entre de novo'
   if (status === 429) return 'muitas chamadas seguidas — tente de novo em instantes'
-  if (status === 502 || status === 503 || status === 504) return 'o servidor esta fora do ar no momento — tente de novo em instantes'
+  if (status === 502 || status === 503 || status === 504) return 'o servidor está fora do ar no momento — tente de novo em instantes'
   if (status >= 500) return 'erro no servidor — tente de novo em instantes'
   return `servidor respondeu ${status}`
 }

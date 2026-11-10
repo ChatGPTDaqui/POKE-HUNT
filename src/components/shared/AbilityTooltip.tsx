@@ -36,7 +36,7 @@ import { cn } from '@/lib/utils'
 // terceira). Golpe de status pode ou nao ter efeito real aqui — ver
 // `golpeTemEfeitoReal` (data/moveDescriptions.ts), que decide se o aviso logo
 // abaixo aparece.
-const ROTULO_CATEGORIA: Record<string, string> = { physical: 'Fisico', special: 'Especial', status: 'Status' }
+const ROTULO_CATEGORIA: Record<string, string> = { physical: 'Físico', special: 'Especial', status: 'Status' }
 
 /**
  * Os efeitos do golpe COM NÚMERO, lidos do próprio objeto `Ability` — o mesmo
@@ -170,7 +170,7 @@ export function AbilityTooltip({
                 "Precisão 100%" e Magnitude, ao lado, nada. */}
             {isDamagingAbility(ability) && (
               <span className={(ability.accuracy ?? 100) < 100 ? 'text-warn' : undefined}>
-                Precisao {ability.accuracy ?? 100}%
+                Precisão {ability.accuracy ?? 100}%
               </span>
             )}
             {/* PH-512: o PP saiu. Ver a nota em AbilityHud — ele nunca foi

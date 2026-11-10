@@ -664,7 +664,7 @@ export function HuntMenu() {
           <div className="flex flex-col gap-[.4em] border-t border-menu-line p-[.55em]">
             <SalasDaHunt mapId={map.id} />
             <div className="text-[.75em] text-menu-muted">
-              Pokemons de {map.name}
+              Pokémon de {map.name}
               {/* A % ja e a real: P(sala) x P(especie | sala). Sem dizer
                   isso, o jogador soma as porcentagens do card com as da
                   sala em que esta e nao fecham. */}
