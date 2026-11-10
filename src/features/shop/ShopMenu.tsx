@@ -33,7 +33,7 @@ export function ShopMenu() {
           onChange={setTab}
           options={[
             { value: 'itens', label: 'Itens' },
-            { value: 'pokemons', label: 'Pokemons' },
+            { value: 'pokemons', label: 'Pokémon' },
           ]}
         />
         {/* No celular a carteira ja esta no trilho de status, logo acima — aqui

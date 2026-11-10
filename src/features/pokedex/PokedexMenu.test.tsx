@@ -37,7 +37,7 @@ describe('Pokédex — grade e ficha de pesquisa', () => {
     expect(screen.getByRole('region', { name: 'Ficha de Bulbasaur' })).toBeTruthy()
     fireEvent.change(search, { target: { value: 'sem-especie-xyz' } })
     expect(screen.queryByRole('region', { name: /Ficha de/ })).toBeNull()
-    expect(screen.getByText('Nenhum Pokemon encontrado.')).toBeTruthy()
+    expect(screen.getByText('Nenhum Pokémon encontrado.')).toBeTruthy()
   })
   it('as setas andam pela Pokédex inteira, nao pelo que a busca deixou visivel', () => {
     render(<PokedexMenu />)

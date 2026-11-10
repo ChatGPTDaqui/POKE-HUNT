@@ -47,7 +47,7 @@ export function PainelAmigos({
 
         {amigos.length === 0 && (
           <p className="mt-[.3em] text-menu-muted">
-            Voce ainda nao tem amigos. Mande um pedido pelo nick acima.
+            Você ainda não tem amigos. Mande um pedido pelo nick acima.
           </p>
         )}
 

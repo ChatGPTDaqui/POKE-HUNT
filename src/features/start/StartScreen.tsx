@@ -83,8 +83,8 @@ function PassoNome({ nomeAtual, aoConfirmar }: { nomeAtual: string; aoConfirmar:
   return (
     <form onSubmit={enviar} className="flex w-full max-w-sm flex-col gap-3 rounded-lg border bg-card p-6">
       <p className="text-sm text-muted-foreground">
-        Antes de tudo: como voce quer ser chamado? Este nome aparece no chat, no ranking, no Mercado e
-        fica registrado em todo POKE que voce capturar.
+        Antes de tudo: como você quer ser chamado? Este nome aparece no chat, no ranking, no Mercado e
+        fica registrado em todo POKE que você capturar.
       </p>
       <Input
         name="nome-treinador" autoFocus required maxLength={MAX_NICK}
@@ -92,7 +92,7 @@ function PassoNome({ nomeAtual, aoConfirmar }: { nomeAtual: string; aoConfirmar:
         value={nome} onChange={(e) => setNome(e.target.value)}
       />
       <p className="text-xs text-muted-foreground">
-        {MIN_NICK} a {MAX_NICK} caracteres, letras, numeros e _ .
+        {MIN_NICK} a {MAX_NICK} caracteres, letras, números e _ .
       </p>
       {erro && (
         <p role="alert" className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">

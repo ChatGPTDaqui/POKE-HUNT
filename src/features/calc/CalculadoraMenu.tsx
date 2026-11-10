@@ -118,7 +118,7 @@ function PainelLado({
           onChange={(e) => onChange({ ...lado, speciesId: e.target.value })}
           className="min-w-0 flex-1"
         >
-          <option value="">Escolher Pokemon...</option>
+          <option value="">Escolher Pokémon...</option>
           {/*
             A equipe atual vem PRIMEIRO, num grupo proprio (pedido explicito).
             O caso comum aqui e "quanto o meu POKE chega a valer" — com 226
@@ -143,7 +143,7 @@ function PainelLado({
 
       {!resultado ? (
         <div className="rounded-[.6em] border border-dashed border-menu-line p-[.6em] text-[.8em] text-menu-muted">
-          Escolha um Pokemon para calcular os status — ou deixe vazio se so quer olhar o outro lado.
+          Escolha um Pokémon para calcular os status — ou deixe vazio se só quer olhar o outro lado.
         </div>
       ) : (
         <>
@@ -169,7 +169,7 @@ function PainelLado({
 
           <div className="grid grid-cols-2 gap-[.5em] text-[.8em]">
             <label className="flex flex-col gap-[.2em] text-menu-muted">
-              Nivel
+              Nível
               <GameInput
                 type="number" min={1} max={999} value={lado.level}
                 onChange={(e) => onChange({ ...lado, level: Math.max(1, Math.min(999, Number(e.target.value) || 1)) })}

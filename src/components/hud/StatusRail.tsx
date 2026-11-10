@@ -393,7 +393,7 @@ function GavetaDetalhes({ comTreinador }: { comTreinador: boolean }) {
     <div className="vidro flex flex-col gap-[.45em] rounded-[.9em] px-[.8em] py-[.6em] text-[.78em]">
       <div className="flex items-baseline justify-between gap-[.6em]">
         <span className="truncate font-medium text-n100">{huntName}</span>
-        <span className="shrink-0 text-n400">Pokedex <b className="font-medium text-n200">{registradas}/{TOTAL_ESPECIES}</b></span>
+        <span className="shrink-0 text-n400">Pokédex <b className="font-medium text-n200">{registradas}/{TOTAL_ESPECIES}</b></span>
       </div>
       {comTreinador && (
         <GameButton

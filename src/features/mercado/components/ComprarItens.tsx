@@ -74,7 +74,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
 
       <GameCard className="flex flex-wrap items-end gap-[.5em] p-[.6em]">
         <label className="flex flex-col gap-[.2em] text-[.78em] text-menu-muted">
-          Preco por unidade
+          Preço por unidade
           <GameInput
             type="number" min={1} className="w-[7em]"
             value={precoEfetivo || ''} placeholder={String(melhorVenda || 1)}

@@ -136,7 +136,7 @@ export function PokemonsTab() {
     if (shinyOnly) {
       askConfirm({
         title: 'Vender POKEs Shiny?',
-        message: `Você esta vendendo ${uids.length} POKE(s) Shiny. Essa ação não pode ser desfeita.`,
+        message: `Você está vendendo ${uids.length} POKE(s) Shiny. Essa ação não pode ser desfeita.`,
         confirmLabel: 'Vender',
         onConfirm: executar,
       })

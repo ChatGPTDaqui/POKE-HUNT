@@ -63,7 +63,7 @@ export function Ativos() {
                   {/* Aceitar E vender, entao o liquido tem que estar na tela
                       antes do clique (PH-98) — nao depois, no extrato. */}
                   {taxaDeVenda(o.valor, o.currency, regra) > 0 && (
-                    <> · voce fica com {fmt.format(o.valor - taxaDeVenda(o.valor, o.currency, regra))}
+                    <> · você fica com {fmt.format(o.valor - taxaDeVenda(o.valor, o.currency, regra))}
                       {' '}(taxa de {regra.percentual}%: {fmt.format(taxaDeVenda(o.valor, o.currency, regra))})</>
                   )}
                 </div>
