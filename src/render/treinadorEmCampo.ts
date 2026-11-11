@@ -92,7 +92,7 @@ const FOLGA_PRA_PARAR = 0.15
 /** Quanto a direcao segue o movimento por quadro (0..1): vira suave, sem tremer de linha. */
 const SUAVIZA_DIRECAO = 0.25
 
-/** Duração do Idle; Walk conserva o ciclo de 40px com 4 ou 5 poses por skin. */
+/** Duração do Idle; Walk anda por distância: 40 px a volta, 4 quadros (em pé, pé no ar, em pé, o outro pé). */
 const DURACOES: Record<'Walk' | 'Idle', number[]> = {
   Walk: [8, 10, 8, 10],
   // Dois quadros iguais (o mais ereto da fonte); a respiracao e do desenho.
@@ -150,8 +150,10 @@ export function poseDoTreinador(
     const f = Math.sin((relogio / RESPIRACAO_PERIODO) * Math.PI * 2)
     return { sx: 1 - RESPIRACAO_ESTICA * 0.45 * f, sy: 1 + RESPIRACAO_ESTICA * f, giro: 0, sobe: 0 }
   }
-  // Dois passos por ciclo: no chao no passo aberto (0 e 0,5), no alto nas pernas cruzadas.
-  const sobe = BALANCO_DO_PASSO * (0.5 - 0.5 * Math.cos(progressoDoPasso * Math.PI * 4))
+  // Dois passos por ciclo (10/11/2026): os quadros 1 e 3 tem um pe no ar — o
+  // corpo esta no alto no MEIO deles (0,375 e 0,875) e no chao no meio dos
+  // quadros em pe (0,125 e 0,625).
+  const sobe = BALANCO_DO_PASSO * (0.5 - 0.5 * Math.cos((progressoDoPasso - 0.125) * Math.PI * 4))
   return { sx: 1, sy: 1, giro: 0, sobe }
 }
 

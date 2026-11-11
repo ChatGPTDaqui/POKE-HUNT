@@ -13,11 +13,11 @@ describe('pose do treinador', () => {
     for (const p of alturas) { expect(p.giro).toBe(0); expect(p.sobe).toBe(0) }
   })
 
-  it('andando: no chao no passo aberto, no alto com as pernas cruzadas', () => {
-    expect(poseDoTreinador('Walk', 0, 0, null).sobe).toBeCloseTo(0)
-    expect(poseDoTreinador('Walk', 0, 0.5, null).sobe).toBeCloseTo(0)
-    expect(poseDoTreinador('Walk', 0, 0.25, null).sobe).toBeGreaterThan(0.015)
-    expect(poseDoTreinador('Walk', 0, 0.75, null).sobe).toBeGreaterThan(0.015)
+  it('andando: no chao no meio do quadro em pe, no alto no meio do quadro de pe no ar', () => {
+    expect(poseDoTreinador('Walk', 0, 0.125, null).sobe).toBeCloseTo(0)
+    expect(poseDoTreinador('Walk', 0, 0.625, null).sobe).toBeCloseTo(0)
+    expect(poseDoTreinador('Walk', 0, 0.375, null).sobe).toBeGreaterThan(0.015)
+    expect(poseDoTreinador('Walk', 0, 0.875, null).sobe).toBeGreaterThan(0.015)
   })
 
   it('arremesso: recua pro lado contrario ao alvo, joga pra frente e volta a pose normal', () => {
