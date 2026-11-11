@@ -46,3 +46,35 @@ describe('ciclo de caminhada sem soluço', () => {
     })
   }
 })
+
+// "Efeito de andar de verdade" (10/11/2026): na arte de origem as pernas quase
+// nao mudavam entre os quadros e o boneco deslizava. O ciclo e gerado: tronco e
+// cabeca identicos nos 4 quadros, e as pernas mudam de um quadro pro seguinte.
+function diferenca(skin: string, r: number, a: number, b: number, deY: number, ateY: number, p: PNG): number {
+  const g = quadros[skin as keyof typeof quadros]
+  let n = 0
+  for (let y = deY; y < ateY; y++) for (let x = 0; x < g.frameWidth; x++) {
+    const i = ((r * g.frameHeight + y) * p.width + a * g.frameWidth + x) * 4
+    const j = ((r * g.frameHeight + y) * p.width + b * g.frameWidth + x) * 4
+    if ((p.data[i + 3] > 128) !== (p.data[j + 3] > 128)) n++
+  }
+  return n
+}
+
+describe('ciclo de caminhada com passo', () => {
+  for (const skin of Object.keys(quadros)) {
+    it(`${skin}: 4 quadros, tronco parado e pernas que alternam em toda direção`, () => {
+      const g = quadros[skin as keyof typeof quadros]
+      expect(g.walkFrames).toBe(4)
+      const p = PNG.sync.read(readFileSync(join(RAIZ, `assets/treinadores/campo/${skin}/Walk-Anim.png`)))
+      const quadril = Math.round(g.footY - g.bodyHeight * 0.32)
+      // Um pe de ~1 px de mundo de largura por ~2 de altura, na resolucao da fonte.
+      const minimo = (g.bodyHeight / 30) ** 2 * 2
+      for (let r = 0; r < 8; r++) {
+        for (let q = 1; q < 4; q++) expect(diferenca(skin, r, 0, q, 0, quadril, p), `${skin} linha ${r}: tronco mudou no quadro ${q}`).toBe(0)
+        const mexe = [0, 1, 2, 3].filter((q) => diferenca(skin, r, q, (q + 1) % 4, quadril, g.frameHeight, p) > minimo)
+        expect(mexe.length, `${skin} linha ${r}: pernas paradas`).toBeGreaterThanOrEqual(2)
+      }
+    })
+  }
+})

@@ -1,4 +1,5 @@
-// Recorta a arte original sem reamostrar, quantizar cores ou redesenhar poses.
+// Recorta a arte original sem reamostrar nem quantizar cores. O Idle e uma pose
+// da fonte, intacta; o Walk e gerado dela (ver PASSO DE VERDADE).
 // Uso: node scripts/arte/importar-treinadores-sem-perda.cjs
 const fs = require('node:fs')
 const path = require('node:path')
@@ -135,67 +136,202 @@ function recortar(source, rows, map, columns = 4, comContorno = true) {
   }
   for (const row of frames) for (const f of row) f.abertura = abertura(f)
 
-  // ORDEM DO CICLO (29/10/2026, "sensacao de movimento"). A arte de origem
-  // nem sempre vem na ordem passo aberto -> pernas cruzadas -> aberto ->
-  // cruzadas; fora dela o boneco parece arrastar o pe. Com 4 quadros, os dois
-  // de maior abertura viram os tempos 0 e 2 e os outros dois os tempos 1 e 3,
-  // cada par na ordem original. So reordena quando a alternancia melhora de
-  // fato (25%) e a linha tem pernas que mexem (8% da altura) — numa linha de
-  // quadros quase iguais, trocar a ordem nao muda nada e so arrisca.
-  const ordem = frames.map(row => {
-    const base = row.map((_, i) => i)
-    if (row.length !== 4) return base
-    const ab = row.map(f => f.abertura)
-    const nota = (o) => o.reduce((t, q, i) => t + Math.abs(ab[q] - ab[o[(i + 1) % o.length]]), 0)
-    const largos = [...base].sort((a, b) => ab[b] - ab[a]).slice(0, 2).sort((a, b) => a - b)
-    const estreitos = base.filter(q => !largos.includes(q))
-    const alternada = [largos[0], estreitos[0], largos[1], estreitos[1]]
-    const mexe = Math.max(...ab) - Math.min(...ab) > row[0].bodyHeight * .08
-    return mexe && nota(alternada) > nota(base) * 1.25 ? alternada : base
-  })
-
-  // ESTABILIZACAO (29/10/2026). Os quadros da arte original nao tem a mesma
-  // altura: alinhados so pelo pe, a cabeca pulava 5 a 13 px de um quadro pro
-  // outro (o "soluco" do passo). Cada quadro desce/sobe ate o centro de massa
-  // ficar 60% do caminho na mediana da linha; os outros 40% ficam no pe, que
-  // continua quase no chao. Nenhum pixel e reamostrado: so a posicao muda.
-  const ESTABILIZACAO = 0.6
-  for (const row of frames) {
-    const ms = row.map(f => f.massa).sort((a, b) => a - b)
-    const mediana = (ms[Math.floor((ms.length - 1) / 2)] + ms[Math.floor(ms.length / 2)]) / 2
-    for (const f of row) f.ajuste = Math.round((f.massa - mediana) * ESTABILIZACAO)
-  }
-
   // IDLE ERETO (29/10/2026): o quadro de pes mais juntos E corpo mais alto
   // (menos curvado no passo). A respiracao e feita no desenho, nao na arte.
   const idle = frames.map(row => {
     const nota = row.map(f => f.abertura - f.bodyHeight * 0.6)
     return nota.indexOf(Math.min(...nota))
   })
-  function atlas(columns, choose, estabilizar) {
-    const out = new PNG({ width: frameWidth * columns, height: frameHeight * 8 })
-    out.data.fill(0)
-    for (let row = 0; row < 8; row++) for (let q = 0; q < columns; q++) {
-      const [originalRow, mirror] = map[row], f = frames[originalRow][choose(originalRow, q)]
-      const dy = estabilizar ? f.ajuste : 0
-      for (let y = f.y0; y <= f.y1; y++) for (let x = f.x0; x <= f.x1; x++) {
-        const tx = halfWidth + (mirror ? f.center - x : x - f.center), ty = footY + y - f.foot + dy
-        if (tx < 0 || tx >= frameWidth || ty < 0 || ty >= frameHeight) throw new Error('Recorte ultrapassa o quadro')
-        // Pixel forte de outro boneco (a borda da vizinha entrando no retangulo)
-        // fica de fora; franja semitransparente (sem corpo) segue como sempre.
-        const dono = labels[y * W + x]
-        if (dono >= 0 && !f.meus.has(dono) && D[(y * W + x) * 4 + 3] > 128) continue
-        const from = (y * W + x) * 4, to = ((row * frameHeight + ty) * out.width + q * frameWidth + tx) * 4
-        D.copy(out.data, to, from, from + 4)
+  // Quadro da fonte desenhado numa celula propria (pe em footY, tronco no meio).
+  function celula(f) {
+    const cel = Buffer.alloc(frameWidth * frameHeight * 4)
+    for (let y = f.y0; y <= f.y1; y++) for (let x = f.x0; x <= f.x1; x++) {
+      const tx = halfWidth + x - f.center, ty = footY + y - f.foot
+      if (tx < 0 || tx >= frameWidth || ty < 0 || ty >= frameHeight) throw new Error('Recorte ultrapassa o quadro')
+      // Pixel forte de outro boneco (a borda da vizinha entrando no retangulo)
+      // fica de fora; franja semitransparente (sem corpo) segue como sempre.
+      const dono = labels[y * W + x]
+      if (dono >= 0 && !f.meus.has(dono) && D[(y * W + x) * 4 + 3] > 128) continue
+      D.copy(cel, (ty * frameWidth + tx) * 4, (y * W + x) * 4, (y * W + x) * 4 + 4)
+    }
+    return cel
+  }
+
+  // PASSO DE VERDADE (10/11/2026, "efeito de andar de verdade"). Na arte de
+  // origem as pernas quase nao mudam de um quadro pro outro (Mochileiro de
+  // frente: 51/50/50/51 px de abertura) — reordenar quadros (29/10) nao criava
+  // passo, e o boneco deslizava. Agora o ciclo sai de UM quadro por direcao:
+  //   0 em pe · 1 um pe no ar · 2 em pe · 3 o outro pe no ar
+  // O pe sobe inteiro (o sapato nao amassa); a perna encurta acima dele, por
+  // descarte de linhas, e vai pro meio do corpo na vista de lado. Tronco e
+  // cabeca sao identicos nos 4 quadros: nada treme alem das pernas.
+  const QUADRIL = 0.24, SAPATO = 0.08, LEVANTA = 0.09, PRO_MEIO = 0.55
+  function divisaDasPernas(cel, bh) {
+    const forte = (x, y) => cel[(y * frameWidth + x) * 4 + 3] > 128
+    const ocupa = new Array(frameWidth).fill(0)
+    for (let y = footY - Math.round(bh * SAPATO); y <= footY; y++) for (let x = 0; x < frameWidth; x++) if (forte(x, y)) ocupa[x]++
+    let xl = ocupa.findIndex(n => n > 0), xr = frameWidth - 1 - [...ocupa].reverse().findIndex(n => n > 0)
+    // Maior vao entre os pes; sem vao (pes sobrepostos), o vale do terco do meio.
+    let melhor = null, ini = -1
+    for (let x = xl; x <= xr + 1; x++) {
+      const vazio = x <= xr && ocupa[x] === 0
+      if (vazio && ini < 0) ini = x
+      if (!vazio && ini >= 0) { if (!melhor || x - ini > melhor.fim - melhor.ini) melhor = { ini, fim: x }; ini = -1 }
+    }
+    if (melhor) return { divisa: Math.round((melhor.ini + melhor.fim) / 2), vao: true, folga: [melhor.fim - melhor.ini, melhor.fim - melhor.ini].map(v => v / 2) }
+    const a = Math.round(xl + (xr - xl) / 3), b = Math.round(xr - (xr - xl) / 3)
+    let divisa = a
+    for (let x = a; x <= b; x++) if (ocupa[x] < ocupa[divisa]) divisa = x
+    return { divisa, vao: false, folga: [0, 0] }
+  }
+  function levantar(cel, f, lado) {
+    const bh = f.bodyHeight
+    const out = Buffer.from(cel)
+    const { divisa, folga } = divisaDasPernas(cel, bh)
+    const topo = footY - Math.round(bh * QUADRIL), base = Math.min(frameHeight - 1, footY + 4)
+    const L = Math.round(bh * LEVANTA), S = Math.round(bh * SAPATO) + 4
+    const puxa = folga[lado] * PRO_MEIO * (lado === 0 ? 1 : -1)
+    const forte = (x, y) => cel[(y * frameWidth + x) * 4 + 3] > 128
+    // Quem sobe: o lado da divisa, linha a linha. Um trecho curto do MESMO pe
+    // que atravessa a reta vai junto (senao fica um palito no chao).
+    const LASCA = Math.round(bh * 0.07)
+    const limite = new Int32Array(frameHeight)
+    for (let y = topo; y <= base; y++) {
+      let x = divisa
+      if (lado === 0) { while (x < frameWidth && x - divisa <= LASCA && forte(x, y)) x++; limite[y] = x - divisa > LASCA ? divisa : x }
+      else { x = divisa - 1; while (x >= 0 && divisa - 1 - x <= LASCA && forte(x, y)) x--; limite[y] = divisa - 1 - x > LASCA ? divisa : x + 1 }
+    }
+    const sobe = (x, y) => y >= topo && y <= base && (lado === 0 ? x < limite[y] : x >= limite[y])
+    for (let y = topo; y <= base; y++) for (let x = 0; x < frameWidth; x++) if (sobe(x, y)) out.fill(0, (y * frameWidth + x) * 4, (y * frameWidth + x) * 4 + 4)
+    const perna = base - S - topo
+    for (let y = topo; y <= base - L; y++) {
+      const sy = y > base - L - S ? y + L : Math.round(topo + (y - topo) * perna / (perna - L))
+      const t = Math.min(1, (y - topo) / (base - L - topo))
+      const dx = Math.round(puxa * t)
+      for (let x = 0; x < frameWidth; x++) {
+        const sx = x - dx
+        if (sx < 0 || sx >= frameWidth || !sobe(sx, sy)) continue
+        const from = (sy * frameWidth + sx) * 4
+        if (cel[from + 3] === 0) continue
+        // A perna que sobe passa NA FRENTE da outra; a franja so entra no vazio.
+        const to = (y * frameWidth + x) * 4
+        if (cel[from + 3] > 128 || out[to + 3] === 0) cel.copy(out, to, from, from + 4)
+      }
+    }
+    // A divisa e uma reta e o pe nao: quando os pes se encostam, sobra uma
+    // lasca do pe levantado do lado que ficou no chao. Ilha pequena solta do
+    // corpo sai, com a franja em volta dela.
+    const rotulo = new Int32Array(frameWidth * frameHeight).fill(-1), ilhas = []
+    for (let i = 0; i < rotulo.length; i++) {
+      if (out[i * 4 + 3] <= 128 || rotulo[i] >= 0) continue
+      const pilha = [i], pontos = []
+      rotulo[i] = ilhas.length
+      while (pilha.length) {
+        const p = pilha.pop(), x = p % frameWidth, y = (p - x) / frameWidth
+        pontos.push(p)
+        for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = x + ax, ny = y + ay, n = ny * frameWidth + nx
+          if (nx < 0 || nx >= frameWidth || ny < 0 || ny >= frameHeight || rotulo[n] >= 0 || out[n * 4 + 3] <= 128) continue
+          rotulo[n] = ilhas.length; pilha.push(n)
+        }
+      }
+      ilhas.push(pontos)
+    }
+    const maior = Math.max(...ilhas.map(p => p.length))
+    for (const pontos of ilhas) {
+      if (pontos.length >= maior * 0.02) continue
+      for (const p of pontos) {
+        const x = p % frameWidth, y = (p - x) / frameWidth
+        for (let ay = -5; ay <= 5; ay++) for (let ax = -5; ax <= 5; ax++) {
+          const nx = x + ax, ny = y + ay
+          if (nx < 0 || nx >= frameWidth || ny < topo || ny >= frameHeight) continue
+          const n = ny * frameWidth + nx
+          if (rotulo[n] === rotulo[p] || out[n * 4 + 3] <= 128) out.fill(0, n * 4, n * 4 + 4)
+        }
       }
     }
     return out
   }
-  const walk = atlas(columns, (r, q) => ordem[r][q], true), idleAtlas = atlas(2, r => idle[r], false)
+  function folha(columns, quadroDe) {
+    const out = new PNG({ width: frameWidth * columns, height: frameHeight * 8 })
+    out.data.fill(0)
+    for (let row = 0; row < 8; row++) for (let q = 0; q < columns; q++) {
+      const mirror = map[row][1], cel = quadroDe(row, q)
+      for (let y = 0; y < frameHeight; y++) for (let x = 0; x < frameWidth; x++) {
+        const from = (y * frameWidth + (mirror ? frameWidth - 1 - x : x)) * 4
+        cel.copy(out.data, ((row * frameHeight + y) * out.width + q * frameWidth + x) * 4, from, from + 4)
+      }
+    }
+    return out
+  }
+  // Base do passo: de frente/costas, o quadro mais ereto (o do Idle); de lado e
+  // nas diagonais, o de passo mais aberto (os dois pes separados no chao).
+  const linhasDeFrente = new Set([map[0][0], map[4][0]])
+  const base = frames.map((row, r) => linhasDeFrente.has(r) ? idle[r] : row.map(f => f.abertura).indexOf(Math.max(...row.map(f => f.abertura))))
+  // DE FRENTE E DE COSTAS a arte costuma ter um pe so a mostra (o outro esta
+  // atras, no meio do passo): nao ha dois pes pra alternar. Ai o passo oposto
+  // e a MESMA perna espelhada no eixo do corpo, do quadril pra baixo — a linha
+  // e o eixo sao os de menor diferenca entre o corpo e o seu espelho, pra
+  // emenda nao aparecer.
+  function espelharPernas(cel, f) {
+    const bh = f.bodyHeight, out = Buffer.from(cel)
+    const dif = (y, eixo2) => {
+      let d = 0
+      for (let x = 0; x < frameWidth; x++) {
+        const mx = eixo2 - x, i = (y * frameWidth + x) * 4
+        const j = mx >= 0 && mx < frameWidth ? (y * frameWidth + mx) * 4 : -1
+        const a = cel[i + 3], b = j < 0 ? 0 : cel[j + 3]
+        if (a <= 128 && b <= 128) continue
+        d += a > 128 && b > 128 ? (Math.abs(cel[i] - cel[j]) + Math.abs(cel[i + 1] - cel[j + 1]) + Math.abs(cel[i + 2] - cel[j + 2])) / 765 : 1
+      }
+      return d
+    }
+    let melhor = null
+    for (let y = footY - Math.round(bh * 0.30); y <= footY - Math.round(bh * 0.16); y++) {
+      for (let eixo2 = 2 * halfWidth - 12; eixo2 <= 2 * halfWidth + 12; eixo2++) {
+        const d = dif(y - 1, eixo2) + dif(y, eixo2) + dif(y + 1, eixo2)
+        if (!melhor || d < melhor.d) melhor = { d, y, eixo2 }
+      }
+    }
+    // So a faixa das pernas espelha: o que pende ao lado delas (a ponta do
+    // cabelo da Jessie, a mao, a barra da capa) fica onde esta.
+    const eixo = melhor.eixo2 / 2, teto = Math.round(bh * 0.2)
+    const ocupa = new Array(frameWidth).fill(0)
+    for (let y = footY - Math.round(bh * SAPATO); y <= footY; y++) for (let x = 0; x < frameWidth; x++) if (cel[(y * frameWidth + x) * 4 + 3] > 128) ocupa[x]++
+    let meia = 0
+    for (const passo of [-1, 1]) {
+      let x = Math.round(eixo), vazios = 0
+      while (x >= 0 && x < frameWidth && Math.abs(x - eixo) < teto && vazios < 4) { vazios = ocupa[x] ? 0 : vazios + 1; if (ocupa[x]) meia = Math.max(meia, Math.abs(x - eixo)); x += passo }
+    }
+    meia = Math.min(teto, meia + 4)
+    for (let y = melhor.y; y < frameHeight; y++) for (let x = Math.ceil(eixo - meia); x <= Math.floor(eixo + meia); x++) {
+      const mx = melhor.eixo2 - x, to = (y * frameWidth + x) * 4
+      if (x < 0 || x >= frameWidth) continue
+      if (mx < 0 || mx >= frameWidth) out.fill(0, to, to + 4)
+      else cel.copy(out, to, (y * frameWidth + mx) * 4, (y * frameWidth + mx) * 4 + 4)
+    }
+    return out
+  }
+  const ciclo = map.map(([r], dir) => {
+    const f = frames[r][base[r]], cel = celula(f)
+    const { vao } = divisaDasPernas(cel, f.bodyHeight)
+    if (!vao && (dir === 0 || dir === 4)) {
+      // Corpo quase simetrico (casaco longo da Cynthia de costas): o espelho
+      // sai igual a pose e nada mexeria — ai vale o pe no ar, como nas outras.
+      const esp = espelharPernas(cel, f)
+      let muda = 0
+      for (let i = 3; i < cel.length; i += 4) if ((cel[i] > 128) !== (esp[i] > 128)) muda++
+      if (muda > (f.bodyHeight / 30) ** 2 * 4) return [cel, cel, esp, esp]
+    }
+    return [cel, levantar(cel, f, 0), cel, levantar(cel, f, 1)]
+  })
+  const walk = folha(4, (row, q) => ciclo[row][q])
+  const idleAtlas = folha(2, (row) => celula(frames[map[row][0]][idle[map[row][0]]]))
   if (contorno > 0) { aplicarContorno(walk, frameWidth, frameHeight, contorno); aplicarContorno(idleAtlas, frameWidth, frameHeight, contorno) }
   return { walk, idle: idleAtlas,
-    geometry: { frameWidth, frameHeight, footX: halfWidth, footY, bodyHeight, walkFrames: columns }, frames, idleFrames: idle, ordem }
+    geometry: { frameWidth, frameHeight, footX: halfWidth, footY, bodyHeight, walkFrames: 4 }, frames, idleFrames: idle, base }
 }
+
 
 function main() {
   const root = path.resolve(__dirname, '../..')
@@ -209,7 +345,7 @@ function main() {
     fs.writeFileSync(path.join(target, 'Walk-Anim.png'), PNG.sync.write(result.walk))
     fs.writeFileSync(path.join(target, 'Idle-Anim.png'), PNG.sync.write(result.idle))
     geometry[skin] = result.geometry
-    console.log(skin, JSON.stringify(result.geometry), 'idle', result.idleFrames.join(','), 'ordem', result.ordem.map(o => o.join('')).join(' '))
+    console.log(skin, JSON.stringify(result.geometry), 'idle', result.idleFrames.join(','), 'base', result.base.join(','))
   }
   fs.writeFileSync(path.join(root, 'src/data/quadrosDoTreinador.json'), JSON.stringify(geometry, null, 2) + '\n')
 }

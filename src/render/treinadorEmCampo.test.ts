@@ -44,7 +44,7 @@ describe('pontoAtras', () => {
 })
 
 describe('TreinadorEmCampo: seguidor de gente (09/10)', () => {
-  it('Red usa os cinco quadros originais sem sair do atlas ao trocar de skin', () => {
+  it('Red passa pelos quatro quadros do passo sem sair do atlas ao trocar de skin', () => {
     const t = new TreinadorEmCampo()
     t.skin = 'red'
     const vistos = new Set<number>()
@@ -52,7 +52,7 @@ describe('TreinadorEmCampo: seguidor de gente (09/10)', () => {
       t.atualizar({ x: i * 1.5, y: 100, radius: RAIO, facing: { x: 1, y: 0 } }, DT)
       if (t.animacao === 'Walk') vistos.add(t.quadro)
     }
-    expect(vistos).toEqual(new Set([0, 1, 2, 3, 4]))
+    expect(vistos).toEqual(new Set([0, 1, 2, 3]))
     t.skin = 'mochila'
     t.atualizar({ x: 901.5, y: 100, radius: RAIO, facing: { x: 1, y: 0 } }, DT)
     expect(t.quadro).toBeLessThan(4)

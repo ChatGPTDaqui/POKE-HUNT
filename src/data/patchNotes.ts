@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.64',
+    date: '2026-11-10',
+    title: 'Treinador anda de verdade',
+    highlights: [
+      'O treinador em campo agora dá passos: os pés alternam e o corpo sobe e desce junto, em vez de deslizar.',
+      'Vale para as 8 skins e para todas as direções; parado, ele continua reto e respirando como antes.',
+    ],
+  },
+  {
     version: '8.63',
     date: '2026-11-10',
     title: 'Textos e telas mais claros',
