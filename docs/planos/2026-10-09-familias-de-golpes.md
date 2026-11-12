@@ -758,3 +758,29 @@ Calibre: `origem` é o ALTO do corpo. Pés em `o.y + 12`, meio do corpo em `o.y 
 | Acid Armor | gotas escorrem e empoçam; depois sobem de volta e fecham um cordão |
 | Cotton Guard | oito chumaços de três gomos brotam em roda e quicam |
 | Amnesia | três interrogações sobem da cabeça e viram reticências que se apagam |
+
+## Golpes de status — 36. Ligeireza — `coreografias/ligeireza.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Agility | divisas de vento atravessam o corpo em três alturas; poeira nos pés |
+| Rock Polish | arco curto (o pano) esfrega em círculo e deixa quatro brilhos onde passou |
+| Autotomize | lascas de metal se soltam, caem, quicam; dois riscos sobem (corpo leve) |
+| Double Team | dois contornos tracejados saltam pros lados e voltam, piscando alternados |
+| Minimize | quatro setas apertam um quadro em três trancos; some num estalo |
+
+Processo: checar tipos com `npx tsc --noEmit -p tsconfig.app.json` — `-p .` não checa nada (tsconfig raiz só tem referências).
+
+## Golpes de status — 37. Aumentos mistos — `coreografias/aumentosMistos.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Dragon Dance | duas fitas-dragão (azul e rubra) sobem em hélice oposta e rugem no alto |
+| Quiver Dance | asas de mariposa batem dos lados; pó brilhante cai balançando |
+| Calm Mind | gota cai na cabeça; três círculos rasos; sobra um traço liso |
+| Bulk Up | contorno de torso em V alarga em três trancos; ombros incham |
+| Coil | três voltas de mola sobem do chão e apertam juntas |
+| Growth | brotos sobem dos dois lados e abrem folhas; brilho de sol no topo |
+| Shell Smash | casco fecha, racha de cima a baixo e estilhaça em oito cacos |
+
+Fracos, a rever se o dono pedir: Bulk Up (ícone de braço não lê nesta escala; ficou o torso em V) e Quiver Dance (asas lembram lanternas).

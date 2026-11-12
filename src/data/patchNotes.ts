@@ -13,6 +13,22 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.74',
+    date: '2026-11-12',
+    title: 'Danças e aumentos duplos com cara própria',
+    highlights: [
+      'Dragon Dance, Quiver Dance, Calm Mind, Bulk Up, Coil, Growth e Shell Smash ganharam efeito próprio em quem usa.',
+    ],
+  },
+  {
+    version: '8.73',
+    date: '2026-11-12',
+    title: 'Velocidade e evasão com cara própria',
+    highlights: [
+      'Agility, Rock Polish, Autotomize, Double Team e Minimize ganharam efeito próprio em quem usa.',
+    ],
+  },
+  {
     version: '8.72',
     date: '2026-11-12',
     title: 'Aumentos de defesa com cara própria',
