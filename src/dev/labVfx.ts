@@ -35,6 +35,7 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { BARREIRAS_POR_GOLPE } from '@/render/vfx/coreografias/barreiras'
 import { PUNHOS_PESADOS_POR_GOLPE } from '@/render/vfx/coreografias/punhosPesados'
 import { VENTOS_EM_AREA_POR_GOLPE, VENTOS_POR_GOLPE } from '@/render/vfx/coreografias/ventos'
 import { ONDAS_EM_AREA_POR_GOLPE, ONDAS_POR_GOLPE } from '@/render/vfx/coreografias/ondas'
@@ -235,6 +236,10 @@ familiaNoLab('Explosão', EXPLOSOES_EM_AREA_POR_GOLPE, { self_destruct: 'geodude
 familiaNoLab('Onda', ONDAS_EM_AREA_POR_GOLPE, { magnitude: 'sandshrew', muddy_water: 'squirtle', origin_pulse: 'squirtle' }, true)
 familiaNoLab('Vento', VENTOS_EM_AREA_POR_GOLPE, { razor_wind: 'pidgey' }, true)
 familiaNoLab('Soco pesado', PUNHOS_PESADOS_POR_GOLPE, { 'hammer_arm': 'machop', 'meteor_mash': 'magnemite' })
+// Barreiras (12/11): primeira família de golpes de STATUS. O efeito acontece em
+// quem usa; a esquerda fica vazia de propósito (hoje o jogo não desenha nada próprio).
+familiaNoLab('Barreiras', BARREIRAS_POR_GOLPE, { protect: 'squirtle', detect: 'hitmonlee', endure: 'machop', wide_guard: 'geodude',
+  reflect: 'espeon', light_screen: 'espeon', safeguard: 'clefairy', mist: 'jynx', lucky_chant: 'clefairy', aurora_veil: 'jynx' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
