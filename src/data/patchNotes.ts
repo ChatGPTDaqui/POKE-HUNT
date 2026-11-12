@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.65',
+    date: '2026-11-12',
+    title: 'Barreiras visíveis',
+    highlights: [
+      'Protect, Detect, Endure, Wide Guard, Reflect, Light Screen, Safeguard, Mist, Lucky Chant e Aurora Veil ganharam efeito próprio: a barreira sobe em volta de quem usou.',
+      'Antes esses golpes não mostravam nada na tela. Proteção que falha continua sem barreira, só com o aviso de falha.',
+    ],
+  },
+  {
     version: '8.64',
     date: '2026-11-10',
     title: 'Treinador anda de verdade',

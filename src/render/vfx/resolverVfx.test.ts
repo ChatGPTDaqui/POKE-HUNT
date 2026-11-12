@@ -1,7 +1,7 @@
 // Golpe -> tier/motivo/coreografia (spec 2026-09-28, decisoes D2, D3, D5, D7, D8).
 import { describe, expect, it } from 'vitest'
 import { ABILITIES, isDamagingAbility } from '@/data/abilities'
-import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE } from './registro'
+import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_DE_STATUS, REGISTRO_SINGLE } from './registro'
 import { isolarRegistros } from './registroDeTeste'
 import { motivoDoGolpe, resolverVfx, tierDoPoder } from './resolverVfx'
 import type { EntradaDeCoreografia } from './tipos'
@@ -76,6 +76,19 @@ describe('resolverVfx', () => {
     REGISTRO_SINGLE.NORMAL = { 1: falsa(), 2: falsa(), 3: falsa(), 4: falsa() }
     REGISTRO_DE_AREA.NORMAL = { 1: falsa(), 2: falsa(), 3: falsa() }
     expect(resolverVfx({ abilityId: 'growl', area: true })).toBeNull()
+  })
+
+  it('golpe de status so resolve com efeito proprio inscrito, e nunca em area', () => {
+    REGISTRO_SINGLE.NORMAL = { 1: falsa(), 2: falsa(), 3: falsa(), 4: falsa() }
+    expect(resolverVfx({ abilityId: 'protect', area: false })).toBeNull()
+    const propria = falsa()
+    REGISTRO_DE_STATUS.protect = propria
+    const r = resolverVfx({ abilityId: 'protect', area: false, critico: true })
+    expect(r?.entrada).toBe(propria)
+    expect(r?.tier).toBe(2)
+    expect(r?.motivo).toBeNull()
+    expect(resolverVfx({ abilityId: 'protect', area: true })).toBeNull()
+    expect(resolverVfx({ abilityId: 'growl', area: false })).toBeNull()
   })
 
   it('golpe desconhecido ou sem id nao resolve', () => {

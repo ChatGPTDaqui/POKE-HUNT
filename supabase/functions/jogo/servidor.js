@@ -151678,11 +151678,13 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	if (chaveDeEscudo) {
 		attacker.escudos ??= {};
 		attacker.escudos[chaveDeEscudo] = ESCUDO_DURACAO_SEGUNDOS;
+		statusRecebeuEm = attacker;
 	}
 	if (ability.id === "aurora_veil" && (world.clima?.tipo === "granizo" || world.clima?.tipo === "neve")) {
 		attacker.escudos ??= {};
 		attacker.escudos.reflect = ESCUDO_DURACAO_SEGUNDOS;
 		attacker.escudos.lightScreen = ESCUDO_DURACAO_SEGUNDOS;
+		statusRecebeuEm = attacker;
 	}
 	if (ability.id === "trick_room") world.trickRoomRestante = (world.trickRoomRestante ?? 0) > 0 ? 0 : 5 * TURNO_SEGUNDOS;
 	if (ability.id === "curse") {
@@ -151795,6 +151797,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 				if (ability.id === "endure") attacker.enduraAtiva = true;
 				else attacker.protegida = true;
 				attacker.protecoesSeguidas = (attacker.protecoesSeguidas ?? 0) + 1;
+				statusRecebeuEm = attacker;
 			} else {
 				attacker.protecoesSeguidas = 0;
 				if (!silent) anunciarFalhou(world, attacker);

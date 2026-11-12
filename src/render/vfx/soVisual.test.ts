@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 import type { WorldEffect } from '@/engine/types'
 import { desenharVfxDeGolpe } from './desenharVfx'
 import { novoOrcamento } from './orcamento'
-import { REGISTRO_SINGLE } from './registro'
+import { REGISTRO_DE_STATUS, REGISTRO_SINGLE } from './registro'
 import { isolarRegistros } from './registroDeTeste'
 import type { ContextoVfx } from './tipos'
 
@@ -69,6 +69,17 @@ describe('VFX de golpe e so visual', () => {
     expect(visto!.origem).toEqual({ x: 60, y: 90 })
     expect(visto!.alvo).toEqual({ x: 100, y: 90 })
     expect(Object.values(visto!).some(v => v && typeof v === 'object' && 'abilityId' in (v as object))).toBe(false)
+  })
+
+  it('efeito de status e desenhado no corpo de quem recebeu, nao na origem congelada', () => {
+    // A origem do efeito nao anda com o POKE (so o alvo segue a entidade): uma
+    // barreira ancorada nela ficaria pra tras quando quem usou saisse andando.
+    let visto: ContextoVfx | null = null
+    REGISTRO_DE_STATUS.protect = { desenhar: c => { visto = c }, duracao: { 2: 900 }, alcance: 30 }
+    const e = efeito({ abilityId: 'protect', elementType: 'NORMAL', statusDirection: 'diminui' })
+    expect(desenharVfxDeGolpe({} as CanvasRenderingContext2D, e, { pixelizar: semPixel, orcamento: novoOrcamento() })).toBe(true)
+    expect(visto!.origem).toEqual({ x: 100, y: 90 })
+    expect(visto!.alvo).toEqual({ x: 100, y: 90 })
   })
 
   it('mesmo ms desenha a mesma coisa: o rng e semeado pelo id do efeito', () => {
