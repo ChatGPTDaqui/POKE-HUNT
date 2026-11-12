@@ -38,6 +38,8 @@ import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
 import { BARREIRAS_POR_GOLPE } from '@/render/vfx/coreografias/barreiras'
 import { ARMADILHAS_POR_GOLPE } from '@/render/vfx/coreografias/armadilhas'
 import { SONO_POR_GOLPE } from '@/render/vfx/coreografias/sono'
+import { CONDICOES_POR_GOLPE } from '@/render/vfx/coreografias/condicoes'
+import { CONFUSAO_POR_GOLPE } from '@/render/vfx/coreografias/confusao'
 import { CLIMA_POR_GOLPE } from '@/render/vfx/coreografias/clima'
 import { PUNHOS_PESADOS_POR_GOLPE } from '@/render/vfx/coreografias/punhosPesados'
 import { VENTOS_EM_AREA_POR_GOLPE, VENTOS_POR_GOLPE } from '@/render/vfx/coreografias/ventos'
@@ -246,6 +248,9 @@ familiaNoLab('Barreiras', BARREIRAS_POR_GOLPE, { protect: 'squirtle', detect: 'h
 familiaNoLab('Clima', CLIMA_POR_GOLPE, { rain_dance: 'squirtle', sunny_day: 'espeon', hail: 'jynx', sandstorm: 'geodude' })
 familiaNoLab('Armadilhas', ARMADILHAS_POR_GOLPE, { spikes: 'sandshrew', toxic_spikes: 'ekans', stealth_rock: 'geodude', sticky_web: 'scyther' })
 familiaNoLab('Sono', SONO_POR_GOLPE, { sleep_powder: 'oddish', spore: 'paras', hypnosis: 'gengar', sing: 'clefairy', grass_whistle: 'oddish', lovely_kiss: 'jynx' })
+familiaNoLab('Condições', CONDICOES_POR_GOLPE, { thunder_wave: 'pikachu', stun_spore: 'oddish', glare: 'ekans', poison_powder: 'oddish',
+  toxic: 'ekans', toxic_thread: 'ekans', will_o_wisp: 'gengar' })
+familiaNoLab('Confusão', CONFUSAO_POR_GOLPE, { supersonic: 'pidgey', confuse_ray: 'gengar', sweet_kiss: 'clefairy', swagger: 'machop', flatter: 'meowth' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
