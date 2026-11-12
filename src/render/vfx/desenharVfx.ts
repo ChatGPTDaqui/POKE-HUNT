@@ -88,7 +88,7 @@ export function desenharVfxDeGolpe(
   const ms = passoDaCoreografia(msReal, effect.id)
 
   const alvo = { x: effect.targetX ?? effect.x, y: effect.targetY ?? effect.y }
-  const origem = effect.origemX !== undefined && effect.origemY !== undefined
+  const origem = r.noCorpo ? alvo : effect.origemX !== undefined && effect.origemY !== undefined
     ? { x: effect.origemX, y: effect.origemY }
     : alvo
   const raio = r.area ? (effect.worldSize ?? 0) / 2 : 0

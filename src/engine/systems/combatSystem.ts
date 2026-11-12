@@ -3428,11 +3428,15 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (chaveDeEscudo) {
     attacker.escudos ??= {}
     attacker.escudos[chaveDeEscudo] = ESCUDO_DURACAO_SEGUNDOS
+    // So desenho: a barreira sobe em volta de QUEM USOU (render/vfx, familia
+    // Barreiras). Sem isto o golpe nao criava efeito nenhum.
+    statusRecebeuEm = attacker
   }
   if (ability.id === 'aurora_veil' && (world.clima?.tipo === 'granizo' || world.clima?.tipo === 'neve')) {
     attacker.escudos ??= {}
     attacker.escudos.reflect = ESCUDO_DURACAO_SEGUNDOS
     attacker.escudos.lightScreen = ESCUDO_DURACAO_SEGUNDOS
+    statusRecebeuEm = attacker
   }
   if (ability.id === 'trick_room') world.trickRoomRestante = (world.trickRoomRestante ?? 0) > 0 ? 0 : 5 * TURNO_SEGUNDOS
 
@@ -3602,6 +3606,8 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         if (ability.id === 'endure') attacker.enduraAtiva = true
         else attacker.protegida = true
         attacker.protecoesSeguidas = (attacker.protecoesSeguidas ?? 0) + 1
+        // So desenho: a protecao que PEGOU mostra a barreira; a que falhou, nao.
+        statusRecebeuEm = attacker
       } else {
         attacker.protecoesSeguidas = 0
         if (!silent) anunciarFalhou(world, attacker)

@@ -66,6 +66,7 @@ import { LAMINAS_POR_GOLPE } from './coreografias/laminas'
 import { GARRAS_POR_GOLPE } from './coreografias/garras'
 import { MORDIDAS_POR_GOLPE } from './coreografias/mordidas'
 import { INVESTIDAS_POR_GOLPE } from './coreografias/investidas'
+import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
 
@@ -142,4 +143,12 @@ export const REGISTRO_POR_GOLPE: Record<string, EntradaDeCoreografia> = {
 }
 export const REGISTRO_POR_GOLPE_DE_AREA: Record<string, EntradaDeCoreografia> = {
   ...LUTA_EM_AREA_POR_GOLPE,  ...PEDRAS_EM_AREA_POR_GOLPE,  ...NEVOAS_EM_AREA_POR_GOLPE,  ...SONS_EM_AREA_POR_GOLPE,  ...LUZES_EM_AREA_POR_GOLPE,  ...EXPLOSOES_EM_AREA_POR_GOLPE,  ...ONDAS_EM_AREA_POR_GOLPE,  ...VENTOS_EM_AREA_POR_GOLPE,
+}
+// Golpes de STATUS com efeito proprio (12/11). Registro separado de proposito:
+// status so resolve quando esta AQUI — golpe de status fora desta lista segue
+// sem coreografia (selo/arte propria), nunca cai no efeito de ataque do tipo.
+// Nao entra na tabela de impactos do motor: nao muda a hora em que o golpe pega.
+//   Barreiras  12/11/2026 — aprovada pelo dono no lab do staging.
+export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
+  ...BARREIRAS_POR_GOLPE,
 }
