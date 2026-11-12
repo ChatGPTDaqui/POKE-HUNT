@@ -38,12 +38,13 @@ export function resolverVfx(pedido: PedidoDeVfx): VfxResolvido | null {
   if (!pedido.abilityId) return null
   const golpe = getAbility(pedido.abilityId)
   if (!golpe) return null
-  // Status so resolve com efeito PROPRIO inscrito (REGISTRO_DE_STATUS), e so no
-  // corpo de quem recebeu — nunca herda efeito de ataque do tipo (D8).
+  // Status so resolve com efeito PROPRIO inscrito (REGISTRO_DE_STATUS) — nunca
+  // herda efeito de ataque do tipo (D8). Desenha no corpo de quem recebeu,
+  // menos a armadilha de campo, que SAI de quem usou e pousa no alvo.
   if (!isDamagingAbility(golpe)) {
     const entrada = pedido.area ? undefined : REGISTRO_DE_STATUS[golpe.id]
     return entrada
-      ? { entrada, tipo: pedido.elementType ?? golpe.type, tier: tierDoPoder(0, false) as Tier, area: false, motivo: null, noCorpo: true }
+      ? { entrada, tipo: pedido.elementType ?? golpe.type, tier: tierDoPoder(0, false) as Tier, area: false, motivo: null, noCorpo: !golpe.hazard }
       : null
   }
   // Exceção aprovada: manter a sprite original, sem editar a arte/configuração.

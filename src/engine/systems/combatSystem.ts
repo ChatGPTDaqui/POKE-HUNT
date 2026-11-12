@@ -3217,6 +3217,10 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // So desenho: a invocacao do clima aparece em QUEM INVOCOU (render/vfx,
   // familia Clima). O clima em si e de campo e continua em `world.clima`.
   if (climaDoGolpe) statusRecebeuEm = attacker
+  // So desenho: o plantio da armadilha vai de quem usou ate o chao do ALVO
+  // (render/vfx, familia Armadilhas). So o jogador planta — mesma guarda do
+  // placar em `world.enemyHazards` acima.
+  if (ability.hazard && attacker.kind === 'player') statusRecebeuEm = target
   if (isDead(target) && ability.statTarget === 'self' && !isDead(attacker)) {
     aplicarMudancasDeStat(world.rng, attacker, target, ability)
   }

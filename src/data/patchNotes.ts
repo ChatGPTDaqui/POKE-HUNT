@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.67',
+    date: '2026-11-12',
+    title: 'Armadilhas à vista',
+    highlights: [
+      'Spikes, Toxic Spikes, Stealth Rock e Sticky Web ganharam efeito próprio: dá pra ver a armadilha sendo plantada no lado do adversário.',
+      'A armadilha em si funciona como antes; depois de plantada ela segue sem marca no chão.',
+    ],
+  },
+  {
     version: '8.66',
     date: '2026-11-12',
     title: 'Clima invocado à vista',
