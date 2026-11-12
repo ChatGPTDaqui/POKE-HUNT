@@ -6,7 +6,7 @@
 // o efeito deles nunca apareceria.
 import { describe, expect, it } from 'vitest'
 import { ABILITIES, isDamagingAbility } from '@/data/abilities'
-import { REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA } from './registro'
+import { REGISTRO_DE_STATUS, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA } from './registro'
 import { VITRINE_DO_ACO } from './coreografias/aco'
 import { VITRINE_DA_AGUA } from './coreografias/agua'
 import { VITRINE_DO_DRAGAO } from './coreografias/dragao'
@@ -51,6 +51,14 @@ describe('cobertura: todo golpe de dano tem efeito próprio', () => {
   it('nada no registro por golpe aponta pra golpe inexistente ou que não dispara', () => {
     for (const id of [...Object.keys(REGISTRO_POR_GOLPE), ...Object.keys(REGISTRO_POR_GOLPE_DE_AREA)]) {
       expect(isDamagingAbility(ABILITIES[id]), id).toBe(true)
+    }
+  })
+
+  it('registro de status só tem golpe que existe e NÃO é de dano', () => {
+    for (const id of Object.keys(REGISTRO_DE_STATUS)) {
+      expect(ABILITIES[id], id).toBeTruthy()
+      expect(isDamagingAbility(ABILITIES[id]), id).toBe(false)
+      expect(REGISTRO_POR_GOLPE[id], id).toBeUndefined()
     }
   })
 })

@@ -626,3 +626,29 @@ Os 54 golpes feitos antes do método novo foram revistos a partir da descrição
 - **Investida** (`investidas.ts`) foi reescrita golpe a golpe. O corpo é um vulto que se choca. Quick Attack aparece só em contornos (quase invisível); Extreme Speed pisca em quatro lugares; Body Slam despenca o peso e deixa paralisia; Giga Impact termina com quem atacou exausto; Last Resort mostra os quatro golpes; Retaliate mostra o aliado caído; Chip Away lasca o escudo de status; Facade queima os ícones de status; Return e Frustration usam coração inteiro ou partido; Strength é um soco máximo; Heavy Slam é um peso de ferro; U-turn termina no facho de troca; Acrobatics é uma cambalhota.
 - **Mordida** ganhou o efeito secundário de cada golpe: susto (Bite, Hyper Fang), Defesa caindo (Crunch), barra de HP pela metade (Super Fang), estática (Thunder Fang), queimadura (Fire Fang), veneno grave borbulhando (Poison Fang), a fruta comida (Bug Bite) e gotas de sangue (Leech Life).
 - **Garra, Lâmina e Chute** ganharam os detalhes da descrição em `secundarios.ts`: crítico fácil, status que sobe ou cai, a garra gigante do Dragon Claw, a barra que para em 1 de HP no False Swipe, as imagens residuais do Aerial Ace, os degraus do Fury Cutter, a queda do Low Kick, as veias de força do Mega Kick e a raiva do Stomping Tantrum.
+
+## Golpes de status — 28. Barreiras — `coreografias/barreiras.ts` (12/11, no lab, aguardando o dono)
+
+Primeira família fora dos golpes de dano: os dez golpes de PROTEÇÃO. Hoje
+`resolverVfx` devolve `null` para golpe de status, então nenhum deles tem
+efeito próprio. Tudo acontece em quem usa (`origem`); nada é chapado, porque o
+efeito é desenhado por cima do POKE. Conceito por golpe (descrição do jogo):
+
+| Golpe | Descrição | Conceito visual |
+|---|---|---|
+| Protect | evade todos os ataques | cúpula de favos: paredes sobem do chão, fecham no topo, clarão corre o arco; quebra em cacos |
+| Detect | evade todos os ataques | não é parede: um olho se abre acima da cabeça e fuzila; contornos-fantasma do corpo saem pros lados |
+| Endure | aguenta qualquer golpe com 1 HP | aura de labaredas duras trava no corpo; três pancadas estouram nela e ela só pisca; vapor no fim |
+| Wide Guard | protege de golpes de área | muralha baixa e larga: lajes de pedra brotam do centro pras pontas; brilho varre a fileira |
+| Reflect | parede contra golpe físico | vidraça dura que SOBE do chão (só moldura e reflexo); fecha como porta |
+| Light Screen | parede contra golpe especial | cortina de fitas de luz que DESCE do céu, da esquerda pra direita; onda de brilho |
+| Safeguard | campo contra condições | círculo no chão com véu subindo; bolha de veneno e brasa batem no véu e estouram |
+| Mist | névoa que impede queda de atributo | dois bancos de neblina rolam de fora e se encontram nos pés; fiapos sobem |
+| Lucky Chant | canto pro céu contra crítico | três notas sobem em zigue-zague, viram estrela e caem em sombrinha de estrelinhas |
+| Aurora Veil | véu de aurora (só no granizo) | três faixas onduladas de aurora acima da cabeça, franja irregular, cristais piscando |
+
+Para inscrever depois da aprovação: `resolverVfx` precisa aceitar golpe de
+status (hoje corta em `isDamagingAbility`), e o efeito de status dura
+`STATUS_VFX_DURATION` = 1,1 s — os perfis somam de 860 a 1100 ms de propósito.
+No lab o atacante dá o bote do golpe de dano e sai de dentro da barreira; no
+jogo o golpe de status não tem bote.

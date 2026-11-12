@@ -2,12 +2,12 @@
 //
 // Unica porta de entrada do VFX procedural. Devolve `null` sempre que o desenho
 // deve seguir o caminho antigo (tira PNG): tipo ainda nao migrado, golpe de
-// status, golpe desconhecido. E esse `null` que deixa a migracao ser TIPO A
+// status sem efeito proprio, golpe desconhecido. E esse `null` que deixa a migracao ser TIPO A
 // TIPO sem o jogo nunca ficar sem efeito (decisao D4 do spec).
 import { getAbility, isDamagingAbility } from '@/data/abilities'
 import { motivoDoGolpe, tetoDoTier, tierDoPoder } from '@/data/tierDoVfx'
 import type { ElementType } from '@/data/generated/types'
-import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA } from './registro'
+import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA, REGISTRO_DE_STATUS } from './registro'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 
 // Faixas de poder, teto e motivo moraram aqui ate 02/10; foram pra
@@ -20,6 +20,11 @@ export interface VfxResolvido {
   tier: Tier
   area: boolean
   motivo: Motivo | null
+  /**
+   * Efeito de status: desenhado NO CORPO de quem recebeu, e anda com ele. A
+   * origem do efeito e congelada no disparo; o alvo e que segue a entidade.
+   */
+  noCorpo?: boolean
 }
 
 export interface PedidoDeVfx {
@@ -32,7 +37,15 @@ export interface PedidoDeVfx {
 export function resolverVfx(pedido: PedidoDeVfx): VfxResolvido | null {
   if (!pedido.abilityId) return null
   const golpe = getAbility(pedido.abilityId)
-  if (!golpe || !isDamagingAbility(golpe)) return null
+  if (!golpe) return null
+  // Status so resolve com efeito PROPRIO inscrito (REGISTRO_DE_STATUS), e so no
+  // corpo de quem recebeu — nunca herda efeito de ataque do tipo (D8).
+  if (!isDamagingAbility(golpe)) {
+    const entrada = pedido.area ? undefined : REGISTRO_DE_STATUS[golpe.id]
+    return entrada
+      ? { entrada, tipo: pedido.elementType ?? golpe.type, tier: tierDoPoder(0, false) as Tier, area: false, motivo: null, noCorpo: true }
+      : null
+  }
   // Exceção aprovada: manter a sprite original, sem editar a arte/configuração.
   if (golpe.id === 'bullet_punch' && !pedido.area) return null
   const tipo = pedido.elementType ?? golpe.type

@@ -4,7 +4,7 @@
 // declarado, orçamento zerado sem quebrar e geometria dentro do retângulo que
 // o pixelizador varre (o que passa dele sai cortado na tela).
 import { describe, expect, it } from 'vitest'
-import { getAbility } from '@/data/abilities'
+import { getAbility, isDamagingAbility } from '@/data/abilities'
 import { retanguloDoEfeito } from '../desenharVfx'
 import { rngSemeado } from '../aleatorio'
 import { PELES } from '../paletas'
@@ -22,6 +22,8 @@ interface Opcoes {
   area?: Record<string, EntradaDeCoreografia>
   /** true quando a família já está inscrita no registro (resolver devolve ela). */
   inscrita: boolean
+  /** Família de golpes de STATUS (12/11): sem dano, lançados em quem usa. */
+  status?: boolean
 }
 
 function pontosDoQuadro(e: EntradaDeCoreografia, id: string, ms: number, tier: Tier, angulo: number, raio: number) {
@@ -68,11 +70,12 @@ function log(e: EntradaDeCoreografia, id: string, ms: number, angulo = 0, orcame
 export function testarFamilia(nome: string, o: Opcoes): void {
   const todos = { ...o.golpes, ...(o.area ?? {}) }
   describe(`família ${nome}`, () => {
-    it('cobre exatamente os golpes do plano, de dano, com o alvo certo', () => {
+    it(o.status ? 'cobre exatamente os golpes do plano, todos de status' : 'cobre exatamente os golpes do plano, de dano, com o alvo certo', () => {
       expect(Object.keys(todos).sort()).toEqual([...o.ids].sort())
       for (const id of o.ids) {
         const g = getAbility(id)
         expect(g, id).toBeTruthy()
+        if (o.status) { expect(isDamagingAbility(g), id).toBe(false); continue }
         expect(g!.category, id).not.toBe('status')
         expect(g!.target === 'single', id).toBe(!o.area?.[id])
       }

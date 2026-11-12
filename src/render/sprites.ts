@@ -1739,6 +1739,13 @@ function drawAbilityEffect(
   // selo — um fica no corpo, o outro acima da cabeca); e o burst procedural de
   // tipo, nunca.
   if (effect.statusDirection) {
+    // Efeito PROPRIO de status (render/vfx, REGISTRO_DE_STATUS — barreiras):
+    // ele e o aviso. O selo so acompanha quando ha atributo pra abreviar; a
+    // peca generica de condicao nao — Protect nao e condicao aplicada.
+    if (desenharVfxDeGolpe(ctx, effect)) {
+      if (effect.statusStat) drawSeloDeEstagio(ctx, effect, world)
+      return
+    }
     drawSeloDeEstagio(ctx, effect, world)
     if (temArtePropria) {
       if (effect.isAoe) drawAoeRing(ctx, effect, false)
