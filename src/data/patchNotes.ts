@@ -13,6 +13,23 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.72',
+    date: '2026-11-12',
+    title: 'Aumentos de defesa com cara própria',
+    highlights: [
+      'Harden, Withdraw, Defense Curl, Iron Defense, Acid Armor, Cotton Guard e Amnesia ganharam efeito próprio em quem usa.',
+    ],
+  },
+  {
+    version: '8.71',
+    date: '2026-11-12',
+    title: 'Aumentos de ataque com cara própria',
+    highlights: [
+      'Swords Dance, Howl, Sharpen, Meditate, Hone Claws, Work Up e Nasty Plot ganharam efeito próprio em quem usa.',
+      'O selo de atributo continua aparecendo junto.',
+    ],
+  },
+  {
     version: '8.70',
     date: '2026-11-12',
     title: 'Golpes de confusão com cara própria',

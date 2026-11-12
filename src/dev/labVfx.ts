@@ -35,6 +35,8 @@ import { semAcabamento } from '@/render/vfx/acabamento'
 import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
+import { AUMENTOS_DEFENSIVOS_POR_GOLPE } from '@/render/vfx/coreografias/aumentosDefensivos'
+import { AUMENTOS_OFENSIVOS_POR_GOLPE } from '@/render/vfx/coreografias/aumentosOfensivos'
 import { BARREIRAS_POR_GOLPE } from '@/render/vfx/coreografias/barreiras'
 import { ARMADILHAS_POR_GOLPE } from '@/render/vfx/coreografias/armadilhas'
 import { SONO_POR_GOLPE } from '@/render/vfx/coreografias/sono'
@@ -251,6 +253,10 @@ familiaNoLab('Sono', SONO_POR_GOLPE, { sleep_powder: 'oddish', spore: 'paras', h
 familiaNoLab('Condições', CONDICOES_POR_GOLPE, { thunder_wave: 'pikachu', stun_spore: 'oddish', glare: 'ekans', poison_powder: 'oddish',
   toxic: 'ekans', toxic_thread: 'ekans', will_o_wisp: 'gengar' })
 familiaNoLab('Confusão', CONFUSAO_POR_GOLPE, { supersonic: 'pidgey', confuse_ray: 'gengar', sweet_kiss: 'clefairy', swagger: 'machop', flatter: 'meowth' })
+familiaNoLab('Aumentos ofensivos', AUMENTOS_OFENSIVOS_POR_GOLPE, { swords_dance: 'scyther', howl: 'growlithe', sharpen: 'porygon', meditate: 'machop',
+  hone_claws: 'meowth', work_up: 'machop', nasty_plot: 'gengar' })
+familiaNoLab('Aumentos defensivos', AUMENTOS_DEFENSIVOS_POR_GOLPE, { harden: 'geodude', withdraw: 'squirtle', defense_curl: 'sandshrew', iron_defense: 'magnemite',
+  acid_armor: 'ekans', cotton_guard: 'oddish', amnesia: 'snorlax' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

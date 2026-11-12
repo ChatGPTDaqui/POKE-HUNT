@@ -732,3 +732,29 @@ Fora: Poison Gas e Teeter Dance (status em área — o resolver ainda não resol
 | Flatter | leque de brilhos sobe; fitas coloridas e estrelinhas chovem no alvo |
 
 Fecho comum: estrelinhas rodando na cabeça. Swagger e Flatter mantêm o selo de atributo (sobem Ataque/Atq. Esp. do alvo).
+
+## Golpes de status — 34. Aumentos ofensivos — `coreografias/aumentosOfensivos.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Swords Dance | quatro espadas rodam fechando o círculo; duas cruzam no alto e tinem |
+| Howl | arcos abertos pra cima sobem da cabeça, alargando; poeira no chão |
+| Sharpen | contorno de polígono em volta do corpo perde lados: 8, 6, 5, 4, 3 |
+| Meditate | ondas rasas no chão; centelha sobe da barriga à testa e abre em brilho |
+| Hone Claws | duas raspadas cruzadas de três riscos, com faísca de afiar |
+| Work Up | colchetes vermelhos bombeiam nos lados; vapor nos ombros e suor |
+| Nasty Plot | balão de pensamento escuro com chifres; sorriso torto acende e treme |
+
+Calibre: `origem` é o ALTO do corpo. Pés em `o.y + 12`, meio do corpo em `o.y + 3`, cabeça em `o.y - 9` (POKE pequeno). Efeito centrado em `o.y - 3` fica acima do corpo.
+
+## Golpes de status — 35. Aumentos defensivos — `coreografias/aumentosDefensivos.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Harden | seis placas sextavadas chegam de fora e estalam no lugar, uma a uma |
+| Withdraw | duas metades de casco fecham por cima e por baixo, com tranco |
+| Defense Curl | traço se enrola em espiral pra dentro e vira anel justo que pulsa |
+| Iron Defense | quatro cantoneiras rebitadas travam nos cantos; reflexo de metal varre duas vezes |
+| Acid Armor | gotas escorrem e empoçam; depois sobem de volta e fecham um cordão |
+| Cotton Guard | oito chumaços de três gomos brotam em roda e quicam |
+| Amnesia | três interrogações sobem da cabeça e viram reticências que se apagam |
