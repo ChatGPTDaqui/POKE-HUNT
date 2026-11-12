@@ -770,3 +770,17 @@ Calibre: `origem` é o ALTO do corpo. Pés em `o.y + 12`, meio do corpo em `o.y 
 | Minimize | quatro setas apertam um quadro em três trancos; some num estalo |
 
 Processo: checar tipos com `npx tsc --noEmit -p tsconfig.app.json` — `-p .` não checa nada (tsconfig raiz só tem referências).
+
+## Golpes de status — 37. Aumentos mistos — `coreografias/aumentosMistos.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Dragon Dance | duas fitas-dragão (azul e rubra) sobem em hélice oposta e rugem no alto |
+| Quiver Dance | asas de mariposa batem dos lados; pó brilhante cai balançando |
+| Calm Mind | gota cai na cabeça; três círculos rasos; sobra um traço liso |
+| Bulk Up | contorno de torso em V alarga em três trancos; ombros incham |
+| Coil | três voltas de mola sobem do chão e apertam juntas |
+| Growth | brotos sobem dos dois lados e abrem folhas; brilho de sol no topo |
+| Shell Smash | casco fecha, racha de cima a baixo e estilhaça em oito cacos |
+
+Fracos, a rever se o dono pedir: Bulk Up (ícone de braço não lê nesta escala; ficou o torso em V) e Quiver Dance (asas lembram lanternas).

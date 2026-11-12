@@ -36,6 +36,7 @@ import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
 import { AUMENTOS_DEFENSIVOS_POR_GOLPE } from '@/render/vfx/coreografias/aumentosDefensivos'
+import { AUMENTOS_MISTOS_POR_GOLPE } from '@/render/vfx/coreografias/aumentosMistos'
 import { AUMENTOS_OFENSIVOS_POR_GOLPE } from '@/render/vfx/coreografias/aumentosOfensivos'
 import { BARREIRAS_POR_GOLPE } from '@/render/vfx/coreografias/barreiras'
 import { ARMADILHAS_POR_GOLPE } from '@/render/vfx/coreografias/armadilhas'
@@ -259,6 +260,8 @@ familiaNoLab('Aumentos ofensivos', AUMENTOS_OFENSIVOS_POR_GOLPE, { swords_dance:
 familiaNoLab('Aumentos defensivos', AUMENTOS_DEFENSIVOS_POR_GOLPE, { harden: 'geodude', withdraw: 'squirtle', defense_curl: 'sandshrew', iron_defense: 'magnemite',
   acid_armor: 'ekans', cotton_guard: 'oddish', amnesia: 'snorlax' })
 familiaNoLab('Ligeireza', LIGEIREZA_POR_GOLPE, { agility: 'pidgey', rock_polish: 'geodude', autotomize: 'magnemite', double_team: 'pikachu', minimize: 'clefairy' })
+familiaNoLab('Aumentos mistos', AUMENTOS_MISTOS_POR_GOLPE, { dragon_dance: 'dratini', quiver_dance: 'scyther', calm_mind: 'espeon', bulk_up: 'machop',
+  coil: 'ekans', growth: 'oddish', shell_smash: 'squirtle' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
