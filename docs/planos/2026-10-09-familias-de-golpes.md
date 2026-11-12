@@ -670,3 +670,22 @@ marcar `statusRecebeuEm = attacker` no ramo de `climaDoGolpe` (hoje o golpe de
 clima não cria efeito nenhum). Sandstorm tem tira PNG própria em `moveVfx.ts`
 (`tornado_areia`) que nunca aparece pelo mesmo motivo — decidir na inscrição
 se sai.
+
+## Golpes de status — 30. Armadilhas de campo — `coreografias/armadilhas.ts` (12/11, no lab, aguardando o dono)
+
+Os quatro golpes com `hazard` no catálogo. Desenha-se o PLANTIO; a armadilha em si é estado do mundo (`world.enemyHazards`) e não tem desenho persistente.
+
+| Golpe | Descrição do jogo | Conceito |
+|---|---|---|
+| Spikes | arma estrepes aos pés do adversário | punhado de estrepes de aço arremessado em leque; cada um voa girando, quica uma vez e para de ponta pra cima; lampejo corre pelas pontas |
+| Toxic Spikes | arma farpas de veneno | três farpas roxas com rebarba caem de alto, cravam tortas e balançam até parar; poça de veneno cresce e borbulha embaixo |
+| Stealth Rock | pedras que levitam em volta do adversário | nada é arremessado: o chão racha, cinco pedras pontudas brotam, flutuam em roda e somem uma a uma num lampejo |
+| Sticky Web | tece uma teia grudenta em volta do adversário | fio disparado de quem usa até o chão do alvo; a teia abre (raios, depois dois anéis com barriga), gotas de cola piscam, recolhe pro centro |
+
+Diferença para Barreiras e Clima: há dois lugares (sai de `origem`, pousa sob `alvo`).
+
+Pendente para inscrever (só após aprovação do dono):
+- `REGISTRO_DE_STATUS` hoje resolve com `noCorpo: true` (origem = alvo). Armadilha precisa de origem em quem usa e alvo no adversário: o resolver tem de distinguir por entrada.
+- Motor: o ramo `ability.hazard` não marca `statusRecebeuEm`; o efeito tem de nascer no ALVO (lado inimigo), não em quem usou. Regerar o bundle da Edge.
+- Só o jogador planta armadilha (`attacker.kind === 'player'`); selvagem que usa o golpe não deve mostrar plantio.
+- Sem desenho persistente no chão: depois do plantio nada indica que a armadilha está armada. Decisão do dono.

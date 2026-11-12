@@ -151577,6 +151577,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	};
 	let statusRecebeuEm = null;
 	if (climaDoGolpe) statusRecebeuEm = attacker;
+	if (ability.hazard && attacker.kind === "player") statusRecebeuEm = target;
 	if (isDead(target) && ability.statTarget === "self" && !isDead(attacker)) aplicarMudancasDeStat(world.rng, attacker, target, ability);
 	if (!isDead(target) && !protegidoPorSubstituto) {
 		const traits = traitsDoConfronto(attacker, target);

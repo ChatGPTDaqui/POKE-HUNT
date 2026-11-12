@@ -91,6 +91,13 @@ describe('resolverVfx', () => {
     expect(resolverVfx({ abilityId: 'growl', area: false })).toBeNull()
   })
 
+  it('status no corpo de quem recebeu, menos armadilha de campo (sai de quem usou)', () => {
+    REGISTRO_DE_STATUS.protect = falsa()
+    REGISTRO_DE_STATUS.spikes = falsa()
+    expect(resolverVfx({ abilityId: 'protect', area: false })?.noCorpo).toBe(true)
+    expect(resolverVfx({ abilityId: 'spikes', area: false })?.noCorpo).toBe(false)
+  })
+
   it('golpe desconhecido ou sem id nao resolve', () => {
     REGISTRO_SINGLE.FIRE = { 3: falsa() }
     expect(resolverVfx({ abilityId: 'nao_existe', area: false })).toBeNull()
