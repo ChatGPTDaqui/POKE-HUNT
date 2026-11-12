@@ -652,3 +652,21 @@ status (hoje corta em `isDamagingAbility`), e o efeito de status dura
 `STATUS_VFX_DURATION` = 1,1 s — os perfis somam de 860 a 1100 ms de propósito.
 No lab o atacante dá o bote do golpe de dano e sai de dentro da barreira; no
 jogo o golpe de status não tem bote.
+
+## Golpes de status — 29. Clima — `coreografias/clima.ts` (12/11, no lab, aguardando o dono)
+Os quatro golpes de `CLIMA_DO_GOLPE`. O que se desenha é a INVOCAÇÃO, em volta
+de quem usou; o clima contínuo no mapa segue sendo do `climaVisual.ts`
+(`world.clima`) e não foi tocado. Conceito por golpe (descrição do jogo):
+
+| Golpe | Descrição | Conceito visual |
+|---|---|---|
+| Rain Dance | faz chover por cinco turnos | gotas sobem dos pés rodando o corpo, viram nuvem carregada acima da cabeça; ela desaba em riscos inclinados com respingo no chão |
+| Sunny Day | intensifica o sol | um sol nasce atrás da cabeça, firma no alto e abre oito raios que giram e pulsam; dois feixes descem até o chão; apaga num clarão |
+| Hail | invoca granizo | nuvem de gelo de quinas, com pingentes; despeja pedras lascadas que batem no chão e QUICAM; a nuvem racha em flocos |
+| Sandstorm | invoca tempestade de areia | poeira estoura dos lados dos pés; quatro rajadas compridas cruzam o corpo serpenteando e enrolam na ponta; grãos correm junto; o vento leva tudo |
+
+Para inscrever depois da aprovação: entrar em `REGISTRO_DE_STATUS`, e o motor
+marcar `statusRecebeuEm = attacker` no ramo de `climaDoGolpe` (hoje o golpe de
+clima não cria efeito nenhum). Sandstorm tem tira PNG própria em `moveVfx.ts`
+(`tornado_areia`) que nunca aparece pelo mesmo motivo — decidir na inscrição
+se sai.
