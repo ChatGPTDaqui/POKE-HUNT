@@ -66,6 +66,7 @@ import { LAMINAS_POR_GOLPE } from './coreografias/laminas'
 import { GARRAS_POR_GOLPE } from './coreografias/garras'
 import { MORDIDAS_POR_GOLPE } from './coreografias/mordidas'
 import { INVESTIDAS_POR_GOLPE } from './coreografias/investidas'
+import { ARMADILHAS_POR_GOLPE } from './coreografias/armadilhas'
 import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
 import { CLIMA_POR_GOLPE } from './coreografias/clima'
 
@@ -150,7 +151,9 @@ export const REGISTRO_POR_GOLPE_DE_AREA: Record<string, EntradaDeCoreografia> = 
 // sem coreografia (selo/arte propria), nunca cai no efeito de ataque do tipo.
 // Nao entra na tabela de impactos do motor: nao muda a hora em que o golpe pega.
 //   Barreiras  12/11/2026 — aprovada pelo dono no lab do staging.
+//   Clima e Armadilhas  12/11/2026 — aprovadas pelo dono no lab.
 export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...BARREIRAS_POR_GOLPE,
   ...CLIMA_POR_GOLPE,
+  ...ARMADILHAS_POR_GOLPE,
 }

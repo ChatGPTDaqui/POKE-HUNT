@@ -27,7 +27,7 @@ function usar(abilityId: string, antes?: (player: NonNullable<ReturnType<typeof 
     timer: 0, attackerId: player.id, targetId: enemy.id, ability: getAbility(abilityId)!,
   })
   updateCombat(world, 0)
-  return { player, efeitos: world.effects.filter((e) => e.type === 'abilityEffect' && e.abilityId === abilityId) }
+  return { player, enemy, efeitos: world.effects.filter((e) => e.type === 'abilityEffect' && e.abilityId === abilityId) }
 }
 
 describe('barreira cria o efeito em quem usou', () => {
@@ -55,6 +55,18 @@ describe('clima cria o efeito de invocacao em quem usou', () => {
       const { player, efeitos } = usar(id)
       expect(efeitos).toHaveLength(1)
       expect(efeitos[0].x).toBe(player.x)
+      expect(efeitos[0].origemX).toBe(player.x)
+      expect(efeitos[0].isAoe).toBeFalsy()
+    })
+  }
+})
+
+describe('armadilha cria o efeito do plantio: sai de quem usou, pousa no alvo', () => {
+  for (const id of ['spikes', 'toxic_spikes', 'stealth_rock', 'sticky_web']) {
+    it(id, () => {
+      const { player, enemy, efeitos } = usar(id)
+      expect(efeitos).toHaveLength(1)
+      expect(efeitos[0].x).toBe(enemy.x)
       expect(efeitos[0].origemX).toBe(player.x)
       expect(efeitos[0].isAoe).toBeFalsy()
     })
