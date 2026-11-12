@@ -13,6 +13,33 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.70',
+    date: '2026-11-12',
+    title: 'Golpes de confusão com cara própria',
+    highlights: [
+      'Supersonic, Confuse Ray, Sweet Kiss, Swagger e Flatter ganharam efeito próprio.',
+      'Quando a confusão pega, estrelinhas rodam em volta da cabeça do alvo.',
+    ],
+  },
+  {
+    version: '8.69',
+    date: '2026-11-12',
+    title: 'Paralisia, veneno e queimadura à vista',
+    highlights: [
+      'Thunder Wave, Stun Spore, Glare, Poison Powder, Toxic, Toxic Thread e Will-O-Wisp ganharam efeito próprio.',
+      'Destaques: os olhos de fenda do Glare, o lodo do Toxic escorrendo e as chamas azuis do Will-O-Wisp rodeando o alvo.',
+    ],
+  },
+  {
+    version: '8.68',
+    date: '2026-11-12',
+    title: 'Golpes de sono com cara própria',
+    highlights: [
+      'Sleep Powder, Spore, Hypnosis, Sing, Grass Whistle e Lovely Kiss ganharam efeito próprio: pó que assenta, cápsulas que estouram, espiral hipnótica, notas musicais, pauta de folha e o beijo que carimba.',
+      'Quando o sono pega, os Z sobem da cabeça do alvo.',
+    ],
+  },
+  {
     version: '8.67',
     date: '2026-11-12',
     title: 'Armadilhas à vista',

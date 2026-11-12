@@ -689,3 +689,46 @@ Pendente para inscrever (só após aprovação do dono):
 - Motor: o ramo `ability.hazard` não marca `statusRecebeuEm`; o efeito tem de nascer no ALVO (lado inimigo), não em quem usou. Regerar o bundle da Edge.
 - Só o jogador planta armadilha (`attacker.kind === 'player'`); selvagem que usa o golpe não deve mostrar plantio.
 - Sem desenho persistente no chão: depois do plantio nada indica que a armadilha está armada. Decisão do dono.
+
+## Golpes de status — 31. Sono — `coreografias/sono.ts` (12/11, inscrita)
+
+A partir daqui o dono liberou construir, testar e promover sem aprovação por família (12/11).
+
+| Golpe | Conceito |
+|---|---|
+| Sleep Powder | nuvem de grãos verdes deriva até a cabeça do alvo e chove devagar |
+| Spore | três cápsulas lançadas em sequência, cada uma estoura num ponto em volta do alvo |
+| Hypnosis | anéis saem dos olhos e crescem no caminho; viram espiral girando diante do rosto |
+| Sing | cinco notas coloridas em onda; dão a volta na cabeça do alvo |
+| Grass Whistle | folha vibrando na boca; pauta de dois fios verdes leva três notas |
+| Lovely Kiss | boca enorme voa crescendo e carimba o alvo |
+
+Fecho comum: os Z sobem da cabeça. `STATUS_QUE_VIAJA` (registro.ts) lista os golpes de status cujo desenho usa a origem real em vez de ancorar no corpo. Traços miúdos compartilhados em `coreografias/tracos.ts`.
+
+Fora desta família: Yawn (sono atrasado, regra própria) e Rest (sono em si mesmo, cura).
+
+## Golpes de status — 32. Condições — `coreografias/condicoes.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Thunder Wave | três arcos de choque trêmulos viajam em fila; faíscas curtas estalam em volta do alvo |
+| Stun Spore | flocos losango jogados pra cima caem em zigue-zague duro |
+| Glare | dois olhos de fenda se abrem sobre quem usa; riscos de olhar; alvo travado, tremendo |
+| Poison Powder | nuvem roxa rola rente ao chão e sobe pelo alvo, borbulhando |
+| Toxic | bolota de lodo em arco, espatifa e escorre em fios que alongam |
+| Toxic Thread | três fios roxos baixos laçam as pernas e apertam |
+| Will-O-Wisp | três chamas azuis nascem em quem usa, vão em fila e fecham a roda no alvo |
+
+Fora: Poison Gas e Teeter Dance (status em área — o resolver ainda não resolve status com `area`).
+
+## Golpes de status — 33. Confusão — `coreografias/confusao.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Supersonic | arcos de som tortos, cada um num compasso, chegam desencontrados |
+| Confuse Ray | orbe sinistro vem devagar, piscando de cor, com halo; abre em anel no rosto |
+| Sweet Kiss | coração aos pulinhos com brilhos atrás; estoura em cinco corações menores |
+| Swagger | quem usa bufa de deboche; alvo com veia de raiva pulsando e vapor |
+| Flatter | leque de brilhos sobe; fitas coloridas e estrelinhas chovem no alvo |
+
+Fecho comum: estrelinhas rodando na cabeça. Swagger e Flatter mantêm o selo de atributo (sobem Ataque/Atq. Esp. do alvo).

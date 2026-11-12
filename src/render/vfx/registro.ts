@@ -68,6 +68,9 @@ import { MORDIDAS_POR_GOLPE } from './coreografias/mordidas'
 import { INVESTIDAS_POR_GOLPE } from './coreografias/investidas'
 import { ARMADILHAS_POR_GOLPE } from './coreografias/armadilhas'
 import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
+import { SONO_POR_GOLPE } from './coreografias/sono'
+import { CONDICOES_POR_GOLPE } from './coreografias/condicoes'
+import { CONFUSAO_POR_GOLPE } from './coreografias/confusao'
 import { CLIMA_POR_GOLPE } from './coreografias/clima'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
@@ -152,8 +155,18 @@ export const REGISTRO_POR_GOLPE_DE_AREA: Record<string, EntradaDeCoreografia> = 
 // Nao entra na tabela de impactos do motor: nao muda a hora em que o golpe pega.
 //   Barreiras  12/11/2026 — aprovada pelo dono no lab do staging.
 //   Clima e Armadilhas  12/11/2026 — aprovadas pelo dono no lab.
+//   Sono em diante  12/11/2026 — dono liberou inscrever sem aprovacao por familia.
 export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...BARREIRAS_POR_GOLPE,
   ...CLIMA_POR_GOLPE,
   ...ARMADILHAS_POR_GOLPE,
+  ...SONO_POR_GOLPE,
+  ...CONDICOES_POR_GOLPE,
+  ...CONFUSAO_POR_GOLPE,
 }
+// Status que SAI de quem usou e chega no alvo: o desenho usa a origem real em
+// vez de ancorar tudo no corpo de quem recebeu.
+export const STATUS_QUE_VIAJA: ReadonlySet<string> = new Set([
+  ...Object.keys(ARMADILHAS_POR_GOLPE), ...Object.keys(SONO_POR_GOLPE),
+  ...Object.keys(CONDICOES_POR_GOLPE), ...Object.keys(CONFUSAO_POR_GOLPE),
+])
