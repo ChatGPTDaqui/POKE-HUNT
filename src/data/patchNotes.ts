@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.70',
+    date: '2026-11-12',
+    title: 'Golpes de confusão com cara própria',
+    highlights: [
+      'Supersonic, Confuse Ray, Sweet Kiss, Swagger e Flatter ganharam efeito próprio.',
+      'Quando a confusão pega, estrelinhas rodam em volta da cabeça do alvo.',
+    ],
+  },
+  {
     version: '8.69',
     date: '2026-11-12',
     title: 'Paralisia, veneno e queimadura à vista',

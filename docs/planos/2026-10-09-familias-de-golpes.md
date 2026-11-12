@@ -720,3 +720,15 @@ Fora desta família: Yawn (sono atrasado, regra própria) e Rest (sono em si mes
 | Will-O-Wisp | três chamas azuis nascem em quem usa, vão em fila e fecham a roda no alvo |
 
 Fora: Poison Gas e Teeter Dance (status em área — o resolver ainda não resolve status com `area`).
+
+## Golpes de status — 33. Confusão — `coreografias/confusao.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Supersonic | arcos de som tortos, cada um num compasso, chegam desencontrados |
+| Confuse Ray | orbe sinistro vem devagar, piscando de cor, com halo; abre em anel no rosto |
+| Sweet Kiss | coração aos pulinhos com brilhos atrás; estoura em cinco corações menores |
+| Swagger | quem usa bufa de deboche; alvo com veia de raiva pulsando e vapor |
+| Flatter | leque de brilhos sobe; fitas coloridas e estrelinhas chovem no alvo |
+
+Fecho comum: estrelinhas rodando na cabeça. Swagger e Flatter mantêm o selo de atributo (sobem Ataque/Atq. Esp. do alvo).
