@@ -44,6 +44,7 @@ import { SONO_POR_GOLPE } from '@/render/vfx/coreografias/sono'
 import { CONDICOES_POR_GOLPE } from '@/render/vfx/coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from '@/render/vfx/coreografias/confusao'
 import { LIGEIREZA_POR_GOLPE } from '@/render/vfx/coreografias/ligeireza'
+import { ENERGIAS_POR_GOLPE } from '@/render/vfx/coreografias/energias'
 import { CLIMA_POR_GOLPE } from '@/render/vfx/coreografias/clima'
 import { PUNHOS_PESADOS_POR_GOLPE } from '@/render/vfx/coreografias/punhosPesados'
 import { VENTOS_EM_AREA_POR_GOLPE, VENTOS_POR_GOLPE } from '@/render/vfx/coreografias/ventos'
@@ -262,6 +263,7 @@ familiaNoLab('Aumentos defensivos', AUMENTOS_DEFENSIVOS_POR_GOLPE, { harden: 'ge
 familiaNoLab('Ligeireza', LIGEIREZA_POR_GOLPE, { agility: 'pidgey', rock_polish: 'geodude', autotomize: 'magnemite', double_team: 'pikachu', minimize: 'clefairy' })
 familiaNoLab('Aumentos mistos', AUMENTOS_MISTOS_POR_GOLPE, { dragon_dance: 'dratini', quiver_dance: 'scyther', calm_mind: 'espeon', bulk_up: 'machop',
   coil: 'ekans', growth: 'oddish', shell_smash: 'squirtle' })
+familiaNoLab('Energias', ENERGIAS_POR_GOLPE, { cosmic_power: 'clefairy', stockpile: 'snorlax', charge: 'pikachu', magnetic_flux: 'magnemite', barrier: 'espeon', tail_glow: 'scyther' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
