@@ -758,3 +758,15 @@ Calibre: `origem` é o ALTO do corpo. Pés em `o.y + 12`, meio do corpo em `o.y 
 | Acid Armor | gotas escorrem e empoçam; depois sobem de volta e fecham um cordão |
 | Cotton Guard | oito chumaços de três gomos brotam em roda e quicam |
 | Amnesia | três interrogações sobem da cabeça e viram reticências que se apagam |
+
+## Golpes de status — 36. Ligeireza — `coreografias/ligeireza.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Agility | divisas de vento atravessam o corpo em três alturas; poeira nos pés |
+| Rock Polish | arco curto (o pano) esfrega em círculo e deixa quatro brilhos onde passou |
+| Autotomize | lascas de metal se soltam, caem, quicam; dois riscos sobem (corpo leve) |
+| Double Team | dois contornos tracejados saltam pros lados e voltam, piscando alternados |
+| Minimize | quatro setas apertam um quadro em três trancos; some num estalo |
+
+Processo: checar tipos com `npx tsc --noEmit -p tsconfig.app.json` — `-p .` não checa nada (tsconfig raiz só tem referências).

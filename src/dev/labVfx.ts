@@ -42,6 +42,7 @@ import { ARMADILHAS_POR_GOLPE } from '@/render/vfx/coreografias/armadilhas'
 import { SONO_POR_GOLPE } from '@/render/vfx/coreografias/sono'
 import { CONDICOES_POR_GOLPE } from '@/render/vfx/coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from '@/render/vfx/coreografias/confusao'
+import { LIGEIREZA_POR_GOLPE } from '@/render/vfx/coreografias/ligeireza'
 import { CLIMA_POR_GOLPE } from '@/render/vfx/coreografias/clima'
 import { PUNHOS_PESADOS_POR_GOLPE } from '@/render/vfx/coreografias/punhosPesados'
 import { VENTOS_EM_AREA_POR_GOLPE, VENTOS_POR_GOLPE } from '@/render/vfx/coreografias/ventos'
@@ -257,6 +258,7 @@ familiaNoLab('Aumentos ofensivos', AUMENTOS_OFENSIVOS_POR_GOLPE, { swords_dance:
   hone_claws: 'meowth', work_up: 'machop', nasty_plot: 'gengar' })
 familiaNoLab('Aumentos defensivos', AUMENTOS_DEFENSIVOS_POR_GOLPE, { harden: 'geodude', withdraw: 'squirtle', defense_curl: 'sandshrew', iron_defense: 'magnemite',
   acid_armor: 'ekans', cotton_guard: 'oddish', amnesia: 'snorlax' })
+familiaNoLab('Ligeireza', LIGEIREZA_POR_GOLPE, { agility: 'pidgey', rock_polish: 'geodude', autotomize: 'magnemite', double_team: 'pikachu', minimize: 'clefairy' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

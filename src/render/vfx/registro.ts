@@ -73,6 +73,7 @@ import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
 import { SONO_POR_GOLPE } from './coreografias/sono'
 import { CONDICOES_POR_GOLPE } from './coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from './coreografias/confusao'
+import { LIGEIREZA_POR_GOLPE } from './coreografias/ligeireza'
 import { CLIMA_POR_GOLPE } from './coreografias/clima'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
@@ -167,6 +168,7 @@ export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...CONFUSAO_POR_GOLPE,
   ...AUMENTOS_OFENSIVOS_POR_GOLPE,
   ...AUMENTOS_DEFENSIVOS_POR_GOLPE,
+  ...LIGEIREZA_POR_GOLPE,
 }
 // Status que SAI de quem usou e chega no alvo: o desenho usa a origem real em
 // vez de ancorar tudo no corpo de quem recebeu.
