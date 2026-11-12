@@ -40,6 +40,7 @@ import { AUMENTOS_MISTOS_POR_GOLPE } from '@/render/vfx/coreografias/aumentosMis
 import { AUMENTOS_OFENSIVOS_POR_GOLPE } from '@/render/vfx/coreografias/aumentosOfensivos'
 import { BARREIRAS_POR_GOLPE } from '@/render/vfx/coreografias/barreiras'
 import { ARMADILHAS_POR_GOLPE } from '@/render/vfx/coreografias/armadilhas'
+import { REDUCOES_HOSTIS_POR_GOLPE } from '@/render/vfx/coreografias/reducoesHostis'
 import { SONO_POR_GOLPE } from '@/render/vfx/coreografias/sono'
 import { CONDICOES_POR_GOLPE } from '@/render/vfx/coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from '@/render/vfx/coreografias/confusao'
@@ -264,6 +265,8 @@ familiaNoLab('Ligeireza', LIGEIREZA_POR_GOLPE, { agility: 'pidgey', rock_polish:
 familiaNoLab('Aumentos mistos', AUMENTOS_MISTOS_POR_GOLPE, { dragon_dance: 'dratini', quiver_dance: 'scyther', calm_mind: 'espeon', bulk_up: 'machop',
   coil: 'ekans', growth: 'oddish', shell_smash: 'squirtle' })
 familiaNoLab('Energias', ENERGIAS_POR_GOLPE, { cosmic_power: 'clefairy', stockpile: 'snorlax', charge: 'pikachu', magnetic_flux: 'magnemite', barrier: 'espeon', tail_glow: 'scyther' })
+familiaNoLab('Reduções hostis', REDUCOES_HOSTIS_POR_GOLPE, { scary_face: 'gengar', screech: 'meowth', metal_sound: 'magnemite', eerie_impulse: 'pikachu',
+  smokescreen: 'charmander', sand_attack: 'sandshrew', kinesis: 'espeon', feather_dance: 'pidgey' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
