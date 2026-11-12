@@ -36,6 +36,7 @@ import { SOCOS_POR_GOLPE } from '@/render/vfx/coreografias/socos'
 import { BEAMS_POR_GOLPE, BEAMS_COM_IMPACTO_ANTERIOR } from '@/render/vfx/coreografias/beams'
 import { MORDIDAS_POR_GOLPE } from '@/render/vfx/coreografias/mordidas'
 import { BARREIRAS_POR_GOLPE } from '@/render/vfx/coreografias/barreiras'
+import { CLIMA_POR_GOLPE } from '@/render/vfx/coreografias/clima'
 import { PUNHOS_PESADOS_POR_GOLPE } from '@/render/vfx/coreografias/punhosPesados'
 import { VENTOS_EM_AREA_POR_GOLPE, VENTOS_POR_GOLPE } from '@/render/vfx/coreografias/ventos'
 import { ONDAS_EM_AREA_POR_GOLPE, ONDAS_POR_GOLPE } from '@/render/vfx/coreografias/ondas'
@@ -240,6 +241,7 @@ familiaNoLab('Soco pesado', PUNHOS_PESADOS_POR_GOLPE, { 'hammer_arm': 'machop', 
 // quem usa; a esquerda fica vazia de propósito (hoje o jogo não desenha nada próprio).
 familiaNoLab('Barreiras', BARREIRAS_POR_GOLPE, { protect: 'squirtle', detect: 'hitmonlee', endure: 'machop', wide_guard: 'geodude',
   reflect: 'espeon', light_screen: 'espeon', safeguard: 'clefairy', mist: 'jynx', lucky_chant: 'clefairy', aurora_veil: 'jynx' })
+familiaNoLab('Clima', CLIMA_POR_GOLPE, { rain_dance: 'squirtle', sunny_day: 'espeon', hail: 'jynx', sandstorm: 'geodude' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.
