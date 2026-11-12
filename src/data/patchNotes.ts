@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.66',
+    date: '2026-11-12',
+    title: 'Clima invocado à vista',
+    highlights: [
+      'Rain Dance, Sunny Day, Hail e Sandstorm ganharam efeito próprio: nuvem de chuva, sol, pedras de gelo e rajadas de areia surgem em volta de quem invocou.',
+      'O clima do campo em si não mudou: mesma duração e os mesmos efeitos em combate.',
+    ],
+  },
+  {
     version: '8.65',
     date: '2026-11-12',
     title: 'Barreiras visíveis',

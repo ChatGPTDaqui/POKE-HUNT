@@ -48,3 +48,15 @@ describe('barreira cria o efeito em quem usou', () => {
     expect(efeitos).toHaveLength(0)
   })
 })
+
+describe('clima cria o efeito de invocacao em quem usou', () => {
+  for (const id of ['rain_dance', 'sunny_day', 'hail', 'sandstorm']) {
+    it(id, () => {
+      const { player, efeitos } = usar(id)
+      expect(efeitos).toHaveLength(1)
+      expect(efeitos[0].x).toBe(player.x)
+      expect(efeitos[0].origemX).toBe(player.x)
+      expect(efeitos[0].isAoe).toBeFalsy()
+    })
+  }
+})
