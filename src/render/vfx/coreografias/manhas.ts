@@ -83,7 +83,7 @@ function corado(s: Cena, forca: number): void {
 const GOLPES: Record<string, (s: Cena) => void> = {
   /** "The user tells the target a secret, and the target loses its ability to concentrate. This lowers the target's Sp. Atk stat." */
   confide(s) {
-    const { ctx, ms } = s.c, [fundo, meio, sombra] = COR.balao
+    const { ctx, ms } = s.c, [fundo, meio] = COR.balao
     // Um BALÃO de cochicho (com reticências) sai da boca e vai de mansinho até
     // o ouvido do alvo; lá estoura em "psst" e o alvo fica com um rabisco
     // de cabeça cheia.
@@ -93,7 +93,6 @@ const GOLPES: Record<string, (s: Cena) => void> = {
       const caixa = (g: number): [number, number][] => [[x - (6 + g) * k, y - (3.6 + g) * k], [x + (6 + g) * k, y - (3.6 + g) * k], [x + (6 + g) * k, y + (3.2 + g) * k], [x + s.dir * 1 * k, y + (3.2 + g) * k], [x + s.dir * 4 * k, y + (6.4 + g) * k], [x - s.dir * 2 * k, y + (3.2 + g) * k], [x - (6 + g) * k, y + (3.2 + g) * k]]
       poligono(ctx, caixa(1.2), ESCURO); poligono(ctx, caixa(0), meio)
       for (let i = 0; i < 3; i++) disco(ctx, x + (i - 1) * 3.2 * k, y - .2 * k + (Math.floor(ms / 110) % 3 === i ? -1 : 0), 1 * k, fundo)
-      void sombra
       return
     }
     const t = s.pega ?? 1, fino = 1 - entrada(s.some), ouvido = { x: s.cabeca.x - s.dir * 6, y: s.cabeca.y + 1 }
@@ -268,7 +267,7 @@ const GOLPES: Record<string, (s: Cena) => void> = {
     }
     else if (s.some < .8) {
       // Fumacinha: o que sobra.
-      const v = s.pega === null ? s.some : (s.pega - .75) / .25
+      const v = s.pega === null ? s.some : limitar((s.pega - .5) / .5)
       for (let i = 0; i < 2; i++) conta(ctx, topo.x + Math.sin(v * 5 + i * 2) * 2, topo.y - v * 9 - i * 4, 1.6 * (1 - v), '#c8ced8')
     }
   },
