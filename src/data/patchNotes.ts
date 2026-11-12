@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.69',
+    date: '2026-11-12',
+    title: 'Paralisia, veneno e queimadura à vista',
+    highlights: [
+      'Thunder Wave, Stun Spore, Glare, Poison Powder, Toxic, Toxic Thread e Will-O-Wisp ganharam efeito próprio.',
+      'Destaques: os olhos de fenda do Glare, o lodo do Toxic escorrendo e as chamas azuis do Will-O-Wisp rodeando o alvo.',
+    ],
+  },
+  {
     version: '8.68',
     date: '2026-11-12',
     title: 'Golpes de sono com cara própria',
