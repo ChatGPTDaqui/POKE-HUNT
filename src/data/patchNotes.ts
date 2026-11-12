@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.75',
+    date: '2026-11-12',
+    title: 'Cargas de energia com cara própria',
+    highlights: [
+      'Cosmic Power, Stockpile, Charge, Magnetic Flux, Barrier e Tail Glow ganharam efeito próprio em quem usa.',
+    ],
+  },
+  {
     version: '8.74',
     date: '2026-11-12',
     title: 'Danças e aumentos duplos com cara própria',

@@ -784,3 +784,16 @@ Processo: checar tipos com `npx tsc --noEmit -p tsconfig.app.json` — `-p .` n�
 | Shell Smash | casco fecha, racha de cima a baixo e estilhaça em oito cacos |
 
 Fracos, a rever se o dono pedir: Bulk Up (ícone de braço não lê nesta escala; ficou o torso em V) e Quiver Dance (asas lembram lanternas).
+
+## Golpes de status — 38. Energias — `coreografias/energias.ts` (12/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Cosmic Power | cinco estrelas descem em espiral; constelação de cinco nós acende sobre a cabeça |
+| Stockpile | orbe se forma com três contas girando, cai pra dentro e a barriga pulsa um anel |
+| Charge | seis raiozinhos convergem de fora pra dentro com anel apertando; corpo estala |
+| Magnetic Flux | polos vermelho/azul e três linhas de campo por lado, traços correndo |
+| Barrier | grade de seis painéis (só moldura) sobe do chão na frente; reflexo corre |
+| Tail Glow | luz atrás pisca três vezes, cada vez com mais raios |
+
+Limite: golpe em si mesmo não tem direção (`angulo` 0). Barrier sai sempre à direita e Tail Glow à esquerda, mesmo com o POKE virado pro outro lado.
