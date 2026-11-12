@@ -13,7 +13,7 @@
 // (`origem`) e pousa no chão sob o alvo (`alvo`). Sem alfa: some encolhendo.
 //
 // Inscrita em REGISTRO_DE_STATUS (12/11): o resolver NÃO ancora em quem usou
-// (`noCorpo` falso para golpe com `hazard`).
+// (`STATUS_QUE_VIAJA`).
 import { getAbility } from '@/data/abilities'
 import { PELES } from '../paletas'
 import { entrada, limitar, saida } from '../primitivas'
