@@ -689,3 +689,20 @@ Pendente para inscrever (só após aprovação do dono):
 - Motor: o ramo `ability.hazard` não marca `statusRecebeuEm`; o efeito tem de nascer no ALVO (lado inimigo), não em quem usou. Regerar o bundle da Edge.
 - Só o jogador planta armadilha (`attacker.kind === 'player'`); selvagem que usa o golpe não deve mostrar plantio.
 - Sem desenho persistente no chão: depois do plantio nada indica que a armadilha está armada. Decisão do dono.
+
+## Golpes de status — 31. Sono — `coreografias/sono.ts` (12/11, inscrita)
+
+A partir daqui o dono liberou construir, testar e promover sem aprovação por família (12/11).
+
+| Golpe | Conceito |
+|---|---|
+| Sleep Powder | nuvem de grãos verdes deriva até a cabeça do alvo e chove devagar |
+| Spore | três cápsulas lançadas em sequência, cada uma estoura num ponto em volta do alvo |
+| Hypnosis | anéis saem dos olhos e crescem no caminho; viram espiral girando diante do rosto |
+| Sing | cinco notas coloridas em onda; dão a volta na cabeça do alvo |
+| Grass Whistle | folha vibrando na boca; pauta de dois fios verdes leva três notas |
+| Lovely Kiss | boca enorme voa crescendo e carimba o alvo |
+
+Fecho comum: os Z sobem da cabeça. `STATUS_QUE_VIAJA` (registro.ts) lista os golpes de status cujo desenho usa a origem real em vez de ancorar no corpo. Traços miúdos compartilhados em `coreografias/tracos.ts`.
+
+Fora desta família: Yawn (sono atrasado, regra própria) e Rest (sono em si mesmo, cura).

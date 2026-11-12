@@ -7,7 +7,7 @@
 import { getAbility, isDamagingAbility } from '@/data/abilities'
 import { motivoDoGolpe, tetoDoTier, tierDoPoder } from '@/data/tierDoVfx'
 import type { ElementType } from '@/data/generated/types'
-import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA, REGISTRO_DE_STATUS } from './registro'
+import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA, REGISTRO_DE_STATUS, STATUS_QUE_VIAJA } from './registro'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 
 // Faixas de poder, teto e motivo moraram aqui ate 02/10; foram pra
@@ -40,11 +40,11 @@ export function resolverVfx(pedido: PedidoDeVfx): VfxResolvido | null {
   if (!golpe) return null
   // Status so resolve com efeito PROPRIO inscrito (REGISTRO_DE_STATUS) — nunca
   // herda efeito de ataque do tipo (D8). Desenha no corpo de quem recebeu,
-  // menos a armadilha de campo, que SAI de quem usou e pousa no alvo.
+  // menos os de `STATUS_QUE_VIAJA`, que SAEM de quem usou e chegam no alvo.
   if (!isDamagingAbility(golpe)) {
     const entrada = pedido.area ? undefined : REGISTRO_DE_STATUS[golpe.id]
     return entrada
-      ? { entrada, tipo: pedido.elementType ?? golpe.type, tier: tierDoPoder(0, false) as Tier, area: false, motivo: null, noCorpo: !golpe.hazard }
+      ? { entrada, tipo: pedido.elementType ?? golpe.type, tier: tierDoPoder(0, false) as Tier, area: false, motivo: null, noCorpo: !STATUS_QUE_VIAJA.has(golpe.id) }
       : null
   }
   // Exceção aprovada: manter a sprite original, sem editar a arte/configuração.
