@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.72',
+    date: '2026-11-12',
+    title: 'Aumentos de defesa com cara própria',
+    highlights: [
+      'Harden, Withdraw, Defense Curl, Iron Defense, Acid Armor, Cotton Guard e Amnesia ganharam efeito próprio em quem usa.',
+    ],
+  },
+  {
     version: '8.71',
     date: '2026-11-12',
     title: 'Aumentos de ataque com cara própria',

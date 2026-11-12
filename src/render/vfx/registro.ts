@@ -67,6 +67,7 @@ import { GARRAS_POR_GOLPE } from './coreografias/garras'
 import { MORDIDAS_POR_GOLPE } from './coreografias/mordidas'
 import { INVESTIDAS_POR_GOLPE } from './coreografias/investidas'
 import { ARMADILHAS_POR_GOLPE } from './coreografias/armadilhas'
+import { AUMENTOS_DEFENSIVOS_POR_GOLPE } from './coreografias/aumentosDefensivos'
 import { AUMENTOS_OFENSIVOS_POR_GOLPE } from './coreografias/aumentosOfensivos'
 import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
 import { SONO_POR_GOLPE } from './coreografias/sono'
@@ -165,6 +166,7 @@ export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...CONDICOES_POR_GOLPE,
   ...CONFUSAO_POR_GOLPE,
   ...AUMENTOS_OFENSIVOS_POR_GOLPE,
+  ...AUMENTOS_DEFENSIVOS_POR_GOLPE,
 }
 // Status que SAI de quem usou e chega no alvo: o desenho usa a origem real em
 // vez de ancorar tudo no corpo de quem recebeu.
