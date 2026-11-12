@@ -3214,6 +3214,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // logo abaixo, se mostra o VFX de status e em cima de quem) — nao existia
   // antes desta leva porque nada fora deste `if` precisava saber.
   let statusRecebeuEm: WorldEntity | null = null
+  // So desenho: a invocacao do clima aparece em QUEM INVOCOU (render/vfx,
+  // familia Clima). O clima em si e de campo e continua em `world.clima`.
+  if (climaDoGolpe) statusRecebeuEm = attacker
   if (isDead(target) && ability.statTarget === 'self' && !isDead(attacker)) {
     aplicarMudancasDeStat(world.rng, attacker, target, ability)
   }

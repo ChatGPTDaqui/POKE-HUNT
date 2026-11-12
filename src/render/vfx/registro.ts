@@ -67,6 +67,7 @@ import { GARRAS_POR_GOLPE } from './coreografias/garras'
 import { MORDIDAS_POR_GOLPE } from './coreografias/mordidas'
 import { INVESTIDAS_POR_GOLPE } from './coreografias/investidas'
 import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
+import { CLIMA_POR_GOLPE } from './coreografias/clima'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
 
@@ -151,4 +152,5 @@ export const REGISTRO_POR_GOLPE_DE_AREA: Record<string, EntradaDeCoreografia> = 
 //   Barreiras  12/11/2026 — aprovada pelo dono no lab do staging.
 export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...BARREIRAS_POR_GOLPE,
+  ...CLIMA_POR_GOLPE,
 }
