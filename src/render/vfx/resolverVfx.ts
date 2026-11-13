@@ -7,7 +7,7 @@
 import { getAbility, isDamagingAbility } from '@/data/abilities'
 import { motivoDoGolpe, tetoDoTier, tierDoPoder } from '@/data/tierDoVfx'
 import type { ElementType } from '@/data/generated/types'
-import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA, REGISTRO_DE_STATUS, STATUS_QUE_VIAJA } from './registro'
+import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_SINGLE, REGISTRO_POR_GOLPE, REGISTRO_POR_GOLPE_DE_AREA, REGISTRO_DE_STATUS, REGISTRO_DE_STATUS_DE_AREA, STATUS_QUE_VIAJA } from './registro'
 import type { EntradaDeCoreografia, Motivo, Tier } from './tipos'
 
 // Faixas de poder, teto e motivo moraram aqui ate 02/10; foram pra
@@ -42,9 +42,10 @@ export function resolverVfx(pedido: PedidoDeVfx): VfxResolvido | null {
   // herda efeito de ataque do tipo (D8). Desenha no corpo de quem recebeu,
   // menos os de `STATUS_QUE_VIAJA`, que SAEM de quem usou e chegam no alvo.
   if (!isDamagingAbility(golpe)) {
-    const entrada = pedido.area ? undefined : REGISTRO_DE_STATUS[golpe.id]
+    // Area tem registro proprio: status alvo-unico pedido em area nao herda o single.
+    const entrada = (pedido.area ? REGISTRO_DE_STATUS_DE_AREA : REGISTRO_DE_STATUS)[golpe.id]
     return entrada
-      ? { entrada, tipo: pedido.elementType ?? golpe.type, tier: tierDoPoder(0, false) as Tier, area: false, motivo: null, noCorpo: !STATUS_QUE_VIAJA.has(golpe.id) }
+      ? { entrada, tipo: pedido.elementType ?? golpe.type, tier: tierDoPoder(0, pedido.area) as Tier, area: pedido.area, motivo: null, noCorpo: pedido.area || !STATUS_QUE_VIAJA.has(golpe.id) }
       : null
   }
   // Exceção aprovada: manter a sprite original, sem editar a arte/configuração.

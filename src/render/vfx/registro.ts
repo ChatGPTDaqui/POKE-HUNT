@@ -73,6 +73,7 @@ import { AUMENTOS_OFENSIVOS_POR_GOLPE } from './coreografias/aumentosOfensivos'
 import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
 import { MANHAS_POR_GOLPE } from './coreografias/manhas'
 import { REDUCOES_HOSTIS_POR_GOLPE } from './coreografias/reducoesHostis'
+import { STATUS_EM_AREA_POR_GOLPE } from './coreografias/statusEmArea'
 import { SONO_POR_GOLPE } from './coreografias/sono'
 import { CONDICOES_POR_GOLPE } from './coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from './coreografias/confusao'
@@ -177,6 +178,10 @@ export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...ENERGIAS_POR_GOLPE,
   ...REDUCOES_HOSTIS_POR_GOLPE,
   ...MANHAS_POR_GOLPE,
+}
+// Status em AREA (13/11): um efeito so pro cast inteiro, centrado em quem usou.
+export const REGISTRO_DE_STATUS_DE_AREA: Record<string, EntradaDeCoreografia> = {
+  ...STATUS_EM_AREA_POR_GOLPE,
 }
 // Status que SAI de quem usou e chega no alvo: o desenho usa a origem real em
 // vez de ancorar tudo no corpo de quem recebeu.

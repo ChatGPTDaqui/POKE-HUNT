@@ -830,3 +830,23 @@ Restam: cura, status em área (Growl, Leer, Tail Whip, Sweet Scent, String Shot,
 Charm saiu da Manhas (13/11): tem arte PNG própria e teste de guarda (`arteDeGolpeDeStatus`). Rodar `npx vitest run src/render` inteiro antes de abrir PR — `src/render/vfx` sozinho não pega esse tipo de colisão.
 
 Pendente de decisão do dono: seis golpes de status com arte PNG própria já foram cobertos pelo efeito procedural sem aviso — Toxic, Sweet Kiss, Swords Dance, Dragon Dance, Growth, Sand Attack (além de Sandstorm, avisado). O teste de guarda só nomeia Charm, Taunt e Spider Web.
+
+## Golpes de status — 41. Status em área — `coreografias/statusEmArea.ts` (13/11, inscrita)
+
+Primeira família de status em área: `REGISTRO_DE_STATUS_DE_AREA`, lido pelo resolver quando o pedido é de área.
+
+| Golpe | Conceito |
+|---|---|
+| Growl | três ondas de borda ondulada abrem pelo chão |
+| Leer | dois olhos em cunha acendem; corte de luz varre o chão com quatro lampejos |
+| Tail Whip | leque de abanadas atrás de quem usa; redemoinhos de poeira pela área |
+| Sweet Scent | fios de perfume em S sobem em cada ponto, pétala girando na ponta |
+| Cotton Spore | chumaços voam em arco alto e assentam espalhados |
+| String Shot | fios de seda em raio com laço que aperta na ponta |
+| Captivate | anel de corações abre girando e estoura em brilho |
+| Poison Gas | gomos roxos rolam baixo e pairam soltando bolhas |
+| Venom Drench | chuva grossa de veneno, gotas que espatifam em coroa e poça |
+| Teeter Dance | anel que gangorra; estrelinhas de tontura na área |
+| Heal Block | cruzes verdes riscadas por X vermelho; anel vermelho fecha a área |
+
+Calibre de área: raio 175. Peça do tamanho de golpe alvo-único some — `espalhar` desenha cada peça ampliada 1,8× em torno do seu ponto. Fraco: Tail Whip (redemoinhos pequenos).
