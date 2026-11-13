@@ -42,6 +42,7 @@ import { BARREIRAS_POR_GOLPE } from '@/render/vfx/coreografias/barreiras'
 import { ARMADILHAS_POR_GOLPE } from '@/render/vfx/coreografias/armadilhas'
 import { MANHAS_POR_GOLPE } from '@/render/vfx/coreografias/manhas'
 import { REDUCOES_HOSTIS_POR_GOLPE } from '@/render/vfx/coreografias/reducoesHostis'
+import { STATUS_EM_AREA_POR_GOLPE } from '@/render/vfx/coreografias/statusEmArea'
 import { SONO_POR_GOLPE } from '@/render/vfx/coreografias/sono'
 import { CONDICOES_POR_GOLPE } from '@/render/vfx/coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from '@/render/vfx/coreografias/confusao'
@@ -270,6 +271,8 @@ familiaNoLab('Reduções hostis', REDUCOES_HOSTIS_POR_GOLPE, { scary_face: 'geng
   smokescreen: 'charmander', sand_attack: 'sandshrew', kinesis: 'espeon', feather_dance: 'pidgey' })
 familiaNoLab('Manhas', MANHAS_POR_GOLPE, { confide: 'meowth', memento: 'gengar', tickle: 'meowth', play_nice: 'pikachu',
   baby_doll_eyes: 'eevee', fake_tears: 'clefairy', tearful_look: 'eevee' })
+familiaNoLab('Status em área', STATUS_EM_AREA_POR_GOLPE, { growl: 'growlithe', leer: 'ekans', tail_whip: 'eevee', sweet_scent: 'oddish', cotton_spore: 'oddish',
+  string_shot: 'scyther', captivate: 'clefairy', poison_gas: 'ekans', venom_drench: 'ekans', teeter_dance: 'clefairy', heal_block: 'espeon' }, true)
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
 // golpe), a esquerda mostra a coreografia SEM o acabamento, pra comparar.

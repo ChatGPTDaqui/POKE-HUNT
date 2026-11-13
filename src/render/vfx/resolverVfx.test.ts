@@ -1,7 +1,7 @@
 // Golpe -> tier/motivo/coreografia (spec 2026-09-28, decisoes D2, D3, D5, D7, D8).
 import { describe, expect, it } from 'vitest'
 import { ABILITIES, isDamagingAbility } from '@/data/abilities'
-import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_DE_STATUS, REGISTRO_SINGLE } from './registro'
+import { REGISTRO_DE_AREA, REGISTRO_DE_MOTIVO, REGISTRO_DE_STATUS, REGISTRO_DE_STATUS_DE_AREA, REGISTRO_SINGLE } from './registro'
 import { isolarRegistros } from './registroDeTeste'
 import { motivoDoGolpe, resolverVfx, tierDoPoder } from './resolverVfx'
 import type { EntradaDeCoreografia } from './tipos'
@@ -96,6 +96,16 @@ describe('resolverVfx', () => {
     REGISTRO_DE_STATUS.spikes = falsa()
     expect(resolverVfx({ abilityId: 'protect', area: false })?.noCorpo).toBe(true)
     expect(resolverVfx({ abilityId: 'spikes', area: false })?.noCorpo).toBe(false)
+  })
+
+  it('status em area le o registro de area, centrado em quem usou, e nao vaza pro single', () => {
+    const propria = falsa()
+    REGISTRO_DE_STATUS_DE_AREA.growl = propria
+    const r = resolverVfx({ abilityId: 'growl', area: true })
+    expect(r?.entrada).toBe(propria)
+    expect(r?.area).toBe(true)
+    expect(r?.noCorpo).toBe(true)
+    expect(resolverVfx({ abilityId: 'growl', area: false })).toBeNull()
   })
 
   it('golpe desconhecido ou sem id nao resolve', () => {
