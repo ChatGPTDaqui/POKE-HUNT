@@ -68773,7 +68773,6 @@ var VFX_POR_GOLPE = {
 		ancoraX: .66
 	} }) },
 	taunt: { single: tira("taunt", 12, { cauda: "repetir" }) },
-	dragon_dance: { single: tira("dragon_dance", 16) },
 	spider_web: { single: tira("spider_web", 4, { cauda: "repetir" }) },
 	bite: { single: tira("mandibula", 6, { cauda: "boomerang" }) },
 	crunch: { single: tira("mandibula", 6, { cauda: "boomerang" }) },
@@ -68872,22 +68871,16 @@ var VFX_POR_GOLPE = {
 		single: tira("gas_roxo", 12),
 		escala: { single: .6 }
 	},
-	toxic: {
-		single: tira("gas_roxo", 12),
-		escala: { single: .6 }
-	},
 	sludge_bomb: { single: tira("estouro_magenta", 10) },
 	poison_sting: { single: tira("estouro_magenta", 10) },
 	cross_poison: { single: tira("estouro_magenta", 10) },
 	mud_slap: { single: tira("poeira_areia", 9) },
-	sand_attack: { single: tira("poeira_areia", 9) },
 	fissure: { single: tira("rachadura", 20, { direcional: {
 		anguloBaseGraus: 41,
 		ancoraX: .74
 	} }) },
 	gust: { single: tira("vento_branco", 7) },
 	air_slash: { single: tira("vento_branco", 7) },
-	sandstorm: { single: tira("tornado_areia", 20) },
 	sand_tomb: { single: tira("tornado_areia", 20) },
 	ice_shard: {
 		single: tira("cristal_branco", 23),
@@ -68929,8 +68922,6 @@ var VFX_POR_GOLPE = {
 		single: tira("cura_verde", 13),
 		escala: { single: 1.25 }
 	},
-	swords_dance: { single: tira("aura_verde", 18) },
-	growth: { single: tira("aura_verde", 18) },
 	attract: { single: tira("charm", 12, { direcional: {
 		anguloBaseGraus: 22,
 		ancoraX: .66
