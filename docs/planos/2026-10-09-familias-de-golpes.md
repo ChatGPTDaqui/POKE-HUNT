@@ -797,3 +797,33 @@ Fracos, a rever se o dono pedir: Bulk Up (ícone de braço não lê nesta escala
 | Tail Glow | luz atrás pisca três vezes, cada vez com mais raios |
 
 Limite: golpe em si mesmo não tem direção (`angulo` 0). Barrier sai sempre à direita e Tail Glow à esquerda, mesmo com o POKE virado pro outro lado.
+
+## Golpes de status — 39. Reduções hostis — `coreografias/reducoesHostis.ts` (13/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Scary Face | carranca (olhos em cunha, boca de serra) cresce sobre quem usa e avança |
+| Screech | cinco riscos pontudos em leque, vibrando; rachaduras curtas no alvo |
+| Metal Sound | duas chapas raspam com faísca; ondas quadradas viajam |
+| Eerie Impulse | dois pulsos lentos e tortos (meio anel da frente); brilhos caem do alvo |
+| Smokescreen | bola cuspida em arco abre em gomos de fumaça em volta da cabeça |
+| Sand Attack | leque de grãos varrido do chão na cara; espalha e escorre; olhos em x |
+| Kinesis | colher flutua e o cabo entorta; fio pontilhado do olhar do alvo |
+| Feather Dance | penas jogadas pro alto caem em balanço largo e grudam no alvo |
+
+Conferida só em miniatura no lab: detalhe fino não verificado.
+
+## Golpes de status — 40. Manhas — `coreografias/manhas.ts` (13/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Confide | balão de cochicho com reticências vai ao ouvido; rabisco de cabeça cheia |
+| Charm | piscada e três corações em fila; alvo cora |
+| Memento | alma (chama escura de dois olhos) sai, voa e desce pelo alvo em fitas |
+| Tickle | dois dedos de pena fazem vai-e-vem nos lados; risadinhas saltam |
+| Play Nice | flor girando cruza em arco e pousa na cabeça do alvo |
+| Baby-Doll Eyes | dois olhões de pupila enorme tremelicando; brilhos vão ao alvo |
+| Fake Tears | dois chafarizes de lágrimas e poça; alvo com gota de suor |
+| Tearful Look | uma lágrima só cai devagar; a chama de luta do alvo míngua e vira fumaça |
+
+Restam: cura, status em área (Growl, Leer, Tail Whip, Sweet Scent, String Shot, Cotton Spore, Captivate, Poison Gas, Venom Drench, Teeter Dance, Heal Block) e os golpes resolvidos por id no motor.

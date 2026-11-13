@@ -13,6 +13,22 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.77',
+    date: '2026-11-13',
+    title: 'Manhas com cara própria',
+    highlights: [
+      'Confide, Charm, Memento, Tickle, Play Nice, Baby-Doll Eyes, Fake Tears e Tearful Look ganharam efeito próprio.',
+    ],
+  },
+  {
+    version: '8.76',
+    date: '2026-11-13',
+    title: 'Sustos e barulhos com cara própria',
+    highlights: [
+      'Scary Face, Screech, Metal Sound, Eerie Impulse, Smokescreen, Sand Attack, Kinesis e Feather Dance ganharam efeito próprio.',
+    ],
+  },
+  {
     version: '8.75',
     date: '2026-11-12',
     title: 'Cargas de energia com cara própria',
