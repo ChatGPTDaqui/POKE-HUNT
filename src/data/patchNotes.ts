@@ -13,6 +13,22 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.79',
+    date: '2026-11-13',
+    title: 'Travas de golpe com cara própria',
+    highlights: [
+      'Disable, Torment, Spite e Encore ganharam efeito próprio em cima do alvo.',
+    ],
+  },
+  {
+    version: '8.78',
+    date: '2026-11-13',
+    title: 'Golpes de status em área com cara própria',
+    highlights: [
+      'Growl, Leer, Tail Whip, Sweet Scent, Cotton Spore, String Shot, Captivate, Poison Gas, Venom Drench, Teeter Dance e Heal Block ganharam efeito próprio cobrindo a área toda.',
+    ],
+  },
+  {
     version: '8.77',
     date: '2026-11-13',
     title: 'Manhas com cara própria',
