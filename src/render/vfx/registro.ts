@@ -71,10 +71,13 @@ import { AUMENTOS_DEFENSIVOS_POR_GOLPE } from './coreografias/aumentosDefensivos
 import { AUMENTOS_MISTOS_POR_GOLPE } from './coreografias/aumentosMistos'
 import { AUMENTOS_OFENSIVOS_POR_GOLPE } from './coreografias/aumentosOfensivos'
 import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
+import { MANHAS_POR_GOLPE } from './coreografias/manhas'
+import { REDUCOES_HOSTIS_POR_GOLPE } from './coreografias/reducoesHostis'
 import { SONO_POR_GOLPE } from './coreografias/sono'
 import { CONDICOES_POR_GOLPE } from './coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from './coreografias/confusao'
 import { LIGEIREZA_POR_GOLPE } from './coreografias/ligeireza'
+import { ENERGIAS_POR_GOLPE } from './coreografias/energias'
 import { CLIMA_POR_GOLPE } from './coreografias/clima'
 
 type PorTier = Partial<Record<Tier, EntradaDeCoreografia>>
@@ -171,10 +174,14 @@ export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...AUMENTOS_DEFENSIVOS_POR_GOLPE,
   ...LIGEIREZA_POR_GOLPE,
   ...AUMENTOS_MISTOS_POR_GOLPE,
+  ...ENERGIAS_POR_GOLPE,
+  ...REDUCOES_HOSTIS_POR_GOLPE,
+  ...MANHAS_POR_GOLPE,
 }
 // Status que SAI de quem usou e chega no alvo: o desenho usa a origem real em
 // vez de ancorar tudo no corpo de quem recebeu.
 export const STATUS_QUE_VIAJA: ReadonlySet<string> = new Set([
   ...Object.keys(ARMADILHAS_POR_GOLPE), ...Object.keys(SONO_POR_GOLPE),
   ...Object.keys(CONDICOES_POR_GOLPE), ...Object.keys(CONFUSAO_POR_GOLPE),
+  ...Object.keys(REDUCOES_HOSTIS_POR_GOLPE), ...Object.keys(MANHAS_POR_GOLPE),
 ])
