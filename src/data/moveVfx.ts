@@ -170,7 +170,6 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // Termina com metade da massa do pico (0,52) — as estrelas ainda estao na
   // tela quando a arte acaba, entao segurar congelaria uma provocacao no ar.
   taunt: { single: tira('taunt', 12, { cauda: 'repetir' }) },
-  dragon_dance: { single: tira('dragon_dance', 16) },
   // A teia ja nasce inteira (quadro 0 e o pico) e termina em 0,94 dele: os 4
   // quadros sao um tremular, nao um desenho que se forma. Repetir e o que ela e.
   spider_web: { single: tira('spider_web', 4, { cauda: 'repetir' }) },
@@ -389,7 +388,6 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // `vfxTiras.ts` proibe ("arte de area cheia so serve pra efeito
   // translucido"). Ele cai na tira de area do tipo POISON, que e anel.
   smog: { single: tira('gas_roxo', 12), escala: { single: 0.6 } },
-  toxic: { single: tira('gas_roxo', 12), escala: { single: 0.6 } },
   // 5425: estouro magenta de particula — bola de lodo acertando.
   sludge_bomb: { single: tira('estouro_magenta', 10) },
   poison_sting: { single: tira('estouro_magenta', 10) },
@@ -401,7 +399,6 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   // `bulldoze` ficou de fora pelo mesmo motivo do `razor_leaf`: e area, e um
   // quadro de 35x36 esticado pra 402px e borrao.
   mud_slap: { single: tira('poeira_areia', 9) },
-  sand_attack: { single: tira('poeira_areia', 9) },
   // 4872, o segundo efeito nomeado `earthquake`. `earthquake` ja usa o 4395
   // (nuvem de poeira); este desenha RACHADURA no chao, que e o unico golpe do
   // catalogo em que o chao abre de verdade.
@@ -418,7 +415,6 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   air_slash: { single: tira('vento_branco', 7) },
   // 4576, tambem nomeado `fly`, mas o tornado dele e de AREIA (marrom). Vai
   // pros dois golpes de areia, e nao pros de vento.
-  sandstorm: { single: tira('tornado_areia', 20) },
   sand_tomb: { single: tira('tornado_areia', 20) },
 
   // --- gelo ---------------------------------------------------------------
@@ -462,9 +458,11 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   wish: { single: tira('cura_verde', 13), escala: { single: 1.25 } },
 
   // --- buff e status ------------------------------------------------------
-  // 5619, nomeado `algum buff`: fitas verdes subindo pelo corpo.
-  swords_dance: { single: tira('aura_verde', 18) },
-  growth: { single: tira('aura_verde', 18) },
+  // Swords Dance e Growth sairam daqui em 13/11: ganharam efeito procedural
+  // proprio (render/vfx, REGISTRO_DE_STATUS), que vence esta tabela. Mesmo caso
+  // de Dragon Dance, Toxic, Sand Attack e Sandstorm. Sweet Kiss fica: a arte
+  // nao chega mais na tela, mas a entrada `direcional` ainda faz o motor
+  // reapontar o efeito (`ehDirecional`).
   // A arte de coracoes do Charm (5389) serve os outros dois golpes de atracao
   // do catalogo. Reusar aqui e o oposto de duplicar: e uma linha em vez de um
   // arquivo novo.
