@@ -74,6 +74,7 @@ import { BARREIRAS_POR_GOLPE } from './coreografias/barreiras'
 import { MANHAS_POR_GOLPE } from './coreografias/manhas'
 import { REDUCOES_HOSTIS_POR_GOLPE } from './coreografias/reducoesHostis'
 import { STATUS_EM_AREA_POR_GOLPE } from './coreografias/statusEmArea'
+import { TRAVAS_POR_GOLPE } from './coreografias/travas'
 import { SONO_POR_GOLPE } from './coreografias/sono'
 import { CONDICOES_POR_GOLPE } from './coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from './coreografias/confusao'
@@ -178,6 +179,7 @@ export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...ENERGIAS_POR_GOLPE,
   ...REDUCOES_HOSTIS_POR_GOLPE,
   ...MANHAS_POR_GOLPE,
+  ...TRAVAS_POR_GOLPE,
 }
 // Status em AREA (13/11): um efeito so pro cast inteiro, centrado em quem usou.
 export const REGISTRO_DE_STATUS_DE_AREA: Record<string, EntradaDeCoreografia> = {
