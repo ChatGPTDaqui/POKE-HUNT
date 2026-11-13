@@ -75,6 +75,8 @@ import { MANHAS_POR_GOLPE } from './coreografias/manhas'
 import { REDUCOES_HOSTIS_POR_GOLPE } from './coreografias/reducoesHostis'
 import { STATUS_EM_AREA_POR_GOLPE } from './coreografias/statusEmArea'
 import { TRAVAS_POR_GOLPE } from './coreografias/travas'
+import { PRAGAS_POR_GOLPE } from './coreografias/pragas'
+import { PREPAROS_POR_GOLPE } from './coreografias/preparos'
 import { SONO_POR_GOLPE } from './coreografias/sono'
 import { CONDICOES_POR_GOLPE } from './coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from './coreografias/confusao'
@@ -180,6 +182,8 @@ export const REGISTRO_DE_STATUS: Record<string, EntradaDeCoreografia> = {
   ...REDUCOES_HOSTIS_POR_GOLPE,
   ...MANHAS_POR_GOLPE,
   ...TRAVAS_POR_GOLPE,
+  ...PREPAROS_POR_GOLPE,
+  ...PRAGAS_POR_GOLPE,
 }
 // Status em AREA (13/11): um efeito so pro cast inteiro, centrado em quem usou.
 export const REGISTRO_DE_STATUS_DE_AREA: Record<string, EntradaDeCoreografia> = {
@@ -191,4 +195,5 @@ export const STATUS_QUE_VIAJA: ReadonlySet<string> = new Set([
   ...Object.keys(ARMADILHAS_POR_GOLPE), ...Object.keys(SONO_POR_GOLPE),
   ...Object.keys(CONDICOES_POR_GOLPE), ...Object.keys(CONFUSAO_POR_GOLPE),
   ...Object.keys(REDUCOES_HOSTIS_POR_GOLPE), ...Object.keys(MANHAS_POR_GOLPE),
+  ...Object.keys(PRAGAS_POR_GOLPE),
 ])

@@ -868,3 +868,16 @@ Fora, por decisão existente:
 - Cura de HP (Recover, Roost, Synthesis, Moonlight, Morning Sun, Slack Off, Milk Drink, Swallow, Heal Pulse): `docs/dominios/interface.md` fixa a cura unificada de `render/cura.ts` (#946).
 
 Fora, por exigir o motor (~105 golpes): medido com sonda em 13/11, estes não criam efeito de desenho nenhum quando usados — Trick Room, Leech Seed, Substitute, Haze, Roar, Whirlwind, Curse, Belly Drum, Yawn, Wish, Aqua Ring, Ingrain, Focus Energy, Tailwind, Gravity, terrenos, trocas (Guard/Power Swap, Trick, Switcheroo), cópias (Mimic, Sketch, Transform, Copycat) e os demais. Cada um pede `statusRecebeuEm` no ramo certo do `combatSystem` + bundle da Edge, e vários nem têm regra implementada. Precisa de triagem: quais o motor de fato executa.
+
+## Golpes de status — 43 e 44. Preparos e Pragas (13/11, inscritas)
+
+Triagem dos ~105 golpes sem efeito: 28 têm regra no `combatSystem` (resolvidos por id) e ganharam marca de desenho + família. Os outros ~77 não têm regra nenhuma no motor (Tailwind, Gravity, terrenos, Mimic, Sketch, Transform, Trick, Switcheroo...) — nada a desenhar até a regra existir.
+
+- `coreografias/preparos.ts` (15, em quem usa): Substitute, Focus Energy, Laser Focus, Magnet Rise, Ingrain, Aqua Ring, Belly Drum, Acupressure, Destiny Bond, Psych Up, Aromatherapy, Heal Bell, Trick Room, Haze, Perish Song.
+- `coreografias/pragas.ts` (13, no alvo, `STATUS_QUE_VIAJA`): Leech Seed, Nightmare, Curse, Embargo, Quash, Roar, Yawn, Soak, Lock-On, Mind Reader, Psycho Shift, Guard Swap, Power Swap.
+
+Motor: cada ramo por id marca `statusRecebeuEm` no ponto em que o efeito PEGA (alvo já semeado, alvo com status no Yawn, substituto já ativo, Psycho Shift sem status: não desenha). Os ramos que rodam antes da declaração usam `desenhoDeSuporte`. Travado em `suporteTemEfeito.test.ts`. Bundle da Edge regenerado.
+
+Fora de propósito: Rest, Wish e Pain Split (cura: seguem a cura unificada), Attract (arte PNG), Rage Powder (no-op estrutural no motor), Odor Sleuth.
+
+Verificação visual fraca nesta leva: conferidos em miniatura no lab; Curse e Quash ficam atrás do número de dano do lab e não foram vistos limpos.
