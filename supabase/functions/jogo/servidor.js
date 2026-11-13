@@ -151409,21 +151409,28 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	}
 	const protegidoPorSubstituto = (target.substitutoHp ?? 0) > 0 && golpeAtingeOAlvo(ability) && !ehGolpeDeSom(ability.id);
 	if (protegidoPorSubstituto && !isDamagingAbility(ability)) return;
+	let desenhoDeSuporte = null;
 	if (ability.id === "substitute" && !(attacker.substitutoHp > 0)) {
 		const custo = Math.max(1, Math.floor(attacker.poke.stats.hp / 4));
 		if (attacker.poke.hp > custo) {
 			attacker.poke.hp -= custo;
 			attacker.substitutoHp = custo;
+			desenhoDeSuporte = attacker;
 		}
 	}
 	if (ability.id === "attract" && traitDoPoke(target.poke) !== "oblivious") target.atracaoRestante = 5 * TURNO_SEGUNDOS;
-	if (ability.id === "embargo") target.embargoRestante = 5 * TURNO_SEGUNDOS;
+	if (ability.id === "embargo") {
+		target.embargoRestante = 5 * TURNO_SEGUNDOS;
+		desenhoDeSuporte = target;
+	}
 	if (ability.id === "quash") {
+		desenhoDeSuporte = target;
 		target.ultimoQuash = hit.id;
 		target.globalCooldown = Math.max(target.globalCooldown, TURNO_SEGUNDOS);
 		for (const pendente of world.pendingHits) if (pendente.attackerId === target.id) pendente.timer += TURNO_SEGUNDOS;
 	}
 	if (ability.id === "roar") {
+		desenhoDeSuporte = target;
 		const dx = target.x - attacker.x, dy = target.y - attacker.y;
 		const distancia = Math.hypot(dx, dy) || 1;
 		target.x = clamp$1(target.x + (dx || (dy === 0 ? 1 : 0)) / distancia * 100, target.radius, (world.mapDef?.bounds.width ?? 1400) - target.radius);
@@ -151578,6 +151585,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	let statusRecebeuEm = null;
 	if (climaDoGolpe) statusRecebeuEm = attacker;
 	if (ability.hazard && attacker.kind === "player") statusRecebeuEm = target;
+	if (desenhoDeSuporte) statusRecebeuEm = desenhoDeSuporte;
 	if (isDead(target) && ability.statTarget === "self" && !isDead(attacker)) aplicarMudancasDeStat(world.rng, attacker, target, ability);
 	if (!isDead(target) && !protegidoPorSubstituto) {
 		const traits = traitsDoConfronto(attacker, target);
@@ -151615,10 +151623,13 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		}
 		const imunidadeRevelada = REVELA_IMUNIDADE[ability.id];
 		if (imunidadeRevelada) target.revelado = imunidadeRevelada;
-		if (ability.id === "magnet_rise") attacker.imuneAoTipoVolatil = {
-			tipo: "GROUND",
-			restante: MAGNET_RISE_TURNOS * TURNO_SEGUNDOS
-		};
+		if (ability.id === "magnet_rise") {
+			attacker.imuneAoTipoVolatil = {
+				tipo: "GROUND",
+				restante: MAGNET_RISE_TURNOS * TURNO_SEGUNDOS
+			};
+			statusRecebeuEm = attacker;
+		}
 		switch (ability.id) {
 			case "taunt":
 				if (traitDoPoke(target.poke) !== "oblivious") {
@@ -151659,13 +151670,25 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		}
 		if (ability.id === "leech_seed" && !target.seeded) {
 			const especieAlvo = SPECIES[target.poke.speciesId];
-			if (!(especieAlvo.type === "GRASS" || especieAlvo.type2 === "GRASS")) target.seeded = { sourceId: attacker.id };
+			if (!(especieAlvo.type === "GRASS" || especieAlvo.type2 === "GRASS")) {
+				target.seeded = { sourceId: attacker.id };
+				statusRecebeuEm = target;
+			}
 		}
-		if (ability.id === "nightmare") target.nightmareDot = true;
+		if (ability.id === "nightmare") {
+			target.nightmareDot = true;
+			statusRecebeuEm = target;
+		}
 		if (GOLPES_QUE_PRENDEM.has(ability.id) && !(target.presoAte && target.presoAte > 0)) target.presoAte = PRESO_DURACAO_SEGUNDOS(world.rng);
 	}
-	if (ability.id === "focus_energy") attacker.estagioDeCritico = (attacker.estagioDeCritico ?? 0) + 2;
-	if (ability.id === "laser_focus") attacker.proximoGolpeCriticoGarantido = true;
+	if (ability.id === "focus_energy") {
+		attacker.estagioDeCritico = (attacker.estagioDeCritico ?? 0) + 2;
+		statusRecebeuEm = attacker;
+	}
+	if (ability.id === "laser_focus") {
+		attacker.proximoGolpeCriticoGarantido = true;
+		statusRecebeuEm = attacker;
+	}
 	if (ability.healPercent && !curaBloqueada(attacker)) {
 		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100 * multiplicadorDeCuraPorClima(ability, world.clima, attacker, target)));
 		heal(attacker, quanto);
@@ -151688,7 +151711,10 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		attacker.escudos.lightScreen = ESCUDO_DURACAO_SEGUNDOS;
 		statusRecebeuEm = attacker;
 	}
-	if (ability.id === "trick_room") world.trickRoomRestante = (world.trickRoomRestante ?? 0) > 0 ? 0 : 5 * TURNO_SEGUNDOS;
+	if (ability.id === "trick_room") {
+		world.trickRoomRestante = (world.trickRoomRestante ?? 0) > 0 ? 0 : 5 * TURNO_SEGUNDOS;
+		statusRecebeuEm = attacker;
+	}
 	if (ability.id === "curse") {
 		const especieAtacante = SPECIES[attacker.poke.speciesId];
 		if ((especieAtacante.type === "GHOST" || especieAtacante.type2 === "GHOST") && !isDead(attacker)) {
@@ -151700,7 +151726,10 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 				effectivenessLabel: null,
 				isCrit: false
 			});
-			if (!isDead(target)) target.curseDot = true;
+			if (!isDead(target)) {
+				target.curseDot = true;
+				statusRecebeuEm = target;
+			}
 			if (isDead(attacker)) {
 				if (attacker.kind === "player") {
 					if (!attacker.fainted) {
@@ -151714,7 +151743,10 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			}
 		}
 	}
-	if (ability.id === "ingrain" || ability.id === "aqua_ring") attacker.regenPercent = INGRAIN_AQUA_RING_REGEN_PERCENT;
+	if (ability.id === "ingrain" || ability.id === "aqua_ring") {
+		attacker.regenPercent = INGRAIN_AQUA_RING_REGEN_PERCENT;
+		statusRecebeuEm = attacker;
+	}
 	if (ability.id === "wish") {
 		const healAmount = Math.max(1, Math.round(attacker.poke.stats.hp * WISH_HEAL_PERCENT));
 		world.pendingWishes.push({
@@ -151807,13 +151839,18 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			break;
 		case "destiny_bond":
 			attacker.destinyBondAtiva = true;
+			statusRecebeuEm = attacker;
 			break;
 		case "haze":
 			apagarTodosOsEstagios(attacker);
 			if (!isDead(target)) apagarTodosOsEstagios(target);
+			statusRecebeuEm = attacker;
 			break;
 		case "psych_up":
-			if (!isDead(target)) copiarEstagiosComPrazoCheio(target, attacker);
+			if (!isDead(target)) {
+				copiarEstagiosComPrazoCheio(target, attacker);
+				statusRecebeuEm = attacker;
+			}
 			break;
 		case "pain_split":
 			if (!isDead(target)) {
@@ -151838,12 +151875,16 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			break;
 		}
 		case "yawn":
-			if (!isDead(target) && !target.poke.status) target.yawnTurnos = 2;
+			if (!isDead(target) && !target.poke.status) {
+				target.yawnTurnos = 2;
+				statusRecebeuEm = target;
+			}
 			break;
 		case "belly_drum": {
 			const perda = Math.round(attacker.poke.stats.hp / 2);
 			attacker.poke.hp = Math.max(1, attacker.poke.hp - perda);
 			registrarFonteDoProprioGolpe(attacker, "atkFis", ability, 6);
+			statusRecebeuEm = attacker;
 			break;
 		}
 		case "acupressure": {
@@ -151856,35 +151897,51 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			];
 			const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)];
 			registrarFonteDoProprioGolpe(attacker, stat, ability, 2);
+			statusRecebeuEm = attacker;
 			break;
 		}
 		case "aromatherapy":
 		case "heal_bell":
 			curarStatus(attacker);
+			statusRecebeuEm = attacker;
 			break;
 		case "lock_on":
 		case "mind_reader":
-			if (!isDead(target)) attacker.miraGarantidaAlvoId = target.id;
+			if (!isDead(target)) {
+				attacker.miraGarantidaAlvoId = target.id;
+				statusRecebeuEm = target;
+			}
 			break;
 		case "guard_swap":
-			if (!isDead(target)) trocarEstagios(attacker, target, ["def", "defEsp"]);
+			if (!isDead(target)) {
+				trocarEstagios(attacker, target, ["def", "defEsp"]);
+				statusRecebeuEm = target;
+			}
 			break;
 		case "power_swap":
-			if (!isDead(target)) trocarEstagios(attacker, target, ["atkFis", "atkEsp"]);
+			if (!isDead(target)) {
+				trocarEstagios(attacker, target, ["atkFis", "atkEsp"]);
+				statusRecebeuEm = target;
+			}
 			break;
 		case "rage_powder": break;
 		case "soak":
-			if (!isDead(target)) target.tipoForcado = "WATER";
+			if (!isDead(target)) {
+				target.tipoForcado = "WATER";
+				statusRecebeuEm = target;
+			}
 			break;
 		case "perish_song":
 			if (attacker.perishCountdown == null) attacker.perishCountdown = 3;
 			if (!isDead(target) && target.perishCountdown == null) target.perishCountdown = 3;
+			statusRecebeuEm = attacker;
 			break;
 		case "psycho_shift": {
 			const meuStatus = attacker.poke.status;
 			if (meuStatus && !isDead(target) && statusVaiPegar(target, meuStatus.tipo)) {
 				target.poke.status = { ...meuStatus };
 				attacker.poke.status = null;
+				statusRecebeuEm = target;
 			}
 			break;
 		}

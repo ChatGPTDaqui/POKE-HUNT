@@ -44,6 +44,8 @@ import { MANHAS_POR_GOLPE } from '@/render/vfx/coreografias/manhas'
 import { REDUCOES_HOSTIS_POR_GOLPE } from '@/render/vfx/coreografias/reducoesHostis'
 import { STATUS_EM_AREA_POR_GOLPE } from '@/render/vfx/coreografias/statusEmArea'
 import { TRAVAS_POR_GOLPE } from '@/render/vfx/coreografias/travas'
+import { PRAGAS_POR_GOLPE } from '@/render/vfx/coreografias/pragas'
+import { PREPAROS_POR_GOLPE } from '@/render/vfx/coreografias/preparos'
 import { SONO_POR_GOLPE } from '@/render/vfx/coreografias/sono'
 import { CONDICOES_POR_GOLPE } from '@/render/vfx/coreografias/condicoes'
 import { CONFUSAO_POR_GOLPE } from '@/render/vfx/coreografias/confusao'
@@ -273,6 +275,11 @@ familiaNoLab('Reduções hostis', REDUCOES_HOSTIS_POR_GOLPE, { scary_face: 'geng
 familiaNoLab('Manhas', MANHAS_POR_GOLPE, { confide: 'meowth', memento: 'gengar', tickle: 'meowth', play_nice: 'pikachu',
   baby_doll_eyes: 'eevee', fake_tears: 'clefairy', tearful_look: 'eevee' })
 familiaNoLab('Travas', TRAVAS_POR_GOLPE, { disable: 'espeon', torment: 'umbreon', spite: 'gengar', encore: 'clefairy' })
+familiaNoLab('Preparos', PREPAROS_POR_GOLPE, { substitute: 'pikachu', focus_energy: 'machop', laser_focus: 'scyther', magnet_rise: 'magnemite', ingrain: 'oddish',
+  aqua_ring: 'squirtle', belly_drum: 'snorlax', acupressure: 'machop', destiny_bond: 'gengar', psych_up: 'espeon', aromatherapy: 'oddish',
+  heal_bell: 'clefairy', trick_room: 'espeon', haze: 'ekans', perish_song: 'gengar' })
+familiaNoLab('Pragas', PRAGAS_POR_GOLPE, { leech_seed: 'oddish', nightmare: 'gengar', curse: 'gengar', embargo: 'umbreon', quash: 'umbreon', roar: 'growlithe',
+  yawn: 'snorlax', soak: 'squirtle', lock_on: 'magnemite', mind_reader: 'machop', psycho_shift: 'espeon', guard_swap: 'espeon', power_swap: 'espeon' })
 familiaNoLab('Status em área', STATUS_EM_AREA_POR_GOLPE, { growl: 'growlithe', leer: 'ekans', tail_whip: 'eevee', sweet_scent: 'oddish', cotton_spore: 'oddish',
   string_shot: 'scyther', captivate: 'clefairy', poison_gas: 'ekans', venom_drench: 'ekans', teeter_dance: 'clefairy', heal_block: 'espeon' }, true)
 

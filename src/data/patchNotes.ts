@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.80',
+    date: '2026-11-13',
+    title: 'Golpes de suporte finalmente aparecem',
+    highlights: [
+      '28 golpes de suporte que não mostravam nada na tela ganharam efeito próprio: Substitute, Focus Energy, Laser Focus, Magnet Rise, Ingrain, Aqua Ring, Belly Drum, Acupressure, Destiny Bond, Psych Up, Aromatherapy, Heal Bell, Trick Room, Haze e Perish Song em quem usa.',
+      'No alvo: Leech Seed, Nightmare, Curse, Embargo, Quash, Roar, Yawn, Soak, Lock-On, Mind Reader, Psycho Shift, Guard Swap e Power Swap.',
+      'Só o visual mudou. Golpe que falha continua sem efeito.',
+    ],
+  },
+  {
     version: '8.79',
     date: '2026-11-13',
     title: 'Travas de golpe com cara própria',
