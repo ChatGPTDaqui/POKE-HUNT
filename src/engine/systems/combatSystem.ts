@@ -2951,21 +2951,29 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // sequencia. Golpe normal tem `acertos === 1` e passa por aqui igual a antes.
   const protegidoPorSubstituto = (target.substitutoHp ?? 0) > 0 && golpeAtingeOAlvo(ability) && !ehGolpeDeSom(ability.id)
   if (protegidoPorSubstituto && !isDamagingAbility(ability)) return
+  // So desenho (13/11): golpe de suporte resolvido por id nao tem `status`/
+  // `statChanges`, entao nunca marcava "algo pegou" e saia sem efeito na tela.
+  // Quem recebe o desenho fica aqui ate `statusRecebeuEm` existir, la embaixo.
+  // Nada de dano, rng ou relogio muda.
+  let desenhoDeSuporte: WorldEntity | null = null
   if (ability.id === 'substitute' && !(attacker.substitutoHp! > 0)) {
     const custo = Math.max(1, Math.floor(attacker.poke.stats.hp / 4))
     if (attacker.poke.hp > custo) {
       attacker.poke.hp -= custo
       attacker.substitutoHp = custo
+      desenhoDeSuporte = attacker
     }
   }
   if (ability.id === 'attract' && traitDoPoke(target.poke) !== 'oblivious') target.atracaoRestante = 5 * TURNO_SEGUNDOS
-  if (ability.id === 'embargo') target.embargoRestante = 5 * TURNO_SEGUNDOS
+  if (ability.id === 'embargo') { target.embargoRestante = 5 * TURNO_SEGUNDOS; desenhoDeSuporte = target }
   if (ability.id === 'quash') {
+    desenhoDeSuporte = target
     target.ultimoQuash = hit.id
     target.globalCooldown = Math.max(target.globalCooldown, TURNO_SEGUNDOS)
     for (const pendente of world.pendingHits) if (pendente.attackerId === target.id) pendente.timer += TURNO_SEGUNDOS
   }
   if (ability.id === 'roar') {
+    desenhoDeSuporte = target
     const dx = target.x - attacker.x, dy = target.y - attacker.y
     const distancia = Math.hypot(dx, dy) || 1
     target.x = clamp(target.x + (dx || (dy === 0 ? 1 : 0)) / distancia * 100, target.radius, (world.mapDef?.bounds.width ?? 1400) - target.radius)
@@ -3221,6 +3229,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // (render/vfx, familia Armadilhas). So o jogador planta — mesma guarda do
   // placar em `world.enemyHazards` acima.
   if (ability.hazard && attacker.kind === 'player') statusRecebeuEm = target
+  if (desenhoDeSuporte) statusRecebeuEm = desenhoDeSuporte
   if (isDead(target) && ability.statTarget === 'self' && !isDead(attacker)) {
     aplicarMudancasDeStat(world.rng, attacker, target, ability)
   }
@@ -3311,6 +3320,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // por isso o id do golpe e checado direto, mesmo padrao do bloco acima.
     if (ability.id === 'magnet_rise') {
       attacker.imuneAoTipoVolatil = { tipo: 'GROUND', restante: MAGNET_RISE_TURNOS * TURNO_SEGUNDOS }
+      statusRecebeuEm = attacker
     }
 
     // Golpes de disable/lock (Taunt/Spite/Disable/Encore/Torment). Depois do
@@ -3372,9 +3382,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     if (ability.id === 'leech_seed' && !target.seeded) {
       const especieAlvo = SPECIES[target.poke.speciesId]
       const alvoEhGrass = especieAlvo.type === 'GRASS' || especieAlvo.type2 === 'GRASS'
-      if (!alvoEhGrass) target.seeded = { sourceId: attacker.id }
+      if (!alvoEhGrass) { target.seeded = { sourceId: attacker.id }; statusRecebeuEm = target }
     }
-    if (ability.id === 'nightmare') target.nightmareDot = true
+    if (ability.id === 'nightmare') { target.nightmareDot = true; statusRecebeuEm = target }
 
     // PRENDER (PH-72): Wrap/Bind/Fire Spin/Clamp/Whirlpool/Sand Tomb/
     // Infestation. Os 7 vem do catalogo como `damage-ailment` com `status: null`
@@ -3398,6 +3408,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // em computeDamage.
   if (ability.id === 'focus_energy') {
     attacker.estagioDeCritico = (attacker.estagioDeCritico ?? 0) + 2
+    statusRecebeuEm = attacker
   }
 
   // LASER FOCUS (self-target): seta a flag de uso unico que garante critico
@@ -3406,6 +3417,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // moram todos no calculo de dano.
   if (ability.id === 'laser_focus') {
     attacker.proximoGolpeCriticoGarantido = true
+    statusRecebeuEm = attacker
   }
 
   // CURA PURA (Recover, Synthesis, Soft-Boiled — 10 golpes). Cura sempre o
@@ -3445,7 +3457,10 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     attacker.escudos.lightScreen = ESCUDO_DURACAO_SEGUNDOS
     statusRecebeuEm = attacker
   }
-  if (ability.id === 'trick_room') world.trickRoomRestante = (world.trickRoomRestante ?? 0) > 0 ? 0 : 5 * TURNO_SEGUNDOS
+  if (ability.id === 'trick_room') {
+    world.trickRoomRestante = (world.trickRoomRestante ?? 0) > 0 ? 0 : 5 * TURNO_SEGUNDOS
+    statusRecebeuEm = attacker
+  }
 
   // CURSE (variante Ghost): custa 50% do PROPRIO HP MAXIMO do atacante
   // (CURSE_SELF_MAX_HP_LOSS_PERCENT — variante de SELF_DESTRUCT_HP_LOSS_PERCENT
@@ -3460,7 +3475,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       const custo = Math.max(1, Math.round(attacker.poke.stats.hp * CURSE_SELF_MAX_HP_LOSS_PERCENT))
       takeDamage(attacker, custo)
       if (!silent) spawnDamageNumber(world, attacker, { amount: custo, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
-      if (!isDead(target)) target.curseDot = true
+      if (!isDead(target)) { target.curseDot = true; statusRecebeuEm = target }
       if (isDead(attacker)) {
         if (attacker.kind === 'player') {
           if (!attacker.fainted) {
@@ -3479,6 +3494,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // sem timer, dura ate o fim da luta — ver limparEstadoVolatil).
   if (ability.id === 'ingrain' || ability.id === 'aqua_ring') {
     attacker.regenPercent = INGRAIN_AQUA_RING_REGEN_PERCENT
+    statusRecebeuEm = attacker
   }
 
   // WISH: enfileira uma cura atrasada 2 turnos, MESMO PADRAO de pendingHits
@@ -3623,6 +3639,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     }
     case 'destiny_bond':
       attacker.destinyBondAtiva = true
+      statusRecebeuEm = attacker
       break
     case 'haze':
       // Reseta TODOS os estagios dos DOIS lados — nao mexe em status (nem o
@@ -3634,6 +3651,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // reapareceria.
       apagarTodosOsEstagios(attacker)
       if (!isDead(target)) apagarTodosOsEstagios(target)
+      statusRecebeuEm = attacker
       break
     case 'psych_up':
       // Copia os estagios do ALVO pro usuario — golpe reconhecidamente ignora
@@ -3642,7 +3660,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // PH-418: copia as fontes COM PRAZO CHEIO, nao com o prazo que sobrou no
       // alvo. Psych Up copia o estado, e herdar "faltam 1,2s" entregaria um buff
       // que morre antes de ser usado — ilegivel na tela e inutil no combate.
-      if (!isDead(target)) copiarEstagiosComPrazoCheio(target, attacker)
+      if (!isDead(target)) { copiarEstagiosComPrazoCheio(target, attacker); statusRecebeuEm = attacker }
       break
     case 'pain_split':
       if (!isDead(target)) {
@@ -3677,7 +3695,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // turn"). So agenda o contador aqui; quem realmente aplica o sono
       // (respeitando imunidade no momento em que pega) e tickStatus, ver
       // statusSystem.ts.
-      if (!isDead(target) && !target.poke.status) target.yawnTurnos = 2
+      if (!isDead(target) && !target.poke.status) { target.yawnTurnos = 2; statusRecebeuEm = target }
       break
     case 'belly_drum': {
       // Perde 50% do HP MAXIMO (nao do atual — bate com o poder real do
@@ -3690,6 +3708,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // uma vez" significa. E ganha prazo como qualquer outro estagio: sem
       // prazo, este seria o unico buff eterno do jogo.
       registrarFonteDoProprioGolpe(attacker, 'atkFis', ability, ESTAGIO_MAXIMO)
+      statusRecebeuEm = attacker
       break
     }
     case 'acupressure': {
@@ -3699,6 +3718,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // atributos diferentes coexistem e somam; o mesmo atributo sorteado de
       // novo renova o prazo em vez de empilhar. E a regra geral, sem excecao.
       registrarFonteDoProprioGolpe(attacker, stat, ability, 2)
+      statusRecebeuEm = attacker
       break
     }
     case 'aromatherapy':
@@ -3706,16 +3726,17 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // Nos jogos cura o TIME inteiro; sem time de reserva neste motor 1v1,
       // cura so o proprio usuario (ver instrucao da Fase 12).
       curarStatus(attacker)
+      statusRecebeuEm = attacker
       break
     case 'lock_on':
     case 'mind_reader':
-      if (!isDead(target)) attacker.miraGarantidaAlvoId = target.id
+      if (!isDead(target)) { attacker.miraGarantidaAlvoId = target.id; statusRecebeuEm = target }
       break
     case 'guard_swap':
-      if (!isDead(target)) trocarEstagios(attacker, target, ['def', 'defEsp'])
+      if (!isDead(target)) { trocarEstagios(attacker, target, ['def', 'defEsp']); statusRecebeuEm = target }
       break
     case 'power_swap':
-      if (!isDead(target)) trocarEstagios(attacker, target, ['atkFis', 'atkEsp'])
+      if (!isDead(target)) { trocarEstagios(attacker, target, ['atkFis', 'atkEsp']); statusRecebeuEm = target }
       break
     case 'rage_powder':
       // No-op ESTRUTURAL, documentado: este motor e sempre 1 jogador vs N
@@ -3724,13 +3745,14 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // ha estado nenhum pra setar.
       break
     case 'soak':
-      if (!isDead(target)) target.tipoForcado = 'WATER'
+      if (!isDead(target)) { target.tipoForcado = 'WATER'; statusRecebeuEm = target }
       break
     case 'perish_song':
       // Contador independente pros DOIS lados que estavam em campo quando o
       // golpe foi usado — chegar a 0 mata (ver tickStatus#pereceu).
       if (attacker.perishCountdown == null) attacker.perishCountdown = 3
       if (!isDead(target) && target.perishCountdown == null) target.perishCountdown = 3
+      statusRecebeuEm = attacker
       break
     case 'psycho_shift': {
       // Transfere o proprio status nao-volatil pro alvo (se ele puder
@@ -3741,6 +3763,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       if (meuStatus && !isDead(target) && statusVaiPegar(target, meuStatus.tipo)) {
         target.poke.status = { ...meuStatus }
         attacker.poke.status = null
+        statusRecebeuEm = target
       }
       break
     }
