@@ -1,10 +1,9 @@
-// Manhas (12/11): oito golpes de status que BAIXAM um atributo do alvo na
+// Manhas (12/11): sete golpes de status que BAIXAM um atributo do alvo na
 // base da lábia, do charme ou do drama. Décima terceira família de golpes de
 // status com efeito próprio.
 //
 // Cada um parte da descrição do jogo, e a forma é do golpe, não da família:
-//   Confide um balão de cochicho vai até o ouvido do alvo · Charm uma piscada
-//   e corações em fila, o alvo cora · Memento a alma de quem usa sai, voa e
+//   Confide um balão de cochicho vai até o ouvido do alvo · Memento a alma de quem usa sai, voa e
 //   afunda o alvo em fitas escuras · Tickle dois dedos de pena fazem cócegas
 //   e o alvo ri · Play Nice uma flor é entregue e pousa na cabeça · Baby-Doll
 //   Eyes dois olhões brilhantes · Fake Tears chafariz de lágrimas falsas ·
@@ -13,6 +12,9 @@
 // Sai de quem usa (`origem`) e chega no alvo (`alvo`) — `STATUS_QUE_VIAJA`.
 // `origem`/`alvo` são o ALTO do corpo: cabeça em `y - 9`, pés em `y + 12`.
 // O selo de atributo do jogo continua aparecendo. Sem alfa.
+//
+// Charm fica FORA de propósito: tem arte PNG própria (`moveVfx.ts`) e o teste
+// de guarda `arteDeGolpeDeStatus` exige que ela chegue na tela.
 import { getAbility } from '@/data/abilities'
 import { PELES } from '../paletas'
 import { entrada, limitar, saida } from '../primitivas'
@@ -25,7 +27,6 @@ interface Perfil { vai: number; pega: number; some: number }
 
 export const PERFIS_DE_MANHA: Record<string, Perfil> = {
   confide: { vai: 400, pega: 460, some: 240 },
-  charm: { vai: 420, pega: 460, some: 240 },
   memento: { vai: 460, pega: 480, some: 260 },
   tickle: { vai: 260, pega: 580, some: 220 },
   play_nice: { vai: 440, pega: 440, some: 240 },
@@ -56,13 +57,6 @@ function cena(p: Perfil, c: ContextoVfx): Cena {
     chaoO: c.origem.y + 12, dir: c.alvo.x >= c.origem.x ? 1 : -1,
     vai: limitar(c.ms / p.vai), pega: janela(c.ms, p.vai, p.pega), some: limitar((c.ms - p.vai - p.pega) / p.some),
   }
-}
-function coracao(ctx: CanvasRenderingContext2D, x: number, y: number, k: number, cor: string, luz: string): void {
-  if (k <= .15) return
-  const forma = (g: number): [number, number][] => ([[0, 3.8 + g], [-4.2 - g, -.4], [-3.2 - g * .7, -3.4 - g], [-1, -3.8 - g], [0, -2.2 - g * .4], [1, -3.8 - g], [3.2 + g * .7, -3.4 - g], [4.2 + g, -.4]] as const)
-    .map(([px, py]) => [x + px * k, y + py * k] as [number, number])
-  poligono(ctx, forma(1.2 / Math.max(.4, k)), ESCURO); poligono(ctx, forma(0), cor)
-  disco(ctx, x - 1.8 * k, y - 1.8 * k, .9 * k, luz)
 }
 /** Gota de ponta pra cima. */
 function gota(ctx: CanvasRenderingContext2D, x: number, y: number, k: number, cores: readonly string[]): void {
@@ -104,28 +98,6 @@ const GOLPES: Record<string, (s: Cena) => void> = {
     const pts: Ponto[] = [], abre = saida(limitar((t - .15) / .4)) * fino
     for (let i = 0; i <= 16; i++) { const f = i / 16, a = f * Math.PI * 3.4 + ms * .006; pts.push({ x: s.cabeca.x + 6 + Math.cos(a) * 4.5 * f * abre, y: s.cabeca.y - 6 + Math.sin(a) * 4.5 * f * abre }) }
     if (abre > .2) traco(ctx, pts, 1.2, fundo)
-  },
-
-  /** "The user gazes at the target rather charmingly, making it less wary. This harshly lowers the target's Attack stat." */
-  charm(s) {
-    const { ctx } = s.c, [fundo, meio, luz] = COR.rosa
-    // Uma PISCADA (estrelinha no canto do olho de quem usa) e três corações
-    // saem em fila, pequenos, subindo e descendo; no alvo ele cora.
-    if (s.vai < .35) brilho(ctx, s.cabecaO.x + s.dir * 5, s.cabecaO.y + 1, 4.5 * Math.sin(s.vai / .35 * Math.PI) + .5, luz)
-    if (s.some <= 0) for (let i = 0; i < 3; i++) {
-      const u = limitar((s.c.ms - 90 - i * 110) / (s.p.vai - 60))
-      if (u <= 0 || u >= 1) continue
-      const de = { x: s.cabecaO.x + s.dir * 6, y: s.cabecaO.y }, ate = { x: s.cabeca.x - s.dir * 3, y: s.cabeca.y }
-      coracao(ctx, de.x + (ate.x - de.x) * u, de.y + (ate.y - de.y) * u + Math.sin(u * Math.PI * 2 + i) * 3, .62 * Math.sin(Math.min(1, u * 1.3) * Math.PI * .5 + .3), i % 2 ? fundo : meio, luz)
-    }
-    if (s.pega !== null || s.some > 0) {
-      const t = s.pega ?? 1, fino = 1 - entrada(s.some)
-      corado(s, Math.min(1, t * 4) * fino)
-      for (let i = 0; i < 3; i++) {
-        const a = s.c.ms * .006 + i * 2.1
-        brilho(ctx, s.cabeca.x + Math.cos(a) * 12, s.cabeca.y + 3 + Math.sin(a) * 7, 2 * fino * Math.abs(Math.sin(s.c.ms * .01 + i)), luz)
-      }
-    }
   },
 
   /** "The user faints when using this move. In return, this harshly lowers the target's Attack and Sp. Atk stats." */

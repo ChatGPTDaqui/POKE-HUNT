@@ -17,7 +17,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
     date: '2026-11-13',
     title: 'Manhas com cara própria',
     highlights: [
-      'Confide, Charm, Memento, Tickle, Play Nice, Baby-Doll Eyes, Fake Tears e Tearful Look ganharam efeito próprio.',
+      'Confide, Memento, Tickle, Play Nice, Baby-Doll Eyes, Fake Tears e Tearful Look ganharam efeito próprio.',
     ],
   },
   {

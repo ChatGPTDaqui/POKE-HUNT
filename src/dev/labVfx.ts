@@ -268,7 +268,7 @@ familiaNoLab('Aumentos mistos', AUMENTOS_MISTOS_POR_GOLPE, { dragon_dance: 'drat
 familiaNoLab('Energias', ENERGIAS_POR_GOLPE, { cosmic_power: 'clefairy', stockpile: 'snorlax', charge: 'pikachu', magnetic_flux: 'magnemite', barrier: 'espeon', tail_glow: 'scyther' })
 familiaNoLab('Reduções hostis', REDUCOES_HOSTIS_POR_GOLPE, { scary_face: 'gengar', screech: 'meowth', metal_sound: 'magnemite', eerie_impulse: 'pikachu',
   smokescreen: 'charmander', sand_attack: 'sandshrew', kinesis: 'espeon', feather_dance: 'pidgey' })
-familiaNoLab('Manhas', MANHAS_POR_GOLPE, { confide: 'meowth', charm: 'clefairy', memento: 'gengar', tickle: 'meowth', play_nice: 'pikachu',
+familiaNoLab('Manhas', MANHAS_POR_GOLPE, { confide: 'meowth', memento: 'gengar', tickle: 'meowth', play_nice: 'pikachu',
   baby_doll_eyes: 'eevee', fake_tears: 'clefairy', tearful_look: 'eevee' })
 
 // Acabamento de impacto (01/10): fora o FIRE (que tem o dele dentro de cada
