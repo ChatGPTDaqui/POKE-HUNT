@@ -850,3 +850,21 @@ Primeira família de status em área: `REGISTRO_DE_STATUS_DE_AREA`, lido pelo re
 | Heal Block | cruzes verdes riscadas por X vermelho; anel vermelho fecha a área |
 
 Calibre de área: raio 175. Peça do tamanho de golpe alvo-único some — `espalhar` desenha cada peça ampliada 1,8× em torno do seu ponto. Fraco: Tail Whip (redemoinhos pequenos).
+
+## Golpes de status — 42. Travas — `coreografias/travas.ts` (13/11, inscrita)
+
+| Golpe | Conceito |
+|---|---|
+| Disable | carta do último golpe aparece; cadeado cai e bate em cima |
+| Torment | dois tridentes cutucam o alvo alternados; veia de raiva |
+| Spite | quatro pontos de PP roídos um a um por um fiapo escuro de dois olhos |
+| Encore | holofote (bordas do cone e roda no chão), palmas e seta em volta |
+
+## Fecho da sequência autônoma (13/11)
+
+Cobertos: todo golpe de status que o motor JÁ desenha hoje, menos os de arte PNG com guarda (Charm, Taunt, Spider Web).
+
+Fora, por decisão existente:
+- Cura de HP (Recover, Roost, Synthesis, Moonlight, Morning Sun, Slack Off, Milk Drink, Swallow, Heal Pulse): `docs/dominios/interface.md` fixa a cura unificada de `render/cura.ts` (#946).
+
+Fora, por exigir o motor (~105 golpes): medido com sonda em 13/11, estes não criam efeito de desenho nenhum quando usados — Trick Room, Leech Seed, Substitute, Haze, Roar, Whirlwind, Curse, Belly Drum, Yawn, Wish, Aqua Ring, Ingrain, Focus Energy, Tailwind, Gravity, terrenos, trocas (Guard/Power Swap, Trick, Switcheroo), cópias (Mimic, Sketch, Transform, Copycat) e os demais. Cada um pede `statusRecebeuEm` no ramo certo do `combatSystem` + bundle da Edge, e vários nem têm regra implementada. Precisa de triagem: quais o motor de fato executa.

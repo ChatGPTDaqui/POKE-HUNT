@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.79',
+    date: '2026-11-13',
+    title: 'Travas de golpe com cara própria',
+    highlights: [
+      'Disable, Torment, Spite e Encore ganharam efeito próprio em cima do alvo.',
+    ],
+  },
+  {
     version: '8.78',
     date: '2026-11-13',
     title: 'Golpes de status em área com cara própria',
