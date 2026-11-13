@@ -829,7 +829,7 @@ Restam: cura, status em área (Growl, Leer, Tail Whip, Sweet Scent, String Shot,
 
 Charm saiu da Manhas (13/11): tem arte PNG própria e teste de guarda (`arteDeGolpeDeStatus`). Rodar `npx vitest run src/render` inteiro antes de abrir PR — `src/render/vfx` sozinho não pega esse tipo de colisão.
 
-Pendente de decisão do dono: seis golpes de status com arte PNG própria já foram cobertos pelo efeito procedural sem aviso — Toxic, Sweet Kiss, Swords Dance, Dragon Dance, Growth, Sand Attack (além de Sandstorm, avisado). O teste de guarda só nomeia Charm, Taunt e Spider Web.
+Decidido pelo dono (13/11): o efeito procedural FICA em Toxic, Sweet Kiss, Swords Dance, Dragon Dance, Growth e Sand Attack (e Sandstorm). As entradas `single` deles em `moveVfx.ts` não chegam mais na tela. O teste de guarda segue nomeando só Charm, Taunt e Spider Web, que mantêm a arte PNG.
 
 ## Golpes de status — 41. Status em área — `coreografias/statusEmArea.ts` (13/11, inscrita)
 
