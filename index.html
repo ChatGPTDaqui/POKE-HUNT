@@ -10,23 +10,50 @@
          precisa ampliar pra ler. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <title>NOVO POKE IDLE</title>
+    <title>Poke Inspiration — idle de captura e batalha no navegador</title>
     <meta
       name="description"
-      content="Idle de captura e batalha automatica: escolha seu inicial, explore as hunts e evolua sua equipe — a cacada roda sozinha enquanto o jogo esta aberto."
+      content="Jogo de fã grátis no navegador: escolha seu inicial, explore as hunts e evolua sua equipe — a caçada roda sozinha enquanto o jogo está aberto."
     />
+    <!-- URL de produção fixa de propósito: o deploy de dev aponta o canonical
+         para produção, então o buscador indexa uma cópia só. -->
+    <link rel="canonical" href="https://poke-hunt-euj.pages.dev/" />
     <!-- Cor da barra do navegador no celular. Sem isto ela fica clara, brigando
          com o jogo inteiro escuro. Mesmo valor de --background do index.css. -->
     <meta name="theme-color" content="#0a0a0a" />
 
     <!-- Previa ao compartilhar o link. Sem isto o link sai "pelado" em
-         WhatsApp/Discord, que e como um jogo web costuma circular. -->
+         WhatsApp/Discord, que e como um jogo web costuma circular. A imagem
+         precisa de URL absoluta: WhatsApp e Discord ignoram caminho relativo. -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="NOVO POKE IDLE" />
+    <meta property="og:site_name" content="Poke Inspiration" />
+    <meta property="og:title" content="Poke Inspiration" />
     <meta
       property="og:description"
-      content="Idle de captura e batalha automatica. A cacada roda sozinha enquanto o jogo esta aberto."
+      content="Idle de captura e batalha automática no navegador. A caçada roda sozinha enquanto o jogo está aberto."
     />
+    <meta property="og:url" content="https://poke-hunt-euj.pages.dev/" />
+    <meta property="og:image" content="https://poke-hunt-euj.pages.dev/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Dados estruturados: o Google so considera VideoGame em resultado rico
+         quando vem junto de outro tipo de app, dai o par com WebApplication. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": ["VideoGame", "WebApplication"],
+        "name": "Poke Inspiration",
+        "url": "https://poke-hunt-euj.pages.dev/",
+        "description": "Jogo de fã grátis no navegador: idle de captura e batalha automática.",
+        "genre": ["Idle", "RPG"],
+        "inLanguage": "pt-BR",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Navegador",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" }
+      }
+    </script>
 
     <!-- O app fala com o Supabase (auth + Edge Function) no primeiro instante
          do carregamento, e e outra origem: sem isto, o navegador so comeca DNS
@@ -44,7 +71,7 @@
          nenhuma explicacao. -->
     <noscript>
       <div style="padding: 2rem; font-family: system-ui, sans-serif; color: #fafafa">
-        <h1>NOVO POKE IDLE</h1>
+        <h1>Poke Inspiration</h1>
         <p>Este jogo precisa de JavaScript para rodar. Ative-o e recarregue a pagina.</p>
       </div>
     </noscript>
