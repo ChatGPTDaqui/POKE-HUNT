@@ -1,0 +1,6 @@
+# /jogo exige login: o buscador só veria a tela de entrada repetida.
+User-agent: *
+Allow: /
+Disallow: /jogo
+
+Sitemap: https://poke-hunt-euj.pages.dev/sitemap.xml

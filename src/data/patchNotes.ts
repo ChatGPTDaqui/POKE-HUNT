@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.81',
+    date: '2026-11-22',
+    title: 'O jogo agora se chama Poke Inspiration',
+    highlights: [
+      'Novo nome na tela inicial, no tutorial de boas-vindas e na Wiki.',
+      'Link compartilhado no WhatsApp ou Discord agora mostra uma imagem do jogo.',
+    ],
+  },
+  {
     version: '8.80',
     date: '2026-11-13',
     title: 'Golpes de suporte finalmente aparecem',
