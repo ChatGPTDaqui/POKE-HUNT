@@ -4,9 +4,6 @@ Duas camadas:
 
   tiras/           por TIPO ELEMENTAL, 18 tipos — UM PNG por tipo com os
                    quadros lado a lado, consumido por src/data/vfxTiras.ts
-  <tipo>/          lote ANTIGO (fire, water, electric, normal, grass, bug,
-                   fighting, rock) — PNG solto de 32x32. SEM CONSUMIDOR
-                   desde a migracao pra tira; sobra em disco
   bullet-punch/    por GOLPE — 8 quadros de 96x64, consumido por
                    src/data/moveVfx.ts
   status/          buff/debuff/condicao — ver status/NOTAS.txt
