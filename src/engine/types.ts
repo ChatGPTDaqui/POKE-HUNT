@@ -134,6 +134,18 @@ export interface BaseEntity {
    * pra servidor e cliente carregarem o mesmo estado. Ausente = nao toca.
    */
   hurtAnimTimer?: number
+  /**
+   * Flinch que chegou durante a PROPRIA pose de golpe: espera ela acabar e vira
+   * `hurtAnimTimer` (animationSystem#tickAttackAnimTimers). Uma animacao nao
+   * corta a outra (coreografia de batalha, 23/11/2026).
+   */
+  hurtNaFila?: number
+  /**
+   * So desenho: tremor, recuo e hitstop do ultimo acerto recebido. Armado fora
+   * do modo silent (combatSystem#resolveHit) e lido so por render/sprites.ts e
+   * por `updateAnimations` (que congela o quadro no hitstop).
+   */
+  impactoVisual?: ImpactoVisual
 
   /**
    * PH-397: este POKE esta girando na encarada do duelo NESTE tick.
@@ -668,6 +680,17 @@ export interface WorldEffect {
   // recebe este campo, entao o congelamento (decisao registrada no call-site)
   // continua valendo pra ela.
   apontarParaId?: string
+}
+
+/** Ver `BaseEntity.impactoVisual`. `angulo` = direcao do golpe (de quem bateu pra quem levou). */
+export interface ImpactoVisual {
+  grau: 1 | 2 | 3
+  angulo: number | null
+  /** Segundos desde o impacto. */
+  idade: number
+  pulsos: number
+  intervalo: number
+  hitstop: number
 }
 
 export interface PendingHit {

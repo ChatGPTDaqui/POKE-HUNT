@@ -117,7 +117,7 @@ const GOLPES: Record<string, (p: Perfil, s: Cena) => void> = {
         // Monte de água + crista que ENROLA pra frente (o jeito de onda brava).
         ctx.save(); ctx.translate(x, base); ctx.scale(s.lado, 1)
         for (const [g, cor] of [[1.4, s.pele.contorno], [0, s.pele.base], [-2, s.pele.meio]] as const) {
-          ctx.fillStyle = cor; ctx.beginPath(); ctx.ellipse(-2, 0, 16 + g, h * .62 + g, 0, Math.PI, 0); ctx.fill()
+          ctx.fillStyle = cor; ctx.beginPath(); ctx.ellipse(-2, 0, 16 + g, Math.max(0, h * .62 + g), 0, Math.PI, 0); ctx.fill()
         }
         crescente(ctx, { x: 2, y: -h * .55 }, h * .42 + 2, -Math.PI * 1.05, .5, 5, .55, 0, { ...s.pele, nucleo: BRANCO }, 1)
         ctx.restore()
