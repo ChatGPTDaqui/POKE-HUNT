@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.83',
+    date: '2026-11-23',
+    title: 'Hunts abrem mais rápido',
+    highlights: [
+      'Os cenários das hunts e da trilha de estágios ficaram cerca de 3 vezes mais leves, com a mesma aparência.',
+      'As animações de batalha também baixam menos dados, sem mudar nenhum pixel.',
+    ],
+  },
+  {
     version: '8.82',
     date: '2026-11-23',
     title: 'Endereço novo: jogar-pokeinspiration.pages.dev',
