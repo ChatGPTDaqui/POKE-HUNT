@@ -1,13 +1,25 @@
 # Auditoria de desempenho e egress — 23/11/2026
 
-A auditoria foi somente leitura. A seção "Feito" registra o que foi aplicado depois.
+**Concluído.** A auditoria foi somente leitura. A seção "Resultado" registra o que foi aplicado depois e o que foi descartado com evidência.
 
-## Feito (PR perf/arte-mais-leve)
+## Resultado
 
-- Prioridade 1, em parte: os 95 fundos JPG (hunt e trilha) foram recomprimidos com mozjpeg q85 pelo `scripts/otimizar-arte.mjs`, com mesmo nome e dimensão, passando de 181 MB para 57 MB. A variante de 1280 px ficou para depois porque exige mudança no renderizador.
-- Prioridade 2: as folhas de `battle-sprites` foram para PNG com paleta só quando o RGBA decodificado ficou idêntico ao original. É sem perda.
-- Prioridade 3: criado `site/public/_headers`.
-- As prioridades 4 a 6 não foram aplicadas. Elas mexem na simulação, nas conquistas ou no RLS, e o ganho é pequeno perante o tráfego atual.
+1. **Fundos (#1180).** Os 95 JPG de hunt e trilha foram recomprimidos com mozjpeg q85 pelo `scripts/otimizar-arte.mjs`, mantendo nome e dimensão: 181 MB → 57 MB.
+   - A variante de 1280 px foi **descartada**. Com `escala` de cerca de 0.4 e zoom padrão 2.5, o fundo é desenhado 1:1 em pixel CSS e sem suavização. Com 1280 px ele perde nitidez visivelmente, e o dono preferiu manter 2048.
+2. **Folhas de batalha (#1180).** As 10.507 folhas viraram PNG com paleta, aceito só quando todo pixel com alfa > 0 decodifica idêntico: 166 MB → 60 MB.
+3. **Cache do site (#1180).** Criado `site/public/_headers`.
+4. **JS (#1183).** As tabelas geradas não foram para JSON sob demanda, porque isso tornaria assíncrono um acesso que hoje é síncrono e mexeria na simulação.
+   - No lugar disso, um plugin de build (`scripts/dados-gerados-como-json.mts`) troca o literal por `JSON.parse` com valor idêntico, conferido por teste: o processamento cai de 66 para 37 ms em Node.
+   - As tabelas também vão para um chunk `dados` (177 KB gzip), que fica em cache entre deploys de código.
+5. **Conquistas: descartada.** A premissa estava errada.
+   - Só 3 dos tipos de regra de `conquista_valor` leem `player_contador`. Os outros (`abates`, `posse`, `colecao`, `metrica`, `conjunto`, `platina`...) leem `player_pokedex`, `pokemon_instances`, `players`, `pvp_rank` etc., que também mudam no flush. Avaliar só as regras dos contadores alterados deixaria de conceder conquistas.
+   - As regras de contador, as únicas que dava para pular com segurança, já são as baratas (busca por índice).
+   - O custo é 3,2% do tempo do banco desde 20/08.
+6. **Advisors: descartada.** As 24 políticas duplicadas já usam `(select auth.uid())` e `(select is_admin())`, avaliados uma vez por consulta (initplan). Fundi-las não muda o custo de forma mensurável e mexe em segurança. Também ficam como estão:
+   - os FKs sem índice (INFO, pouco volume);
+   - os índices "não usados" (tráfego baixo demais para concluir).
+
+**Achado extra.** Desde 20/08, 75% do tempo do banco está na leitura de WAL do Realtime (`SELECT wal->>...`, 4,4 milhões de chamadas). Isso era o custo das assinaturas `postgres_changes`, já removidas em 12/10 (`20261012200000_realtime_sem_postgres_changes.sql`). Em 23/11 o contador não subiu durante a medição, e a publicação `supabase_realtime` está vazia. Não há nada a fazer; o número é histórico.
 
 ## Conclusão
 
