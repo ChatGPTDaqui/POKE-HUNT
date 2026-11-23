@@ -18,7 +18,9 @@ Projeto `pokeinspiration`, ligado a este repositório:
 | Build command | `npm ci && npm run build` |
 | Build output directory | `dist` |
 
-Node vem de `site/.node-version`.
+Node vem de `site/.node-version`. O projeto reconstrói quando `site/*` ou `src/*` muda: a Wiki
+(`site/src/wiki/dados.ts`) lê os dados do jogo no build. Esses módulos não podem importar pacote
+npm, porque o Pages instala só as dependências de `site/`.
 
 Pendência: Astro está no 5.x porque o 7.x exige Node ≥ 22.23.4. As vulnerabilidades
 do `npm audit` atingem SSR, endpoint de imagem e servidor de dev, que este site

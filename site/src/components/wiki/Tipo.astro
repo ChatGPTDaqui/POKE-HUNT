@@ -1,0 +1,10 @@
+---
+// Chip de tipo elemental, na cor que o jogo usa para o tipo.
+import { corDoTipo } from '../../wiki/dados'
+import type { ElementType } from '@/data/generated/types'
+
+interface Props { t: ElementType }
+const { t } = Astro.props
+---
+
+<span class="tipo" style={`background:${corDoTipo(t)}`}>{t}</span>

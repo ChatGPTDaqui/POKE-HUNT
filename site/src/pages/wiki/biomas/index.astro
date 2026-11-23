@@ -1,0 +1,33 @@
+---
+import WikiLayout from '../../../components/wiki/WikiLayout.astro'
+import Tipo from '../../../components/wiki/Tipo.astro'
+import { BIOMAS_DA_WIKI, MUNDO, pct } from '../../../wiki/dados'
+---
+
+<WikiLayout
+  slug="biomas"
+  title="Biomas — Wiki do Poke Inspiration"
+  description={`Os ${MUNDO.biomas} biomas do Poke Inspiration, com ${MUNDO.totalSubBiomas} sub-biomas e ${MUNDO.totalEspeciais} salas especiais: quem aparece, clima e itens de cada lugar.`}
+  h1="Biomas"
+  sprite="caterpie"
+  lead={`Cada bioma é feito de sub-biomas. A cada sala o jogo sorteia um, e é ele que decide quem aparece, o clima e os itens. ${MUNDO.totalEspeciais} salas especiais aparecem em ${pct(MUNDO.chanceSalaEspecial)} das trocas de sala.`}
+>
+  <section>
+    <div class="biome-grid">
+      {
+        BIOMAS_DA_WIKI.map((b) => (
+          <a class="frame" href={`/wiki/biomas/${b.chave}/`}>
+            {b.arte && <img src={b.arte} alt="" width="640" height="480" loading="lazy" />}
+            <div class="cap">
+              <span>{b.nome}</span>
+              <Tipo t={b.tipo} />
+            </div>
+            <div class="nota" style="padding:0 12px 10px">
+              {b.subBiomas.length} sub-biomas{b.especiais.length > 0 && ` · ${b.especiais.length} especia${b.especiais.length > 1 ? 'is' : 'l'}`}
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</WikiLayout>

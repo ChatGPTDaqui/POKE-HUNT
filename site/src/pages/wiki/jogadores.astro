@@ -1,0 +1,60 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+---
+
+<WikiLayout
+  slug="jogadores"
+  title="Mercado, troca e social — Wiki do Poke Inspiration"
+  description="Como funcionam o Mercado (livro de ofertas e anúncios), a troca direta, o Social, o chat e o Ranking do Poke Inspiration."
+  h1="Jogadores"
+  sprite="wingull"
+  lead="Tudo o que envolve outra pessoa: negociar, trocar, conversar e comparar."
+>
+  <section>
+    <h2>Mercado</h2>
+    <div class="cards">
+      <div class="frame">
+        <h3>Item: livro de ofertas</h3>
+        <ul>
+          <li>Uma Poké Bola é igual a outra, então compras e vendas se cruzam pelo melhor preço.</li>
+          <li><b>Quem executa paga o preço da ordem que já estava no livro.</b> Comprou com limite alto e havia venda mais barata? Paga a mais barata e recebe o troco.</li>
+        </ul>
+      </div>
+      <div class="frame">
+        <h3>POKE: anúncio de preço fixo</h3>
+        <ul>
+          <li>Cada POKE é único (IV, raridade, shiny, nível). Você anuncia em ouro ou diamante.</li>
+          <li><b>Somente lance:</b> anúncio sem preço que aceita ofertas. Uma oferta pendente por anúncio; mandar outra substitui.</li>
+        </ul>
+      </div>
+      <div class="frame">
+        <h3>Escrow: não é bug</h3>
+        <ul>
+          <li>Ordem de venda tira o item da Mochila na hora; ordem de compra tira o ouro na hora.</li>
+          <li>POKE anunciado sai da Mochila e da Equipe enquanto estiver à venda.</li>
+          <li><b>Cancelar, recusar ou expirar devolve tudo.</b></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Troca, Social e chat</h2>
+    <ul class="rules">
+      <li><b>Troca direta:</b> convide pelo Ranking, perfil ou chat. Só acontece quando <b>os dois confirmam</b>; mexer na mesa derruba a confirmação.</li>
+      <li><b>Social:</b> um fio de conversa por contato, quem está online e amigos. Pedido de amizade chega como mensagem com dois botões.</li>
+      <li>Mensagem pode trazer <b>item anexado</b>: você clica para receber, e ela não pode ser apagada antes.</li>
+      <li><b>Chat Mundo:</b> um canal para todos. Dá para anexar um POKE, e vai um retrato dele naquele momento.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Ranking e Hall da Fama</h2>
+    <ul class="rules">
+      <li>Três frentes: <b>Treinadores</b>, <b>Pokémon</b> (vários critérios) e <b>Hall da Fama</b>.</li>
+      <li>Do Ranking você abre o perfil público de qualquer jogador para pedir amizade ou convidar para trocar.</li>
+      <li>O Hall da Fama guarda quem venceu o Campeão Lance e a data da <b>primeira</b> vitória.</li>
+      <li>Seu nome de treinador é <b>único</b>: é como os outros te acham.</li>
+    </ul>
+  </section>
+</WikiLayout>

@@ -1,0 +1,207 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import Tipo from '../../components/wiki/Tipo.astro'
+import { COMBATE, golpe as g, turnos, pct } from '../../wiki/dados'
+
+// Habilidades passivas com mecânica real no motor (mesma lista da Wiki do jogo).
+const TRAITS: [string, string][] = [
+  ['Levitate', 'Imune a golpes GROUND.'],
+  ['Volt Absorb', 'Imune a ELECTRIC; cura 1/4 do HP máximo em vez de tomar dano.'],
+  ['Water Absorb', 'Imune a WATER; cura 1/4 do HP máximo em vez de tomar dano.'],
+  ['Flash Fire', 'Imune a FIRE; depois de absorver, os próprios golpes FIRE saem 1,5× mais fortes.'],
+  ['Sap Sipper', 'Imune a GRASS; +1 estágio de Ataque Físico.'],
+  ['Lightning Rod', 'Imune a ELECTRIC; +1 estágio de Ataque Especial.'],
+  ['Storm Drain', 'Imune a WATER; +1 estágio de Ataque Especial.'],
+  ['Motor Drive', 'Imune a ELECTRIC; +1 estágio de Velocidade.'],
+  ['Intimidate', 'Ao entrar, baixa 1 estágio do Ataque Físico do oponente.'],
+  ['Download', 'Ao entrar, +1 no Ataque que for mais forte contra a defesa do oponente.'],
+  ['Static', '30% de paralisar quem acertar golpe FÍSICO nele.'],
+  ['Flame Body', '30% de queimar quem acertar golpe FÍSICO nele.'],
+  ['Poison Point', '30% de envenenar quem acertar golpe FÍSICO nele.'],
+  ['Effect Spore', '30% de envenenar, paralisar ou adormecer quem acertar golpe FÍSICO (não pega em GRASS).'],
+  ['Inner Focus', 'Imune a flinch.'],
+  ['Huge Power / Pure Power', 'Ataque Físico ×2.'],
+  ['Hustle', 'Ataque Físico ×1,5, mas golpes físicos com 20% menos precisão.'],
+  ['Guts', 'Ataque Físico ×1,5 com qualquer status.'],
+  ['Marvel Scale', 'Defesa Física ×1,5 com qualquer status.'],
+  ['Quick Feet', 'Velocidade ×1,5 com qualquer status, ignorando a penalidade do status.'],
+  ['Blaze / Torrent / Overgrow / Swarm', 'Abaixo de 1/3 do HP, golpes FIRE / WATER / GRASS / BUG ×1,5.'],
+  ['Sturdy', 'Sobrevive com 1 HP a um golpe fatal, partindo do HP máximo exato.'],
+  ['Multiscale', 'Dano recebido pela metade com HP no máximo exato.'],
+  ['Synchronize', 'Veneno, paralisia e queimadura recebidos voltam para quem aplicou.'],
+  ['Poison Heal', 'Veneno cura em vez de causar dano.'],
+  ['Rough Skin / Iron Barbs', 'Golpe físico de contato recebido devolve 1/8 do HP máximo do atacante.'],
+  ['Aftermath', 'Derrotado por golpe físico: o atacante perde 1/4 do HP máximo dele.'],
+  ['Immunity · Limber · Insomnia · Vital Spirit · Water Veil · Magma Armor · Own Tempo', 'Imune a Envenenado · Paralisado · Dormindo · Dormindo · Queimado · Congelado · Confuso.'],
+  ['Drizzle · Sand Stream · Snow Warning · Drought', 'Ao entrar, põe chuva · areia · granizo · sol em campo.'],
+]
+const SEM_EFEITO = 'Swift Swim, Chlorophyll, Sand Rush, Ice Body, Sand Veil, Snow Cloak, Speed Boost, Moxie, Shed Skin, Rain Dish'
+---
+
+<WikiLayout
+  slug="combate"
+  title="Combate e dano — Wiki do Poke Inspiration"
+  description={`Como funciona o combate do Poke Inspiration: IA de golpes, acerto, cálculo de dano (STAB ${COMBATE.stab}×, crítico ${COMBATE.critMult}×), clima, escudos, habilidades e golpes especiais.`}
+  h1="Combate e dano"
+  sprite="pikachu"
+  lead={`Sem turnos alternados: cada POKE age assim que um golpe fica pronto. A unidade de tempo é o turno de ${COMBATE.turnoSegundos} segundos, o intervalo mínimo entre duas ações.`}
+>
+  <nav class="frame toc" aria-label="Nesta página">
+    <a href="#campo">Em campo</a><a href="#ia">IA dos golpes</a><a href="#recarga">Recarga</a><a href="#acerto">Acerto</a><a href="#dano">Dano</a><a href="#traits">Habilidades</a><a href="#clima">Clima</a><a href="#escudos">Escudos</a><a href="#especiais">Golpes especiais</a>
+  </nav>
+
+  <section id="campo">
+    <h2>Em campo</h2>
+    <ul class="rules">
+      <li><b>Agressividade:</b> o selvagem nota seu POKE a uma distância média e persegue; se a distância crescer demais, desiste e volta a vagar.</li>
+      <li>Seu POKE foca o inimigo vivo <b>mais próximo do mapa inteiro</b> (ou o shiny mais próximo) e reescolhe a cada abate.</li>
+      <li><b>Golpes em área</b> (bolinha verde no ícone) acertam todos num raio; o anel em campo tem o tamanho real da área.</li>
+      <li>No <b>Nível {COMBATE.nivelAoe}</b>, todo POKE aprende um golpe em área do próprio tipo, físico ou especial conforme o Ataque mais alto dele.</li>
+      <li>Enquanto executa um golpe, o POKE fica parado.</li>
+    </ul>
+  </section>
+
+  <section id="ia">
+    <h2>Como a IA escolhe o golpe</h2>
+    <ul class="rules">
+      <li><b>Seu POKE</b> usa até <b>{COMBATE.golpesAtivos} golpes</b> ativos. Com a Rotação desligada (padrão), escolhe o golpe pronto que mais causa dano naquele inimigo.</li>
+      <li>Com a <b>Rotação de golpes</b> ligada, segue a sua fila, pulando golpe de status que não faria nada agora.</li>
+      <li><b>Selvagens</b> usam apoio (status, buff, escudo) quando vale a pena e o melhor golpe de dano não derrota o alvo na hora.</li>
+      <li>Se um golpe em área pronto acerta 2 ou mais alvos, a escolha fica só entre os de área; depois vence o maior <b>dano esperado</b> (dano × chance de acerto).</li>
+      <li><b>Não existe Ataque Básico.</b> Sem golpe de dano, o POKE usa o que tem e depois luta com <b>Struggle</b>, que tira 1/4 do próprio HP por uso. Ensine um golpe de dano com TM.</li>
+    </ul>
+  </section>
+
+  <section id="recarga">
+    <h2>Recarga e velocidade</h2>
+    <ul class="rules">
+      <li>Quanto menos usos o golpe tem nos jogos originais, <b>mais devagar ele volta</b>: {g('scratch')} (35 usos) volta em 1 turno; um de 5 usos leva sete vezes isso.</li>
+      <li>A <b>Velocidade</b> (referência {COMBATE.velocidadeRef}) mexe só no tempo além do turno: o POKE rápido corta até pela metade, o lento chega ao dobro.</li>
+      <li>Por isso <b>não existe prioridade</b> de golpe: {g('quick_attack')} não age primeiro, e essa parte de {g('wide_guard')} e {g('quick_guard')} não faz nada aqui.</li>
+    </ul>
+  </section>
+
+  <section id="acerto">
+    <h2>Acerto ou erro</h2>
+    <ul class="rules">
+      <li>Chance = <code>precisão do golpe × Precisão do atacante ÷ Evasão do defensor</code>. Golpes de precisão 100 nunca erram.</li>
+      <li>Estágios de Precisão e Evasão: +1 = 1,33×, −1 = 0,75×.</li>
+      <li>Uma rolagem <b>por uso</b>, não por alvo: um golpe em área acerta todos ou erra todos.</li>
+      <li>{g('lock_on')} e {g('mind_reader')} garantem o próximo golpe; {g('foresight')}, {g('miracle_eye')} e {g('odor_sleuth')} ignoram a Evasão.</li>
+    </ul>
+  </section>
+
+  <section id="dano">
+    <h2>O cálculo de dano</h2>
+    <div class="stats">
+      <div class="frame stat"><b>{COMBATE.stab}×</b><span>STAB</span></div>
+      <div class="frame stat"><b>{pct(COMBATE.critChance)}</b><span>chance de crítico</span></div>
+      <div class="frame stat"><b>{COMBATE.critMult}×</b><span>dano do crítico</span></div>
+      <div class="frame stat"><b>85–100%</b><span>variação final</span></div>
+    </div>
+    <ol class="passos">
+      <li><b>Dano base</b> com nível, poder do golpe e Ataque/Defesa certos (físico ou especial).</li>
+      <li>Cada atributo entra com o próprio estágio (+1 = 1,5×, −1 = 0,67×, até ±6).</li>
+      <li>Queimado reduz pela metade o dano físico de quem está queimado.</li>
+      <li><b>STAB:</b> golpe do mesmo tipo do atacante sai {COMBATE.stab}× mais forte.</li>
+      <li>Habilidades de HP baixo e Flash Fire.</li>
+      <li><b>Efetividade de tipo</b> (ver <a href="/wiki/tipos/">Tipos</a>).</li>
+      <li>Clima (ver abaixo).</li>
+      <li>Multiscale, e {g('reflect')} / {g('light_screen')} pela metade.</li>
+      <li><b>Crítico:</b> chance base ×3 por estágio de crítico, até 50%. {g('lucky_chant')} imuniza; {g('laser_focus')} garante um.</li>
+      <li>Variação aleatória de 85% a 100%. Mínimo 1 de dano (0 se imune).</li>
+    </ol>
+    <p class="nota">Dano fixo ignora tudo isso (menos imunidade): {g('seismic_toss')} e {g('night_shade')} = nível do usuário, {g('dragon_rage')} = 40, {g('super_fang')} = metade do HP atual.</p>
+  </section>
+
+  <section id="traits">
+    <h2>Habilidades passivas</h2>
+    <p>Cada espécie tem uma habilidade fixa, que vale o tempo todo. Estas já têm efeito real no combate:</p>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Habilidade</th><th>Efeito</th></tr></thead>
+        <tbody>{TRAITS.map(([n, e]) => <tr><td><b>{n}</b></td><td>{e}</td></tr>)}</tbody>
+      </table>
+    </div>
+    <p class="nota">Ainda sem efeito em combate: {SEM_EFEITO}.</p>
+  </section>
+
+  <section id="clima">
+    <h2>Clima</h2>
+    <ul class="rules">
+      <li>Seis climas: Chuva, Sol, Granizo, Areia, Neve e Neblina. A sala nasce com um (ver <a href="/wiki/mundo/#clima">Mundo</a>).</li>
+      <li>{g('rain_dance')}, {g('sunny_day')}, {g('hail')} e {g('sandstorm')} criam clima por {turnos(10)}; depois o clima da sala volta. Neve e Neblina só vêm do ambiente.</li>
+      <li>Chuva: <Tipo t="WATER" /> +50%, <Tipo t="FIRE" /> −50%. Sol: o contrário.</li>
+      <li>Granizo e Areia tiram 1/16 do HP por turno de quem não é do tipo protegido.</li>
+      <li>{g('thunder')} e {g('hurricane')} nunca erram na chuva; {g('blizzard')} nunca erra no granizo e na neve; {g('weather_ball')} muda de tipo e dobra; {g('solar_beam')} perde metade fora do sol.</li>
+    </ul>
+  </section>
+
+  <section id="escudos">
+    <h2>Escudos e proteção</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Golpe</th><th>Efeito</th></tr></thead>
+        <tbody>
+          <tr><td><b>{g('reflect')}</b></td><td>Metade do dano físico recebido por {turnos(5)}.</td></tr>
+          <tr><td><b>{g('light_screen')}</b></td><td>Metade do dano especial recebido por {turnos(5)}.</td></tr>
+          <tr><td><b>{g('safeguard')}</b></td><td>Nenhum status novo pega.</td></tr>
+          <tr><td><b>{g('mist')}</b></td><td>O oponente não baixa seus estágios.</td></tr>
+          <tr><td><b>{g('lucky_chant')}</b></td><td>Imune a crítico, mesmo garantido.</td></tr>
+          <tr><td><b>{g('wide_guard')}</b></td><td>Cancela o próximo golpe em área recebido.</td></tr>
+          <tr><td><b>{g('protect')} / {g('detect')}</b></td><td>Bloqueia o próximo golpe que mira em quem usou.</td></tr>
+          <tr><td><b>{g('endure')}</b></td><td>Sobrevive com 1 HP ao próximo golpe fatal.</td></tr>
+          <tr><td><b>{g('destiny_bond')}</b></td><td>Se cair, quem derrubou cai junto.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="especiais">
+    <h2>Golpes com regras próprias</h2>
+    <div class="cards">
+      <div class="frame">
+        <h3>Por turno</h3>
+        <ul>
+          <li><b>{g('leech_seed')}</b>: drena 1/8 do HP do alvo por turno (não pega em GRASS).</li>
+          <li><b>{g('curse')}</b> (GHOST): custa 50% do HP; tira 1/4 do HP do alvo por turno.</li>
+          <li><b>{g('nightmare')}</b>: 1/4 do HP por turno enquanto o alvo dorme.</li>
+          <li><b>{g('ingrain')}</b> e <b>{g('aqua_ring')}</b>: curam 1/16 por turno.</li>
+          <li><b>{g('wish')}</b>: cura 50% dois turnos depois.</li>
+        </ul>
+      </div>
+      <div class="frame">
+        <h3>Travas</h3>
+        <ul>
+          <li><b>{g('taunt')}</b>: sem golpe de status por {turnos(3)}.</li>
+          <li><b>{g('disable')}</b>: tranca o último golpe por {turnos(4)}.</li>
+          <li><b>{g('encore')}</b>: repete o último golpe por {turnos(3)}.</li>
+          <li><b>{g('torment')}</b>: não repete golpe seguido por {turnos(3)}.</li>
+          <li><b>{g('spite')}</b>: +{turnos(4)} na recarga do último golpe.</li>
+          <li><b>{g('heal_block')}</b>: sem cura por {turnos(5)}.</li>
+          <li><b>{g('yawn')}</b>: tenta adormecer 2 turnos depois.</li>
+        </ul>
+      </div>
+      <div class="frame">
+        <h3>Poder variável</h3>
+        <ul>
+          <li><b>{g('magnitude')}</b>: poder sorteado de 10 a 150.</li>
+          <li><b>{g('reversal')}</b> / <b>{g('flail')}</b>: mais forte com menos HP (até 200).</li>
+          <li><b>{g('present')}</b>: 40, 80 ou 120.</li>
+          <li><b>{g('hidden_power')}</b>: sempre NORMAL, poder 30–70 pelos IVs.</li>
+          <li><b>{g('counter')}</b> / <b>{g('mirror_coat')}</b>: devolve 2× o último dano recebido nos últimos 3s.</li>
+        </ul>
+      </div>
+      <div class="frame">
+        <h3>Outros</h3>
+        <ul>
+          <li><b>Armadilhas</b> ({g('spikes')}, {g('toxic_spikes')}, {g('stealth_rock')}, {g('sticky_web')}): atingem cada selvagem novo da caçada.</li>
+          <li><b>{g('explosion')}</b> / <b>{g('self_destruct')}</b>: custam 50% do HP atual (sem desmaiar).</li>
+          <li><b>{g('soak')}</b>: o alvo vira WATER para efetividade.</li>
+          <li><b>Flinch</b>: o atingido perde a próxima ação.</li>
+          <li>Ao sair da caçada, estágios, confusão, escudos, clima e travas zeram; status não-volátil fica.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</WikiLayout>

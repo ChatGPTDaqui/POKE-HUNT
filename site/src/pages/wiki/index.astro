@@ -1,0 +1,46 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import { spriteUrl } from '../../config.mjs'
+import { WIKI } from '../../wiki/secoes'
+import { MUNDO, TOTAL_ESPECIES, TOTAL_LENDARIOS, TIPOS, CLIMAS } from '../../wiki/dados'
+---
+
+<WikiLayout
+  slug=""
+  title="Wiki do Poke Inspiration — guia completo do jogo"
+  description={`Guia completo do Poke Inspiration: ${MUNDO.biomas} biomas, ${TOTAL_ESPECIES} espécies, tipos, status, combate, captura, evolução, especialidades e mercado.`}
+  h1="Wiki"
+  lead="Tudo o que a Wiki de dentro do jogo explica, num lugar só. Os números saem do código do jogo e se atualizam a cada versão."
+>
+  <section>
+    <div class="stats">
+      <div class="frame stat"><b>{MUNDO.biomas}</b><span>biomas</span></div>
+      <div class="frame stat"><b>{MUNDO.totalSubBiomas}</b><span>sub-biomas</span></div>
+      <div class="frame stat"><b>{MUNDO.totalEspeciais}</b><span>salas especiais</span></div>
+      <div class="frame stat"><b>{TOTAL_ESPECIES}</b><span>espécies</span></div>
+      <div class="frame stat"><b>{TOTAL_LENDARIOS}</b><span>lendários</span></div>
+      <div class="frame stat"><b>{TIPOS.length}</b><span>tipos</span></div>
+      <div class="frame stat"><b>{CLIMAS.length}</b><span>climas</span></div>
+      <div class="frame stat"><b>Lv {MUNDO.teto}</b><span>teto do modo normal</span></div>
+    </div>
+  </section>
+  <section>
+    <ul class="chapters">
+      {
+        WIKI.map((g) => (
+          <>
+            <li class="grupo">{g.grupo}</li>
+            {g.secoes.map((s) => (
+              <li>
+                <a class="frame" href={`/wiki/${s.slug}/`}>
+                  <img class="sprite" src={spriteUrl(s.sprite)} alt="" width="56" height="56" loading="lazy" />
+                  <div><b>{s.titulo}</b><span>{s.resumo}</span></div>
+                </a>
+              </li>
+            ))}
+          </>
+        ))
+      }
+    </ul>
+  </section>
+</WikiLayout>

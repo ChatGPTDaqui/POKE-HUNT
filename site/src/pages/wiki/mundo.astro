@@ -1,0 +1,131 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import Tipo from '../../components/wiki/Tipo.astro'
+import { MUNDO, ESTAGIOS, CLIMAS, COR_CLIMA, BIOMAS_DA_WIKI, TOTAL_LENDARIOS, pct, fmt } from '../../wiki/dados'
+---
+
+<WikiLayout
+  slug="mundo"
+  title="Como o mundo funciona — Wiki do Poke Inspiration"
+  description={`Biomas, ${MUNDO.estagios} estágios por bioma, salas de ${MUNDO.abatesPorSala} abates, Guardião e Lord, clima, Hospital, Campeão Lance e Modo Pesadelo no Poke Inspiration.`}
+  h1="Como o mundo funciona"
+  sprite="pidgey"
+  lead="Para onde ir, o que avança a trilha e o que espera no fim dela."
+>
+  <nav class="frame toc" aria-label="Nesta página">
+    <a href="#biomas">Biomas</a><a href="#estagios">Estágios</a><a href="#salas">Salas e chefes</a><a href="#especiais">Salas especiais</a><a href="#clima">Clima</a><a href="#hospital">Hospital</a><a href="#tms">TMs</a><a href="#lance">Lance</a><a href="#pesadelo">Pesadelo</a>
+  </nav>
+
+  <section id="biomas">
+    <h2>{MUNDO.biomas} biomas, todos abertos</h2>
+    <ul class="rules">
+      <li>Nenhum bioma é trancado atrás de outro. O que decide onde você <i>consegue</i> caçar é o nível do seu POKE.</li>
+      <li>Cada bioma concentra um tipo elemental: você caça onde vive a espécie que quer.</li>
+      <li>Cada um tem vários <b>sub-biomas</b> ({MUNDO.totalSubBiomas} no total). A cada sala o jogo sorteia um, e ele decide <b>quem aparece</b>, o <b>clima</b> e os <b>itens</b>.</li>
+      <li>Quanto mais fundo no bioma, mais aparecem os sub-biomas do fundo. Veja tudo no <a href="/wiki/biomas/">atlas dos biomas</a>.</li>
+    </ul>
+    <div class="chips">{BIOMAS_DA_WIKI.map((b) => <a href={`/wiki/biomas/${b.chave}/`} style="text-decoration:none"><Tipo t={b.tipo} /></a>)}</div>
+    <p class="nota">Tipo dominante de cada bioma, na ordem do jogo.</p>
+  </section>
+
+  <section id="estagios">
+    <h2>{MUNDO.estagios} estágios de {MUNDO.niveisPorEstagio} níveis por bioma</h2>
+    <div class="stats">
+      <div class="frame stat"><b>{MUNDO.salasPorBioma}</b><span>salas por bioma</span></div>
+      <div class="frame stat"><b>{fmt.format(MUNDO.abatesPorBioma)}</b><span>abates por bioma</span></div>
+      <div class="frame stat"><b>Lv {MUNDO.teto}</b><span>fim do modo normal</span></div>
+    </div>
+    <ul class="rules">
+      <li><b>O progresso é separado por bioma:</b> dá para estar no estágio 7 do Marinho e no 2 do Ígneo ao mesmo tempo.</li>
+      <li>O estágio fica mais longo conforme você avança.</li>
+    </ul>
+    <div class="tbl-wrap">
+      <table class="tbl num">
+        <thead><tr><th>Estágio</th><th>Níveis</th><th>Salas</th></tr></thead>
+        <tbody>{ESTAGIOS.map((e) => <tr><td><b>{e.n}</b></td><td>Lv {e.de}–{e.ate}</td><td>{e.salas}</td></tr>)}</tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="salas">
+    <h2>Salas, Guardião e Lord</h2>
+    <ul class="rules">
+      <li>Cada sala pede <b>{MUNDO.abatesPorSala} abates</b>: {MUNDO.abatesComuns} selvagens comuns e o <b>chefe</b> como {MUNDO.abatesPorSala}º.</li>
+      <li>A barra trava em {MUNDO.abatesComuns}/{MUNDO.abatesPorSala} e o campo para de repovoar: falta o chefe aparecer. Não é bug.</li>
+      <li><b>Guardião</b> fecha as salas do meio do estágio. <b>Lord</b> fecha a última, e é sorteado de um grupo mais raro.</li>
+      <li><b>Vencer o Lord libera o próximo estágio</b> daquele bioma. Não existe atalho por nível nem por ouro.</li>
+      <li>Por padrão o jogo <b>repete</b> o estágio atual. Para avançar sozinho, ligue “avançar de estágio” nas Automações.</li>
+      <li>Nos estágios baixos o chefe pode ser um POKE comum: formas finais não cabem nos níveis do começo.</li>
+    </ul>
+  </section>
+
+  <section id="especiais">
+    <h2>Salas especiais</h2>
+    <div class="stats">
+      <div class="frame stat"><b>{pct(MUNDO.chanceSalaEspecial)}</b><span>por troca de sala</span></div>
+      <div class="frame stat"><b>{MUNDO.totalEspeciais}</b><span>lugares do anime e dos jogos</span></div>
+      <div class="frame stat"><b>+{pct(MUNDO.chancePedraTematica)}</b><span>de Pedra extra por abate</span></div>
+    </div>
+    <ul class="rules">
+      <li>Zona Safári, Monte Lua, Torre Pokémon e outros. A troca de sala avisa quando cai numa.</li>
+      <li>Alguns Pokémon <b>só existem nelas</b>: Bulbasaur, Charmander, Squirtle, Eevee e Porygon.</li>
+      <li>Algumas só aparecem a partir de certo estágio; a primeira sala da caçada nunca é especial.</li>
+      <li>Conta como sala normal: tem chefe e vale para o progresso.</li>
+    </ul>
+  </section>
+
+  <section id="clima">
+    <h2>O clima da sala</h2>
+    <p>Cada sala nasce com o clima do sub-bioma e mantém esse clima. Golpes como Rain Dance e Sunny Day criam clima temporário; acabado o prazo, o da sala volta.</p>
+    <div class="cards">
+      {
+        CLIMAS.map((c) => (
+          <div class="frame">
+            <h3><span class="dot" style={`background:${COR_CLIMA[c.tipo] ?? '#ccc'}`}></span>{c.nome}</h3>
+            <ul>{c.efeitos.map((e) => <li>{e}</li>)}</ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section id="hospital">
+    <h2>Hospital e desmaio</h2>
+    <ul class="rules">
+      <li>Dentro da caçada, o botão <b>Hospital</b> leva à enfermeira: cura o time inteiro, <b>de graça e sem limite</b>.</li>
+      <li>Desmaiar custa <b>5% da EXP do nível atual</b>. Pode perder um nível, mas um POKE evoluído <b>nunca de-evolui</b>.</li>
+    </ul>
+  </section>
+
+  <section id="tms">
+    <h2>TMs</h2>
+    <ul class="rules">
+      <li>Cada abate de espécie compatível tem <b>0,1%</b> de chance de soltar uma TM que ela aprende.</li>
+      <li>No Hospital, em Itens da Mochila, ensine a um POKE compatível: a TM é consumida e o golpe fica permanente (marca azul na ficha).</li>
+      <li>A Loja compra TM por 1.000 de ouro, mas não vende. Negocie no Mercado.</li>
+    </ul>
+  </section>
+
+  <section id="lance">
+    <h2>Campeão Lance</h2>
+    <ul class="rules">
+      <li>Para desafiá-lo: limpar o <b>estágio {MUNDO.estagiosParaLance} dos {MUNDO.biomas} biomas</b>. O cartão dele mostra quais faltam.</li>
+      <li>Vencer entra no <b>Hall da Fama</b> (com a data da primeira vitória) e libera o Modo Pesadelo.</li>
+      <li>Captura desabilitada nessa luta.</li>
+    </ul>
+  </section>
+
+  <section id="pesadelo">
+    <h2>Modo Pesadelo</h2>
+    <div class="stats">
+      <div class="frame stat"><b>+{MUNDO.pesadeloOffset}</b><span>níveis sobre a hunt original</span></div>
+      <div class="frame stat"><b>Lv {MUNDO.nivelBoss}</b><span>hunts BOSS</span></div>
+      <div class="frame stat"><b>{TOTAL_LENDARIOS}</b><span>lendários, só aqui</span></div>
+    </div>
+    <ul class="rules">
+      <li>Toda caçada normal tem um espelho no Pesadelo, liberado ao vencer o Lance, sem custo e com progresso próprio.</li>
+      <li>Os lendários só aparecem nas <b>hunts BOSS</b>: confronto único, sem respawn.</li>
+      <li>Morrer numa hunt BOSS é definitivo (volta ao Hospital), e <b>auto-poção e auto-revive não agem lá</b>.</li>
+    </ul>
+  </section>
+</WikiLayout>

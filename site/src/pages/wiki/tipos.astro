@@ -1,0 +1,77 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import Tipo from '../../components/wiki/Tipo.astro'
+import Tipos from '../../components/wiki/Tipos.astro'
+import { TIPOS, tabelaDeTipos, resumoDosTipos, corDoTipo } from '../../wiki/dados'
+
+const classe = (m: number) => (m === 2 ? 'x2' : m === 0.5 ? 'x05' : m === 0 ? 'x0' : 'x1')
+const rotulo = (m: number) => (m === 1 ? '·' : m === 0.5 ? '½' : String(m))
+---
+
+<WikiLayout
+  slug="tipos"
+  title="Tipos e efetividade — Wiki do Poke Inspiration"
+  description="Tabela completa de efetividade dos 18 tipos no Poke Inspiration: super eficaz, pouco eficaz e imunidades, atacando e defendendo."
+  h1="Tipos"
+  sprite="charmander"
+  lead="Todo golpe tem um tipo. Contra o tipo do defensor, o dano vira 2× (super eficaz), ½× (resistido) ou 0× (imune). Com dois tipos, os efeitos se multiplicam: Água contra Terra+Pedra = 4×."
+>
+  <section>
+    <h2>Escolha um tipo</h2>
+    <div class="tipo-pick" role="group" aria-label="Tipo">
+      {TIPOS.map((t, i) => <button type="button" data-tipo={t} aria-pressed={i === 1 ? 'true' : 'false'}><Tipo t={t} /></button>)}
+    </div>
+    {
+      TIPOS.map((t, i) => {
+        const r = resumoDosTipos[t]
+        return (
+          <div class="cards" data-painel={t} hidden={i !== 1}>
+            <div class="frame">
+              <h3>Atacando com <Tipo t={t} /></h3>
+              <p><b>2×</b> contra</p><Tipos lista={r.ataque.forte} />
+              <p><b>½×</b> contra</p><Tipos lista={r.ataque.fraco} />
+              <p><b>0×</b> contra</p><Tipos lista={r.ataque.nulo} />
+            </div>
+            <div class="frame">
+              <h3>Defendendo como <Tipo t={t} /></h3>
+              <p>Fraco a (recebe <b>2×</b>)</p><Tipos lista={r.defesa.fraqueza} />
+              <p>Resiste a (recebe <b>½×</b>)</p><Tipos lista={r.defesa.resiste} />
+              <p>Imune a (recebe <b>0×</b>)</p><Tipos lista={r.defesa.imune} />
+            </div>
+          </div>
+        )
+      })
+    }
+  </section>
+
+  <section>
+    <h2>Tabela completa</h2>
+    <p class="nota">Linhas: tipo do golpe. Colunas: tipo do POKE que recebe. “·” é dano normal.</p>
+    <div class="tbl-wrap">
+      <table class="matriz">
+        <thead>
+          <tr><th>ATK \ DEF</th>{TIPOS.map((t) => <th style={`background:${corDoTipo(t)}`} title={t}>{t.slice(0, 3)}</th>)}</tr>
+        </thead>
+        <tbody>
+          {tabelaDeTipos.map((l) => (
+            <tr>
+              <th style={`background:${corDoTipo(l.atk)}`} title={l.atk}>{l.atk.slice(0, 3)}</th>
+              {l.linha.map((m) => <td class={classe(m)}>{rotulo(m)}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</WikiLayout>
+
+<script>
+  const botoes = document.querySelectorAll<HTMLButtonElement>('[data-tipo]')
+  const paineis = document.querySelectorAll<HTMLElement>('[data-painel]')
+  botoes.forEach((b) =>
+    b.addEventListener('click', () => {
+      botoes.forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
+      paineis.forEach((p) => (p.hidden = p.dataset.painel !== b.dataset.tipo))
+    }),
+  )
+</script>

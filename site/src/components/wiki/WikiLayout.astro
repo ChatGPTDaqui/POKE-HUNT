@@ -1,0 +1,56 @@
+---
+// Moldura das páginas da Wiki: cabeçalho curto (sem cenário: a Wiki é para
+// consulta), navegação lateral pelos grupos e o conteúdo.
+import Base from '../../layouts/Base.astro'
+import '../../wiki.css'
+import { spriteUrl } from '../../config.mjs'
+import { WIKI } from '../../wiki/secoes'
+
+interface Props { slug: string; title: string; description: string; h1: string; lead?: string; sprite?: string; crumbs?: { href: string; label: string }[]; jsonLd?: Record<string, unknown> }
+const { slug, title, description, h1, lead, sprite, crumbs = [], jsonLd } = Astro.props
+const atual = (s: string) => slug === s || slug.startsWith(`${s}/`)
+---
+
+<Base lang="pt" page="wiki" title={title} description={description} jsonLd={jsonLd}>
+  <header class="wiki-head">
+    <div class="wrap">
+      <p class="crumb">
+        <a href="/wiki/">Wiki</a>
+        {crumbs.map((c) => <> / <a href={c.href}>{c.label}</a></>)}
+      </p>
+      <h1>{sprite && <img class="sprite" src={spriteUrl(sprite)} alt="" width="64" height="64" />}{h1}</h1>
+      {lead && <p>{lead}</p>}
+    </div>
+  </header>
+  <div class="wrap wiki">
+    <nav class="wiki-nav" aria-label="Seções da Wiki">
+      {
+        WIKI.map((g) => (
+          <>
+            <h2>{g.grupo}</h2>
+            <ul>
+              {g.secoes.map((s) => (
+                <li>
+                  <a href={`/wiki/${s.slug}/`} aria-current={atual(s.slug) ? 'page' : undefined}>
+                    <img class="sprite" src={spriteUrl(s.sprite)} alt="" width="28" height="28" loading="lazy" />
+                    {s.titulo}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        ))
+      }
+    </nav>
+    <div class="wiki-body">
+      <slot />
+    </div>
+  </div>
+</Base>
+
+<script>
+  // No celular o menu vira uma faixa rolável: começa mostrando a seção atual.
+  const atual = document.querySelector<HTMLElement>('.wiki-nav a[aria-current="page"]')
+  const nav = document.querySelector<HTMLElement>('.wiki-nav')
+  if (atual && nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = atual.offsetLeft - 16
+</script>

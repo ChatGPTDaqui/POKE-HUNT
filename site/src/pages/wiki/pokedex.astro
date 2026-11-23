@@ -1,0 +1,71 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import Tipos from '../../components/wiki/Tipos.astro'
+import { POKEDEX, TOTAL_ESPECIES, TIPOS, BIOMAS_DA_WIKI } from '../../wiki/dados'
+
+const onde = (p: (typeof POKEDEX)[number]) => {
+  if (p.onde.length) return p.onde.map((o) => `${o.bioma} ${o.de === o.ate ? o.de : `${o.de}–${o.ate}`}`).join(' · ')
+  if (p.lendario) return 'Hunt BOSS do Modo Pesadelo'
+  if (p.de) return `Evolui de ${p.de}`
+  return 'Não aparece em caçada normal'
+}
+---
+
+<WikiLayout
+  slug="pokedex"
+  title="Pokédex — Wiki do Poke Inspiration"
+  description={`Pokédex do Poke Inspiration: as ${TOTAL_ESPECIES} espécies do jogo, com tipos, evoluções e em que bioma, sub-bioma e estágio encontrar cada uma.`}
+  h1="Pokédex"
+  sprite="eevee"
+  lead={`As ${TOTAL_ESPECIES} espécies do jogo e onde cada uma nasce: bioma e faixa de estágios (passe o mouse para ver os lugares; o detalhe por lugar está em cada bioma).`}
+>
+  <section>
+    <div class="frame dex-filtros" role="search">
+      <input type="search" placeholder="Buscar espécie..." aria-label="Buscar espécie" data-busca />
+      <select aria-label="Tipo" data-filtro-tipo>
+        <option value="">Todos os tipos</option>
+        {TIPOS.map((t) => <option value={t}>{t}</option>)}
+      </select>
+      <select aria-label="Bioma" data-filtro-bioma>
+        <option value="">Todos os biomas</option>
+        {BIOMAS_DA_WIKI.map((b) => <option value={b.nome}>{b.nome}</option>)}
+      </select>
+      <span class="cont" data-contagem>{TOTAL_ESPECIES} espécies</span>
+    </div>
+    <div class="dex">
+      {
+        POKEDEX.map((p) => (
+          <article class="frame" data-nome={p.nome.toLowerCase()} data-tipos={p.tipos.join(' ')} data-biomas={p.onde.map((o) => o.bioma).join('|')}>
+            <img src={`/art/rostos/${p.id}.png`} alt="" width="48" height="48" loading="lazy" />
+            <div class="nome">{p.nome} <small>{p.lendario ? 'lendário' : `base ${p.total}`}</small></div>
+            <Tipos lista={p.tipos} />
+            <p class="onde" title={p.onde.map((o) => `${o.bioma}: ${o.lugares.join(', ')}`).join(' · ') || undefined}>{p.onde.length > 0 && <b>Onde: </b>}{onde(p)}{p.evolui.length > 0 && <><br />Evolui para {p.evolui.join(', ')}</>}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</WikiLayout>
+
+<script>
+  const busca = document.querySelector<HTMLInputElement>('[data-busca]')!
+  const tipo = document.querySelector<HTMLSelectElement>('[data-filtro-tipo]')!
+  const bioma = document.querySelector<HTMLSelectElement>('[data-filtro-bioma]')!
+  const cont = document.querySelector<HTMLElement>('[data-contagem]')!
+  const cartas = [...document.querySelectorAll<HTMLElement>('.dex [data-nome]')]
+  function filtrar() {
+    const q = busca.value.trim().toLowerCase()
+    let n = 0
+    for (const c of cartas) {
+      const ok = (!q || c.dataset.nome!.includes(q))
+        && (!tipo.value || c.dataset.tipos!.split(' ').includes(tipo.value))
+        && (!bioma.value || c.dataset.biomas!.split('|').includes(bioma.value))
+      c.hidden = !ok
+      if (ok) n++
+    }
+    cont.textContent = `${n} espécie${n === 1 ? '' : 's'}`
+  }
+  busca.addEventListener('input', filtrar)
+  tipo.addEventListener('change', filtrar)
+  bioma.addEventListener('change', filtrar)
+</script>

@@ -3,6 +3,7 @@
 // Publicado num projeto Cloudflare Pages próprio (raiz do build: site/).
 import { defineConfig } from 'astro/config'
 import sitemap from '@astrojs/sitemap'
+import { fileURLToPath } from 'node:url'
 import { SITE_URL } from './src/config.mjs'
 
 export default defineConfig({
@@ -14,4 +15,10 @@ export default defineConfig({
   // O hreflang já está no <head> de cada página. A opção i18n do sitemap
   // pareia por caminho igual (/x/ com /en/x/) e as slugs aqui diferem.
   integrations: [sitemap()],
+  vite: {
+    // A Wiki lê os dados do próprio jogo (src/data, src/core) no build, com o
+    // mesmo alias "@" do app. Esses módulos não podem importar pacote npm: o
+    // Pages instala só as dependências de site/ (ver site/src/wiki/dados.ts).
+    resolve: { alias: { '@': fileURLToPath(new URL('../src', import.meta.url)) } },
+  },
 })
