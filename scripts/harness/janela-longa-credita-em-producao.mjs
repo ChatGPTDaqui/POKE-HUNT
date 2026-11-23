@@ -36,7 +36,7 @@ const env = ler(`${R}/.env`), local = ler(`${R}/.env.local`)
 const URL_BASE = local.VITE_SUPABASE_URL || env.SUPABASE_URL
 const ANON = local.VITE_SUPABASE_ANON_KEY
 const SENHA = env.CONTA_TESTE_SENHA
-const ORIGEM = 'https://poke-hunt-euj.pages.dev'
+const ORIGEM = 'https://jogar-pokeinspiration.pages.dev'
 const F = `${URL_BASE}/functions/v1/jogo`
 
 const r0 = await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, { method:'POST', headers:{apikey:ANON,'Content-Type':'application/json',Origin:ORIGEM}, body: JSON.stringify({email:'claude@teste.pokehunt.local',password:SENHA})})
