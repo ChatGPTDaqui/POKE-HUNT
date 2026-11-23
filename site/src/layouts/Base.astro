@@ -31,6 +31,8 @@ const ogImage = new URL('/og-image.png', SITE_URL).href
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {/* Verificação do Google Search Console (ver index.html do jogo). Remover desfaz a verificação. */}
+    <meta name="google-site-verification" content="dn0iuu5wJcGRs31kNptcX1s6aqDvLkqpDbjsOfSd2U4" />
     {pair.pt && <link rel="alternate" hreflang="pt-BR" href={new URL(pair.pt, SITE_URL).href} />}
     {pair.en && <link rel="alternate" hreflang="en" href={new URL(pair.en, SITE_URL).href} />}
     <link rel="alternate" hreflang="x-default" href={new URL(pair.pt, SITE_URL).href} />
