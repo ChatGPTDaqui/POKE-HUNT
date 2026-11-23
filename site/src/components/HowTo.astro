@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro'
-import { GAME_URL } from '../config.mjs'
+import PageHero from './PageHero.astro'
+import { GAME_URL, spriteUrl } from '../config.mjs'
 import { UI } from '../i18n.mjs'
 
 interface Props { lang: 'pt' | 'en' }
@@ -13,26 +14,27 @@ const C = {
     title: 'Como jogar Poke Inspiration — guia para iniciantes',
     description:
       'Guia rápido do Poke Inspiration: escolha do inicial, primeira caçada na Rota 46, combate automático, automações de captura e poção, e os menus do jogo.',
+    eyebrow: 'Guia rápido',
     h1: 'Como jogar',
     intro: 'Poke Inspiration é um jogo idle: seu POKE em campo anda e luta sozinho, e você nunca aperta um botão de ataque. Seu trabalho é decidir onde caçar, cuidar do time e gerenciar itens, ouro e capturas.',
     sections: [
-      ['Seu inicial e a primeira caçada', [
+      ['bulbasaur', 'Seu inicial e a primeira caçada', [
         'Na primeira vez você escolhe um dos 3 iniciais clássicos: Bulbasaur, Charmander ou Squirtle.',
         'Comece pela <strong>Rota 46</strong>, no topo da lista de hunts. Ela é feita para o começo e só tem inimigos de nível baixo.',
         'Os biomas vêm depois, quando seu POKE tiver nível para eles.',
       ]],
-      ['Combate automático', [
+      ['charmander', 'Combate automático', [
         'Ao entrar numa caçada, seu POKE procura o inimigo mais próximo e escolhe os golpes sozinho, pelo maior dano estimado contra aquele alvo.',
         'Golpes em área têm preferência quando acertam 2 ou mais inimigos.',
         'Se houver um <strong>shiny</strong> na caçada, ele vira o alvo prioritário.',
         'Quer outra ordem? Ligue a <strong>Rotação de golpes</strong> nas automações, ou desligue um golpe específico.',
       ]],
-      ['Automações', [
+      ['squirtle', 'Automações', [
         '<strong>Auto-Poção</strong> e <strong>Auto-Status</strong> começam ligados.',
         '<strong>Auto-Captura</strong> e <strong>Auto-Revive</strong> começam desligados, porque gastam item a cada uso. Para capturar, ligue a Auto-Captura: não existe botão manual de jogar bola.',
         'Tudo fica no botão de robô, ao lado dos golpes, onde você escolhe qual item cada automação usa.',
       ]],
-      ['Os menus', [
+      ['pikachu', 'Os menus', [
         '<strong>Equipe</strong>: seus POKEs ativos, trocas, evolução e atributos.',
         '<strong>Mochila</strong>: capturas extras e todos os itens.',
         '<strong>Hunt</strong>: escolher onde caçar.',
@@ -47,26 +49,27 @@ const C = {
     title: 'How to play Poke Inspiration — beginner guide',
     description:
       'Quick Poke Inspiration guide: picking your starter, first hunt on Route 46, automatic combat, catch and potion automations, and the game menus.',
+    eyebrow: 'Quick guide',
     h1: 'How to play',
     intro: 'Poke Inspiration is an idle game: your POKE on the field walks and fights by itself, and you never press an attack button. Your job is to choose where to hunt, look after your team and manage items, gold and catches. The game itself is currently in Portuguese; the names below are the in-game ones.',
     sections: [
-      ['Your starter and first hunt', [
+      ['bulbasaur', 'Your starter and first hunt', [
         'The first time you play, you pick one of the 3 classic starters: Bulbasaur, Charmander or Squirtle.',
-        'Start on <strong>Rota 46</strong>, at the top of the hunt list. It is made for beginners and only has low-level enemies.',
+        'Start on <strong>Rota 46</strong> (Route 46), at the top of the hunt list. It is made for beginners and only has low-level enemies.',
         'Biomes come later, once your POKE is strong enough.',
       ]],
-      ['Automatic combat', [
+      ['charmander', 'Automatic combat', [
         'In a hunt, your POKE looks for the nearest enemy and picks its moves by the highest estimated damage against that target.',
         'Area moves are preferred when they hit 2 or more enemies.',
         'If a <strong>shiny</strong> is in the hunt, it becomes the priority target.',
         'Want a different order? Turn on <strong>Rotação de golpes</strong> (move rotation) in the automations, or switch off a specific move.',
       ]],
-      ['Automations', [
+      ['squirtle', 'Automations', [
         '<strong>Auto-Pot</strong> and <strong>Auto-Status</strong> start on.',
         '<strong>Auto-Catch</strong> and <strong>Auto-Revive</strong> start off, because they spend an item each time. To catch, turn on Auto-Catch: there is no manual throw button.',
         'Everything lives under the robot button next to your moves, where you pick which item each automation uses.',
       ]],
-      ['The menus', [
+      ['pikachu', 'The menus', [
         '<strong>Equipe</strong> (Team): your active POKEs, swaps, evolution and stats.',
         '<strong>Mochila</strong> (Bag): extra catches and all your items.',
         '<strong>Hunt</strong>: choose where to hunt.',
@@ -81,20 +84,28 @@ const C = {
 ---
 
 <Base lang={lang} page="howto" title={C.title} description={C.description}>
-  <article class="prose">
-    <h1>{C.h1}</h1>
-    <p>{C.intro}</p>
-    {
-      C.sections.map(([title, items]) => (
-        <>
-          <h2>{title}</h2>
-          <ul>
-            {items.map((item) => <li set:html={item} />)}
-          </ul>
-        </>
-      ))
-    }
-    <p>{C.tip}</p>
-    <p><a class="btn" href={`${GAME_URL}/registro`}>{t.play}</a></p>
-  </article>
+  <PageHero scene="forest" eyebrow={C.eyebrow} title={C.h1} text={C.intro} />
+  <section class="section">
+    <div class="wrap">
+      <article class="prose">
+        {
+          C.sections.map(([sprite, title, items]) => (
+            <>
+              <h2>
+                <img class="sprite" src={spriteUrl(sprite as string)} alt="" width="56" height="56" loading="lazy" />
+                {title}
+              </h2>
+              <ul>
+                {(items as string[]).map((item) => <li set:html={item} />)}
+              </ul>
+            </>
+          ))
+        }
+        <div class="frame tip">
+          <p style="margin:0 0 12px">{C.tip}</p>
+          <a class="btn" href={`${GAME_URL}/registro`}><span class="ball" aria-hidden="true"></span>{t.play}</a>
+        </div>
+      </article>
+    </div>
+  </section>
 </Base>

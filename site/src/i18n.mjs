@@ -13,6 +13,7 @@ export const UI = {
     nav: { home: 'Início', howto: 'Como jogar', faq: 'Perguntas', updates: 'Novidades' },
     play: 'Jogar grátis',
     switchLabel: 'English',
+    footerNote: 'Jogo grátis no navegador, no PC e no celular.',
     disclaimer:
       'Poke Inspiration é um jogo de fã, gratuito e sem vínculo com Nintendo, Game Freak, Creatures ou The Pokémon Company. Pokémon e os nomes relacionados são marcas de seus respectivos donos.',
   },
@@ -21,6 +22,7 @@ export const UI = {
     nav: { home: 'Home', howto: 'How to play', faq: 'FAQ', updates: 'Updates (PT)' },
     play: 'Play free',
     switchLabel: 'Português',
+    footerNote: 'Free browser game, on PC and mobile. The game itself is in Portuguese.',
     disclaimer:
       'Poke Inspiration is a free fan game with no affiliation with Nintendo, Game Freak, Creatures or The Pokémon Company. Pokémon and related names are trademarks of their respective owners.',
   },
