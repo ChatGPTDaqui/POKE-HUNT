@@ -1,6 +1,7 @@
 ---
 // Lê as patch notes do próprio jogo: o site nunca fica atrás do que foi lançado.
 import Base from '../layouts/Base.astro'
+import PageHero from '../components/PageHero.astro'
 import { PATCH_NOTES } from '../../../src/data/patchNotes'
 
 const recentes = [...PATCH_NOTES].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 15)
@@ -13,21 +14,30 @@ const data = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('p
   title="Novidades do Poke Inspiration — atualizações recentes"
   description="As atualizações mais recentes do Poke Inspiration: novos efeitos, sistemas e melhorias, direto das notas de versão do jogo."
 >
-  <article class="prose">
-    <h1>Novidades</h1>
-    <p>As {recentes.length} atualizações mais recentes. O histórico completo fica em Configurações, dentro do jogo.</p>
-    {
-      recentes.map((n) => (
-        <div class="update">
-          <div class="meta">
-            v{n.version} · {data(n.date)}
-          </div>
-          <h3>{n.title}</h3>
-          <ul>
-            {n.highlights.map((h) => <li>{h}</li>)}
-          </ul>
-        </div>
-      ))
-    }
-  </article>
+  <PageHero
+    scene="tall-grass"
+    eyebrow="Diário de atualizações"
+    title="Novidades"
+    text={`As ${recentes.length} atualizações mais recentes. O histórico completo fica em Configurações, dentro do jogo.`}
+  />
+  <section class="section">
+    <div class="wrap">
+      <ol class="updates">
+        {
+          recentes.map((n) => (
+            <li class="frame">
+              <div class="meta">
+                <span class="ver">v{n.version}</span>
+                <time datetime={n.date}>{data(n.date)}</time>
+              </div>
+              <h3>{n.title}</h3>
+              <ul>
+                {n.highlights.map((h) => <li>{h}</li>)}
+              </ul>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
 </Base>

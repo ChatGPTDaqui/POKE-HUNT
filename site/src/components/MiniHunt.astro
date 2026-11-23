@@ -1,0 +1,158 @@
+---
+// Caçada encenada no topo da página: um inicial luta sozinho contra selvagens
+// da rota, com dano, HP e captura. É uma animação do site (não o motor do
+// jogo): leve, sem dependências, pausa fora da tela e respeita
+// prefers-reduced-motion (fica a cena parada).
+import { spriteUrl } from '../config.mjs'
+
+interface Props { lang: 'pt' | 'en' }
+const { lang } = Astro.props
+
+const T = {
+  pt: {
+    label: 'Demonstração: seu POKE caçando sozinho',
+    wildAppears: 'Um {w} selvagem apareceu!',
+    used: '{m} usou {mv}!',
+    fainted: '{w} desmaiou. +{xp} EXP',
+    thrown: 'Auto-captura: Poké Bola!',
+    caught: '{w} foi capturado!',
+    lv: 'Nv',
+  },
+  en: {
+    label: 'Demo: your POKE hunting on its own',
+    wildAppears: 'A wild {w} appeared!',
+    used: '{m} used {mv}!',
+    fainted: '{w} fainted. +{xp} EXP',
+    thrown: 'Auto-catch: Poké Ball!',
+    caught: '{w} was caught!',
+    lv: 'Lv',
+  },
+}[lang]
+
+const data = {
+  t: T,
+  starters: [
+    { id: 'charmander', name: 'Charmander', moves: lang === 'pt' ? ['Brasa', 'Arranhão'] : ['Ember', 'Scratch'] },
+    { id: 'squirtle', name: 'Squirtle', moves: lang === 'pt' ? ["Jato d'Água", 'Investida'] : ['Water Gun', 'Tackle'] },
+    { id: 'bulbasaur', name: 'Bulbasaur', moves: lang === 'pt' ? ['Chicote de Vinha', 'Investida'] : ['Vine Whip', 'Tackle'] },
+  ],
+  wilds: [
+    { id: 'pidgey', name: 'Pidgey' },
+    { id: 'rattata', name: 'Rattata' },
+    { id: 'caterpie', name: 'Caterpie' },
+    { id: 'eevee', name: 'Eevee', rare: true },
+  ],
+  sprites: Object.fromEntries(
+    ['charmander', 'squirtle', 'bulbasaur', 'pidgey', 'rattata', 'caterpie', 'eevee'].map((id) => [id, spriteUrl(id)]),
+  ),
+}
+---
+
+<div class="stage" data-hunt={JSON.stringify(data)} role="img" aria-label={T.label}>
+  <div class="frame card-hp wild-hp">
+    <div class="name"><span data-wild-name>Pidgey</span><span>{T.lv} 3</span></div>
+    <div class="hp"><b>HP</b><span class="bar"><span class="fill" data-wild-hp></span></span></div>
+  </div>
+  <img class="mon wild sprite" data-wild src={spriteUrl('pidgey')} alt="" width="120" height="120" />
+  <div class="throw" data-ball></div>
+  <img class="mon me sprite" data-me src={spriteUrl('charmander')} alt="" width="120" height="120" />
+  <div class="frame card-hp me-hp">
+    <div class="name"><span data-me-name>Charmander</span><span>{T.lv} 7</span></div>
+    <div class="hp"><b>HP</b><span class="bar"><span class="fill" style="width:86%"></span></span></div>
+  </div>
+  <p class="log" data-log aria-live="off"></p>
+</div>
+
+<script>
+  const stage = document.querySelector<HTMLElement>('[data-hunt]')
+  if (stage) {
+    const d = JSON.parse(stage.dataset.hunt!)
+    const $ = <T extends HTMLElement>(s: string) => stage.querySelector<T>(s)!
+    const wild = $<HTMLImageElement>('[data-wild]')
+    const me = $<HTMLImageElement>('[data-me]')
+    const ball = $('[data-ball]')
+    const wildHp = $('[data-wild-hp]')
+    const wildName = $('[data-wild-name]')
+    const meName = $('[data-me-name]')
+    const log = $('[data-log]')
+    const fmt = (s: string, v: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(v[k] ?? ''))
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    const rand = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1))
+
+    const starter = d.starters[Math.floor(Math.random() * d.starters.length)]
+    me.src = d.sprites[starter.id]
+    meName.textContent = starter.name
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    let visible = true
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting }).observe(stage)
+    const ready = async () => { while (!visible || document.hidden) await sleep(400) }
+
+    function setHp(pct: number) {
+      wildHp.style.width = `${Math.max(0, pct)}%`
+      wildHp.style.background = pct > 50 ? 'var(--hp-hi)' : pct > 20 ? 'var(--hp-mid)' : 'var(--hp-lo)'
+    }
+    function popup(text: string, gold = false) {
+      const el = document.createElement('span')
+      el.className = gold ? 'dmg gold' : 'dmg'
+      el.textContent = text
+      el.style.right = `${60 + rand(0, 40)}px`
+      el.style.top = `${60 + rand(0, 20)}px`
+      stage!.appendChild(el)
+      setTimeout(() => el.remove(), 1000)
+    }
+
+    async function round(n: number) {
+      // A cada quatro rodadas o selvagem é raro e a auto-captura entra em ação.
+      const pick = n % 4 === 3 ? d.wilds.find((w: { rare?: boolean }) => w.rare) : d.wilds[n % 3]
+      wild.src = d.sprites[pick.id]
+      wildName.textContent = pick.name
+      setHp(100)
+      wild.classList.remove('gone')
+      log.textContent = fmt(d.t.wildAppears, { w: pick.name })
+      await sleep(1300)
+      let hp = 100
+      let turn = 0
+      while (hp > 0) {
+        await ready()
+        const mv = starter.moves[turn++ % starter.moves.length]
+        log.textContent = fmt(d.t.used, { m: starter.name, mv })
+        me.classList.add('lunge')
+        await sleep(260)
+        me.classList.remove('lunge')
+        wild.classList.add('hit')
+        const dmg = rand(28, 46)
+        hp -= dmg
+        popup(`-${dmg}`)
+        setHp(hp)
+        await sleep(120)
+        wild.classList.remove('hit')
+        await sleep(900)
+      }
+      if (pick.rare) {
+        log.textContent = d.t.thrown
+        ball.classList.remove('play')
+        void ball.offsetWidth
+        wild.classList.add('gone')
+        ball.classList.add('play')
+        await sleep(1800)
+        log.textContent = fmt(d.t.caught, { w: pick.name })
+        popup('★', true)
+        await sleep(1600)
+        ball.classList.remove('play')
+      } else {
+        wild.classList.add('gone')
+        const xp = rand(12, 24)
+        log.textContent = fmt(d.t.fainted, { w: pick.name, xp })
+        popup(`+${xp} EXP`, true)
+        await sleep(1700)
+      }
+    }
+
+    if (!reduced) {
+      ;(async () => {
+        for (let n = 0; ; n++) await round(n)
+      })()
+    }
+  }
+</script>

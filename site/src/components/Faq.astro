@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro'
+import PageHero from './PageHero.astro'
 import { GAME_URL } from '../config.mjs'
 import { UI } from '../i18n.mjs'
 
@@ -11,6 +12,7 @@ const C = {
   pt: {
     title: 'Perguntas frequentes — Poke Inspiration',
     description: 'Respostas rápidas sobre o Poke Inspiration: é grátis, precisa baixar, funciona no celular, roda com a aba fechada, é oficial?',
+    eyebrow: 'Dúvidas',
     h1: 'Perguntas frequentes',
     qa: [
       ['O jogo é grátis?', 'Sim. Basta criar uma conta gratuita para jogar.'],
@@ -24,6 +26,7 @@ const C = {
   en: {
     title: 'FAQ — Poke Inspiration',
     description: 'Quick answers about Poke Inspiration: is it free, do I need to download it, does it work on mobile, does it run when closed, is it official?',
+    eyebrow: 'Questions',
     h1: 'Frequently asked questions',
     qa: [
       ['Is the game free?', 'Yes. You only need a free account to play.'],
@@ -49,16 +52,20 @@ const jsonLd = {
 ---
 
 <Base lang={lang} page="faq" title={C.title} description={C.description} jsonLd={jsonLd}>
-  <article class="prose">
-    <h1>{C.h1}</h1>
-    {
-      C.qa.map(([q, a]) => (
-        <details>
-          <summary>{q}</summary>
-          <p>{a}</p>
-        </details>
-      ))
-    }
-    <p style="margin-top:1.5rem"><a class="btn" href={`${GAME_URL}/registro`}>{t.play}</a></p>
-  </article>
+  <PageHero scene="beach" eyebrow={C.eyebrow} title={C.h1} />
+  <section class="section">
+    <div class="wrap">
+      <div class="faq">
+        {
+          C.qa.map(([q, a], i) => (
+            <details class="frame" open={i === 0}>
+              <summary>{q}</summary>
+              <p>{a}</p>
+            </details>
+          ))
+        }
+      </div>
+      <p style="margin-top:2rem"><a class="btn" href={`${GAME_URL}/registro`}><span class="ball" aria-hidden="true"></span>{t.play}</a></p>
+    </div>
+  </section>
 </Base>

@@ -63,6 +63,14 @@ export function HomePage() {
           Entrar
         </Link>
       </div>
+      {/* Link para o site de apresentação (site/): guia e perguntas para quem
+          ainda não decidiu jogar, e o buscador liga as duas propriedades. */}
+      <a
+        href="https://pokeinspiration.pages.dev/como-jogar/"
+        className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+      >
+        Como jogar e perguntas frequentes
+      </a>
       {/* Aviso de jogo de fã: a página é indexada pelo buscador, então quem
           chega por lá precisa ver logo que não é um produto oficial. */}
       <p className="max-w-md text-xs text-muted-foreground">
