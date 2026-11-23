@@ -1,6 +1,7 @@
 ---
-import '@fontsource-variable/fredoka'
-import '@fontsource-variable/manrope'
+import '@fontsource-variable/pixelify-sans'
+import '@fontsource/atkinson-hyperlegible/400.css'
+import '@fontsource/atkinson-hyperlegible/700.css'
 import '../styles.css'
 import { SITE_URL, GAME_URL } from '../config.mjs'
 import { ROUTES, UI } from '../i18n.mjs'
@@ -11,9 +12,10 @@ interface Props {
   title: string
   description: string
   jsonLd?: Record<string, unknown>
+  preload?: string
 }
 
-const { lang, page, title, description, jsonLd } = Astro.props
+const { lang, page, title, description, jsonLd, preload } = Astro.props
 const t = UI[lang]
 const pair = ROUTES[page]
 const canonical = new URL(pair[lang] ?? pair.pt, SITE_URL).href
@@ -21,6 +23,7 @@ const other = lang === 'pt' ? 'en' : 'pt'
 const otherHref = pair[other] ?? ROUTES.home[other]
 const navIds = Object.keys(ROUTES) as (keyof typeof ROUTES)[]
 const ogImage = new URL('/og-image.png', SITE_URL).href
+const year = new Date().getFullYear()
 ---
 
 <!doctype html>
@@ -37,7 +40,7 @@ const ogImage = new URL('/og-image.png', SITE_URL).href
     {pair.en && <link rel="alternate" hreflang="en" href={new URL(pair.en, SITE_URL).href} />}
     <link rel="alternate" hreflang="x-default" href={new URL(pair.pt, SITE_URL).href} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="theme-color" content="#f5ecd5" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Poke Inspiration" />
     <meta property="og:title" content={title} />
@@ -49,31 +52,45 @@ const ogImage = new URL('/og-image.png', SITE_URL).href
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    {preload && <link rel="preload" as="image" href={preload} fetchpriority="high" />}
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>
     <header class="top">
-      <a class="brand" href={ROUTES.home[lang]}>Poke Inspiration</a>
-      <nav aria-label={lang === 'pt' ? 'Menu' : 'Menu'}>
-        {
-          navIds.map((id) => {
-            const href = ROUTES[id][lang] ?? ROUTES[id].pt
-            return (
-              <a href={href} aria-current={id === page ? 'page' : undefined}>
-                {t.nav[id]}
-              </a>
-            )
-          })
-        }
-        <a class="lang" href={otherHref} hreflang={other === 'pt' ? 'pt-BR' : 'en'}>{t.switchLabel}</a>
-      </nav>
-      <a class="btn small" href={`${GAME_URL}/registro`}>{t.play}</a>
+      <div class="wrap">
+        <a class="brand" href={ROUTES.home[lang]}><span class="ball" aria-hidden="true"></span>Poke Inspiration</a>
+        <nav aria-label="Menu">
+          {
+            navIds.map((id) => {
+              const href = ROUTES[id][lang] ?? ROUTES[id].pt
+              return (
+                <a href={href} aria-current={id === page ? 'page' : undefined}>
+                  {t.nav[id]}
+                </a>
+              )
+            })
+          }
+          <a class="lang" href={otherHref} hreflang={other === 'pt' ? 'pt-BR' : 'en'}>{t.switchLabel}</a>
+        </nav>
+        <a class="btn small" href={`${GAME_URL}/registro`}>{t.play}</a>
+      </div>
     </header>
     <main>
       <slot />
     </main>
     <footer>
-      <p>{t.disclaimer}</p>
+      <div class="wrap">
+        <div>
+          <a class="brand" href={ROUTES.home[lang]}><span class="ball" aria-hidden="true"></span>Poke Inspiration</a>
+          <p>{t.footerNote}</p>
+          <p>{t.disclaimer}</p>
+          <p>© {year} Poke Inspiration</p>
+        </div>
+        <nav aria-label={lang === 'pt' ? 'Rodapé' : 'Footer'}>
+          {navIds.map((id) => <a href={ROUTES[id][lang] ?? ROUTES[id].pt}>{t.nav[id]}</a>)}
+          <a href={`${GAME_URL}/registro`}>{t.play}</a>
+        </nav>
+      </div>
     </footer>
   </body>
 </html>

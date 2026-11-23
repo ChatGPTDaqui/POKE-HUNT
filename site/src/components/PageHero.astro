@@ -1,0 +1,18 @@
+---
+// Topo das páginas internas: um cenário do jogo com o título numa caixa de diálogo.
+import { sceneUrl } from '../config.mjs'
+
+interface Props { scene: string; eyebrow: string; title: string; text?: string }
+const { scene, eyebrow, title, text } = Astro.props
+---
+
+<section class="page-hero" style={`background-image:url(${sceneUrl(scene, 1600)})`}>
+  <div class="wrap">
+    <div class="frame dialog">
+      <p class="eyebrow">{eyebrow}</p>
+      <h1>{title}</h1>
+      {text && <p>{text}</p>}
+      <span class="next" aria-hidden="true"></span>
+    </div>
+  </div>
+</section>
