@@ -72,7 +72,7 @@ export const TUTORIAIS: Tutorial[] = [
   // cartão não diz: que o POKE luta sozinho e que errar não custa nada.
   {
     id: TUTORIAL_BOAS_VINDAS,
-    titulo: 'Bem-vindo ao NOVO POKE IDLE',
+    titulo: 'Bem-vindo ao Poke Inspiration',
     resumo: 'O essencial: seu POKE luta sozinho, o cartão de Primeiros Passos mostra o que fazer, e errar não custa nada.',
     passos: [
       {

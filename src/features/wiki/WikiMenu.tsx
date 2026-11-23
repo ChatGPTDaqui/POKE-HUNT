@@ -93,7 +93,7 @@ function ChipList({ types }: { types: ElementType[] }) {
 function ComecandoTab() {
   return (
     <div className="space-y-2">
-      <WikiCard title="Bem-vindo ao NOVO POKE IDLE">
+      <WikiCard title="Bem-vindo ao Poke Inspiration">
         Este é um jogo <b>idle</b>: seu POKE em campo anda e luta sozinho contra os selvagens, e você nunca
         aperta um botão de ataque. Seu trabalho é decidir <b>onde caçar</b>, cuidar do time e gerenciar o que
         você ganha — itens, ouro e capturas.
