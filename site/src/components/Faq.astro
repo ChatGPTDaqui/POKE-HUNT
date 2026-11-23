@@ -1,0 +1,64 @@
+---
+import Base from '../layouts/Base.astro'
+import { GAME_URL } from '../config.mjs'
+import { UI } from '../i18n.mjs'
+
+interface Props { lang: 'pt' | 'en' }
+const { lang } = Astro.props
+const t = UI[lang]
+
+const C = {
+  pt: {
+    title: 'Perguntas frequentes — Poke Inspiration',
+    description: 'Respostas rápidas sobre o Poke Inspiration: é grátis, precisa baixar, funciona no celular, roda com a aba fechada, é oficial?',
+    h1: 'Perguntas frequentes',
+    qa: [
+      ['O jogo é grátis?', 'Sim. Basta criar uma conta gratuita para jogar.'],
+      ['Precisa baixar alguma coisa?', 'Não. O jogo roda direto no navegador.'],
+      ['Funciona no celular?', 'Sim, no navegador do celular e do computador.'],
+      ['A caçada continua com o jogo fechado?', 'Não. A caçada roda sozinha enquanto o jogo está aberto.'],
+      ['Dá para jogar com outras pessoas?', 'Sim: há PvP, ranking, ginásios e um Mercado para negociar itens e POKEs com outros jogadores.'],
+      ['É um jogo oficial de Pokémon?', 'Não. Poke Inspiration é um jogo de fã, sem vínculo com Nintendo, Game Freak, Creatures ou The Pokémon Company.'],
+    ],
+  },
+  en: {
+    title: 'FAQ — Poke Inspiration',
+    description: 'Quick answers about Poke Inspiration: is it free, do I need to download it, does it work on mobile, does it run when closed, is it official?',
+    h1: 'Frequently asked questions',
+    qa: [
+      ['Is the game free?', 'Yes. You only need a free account to play.'],
+      ['Do I need to download anything?', 'No. The game runs right in your browser.'],
+      ['Does it work on mobile?', 'Yes, in the browser on both phone and computer.'],
+      ['What language is the game in?', 'The game is currently in Portuguese. This site is available in English and Portuguese.'],
+      ['Does the hunt keep going when the game is closed?', 'No. The hunt runs on its own while the game is open.'],
+      ['Can I play with other people?', 'Yes: there is PvP, rankings, gyms and a Market to trade items and POKEs with other players.'],
+      ['Is this an official Pokémon game?', 'No. Poke Inspiration is a fan game with no affiliation with Nintendo, Game Freak, Creatures or The Pokémon Company.'],
+    ],
+  },
+}[lang]
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: C.qa.map(([q, a]) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+}
+---
+
+<Base lang={lang} page="faq" title={C.title} description={C.description} jsonLd={jsonLd}>
+  <article class="prose">
+    <h1>{C.h1}</h1>
+    {
+      C.qa.map(([q, a]) => (
+        <details>
+          <summary>{q}</summary>
+          <p>{a}</p>
+        </details>
+      ))
+    }
+    <p style="margin-top:1.5rem"><a class="btn" href={`${GAME_URL}/registro`}>{t.play}</a></p>
+  </article>
+</Base>

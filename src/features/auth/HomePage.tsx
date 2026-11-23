@@ -39,7 +39,7 @@ export function HomePage() {
         ))}
       </div>
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold">NOVO POKE IDLE</h1>
+        <h1 className="text-3xl font-bold">Poke Inspiration</h1>
         <p className="max-w-md text-muted-foreground">
           Um idle de captura e batalha automática. Escolha seu inicial, explore as hunts e evolua
           sua equipe — a caçada roda sozinha enquanto o jogo está aberto.
@@ -63,6 +63,12 @@ export function HomePage() {
           Entrar
         </Link>
       </div>
+      {/* Aviso de jogo de fã: a página é indexada pelo buscador, então quem
+          chega por lá precisa ver logo que não é um produto oficial. */}
+      <p className="max-w-md text-xs text-muted-foreground">
+        Poke Inspiration é um jogo de fã, gratuito e sem vínculo com Nintendo, Game Freak, Creatures
+        ou The Pokémon Company. Pokémon e os nomes relacionados são marcas de seus respectivos donos.
+      </p>
     </div>
   )
 }

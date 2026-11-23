@@ -9,4 +9,8 @@
 # nenhuma, cair no catch-all e devolver o index.html com status 200 — uma
 # sprite que volta como HTML nao da erro visivel, so nao aparece.
 /assets/*  /assets/:splat  200
+# Mesmo motivo: buscador que recebe HTML no lugar do robots/sitemap ignora os dois.
+/robots.txt   /robots.txt   200
+/sitemap.xml  /sitemap.xml  200
+/og-image.png /og-image.png 200
 /*         /index.html     200
