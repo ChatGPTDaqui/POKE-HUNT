@@ -35,6 +35,7 @@
 export const ORIGENS_DO_JOGO = [
   'http://localhost:5173',
   'http://localhost:4173',
+  'https://jogar-pokeinspiration.pages.dev',
   'https://poke-hunt-euj.pages.dev',
   'https://dev.poke-hunt-euj.pages.dev',
 ]

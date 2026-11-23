@@ -13,6 +13,33 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.84',
+    date: '2026-11-23',
+    title: 'Entrada no jogo mais leve depois de cada atualização',
+    highlights: [
+      'Os dados do jogo (Pokémon, golpes, cenários) ficam guardados no navegador entre uma atualização e outra; só o código novo é baixado.',
+      'O celular também gasta menos tempo preparando esses dados ao abrir o jogo.',
+    ],
+  },
+  {
+    version: '8.83',
+    date: '2026-11-23',
+    title: 'Hunts abrem mais rápido',
+    highlights: [
+      'Os cenários das hunts e da trilha de estágios ficaram cerca de 3 vezes mais leves, com a mesma aparência.',
+      'As animações de batalha também baixam menos dados, sem mudar nenhum pixel.',
+    ],
+  },
+  {
+    version: '8.82',
+    date: '2026-11-23',
+    title: 'Endereço novo: jogar-pokeinspiration.pages.dev',
+    highlights: [
+      'O jogo agora fica em jogar-pokeinspiration.pages.dev, com o mesmo nome do site.',
+      'O endereço antigo leva automaticamente para o novo. Pode ser preciso entrar na conta mais uma vez; o progresso continua salvo.',
+    ],
+  },
+  {
     version: '8.81',
     date: '2026-11-22',
     title: 'O jogo agora se chama Poke Inspiration',

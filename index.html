@@ -9,6 +9,15 @@
          controle de zoom proprio, mas bloquear o do navegador quebra quem
          precisa ampliar pra ler. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- O jogo mudou de endereco junto com o nome (Poke Inspiration). O projeto
+         antigo do Pages continua publicando o staging (dev.poke-hunt-euj), entao
+         so a producao antiga redireciona, levando caminho, busca e hash (o hash
+         carrega o token do link de recuperacao de senha). Primeira coisa do
+         head para nao baixar o jogo inteiro antes de sair. -->
+    <script>
+      if (location.hostname === 'poke-hunt-euj.pages.dev')
+        location.replace('https://jogar-pokeinspiration.pages.dev' + location.pathname + location.search + location.hash)
+    </script>
 
     <title>Poke Inspiration — idle de captura e batalha no navegador</title>
     <meta
@@ -17,7 +26,7 @@
     />
     <!-- URL de produção fixa de propósito: o deploy de dev aponta o canonical
          para produção, então o buscador indexa uma cópia só. -->
-    <link rel="canonical" href="https://poke-hunt-euj.pages.dev/" />
+    <link rel="canonical" href="https://jogar-pokeinspiration.pages.dev/" />
     <!-- Verificação do Google Search Console. Metatag em vez de arquivo .html:
          o Pages redireciona /x.html para /x e a verificação por arquivo falha.
          Remover desfaz a verificação da propriedade. -->
@@ -36,8 +45,8 @@
       property="og:description"
       content="Idle de captura e batalha automática no navegador. A caçada roda sozinha enquanto o jogo está aberto."
     />
-    <meta property="og:url" content="https://poke-hunt-euj.pages.dev/" />
-    <meta property="og:image" content="https://poke-hunt-euj.pages.dev/og-image.png" />
+    <meta property="og:url" content="https://jogar-pokeinspiration.pages.dev/" />
+    <meta property="og:image" content="https://jogar-pokeinspiration.pages.dev/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -49,7 +58,7 @@
         "@context": "https://schema.org",
         "@type": ["VideoGame", "WebApplication"],
         "name": "Poke Inspiration",
-        "url": "https://poke-hunt-euj.pages.dev/",
+        "url": "https://jogar-pokeinspiration.pages.dev/",
         "description": "Jogo de fã grátis no navegador: idle de captura e batalha automática.",
         "genre": ["Idle", "RPG"],
         "inLanguage": "pt-BR",

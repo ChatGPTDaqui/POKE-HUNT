@@ -63,6 +63,7 @@ describe('cliente e servidor concordam sobre as origens (PH-293)', () => {
   })
 
   it('producao e o dev local continuam, porque isto e acrescimo e nao troca', () => {
+    expect(ORIGENS_DO_JOGO).toContain('https://jogar-pokeinspiration.pages.dev')
     expect(ORIGENS_DO_JOGO).toContain('https://poke-hunt-euj.pages.dev')
     expect(ORIGENS_DO_JOGO).toContain('http://localhost:5173')
   })
