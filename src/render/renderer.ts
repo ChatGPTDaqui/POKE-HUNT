@@ -6,7 +6,7 @@
 // worldStore para cura e cabeçalho. Apresentação nunca muta o estado do motor.
 import {
   drawEntity, drawCorpoPorCima, drawCuraDaEntidade, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
-  drawMarcaDoAlvo, drawMarcaDoJogador, planejarTextoDeCombate,
+  drawMarcaDoAlvo, drawMarcaDoJogador, planejarTextoDeCombate, definirMovimentoReduzidoNoCorpo,
 } from './sprites'
 import { desenharAmbiente } from './ambiente'
 import { drawBalaoDaAbertura } from './balaoDaAbertura'
@@ -276,6 +276,7 @@ export class Renderer {
     this.curaNoCentro = null // nada da confirmação da enfermeira atravessa a hunt
     const ctx = this.ctx
     this.clear()
+    definirMovimentoReduzidoNoCorpo(this.movimentoReduzido)
     // Teto de particulas do VFX de golpe e POR QUADRO, somado entre todos os
     // efeitos: renova aqui, uma vez, antes de qualquer efeito pedir. E solta o
     // quadro guardado de efeito que ja acabou (vfx/pixelizador.ts).

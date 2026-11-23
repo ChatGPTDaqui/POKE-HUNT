@@ -68,6 +68,14 @@ export function atrasoDoNumeroDeDano(abilityId: string | undefined, critico?: bo
   return r?.entrada.impactos?.[r.tier]?.[0] ?? 0
 }
 
+const coreografiasQuebradas = new Set<string>()
+/** Um aviso por golpe, nao um por quadro. */
+function avisarCoreografiaQuebrada(chave: string, erro: unknown): void {
+  if (coreografiasQuebradas.has(chave)) return
+  coreografiasQuebradas.add(chave)
+  console.warn(`[vfx] coreografia de ${chave} falhou e foi pulada`, erro)
+}
+
 export interface OpcoesDeDesenho {
   orcamento?: Orcamento
   /** Troca o pixelizador — testes passam um que so chama `pintar`. */
@@ -106,15 +114,23 @@ export function desenharVfxDeGolpe(
   const versao = `${ms}|${raio}|${r.tier}`
 
   pixelizar(ctx, retanguloDoEfeito(origem, alvo, r.entrada.alcance, raio, r.entrada.margem), paletaDaPele(pele), c => {
-    r.entrada.desenhar({
-      ctx: c, ms, duracao, origem, alvo, angulo,
-      acertos: effect.acertosVisuais,
-      raio, tier: r.tier, pele,
-      // Semente nova a cada quadro, mesma sequencia: e isso que torna a
-      // coreografia funcao pura de `ms` (ver aleatorio.ts).
-      rng: rngSemeado(hashTexto(effect.id)),
-      pedir: orcamento.pedir,
-    })
+    // Uma coreografia que lanca (raio negativo num `ellipse`, achado no Aqua
+    // Tail em 23/11/2026) nao pode derrubar o QUADRO inteiro: sem isto o resto
+    // da cena — corpos, numeros, barras — deixava de ser desenhado. O golpe
+    // perde aquele passo; o jogo segue.
+    try {
+      r.entrada.desenhar({
+        ctx: c, ms, duracao, origem, alvo, angulo,
+        acertos: effect.acertosVisuais,
+        raio, tier: r.tier, pele,
+        // Semente nova a cada quadro, mesma sequencia: e isso que torna a
+        // coreografia funcao pura de `ms` (ver aleatorio.ts).
+        rng: rngSemeado(hashTexto(effect.id)),
+        pedir: orcamento.pedir,
+      })
+    } catch (erro) {
+      avisarCoreografiaQuebrada(effect.abilityId ?? r.tipo, erro)
+    }
   }, { id: effect.id, versao })
   return true
 }

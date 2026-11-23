@@ -91,12 +91,16 @@ describe('sono e congelamento travam o POKE no lugar', () => {
 })
 
 describe('animacao de quem esta imobilizado', () => {
-  it('dormindo usa a animacao Sleep, mesmo no meio de uma pose de ataque', () => {
+  // Coreografia de batalha (23/11/2026): o sono ESPERA a pose de golpe acabar —
+  // uma animacao nao corta a outra.
+  it('dormindo usa a animacao Sleep, depois que a pose de ataque termina', () => {
     const { player } = cenario('sleep', 600)
     expect(desiredAnimName(player)).toBe('Sleep')
 
     player.attackAnim = 'Shoot'
     player.attackAnimTimer = 0.5
+    expect(desiredAnimName(player)).toBe('Shoot')
+    player.attackAnimTimer = 0
     expect(desiredAnimName(player)).toBe('Sleep')
   })
 
