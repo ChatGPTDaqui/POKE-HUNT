@@ -1,4 +1,5 @@
 import { buildInfo } from './scripts/build-info.mts'
+import { dadosGeradosComoJson, ehDadoGerado } from './scripts/dados-gerados-como-json.mts'
 import fs from 'node:fs'
 import path from 'node:path'
 import type { Plugin, Connect } from 'vite'
@@ -80,7 +81,7 @@ const LAB_NO_BUILD = process.env.CF_PAGES_BRANCH === 'dev'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [buildInfo(), react(), tailwindcss(), serveGameAssets()],
+  plugins: [buildInfo(), dadosGeradosComoJson(), react(), tailwindcss(), serveGameAssets()],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
@@ -148,8 +149,13 @@ export default defineConfig({
     // `dist/build/` — assim `/assets/*` fica exclusivamente da arte, servida
     // pelo plugin acima (ou pelo servidor estatico em producao).
     assetsDir: 'build',
-    rollupOptions: LAB_NO_BUILD
-      ? { input: { main: path.resolve(import.meta.dirname, 'index.html'), labVfx: path.resolve(import.meta.dirname, 'lab-vfx.html') } }
-      : undefined,
+    rolldownOptions: {
+      ...(LAB_NO_BUILD
+        ? { input: { main: path.resolve(import.meta.dirname, 'index.html'), labVfx: path.resolve(import.meta.dirname, 'lab-vfx.html') } }
+        : {}),
+      // Tabelas geradas num chunk proprio (ver scripts/dados-gerados-como-json.mts):
+      // mudam pouco, entao o navegador as mantem em cache entre deploys de codigo.
+      output: { codeSplitting: { groups: [{ name: 'dados', test: (id: string) => ehDadoGerado(id) }] } },
+    },
   },
 })
