@@ -15,6 +15,7 @@ import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
 import { desenharVfxDeGolpe } from './vfx/desenharVfx'
+import { deslocamentoDoImpacto } from './reacaoAoGolpe'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
 import { footOffsetFraction } from '@/data/spriteFootOffsets'
@@ -304,11 +305,24 @@ function currentFrameSource(entity: WorldEntity): FrameSource | null {
   }
 }
 
+/**
+ * `prefers-reduced-motion`: sem tremor nem recuo no corpo (o hitstop e um
+ * quadro parado, fica). O renderer escreve isto a cada quadro, a partir de
+ * `Renderer.movimentoReduzido`.
+ */
+let movimentoReduzidoNoCorpo = false
+export function definirMovimentoReduzidoNoCorpo(reduzido: boolean): void {
+  movimentoReduzidoNoCorpo = reduzido
+}
+
 function drawBattleSprite(ctx: CanvasRenderingContext2D, entity: WorldEntity): boolean {
   const frame = currentFrameSource(entity)
   if (!frame) return false
 
-  const bounds = spriteBounds(entity)!
+  const caixa = spriteBounds(entity)!
+  // Tremor/recuo de quem levou o golpe — so a sprite se mexe, nao o corpo.
+  const { dx, dy } = deslocamentoDoImpacto(entity.impactoVisual, movimentoReduzidoNoCorpo)
+  const bounds = dx === 0 && dy === 0 ? caixa : { ...caixa, x: caixa.x + dx, y: caixa.y + dy }
 
   ctx.save()
   // Pixel art: vizinho mais proximo, sempre. Nao confiar no estado herdado do
@@ -1909,6 +1923,9 @@ export function medirTextoDeCombate(
   const moveis: CaixaDeEfeito[] = []
   for (const effect of world.effects) {
     if (effect.type !== 'damageNumber' && effect.type !== 'abilityName') continue
+    // Numero ainda esperando o proprio impacto (multi-hit escalonado): nao
+    // ocupa raia antes de aparecer.
+    if (effect.age < effect.delay) continue
     const owner = resolveEffectOwner(effect, world)
     // Efeito sem dono nao entra: ele nasce colado no ponto do impacto
     // (`targetX/targetY`) e mover isso trocaria o significado do texto.
@@ -1977,6 +1994,8 @@ const BORDA_DA_PLACA = 'rgba(248, 113, 113, 0.9)'
 function drawDamageNumber(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState, desvio = 0,
 ): void {
+  // Multi-hit: cada numero espera o proprio impacto (spawnDamageNumber).
+  if (effect.age < effect.delay) return
   const progress = effectProgress(effect)
   const alpha = progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3
   const anchor = ancoraDoTexto(effect, world)

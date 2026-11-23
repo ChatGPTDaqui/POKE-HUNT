@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   triggerAttackAnim, directionRowFromFacing, desiredAnimName,
-  registrarDanoParaHurt, tickAttackAnimTimers, HURT_ANIM_DURATION,
+  registrarDanoParaHurt, tickAttackAnimTimers, HURT_ANIM_DURATION, grauDoImpacto,
 } from './animationSystem'
 import type { EnemyEntity, PlayerEntity, WorldState } from '../types'
 
@@ -80,51 +80,88 @@ describe('animacao parada durante a pausa do wander', () => {
   })
 })
 
-// PH-542: flinch de levar dano so no combate DUELO e so em acerto pesado.
-describe('pose Hurt no duelo (PH-542)', () => {
+// Coreografia de batalha (23/11/2026): reacao a dano nos DOIS modos, por grau,
+// e uma animacao nao corta a outra.
+describe('reacao a dano e fila de poses', () => {
   function alvo(hp = 100): PlayerEntity {
     return {
       state: 'engaged', facing: { x: 1, y: 0 }, attackAnim: null, attackAnimTimer: 0, fainted: false,
+      animFrame: 0, animElapsed: 0, x: 0, y: 0,
       poke: { hp, stats: { hp: 100 }, status: null },
     } as unknown as PlayerEntity
   }
-  const duelo = { mapDef: { encarada: true } } as unknown as WorldState
-  const livre = { mapDef: { encarada: false } } as unknown as WorldState
+  const mundoCom = (e: PlayerEntity) => ({ player: e, enemies: [] }) as unknown as WorldState
 
-  it('acerto de 20%+ do HP maximo no duelo arma a pose', () => {
+  it('grau: leve < 10%, medio ate 25%, forte dali; critico/super sobem um grau', () => {
+    expect(grauDoImpacto(9, 100)).toBe(1)
+    expect(grauDoImpacto(10, 100)).toBe(2)
+    expect(grauDoImpacto(25, 100)).toBe(3)
+    expect(grauDoImpacto(5, 100, { critico: true })).toBe(2)
+    expect(grauDoImpacto(30, 100, { superEfetivo: true })).toBe(3)
+  })
+
+  it('acerto medio arma o Hurt em qualquer modo; acerto leve nao', () => {
     const e = alvo()
-    registrarDanoParaHurt(duelo, e, 20)
-    expect(e.hurtAnimTimer).toBe(HURT_ANIM_DURATION)
+    expect(registrarDanoParaHurt(e, 10)).toBe(2)
+    expect(e.hurtAnimTimer).toBe(HURT_ANIM_DURATION) // sem arte: o fallback
     expect(desiredAnimName(e)).toBe('Hurt')
+    const leve = alvo()
+    expect(registrarDanoParaHurt(leve, 5)).toBe(1)
+    expect(leve.hurtAnimTimer).toBeUndefined()
   })
 
-  it('acerto abaixo de 20% nao arma; combate livre nunca arma', () => {
-    const fraco = alvo()
-    registrarDanoParaHurt(duelo, fraco, 19)
-    expect(fraco.hurtAnimTimer).toBeUndefined()
-    const mundo = alvo()
-    registrarDanoParaHurt(livre, mundo, 100)
-    expect(mundo.hurtAnimTimer).toBeUndefined()
-    expect(desiredAnimName(mundo)).toBe('Idle')
-  })
-
-  it('a pose de ataque propria vence o Hurt, e o timer desce em tickAttackAnimTimers', () => {
+  it('hitstop estende o Hurt, pra pose nao perder o fim', () => {
     const e = alvo()
-    registrarDanoParaHurt(duelo, e, 50)
-    triggerAttackAnim(e, false)
+    registrarDanoParaHurt(e, 50, { hitstop: 0.09 })
+    expect(e.hurtAnimTimer).toBeCloseTo(HURT_ANIM_DURATION + 0.09)
+  })
+
+  it('acerto no meio da propria pose: o golpe termina e o Hurt toca DEPOIS', () => {
+    const e = alvo()
+    triggerAttackAnim(e, false, undefined, false, 0.5)
+    registrarDanoParaHurt(e, 50)
+    expect(e.hurtAnimTimer).toBeUndefined()
+    expect(desiredAnimName(e)).toBe('Shoot')
+    const world = mundoCom(e)
+    tickAttackAnimTimers(world, 0.3)
+    expect(desiredAnimName(e)).toBe('Shoot')
+    e.animFrame = 3
+    tickAttackAnimTimers(world, 0.2)
+    expect(desiredAnimName(e)).toBe('Hurt')
+    expect(e.animFrame).toBe(0)
+    tickAttackAnimTimers(world, HURT_ANIM_DURATION)
+    expect(desiredAnimName(e)).toBe('Idle')
+  })
+
+  it('Hurt sobre Hurt recomeca do quadro 0', () => {
+    const e = alvo()
+    registrarDanoParaHurt(e, 50)
+    e.animFrame = 1
+    registrarDanoParaHurt(e, 50)
+    expect(e.animFrame).toBe(0)
+  })
+
+  it('o sono espera a pose de golpe acabar', () => {
+    const e = alvo()
+    triggerAttackAnim(e, false, undefined, false, 0.5)
+    e.poke.status = { tipo: 'sleep' } as PlayerEntity['poke']['status']
     expect(desiredAnimName(e)).toBe('Shoot')
     e.attackAnimTimer = 0
-    const world = { player: e, enemies: [] } as unknown as WorldState
-    tickAttackAnimTimers(world, HURT_ANIM_DURATION / 2)
-    expect(desiredAnimName(e)).toBe('Hurt')
-    tickAttackAnimTimers(world, HURT_ANIM_DURATION)
-    expect(e.hurtAnimTimer).toBeUndefined()
+    expect(desiredAnimName(e)).toBe('Sleep')
+  })
+
+  it('golpe ainda no ar (travaDoGolpe) mostra Idle, nao anda no lugar', () => {
+    const e = alvo()
+    e.state = 'chase'
+    e.travaDoGolpe = 0.4
     expect(desiredAnimName(e)).toBe('Idle')
+    delete e.travaDoGolpe
+    expect(desiredAnimName(e)).toBe('Walk')
   })
 
   it('morto nao flincha: a pose de desmaio vence', () => {
     const e = alvo(0)
-    registrarDanoParaHurt(duelo, e, 50)
+    registrarDanoParaHurt(e, 50)
     expect(e.hurtAnimTimer).toBeUndefined()
     expect(desiredAnimName(e)).toBe('Faint')
   })

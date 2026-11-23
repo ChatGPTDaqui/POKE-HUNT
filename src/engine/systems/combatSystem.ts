@@ -56,10 +56,14 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange, clamp } from '@/core/random'
-import { registrarDanoParaHurt, triggerAttackAnim } from './animationSystem'
+import {
+  grauDoImpacto, hitstopDoImpacto, registrarDanoParaHurt, registrarImpactoVisual, triggerAttackAnim,
+  type GrauDoImpacto,
+} from './animationSystem'
 import { poseDoGolpe } from '@/data/poseDoGolpe'
 import { gastarPpDeCura, sincronizarAlvoDaCura, temPpDeCura } from '../ppDeCura'
 import { tempoDoGolpe, type TempoDoGolpe } from '../tempoDoGolpe'
+import { IMPACTOS_DOS_GOLPES } from '@/data/generated/impactosDosGolpes.generated'
 // Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
 // turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
 // dura 30 abates, entao 5 turnos de clima passavam antes de qualquer coisa
@@ -1774,8 +1778,42 @@ const DURACAO_DO_NUMERO_DE_DANO_S = 2.8
 // Texto de combate flutuante acima do alvo. Hits com rotulo de efetividade
 // (ex: "Super efetivo!") desenham 2 linhas empilhadas, entao reservam 2
 // slots de raia em vez de 1.
-function spawnDamageNumber(world: WorldState, target: WorldEntity, result: DamageResult, abilityId?: string): void {
+/**
+ * Espaco (s) entre os numeros de dano de um golpe de varios acertos. A tabela
+ * do motor guarda so [primeiro, ultimo] impacto da coreografia; quando os dois
+ * diferem (Double Kick, Pin Missile), o espaco e esse. Quando nao, as
+ * coreografias de 2–5 acertos repetem o contato a cada ~85–100 ms
+ * (render/vfx/coreografias/lutaCorpo.ts, perfurar.ts…) — dai o padrao.
+ */
+const INTERVALO_PADRAO_ENTRE_ACERTOS = 0.1
+function intervaloEntreAcertos(abilityId: string): number {
+  const [primeiro, ultimo] = IMPACTOS_DOS_GOLPES[abilityId] ?? [0, 0]
+  return ultimo > primeiro ? (ultimo - primeiro) / 1000 : INTERVALO_PADRAO_ENTRE_ACERTOS
+}
+
+/**
+ * Dois numeros que nascem quase juntos no MESMO alvo (varios selvagens batendo
+ * no jogador no mesmo instante) se espaçam por esta folga — so no desenho. Sem
+ * ela, os golpes de quem atacou junto liam como um borrao unico.
+ */
+const FOLGA_ENTRE_NUMEROS_DO_MESMO_ALVO = 0.12
+
+function spawnDamageNumber(world: WorldState, target: WorldEntity, result: DamageResult, abilityId?: string, atraso = 0): void {
+  // Ultimo numero ainda por aparecer (ou recem-aparecido) neste alvo, vindo de
+  // OUTRO golpe: o novo espera a folga atras dele. Os do mesmo golpe ja vem
+  // escalonados por `atraso`.
+  let delay = atraso
+  if (atraso === 0) {
+    for (const e of world.effects) {
+      if (e.type !== 'damageNumber' || e.ownerId !== target.id) continue
+      const faltaPraAparecer = e.delay - e.age
+      if (faltaPraAparecer > -FOLGA_ENTRE_NUMEROS_DO_MESMO_ALVO) {
+        delay = Math.max(delay, faltaPraAparecer + FOLGA_ENTRE_NUMEROS_DO_MESMO_ALVO)
+      }
+    }
+  }
   world.effects.push(createWorldEffect(world.counters, {
+    delay,
     type: 'damageNumber',
     x: target.x, y: target.y,
     targetX: target.x, targetY: target.y - target.radius - 40,
@@ -2988,6 +3026,10 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   let danoCausado = 0
   let houveCritico = false
   let acertosVisuais = 0
+  let grauVisual: GrauDoImpacto | 0 = 0
+  let hitstopVisual = 0
+  let pulsosVisuais = 0
+  const intervaloDosAcertos = intervaloEntreAcertos(ability.id)
   for (let acerto = 0; acerto < acertos; acerto++) {
     // Alvo caiu no acerto anterior: a sequencia para. Nos jogos e igual — os
     // acertos restantes de um Fury Swipes nao saem depois do KO.
@@ -3036,10 +3078,29 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
     if (danoDoAcerto > 0) {
       takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke))
-      registrarDanoParaHurt(world, target, danoDoAcerto)
-      if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoDoAcerto }, ability.id)
+      const detalhe = {
+        critico: result.isCrit,
+        superEfetivo: result.effectiveness === 'super' || result.effectiveness === 'effective',
+      }
+      const grau = grauDoImpacto(danoDoAcerto, target.poke.stats.hp, detalhe)
+      const hitstop = hitstopDoImpacto(grau, result.isCrit, isDead(target))
+      registrarDanoParaHurt(target, danoDoAcerto, { ...detalhe, hitstop })
+      if (grau > grauVisual) grauVisual = grau
+      if (hitstop > hitstopVisual) hitstopVisual = hitstop
+      // Golpe de varios acertos: um numero por impacto, no ritmo dos impactos
+      // da coreografia, em vez dos N numeros juntos no primeiro. So o desenho
+      // espera — o HP ja caiu aqui, como sempre (ver `intervaloEntreAcertos`).
+      if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoDoAcerto }, ability.id, pulsosVisuais * intervaloDosAcertos)
+      pulsosVisuais++
       if (aguentou && !silent) anunciarAguentou(world, target)
     }
+  }
+  // Tremor/recuo/hitstop de quem levou — um pulso por numero de dano. So
+  // desenho (fora do silent); a simulacao nao le `impactoVisual`.
+  if (!silent && grauVisual !== 0) {
+    registrarImpactoVisual(target, attacker, grauVisual, {
+      pulsos: pulsosVisuais, intervalo: intervaloDosAcertos, hitstop: hitstopVisual,
+    })
   }
 
   // HABILIDADES QUE REAGEM A LEVAR UM HIT (Justified, Rattled, Weak Armor,

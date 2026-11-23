@@ -144272,14 +144272,46 @@ new Set(Object.values(POSES_DA_FAMILIA).flat().filter((p) => p !== "Swing"));
 //#region src/engine/systems/animationSystem.ts
 var ATTACK_ANIM_DURATION = .5;
 var HURT_ANIM_DURATION = .45;
+/**
+* Hitstop: quanto o alvo de um impacto forte fica congelado no quadro em que
+* foi atingido. So DESENHO — a simulacao nao para (ver `updateAnimations`). O
+* Hurt de quem congelou ganha o mesmo tanto, pra pose nao perder o fim.
+*/
+var HITSTOP_FORTE = .09;
+var HITSTOP_CRITICO = .12;
+var HITSTOP_DE_DERROTA = .15;
+function grauDoImpacto(dano, hpMaximo, detalhe = {}) {
+	const fracao = hpMaximo > 0 ? dano / hpMaximo : 1;
+	let grau = fracao >= .25 ? 3 : fracao >= .1 ? 2 : 1;
+	if (detalhe.critico || detalhe.superEfetivo) grau += 1;
+	return Math.min(3, grau);
+}
+function hitstopDoImpacto(grau, critico, derrota) {
+	if (derrota) return HITSTOP_DE_DERROTA;
+	if (grau < 3) return 0;
+	return critico ? HITSTOP_CRITICO : HITSTOP_FORTE;
+}
+/**
+* Segundos que o flinch fica na tela. Toda arte de Hurt do acervo PMD tem 2
+* quadros e ~0,17 s — curta demais pro olho registrar num jogo assistido. Ela
+* toca UMA vez e segura o ultimo quadro (o recuo) ate completar
+* HURT_ANIM_DURATION (`updateAnimations`), em vez de dar volta e meia.
+*/
+function duracaoDoHurt(speciesId) {
+	if (!speciesId) return HURT_ANIM_DURATION;
+	const arte = resolveBattleAnim(speciesId, "Hurt");
+	if (!arte || arte.name !== "Hurt" || arte.durations.length === 0) return HURT_ANIM_DURATION;
+	return Math.max(HURT_ANIM_DURATION, arte.durations.reduce((s, d) => s + d, 0) / 60);
+}
 function desiredAnimName(entity) {
 	if (isDead(entity)) return "Faint";
 	if (entity.animOverride) return entity.animOverride;
-	if (entity.poke.status?.tipo === "sleep") return "Sleep";
 	if (entity.attackAnimTimer > 0) return entity.attackAnim;
+	if (entity.poke.status?.tipo === "sleep") return "Sleep";
 	if ((entity.hurtAnimTimer ?? 0) > 0) return "Hurt";
 	if (imobilizadoPorStatus(entity)) return "Idle";
 	if (entity.encarando) return "Walk";
+	if ((entity.travaDoGolpe ?? 0) > 0) return "Idle";
 	if (entity.state === "chase") return "Walk";
 	if (entity.state === "wander") return entity.wanderTarget ? "Walk" : "Idle";
 	return "Idle";
@@ -144299,7 +144331,14 @@ function tickAttackAnimTimers(world, dt) {
 	const entities = [world.player, ...world.enemies];
 	for (const entity of entities) {
 		if (!entity) continue;
-		if (entity.attackAnimTimer > 0) entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt);
+		if (entity.attackAnimTimer > 0) {
+			entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt);
+			if (entity.attackAnimTimer === 0 && entity.hurtNaFila) {
+				entity.hurtAnimTimer = entity.hurtNaFila;
+				delete entity.hurtNaFila;
+				reiniciarQuadros(entity);
+			}
+		}
 		if (entity.travaDoGolpe) {
 			const resta = entity.travaDoGolpe - dt;
 			if (resta > 0) entity.travaDoGolpe = resta;
@@ -144309,6 +144348,10 @@ function tickAttackAnimTimers(world, dt) {
 			const resta = entity.hurtAnimTimer - dt;
 			if (resta > 0) entity.hurtAnimTimer = resta;
 			else delete entity.hurtAnimTimer;
+		}
+		if (entity.impactoVisual) {
+			entity.impactoVisual.idade += dt;
+			if (entity.impactoVisual.idade >= duracaoDoImpactoVisual(entity.impactoVisual)) delete entity.impactoVisual;
 		}
 		tickCuraTimers(entity, dt);
 	}
@@ -144328,7 +144371,8 @@ function updateAnimations(world, dt) {
 			entity.animElapsed = 0;
 		}
 		const frameOnLastFrame = entity.animFrame >= resolved.durations.length - 1;
-		if (wantedName === "Faint" && frameOnLastFrame) continue;
+		if ((wantedName === "Faint" || wantedName === "Hurt") && frameOnLastFrame) continue;
+		if (entity.impactoVisual && entity.impactoVisual.idade < entity.impactoVisual.hitstop) continue;
 		entity.animElapsed += dt;
 		const frameDuration = resolved.durations[entity.animFrame] / 60;
 		if (entity.animElapsed >= frameDuration) {
@@ -144355,17 +144399,59 @@ function triggerAttackAnim(entity, isAoe, target, duelo = false, duracao = ATTAC
 	entity.attackAnimTimer = duracao;
 	if (target) faceToward(entity, target);
 }
+/** Volta a arte do quadro 0 — o Hurt seguinte recomeca o flinch, nao continua o anterior. */
+function reiniciarQuadros(entity) {
+	entity.animFrame = 0;
+	entity.animElapsed = 0;
+}
 /**
-* PH-542: arma a pose Hurt em quem levou o acerto — so no combate duelo
-* (`mapDef.encarada`) e so quando UM acerto tira 20%+ do HP maximo. Multi-hit
-* conta por acerto (cada um passa por aqui). Morto nao flincha: a pose de
-* desmaio vence em `desiredAnimName`, e o timer ficaria armado a toa.
+* Reacao a UM acerto que tirou HP, nos dois modos de combate (PH-542 armava so
+* no duelo e so acima de 20%). Devolve o grau (`grauDoImpacto`); do grau 2 pra
+* cima arma a pose Hurt. Multi-hit conta por acerto.
+*
+* FILA, NAO CORTE: quem esta no meio da propria pose de golpe nao e
+* interrompido — o Hurt vai pra `hurtNaFila` e toca quando a pose termina
+* (`tickAttackAnimTimers`). Hurt sobre Hurt recomeca do quadro 0.
+*
+* Morto nao flincha: a pose de desmaio vence em `desiredAnimName`. Roda tambem
+* no servidor (silent): os timers sao so apresentacao, mas descem nos dois
+* lados pelo mesmo caminho dos timers de cura.
 */
-function registrarDanoParaHurt(world, alvo, dano) {
-	if (!world.mapDef?.encarada) return;
-	if (dano < alvo.poke.stats.hp * .2) return;
-	if (isDead(alvo)) return;
-	alvo.hurtAnimTimer = HURT_ANIM_DURATION;
+function registrarDanoParaHurt(alvo, dano, detalhe = {}) {
+	if (dano <= 0) return 0;
+	const grau = grauDoImpacto(dano, alvo.poke.stats.hp, detalhe);
+	if (isDead(alvo) || grau < 2) return grau;
+	const duracao = duracaoDoHurt(alvo.poke.speciesId) + (detalhe.hitstop ?? 0);
+	if (alvo.attackAnimTimer > 0) {
+		alvo.hurtNaFila = Math.max(alvo.hurtNaFila ?? 0, duracao);
+		return grau;
+	}
+	if ((alvo.hurtAnimTimer ?? 0) > 0) reiniciarQuadros(alvo);
+	alvo.hurtAnimTimer = duracao;
+	return grau;
+}
+/** Quanto tempo o tremor/recuo de UM pulso fica vivo. */
+var DURACAO_DO_TREMOR = .28;
+function duracaoDoImpactoVisual(i) {
+	return i.hitstop + (i.pulsos - 1) * i.intervalo + DURACAO_DO_TREMOR;
+}
+/**
+* Arma o tremor/recuo/hitstop do acerto em quem levou. So desenho: o combate
+* chama fora do modo silent, e nada da simulacao le este campo. `pulsos` =
+* acertos de um golpe multiplo (um tremor por numero de dano), `intervalo` o
+* espaco entre eles.
+*/
+function registrarImpactoVisual(alvo, origem, grau, opcoes = {}) {
+	const dx = origem ? alvo.x - origem.x : 0;
+	const dy = origem ? alvo.y - origem.y : 0;
+	alvo.impactoVisual = {
+		grau,
+		angulo: dx === 0 && dy === 0 ? null : Math.atan2(dy, dx),
+		idade: 0,
+		pulsos: Math.max(1, opcoes.pulsos ?? 1),
+		intervalo: opcoes.intervalo ?? 0,
+		hitstop: opcoes.hitstop ?? 0
+	};
 }
 //#endregion
 //#region src/engine/ppDeCura.ts
@@ -148788,7 +148874,9 @@ function aplicarEncarada(world, dt) {
 		estado.progresso = 1;
 	}
 	estado.poseAtiva = poseAgora;
-	if (poseAgora || imobilizadoPorStatus(jogador) || imobilizadoPorStatus(inimigo)) return;
+	const corpoOcupado = (e) => (e.travaDoGolpe ?? 0) > 0 || (e.hurtAnimTimer ?? 0) > 0;
+	if (poseAgora || corpoOcupado(jogador) || corpoOcupado(inimigo)) return;
+	if (imobilizadoPorStatus(jogador) || imobilizadoPorStatus(inimigo)) return;
 	const velocidade = estado.velocidade ?? VELOCIDADE_DA_ENCARADA;
 	if (estado.progresso >= 1) {
 		estado.perna += 1;
@@ -150665,8 +150753,33 @@ var EFFECTIVENESS_COLORS = {
 	immune: "#000000"
 };
 var DURACAO_DO_NUMERO_DE_DANO_S = 2.8;
-function spawnDamageNumber(world, target, result, abilityId) {
+/**
+* Espaco (s) entre os numeros de dano de um golpe de varios acertos. A tabela
+* do motor guarda so [primeiro, ultimo] impacto da coreografia; quando os dois
+* diferem (Double Kick, Pin Missile), o espaco e esse. Quando nao, as
+* coreografias de 2–5 acertos repetem o contato a cada ~85–100 ms
+* (render/vfx/coreografias/lutaCorpo.ts, perfurar.ts…) — dai o padrao.
+*/
+var INTERVALO_PADRAO_ENTRE_ACERTOS = .1;
+function intervaloEntreAcertos(abilityId) {
+	const [primeiro, ultimo] = IMPACTOS_DOS_GOLPES[abilityId] ?? [0, 0];
+	return ultimo > primeiro ? (ultimo - primeiro) / 1e3 : INTERVALO_PADRAO_ENTRE_ACERTOS;
+}
+/**
+* Dois numeros que nascem quase juntos no MESMO alvo (varios selvagens batendo
+* no jogador no mesmo instante) se espaçam por esta folga — so no desenho. Sem
+* ela, os golpes de quem atacou junto liam como um borrao unico.
+*/
+var FOLGA_ENTRE_NUMEROS_DO_MESMO_ALVO = .12;
+function spawnDamageNumber(world, target, result, abilityId, atraso = 0) {
+	let delay = atraso;
+	if (atraso === 0) for (const e of world.effects) {
+		if (e.type !== "damageNumber" || e.ownerId !== target.id) continue;
+		const faltaPraAparecer = e.delay - e.age;
+		if (faltaPraAparecer > -.12) delay = Math.max(delay, faltaPraAparecer + FOLGA_ENTRE_NUMEROS_DO_MESMO_ALVO);
+	}
 	world.effects.push(createWorldEffect(world.counters, {
+		delay,
 		type: "damageNumber",
 		x: target.x,
 		y: target.y,
@@ -151433,6 +151546,10 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	let danoCausado = 0;
 	let houveCritico = false;
 	let acertosVisuais = 0;
+	let grauVisual = 0;
+	let hitstopVisual = 0;
+	let pulsosVisuais = 0;
+	const intervaloDosAcertos = intervaloEntreAcertos(ability.id);
 	for (let acerto = 0; acerto < acertos; acerto++) {
 		if (acerto > 0 && isDead(target)) break;
 		const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null, world.especialidadeNiveis);
@@ -151454,14 +151571,31 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		danoFinal += danoDoAcerto;
 		if (danoDoAcerto > 0) {
 			takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke));
-			registrarDanoParaHurt(world, target, danoDoAcerto);
+			const detalhe = {
+				critico: result.isCrit,
+				superEfetivo: result.effectiveness === "super" || result.effectiveness === "effective"
+			};
+			const grau = grauDoImpacto(danoDoAcerto, target.poke.stats.hp, detalhe);
+			const hitstop = hitstopDoImpacto(grau, result.isCrit, isDead(target));
+			registrarDanoParaHurt(target, danoDoAcerto, {
+				...detalhe,
+				hitstop
+			});
+			if (grau > grauVisual) grauVisual = grau;
+			if (hitstop > hitstopVisual) hitstopVisual = hitstop;
 			if (!silent) spawnDamageNumber(world, target, {
 				...result,
 				amount: danoDoAcerto
-			}, ability.id);
+			}, ability.id, pulsosVisuais * intervaloDosAcertos);
+			pulsosVisuais++;
 			if (aguentou && !silent) anunciarAguentou(world, target);
 		}
 	}
+	if (!silent && grauVisual !== 0) registrarImpactoVisual(target, attacker, grauVisual, {
+		pulsos: pulsosVisuais,
+		intervalo: intervaloDosAcertos,
+		hitstop: hitstopVisual
+	});
 	if (danoFinal > 0 && !isDead(target)) {
 		const traitDoAlvo = traitsDoConfronto(attacker, target).defensor;
 		const reacao = traitDoAlvo ? REACAO_A_HIT[traitDoAlvo] : void 0;

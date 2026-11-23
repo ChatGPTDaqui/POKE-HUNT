@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.85',
+    date: '2026-11-23',
+    title: 'Batalhas mais fáceis de assistir',
+    highlights: [
+      'Quem leva um golpe agora reage em toda hunt: treme, recua e, nos golpes fortes, segura o impacto por um instante.',
+      'Uma animação não corta mais a outra: quem toma dano no meio do próprio ataque termina o golpe e só depois sente o impacto.',
+      'Golpes de vários acertos mostram um número por impacto, e o Pokémon não anda mais no lugar enquanto o golpe está no ar.',
+      'Com "reduzir movimento" ligado no sistema, o tremor e o recuo ficam desligados.',
+    ],
+  },
+  {
     version: '8.84',
     date: '2026-11-23',
     title: 'Entrada no jogo mais leve depois de cada atualização',

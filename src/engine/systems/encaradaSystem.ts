@@ -384,7 +384,14 @@ export function aplicarEncarada(world: WorldState, dt: number): void {
   // tambem: sono e congelamento sao sobre nao poder agir, e uma coreografia
   // seria exatamente uma acao. Nao ha `else` — os dois casos so deixam
   // `encarando` em false, entao a arte cai na pose de ataque ou em 'Idle'.
-  if (poseAgora || imobilizadoPorStatus(jogador) || imobilizadoPorStatus(inimigo)) return
+  //
+  // O golpe AINDA NO AR (`travaDoGolpe`, ate o ultimo impacto) e o flinch de
+  // quem levou tambem seguram o par: sem isso a danca recomecava no fim da pose,
+  // com a coreografia do golpe ainda batendo (coreografia de batalha, 23/11/2026).
+  // Fica fora da borda de subida acima de proposito: nao conta troca nova.
+  const corpoOcupado = (e: { travaDoGolpe?: number; hurtAnimTimer?: number }) => (e.travaDoGolpe ?? 0) > 0 || (e.hurtAnimTimer ?? 0) > 0
+  if (poseAgora || corpoOcupado(jogador) || corpoOcupado(inimigo)) return
+  if (imobilizadoPorStatus(jogador) || imobilizadoPorStatus(inimigo)) return
 
   const velocidade = estado.velocidade ?? VELOCIDADE_DA_ENCARADA
 
