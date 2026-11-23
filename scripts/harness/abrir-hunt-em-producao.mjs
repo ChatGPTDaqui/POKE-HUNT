@@ -91,7 +91,7 @@ const URL_BASE = local.VITE_SUPABASE_URL || env.SUPABASE_URL || doAmbiente('VITE
 const ANON = local.VITE_SUPABASE_ANON_KEY || doAmbiente('VITE_SUPABASE_ANON_KEY')
 const SENHA = env.CONTA_TESTE_SENHA || doAmbiente('CONTA_TESTE_SENHA')
 const CONTA = 'claude@teste.pokehunt.local'
-const ORIGEM = 'https://poke-hunt-euj.pages.dev'
+const ORIGEM = 'https://jogar-pokeinspiration.pages.dev'
 const FUNCAO = 'jogo'
 
 if (!URL_BASE || !ANON || !SENHA) {

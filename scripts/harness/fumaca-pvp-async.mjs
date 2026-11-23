@@ -63,7 +63,7 @@ if (!URL_BASE || !ANON || !SERVICO || !SENHA) {
 const args = process.argv.slice(2)
 const schema = resolverSchema({ argv: args, envSchema: env.SUPABASE_SCHEMA })
 const FUNCAO = schema === 'public' ? 'jogo' : 'jogo-dev'
-const ORIGEM = schema === 'public' ? 'https://poke-hunt-euj.pages.dev' : 'https://dev.poke-hunt-euj.pages.dev'
+const ORIGEM = schema === 'public' ? 'https://jogar-pokeinspiration.pages.dev' : 'https://dev.poke-hunt-euj.pages.dev'
 const admin = cabecalhosRest(SERVICO, schema)
 console.log(`Banco: ${URL_BASE}\nSchema: ${schema}\nEdge: ${FUNCAO}`)
 

@@ -11,7 +11,7 @@ export function resumir({ commit, migrations, edge, smokes, client }) {
   return { version: 1, commit, status, migrations, edge, smokes: smokes ?? { status: 'not-run' }, client: client ?? { status: 'not-run' } }
 }
 
-export async function conferirCliente(commit, { request = fetch, wait = ms => new Promise(r => setTimeout(r, ms)), attempts = 20, origin = 'https://poke-hunt-euj.pages.dev' } = {}) {
+export async function conferirCliente(commit, { request = fetch, wait = ms => new Promise(r => setTimeout(r, ms)), attempts = 20, origin = 'https://jogar-pokeinspiration.pages.dev' } = {}) {
   if (!/^[a-f0-9]{40}$/.test(commit ?? '')) throw new Error('Commit esperado inválido')
   let observedCommit = null
   for (let n = 0; n < attempts; n++) {
