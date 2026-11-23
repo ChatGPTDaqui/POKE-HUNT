@@ -1,0 +1,8 @@
+move-icons-atlas.webp — icones ilustrados por golpe (128x128 por celula).
+
+Ordem e grade vivem em src/data/moveIcons.ts (ATLAS, COLUNAS, LINHAS): o golpe de
+indice i ocupa a coluna i % COLUNAS, linha floor(i / COLUNAS). So acrescente ao FIM.
+Um arquivo por golpe NAO serve: Cloudflare Pages limita 20.000 arquivos por deploy e
+o build ja passa de 19.500 (520 arquivos soltos derrubaram o deploy da PR #1171).
+Origem: PNGs 360x360 (icon_NNN_<id>.png), reduzidos a 128px e montados em grade,
+so os golpes presentes em ABILITIES_DATA (327 de 526 no momento).

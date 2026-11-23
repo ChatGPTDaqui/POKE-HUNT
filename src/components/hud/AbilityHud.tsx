@@ -27,7 +27,7 @@ import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { abilityIconUrl } from '@/data/abilityIcons'
-import { moveIconUrl } from '@/data/moveIcons'
+import { moveIcon } from '@/data/moveIcons'
 import { colorForType } from '@/data/typeColors'
 import { controller } from '@/engine/controller'
 import { segundosAtePoderUsar, cooldownProprio } from '@/engine/entity'
@@ -242,8 +242,8 @@ export function AbilityHud() {
         const borderColor = CATEGORY_BORDER[resolveAbilityCategory(ability, poke)] || CATEGORY_BORDER.physical
         // Arte propria do golpe (ilustracao cheia, sem fundo preto) quando existe;
         // senao o icone do tipo (pixel-art que precisa de `screen`).
-        const iconeDoGolpe = moveIconUrl(ability.id)
-        const icone = iconeDoGolpe ?? abilityIconUrl(ability.type)
+        const iconeDoGolpe = moveIcon(ability.id)
+        const icone = iconeDoGolpe ? iconeDoGolpe.url : abilityIconUrl(ability.type)
 
         return (
           <EnvolucroSlot
@@ -317,19 +317,28 @@ export function AbilityHud() {
               // dessatura e escurece o PROPRIO icone (`grayscale` +
               // `opacity-40`) em vez de tapa-lo com uma camada opaca — o
               // desenho continua reconhecivel, so visivelmente "apagado".
-              <img
-                src={icone}
-                alt=""
-                aria-hidden
-                draggable={false}
-                className={cn(
-                  'pointer-events-none h-full w-full object-cover',
-                  (isOff || semPp) && 'grayscale opacity-40',
-                )}
-                style={
-                  iconeDoGolpe ? undefined : { imageRendering: 'pixelated', mixBlendMode: 'screen' }
-                }
-              />
+              iconeDoGolpe ? (
+                <div
+                  aria-hidden
+                  className={cn(
+                    'pointer-events-none h-full w-full',
+                    (isOff || semPp) && 'grayscale opacity-40',
+                  )}
+                  style={iconeDoGolpe.estilo}
+                />
+              ) : (
+                <img
+                  src={icone}
+                  alt=""
+                  aria-hidden
+                  draggable={false}
+                  className={cn(
+                    'pointer-events-none h-full w-full object-cover',
+                    (isOff || semPp) && 'grayscale opacity-40',
+                  )}
+                  style={{ imageRendering: 'pixelated', mixBlendMode: 'screen' }}
+                />
+              )
             ) : (
               <span
                 className={cn('font-mono font-bold text-white', isOff && 'opacity-40')}

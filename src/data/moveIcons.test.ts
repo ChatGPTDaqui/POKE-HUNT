@@ -1,21 +1,25 @@
 import { describe, it, expect } from 'vitest'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { moveIconUrl, golpesComIcone } from './moveIcons'
+import { moveIcon, golpesComIcone, COLUNAS, LINHAS } from './moveIcons'
 import { ABILITIES_DATA } from './generated/abilities.generated'
 
 describe('icones de golpe', () => {
-  it('todo id da lista tem arquivo em assets/move-icons', () => {
-    for (const id of golpesComIcone()) {
-      expect(existsSync(join(process.cwd(), 'assets/move-icons', `${id}.webp`)), id).toBe(true)
-    }
+  it('o atlas existe em disco e a grade comporta todos os golpes', () => {
+    expect(existsSync(join(process.cwd(), 'assets/move-icons-atlas.webp'))).toBe(true)
+    expect(COLUNAS * LINHAS).toBeGreaterThanOrEqual(golpesComIcone().length)
+  })
+  it('todo id do atlas existe no catalogo e nao se repete', () => {
+    const ids = golpesComIcone()
+    expect(new Set(ids).size).toBe(ids.length)
+    for (const id of ids) expect(ABILITIES_DATA[id], id).toBeTruthy()
   })
   it('golpe sem arte devolve null (slot cai no icone do tipo)', () => {
-    expect(moveIconUrl('growl')).toBeNull()
-    expect(moveIconUrl(undefined)).toBeNull()
+    expect(moveIcon('growl')).toBeNull()
+    expect(moveIcon(undefined)).toBeNull()
   })
-  it('ha cobertura relevante do catalogo', () => {
-    const cobertos = Object.keys(ABILITIES_DATA).filter((id) => moveIconUrl(id)).length
-    expect(cobertos).toBeGreaterThan(300)
+  it('a ultima celula posiciona em 100% 100% quando a grade esta cheia ou dentro da grade', () => {
+    const ultimo = moveIcon(golpesComIcone().at(-1))
+    expect(ultimo?.estilo.backgroundPosition).toMatch(/^[\d.]+% [\d.]+%$/)
   })
 })
