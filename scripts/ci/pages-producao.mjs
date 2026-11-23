@@ -1,4 +1,5 @@
-// Deployments de PRODUCAO do Cloudflare Pages (projeto poke-hunt) e retry do
+// Deployments de PRODUCAO do Cloudflare Pages (projeto jogar-pokeinspiration;
+// o poke-hunt antigo publica so o staging) e retry do
 // ultimo que falhou.
 //
 //   node scripts/ci/pages-producao.mjs            # lista os ultimos deployments de producao
@@ -16,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const CONTA = 'afcba46ce039e450a9136dc96e8032b1'
-const PROJETO = 'poke-hunt'
+const PROJETO = 'jogar-pokeinspiration'
 const BASE = `https://api.cloudflare.com/client/v4/accounts/${CONTA}/pages/projects/${PROJETO}/deployments`
 
 function lerEnv(caminho) {

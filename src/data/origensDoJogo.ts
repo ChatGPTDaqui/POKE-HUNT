@@ -40,7 +40,10 @@ export const ORIGENS_DO_JOGO: readonly string[] = [
   'http://localhost:5173',
   // `vite preview`, usado pra conferir o build antes de subir.
   'http://localhost:4173',
-  // Cliente de PRODUCAO.
+  // Cliente de PRODUCAO (desde 23/11/2026, com o nome Poke Inspiration).
+  'https://jogar-pokeinspiration.pages.dev',
+  // Producao antiga: hoje so redireciona para a nova (index.html), mas fica
+  // liberada para quem estiver com a aba velha aberta.
   'https://poke-hunt-euj.pages.dev',
   // Cliente de STAGING — o que faltava, e a razao desta issue.
   'https://dev.poke-hunt-euj.pages.dev',

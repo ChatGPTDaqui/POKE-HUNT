@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.82',
+    date: '2026-11-23',
+    title: 'Endereço novo: jogar-pokeinspiration.pages.dev',
+    highlights: [
+      'O jogo agora fica em jogar-pokeinspiration.pages.dev, com o mesmo nome do site.',
+      'O endereço antigo leva automaticamente para o novo. Pode ser preciso entrar na conta mais uma vez; o progresso continua salvo.',
+    ],
+  },
+  {
     version: '8.81',
     date: '2026-11-22',
     title: 'O jogo agora se chama Poke Inspiration',

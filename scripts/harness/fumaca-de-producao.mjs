@@ -106,7 +106,7 @@ if (!URL_BASE || !ANON || !SENHA) {
  * conhece, e foi a origem de staging que faltava na lista por duas levas.
  */
 const AMBIENTES = [
-  { nome: 'producao', funcao: 'jogo', origem: 'https://poke-hunt-euj.pages.dev' },
+  { nome: 'producao', funcao: 'jogo', origem: 'https://jogar-pokeinspiration.pages.dev' },
   { nome: 'staging', funcao: 'jogo-dev', origem: 'https://dev.poke-hunt-euj.pages.dev' },
 ]
 

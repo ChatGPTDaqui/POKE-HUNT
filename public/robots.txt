@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 Disallow: /jogo
 
-Sitemap: https://poke-hunt-euj.pages.dev/sitemap.xml
+Sitemap: https://jogar-pokeinspiration.pages.dev/sitemap.xml

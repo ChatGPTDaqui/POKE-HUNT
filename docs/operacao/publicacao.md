@@ -31,8 +31,9 @@ independentemente da versão das patch notes. A espera por propagação tem limi
 
 ## Ambientes e ferramentas
 
-Servidor: jogo-dev (dev), jogo (public). Cliente: dev.poke-hunt-euj.pages.dev e
-poke-hunt-euj.pages.dev. Configuração: [ambiente local](ambiente-local.md).
+Servidor: jogo-dev (dev), jogo (public). Cliente: dev.poke-hunt-euj.pages.dev (projeto Pages
+poke-hunt, branch dev) e jogar-pokeinspiration.pages.dev (projeto jogar-pokeinspiration, main).
+A produção antiga poke-hunt-euj.pages.dev só redireciona para a nova (index.html). Configuração: [ambiente local](ambiente-local.md).
 Build publicável: npm run build inclui copiar-assets; build:verificar não inclui arte.
 Deploy normal é pelo CI. Acesso técnico a edge:publicar/db push não autoriza uso fora do fluxo.
 Diagnóstico de crédito pode exigir fumaca-credito.mjs: ele escreve com conta de teste;
