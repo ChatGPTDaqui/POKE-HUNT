@@ -27,6 +27,7 @@ import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { abilityIconUrl } from '@/data/abilityIcons'
+import { moveIconUrl } from '@/data/moveIcons'
 import { colorForType } from '@/data/typeColors'
 import { controller } from '@/engine/controller'
 import { segundosAtePoderUsar, cooldownProprio } from '@/engine/entity'
@@ -239,7 +240,10 @@ export function AbilityHud() {
         // vez de dividir por zero.
         const fracaoPronta = cdTotal > 0 ? Math.max(0, Math.min(1, 1 - cdProprio / cdTotal)) : 1
         const borderColor = CATEGORY_BORDER[resolveAbilityCategory(ability, poke)] || CATEGORY_BORDER.physical
-        const icone = abilityIconUrl(ability.type)
+        // Arte propria do golpe (ilustracao cheia, sem fundo preto) quando existe;
+        // senao o icone do tipo (pixel-art que precisa de `screen`).
+        const iconeDoGolpe = moveIconUrl(ability.id)
+        const icone = iconeDoGolpe ?? abilityIconUrl(ability.type)
 
         return (
           <EnvolucroSlot
@@ -322,7 +326,9 @@ export function AbilityHud() {
                   'pointer-events-none h-full w-full object-cover',
                   (isOff || semPp) && 'grayscale opacity-40',
                 )}
-                style={{ imageRendering: 'pixelated', mixBlendMode: 'screen' }}
+                style={
+                  iconeDoGolpe ? undefined : { imageRendering: 'pixelated', mixBlendMode: 'screen' }
+                }
               />
             ) : (
               <span

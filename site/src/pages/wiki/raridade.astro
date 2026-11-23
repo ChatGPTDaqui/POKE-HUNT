@@ -1,0 +1,55 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import { RARIDADES, TOTAL_LENDARIOS } from '../../wiki/dados'
+---
+
+<WikiLayout
+  slug="raridade"
+  title="Raridade e shiny — Wiki do Poke Inspiration"
+  description="Tabela de raridades do Poke Inspiration (chance, multiplicador de status e de venda), shiny e os POKEs lendários."
+  h1="Raridade e shiny"
+  sprite="dragonite"
+  lead="Todo POKE sorteia uma raridade ao aparecer, independente da espécie: um Rattata pode nascer Mítico e um Dragonite, Comum. Quanto mais raro, mais forte e mais valioso."
+>
+  <section>
+    <h2>Tabela de raridades</h2>
+    <div class="tbl-wrap">
+      <table class="tbl num">
+        <thead><tr><th>Raridade</th><th>Chance</th><th>Atributos</th><th>Venda</th></tr></thead>
+        <tbody>
+          {RARIDADES.map((r) => (
+            <tr>
+              <td><span class="dot" style={`background:${r.color}`}></span><b>{r.label}</b></td>
+              <td>{r.weight}%</td>
+              <td>{r.statMultiplier}×</td>
+              <td>{r.sellMultiplier}×</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="cards">
+      <div class="frame">
+        <h3>Shiny</h3>
+        <ul>
+          <li>Chance independente da raridade, proporcional à taxa de captura da espécie.</li>
+          <li>200× mais comum que nos jogos oficiais.</li>
+          <li>Não muda atributo nem venda por si só: é um troféu visual.</li>
+          <li>Vira alvo prioritário em campo, e a auto-venda <b>nunca</b> vende shiny.</li>
+        </ul>
+      </div>
+      <div class="frame">
+        <h3>Lendários</h3>
+        <ul>
+          <li><b>{TOTAL_LENDARIOS}</b> lendários, nenhum em caçada normal.</li>
+          <li>Só nas <b>hunts BOSS</b> do Modo Pesadelo, uma por lendário, sem respawn.</li>
+          <li>Desenhados maiores em campo; a raridade sorteada segue a mesma tabela.</li>
+          <li>A barra grande no topo é do chefe de sala (Guardião ou Lord), não do lendário.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</WikiLayout>

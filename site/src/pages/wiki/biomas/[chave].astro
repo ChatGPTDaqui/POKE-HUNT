@@ -1,0 +1,98 @@
+---
+// Uma página por bioma: a composição de cada estágio, os sub-biomas e as salas
+// especiais. Tudo de src/data/atlasDosBiomas.ts (o mesmo atlas da Wiki do jogo).
+import WikiLayout from '../../../components/wiki/WikiLayout.astro'
+import Tipo from '../../../components/wiki/Tipo.astro'
+import { BIOMAS_DA_WIKI, MUNDO, COR_CLIMA, nomeDoClima, pct } from '../../../wiki/dados'
+
+export function getStaticPaths() {
+  return BIOMAS_DA_WIKI.map((b) => ({ params: { chave: b.chave }, props: { b } }))
+}
+
+const { b } = Astro.props as { b: (typeof BIOMAS_DA_WIKI)[number] }
+const cor = new Map(b.subBiomas.map((s) => [s.chave, s.cor]))
+const intervalo = (e: number[]) => (e.length === 0 ? '—' : e[0] === e[e.length - 1] ? `estágio ${e[0]}` : `estágios ${e[0]}–${e[e.length - 1]}`)
+const rosto = (id: string) => `/art/rostos/${id}.png`
+---
+
+<WikiLayout
+  slug={`biomas/${b.chave}`}
+  title={`${b.nome} — bioma do Poke Inspiration`}
+  description={`Bioma ${b.nome} (tipo ${b.tipo}) no Poke Inspiration: ${b.subBiomas.map((s) => s.nome).join(', ')}. Quem aparece, clima e itens de cada sub-bioma.`}
+  h1={b.nome}
+  crumbs={[{ href: '/wiki/biomas/', label: 'Biomas' }]}
+>
+  <section class="biome-hero">
+    {b.arte && <img class="frame" src={b.arte} alt={`Ilustração do bioma ${b.nome}`} width="640" height="640" />}
+    <div>
+      <p>Tipo dominante <Tipo t={b.tipo} /></p>
+      <div class="stats">
+        <div class="frame stat"><b>{b.subBiomas.length}</b><span>sub-biomas</span></div>
+        <div class="frame stat"><b>{b.especiais.length}</b><span>salas especiais</span></div>
+        <div class="frame stat"><b>{MUNDO.estagios}</b><span>estágios</span></div>
+      </div>
+      <h3>De que é feito cada estágio</h3>
+      <div class="frame composicao" role="img" aria-label="Fatia de cada sub-bioma por estágio">
+        {
+          b.composicao.map((pesos, i) => (
+            <div class="col" title={`Estágio ${i + 1}`}>
+              {b.subBiomas.map((s) => (pesos[s.chave] ?? 0) > 0 && (
+                <span style={`height:${(pesos[s.chave] ?? 0) * 100}%;background:${cor.get(s.chave)}`} title={`${s.nome}: ${pct(pesos[s.chave] ?? 0)}`}></span>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+      <div class="composicao-eixo">{b.composicao.map((_, i) => <span>{i + 1}</span>)}</div>
+      <div class="legenda">{b.subBiomas.map((s) => <span><span class="dot" style={`background:${s.cor}`}></span>{s.nome}</span>)}</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Sub-biomas</h2>
+    <div class="lugares">
+      {
+        b.subBiomas.map((s) => (
+          <article class="frame lugar" style={`--c:${s.cor}`}>
+            <h3>{s.nome} <span class="tag">Lv {s.de}–{s.ate}</span></h3>
+            <p class="meta">{intervalo(s.estagios)} · mais comum no estágio {s.pico} ({pct(s.fatiaNoPico)} das salas)</p>
+            <dl>
+              <dt>Clima</dt>
+              <dd>{s.climas.map((c) => <span style="margin-right:12px"><span class="dot" style={`background:${COR_CLIMA[c.tipo] ?? '#ccc'}`}></span>{nomeDoClima(c.tipo)} {pct(c.chance)}</span>)}</dd>
+              <dt>Itens</dt>
+              <dd>{s.itens.join(' · ')}</dd>
+              <dt>Comuns</dt>
+              <dd class="faces">{s.destaques.map((e) => <span class="face"><img src={rosto(e.id)} alt="" width="40" height="40" loading="lazy" />{e.nome}</span>)}</dd>
+            </dl>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  {
+    b.especiais.length > 0 && (
+      <section>
+        <h2>Salas especiais</h2>
+        <p class="nota">Em destaque: espécies que só existem nesta sala.</p>
+        <div class="lugares">
+          {b.especiais.map((e) => (
+            <article class="frame lugar" style="--c:var(--gold)">
+              <h3>{e.nome} <span class="tag">{e.estagioMinimo > 1 ? `a partir do estágio ${e.estagioMinimo}` : 'qualquer estágio'}</span></h3>
+              <dl style="margin-top:10px">
+                {e.pedra && <><dt>Pedra</dt><dd>Pedra extra <Tipo t={e.pedra} /></dd></>}
+                {e.shiny && <><dt>Shiny</dt><dd>{e.shiny.nome} aparece shiny {e.shiny.mult}× mais vezes aqui.</dd></>}
+                <dt>Clima</dt>
+                <dd>{e.climas.map((c) => <span style="margin-right:12px"><span class="dot" style={`background:${COR_CLIMA[c.tipo] ?? '#ccc'}`}></span>{nomeDoClima(c.tipo)} {pct(c.chance)}</span>)}</dd>
+                <dt>Itens</dt>
+                <dd>{e.itens.join(' · ')}</dd>
+                <dt>Quem</dt>
+                <dd class="faces">{e.especies.map((sp) => <span class={sp.exclusiva ? 'face exclusiva' : 'face'}><img src={rosto(sp.id)} alt="" width="40" height="40" loading="lazy" />{sp.nome}</span>)}</dd>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
+</WikiLayout>

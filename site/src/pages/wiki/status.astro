@@ -1,0 +1,50 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import Tipos from '../../components/wiki/Tipos.astro'
+import { STATUS, STATUS_EXTRA, COMBATE } from '../../wiki/dados'
+
+const COR: Record<string, string> = { poison: '#a855f7', burn: '#f97316', paralysis: '#eab308', sleep: '#94a3b8', freeze: '#38bdf8', confusion: '#ec4899' }
+---
+
+<WikiLayout
+  slug="status"
+  title="Status — Wiki do Poke Inspiration"
+  description="Envenenado, Queimado, Paralisado, Dormindo, Congelado e Confuso no Poke Inspiration: efeitos, duração, imunidades por tipo e como curar."
+  h1="Status"
+  sprite="krabby"
+  lead={`O combate é contínuo: um “turno” aqui são ${COMBATE.turnoSegundos} segundos, o intervalo mínimo entre duas ações.`}
+>
+  <section>
+    <h2>Duas famílias</h2>
+    <ul class="rules">
+      <li><b>Não-voláteis</b> (Envenenado, Queimado, Paralisado, Dormindo, Congelado): <b>um por vez</b> e sobrevivem entre combates. Só saem com item ou no Hospital.</li>
+      <li><b>Voláteis</b> (Confuso): convive com um não-volátil e some ao sair da caçada.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Cada status</h2>
+    <div class="cards">
+      {
+        STATUS.map((s) => (
+          <div class="frame">
+            <h3><span class="dot" style={`background:${COR[s.tipo] ?? '#ccc'}`}></span>{s.nome} {s.volatil && <span class="tag">volátil</span>}</h3>
+            <ul>{s.linhas.map((l) => <li set:html={l} />)}</ul>
+            {s.imunes.length > 0 && <div class="rodape">Imune por tipo: <Tipos lista={s.imunes} /></div>}
+            <div class="rodape">Cura: {s.curas.length ? `${s.curas.join(', ')} ou o Hospital` : 'só no Hospital'}</div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Regras gerais</h2>
+    <ul class="rules">
+      <li><b>Imunidade de reaplicação:</b> todo status que sai deixa o POKE imune a outro por <b>{STATUS_EXTRA.turnosDeImunidade} turnos</b> ({STATUS_EXTRA.turnosDeImunidade * COMBATE.turnoSegundos}s).</li>
+      <li><b>Golpes de pó</b> ({STATUS_EXTRA.golpesDePo.join(', ')}): POKEs de tipo GRASS são imunes a eles.</li>
+      <li><b>Auto-Status</b> usa sozinho o item <b>mais barato</b> que cura aquele status; o Full Heal só entra se for o único.</li>
+      <li>Um ícone acima da barra de golpes mostra cada status ativo (passe o mouse para ver o nome).</li>
+    </ul>
+  </section>
+</WikiLayout>

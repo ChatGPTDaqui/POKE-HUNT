@@ -1,0 +1,134 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import Tipo from '../../components/wiki/Tipo.astro'
+import { PROGRESSO, CUSTOS_ESPECIALIDADE, MUNDO, COMBATE, fmt } from '../../wiki/dados'
+
+const tipos = PROGRESSO.tiposEspecialidade
+---
+
+<WikiLayout
+  slug="progresso"
+  title="Progressão — Wiki do Poke Inspiration"
+  description={`Como ficar mais forte no Poke Inspiration: captura automática, economia, Loja, evolução por nível e por pedra, Especialidades até +${PROGRESSO.bonusMax}% por tipo e ovos de contrato.`}
+  h1="Progressão"
+  sprite="bulbasaur"
+  lead="O que faz um POKE e a sua conta crescerem."
+>
+  <nav class="frame toc" aria-label="Nesta página">
+    <a href="#nivel">Nível e equipe</a><a href="#captura">Captura</a><a href="#economia">Economia</a><a href="#evolucao">Evolução</a><a href="#especialidades">Especialidades</a><a href="#ovos">Contratos e ovos</a><a href="#telas">Pokédex e Calculadora</a>
+  </nav>
+
+  <section id="nivel">
+    <h2>Nível, EXP e equipe</h2>
+    <ul class="rules">
+      <li>O POKE em campo ganha EXP por abate e sobe sozinho. A <b>Equipe</b> tem até <b>{MUNDO.equipe}</b> POKEs; só um fica em campo e ganha a EXP.</li>
+      <li>A curva do POKE é mais lenta que a do Treinador. Um nível pode não mover atributo nenhum: não é bug.</li>
+      <li>Até <b>{COMBATE.golpesAtivos}</b> golpes ativos por POKE. Trocar quais estão ativos só fora de uma caçada.</li>
+    </ul>
+  </section>
+
+  <section id="captura">
+    <h2>Captura: sempre automática</h2>
+    <ul class="rules">
+      <li>Não existe botão de jogar bola: a captura acontece ao derrotar um selvagem com <b>Auto-Captura ligada</b>.</li>
+      <li>A chance combina a <b>taxa de captura da espécie</b>, o <b>multiplicador da bola</b> e um ajuste global.</li>
+      <li>A bola é gasta <b>mesmo se falhar</b>. O POKE capturado entra no <b>Nível 1</b>, trazendo raridade, shiny, natureza e IVs.</li>
+      <li><b>Regra por espécie</b> (“Dratini com Ultra Ball”) tem prioridade. Se a bola dela acabar, o bot não tenta outra.</li>
+      <li>Guardião e Lord têm <b>metade</b> da chance normal.</li>
+    </ul>
+  </section>
+
+  <section id="economia">
+    <h2>Economia e Loja</h2>
+    <div class="stats">
+      <div class="frame stat"><b>~20×</b><span>mais ouro vendendo capturas do que abatendo</span></div>
+      <div class="frame stat"><b>50%</b><span>do preço de compra na revenda</span></div>
+    </div>
+    <ul class="rules">
+      <li>O preço de venda de um POKE tem <b>piso alto</b> e sobe com nível e raridade. Quer ouro? Ligue a Auto-Captura e venda o que não presta.</li>
+      <li><b>Auto-Venda</b> vende a captura na hora, nas raridades que você marcar, e <b>nunca vende shiny</b>. Use o <b>cadeado</b> para proteger item ou POKE.</li>
+      <li>Bola, poção e cura de status têm desconto grande na compra.</li>
+      <li><b>Pedras</b> (uma por tipo) não se compram: caem de abate, do tipo do POKE derrotado. Evolução especial e Especialidades disputam o mesmo estoque.</li>
+    </ul>
+  </section>
+
+  <section id="evolucao">
+    <h2>Evolução</h2>
+    <div class="stats">
+      <div class="frame stat"><b>{PROGRESSO.especiesQueEvoluem}</b><span>espécies evoluem</span></div>
+      <div class="frame stat"><b>Lv {PROGRESSO.evolucaoEspecialNivel}</b><span>+ {PROGRESSO.evolucaoEspecialPedras} Pedras na evolução especial</span></div>
+    </div>
+    <ul class="rules">
+      <li>A maioria evolui por nível: o botão aparece na Equipe. Com mais de um destino (Eevee tem cinco), <b>você escolhe</b>.</li>
+      <li>Evoluções por troca ou item viraram <b>evolução especial</b>: nível {PROGRESSO.evolucaoEspecialNivel} + {PROGRESSO.evolucaoEspecialPedras} Pedras do tipo do caminho (Flareon cobra FIRE) ou do tipo primário da espécie.</li>
+      <li>Evoluir tarde não perde golpe, e um POKE evoluído nunca de-evolui.</li>
+    </ul>
+  </section>
+
+  <section id="especialidades">
+    <h2>Especialidades: até +{PROGRESSO.bonusMax}% por tipo</h2>
+    <ul class="rules">
+      <li>Vale para <b>toda a conta</b>. São {tipos.length} tipos, cada um com duas trilhas de {PROGRESSO.nivelMax} níveis: <b>Dano</b> (seus golpes do tipo) e <b>Defesa</b> (golpes do tipo contra você).</li>
+      <li>Cada nível dá <b>+{PROGRESSO.bonusPorNivel}%</b> e pede feitos com POKEs do tipo: vitórias, golpes super-efetivos, chefes, capturas, evoluções e estágios.</li>
+      <li>Também custa Pedras do tipo e ouro. Tipos raros cobram menos pedras.</li>
+    </ul>
+    <h3>Custo de uma trilha</h3>
+    <div class="tipo-pick" role="group" aria-label="Tipo da especialidade">
+      {tipos.map((t, i) => <button type="button" data-tipo={t} aria-pressed={i === 1 ? 'true' : 'false'}><Tipo t={t} /></button>)}
+    </div>
+    {
+      tipos.map((t, i) => {
+        const c = CUSTOS_ESPECIALIDADE[t]
+        return (
+          <div class="tbl-wrap" data-painel={t} hidden={i !== 1}>
+            <table class="tbl num">
+              <thead><tr><th>Nível</th><th>Pedras</th><th>Ouro</th></tr></thead>
+              <tbody>
+                {c.niveis.map((n, j) => <tr><td><b>{j + 1}</b></td><td>{fmt.format(n.pedras)}</td><td>{fmt.format(n.ouro)}</td></tr>)}
+                <tr><td><b>Trilha inteira</b></td><td><b>{fmt.format(c.pedras)}</b></td><td><b>{fmt.format(c.ouro)}</b></td></tr>
+              </tbody>
+            </table>
+            <p class="nota">Dano e Defesa cobram o mesmo: as duas trilhas de <Tipo t={t} /> somam {fmt.format(c.pedras * 2)} pedras e {fmt.format(c.ouro * 2)} de ouro.</p>
+          </div>
+        )
+      })
+    }
+  </section>
+
+  <section id="ovos">
+    <h2>Contratos e ovos</h2>
+    <ul class="rules">
+      <li>Em <b>Missões › Contratos</b>: {PROGRESSO.contratosPorDia} contratos por dia, renovados à meia-noite (Brasília). Cada um pede abates de uma espécie (ou derrotar um shiny dela) e paga um <b>ovo</b>.</li>
+      <li>O ovo só choca <b>na equipe</b> (ocupa uma vaga), com os abates da caçada. Nasce no nível 1 com IVs de pelo menos {PROGRESSO.ivMinimoOvo}.</li>
+      <li>Ovo de contrato shiny tem 25% de chance de nascer shiny. Trocar contrato custa diamantes, e o preço dobra a cada troca no dia.</li>
+    </ul>
+    <div class="tbl-wrap">
+      <table class="tbl num">
+        <thead><tr><th>Ovo</th><th>Abates para chocar</th><th>Lendário</th><th>Mítico</th></tr></thead>
+        <tbody>
+          {PROGRESSO.ovos.map((o) => <tr><td><span class="dot" style={`background:${o.cor}`}></span><b>{o.nome}</b></td><td>{fmt.format(o.abates)}</td><td>{o.lendario}%</td><td>{o.mitico}%</td></tr>)}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="telas">
+    <h2>Pokédex, Bestiário e Calculadora</h2>
+    <ul class="rules">
+      <li><b>Pokédex</b>: toda espécie, com fraquezas e onde encontrar. Também está aqui na <a href="/wiki/pokedex/">Wiki</a>.</li>
+      <li><b>Bestiário</b>: quantos você abateu de cada espécie, normal e shiny. Por enquanto é só registro.</li>
+      <li><b>Calculadora de Força</b>: simula atributos de qualquer espécie, nível, raridade e IV, com a mesma função do jogo.</li>
+    </ul>
+  </section>
+</WikiLayout>
+
+<script>
+  const botoes = document.querySelectorAll<HTMLButtonElement>('[data-tipo]')
+  const paineis = document.querySelectorAll<HTMLElement>('[data-painel]')
+  botoes.forEach((b) =>
+    b.addEventListener('click', () => {
+      botoes.forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
+      paineis.forEach((p) => (p.hidden = p.dataset.painel !== b.dataset.tipo))
+    }),
+  )
+</script>

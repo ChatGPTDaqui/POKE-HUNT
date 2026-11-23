@@ -4,13 +4,14 @@ export const ROUTES = {
   home: { pt: '/', en: '/en/' },
   howto: { pt: '/como-jogar/', en: '/en/how-to-play/' },
   faq: { pt: '/perguntas/', en: '/en/faq/' },
+  wiki: { pt: '/wiki/', en: null },
   updates: { pt: '/novidades/', en: null },
 }
 
 export const UI = {
   pt: {
     lang: 'pt-BR',
-    nav: { home: 'Início', howto: 'Como jogar', faq: 'Perguntas', updates: 'Novidades' },
+    nav: { home: 'Início', howto: 'Como jogar', faq: 'Perguntas', wiki: 'Wiki', updates: 'Novidades' },
     play: 'Jogar grátis',
     switchLabel: 'English',
     footerNote: 'Jogo grátis no navegador, no PC e no celular.',
@@ -19,7 +20,7 @@ export const UI = {
   },
   en: {
     lang: 'en',
-    nav: { home: 'Home', howto: 'How to play', faq: 'FAQ', updates: 'Updates (PT)' },
+    nav: { home: 'Home', howto: 'How to play', faq: 'FAQ', wiki: 'Wiki (PT)', updates: 'Updates (PT)' },
     play: 'Play free',
     switchLabel: 'Português',
     footerNote: 'Free browser game, on PC and mobile. The game itself is in Portuguese.',

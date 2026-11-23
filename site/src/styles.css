@@ -45,7 +45,7 @@ body {
   flex-direction: column;
 }
 
-img { max-width: 100%; display: block; }
+img { max-width: 100%; height: auto; display: block; }
 a { color: var(--water); text-underline-offset: 3px; }
 a:hover { color: var(--ember); }
 :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }

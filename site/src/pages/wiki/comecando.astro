@@ -1,0 +1,84 @@
+---
+import WikiLayout from '../../components/wiki/WikiLayout.astro'
+import { MUNDO } from '../../wiki/dados'
+---
+
+<WikiLayout
+  slug="comecando"
+  title="Primeiros passos — Wiki do Poke Inspiration"
+  description="Como começar no Poke Inspiration: escolha do inicial, primeira caçada na Rota 46, combate automático, automações e os menus do jogo."
+  h1="Primeiros passos"
+  sprite="squirtle"
+  lead="Um jogo idle: seu POKE anda e luta sozinho. Você decide onde caçar, cuida do time e administra itens, ouro e capturas."
+>
+  <nav class="frame toc" aria-label="Nesta página">
+    <a href="#inicial">Inicial</a><a href="#combate">Combate automático</a><a href="#automacoes">Automações</a><a href="#menus">Menus</a><a href="#camera">Câmera</a>
+  </nav>
+
+  <section id="inicial">
+    <h2>Seu inicial e a primeira caçada</h2>
+    <ul class="rules">
+      <li>Escolha um dos 3 iniciais: <b>Bulbasaur</b>, <b>Charmander</b> ou <b>Squirtle</b>. Ele começa no Nível 1.</li>
+      <li>Comece pela <b>Rota 46</b>, no topo da lista de hunts: seu POKE chega ao nível 5 e lá só aparecem POKEs de nível 1 e 2.</li>
+      <li>Os {MUNDO.biomas} biomas vêm depois, quando seu POKE tiver nível para eles.</li>
+    </ul>
+  </section>
+
+  <section id="combate">
+    <h2>Combate automático</h2>
+    <ul class="rules">
+      <li>O POKE procura o selvagem vivo mais próximo, engaja e escolhe o golpe pronto de <b>maior dano estimado</b> contra aquele alvo.</li>
+      <li>Golpe em área tem preferência quando acerta <b>2 ou mais</b> inimigos.</li>
+      <li>Um <b>shiny</b> vivo na caçada vira o alvo prioritário.</li>
+      <li>Quer sua própria ordem? Ligue a <b>Rotação de golpes</b> em Automações.</li>
+      <li>Para desligar um golpe: no celular, toque no ícone e use o botão no fim da ficha; no computador, duplo clique no ícone.</li>
+    </ul>
+  </section>
+
+  <section id="automacoes">
+    <h2>As automações não vêm todas ligadas</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Automação</th><th>Começa</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>Auto-Poção</td><td><b>Ligada</b></td><td>Usa poção quando o HP cai.</td></tr>
+          <tr><td>Auto-Status</td><td><b>Ligada</b></td><td>Cura veneno, queimadura, paralisia e congelamento.</td></tr>
+          <tr><td>Auto-Captura</td><td>Desligada</td><td>Joga bola ao derrotar. <b>Sem ela, nada é capturado.</b></td></tr>
+          <tr><td>Auto-Revive</td><td>Desligada</td><td>Revive o POKE desmaiado.</td></tr>
+          <tr><td>Auto-Venda</td><td>Sem raridade marcada</td><td>Vende capturas das raridades escolhidas (nunca shiny).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nota">Tudo fica no botão de <b>robô</b>, ao lado dos golpes, onde você escolhe o item que cada automação usa. Captura e revive começam desligadas porque gastam item a cada uso.</p>
+  </section>
+
+  <section id="menus">
+    <h2>Os menus</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Menu</th><th>Para quê</th></tr></thead>
+        <tbody>
+          <tr><td><b>Equipe</b></td><td>Até {MUNDO.equipe} POKEs ativos: trocar quem está em campo, evoluir, ver atributos.</td></tr>
+          <tr><td><b>Mochila</b></td><td>Capturas extras e todos os itens (bolas, poções, revives, Pedras).</td></tr>
+          <tr><td><b>Hunt</b></td><td>Onde caçar: a Rota 46 no topo e o mapa dos {MUNDO.biomas} biomas.</td></tr>
+          <tr><td><b>Loja</b></td><td>Comprar itens e vender POKEs e itens por ouro.</td></tr>
+          <tr><td><b>Pokédex</b></td><td>Toda espécie do jogo, com fraquezas e onde encontrar.</td></tr>
+          <tr><td><b>Mercado</b></td><td>Negociar com outros jogadores: itens por livro de ofertas, POKEs por anúncio.</td></tr>
+          <tr><td><b>Missões</b></td><td>Diário, Objetivos, Contratos, Especialidades, Conquistas e Bestiário.</td></tr>
+          <tr><td><b>Hospital</b></td><td>Clique na enfermeira em campo: cura o time inteiro, de graça.</td></tr>
+          <tr><td><b>Automações</b></td><td>O botão de robô: liga e configura as automações acima.</td></tr>
+          <tr><td><b>Configurações</b></td><td>Reiniciar o jogo e ver as notas de atualização.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nota">A barra de baixo tem Equipe, Mochila, Hunt e Loja. Missões abre pela bandeira no canto direito. O resto fica no botão <b>Mais</b>; em tela larga, Pokédex e Mercado sobem para a barra.</p>
+  </section>
+
+  <section id="camera">
+    <h2>Câmera</h2>
+    <ul class="rules">
+      <li>A câmera começa afastada: você vê mais mapa ao redor do POKE.</li>
+      <li>Dentro da caçada, as lupas <b>+</b> e <b>−</b> ao lado dos golpes ajustam o zoom. No computador, <b>Ctrl + roda do mouse</b>.</li>
+    </ul>
+  </section>
+</WikiLayout>
