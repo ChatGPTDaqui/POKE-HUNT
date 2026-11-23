@@ -1,0 +1,17 @@
+# Cloudflare Pages: cache do navegador do site (auditoria de 23/11/2026).
+#
+# Sem este arquivo o Pages manda `max-age=0, must-revalidate` em tudo, e cada
+# visita revalidava toda a arte da pagina antes de mostrar.
+#
+# /_astro/* tem hash no nome (build do Astro): conteudo de uma URL nunca muda.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# /art/* nao tem hash (gerada por scripts/preparar-arte.mjs com o mesmo nome).
+# Um dia sem revalidar; depois o navegador usa a copia e revalida em segundo
+# plano, entao arte nova aparece na visita seguinte.
+/art/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# As paginas HTML ficam no padrao (revalidar sempre): um deploy novo aparece
+# no carregamento seguinte.
