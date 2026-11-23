@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.84',
+    date: '2026-11-23',
+    title: 'Entrada no jogo mais leve depois de cada atualização',
+    highlights: [
+      'Os dados do jogo (Pokémon, golpes, cenários) ficam guardados no navegador entre uma atualização e outra; só o código novo é baixado.',
+      'O celular também gasta menos tempo preparando esses dados ao abrir o jogo.',
+    ],
+  },
+  {
     version: '8.83',
     date: '2026-11-23',
     title: 'Hunts abrem mais rápido',
