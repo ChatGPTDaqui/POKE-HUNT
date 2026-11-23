@@ -1,0 +1,12 @@
+---
+// Lista de chips de tipo, com "nenhum" quando vazia.
+import Tipo from './Tipo.astro'
+import type { ElementType } from '@/data/generated/types'
+
+interface Props { lista: ElementType[] }
+const { lista } = Astro.props
+---
+
+<span class="chips">
+  {lista.length === 0 ? <span class="vazio">nenhum</span> : lista.map((t) => <Tipo t={t} />)}
+</span>

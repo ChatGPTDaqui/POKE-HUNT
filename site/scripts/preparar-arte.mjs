@@ -6,7 +6,7 @@
 //
 // Rodar de novo só quando a arte de origem mudar. O resultado é versionado.
 import sharp from 'sharp'
-import { copyFileSync, mkdirSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -45,5 +45,12 @@ for (const nome of ['bulbasaur', 'charmander', 'squirtle', 'pikachu', 'krabby', 
   copyFileSync(join(ORIGEM, 'gen5ani', `${nome}.gif`), join(sprites, `${nome}.gif`))
 }
 copyFileSync(join(ORIGEM, 'pokeball-throw', 'poke_ball-success.png'), join(pasta('fx'), 'pokebola.png'))
+
+// Rostos (40x40) de TODAS as espécies, para a Wiki e a Pokédex. Recomprimidos
+// com paleta: o original carrega metadados que multiplicam o tamanho.
+const rostos = pasta('rostos')
+for (const arq of readdirSync(join(ORIGEM, 'sprites-face')).filter((f) => f.endsWith('.png'))) {
+  await sharp(join(ORIGEM, 'sprites-face', arq)).png({ palette: true, compressionLevel: 9 }).toFile(join(rostos, arq))
+}
 
 console.log('arte pronta em', DESTINO)
