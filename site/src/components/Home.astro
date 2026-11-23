@@ -1,0 +1,124 @@
+---
+import Base from '../layouts/Base.astro'
+import { GAME_URL, SITE_URL, spriteUrl } from '../config.mjs'
+import { ROUTES, UI } from '../i18n.mjs'
+
+interface Props { lang: 'pt' | 'en' }
+const { lang } = Astro.props
+const t = UI[lang]
+
+const C = {
+  pt: {
+    title: 'Poke Inspiration — jogo idle de captura e batalha grátis no navegador',
+    description:
+      'Jogo de fã grátis no navegador: escolha seu inicial, cace em biomas, capture shinies e evolua sua equipe com batalha automática. Sem download, no PC e no celular.',
+    lead: 'Um jogo idle de captura e batalha automática. Seu time luta sozinho; você decide onde caçar, quem evoluir e como gastar o que ganha.',
+    note: 'Grátis · Sem download · PC e celular',
+    howBtn: 'Como funciona',
+    featuresTitle: 'O que tem no jogo',
+    features: [
+      ['⚔️', 'Batalha automática', 'Seu POKE anda pelo mapa, escolhe o alvo e usa os golpes sozinho, preferindo golpes em área quando acertam vários inimigos.'],
+      ['🎯', 'Captura e shinies', 'Centenas de espécies com raridades até Mítico. Um shiny na caçada vira alvo prioritário automaticamente.'],
+      ['🗺️', 'Biomas e chefes', 'Comece na Rota 46 e avance por biomas com estágios, salas, chefes, clima e o Modo Pesadelo.'],
+      ['🤖', 'Automações', 'Auto-poção, auto-status, auto-captura, auto-revive e auto-venda, cada uma configurável.'],
+      ['🏆', 'Contra outros treinadores', 'Ginásios, PvP, ranking e um Mercado para negociar itens e POKEs com outros jogadores.'],
+      ['📜', 'Sempre algo a fazer', 'Diário, objetivos, contratos, especialidades por tipo, conquistas, bestiário e Pokédex completa.'],
+    ],
+    stepsTitle: 'Comece em três passos',
+    steps: [
+      ['Crie sua conta grátis', 'Leva menos de um minuto e o jogo abre direto no navegador.'],
+      ['Escolha seu inicial', 'Bulbasaur, Charmander ou Squirtle. Ele já pode ir direto para a primeira caçada.'],
+      ['Deixe a caçada rodar', 'Seu time luta e ganha experiência enquanto o jogo está aberto. Volte para evoluir, capturar e avançar.'],
+    ],
+    bandTitle: 'Pronto para a primeira caçada?',
+  },
+  en: {
+    title: 'Poke Inspiration — free idle catching & battle game in your browser',
+    description:
+      'Free fan-made browser game: pick your starter, hunt across biomes, catch shinies and grow your team with automatic battles. No download, on PC and mobile.',
+    lead: 'An idle game of catching and automatic battles. Your team fights on its own; you choose where to hunt, who to evolve and how to spend what you earn.',
+    note: 'Free · No download · PC and mobile · Game currently in Portuguese',
+    howBtn: 'How it works',
+    featuresTitle: "What's in the game",
+    features: [
+      ['⚔️', 'Automatic battles', 'Your POKE walks the map, picks targets and uses its moves on its own, favoring area moves when they hit several enemies.'],
+      ['🎯', 'Catching and shinies', 'Hundreds of species with rarities up to Mythical. A shiny in the hunt automatically becomes the priority target.'],
+      ['🗺️', 'Biomes and bosses', 'Start on Route 46 and progress through biomes with stages, rooms, bosses, weather and Nightmare Mode.'],
+      ['🤖', 'Automations', 'Auto-potion, auto-status, auto-catch, auto-revive and auto-sell, each one configurable.'],
+      ['🏆', 'Against other trainers', 'Gyms, PvP, rankings and a Market to trade items and POKEs with other players.'],
+      ['📜', 'Always something to do', 'Daily log, objectives, contracts, type specialties, achievements, bestiary and a full Pokédex.'],
+    ],
+    stepsTitle: 'Start in three steps',
+    steps: [
+      ['Create your free account', 'It takes under a minute and the game opens right in your browser.'],
+      ['Pick your starter', 'Bulbasaur, Charmander or Squirtle. It can head straight to its first hunt.'],
+      ['Let the hunt run', 'Your team fights and earns experience while the game is open. Come back to evolve, catch and progress.'],
+    ],
+    bandTitle: 'Ready for your first hunt?',
+  },
+}[lang]
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': ['VideoGame', 'WebApplication'],
+  name: 'Poke Inspiration',
+  url: new URL(ROUTES.home[lang], SITE_URL).href,
+  description: C.description,
+  image: new URL('/og-image.png', SITE_URL).href,
+  genre: ['Idle', 'RPG'],
+  inLanguage: 'pt-BR',
+  applicationCategory: 'GameApplication',
+  operatingSystem: 'Web browser',
+  gamePlatform: 'Web browser',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'BRL', url: `${GAME_URL}/registro` },
+}
+---
+
+<Base lang={lang} page="home" title={C.title} description={C.description} jsonLd={jsonLd}>
+  <section class="hero">
+    <div class="mons" aria-hidden="true">
+      {['bulbasaur', 'charmander', 'squirtle'].map((id) => <img src={spriteUrl(id)} alt="" width="150" height="150" loading="eager" />)}
+    </div>
+    <h1>Poke Inspiration</h1>
+    <p class="lead">{C.lead}</p>
+    <div class="ctas">
+      <a class="btn" href={`${GAME_URL}/registro`}>{t.play}</a>
+      <a class="btn ghost" href={ROUTES.howto[lang]}>{C.howBtn}</a>
+    </div>
+    <p class="note">{C.note}</p>
+  </section>
+
+  <section>
+    <h2>{C.featuresTitle}</h2>
+    <div class="grid">
+      {
+        C.features.map(([icon, title, text]) => (
+          <div class="card">
+            <span class="icon" aria-hidden="true">{icon}</span>
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>{C.stepsTitle}</h2>
+    <ol class="steps">
+      {
+        C.steps.map(([title, text]) => (
+          <li>
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="cta-band">
+    <h2>{C.bandTitle}</h2>
+    <a class="btn" href={`${GAME_URL}/registro`}>{t.play}</a>
+  </section>
+</Base>

@@ -1,0 +1,17 @@
+{
+  "name": "poke-inspiration-site",
+  "private": true,
+  "type": "module",
+  "description": "Site de apresentação do Poke Inspiration (Astro, estático, PT/EN).",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.6",
+    "@fontsource-variable/fredoka": "^5.2.8",
+    "@fontsource-variable/manrope": "^5.2.8",
+    "astro": "^5.18.2"
+  }
+}

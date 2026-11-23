@@ -1,0 +1,33 @@
+---
+// Lê as patch notes do próprio jogo: o site nunca fica atrás do que foi lançado.
+import Base from '../layouts/Base.astro'
+import { PATCH_NOTES } from '../../../src/data/patchNotes'
+
+const recentes = [...PATCH_NOTES].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 15)
+const data = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+---
+
+<Base
+  lang="pt"
+  page="updates"
+  title="Novidades do Poke Inspiration — atualizações recentes"
+  description="As atualizações mais recentes do Poke Inspiration: novos efeitos, sistemas e melhorias, direto das notas de versão do jogo."
+>
+  <article class="prose">
+    <h1>Novidades</h1>
+    <p>As {recentes.length} atualizações mais recentes. O histórico completo fica em Configurações, dentro do jogo.</p>
+    {
+      recentes.map((n) => (
+        <div class="update">
+          <div class="meta">
+            v{n.version} · {data(n.date)}
+          </div>
+          <h3>{n.title}</h3>
+          <ul>
+            {n.highlights.map((h) => <li>{h}</li>)}
+          </ul>
+        </div>
+      ))
+    }
+  </article>
+</Base>
