@@ -12,7 +12,7 @@ import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
 import { updateCombat } from './combatSystem'
 import { desiredAnimName, hpEmCena } from './animationSystem'
-import { deslocamentoDoImpacto } from '@/render/reacaoAoGolpe'
+import { deslocamentoDaEsquiva, deslocamentoDoImpacto } from '@/render/reacaoAoGolpe'
 
 function cenario(golpeId: string, hpDoAlvo = 99999) {
   const rng = createRng(31)
@@ -120,5 +120,50 @@ describe('deslocamento da sprite', () => {
     expect(deslocamentoDoImpacto({ ...impacto, idade: 2 }, false)).toEqual({ dx: 0, dy: 0 })
     expect(deslocamentoDoImpacto({ ...impacto, idade: 0.13 }, true)).toEqual({ dx: 0, dy: 0 })
     expect(deslocamentoDoImpacto(undefined, false)).toEqual({ dx: 0, dy: 0 })
+  })
+})
+
+// Golpe que erra (23/11/2026, opcao A do brainstorm): so a cena muda.
+describe('golpe que erra na tela', () => {
+  function umErro() {
+    // Evasao +6 no alvo e Zap Cannon (50%): a precisao efetiva fica ~17%. Varre
+    // sementes ate achar um erro — o sorteio e deterministico por semente.
+    for (let semente = 0; semente < 40; semente++) {
+      const c = cenario('zap_cannon')
+      c.world.rng = createRng(semente)
+      c.enemy.estagios = { ...c.enemy.estagios, evasion: 6 }
+      updateCombat(c.world, 0)
+      if (!c.world.pendingHits.length) return c
+    }
+    throw new Error('nenhuma semente errou')
+  }
+
+  it('Errou! sai no instante do impacto, em cima do alvo', () => {
+    const { world, enemy } = umErro()
+    const aviso = world.effects.find((e) => e.type === 'abilityName' && e.text === 'Errou!')
+    expect(aviso?.ownerId).toBe(enemy.id)
+    expect(aviso!.delay).toBeGreaterThan(0)
+  })
+
+  it('o golpe sai e passa raspando, sem grudar no alvo; o alvo esquiva; quem atacou fica parado', () => {
+    const { world, enemy, player } = umErro()
+    const golpe = world.effects.find((e) => e.type === 'abilityEffect' && e.abilityId === 'zap_cannon')
+    expect(golpe).toBeDefined()
+    expect(golpe!.seguirId).toBeUndefined()
+    expect(Math.hypot(golpe!.x - enemy.x, golpe!.y - enemy.y)).toBeGreaterThan(15)
+    expect(enemy.esquivaVisual?.espera).toBeGreaterThan(0)
+    expect(player.travaDoGolpe ?? 0).toBeGreaterThan(0)
+    expect(world.effects.some((e) => e.type === 'damageNumber')).toBe(false)
+  })
+
+  it('a esquiva toca Hop e desloca a sprite pro lado no impacto', () => {
+    const { enemy } = umErro()
+    const v = enemy.esquivaVisual!
+    expect(deslocamentoDaEsquiva(v, false)).toEqual({ dx: 0, dy: 0 })
+    v.idade = v.espera + 0.2
+    const d = deslocamentoDaEsquiva(v, false)
+    expect(Math.hypot(d.dx, d.dy)).toBeGreaterThan(8)
+    expect(desiredAnimName(enemy)).toBe('Hop')
+    expect(deslocamentoDaEsquiva(v, true)).toEqual({ dx: 0, dy: 0 })
   })
 })

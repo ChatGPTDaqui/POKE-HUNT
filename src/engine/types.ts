@@ -146,6 +146,12 @@ export interface BaseEntity {
    * por `updateAnimations` (que congela o quadro no hitstop).
    */
   impactoVisual?: ImpactoVisual
+  /**
+   * So desenho: o golpe que mirava este POKE errou e ele esquiva pro lado no
+   * instante em que seria atingido (combatSystem#golpeErrouNaCena). `espera`
+   * = segundos ate o impacto; `angulo` = direcao do golpe; `lado` = +1/-1.
+   */
+  esquivaVisual?: { espera: number; idade: number; angulo: number; lado: number }
 
   /**
    * PH-397: este POKE esta girando na encarada do duelo NESTE tick.

@@ -13,6 +13,16 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.90',
+    date: '2026-11-23',
+    title: 'Golpes que erram agora aparecem',
+    highlights: [
+      'Quando um golpe erra, ele sai e passa raspando ao lado do alvo, e o alvo dá um pulinho para o lado.',
+      'O "Errou!" aparece em cima do alvo no instante em que o golpe acertaria, e não mais antes de o golpe sair.',
+      'Quem errou fica parado até o golpe terminar de passar. A chance de acerto não mudou.',
+    ],
+  },
+  {
     version: '8.89',
     date: '2026-11-23',
     title: 'Dojo com colisão refeita',
