@@ -11,6 +11,7 @@ import { getAbility } from '@/data/abilities'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
 import { updateCombat } from './combatSystem'
+import { desiredAnimName, hpEmCena } from './animationSystem'
 import { deslocamentoDoImpacto } from '@/render/reacaoAoGolpe'
 
 function cenario(golpeId: string, hpDoAlvo = 99999) {
@@ -58,6 +59,27 @@ describe('golpe de varios acertos: um numero por impacto', () => {
     expect(atrasos[0]).toBe(0)
     expect(atrasos[1]).toBeGreaterThan(0.1)
     expect(enemy.impactoVisual?.pulsos).toBe(2)
+  })
+
+  it('a barra (hpEmCena) cai um acerto por vez, no ritmo dos numeros', () => {
+    const { world, enemy } = cenario('double_kick')
+    updateCombat(world, 0)
+    // Avanca ate o 1o impacto pousar, sem chegar no 2o.
+    for (let t = 0; t < 2 && !enemy.impactoVisual; t += 1 / 60) updateCombat(world, 1 / 60)
+    const iv = enemy.impactoVisual!
+    expect(iv.danos).toHaveLength(2)
+    expect(hpEmCena(enemy)).toBe(enemy.poke.hp + iv.danos![1])
+    iv.idade = iv.intervalo + 0.001
+    expect(hpEmCena(enemy)).toBe(enemy.poke.hp)
+  })
+
+  it('derrota no meio da sequencia: o desmaio espera o ultimo acerto aparecer', () => {
+    const { enemy } = cenario('double_kick')
+    enemy.poke.hp = 0
+    enemy.impactoVisual = { grau: 3, angulo: 0, idade: 0.05, pulsos: 2, intervalo: 0.19, hitstop: 0.15, danos: [40, 30] }
+    expect(desiredAnimName(enemy)).toBe('Hurt')
+    enemy.impactoVisual.idade = 0.2
+    expect(desiredAnimName(enemy)).toBe('Faint')
   })
 })
 

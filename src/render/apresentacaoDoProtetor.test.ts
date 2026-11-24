@@ -20,6 +20,8 @@ function ctxEspiao() {
     save() {}, restore() {},
     fillText(texto: string) { escritas.push(texto) },
     strokeText() {},
+    fillRect() {}, clip() {}, // divisorias e brilho da barra de HP
+    createLinearGradient() { return { addColorStop() {} } },
     beginPath() {}, closePath() {}, stroke() {}, fill() {}, arc() {},
     moveTo(x: number) { ultimoMoveTo = { x } },
     arcTo(x: number) {

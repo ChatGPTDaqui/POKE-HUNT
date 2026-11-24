@@ -691,6 +691,12 @@ export interface ImpactoVisual {
   pulsos: number
   intervalo: number
   hitstop: number
+  /**
+   * HP que cada acerto tirou, na ordem. O motor aplica a sequencia inteira no
+   * primeiro impacto; o desenho mostra o acerto `i` so em `i * intervalo` —
+   * barra de HP e numero caem no ritmo dos impactos (`hpEmCena`).
+   */
+  danos?: number[]
 }
 
 export interface PendingHit {

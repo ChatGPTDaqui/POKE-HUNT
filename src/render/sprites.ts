@@ -10,12 +10,13 @@
 // id (ver engine/types.ts) — toda funcao que precisava do owner agora recebe
 // tambem `world` pra resolver o id numa entidade de verdade
 // (`resolveEffectOwner`), no lugar de `effect.owner` direto.
-import { directionRowFromFacing } from '@/engine/systems/animationSystem'
+import { directionRowFromFacing, hpEmCena } from '@/engine/systems/animationSystem'
 import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
 import { desenharVfxDeGolpe } from './vfx/desenharVfx'
 import { deslocamentoDoImpacto } from './reacaoAoGolpe'
+import { divisoriasDoHp } from '@/data/divisoriasDoHp'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
 import { footOffsetFraction } from '@/data/spriteFootOffsets'
@@ -24,7 +25,8 @@ import {
   alturaDaFonte, caixaDoNomeDeGolpe, caixaDoNumeroDeDano, caixaDoRotuloFixo, FONTE, medidorDoCanvas,
   resolverColunasDeTexto, type Caixa, type CaixaDeEfeito, type Janela, type Medidor,
 } from './textoDeCombate'
-import { hpBarFillColor } from '@/data/hpBar'
+import { COR_DO_RASTRO_DE_DANO, tonsDaBarraDeHp } from '@/data/hpBar'
+import { RastrosDoHp } from './rastroDoHp'
 import { AURA_COLORS } from '@/data/auraColors'
 import { colorForType } from '@/data/typeColors'
 import { rarityOf } from '@/data/rarity'
@@ -805,6 +807,23 @@ const PROTETOR_HP_BAR_HEIGHT_MULTIPLIER = 2
  */
 const COR_DA_PORCENTAGEM = '#ffffff'
 
+/**
+ * Divisorias por quantidade de HP, estilo LoL (data/divisoriasDoHp.ts): quanto
+ * mais vida, mais riscos. Fino = metade de cima da barra, forte = altura toda.
+ * 1 px, alinhados ao pixel inteiro pra nao borrar na pixel art.
+ */
+/** Rastro do dano de cada barra (so desenho; ver render/rastroDoHp.ts). */
+const rastrosDoHp = new RastrosDoHp()
+
+function desenharDivisoriasDoHp(
+  ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, hpMaximo: number,
+): void {
+  for (const { posicao, forte } of divisoriasDoHp(hpMaximo, width)) {
+    ctx.fillStyle = forte ? 'rgba(0, 0, 0, 0.75)' : 'rgba(0, 0, 0, 0.45)'
+    ctx.fillRect(Math.round(x + width * posicao), y, 1, forte ? height : Math.ceil(height / 2))
+  }
+}
+
 export function drawHpBar(
   ctx: CanvasRenderingContext2D, entity: WorldEntity, mostrarPorcentagem = false,
 ): void {
@@ -824,7 +843,9 @@ export function drawHpBar(
   const height = HP_BAR_HEIGHT * (barraGrande ? PROTETOR_HP_BAR_HEIGHT_MULTIPLIER : 1)
   const x = entity.x - width / 2
   const y = entity.y - visualTopOffset(entity) - 8 - height
-  const pct = Math.max(0, entity.poke.hp / maxHp(entity))
+  // `hpEmCena`, nao `poke.hp`: num golpe de varios acertos a barra cai um
+  // acerto por vez, junto do numero de dano (coreografia de batalha).
+  const pct = Math.max(0, hpEmCena(entity) / maxHp(entity))
 
   ctx.save()
   roundedRectPath(ctx, x, y, width, height, height / 2)
@@ -834,11 +855,32 @@ export function drawHpBar(
   ctx.lineWidth = 1
   ctx.stroke()
 
-  if (pct > 0) {
-    roundedRectPath(ctx, x, y, width * pct, height, height / 2)
-    ctx.fillStyle = hpBarFillColor(pct)
+  // Rastro do dano recente (claro), por baixo do preenchimento.
+  const rastro = rastrosDoHp.atualizar(entity.id, pct, performance.now() / 1000)
+  if (rastro > pct) {
+    roundedRectPath(ctx, x, y, width * rastro, height, height / 2)
+    ctx.fillStyle = COR_DO_RASTRO_DE_DANO
     ctx.fill()
   }
+
+  if (pct > 0) {
+    // Volume: degrade vertical (brilho em cima, sombra embaixo) e um fio de luz
+    // na primeira linha — a barra deixa de ser um bloco de cor chapada.
+    const tons = tonsDaBarraDeHp(pct)
+    const degrade = ctx.createLinearGradient(0, y, 0, y + height)
+    degrade.addColorStop(0, tons.topo)
+    degrade.addColorStop(0.45, tons.meio)
+    degrade.addColorStop(1, tons.base)
+    roundedRectPath(ctx, x, y, width * pct, height, height / 2)
+    ctx.fillStyle = degrade
+    ctx.fill()
+    ctx.save()
+    ctx.clip()
+    ctx.fillStyle = tons.luz
+    ctx.fillRect(x, y, width * pct, Math.max(1, Math.round(height * 0.2)))
+    ctx.restore()
+  }
+  desenharDivisoriasDoHp(ctx, x, y, width, height, maxHp(entity))
 
   // A porcentagem (PH-189). So no POKE do jogador e no alvo dele — quem decide
   // e o `Renderer`, que e quem conhece `player.targetId`. Escrever em todo mundo
