@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.87',
+    date: '2026-11-23',
+    title: 'Golpes de contato com investida',
+    highlights: [
+      'Em socos, chutes, mordidas, garras e investidas, o Pokémon agora avança até o alvo no momento do golpe e volta para o lugar, seguindo o tempo da arte de cada espécie.',
+      'Golpes de soltar ou canalizar (raios, cantos, gases) continuam no lugar. Com "reduzir movimento" ligado, ninguém avança.',
+    ],
+  },
+  {
     version: '8.86',
     date: '2026-11-23',
     title: 'Barra de HP nova',

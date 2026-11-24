@@ -1,6 +1,6 @@
 # Coreografia de batalha: auditoria e brainstorm (23/11/2026)
 
-Brainstorm. **Estado em 23/11/2026:** implementados A1–A6, P1, P2, P3 (sem congelar o atacante nem o VFX), P4 (só no desenho: o HP ainda cai inteiro no 1º impacto) e P7(a). Ficaram para depois: P5 (RushFrame/ReturnFrame), P6 (respiro "vivo") e P7(b).
+Brainstorm. **Estado em 23/11/2026:** implementados A1–A6, P1, P2, P3 (sem congelar o atacante nem o VFX), P4 (só no desenho: o HP ainda cai inteiro no 1º impacto) e P7(a). Depois: P4 virou barra por acerto (só desenho) e P5 virou a investida dos golpes de contato (render/avancoDoGolpe.ts). Ficaram para depois: P6 (respiro "vivo") e P7(b).
 
 Objetivo do dono: um combate agradável e fácil de assistir, com todas as sprites em harmonia dentro do turno de 3 s (`TURNO_SEGUNDOS`). Regras pedidas:
 

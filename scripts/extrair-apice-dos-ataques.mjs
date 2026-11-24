@@ -24,6 +24,9 @@ const SPRITE_ROOT = join(ACERVO, 'sprite')
 const ANIMS_TS_PATH = join(ROOT, 'src', 'data', 'battleSpriteAnims.ts')
 const POKES_GENERATED_PATH = join(ROOT, 'src', 'data', 'generated', 'pokes.generated.ts')
 const SAIDA = join(ROOT, 'src', 'data', 'generated', 'apiceDoAtaque.generated.ts')
+// 23/11/2026: <RushFrame> e <ReturnFrame> — onde a investida comeca e onde a
+// sprite volta. Tabela propria, lida so pelo desenho (render/avancoDoGolpe.ts).
+const SAIDA_INVESTIDA = join(ROOT, 'src', 'data', 'generated', 'investidaDoAtaque.generated.ts')
 // 18/10/2026: toda pose que um golpe pode tocar (engine/poseDoGolpe.ts), nao
 // so as tres de antes.
 const POSES = ['Shoot', 'Charge', 'Attack', 'Swing', 'Strike', 'SpAttack', 'Double', 'Rotate', 'Head', 'HitGround', 'Stomp', 'Kick',
@@ -39,9 +42,13 @@ function parseAnimData(xmlPath) {
     const nome = (bloco.match(/<Name>(.*?)<\/Name>/) || [])[1]
     if (!nome) continue
     const hit = (bloco.match(/<HitFrame>(\d+)<\/HitFrame>/) || [])[1]
+    const rush = (bloco.match(/<RushFrame>(\d+)<\/RushFrame>/) || [])[1]
+    const ret = (bloco.match(/<ReturnFrame>(\d+)<\/ReturnFrame>/) || [])[1]
     nodes[nome] = {
       copyOf: (bloco.match(/<CopyOf>(.*?)<\/CopyOf>/) || [])[1] || null,
       hitFrame: hit === undefined ? null : parseInt(hit, 10),
+      rushFrame: rush === undefined ? null : parseInt(rush, 10),
+      returnFrame: ret === undefined ? null : parseInt(ret, 10),
       durations: [...bloco.matchAll(/<Duration>(\d+)<\/Duration>/g)].map((m) => parseInt(m[1], 10)),
     }
   }
@@ -74,6 +81,7 @@ function main() {
   const dex = dexPorEspecie()
 
   const saida = {}
+  const investida = {}
   const faltas = []
   for (const id of Object.keys(anims).sort()) {
     const n = dex[id]
@@ -88,6 +96,16 @@ function main() {
       if (node.durations.join(',') !== nosso.durations.join(',')) { faltas.push(`${id}.${pose} (duracoes divergem)`); continue }
       if (node.hitFrame < 0 || node.hitFrame >= nosso.durations.length) { faltas.push(`${id}.${pose} (HitFrame fora)`); continue }
       ;(saida[id] ??= {})[pose] = node.hitFrame
+      // Investida [rush, return]: so quando o acervo marca pelo menos um dos
+      // dois (sem marca, a pose e "no lugar"). Ausente, vale o padrao do PMD:
+      // rush = 1o quadro, return = ultimo.
+      if (node.rushFrame != null || node.returnFrame != null) {
+        const rush = node.rushFrame ?? 0
+        const ret = node.returnFrame ?? nosso.durations.length - 1
+        if (rush <= node.hitFrame && node.hitFrame <= ret && ret < nosso.durations.length) {
+          ;(investida[id] ??= {})[pose] = [rush, ret]
+        } else faltas.push(`${id}.${pose} (investida fora de ordem)`)
+      }
     }
   }
 
@@ -99,6 +117,18 @@ import type { AnimName } from '@/data/battleSpriteAnims'
 // Especie/pose ausente: o motor estima (ver engine/tempoDoGolpe.ts).
 export const APICE_DO_ATAQUE: Record<string, Partial<Record<AnimName, number>>> = ${corpo}
 `)
+  const corpoInvestida = JSON.stringify(investida).replace(/\]\},"/g, ']},\n  "').replace(/^\{/, '{\n  ').replace(/\}$/, '\n}')
+  writeFileSync(SAIDA_INVESTIDA, `// GERADO por scripts/extrair-apice-dos-ataques.mjs — nao editar a mao.
+import type { AnimName } from '@/data/battleSpriteAnims'
+
+// [RushFrame, ReturnFrame] (0-based) de cada pose de ataque do acervo PMD. No
+// jogo original o MOTOR move a sprite: avanca de RushFrame ate o apice
+// (HitFrame, apiceDoAtaque.generated.ts) e volta a partir de ReturnFrame — a
+// arte em si fica no lugar. Ausente: a pose nao tem investida.
+export const INVESTIDA_DO_ATAQUE: Record<string, Partial<Record<AnimName, readonly [number, number]>>> = ${corpoInvestida}
+`)
+  const comInvestida = Object.values(investida).reduce((s, p) => s + Object.keys(p).length, 0)
+  console.log(`investidas: ${comInvestida}`)
   const total = Object.values(saida).reduce((s, p) => s + Object.keys(p).length, 0)
   console.log(`apices: ${total} (especies: ${Object.keys(saida).length}); faltas: ${faltas.length}`)
   if (faltas.length) console.log(faltas.slice(0, 30).join('\n'))
