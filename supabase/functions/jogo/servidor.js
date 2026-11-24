@@ -155116,10 +155116,10 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 				targetY: enemy.y,
 				ballItemId: captureResult.ballItemId,
 				success: captureResult.success,
-				delay: 3,
+				delay: 2,
 				duration: duracao
 			}));
-			atrasoDoToastMs = (3 + duracao) * 1e3;
+			atrasoDoToastMs = (2 + duracao) * 1e3;
 		}
 		if (captureResult) {
 			const dispararToastDeCaptura = () => {
