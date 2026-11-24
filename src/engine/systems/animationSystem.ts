@@ -79,7 +79,10 @@ export function directionRowFromFacing(facing: Point): number {
 }
 
 export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
-  if (isDead(entity)) return 'Faint'
+  // Golpe de varios acertos: o motor ja derrubou o HP, mas a cena ainda mostra
+  // acertos por cair. O desmaio espera o ultimo numero, senao o POKE caia
+  // com a barra ainda cheia e levava os acertos restantes ja no chao.
+  if (isDead(entity)) return danoAindaPorMostrar(entity.impactoVisual) > 0 ? 'Hurt' : 'Faint'
   // PH-552: pose da abertura do duelo (ameaca/habilidade de entrada). Acima
   // do sono de proposito: quem acabou de sair da bola esta se apresentando, e
   // a apresentacao e o que o jogador esta olhando.
@@ -325,9 +328,25 @@ export function duracaoDoImpactoVisual(i: ImpactoVisual): number {
  * acertos de um golpe multiplo (um tremor por numero de dano), `intervalo` o
  * espaco entre eles.
  */
+/** HP dos acertos que o desenho ainda nao mostrou (golpe de varios acertos). */
+export function danoAindaPorMostrar(i: ImpactoVisual | undefined): number {
+  if (!i?.danos) return 0
+  let resta = 0
+  for (let k = 1; k < i.danos.length; k++) if (k * i.intervalo > i.idade) resta += i.danos[k]
+  return resta
+}
+
+/**
+ * O HP que a CENA mostra: o do motor mais os acertos ainda por cair. So
+ * desenho — barra, porcentagem e a espera do desmaio leem isto; nenhuma regra.
+ */
+export function hpEmCena(entity: { poke: { hp: number; stats: { hp: number } }; impactoVisual?: ImpactoVisual }): number {
+  return Math.min(entity.poke.stats.hp, entity.poke.hp + danoAindaPorMostrar(entity.impactoVisual))
+}
+
 export function registrarImpactoVisual(
   alvo: PlayerEntity | EnemyEntity, origem: Point | null, grau: GrauDoImpacto,
-  opcoes: { pulsos?: number; intervalo?: number; hitstop?: number } = {},
+  opcoes: { pulsos?: number; intervalo?: number; hitstop?: number; danos?: number[] } = {},
 ): void {
   const dx = origem ? alvo.x - origem.x : 0
   const dy = origem ? alvo.y - origem.y : 0
@@ -338,5 +357,6 @@ export function registrarImpactoVisual(
     pulsos: Math.max(1, opcoes.pulsos ?? 1),
     intervalo: opcoes.intervalo ?? 0,
     hitstop: opcoes.hitstop ?? 0,
+    danos: opcoes.danos && opcoes.danos.length > 1 ? opcoes.danos : undefined,
   }
 }

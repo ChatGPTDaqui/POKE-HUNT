@@ -10,7 +10,7 @@
 // id (ver engine/types.ts) — toda funcao que precisava do owner agora recebe
 // tambem `world` pra resolver o id numa entidade de verdade
 // (`resolveEffectOwner`), no lugar de `effect.owner` direto.
-import { directionRowFromFacing } from '@/engine/systems/animationSystem'
+import { directionRowFromFacing, hpEmCena } from '@/engine/systems/animationSystem'
 import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
@@ -805,6 +805,22 @@ const PROTETOR_HP_BAR_HEIGHT_MULTIPLIER = 2
  */
 const COR_DA_PORCENTAGEM = '#ffffff'
 
+/** Cada divisoria marca 10% do HP maximo (pedido do dono, 23/11/2026). */
+export const FRACAO_DA_DIVISORIA_DO_HP = 0.1
+
+/**
+ * As 9 divisorias da barra de HP. Riscos escuros de 1 px na altura toda, por
+ * cima do preenchimento e do fundo: o jogador conta "quantos 10% sobraram" sem
+ * ler numero. Alinhados ao pixel inteiro pra nao borrar na pixel art.
+ */
+function desenharDivisoriasDoHp(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number): void {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
+  const passos = Math.round(1 / FRACAO_DA_DIVISORIA_DO_HP)
+  for (let k = 1; k < passos; k++) {
+    ctx.fillRect(Math.round(x + width * k * FRACAO_DA_DIVISORIA_DO_HP), y, 1, height)
+  }
+}
+
 export function drawHpBar(
   ctx: CanvasRenderingContext2D, entity: WorldEntity, mostrarPorcentagem = false,
 ): void {
@@ -824,7 +840,9 @@ export function drawHpBar(
   const height = HP_BAR_HEIGHT * (barraGrande ? PROTETOR_HP_BAR_HEIGHT_MULTIPLIER : 1)
   const x = entity.x - width / 2
   const y = entity.y - visualTopOffset(entity) - 8 - height
-  const pct = Math.max(0, entity.poke.hp / maxHp(entity))
+  // `hpEmCena`, nao `poke.hp`: num golpe de varios acertos a barra cai um
+  // acerto por vez, junto do numero de dano (coreografia de batalha).
+  const pct = Math.max(0, hpEmCena(entity) / maxHp(entity))
 
   ctx.save()
   roundedRectPath(ctx, x, y, width, height, height / 2)
@@ -839,6 +857,7 @@ export function drawHpBar(
     ctx.fillStyle = hpBarFillColor(pct)
     ctx.fill()
   }
+  desenharDivisoriasDoHp(ctx, x, y, width, height)
 
   // A porcentagem (PH-189). So no POKE do jogador e no alvo dele — quem decide
   // e o `Renderer`, que e quem conhece `player.targetId`. Escrever em todo mundo

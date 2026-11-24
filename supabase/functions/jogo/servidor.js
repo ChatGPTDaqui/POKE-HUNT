@@ -144304,7 +144304,7 @@ function duracaoDoHurt(speciesId) {
 	return Math.max(HURT_ANIM_DURATION, arte.durations.reduce((s, d) => s + d, 0) / 60);
 }
 function desiredAnimName(entity) {
-	if (isDead(entity)) return "Faint";
+	if (isDead(entity)) return danoAindaPorMostrar(entity.impactoVisual) > 0 ? "Hurt" : "Faint";
 	if (entity.animOverride) return entity.animOverride;
 	if (entity.attackAnimTimer > 0) return entity.attackAnim;
 	if (entity.poke.status?.tipo === "sleep") return "Sleep";
@@ -144441,6 +144441,13 @@ function duracaoDoImpactoVisual(i) {
 * acertos de um golpe multiplo (um tremor por numero de dano), `intervalo` o
 * espaco entre eles.
 */
+/** HP dos acertos que o desenho ainda nao mostrou (golpe de varios acertos). */
+function danoAindaPorMostrar(i) {
+	if (!i?.danos) return 0;
+	let resta = 0;
+	for (let k = 1; k < i.danos.length; k++) if (k * i.intervalo > i.idade) resta += i.danos[k];
+	return resta;
+}
 function registrarImpactoVisual(alvo, origem, grau, opcoes = {}) {
 	const dx = origem ? alvo.x - origem.x : 0;
 	const dy = origem ? alvo.y - origem.y : 0;
@@ -144450,7 +144457,8 @@ function registrarImpactoVisual(alvo, origem, grau, opcoes = {}) {
 		idade: 0,
 		pulsos: Math.max(1, opcoes.pulsos ?? 1),
 		intervalo: opcoes.intervalo ?? 0,
-		hitstop: opcoes.hitstop ?? 0
+		hitstop: opcoes.hitstop ?? 0,
+		danos: opcoes.danos && opcoes.danos.length > 1 ? opcoes.danos : void 0
 	};
 }
 //#endregion
@@ -151549,6 +151557,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	let grauVisual = 0;
 	let hitstopVisual = 0;
 	let pulsosVisuais = 0;
+	const danosDosPulsos = [];
 	const intervaloDosAcertos = intervaloEntreAcertos(ability.id);
 	for (let acerto = 0; acerto < acertos; acerto++) {
 		if (acerto > 0 && isDead(target)) break;
@@ -151570,7 +151579,9 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		danoCausado += Math.min(danoDoAcerto, target.poke.hp);
 		danoFinal += danoDoAcerto;
 		if (danoDoAcerto > 0) {
+			const hpAntes = target.poke.hp;
 			takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke));
+			danosDosPulsos.push(hpAntes - target.poke.hp);
 			const detalhe = {
 				critico: result.isCrit,
 				superEfetivo: result.effectiveness === "super" || result.effectiveness === "effective"
@@ -151594,7 +151605,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	if (!silent && grauVisual !== 0) registrarImpactoVisual(target, attacker, grauVisual, {
 		pulsos: pulsosVisuais,
 		intervalo: intervaloDosAcertos,
-		hitstop: hitstopVisual
+		hitstop: hitstopVisual,
+		danos: danosDosPulsos
 	});
 	if (danoFinal > 0 && !isDead(target)) {
 		const traitDoAlvo = traitsDoConfronto(attacker, target).defensor;
