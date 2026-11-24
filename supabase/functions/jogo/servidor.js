@@ -144286,6 +144286,10 @@ function grauDoImpacto(dano, hpMaximo, detalhe = {}) {
 	if (detalhe.critico || detalhe.superEfetivo) grau += 1;
 	return Math.min(3, grau);
 }
+function estaEsquivando(e) {
+	const v = e.esquivaVisual;
+	return v != null && v.idade >= v.espera && v.idade < v.espera + .4;
+}
 function hitstopDoImpacto(grau, critico, derrota) {
 	if (derrota) return HITSTOP_DE_DERROTA;
 	if (grau < 3) return 0;
@@ -144309,6 +144313,7 @@ function desiredAnimName(entity) {
 	if (entity.attackAnimTimer > 0) return entity.attackAnim;
 	if (entity.poke.status?.tipo === "sleep") return "Sleep";
 	if ((entity.hurtAnimTimer ?? 0) > 0) return "Hurt";
+	if (estaEsquivando(entity)) return "Hop";
 	if (imobilizadoPorStatus(entity)) return "Idle";
 	if (entity.encarando) return "Walk";
 	if ((entity.travaDoGolpe ?? 0) > 0) return "Idle";
@@ -144348,6 +144353,10 @@ function tickAttackAnimTimers(world, dt) {
 			const resta = entity.hurtAnimTimer - dt;
 			if (resta > 0) entity.hurtAnimTimer = resta;
 			else delete entity.hurtAnimTimer;
+		}
+		if (entity.esquivaVisual) {
+			entity.esquivaVisual.idade += dt;
+			if (entity.esquivaVisual.idade >= entity.esquivaVisual.espera + .4) delete entity.esquivaVisual;
 		}
 		if (entity.impactoVisual) {
 			entity.impactoVisual.idade += dt;
@@ -148252,6 +148261,9 @@ function tempoDoGolpe(speciesId, kind, abilityId) {
 	};
 }
 //#endregion
+//#region src/data/textoDoErro.ts
+var TEXTO_DO_ERRO = "Errou!";
+//#endregion
 //#region src/engine/systems/climaAmbiente.ts
 /**
 * Identidade da sala DENTRO da sessao. `indice` sozinho nao serve: ele volta a
@@ -151102,18 +151114,65 @@ function golpeErrou(rng, ability, atacante, defensor, clima = null) {
 	if (precisaoEfetiva >= 100) return false;
 	return nextFloat(rng) * 100 >= precisaoEfetiva;
 }
-function anunciarErro(world, atacante) {
+/**
+* O "Errou!" sai no INSTANTE em que o golpe acertaria (`tempo.impacto`) e em
+* cima de quem ele mirava — igual ao numero de dano (coreografia, 23/11/2026).
+* Antes saia no disparo, nos pes de quem atacou, antes de o golpe existir.
+*/
+function anunciarErro(world, sobreQuem, delay) {
 	world.effects.push(createWorldEffect(world.counters, {
 		type: "abilityName",
-		x: atacante.x,
-		y: atacante.y,
-		targetX: atacante.x,
-		targetY: atacante.y + getGroundOffset(atacante) + 14,
-		text: "Errou!",
-		color: "#94a3b8",
-		duration: .7,
-		owner: atacante
+		x: sobreQuem.x,
+		y: sobreQuem.y,
+		targetX: sobreQuem.x,
+		targetY: sobreQuem.y - sobreQuem.radius - 40,
+		text: TEXTO_DO_ERRO,
+		color: "#cbd5e1",
+		delay,
+		duration: .9,
+		owner: sobreQuem
 	}));
+}
+/** Quanto o golpe que errou passa ao lado do alvo (px de mundo). */
+var DESVIO_DO_GOLPE_QUE_ERRA = 22;
+/**
+* GOLPE QUE ERRA NA TELA (23/11/2026, opcao A do brainstorm). O sorteio continua
+* no disparo (determinismo, servidor igual); so a cena muda:
+*  - quem atacou fica parado ate o golpe "passar" (`travaDoGolpe`, sim tambem
+*    no servidor — mesmo caminho do acerto);
+*  - o VFX de dano de alvo unico sai e passa RASPANDO ao lado do alvo;
+*  - o alvo esquiva pro lado no instante do impacto (`esquivaVisual`);
+*  - "Errou!" aparece em cima do alvo nesse mesmo instante.
+* Golpe em area que erra: so o "Errou!" sobre quem lancou.
+*/
+function golpeErrouNaCena(world, atacante, alvo, ability, tempo, silent) {
+	travarAteOGolpeAcabar(atacante, ability, tempo);
+	if (silent) return;
+	const unico = ability.target !== "aoe" && alvo != null && alvo.id !== atacante.id;
+	anunciarErro(world, unico ? alvo : atacante, tempo.impacto);
+	if (!unico) return;
+	const angulo = Math.atan2(alvo.y - atacante.y, alvo.x - atacante.x);
+	const lado = world.counters.effect % 2 === 0 ? 1 : -1;
+	const px = -Math.sin(angulo) * lado, py = Math.cos(angulo) * lado;
+	if (ability.power > 0) {
+		const efeito = efeitoDoGolpeUnico(atacante, alvo, ability, { delay: tempo.apice });
+		const dx = px * DESVIO_DO_GOLPE_QUE_ERRA + Math.cos(angulo) * 10;
+		const dy = py * DESVIO_DO_GOLPE_QUE_ERRA + Math.sin(angulo) * 10;
+		world.effects.push(createWorldEffect(world.counters, {
+			...efeito,
+			x: efeito.x + dx,
+			y: efeito.y + dy,
+			targetX: (efeito.targetX ?? efeito.x) + dx,
+			targetY: (efeito.targetY ?? efeito.y) + dy,
+			seguir: null
+		}));
+	}
+	alvo.esquivaVisual = {
+		espera: tempo.impacto,
+		idade: 0,
+		angulo,
+		lado
+	};
 }
 function statusImpedeAcao(world, entity, silent) {
 	if ((entity.atracaoRestante ?? 0) > 0 && nextFloat(world.rng) < .5) {
@@ -151201,7 +151260,7 @@ function executePlayerAction(world, player, engagedEnemies, silent, golpeEscolhi
 	if (miraGarantida) player.miraGarantidaAlvoId = null;
 	if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget, world.clima?.tipo ?? null)) {
 		armarCooldown(player, ability, world);
-		if (!silent) anunciarErro(world, player);
+		golpeErrouNaCena(world, player, primaryTarget, ability, tempo, silent);
 		return;
 	}
 	const targets = ability.target === "aoe" ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0)) : [engagedEnemies[0]].filter(Boolean);
@@ -151231,7 +151290,7 @@ function executeEnemyAction(world, enemy, player, silent, golpeEscolhido = null)
 	if (miraGarantida) enemy.miraGarantidaAlvoId = null;
 	if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player, world.clima?.tipo ?? null)) {
 		armarCooldown(enemy, ability, world);
-		if (!silent) anunciarErro(world, enemy);
+		golpeErrouNaCena(world, enemy, player, ability, tempo, silent);
 		return;
 	}
 	travarAteOGolpeAcabar(enemy, ability, tempo);

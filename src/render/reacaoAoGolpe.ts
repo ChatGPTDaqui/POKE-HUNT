@@ -11,7 +11,7 @@
 //
 // Puro: depende so do `impactoVisual` e do `reduzido`, pra ter teste sem canvas.
 import type { ImpactoVisual } from '@/engine/types'
-import { DURACAO_DO_TREMOR } from '@/engine/systems/animationSystem'
+import { DURACAO_DA_ESQUIVA, DURACAO_DO_TREMOR } from '@/engine/systems/animationSystem'
 
 /** Pixels de mundo por grau (indice = grau). */
 export const RECUO_POR_GRAU = [0, 1.5, 4, 8] as const
@@ -24,6 +24,25 @@ const FREQUENCIA_DO_TREMOR = 28
 
 export interface Deslocamento { dx: number; dy: number }
 const PARADO: Deslocamento = Object.freeze({ dx: 0, dy: 0 })
+
+/** Quanto o POKE sai pro lado (e sobe) na esquiva de um golpe que errou. */
+export const PASSO_DA_ESQUIVA = 12
+export const PULO_DA_ESQUIVA = 6
+
+/**
+ * Esquiva de um golpe que errou: um pulinho pro lado, perpendicular ao golpe,
+ * que vai e volta em DURACAO_DA_ESQUIVA a partir do instante do impacto.
+ */
+export function deslocamentoDaEsquiva(
+  v: { espera: number; idade: number; angulo: number; lado: number } | undefined, reduzido: boolean,
+): Deslocamento {
+  if (!v || reduzido || v.idade < v.espera) return PARADO
+  const u = (v.idade - v.espera) / DURACAO_DA_ESQUIVA
+  if (u >= 1) return PARADO
+  const arco = Math.sin(Math.PI * u)
+  const px = -Math.sin(v.angulo) * v.lado, py = Math.cos(v.angulo) * v.lado
+  return { dx: px * PASSO_DA_ESQUIVA * arco, dy: py * PASSO_DA_ESQUIVA * arco * 0.6 - PULO_DA_ESQUIVA * arco }
+}
 
 export function deslocamentoDoImpacto(i: ImpactoVisual | undefined, reduzido: boolean): Deslocamento {
   if (!i || reduzido) return PARADO

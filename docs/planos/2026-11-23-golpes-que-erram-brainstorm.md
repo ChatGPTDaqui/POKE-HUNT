@@ -1,6 +1,6 @@
 # Golpes que erram: auditoria e brainstorm (23/11/2026)
 
-Brainstorm, não decisão. Nada aqui foi implementado.
+Brainstorm. **Estado em 23/11/2026:** o dono escolheu só a camada A (visual), com o texto sempre "Errou!" (A5 descartado). A1–A4 implementados; nenhuma regra de B.
 
 Pedido do dono: "precisamos fazer alguma coisa sobre os ataques que erram".
 

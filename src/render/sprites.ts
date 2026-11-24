@@ -15,8 +15,9 @@ import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
 import { desenharVfxDeGolpe } from './vfx/desenharVfx'
-import { deslocamentoDoImpacto } from './reacaoAoGolpe'
+import { deslocamentoDaEsquiva, deslocamentoDoImpacto } from './reacaoAoGolpe'
 import { avancoDoGolpe } from './avancoDoGolpe'
+import { TEXTO_DO_ERRO } from '@/data/textoDoErro'
 import { divisoriasDoHp } from '@/data/divisoriasDoHp'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
@@ -322,7 +323,8 @@ export function definirMovimentoReduzidoNoCorpo(reduzido: boolean): void {
 function deslocamentoDoCorpo(entity: WorldEntity): { dx: number; dy: number } {
   const reacao = deslocamentoDoImpacto(entity.impactoVisual, movimentoReduzidoNoCorpo)
   const investida = avancoDoGolpe(entity, movimentoReduzidoNoCorpo)
-  return { dx: reacao.dx + investida.dx, dy: reacao.dy + investida.dy }
+  const esquiva = deslocamentoDaEsquiva(entity.esquivaVisual, movimentoReduzidoNoCorpo)
+  return { dx: reacao.dx + investida.dx + esquiva.dx, dy: reacao.dy + investida.dy + esquiva.dy }
 }
 
 function drawBattleSprite(ctx: CanvasRenderingContext2D, entity: WorldEntity): boolean {
@@ -1929,7 +1931,9 @@ function effectAnchor(effect: WorldEffect, world: WorldState): { x: number; y: n
  */
 function ancoraDoTexto(effect: WorldEffect, world: WorldState): { x: number; y: number } {
   const ancora = effectAnchor(effect, world)
-  if (effect.type === 'damageNumber') {
+  // "Errou!" sobe acima da cabeca do alvo, igual ao numero de dano — nos pes
+  // ele ficava coberto pelo golpe que passa raspando.
+  if (effect.type === 'damageNumber' || (effect.type === 'abilityName' && effect.text === TEXTO_DO_ERRO)) {
     return { x: ancora.x, y: ancora.y - SUBIDA_DO_NUMERO * effectProgress(effect) }
   }
   // Nome do golpe: centrado EMBAIXO DOS PES de quem usou (02/10). Sem dono ele
@@ -2158,6 +2162,8 @@ const PLACA_DO_GOLPE_FOLGA_Y = 2
 function drawAbilityName(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState, desvio = 0,
 ): void {
+  // "Errou!" espera o instante do impacto (combatSystem#anunciarErro).
+  if (effect.age < effect.delay) return
   const progress = effectProgress(effect)
   const alpha = progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3
   const anchor = ancoraDoTexto(effect, world)
