@@ -1,7 +1,7 @@
 // O treinador em campo: segue o POKE como GENTE, a 3 quadrados (09/10).
 import { describe, expect, it, vi } from 'vitest'
 import { quadroDaSkin, SKINS_DO_TREINADOR } from '@/data/skinsDoTreinador'
-import { ESPACO_DO_TREINADOR, TreinadorEmCampo, lugarNoDuelo, pontoAtras } from './treinadorEmCampo'
+import { ALTURA_DO_BONECO, ESPACO_DO_TREINADOR, TreinadorEmCampo, lugarNoDuelo, pontoAtras } from './treinadorEmCampo'
 
 const RAIO = 12
 const DT = 1 / 60
@@ -76,7 +76,7 @@ describe('TreinadorEmCampo: seguidor de gente (09/10)', () => {
         expect(drawImage).toHaveBeenCalledOnce()
         const args = drawImage.mock.calls[0]
         expect(args.slice(3, 5)).toEqual([g.frameWidth, g.frameHeight])
-        const k = 30 / g.bodyHeight
+        const k = ALTURA_DO_BONECO / g.bodyHeight
         expect(translate).toHaveBeenCalledWith(200, 200)
         const [sx, sy] = scale.mock.calls[0]
         expect(Math.abs(sx - 1)).toBeLessThan(0.03)
@@ -183,7 +183,7 @@ describe('TreinadorEmCampo: seguidor de gente (09/10)', () => {
     t.desenhar(ctx)
     expect(textos).toHaveLength(1)
     expect(textos[0].texto).toBe('Ash')
-    expect(textos[0].y).toBeLessThan(t.pe!.y - 30)
+    expect(textos[0].y).toBeLessThan(t.pe!.y - ALTURA_DO_BONECO)
   })
 
   it('caminhada conserva a cadência: um quadro a cada ~10 px andados pelo TREINADOR', () => {
