@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.91',
+    date: '2026-11-24',
+    title: 'Treinador do tamanho certo',
+    highlights: [
+      'O treinador em campo ficou menor, na altura de um Pokémon médio, e não aparece mais maior que Charizard ou Snorlax.',
+    ],
+  },
+  {
     version: '8.90',
     date: '2026-11-23',
     title: 'Golpes que erram agora aparecem',

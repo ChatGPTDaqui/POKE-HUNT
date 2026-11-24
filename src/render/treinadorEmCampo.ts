@@ -72,8 +72,14 @@ const DO_CENTRO_AO_CHAO = 8
 /** Salto maior que isto num quadro (troca de sala, reconstrucao) reposiciona sem andar. */
 const SALTO = 120
 
-/** Altura do boneco (px), do pe ao topo do bone. */
-const ALTURA_DO_BONECO = 30
+/**
+ * Altura do boneco (px de mundo), do pe ao topo do bone. Era 30 — maior que
+ * quase todo POKE em campo (altura visivel mediana das 380 artes Idle: 23 px;
+ * Charizard 26, Snorlax 27). Pedido do dono (24/11/2026): "mais proporcional em
+ * relacao aos pokemons". 22 fica na altura de um POKE medio (Charmander,
+ * Rattata). Nome, sombra e a mao que solta a Pokebola seguem esta altura.
+ */
+export const ALTURA_DO_BONECO = 22
 /** Cor do nome do treinador: azul claro, pra nao confundir com o nome dos POKE (branco/raridade). */
 const COR_DO_NOME = '#9fd8ff'
 /**
