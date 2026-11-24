@@ -16,6 +16,7 @@ import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
 import { desenharVfxDeGolpe } from './vfx/desenharVfx'
 import { deslocamentoDoImpacto } from './reacaoAoGolpe'
+import { avancoDoGolpe } from './avancoDoGolpe'
 import { divisoriasDoHp } from '@/data/divisoriasDoHp'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
@@ -317,13 +318,21 @@ export function definirMovimentoReduzidoNoCorpo(reduzido: boolean): void {
   movimentoReduzidoNoCorpo = reduzido
 }
 
+/** Quanto a sprite (e a sombra) saem do lugar neste quadro: reacao ao golpe + investida. */
+function deslocamentoDoCorpo(entity: WorldEntity): { dx: number; dy: number } {
+  const reacao = deslocamentoDoImpacto(entity.impactoVisual, movimentoReduzidoNoCorpo)
+  const investida = avancoDoGolpe(entity, movimentoReduzidoNoCorpo)
+  return { dx: reacao.dx + investida.dx, dy: reacao.dy + investida.dy }
+}
+
 function drawBattleSprite(ctx: CanvasRenderingContext2D, entity: WorldEntity): boolean {
   const frame = currentFrameSource(entity)
   if (!frame) return false
 
   const caixa = spriteBounds(entity)!
   // Tremor/recuo de quem levou o golpe — so a sprite se mexe, nao o corpo.
-  const { dx, dy } = deslocamentoDoImpacto(entity.impactoVisual, movimentoReduzidoNoCorpo)
+  // + investida do proprio golpe (RushFrame/ReturnFrame do PMD).
+  const { dx, dy } = deslocamentoDoCorpo(entity)
   const bounds = dx === 0 && dy === 0 ? caixa : { ...caixa, x: caixa.x + dx, y: caixa.y + dy }
 
   ctx.save()
@@ -471,10 +480,12 @@ function drawShadow(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
     ? entity.battleAnim.frameWidth * effectiveScale(entity)
     : entity.radius * 2
   const rx = baseWidth * 0.32
+  // A sombra acompanha a investida (o corpo vai junto do chao), nao o tremor.
+  const investida = avancoDoGolpe(entity, movimentoReduzidoNoCorpo)
   ctx.save()
   ctx.fillStyle = 'rgba(0, 0, 0, 0.35)'
   ctx.beginPath()
-  ctx.ellipse(entity.x, groundY - 1, rx, rx * 0.35, 0, 0, Math.PI * 2)
+  ctx.ellipse(entity.x + investida.dx, groundY - 1 + investida.dy, rx, rx * 0.35, 0, 0, Math.PI * 2)
   ctx.fill()
   ctx.restore()
 }
