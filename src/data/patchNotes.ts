@@ -13,6 +13,33 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.90',
+    date: '2026-11-23',
+    title: 'Golpes que erram agora aparecem',
+    highlights: [
+      'Quando um golpe erra, ele sai e passa raspando ao lado do alvo, e o alvo dá um pulinho para o lado.',
+      'O "Errou!" aparece em cima do alvo no instante em que o golpe acertaria, e não mais antes de o golpe sair.',
+      'Quem errou fica parado até o golpe terminar de passar. A chance de acerto não mudou.',
+    ],
+  },
+  {
+    version: '8.89',
+    date: '2026-11-23',
+    title: 'Dojo com colisão refeita',
+    highlights: [
+      'No Dojo, os Pokémon não atravessam mais bonecos de treino, lanternas, suportes de armas, bancos, estátuas, estandartes nem as encostas de terra.',
+      'Caminhos, praças e arenas continuam livres e ligados entre si.',
+    ],
+  },
+  {
+    version: '8.88',
+    date: '2026-11-23',
+    title: 'Pokébola de captura mais rápida',
+    highlights: [
+      'A Pokébola de captura agora chega ao Pokémon 2 segundos depois da derrota (antes eram 3).',
+    ],
+  },
+  {
     version: '8.87',
     date: '2026-11-23',
     title: 'Golpes de contato com investida',

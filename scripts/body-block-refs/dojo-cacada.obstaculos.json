@@ -1,0 +1,52 @@
+{
+  "_comentario": "Obstaculos do Dojo (cacada), em px de uma previa 1024x1024 da arte assets/hunt-backgrounds/dojo.jpg. Aplicar: node scripts/aplicar-obstaculos-na-referencia.mjs dojo-cacada",
+  "previa": 1024,
+  "obstaculos": [
+    { "_": "jardim zen: pedras e estatuas", "ret": [126, 150, 154, 196] },
+    { "ret": [96, 186, 126, 222] },
+    { "ret": [84, 226, 112, 252] },
+    { "ret": [150, 228, 182, 254] },
+    { "_": "cerca do jardim", "ret": [76, 252, 188, 270] },
+
+    { "_": "patio de treino: suporte de armas e bonecos", "ret": [342, 286, 388, 334] },
+    { "ret": [310, 337, 334, 380] },
+    { "ret": [352, 360, 376, 402] },
+    { "ret": [392, 337, 416, 380] },
+    { "ret": [310, 390, 334, 432] },
+    { "ret": [392, 390, 416, 432] },
+    { "_": "bonsai em vaso, lado do patio", "ret": [232, 384, 280, 440] },
+
+    { "_": "praca do dojo: cerejeira, lanternas, banco, vaso, estatuas, estandartes", "elipse": [520, 330, 32, 36] },
+    { "ret": [464, 370, 484, 418] },
+    { "ret": [484, 394, 522, 414] },
+    { "ret": [524, 366, 562, 414] },
+    { "ret": [562, 380, 610, 416] },
+    { "ret": [670, 370, 692, 418] },
+    { "ret": [672, 302, 692, 362] },
+    { "ret": [768, 302, 792, 362] },
+    { "ret": [748, 370, 770, 418] },
+    { "_": "cerca de madeira da praca direita", "ret": [856, 384, 906, 418] },
+    { "_": "pe da cerejeira do canto do dojo", "elipse": [966, 98, 34, 34] },
+
+    { "_": "encosta de terra entre a praca e a arena do centro", "linha": [[438, 470], [520, 462], [600, 462], [660, 470]], "espessura": 22 },
+    { "_": "suportes de armas e estandartes acima da arena", "ret": [566, 482, 632, 536] },
+    { "ret": [536, 482, 558, 540] },
+    { "ret": [636, 482, 658, 528] },
+    { "_": "postes abaixo da arena", "ret": [456, 666, 532, 700] },
+    { "_": "lanterna junto da ponte", "ret": [538, 712, 562, 762] },
+
+    { "_": "meio-esquerdo: cerejeiras, suportes e tocha", "elipse": [280, 548, 32, 34] },
+    { "elipse": [342, 576, 34, 38] },
+    { "ret": [206, 556, 312, 606] },
+    { "ret": [188, 572, 206, 606] },
+    { "_": "encosta de terra do meio-esquerdo", "linha": [[402, 552], [372, 600], [384, 652], [362, 704], [372, 760], [348, 800]], "espessura": 26 },
+    { "_": "cerca e suportes de baixo, lanternas, arvore", "ret": [260, 754, 336, 792] },
+    { "ret": [198, 798, 334, 852] },
+    { "ret": [170, 798, 192, 852] },
+    { "ret": [378, 748, 400, 832] },
+    { "elipse": [360, 830, 24, 32] },
+
+    { "_": "lado direito: estandarte e lanterna", "ret": [864, 482, 888, 532] },
+    { "ret": [888, 488, 908, 542] }
+  ]
+}

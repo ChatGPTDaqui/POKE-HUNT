@@ -49,6 +49,14 @@ export function grauDoImpacto(dano: number, hpMaximo: number, detalhe: DetalheDo
   return Math.min(3, grau) as GrauDoImpacto
 }
 
+/** Quanto dura o pulinho de esquiva de um golpe que errou. */
+export const DURACAO_DA_ESQUIVA = 0.4
+
+export function estaEsquivando(e: { esquivaVisual?: { espera: number; idade: number } }): boolean {
+  const v = e.esquivaVisual
+  return v != null && v.idade >= v.espera && v.idade < v.espera + DURACAO_DA_ESQUIVA
+}
+
 export function hitstopDoImpacto(grau: GrauDoImpacto, critico: boolean, derrota: boolean): number {
   if (derrota) return HITSTOP_DE_DERROTA
   if (grau < 3) return 0
@@ -101,6 +109,9 @@ export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
   // interrompido: o Hurt espera em `hurtNaFila` e toca quando a pose de ataque
   // termina (ver `registrarDanoParaHurt` e `tickAttackAnimTimers`).
   if ((entity.hurtAnimTimer ?? 0) > 0) return 'Hurt'
+  // Esquiva de um golpe que errou: pulinho pro lado no instante do impacto
+  // (`Hop` esta nas 380 especies). So desenho; ver combatSystem#golpeErrouNaCena.
+  if (estaEsquivando(entity)) return 'Hop'
   // Imobilizado por status (hoje congelamento — o sono ja saiu acima, com
   // animacao propria): o estado continua 'chase'/'wander' pra o combate
   // seguir funcionando (movementSystem.ts explica por que), entao sem esta
@@ -171,6 +182,10 @@ export function tickAttackAnimTimers(world: WorldState, dt: number): void {
       const resta = entity.hurtAnimTimer - dt
       if (resta > 0) entity.hurtAnimTimer = resta
       else delete entity.hurtAnimTimer
+    }
+    if (entity.esquivaVisual) {
+      entity.esquivaVisual.idade += dt
+      if (entity.esquivaVisual.idade >= entity.esquivaVisual.espera + DURACAO_DA_ESQUIVA) delete entity.esquivaVisual
     }
     if (entity.impactoVisual) {
       entity.impactoVisual.idade += dt
