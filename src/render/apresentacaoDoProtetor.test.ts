@@ -20,6 +20,7 @@ function ctxEspiao() {
     save() {}, restore() {},
     fillText(texto: string) { escritas.push(texto) },
     strokeText() {},
+    fillRect() {}, // divisorias de 10% da barra de HP
     beginPath() {}, closePath() {}, stroke() {}, fill() {}, arc() {},
     moveTo(x: number) { ultimoMoveTo = { x } },
     arcTo(x: number) {

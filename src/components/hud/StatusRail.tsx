@@ -260,7 +260,7 @@ function VitaisPoke() {
             que dava no mesmo enquanto o vizinho da direita nao mudava — mas
             fazia qualquer coluna nova de rotulo sair do tamanho da barra. */}
         <div className="journey-vitals-bars flex w-[min(14em,34vw)] shrink-0 flex-col gap-[.12em]">
-          <Barra pct={hpPct} altura=".34em" cor={hpBaixo ? 'var(--color-hp-low)' : 'var(--color-hp)'} />
+          <Barra pct={hpPct} altura=".34em" cor={hpBaixo ? 'var(--color-hp-low)' : 'var(--color-hp)'} divisorias />
           <Barra pct={expPct} altura=".18em" cor="var(--color-exp)" />
         </div>
         {/* ROTULO EM CADA PORCENTAGEM (PH-193, item 3). Eram dois numeros
@@ -289,13 +289,21 @@ function VitaisPoke() {
   )
 }
 
-function Barra({ pct, altura, cor }: { pct: number; altura: string; cor: string }) {
+// Divisorias a cada 10% do HP maximo (mesma regra da barra no canvas,
+// render/sprites.ts#desenharDivisoriasDoHp). O ultimo risco cai na borda e
+// some no `overflow-hidden`.
+const DIVISORIAS_DE_10 = 'repeating-linear-gradient(to right, transparent 0 calc(10% - 1px), rgba(0,0,0,.55) calc(10% - 1px) 10%)'
+
+function Barra({ pct, altura, cor, divisorias = false }: { pct: number; altura: string; cor: string; divisorias?: boolean }) {
   return (
     <span className="relative block w-full overflow-hidden rounded-full bg-n800" style={{ height: altura }}>
       <span
         className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-200"
         style={{ width: `${pct}%`, background: cor }}
       />
+      {divisorias && (
+        <span aria-hidden="true" data-divisorias-do-hp className="pointer-events-none absolute inset-0" style={{ backgroundImage: DIVISORIAS_DE_10 }} />
+      )}
     </span>
   )
 }

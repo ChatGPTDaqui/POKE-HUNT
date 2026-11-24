@@ -3029,6 +3029,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   let grauVisual: GrauDoImpacto | 0 = 0
   let hitstopVisual = 0
   let pulsosVisuais = 0
+  const danosDosPulsos: number[] = []
   const intervaloDosAcertos = intervaloEntreAcertos(ability.id)
   for (let acerto = 0; acerto < acertos; acerto++) {
     // Alvo caiu no acerto anterior: a sequencia para. Nos jogos e igual — os
@@ -3077,7 +3078,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // Golpe de status causa 0 de dano — nao mostra "0" flutuando sobre o alvo
     // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
     if (danoDoAcerto > 0) {
+      const hpAntes = target.poke.hp
       takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke))
+      danosDosPulsos.push(hpAntes - target.poke.hp)
       const detalhe = {
         critico: result.isCrit,
         superEfetivo: result.effectiveness === 'super' || result.effectiveness === 'effective',
@@ -3100,6 +3103,8 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (!silent && grauVisual !== 0) {
     registrarImpactoVisual(target, attacker, grauVisual, {
       pulsos: pulsosVisuais, intervalo: intervaloDosAcertos, hitstop: hitstopVisual,
+      // A barra de HP cai um acerto por vez, junto do numero (`hpEmCena`).
+      danos: danosDosPulsos,
     })
   }
 

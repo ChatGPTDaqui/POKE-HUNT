@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.86',
+    date: '2026-11-23',
+    title: 'Barra de HP com divisórias',
+    highlights: [
+      'A barra de HP ganhou divisórias a cada 10% da vida, em campo e no painel do seu Pokémon.',
+      'Em golpes de vários acertos, a barra cai um acerto por vez, junto de cada número de dano, e o Pokémon só desmaia depois do último.',
+    ],
+  },
+  {
     version: '8.85',
     date: '2026-11-23',
     title: 'Batalhas mais fáceis de assistir',
