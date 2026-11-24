@@ -15,9 +15,10 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   {
     version: '8.86',
     date: '2026-11-23',
-    title: 'Barra de HP com divisórias',
+    title: 'Barra de HP nova',
     highlights: [
       'A barra de HP ganhou divisórias por quantidade de vida: um risco fino a cada 25 HP e um forte a cada 100. Quanto mais vida o Pokémon tem, mais divisórias a barra mostra — em campo e no painel do seu Pokémon.',
+      'A barra também ganhou volume: brilho em cima, sombra embaixo, e o pedaço de vida que acabou de sair fica claro por um instante antes de escoar.',
       'Em golpes de vários acertos, a barra cai um acerto por vez, junto de cada número de dano, e o Pokémon só desmaia depois do último.',
     ],
   },

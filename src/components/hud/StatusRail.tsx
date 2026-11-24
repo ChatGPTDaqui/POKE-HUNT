@@ -42,6 +42,7 @@ import { ClimaChip } from '@/components/hud/ClimaChip'
 import { useIntervalo } from '@/hooks/useIntervalo'
 import { cn } from '@/lib/utils'
 import { divisoriasDoHp } from '@/data/divisoriasDoHp'
+import { COR_DO_RASTRO_DE_DANO } from '@/data/hpBar'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
 
@@ -295,13 +296,31 @@ function VitaisPoke() {
 // estimativa so decide quando afinar os riscos finos.
 const LARGURA_ESTIMADA_DA_BARRA_PX = 140
 
+// Volume da barra de HP (mesma ideia do canvas, data/hpBar.ts#tonsDaBarraDeHp):
+// brilho em cima, sombra embaixo e um fio de luz na primeira linha.
+const volumeDaBarra = (cor: string) =>
+  `linear-gradient(to bottom, color-mix(in srgb, ${cor} 55%, white) 0%, ${cor} 45%, color-mix(in srgb, ${cor} 60%, black) 100%)`
+
 function Barra({ pct, altura, cor, hpMaximo }: { pct: number; altura: string; cor: string; hpMaximo?: number }) {
+  const ehHp = hpMaximo != null
   const riscos = hpMaximo ? divisoriasDoHp(hpMaximo, LARGURA_ESTIMADA_DA_BARRA_PX) : []
   return (
     <span className="relative block w-full overflow-hidden rounded-full bg-n800" style={{ height: altura }}>
+      {ehHp && (
+        // Rastro do dano: o pedaco que acabou de sair fica claro e escoa
+        // depois da barra (transicao com atraso). Cura: fica escondido atras.
+        <span
+          aria-hidden="true"
+          data-rastro-do-hp
+          className="absolute inset-y-0 left-0 rounded-full transition-[width] delay-[350ms] duration-[450ms] ease-out"
+          style={{ width: `${pct}%`, background: COR_DO_RASTRO_DE_DANO }}
+        />
+      )}
       <span
         className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-200"
-        style={{ width: `${pct}%`, background: cor }}
+        style={ehHp
+          ? { width: `${pct}%`, background: volumeDaBarra(cor), boxShadow: 'inset 0 1px 0 rgba(255,255,255,.45)' }
+          : { width: `${pct}%`, background: cor }}
       />
       {riscos.map(({ posicao, forte }) => (
         <span
