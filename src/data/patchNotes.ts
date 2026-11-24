@@ -13,6 +13,15 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.89',
+    date: '2026-11-23',
+    title: 'Dojo com colisão refeita',
+    highlights: [
+      'No Dojo, os Pokémon não atravessam mais bonecos de treino, lanternas, suportes de armas, bancos, estátuas, estandartes nem as encostas de terra.',
+      'Caminhos, praças e arenas continuam livres e ligados entre si.',
+    ],
+  },
+  {
     version: '8.88',
     date: '2026-11-23',
     title: 'Pokébola de captura mais rápida',
