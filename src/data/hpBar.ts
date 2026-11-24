@@ -21,3 +21,30 @@ export function hpBarFillColor(pct: number): string {
   if (pct <= 0.5) return ORANGE
   return GREEN
 }
+
+/**
+ * A barra com VOLUME (pedido do dono, 23/11/2026: "sombra mais clara na parte
+ * superior, como no LoL; que nao seja tao monocromatica"). Tres tons por faixa
+ * — `topo` (o brilho da metade de cima), `meio` (a cor da faixa) e `base` (a
+ * sombra de baixo) — num degrade vertical, mais um fio de luz na primeira
+ * linha. A faixa (verde/laranja/vermelho) continua a mesma de `hpBarFillColor`.
+ */
+export interface TonsDaBarraDeHp { topo: string; meio: string; base: string; luz: string }
+
+const TONS: Record<'verde' | 'laranja' | 'vermelho', TonsDaBarraDeHp> = {
+  verde: { topo: '#7ee08a', meio: '#1fae45', base: '#0a6b26', luz: 'rgba(220, 255, 220, 0.75)' },
+  laranja: { topo: '#f5c25a', meio: '#d2861c', base: '#7d4a0c', luz: 'rgba(255, 240, 200, 0.75)' },
+  vermelho: { topo: '#ff8a8a', meio: '#d23a46', base: '#7a1622', luz: 'rgba(255, 220, 220, 0.75)' },
+}
+
+export function tonsDaBarraDeHp(pct: number): TonsDaBarraDeHp {
+  if (pct <= 0.2) return TONS.vermelho
+  if (pct <= 0.5) return TONS.laranja
+  return TONS.verde
+}
+
+/** Cor do rastro do dano recente: o pedaco que acabou de sair e ainda escoa. */
+export const COR_DO_RASTRO_DE_DANO = '#f4e3a1'
+/** Quanto o rastro espera parado antes de escoar (s) e quanto leva escoando. */
+export const ESPERA_DO_RASTRO_S = 0.35
+export const ESCOAMENTO_DO_RASTRO_S = 0.45
