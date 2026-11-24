@@ -16,6 +16,7 @@ import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
 import { desenharVfxDeGolpe } from './vfx/desenharVfx'
 import { deslocamentoDoImpacto } from './reacaoAoGolpe'
+import { divisoriasDoHp } from '@/data/divisoriasDoHp'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
 import { footOffsetFraction } from '@/data/spriteFootOffsets'
@@ -805,19 +806,17 @@ const PROTETOR_HP_BAR_HEIGHT_MULTIPLIER = 2
  */
 const COR_DA_PORCENTAGEM = '#ffffff'
 
-/** Cada divisoria marca 10% do HP maximo (pedido do dono, 23/11/2026). */
-export const FRACAO_DA_DIVISORIA_DO_HP = 0.1
-
 /**
- * As 9 divisorias da barra de HP. Riscos escuros de 1 px na altura toda, por
- * cima do preenchimento e do fundo: o jogador conta "quantos 10% sobraram" sem
- * ler numero. Alinhados ao pixel inteiro pra nao borrar na pixel art.
+ * Divisorias por quantidade de HP, estilo LoL (data/divisoriasDoHp.ts): quanto
+ * mais vida, mais riscos. Fino = metade de cima da barra, forte = altura toda.
+ * 1 px, alinhados ao pixel inteiro pra nao borrar na pixel art.
  */
-function desenharDivisoriasDoHp(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number): void {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
-  const passos = Math.round(1 / FRACAO_DA_DIVISORIA_DO_HP)
-  for (let k = 1; k < passos; k++) {
-    ctx.fillRect(Math.round(x + width * k * FRACAO_DA_DIVISORIA_DO_HP), y, 1, height)
+function desenharDivisoriasDoHp(
+  ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, hpMaximo: number,
+): void {
+  for (const { posicao, forte } of divisoriasDoHp(hpMaximo, width)) {
+    ctx.fillStyle = forte ? 'rgba(0, 0, 0, 0.75)' : 'rgba(0, 0, 0, 0.45)'
+    ctx.fillRect(Math.round(x + width * posicao), y, 1, forte ? height : Math.ceil(height / 2))
   }
 }
 
@@ -857,7 +856,7 @@ export function drawHpBar(
     ctx.fillStyle = hpBarFillColor(pct)
     ctx.fill()
   }
-  desenharDivisoriasDoHp(ctx, x, y, width, height)
+  desenharDivisoriasDoHp(ctx, x, y, width, height, maxHp(entity))
 
   // A porcentagem (PH-189). So no POKE do jogador e no alvo dele — quem decide
   // e o `Renderer`, que e quem conhece `player.targetId`. Escrever em todo mundo

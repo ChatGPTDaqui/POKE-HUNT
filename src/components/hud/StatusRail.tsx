@@ -41,6 +41,7 @@ import { SalaChip } from '@/components/hud/SalaChip'
 import { ClimaChip } from '@/components/hud/ClimaChip'
 import { useIntervalo } from '@/hooks/useIntervalo'
 import { cn } from '@/lib/utils'
+import { divisoriasDoHp } from '@/data/divisoriasDoHp'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
 
@@ -260,7 +261,7 @@ function VitaisPoke() {
             que dava no mesmo enquanto o vizinho da direita nao mudava — mas
             fazia qualquer coluna nova de rotulo sair do tamanho da barra. */}
         <div className="journey-vitals-bars flex w-[min(14em,34vw)] shrink-0 flex-col gap-[.12em]">
-          <Barra pct={hpPct} altura=".34em" cor={hpBaixo ? 'var(--color-hp-low)' : 'var(--color-hp)'} divisorias />
+          <Barra pct={hpPct} altura=".34em" cor={hpBaixo ? 'var(--color-hp-low)' : 'var(--color-hp)'} hpMaximo={poke.stats.hp} />
           <Barra pct={expPct} altura=".18em" cor="var(--color-exp)" />
         </div>
         {/* ROTULO EM CADA PORCENTAGEM (PH-193, item 3). Eram dois numeros
@@ -289,21 +290,28 @@ function VitaisPoke() {
   )
 }
 
-// Divisorias a cada 10% do HP maximo (mesma regra da barra no canvas,
-// render/sprites.ts#desenharDivisoriasDoHp). O ultimo risco cai na borda e
-// some no `overflow-hidden`.
-const DIVISORIAS_DE_10 = 'repeating-linear-gradient(to right, transparent 0 calc(10% - 1px), rgba(0,0,0,.55) calc(10% - 1px) 10%)'
+// Divisorias por quantidade de HP, estilo LoL — mesma regra da barra no canvas
+// (data/divisoriasDoHp.ts). A largura real da barra varia com o layout; esta
+// estimativa so decide quando afinar os riscos finos.
+const LARGURA_ESTIMADA_DA_BARRA_PX = 140
 
-function Barra({ pct, altura, cor, divisorias = false }: { pct: number; altura: string; cor: string; divisorias?: boolean }) {
+function Barra({ pct, altura, cor, hpMaximo }: { pct: number; altura: string; cor: string; hpMaximo?: number }) {
+  const riscos = hpMaximo ? divisoriasDoHp(hpMaximo, LARGURA_ESTIMADA_DA_BARRA_PX) : []
   return (
     <span className="relative block w-full overflow-hidden rounded-full bg-n800" style={{ height: altura }}>
       <span
         className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-200"
         style={{ width: `${pct}%`, background: cor }}
       />
-      {divisorias && (
-        <span aria-hidden="true" data-divisorias-do-hp className="pointer-events-none absolute inset-0" style={{ backgroundImage: DIVISORIAS_DE_10 }} />
-      )}
+      {riscos.map(({ posicao, forte }) => (
+        <span
+          key={posicao}
+          aria-hidden="true"
+          data-divisoria-do-hp={forte ? 'forte' : 'fina'}
+          className="pointer-events-none absolute top-0 w-px"
+          style={{ left: `${posicao * 100}%`, height: forte ? '100%' : '50%', background: forte ? 'rgba(0,0,0,.75)' : 'rgba(0,0,0,.45)' }}
+        />
+      ))}
     </span>
   )
 }
