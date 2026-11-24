@@ -13,6 +13,14 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.88',
+    date: '2026-11-23',
+    title: 'Pokébola de captura mais rápida',
+    highlights: [
+      'A Pokébola de captura agora chega ao Pokémon 2 segundos depois da derrota (antes eram 3).',
+    ],
+  },
+  {
     version: '8.87',
     date: '2026-11-23',
     title: 'Golpes de contato com investida',

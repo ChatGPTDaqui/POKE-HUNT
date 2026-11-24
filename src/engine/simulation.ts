@@ -83,10 +83,11 @@ export const STARTER_LEVEL = 5 // 19/10/2026: era 1; ver migration 2026101913000
 export const STARTER_RARITY = 'comum' as const
 export const STARTER_IVS = { hp: 23, atkFis: 23, atkEsp: 23, def: 23, defEsp: 23, speed: 23 }
 export const DEATH_ANIM_GRACE_PERIOD = 4.0 // segundos que um inimigo derrotado fica visivel tocando a pose Faint
-// Quando a Pokebola de captura e arremessada depois do desmaio (pedido do dono,
-// 17/10/2026: 3s). Antes ela esperava o corpo sumir inteiro (4s); agora a bola
-// chega com o corpo ainda caido, e ele some no meio do arremesso.
-export const ESPERA_DA_BOLA_DE_CAPTURA = 3.0
+// Quando a Pokebola de captura chega ao POKE depois do desmaio (pedido do dono:
+// 3 s em 17/10/2026, 2 s em 23/11/2026). Antes ela esperava o corpo sumir
+// inteiro (4 s); agora a bola chega com o corpo ainda caido. O gesto do
+// treinador comeca DURACAO_DO_ARREMESSO antes (render/treinadorEmCampo.ts).
+export const ESPERA_DA_BOLA_DE_CAPTURA = 2.0
 
 /**
  * PH-301: quantas vezes o sorteio do protetor pode repetir procurando um que o
