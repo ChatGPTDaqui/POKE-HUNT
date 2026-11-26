@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.92',
+    date: '2026-11-26',
+    title: 'Menus mais limpos e fáceis de navegar',
+    highlights: [
+      'Abas redesenhadas: a aba aberta fica destacada num trilho discreto, e a cor forte ficou só para os botões de ação.',
+      'O menu inferior mostra com clareza qual tela está aberta, e no celular um degradê avisa quando há mais atalhos para o lado.',
+      'No PC, o menu Mais abre num painel compacto à direita, e janelas largas como Hunt e Mercado não passam mais da borda da tela.',
+      'Listas vazias explicam o que falta e o próximo passo, e a Loja no celular mostra preço e quantidade numa linha só.',
+    ],
+  },
+  {
     version: '8.91',
     date: '2026-11-24',
     title: 'Treinador do tamanho certo',
