@@ -17,7 +17,7 @@
 // e afogariam a mensagem de gente de verdade.
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChatCircleDots, Gift, PencilSimple, Trash, UserPlus, X } from '@phosphor-icons/react'
+import { Bell, ChatCircleDots, Gift, PencilSimple, Trash, UserPlus, X } from '@phosphor-icons/react'
 import {
   ErroServidor, detalheDeErro,
   type AnexoItemSocial, type ConversaResumo,
@@ -26,9 +26,7 @@ import * as socialRpc from '@/data/remote/socialRealtime'
 import { supabase } from '@/lib/supabase'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
 import { useDeviceMode, useUiStore } from '@/stores/uiStore'
-import {
-  GameButton, GameCard, GameInput, SectionLabel, SegmentedTabs,
-} from '@/components/game/controls'
+import { GameButton, GameCard, GameInput, SectionLabel, SegmentedTabs, EstadoVazio } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 import { BotaoConvidarTroca } from '@/features/troca/BotaoConvidarTroca'
 import { ComporMensagem } from './ComporMensagem'
@@ -317,9 +315,9 @@ export function SocialMenu() {
         <div>
           <SectionLabel>CONVERSAS {naoLidasConversas ? `(${naoLidasConversas} nova(s))` : ''}</SectionLabel>
           {conversas.length === 0 && (
-            <p className="text-menu-muted">
-              Nenhuma conversa ainda. Use "Nova conversa" pra falar com alguem pelo nick.
-            </p>
+            <EstadoVazio icone={<ChatCircleDots weight="duotone" />} titulo="Nenhuma conversa ainda">
+              Use "Nova conversa" pra falar com alguém pelo nick.
+            </EstadoVazio>
           )}
           <div className="mt-[.4em] flex flex-col gap-[.35em]">
             {conversas.map((c) => <LinhaDeConversa key={c.userId} c={c} />)}
@@ -330,7 +328,7 @@ export function SocialMenu() {
       {!isLoading && aba === 'avisos' && (
         <div>
           <SectionLabel>AVISOS {naoLidosAvisos ? `(${naoLidosAvisos} novo(s))` : ''}</SectionLabel>
-          {avisos.length === 0 && <p className="text-menu-muted">Nenhum aviso.</p>}
+          {avisos.length === 0 && <EstadoVazio icone={<Bell weight="duotone" />} titulo="Nenhum aviso">Pedidos de amizade, presentes e recados aparecem aqui.</EstadoVazio>}
           <div className="mt-[.4em] flex flex-col gap-[.4em]">
             {avisos.map((m) => (
               <LinhaDeMensagem

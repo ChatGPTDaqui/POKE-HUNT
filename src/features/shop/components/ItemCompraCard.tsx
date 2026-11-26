@@ -129,9 +129,14 @@ export function ItemCompraCard({ onAbrir, ...props }: AcoesCompra & { onAbrir: (
         <ItemTooltip item={item}><span className="cursor-help"><ItemIcon itemId={item.id} name={item.name} /></span></ItemTooltip>
         <button type="button" aria-label={`Comprar ${item.name}`} onClick={onAbrir}
           className="flex min-h-[44px] min-w-0 cursor-pointer flex-col justify-center text-left font-[inherit]">
-          <span className="break-words font-medium">{item.name}</span>
-          <span className="text-[.78em] text-gold">{fmt.format(item.buyPrice)} ouro</span>
-          <span className="text-[.78em] text-menu-muted">Na mochila: {fmt.format(owned)}</span>
+          {/* Auditoria dos menus (26/11/2026): no celular a coluna tem ~120px e
+              "Great Ball" / "Na mochila: 12.345" quebravam em quatro linhas.
+              Nome numa linha so e preco + quantidade numa segunda. */}
+          <span className="truncate font-medium">{item.name}</span>
+          <span className="truncate text-[.78em]">
+            <span className="text-gold">{fmt.format(item.buyPrice)} ouro</span>
+            <span className="text-menu-muted"> · <span className="sr-only">Na mochila: </span>×{fmt.format(owned)}</span>
+          </span>
         </button>
       </GameCard>
     )

@@ -3,6 +3,7 @@
 // nas telas estreitas sem mover Hunt. Gestão recolhe apenas os controles
 // visuais de combate — Auto e o motor continuam funcionando.
 import { useRef, useState } from 'react'
+import { useTransborda } from '@/hooks/useTransborda'
 import {
   Backpack, BookOpen, Books, Calculator, ChatsCircle, CheckSquare, DotsThreeOutline,
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus,
@@ -176,6 +177,9 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
     else iniciarViagem()
   }
 
+  // Fileiras laterais rolam quando nao cabem: o degrade avisa que ha mais.
+  const [grupoEsquerdo, esquerdaTransborda] = useTransborda<HTMLDivElement>()
+  const [grupoDireito, direitaTransborda] = useTransborda<HTMLDivElement>()
   return (
     // `data-keep-open`: estes botoes ja alternam a tela sozinhos. Sem a marca, o
     // fechar-ao-tocar-fora do sheet fecharia a tela ANTES do onClick e o gesto
@@ -189,7 +193,7 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         deitado ? 'px-[.5em] py-[.2em]' : 'px-[.4em] py-[.3em]',
       )}
     >
-      <div className="journey-navigation-left">{ESQUERDA.map((d) => (
+      <div ref={grupoEsquerdo} className={cn('journey-navigation-left', esquerdaTransborda && 'tiras-de-aba')}>{ESQUERDA.map((d) => (
         <SlotNav
           key={d.screen}
           destino={d}
@@ -209,7 +213,7 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         onClick={() => { destaqueHunt.aoTocar(); toggleScreen('hunts') }}
       />
 
-      <div className="journey-navigation-right"><SlotNav
+      <div ref={grupoDireito} className={cn('journey-navigation-right', direitaTransborda && 'tiras-de-aba')}><SlotNav
         destino={DIREITA[0]}
         ativo={currentScreen === DIREITA[0].screen}
         rotulo
@@ -374,7 +378,7 @@ export function SheetMais() {
   if (!moreOpen) return null
 
   return (
-    <Sheet appearance="journey" winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais">
+    <Sheet appearance="journey" winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais" larguraNoAmplo="30em">
       <div className="journey-guide">
         <div className="journey-guide-intro"><EquipmentArt kind="guide" /><p>Seu guia de jornada<span>Encontre treinadores e consulte suas ferramentas.</span></p></div>
         {[

@@ -40,6 +40,12 @@ No Hospital, o treinador com a skin selecionada ocupa o tapete, virado para a
 câmera, no lugar do Pokémon. Nome legível independe da escala da cena; cura e
 Pokémon ativo do cabeçalho continuam usando a entidade original, sem mutação.
 
+Cor de destaque (--journey-primary) é de ação e de "você está aqui"; abas usam
+SegmentedTabs (trilho + aba levantada), nunca botão primário. Lista vazia de verdade
+usa EstadoVazio; "sem resultado no filtro" segue uma linha curta. Fileira rolável
+mostra degradê só quando transborda (useTransborda). Ver
+[auditoria dos menus](../planos/2026-11-26-auditoria-dos-menus.md).
+
 ## Cura visual
 
 Cura de HP usa render/cura.ts: pulso mentolado, aros abertos e brilhos ascendentes,
