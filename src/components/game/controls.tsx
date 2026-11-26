@@ -297,6 +297,45 @@ export function SegmentedTabs<T extends string>({
   )
 }
 
+/**
+ * Filtro em pilulas: escolhe UM recorte de uma lista (regiao, raridade), sem
+ * trocar de tela. Abas (`SegmentedTabs`) mudam o que o painel mostra; pilulas
+ * so estreitam a lista — por isso o visual e outro (pilula leve, ativa tingida
+ * com a cor de destaque) e elas aparecem abaixo das abas (pendencias da
+ * auditoria dos menus, 26/11/2026).
+ */
+export function PilulasDeFiltro<T extends string>({
+  value, options, onChange, rotulo, className,
+}: {
+  value: T
+  options: { value: T; label: string; contagem?: number }[]
+  onChange: (value: T) => void
+  rotulo: string
+  className?: string
+}) {
+  return (
+    <div role="group" aria-label={rotulo} className={cn('pilulas-de-filtro flex flex-wrap items-center gap-[.3em]', className)}>
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          data-pilula-de-filtro
+          aria-pressed={option.value === value}
+          className={cn(
+            'pilula-de-filtro inline-flex cursor-pointer items-center gap-[.35em] rounded-full border',
+            'px-[1.1em] py-[.2em] font-[inherit] text-[.8em] leading-[1.35] whitespace-nowrap',
+            'focus-visible:ring-2 focus-visible:ring-menu-brand focus-visible:outline-none',
+          )}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+          {option.contagem != null && <span className="pilula-de-filtro-contagem tabular-nums">{option.contagem}</span>}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 /** Barra de progresso fina. `height` em `em` pra acompanhar a escala. */
 export function Meter({
   pct, color, height = '.35em', className,

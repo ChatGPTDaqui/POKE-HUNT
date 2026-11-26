@@ -35,7 +35,7 @@ import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { Explicacao, Palavra } from '@/components/shared/Explicacao'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
-import { GameButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
+import { GameButton, GameInput, PilulasDeFiltro, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { focusHunt } from '@/features/hunt/HuntMenu'
 import { salasEspeciaisDaEspecie } from '@/data/atlasDosBiomas'
 
@@ -353,18 +353,24 @@ function SpeciesDetail({ species }: { species: Species }) {
 // estava. Hunt deixou de ter regiao (as hunts sao biomas tematicos agora, ver
 // data/biomas.ts), entao a regiao virou escolha explicita. A ESPECIE continua
 // tendo regiao — e o numero da Pokedex, ver data/regions.ts.
-type Escopo = 'hunt' | 'johto' | 'kanto' | 'tudo'
+//
+// Abas e filtro sao coisas diferentes (pendencias da auditoria dos menus,
+// 26/11/2026): a aba escolhe DE ONDE vem a lista (Pokedex inteira ou a hunt
+// atual); a regiao so estreita a Pokedex inteira, em pilulas abaixo, na ordem
+// do numero (Kanto antes de Johto).
+type Escopo = 'tudo' | 'hunt'
+type FiltroDeRegiao = 'todas' | Region
 
 const ESCOPOS: { value: Escopo; label: string }[] = [
-  { value: 'hunt', label: 'Hunt Atual' },
-  { value: 'johto', label: 'Johto' },
-  { value: 'kanto', label: 'Kanto' },
   { value: 'tudo', label: 'Pokédex' },
+  { value: 'hunt', label: 'Hunt Atual' },
 ]
 
-function regiaoDoEscopo(escopo: Escopo): Region | null {
-  return escopo === 'johto' || escopo === 'kanto' ? escopo : null
-}
+const FILTROS_DE_REGIAO: { value: FiltroDeRegiao; label: string }[] = [
+  { value: 'todas', label: 'Todas' },
+  { value: 'kanto', label: 'Kanto' },
+  { value: 'johto', label: 'Johto' },
+]
 
 /** Ids das especies que podem aparecer numa hunt. */
 function especiesDaHunt(map: HuntMapDef): Set<string> {
@@ -386,6 +392,7 @@ export function PokedexMenu() {
   const [escopo, setEscopo] = useState<Escopo>('tudo')
   const [expandedSpeciesId, setExpandedSpeciesId] = useState<string | null>(null)
   const [shinyView, setShinyView] = useState(false)
+  const [filtroDeRegiao, setFiltroDeRegiao] = useState<FiltroDeRegiao>('todas')
 
   const allSpecies = useMemo(
     () => Object.values(SPECIES).sort((a, b) => dexNumber(a) - dexNumber(b)),
@@ -393,7 +400,7 @@ export function PokedexMenu() {
   )
 
   const escopoAtivo: Escopo = escopo === 'hunt' && !mapaAtual ? 'tudo' : escopo
-  const regiaoAtual = regiaoDoEscopo(escopoAtivo)
+  const regiaoAtual: Region | null = escopoAtivo === 'tudo' && filtroDeRegiao !== 'todas' ? filtroDeRegiao : null
 
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -442,8 +449,8 @@ export function PokedexMenu() {
             value={search}
             onChange={(e) => aoDigitarBusca(e.target.value)}
           />
-          <GameButton variant={shinyView ? 'primary' : 'secondary'} onClick={() => setShinyView((v) => !v)}>
-            ✨ {shinyView ? 'Abates Shiny' : 'Abates Totais'}
+          <GameButton aria-pressed={shinyView} title="Mostrar só os abates shiny" onClick={() => setShinyView((v) => !v)}>
+            ✨ Shiny
           </GameButton>
         </div>
         <div className="flex flex-wrap items-center gap-[.4em]">
@@ -457,9 +464,12 @@ export function PokedexMenu() {
           <span className="text-[.75em] text-menu-muted">
             {escopoAtivo === 'hunt' && mapaAtual && `${mapaAtual.name} · ${visible.length}`}
             {regiaoAtual && `${REGION_LABEL[regiaoAtual]} · ${visible.length}`}
-            {escopoAtivo === 'tudo' && `${visible.length} espécies`}
+            {escopoAtivo === 'tudo' && !regiaoAtual && `${visible.length} espécies`}
           </span>
         </div>
+        {escopoAtivo === 'tudo' && (
+          <PilulasDeFiltro rotulo="Região" value={filtroDeRegiao} onChange={setFiltroDeRegiao} options={FILTROS_DE_REGIAO} />
+        )}
       </StickyHeader>
 
       {visible.length === 0 && <p className="text-menu-muted">Nenhum Pokémon encontrado.</p>}

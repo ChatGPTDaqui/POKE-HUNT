@@ -93,7 +93,7 @@ export function PainelAmigos({
 
                 <div className="flex shrink-0 gap-[.25em]">
                   <GameButton
-                    variant={ativo ? 'primary' : 'secondary'}
+                    aria-pressed={ativo}
                     title="Conversar"
                     aria-label={`Conversar com ${a.nome}`}
                     onClick={(e) => { e.stopPropagation(); onSelecionar(a) }}

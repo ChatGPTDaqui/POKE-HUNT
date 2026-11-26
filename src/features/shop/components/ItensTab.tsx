@@ -212,7 +212,12 @@ export function ItensTab() {
           {ownedItemIds.length > 0 && (
             <GradeDeInventario
               rotuloDoGrupo="Item para vender"
-              alturaMaxEm={11}
+              // No celular a coluna so cabe um slot: lado limitado, para o
+              // sprite ter o porte do icone da coluna COMPRAR, e mais altura,
+              // para a coluna acompanhar a lista de compra ao lado.
+              alturaMaxEm={estreito ? 24 : 11}
+              ladoMaxEm={estreito ? 3.4 : undefined}
+              className="grade-da-venda"
               selecionado={vendaAberta}
               onSelecionar={setVendaAberta}
               slots={paginadoVenda.pagina.map((itemId) => {

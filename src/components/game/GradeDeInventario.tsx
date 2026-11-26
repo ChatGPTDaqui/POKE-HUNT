@@ -113,6 +113,13 @@ export const GradeDeInventario = forwardRef<HTMLDivElement, {
   onSelecionar: (id: string, evento: MouseEvent<HTMLButtonElement>) => void
   /** Altura maxima antes de rolar. Inventario grande nao pode estourar o painel. */
   alturaMaxEm?: number
+  /**
+   * Lado maximo do slot, em `em`. Ausente: o slot estica ate a largura da
+   * coluna (`1fr`). Numa coluna estreita que so cabe UM slot, `1fr` virava um
+   * sprite gigante ao lado de linhas de texto pequenas — a coluna VENDER da Loja
+   * no celular (pendencias da auditoria dos menus, 26/11/2026).
+   */
+  ladoMaxEm?: number
   className?: string
   rotuloDoGrupo: string
   /**
@@ -133,7 +140,7 @@ export const GradeDeInventario = forwardRef<HTMLDivElement, {
    */
   onScroll?: (evento: UIEvent<HTMLDivElement>) => void
 }>(function GradeDeInventario({
-  slots, selecionado, onSelecionar, alturaMaxEm = 13, className, rotuloDoGrupo,
+  slots, selecionado, onSelecionar, alturaMaxEm = 13, ladoMaxEm, className, rotuloDoGrupo,
   modo = 'unico', selecionados, onScroll,
 }, ref) {
   const multiplo = modo === 'multiplo'
@@ -156,7 +163,8 @@ export const GradeDeInventario = forwardRef<HTMLDivElement, {
         display: 'grid',
         // `auto-fill` e nao um numero fixo de colunas: a mesma grade serve o
         // painel largo do desktop e os ~470px uteis do celular sem media query.
-        gridTemplateColumns: `repeat(auto-fill, minmax(${LADO}em, 1fr))`,
+        gridTemplateColumns: `repeat(auto-fill, minmax(${LADO}em, ${ladoMaxEm ? `${Math.max(LADO, ladoMaxEm)}em` : '1fr'}))`,
+        justifyContent: ladoMaxEm ? 'center' : undefined,
         gap: '.3em',
       }}
     >
