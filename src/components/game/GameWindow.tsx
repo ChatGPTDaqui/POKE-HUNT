@@ -8,7 +8,7 @@
 //    `overflow: hidden` no container, e por isso a rolagem vive no CORPO
 //    (`flex-1 min-h-0 overflow-auto`) e nunca na janela inteira;
 //  - manter a barra de titulo e o botao de fechar FORA da area rolavel.
-import { useCallback, useEffect, type CSSProperties, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { X } from '@phosphor-icons/react'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import { useWindowResize } from '@/hooks/useWindowResize'
@@ -69,8 +69,21 @@ export function GameWindow({
   // frame de arrasto) reescreveria `style.width` e desfaria o
   // redimensionamento que o jogador tivesse feito pelo canto — o `resize: both`
   // do CSS grava exatamente nessa mesma propriedade inline.
+  //
+  // TROCA DE TELA (26/11/2026, auditoria dos menus): a janela de menu e UMA so
+  // (`winKey` 'panel') reaproveitada entre Equipe, Hunt, Mercado... Com o
+  // "so se ainda nao tem largura", a primeira tela aberta fixava a largura de
+  // todas as seguintes — abrir a Equipe (50em) e depois a Hunt (36em) deixava a
+  // Hunt com 50em centralizada como se tivesse 36em, saindo pela direita e
+  // escondendo o X em 1100 px. Agora a largura acompanha a tela quando ela
+  // muda; o redimensionamento manual continua valendo dentro da mesma tela.
+  const larguraAplicada = useRef<number | null>(null)
   const aplicarLarguraInicial = useCallback((el: HTMLDivElement | null) => {
-    if (el && !el.style.width) el.style.width = `${widthEm}em`
+    if (!el) return
+    if (!el.style.width || larguraAplicada.current !== widthEm) {
+      el.style.width = `${widthEm}em`
+      larguraAplicada.current = widthEm
+    }
   }, [widthEm])
 
   // `pointerdown` e nao `mousedown`: no toque o navegador so emite o evento de
@@ -124,7 +137,7 @@ export function GameWindow({
   // transform aplicado a janela "escorrega" enquanto e redimensionada.
   const style: CSSProperties = pos
     ? { left: pos.x, top: pos.y }
-    : { left: `max(.75em, calc(50vw - ${widthEm / 2}em))`, top: defaultTop }
+    : { left: `max(.75em, calc(50% - ${widthEm / 2}em))`, top: defaultTop }
 
   return (
     <>

@@ -530,3 +530,78 @@
   .journey-team-list { grid-template-columns: minmax(0, 1fr); max-height: 10em; overflow-y: auto; }
   .journey-dex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ---------------------------------------------------------------------------
+   AUDITORIA DOS MENUS (26/11/2026). Pedido do dono: menus bonitos,
+   minimalistas, faceis de navegar; o visual como recompensa. Tres regras:
+   1. A cor de destaque (--journey-primary) e de ACAO e de "voce esta aqui";
+      nunca fundo de controle comum.
+   2. Navegacao (abas, menu inferior) usa trilho + item levantado, nao caixas.
+   3. Resposta ao toque/hover em tudo que e clicavel, curta e contida
+      (sem animacao com prefers-reduced-motion).
+   --------------------------------------------------------------------------- */
+
+/* Abas segmentadas (controls.tsx#SegmentedTabs). */
+.abas-segmentadas {
+  background: color-mix(in srgb, var(--journey-wash, #252e39) 70%, transparent);
+  border: 1px solid var(--journey-line, #ffffff26);
+}
+.aba-segmentada {
+  position: relative;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--journey-muted, #b2bdc9);
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.aba-segmentada:hover { color: var(--journey-ink, #f2f1eb); background: color-mix(in srgb, var(--journey-card, #1c222c) 60%, transparent); }
+.aba-segmentada[aria-pressed='true'] {
+  color: var(--journey-ink, #f2f1eb);
+  background: var(--journey-card, #1c222c);
+  border-color: var(--journey-line, #ffffff26);
+  box-shadow: 0 1px 2px #0006, inset 0 -2px 0 var(--journey-primary, #ffac91);
+  font-weight: 600;
+}
+
+/* Menu inferior: o destino aberto fica inequivoco (antes so o fundo n800,
+   quase invisivel sobre o vidro escuro). */
+.journey-nav-slot { transition: background-color .15s ease, color .15s ease; }
+.journey-nav-slot .journey-nav-icon { transition: transform .18s cubic-bezier(.2, .8, .3, 1.4); }
+.journey-nav-slot:hover .journey-nav-icon { transform: translateY(-2px); }
+.journey-nav-slot[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--journey-primary, #ffac91) 13%, transparent);
+  color: var(--journey-ink, #f2f1eb);
+}
+.journey-nav-slot[aria-pressed='true'] .journey-nav-icon { transform: translateY(-2px) scale(1.08); }
+.journey-nav-slot[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 32%;
+  right: 32%;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--journey-primary, #ffac91);
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-nav-slot .journey-nav-icon,
+  .journey-nav-slot:hover .journey-nav-icon,
+  .journey-nav-slot[aria-pressed='true'] .journey-nav-icon { transform: none; transition: none; }
+}
+/* Alvo de toque: trilho (2px de folga em cada lado) + aba = 44px. */
+[data-appearance='journey'] .aba-segmentada { min-height: 40px; }
+
+/* "Mais" no PC (Sheet com larguraNoAmplo): duas colunas de atalho com o icone
+   alinhado a esquerda, que e onde o olho comeca a ler. */
+[data-window='mais'] .journey-destinations { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+[data-window='mais'] .journey-destination { justify-content: flex-start; padding-inline: .6em; }
+.journey-destination { transition: background-color .15s ease, border-color .15s ease, transform .15s ease; }
+.journey-destination:hover { transform: translateY(-1px); }
+.journey-destination:active { transform: translateY(0) scale(.98); }
+@media (prefers-reduced-motion: reduce) { .journey-destination, .journey-destination:hover, .journey-destination:active { transform: none; } }
+
+/* Estado vazio (controls.tsx#EstadoVazio). */
+.estado-vazio { border: 1px dashed var(--journey-line, #ffffff26); border-radius: .7em; margin-block: .35em; }
+.estado-vazio-icone {
+  color: var(--journey-leaf, #7fd6a6);
+  background: color-mix(in srgb, var(--journey-leaf, #7fd6a6) 14%, transparent);
+}

@@ -6,7 +6,7 @@
 // estavel entre renders, entao da pra filtrar o array de verdade — esse
 // workaround nao precisa ser portado.
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
+import { ArrowDown, ArrowUp, Backpack, Disc, Egg, LockSimple, LockSimpleOpen, Package } from '@phosphor-icons/react'
 import { MenuScene, SelectionHint } from '@/components/game/MenuScene'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { pedirAcao } from '@/data/remote/autoridade'
@@ -27,9 +27,7 @@ import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { linkarItem, linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
-import {
-  GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
-} from '@/components/game/controls'
+import { GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader, EstadoVazio } from '@/components/game/controls'
 import { GradeDeInventario } from '@/components/game/GradeDeInventario'
 import { IconeDeItemNaGrade } from '@/components/shared/IconeDeItemNaGrade'
 import { RevelacaoIncremental, useRevelacaoIncremental } from '@/components/game/Paginacao'
@@ -121,7 +119,7 @@ export function PokemonsTab() {
   const revelacao = useRevelacaoIncremental(visible)
 
   if (!carregada) return <EstadoDaMochila />
-  if (bagPokes.length === 0) return <p className="text-menu-muted">Nenhum POKE na mochila.</p>
+  if (bagPokes.length === 0) return <EstadoVazio icone={<Backpack weight="duotone" />} titulo="Nenhum POKE na mochila">Capturas que não cabem na equipe vêm para cá.</EstadoVazio>
 
   // Ovo na equipe ocupa vaga (20/10/2026).
   const canMove = teamLength + ovosNaEquipe < MAX_TEAM_SIZE
@@ -347,7 +345,7 @@ export function ItensTab() {
   ), [ids, busca, categoria])
   const revelacao = useRevelacaoIncremental(filtrados)
 
-  if (ids.length === 0) return <p className="text-menu-muted">Nenhum item.</p>
+  if (ids.length === 0) return <EstadoVazio icone={<Package weight="duotone" />} titulo="Nenhum item">Itens caem das hunts e podem ser comprados na Loja.</EstadoVazio>
 
   // Da lista inteira e nao da pagina, pelo mesmo motivo da aba Pokemons. Item
   // que zerou (usado, vendido) sai de `ids` e a ficha fecha junto.
@@ -504,7 +502,7 @@ export function TmsTab() {
   const revelacao = useRevelacaoIncremental(filtrados)
   const mostradas = revelacao.mostrados
 
-  if (idsTm.length === 0) return <p className="text-menu-muted">Nenhuma TM na mochila.</p>
+  if (idsTm.length === 0) return <EstadoVazio icone={<Disc weight="duotone" />} titulo="Nenhuma TM na mochila" />
 
   const itemEmFoco = foco != null && idsTm.includes(foco) ? TM_ITEMS[foco] : null
   const abilityEmFoco = itemEmFoco ? ABILITY_POR_TM[itemEmFoco.id] : null
@@ -617,7 +615,7 @@ export function TmsTab() {
 // equipe, onde chocam com os abates.
 function OvosTab() {
   const n = useGameStateStore((s) => s.ovos.length)
-  if (n === 0) return <p className="text-menu-muted">Nenhum ovo. Cumpra contratos em Missões › Contratos para ganhar ovos.</p>
+  if (n === 0) return <EstadoVazio icone={<Egg weight="duotone" />} titulo="Nenhum ovo">Cumpra contratos em Missões › Contratos para ganhar ovos.</EstadoVazio>
   return <ListaDeOvos onde="todos" />
 }
 

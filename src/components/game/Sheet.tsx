@@ -86,11 +86,18 @@ export interface SheetProps {
   bodyClassName?: string
   /** Migração opt-in: não muda as superfícies ainda não adaptadas. */
   appearance?: 'legacy' | 'journey'
+  /**
+   * Fora do celular (regime não compacto), o sheet vira um painel desta
+   * largura ancorado à direita, acima do botão que o abriu, em vez de uma faixa
+   * de borda a borda (auditoria dos menus, 26/11/2026: o "Mais" ocupava
+   * 1100 px pra mostrar cinco atalhos). Ausente: comportamento de sempre.
+   */
+  larguraNoAmplo?: string
 }
 
 export function Sheet({
   winKey, onClose, title, header, subheader, footer,
-  snap = 'cheia', zIndex = 31, backdrop = true, children, bodyClassName, appearance = 'journey',
+  snap = 'cheia', zIndex = 31, backdrop = true, children, bodyClassName, appearance = 'journey', larguraNoAmplo,
 }: SheetProps) {
   const footerHeight = useUiStore((s) => s.footerHeight)
   const navHeight = useUiStore((s) => s.navHeight)
@@ -188,6 +195,7 @@ export function Sheet({
           zIndex,
           ...(protegeLateral ? { left: 52, right: zIndex <= 35 ? 56 : 0,
             maxWidth: `calc(100% - ${zIndex <= 35 ? 108 : 52}px)` } : {}),
+          ...(larguraNoAmplo && !compacto ? { left: 'auto', right: '.75em', width: larguraNoAmplo, maxWidth: 'calc(100% - 1.5em)' } : {}),
           // `+ .5em` porque o rodape da HUD e ancorado em `bottom-[.5em]`:
           // sem a folga o sheet cobre os 8px do canto arredondado da barra de
           // navegacao e ela parece cortada.
@@ -212,7 +220,7 @@ export function Sheet({
           'vidro-alto sheet-entrada pointer-events-auto absolute inset-x-0 flex flex-col overflow-hidden',
           // Cantos so em cima: o sheet encosta na doca, e arredondar embaixo
           // deixaria duas fatias do jogo aparecendo entre as duas superficies.
-          'rounded-t-[1.15em]',
+          larguraNoAmplo && !compacto ? 'rounded-[1.15em]' : 'rounded-t-[1.15em]',
         )}
       >
         {/* Alca. E ela que arrasta, e nao o cabecalho inteiro: com o cabecalho

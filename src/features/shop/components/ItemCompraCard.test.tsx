@@ -15,7 +15,8 @@ it('abre a ficha pela identidade compacta sem executar compra', () => {
   render(<ItemCompraCard item={item} owned={12345} gold={99999} qty={1} ocupado={false}
     isPending={false} onQtyChange={vi.fn()} onComprar={onComprar}
     onExecutarAtalho={onExecutarAtalho} onAbrir={onAbrir} />)
-  expect(screen.getByText('Na mochila: 12.345')).toBeTruthy()
+  expect(screen.getByText('Na mochila:')).toBeTruthy()
+  expect(screen.getByText(/×12.345/)).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: `Comprar ${item.name}` }))
   expect(onAbrir).toHaveBeenCalledTimes(1)
   expect(onComprar).not.toHaveBeenCalled()

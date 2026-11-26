@@ -5,7 +5,7 @@ import { type AnuncioMercado, type OrdemMercado } from '@/data/remote/servidor'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
-import { GameButton, GameCard, SectionLabel } from '@/components/game/controls'
+import { GameButton, GameCard, SectionLabel, EstadoVazio } from '@/components/game/controls'
 import { useUiStore } from '@/stores/uiStore'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
@@ -140,7 +140,7 @@ export function Ativos() {
       )}
 
       <SectionLabel>MINHAS ORDENS DE ITEM</SectionLabel>
-      {ordens.length === 0 && <p className="text-menu-muted">Nenhuma ordem ativa.</p>}
+      {ordens.length === 0 && <EstadoVazio icone={<Gavel weight="duotone" />} titulo="Nenhuma ordem ativa">Suas ofertas de compra e venda de itens aparecem aqui.</EstadoVazio>}
       {ordens.map((o) => (
         <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
           <IconeItem itemId={o.item_id} />
@@ -159,7 +159,7 @@ export function Ativos() {
       ))}
 
       <SectionLabel>MEUS POKES ANUNCIADOS</SectionLabel>
-      {anuncios.length === 0 && <p className="text-menu-muted">Nenhum POKE anunciado.</p>}
+      {anuncios.length === 0 && <EstadoVazio icone={<BookmarkSimple weight="duotone" />} titulo="Nenhum POKE anunciado">Anuncie pela aba Vender.</EstadoVazio>}
       {anuncios.map((a) => (
         <GameCard key={a.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
           <img src={faceIconUrl(a.species_id, a.is_shiny) ?? undefined} alt="" className="h-[2.2em] w-[2.2em] rounded-[.4em] object-cover" />

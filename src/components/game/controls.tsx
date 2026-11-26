@@ -17,7 +17,7 @@
 // auto-pot). Os primitivos do shadcn continuam em uso nas telas FORA do jogo
 // (login/cadastro/home), onde nao ha escala fluida.
 import { CaretDown, CircleNotch } from '@phosphor-icons/react'
-import { useId, useState } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
 import type {
   ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes,
 } from 'react'
@@ -244,30 +244,54 @@ export function SegmentedTabs<T extends string>({
   className?: string
 }) {
   const { compacto } = useDeviceMode()
-  // O degrade da borda so entra quando a fileira PROVAVELMENTE nao cabe. Ele e
-  // estatico (CSS nao enxerga overflow), entao aplicado sempre ele apagaria a
-  // ultima aba de uma fileira que cabia inteira. Cinco e o ponto em que a
-  // fileira passa de 374px uteis com rotulos de tamanho tipico.
-  const podeRolar = compacto && options.length >= 5
+  // O degrade da borda ("tem mais pra la") so entra quando a fileira de fato
+  // TRANSBORDA e ainda ha o que rolar. Antes era um palpite por contagem (5+
+  // abas), e no celular as 3 abas da Hunt ("Mundo · Modo Pesadelo ·
+  // Ginásios") cortavam o Ginásios sem aviso (auditoria dos menus, 26/11/2026).
+  const trilho = useRef<HTMLDivElement | null>(null)
+  const [podeRolar, setPodeRolar] = useState(false)
+  useLayoutEffect(() => {
+    const el = trilho.current
+    if (!el || !compacto) { setPodeRolar(false); return }
+    const medir = () => setPodeRolar(el.scrollWidth - el.clientWidth - el.scrollLeft > 2)
+    medir()
+    el.addEventListener('scroll', medir, { passive: true })
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(medir) : null
+    ro?.observe(el)
+    return () => { el.removeEventListener('scroll', medir); ro?.disconnect() }
+  }, [compacto, options.length])
+  // AUDITORIA DOS MENUS (26/11/2026): abas como CONTROLE SEGMENTADO — um trilho
+  // discreto com a aba ativa "levantada" (cartao + texto e filete na cor de
+  // destaque). Antes cada aba era um botao com borda propria e a ativa vinha
+  // cheia de salmao: a cor de acao principal (Entrar, Comprar) virava cor de
+  // navegacao, e o olho nao separava "onde estou" de "o que faco".
   return (
     <div
+      ref={trilho}
+      role="group"
       className={cn(
-        'flex gap-[.3em]',
+        'abas-segmentadas inline-flex max-w-full gap-[.2em] rounded-[.6em] p-[.2em]',
         compacto ? 'fileira-abas flex-nowrap overflow-x-auto' : 'flex-wrap',
         podeRolar && 'tiras-de-aba',
         className,
       )}
     >
       {options.map((option) => (
-        <GameButton
+        <button
           key={option.value}
-          variant={option.value === value ? 'primary' : 'secondary'}
+          type="button"
+          data-aba-segmentada
           aria-pressed={option.value === value}
-          className={compacto ? 'shrink-0' : undefined}
+          className={cn(
+            'aba-segmentada inline-flex cursor-pointer items-center justify-center gap-[.35em] rounded-[.45em]',
+            'px-[.7em] py-[.32em] font-[inherit] text-[.85em] leading-[1.35] whitespace-nowrap',
+            'focus-visible:ring-2 focus-visible:ring-menu-brand focus-visible:outline-none',
+            compacto && 'shrink-0',
+          )}
           onClick={() => onChange(option.value)}
         >
           {option.icone}{option.label}
-        </GameButton>
+        </button>
       ))}
     </div>
   )
@@ -358,6 +382,28 @@ export function GameCard({
       )}
     >
       {children}
+    </div>
+  )
+}
+
+/**
+ * Lista vazia que EXPLICA (auditoria dos menus, 26/11/2026). Antes era uma
+ * linha cinza solta no topo do painel ("Nenhum aviso.") — lia como "nao
+ * carregou". Aqui: icone num disco suave, o que falta e, quando houver, o
+ * proximo passo. Use para o vazio de VERDADE; "nenhum resultado com esse
+ * filtro" continua uma linha curta, perto do filtro.
+ */
+export function EstadoVazio({ icone, titulo, children, className }: {
+  icone?: ReactNode; titulo: string; children?: ReactNode; className?: string
+}) {
+  return (
+    <div
+      role="status"
+      className={cn('estado-vazio flex flex-col items-center gap-[.35em] px-[.75em] py-[1.1em] text-center', className)}
+    >
+      {icone && <span aria-hidden className="estado-vazio-icone flex h-[2.4em] w-[2.4em] items-center justify-center rounded-full text-[1.35em]">{icone}</span>}
+      <p className="font-medium text-menu-ink">{titulo}</p>
+      {children && <p className="max-w-[26em] text-[.82em] text-menu-muted">{children}</p>}
     </div>
   )
 }
