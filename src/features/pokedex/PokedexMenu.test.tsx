@@ -14,6 +14,17 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('Pokédex — grade e ficha de pesquisa', () => {
+  it('filtra por região em pílulas, separadas das abas', () => {
+    render(<PokedexMenu />)
+    const regiao = screen.getByRole('group', { name: 'Região' })
+    expect(within(regiao).getByRole('button', { name: 'Todas' }).getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(within(regiao).getByRole('button', { name: 'Johto' }))
+    expect(screen.queryByRole('button', { name: 'Selecionar Pikachu' })).toBeNull()
+    fireEvent.click(within(regiao).getByRole('button', { name: 'Kanto' }))
+    expect(screen.getByRole('button', { name: 'Selecionar Pikachu' })).toBeTruthy()
+  })
+
+
   it('seleciona sem abrir perfil e mantém contagem normal e shiny', () => {
     render(<PokedexMenu />)
     fireEvent.change(screen.getByRole('textbox', { name: 'Buscar Pokémon' }), { target: { value: 'pikachu' } })
@@ -23,7 +34,7 @@ describe('Pokédex — grade e ficha de pesquisa', () => {
     expect(within(choice).getByText('Abates: 15')).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Ficha de Pikachu' })).toBeTruthy()
     expect(usePokeProfileStore.getState().open).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: /Abates Totais/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Shiny/ }))
     expect(within(choice).getByText('✨ 3')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Ver perfil completo' }))
     expect(usePokeProfileStore.getState().open?.species.id).toBe('pikachu')

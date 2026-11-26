@@ -605,3 +605,30 @@
   color: var(--journey-leaf, #7fd6a6);
   background: color-mix(in srgb, var(--journey-leaf, #7fd6a6) 14%, transparent);
 }
+
+/* Pendencias da auditoria dos menus (26/11/2026). */
+/* Filtro em pilulas: estreita a lista, nao troca de tela (ver PilulasDeFiltro). */
+.pilula-de-filtro {
+  border-color: var(--journey-line, #ffffff26);
+  background: transparent;
+  color: var(--journey-muted, #b2bdc9);
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.pilula-de-filtro:hover { color: var(--journey-ink, #f2f1eb); border-color: color-mix(in srgb, var(--journey-primary, #ffac91) 45%, var(--journey-line, #ffffff26)); }
+.pilula-de-filtro[aria-pressed='true'] {
+  color: var(--journey-ink, #f2f1eb);
+  border-color: var(--journey-primary, #ffac91);
+  background: color-mix(in srgb, var(--journey-primary, #ffac91) 16%, transparent);
+  font-weight: 600;
+}
+.pilula-de-filtro-contagem { font-size: .85em; opacity: .7; }
+[data-appearance='journey'] .pilula-de-filtro { min-height: 36px; }
+
+/* Botao de alternancia (aria-pressed / aria-expanded): o estado "ligado" e
+   tingido, nunca a pilula cheia do botao primario, que e de ACAO. */
+[data-game-button='secondary'][aria-pressed='true'],
+[data-game-button='secondary'][aria-expanded='true'] {
+  border-color: var(--journey-primary, #ffac91);
+  background: color-mix(in srgb, var(--journey-primary, #ffac91) 16%, var(--journey-card, #1c222c));
+  color: var(--journey-ink, #f2f1eb);
+}

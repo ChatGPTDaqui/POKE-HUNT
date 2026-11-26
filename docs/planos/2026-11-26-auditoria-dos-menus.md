@@ -26,12 +26,15 @@ Método: bancada `scripts/harness/jornada-completa.html` (menus reais, dados fic
 | "Great Ball" e "Na mochila: 12.345" quebravam em 4 linhas | Loja (celular) | Nome em uma linha; preço · ×quantidade na segunda (leitor de tela continua ouvindo "Na mochila") |
 | Atalhos sem resposta ao toque | Guia "Mais" | Levanta no hover, encolhe no clique |
 
-## Fica para depois (não feito nesta rodada)
+## Segunda rodada (mesmo dia)
 
-- Revisar com a conta real (dados de verdade: listas longas, ranking, mercado cheio).
-- Pokédex: filtro de região com estilo próprio, fora do `SegmentedTabs`.
-- Botões de alternância soltos (`variant ? 'primary' : 'secondary'`, 8 lugares) poderiam virar `SegmentedTabs` ou interruptor.
-- Ficha de item da Loja no celular: a coluna de venda usa ícones grandes, desequilibrando com a de compra.
+- Pokédex: abas só `Pokédex · Hunt Atual`; região em `PilulasDeFiltro` (Todas/Kanto/Johto) abaixo; ✨ Shiny é alternância com `aria-pressed`.
+- Alternâncias: tema vira `SegmentedTabs`; Conversar (Social) usa `aria-pressed`; Golpes (montador) e Montar equipe (ginásio) usam `aria-expanded`. Estado ligado é tingido por CSS, nunca o primário. Ficaram primários os botões que são ação (Receber contrato, Ligar golpe, Comprar, Entrar).
+- Loja no celular: `GradeDeInventario ladoMaxEm` limita o slot da coluna VENDER (antes esticava até a coluna) e ela sobe para 24em.
+
+## Fica para depois
+
+- Revisar com a conta real (dados de verdade: listas longas, ranking, mercado cheio) — a senha da conta de teste não pode ser lida pelo agente.
 
 ## Fontes
 

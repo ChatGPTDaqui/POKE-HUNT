@@ -42,7 +42,9 @@ Pokémon ativo do cabeçalho continuam usando a entidade original, sem mutação
 
 Cor de destaque (--journey-primary) é de ação e de "você está aqui"; abas usam
 SegmentedTabs (trilho + aba levantada), nunca botão primário. Lista vazia de verdade
-usa EstadoVazio; "sem resultado no filtro" segue uma linha curta. Fileira rolável
+usa EstadoVazio; "sem resultado no filtro" segue uma linha curta. Recorte de
+lista usa PilulasDeFiltro abaixo das abas; alternância é GameButton com
+aria-pressed/aria-expanded (tingido), não troca de variant. Fileira rolável
 mostra degradê só quando transborda (useTransborda). Ver
 [auditoria dos menus](../planos/2026-11-26-auditoria-dos-menus.md).
 
