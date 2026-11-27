@@ -198,16 +198,21 @@ export function ComprarItens() {
         <div key={item.id}>
           <GameCard
             onClick={() => setAberto(aberto === item.id ? null : item.id)}
-            className="flex flex-wrap items-center gap-[.5em] p-[.4em]"
+            className="flex items-center gap-[.5em] p-[.4em]"
           >
+            {/* Duas linhas fixas (auditoria dos menus, 26/11/2026): com o preço
+                ao lado do nome, nomes longos jogavam o preço pra baixo e a lista
+                alternava entre uma e duas linhas. */}
             <ItemTooltip item={item}>
-              <span className="flex cursor-help items-center gap-[.5em]">
+              <span className="flex shrink-0 cursor-help items-center">
                 <IconeItem itemId={item.id} />
-                <b className="font-medium">{item.name}</b>
               </span>
             </ItemTooltip>
-            <PrecoMedioCurto chave={chaveDeItem(item.id)} />
-            <span className="flex-1" />
+            <span className="flex min-w-0 flex-1 flex-col">
+            <span className="flex min-w-0 flex-wrap items-baseline gap-x-[.5em]">
+              <b className="truncate font-medium">{item.name}</b>
+              <PrecoMedioCurto chave={chaveDeItem(item.id)} />
+            </span>
             {/* A lista so traz item com ordem ativa, mas a ordem pode ser de
                 COMPRA — e ai nao ha nada a venda. Dizer "sem oferta" seria
                 confuso ao lado de uma linha que so aparece porque tem gente
@@ -220,6 +225,7 @@ export function ComprarItens() {
               ) : (
                 <span className="text-menu-muted">sem oferta</span>
               )}
+            </span>
             </span>
           </GameCard>
           {aberto === item.id && (

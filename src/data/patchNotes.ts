@@ -20,6 +20,9 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'Pokédex: a região virou um filtro próprio (Todas, Kanto, Johto) abaixo das abas, e o ✨ Shiny fica aceso quando ligado.',
       'O tema da interface e os botões de ligar e desligar mostram o estado sem usar a cor dos botões de ação.',
       'Loja no celular: a coluna de venda mostra os itens no mesmo tamanho da compra e acompanha a altura da lista.',
+      'Equipe no celular: os seis Pokémon aparecem lado a lado em retratos, acima da ficha.',
+      'Mochila, Hunt e Mercado com filtros mais enxutos; o Hunt Analyzer espera o primeiro abate antes de mostrar os números.',
+      'No Hospital, o menu inferior marca o lugar com um ponto e acende só a tela aberta.',
     ],
   },
   {

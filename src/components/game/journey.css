@@ -527,7 +527,6 @@
 }
 @media (max-width: 380px) {
   .journey-guide .journey-destinations { grid-template-columns: minmax(0, 1fr); }
-  .journey-team-list { grid-template-columns: minmax(0, 1fr); max-height: 10em; overflow-y: auto; }
   .journey-dex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -631,4 +630,31 @@
   border-color: var(--journey-primary, #ffac91);
   background: color-mix(in srgb, var(--journey-primary, #ffac91) 16%, var(--journey-card, #1c222c));
   color: var(--journey-ink, #f2f1eb);
+}
+
+/* Equipe no celular: a ficha do selecionado ja diz nome, HP e atributos, entao
+   a lista vira uma fileira de retratos (os seis cabem de uma vez) em vez de
+   uma lista de 10em que mostrava dois membros e meio. */
+@media (max-width: 600px) {
+  .journey-team-list { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .25em; max-height: none; overflow: visible; }
+  .journey-team-list > :not(.journey-team-choice) { grid-column: 1 / -1; }
+  .journey-team-list > .journey-team-choice { min-width: 0; flex-direction: column; justify-content: center; gap: .1em; padding: .25em .15em; position: relative; }
+  .journey-team-choice .journey-team-copy { align-items: center; font-size: .7em; }
+  .journey-team-choice .journey-team-copy > :first-child { display: none; }
+  .journey-team-choice .journey-team-copy > span + span { font-size: 1em; }
+  .journey-team-choice .journey-team-copy .hp-da-equipe { display: none; }
+  .journey-team-choice .journey-team-copy small { position: absolute; top: .3em; right: .3em; width: .5em; height: .5em; border-radius: 50%; background: var(--journey-leaf); font-size: 0; }
+}
+
+/* "Voce esta aqui" sem tela aberta por cima: ponto discreto, nao o destaque
+   da tela aberta (ActionDock, slot do Hospital). */
+.journey-nav-slot[aria-current='location'][aria-pressed='false']::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: calc(50% - 2.5px);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--journey-leaf, #8fd18a);
 }

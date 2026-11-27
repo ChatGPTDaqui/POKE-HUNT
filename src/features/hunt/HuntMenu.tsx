@@ -588,9 +588,11 @@ export function HuntMenu() {
             }}
           />
           <div className="min-w-0 flex-1">
-            <div className="truncate font-medium">
+            {/* Quebra em vez de cortar: "Route 46 (Inicial) (L…" escondia
+                justamente a faixa de nivel. */}
+            <div className="break-words font-medium">
               {map.name}{' '}
-              <span className="font-normal text-menu-muted">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
+              <span className="whitespace-nowrap font-normal text-menu-muted">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
               {/* PH-229/236: selo de protetor — motor exige Guardian/Lord
                   em toda sala de todo bioma (PH-225), entao vale pra
                   qualquer hunt que pertenca a ORDEM_DOS_BIOMAS. Selo
@@ -685,15 +687,19 @@ export function HuntMenu() {
       <StickyHeader>
         {abas}
 
-        <div className="flex flex-wrap gap-[.5em]">
+        {/* Uma fileira (auditoria dos menus, 26/11/2026): no celular o filtro
+            caia sozinho numa segunda linha. Sao 18 tipos — pilulas seriam tres
+            fileiras —, entao fica o select, curto e rotulado. */}
+        <div className="flex flex-nowrap gap-[.5em]">
           <GameInput
-            className="min-w-[10em] flex-1"
+            className="min-w-0 flex-1"
             placeholder="Buscar local ou POKE..."
+            aria-label="Buscar local ou POKE"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <GameSelect value={typeFilter} onChange={(e) => setTypeFilter(e.target.value || 'all')}>
-            <option value="all">Todos os elementos</option>
+          <GameSelect aria-label="Elemento" className="shrink-0" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value || 'all')}>
+            <option value="all">Elemento: todos</option>
             {TYPE_LIST.map((type) => (
               <option key={type} value={type}>{type}</option>
             ))}

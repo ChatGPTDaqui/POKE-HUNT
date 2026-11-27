@@ -71,6 +71,14 @@ describe('navegação Jornada', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Equipe' }))
     expect(useUiStore.getState().currentScreen).toBe('equipe')
   })
+  it('no Hospital com outra tela aberta, só a tela aberta fica acesa', () => {
+    useUiStore.setState({ currentScreen: 'mercado' })
+    render(<ActionDock />)
+    const hospital = screen.getByRole('button', { name: 'Hospital' })
+    expect(hospital.getAttribute('aria-pressed')).toBe('false')
+    expect(hospital.getAttribute('aria-current')).toBe('location')
+    expect(screen.getByRole('button', { name: 'Mercado' }).getAttribute('aria-pressed')).toBe('true')
+  })
   it('preserva marcar e cancelar viagem ao Hospital', () => {
     const map = Object.values(MAPS)[0]
     useWorldStore.setState({ mapDef: { ...map, collisionGrid: map.collisionGrid ?? null } })
