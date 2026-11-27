@@ -53,7 +53,7 @@ function vemAntes(a: Element, b: Element): boolean {
 /** Todos os nos cujo texto COMECA com o nome da hunt, do mais fundo pro topo. */
 function ocorrenciasDe(nome: string): HTMLElement[] {
   return screen.queryAllByText((_, node) => node?.textContent?.startsWith(nome) === true)
-    .filter((el) => el.className.includes('truncate') && el.className.includes('font-medium'))
+    .filter((el) => el.className.includes('break-words') && el.className.includes('font-medium'))
 }
 
 beforeEach(() => {

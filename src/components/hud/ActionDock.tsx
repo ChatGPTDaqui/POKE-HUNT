@@ -222,10 +222,16 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
 
       {/* `ativo` durante a contagem tambem: o slot fica marcado desde o toque,
           e nao so quando a viagem termina — sem isso o unico sinal de que o
-          comando pegou seria o overlay no meio do campo. */}
+          comando pegou seria o overlay no meio do campo.
+
+          Estar NO Hospital e outro estado (auditoria dos menus, 26/11/2026):
+          antes ele acendia igual a tela aberta, e com o Mercado aberto no
+          saguao havia dois destinos "ativos". Agora o lugar e `aria-current`,
+          com marca discreta, e a tela aberta continua sendo a unica acesa. */}
       <SlotNav
         destino={{ label: 'Hospital', Icon: FirstAid, art: 'hospital' }}
-        ativo={!emHunt || viagemMarcada}
+        ativo={viagemMarcada || (!emHunt && currentScreen == null && !moreOpen)}
+        local={!emHunt}
         rotulo
         onClick={irAoHospital}
       />
@@ -255,10 +261,12 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
 }
 
 function SlotNav({
-  destino, ativo, rotulo, badge = 0, descricaoDoBadge, trancado, destaque, onClick,
+  destino, ativo, local, rotulo, badge = 0, descricaoDoBadge, trancado, destaque, onClick,
 }: {
   destino: Destino
   ativo: boolean
+  /** O jogador ESTA neste lugar (Hospital), mesmo com outra tela aberta. */
+  local?: boolean
   rotulo: boolean
   badge?: number
   /** Passo que ainda tranca este menu (Primeiros Passos). */
@@ -287,6 +295,7 @@ function SlotNav({
       type="button"
       aria-label={label}
       aria-pressed={ativo}
+      aria-current={local ? 'location' : undefined}
       onClick={onClick}
       className={cn(
         'journey-nav-slot relative flex min-h-[44px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-[.15em]',

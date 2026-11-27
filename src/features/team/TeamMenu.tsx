@@ -61,7 +61,7 @@ export function TeamMenu() {
           return <button key={poke.uid} type="button" className="journey-team-choice" aria-label={`Selecionar ${species.name}`} aria-pressed={selected?.uid === poke.uid} onClick={() => setSelectedUid(poke.uid)}>
             <span className="team-position">{String(index + 1).padStart(2, '0')}</span>
             <PokeSwatch species={species} isShiny={poke.isShiny} size={2.8} />
-            <span className="journey-team-copy"><PokeNameTag poke={poke} species={species} /><span>Lv{poke.level} · HP {Math.floor(poke.hp)}/{poke.stats.hp}</span>{index === activeIndex && <small>Em campo</small>}</span>
+            <span className="journey-team-copy"><PokeNameTag poke={poke} species={species} /><span>Lv{poke.level}<span className="hp-da-equipe"> · HP {Math.floor(poke.hp)}/{poke.stats.hp}</span></span>{index === activeIndex && <small>Em campo</small>}</span>
           </button>
         })}
       </div>

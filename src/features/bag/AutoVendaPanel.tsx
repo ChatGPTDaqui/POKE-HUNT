@@ -62,7 +62,8 @@ export function ChipAutoVenda({ aberto, onToggle }: { aberto: boolean; onToggle:
       )}
     >
       <CurrencyCircleDollar className={cn('shrink-0 text-[1.15em]', ligada ? 'text-gold' : 'text-menu-muted')} />
-      <span className="truncate text-menu-muted">{resumo}</span>
+      {/* O nome vai visivel: so "desligada" nao dizia O QUE estava desligado. */}
+      <span className="truncate text-menu-muted"><span className="text-menu-ink">Auto-venda</span> · {resumo}</span>
       <CaretDown className={cn('shrink-0 text-menu-muted transition-transform duration-150', aberto && 'rotate-180')} />
     </button>
   )
