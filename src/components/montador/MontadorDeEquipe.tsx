@@ -144,7 +144,7 @@ export function MontadorDeEquipe({
                   <ModoDoSlot rotacao={slot.rotacao} />
                   <div className="mt-auto flex flex-wrap gap-[.3em]">
                     <GameButton data-slot={indice} disabled={desabilitado || carregandoCandidatos} onClick={abrir}>Trocar</GameButton>
-                    <GameButton variant={editando === indice ? 'primary' : 'secondary'} disabled={desabilitado}
+                    <GameButton aria-expanded={editando === indice} disabled={desabilitado}
                       onClick={() => { setEscolhendo(null); setEditando(editando === indice ? null : indice) }}>Golpes</GameButton>
                     <GameButton variant="ghost" onClick={() => showProfile(poke, species, 'golpes')}>Ficha</GameButton>
                   </div>

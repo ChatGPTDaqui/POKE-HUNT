@@ -19,7 +19,7 @@ import { useGameStateStore, useActivePoke } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
 import { Painel } from '@/components/game/Painel'
-import { SectionLabel } from '@/components/game/controls'
+import { EstadoVazio, SectionLabel } from '@/components/game/controls'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { huntOdds } from './HuntMenu'
 import { useEffect, useState } from 'react'
@@ -122,6 +122,14 @@ export function HuntAnalyzer() {
           </span>
         </div>
 
+        {/* Antes do primeiro abate eram doze caixas de "0" e "—" (auditoria dos
+            menus, 26/11/2026). Um estado de espera diz o mesmo e deixa à vista
+            o que importa nesse momento: o que nasce aqui. */}
+        {perfStats.mobs === 0 ? (
+          <EstadoVazio icone={<Target weight="fill" />} titulo="Nenhum abate nesta amostra ainda">
+            Ganhos por hora, médias e projeções aparecem depois do primeiro abate.
+          </EstadoVazio>
+        ) : (<>
         <div className="grid grid-cols-2 gap-[.3em] sm:grid-cols-4">
           <Metrica
             icone={<Coin weight="fill" />} rotulo="Ouro / hora"
@@ -176,12 +184,8 @@ export function HuntAnalyzer() {
               detalhe={`faltam ${fmt.format(faltaTreinador)} XP`}
             />
           </div>
-          {perfStats.mobs === 0 && (
-            <p className="mt-[.3em] text-[.75em] text-warn">
-              Nenhum abate registrado nesta amostra ainda — as projeções aparecem depois do primeiro.
-            </p>
-          )}
         </div>
+        </>)}
 
         {odds && (
           <div>

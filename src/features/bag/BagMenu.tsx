@@ -134,15 +134,18 @@ export function PokemonsTab() {
           largura inteira por ser um `<label>` com 44px de alvo), o cabeçalho de
           filtros comia 180px dos ~470px uteis do celular. Como CHIP ele cabe ao
           lado dos outros tres controles e o estado continua obvio. */}
+      {/* Auditoria dos menus (26/11/2026): em 375px o Shiny caia sozinho numa
+          segunda fileira. No celular a busca ocupa a primeira linha inteira e
+          ordem + Shiny dividem a segunda; no PC tudo cabe numa so. */}
       <div className="inventory-toolbar">
         <GameInput
           placeholder="Buscar POKE..."
           aria-label="Buscar POKE na mochila"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="min-w-[6em] flex-1"
+          className="min-w-0 flex-[1_1_100%] sm:flex-[1_1_8em]"
         />
-        <GameSelect value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
+        <GameSelect aria-label="Ordenar por" className="shrink-0" value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
           {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
             <option key={key} value={key}>{SORT_LABELS[key]}</option>
           ))}

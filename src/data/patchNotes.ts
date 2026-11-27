@@ -13,6 +13,19 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '8.93',
+    date: '2026-11-26',
+    title: 'Filtros e alternâncias mais claros',
+    highlights: [
+      'Pokédex: a região virou um filtro próprio (Todas, Kanto, Johto) abaixo das abas, e o ✨ Shiny fica aceso quando ligado.',
+      'O tema da interface e os botões de ligar e desligar mostram o estado sem usar a cor dos botões de ação.',
+      'Loja no celular: a coluna de venda mostra os itens no mesmo tamanho da compra e acompanha a altura da lista.',
+      'Equipe no celular: os seis Pokémon aparecem lado a lado em retratos, acima da ficha.',
+      'Mochila, Hunt e Mercado com filtros mais enxutos; o Hunt Analyzer espera o primeiro abate antes de mostrar os números.',
+      'No Hospital, o menu inferior marca o lugar com um ponto e acende só a tela aberta.',
+    ],
+  },
+  {
     version: '8.92',
     date: '2026-11-26',
     title: 'Menus mais limpos e fáceis de navegar',

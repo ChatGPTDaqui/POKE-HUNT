@@ -92,7 +92,7 @@ export function EquipeDoDesafio({ tipo, bloqueio, ocupado, aoDesafiar }: {
               : <span key={i} className="h-[2.2em] w-[2.2em] rounded-[.4em] border border-dashed border-menu-line" />
           })}
         </div>
-        <GameButton variant={editando ? 'primary' : 'secondary'} onClick={() => setEditando((v) => !v)}>
+        <GameButton aria-expanded={editando} onClick={() => setEditando((v) => !v)}>
           <PencilSimple aria-hidden /> {editando ? 'Fechar' : 'Montar equipe'}
         </GameButton>
       </div>

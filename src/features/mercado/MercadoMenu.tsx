@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react'
 import { Tag } from '@phosphor-icons/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useDeviceMode } from '@/stores/uiStore'
-import { SegmentedTabs, StickyHeader } from '@/components/game/controls'
+import { PilulasDeFiltro, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { ComprarItens } from './components/ComprarItens'
 import { ComprarPokes } from './components/ComprarPokes'
 import { VenderItens } from './components/VenderItens'
@@ -66,7 +66,10 @@ export function MercadoMenu() {
         </div>
 
         {(aba === 'comprar' || aba === 'vender') && (
-          <SegmentedTabs
+          // Recorte da lista, nao outra tela: pilulas, para nao empilhar dois
+          // trilhos de abas iguais (auditoria dos menus, 26/11/2026).
+          <PilulasDeFiltro
+            rotulo="Tipo de anúncio"
             value={tipo}
             onChange={setTipo}
             options={[{ value: 'itens', label: 'Itens' }, { value: 'pokes', label: 'Pokémon' }]}
